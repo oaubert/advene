@@ -5,7 +5,7 @@ from advene.model.exceptions import ModelError
 from advene.model.tales import tales_path1_function
 from advene.util.sorted_dict import SortedDict
 
-class WithMetaMixin:
+class WithMetaMixin(object):
     """Metadata access mixin.
 
     I factorize all metadata-related code for classes Package and
@@ -25,6 +25,20 @@ class WithMetaMixin:
     __cache = None # SortedDict of all known metadata
                    # values are either string or (weakref, id)
     __cache_is_complete = False # is self.__cache complete?
+
+    def _update_caches(self, old_idref, new_idref, element, relation):
+        """
+        :see-also: `advene.model.core.element.PackageElement._update_caches`
+        """
+        if relation.startswith(":meta ") and self.__cache is not None:
+            key = relation[6:]
+            self.__cache[key] = (ref(element), new_idref)
+        else:
+            try:
+                super(WithMetaMixin, self) \
+                    ._update_caches(old_idref, new_idref, element, relation)
+            except AttributeError:
+                pass
 
     def iter_meta(self):
         """Iter over all the metadata of this object.

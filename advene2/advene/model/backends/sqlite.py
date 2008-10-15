@@ -1,4 +1,5 @@
 """
+
 I am the reference implementation for advene backends modules.
 
 A backend module can be registered by invoking
@@ -798,56 +799,144 @@ class _SqliteBackend(object):
         else:
             return(t, package_id, id)
 
+    def iter_references(self, package_ids, element):
+        """
+        Iter over all the elements relying on the identified element
+        (where `element` is a uri-ref).
+
+        Yields 3-tuples where the first item one of the given package_ids,
+        the second element is either an element id-ref or an empty string to
+        identify the package itself. The thirs item describes the relation
+        between the second item and the identified element. It can be either:
+          an attribute name with an element as its value
+            in that case, the identified element is the value of the attribute
+            for the element or package identified by the first item.
+          the string ":item %s" where %s is an int i
+            the first item identifies a list, and its i'th item is the
+            identified element
+          the string ":member %s" where %s is an int i
+            the first item identifies a relation, and its i'th item is the
+            identified element
+          the string ":meta %s" where %s is a metadata key
+            in that case, the itdentified element is the value of that metadata
+            for the element or package identified by the first item.
+          the string ":tag"
+            the identified element is a tag, to which this package identified
+            by the first parameter associates at least one element.
+          the string ":tagged"
+            this package associates at least one tag to the identified element.
+
+        The attribute names that may be returned are ``media`` and
+        ``content_model``.
+        """
+        assert _DF or not isinstance(package_ids, basestring)
+        elt_u, elt_i = _split_uri_ref(element)
+        qmarks = "(" + ",".join("?" for i in package_ids) + ")"
+        q = """SELECT a.package, id, 'media'
+               FROM Annotations a
+               JOIN UriBases u ON a.package = u.package
+                               AND media_p = prefix
+               WHERE a.package IN %(pid_list)s
+               AND uri_base = ? AND media_i = ?
+            UNION
+               SELECT c.package, element, 'content_model'
+               FROM Contents c
+               JOIN UriBases u ON c.package = u.package
+                               AND model_p = prefix
+               WHERE c.package IN %(pid_list)s
+               AND uri_base = ? AND model_i = ?
+            UNION
+               SELECT r.package, relation, ':member '||ord
+               FROM RelationMembers r
+               JOIN UriBases u ON r.package = u.package
+                               AND member_p = prefix
+               WHERE r.package IN %(pid_list)s
+               AND uri_base = ? AND member_i = ?
+            UNION
+               SELECT l.package, list, ':item '||ord
+               FROM ListItems l
+               JOIN UriBases u ON l.package = u.package
+                               AND item_p = prefix
+               WHERE l.package IN %(pid_list)s
+               AND uri_base = ? AND item_i = ?
+            UNION
+               SELECT t.package, '', ':tag'
+               FROM Tagged t
+               JOIN UriBases u ON t.package = u.package
+                               AND tag_p = prefix
+               WHERE t.package IN %(pid_list)s
+               AND uri_base = ? AND tag_i = ?
+            UNION
+               SELECT t.package, '', ':tagged'
+               FROM Tagged t
+               JOIN UriBases u ON t.package = u.package
+                               AND element_p = prefix
+               WHERE t.package IN %(pid_list)s
+               AND uri_base = ? AND element_i = ?
+            UNION
+               SELECT m.package, element, ':meta '||key
+               FROM Meta m
+               JOIN UriBases u ON m.package = u.package
+                               AND value_p = prefix
+               WHERE m.package IN %(pid_list)s
+               AND uri_base = ? AND value_i = ?
+            """ % {"pid_list": qmarks}
+        args = (list(package_ids) + [elt_u, elt_i]) * 7
+        c = self._conn.execute(q, args)
+        r = ( (i[0], i[1], i[2]) for i in c )
+        return _FlushableIterator(r, self)
+
     def iter_references_with_import(self, package_id, id):
         """Iter over all the elements relying on the identified import.
 
-        Yields 3-tuples where the first item is either an element id-ref
+        Yields 2-tuples where the first item is either an element id-ref
         or an empty string to identify the package itself and the third item is
         the id-ref of an element imported through the import in question. The
         second item describes the relation between the first and third ones. It
         can be either:
-          an int i
-            in that case, the imported element is the i'th item of the (list-
-            like) element identified by the first item.
-          and attribute name with an element as its value
+          an attribute name with an element as its value
             in that case, the imported element is the value of the attribute
             for the element or package identified by the first item.
-          the string "meta %s" where %s is a metadata key
+          the string ":item %s" where %s is an int i
+            the first item identifies a list, and its i'th item is the
+            imported element
+          the string ":member %s" where %s is an int i
+            the first item identifies a relation, and its i'th item is the
+            imported element
+          the string ":meta %s" where %s is a metadata key
             in that case, the imported element is the value of that metadata
             for the element or package identified by the first item.
-          the special string ":tag"
+          the string ":tag"
             the imported element is a tag, to which this package identified by
             the first item associates at least one element.
-          the special string ":tagged"
+          the string ":tagged"
             this package associates at least one tag to the imported element.
 
         The attribute names that may be returned are ``media`` and
         ``content_model``.
         """
-        q = """SELECT id, ?, media_i FROM Annotations
+        q = """SELECT id, 'media', media_i FROM Annotations
                  WHERE package = ? AND media_p = ?
                UNION
-               SELECT element, ?, model_i FROM Contents
+               SELECT element, 'content_model', model_i FROM Contents
                  WHERE package = ? AND model_p = ?
                UNION
-               SELECT relation, ord, member_i FROM RelationMembers
+               SELECT relation, ':member '||ord, member_i FROM RelationMembers
                  WHERE package = ? AND member_p = ?
                UNION
-               SELECT list, ord, item_i FROM ListItems
+               SELECT list, ':item '||ord, item_i FROM ListItems
                  WHERE package = ? AND item_p = ?
                UNION
-               SELECT ?, ?, tag_i FROM Tagged
+               SELECT '', ':tag', tag_i FROM Tagged
                  WHERE package = ? AND tag_p = ?
                UNION
-               SELECT ?, ?, element_i FROM Tagged
+               SELECT '', ':tagged', element_i FROM tagged
                  WHERE package = ? AND element_p = ?
                UNION
-               SELECT element, ?||key, value_i FROM Meta
+               SELECT element, ':meta '||key, value_i FROM meta
                  WHERE package = ? AND value_p = ?
             """
-        args = ["media", package_id, id, "content_model", package_id, id,
-                package_id, id, package_id, id, "", ":tag", package_id, id,
-                "", ":tagged", package_id, id, "meta ", package_id, id]
+        args = [package_id, id, ] * 7
         c = self._conn.execute(q, args)
         r = ( (i[0], i[1], "%s:%s" % (id, i[2])) for i in c )
         return _FlushableIterator(r, self)
@@ -1227,69 +1316,94 @@ class _SqliteBackend(object):
         """
         assert _DF or not isinstance(package_ids, basestring)
         element_u, element_i = _split_uri_ref(old_uriref)
-        args = [new_id,] + list(package_ids) \
-             + [element_i, element_u, element_u,]
-        q1 = "SELECT p.id || ' ' || i.id " \
-             "FROM Packages p JOIN Imports i ON p.id = i.package " \
-             "WHERE ? IN (i.uri, i.url) " \
-             "UNION " \
-             "SELECT p.id || ' ' FROM Packages p " \
-             "WHERE ? IN (p.uri, p.url)"
-        # The query above selects all pairs package_id/import_id (where the
-        # second can be "") matching the URI prefix of old_uriref.
-        # It can then be used to know detect id-refs to update.
-        # (see also iter_meta_refs)
+        args = [new_id,] + list(package_ids) + [element_i, element_u,]
+        qmarks = "(" + ",".join( "?" for i in package_ids ) + ")"
         execute = self._curs.execute
         self._begin_transaction("IMMEDIATE")
         try:
             # media references
-            q2 = "UPDATE Annotations SET media_i = ? " \
-                 "WHERE package IN (" \
-                   + ",".join( "?" for i in package_ids ) + ")" \
-                   "AND media_i = ? " \
-                   "AND package || ' ' || media_p IN (%s)" % q1
+            q2 = """UPDATE Annotations SET media_i = ?
+                    WHERE package IN %s
+                    AND media_i = ?
+                    AND EXISTS (
+                      SELECT * FROM UriBases
+                      WHERE UriBases.package = Annotations.package
+                      AND prefix = media_p
+                      AND uri_base = ?
+                    )
+                  """ % qmarks
             execute(q2, args)
             # model references
-            q2 = "UPDATE Contents SET model_i = ? " \
-                 "WHERE package IN (" \
-                   + ",".join( "?" for i in package_ids ) + ")" \
-                   "AND model_i = ? " \
-                   "AND package || ' ' || model_p IN (%s)" % q1
+            q2 = """UPDATE Contents SET model_i = ?
+                    WHERE package IN %s
+                    AND model_i = ?
+                    AND EXISTS (
+                      SELECT * FROM UriBases
+                      WHERE UriBases.package = Contents.package
+                      AND prefix = model_p
+                      AND uri_base = ?
+                    )
+                 """ % qmarks
             execute(q2, args)
             # member references
-            q2 = "UPDATE RelationMembers SET member_i = ? " \
-                 "WHERE package IN (" \
-                   + ",".join( "?" for i in package_ids ) + ")" \
-                   "AND member_i = ? " \
-                   "AND package || ' ' || member_p IN (%s)" % q1
+            q2 = """UPDATE RelationMembers SET member_i = ?
+                    WHERE package IN %s
+                    AND member_i = ?
+                    AND EXISTS (
+                      SELECT * FROM UriBases
+                      WHERE UriBases.package = RelationMembers.package
+                      AND prefix = member_p
+                      AND uri_base = ?
+                    )
+                 """ % qmarks
             execute(q2, args)
             # item references
-            q2 = "UPDATE ListItems SET item_i = ? " \
-                 "WHERE package IN (" \
-                   + ",".join( "?" for i in package_ids ) + ")" \
-                   "AND item_i = ? " \
-                   "AND package || ' ' || item_p IN (%s)" % q1
+            q2 = """UPDATE ListItems SET item_i = ?
+                    WHERE package IN %s
+                    AND item_i = ?
+                    AND EXISTS (
+                      SELECT * FROM UriBases
+                      WHERE UriBases.package = ListItems.package
+                      AND prefix = item_p
+                      AND uri_base = ?
+                    )
+                 """ % qmarks
             execute(q2, args)
             # tags references
-            q2 = "UPDATE Tagged SET tag_i = ? " \
-                 "WHERE package IN (" \
-                   + ",".join( "?" for i in package_ids ) + ")" \
-                   "AND tag_i = ? " \
-                   "AND package || ' ' || tag_p IN (%s)" % q1
+            q2 = """UPDATE Tagged SET tag_i = ?
+                    WHERE package IN %s
+                    AND tag_i = ?
+                    AND EXISTS (
+                      SELECT * FROM UriBases
+                      WHERE UriBases.package = Tagged.package
+                      AND prefix = tag_p
+                      AND uri_base = ?
+                    )
+                 """ % qmarks
             execute(q2, args)
             # tagged element references
-            q2 = "UPDATE Tagged SET element_i = ? " \
-                 "WHERE package IN (" \
-                   + ",".join( "?" for i in package_ids ) + ")" \
-                   "AND element_i = ? " \
-                   "AND package || ' ' || element_p IN (%s)" % q1
+            q2 = """UPDATE Tagged SET element_i = ?
+                    WHERE package IN %s
+                    AND element_i = ?
+                    AND EXISTS (
+                      SELECT * FROM UriBases
+                      WHERE UriBases.package = Tagged.package
+                      AND prefix = element_p
+                      AND uri_base = ?
+                    )
+                 """ % qmarks
             execute(q2, args)
             # metadata references
-            q2 = "UPDATE Meta SET value_i = ? " \
-                 "WHERE package IN (" \
-                   + ",".join( "?" for i in package_ids ) + ")" \
-                   "AND value_i = ? " \
-                   "AND package || ' ' || value_p IN (%s)" % q1
+            q2 = """UPDATE Meta SET value_i = ?
+                    WHERE package IN %s
+                    AND value_i = ?
+                    AND EXISTS (
+                      SELECT * FROM UriBases
+                      WHERE UriBases.package = Meta.package
+                      AND prefix = value_p
+                      AND uri_base = ?
+                    )
+                 """ % qmarks
             execute(q2, args)
         except InternalError, e:#sqlite.Error, e:
             execute("ROLLBACK")
@@ -1552,6 +1666,7 @@ class _SqliteBackend(object):
         (package_id, element_id, metadata_key) where element_id is the empty
         string for package metadata.d
         """
+        # TODO may be deprecated
         assert _DF or not isinstance(package_ids, basestring)
         element_u, element_i = _split_uri_ref(uriref)
         q1 = "SELECT p.id || ' ' || i.id " \

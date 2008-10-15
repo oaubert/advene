@@ -131,6 +131,16 @@ class WithContentMixin:
                 or mimetype is None and self.__mimetype == "x-advene/none":
                     raise ModelError("Can not set URL of empty content")
 
+    def _update_caches(self, old_idref, new_idref, element, relation):
+        """
+        :see-also: `advene.model.core.element.PackageElement._update_caches`
+        """
+        if relation == ("content_model"):
+            self.__model_id = new_idref
+        else:
+            super(WithContentMixin, self) \
+                ._update_caches(old_idref, new_idref, element, relation)
+
     @classmethod
     def _check_content_cls(cls, mimetype, model, url, _func=_check_content):
         """

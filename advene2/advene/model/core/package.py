@@ -48,7 +48,7 @@ _constructor = {
 def _noop(*args, **kw):
     pass
 
-class Package(object, WithMetaMixin, WithEventsMixin):
+class Package(WithMetaMixin, WithEventsMixin, object):
     """FIXME: missing docstring.
     """
 

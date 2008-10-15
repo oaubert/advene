@@ -47,6 +47,21 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
             r.extend(members)
         return r
 
+    def _update_caches(self, old_idref, new_idref, element, relation):
+        """
+        :see-also: `advene.model.core.element.PackageElement._update_caches`
+        """
+        if relation.startswith(":member "):
+            index = int(relation[8:])
+            self._ids[index] = new_idref
+            self._cache[index] = element # just in case both were None
+        else:
+            try:
+                super(Relation, self) \
+                    ._update_caches(old_idref, new_idref, element, relation)
+            except AttributeError:
+                pass
+
     def __len__(self):
         return len(self._cache)
 

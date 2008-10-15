@@ -597,6 +597,45 @@ class TestHandleElements(TestCase):
         for i in self.own + self.imported:
             self.assertEqual(self.be.get_element(*i[:2])[1:], i)
 
+    def test_iter_references(self):
+        pid1 = self.pid1
+        u2 = "%s#%%s" % self.i1_uri
+        key = "http://www.w3.org/2000/01/rdf-schema#seeAlso"
+        self.be.update_content_info(self.pid1, "a2", ANNOTATION,
+                                    "text/plain", "i1:R3", "")
+        self.be.insert_member(pid1, "r1", "i1:a5", 0)
+        self.be.insert_item(pid1, "l1", "i1:a5", 0)
+        self.be.insert_item(pid1, "l1", "i1:m3", 1)
+        self.be.associate_tag(pid1, "v1", "i1:t3")
+        self.be.associate_tag(pid1, "i1:a5", "t1")
+        self.be.associate_tag(pid1, "i1:R3", "t1")
+        self.be.set_meta(pid1, "a1", ANNOTATION, key, "i1:a5", True)
+        self.be.set_meta(pid1, "", "", key, "i1:a6", True)
+
+        self.assertEqual(frozenset([
+                (pid1, "a1", "media"), (pid1, "l1", ":item 1"),
+            ]),
+            frozenset(self.be.iter_references([self.pid1], u2 % "m3")))
+
+        self.assertEqual(frozenset([
+                (pid1, "a2", "content_model"), (pid1, "", ":tagged"),
+            ]),
+            frozenset(self.be.iter_references([self.pid1], u2 % "R3")))
+
+        self.assertEqual(frozenset([
+                (pid1, "r1", ":member 0"), (pid1, "l1", ":item 0"),
+                (pid1, "", ":tagged"), (pid1, "a1", ":meta "+key),
+            ]),
+            frozenset(self.be.iter_references([self.pid1], u2 % "a5")))
+
+        self.assertEqual(frozenset([(pid1, "", ":tag"),]),
+            frozenset(self.be.iter_references([self.pid1], u2 % "t3")))
+
+        self.assertEqual(frozenset([
+                (pid1, "", ":meta "+key),
+            ]),
+            frozenset(self.be.iter_references([self.pid1], u2 % "a6")))
+
     def test_iter_references_with_import(self):
         key = "http://www.w3.org/2000/01/rdf-schema#seeAlso"
         self.be.update_content_info(self.pid1, "a2", ANNOTATION,
@@ -608,10 +647,10 @@ class TestHandleElements(TestCase):
         self.be.set_meta(self.pid1, "a1", ANNOTATION, key, "i1:a5", True)
         self.be.set_meta(self.pid1, "", "", key, "i1:a6", True)
         ref = frozenset([("a1", "media", "i1:m3"),
-            ("a2", "content_model", "i1:R3"), ("r1", 0, "i1:a5"),
-            ("l1", 0, "i1:a5"), ("", ":tag", "i1:t3"),
-            ("", ":tagged", "i1:a5"), ("", "meta %s" % key, "i1:a6"),
-            ("a1", "meta %s" % key, "i1:a5"),])
+            ("a2", "content_model", "i1:R3"), ("r1", ":member 0", "i1:a5"),
+            ("l1", ":item 0", "i1:a5"), ("", ":tag", "i1:t3"),
+            ("", ":tagged", "i1:a5"), ("", ":meta %s" % key, "i1:a6"),
+            ("a1", ":meta %s" % key, "i1:a5"),])
 
         self.assertEqual(ref,
             frozenset(self.be.iter_references_with_import(self.pid1, "i1",)))
@@ -1795,7 +1834,7 @@ class TestRenameElement(TestCase):
         self.be.update_annotation(self.pid1, "a2", "i2:m3", 1, 2) #it's a trap!
         self.be.update_annotation(self.pid1, "a3", "i1:m4", 1, 2) #it's a trap!
         pids = (self.pid1, self.pid2)
-        m3_uri = "%s#m3" % self.url2
+        m3_uri = "%s#m3" % self.i1_uri
         self.be.rename_element(self.pid2, "m3", MEDIA, "renamed")
         self.be.rename_references(pids, m3_uri, "renamed")
         self.assertEqual("i1:renamed", self.be.get_element(self.pid1, "a1")[3])
@@ -1806,7 +1845,7 @@ class TestRenameElement(TestCase):
         self.assertEqual("i1:m4", self.be.get_element(self.pid1, "a3")[3])
 
         # now only on one package
-        m3_uri = "%s#renamed" % self.url2
+        m3_uri = "%s#renamed" % self.i1_uri
         self.be.rename_element(self.pid2, "renamed", MEDIA, "foo")
         self.be.rename_references((self.pid2,), m3_uri, "foo")
         self.assertEqual("i1:renamed", self.be.get_element(self.pid1, "a1")[3])
@@ -1824,7 +1863,7 @@ class TestRenameElement(TestCase):
         self.be.update_content_info(self.pid1, "a3", ANNOTATION,
                                     "text/plain", "i1:R4", "") # it's a trap!
         pids = (self.pid1, self.pid2)
-        R3_uri = "%s#R3" % self.url2
+        R3_uri = "%s#R3" % self.i1_uri
         self.be.rename_element(self.pid2, "R3", RESOURCE, "renamed")
         self.be.rename_references(pids, R3_uri, "renamed")
         self.assertEqual("i1:renamed",
@@ -1838,7 +1877,7 @@ class TestRenameElement(TestCase):
             self.be.get_content_info(self.pid1, "a3", ANNOTATION)[1])
 
         # now only on one package
-        R3_uri = "%s#renamed" % self.url2
+        R3_uri = "%s#renamed" % self.i1_uri
         self.be.rename_element(self.pid2, "renamed", RESOURCE, "foo")
         self.be.rename_references((self.pid2,), R3_uri, "foo")
         self.assertEqual("i1:renamed",
@@ -1852,7 +1891,7 @@ class TestRenameElement(TestCase):
         self.be.insert_member(self.pid1, "r1", "i1:a5", 0)
         self.be.insert_member(self.pid1, "r1", "i2:a5", 1) # it's a trap
         pids = (self.pid1, self.pid2)
-        a5_uri = "%s#a5" % self.url2
+        a5_uri = "%s#a5" % self.i1_uri
         self.be.rename_element(self.pid2, "a5", ANNOTATION, "renamed")
         self.be.rename_references(pids, a5_uri, "renamed")
         self.assertEqual("renamed", self.be.get_member(self.pid2, "r3", 1))
@@ -1862,7 +1901,7 @@ class TestRenameElement(TestCase):
         self.assertEqual("i2:a5", self.be.get_member(self.pid1, "r1", 1))
 
         # now only on one package
-        a5_uri = "%s#renamed" % self.url2
+        a5_uri = "%s#renamed" % self.i1_uri
         self.be.rename_element(self.pid2, "renamed", ANNOTATION, "foo")
         self.be.rename_references((self.pid2,), a5_uri, "foo")
         self.assertEqual("foo", self.be.get_member(self.pid2, "r3", 1))
@@ -1874,7 +1913,7 @@ class TestRenameElement(TestCase):
         self.be.insert_item(self.pid1, "l1", "i1:a5", 0)
         self.be.insert_item(self.pid1, "l1", "i2:a5", 1) # it's a trap
         pids = (self.pid1, self.pid2)
-        a5_uri = "%s#a5" % self.url2
+        a5_uri = "%s#a5" % self.i1_uri
         self.be.rename_element(self.pid2, "a5", ANNOTATION, "renamed")
         self.be.rename_references(pids, a5_uri, "renamed")
         self.assertEqual("renamed", self.be.get_item(self.pid2, "l3", 1))
@@ -1884,7 +1923,7 @@ class TestRenameElement(TestCase):
         self.assertEqual("i2:a5", self.be.get_item(self.pid1, "l1", 1))
 
         # now only on one package
-        a5_uri = "%s#renamed" % self.url2
+        a5_uri = "%s#renamed" % self.i1_uri
         self.be.rename_element(self.pid2, "renamed", ANNOTATION, "foo")
         self.be.rename_references((self.pid2,), a5_uri, "foo")
         self.assertEqual("foo", self.be.get_item(self.pid2, "l3", 1))
@@ -1898,10 +1937,10 @@ class TestRenameElement(TestCase):
         self.be.associate_tag(self.pid1, "a1", "i2:t3") # it's a trap
         self.be.associate_tag(self.pid1, "a1", "i1:t4") # it's a trap
         pids = (self.pid1, self.pid2)
-        t3_uri = "%s#t3" % self.url2
+        t3_uri = "%s#t3" % self.i1_uri
         self.be.rename_element(self.pid2, "t3", TAG, "renamed")
         self.be.rename_references(pids, t3_uri, "renamed")
-        a5_uri = "%s#a5" % self.url2
+        a5_uri = "%s#a5" % self.i1_uri
         self.assertEqual(
             frozenset([(self.pid1, "i1:renamed"), (self.pid2, "renamed"),]),
             frozenset(self.be.iter_tags_with_element(pids, a5_uri, ))
@@ -1915,7 +1954,7 @@ class TestRenameElement(TestCase):
         )
 
         # now only on one package
-        t3_uri = "%s#renamed" % self.url2
+        t3_uri = "%s#renamed" % self.i1_uri
         self.be.rename_element(self.pid2, "renamed", TAG, "foo")
         self.be.rename_references((self.pid2,), t3_uri, "foo")
         self.assertEqual(
@@ -1929,10 +1968,10 @@ class TestRenameElement(TestCase):
         self.be.associate_tag(self.pid1, "i1:a6", "i1:t3") # it's a trap
         self.be.associate_tag(self.pid1, "i2:a5", "i1:t3") # it's a trap
         pids = (self.pid1, self.pid2)
-        a5_uri = "%s#a5" % self.url2
+        a5_uri = "%s#a5" % self.i1_uri
         self.be.rename_element(self.pid2, "a5", ANNOTATION, "renamed")
         self.be.rename_references(pids, a5_uri, "renamed")
-        t3_uri = "%s#t3" % self.url2
+        t3_uri = "%s#t3" % self.i1_uri
         self.assertEqual(
             frozenset([(self.pid1, "i1:renamed"), (self.pid2, "renamed"),
                        # did you fall in the traps?
@@ -1941,7 +1980,7 @@ class TestRenameElement(TestCase):
         )
 
         # now only on one package
-        a5_uri = "%s#renamed" % self.url2
+        a5_uri = "%s#renamed" % self.i1_uri
         self.be.rename_element(self.pid2, "renamed", ANNOTATION, "foo")
         self.be.rename_references((self.pid2,), a5_uri, "foo")
         self.assertEqual(
@@ -1962,7 +2001,7 @@ class TestRenameElement(TestCase):
         self.be.set_meta(self.pid1, "a1", ANNOTATION,
                          key2, "i1:r3", True) # it's a trap
         pids = (self.pid1, self.pid2)
-        R3_uri = "%s#R3" % self.url2
+        R3_uri = "%s#R3" % self.i1_uri
         self.be.rename_element(self.pid2, "R3", RESOURCE, "renamed")
         self.be.rename_references(pids, R3_uri, "renamed")
         self.assertEqual(("renamed", True),
@@ -1976,7 +2015,7 @@ class TestRenameElement(TestCase):
                          self.be.get_meta(self.pid1, "a1", ANNOTATION, key2))
 
         # now only on one package
-        R3_uri = "%s#renamed" % self.url2
+        R3_uri = "%s#renamed" % self.i1_uri
         self.be.rename_element(self.pid2, "renamed", RESOURCE, "foo")
         self.be.rename_references((self.pid2,), R3_uri, "foo")
         self.assertEqual(("foo", True),
@@ -2110,6 +2149,7 @@ class TestRobustIterations(TestCase):
     i2_url = "http://example.com/advene/db2#R5"
 
     iter_methods = {
+        "iter_references": [[pid1,], i2_url],
         "iter_references_with_import": [pid1, "i1",],
         "iter_medias": [pids,],
         "iter_annotations": [pids,],
@@ -2211,7 +2251,6 @@ class TestRobustIterations(TestCase):
                         try:
                             getattr(b, n2)(*args2)
                         except AssertionError:
-                            print "===", n2, args2
                             raise
                         except InternalError, e:
                             self.fail("%s during %s raise:\n %s" % (n2, n, e))

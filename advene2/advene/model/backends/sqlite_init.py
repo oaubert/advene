@@ -148,4 +148,14 @@ CREATE TABLE Tagged (
   -- element_i must be the id of an own or directly imported (from 
   -- element_p) element
   -- tag_i must be the id of an own or directly imported (from tag_p) tag
-);--cut""".split(";--cut")[:-1]
+);--cut
+
+CREATE VIEW UriBases AS
+  SELECT id as package, "" AS prefix,
+         CASE uri WHEN "" THEN url ELSE uri END AS uri_base
+  FROM Packages
+UNION
+  SELECT package, id AS prefix,
+         CASE uri WHEN "" THEN url ELSE uri END AS uri_base
+  FROM Imports
+;--cut""".split(";--cut")[:-1]

@@ -67,7 +67,7 @@ class TestDiffPackage(TestCase):
         p1, p2 = self.p1, self.p2
         self.assertEqual([], diff_packages(p1, p2))
         self.assertEqual([], diff_packages(p2, p1))
-   
+
     def test_step_by_step(self):
         p1, p2 = self.p1, self.p2
         fill_p2 = fill_package_step_by_step(p2)

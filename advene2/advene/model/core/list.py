@@ -47,6 +47,21 @@ class List(PackageElement, WithContentMixin, GroupMixin):
             r.extend(items)
         return r
 
+    def _update_caches(self, old_idref, new_idref, element, relation):
+        """
+        :see-also: `advene.model.core.element.PackageElement._update_caches`
+        """
+        if relation.startswith(":item "):
+            index = int(relation[6:])
+            self._ids[index] = new_idref
+            self._cache[index] = ref(element) # just in case both were None
+        else:
+            try:
+                super(List, self) \
+                    ._update_caches(old_idref, new_idref, element, relation)
+            except AttributeError:
+                pass
+
     def __len__(self):
         return len(self._cache)
 

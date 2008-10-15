@@ -33,7 +33,7 @@ def _handler_wrapper(gobj, *args):
     args = args[:-1]
     return original_handler(gobj._boss, *args)
 
-class WithEventsMixin:
+class WithEventsMixin(object):
     """
     This mixin class assumes that the mixed-in class will provide a
     `_event_delegate` attribute valued with an instance of EventDelegate.

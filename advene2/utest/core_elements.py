@@ -715,6 +715,7 @@ class TestElements(TestCase):
         R = p.get("R1")
         # TODO test content handler
 
+
 class TestTagAsGroup(TestCase):
     def setUp(self):
         p = Package("file:/tmp/p", create=True)
@@ -1461,6 +1462,177 @@ class TestEvents(TestCase):
         self.i1().uri = "file:/bar.bzp"
         self.assertEqual(self.buf, [])
 
+
+class TestReferences(TestCase):
+
+    def setUp(self):
+        p = self.p = Package("transient:1", create=True)
+        q = self.q = Package("transient:2", create=True)
+
+        m1 = q.create_media("m1", "http://example.com/m1.avi")
+        at1 = q.create_tag("at1")
+        rt1 = q.create_tag("rt1")
+        a1 = q.create_annotation("a1", m1, 0, 42, "text/plain")
+        q.associate_tag(a1, at1)
+        r1 = q.create_relation("r1", members=[a1,])
+        q.associate_tag(r1, rt1)
+        L1 = q.create_list("L1", items=[m1, a1, r1,])
+        t1 = q.create_tag("t1")
+        R1 = q.create_resource("R1", "text/plain")
+        a1.content_model = R1
+
+        p.create_import("i", q)
+        m2 = p.create_media("m2", "http://example.com/m2.avi")
+        at2 = p.create_tag("at2")
+        rt2 = p.create_tag("rt2")
+        a2 = p.create_annotation("a2", m2, 0, 42, "text/plain")
+        p.associate_tag(a2, at2)
+        r2 = p.create_relation("r2", members=[a2,])
+        p.associate_tag(r2, rt2)
+        L2 = p.create_list("L2", items=[m2, a2, r2,])
+        t2 = p.create_tag("t2")
+        R2 = p.create_resource("R2", "text/plain")
+        a2.content_model = R2
+
+        a3 = p.create_annotation("a3", m1, 1, 2, "text/plain")
+        p.associate_tag(a3, at1)
+        a3.content_model=R1
+        r3 = p.create_relation("r3", members=[a2, a1,])
+        p.associate_tag(r3, rt2)
+        L3 = p.create_list("L3", items=[a1, m1,])
+
+        p.meta["key"] = a1
+        p.associate_tag(a1, t1)
+
+    def tearDown(self):
+        self.p.close()
+        self.q.close()
+
+    def test_iter_references(self):
+        def check(it1, it2=None):
+            if it2 is None: print list(it1) # debugging
+            else:
+                #self.assertEqual(frozenset(it1), frozenset(it2))
+                try:
+                    s1 = frozenset(it1)
+                    s2 = frozenset(it2)
+                    self.assertEqual(s1, s2)
+                except AssertionError, e:
+                    print "+++", s1.difference(s2)
+                    print "---", s2.difference(s1)
+                    raise e
+
+        p = self.p
+        q = self.q
+        at1 = q.get("at1")
+        m1 = q.get("m1")
+        a1 = q.get("a1")
+        a3 = p.get("a3")
+        r1 = q.get("r1")
+        r3 = p.get("r3")
+        t1 = q.get("t1")
+        L1 = q.get("L1")
+        L3 = p.get("L3")
+        R1 = q.get("R1")
+
+        check(at1.iter_references(), [
+            ("tagging", q, a1), ("tagging", p, a3),
+        ])
+
+        check(a1.iter_references(), [
+            ("tagged", q, at1), ("tagged", p, t1),
+            ("item", L1), ("item", L3),
+            ("member", r1), ("member", r3),
+            ("meta", p, "key"),
+        ])
+
+        check(m1.iter_references(), [
+            ("media", a1), ("media", a3),
+            ("item", L1), ("item", L3),
+        ])
+
+
+        check(R1.iter_references(), [
+            ("content_model", a1), ("content_model", a3),
+        ])
+
+    def _do_test_rename(self):
+        p = self.p
+        q = self.q
+
+        q.get("m1").id = "m01"
+        self.assertNotEqual(q.get("m01"), None)
+        self.assertEqual(q.get("a1").media_id, "m01")
+        self.assertEqual(p.get("a3").media_id, "i:m01")
+
+        q.get("at1").id = "at01"
+        assert not q.has_element("at1")
+        assert q.has_element("at01")
+        assert "at01" in q.get("a1").iter_my_tag_ids(q)
+        assert "i:at01" in p.get("a3").iter_my_tag_ids(p)
+        assert "at01" in list(q.get("a1").iter_my_tag_ids(q))
+        assert "i:at01" in list(p.get("a3").iter_my_tag_ids(p))
+
+        q.get("a1").id = "a01"
+        self.assertEqual(p.get_meta_id("key"), "i:a01")
+        assert not q.has_element("a1")
+        assert q.has_element("a01")
+        self.assertEqual(p.meta.get_id("key"),  "i:a01")
+        assert "a01" in list(q.get("at01").iter_element_ids(q))
+        self.assertEqual(q.get("r1").get_member_id(0), "a01")
+        self.assertEqual(p.get("r3").get_member_id(1), "i:a01")
+        self.assertEqual(q.get("L1").get_item_id(1), "a01")
+        assert "i:a01" in p.get("L3").iter_item_ids()
+
+        q.get("R1").id = "R01"
+        assert not q.has_element("R1")
+        assert q.has_element("R01")
+        self.assertEqual(q.get("a01").content_model_id, "R01")
+        self.assertEqual(p.get("a3").content_model_id, "i:R01")
+
+        # fake name clash: a2 exists in p, but not in q
+        q.get("a01").id = "a2"
+        assert not q.has_element("a01")
+        assert q.has_element("a2")
+        self.assertEqual(p.meta.get_id("key"), "i:a2")
+        assert "a2" in q.get("at01").iter_element_ids(q)
+        self.assertEqual(q.get("r1").get_member_id(0), "a2")
+        self.assertEqual(p.get("r3").get_member_id(1), "i:a2")
+        self.assertEqual(q.get("L1").get_item_id(1), "a2")
+        assert "i:a2" in p.get("L3").iter_item_ids()
+
+        # real name clash
+        self.assertRaises(AssertionError, setattr, p.get("a2"), "id", "a3")
+
+    def test_rename_volatile(self):
+        # in this method, we check that renaming is performed correctly
+        # when the objects are volatile, and mainly relying on the backend
+
+        self._do_test_rename()
+
+    def test_rename_in_caches(self):
+        # in this method, we check that renaming is performed correctly
+        # when the objects are kept in memory, and rely on their internal
+        # cache.
+        # For this purpose, we keep a reference of all involved objects,
+        # and try to have their cache filled by accessing the attributes
+
+        p = self.p
+        q = self.q
+
+        m1 = q.get("m1")
+        a1 = q.get("a1"); a1m = a1.media; a1c = a1.content_model
+        at1 = q.get("at1")
+        r1 = q.get("r1"); r1m = list(r1)
+        r3 = p.get("r3"); r3m = list(r3)
+        L1 = q.get("L1"); L1i = list(L1)
+        L3 = p.get("L3"); L3i = list(L3)
+        R1 = q.get("R1")
+        a3 = p.get("a3"); a3c = a3.content_model
+        pm = list(p.iter_meta())
+        a3 = p.get("a3"); a3m = a3.media; a3c = a3.content_model
+
+        self._do_test_rename()
 
 if __name__ == "__main__":
     main()

@@ -38,7 +38,7 @@ def get_advene_type_label(typ):
     }[typ]
 
 
-class PackageElement(object, WithMetaMixin, WithEventsMixin):
+class PackageElement(WithMetaMixin, WithEventsMixin, object):
     """
     I am the common subclass of all package element.
 
@@ -224,6 +224,7 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         packages that are currently loaded and directly importing 
         imported packages if ``inherited`` is True.
         """
+        # TODO: this method is deprecated, must be removed
         o = self._owner
         if package is None:
             it = self.iter_references
@@ -301,21 +302,53 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         package, else raises an AssertionError.
         """
         o = self._owner
+        importers = o._importers
         assert not o.has_element(new_id)
         old_id = self._id
-        be = o._backend
-        be.rename_element(o._id, old_id, self.ADVENE_TYPE, new_id)
-        # FIXME: possible optimisation
-        # we could factorize calls to the same backend, in the same fashion
-        # as AllGroup does. Let us wait and see if it is necessary.
+        # grouping importers by backend, for optimizing loops
+        # FIXME may be this should be maintained at all time by the package?
+        ibe_dict = {}
+        for p, iid in list(importers.iteritems()) + [(o, ""),]:
+            d = ibe_dict.get(p._backend)
+            if d is None:
+                d = ibe_dict[p._backend] = {}
+            d[p._id] = p
+        # renaming in the owner package
+        o._backend.rename_element(o._id, old_id, self.ADVENE_TYPE, new_id)
+        # best effort renaming in all (known) importing packages
         old_uriref = self.uriref
-        be.rename_references([o._id,], old_uriref, new_id)
-        for p in o._importers.keys():
-            p._backend.rename_references([p._id,], old_uriref, new_id)
-        
+        for be, d in ibe_dict.iteritems():
+            be.rename_references(d, old_uriref, new_id)
+        # actually renaming
         del o._elements[old_id]
         o._elements[new_id] = self
         self._id = new_id
+        # updating caches of packages and instantiated elements
+        new_uriref = self._get_uriref()
+        for be, d in ibe_dict.iteritems():
+            for pid, eid, rel in be.iter_references(d, new_uriref):
+                p = d[pid]
+                prefix = importers.get(p, "") # p may be the owner package
+                old_idref = prefix and "%s:%s" % (prefix, old_id) or old_id
+                new_idref = prefix and "%s:%s" % (prefix, new_id) or new_id
+                if eid == "":
+                    p._update_caches(old_idref, new_idref, self, rel)
+                else:
+                    e = p._elements.get(eid) # only update *instantiated* elts
+                    if e is not None:
+                        e._update_caches(old_idref, new_idref, self, rel)
+
+    def _update_caches(self, old_idref, new_idref, element, relation):
+        """
+        This cooperative method is used to update all caches when an element
+        in the cache is renamed. The old_idref, new_idref and the element
+        itself are provided, as well as the relation (as represented by
+        backend methods `iter_references` and `iter_references_with_import`)
+        with this element.
+        """
+        super(PackageElement, self) \
+            ._update_caches(old_idref, new_idref, element, relation)
+
 
     @autoproperty
     def _get_uriref(self):
@@ -561,7 +594,6 @@ class ElementCollection(object):
                 return list(self)[key]
         elif isinstance(key, slice):
             if key.step is None or key.step > 0:
-                print "===", key.start, key.stop, key.step
                 key = key.indices(self.__len__())
                 return list(islice(self, *key))
             else:

@@ -6,7 +6,7 @@ from advene.model.core.element import MEDIA, ANNOTATION, RELATION, LIST, \
                                       TAG, VIEW, QUERY, RESOURCE, IMPORT, \
                                       ElementCollection
 
-class GroupMixin:
+class GroupMixin(object):
     """I provide default implementation for all methods of the Group interface.
 
     Note that at least __iter__ or all the iter_* methods must be implemented

@@ -59,6 +59,15 @@ class Annotation(PackageElement, WithContentMixin):
             r._media = media
         return r
 
+    def _update_caches(self, old_idref, new_idref, element, relation):
+        """
+        :see-also: `advene.model.core.element.PackageElement._update_caches`
+        """
+        if relation == ("media"):
+            self._media_id = new_idref
+        else:
+            super(Annotation, self) \
+                ._update_caches(old_idref, new_idref, element, relation)
 
     def __str__(self):
         return "Annotation(%s,%s,%s)" % \
