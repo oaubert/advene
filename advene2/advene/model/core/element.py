@@ -6,6 +6,7 @@ from itertools import chain
 
 from advene.model.consts       import _RAISE
 from advene.model.core.meta    import WithMetaMixin
+from advene.model.tales        import tales_context_function
 from advene.utils.autoproperty import autoproperty
 
 # the following constants must be used as values of a property ADVENE_TYPE
@@ -151,5 +152,10 @@ class PackageElement(object, WithMetaMixin):
             return bool(list(it))
         else:
             return list(self.iter_taggers(tag, package))
+
+    @tales_context_function
+    def _tales_tags(self, context):
+        refpkg = context.globals["refpkg"]
+        return self.iter_tags(refpkg)
 
 # TODO: provide class DestroyedPackageElement.

@@ -2,8 +2,9 @@ from bisect import insort
 from itertools import chain
 from weakref import ref
 
-from advene.model.consts import _RAISE
+from advene.model.consts import _RAISE, PARSER_META_PREFIX
 from advene.model.exceptions import ModelError
+from advene.model.tales import tales_path1_function
 from advene.utils.sorted_dict import SortedDict
 
 class WithMetaMixin:
@@ -265,6 +266,25 @@ class WithMetaMixin:
 
         setattr(cls, alias, property(getter, setter, deller))
 
+    @tales_path1_function
+    def _tales_meta(self, path):
+        nsd = self._get_ns_dict()
+        return _PrefixDict(self, nsd[path])
+
+    def _get_ns_dict(self):
+        if hasattr(self, "ADVENE_TYPE"):
+            package = self.ownet
+        else:
+            package = self
+        namespaces = {}
+        prefixes = package.get_meta(PARSER_META_PREFIX + "namespaces", "")
+        for line in prefixes.split("\n"):
+            if line:
+                prefix, uri = line.split(" ")
+                namespaces[prefix] = uri
+        return namespaces
+        
+        
 
 class _MetaDict(object):
     """A dict-like object representing the metadata of an object.
@@ -404,6 +424,25 @@ class _MetaDict(object):
     def values_ids(self):
         return [ v for _, v in self._owner.iter_meta_ids() ]
 
+
+class _PrefixDict(object):
+    """
+    A dict-like object used as an intermediate object in TALES expression.
+    """
+    __slots__ = ["_obj", "_prefix"]
+
+    def __init__(self, obj, prefix):
+        self._obj = obj
+        self._prefix = prefix
+
+    def __getitem__(self, path):
+        return self._obj.get_meta(self._prefix+path)
+
+    def __call__(self):
+        # TODO use iter_meta(prefix=X) when implemented
+        return ( (k[len(self._prefix):], v)
+                 for k,v in self._obj.iter_meta()
+                 if k.startswith(self._prefix))
 
 class metadata_value(str):
     def __new__ (cls, val, is_id):

@@ -1,4 +1,5 @@
 import advene.model.view.builtin as builtin
+import advene.model.view.tal as tal
 
 # view_handler register functions
 
@@ -21,3 +22,4 @@ _view_handlers = []
 # default registration
 
 register_view_handler(builtin)
+register_view_handler(tal)

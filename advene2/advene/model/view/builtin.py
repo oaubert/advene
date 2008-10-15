@@ -99,18 +99,9 @@ def hello_world(obj):
 
 @_wrap_method(
     output_mimetype = "text/plain",
-    type = """one of the following values:
- * ANNOTATION
- * IMPORT
- * LIST
- * MEDIA
- * PACKAGE
- * QUERY
- * RELATION
- * RESOURCE
- * TAG
- * VIEW
-"""
+    type = "one of the following values:\n" \
+           " * ANNOTATION\n * IMPORT\n * LIST\n * MEDIA\n * PACKAGE\n * QUERY\n" \
+           " * RELATION\n * RESOURCE\n * TAG\n * VIEW\n"""
 )
 def has_type(obj, type):
     d = { "ANNOTATION": ANNOTATION,

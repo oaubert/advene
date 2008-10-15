@@ -34,6 +34,9 @@ class View(PackageElement, WithContentMixin):
             self._handler = None
 
     def apply_to(self, obj):
+        self._update_content_handler()
+        # TODO: _update_content_handler should rather be associated to the
+        # change of content_mimetype...
         h = self._handler
         if  h is None:
             raise NoContentHandlerError(self._get_uriref())
