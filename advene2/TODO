@@ -1,6 +1,10 @@
 Important improvements
 ======================
 
+- prevent annotations/relations to be untyped
+
+- implement ID generator
+
 - fix problem in utest/serpar.py with "created" and "modified" metadata
 
 - check in can_reference that "embeded" elements are not references outside
