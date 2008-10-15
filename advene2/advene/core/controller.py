@@ -577,6 +577,15 @@ class AdveneController(object):
             raise Exception("Unsupported query type for %s" % query.id)
         return result, qexpr
 
+    @property
+    def typed_active(self):
+        """Return a DefaultDict of active annotations grouped by type id.
+        """
+        d=DefaultDict(default=False)
+        for a in self.active_annotations:
+            d.setdefault(a.type.id, []).append(a)
+        return d
+
     def build_context(self, here=None, alias=None, baseurl=None):
         """Build a context object with additional information.
         """
