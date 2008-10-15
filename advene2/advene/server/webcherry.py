@@ -46,7 +46,7 @@ import cherrypy
 if int(cherrypy.__version__.split('.')[0]) < 3:
     raise _("The webserver requires version 3.0 of CherryPy at least.")
 
-from advene.model.core.package import Package
+from advene.model.cam.package import Package
 from advene.model.tales import AdveneContext
 from advene.model.exceptions import NoSuchElementError, UnreachableImportError
 from simpletal.simpleTALES import PathNotFoundException
