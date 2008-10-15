@@ -1,3 +1,24 @@
+* use of reserved keywords (id): should we allow this ?
+
+* some standard metadata (dc_description, dc_author,etc) should return '' if not set,
+  not raise an exception, or always be initialized.
+
+* how to get owner/root package from element ? -> _owner, hidden ?
+
+* autoproperties: define docstrings ? Cf a.content.model? in ipython
+
+* données non cohérentes (end < begin)
+
+* readable id generation...
+
+* advene2: implement text search on content
+
+* Replace .bzp by .oda (OpenDocument Advene) or .aod (Advene Open Document)
+
+* Copy iter_*.__doc__ to corresponding filter method
+
+--
+
 * frame-of-reference: verbose and not easy to manipulate. Better: <media origin="0" unit="ms" ...>
 
 -> ok
