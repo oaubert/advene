@@ -45,7 +45,8 @@ _constructor = {
     IMPORT: "import_factory",
 }
 
-def _noop(*args, **kw): pass
+def _noop(*args, **kw):
+    pass
 
 class Package(object, WithMetaMixin, WithEventsMixin):
     """FIXME: missing docstring.
@@ -723,6 +724,44 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         s = "\n".join( "%s %s" % (prefix, uri)
                        for uri, prefix in d.iteritems() )
         self.set_meta(PARSER_META_PREFIX+"namespaces", s)
+
+    # TALES shortcuts
+
+    @property
+    def _tales_medias(self):
+        return self.all.media
+
+    @property
+    def _tales_annotations(self):
+        return self.all.annotations
+
+    @property
+    def _tales_relations(self):
+        return self.all.relations
+
+    @property
+    def _tales_lists(self):
+        return self.all.lists
+
+    @property
+    def _tales_tags(self):
+        return self.all.tags
+
+    @property
+    def _tales_imports(self):
+        return self.all.imports
+
+    @property
+    def _tales_queries(self):
+        return self.all.queries
+
+    @property
+    def _tales_views(self):
+        return self.all.views
+
+    @property
+    def _tales_resources(self):
+        return self.all.resources
 
 def _make_absolute(url):
     abscurdir = abspath(curdir)

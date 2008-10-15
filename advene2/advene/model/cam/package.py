@@ -349,6 +349,20 @@ class Package(CorePackage):
             raise SemanticError("Tag %s is not simple: %s", tag._id, systemtype)
         super(Package, self).dissociate_tag(element, tag)
 
+    # TALES shortcuts
+
+    @property
+    def _tales_annotation_types(self):
+        return self.all.annotation_types
+
+    @property
+    def _tales_relation_types(self):
+        return self.all.relation_types
+
+    @property
+    def _tales_schemas(self):
+        return self.all.schemas
+
 _bootstrap_ref = lambda: None
 
 Package.make_metadata_property(DC_NS_PREFIX + "creator", default="")
