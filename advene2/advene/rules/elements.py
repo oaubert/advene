@@ -22,7 +22,6 @@ The event framework makes it possible to bind actions to specific
 events that match a condition."""
 
 import re
-import sets
 import StringIO
 import urllib
 import itertools
@@ -581,8 +580,7 @@ class SubviewList(list, EtreeMixin):
         """
         self.origin=origin
 
-        # FIXME: check the the element tagname is 'subviewlist'
-        assert element.tag == tag('subviewlist'), "Trying to parse %s as a subviewlist" % element.tag
+        assert element.tag == tag('subviewlist') or element.tag == 'subviewlist', "Trying to parse %s as a subviewlist" % element.tag
 
         self.name=element.attrib['name']
         v=element.attrib['value']
@@ -1011,7 +1009,7 @@ class ECACatalog:
         }
 
     # Events that set the controller.modified state
-    modifying_events=sets.Set((
+    modifying_events=set((
         'PackageEditEnd',
         'AnnotationCreate',
         'AnnotationEditEnd',
@@ -1040,9 +1038,9 @@ class ECACatalog:
         ))
 
     # Basic events are exposed to the user when defining new STBV
-    basic_events=('AnnotationBegin', 'AnnotationEnd', 'PlayerStart', 'PlayerPause',
+    basic_events=['AnnotationBegin', 'AnnotationEnd', 'PlayerStart', 'PlayerPause',
                   'PlayerResume', 'PlayerStop', 'ApplicationStart', 'ViewActivation',
-                  'UserEvent')
+                  'UserEvent']
 
     action_categories={
         'generic': _("Generic actions"),
