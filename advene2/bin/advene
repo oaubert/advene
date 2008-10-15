@@ -73,7 +73,7 @@ if config.data.preferences['language']:
 
 print config.data.version_string, "run at", time.strftime("%F %H:%M:%S %z"), "on", sys.platform
 
-if config.data.os in ('darwin', 'linux') and not 'DISPLAY' in os.environ:
+if config.data.os in ('linux') and not 'DISPLAY' in os.environ:
     print "The DISPLAY environment variable is not set. Cannot continue."
     sys.exit(1)
 
@@ -125,7 +125,6 @@ if config.data.os == 'win32':
     try:
         import pygtk
         import gtk
-        import gtk.glade
     except ImportError:
         # Gtk DLLs are not in the PATH. Try to get their directory
         # from the registry
@@ -137,7 +136,6 @@ if config.data.os == 'win32':
         print "Using GTK DLLs at %s" % path
         import pygtk
         import gtk
-        import gtk.glade
     else:
         import gtk
 
@@ -179,13 +177,6 @@ Aborting.""" % config.data.path[d]
             #FIXME: could trigger events?
             c.apply_export_filter(l[0], output)
         sys.exit(0)
-
-    gladefile=config.data.advenefile (config.data.gladefilename)
-    if not os.path.exists(gladefile):
-        print """The %s file does not exist.
-Either the Advene software is not installed or it is badly configured.
-Check your .advenerc file.""" % gladefile
-        sys.exit(1)
 
     # First time configuration
     if config.data.first_run:
