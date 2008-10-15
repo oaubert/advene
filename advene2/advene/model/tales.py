@@ -47,6 +47,17 @@ def tales_auto_call(f):
 
 
 class AdveneContext(simpleTALES.Context):
+    def __init__(self, here, options=None):
+        """Creates a tales.AdveneContext object, having a global symbol 'here'
+           with value 'here' and a global symbol 'options' where all the key-
+           value pairs of parameter 'options' are copied. Of course, it also
+           has all the standard TALES global symbols.
+        """
+        if options is None:
+                options={}
+        simpleTALES.Context.__init__(self, dict(options)) # *copy* dict 'options'
+        self.addGlobal('here', here)
+
     def traversePath(self, expr, canCall=1):
         if expr.startswith('"') or expr.startswith("'"):
             if expr.endswith('"') or expr.endswith("'"):
