@@ -195,13 +195,18 @@ class _GroupCollection(object):
 
     def __getitem__(self, key):
         if isinstance(key, int):
-            it = self.__iter__()
-            for i in xtange(key): it.next()
-            return it.next()
+            if key >= 0:
+                for i,j in enumerate(self):
+                    if i == key:
+                        return j
+                raise IndexError, key
+            else:
+                return list(self)[key]
         elif isinstance(key, slice):
-            if slice.step is None or slice.step > 0:
+            if key.step is None or key.step > 0:
+                print "===", key.start, key.stop, key.step
                 key = key.indices(self.__len__())
-                return list(islice(self, key))
+                return list(islice(self, *key))
             else:
                 return list(self)[key]
         else:
