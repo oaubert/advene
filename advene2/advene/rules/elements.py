@@ -190,8 +190,8 @@ class Condition:
         """Test if the condition matches the context."""
         if self.operator in self.binary_operators:
             # Binary operator
-            left=context.evaluateValue(self.lhs)
-            right=context.evaluateValue(self.rhs)
+            left=context.evaluate(self.lhs)
+            right=context.evaluate(self.rhs)
             if self.operator == 'equals':
                 return left == right
             if self.operator == 'different':
@@ -257,7 +257,7 @@ class Condition:
         elif self.operator in self.unary_operators:
             # Unary operator
             # Note: self.rhs is ignored, whatever its value is.
-            left=context.evaluateValue(self.lhs)
+            left=context.evaluate(self.lhs)
             if self.operator == 'not':
                 return not left
             elif self.operator == 'value':
@@ -753,7 +753,7 @@ class SimpleQuery(EtreeMixin):
 
         @return: the list of elements matching the query or a boolean
         """
-        s=context.evaluateValue(self.source)
+        s=context.evaluate(self.source)
 
         if self.condition is None:
             if self.rvalue is None or self.rvalue == 'element':

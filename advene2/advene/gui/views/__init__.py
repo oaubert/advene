@@ -349,7 +349,7 @@ class AdhocView(object):
         d=dialog.message_dialog(_("View successfully exported as %s.\nOpen it in the web browser ?") % v.title, icon=gtk.MESSAGE_QUESTION)
         if d:
             c=self.controller.build_context(here=v)
-            self.controller.open_url(c.evaluateValue('package/view/%s/absolute_url' % ident))
+            self.controller.open_url(c.evaluate('package/view/%s/absolute_url' % ident))
         return True
 
     def get_widget (self):

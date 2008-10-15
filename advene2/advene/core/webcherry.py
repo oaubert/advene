@@ -1123,7 +1123,7 @@ class Packages(Common):
         context.setLocal (u'view', p)
 
         try:
-            objet = context.evaluateValue (expr)
+            objet = context.evaluate(expr)
         except AdveneException, e:
             self.start_html (_("Error"), duplicate_title=True, mode='navigation')
             res.append (_("""The TALES expression %s is not valid.""") % tales)
@@ -1497,7 +1497,7 @@ class Packages(Common):
                 for i in range(1, len(path)+1):
                     subpath=path[:i]
                     try:
-                        r = context.evaluateValue("here/resources/%s" % "/".join(subpath))
+                        r = context.evaluate("here/resources/%s" % "/".join(subpath))
                     except AdveneException:
                         # The resource folder does not exist. Create it.
                         parent[subpath[-1]] = parent.DIRECTORY_TYPE
@@ -1520,7 +1520,7 @@ class Packages(Common):
             return _("Resource successfuly created/updated")
 
         try:
-            objet = context.evaluateValue (expr)
+            objet = context.evaluate(expr)
         except Exception, e:
             return self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
         try:
@@ -1690,7 +1690,7 @@ class Packages(Common):
         # Different actions : update, create, delete
         if query['action'] == 'update':
             try:
-                objet = context.evaluateValue (expr)
+                objet = context.evaluate(expr)
             except Exception, e:
                 return self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
             if hasattr(objet, attribute):
@@ -1699,7 +1699,7 @@ class Packages(Common):
                     return self.send_redirect(query['redirect'])
                 if expr.endswith('/content'):
                     # We have updated the content.data of an element
-                    element = context.evaluateValue(expr[:-8])
+                    element = context.evaluate(expr[:-8])
                     if isinstance(element, View) and element.matchFilter['class'] in ('*', 'package'):
                         return self.send_redirect('/packages/advene/view/' + element.id)
                     else:
@@ -1750,7 +1750,7 @@ class Packages(Common):
                         for i in range(1, len(path)+1):
                             subpath=path[:i]
                             try:
-                                r = context.evaluateValue("here/resources/%s" % "/".join(subpath))
+                                r = context.evaluate("here/resources/%s" % "/".join(subpath))
                             except AdveneException:
                                 # The resource folder does not exist. Create it.
                                 parent[subpath[-1]] = parent.DIRECTORY_TYPE
@@ -1828,17 +1828,17 @@ class Packages(Common):
                 for k in ('relationtype', 'member1', 'member2'):
                     if not query.has_key(k):
                         return self.send_error(500, _("Missing %s parameter") % k)
-                rt = context.evaluateValue("here/relationTypes/%s" % query['relationtype'])
+                rt = context.evaluate("here/relationTypes/%s" % query['relationtype'])
                 if rt is None:
                     return self.send_error(500, _("Relation type %s does not exist") % query['relationtype'])
                 try:
                     id_ = query['id']
                 except KeyError:
                     id_ = objet._idgenerator.get_id(Relation)
-                m1 = context.evaluateValue('package/annotations/%s' % query['member1'])
+                m1 = context.evaluate('package/annotations/%s' % query['member1'])
                 if m1 is None:
                     return self.send_error(500, _("Annotation %s does not exist") % query['member1'])
-                m2 = context.evaluateValue('package/annotations/%s' % query['member2'])
+                m2 = context.evaluate('package/annotations/%s' % query['member2'])
                 if m2 is None:
                     return self.send_error(500, _("Annotation %s does not exist") % query['member2'])
 
@@ -1867,7 +1867,7 @@ class Packages(Common):
                 # annotationtype = relation type identifier
                 # begin, end = begin and end time (in ms)
                 # data = content data (optional)
-                at = context.evaluateValue("here/annotationTypes/%s" % query['annotationtype'])
+                at = context.evaluate("here/annotationTypes/%s" % query['annotationtype'])
                 if at is None:
                     return self.send_error(500, _("Annotation type %s does not exist") % query['annotationtype'])
                 try:

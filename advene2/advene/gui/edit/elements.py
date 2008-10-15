@@ -152,7 +152,7 @@ class EditElementPopup (AdhocView):
                 self.apply_cb(b, None)
                 # Open in web browser
                 ctx=self.controller.build_context()
-                url=ctx.evaluateValue('here/absolute_url')
+                url=ctx.evaluate('here/absolute_url')
                 self.controller.open_url('/'.join( (url, 'view', self.element.id) ))
                 return True
 
@@ -1527,7 +1527,7 @@ class EditGenericForm(EditForm):
             if v:
                 c=self.controller.build_context()
                 try:
-                    color=c.evaluateValue(v)
+                    color=c.evaluate(v)
                     gtk_color=gtk.gdk.color_parse(color)
                     b.set_color(gtk_color)
                 except:

@@ -385,7 +385,7 @@ class Menu:
 
         def open_in_browser(i, v):
             c=self.controller.build_context(here=element)
-            url=c.evaluateValue('here/absolute_url')
+            url=c.evaluate('here/absolute_url')
             self.controller.open_url(url)
             return True
         add_item(_("Open in web browser"), open_in_browser, element)
@@ -689,13 +689,13 @@ class Menu:
     def make_view_menu(self, element, menu):
         def wysiwyg_edit(i, e):
             c=self.controller.build_context(here=e)
-            url=c.evaluateValue('here/view/_richedit/absolute_url')
+            url=c.evaluate('here/view/_richedit/absolute_url')
             self.controller.open_url(url)
             return True
 
         def open_in_browser(i, v):
             c=self.controller.build_context()
-            url=c.evaluateValue('here/view/%s/absolute_url' % v.id)
+            url=c.evaluate('here/view/%s/absolute_url' % v.id)
             self.controller.open_url(url)
             return True
 
