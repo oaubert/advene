@@ -18,9 +18,9 @@ from urlparse import urlparse
 from weakref import ref
 
 from advene import _RAISE
-from advene.model import PARSER_META_PREFIX
-from advene.model.exceptions import ModelError
 from advene.model.core.dirty import DirtyMixin
+from advene.model.exceptions import ModelError
+from advene.model.parsers import PARSER_META_PREFIX
 from advene.utils.autoproperty import autoproperty
 
 PACKAGED_ROOT = "%spackage_root" % PARSER_META_PREFIX
@@ -224,7 +224,7 @@ class WithContentMixin(DirtyMixin):
             self._load_content_info()
             url = self.__url
         packaged = url.startswith("packaged:")
-        
+
         if url: # non-empty string
             if url.startswith("packaged:"):
                 # special URL scheme

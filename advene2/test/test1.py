@@ -9,6 +9,7 @@ import advene.model.core.dirty as dirty
 ## uncomment the following to disable differed cleaning
 #dirty.DirtyMixin = dirty.DirtyMixinInstantCleaning
 
+from advene.model import DC_NS_PREFIX
 import advene.model.backends.sqlite as backend_sqlite
 from advene.model.core.content import PACKAGED_ROOT
 from advene.model.core.element import PackageElement
@@ -61,11 +62,8 @@ if __name__ == "__main__":
     content_file = join(base, "a1.txt")
     if exists (content_file): unlink (content_file)
 
-    Package.make_metadata_property ("http://purl.org/dc/elements/1.1/creator",
-                                    "dc_creator")
-    PackageElement.make_metadata_property (
-        "http://purl.org/dc/elements/1.1/creator",
-        "dc_creator")
+    Package.make_metadata_property (DC_NS_PREFIX+"creator", "dc_creator")
+    PackageElement.make_metadata_property (DC_NS_PREFIX+"creator", "dc_creator")
 
     p = Package(package_url, create=True)
     #trace_wrap_all (p._backend)

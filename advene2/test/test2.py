@@ -9,7 +9,9 @@ import advene.model.core.dirty as dirty
 ## uncomment the following to disable differed cleaning
 #dirty.DirtyMixin = dirty.DirtyMixinInstantCleaning
 
+from advene.model import DC_NS_PREFIX, RDFS_NS_PREFIX
 from advene.model.core.package import Package
+from advene.model.parsers import PARSER_META_PREFIX
 
 _indent = []
 def trace_wrapper (f):
@@ -60,7 +62,7 @@ if __name__ == "__main__":
     if exists (filea): unlink (filea)
     if exists (fileb): unlink (fileb)
 
-    Package.make_metadata_property ("dc#Creator", "dc_creator")
+    Package.make_metadata_property (DC_NS_PREFIX+"creator", "dc_creator")
 
     p1 = Package(url1, create=True)
     p2 = Package(url2, create=True)
@@ -82,8 +84,8 @@ if __name__ == "__main__":
     p5.create_import("p3", p3)
     p7.create_import("p5", p5) # will not be loaded again; just a decoy
 
-    trace_wrap_all(p1._backend)
-    trace_wrap_all(p4._backend)
+    #trace_wrap_all(p1._backend)
+    #trace_wrap_all(p4._backend)
 
     foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
     m4 = p4.create_media("m4", "http://example.com/m4.ogm", foref)
@@ -91,12 +93,22 @@ if __name__ == "__main__":
     a3 = p3.create_annotation("a3", m4, 30, 39, "text/plain")
     a5 = p5.create_annotation("a5", m6, 50, 59, "text/plain")
     t2 = p2.create_tag("t2")
+    t3 = p3.create_tag("t3")
     t4 = p4.create_tag("t4")
     t6 = p6.create_tag("t6")
     p3.associate_tag(a5, t4)
+    p3.associate_tag(a5, t3)
+    p3.associate_tag(a3, t3)
     p5.associate_tag(a3, t6)
     p5.associate_tag(a5, t6)
     p1.associate_tag(a3, t2)
+
+    m3 = p3.create_media("m3", "urn:xyz", foref)
+    r3 = p3.create_relation("r3", "text/plain", members=[a5, a3])
+    L3 = p3.create_list("L3", items=[a5, r3, a3])
+    v3 = p3.create_view("v3", "text/plain")
+    q3 = p3.create_query("q3", "text/plain")
+    R3 = p3.create_resource("R3", "text/plain")
 
     print
     print [i.id for i in p3.own.annotations]
@@ -119,6 +131,33 @@ if __name__ == "__main__":
     print [ e.id for e in t6.iter_elements(p5, False) ]
     print [ e.id for e in t6.iter_elements(p5) ]
     print [ i for i in t6.iter_element_idrefs(p5) ]
+
+    print a3.content_mimetype
+    a3.content_mimetype = "text/html"
+    a3.content_data = "<em>hello</em>\n"
+    print a3.content_mimetype
+    print "\n\n"
+
+
+    ################
+
+    from advene.model.serializers.advene_xml import make_serializer
+    from sys import stdout
+
+    p3.set_meta(PARSER_META_PREFIX + "namespaces", """\
+dc %s
+rdfs %s"""
+    % (DC_NS_PREFIX, RDFS_NS_PREFIX))
+
+    # testing metadata, including to unreachable element
+    p3.dc_creator = "pchampin"
+    trap = p4.create_resource("trap", "text/plain")
+    p3.set_meta(RDFS_NS_PREFIX+"seeAlso", trap)
+    trap.delete()
+    del trap
+
+    make_serializer(p3, stdout).serialize()
+    print
 
     p1.close()
     p7.close()
