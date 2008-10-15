@@ -12,7 +12,7 @@ def claims_for_handle(mimetype):
     to handle correctly the given mimetype. 70 is used as a standard value when
     the hanlder is pretty sure it can handle the mimetype.
     """
-    if mimetype == "application/x-advene-builtin-view":
+    if mimetype == "application/x-advene-builtin-view" or mimetype == 'application/x-advene-structured':
         return 99
     else:
         return 0
