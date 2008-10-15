@@ -35,6 +35,7 @@ class Media(PackageElement):
     def _set_frame_of_reference(self, frame_of_reference):
         self._frame_of_reference = frame_of_reference
         self.__store()
+        self._update_unit_and_origin()
 
     @autoproperty
     def _get_unit(self):
