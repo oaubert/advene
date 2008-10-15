@@ -20,6 +20,7 @@
 # Advene browser, a la NeXT's workspace manager
 # FIXME: implement set_path to directly display a given path
 import sys
+import textwrap
 
 # Advene part
 import advene.core.config as config
@@ -44,6 +45,7 @@ class BrowserColumn:
         self.callback=callback
         self.next=None
         self.previous=parent
+        self.tooltips=gtk.Tooltips()
         self.widget=self.build_widget()
         self.widget.connect('key-press-event', self.key_pressed_cb)
 
@@ -85,7 +87,8 @@ class BrowserColumn:
         for att in helper.get_valid_members(element):
             self.liststore.append([att])
         self.name=name
-        self.label.set_label(name)
+        self.label.set_label("\n".join( (name, unicode(self.model) ) ) )
+        self.tooltips.set_tip(self.label, "\n".join(textwrap.wrap(self.label.get_label())))
         # Destroy all following columns
         self.next=None
         return True
@@ -134,7 +137,9 @@ class BrowserColumn:
     def build_widget(self):
         vbox=gtk.VBox()
 
-        self.label=gtk.Button(self.name, use_underline=False)
+        self.label=gtk.Button("\n".join( (self.name, unicode(self.model) )),
+                              use_underline=False)
+        self.tooltips.set_tip(self.label, "\n".join(textwrap.wrap(self.label.get_label())))
         self.label.connect('clicked', self.on_column_activation)
         vbox.pack_start(self.label, expand=False)
 
