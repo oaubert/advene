@@ -5,8 +5,6 @@ Important improvements
 
 - autoproperties should inherit getter docstring
 
-- ensure that the import "cam" is never renamed
-
 - check in can_reference that "embeded" elements are not references outside
   their embeding elements
 
@@ -24,30 +22,7 @@ Important improvements
 - implement content handlers for queries and models, in the same way it has
   been done for views
 
-- implement TALES support, and find a *clean* way to add TALES-specific
-  methods; for example, elements should have a tal-method ``tags``, so that
-
-    ``a_package/i:e/tags``
-
-  would be equivalent to the following python:::
-
-    a_package["i:e"].iter_tags(a_package)
-
-  We can see that the first item of the TALES path (``a_package``) is used
-  as a context for following items; that notion of "context" does not exist
-  in python (``a_package`` must be explicitly passed to ``iter_tags``) and it
-  seems like a good idea (explicit is better than implicit). Since TALES does
-  favour no-arguments function, however, the context may help here.
-
-  Other common patterns in TALES are like:
-
-    ``a_package/view/i:v``
-
-  where the second item kind of takes the third as a parameter. This should
-  be cleanly implemented.
-
-  NB: there are first attempts to do that in advene/model/tales.py,
-  to be validated
+- implement element renaming; ensure that the import "cam" is never renamed
 
 - advene_zip: make unit test with accented filenames stored in the
    package, to ensure that there is no problem with multiplaform
