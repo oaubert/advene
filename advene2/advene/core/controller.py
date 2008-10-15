@@ -1501,11 +1501,14 @@ class AdveneController(object):
         p=context.evaluate('package')
 
         # Cache common fieldnames for structured content
+        p._fieldnames={}
         for at in p.all.annotation_types:
-            if at.mimetype.endswith('/x-advene-structured'):
-                at.meta[config.data.transientns+'fieldnames']=helper.common_fieldnames(at.annotations)
+            # FIXME: to replace once at.mimetype is back
+            #if at.mimetype.endswith('/x-advene-structured'):
+            if len(at.annotations) and at.annotations[0].content.mimetype.endswith('/x-advene-structured'):
+                p._fieldnames[at.id]=helper.common_fieldnames(at.annotations)
             else:
-                at.meta[config.data.transientns+'fieldnames']=[]
+                p._fieldnames[at.id]=set()
 
         for m in p.all.medias:
             ic=self.package.imagecache[m.id]
