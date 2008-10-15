@@ -1,0 +1,13 @@
+- conform to PEP 8
+
+  * replace: raise ExceptionClass, message
+         by: raise ExceptionClass (message) 
+
+  * replace: url[:7] == "sqlite"
+         by: url.startswith ("sqlite")
+
+  * rename files without starting capital
+
+  * no relative imports
+
+- add indexes in the SQL schema (Annotations.f_begin at least)

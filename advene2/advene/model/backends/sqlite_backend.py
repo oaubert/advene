@@ -244,6 +244,7 @@ class _SqliteBackend (object):
         no reference to the backend instance, so that the garbage collector
         can delete it, which will invoke the close method (see __del__ below).
         """
+        #print "=== About to close SqliteBackend", self._path
         self._conn.close()
 
     def __del__ (self):
@@ -464,7 +465,9 @@ class _SqliteBackend (object):
                         ):
         """
         Yield tuples of the form
-        (ANNOTATION, package_id, id, media, begin, end,).
+        (ANNOTATION, package_id, id, media, begin, end,), ordered by begin,
+        end and media id-ref.
+
         ``media`` is the uri-ref of a media ;
         ``media_alt`` is an iterable of uri-refs.
         """
@@ -539,6 +542,8 @@ class _SqliteBackend (object):
         if end_max is not None:
             q += " AND a.fend <= ?"
             args.append (end_max)
+
+        q += " ORDER BY fbegin, fend, media_p, media_i"
 
         return self._conn.execute (q, args)
 
@@ -697,7 +702,6 @@ class _SqliteBackend (object):
         Note that ``schema_idref`` will be an empty string if no schema is
         specified (never None).
         """
-        # TODO manage schema and url
         q = "SELECT mimetype, data, join_id_ref(schema_p,schema_i) as schema " \
             "FROM Contents " \
             "WHERE package = ? AND element = ?"

@@ -263,15 +263,15 @@ class TestCreateElement (TestCase):
     def test_create_annotation (self):
         self.be.create_media (self.pid, "m1", "http://example.com/m1.avi")
         try:
-            self.be.create_annotation (self.pid, "a1", "m1", 10, 20)
+            self.be.create_annotation (self.pid, "a4", "m1", 10, 20)
         except Exception, e:
             self.fail (e) # raised by create_annotation
-        self.assert_ (self.be.has_element (self.pid, "a1"))
-        self.assert_ (self.be.has_element (self.pid, "a1", ANNOTATION))
-        self.assertEquals ((ANNOTATION, self.pid, "a1", "m1", 10, 20),
-                           self.be.get_element (self.pid, "a1"))
+        self.assert_ (self.be.has_element (self.pid, "a4"))
+        self.assert_ (self.be.has_element (self.pid, "a4", ANNOTATION))
+        self.assertEquals ((ANNOTATION, self.pid, "a4", "m1", 10, 20),
+                           self.be.get_element (self.pid, "a4"))
         # check that it has a content
-        self.assertNotEqual (self.be.get_content (self.pid, "a1", ANNOTATION),
+        self.assertNotEqual (self.be.get_content (self.pid, "a4", ANNOTATION),
                              None)
 
     def test_create_relation (self):
@@ -372,10 +372,10 @@ class TestHandleElements (TestCase):
 
             self.m1 = (self.pid1, "m1", self.m1_url)
             self.m2 = (self.pid1, "m2", self.m2_url)
-            self.a1 = (self.pid1, "a1", "m1", 10, 20)
-            self.a2 = (self.pid1, "a2", "m2", 10, 20)
-            self.a3 = (self.pid1, "a3", "m1", 10, 30)
-            self.a4 = (self.pid1, "a4", "i1:m3", 15, 20)
+            self.a1 = (self.pid1, "a1", "i1:m3", 15, 20)
+            self.a2 = (self.pid1, "a2", "m1", 10, 30)
+            self.a3 = (self.pid1, "a3", "m2", 10, 20)
+            self.a4 = (self.pid1, "a4", "m1", 10, 20)
             self.r1 = (self.pid1, "r1",)
             self.r2 = (self.pid1, "r2",)
             self.v1 = (self.pid1, "v1",)
@@ -391,7 +391,7 @@ class TestHandleElements (TestCase):
             self.i1 = (self.pid1, "i1", self.url2, self.i1_uri)
             self.i2 = (self.pid1, "i2", self.i2_url, "")
 
-            self.own = [ self.m1, self.m2, self.a1, self.a2, self.a3, self.a4,
+            self.own = [ self.m1, self.m2, self.a4, self.a3, self.a2, self.a1,
                          self.r1, self.r2, self.v1, self.v2, self.t1, self.t2,
                          self.l1, self.l2, self.i1, self.i2, ]
 
@@ -399,7 +399,7 @@ class TestHandleElements (TestCase):
             self.be.create_import     (*self.i2)
             self.be.create_media      (*self.m1)
             self.be.create_media      (*self.m2)
-            self.be.create_annotation (*self.a1)
+            self.be.create_annotation (*self.a1) 
             self.be.create_annotation (*self.a2)
             self.be.create_annotation (*self.a3)
             self.be.create_annotation (*self.a4)
@@ -507,71 +507,75 @@ class TestHandleElements (TestCase):
     def test_get_annotations (self):
 
         # NB: annotations are ordered, so we compare lists
+        # NB: it is IMPORTANT that the identifiers of annotations do not
+        # exactly match their chronological order, for the tests to be
+        # really significant
 
         # the following function makes assert expression fit in one line...
+
         def get (*a, **k):
             return [ i[1:] for i in self.be.get_annotations (*a, **k) ]
 
-        ref = [self.a1, self.a2, self.a3, self.a4, self.a5, self.a6,]
+        ref = [self.a4, self.a3, self.a2, self.a1, self.a5, self.a6,]
         self.assertEqual (ref, get ((self.pid1, self.pid2,),))
 
-        ref = [self.a1, self.a2, self.a3, self.a4,]
+        ref = [self.a4, self.a3, self.a2, self.a1,]
         self.assertEqual (ref, get ((self.pid1,),))
 
         ref = [self.a5, self.a6,]
         self.assertEqual (ref, get ((self.pid2,),))
 
-        ref = [self.a1,]
-        self.assertEqual (ref, get ((self.pid1, self.pid2,), id="a1",))
+        ref = [self.a4,]
+        self.assertEqual (ref, get ((self.pid1, self.pid2,), id="a4",))
 
-        ref = [self.a2, self.a4, self.a6]
+        ref = [self.a3, self.a1, self.a6]
         self.assertEqual (ref,
-            get ((self.pid1, self.pid2), id_alt=("a6", "a4", "a2",),))
+            get ((self.pid1, self.pid2), id_alt=("a6", "a1", "a3",),))
 
-        media3 = "%s#m3" % self.i1_uri
-        ref = [self.a4, self.a5, self.a6]
+        media2 = "%s#m3" % self.i1_uri
+        ref = [self.a1, self.a5, self.a6]
         self.assertEqual (ref,
-            get ((self.pid1, self.pid2), media=media3,))
+            get ((self.pid1, self.pid2), media=media2,))
 
-        media1_or_3 = ("%s#m1" % self.url1, media3)
-        ref = [self.a1, self.a3, self.a4, self.a5, self.a6,]
+        media4_or_3 = ("%s#m1" % self.url1, media2)
+        ref = [self.a4, self.a2, self.a1, self.a5, self.a6,]
         self.assertEqual (ref,
-            get ((self.pid1, self.pid2), media_alt=media1_or_3,))
+            get ((self.pid1, self.pid2), media_alt=media4_or_3,))
 
-        ref = [self.a1, self.a2, self.a3,]
+        ref = [self.a4, self.a3, self.a2,]
         self.assertEqual (ref, get ((self.pid1, self.pid2), begin=10,))
 
-        ref = [self.a4, self.a5, self.a6,]
+        ref = [self.a1, self.a5, self.a6,]
         self.assertEqual (ref, get ((self.pid1, self.pid2), begin_min=15,))
 
-        ref = [self.a1, self.a2, self.a3, self.a4,]
+        ref = [self.a4, self.a3, self.a2, self.a1,]
         self.assertEqual (ref, get ((self.pid1, self.pid2), begin_max=15,))
 
-        ref = [self.a3, self.a5,]
+        ref = [self.a2, self.a5,]
         self.assertEqual (ref, get ((self.pid1, self.pid2), end=30,))
 
-        ref = [self.a3, self.a5, self.a6]
+        ref = [self.a2, self.a5, self.a6]
         self.assertEqual (ref, get ((self.pid1, self.pid2), end_min=30,))
 
-        ref = [self.a1, self.a2, self.a3, self.a4, self.a5]
+        ref = [self.a4, self.a3, self.a2, self.a1, self.a5]
         self.assertEqual (ref, get ((self.pid1, self.pid2), end_max=30,))
 
         # mixing several criteria
 
-        ref = [self.a3, self.a5,]
+        ref = [self.a2, self.a5,]
         self.assertEqual (ref,
             get ((self.pid1, self.pid2), begin_max=27, end_min=27,))
 
-        ref = [self.a3, self.a5,]
+        ref = [self.a2, self.a5,]
         self.assertEqual (ref,
             get ((self.pid1, self.pid2), begin_max=27, end_min=27,))
 
         ref = [self.a5,]
         self.assertEqual (ref, get ((self.pid2,), begin_max=27, end_min=27,))
 
-        ref = [self.a4, self.a5,]
+        ref = [self.a1, self.a5,]
         self.assertEqual (ref,
-            get ((self.pid1, self.pid2), media=media3, end_max=30,))
+            get ((self.pid1, self.pid2), media=media2, end_max=30,))
 
     def test_get_relations (self):
 
@@ -745,7 +749,7 @@ class TestHandleElements (TestCase):
         mime = "text/html"
         data = "<em>hello</em> world"
 
-        for i in [self.a1, self.r1, self.v1, self.R1, self.q1,
+        for i in [self.a4, self.r1, self.v1, self.R1, self.q1,
                   self.a5, self.r3, self.v3, self.q3,]:
             typ = T[i[1][0]]
             if i[0] is self.pid1: schema = "i1:R3"
@@ -793,31 +797,31 @@ class TestHandleElements (TestCase):
                 self.be.iter_meta (i[0], i[1], typ)))
 
     def test_members (self):
-        self.be.insert_member (self.pid1, "r1", "a1", -1)
+        self.be.insert_member (self.pid1, "r1", "a4", -1)
         self.assertEqual (1, self.be.count_members (self.pid1, "r1"))
-        self.be.insert_member (self.pid1, "r1", "a2", -1)
+        self.be.insert_member (self.pid1, "r1", "a3", -1)
         self.assertEqual (2, self.be.count_members (self.pid1, "r1"))
-        self.assertEqual ("a1", self.be.get_member (self.pid1, "r1", 0))
-        self.assertEqual ("a2", self.be.get_member (self.pid1, "r1", 1))
-        self.assertEqual (["a1", "a2"],
+        self.assertEqual ("a4", self.be.get_member (self.pid1, "r1", 0))
+        self.assertEqual ("a3", self.be.get_member (self.pid1, "r1", 1))
+        self.assertEqual (["a4", "a3"],
                           list (self.be.iter_members (self.pid1, "r1")))
 
         self.be.insert_member (self.pid1, "r1", "i1:a5", 1)
         self.assertEqual (3, self.be.count_members (self.pid1, "r1"))
-        self.assertEqual (   "a1", self.be.get_member (self.pid1, "r1", 0))
+        self.assertEqual (   "a4", self.be.get_member (self.pid1, "r1", 0))
         self.assertEqual ("i1:a5", self.be.get_member (self.pid1, "r1", 1))
-        self.assertEqual (   "a2", self.be.get_member (self.pid1, "r1", 2))
-        self.assertEqual (["a1", "i1:a5", "a2"],
+        self.assertEqual (   "a3", self.be.get_member (self.pid1, "r1", 2))
+        self.assertEqual (["a4", "i1:a5", "a3"],
                           list (self.be.iter_members (self.pid1, "r1")))
             
         self.be.remove_member (self.pid1, "r1", 0)
         self.assertEqual (2, self.be.count_members (self.pid1, "r1"))
         self.assertEqual ("i1:a5", self.be.get_member (self.pid1, "r1", 0))
-        self.assertEqual (   "a2", self.be.get_member (self.pid1, "r1", 1))
-        self.assertEqual (["i1:a5", "a2"],
+        self.assertEqual (   "a3", self.be.get_member (self.pid1, "r1", 1))
+        self.assertEqual (["i1:a5", "a3"],
                           list (self.be.iter_members (self.pid1, "r1")))
 
-        self.be.insert_member (self.pid1, "r2", "a1", -1)
+        self.be.insert_member (self.pid1, "r2", "a4", -1)
         self.be.insert_member (self.pid2, "r3", "a6", -1)
         self.be.insert_member (self.pid2, "r3", "a5", -1)
         rel_w_member = self.be.get_relations_with_member

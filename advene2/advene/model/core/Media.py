@@ -10,7 +10,7 @@ class Media (PackageElement):
 
     def __init__ (self, owner, id, url):
         PackageElement.__init__ (self, owner, id)
-        self._uri = url
+        self._url = url
 
     def _get_url (self):
         return self._url
