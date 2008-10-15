@@ -48,9 +48,10 @@ class WithTypeConstraintMixin(object):
     Implement shortcut attributes to the underlying type-constraint.
     """
 
-    def set_meta(self, key, value, val_is_idref=False, _guard=True):
+    def set_meta(self, key, value, val_is_idref=False):
         if key == CAM_NS_PREFIX + "element-constraint":
              raise TypeError, "element-constraint can not be changed"
+        super(WithTypeConstraintMixin, self).set_meta(key, value, val_is_idref)
 
     @autoproperty
     def _get_mimetype(self):
