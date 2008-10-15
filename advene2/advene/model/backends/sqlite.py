@@ -17,7 +17,7 @@ which `_SqliteBackend` provides a reference implementation.
 
 from pysqlite2 import dbapi2 as sqlite
 from os        import unlink
-from os.path   import exists, isdir, join, split
+from os.path   import exists
 from urllib    import url2pathname, pathname2url
 from weakref   import WeakKeyDictionary, WeakValueDictionary
 import re
@@ -1243,7 +1243,7 @@ class _SqliteBackend(object):
                    "AND value_i = ? " \
                    "AND package || ' ' || value_p IN (%s)" % q1
             execute(q2, args)
-        except InternalError:#sqlite.Error, e:
+        except InternalError, e:#sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not update", e)
         execute("COMMIT")

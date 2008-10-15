@@ -1,5 +1,3 @@
-from bisect import insort
-from itertools import chain
 from weakref import ref
 
 from advene.model.consts import _RAISE, PARSER_META_PREFIX
@@ -344,7 +342,7 @@ class _MetaDict(object):
             self._owner.del_meta(k)
 
     def copy(self):
-        return dirt(self)
+        return dict(self)
 
     def get(self, k, v=None):
         return self._owner.get_meta(k, v)

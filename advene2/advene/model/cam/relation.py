@@ -8,7 +8,7 @@ from advene.model.core.element import TAG
 class Relation(CamGroupMixin, CoreRelation, CamElement):
     def __iter__(self):
         # necessary to override CamGroupMixin __iter__
-        return CoreList.__iter__(self)
+        return CoreRelation.__iter__(self)
 
     def set_meta(self, key, value, val_is_idref=False, _guard=True):
         if key == CAM_TYPE:
@@ -36,6 +36,6 @@ class Relation(CamGroupMixin, CoreRelation, CamElement):
             old_type = self.get_meta(key, None)
             if old_type:
                 self._owner.dissociate_tag(self, old_type, _guard=False)
-        return super(Annotation, self).del_meta(key, _guard)
+        return super(Relation, self).del_meta(key, _guard)
 
 Relation.make_metadata_property(CAM_TYPE, "type", default=None)

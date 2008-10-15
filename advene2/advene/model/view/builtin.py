@@ -4,8 +4,8 @@
 from inspect import getargspec
 
 from advene.model.consts import _RAISE
-from advene.model.core.element import PackageElement, MEDIA, ANNOTATION, \
-  RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
+from advene.model.core.element import \
+    MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
 from advene.model.exceptions import ContentHandlingError
 
 # general handler interface

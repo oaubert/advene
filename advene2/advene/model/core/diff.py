@@ -1,8 +1,5 @@
 """I provide functions to compare elements and packages."""
 
-from advene.model.core.element import PackageElement, MEDIA, ANNOTATION, \
-  RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
-
 def diff_medias(m1, m2):
     return _diff_attr(m1, m2, "url") \
          + _diff_attr(m1, m2, "frame_of_reference") \

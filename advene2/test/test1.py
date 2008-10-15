@@ -1,8 +1,5 @@
 from os import unlink
 from os.path import exists, join, split
-import gc
-import sys
-from urllib import pathname2url
 from weakref import ref
 
 import advene.model.backends.sqlite as backend_sqlite

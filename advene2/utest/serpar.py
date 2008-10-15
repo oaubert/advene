@@ -1,6 +1,6 @@
 """Unit test for serialization and parsing."""
 
-from os import fdopen, path, unlink
+from os import fdopen, unlink
 from tempfile import mkstemp
 from unittest import TestCase, main
 from urllib import pathname2url

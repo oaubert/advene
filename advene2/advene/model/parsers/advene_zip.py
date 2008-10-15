@@ -4,11 +4,8 @@ Unstable and experimental parser implementation.
 See `advene.model.parsers.advene_xml` for the reference implementation.
 """
 
-from os import mkdir, path, tmpfile
-import sys
 from tempfile import mkdtemp
-from urllib import url2pathname, pathname2url
-from urlparse import urlparse, urljoin
+from os import path, tmpfile
 from zipfile import BadZipfile, ZipFile
 
 from advene.model.consts import PACKAGED_ROOT

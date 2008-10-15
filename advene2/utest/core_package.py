@@ -1,6 +1,5 @@
-import gc
-from os import fdopen, rmdir, unlink
-from os.path import abspath, join, split
+from os import rmdir, unlink
+from os.path import join
 from tempfile import mkdtemp
 from unittest import TestCase, main
 from urllib import pathname2url

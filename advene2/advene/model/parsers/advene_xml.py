@@ -10,8 +10,6 @@ from xml.etree.ElementTree import iterparse
 from xml.parsers.expat import ExpatError
 
 from advene.model.consts import ADVENE_XML, PARSER_META_PREFIX, PACKAGED_ROOT
-from advene.model.core.element import MEDIA, ANNOTATION, RELATION, LIST, TAG, \
-                                      VIEW, QUERY, RESOURCE, IMPORT
 from advene.model.parsers.base_xml import XmlParserBase
 from advene.model.parsers.exceptions import ParserError
 import advene.model.serializers.advene_xml as serializer
@@ -325,7 +323,7 @@ class Parser(XmlParserBase):
                 if encoding == "base64":
                     data = base64.decodestring(data)
                 else:
-                    raise ParseError("encoding %s is not supported", encoding)
+                    raise ParserError("encoding %s is not supported", encoding)
             elt.content_data = data
         return elt
 

@@ -2,9 +2,6 @@
 I define the common super-class of all package element classes.
 """
 
-from itertools import chain
-
-from advene.model.consts       import _RAISE
 from advene.model.core.meta    import WithMetaMixin
 from advene.model.events       import ElementEventDelegate, WithEventsMixin
 from advene.model.tales        import tales_context_function

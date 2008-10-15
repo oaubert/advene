@@ -62,12 +62,12 @@ class GroupMixin:
 
     def iter_resources(self):
         for i in self:
-            if i.ADVENE_TYPE == RESOURCES:
+            if i.ADVENE_TYPE == RESOURCE:
                 yield i
 
     def iter_imports(self):
         for i in self:
-            if i.ADVENE_TYPE == IMPORTS:
+            if i.ADVENE_TYPE == IMPORT:
                 yield i
 
 

@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from advene.utils.itertools import *
+from advene.utils.itertools import interclass
 from advene.utils.itertools import _IterHead
 
 class Sortable(object):
@@ -71,4 +71,3 @@ class TestInterclass(TestCase):
 
 if __name__ == "__main__":
      main()
-     print list(interclass(l1, l2, l3, l4))

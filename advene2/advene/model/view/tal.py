@@ -3,14 +3,10 @@
 Note that X/Y must be either text/html or an XML based mimetype.
 """
 
-from advene.model.consts import _RAISE
-from advene.model.core.element import PackageElement, MEDIA, ANNOTATION, \
-  RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
 from advene.model.tales import AdveneContext
-from advene.model.exceptions import ContentHandlingError
 
 from cStringIO import StringIO
-from simpletal import simpleTAL, simpleTALES
+from simpletal import simpleTAL
 
 # general handler interface
 

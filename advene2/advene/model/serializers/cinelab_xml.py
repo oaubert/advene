@@ -4,8 +4,7 @@ Cinelab serializer implementation.
 from bisect import insort
 from xml.etree.cElementTree import Element, ElementTree, SubElement
 
-from advene.model.cam.consts import CAM_XML, CAMSYS_NS_PREFIX, BOOTSTRAP_URI
-from advene.model.consts import PARSER_META_PREFIX
+from advene.model.cam.consts import CAM_XML, CAMSYS_NS_PREFIX
 from advene.model.serializers.advene_xml import _indent
 from advene.model.serializers.advene_xml import _Serializer as _AdveneSerializer
 

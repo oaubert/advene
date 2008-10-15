@@ -12,7 +12,7 @@ efficient (less lookup). Maybe the former should be eventually
 deprecated...
 """
 
-from os import mkdir, path, tmpfile, unlink
+from os import path, tmpfile, unlink
 from tempfile import mkdtemp
 from urllib2 import urlopen, url2pathname
 from urlparse import urljoin, urlparse

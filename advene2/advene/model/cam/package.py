@@ -10,8 +10,7 @@ from advene.model.cam.tag import Tag
 from advene.model.cam.list import List
 from advene.model.cam.query import Query
 from advene.model.cam.import_ import Import
-from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX, \
-                                PARSER_META_PREFIX
+from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX
 from advene.model.core.package import Package as CorePackage
 from advene.model.core.all_group import AllGroup as CoreAllGroup
 from advene.model.core.own_group import OwnGroup as CoreOwnGroup

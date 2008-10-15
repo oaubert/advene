@@ -10,8 +10,8 @@ from advene.model.consts import _RAISE, PARSER_META_PREFIX
 from advene.model.backends.exceptions import PackageInUse
 from advene.model.backends.register import iter_backends
 import advene.model.backends.sqlite as sqlite_backend
-from advene.model.core.element import PackageElement, MEDIA, ANNOTATION, \
-  RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
+from advene.model.core.element import \
+    MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
 from advene.model.core.media import Media, DEFAULT_FOREF
 from advene.model.core.annotation import Annotation
 from advene.model.core.relation import Relation
@@ -25,7 +25,7 @@ from advene.model.core.all_group import AllGroup
 from advene.model.core.own_group import OwnGroup
 from advene.model.core.meta import WithMetaMixin
 from advene.model.exceptions import \
-    ModelError, NoClaimingError, NoSuchElementError, UnreachableImportError
+    NoClaimingError, NoSuchElementError, UnreachableImportError
 from advene.model.events import PackageEventDelegate, WithEventsMixin
 from advene.model.parsers.register import iter_parsers
 from advene.model.serializers.register import iter_serializers

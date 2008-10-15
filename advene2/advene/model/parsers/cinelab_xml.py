@@ -1,16 +1,9 @@
 """
 Cinelab parser implementation.
 """
-from xml.etree.ElementTree import iterparse
-from xml.parsers.expat import ExpatError
-
 from advene.model.cam.consts import CAM_XML
 import advene.model.serializers.cinelab_xml as serializer
 from advene.model.parsers.advene_xml import Parser as _AdveneXmlParser
-from advene.utils.files import get_path
-
-
-
 
 class Parser(_AdveneXmlParser):
     NAME = serializer.NAME

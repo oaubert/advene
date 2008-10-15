@@ -1,5 +1,4 @@
 from simpletal import simpleTALES
-from inspect import getargspec
 
 def tales_full_path_function(f):
     """

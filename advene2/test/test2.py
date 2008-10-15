@@ -1,8 +1,5 @@
 from os import unlink
 from os.path import exists, join, split
-import gc
-import sys
-from weakref import ref
 
 from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX, PARSER_META_PREFIX
 from advene.model.cam.package import Package

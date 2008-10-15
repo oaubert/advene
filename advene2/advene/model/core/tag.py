@@ -2,7 +2,6 @@
 I define the class Tag.
 """
 
-from advene.model.consts import _RAISE
 from advene.model.core.element import PackageElement, TAG
 
 class Tag(PackageElement):

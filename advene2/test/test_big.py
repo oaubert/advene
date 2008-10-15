@@ -1,4 +1,3 @@
-from os import unlink, path
 from time import time
 
 from advene.model.core.diff import diff_packages

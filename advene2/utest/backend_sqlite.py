@@ -1,6 +1,6 @@
 from pysqlite2 import dbapi2 as sqlite
 from os        import path, rmdir, unlink
-from os.path   import abspath, exists, join
+from os.path   import exists, join
 from tempfile  import mkdtemp
 from unittest  import TestCase, main
 from urllib    import pathname2url
@@ -8,7 +8,6 @@ from urllib    import pathname2url
 from advene.model.backends.sqlite \
   import claims_for_create, create, claims_for_bind, bind, IN_MEMORY_URL, \
          PackageInUse, InternalError, _set_module_debug
-from advene.model.core.content import Content
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
 

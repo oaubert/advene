@@ -1,6 +1,6 @@
 import gc
-from os import fdopen, path, rmdir, unlink
-from os.path import abspath, exists, split
+from os import path, rmdir, unlink
+from os.path import abspath, exists
 from tempfile import mkdtemp
 from urllib import pathname2url, url2pathname
 from unittest import TestCase, main

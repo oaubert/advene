@@ -1,13 +1,7 @@
 from os import unlink, getcwd
-from os.path import exists, join, split
-import gc
-import sys
-from urllib import pathname2url
-from weakref import ref
+from os.path import exists, join
 
 import advene.model.backends.sqlite as backend_sqlite
-from advene.model.consts import DC_NS_PREFIX
-from advene.model.core.content import PACKAGED_ROOT
 from advene.model.cam.package import Package
 
 

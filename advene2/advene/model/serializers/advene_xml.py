@@ -11,7 +11,7 @@ import base64
 from itertools import chain
 from xml.etree.cElementTree import Element, ElementTree, SubElement
 
-from advene.model.consts import ADVENE_XML, PARSER_META_PREFIX
+from advene.model.consts import ADVENE_XML
 from advene.model.serializers.unserialized import iter_unserialized_meta_prefix
 
 NAME = "Generic Advene XML"

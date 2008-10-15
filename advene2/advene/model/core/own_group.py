@@ -4,8 +4,6 @@ I define the class OwnGroup.
 This class is intended to be used only inside class Package.
 """
 
-from advene.model.core.element \
-  import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
 from advene.model.core.group import GroupMixin
 
 class OwnGroup(GroupMixin, object):
