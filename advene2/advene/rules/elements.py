@@ -74,12 +74,14 @@ class EtreeMixin:
         s.close()
         return buf
 
-    def from_xml_string(self, xmlstring, catalog=None):
+    def from_xml_string(self, xmlstring, catalog=None, origin=None):
         """Read the rule from a XML string.
         """
+        if origin is None:
+            origin='XML string'
         s=StringIO.StringIO(xmlstring)
         rulenode=ET.parse(s).getroot()
-        self.from_etree(rulenode, catalog=catalog, origin='XML string')
+        self.from_etree(rulenode, catalog=catalog, origin=origin)
         s.close()
 
     def from_xml(self, uri=None, catalog=None, origin=None):
