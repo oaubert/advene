@@ -104,9 +104,10 @@ class AnnotationDisplay(AdhocView):
             d={ 'title': title,
                 'begin': helper.format_time(b),
                 'end': helper.format_time(e),
-                'contents': _("%(total)s\nId: %(id)s") % {
+                'contents': _("%(total)s\nId: %(id)s\n\n%(description)s") % {
                     'total': helper.format_element_name('annotation', len(self.annotation.annotations)),
-                    'id': self.annotation.id 
+                    'id': self.annotation.id,
+                    'description': self.annotation.description,
                     },
                 'imagecontents': None,
                 }
