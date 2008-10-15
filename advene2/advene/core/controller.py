@@ -61,7 +61,7 @@ from advene.model.cam.annotation import Annotation
 from advene.model.cam.relation import Relation
 from advene.model.cam.tag import AnnotationType, RelationType
 from advene.model.consts import DC_NS_PREFIX, ADVENE_NS_PREFIX
-from advene.util.session import session
+import advene.util.session
 from advene.model.cam.view import View
 from advene.model.cam.query import Query
 from advene.util.defaultdict import DefaultDict
@@ -1388,8 +1388,8 @@ class AdveneController(object):
         self.packages['advene']=self.package
 
         # Define the package as root package for the model layer
-        session.package=self.package
-        session.user=config.data.userid
+        advene.util.session.session.package=self.package
+        advene.util.session.session.user=config.data.userid
 
         mediafile = self.get_current_mediafile()
         if mediafile:
@@ -1617,9 +1617,8 @@ class AdveneController(object):
             # Save preferences
             config.data.save_preferences()
 
-            # FIXME: a method should be provided in advene.model for this
-            # Cleanup the ZipPackage directories
-            # advene.model.cleanup()
+            # Cleanup the temporary directories
+            advene.util.session.cleanup()
 
             # Terminate the web server
             try:
