@@ -64,7 +64,7 @@ class CamGroupMixin(GroupMixin):
                 return getattr(e, "ADVENE_TYPE", None) == TAG \
                        and e.get_meta(CAMSYS_TYPE, None) is None \
                        and e in group
-        return GroupUserTags(group)
+        return GroupUserTags(group.owner)
 
     @property
     def annotation_types(group):
@@ -76,7 +76,7 @@ class CamGroupMixin(GroupMixin):
                        and e.get_meta(CAMSYS_TYPE, None) \
                            == "annotation-type" \
                        and e in group
-        return GroupAnnotationTypes(group)
+        return GroupAnnotationTypes(group.owner)
 
     @property
     def relation_types(group):
@@ -88,7 +88,7 @@ class CamGroupMixin(GroupMixin):
                        and e.get_meta(CAMSYS_TYPE, None) \
                            == "relation-type" \
                        and e in group
-        return GroupRelationTypes(group)
+        return GroupRelationTypes(group.owner)
 
     @property
     def user_lists(group):
@@ -99,7 +99,7 @@ class CamGroupMixin(GroupMixin):
                 return getattr(e, "ADVENE_TYPE", None) == LIST \
                        and e.get_meta(CAMSYS_TYPE, None) is None \
                        and e in group
-        return GroupUserLists(group)
+        return GroupUserLists(group.owner)
 
     @property
     def schemas(group):
@@ -110,4 +110,4 @@ class CamGroupMixin(GroupMixin):
                 return getattr(e, "ADVENE_TYPE", None) == LIST \
                        and e.get_meta(CAMSYS_TYPE, None) == "schema" \
                        and e in group
-        return GroupSchemas(group)
+        return GroupSchemas(group.owner)

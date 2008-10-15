@@ -166,7 +166,6 @@ class AllGroup(GroupMixin, object):
             return sum( be.count_relations_with_member(pdict, uri, position)
                         for be, pdict in o._backends_dict.items() )
 
-
     def count_views(self):
         o = self._owner
         return sum( be.count_views(pdict)
