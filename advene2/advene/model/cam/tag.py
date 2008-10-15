@@ -20,7 +20,7 @@ class AnnotationType(Tag):
     """
     The class of annotation types.
     """
-    # This class is automatically transtyped from Tag (and back) when 
+    # This class is automatically transtyped from Tag (and back) when
     # CAMSYS_TYPE is changed. See Tag.set_meta
     pass
 
@@ -28,11 +28,12 @@ class RelationType(Tag):
     """
     The class of annotation types.
     """
-    # This class is automatically transtyped from Tag (and back) when 
+    # This class is automatically transtyped from Tag (and back) when
     # CAMSYS_TYPE is changed. See Tag.set_meta
     pass
 
 Tag.make_metadata_property(CAMSYS_TYPE, "system_type", default=None)
 Tag.make_metadata_property(CAM_NS_PREFIX + "representation", default=None)
 Tag.make_metadata_property(CAM_NS_PREFIX + "color", default=None)
-Tag.make_metadata_property(CAM_NS_PREFIX + "element-color", default=None)
+Tag.make_metadata_property(CAM_NS_PREFIX + "element-color",
+                           "element_color", default=None)
