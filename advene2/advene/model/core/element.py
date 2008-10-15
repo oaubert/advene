@@ -7,7 +7,8 @@ from advene.model.core.meta import WithMetaMixin
 from advene.model.events import ElementEventDelegate, WithEventsMixin
 from advene.model.exceptions import ModelError, UnreachableImportError, \
                                     NoSuchElementError
-from advene.model.tales import tales_property, tales_use_as_context
+from advene.model.tales import tales_property, tales_use_as_context,\
+                               WithAbsoluteUrlMixin as WithAbsUrlMixin
 from advene.util.alias import alias
 from advene.util.autoproperty import autoproperty
 from advene.util.session import session
@@ -38,7 +39,7 @@ _package_event_template = {
         RESOURCE   : 'resource::%s',
 }
 
-class PackageElement(WithMetaMixin, WithEventsMixin, object):
+class PackageElement(WithMetaMixin, WithEventsMixin, WithAbsUrlMixin, object):
     """
     I am the common subclass of all package element.
 
@@ -543,6 +544,14 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
             __iter__ = lambda s: self.iter_my_tags(context_package)
             __contains__ = lambda s,x: self.has_tag(x, context_package)
         return TagCollection(self._owner)
+
+    def _compute_absolute_url(self, packages):
+        base = self._owner._compute_absolute_url(packages)
+        if base[-8:] == "/package":
+            # remove '/package' from the end, and add our id
+            return "%s:%s" % (base[:-8], self._id)
+        else:
+            return "%s/%s" % (base, self._id)
 
 
 class DeletedPackageElement(object):

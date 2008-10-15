@@ -137,7 +137,10 @@ class AdveneContext(simpleTALES.Context):
             tales_type = getattr(val, "tales_type", None)
             if tales_type == "full-path-function":
                 # stop traversing, path remaining path to val
-                return val(pathList[i+2:])
+                arg = pathList[i+2:]
+                if arg or canCall:
+                    return val(pathList[i+2:])
+                # else the function will be returned as is
             elif tales_type == "auto-call":
                 variable_context = getattr(val, "tales_context_variable", None)
                 if variable_context is None:
@@ -246,3 +249,69 @@ def _gm_repr(obj, context):
     return repr(obj)
 
 register_global_method(_gm_repr, "repr")
+
+
+# absolute_url
+
+class WithAbsoluteUrlMixin(object):
+    """
+    This class provides a common implementation for the ``absolute_url`` tales
+    function.
+
+    ``absolute_url`` is supposed to return an URL where one can retrieve a
+    *description* of an object (this is *not* the URL where a package can be
+    downloaded, nor the URI-ref of an element). It is intensively used in
+    HTML views served by the embedded HTTP server in the Advene tool.
+
+    ``absolute_url`` is expected to consume the rest of the TALES path, and
+    suffix it to its return value. E.g::
+          some_element/absolute_url/content_data
+          -> http://localhost:1234/packages/p/some_element/content_data
+
+          some_package/absolute_url/annotations
+          -> http://localhost:1234/packages/some_package/annotations
+
+    But if no URL can be constructed, it returns None.
+
+    This mixin provides all the bells and whistles to do so. It relies on
+    the presence of two TALES variables:
+     * options/packages (mandatory) contains a dict whose keys are package
+       names, and whose values are package instances
+     * options/base_url (optional) contains the reference URL
+
+    The returned value will be of the form::
+      base_url/specific/rest/of/the/path
+    where ``specific`` is computed by a method from the mixed-in class, of the
+    form::
+
+      def _compute_absolute_url(self, packages)
+
+    and this method should invoke `self._absolute_url_fail()` if it can not
+    construct a URL (resulting in the TALES path failing to evaluate).
+    """
+    @tales_property
+    def _tales_absolute_url(self, context):
+        """
+        See class documentation.
+        """
+        options = context.evaluate("options|nothing")
+        if options is None:
+            raise AdveneTalesException
+        packages = options.get("packages")
+        if packages is None:
+            raise AdveneTalesException
+        base = options.get("base_url", "")
+        abs = self._compute_absolute_url(packages)
+        return _AbsoluteUrl("%s/%s" % (base, abs))
+
+    def _absolute_url_fail(self):
+        raise AdveneTalesException
+
+class _AbsoluteUrl(unicode):
+    """
+    Used by `WithAbsoluteUrlMixin`.
+    """
+    def __new__(self, abs):
+        return unicode.__new__(self, abs)
+    def __getitem__(self, item):
+        return _AbsoluteUrl(u"%s/%s" % (self, item))

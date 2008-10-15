@@ -31,7 +31,7 @@ from advene.model.parsers.register import iter_parsers
 from advene.model.serializers.register import iter_serializers
 from advene.util.autoproperty import autoproperty
 from advene.util.files import smart_urlopen
-from advene.model.tales import tales_path1_function
+from advene.model.tales import tales_path1_function, WithAbsoluteUrlMixin
 
 _constructor = {
     MEDIA: "media_factory",
@@ -53,7 +53,7 @@ def _make_absolute(url):
     abslocal = "file:" + pathname2url(abscurdir) + "/"
     return urljoin(abslocal, url)
 
-class Package(WithMetaMixin, WithEventsMixin, object):
+class Package(WithMetaMixin, WithEventsMixin, WithAbsoluteUrlMixin, object):
     """FIXME: missing docstring.
     """
 
@@ -777,7 +777,28 @@ class Package(WithMetaMixin, WithEventsMixin, object):
                        for uri, prefix in d.iteritems() )
         self.set_meta(PARSER_META_PREFIX+"namespaces", s)
 
-    # TALES shortcuts
+    # TALES properties
+
+    def _compute_absolute_url(self, packages):
+        """
+        Used by `WithAbsoluteUrlMixin`
+        """
+        for k,v in packages.iteritems():
+            if v is self:
+                return k
+        # if we reach that point, self if not in packages
+        # try to find a suitable import
+        if self.uri:
+            kw = {"uri": self.uri}
+        else:
+            kw = {"url": self.url}
+        for k,v in packages.iteritems():
+            for imp in v.all.iter_imports(**kw):
+                return "%s/%s/package" % (k, imp.make_id_in(v))
+        # if we reach that point, there is nothing we can do
+        self._absolute_url_fail()
+
+
 
     @property
     def _tales_medias(self):
@@ -827,5 +848,4 @@ def _split_idref(idref):
         return path1[0].split(":") + [":%s" % path1[1]]
     else:
         return [ idref, ]
-
 #

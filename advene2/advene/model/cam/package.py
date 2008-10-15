@@ -547,12 +547,16 @@ class Package(CorePackage):
         return self.all.relation_types
 
     @property
+    def _tales_user_tags(self):
+        return self.all.user_tags
+
+    @property
     def _tales_schemas(self):
         return self.all.schemas
 
     @property
-    def _tales_medias(self):
-        return self.all.medias
+    def _tales_user_lists(self):
+        return self.all.user_lists
 
 _bootstrap_ref = lambda: None
 
