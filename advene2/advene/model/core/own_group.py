@@ -26,11 +26,14 @@ class OwnGroup(GroupMixin):
 
     def iter_annotations(self, media=None, medias=None,
                                begin=None, begin_min=None, begin_max=None,
-                               end=None, end_min=None, end_max=None):
+                               end=None, end_min=None, end_max=None,
+                               at=None):
         if media is not None:
             media = media._get_uriref()
         if medias is not None:
             medias = (m._get_uriref() for m in medias)
+        if at is not None:
+            begin_max = end_min = at
         o = self._owner
         for i in o._backend.iter_annotations((o._id,), None, None,
                                               media, medias,

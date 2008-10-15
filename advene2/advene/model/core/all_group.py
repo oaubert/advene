@@ -35,12 +35,15 @@ class AllGroup(GroupMixin):
 
     def iter_annotations(self, media=None, medias=None,
                                begin=None, begin_min=None, begin_max=None,
-                               end=None, end_min=None, end_max=None):
+                               end=None, end_min=None, end_max=None,
+                               at=None):
         o = self._owner
         if media is not None:
             media = media._get_uriref()
         if medias is not None:
-            media = (m._get_uriref() for m in medias)
+            medias = (m._get_uriref() for m in medias)
+        if at is not None:
+            begin_max = end_min = at
         def annotation_iterator(be, pdict):
             for i in be.iter_annotations(pdict, None, None, media, medias,
                                                 begin, begin_min, begin_max,
