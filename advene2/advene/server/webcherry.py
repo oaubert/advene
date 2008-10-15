@@ -596,10 +596,11 @@ class Packages(Common):
             context.setLocal(u'view', objet)
             try:
                 v=objet.view (context=context)
-                res.append( self.start_html(mimetype=v.contenttype) )
                 if v.contenttype.startswith('text'):
+                    res.append( self.start_html(mimetype=v.contenttype) )
                     res.append (unicode(v).encode('utf-8'))
                 else:
+                    res.append( self.start_html(mimetype=v.contenttype, mode='raw') )
                     res.append(v)
             except PathNotFoundException, e:
                 res.append( self.start_html(_("Error")) )
@@ -617,11 +618,13 @@ class Packages(Common):
                 except AttributeError:
                     pass
             try:
-                res.append( self.start_html(mimetype=mimetype) )
                 if mimetype and mimetype.startswith('text'):
+                    res.append( self.start_html(mimetype=mimetype) )
                     res.append (unicode(objet).encode('utf-8'))
                 else:
+                    res.append( self.start_html(mimetype=mimetype, mode='raw' ) )
                     res.append(str(objet))
+                    return res
             except PathNotFoundException, e:
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error.</p>
