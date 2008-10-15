@@ -3,14 +3,14 @@ from weakref import WeakValueDictionary
 from advene import RAISE
 from advene.model.backends import iter_backends
 
-from PackageElement import STREAM, ANNOTATION, RELATION, VIEW, RESOURCE, BAG, FILTER, IMPORT
+from PackageElement import STREAM, ANNOTATION, RELATION, BAG, IMPORT, QUERY, VIEW, RESOURCE 
 from Stream import Stream
 from Annotation import Annotation
 from Relation import Relation
 from View import View
 from Resource import Resource
 from Bag import Bag
-from Filter import Filter
+from Query import Query
 from Import import Import
 from AllGroup import AllGroup
 from OwnGroup import OwnGroup
@@ -24,7 +24,7 @@ _constructor = {
     VIEW: View,
     RESOURCE: Resource,
     BAG: Bag,
-    FILTER: Filter,
+    QUERY: Query,
     IMPORT: Import,
 }
 
@@ -51,7 +51,11 @@ class Package (object, WithMetaMixin):
         self._elements     = WeakValueDictionary()
         self._own          = OwnGroup(self)
         self._all          = AllGroup(self)
-        self._imports_dict = backend.construct_imports_dict()
+        self._imports_dict = {}
+        for id, uri in backend.get_imports():
+            dict[id] = Package.bind (uri)
+            # TODO handle circular import
+            # TODO use metadata/cache if URI can not be got?
 
     def close (self):
         self._backend.close()
@@ -66,11 +70,11 @@ class Package (object, WithMetaMixin):
         self._elements to prevent several instances of the same element to be
         produced.
         """
-        slash = id.find ("/")
-        if slash == -1:
+        colon = id.find (":")
+        if colon <= 0:
             return self._get_own_element (id, default)
         else:
-            imp = id[:slash]
+            imp = id[:colon]
             pkg = self._imported.get (imp)
             if pkg is None:
                 if default is RAISE:
@@ -78,7 +82,7 @@ class Package (object, WithMetaMixin):
                 else:
                     return default
             else:
-                return pkg.get_element (id[slash+1:], default)
+                return pkg.get_element (id[colon+1:], default)
 
     def _get_own_element (self, id, default=None):
         """
@@ -145,9 +149,9 @@ class Package (object, WithMetaMixin):
         self._backend.create_bag (id)
         return Bag (self, id)
 
-    def create_filter (self, id):
-        self._backend.create_filter (id)
-        return Filter (self, id)
+    def create_query (self, id):
+        self._backend.create_query (id)
+        return Query (self, id)
 
     @property
     def own (self):

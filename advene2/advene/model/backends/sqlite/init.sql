@@ -55,17 +55,9 @@ CREATE TABLE RelationMembers (
   -- annotation must be a path identifying an own or imported annotation
 );
 
-CREATE TABLE Filters (
-  id TEXT PRIMARY KEY,
-  FOREIGN KEY (id) references Elements (id)
-  -- Filters must have a content
-);
-
 CREATE TABLE Bags (
-  id     TEXT PRIMARY KEY,
-  filter TEXT,
+  id   TEXT PRIMARY KEY,
   FOREIGN KEY (id) references Elements (id)
-  -- if not null, filter must be a path identifying an own or imported filter
 );
 
 CREATE TABLE BagItems (
@@ -83,12 +75,16 @@ CREATE TABLE Imports (
   FOREIGN KEY (id) references Elements (id)
 );
 
+CREATE TABLE Queries (
+  id TEXT PRIMARY KEY,
+  FOREIGN KEY (id) references Elements (id)
+  -- Queries must have a content
+);
+
 CREATE TABLE Views (
   id     TEXT PRIMARY KEY,
-  filter TEXT,
   FOREIGN KEY (id) references Elements (id)
   -- Views must have a content
-  -- if not null, filter must be a path identifying an own or imported filter
 );
 
 CREATE TABLE Resources (

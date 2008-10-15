@@ -28,21 +28,21 @@ class Import (PackageElement):
         return self._imported._all.relations
 
     @property
-    def views (self):
-        return self._imported._all.views
-
-    @property
-    def resources (self):
-        return self._imported._all.resources
-
-    @property
-    def filters (self):
-        return self._imported._all.filters
-
-    @property
     def bags (self):
         return self._imported._all.bags
 
     @property
     def imports (self):
         return self._imported._all.imports
+
+    @property
+    def queries (self):
+        return self._imported._all.queries
+
+    @property
+    def views (self):
+        return self._imported._all.views
+
+    @property
+    def resources (self):
+        return self._imported._all.resources

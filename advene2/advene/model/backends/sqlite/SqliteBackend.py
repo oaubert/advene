@@ -5,7 +5,7 @@ I am the reference API for advene backends.
 from pysqlite2 import dbapi2 as sqlite
 from os.path   import exists, isdir, join, split
 
-from advene.model.core.PackageElement import STREAM, ANNOTATION, RELATION, VIEW, RESOURCE, BAG, FILTER, IMPORT
+from advene.model.core.PackageElement import STREAM, ANNOTATION, RELATION, VIEW, RESOURCE, BAG, QUERY, IMPORT
 
 class SqliteBackend (object):
     @staticmethod
@@ -85,6 +85,8 @@ class SqliteBackend (object):
         self._conn.close()
 
 
+     # ids retrieval
+
     def get_annotation_ids (self):
         "Guarantees that annotations are sorted by begin, end, stream"
         c = self._conn.execute ("select id from Annotations order by fbegin, fend, stream")
@@ -94,16 +96,8 @@ class SqliteBackend (object):
         c = self._conn.execute ("select id from Relations")
         for a in c: yield a[0]
 
-    def get_view_ids (self):
-        c = self._conn.execute ("select id from Views")
-        for a in c: yield a[0]
-
-    def get_resource_ids (self):
-        c = self._conn.execute ("select id from Resources")
-        for a in c: yield a[0]
-
-    def get_filter_ids (self):
-        c = self._conn.execute ("select id from Filters")
+    def get_query_ids (self):
+        c = self._conn.execute ("select id from Queries")
         for a in c: yield a[0]
 
     def get_bag_ids (self):
@@ -114,9 +108,20 @@ class SqliteBackend (object):
         c = self._conn.execute ("select id from Imports")
         for a in c: yield a[0]
 
-    def construct_imports_dict (self):
+    def get_view_ids (self):
+        c = self._conn.execute ("select id from Views")
+        for a in c: yield a[0]
+
+    def get_resource_ids (self):
+        c = self._conn.execute ("select id from Resources")
+        for a in c: yield a[0]
+
+    def get_imports (self):
         c = self._conn.execute ("select id, url from Imports")
-        return dict (c)
+        return iter (c)
+
+
+    # creation
 
     def _create_element_cursor (self, id):
         """
@@ -160,6 +165,32 @@ class SqliteBackend (object):
             self._conn.rollback()
         self._conn.commit()
 
+    def create_bag (self, id):
+        try:
+            c = self._create_element_cursor (id)
+            c.execute ("insert into Bags(id) values (?)", (id,))
+        except sqlite.Error:
+            self._conn.rollback()
+        self._conn.commit()
+
+    def create_import (self, id, uri):
+        try:
+            c = self._create_element_cursor (id)
+            c.execute ("insert into Streams(id,url) values (?,?)", (id, uri))
+        except sqlite.Error:
+            self._conn.rollback()
+        self._conn.commit()
+
+    def create_query (self, id):
+        try:
+            c = self._create_element_cursor (id)
+            c.execute ("insert into Queries(id) values (?)", (id,))
+            c.execute ("insert into Contents(element,mimetype,data) values (?,?,?)",
+                       (id, "text/plain", ""))
+        except sqlite.Error:
+            self._conn.rollback()
+        self._conn.commit()
+
     def create_view (self, id):
         try:
             c = self._create_element_cursor (id)
@@ -178,38 +209,13 @@ class SqliteBackend (object):
             self._conn.rollback()
         self._conn.commit()
 
-    def create_bag (self, id):
-        try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Bags(id) values (?)", (id,))
-        except sqlite.Error:
-            self._conn.rollback()
-        self._conn.commit()
-
-    def create_filter (self, id):
-        try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Filters(id) values (?)", (id,))
-            c.execute ("insert into Contents(element,mimetype,data) values (?,?,?)",
-                       (id, "text/plain", ""))
-        except sqlite.Error:
-            self._conn.rollback()
-        self._conn.commit()
-
-    def create_import (self, id, uri):
-        try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Streams(id,url) values (?,?)", (id, uri))
-        except sqlite.Error:
-            self._conn.rollback()
-        self._conn.commit()
-
+    # retrieval
 
     def construct_element (self, id):
         # TODO would it be better to let the caller specify the type of element
         # or would it be wise to store in table Elements the type of element?
 
-        # TODO adjuts parameters (filters on views and bags, etc.)
+        # TODO adjuts parameters (queries on views and bags, etc.)
 
         c = self._conn.cursor()
         c.execute ("select id, url from Streams where id = ?", (id,))
@@ -235,9 +241,9 @@ class SqliteBackend (object):
         d = c.fetchone ()
         if d is not None: return RESOURCE, ()
 
-        c.execute ("select id from Filters where id = ?", (id,))
+        c.execute ("select id from Queries where id = ?", (id,))
         d = c.fetchone ()
-        if d is not None: return FILTER, ()
+        if d is not None: return QUERY, ()
 
         c.execute ("select id from Bags where id = ?", (id,))
         d = c.fetchone ()
@@ -247,6 +253,7 @@ class SqliteBackend (object):
         d = c.fetchone ()
         if d is not None: return IMPORT, (d[1],)
 
+    # content
 
     def get_content (self, id, element_type):
         """
@@ -259,7 +266,6 @@ class SqliteBackend (object):
         )
         return cur.fetchone() or (None, None)
 
-
     def update_content (self, content):
         # TODO manage schema and url
         cur = self._conn.execute (
@@ -267,6 +273,20 @@ class SqliteBackend (object):
             (content.mimetype, content.data, content.owner_element.id),
         )
         self._conn.commit()
+
+    # meta-data
+
+    def iter_meta (self, id, element_type, key):
+        """
+        Iter over the metadata, sorting keys in alphabetical order.
+
+        In this implementation, element_type will always be ignored.
+        """
+        c = self._conn.execute ("select key, value from Meta where element = ? order by key", (id,))
+        d = c.fetchone()
+        while d is not None:
+            yield d[0],d[1]
+            d = c.fetchone()
 
     def get_meta (self, id, element_type, key):
         """

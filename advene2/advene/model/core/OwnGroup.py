@@ -33,24 +33,6 @@ class OwnGroup (object):
             yield o.get_element (id)
 
     @property
-    def views (self):
-        o = self._owner
-        for id in o._backend.get_view_ids():
-            yield o.get_element (id)
-
-    @property
-    def resources (self):
-        o = self._owner
-        for id in o._backend.get_resource_ids():
-            yield o.get_element (id)
-
-    @property
-    def filters (self):
-        o = self._owner
-        for id in o._backend.get_filter_ids():
-            yield o.get_element (id)
-
-    @property
     def bags (self):
         o = self._owner
         for id in o._backend.get_bag_ids():
@@ -60,4 +42,22 @@ class OwnGroup (object):
     def imports (self):
         o = self._owner
         for id in o._backend.get_import_ids():
+            yield o.get_element (id)
+
+    @property
+    def queries (self):
+        o = self._owner
+        for id in o._backend.get_queries_ids():
+            yield o.get_element (id)
+
+    @property
+    def views (self):
+        o = self._owner
+        for id in o._backend.get_view_ids():
+            yield o.get_element (id)
+
+    @property
+    def resources (self):
+        o = self._owner
+        for id in o._backend.get_resource_ids():
             yield o.get_element (id)

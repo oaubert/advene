@@ -14,3 +14,8 @@ class Annotation (PackageElement, WithContentMixin):
         self._stream_id = stream_id
         self._begin     = begin
         self._end       = end
+
+    def __cmp__ (self, other):
+        return self._begin - other._begin \
+            or self._end - other._end \
+            or cmp (self._stream_id, other._stream_id)

@@ -18,14 +18,14 @@ from WithMetaMixin import WithMetaMixin
 
 # the following constants must be used as values of a property ADVENE_TYPE
 # in all subclasses of PackageElement
-STREAM     = 3
-ANNOTATION = 1
-RELATION   = 2
-VIEW       = 4
-RESOURCE   = 5
-BAG        = 6
-FILTER     = 7
-IMPORT     = 8
+STREAM     = 1
+ANNOTATION = 2
+RELATION   = 3
+BAG        = 4
+IMPORT     = 5
+QUERY      = 6
+VIEW       = 7
+RESOURCE   = 8
 
 class PackageElement (object, WithMetaMixin):
 
@@ -72,7 +72,7 @@ class PackageElement (object, WithMetaMixin):
         r = self._id
         c = queue[current]
         while c is not None:
-            r = "%s/%s" % (c[0], r)
+            r = "%s:%s" % (c[0], r)
             c = parent.get (c)
         return r
 
@@ -82,30 +82,6 @@ class PackageElement (object, WithMetaMixin):
         self._destroyed = True
         self.__class__ = DestroyedPackageElement
         
-    def __cmp__ (self, other):
-        """
-        Implements a global order over package elements.
-
-        That order guarantees that annotations will be sorted in temporal order.
-        """        
-        if not isinstance (other, PackageElement): return -1
-        if self._state is DESTROYED: return 1
-        if other._state is DESTROYED: return -1
-
-        t = self.ADVENE_TYPE
-        d = t - other.ADVENE_TYPE
-        if d: return d
-        if t is ANNOTATION:
-            d = self._begin - other._begin
-            if d: return d
-            d = self._end   - other._end
-            if d: return d
-            d = cmp (self._stream_id, other._stream_id)
-            if d: return d
-        d = cmp (self._id, other._id)
-        if d: return d
-        return cmp (self._owner._uri, other._owner._uri)
-
     def _get_id(self):
         return self._id
 
