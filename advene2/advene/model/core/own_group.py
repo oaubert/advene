@@ -6,21 +6,9 @@ This class is intended to be used only inside class Package.
 
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
-from advene.model.core.media import Media
-from advene.model.core.annotation import Annotation
-from advene.model.core.relation import Relation
-from advene.model.core.view import View
-from advene.model.core.resource import Resource
-from advene.model.core.tag import Tag
-from advene.model.core.list import List
-from advene.model.core.query import Query
-from advene.model.core.import_ import Import
 from advene.model.core.group import GroupMixin
 
 class OwnGroup(GroupMixin):
-
-    # TODO : methods giving access to filters,
-    # e.g. def iter_medias(id=None, id_alt=None, url=None, url_alt=None)
 
     def __init__(self, owner):
         self._owner = owner
@@ -36,15 +24,31 @@ class OwnGroup(GroupMixin):
         for i in o._backend.iter_medias((o._id,)):
             yield o.get_element(i)
 
-    def iter_annotations(self):
+    def iter_annotations(self, media=None, medias=None,
+                               begin=None, begin_min=None, begin_max=None,
+                               end=None, end_min=None, end_max=None):
+        if media is not None:
+            media = media._get_uriref()
+        if medias is not None:
+            medias = (m._get_uriref() for m in medias)
         o = self._owner
-        for i in o._backend.iter_annotations((o._id,)):
+        for i in o._backend.iter_annotations((o._id,), None, None,
+                                              media, medias,
+                                              begin, begin_min, begin_max,
+                                              end, end_min, end_max):
             yield o.get_element(i)
 
-    def iter_relations(self):
+    def iter_relations(self, member=None, position=None):
+        assert position is None or member
         o = self._owner
-        for i in o._backend.iter_relations((o._id,)):
-            yield o.get_element(i)
+        if member is None:
+            for i in o._backend.iter_relations((o._id,)):
+                yield o.get_element(i)
+        else:
+            member = member._get_uriref()
+            for i in o._backend.iter_relations_with_member((o._id,), member,
+                                                           position):
+                yield o.get_element(i)
 
     def iter_views(self):
         o = self._owner
@@ -61,10 +65,16 @@ class OwnGroup(GroupMixin):
         for i in o._backend.iter_tags((o._id,)):
             yield o.get_element(i)
 
-    def iter_lists(self):
+    def iter_lists(self, item=None, position=None):
+        assert position is None or item
         o = self._owner
-        for i in o._backend.iter_lists((o._id,)):
-            yield o.get_element(i)
+        if item is None:
+            for i in o._backend.iter_lists((o._id,)):
+                yield o.get_element(i)
+        else:
+            item = item._get_uriref()
+            for i in o._backend.iter_lists_with_item((o._id,), item, position):
+                yield o.get_element(i)
 
     def iter_queries(self):
         o = self._owner

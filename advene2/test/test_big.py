@@ -19,7 +19,7 @@ def measure_time(label=None):
 NBM = 100
 NBA = 10000
 Lm = [ ("m%s" % i, "http://example.com/m%s" % i) for i in xrange(NBM) ]
-La = [ ("a%s" % i, Lm[i%NBM][0], (i//NBA)*10, (i//NBA)*10+9)
+La = [ ("a%s" % i, Lm[i%NBM][0], (i//NBM)*10, (i//NBM)*10+9)
        for i in xrange(NBA) ]
 foref = FOREF_PREFIX + "ms;o=0"
 
@@ -61,8 +61,18 @@ if __name__ == "__main__":
     measure_time("checking parsed package")
     assert len(diff) == 1, diff # the PACKAGED_ROOT metadata is different
 
-    list(r.all.annotations)
+    list(p.all.annotations)
     measure_time("building annotations list")
+
+    m7 = p["m7"]
+ 
+    measure_time() # take origin
+    print [ a.id for a in p.all.iter_annotations(m7, begin_min=100) ]
+    measure_time("building annotations sublist (efficient)")
+
+    print [ a.id for a in p.all.annotations
+                 if a.media == m7 and a.begin >= 100 ]
+    measure_time("building annotations sublist (less efficient)")
 
     p.close()
     q.close()
