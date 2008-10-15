@@ -127,4 +127,9 @@ if __name__ == "__main__":
     p.create_resource("eraseme", "text/plain").delete()
     print list(p.own.resources)
 
+    fname=join(base, 'test1.bzp')
+    print "Saving as ", fname
+    p.save_as(fname)
+
     l = None; a1 = None; a2 = None; p.close(); p = None
+
