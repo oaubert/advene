@@ -436,6 +436,11 @@ class Package(object, WithMetaMixin, WithEventsMixin):
                 return pkg.get_element(id[colon+1:], default)
 
     def get(self, id, default=None):
+        n=id.rfind('#')
+        if n > 0:
+            # FIXME quick hack to be able to advance. Should check the
+            # URI part, and generally be correctly implemented
+            id=id[n+1:]
         return self.get_element(id, default)
 
     def get_element_by_uriref(self, uriref, default_RAISE):
