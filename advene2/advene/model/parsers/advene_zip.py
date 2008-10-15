@@ -9,7 +9,6 @@ import sys
 from tempfile import mkdtemp
 from urllib import url2pathname, pathname2url
 from urlparse import urlparse, urljoin
-from urllib2 import urlopen, URLError
 from zipfile import BadZipfile, ZipFile
 
 from advene.model.consts import PACKAGED_ROOT

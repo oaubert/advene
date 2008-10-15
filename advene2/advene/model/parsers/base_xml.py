@@ -2,7 +2,6 @@
 
 TODO: document the provided classes.
 """
-from urllib2 import urlopen
 from xml.etree.ElementTree import iterparse
 
 from advene.model.consts import _RAISE, ADVENE_XML

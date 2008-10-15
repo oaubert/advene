@@ -134,7 +134,6 @@ class WithContentMixin:
         if url is None: # should not happen, but that's safer
             self._load_content_info()
             url = self.__url
-        packaged = url.startswith("packaged:")
 
         if url: # non-empty string
             if url.startswith("packaged:"):
