@@ -32,7 +32,7 @@ class RelationType(Tag):
     # CAMSYS_TYPE is changed. See Tag.set_meta
     pass
 
-Tag.make_metadata_property(CAMSYS_TYPE, "system_type")
+Tag.make_metadata_property(CAMSYS_TYPE, "system_type", default=None)
 Tag.make_metadata_property(CAM_NS_PREFIX + "representation", default=None)
 Tag.make_metadata_property(CAM_NS_PREFIX + "color", default=None)
 Tag.make_metadata_property(CAM_NS_PREFIX + "element-color", default=None)

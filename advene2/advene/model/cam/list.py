@@ -19,7 +19,7 @@ class List(CamGroupMixin, CoreList, CamElement) :
                 self.__class__ = newtype
         return super(List, self).set_meta(key, value, val_is_idref, _guard)
 
-List.make_metadata_property(CAMSYS_TYPE, "system_type")
+List.make_metadata_property(CAMSYS_TYPE, "system_type", default=None)
 
 class Schema(List):
     """
