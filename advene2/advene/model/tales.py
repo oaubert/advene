@@ -98,7 +98,7 @@ def tales_use_as_context(var):
 
     Example::
         @tales_property
-        @tales_use_as_context("refpkg")
+        @tales_use_as_context("package")
         def some_method(self, a_package):
             ...
     """

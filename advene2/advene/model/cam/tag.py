@@ -128,7 +128,7 @@ class CamTypeMixin(object):
         Return an ElementCollection of all the schemas containing this type.
 
         In python, property `my_schemas` uses ``session.package``.
-        In TALES, property `my_schemas` uses ``refpkg``.
+        In TALES, property `my_schemas` uses ``package``.
         """
         if package is None:
             package = session.package
@@ -146,7 +146,7 @@ class CamTypeMixin(object):
         return TypeSchemas(package)
 
     @tales_property
-    @tales_use_as_context("refpkg")
+    @tales_use_as_context("package")
     @alias(_get_my_schemas)
     def _tales_my_schemas(self, context):
         # recycle _get_my_schemas implementation

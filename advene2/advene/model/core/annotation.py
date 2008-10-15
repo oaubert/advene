@@ -8,7 +8,7 @@ from advene.model.consts import _RAISE
 from advene.model.core.element import PackageElement, ElementCollection, \
                                       ANNOTATION, MEDIA, RESOURCE, RELATION
 from advene.model.core.content import WithContentMixin
-from advene.model.tales import tales_property
+from advene.model.tales import tales_property, tales_use_as_context
 from advene.util.autoproperty import autoproperty
 from advene.util.session import session
 
@@ -288,8 +288,9 @@ class Annotation(PackageElement, WithContentMixin):
                  itertools.groupby(self.outgoing_relations, key=lambda e: e.type) ]
 
     @tales_property
-    def _tales_relations(annotation, context):
-        p = context.locals.get("refpkg") or context.globals.get("refpkg")
+    @tales_use_as_context("package")
+    def _tales_relations(annotation, context_package):
+        p = context_package
         class TalesAnnotationRelations(ElementCollection):
             def __iter__(self, position=None):
                 return annotation.iter_relations(p, position)

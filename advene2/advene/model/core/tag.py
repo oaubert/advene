@@ -115,7 +115,8 @@ class Tag(PackageElement, GroupMixin):
 class ContextualizedTag(GroupMixin, object):
     def __init__(self, tag, context):
         self._t = tag
-        self._p = context.locals.get("refpkg") or context.globals.get("refpkg")
+        self._p = context.locals.get("package") \
+               or context.globals.get("package")
 
     def __iter__(self):
         return self._t.iter_elements(package=self._p)

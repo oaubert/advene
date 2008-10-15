@@ -61,7 +61,7 @@ def apply_to(view, obj, refpkg=None):
             refpkg = obj.owner
         else:
             refpkg = obj
-    c.addGlobal("refpkg", refpkg)
+    c.addGlobal("package", refpkg)
     out = StringIO()
     t.expand(c, out, outputEncoding="utf-8", **kw)
     return out.getvalue()

@@ -93,7 +93,7 @@ class CamElementMixin(PackageElement):
             return ( i for i in all if i != type_id )
 
     @tales_property
-    @tales_use_as_context("refpkg")
+    @tales_use_as_context("package")
     def _tales_my_tags(self, context_package):
         """
         Iter over all the user-tags of this element in the context of the

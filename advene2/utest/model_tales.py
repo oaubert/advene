@@ -4,7 +4,7 @@ from advene.model.core.package import Package as CorePackage
 from advene.model.tales import AdveneContext, register_global_method, \
                                unregister_global_method
 
-class TestGlobalMethod(TestCase):
+class TestTales(TestCase):
     def setUp(self):
         self.p = p = CorePackage("tmp1", create=True)
         p.uri = "urn:1234"
@@ -20,14 +20,14 @@ class TestGlobalMethod(TestCase):
         self.assertEqual(self.c.traversePath(path), expected_result)
 
 
-    def test_repr(self):
+    def test_repr_global_method(self):
         p = self.p
         self.check_path("here", p)
         self.check_path("here/repr", repr(p))
         self.check_path("here/uri", p.uri)
         self.check_path("here/uri/repr", repr(p.uri))
 
-    def test_registered(self):
+    def test_registered_global_method(self):
         def my_global_method(obj, context):
             return (obj, context)
         register_global_method(my_global_method)
@@ -40,8 +40,7 @@ class TestGlobalMethod(TestCase):
         finally:
             unregister_global_method(my_global_method)
 
-
-    def test_aliased(self):
+    def test_aliased_global_method(self):
         def my_global_method(obj, context):
             return (obj, context)
         register_global_method(my_global_method, "aliased_global_method")

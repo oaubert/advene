@@ -902,7 +902,7 @@ class BasicController:
 
     def build_context(self, here=None, alias=None):
         c=AdveneContext(here)
-        c.addGlobal("refpkg", here)
+        c.addGlobal("package", here)
         return c
 
     def queue_action(self, action, *p, **kw):

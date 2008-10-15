@@ -537,7 +537,7 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
 
 
     @tales_property
-    @tales_use_as_context("refpkg")
+    @tales_use_as_context("package")
     def _tales_my_tags(self, context_package):
         class TagCollection(ElementCollection):
             __iter__ = lambda s: self.iter_my_tags(context_package)
