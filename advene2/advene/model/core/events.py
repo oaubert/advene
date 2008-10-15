@@ -236,12 +236,11 @@ gobject.signal_new("renamed", ElementEventDelegate,
 #
 # Emitted when the element has a tag added to it.
 #
-# detail:: the ID-ref of the added tag
 # params::
 #     * the tag that has been added
 
 gobject.signal_new("added-tag", ElementEventDelegate,
-                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (object,)) 
 
 # signal:`removed-tag`
@@ -249,12 +248,11 @@ gobject.signal_new("added-tag", ElementEventDelegate,
 #
 # Emitted when the element has a tag removed from it.
 #
-# detail:: the ID-ref of the added tag
 # params::
 #     * the tag that has been removed
 
 gobject.signal_new("removed-tag", ElementEventDelegate,
-                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (object,))
 
 # signal:`added`
@@ -262,7 +260,6 @@ gobject.signal_new("removed-tag", ElementEventDelegate,
 #
 # Emitted by tags when added to an element.
 #
-# detail:: the ID-ref of the element this tag is added to.
 # params::
 #     * the element this tag has been added to.
 
@@ -275,7 +272,6 @@ gobject.signal_new("added", ElementEventDelegate,
 #
 # Emitted by tags when removed from an element.
 #
-# detail:: the ID-ref of the element this tag is removed from.
 # params::
 #     * the element this tag has been removed from.
 

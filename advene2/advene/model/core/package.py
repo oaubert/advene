@@ -633,6 +633,8 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         else:
             id_t = tag.make_id_in(self)
         self._backend.associate_tag(self._id, id_e, id_t)
+        element.emit("added-tag", tag)
+        tag.emit("added", element)
 
     def dissociate_tag(self, element, tag):
         """Dissociate the given element to the given tag on behalf of this package.
@@ -649,6 +651,8 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         else:
             id_t = tag.make_id_in(self)
         self._backend.dissociate_tag(self._id, id_e, id_t)
+        element.emit("removed-tag", tag)
+        tag.emit("removed", element)
 
     # reference finding (find all the own or imported elements referencing a
     # given element) -- combination of several backend methods

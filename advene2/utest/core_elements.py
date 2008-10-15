@@ -6,6 +6,7 @@ from urllib import pathname2url, url2pathname
 from unittest import TestCase, main
 
 from advene.model.backends.sqlite import _set_module_debug
+from advene.model.consts import DC_NS_PREFIX
 from advene.model.core.content import PACKAGED_ROOT
 from advene.model.core.media import FOREF_PREFIX
 from advene.model.core.element import RELATION
@@ -753,6 +754,207 @@ class TestUnreachable(TestCase):
             frozenset(t1.iter_elements(p1)))
         p1.close()
 
+
+class TestEvents(TestCase):
+    def setUp(self):
+        self.dirname = mkdtemp()
+        self.db = path.join(self.dirname, "db")
+        self.url = "sqlite:%s" % pathname2url(self.db)
+        self.p1 = Package(self.url+";p1", create=True)
+        self.p2 = Package(self.url+";p2", create=True)
+        self.m1 = self.p2.create_media("m1", "file:/tmp/test.avi")
+        self.t1 = self.p2.create_tag("t1")
+        self.t2 = self.p2.create_tag("t2")
+        self.p1.create_import("i1", self.p2)
+        self.a1 = self.p1.create_annotation("a1", self.m1, 10, 20, "text/plain")
+
+        self.buf = []
+        self.callback_errors = []
+
+    def tearDown(self):
+        try:
+            if self.p1 and not self.p1.closed: self.p1.close()
+            if self.p2 and not self.p2.closed: self.p2.close()
+        except ValueError: 
+            pass
+        unlink(self.db)
+        rmdir(self.dirname)
+
+
+    def default_handler(self, *args):
+        self.buf.append(args)
+
+    def attr_handler(self, obj, attr, val, pre=None):
+        actual_val = getattr(obj, attr)
+        if pre:
+            if actual_val == val:
+                self.callback_errors.append("%s should not be %r yet" %
+                                            (attr, val))
+        else:
+            if actual_val != val:
+                self.callback_errors.append("%s = %r, should be %r" %
+                                            (attr, actual_val, val))
+        self.default_handler(obj, attr, val)
+
+    def meta_handler(self, obj, key, val, pre=None):
+        actual_val = obj.get_meta(key, None)
+        if pre:
+            if actual_val == val:
+                self.callback_errors.append("%s should not be %r yet" %
+                                            (key, val))
+        else:
+            if actual_val != val:
+                self.callback_errors.append("%s : %r, should be %r" %
+                                            (key, actual_val, val))
+        self.default_handler(obj, key, val)
+
+    def tag_handler(self, obj, tag, removed=None):
+        if removed:
+            if obj.has_tag(tag, self.p1):
+                self.callback_errors.append("%s should not have tag %s yet" %
+                                            (obj.id, tag.id))
+        else:
+            if not obj.has_tag(tag, self.p1):
+                self.callback_errors.append("%s should have tag %s" %
+                                            (obj.id, tag.id))
+        self.default_handler(obj, tag)
+
+    def element_handler(self, obj, element, removed=None):
+        self.tag_handler(element, obj, removed)
+        
+
+    def test_changed_meta(self):
+        k = DC_NS_PREFIX + "creator"
+        k2 = DC_NS_PREFIX + "title"
+        hid = self.m1.connect("changed-meta::" + k, self.meta_handler)
+        self.m1.set_meta(k2, "hello world")
+        self.assertEqual(self.buf, [])
+        self.a1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [])
+        self.m1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [(self.m1, k, "pchampin"),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.del_meta(k2)
+        self.assertEqual(self.buf, [])
+        self.a1.del_meta(k)
+        self.assertEqual(self.buf, [])
+        self.m1.del_meta(k)
+        self.assertEqual(self.buf, [(self.m1, k, None)])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid)
+        self.m1.set_meta(k, "oaubert")
+        self.assertEqual(self.buf, [])
+
+    def test_changed_meta_any(self):
+        k = DC_NS_PREFIX + "creator"
+        hid = self.m1.connect("changed-meta", self.meta_handler)
+        self.a1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [])
+        self.m1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [(self.m1, k, "pchampin"),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.del_meta(k)
+        self.assertEqual(self.buf, [])
+        self.m1.del_meta(k)
+        self.assertEqual(self.buf, [(self.m1, k, None)])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid)
+        self.m1.set_meta(k, "oaubert")
+        self.assertEqual(self.buf, [])
+
+    def test_pre_changed_meta(self):
+        k = DC_NS_PREFIX + "creator"
+        k2 = DC_NS_PREFIX + "title"
+        hid = self.m1.connect("pre-changed-meta::" + k, self.meta_handler, 1)
+        self.m1.set_meta(k2, "hello world")
+        self.assertEqual(self.buf, [])
+        self.a1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [])
+        self.m1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [(self.m1, k, "pchampin"),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.del_meta(k2)
+        self.assertEqual(self.buf, [])
+        self.a1.del_meta(k)
+        self.assertEqual(self.buf, [])
+        self.m1.del_meta(k)
+        self.assertEqual(self.buf, [(self.m1, k, None)])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid)
+        self.m1.set_meta(k, "oaubert")
+        self.assertEqual(self.buf, [])
+
+    def test_pre_changed_meta_any(self):
+        k = DC_NS_PREFIX + "creator"
+        hid = self.m1.connect("pre-changed-meta", self.meta_handler, 1)
+        self.a1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [])
+        self.m1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [(self.m1, k, "pchampin"),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.del_meta(k)
+        self.assertEqual(self.buf, [])
+        self.m1.del_meta(k)
+        self.assertEqual(self.buf, [(self.m1, k, None)])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid)
+        self.m1.set_meta(k, "oaubert")
+        self.assertEqual(self.buf, [])
+
+    def test_added_tag_removed_tag(self):
+        hid = self.m1.connect("added-tag", self.tag_handler)
+        self.p1.associate_tag(self.a1, self.t1)
+        self.assertEqual(self.buf, [])
+        self.p1.associate_tag(self.m1, self.t1)
+        self.assertEqual(self.buf, [(self.m1, self.t1,),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid)
+        self.p1.associate_tag(self.m1, self.t2)
+        self.assertEqual(self.buf, [])
+        del self.buf[:]
+        hid = self.m1.connect("removed-tag", self.tag_handler, "remove")
+        self.p1.dissociate_tag(self.a1, self.t1)
+        self.assertEqual(self.buf, [])
+        self.p1.dissociate_tag(self.m1, self.t1)
+        self.assertEqual(self.buf, [(self.m1, self.t1,),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid)
+        self.p1.dissociate_tag(self.m1, self.t2)
+        self.assertEqual(self.buf, [])
+
+    def test_added_removed(self):
+        hid = self.t1.connect("added", self.element_handler)
+        self.p1.associate_tag(self.m1, self.t2)
+        self.assertEqual(self.buf, [])
+        self.p1.associate_tag(self.m1, self.t1)
+        self.assertEqual(self.buf, [(self.m1, self.t1,),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid)
+        self.p1.associate_tag(self.a1, self.t1)
+        self.assertEqual(self.buf, [])
+        del self.buf[:]
+        hid = self.t1.connect("removed", self.element_handler, "remove")
+        self.p1.dissociate_tag(self.m1, self.t2)
+        self.assertEqual(self.buf, [])
+        self.p1.dissociate_tag(self.m1, self.t1)
+        self.assertEqual(self.buf, [(self.m1, self.t1,),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid)
+        self.p1.dissociate_tag(self.a1, self.t1)
+        self.assertEqual(self.buf, [])
+ 
 if __name__ == "__main__":
     main()
 
