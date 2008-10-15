@@ -480,8 +480,11 @@ class AdveneController(object):
     def search_string(self, searched=None, source=None, case_sensitive=False):
         """Search a string in the given source (TALES expression).
 
-        A special source value is 'tags', which will then return the
-        elements that are tagged with the searched string.
+        A special source value 'tags' will return the elements that
+        are tagged with the searched string.
+
+        A special source value 'ids' will return the element with the
+        given id.
 
         The search string obeys the classical syntax:
         w1 w2 -> search objects containing w1 or w2
@@ -510,6 +513,14 @@ class AdveneController(object):
                 data_func=lambda e: e.title
             else:
                 data_func=lambda e: normalize_case(e.title)
+        elif source == 'ids':
+            # Special search.
+            res=[]
+            for i in searched.split():
+                e=p.get(i)
+                if e is not None:
+                    res.append(e)
+            return res
         else:
             c=self.build_context()
             source=c.evaluate(source)
