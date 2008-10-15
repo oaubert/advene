@@ -1,6 +1,18 @@
 Important improvements
 ======================
 
+- implement cam mandatory metadata, making them always present
+
+- autoproperties should inherit getter docstring
+
+- ensure that the import "cam" is never renamed
+
+- check in can_reference that "embeded" elements are not references outside
+  their embeding elements
+
+- align backend granularity on notification granularity (i.e. tell the backend
+  to change a specific attribute in an element)
+
 - add parameters X_with_prefix and X_exclude_prefix in backend_methods
   (id_with_prefix, id_exclude_prefix, media_with_prefix, etc...)
 
