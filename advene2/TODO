@@ -3,8 +3,6 @@ Important improvements
 
 - implement cam mandatory metadata, making them always present
 
-- autoproperties should inherit getter docstring
-
 - check in can_reference that "embeded" elements are not references outside
   their embeding elements
 

@@ -78,7 +78,12 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
     @autoproperty        
     def _get_id(self):
+        """
+        The identifier of this element in the context of its owner package.
+        """
         return self._id
+
+    # TODO implement renaming by setting id
 
     @autoproperty
     def _get_uriref(self):
