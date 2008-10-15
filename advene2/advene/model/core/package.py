@@ -326,9 +326,9 @@ class Package(WithMetaMixin, WithEventsMixin, object):
                      change_url=True, erase=True)
         # above, change_url is set to force to remember the serializer
 
-    def save_as(self, filename, change_url=False, serializer=None,
-                      erase=False):
-        """Save the package under the given `filename`.
+    def save_as(self, url, change_url=False, serializer=None, erase=False):
+        """
+        Save the package under the given URL (if it is in the 'file:' scheme).
 
         If `change_url` is set, the URL of the package will be modified to the
         corresponding ``file:`` URL.
@@ -338,7 +338,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
 
         Note that if the file exists, an exception will be raised.
         """
-        p = urlparse(filename)
+        p = urlparse(url)
         if p.scheme not in ('file', ''):
             raise ValueError("Can not save to URL %s" % filename)
         filename = url2pathname(p.path)
