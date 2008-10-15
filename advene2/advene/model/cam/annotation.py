@@ -6,7 +6,7 @@ from advene.model.core.element import TAG
 
 class Annotation(CoreAnnotation, CamElementMixin):
 
-    def set_meta(self, key, value, val_is_idref=False, _guard=True):
+    def set_meta(self, key, value, val_is_idref=False):
         if key == CAM_TYPE:
             advene_type = getattr(value, "ADVENE_TYPE", None)
             if advene_type:
@@ -21,19 +21,18 @@ class Annotation(CoreAnnotation, CamElementMixin):
             owner = self._owner
             if old_type:
                 old_type = owner.get(old_type, old_type) # get element if we can
-                owner.dissociate_tag(self, old_type, _guard=False)
-            owner.associate_tag(self, value, _guard=False)
+                owner._dissociate_tag_nowarn(self, old_type)
+            owner._associate_tag_nowarn(self, value)
 
-        return super(Annotation, self).set_meta(key, value, val_is_idref,
-                                                _guard)
+        return super(Annotation, self).set_meta(key, value, val_is_idref)
 
-    def del_meta(self, key, _guard=True):
+    def del_meta(self, key):
         if key == CAM_TYPE:
             # TODO raise a user-warning, this is not good practice
             old_type = self.get_meta(key, None)
             if old_type:
-                self._owner.dissociate_tag(self, old_type, _guard=False)
-        return super(Annotation, self).del_meta(key, _guard)
+                self._owner._dissociate_tag_nowarn(self, old_type)
+        return super(Annotation, self).del_meta(key)
 
 Annotation.make_metadata_property(CAM_TYPE, "type", default=None, doc="""
 The type of this annotation, created with Package.create_annotation_type(). May be None if undefined.

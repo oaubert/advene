@@ -10,7 +10,7 @@ class Relation(CamGroupMixin, CoreRelation, CamElementMixin):
         # necessary to override CamGroupMixin __iter__
         return CoreRelation.__iter__(self)
 
-    def set_meta(self, key, value, val_is_idref=False, _guard=True):
+    def set_meta(self, key, value, val_is_idref=False):
         if key == CAM_TYPE:
             advene_type = getattr(value, "ADVENE_TYPE", None)
             if advene_type:
@@ -25,18 +25,18 @@ class Relation(CamGroupMixin, CoreRelation, CamElementMixin):
             owner = self._owner
             if old_type:
                 old_type = owner.get(old_type, old_type) # get element if we can
-                owner.dissociate_tag(self, old_type, _guard=False)
-            owner.associate_tag(self, value, _guard=False)
+                owner._dissociate_tag_nowarn(self, old_type)
+            owner._associate_tag_nowarn(self, value)
 
-        return super(Relation, self).set_meta(key, value, val_is_idref, _guard)
+        return super(Relation, self).set_meta(key, value, val_is_idref)
 
-    def del_meta(self, key, _guard=True):
+    def del_meta(self, key):
         if key == CAM_TYPE:
             # TODO raise a user-warning, this is not good practice
             old_type = self.get_meta(key, None)
             if old_type:
-                self._owner.dissociate_tag(self, old_type, _guard=False)
-        return super(Relation, self).del_meta(key, _guard)
+                self._owner._dissociate_tag_nowarn(self, old_type)
+        return super(Relation, self).del_meta(key)
 
 Relation.make_metadata_property(CAM_TYPE, "type", default=None, doc="""
 The type of this relation, created with Package.create_relation_type.

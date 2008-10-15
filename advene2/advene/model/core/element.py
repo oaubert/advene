@@ -521,6 +521,17 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         self._decrease_weight()
         return r
 
+    def _self_connect(self, detailed_signal, handler, *args):
+        """
+        This alternative to `connect` can only be used by the element itself.
+        It connects the handler to the signal but *does not* make the element
+        heavier (since if the handler will disappear at the same time as the
+        element...).
+        """
+        return super(PackageElement, self) \
+                .connect(detailed_signal, handler, *args)
+
+
     @tales_property
     @tales_use_as_context("refpkg")
     def _tales_my_tags(self, context_package):

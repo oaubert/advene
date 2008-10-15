@@ -15,42 +15,54 @@ class CamElementMixin(PackageElement):
     class (having no implication in instance creation).
     """
 
-    # inheriting object is required because we use super()
-
-    def set_meta(self, key, value, val_is_idref=False, _guard=True):
-        if _guard:
-            if key == CAMSYS_TYPE:
-                raise SemanticError("cam:system-type can not be modified")
+    def set_meta(self, key, value, val_is_idref=False):
+        if key == CAMSYS_TYPE:
+            raise SemanticError("cam:system-type can not be modified")
         return super(CamElementMixin, self).set_meta(key, value, val_is_idref)
 
-    def del_meta(self, key, _guard=True):
-        if _guard:
-            if key == CAMSYS_TYPE:
-                raise SemanticError("cam:system-type can not be modified")
+    def _set_camsys_type(self, value, val_is_idref=False):
+        return super(CamElementMixin, self) \
+                .set_meta(CAMSYS_TYPE, value, val_is_idref)
+
+    def del_meta(self, key):
+        if key == CAMSYS_TYPE:
+            raise SemanticError("cam:system-type can not be modified")
         return super(CamElementMixin, self).del_meta(key)
 
-    def iter_my_tags(self, package=None, inherited=True, _guard=True):
+    def iter_my_tags(self, package=None, inherited=True):
         """
         This method is inherited from core.Package but is unsafe on
         cam.Package. Use instead `iter_my_user_tags`.
         """
-        if _guard: warn("use iter_my_user_tags instead", UnsafeUseWarning, 2)
+        warn("use iter_my_user_tags instead", UnsafeUseWarning, 2)
+        return super(CamElementMixin, self).iter_my_tags(package, inherited)
+
+    def _iter_my_tags_nowarn(self, package=None, inherited=True):
+        """
+        Allows to call iter_my_tags internally without raising a warning.
+        """
         return super(CamElementMixin, self).iter_my_tags(package, inherited)
 
     def iter_my_user_tags(self, package=None, inherited=True):
-        for t in self.iter_my_tags(package, inherited, _guard=False):
+        for t in super(CamElementMixin, self).iter_my_tags(package, inherited):
             if t.get_meta(CAMSYS_TYPE, None) is None:
                 yield t
 
-    def iter_my_tag_ids(self, package=None, inherited=True, _guard=True):
+    def iter_my_tag_ids(self, package=None, inherited=True):
         """
         This method is inherited from core.Package but is unsafe on
         cam.Package. Use instead `iter_my_user_tag_ids`.
         """
-        if _guard: warn("use iter_my_user_tag_ids instead", UnsafeUseWarning, 2)
+        warn("use iter_my_user_tag_ids instead", UnsafeUseWarning, 2)
         return super(CamElementMixin, self).iter_my_tag_ids(package, inherited)
 
-    def iter_my_user_tag_ids(self, package=None, inherited=True, _guard=True):
+    def _iter_my_tag_ids_nowarn(self, package=None, inherited=True):
+        """
+        Allows to call iter_my_tag_ids internally without raising a warning.
+        """
+        return super(CamElementMixin, self).iter_my_tag_ids(package, inherited)
+
+    def iter_my_user_tag_ids(self, package=None, inherited=True):
         """
         FIXME: missing docstring
         """

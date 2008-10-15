@@ -14,10 +14,9 @@ class Tag(CoreTag, CamElementMixin):
         r._transtype()
         return r
 
-    def set_meta(self, key, value, val_is_idref=False, _guard=True):
-        if key == CAMSYS_TYPE:
-            self._transtype(value)
-        return super(Tag, self).set_meta(key, value, val_is_idref, _guard)
+    def _set_camsys_type(self, value, val_is_idref=False):
+        super(Tag, self)._set_camsys_type(value, val_is_idref)
+        self._transtype(value)
 
     def _transtype(self, systype=None):
         """
@@ -60,7 +59,6 @@ class WithTypeConstraintMixin(object):
         super(WithTypeConstraintMixin, self) \
                 .set_meta(CAM_ELEMENT_CONSTRAINT, c)
         return c
-
 
     def get_meta(self, key, default=_RAISE):
         if key == CAM_ELEMENT_CONSTRAINT:

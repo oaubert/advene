@@ -3,7 +3,7 @@ from advene.model.cam.element import CamElementMixin
 from advene.model.cam.group import CamGroupMixin
 from advene.model.core.list import List as CoreList
 
-class List(CamGroupMixin, CoreList, CamElementMixin) :
+class List(CoreList, CamGroupMixin, CamElementMixin) :
 
     @classmethod
     def instantiate(cls, owner, id):
@@ -15,10 +15,9 @@ class List(CamGroupMixin, CoreList, CamElementMixin) :
         # necessary to override CamGroupMixin __iter__
         return CoreList.__iter__(self)
 
-    def set_meta(self, key, value, val_is_idref=False, _guard=True):
-        if key == CAMSYS_TYPE:
-            self._transtype(value)
-        return super(List, self).set_meta(key, value, val_is_idref, _guard)
+    def _set_camsys_type(self, value, val_is_idref=False):
+        super(List, self)._set_camsys_type(value, val_is_idref)
+        self._transtype(value)
 
     def _transtype(self, systype=None):
         """

@@ -20,12 +20,19 @@ from warnings import warn
 from weakref import ref as wref
 
 class _AllGroup(CamGroupMixin, CoreAllGroup):
-    def iter_tags(self, _guard=True):
+
+    def iter_tags(self):
         """
         This method is inherited from CoreAllGroup but is unsafe on
         cam.Package. Use instead `iter_user_tags`.
         """
-        if _guard: warn("use iter_user_tags instead", UnsafeUseWarning, 2)
+        warn("use iter_user_tags instead", UnsafeUseWarning, 2)
+        return super(_AllGroup, self).iter_tags()
+
+    def _iter_tags_nowarn(self):
+        """
+        Allows to call iter_tags internally without raising a warning.
+        """
         return super(_AllGroup, self).iter_tags()
 
     def iter_user_tags(self):
@@ -49,12 +56,18 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
             for i in be.iter_tags(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)
 
-    def iter_lists(self, item=None, position=None, _guard=True):
+    def iter_lists(self, item=None, position=None):
         """
         This method is inherited from CoreAllGroup but is unsafe on
         cam.Package. Use instead `iter_user_lists`.
         """
-        if _guard: warn("use iter_user_lists instead", UnsafeUseWarning, 2)
+        warn("use iter_user_lists instead", UnsafeUseWarning, 2)
+        return super(_AllGroup, self).iter_lists(item=item, position=position)
+
+    def _iter_lists_nowarn(self, item=None, position=None):
+        """
+        Allows to call iter_lists internally without raising a warning.
+        """
         return super(_AllGroup, self).iter_lists(item=item, position=position)
 
     def iter_user_lists(self):
@@ -71,12 +84,18 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
             for i in be.iter_lists(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)
 
-    def count_tags(self, _guard=True):
+    def count_tags(self):
         """
         This method is inherited from CoreAllGroup but is unsafe on
         cam.Package. Use instead `count_user_tags`.
         """
-        if _guard: warn("use count_user_tags instead", UnsafeUseWarning, 2)
+        warn("use count_user_tags instead", UnsafeUseWarning, 2)
+        return super(_AllGroup, self).count_tags()
+
+    def _count_tags_nowarn(self):
+        """
+        Allows to call count_tags internally without raising a warning.
+        """
         return super(_AllGroup, self).count_tags()
 
     def count_user_tags(self):
@@ -97,13 +116,20 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
         return sum( be.count_tags(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
-    def count_lists(self, _guard=True):
+    def count_lists(self):
         """
         This method is inherited from CoreAllGroup but is unsafe on
         cam.Package. Use instead `count_user_lists`.
         """
-        if _guard: warn("use count_user_lists instead", UnsafeUseWarning, 2)
+        warn("use count_user_lists instead", UnsafeUseWarning, 2)
         return super(_AllGroup, self).count_lists()
+
+    def _count_lists_nowarn(self):
+        """
+        Allows to call count_lists internally without raising a warning.
+        """
+        return super(_AllGroup, self).count_lists()
+
 
     def count_user_lists(self):
         o = self._owner
@@ -118,12 +144,18 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
                     for be, pdict in o._backends_dict.items() )
 
 class _OwnGroup(CamGroupMixin, CoreOwnGroup):
-    def iter_tags(self, _guard=True):
+    def iter_tags(self):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
         cam.Package. Use instead `iter_user_tags`.
         """
-        if _guard: warn("use iter_user_tags instead", UnsafeUseWarning, 2)
+        warn("use iter_user_tags instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).iter_tags()
+
+    def _iter_tags_nowarn(self):
+        """
+        Allows to call iter_tags internally without raising a warning.
+        """
         return super(_OwnGroup, self).iter_tags()
 
     def iter_user_tags(self):
@@ -144,12 +176,18 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
           meta=[(CAMSYS_TYPE, "relation-type", False)]):
             yield o.get_element(i)
 
-    def iter_lists(self, item=None, position=None, _guard=True):
+    def iter_lists(self, item=None, position=None):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
         cam.Package. Use instead `iter_user_lists`.
         """
-        if _guard: warn("use iter_user_lists instead", UnsafeUseWarning, 2)
+        warn("use iter_user_lists instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).iter_lists(item=item, position=position)
+
+    def _iter_lists_nowarn(self, item=None, position=None):
+        """
+        Allows to call iter_lists internally without raising a warning.
+        """
         return super(_OwnGroup, self).iter_lists(item=item, position=position)
 
     def iter_user_lists(self):
@@ -164,12 +202,18 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
           meta=[(CAMSYS_TYPE, "schema", False)]):
             yield o.get_element(i)
 
-    def count_tags(self, _guard=True):
+    def count_tags(self):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
         cam.Package. Use instead `count_user_tags`.
         """
-        if _guard: warn("use count_user_tags instead", UnsafeUseWarning, 2)
+        warn("use count_user_tags instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).count_tags()
+
+    def _count_tags_nowarn(self):
+        """
+        Allows to call count_tags internally without raising a warning.
+        """
         return super(_OwnGroup, self).count_tags()
 
     def count_user_tags(self):
@@ -187,12 +231,18 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
         return o._backend.count_tags((o._id,),
             meta=[(CAMSYS_TYPE, "relation-type", False)])
 
-    def count_lists(self, _guard=True):
+    def count_lists(self):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
         cam.Package. Use instead `count_user_lists`.
         """
-        if _guard: warn("use count_user_lists instead", UnsafeUseWarning, 2)
+        warn("use count_user_lists instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).count_lists()
+
+    def _count_lists_nowarn(self):
+        """
+        Allows to call count_lists internally without raising a warning.
+        """
         return super(_OwnGroup, self).count_lists()
 
     def count_user_lists(self):
@@ -272,14 +322,14 @@ class Package(CorePackage):
         """FIXME: missing docstring.
         """
         at = super(Package, self).create_tag(id)
-        at.set_meta(CAMSYS_TYPE, "annotation-type", _guard=0)
+        at._set_camsys_type("annotation-type")
         return at
 
     def create_relation_type(self, id):
         """FIXME: missing docstring.
         """
         rt = super(Package, self).create_tag(id)
-        rt.set_meta(CAMSYS_TYPE, "relation-type", _guard=0)
+        rt._set_camsys_type("relation-type")
         return rt
 
     def create_annotation(self, id, media, begin, end,
@@ -321,23 +371,36 @@ class Package(CorePackage):
         """FIXME: missing docstring.
         """
         sc = super(Package, self).create_list(id, items)
-        sc.set_meta(CAMSYS_TYPE, "schema", _guard=0)
+        sc._set_camsys_type("schema")
         return sc
 
-    def associate_tag(self, element, tag, _guard=True):
+    def associate_tag(self, element, tag):
         """
         This method is inherited from core.Package but is unsafe on
         cam.Package. Use instead `associate_user_tag`.
         """
-        if _guard: warn("use associate_user_tag instead", UnsafeUseWarning, 2)
+        warn("use associate_user_tag instead", UnsafeUseWarning, 2)
         super(Package, self).associate_tag(element, tag)
 
-    def dissociate_tag(self, element, tag, _guard=True):
+    def _associate_tag_nowarn(self, element, tag):
+        """
+        Allows to call associate_tag internally without raising a warning.
+        """
+        super(Package, self).associate_tag(element, tag)
+
+
+    def dissociate_tag(self, element, tag):
         """
         This method is inherited from core.Package but is unsafe on
         cam.Package. Use instead `dissociate_user_tag`.
         """
-        if _guard: warn("use associate_user_tag instead", UnsafeUseWarning, 2)
+        warn("use associate_user_tag instead", UnsafeUseWarning, 2)
+        super(Package, self).dissociate_tag(element, tag)
+
+    def _dissociate_tag_nowarn(self, element, tag):
+        """
+        Allows to call dissociate_tag internally without raising a warning.
+        """
         super(Package, self).dissociate_tag(element, tag)
 
     def associate_user_tag(self, element, tag):
