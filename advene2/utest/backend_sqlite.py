@@ -636,14 +636,14 @@ class TestHandleElements(TestCase):
 
         ref = frozenset([self.m1, self.m3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("m1","m3"),))
+            get((self.pid1, self.pid2,), id=("m1","m3"),))
 
         ref = frozenset([self.m1,])
         self.assertEqual(ref, get((self.pid1, self.pid2,), url=self.m1_url,))
 
         ref = frozenset([self.m1, self.m3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2), url_alt=(self.m1_url, self.m3_url),))
+            get((self.pid1, self.pid2), url=(self.m1_url, self.m3_url),))
 
         ref = frozenset([self.m1, self.m3])
         self.assertEqual(ref,
@@ -651,7 +651,7 @@ class TestHandleElements(TestCase):
 
         ref = frozenset([self.m1, self.m2, self.m3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), foref_alt=(self.foref, self.foref2)))
+            get((self.pid1, self.pid2,), foref=(self.foref, self.foref2)))
 
         # mixing several criteria
 
@@ -685,7 +685,7 @@ class TestHandleElements(TestCase):
 
         ref = [self.a3, self.a1, self.a6]
         self.assertEqual(ref,
-            get((self.pid1, self.pid2), id_alt=("a6", "a1", "a3",),))
+            get((self.pid1, self.pid2), id=("a6", "a1", "a3",),))
 
         media2 = "%s#m3" % self.i1_uri
         ref = [self.a1, self.a5, self.a6]
@@ -695,7 +695,7 @@ class TestHandleElements(TestCase):
         media4_or_3 = ("%s#m1" % self.url1, media2)
         ref = [self.a4, self.a2, self.a1, self.a5, self.a6,]
         self.assertEqual(ref,
-            get((self.pid1, self.pid2), media_alt=media4_or_3,))
+            get((self.pid1, self.pid2), media=media4_or_3,))
 
         ref = [self.a4, self.a3, self.a2,]
         self.assertEqual(ref, get((self.pid1, self.pid2), begin=10,))
@@ -752,7 +752,7 @@ class TestHandleElements(TestCase):
 
         ref = frozenset([self.r1, self.r3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("r1","r3"),))
+            get((self.pid1, self.pid2,), id=("r1","r3"),))
 
     def test_iter_views(self):
 
@@ -774,7 +774,7 @@ class TestHandleElements(TestCase):
 
         ref = frozenset([self.v1, self.v3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("v1","v3"),))
+            get((self.pid1, self.pid2,), id=("v1","v3"),))
 
     def test_iter_resources(self):
 
@@ -796,7 +796,7 @@ class TestHandleElements(TestCase):
 
         ref = frozenset([self.R1, self.R3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("R1","R3"),))
+            get((self.pid1, self.pid2,), id=("R1","R3"),))
 
     def test_iter_tags(self):
 
@@ -818,7 +818,7 @@ class TestHandleElements(TestCase):
 
         ref = frozenset([self.t1, self.t3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("t1","t3"),))
+            get((self.pid1, self.pid2,), id=("t1","t3"),))
 
     def test_iter_lists(self):
 
@@ -840,7 +840,7 @@ class TestHandleElements(TestCase):
 
         ref = frozenset([self.l1, self.l3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("l1","l3"),))
+            get((self.pid1, self.pid2,), id=("l1","l3"),))
 
     def test_iter_queries(self):
 
@@ -862,7 +862,7 @@ class TestHandleElements(TestCase):
 
         ref = frozenset([self.q1, self.q3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("q1","q3"),))
+            get((self.pid1, self.pid2,), id=("q1","q3"),))
 
     def test_iter_imports(self):
 
@@ -884,21 +884,21 @@ class TestHandleElements(TestCase):
 
         ref = frozenset([self.i1, self.i3,])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("i1","i3"),))
+            get((self.pid1, self.pid2,), id=("i1","i3"),))
 
         ref = frozenset([self.i2, self.i3,])
         self.assertEqual(ref, get((self.pid1, self.pid2), url=self.i2_url,))
 
         ref = frozenset([self.i1, self.i2, self.i3,])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2), url_alt=(self.url2, self.i2_url),))
+            get((self.pid1, self.pid2), url=(self.url2, self.i2_url),))
 
         ref = frozenset([self.i1,])
         self.assertEqual(ref, get((self.pid1, self.pid2), uri=self.i1_uri,))
 
         ref = frozenset([self.i1, self.i2, self.i3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2), uri_alt=("", self.i1_uri)))
+            get((self.pid1, self.pid2), uri=("", self.i1_uri)))
 
     def test_count_medias(self):
 
@@ -920,14 +920,14 @@ class TestHandleElements(TestCase):
 
         ref = len([self.m1, self.m3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("m1","m3"),))
+            get((self.pid1, self.pid2,), id=("m1","m3"),))
 
         ref = len([self.m1,])
         self.assertEqual(ref, get((self.pid1, self.pid2,), url=self.m1_url,))
 
         ref = len([self.m1, self.m3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2), url_alt=(self.m1_url, self.m3_url),))
+            get((self.pid1, self.pid2), url=(self.m1_url, self.m3_url),))
 
         ref = len([self.m1, self.m3])
         self.assertEqual(ref,
@@ -935,7 +935,7 @@ class TestHandleElements(TestCase):
 
         ref = len([self.m1, self.m2, self.m3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), foref_alt=(self.foref, self.foref2)))
+            get((self.pid1, self.pid2,), foref=(self.foref, self.foref2)))
 
         # mixing several criteria
 
@@ -969,7 +969,7 @@ class TestHandleElements(TestCase):
 
         ref = len([self.a3, self.a1, self.a6])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2), id_alt=("a6", "a1", "a3",),))
+            get((self.pid1, self.pid2), id=("a6", "a1", "a3",),))
 
         media2 = "%s#m3" % self.i1_uri
         ref = len([self.a1, self.a5, self.a6])
@@ -979,7 +979,7 @@ class TestHandleElements(TestCase):
         media4_or_3 = ("%s#m1" % self.url1, media2)
         ref = len([self.a4, self.a2, self.a1, self.a5, self.a6,])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2), media_alt=media4_or_3,))
+            get((self.pid1, self.pid2), media=media4_or_3,))
 
         ref = len([self.a4, self.a3, self.a2,])
         self.assertEqual(ref, get((self.pid1, self.pid2), begin=10,))
@@ -1036,7 +1036,7 @@ class TestHandleElements(TestCase):
 
         ref = len([self.r1, self.r3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("r1","r3"),))
+            get((self.pid1, self.pid2,), id=("r1","r3"),))
 
     def test_count_views(self):
 
@@ -1058,7 +1058,7 @@ class TestHandleElements(TestCase):
 
         ref = len([self.v1, self.v3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("v1","v3"),))
+            get((self.pid1, self.pid2,), id=("v1","v3"),))
 
     def test_count_resources(self):
 
@@ -1080,7 +1080,7 @@ class TestHandleElements(TestCase):
 
         ref = len([self.R1, self.R3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("R1","R3"),))
+            get((self.pid1, self.pid2,), id=("R1","R3"),))
 
     def test_count_tags(self):
 
@@ -1102,7 +1102,7 @@ class TestHandleElements(TestCase):
 
         ref = len([self.t1, self.t3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("t1","t3"),))
+            get((self.pid1, self.pid2,), id=("t1","t3"),))
 
     def test_count_lists(self):
 
@@ -1124,7 +1124,7 @@ class TestHandleElements(TestCase):
 
         ref = len([self.l1, self.l3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("l1","l3"),))
+            get((self.pid1, self.pid2,), id=("l1","l3"),))
 
     def test_count_queries(self):
 
@@ -1146,7 +1146,7 @@ class TestHandleElements(TestCase):
 
         ref = len([self.q1, self.q3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("q1","q3"),))
+            get((self.pid1, self.pid2,), id=("q1","q3"),))
 
     def test_count_imports(self):
 
@@ -1168,21 +1168,21 @@ class TestHandleElements(TestCase):
 
         ref = len([self.i1, self.i3,])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2,), id_alt=("i1","i3"),))
+            get((self.pid1, self.pid2,), id=("i1","i3"),))
 
         ref = len([self.i2, self.i3,])
         self.assertEqual(ref, get((self.pid1, self.pid2), url=self.i2_url,))
 
         ref = len([self.i1, self.i2, self.i3,])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2), url_alt=(self.url2, self.i2_url),))
+            get((self.pid1, self.pid2), url=(self.url2, self.i2_url),))
 
         ref = len([self.i1,])
         self.assertEqual(ref, get((self.pid1, self.pid2), uri=self.i1_uri,))
 
         ref = len([self.i1, self.i2, self.i3])
         self.assertEqual(ref,
-            get((self.pid1, self.pid2), uri_alt=("", self.i1_uri)))
+            get((self.pid1, self.pid2), uri=("", self.i1_uri)))
 
     def test_update_media(self):
         new_url = "http://foo.com/m1.avi"

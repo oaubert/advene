@@ -2031,7 +2031,6 @@ class _SqliteBackend(object):
         If element_type is a type with content, content fields are added.
         """
         assert _DF or not isinstance(package_ids, basestring)
-        assert _DF or id is None
 
         s = "SELECT e.typ, e.package, e.id%s FROM Elements e%s"
         if element_type in (ANNOTATION, RELATION, VIEW, QUERY, RESOURCE):
@@ -2200,7 +2199,7 @@ class _SqliteBackend(object):
         if isinstance(url, basestring):
             q += " AND url = ?"
             args.append(url)
-        if url is not None:
+        elif url is not None:
             q += " AND url IN (" + ",".join( "?" for i in url ) + ")"
             args.extend(url)
 
@@ -2208,7 +2207,7 @@ class _SqliteBackend(object):
             q += " AND uri = ?"
             args.append(uri)
         elif uri is not None:
-            q += " AND uri IN (" + ",".join( "?" for i in urialt ) + ")"
+            q += " AND uri IN (" + ",".join( "?" for i in uri ) + ")"
             args.extend(uri)
 
         return q0, q, args
