@@ -1,18 +1,14 @@
 Needed improvements
 ===================
 
-- improve get when id is a uriref
-
-- make incoming_relations and _tales_incoming_relations dependant on a
-  common _get_incoming_relations method, so that they do not diverge
-
 - R/W annotationtype.mimetype (could handle jokers such as None, '*' or text/*')
 
 - auto-update of creator/created/contributor/modified. For package,
    update contributor/modified upon package saving.
 
-- How to do package.get(foo) in TALES ? package/foo ? package/get/foo?
+- improve get when id is a uriref (recursively search imported packages)
 
+- How to do package.get(foo) in TALES ? package/foo ? package/get/foo?
 - How to express the same thing as matchFilter (essentially, which
    element does the view apply on).
 
@@ -85,6 +81,10 @@ Misc
 
 - try to improve XML parser, either by using DOM (instead of event stream)
   or a native parser (expat?)
+
+- make incoming_relations and _tales_incoming_relations dependant on a
+  common _get_incoming_relations method, so that they do not diverge
+
 
 Open questions and remarks
 ==========================
