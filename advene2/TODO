@@ -82,8 +82,6 @@ Misc
 - make incoming_relations and _tales_incoming_relations dependant on a
   common _get_incoming_relations method, so that they do not diverge
 
-- improve get when id is a uriref (recursively search imported packages)
-
 Open questions and remarks
 ==========================
 

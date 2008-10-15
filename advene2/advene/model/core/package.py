@@ -428,10 +428,14 @@ class Package(WithMetaMixin, WithEventsMixin, object):
                 or self._backend.has_element(self._id, id, element_type)
 
     def get_element(self, id, default=_RAISE):
-        """Get the element with the given id-ref.
+        """Get the element with the given id-ref or uri-ref.
 
         If the element does not exist, an exception is raised (see below) 
         unless ``default`` is provided, in which case its value is returned.
+
+        If 'id' contains a '#', it is assumed to be a URI-ref, else it is
+        assumed to be an ID-ref. In both cases, all imported packages are
+        searched for the element
 
         An `UnreachableImportError` is raised if the given id involves an
         nonexistant or unreachable import. A `NoSuchElementError` is raised if
@@ -457,6 +461,9 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             id = tuple[2]
         else:
             tuple = None
+        sharp = id.find("#")
+        if sharp >= 0:
+            return self.get_element_by_uriref(id, default)
         colon = id.find(":")
         if colon <= 0:
             return self._get_own_element(id, tuple, default)
@@ -474,30 +481,26 @@ class Package(WithMetaMixin, WithEventsMixin, object):
 
     @tales_path1_function
     def get(self, id, default=None):
-        n=id.rfind('#')
-        if n > 0:
-            # FIXME quick hack to be able to advance. Should check the
-            # URI part, and generally be correctly implemented
-            id=id[n+1:]
         return self.get_element(id, default)
 
-    def get_element_by_uriref(self, uriref, default_RAISE):
+    def get_element_by_uriref(self, uriref, default=_RAISE):
         """Get the element with the given uri-ref.
 
         If the element does not exist, an exception is raised (see below)
         unless ``default`` is provided, in which case its value is returned.
 
-        FIXME: copied from get_element, but not adapted.
         An `UnreachableImportError` is raised if the given id involves an
         nonexistant or unreachable import. A `NoSuchElementError` is raised if
         the last item of the id-ref is not the id of an element in the
         corresponding package.
-
-        Note that packages are also similar to python dictionaries, so
-        `__getitem__` and `get` can also be used to get elements.
         """
         sharp = uriref.index("#")
-        raise NotImplementedError
+        package_uri, id = uriref[:sharp], uriref[sharp+1:]
+        for _, ps in self._backends_dict.iteritems():
+            for p in ps.itervalues():
+                if package_uri == p.uri or package_uri == p.url:
+                    return p.get_element(id, default)
+        raise NoSuchElementError(uriref)
 
     __getitem__ = get_element
 
