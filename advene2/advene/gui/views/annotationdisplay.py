@@ -47,7 +47,7 @@ class AnnotationDisplay(AdhocView):
         self.contextual_actions = ()
         self.controller=controller
         self.annotation=annotation
-        self.no_image_pixbuf=png_to_pixbuf(ImageCache.not_yet_available_image)
+        self.no_image_pixbuf=png_to_pixbuf(ImageCache.not_yet_available_image, width=50)
         self.widget=self.build_widget()
 
     def set_annotation(self, a=None):
