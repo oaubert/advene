@@ -4,7 +4,7 @@ I define the class of medias.
 
 from advene.model.consts import ADVENE_NS_PREFIX
 from advene.model.core.element import PackageElement, MEDIA
-from advene.utils.autoproperty import autoproperty
+from advene.util.autoproperty import autoproperty
 
 FOREF_PREFIX = "%s%s" % (ADVENE_NS_PREFIX, "frame_of_reference/")
 DEFAULT_FOREF = FOREF_PREFIX + "ms;o=0"

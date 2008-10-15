@@ -13,7 +13,7 @@ from advene.model.consts import ADVENE_XML, PARSER_META_PREFIX, PACKAGED_ROOT
 from advene.model.parsers.base_xml import XmlParserBase
 from advene.model.parsers.exceptions import ParserError
 import advene.model.serializers.advene_xml as serializer
-from advene.utils.files import get_path, is_local
+from advene.util.files import get_path, is_local
 
 class Parser(XmlParserBase):
 

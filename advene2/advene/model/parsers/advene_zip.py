@@ -11,7 +11,7 @@ from zipfile import BadZipfile, ZipFile
 from advene.model.consts import PACKAGED_ROOT
 import advene.model.parsers.advene_xml as advene_xml
 import advene.model.serializers.advene_zip as serializer
-from advene.utils.files import get_path, recursive_mkdir 
+from advene.util.files import get_path, recursive_mkdir
 
 
 

@@ -5,8 +5,8 @@ I define the common super-class of all package element classes.
 from advene.model.core.meta    import WithMetaMixin
 from advene.model.events       import ElementEventDelegate, WithEventsMixin
 from advene.model.tales        import tales_context_function
-from advene.utils.alias        import alias
-from advene.utils.autoproperty import autoproperty
+from advene.util.alias        import alias
+from advene.util.autoproperty import autoproperty
 
 # the following constants must be used as values of a property ADVENE_TYPE
 # in all subclasses of PackageElement

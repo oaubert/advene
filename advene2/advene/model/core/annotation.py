@@ -5,7 +5,7 @@ I define the class of annotations.
 from advene.model.consts import _RAISE
 from advene.model.core.element import PackageElement, ANNOTATION, MEDIA
 from advene.model.core.content import WithContentMixin
-from advene.utils.autoproperty import autoproperty
+from advene.util.autoproperty import autoproperty
 
 class Annotation(PackageElement, WithContentMixin):
     """FIXME: missing docstring.

@@ -29,8 +29,8 @@ from advene.model.exceptions import \
 from advene.model.events import PackageEventDelegate, WithEventsMixin
 from advene.model.parsers.register import iter_parsers
 from advene.model.serializers.register import iter_serializers
-from advene.utils.autoproperty import autoproperty
-from advene.utils.files import smart_urlopen
+from advene.util.autoproperty import autoproperty
+from advene.util.files import smart_urlopen
 
 
 _constructor = {

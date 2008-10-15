@@ -28,7 +28,7 @@ import advene.model.backends.sqlite_init as sqlite_init
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
 from advene.model.exceptions import ModelError
-from advene.utils.reftools import WeakValueDictWithCallback
+from advene.util.reftools import WeakValueDictWithCallback
 
 
 BACKEND_VERSION = "1.2"

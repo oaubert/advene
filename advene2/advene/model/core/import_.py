@@ -4,7 +4,7 @@ I define the class Import.
 
 from advene.model.exceptions import UnreachableImportError
 from advene.model.core.element import PackageElement, IMPORT
-from advene.utils.autoproperty import autoproperty
+from advene.util.autoproperty import autoproperty
  
 
 class Import(PackageElement):

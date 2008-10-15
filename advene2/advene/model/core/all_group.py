@@ -2,7 +2,7 @@
 """
 
 from advene.model.core.group import GroupMixin
-from advene.utils.itertools import interclass
+from advene.util.itertools import interclass
 
 class AllGroup(GroupMixin, object):
     """FIXME: missing docstring.

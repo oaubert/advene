@@ -22,8 +22,8 @@ from advene.model.consts import _RAISE, PACKAGED_ROOT
 from advene.model.content.register import iter_content_handlers
 from advene.model.core.element import RELATION
 from advene.model.exceptions import ModelError
-from advene.utils.autoproperty import autoproperty
-from advene.utils.files import recursive_mkdir
+from advene.util.autoproperty import autoproperty
+from advene.util.files import recursive_mkdir
 
 class WithContentMixin:
     """I provide functionality for elements with a content.

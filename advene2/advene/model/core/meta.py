@@ -3,7 +3,7 @@ from weakref import ref
 from advene.model.consts import _RAISE, PARSER_META_PREFIX
 from advene.model.exceptions import ModelError
 from advene.model.tales import tales_path1_function
-from advene.utils.sorted_dict import SortedDict
+from advene.util.sorted_dict import SortedDict
 
 class WithMetaMixin:
     """Metadata access mixin.
