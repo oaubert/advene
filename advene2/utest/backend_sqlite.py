@@ -792,6 +792,19 @@ class TestHandleElements (TestCase):
                 self.be.set_meta (i[0], i[1], typ, p, "xxx")
             self.assertEqual (items_sorted, list (
                 self.be.iter_meta (i[0], i[1], typ)))
+
+    def test_members (self):
+        a1 = "%s a1" % self.uuid1
+        a2 = "%s a2" % self.uuid1
+        self.be.insert_member (self.pid1, "r1", a1, -1)
+        self.assertEqual (1, self.be.count_members (self.pid1, "r1"))
+        self.be.insert_member (self.pid1, "r1", a2, -1)
+        self.assertEqual (2, self.be.count_members (self.pid1, "r1"))
+        self.assertEqual (a1, self.be.get_member (self.pid1, "r1", 0))
+        self.assertEqual (a2, self.be.get_member (self.pid1, "r1", 1))
+        self.assertEqual ([a1, a2],
+                          list (self.be.iter_members (self.pid1, "r1")))
+        # TODO finish that
             
 
 class TestRetrieveDataWithSameId (TestCase):

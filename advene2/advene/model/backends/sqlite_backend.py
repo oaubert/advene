@@ -5,7 +5,8 @@ I am the reference API for advene backends.
 #TODO: the backend does not ensure an exclusive access to the sqlite file.
 #      this is contrary to the backend specification.
 #      We should explore sqlite locking and use it (seems that multiple
-#      read-only access is possible, so everything should be ok).
+#      read-only access is possible), but also the possibility to lock 
+#      differently each package in the database.
 
 from pysqlite2 import dbapi2 as sqlite
 from os.path   import exists, isdir, join, split
@@ -673,3 +674,63 @@ class _SqliteBackend (object):
                        WHERE package = ? AND element = ? AND key = ?"""
                 self._conn.execute (q, (package_id, id, key))
         self._conn.commit()
+
+    # relation members
+
+    def insert_member (self, package_id, id, uuid_ref, pos):
+        """
+        Insert a member at the given position.
+        ``pos`` may be any value between -1 and n (inclusive), where n is the
+        current number of members.
+        If -1, the member will be appended at the end (**note** that this is
+        not the same behaviour as ``list.insert`` in python2.5).
+        If non-negative, the member will be inserted at that position.
+        """
+        assert (-1 <= pos <= self.count_members (package_id, id))
+
+        if pos == -1:
+            pos = self.count_members (package_id, id)
+
+        try:
+            c = self._conn.cursor()
+            c.execute ("update RelationMembers set ord=ord+1 "
+                       "where package = ? and relation = ? and ord > ?",
+                       (package_id, id, pos))
+            c.execute ("insert into RelationMembers values (?,?,?,?)",
+                       (package_id, id, pos, uuid_ref))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not update or insert", e)
+
+    def count_members (self, package_id, id):
+        q = "select count(ord) from RelationMembers "\
+            "where package = ? and relation = ?"
+        return self._conn.execute (q, (package_id, id)).fetchone()[0]
+
+    def get_member (self, package_id, id, pos):
+        if __debug__:
+            c = self.count_members (package_id, id)
+            assert (-c <= pos < c)
+
+        if pos < 0:
+            c = self.count_members (package_id, id)
+            pos += c
+
+        q = "select annotation from RelationMembers "\
+            "where package = ? and relation = ? and ord = ?"
+        return self._conn.execute (q, (package_id, id, pos)).fetchone()[0]
+
+    def iter_members (self, package_id, id):
+        q = "select annotation from RelationMembers "\
+            "where package = ? and relation = ? order by ord"
+        for r in self._conn.execute (q, (package_id, id)):
+            yield r[0]
+
+    def remove_member (self, package_id, id, pos):
+        raise NotImplementedError
+
+    def get_relations_with_member (self, uuid_ref, package_ids, pos=None):
+        raise NotImplementedError
+
+    # end of the class
