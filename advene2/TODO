@@ -11,3 +11,10 @@
   * no relative imports
 
 - add indexes in the SQL schema (Annotations.f_begin at least)
+
+- implement "external" contents (url attribute)
+
+- make subcollections (annotations, medias...) of all and own groups dict-like
+
+- make content data independant from other attributes (mimetype, schema) in
+  the backend and update the API accordingly
