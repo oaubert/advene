@@ -3,7 +3,6 @@ from unittest import TestCase, main
 from pysqlite2 import dbapi2 as sqlite
 from os        import tmpnam, unlink
 from os.path   import exists
-from uuid      import uuid4
 from warnings  import filterwarnings
 
 from advene.model.backends.sqlite_backend import (
@@ -36,8 +35,8 @@ filterwarnings ("ignore", "tmpnam is a potential security risk to your program")
 class TestCreateBackend (TestCase):
     def setUp (self):
         self.filename = tmpnam()
-        self.url1 = "file:%s" % self.filename
-        self.url2 = "%s#foo" % self.url1
+        self.url1 = "sqlite:%s" % self.filename
+        self.url2 = "%s;foo" % self.url1
 
     def tearDown (self):
         if exists (self.filename):
@@ -77,18 +76,13 @@ class TestCreateBackend (TestCase):
     def test_claim_existing_fragment (self):
         create (self.url2)
         self.assert_ (
-            not claims_for_create ("%s#foo" % self.url1)
+            not claims_for_create ("%s;foo" % self.url1)
         )
 
     def test_claim_new_fragment (self):
         create (self.url2)
         self.assert_ (
-            claims_for_create ("%s#bar" % self.url1)
-        )
-
-    def test_claim_sqlite_scheme (self):
-        self.assert_ ( 
-            claims_for_create ("sqlite:%s" % tmpnam())
+            claims_for_create ("%s;bar" % self.url1)
         )
 
     def test_claim_memory (self):
@@ -115,13 +109,6 @@ class TestCreateBackend (TestCase):
             claims_for_bind (self.url2)
         )
 
-    def test_create_sqlite_scheme (self):
-        url = "sqlite:%s#foo" % self.filename
-        create (url)
-        self.assert_ (
-            claims_for_bind (url)
-        )
-
     def test_create_in_memory (self):
         b,p = create (IN_MEMORY_URL)
         self.assert_ (b._path, ":memory:")
@@ -130,8 +117,8 @@ class TestCreateBackend (TestCase):
 class TestBindBackend (TestCase):
     def setUp (self):
         self.filename = tmpnam()
-        self.url1 = "file:%s" % self.filename
-        self.url2 = "%s#foo" % self.url1
+        self.url1 = "sqlite:%s" % self.filename
+        self.url2 = "%s;foo" % self.url1
         create (self.url2)
 
     def tearDown (self):
@@ -170,7 +157,7 @@ class TestBindBackend (TestCase):
 
     def test_claim_wrong_fragment (self):
         self.assert_ (
-            not claims_for_bind ("%s#bar" % self.url1)
+            not claims_for_bind ("%s;bar" % self.url1)
         )
 
     def test_claim_without_fragment (self):
@@ -184,15 +171,10 @@ class TestBindBackend (TestCase):
         )
 
     def test_claim_with_other_fragment (self):
-        url3 = "%s#bar" % self.url1
+        url3 = "%s;bar" % self.url1
         create (url3)
         self.assert_ (
             claims_for_bind (url3)
-        )
-
-    def test_claim_sqlite_scheme (self):
-        self.assert_ (
-            claims_for_bind ("sqlite:%s" % self.filename)
         )
 
     def test_bind_without_fragment (self):
@@ -202,17 +184,30 @@ class TestBindBackend (TestCase):
         bind (self.url2)
 
     def test_bind_with_other_fragment (self):
-        url3 = "%s#bar" % self.url1
+        url3 = "%s;bar" % self.url1
         create (url3)
         bind (url3)
+
+
+class TestPackageUri (TestCase):
+    def test_uri (self):
+        be, pid1 = create (IN_MEMORY_URL)
+        _ , pid2 = create ("%s;foo" % IN_MEMORY_URL)
+        for pid in (pid1, pid2,):
+            be.update_uri (pid, "urn:foobar")
+            self.assertEqual ("urn:foobar", be.get_uri (pid))
+            be.update_uri (pid, "urn:toto")
+            self.assertEqual ("urn:toto", be.get_uri (pid))
+            be.update_uri (pid, "")
+            self.assertEqual ("", be.get_uri (pid))
 
 
 class TestCache (TestCase):
     def setUp (self):
         self.filename = tmpnam()
-        self.url1 = "file:%s" % self.filename
-        self.url2 = "%s#foo" % self.url1
-        self.url3 = "%s#bar" % self.url1
+        self.url1 = "sqlite:%s" % self.filename
+        self.url2 = "%s;foo" % self.url1
+        self.url3 = "%s;bar" % self.url1
         self.created = create (self.url2)
 
     def tearDown (self):
@@ -246,7 +241,7 @@ class TestCache (TestCase):
 class TestCreateElement (TestCase):
     def setUp (self):
         self.url1 = IN_MEMORY_URL
-        self.url2 = "%s#foo" % self.url1
+        self.url2 = "%s;foo" % self.url1
         self.be, self.pid = create (self.url2)
 
     def tearDown (self):
@@ -264,11 +259,9 @@ class TestCreateElement (TestCase):
                           None) 
 
     def test_create_annotation (self):
-        uuid = self.be.get_uuid (self.pid)
         self.be.create_media (self.pid, "m1", "http://example.com/m1.avi")
-        media = "%s m1" % uuid
         try:
-            self.be.create_annotation (self.pid, "a1", media, 10, 20)
+            self.be.create_annotation (self.pid, "a1", "m1", 10, 20)
         except Exception, e:
             self.fail (e) # raised by create_annotation
         self.assert_ (self.be.has_element (self.pid, "a1"))
@@ -346,8 +339,7 @@ class TestCreateElement (TestCase):
     def test_create_import (self):
         try:
             self.be.create_import (self.pid, "i1",
-                                   "http://example.com/advene/db",
-                                   str (uuid4()),)
+                                   "http://example.com/advene/db", "",)
         except Exception, e:
             self.fail (e) # raised by create_import
         self.assert_ (self.be.has_element (self.pid, "i1"))
@@ -359,95 +351,91 @@ class TestCreateElement (TestCase):
 
 class TestHandleElements (TestCase):
     def setUp (self):
-        self.url1 = IN_MEMORY_URL
-        self.url2 = "%s#foo" % self.url1
-        self.be, self.pid1 = create (self.url1)
-        _,       self.pid2 = create (self.url2)
+        try:
+            self.url1 = IN_MEMORY_URL
+            self.url2 = "%s;foo" % self.url1
+            self.be, self.pid1 = create (self.url1)
+            _,       self.pid2 = create (self.url2)
 
-        self.uuid1 = self.be.get_uuid (self.pid1)
-        self.uuid2 = self.be.get_uuid (self.pid2)
-        self.media1 = "%s m1" % self.uuid1
-        self.media2 = "%s m2" % self.uuid1
-        self.media3 = "%s m3" % self.uuid2
+            self.m1_url = "http://example.com/m1.avi"
+            self.m2_url = "http://example.com/m2.avi"
+            self.m3_url = "http://example.com/m3.avi"
+            self.i1_uri = "urn:xyz-abc"
+            self.i2_url = "http://example.com/advene/db2"
 
-        self.resource3 = "%s R3" % self.uuid2
+            self.m1 = (self.pid1, "m1", self.m1_url)
+            self.m2 = (self.pid1, "m2", self.m2_url)
+            self.a1 = (self.pid1, "a1", "m1", 10, 20)
+            self.a2 = (self.pid1, "a2", "m2", 10, 20)
+            self.a3 = (self.pid1, "a3", "m1", 10, 30)
+            self.a4 = (self.pid1, "a4", "i1:m3", 15, 20)
+            self.r1 = (self.pid1, "r1",)
+            self.r2 = (self.pid1, "r2",)
+            self.v1 = (self.pid1, "v1",)
+            self.v2 = (self.pid1, "v2",)
+            self.R1 = (self.pid1, "R1",)
+            self.R2 = (self.pid1, "R2",)
+            self.t1 = (self.pid1, "t1",)
+            self.t2 = (self.pid1, "t2",)
+            self.l1 = (self.pid1, "l1",)
+            self.l2 = (self.pid1, "l2",)
+            self.q1 = (self.pid1, "q1",)
+            self.q2 = (self.pid1, "q2",)
+            self.i1 = (self.pid1, "i1", self.url2, self.i1_uri)
+            self.i2 = (self.pid1, "i2", self.i2_url, "")
 
-        self.m1_url = "http://example.com/m1.avi"
-        self.m2_url = "http://example.com/m2.avi"
-        self.m3_url = "http://example.com/m3.avi"
-        self.imp_url = "http://example.com/advene/db2"
-        self.imp_uuid = str (uuid4())
+            self.own = [ self.m1, self.m2, self.a1, self.a2, self.a3, self.a4,
+                         self.r1, self.r2, self.v1, self.v2, self.t1, self.t2,
+                         self.l1, self.l2, self.i1, self.i2, ]
 
-        self.m1 = (self.pid1, "m1", self.m1_url)
-        self.m2 = (self.pid1, "m2", self.m2_url)
-        self.a1 = (self.pid1, "a1", self.media1, 10, 20)
-        self.a2 = (self.pid1, "a2", self.media2, 10, 20)
-        self.a3 = (self.pid1, "a3", self.media1, 10, 30)
-        self.a4 = (self.pid1, "a4", self.media3, 15, 20)
-        self.r1 = (self.pid1, "r1",)
-        self.r2 = (self.pid1, "r2",)
-        self.v1 = (self.pid1, "v1",)
-        self.v2 = (self.pid1, "v2",)
-        self.R1 = (self.pid1, "R1",)
-        self.R2 = (self.pid1, "R2",)
-        self.t1 = (self.pid1, "t1",)
-        self.t2 = (self.pid1, "t2",)
-        self.l1 = (self.pid1, "l1",)
-        self.l2 = (self.pid1, "l2",)
-        self.q1 = (self.pid1, "q1",)
-        self.q2 = (self.pid1, "q2",)
-        self.i1 = (self.pid1, "i1", self.url2, self.uuid2)
-        self.i2 = (self.pid1, "i2", self.imp_url, self.imp_uuid)
+            self.be.create_import     (*self.i1)
+            self.be.create_import     (*self.i2)
+            self.be.create_media      (*self.m1)
+            self.be.create_media      (*self.m2)
+            self.be.create_annotation (*self.a1)
+            self.be.create_annotation (*self.a2)
+            self.be.create_annotation (*self.a3)
+            self.be.create_annotation (*self.a4)
+            self.be.create_relation   (*self.r1)
+            self.be.create_relation   (*self.r2)
+            self.be.create_view       (*self.v1)
+            self.be.create_view       (*self.v2)
+            self.be.create_resource   (*self.R1)
+            self.be.create_resource   (*self.R2)
+            self.be.create_tag        (*self.t1)
+            self.be.create_tag        (*self.t2)
+            self.be.create_list       (*self.l1)
+            self.be.create_list       (*self.l2)
+            self.be.create_query      (*self.q1)
+            self.be.create_query      (*self.q2)
 
-        self.own = [ self.m1, self.m2, self.a1, self.a2, self.a3, self.a4,
-                     self.r1, self.r2, self.v1, self.v2, self.t1, self.t2,
-                     self.l1, self.l2, self.i1, self.i2, ]
+            self.m3 = (self.pid2, "m3", self.m3_url)
+            self.a5 = (self.pid2, "a5", "m3", 25, 30)
+            self.a6 = (self.pid2, "a6", "m3", 35, 45)
+            self.r3 = (self.pid2, "r3",)
+            self.v3 = (self.pid2, "v3",)
+            self.R3 = (self.pid2, "R3",)
+            self.t3 = (self.pid2, "t3",)
+            self.l3 = (self.pid2, "l3",)
+            self.q3 = (self.pid2, "q3",)
+            self.i3 = (self.pid2, "i3", self.i2_url, "")
 
-        self.be.create_media      (*self.m1)
-        self.be.create_media      (*self.m2)
-        self.be.create_annotation (*self.a1)
-        self.be.create_annotation (*self.a2)
-        self.be.create_annotation (*self.a3)
-        self.be.create_annotation (*self.a4)
-        self.be.create_relation   (*self.r1)
-        self.be.create_relation   (*self.r2)
-        self.be.create_view       (*self.v1)
-        self.be.create_view       (*self.v2)
-        self.be.create_resource   (*self.R1)
-        self.be.create_resource   (*self.R2)
-        self.be.create_tag        (*self.t1)
-        self.be.create_tag        (*self.t2)
-        self.be.create_list       (*self.l1)
-        self.be.create_list       (*self.l2)
-        self.be.create_query      (*self.q1)
-        self.be.create_query      (*self.q2)
-        self.be.create_import     (*self.i1)
-        self.be.create_import     (*self.i2)
+            self.imported = [ self.m3, self.a5, self.a6, self.r3, self.v3,
+                              self.R3, self.t3, self.l3, self.q3, self.i3, ]
 
-        self.m3 = (self.pid2, "m3", self.m3_url)
-        self.a5 = (self.pid2, "a5", self.media3, 25, 30)
-        self.a6 = (self.pid2, "a6", self.media3, 35, 45)
-        self.r3 = (self.pid2, "r3",)
-        self.v3 = (self.pid2, "v3",)
-        self.R3 = (self.pid2, "R3",)
-        self.t3 = (self.pid2, "t3",)
-        self.l3 = (self.pid2, "l3",)
-        self.q3 = (self.pid2, "q3",)
-        self.i3 = (self.pid2, "i3", self.imp_url, self.imp_uuid)
-
-        self.imported = [ self.m3, self.a5, self.a6, self.r3, self.v3, self.R3,
-                          self.t3, self.l3, self.q3, self.i3, ]
-
-        self.be.create_media      (*self.m3)
-        self.be.create_annotation (*self.a5)
-        self.be.create_annotation (*self.a6)
-        self.be.create_relation   (*self.r3)
-        self.be.create_view       (*self.v3)
-        self.be.create_resource   (*self.R3)
-        self.be.create_tag        (*self.t3)
-        self.be.create_list       (*self.l3)
-        self.be.create_query      (*self.q3)
-        self.be.create_import     (*self.i3)
+            self.be.create_import     (*self.i3)
+            self.be.create_media      (*self.m3)
+            self.be.create_annotation (*self.a5)
+            self.be.create_annotation (*self.a6)
+            self.be.create_relation   (*self.r3)
+            self.be.create_view       (*self.v3)
+            self.be.create_resource   (*self.R3)
+            self.be.create_tag        (*self.t3)
+            self.be.create_list       (*self.l3)
+            self.be.create_query      (*self.q3)
+        except:
+            self.tearDown()
+            raise
 
     def tearDown (self):
         self.be = None # ensure that the backend will be removed from the cache
@@ -531,11 +519,12 @@ class TestHandleElements (TestCase):
         self.assertEqual (ref,
             get ((self.pid1, self.pid2), id_alt=("a6", "a4", "a2",),))
 
+        media3 = "%s#m3" % self.url2
         ref = [self.a4, self.a5, self.a6]
         self.assertEqual (ref,
-            get ((self.pid1, self.pid2), media=self.media3,))
+            get ((self.pid1, self.pid2), media=media3,))
 
-        media1_or_3 = (self.media1, self.media3)
+        media1_or_3 = ("%s#m1" % self.url1, media3)
         ref = [self.a1, self.a3, self.a4, self.a5, self.a6,]
         self.assertEqual (ref,
             get ((self.pid1, self.pid2), media_alt=media1_or_3,))
@@ -573,7 +562,7 @@ class TestHandleElements (TestCase):
 
         ref = [self.a4, self.a5,]
         self.assertEqual (ref,
-            get ((self.pid1, self.pid2), media=self.media3, end_max=30,))
+            get ((self.pid1, self.pid2), media=media3, end_max=30,))
 
     def test_get_relations (self):
 
@@ -730,35 +719,36 @@ class TestHandleElements (TestCase):
             get ((self.pid1, self.pid2,), id_alt=("i1","i3"),))
 
         ref = frozenset ([self.i2, self.i3,])
-        self.assertEqual (ref, get ((self.pid1, self.pid2), url=self.imp_url,))
+        self.assertEqual (ref, get ((self.pid1, self.pid2), url=self.i2_url,))
 
         ref = frozenset ([self.i1, self.i2, self.i3,])
         self.assertEqual (ref,
-            get ((self.pid1, self.pid2), url_alt=(self.url2, self.imp_url),))
+            get ((self.pid1, self.pid2), url_alt=(self.url2, self.i2_url),))
 
         ref = frozenset ([self.i1,])
-        self.assertEqual (ref, get ((self.pid1, self.pid2), uuid=self.uuid2,))
+        self.assertEqual (ref, get ((self.pid1, self.pid2), uri=self.i1_uri,))
 
         ref = frozenset ([self.i1, self.i2, self.i3])
         self.assertEqual (ref,
-            get ((self.pid1, self.pid2), uuid_alt=(self.uuid2, self.imp_uuid)))
+            get ((self.pid1, self.pid2), uri_alt=("", self.i1_uri)))
 
     def test_content (self):
         mime = "text/html"
         data = "<em>hello</em> world"
-        schema = self.resource3
 
         for i in [self.a1, self.r1, self.v1, self.R1, self.q1,
                   self.a5, self.r3, self.v3, self.q3,]:
             typ = T[i[1][0]]
+            if i[0] is self.pid1: schema = "i1:R3"
+            else:              schema = "R3"
             self.be.update_content(i[0], i[1], mime, data, schema)
             self.assertEqual ((mime, data, schema),
                 self.be.get_content (i[0], i[1], typ))
-            self.be.update_content(i[0], i[1], mime, data, None)
-            self.assertEqual ((mime, data, None),
+            self.be.update_content(i[0], i[1], mime, data, "")
+            self.assertEqual ((mime, data, ""),
                 self.be.get_content (i[0], i[1], typ))
-            self.be.update_content(i[0], i[1], "", "", None)
-            self.assertEqual (("", "", None),
+            self.be.update_content(i[0], i[1], "", "", "")
+            self.assertEqual (("", "", ""),
                 self.be.get_content (i[0], i[1], typ))
 
     def test_metadata (self):
@@ -794,65 +784,63 @@ class TestHandleElements (TestCase):
                 self.be.iter_meta (i[0], i[1], typ)))
 
     def test_members (self):
-        a1 = "%s a1" % self.uuid1
-        a2 = "%s a2" % self.uuid1
-        self.be.insert_member (self.pid1, "r1", a1, -1)
+        self.be.insert_member (self.pid1, "r1", "a1", -1)
         self.assertEqual (1, self.be.count_members (self.pid1, "r1"))
-        self.be.insert_member (self.pid1, "r1", a2, -1)
+        self.be.insert_member (self.pid1, "r1", "a2", -1)
         self.assertEqual (2, self.be.count_members (self.pid1, "r1"))
-        self.assertEqual (a1, self.be.get_member (self.pid1, "r1", 0))
-        self.assertEqual (a2, self.be.get_member (self.pid1, "r1", 1))
-        self.assertEqual ([a1, a2],
+        self.assertEqual ("a1", self.be.get_member (self.pid1, "r1", 0))
+        self.assertEqual ("a2", self.be.get_member (self.pid1, "r1", 1))
+        self.assertEqual (["a1", "a2"],
                           list (self.be.iter_members (self.pid1, "r1")))
         # TODO finish that
             
 
 class TestRetrieveDataWithSameId (TestCase):
     def setUp (self):
-        self.url1 = IN_MEMORY_URL
-        self.url2 = "%s#foo" % self.url1
-        self.be, self.pid1 = create (self.url1)
-        _,       self.pid2 = create (self.url2)
+        try:
+            self.url1 = IN_MEMORY_URL
+            self.url2 = "%s;foo" % self.url1
+            self.be, self.pid1 = create (self.url1)
+            _,       self.pid2 = create (self.url2)
 
-        self.uuid1 = self.be.get_uuid (self.pid1)
-        self.uuid2 = self.be.get_uuid (self.pid2)
-        self.media = "%s m" % self.uuid1
+            self.m_url = "http://example.com/m1.avi"
 
-        self.m_url = "http://example.com/m1.avi"
+            self.m = ("m", self.m_url)
+            self.a = ("a", "m", 10, 20)
+            self.r = ("r",)
+            self.v = ("v",)
+            self.R = ("R",)
+            self.t = ("t",)
+            self.l = ("l",)
+            self.q = ("q",)
+            self.i1 = (self.pid1, "i", self.url2, "")
+            self.i2 = (self.pid2, "i", self.url1, "")
 
-        self.m = ("m", self.m_url)
-        self.a = ("a", self.media, 10, 20)
-        self.r = ("r",)
-        self.v = ("v",)
-        self.R = ("R",)
-        self.t = ("t",)
-        self.l = ("l",)
-        self.q = ("q",)
-        self.i1 = (self.pid1, "i", self.url2, self.uuid2)
-        self.i2 = (self.pid2, "i", self.url1, self.uuid1)
+            self.generic = [self.m, self.a, self.r, self.v, self.R, self.t,
+                            self.l, self.q]
+            self.ids = list ("marvRtlqi")
 
-        self.generic = [self.m, self.a, self.r, self.v, self.R, self.t, self.l,
-                        self.q]
-        self.ids = list ("marvRtlqi")
-
-        self.be.create_media      (self.pid1, *self.m)
-        self.be.create_media      (self.pid2, *self.m)
-        self.be.create_annotation (self.pid1, *self.a)
-        self.be.create_annotation (self.pid2, *self.a)
-        self.be.create_relation   (self.pid1, *self.r)
-        self.be.create_relation   (self.pid2, *self.r)
-        self.be.create_view       (self.pid1, *self.v)
-        self.be.create_view       (self.pid2, *self.v)
-        self.be.create_resource   (self.pid1, *self.R)
-        self.be.create_resource   (self.pid2, *self.R)
-        self.be.create_tag        (self.pid1, *self.t)
-        self.be.create_tag        (self.pid2, *self.t)
-        self.be.create_list       (self.pid1, *self.l)
-        self.be.create_list       (self.pid2, *self.l)
-        self.be.create_query      (self.pid1, *self.q)
-        self.be.create_query      (self.pid2, *self.q)
-        self.be.create_import     (*self.i1)
-        self.be.create_import     (*self.i2)
+            self.be.create_media      (self.pid1, *self.m)
+            self.be.create_media      (self.pid2, *self.m)
+            self.be.create_annotation (self.pid1, *self.a)
+            self.be.create_annotation (self.pid2, *self.a)
+            self.be.create_relation   (self.pid1, *self.r)
+            self.be.create_relation   (self.pid2, *self.r)
+            self.be.create_view       (self.pid1, *self.v)
+            self.be.create_view       (self.pid2, *self.v)
+            self.be.create_resource   (self.pid1, *self.R)
+            self.be.create_resource   (self.pid2, *self.R)
+            self.be.create_tag        (self.pid1, *self.t)
+            self.be.create_tag        (self.pid2, *self.t)
+            self.be.create_list       (self.pid1, *self.l)
+            self.be.create_list       (self.pid2, *self.l)
+            self.be.create_query      (self.pid1, *self.q)
+            self.be.create_query      (self.pid2, *self.q)
+            self.be.create_import     (*self.i1)
+            self.be.create_import     (*self.i2)
+        except:
+            self.tearDown()
+            raise
 
     def tearDown (self):
         self.be = None # ensure that the backend will be removed from the cache

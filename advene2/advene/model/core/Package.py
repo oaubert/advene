@@ -3,7 +3,7 @@ from weakref import WeakValueDictionary
 from advene import RAISE
 from advene.model.backends import iter_backends
 
-from PackageElement import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE 
+from PackageElement import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
 from Media import Media
 from Annotation import Annotation
 from Relation import Relation

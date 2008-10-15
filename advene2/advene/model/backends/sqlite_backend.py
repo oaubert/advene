@@ -10,7 +10,6 @@ I am the reference API for advene backends.
 
 from pysqlite2 import dbapi2 as sqlite
 from os.path   import exists, isdir, join, split
-from uuid      import uuid4
 from weakref   import WeakValueDictionary
 
 import re
@@ -29,7 +28,7 @@ def claims_for_create (url):
     """
     Is this backend able to create a package to the given URL ?
     """
-    if url[:5] != "file:" and url[:7] != "sqlite:": return False
+    if url[:7] != "sqlite:": return False
 
     path, pkgid = _strip_url (url)
 
@@ -82,20 +81,21 @@ def create (url):
             try:
                 for query in sql.split(";"):
                     conn.execute (query)
+                conn.execute ("INSERT INTO Version VALUES (?)",
+                              (BACKEND_VERSION,))
+                conn.execute ("INSERT INTO Packages VALUES (?,?)",
+                              (_DEFAULT_PKGID, "",))
+                conn.commit()
             except sqlite.OperationalError, e:
+                conn.rollback()
                 raise RuntimeError, "%s - SQL:\n%s" % (e, query)
-            conn.execute ("INSERT INTO Version VALUES (?)", (BACKEND_VERSION,))
-            conn.execute ("INSERT INTO Packages VALUES (?,?)",
-                          (_DEFAULT_PKGID, str(uuid4()),))
-            conn.commit()
         b = _SqliteBackend (path, conn, False, False)
         _cache[path] = b
     else:
         conn = b._conn
 
     if pkgid != _DEFAULT_PKGID:
-        conn.execute ("INSERT INTO Packages VALUES (?,?)",
-                      (pkgid, str(uuid4()),))
+        conn.execute ("INSERT INTO Packages VALUES (?,?)", (pkgid, "",))
         conn.commit()
 
 
@@ -105,7 +105,7 @@ def claims_for_bind (url):
     """
     Is this backend able to bind to the given URL ?
     """
-    if url[:5] != "file:" and url[:7] != "sqlite:": return False
+    if url[:7] != "sqlite:": return False
 
     path, pkgid = _strip_url (url)
 
@@ -142,7 +142,7 @@ def bind (url, readonly=False, force=False):
         raise NotImplementedError ("This backend can not force access to "
                                    "locked package")
 
-    if url[:5] != "file:" and url[:7] != "sqlite:": return False
+    if url[:7] != "sqlite:": return False
 
     path, pkgid = _strip_url (url)
 
@@ -161,23 +161,20 @@ _DEFAULT_PKGID = ""
 
 def _strip_url (url):
     """
-    Strip URL from its scheme ("file:" or "sqlite:") and separate path and
+    Strip URL from its scheme ("sqlite:") and separate path and
     fragment.
     """
-    if url[0] == "f": # file:
-        scheme = 5
-    else: # sqlite:
-        scheme = 7
-    sharp = url.find('#')
-    if sharp != -1:
-        return url[scheme:sharp], url[sharp+1:]
+    scheme = 7
+    semicolon = url.find(';')
+    if semicolon != -1:
+        return url[scheme:semicolon], url[semicolon:]
     else:
         return url[scheme:], _DEFAULT_PKGID
 
 def _get_connection (path):
     try:
         cx = sqlite.connect (path)
-        c = cx.execute ("select version from Version")
+        c = cx.execute ("SELECT version FROM Version")
         for v in c:
             if v[0] != BACKEND_VERSION: return None
         return cx
@@ -190,11 +187,31 @@ def _get_connection (path):
 def _contains_package (cx, pkgid):
     if pkgid == _DEFAULT_PKGID:
         return True
-    c = cx.execute ("select id from Packages where id = ?", (pkgid,))
+    c = cx.execute ("SELECT id FROM Packages WHERE id = ?", (pkgid,))
     for i in c:
         return True
     return False
 
+def _split_id_ref (id_ref):
+    """
+    Slit an id_ref into a prefix and a suffix.
+    Return None prefix if id_ref is a plain id.
+    Raise an AssertionError if id_ref has length > 2.
+    """
+    colon = id_ref.find (":")
+    if colon <= 0:
+        return "", id_ref
+    prefix, suffix = id_ref[:colon], id_ref[colon+1:]
+    colon = suffix.find (":")
+    assert colon <= 0, "id-path has length > 2"
+    return prefix, suffix
+
+def _split_uri_ref (uri_ref):
+    """
+    Split a uri_ref into a URI and a fragment.
+    """
+    sharp = uri_ref.find("#")
+    return uri_ref[:sharp], uri_ref[sharp+1:]
 
 class _SqliteBackend (object):
 
@@ -208,6 +225,8 @@ class _SqliteBackend (object):
 
         self._path = path
         self._conn = conn
+        conn.create_function ("join_id_ref", 2,
+                              lambda p,s: p and "%s:%s" % (p,s) or s)
         conn.create_function ("regexp", 2,
                               lambda r,l: re.search(r,l) is not None )
         # NB: for a reason I don't know, the defined function receives the
@@ -225,7 +244,22 @@ class _SqliteBackend (object):
         except sqlite.OperationalError:
             pass
 
-   # creation
+    # package uri
+
+    def get_uri (self, package_id):
+        q = "SELECT uri FROM Packages WHERE id = ?"
+        return self._conn.execute (q, (package_id,)).fetchone()[0]
+
+    def update_uri (self, package_id, uri):
+        q = "UPDATE Packages SET uri = ? WHERE id = ?"
+        try:
+            self._conn.execute (q, (uri, package_id,))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not update", e)
+
+    # creation
 
     def _create_element_cursor (self, package_id, id, element_type):
         """
@@ -256,15 +290,16 @@ class _SqliteBackend (object):
         # assertions for debug
         assert (isinstance (begin, int) and begin >  0), begin
         assert (isinstance (  end, int) and   end >= begin), (begin, end)
-        # asserting that media is indeed the uuid-ref of an own or imported
-        # media is not trivial at all, so we just hope for the best ;)
+
+        p,s = _split_id_ref (media) # also assert that media has len<=2
+        assert p != "" or self.has_element(package_id, s, MEDIA), media
 
         try:
             c = self._create_element_cursor (package_id, id, ANNOTATION)
-            c.execute ("INSERT INTO Annotations VALUES (?,?,?,?,?)",
-                       (package_id, id, media, begin, end))
-            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", None))
+            c.execute ("INSERT INTO Annotations VALUES (?,?,?,?,?,?)",
+                       (package_id, id, p, s, begin, end))
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
+                       (package_id, id, "text/plain", "", "",""))
             self._conn.commit()
         except sqlite.Error, e:
             self._conn.rollback()
@@ -273,8 +308,8 @@ class _SqliteBackend (object):
     def create_relation (self, package_id, id):
         try:
             c = self._create_element_cursor (package_id, id, RELATION)
-            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
-                       (package_id, id, "", "", None))
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
+                       (package_id, id, "", "", "", ""))
             self._conn.commit()
         except sqlite.Error, e:
             self._conn.rollback()
@@ -283,8 +318,8 @@ class _SqliteBackend (object):
     def create_view (self, package_id, id):
         try:
             c = self._create_element_cursor (package_id, id, VIEW)
-            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", None))
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
+                       (package_id, id, "text/plain", "", "", ""))
             self._conn.commit()
         except sqlite.Error, e:
             self._conn.rollback()
@@ -293,8 +328,8 @@ class _SqliteBackend (object):
     def create_resource (self, package_id, id):
         try:
             c = self._create_element_cursor (package_id, id, RESOURCE)
-            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", None))
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
+                       (package_id, id, "text/plain", "", "", ""))
             self._conn.commit()
         except sqlite.Error, e:
             self._conn.rollback()
@@ -319,33 +354,24 @@ class _SqliteBackend (object):
     def create_query (self, package_id, id):
         try:
             c = self._create_element_cursor (package_id, id, QUERY)
-            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", None))
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
+                       (package_id, id, "text/plain", "", "", ""))
             self._conn.commit()
         except sqlite.Error, e:
             self._conn.rollback()
             raise InternalError ("error in creating",e)
         
-    def create_import (self, package_id, id, url, uuid):
+    def create_import (self, package_id, id, url, uri):
         try:
             c = self._create_element_cursor (package_id, id, IMPORT)
             c.execute ("INSERT INTO Imports VALUES (?,?,?,?)",
-                       (package_id, id, url, uuid))
+                       (package_id, id, url, uri))
             self._conn.commit()
         except sqlite.Error, e:
             self._conn.rollback()
             raise InternalError ("error in creating", e)
 
-     # retrieval
-
-    def get_uuid (self, package_id):
-        """
-        Return the internal uuid of the given package, or None.
-        """
-        q = "SELECT uuid FROM Packages WHERE id = ?"
-        for r in self._conn.execute (q, (package_id,)):
-            return r[0]
-        return None
+    # retrieval
 
     def has_element (self, package_id, id, element_type=None):
         """
@@ -432,8 +458,22 @@ class _SqliteBackend (object):
         assert (begin is None  or  begin_min is None and begin_max is None)
         assert (  end is None  or    end_min is None and   end_max is None)
 
-        q = """SELECT ?, package, id, media, fbegin, fend FROM Annotations
-               WHERE package in ("""
+        if media is not None:
+            media_alt = (media,)
+
+        q = "SELECT ?, a.package, a.id, " \
+            "       join_id_ref(media_p,media_i) as media, " \
+            "       fbegin, fend " \
+            "FROM Annotations a %s " \
+            "WHERE a.package in ("
+
+        if media_alt is not None:
+            q %= "JOIN Packages p ON a.package = p.id "\
+                 "LEFT JOIN Imports i " \
+                 "  ON a.package = i.package AND a.media_p = i.id"
+        else:
+            q %= ""
+
         args = [ANNOTATION,]
 
         for p in package_ids:
@@ -442,40 +482,45 @@ class _SqliteBackend (object):
         q += ")"
 
         if id is not None:
-            q += " AND id = ?"
+            q += " AND a.id = ?"
             args.append (id)
         if id_alt is not None:
-            q += " AND id IN ("
+            q += " AND a.id IN ("
             for i in id_alt:
                 q += "?,"
                 args.append(i)
             q += ")"
-        if media is not None:
-            q += " AND media = ?"
-            args.append (media)
+        # NB: media is managed as media_alt (cf. above)
         if media_alt is not None:
-            q += " AND media IN ("
-            for i in media_alt:
-                q += "?,"
-                args.append(i)
-            q += ")"
+            q += "AND ("
+            for m in media_alt:
+                media_u, media_i = _split_uri_ref (m)
+                q += "(media_i = ? " \
+                     " AND (" \
+                     "  (media_p = ''   AND  ? IN (p.uri, ?||a.package)) OR " \
+                     "  (media_p = i.id AND  ? IN (i.uri, i.url)) ) ) OR "
+                args.append (media_i)
+                args.append (media_u)
+                args.append ("sqlite:%s" % self._path)
+                args.append (media_u)
+            q += "0) "
         if begin is not None:
-            q += " AND fbegin = ?"
+            q += " AND a.fbegin = ?"
             args.append (begin)
         if begin_min is not None:
-            q += " AND fbegin >= ?"
+            q += " AND a.fbegin >= ?"
             args.append (begin_min)
         if begin_max is not None:
-            q += " AND fbegin <= ?"
+            q += " AND a.fbegin <= ?"
             args.append (begin_max)
         if end is not None:
-            q += " AND fend = ?"
+            q += " AND a.fend = ?"
             args.append (end)
         if end_min is not None:
-            q += " AND fend >= ?"
+            q += " AND a.fend >= ?"
             args.append (end_min)
         if end_max is not None:
-            q += " AND fend <= ?"
+            q += " AND a.fend <= ?"
             args.append (end_max)
 
         for i in self._conn.execute (q, args): yield i
@@ -519,15 +564,16 @@ class _SqliteBackend (object):
     def get_imports (self, package_ids,
                        id=None,   id_alt=None,
                       url=None,  url_alt=None,
-                     uuid=None, uuid_alt=None,
+                      uri=None,  uri_alt=None,
                     ):
         """
-        Yield tuples of the form (IMPORT, package_id, id, url, uuid).
+        Yield tuples of the form (IMPORT, package_id, id, url, uri).
         """
         assert ( id is None  or   id_alt is None)
         assert (url is None  or  url_alt is None)
+        assert (uri is None  or  uri_alt is None)
 
-        q = "SELECT ?, package, id, url, uuid FROM Imports " \
+        q = "SELECT ?, package, id, url, uri FROM Imports " \
             "WHERE package in ("
         args = [IMPORT,]
 
@@ -554,12 +600,12 @@ class _SqliteBackend (object):
                 q += "?,"
                 args.append(i)
             q += ")"
-        if uuid is not None:
-            q += " AND uuid = ?"
-            args.append (uuid)
-        if uuid_alt is not None:
-            q += " AND uuid IN ("
-            for i in uuid_alt:
+        if uri is not None:
+            q += " AND uri = ?"
+            args.append (uri)
+        if uri_alt is not None:
+            q += " AND uri IN ("
+            for i in uri_alt:
                 q += "?,"
                 args.append(i)
             q += ")"
@@ -604,16 +650,24 @@ class _SqliteBackend (object):
         In this implementation, element_type will always be ignored.
         """
         # TODO manage schema and url
-        q = """SELECT mimetype, data, schema FROM Contents
-               WHERE package = ? AND element = ?"""
+        q = "SELECT mimetype, data, join_id_ref(schema_p,schema_i) as schema " \
+            "FROM Contents " \
+            "WHERE package = ? AND element = ?"
         cur = self._conn.execute (q, (package_id, id,))
         return cur.fetchone() or None
 
     def update_content (self, package_id, id, mimetype, data, schema):
-        # TODO manage schema and url
-        q = """UPDATE Contents SET mimetype = ?, data = ?, schema = ?
-               WHERE package = ? AND element = ?"""
-        args = ( mimetype, data, schema, package_id, id,)
+        if len (schema) > 0:
+            p,s = _split_id_ref (schema) # also assert that schema has len<=2
+            assert p == "" or self.has_element(package_id,p,IMPORT), p
+            assert p != "" or self.has_element(package_id,s,RESOURCE), schema
+        else:
+            p,s = "",""
+
+        q = "UPDATE Contents "\
+            "SET mimetype = ?, data = ?, schema_p = ?, schema_i = ? "\
+            "WHERE package = ? AND element = ?"
+        args = ( mimetype, data, p, s, package_id, id,)
         cur = self._conn.execute (q, args)
         self._conn.commit()
 
@@ -677,7 +731,7 @@ class _SqliteBackend (object):
 
     # relation members
 
-    def insert_member (self, package_id, id, uuid_ref, pos):
+    def insert_member (self, package_id, id, member, pos):
         """
         Insert a member at the given position.
         ``pos`` may be any value between -1 and n (inclusive), where n is the
@@ -687,25 +741,29 @@ class _SqliteBackend (object):
         If non-negative, the member will be inserted at that position.
         """
         assert (-1 <= pos <= self.count_members (package_id, id))
+        assert (-1 <= pos <= self.count_members (package_id, id))
+
+        p,s = _split_id_ref (member) # also assert that member has len<=2
+        assert p != "" or self.has_element(package_id, s, ANNOTATION), member
 
         if pos == -1:
             pos = self.count_members (package_id, id)
 
         try:
             c = self._conn.cursor()
-            c.execute ("update RelationMembers set ord=ord+1 "
-                       "where package = ? and relation = ? and ord > ?",
+            c.execute ("UPDATE RelationMembers SET ord=ord+1 "
+                       "WHERE package = ? AND relation = ? AND ord > ?",
                        (package_id, id, pos))
-            c.execute ("insert into RelationMembers values (?,?,?,?)",
-                       (package_id, id, pos, uuid_ref))
+            c.execute ("INSERT INTO RelationMembers VALUES (?,?,?,?,?)",
+                       (package_id, id, pos, p, s))
             self._conn.commit()
         except sqlite.Error, e:
             self._conn.rollback()
             raise InternalError ("could not update or insert", e)
 
     def count_members (self, package_id, id):
-        q = "select count(ord) from RelationMembers "\
-            "where package = ? and relation = ?"
+        q = "SELECT count(ord) FROM RelationMembers "\
+            "WHERE package = ? AND relation = ?"
         return self._conn.execute (q, (package_id, id)).fetchone()[0]
 
     def get_member (self, package_id, id, pos):
@@ -717,20 +775,22 @@ class _SqliteBackend (object):
             c = self.count_members (package_id, id)
             pos += c
 
-        q = "select annotation from RelationMembers "\
-            "where package = ? and relation = ? and ord = ?"
+        q = "SELECT join_id_ref(member_p,member_i) AS member " \
+            "FROM RelationMembers "\
+            "WHERE package = ? AND relation = ? AND ord = ?"
         return self._conn.execute (q, (package_id, id, pos)).fetchone()[0]
 
     def iter_members (self, package_id, id):
-        q = "select annotation from RelationMembers "\
-            "where package = ? and relation = ? order by ord"
+        q = "SELECT join_id_ref(member_p,member_i) AS member " \
+            "FROM RelationMembers " \
+            "WHERE package = ? AND relation = ? ORDER BY ord"
         for r in self._conn.execute (q, (package_id, id)):
             yield r[0]
 
     def remove_member (self, package_id, id, pos):
         raise NotImplementedError
 
-    def get_relations_with_member (self, uuid_ref, package_ids, pos=None):
+    def get_relations_with_member (self, member, package_ids, pos=None):
         raise NotImplementedError
 
     # end of the class
