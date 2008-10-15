@@ -261,7 +261,7 @@ class ContentDataFile(object):
         self.seek = f.seek
         self.tell = f.tell
 
-        f.write(element._WithContentMixin__data)
+        f.write(element._WithContentMixin__data or "")
         f.seek(0)
 
     def _get_data(self):
@@ -272,6 +272,10 @@ class ContentDataFile(object):
         r = f.read()
         f.seek(pos)
         return r
+
+    def info(self):
+        mimetype = self._element._get_content_mimetype()
+        return {"content-type": mimetype,}
 
     def close(self):
         self._element._WithContentMixin__data = self._get_data()
