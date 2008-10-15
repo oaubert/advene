@@ -198,8 +198,6 @@ class Common:
             res.append(_("""
             <p>
             <a href="/admin">Server administration</a> |
-            <a href="/admin/status">Server status</a> |
-            <a href="/media">Media control</a> |
             <a href="%(path)s?mode=raw">Raw view</a>
             </p>
             Location: %(locationbar)s
