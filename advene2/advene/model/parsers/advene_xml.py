@@ -238,7 +238,7 @@ class _Parser(XmlParserBase):
     def handle_relation(self):
         id = self.get_attribute("id")
         elt = self.package.create_relation(id, "x-advene/none")
-        self.optional_sequence("members", elt, [0])
+        self.optional_sequence("members", elt)
         def update_content_info(mimetype, model, url):
             elt.content_mimetype = mimetype
             elt.content_model = model
@@ -304,20 +304,19 @@ class _Parser(XmlParserBase):
             elt.content_data = data
         return elt
 
-    def handle_member(self, relation, c):
-        # c is a 1-length list containing the virtual length of the list,
-        # i.e. the length counting the postponed elements
+    def handle_member(self, relation):
         a = self.get_attribute("id-ref")
         if ":" not in a:
             a = self.package.get(a)
         relation.append(a)
-        c[0] += 1
 
     def handle_item(self, lst, c):
-        # c is a 1-length list containing the virtual length of the list,
-        # i.e. the length counting the postponed elements
+        # c is a 1-item list containing the virtual length of the list,
+        # i.e. the length taking into account the postponed elements
+        # it is used to insert postponed elements at the right index
         id = self.get_attribute("id-ref")
-        self.do_or_postpone(id, lambda e: lst.insert(c[0], e))
+        self.do_or_postpone(id, lst.append,
+                                lambda e,p=c[0]: lst.insert(p,e))
         c[0] += 1
 
     def handle_element(self, advene_tag):
