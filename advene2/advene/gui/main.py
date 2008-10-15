@@ -2649,8 +2649,8 @@ class AdveneGUI(Connect):
         """Save the current package."""
         if package is None:
             package=self.controller.package
-        if (package.uri == ""
-            or package.uri.endswith('new_pkg')):
+        if (package.url == ""
+            or package.url.endswith('new_pkg')):
             self.on_save_as1_activate (package=package)
         else:
             # Save the current workspace
