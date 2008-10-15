@@ -91,6 +91,68 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
             c = parent.get(c)
         return r
 
+    def iter_references(self, package=None, inherited=True):
+        """
+        Iter over all references that are made to this element.
+
+        A reference is represented by a tuple of the form
+        * ('item', relation_or_list)
+        * ('meta', package_or_element, key)
+        * ('tagged', package, tag)
+        * ('tagging', package, element) -- for tags only
+        * (attribute_name, other_element)
+
+        References are searched in the given package, and recursively in
+        imported packages if ``inherited`` is True.
+
+        If ``package`` is None, the ``package`` session variable is used. If
+        latter is not defined, a TypeError is raised.
+        """
+        if package is None:
+            package = session.package
+        if package is None:
+            raise TypeError("no package set in session, must be specified")
+
+        o = self._owner
+        typ = self.ADVENE_TYPE
+        if inherited:
+            grp = package.all
+            backends_dict = {o._backend:{o._id: o}}
+        else:
+            grp = package.own
+            backends_dict = o._backends_dict
+        # meta references
+        for be, pdict in backends_dict.items():
+            for (p,e,k) in be.iter_meta_refs(pdict,
+                                             self.uriref, self.ADVENE_TYPE):
+                p = pdict[p]
+                if e: e = p.get(e)
+                yield ("meta", e or p, k)
+        # tags
+        for t in self.iter_my_tags(package, inherited):
+            yield ("tagged", t)
+        # tagged elements
+        if typ is TAG:
+            for e in self.iter_elements(package, inherited):
+                yield ("tagging", e)
+        # lists
+        for L in grp.iter_lists(item=self):
+            yield ("item", L)
+        # relation
+        if self.ADVENE_TYPE is ANNOTATION:
+            for r in grp.iter_relations(member=self):
+                yield ("item", r)
+        # media
+        if self.ADVENE_TYPE is MEDIA:
+            for a in grp.iter_annotations(media=self):
+                yield ("media", a)
+        # content_model
+        if self.ADVENE_TYPE is RESOURCE:
+            for be, pdict in backends_dict.items():
+                for (p,e) in be.iter_contents_with_model(pdict):
+                    e = pdict[p].get(e)
+                    yield ("content_model", e)
+
     def delete(self):
         self._owner._backend.delete_element(self._owner._id, self._id,
                                             self.ADVENE_TYPE)

@@ -49,13 +49,13 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
             for i in be.iter_tags(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)
 
-    def iter_lists(self, _guard=True):
+    def iter_lists(self, item=None, position=None, _guard=True):
         """
         This method is inherited from CoreAllGroup but is unsafe on
         cam.Package. Use instead `iter_user_lists`.
         """
-        if _guard: warn("use iter_user_schemas instead", UnsafeUseWarning, 2)
-        return super(_AllGroup, self).iter_lists()
+        if _guard: warn("use iter_user_lists instead", UnsafeUseWarning, 2)
+        return super(_AllGroup, self).iter_lists(item=item, position=position)
 
     def iter_user_lists(self):
         o = self._owner
@@ -144,13 +144,13 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
           meta=[(CAMSYS_TYPE, "relation-type", False)]):
             yield o.get_element(i)
 
-    def iter_lists(self, _guard=True):
+    def iter_lists(self, item=None, position=None, _guard=True):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
         cam.Package. Use instead `iter_user_lists`.
         """
         if _guard: warn("use iter_user_lists instead", UnsafeUseWarning, 2)
-        return super(_OwnGroup, self).iter_lists()
+        return super(_OwnGroup, self).iter_lists(item=item, position=position)
 
     def iter_user_lists(self):
         o = self._owner
