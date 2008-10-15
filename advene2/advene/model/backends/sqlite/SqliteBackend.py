@@ -4,71 +4,152 @@ I am the reference API for advene backends.
 
 from pysqlite2 import dbapi2 as sqlite
 from os.path   import exists, isdir, join, split
+from uuid      import uuid4
+from weakref   import WeakValueDictionary
 
-from advene.model.core.PackageElement import STREAM, ANNOTATION, RELATION, VIEW, RESOURCE, BAG, QUERY, IMPORT
+import re
 
-class SqliteBackend (object):
-    @staticmethod
-    def claims_for_create (url):
-        """
-        Is this backend able to create a package to the given URL ?
-        """
-        if url[:7] != "sqlite:": return False
-        url = url[7:]
+from advene.model.core.PackageElement import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
 
-        if url == ":memory:": return True
+BACKEND_VERSION = "0.1"
 
-        if exists (url): return False
+
+def claims_for_create (url):
+    """
+    Is this backend able to create a package to the given URL ?
+    """
+    if url[:7] != "sqlite:": return False
+
+    path, pkgid = _strip_url (url)
+
+    if not exists (url):
+        # check that file can be created
         url = split (url)[0]
         if not isdir (url): return False
         return True
+    else:
+        # check that file is a correct database (created by this backend)
+        cx = _get_connection (path)
+        if cx is None: return False
+        # check that file does not already contains the required pkg
+        r = not _contains_package (cx, pkgid)
+        cx.close()
+        return r
 
-    @staticmethod
-    def create (url):
-        """
-        Create a SqliteBackend instance for a new URL which will be created.
-        """
-        assert (SqliteBackend.claims_for_create (url))
+def create (url):
+    """
+    Create a _SqliteBackend instance for a new URL which will be created.
 
-        conn = sqlite.connect (url[7:])
-        f = open (join (split (__file__)[0], "init.sql"))
-        sql = f.read()
-        f.close()
-        for query in sql.split(";"):
-            conn.execute (query)
-        return SqliteBackend (conn, False, False)
+    Return
+    """
+    assert (_SqliteBackend.claims_for_create (url))
 
-    @staticmethod
-    def claims_for_bind (url):
-        """
-        Is this backend able to bind to the given URL ?
-        """
-        if url[:7] != "sqlite:": return False
-        url = url[7:]
+    path, pkgid = _strip_url (url)
 
-        if url == ":memory:": return False
+    b = _cache.get (path)
+    if b is None:
+        # check the following *before* sqlite.connect creates the file!
+        must_init = (path == ":memory:" or not exists path)
+        conn = sqlite.connect (path)
+        if must_init:
+            # initialize database
+            f = open (join (split (__file__)[0], "init.sql"))
+            sql = f.read()
+            f.close()
+            for query in sql.split(";"):
+                conn.execute (query)
+            conn.execute ("INSERT INTO Version VALUES (?)", BACKEND_VERSION)
+            conn.execute ("INSERT INTO Packages VALUES (?,?)",
+                          pkgid, uuid4(),)
+            if pkgid != DEFAULT_PKDID:
+                conn.execute ("INSERT INTO Packages VALUES (?)",
+                              pkgid, uuid4(),)
+            conn.commit()
 
-        try:
-            conn = sqlite.connect (url)
-            conn.close()
-        except sqlite.OperationalError:
-            return False
+        b = _SqliteBackend (conn, False, False)
+        _cache[path] = b
+
+    return b, pkgid
+
+def claims_for_bind (url):
+    """
+    Is this backend able to bind to the given URL ?
+    """
+    if url[:7] != "sqlite:": return False
+
+    path, pkgid = _strip_url (url)
+
+    if not exists (url):
+        return False
+    else:
+        # check that file is a correct database (created by this backend)
+        cx = _get_connection (path)
+        if cx is None: return False
+        # check that file does contains the required pkg
+        r = _contains_package (cx, pkgid)
+        cx.close()
+        return r
+
+def bind (url, readonly=False, force=False):
+    """
+    Create a _SqliteBackend instance from the existing URL.
+    @param url: the URL to open
+    @param readonly: should the package be open in read-only mode?
+    @param force: should the package be open even if it is locked?
+    """
+    assert (_SqliteBackend.claims_for_bind (url))
+    if force:
+        raise Exception ("This backend can not force access to locked "
+                         "package")
+
+    if url[:7] != "sqlite:": return False
+
+    path, pkgid = _strip_url (url)
+
+    b = _cache.get (path)
+    if b is None:
+        conn = sqlite.connect (path)
+        b = _SqliteBackend (conn, False, False)
+        _cache[path] = b
+
+    return b, pkgid
+
+
+_cache = WeakValueDictionary()
+
+_DEFAULT_PKGID = ""
+
+def _strip_url (url):
+    """
+    Strip URL from its scheme ("sqlite:") and separate path and fragment.
+    """
+    sharp = url.find('#')
+    if sharp != -1:
+        return url[7:-sharp], url[sharp+1:]
+    else:
+        return url[7:], DEFAULT_PKDID
+
+def _get_connection (path):
+    try:
+        cx = sqlite.content (path)
+        c = cx.execute ("select version from Version")
+        for v in c:
+            if v[0] != BACKEND_VERSION: return None
+        return cx
+        
+    except sqlite.OperationalError:
+        return None
+
+def _contains_package (cx, pkgid):
+    if pkgid == DEFAULT_PKDID:
         return True
+    c = cx.execute ("select id from Packages where id = ?", pkgid)
+    for i in c:
+        return True
+    return False
 
-    @staticmethod
-    def bind (url, readonly=False, force=False):
-        """
-        Create a SqliteBackend instance from the existing URL.
-        @param url: the URL to open
-        @param readonly: should the package be open in read-only mode?
-        @param force: should the package be open even if it is locked?
-        """
-        assert (SqliteBackend.claims_for_bind (url))
-        if force:
-            raise Exception ("This backend can not force access to locked "
-                             "package")
-        conn = sqlite.connect (url[7:])
-        return SqliteBackend (conn, readonly, force)
+
+class _SqliteBackend (object):
 
     def __init__ (self, conn, readonly, force):
         """
@@ -79,242 +160,423 @@ class SqliteBackend (object):
         """
 
         self._conn = conn
+        conn.create_function ("regexp", 2,
+                              lambda l,r: re.search(r,l) is not None
         self._readonly = readonly
 
     def close (self):
         self._conn.close()
 
+     # retrieval
 
-     # ids retrieval
+    def has_element (self, package_id, id, element_type=None):
+        """
+        Return True if the given package has an element with the given id.
+        If element_type is provided, only return true if the element has the
+        the given type.
+        """
+        q = "SELECT typ FROM Elements WHERE package = ? and id = ?"
+        for i in self._conn.execute (q, package_id, id):
+            return element_type is None or i[0] == element_type
+        return False
 
-    def get_annotation_ids (self):
-        "Guarantees that annotations are sorted by begin, end, stream"
-        c = self._conn.execute ("select id from Annotations order by fbegin, fend, stream")
-        for a in c: yield a[0]
+    def get_element (self, package_id, id):
+        """
+        Return the tuple describing a given element, None if that element does
+        not exist.
+        """
 
-    def get_relation_ids (self):
-        c = self._conn.execute ("select id from Relations")
-        for a in c: yield a[0]
+        q = "SELECT typ FROM Elements WHERE package = ? AND id = ?"
+        l = list (self._conn.execute (q, package_id, id))
+        if len (l) == 0:
+            return None
+        t = l[0][0]
+        if t == MEDIA:
+            return get_medias (id=id).next()
+        elif t == ANNOTATION:
+            return get_annotations (id=id).next()
+        elif t == IMPORT:
+            return get_imports (id=id).next()
+        else:
+            return (t, id)
 
-    def get_query_ids (self):
-        c = self._conn.execute ("select id from Queries")
-        for a in c: yield a[0]
+    def get_medias (self, package_ids,
+                     id=None,  id_regexp=None,
+                    url=None, url_regexp=None,
+                   ):
+        """
+        Yield tuples of the form (MEDIA, id, url;).
+        """
+        assert ( id is None  or   id_regexp is None)
+        assert (url is None  or  url_regexp is None)
 
-    def get_bag_ids (self):
-        c = self._conn.execute ("select id from Bags")
-        for a in c: yield a[0]
+        q = "SELECT ?, id, url FROM Medias WHERE package in ("
+        args = [MEDIA,]
 
-    def get_import_ids (self):
-        c = self._conn.execute ("select id from Imports")
-        for a in c: yield a[0]
+        for p in package_ids:
+            q += "?,"
+            args.append (p)
+        q += ")"
 
-    def get_view_ids (self):
-        c = self._conn.execute ("select id from Views")
-        for a in c: yield a[0]
+        if id is not None:
+            q += " AND id = ?"
+            args.append (id)
+        if id_regexp is not None:
+            q += " AND id REGEXP ?"
+            args.append (id_regexp)
+        if url is not None:
+            q += " AND url = ?"
+            args.append (url)
+        if url_regexp is not None:
+            q += " AND url REGEXP ?"
+            args.append (url_regexp)
 
-    def get_resource_ids (self):
-        c = self._conn.execute ("select id from Resources")
-        for a in c: yield a[0]
+        for i in self._conn.execute (q, args): yield i
 
-    def get_imports (self):
-        c = self._conn.execute ("select id, url from Imports")
-        return iter (c)
+    def get_annotations (self, package_ids,
+                            id=None,    id_regexp=None,
+                         media=None, media_regexp=None,
+                         begin=None,    begin_min=None, begin_max=None,
+                           end=None,      end_min=None,   end_max=None,
+                        ):
+        """
+        Yield tuples of the form (ANNOTATION, id, media, begin, end,).
+        """
+        assert (   id is None  or     id_regexp is None)
+        assert (media is None  or  media_regexp is None)
+        assert (begin is None  or  begin_min is None and begin_max is None
+        assert (  end is None  or    end_min is None and   end_max is None
 
+        q = """SELECT ?, id, media, fbegin, fend FROM Annotations
+               WHERE package in ("""
+        args = [ANNOTATION,]
 
-    # creation
+        for p in package_ids:
+            q += "?,"
+            args.append (p)
+        q += ")"
 
-    def _create_element_cursor (self, id):
+        if id is not None:
+            q += " AND id = ?"
+            args.append (id)
+        if id_regexp is not None:
+            q += " AND id REGEXP ?"
+            args.append (id_regexp)
+        if media is not None:
+            q += " AND media = ?"
+            args.append (media)
+        if media_regexp is not None:
+            q += " AND media regexp = ?"
+            args.append (media_regexp)
+        if begin is not None:
+            q += " AND fbegin = ?"
+            args.append (begin)
+        if begin_min is not None:
+            q += " AND fbegin >= ?"
+            args.append (begin_min)
+        if begin_max is not None:
+            q += " AND fbegin <= ?"
+            args.append (begin_max)
+        if end is not None:
+            q += " AND fend = ?"
+            args.append (end)
+        if end_min is not None:
+            q += " AND fend >= ?"
+            args.append (end_min)
+        if end_max is not None:
+            q += " AND fend <= ?"
+            args.append (end_max)
+
+        for i in self._conn.execute (q, args): yield i
+
+    def get_relations (self, package_ids, id=None, id_regexp=None):
+        """
+        Yield tuples of the form (RELATION, id,).
+        """
+        return self._get_simple_elements (package_ids, RELATION, id, id_regexp)
+
+    def get_views (self, package_ids, id=None, id_regexp=None):
+        """
+        Yield tuples of the form (VIEW, id,).
+        """
+        return self._get_simple_elements (package_ids, VIEW, id, id_regexp)
+
+    def get_resources (self, package_ids, id=None, id_regexp=None):
+        """
+        Yield tuples of the form (RESOURCE, id,).
+        """
+        return self._get_simple_elements (package_ids, RESOURCE, id, id_regexp)
+
+    def get_tags (self, package_ids, id=None, id_regexp=None):
+        """
+        Yield tuples of the form (TAG, id,).
+        """
+        return self._get_simple_elements (package_ids, TAG, id, id_regexp)
+
+    def get_lists (self, package_ids, id=None, id_regexp=None):
+        """
+        Yield tuples of the form (LIST, id,).
+        """
+        return self._get_simple_elements (package_ids, LIST, id, id_regexp)
+
+    def get_querys (self, package_ids, id=None, id_regexp=None):
+        """
+        Yield tuples of the form (QUERY, id,).
+        """
+        return self._get_simple_elements (package_ids, QUERY, id, id_regexp)
+
+    def get_imports (self, package_ids,
+                       id=None,  id_regexp=None,
+                      url=None, url_regexp=None,
+                     uuid=None,
+                    ):
+        """
+        Yield tuples of the form (IMPORT, id, url, uuid).
+        """
+        assert ( id is None  or   id_regexp is None)
+        assert (url is None  or  url_regexp is None)
+
+        q = "SELECT ?, id, url, uuid FROM Imports WHERE package in ("
+        args = [IMPORT,]
+
+        for p in package_ids:
+            q += "?,"
+            args.append (p)
+        q += ")"
+
+        if id is not None:
+            q += " AND id = ?"
+            args.append (id)
+        if id_regexp is not None:
+            q += " AND id REGEXP ?"
+            args.append (id_regexp)
+        if url is not None:
+            q += " AND url = ?"
+            args.append (url)
+        if url_regexp is not None:
+            q += " AND url REGEXP ?"
+            args.append (url_regexp)
+        if uuid is not None:
+            q += " AND uuid = ?"
+            args.append (uuid)
+
+        for i in self._conn.execute (q, args): yield i
+
+    def _get_simple_elements (self, package_ids, element_type,
+                              id=None, id_regexp=None):
+        """
+        Yield tuples of the form (element_type, id,).
+        Useful for all elements that have that form of tuple.
+        """
+        assert (id is None  or  id_regexp is None)
+
+        q = "SELECT typ, id FROM Elements WHERE package in ("
+        args = []
+
+        for p in package_ids:
+            q += "?,"
+            args.append (p)
+        q += ")"
+
+        q += " AND typ = ?"
+        args.append (element_type)
+
+        if id is not None:
+            q += " AND id = ?"
+            args.append (id)
+        if id_regexp is not None:
+            q += " AND id REGEXP ?"
+            args.append (id_regexp)
+
+        for i in self._conn.execute (q, args): yield i
+
+    # content
+
+    def get_content (self, package_id, id, element_type):
+        """
+        In this implementation, element_type will always be ignored.
+        """
+        # TODO manage schema and url
+        q = """SELECT mimetype, data FROM Contents
+               WHERE package = ? AND element = ?"""
+        cur = self._conn.execute (q, package_id, id)
+        return cur.fetchone() or (None, None)
+
+    def update_content (self, package_id, content):
+        # TODO manage schema and url
+        q = """UPDATE Contents SET mimetype = ?, data = ?
+               WHERE package = ? AND element = ?"""
+        args = (
+            content.mimetype,
+            content.data,
+            package_id,
+            content.owner_element.id,
+        )
+        cur = self._conn.execute (q, args)
+        self._conn.commit()
+
+    # meta-data
+
+    def iter_meta (self, package_id, id, element_type, key):
+        """
+        Iter over the metadata, sorting keys in alphabetical order.
+
+        In this implementation, element_type will always be ignored.
+        """
+        q = """SELECT key, value FROM Meta
+               WHERE package = ? AND element = ? ORDER BY key"""
+        c = self._conn.execute (q, (package_id, id))
+        d = c.fetchone()
+        while d is not None:
+            yield d[0],d[1]
+            d = c.fetchone()
+
+    def get_meta (self, package_id, id, element_type, key):
+        """
+        id should be an empty string if package metadata is required,
+        and element_type will be ignored.
+
+        In this implementation, element_type will always be ignored.
+        """
+        q = """SELECT value FROM Meta
+               WHERE package = ? AND element = ? AND KEY = ?"""
+        c = self._conn.execute (q, (package_id, id, key))
+        d = c.fetchone()
+        if d is None: return None
+        else:         return d[0]
+
+    def set_meta (self, package_id, id, element_type, key, val):
+        """
+        id should be an empty string if package metadata is required,
+        and element_type will be ignored.
+
+        In this implementation, element_type will always be ignored.
+        """
+        q = """SELECT value FROM Meta
+               WHERE package = ? AND element = ? and key = ?"""
+        c = self._conn.execute (q, (package_id, id, key))
+        d = c.fetchone()
+
+        if d is None:
+            if val is not None:
+                q = """INSERT INTO Meta (package, element, key, value)
+                       VALUES (?,?,?,?)"""
+                self._conn.execute (q, (package_id, id, key, val))
+        else:
+            if val is not None:
+                q = """UPDATE Meta SET value = ?
+                       WHERE package = ? AND element = ? AND key = ?"""
+                self._conn.execute (q, (val, package_id, id, key))
+            else:
+                q = """DELETE FROM Meta
+                       WHERE package = ? AND element = ? AND key = ?"""
+                self._conn.execute (q, (package_id, id, key))
+        self._conn.commit()
+
+   # creation
+
+    def _create_element_cursor (self, package_id, id, element_type):
         """
         Makes common control and return the cursor to be used.
         Starts a transaction that must be commited by caller.
         """
         c = self._conn.cursor()
         # check that the id is not in use
-        c.execute ("select id from Elements where id=?", (id,))
-        assert (c.fetchone() is None)
+        c.execute ("SELECT id FROM Elements WHERE package = ? AND id = ?",
+                   (package_id, id,))
+        if c.fetchone() is not None:
+            raise Exception, "id in use"
+            # TODO use a specific Exception class
+        c.execute ("INSERT INTO Elements VALUES (?,?,?)",
+                   (package_id, id, element_type))
+        return c
+
+    def create_media (self, package_id, id, uri):
         try:
-            c.execute ("insert into Elements(id) values (?)", (id,))
-            return c
+            c = self._create_element_cursor (package_id, id, MEDIA)
+            c.execute ("INSERT INTO Medias VALUES (?,?,?)",
+                       (package_id, id, uri))
+            self._conn.commit()
         except sqlite.Error:
             self._conn.rollback()
+            raise Exception, "could not insert"
+            # TODO use a specific Exception class
 
-    def create_stream (self, id, uri):
+    def create_annotation (self, package_id, id, media, begin, end):
         try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Streams(id,url) values (?,?)", (id, uri))
+            c = self._create_element_cursor (package_id, id, ANNOTATION)
+            c.execute ("INSERT INTO Annotations VALUES (?,?,?,?,?)",
+                       (package_id, id, media, begin, end))
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?)",
+                       (package_id, id, "text/plain", ""))
+            self._conn.commit()
         except sqlite.Error:
             self._conn.rollback()
-        self._conn.commit()
+            raise Exception, "could not insert"
+            # TODO use a specific Exception class
 
-    def create_annotation (self, id, sid, begin, end):
+    def create_relation (self, package_id, id):
         try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Annotations(id,stream,fbegin,fend) values (?,?,?,?)",
-                       (id, sid, begin, end))
-            c.execute ("insert into Contents(element,mimetype,data) values (?,?,?)",
-                       (id, "text/plain", ""))
+            c = self._create_element_cursor (package_id, id, RELATION)
+            self._conn.commit()
         except sqlite.Error:
             self._conn.rollback()
-        self._conn.commit()
+            raise Exception, "error in creating"
+            # TODO use a specific class of Exception
 
-    def create_relation (self, id):
+    def create_view (self, package_id, id):
         try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Relations(id) values (?)", (id,))
+            c = self._create_element_cursor (package_id, id, VIEW)
+            self._conn.commit()
         except sqlite.Error:
             self._conn.rollback()
-        self._conn.commit()
+            raise Exception, "error in creating"
+            # TODO use a specific class of Exception
 
-    def create_bag (self, id):
+    def create_resource (self, package_id, id):
         try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Bags(id) values (?)", (id,))
+            c = self._create_element_cursor (package_id, id, RESOURCE)
+            self._conn.commit()
         except sqlite.Error:
             self._conn.rollback()
-        self._conn.commit()
+            raise Exception, "error in creating"
+            # TODO use a specific class of Exception
 
-    def create_import (self, id, uri):
+    def create_tag (self, package_id, id):
         try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Streams(id,url) values (?,?)", (id, uri))
+            c = self._create_element_cursor (package_id, id, TAG)
+            self._conn.commit()
         except sqlite.Error:
             self._conn.rollback()
-        self._conn.commit()
+            raise Exception, "error in creating"
+            # TODO use a specific class of Exception
 
-    def create_query (self, id):
+    def create_list (self, package_id, id):
         try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Queries(id) values (?)", (id,))
-            c.execute ("insert into Contents(element,mimetype,data) values (?,?,?)",
-                       (id, "text/plain", ""))
+            c = self._create_element_cursor (package_id, id, LIST)
+            self._conn.commit()
         except sqlite.Error:
             self._conn.rollback()
-        self._conn.commit()
+            raise Exception, "error in creating"
+            # TODO use a specific class of Exception
 
-    def create_view (self, id):
+    def create_query (self, package_id, id):
         try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Views(id) values (?)", (id,))
-            c.execute ("insert into Contents(element,mimetype,data) values (?,?,?)", (id, "text/plain", ""))
+            c = self._create_element_cursor (package_id, id, QUERY)
+            self._conn.commit()
         except sqlite.Error:
             self._conn.rollback()
-        self._conn.commit()
+            raise Exception, "error in creating"
+            # TODO use a specific class of Exception
 
-    def create_resource (self, id):
+    def create_import (self, package_id, id, uri, uuid):
         try:
-            c = self._create_element_cursor (id)
-            c.execute ("insert into Resources(id) values (?)", (id,))
-            c.execute ("insert into Contents(element,mimetype,data) values (?,?,?)", (id, "text/plain", ""))
+            c = self._create_element_cursor (package_id, id, IMPORT)
+            c.execute ("INSERT INTO Imports VALUES (?,?,?,?)",
+                       (package_id, id, uri, uuid))
+            self._conn.commit()
         except sqlite.Error:
             self._conn.rollback()
-        self._conn.commit()
+            raise Exception, "error in creating"
+            # TODO use a specific class of Exception
 
-    # retrieval
-
-    def construct_element (self, id):
-        # TODO would it be better to let the caller specify the type of element
-        # or would it be wise to store in table Elements the type of element?
-
-        # TODO adjuts parameters (queries on views and bags, etc.)
-
-        c = self._conn.cursor()
-        c.execute ("select id, url from Streams where id = ?", (id,))
-        d = c.fetchone ()
-        if d is not None: return STREAM, (d[1],)
-
-        c.execute (
-            "select id,stream,fbegin,fend from Annotations where id = ?",
-            (id,),
-        )
-        d = c.fetchone ()
-        if d is not None: return ANNOTATION, (d[1], d[2], d[3])
-
-        c.execute ("select id from Relations where id = ?", (id,))
-        d = c.fetchone ()
-        if d is not None: return RELATION, ()
-
-        c.execute ("select id from Views where id = ?", (id,))
-        d = c.fetchone ()
-        if d is not None: return VIEW, ()
-
-        c.execute ("select id from Resources where id = ?", (id,))
-        d = c.fetchone ()
-        if d is not None: return RESOURCE, ()
-
-        c.execute ("select id from Queries where id = ?", (id,))
-        d = c.fetchone ()
-        if d is not None: return QUERY, ()
-
-        c.execute ("select id from Bags where id = ?", (id,))
-        d = c.fetchone ()
-        if d is not None: return BAG, ()
-
-        c.execute ("select id,url from Imports where id = ?", (id,))
-        d = c.fetchone ()
-        if d is not None: return IMPORT, (d[1],)
-
-    # content
-
-    def get_content (self, id, element_type):
-        """
-        In this implementation, element_type will always be ignored.
-        """
-        # TODO manage schema and url
-        cur = self._conn.execute (
-            "select mimetype,data from Contents where element = ?",
-            (id,),
-        )
-        return cur.fetchone() or (None, None)
-
-    def update_content (self, content):
-        # TODO manage schema and url
-        cur = self._conn.execute (
-            "update Contents set mimetype=?, data=? where element=?",
-            (content.mimetype, content.data, content.owner_element.id),
-        )
-        self._conn.commit()
-
-    # meta-data
-
-    def iter_meta (self, id, element_type, key):
-        """
-        Iter over the metadata, sorting keys in alphabetical order.
-
-        In this implementation, element_type will always be ignored.
-        """
-        c = self._conn.execute ("select key, value from Meta where element = ? order by key", (id,))
-        d = c.fetchone()
-        while d is not None:
-            yield d[0],d[1]
-            d = c.fetchone()
-
-    def get_meta (self, id, element_type, key):
-        """
-        id should be an empty string if package metadata is required, and element_type will be ignored.
-
-        In this implementation, element_type will always be ignored.
-        """
-        c = self._conn.execute ("select value from Meta where element = ? and key = ?", (id, key))
-        d = c.fetchone()
-        if d is None: return None
-        else:         return d[0]
-
-    def set_meta (self, id, element_type, key, val):
-        """
-        id should be an empty string if package metadata is required, and element_type will be ignored.
-
-        In this implementation, element_type will always be ignored.
-        """
-        c = self._conn.execute ("select value from Meta where element = ? and key = ?", (id, key))
-        d = c.fetchone()
-
-        if d is None:
-            if val is not None:
-                self._conn.execute ("insert into Meta (element, key, value) values (?,?,?)",
-                                    (id, key, val))
-        else:
-            if val is not None:
-                self._conn.execute ("update Meta set value=? where element=? and key=?", (val, id, key))
-            else:
-                self._conn.execute ("delete from Meta where element=? and key=?", (id, key))
-        self._conn.commit()

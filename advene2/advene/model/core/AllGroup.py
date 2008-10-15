@@ -17,9 +17,9 @@ class AllGroup (object):
         return True
 
     @property
-    def streams (self):
-        return chain ( self._owner._own.streams,
-                       *[ imp._all.streams
+    def medias (self):
+        return chain ( self._owner._own.medias,
+                       *[ imp._all.medias
                           for imp in self._owner._imports_dict.itervalues() ] )
 
     @property

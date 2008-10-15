@@ -18,14 +18,15 @@ from WithMetaMixin import WithMetaMixin
 
 # the following constants must be used as values of a property ADVENE_TYPE
 # in all subclasses of PackageElement
-STREAM     = 1
-ANNOTATION = 2
-RELATION   = 3
-BAG        = 4
-IMPORT     = 5
-QUERY      = 6
-VIEW       = 7
-RESOURCE   = 8
+MEDIA      = 'm'
+ANNOTATION = 'a'
+RELATION   = 'r'
+TAG        = 't'
+LIST       = 'l'
+IMPORT     = 'i'
+QUERY      = 'q'
+VIEW       = 'v'
+RESOURCE   = 'R'
 
 class PackageElement (object, WithMetaMixin):
 

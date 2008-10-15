@@ -3,13 +3,14 @@ from weakref import WeakValueDictionary
 from advene import RAISE
 from advene.model.backends import iter_backends
 
-from PackageElement import STREAM, ANNOTATION, RELATION, BAG, IMPORT, QUERY, VIEW, RESOURCE 
-from Stream import Stream
+from PackageElement import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE 
+from Media import Media
 from Annotation import Annotation
 from Relation import Relation
 from View import View
 from Resource import Resource
-from Bag import Bag
+from Tag import Tag
+from List import List
 from Query import Query
 from Import import Import
 from AllGroup import AllGroup
@@ -18,12 +19,13 @@ from OwnGroup import OwnGroup
 from WithMetaMixin import WithMetaMixin
 
 _constructor = {
-    STREAM: Stream,
+    MEDIA: Media,
     ANNOTATION: Annotation,
     RELATION: Relation,
     VIEW: View,
     RESOURCE: Resource,
-    BAG: Bag,
+    TAG: Tag,
+    LIST: List,
     QUERY: Query,
     IMPORT: Import,
 }
@@ -118,9 +120,9 @@ class Package (object, WithMetaMixin):
         "will be wrapped by the WithMetaMixin"
         self._backend.set_meta ("", None, key, val)
 
-    def create_stream (self, id, uri):
-        self._backend.create_stream (id, uri)
-        return Stream (self, id, uri)
+    def create_media (self, id, uri):
+        self._backend.create_media (id, uri)
+        return Media (self, id, uri)
 
     def create_annotation (self, id, sid, begin, end=None):
         if end is None:
@@ -145,9 +147,13 @@ class Package (object, WithMetaMixin):
         self._imports_dict[id] = uri
         return Import (self, id, uri)
 
-    def create_bag (self, id):
-        self._backend.create_bag (id)
-        return Bag (self, id)
+    def create_tag (self, id):
+        self._backend.create_tag (id)
+        return Tag (self, id)
+
+    def create_list (self, id):
+        self._backend.create_list (id)
+        return List (self, id)
 
     def create_query (self, id):
         self._backend.create_query (id)

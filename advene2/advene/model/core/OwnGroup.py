@@ -15,9 +15,9 @@ class OwnGroup (object):
         return elements in self._owner._elements
 
     @property
-    def streams (self):
+    def medias (self):
         o = self._owner
-        for id in o._backend.get_stream_ids():
+        for id in o._backend.get_media_ids():
             yield o.get_element (id)
 
     @property

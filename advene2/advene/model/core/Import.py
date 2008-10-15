@@ -16,8 +16,8 @@ class Import (PackageElement):
         return element in self._imported._all
 
     @property
-    def streams (self):
-        return self._imported._all.streams
+    def medias (self):
+        return self._imported._all.medias
 
     @property
     def annotations (self):
