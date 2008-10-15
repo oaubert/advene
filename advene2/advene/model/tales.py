@@ -1,5 +1,7 @@
 from simpletal import simpleTALES
 
+AdveneTalesException=simpleTALES.PathNotFoundException
+
 def tales_full_path_function(f):
     """
     Decorator for TALES full-path-functions.
