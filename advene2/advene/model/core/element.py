@@ -118,6 +118,8 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
             default = None
         else: # yield_idrefs is false
             default = _RAISE
+        # cleaning the owner is required to have URI-refs in sync with backend
+        self._owner.clean()
         u = self._get_uriref()
         if not inherited:
             pids = (package._id,)
