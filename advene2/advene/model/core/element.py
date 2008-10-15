@@ -577,6 +577,10 @@ class ElementCollection(object):
         self._owner = owner_package
 
     def __eq__(self, other):
+        try:
+            o=tuple(other)
+        except TypeError:
+            return False
         return tuple(self) == tuple(other)
 
     def __iter__(self):
