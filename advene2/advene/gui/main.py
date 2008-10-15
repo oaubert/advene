@@ -454,7 +454,7 @@ class AdveneGUI(object):
                  None) ] + [
                 (_("Annotations of type %s") % self.controller.get_title(at),
                  # FIXME: invalid expression here. We should use iter_elements(p)
-                 'here/all/annotation_types/%s/annotations' % at.id) for at in self.controller.package.all.annotation_types ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags') ]
+                 'here/all/annotation_types/%s/annotations' % at.id) for at in self.controller.package.all.annotation_types ] + [ (_("Views"), 'here/all/views'), (_("Tags"), 'tags') ]
             for (label, expression) in l:
                 i=gtk.CheckMenuItem(label, use_underline=False)
                 i.set_active(expression == config.data.preferences['quicksearch-source'])
