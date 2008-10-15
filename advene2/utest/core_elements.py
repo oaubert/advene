@@ -56,8 +56,8 @@ class TestElements(TestCase):
         b[2:4] = a[0:9]
         self.assertEqual (b, list(r))
 
-        r[:] = a[0:9]
-        b[:] = a[0:9]
+        r[:] = a[0:10]
+        b[:] = a[0:10]
         self.assertEqual (b, list(r))
 
         r[9:0:-2] = a[19:10:-2]
@@ -66,7 +66,7 @@ class TestElements(TestCase):
 
         del r[0::2]
         del b[0::2]
-        self.assertEqual (a[1:6:2], list(r))
+        self.assertEqual (b, list(r))
 
 if __name__ == "__main__":
     main()

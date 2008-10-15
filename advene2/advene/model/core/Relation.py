@@ -96,9 +96,9 @@ class Relation(PackageElement, WithContentMixin):
             if not same_length:
                 raise ValueError("attempt to assign sequence of size %s to "
                                  "extended slice of size %s"
-                                 % (c, len(annotations)))
-            for i in indices:
-                self.__setitem__(i, annotations[i])
+                                 % (len(annotations), len(indices)))
+            for i,j in enumerate(indices):
+                self.__setitem__(j, annotations[i])
         
     def _del_slice(self,s):
         c = self.__len__() # also prepares cache
