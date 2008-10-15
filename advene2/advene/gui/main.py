@@ -1764,7 +1764,7 @@ class AdveneGUI(Connect):
                 if at is None:
                     return None
                 else:
-                    kwargs['source']="here/annotationTypes/%s/annotations/sorted" % at.id
+                    kwargs['source']="here/all/annotation_types/%s/annotations/sorted" % at.id
                     if label is None:
                         label=self.controller.get_title(at)
             view = self.registered_adhoc_views[name](**kwargs)
@@ -2248,7 +2248,7 @@ class AdveneGUI(Connect):
         if create and force_create:
             ats=[]
         else:
-            ats=list(self.controller.package.annotationTypes)
+            ats=list(self.controller.package.all.annotation_types)
         newat = None
         if create:
             newat=helper.TitledElement(value=None,
@@ -2384,7 +2384,7 @@ class AdveneGUI(Connect):
                 at.mimetype=mimetype_selector.get_current_element()
                 at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
                 at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
-                sc.annotationTypes.append(at)
+                sc.annotation_types.append(at)
                 self.controller.notify('AnnotationTypeCreate', annotationtype=at)
                 self.edit_element(at, modal=True)
         else:
