@@ -7,7 +7,10 @@ here.
 """
 from unittest import TestCase, main
 
-# TODO
+
+class TestSomething(TestCase):
+    pass
+    # TODO
 
 if __name__ == "__main__":
     main()

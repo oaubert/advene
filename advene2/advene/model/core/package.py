@@ -48,6 +48,11 @@ _constructor = {
 def _noop(*args, **kw):
     pass
 
+def _make_absolute(url):
+    abscurdir = abspath(curdir)
+    abslocal = "file:" + pathname2url(abscurdir) + "/"
+    return urljoin(abslocal, url)
+
 class Package(WithMetaMixin, WithEventsMixin, object):
     """FIXME: missing docstring.
     """
@@ -783,7 +788,5 @@ class Package(WithMetaMixin, WithEventsMixin, object):
     def _tales_resources(self):
         return self.all.resources
 
-def _make_absolute(url):
-    abscurdir = abspath(curdir)
-    abslocal = "file:" + pathname2url(abscurdir) + "/"
-    return urljoin(abslocal, url)
+
+#

@@ -210,18 +210,18 @@ class Stream(object):
             return True
         stop = False
         namespaces = self.namespaces
-        while not stop:
-            try:
+        try:
+            while not stop:
                 ev, el = self._it.next()
-            except StopIteration:
-                ev, el =  None, None
-                self._it = None
-            if ev == "start-ns":
-                namespaces.append(el)
-            elif ev == "end-ns":
-                namespaces.pop(-1)
-            else:
-                stop = True
+                if ev == "start-ns":
+                    namespaces.append(el)
+                elif ev == "end-ns":
+                    namespaces.pop(-1)
+                else:
+                    stop = True
+        except StopIteration:
+            ev, el =  None, None
+            self._it = None
         self._prev = self._event, self._elem
         self._event = ev
         self._elem  = el

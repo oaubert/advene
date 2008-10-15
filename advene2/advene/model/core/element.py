@@ -24,19 +24,17 @@ QUERY      = 'q'
 VIEW       = 'v'
 RESOURCE   = 'R'
 
-def get_advene_type_label(typ):
-    return {
-        MEDIA      : 'media',
-        ANNOTATION : 'annotation',
-        RELATION   : 'relation',
-        TAG        : 'tag',
-        LIST       : 'list',
-        IMPORT     : 'import',
-        QUERY      : 'query',
-        VIEW       : 'view',
-        RESOURCE   : 'resource',
-    }[typ]
-
+_package_event_template = {
+        MEDIA      : 'media::%s',
+        ANNOTATION : 'annotation::%s',
+        RELATION   : 'relation::%s',
+        TAG        : 'tag::%s',
+        LIST       : 'list::%s',
+        IMPORT     : 'import::%s',
+        QUERY      : 'query::%s',
+        VIEW       : 'view::%s',
+        RESOURCE   : 'resource::%s',
+}
 
 class PackageElement(WithMetaMixin, WithEventsMixin, object):
     """
@@ -391,7 +389,6 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         See also `iter_my_tag_ids`.
         """
         return self._iter_my_tags_or_tag_ids(package, inherited, True)
-
     def iter_my_tag_ids(self, package=None, inherited=True, _get=0):
         """Iter over the id-refs of the tags associated with this element in
         ``package``.
@@ -517,11 +514,15 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         package signal corresponding to each element signal.
         """
         WithEventsMixin.emit(self, detailed_signal, *args)
-        colon = detailed_signal.find(":")
-        if colon > 0: detailed_signal = detailed_signal[:colon]
-        s = "%s::%s" % (get_advene_type_label(self.ADVENE_TYPE),
-                        detailed_signal)
-        self._owner.emit(s, self, detailed_signal, args)
+        def lazy_params():
+            colon = detailed_signal.find(":")
+            if colon > 0: s = detailed_signal[:colon]
+            else: s = detailed_signal
+            yield _package_event_template[self.ADVENE_TYPE] % s
+            yield self
+            yield s
+            yield args
+        self._owner.emit_lazy(lazy_params)
 
     def connect(self, detailed_signal, handler, *args):
         """

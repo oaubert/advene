@@ -101,6 +101,16 @@ class WithEventsMixin(object):
         if self.__event_delegate is not None:
             return self.__event_delegate.emit(detailed_signal, *args)
 
+    def emit_lazy(self, lazy_params):
+        """
+        Like emit, but lazy_params is assumed to be a function returning an
+        iterable of the params to send to emit.
+        The rationale is that, since emit does nothing if we have no
+        EventDelegate, the parameters would not be evaluated.
+        """
+        if self.__event_delegate is not None:
+            return self.__event_delegate.emit(*lazy_params())
+
     def stop_emission(self, detailed_signal):
         """
         Stop the current emission of the signal specified by detailed_signal.

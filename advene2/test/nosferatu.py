@@ -27,14 +27,15 @@ if __name__ == "__main__":
     def the_test():
         global p
         p = Package("file:examples/nosferatu.czp")
+        pass
 
     measure_time() # take origin
-    prof = hotshot.Profile("test/nosferatu.prof", lineevents=1)
+    prof = hotshot.Profile("test/p_nosferatu.prof", lineevents=1)
     prof.run("the_test()")
     prof.close()
     measure_time("the test took")
 
     p.close()
 
-    os.system("hotshot2calltree -o test/cachegrind.out test/nosferatu.prof")
+    os.system("hotshot2calltree -o test/cachegrind.out test/p_nosferatu.prof")
     os.system("kcachegrind test/cachegrind.out")
