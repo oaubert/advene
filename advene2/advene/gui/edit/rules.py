@@ -64,39 +64,71 @@ class EditRuleSet(EditGeneric):
         for rule in self.model:
             self.add_rule(rule, append=False)
 
-    def remove_rule_cb(self, button=None):
-        """Remove the currently activated rule."""
-        if not self.editable:
-            return True
-        current=self.widget.get_current_page()
-        w=self.widget.get_nth_page(current)
-        l=[edit
-           for edit in self.editlist
-           if edit.get_widget() == w ]
-        if len(l) == 1:
-            edit=l[0]
-            self.editlist.remove(edit)
-            self.model.remove(edit.model)
-            self.widget.remove_page(current)
-        elif len(l) > 1:
-            print "Error in remove_rule"
-        return True
-
     def get_packed_widget(self):
         """Return an enriched widget (with rules add and remove buttons)."""
         vbox=gtk.VBox()
         vbox.set_homogeneous (False)
 
+        def add_rule_cb(button=None):
+            if not self.editable:
+                return True
+            # Create a new default Rule
+            event=Event("AnnotationBegin")
+            ra=self.catalog.get_action("Message")
+            action=Action(registeredaction=ra, catalog=self.catalog)
+            for p in ra.parameters:
+                action.add_parameter(p, ra.defaults.get(p, ''))
+            # Find the next rulename index
+            l=[ int(i) for i in re.findall(unicode(_('Rule')+'\s*(\d+)'), ''.join(r.name for r in self.model)) ]
+            idx=max(l or [ 0 ] ) + 1
+            rule=Rule(name=_("Rule") + str(idx),
+                      event=event,
+                      action=action)
+            self.add_rule(rule)
+            return True
+
+        def add_subview_cb(button=None):
+            if not self.editable:
+                return True
+            rule=SubviewList(name=_("Subviews"))
+            self.add_rule(rule)
+            return True
+
+        def remove_rule_cb(button=None):
+            """Remove the currently activated rule."""
+            if not self.editable:
+                return True
+            current=self.widget.get_current_page()
+            w=self.widget.get_nth_page(current)
+            l=[edit
+               for edit in self.editlist
+               if edit.get_widget() == w ]
+            if len(l) == 1:
+                edit=l[0]
+                self.editlist.remove(edit)
+                self.model.remove(edit.model)
+                self.widget.remove_page(current)
+            elif len(l) > 1:
+                print "Error in remove_rule"
+            return True
+
         hb=gtk.HBox()
 
         b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect('clicked', self.add_rule_cb)
+        b.connect('clicked', add_rule_cb)
         b.set_sensitive(self.editable)
         self.controller.gui.tooltips.set_tip(b, _("Add a new rule"))
         hb.pack_start(b, expand=False)
 
+        b=gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+        b.set_label(_("Subview"))
+        b.connect('clicked', add_subview_cb)
+        b.set_sensitive(self.editable)
+        self.controller.gui.tooltips.set_tip(b, _("Add a subview list"))
+        hb.pack_start(b, expand=False)
+
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
-        b.connect('clicked', self.remove_rule_cb)
+        b.connect('clicked', remove_rule_cb)
         b.set_sensitive(self.editable)
         self.controller.gui.tooltips.set_tip(b, _("Remove the current rule"))
         hb.pack_start(b, expand=False)
@@ -107,23 +139,6 @@ class EditRuleSet(EditGeneric):
 
         return vbox
 
-    def add_rule_cb(self, button=None):
-        if not self.editable:
-            return True
-        # Create a new default Rule
-        event=Event("AnnotationBegin")
-        ra=self.catalog.get_action("Message")
-        action=Action(registeredaction=ra, catalog=self.catalog)
-        for p in ra.parameters:
-            action.add_parameter(p, ra.defaults.get(p, ''))
-        # Find the next rulename index
-        l=[ int(i) for i in re.findall(unicode(_('Rule')+'\s*(\d+)'), ''.join(r.name for r in self.model)) ]
-        idx=max(l or [ 0 ] ) + 1
-        rule=Rule(name=_("Rule") + str(idx),
-                  event=event,
-                  action=action)
-        self.add_rule(rule)
-        return True
 
     def add_rule(self, rule, append=True):
         # Insert the given rule
