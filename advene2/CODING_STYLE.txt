@@ -33,16 +33,8 @@ parameter, if appropriate
 * for method with optional parameters and only self as a required parameter,
 a read-only property should also exist if appropriate (see Exceptions_ below)
 * it is not appropriate for a method to be replaced by a read-only property
-if the method involves much computing, or if its value is not considered as
-a property of the object (e.g. when a new value is generated on each call).
-
-methods and properties should rather return an iterator than another iterable,
-except when the iterable is already available and may be safely shared with 
-caller
-
-as a consequence, generic APIs should stick to iterators, since they should not
-make asumption on the availability of an iterable in the underlying 
-implementations
+if the method has side-effects (changing the state of self or another object) 
+or involves much computing.
 
 Assertions
 ++++++++++
