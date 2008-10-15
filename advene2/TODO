@@ -1,15 +1,28 @@
+Questions
+=========
+
+- How to extend builtin types in TALES expressions  (or reintroduce
+   global methods) ? Typically, the "formatted" method applies to an
+   annotation or an int, and returns the formatted timestamp.
+
+- How to express the same thing as matchFilter (essentially, which
+   element does the view apply on) -> toplevel metadata
+
 Needed improvements
 ===================
+
+- absolute_url global method ??
+
+- Encoding issues when using accented characters in atributes
 
 - replace package session with threading.local
 
 - auto-update of creator/created/contributor/modified. For package,
    update contributor/modified upon package saving.
 
-- How to express the same thing as matchFilter (essentially, which
-   element does the view apply on) -> toplevel metadata
-
 - implement annotations.__in__(self, an_int) (used in rules)
+
+- annotation_type.schemas
 
 Important improvements
 ======================
