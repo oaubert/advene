@@ -338,6 +338,11 @@ class Package(WithMetaMixin, WithEventsMixin, object):
 
         Note that if the file exists, an exception will be raised.
         """
+        p = urlparse(filename)
+        if p.scheme not in ('file', ''):
+            raise ValueError("Can not save to URL %s" % filename)
+        filename = url2pathname(p.path)
+
         if exists(filename) and not erase:
             raise Exception("File already exists %s" % filename) 
 
