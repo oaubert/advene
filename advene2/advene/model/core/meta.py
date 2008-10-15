@@ -2,7 +2,7 @@ from weakref import ref
 
 from advene.model.consts import _RAISE, PARSER_META_PREFIX
 from advene.model.exceptions import ModelError
-from advene.model.tales import tales_path1_function
+from advene.model.tales import tales_property
 from advene.util.sorted_dict import SortedDict
 
 class WithMetaMixin(object):
@@ -310,11 +310,20 @@ class WithMetaMixin(object):
 
         setattr(cls, alias, property(getter, setter, deller, doc))
 
-    @tales_path1_function
-    def _tales_meta(self, path):
-        nsd = self._get_ns_dict()
-        return _PrefixDict(self, nsd[path])
+#    @tales_path1_function
+#    def _tales_meta(self, path):
+#        nsd = self._get_ns_dict()
+#        return _PrefixDict(self, nsd[path])
 
+    @tales_property
+    def _tales_meta(self, context=None):
+        d=dict( (qname, 
+                 dict( (k.replace(uri, ''), v)
+                       for (k, v) in self.iter_meta()
+                       if k.startswith(uri) ) )
+                for (qname, uri) in self._get_ns_dict().iteritems() )
+        return d
+            
     def _get_ns_dict(self):
         if hasattr(self, "ADVENE_TYPE"):
             package = self.owner
@@ -468,25 +477,25 @@ class _MetaDict(object):
         return [ v for _, v in self._owner.iter_meta_ids() ]
 
 
-class _PrefixDict(object):
-    """
-    A dict-like object used as an intermediate object in TALES expression.
-    """
-    __slots__ = ["_obj", "_prefix"]
-
-    def __init__(self, obj, prefix):
-        self._obj = obj
-        self._prefix = prefix
-
-    def __getitem__(self, path):
-        return self._obj.get_meta(self._prefix+path)
-
-    def __call__(self):
-        # TODO use iter_meta(prefix=X) when implemented
-        return ( (k[len(self._prefix):], v)
-                 for k,v in self._obj.iter_meta()
-                 if k.startswith(self._prefix))
-
+#class _PrefixDict(object):
+#    """
+#    A dict-like object used as an intermediate object in TALES expression.
+#    """
+#    __slots__ = ["_obj", "_prefix"]
+#
+#    def __init__(self, obj, prefix):
+#        self._obj = obj
+#        self._prefix = prefix
+#
+#    def __getitem__(self, path):
+#        return self._obj.get_meta(self._prefix+path)
+#
+#    def __call__(self):
+#        # TODO use iter_meta(prefix=X) when implemented
+#        return ( (k[len(self._prefix):], v)
+#                 for k,v in self._obj.iter_meta()
+#                 if k.startswith(self._prefix))
+#
 class metadata_value(str):
     def __new__ (cls, val, is_id):
         return str.__new__(cls, val)
