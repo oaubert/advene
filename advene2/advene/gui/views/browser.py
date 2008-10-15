@@ -170,7 +170,7 @@ class BrowserColumn:
         #self.listview.connect('row-activated', self.row_activated)
         #self.listview.connect('button-press-event', self.on_button_press)
 
-        sw.add_with_viewport(self.listview)
+        sw.add(self.listview)
 
         vbox.show_all()
         return vbox
