@@ -1,0 +1,74 @@
+* frame-of-reference: verbose and not easy to manipulate. Better: <media origin="0" unit="ms" ...>
+
+* p.annotations should default to p.all.annotations. p.own and p.all
+  should be used to ensure there is no ambiguity, but they are more verbose
+
+* Maybe all iterators (relations, annotations, groups...) should have
+  an appropriate __str__ method, to make it easier to interact/explore
+  them. Else we have to constantly use list(p.annotations)
+
+* Iterators should implement __len__ (e.g. len(p.all.annotations) ). I
+  see it is done in List, but not Group. Pb is that it is common to do
+  len(p.annotations) -> we have then to do len(list(p.annotations))
+
+* Should (re)introduce annotation.type/relation.type -> builtin
+
+* Shouldn't p.uri be initialized at p.url by default ?
+
+* Should add docstrings everywhere (esp. properties (p.meta...) [which
+  should be inferred from the getter's docstring ?], etc)
+
+* Docstrings: use epydoc format (@param name: ...., @type name: ...,
+  @return: foo... )?
+
+* Docstrings: first line (just after """, so no """\n) should hold a
+  concise description on 1 line, and finish with '.'. It is used by
+  some tools.
+
+* Suggestion: reuse TypedString / TypedUnicode (or equivalent) from
+  the current model, to return string contents with associated
+  mimetype
+
+* package.py, l. 135: comments about 'hook function': a more generic interaction
+ framework than a simple hook function may be necessary in fact, since
+ there may be multiple needs for such interaction. It will maybe rely
+ on defined hooks (static or dynamic), but it should be generic IMHO
+
+* package save/save_as: inconsistent behaviour (erase forced for save,
+  erase checked for save_as) -> decide for one
+
+* there should be an explanation with examples somewhere of
+    id-ref vs. id
+    ADVENE_TYPE
+
+
+* Content: deprecated content.XXX in favor of content_XXX ? Not sure
+  if it is a good idea, I have a bad feeling here.
+
+* Content: is the empty_content special case for relations necessary ?
+  Or could be made more generic (e.g. for annotations)
+
+* Content: think about the equivalent of the current .parse method,
+  which returns a parsed representation of the content.
+
+* Content: si j'interprete bien
+        if path.exists(filename):
+            file.__init__ (self, filename, "r+")
+        else:
+            file.__init__ (self, filename, "w+")
+
+si le fichier existe déjà, je ne peux qu'ajouter à la fin. COmment je
+fais pour écraser alors ? En fait, on ne peut pas vraiment savoir avec
+quel mode l'ouvrir avant d'avoir l'opération correspondante
+(get_content_data / set_content_data)
+
+The handling of missing elements:
+    * list.iter_items: yield idref for missing elements: dangerous ? Maybe
+      better yield None ?
+    
+    * relations.__iter__: yet another behaviour (raise exception). To unify also (+ iter_members)
+    
+    * tag.iter_elements: 2 possible behaviours for missing elements (through yield_idrefs param)
+    
+
+
