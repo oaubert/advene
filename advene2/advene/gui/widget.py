@@ -488,7 +488,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             # that should be treated as percentage (between 0.0 and
             # 100.0) of the height (FIXME: define a scale somewhere)
             #l=[ (1 - v / 100.0) for v in self.annotation.content.parsed ]
-            l=[ (1 - int(v) / 100.0) for v in self.annotation.content.data.split() ]
+            l=[ (1 - float(v) / 100) for v in self.annotation.content.data.split() ]
             s=len(l)
             if width < s:
                 # There are more samples than available pixels. Downsample the data
@@ -498,7 +498,6 @@ class AnnotationWidget(GenericColorButtonWidget):
             c=w
             context.set_source_rgba(0, 0, 0, .5)
             context.move_to(0, height)
-            context.line_to(0, int(height * v))
             for v in l:
                 context.line_to(int(c), int(height * v))
                 c += w
