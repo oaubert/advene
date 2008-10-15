@@ -952,33 +952,74 @@ class TestHandleElements(TestCase):
 
     def test_metadata(self):
         dc_creator = "http://purl.org/dc/elements/1.1/creator"
-        value1 = "pchampin"
-        value2 = "oaubert"
+        value1 = ("pchampin", False)
+        value2 = ("oaubert", False)
         for i in self.own + self.imported:
             typ = T[i[1][0]]
-            self.be.set_meta(i[0], i[1], typ, dc_creator, value1)
+            self.be.set_meta(i[0], i[1], typ, dc_creator, *value1)
             self.assertEqual(value1,
                 self.be.get_meta(i[0], i[1], typ, dc_creator))
-            self.be.set_meta(i[0], i[1], typ, dc_creator, value2)
+            self.be.set_meta(i[0], i[1], typ, dc_creator, *value2)
             self.assertEqual(value2,
                 self.be.get_meta(i[0], i[1], typ, dc_creator))
-            self.be.set_meta(i[0], i[1], typ, dc_creator, None)
+            self.be.set_meta(i[0], i[1], typ, dc_creator, None, False)
+            self.assertEqual(None,
+                self.be.get_meta(i[0], i[1], typ, dc_creator))
+        rdfs_seeAlso = "http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso"
+        value1 = ("m1", True)
+        value1 = ("i1:m3", True)
+        for i in self.own:
+            typ = T[i[1][0]]
+            self.be.set_meta(i[0], i[1], typ, dc_creator, *value1)
+            self.assertEqual(value1,
+                self.be.get_meta(i[0], i[1], typ, dc_creator))
+            self.be.set_meta(i[0], i[1], typ, dc_creator, *value2)
+            self.assertEqual(value2,
+                self.be.get_meta(i[0], i[1], typ, dc_creator))
+            self.be.set_meta(i[0], i[1], typ, dc_creator, None, False)
+            self.assertEqual(None,
+                self.be.get_meta(i[0], i[1], typ, dc_creator))
+        value1 = ("m3", True)
+        value1 = ("i3:m4", True)
+        for i in self.imported:
+            typ = T[i[1][0]]
+            self.be.set_meta(i[0], i[1], typ, dc_creator, *value1)
+            self.assertEqual(value1,
+                self.be.get_meta(i[0], i[1], typ, dc_creator))
+            self.be.set_meta(i[0], i[1], typ, dc_creator, *value2)
+            self.assertEqual(value2,
+                self.be.get_meta(i[0], i[1], typ, dc_creator))
+            self.be.set_meta(i[0], i[1], typ, dc_creator, None, True)
             self.assertEqual(None,
                 self.be.get_meta(i[0], i[1], typ, dc_creator))
 
     def test_iter_metadata(self):
-        props_random = [
-            "http://purl.org/dc/elements/1.1/description",
-            "http://purl.org/dc/elements/1.1/creator",
-            "http://purl.org/dc/elements/1.1/date",
+        items_random = [
+            ("http://purl.org/dc/elements/1.1/description", "xxx", False),
+            ("http://purl.org/dc/elements/1.1/creator", "yyy", False),
+            ("http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso",
+             "i1:m3", True),
+            ("http://purl.org/dc/elements/1.1/date", "2007-06-27", False),
         ]
-        items_sorted = zip(props_random, ["xxx"]*3)
-        items_sorted.sort()
 
-        for i in self.own + self.imported:
+        items_sorted = list(items_random)
+        items_sorted.sort()
+        for i in self.own:
             typ = T[i[1][0]]
-            for p in props_random:
-                self.be.set_meta(i[0], i[1], typ, p, "xxx")
+            for p,v1,v2 in items_random:
+                self.be.set_meta(i[0], i[1], typ, p, v1, v2)
+            self.assertEqual(items_sorted, list(
+                self.be.iter_meta(i[0], i[1], typ)))
+
+        items_random[2] = (
+          "http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso", "i3:m4", True)
+
+        items_sorted = list(items_random)
+        items_sorted.sort()
+        for i in self.imported:
+            typ = T[i[1][0]]
+            for p,v1,v2 in items_random:
+                self.be.set_meta(i[0], i[1], typ, p, v1, v2)
             self.assertEqual(items_sorted, list(
                 self.be.iter_meta(i[0], i[1], typ)))
 
@@ -1218,6 +1259,7 @@ class TestRenameElement(TestCase):
         # test them here
 
     def test_rename_import(self):
+        key = "http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso"
         iX_url = "file:///tmp/iX"
         self.be.create_import(self.pid1, "iX", iX_url, "")
 
@@ -1228,6 +1270,7 @@ class TestRenameElement(TestCase):
         self.be.insert_item(self.pid1, "l1", "iX:r", 0)
         self.be.associate_tag(self.pid1, "a1", "iX:t")
         self.be.associate_tag(self.pid1, "iX:a", "t1")
+        self.be.set_meta(self.pid1, "", None, key, "iX:R", True)
 
         self.be.rename_element(self.pid1, "iX", IMPORT, "iY")
         self.assert_(not self.be.has_element(self.pid1, "iX"))
@@ -1246,6 +1289,8 @@ class TestRenameElement(TestCase):
         t1_uri = self.url1 + "#t1"
         self.assertEqual([(self.pid1, "iY:a"),],
             list(self.be.iter_elements_with_tag((self.pid1,), t1_uri)))
+        self.assertEqual(("iY:R", True),
+            self.be.get_meta(self.pid1, "", None, key))
 
     def test_rename_view(self):
         self.be.create_view(self.pid1, "vX", "text/plain", "", "")
@@ -1438,6 +1483,42 @@ class TestRenameElement(TestCase):
             frozenset(self.be.iter_elements_with_tag(pids, t3_uri, ))
         )
 
+    def test_rename_refs_meta(self):
+        key1 = "http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso"
+        key2 = "http://example.com/seeAlso"
+        self.be.set_meta(self.pid2, "a5", ANNOTATION,
+                         key1, "r3", True) # it's a trap
+        self.be.set_meta(self.pid2, "a5", ANNOTATION,
+                         key2, "R3", True)
+        self.be.set_meta(self.pid1, "a1", ANNOTATION,
+                         key1, "i1:R3", True)
+        self.be.set_meta(self.pid1, "a1", ANNOTATION,
+                         key2, "i1:r3", True) # it's a trap
+        pids = (self.pid1, self.pid2)
+        R3_uri = "%s#R3" % self.url2
+        self.be.rename_element(self.pid2, "R3", RESOURCE, "renamed")
+        self.be.rename_references(pids, R3_uri, "renamed")
+        self.assertEqual(("renamed", True),
+                         self.be.get_meta(self.pid2, "a5", ANNOTATION, key2))
+        self.assertEqual(("i1:renamed", True),
+                         self.be.get_meta(self.pid1, "a1", ANNOTATION, key1))
+        # did you fall in the traps?
+        self.assertEqual(("r3", True),
+                         self.be.get_meta(self.pid2, "a5", ANNOTATION, key1))
+        self.assertEqual(("i1:r3", True),
+                         self.be.get_meta(self.pid1, "a1", ANNOTATION, key2))
+
+        # now only on one package
+        R3_uri = "%s#renamed" % self.url2
+        self.be.rename_element(self.pid2, "renamed", RESOURCE, "foo")
+        self.be.rename_references((self.pid2,), R3_uri, "foo")
+        self.assertEqual(("foo", True),
+                         self.be.get_meta(self.pid2, "a5", ANNOTATION,
+                                                 key2))
+        self.assertEqual(("i1:renamed", True),
+                         self.be.get_meta(self.pid1, "a1",
+                                                        ANNOTATION, key1))
+
 
 class TestDeleteElement(TestCase):
     def setUp(self):
@@ -1603,7 +1684,7 @@ class TestRobustIterations(TestCase):
         "delete_element": [pid2, "q3", QUERY,],
         "update_content_info": [pid1, "a1", ANNOTATION, "test/html", "", "",],
         "update_content_data": [pid1, "a1", ANNOTATION, "listen carefuly",],
-        "set_meta": [pid1, "", "", "pac#test2", "bar",],
+        "set_meta": [pid1, "", "", "pac#test2", "bar", False],
         "insert_member": [pid1, "r1", "a3", -1],
         "update_member": [pid1, "r1", "a4", 0],
         "remove_member": [pid1, "r1", 0],
@@ -1620,7 +1701,7 @@ class TestRobustIterations(TestCase):
         try:
             b = self.be
             # populate package to get non empty lists
-            b.set_meta(self.pid1, "", "", "pac#test", "foo")
+            b.set_meta(self.pid1, "", "", "pac#test", "foo", False)
             b.insert_member(self.pid1, "r1", "a1", -1)
             b.insert_member(self.pid1, "r1", "i1:a5", -1)
             b.insert_item(self.pid1, "l1", "r1", -1)

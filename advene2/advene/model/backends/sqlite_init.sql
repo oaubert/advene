@@ -36,12 +36,16 @@ CREATE TABLE Meta (
   package TEXT NOT NULL,
   element TEXT NOT NULL,
   key     TEXT NOT NULL,
-  value   TEXT NOT NULL,
+  value   TEXT NOT NULL, -- text value
+  value_p TEXT NOT NULL, -- element value (prefix)
+  value_i TEXT NOT NULL, -- element value (identifier)
   PRIMARY KEY (package, element, key),
   FOREIGN KEY (package) references Packages (id)
   -- if column element is not an empty string,
   -- then it must reference Elements (package, id)
   -- else, the metadata is about the package itself
+  --
+  -- either value or value_i must be empty
 );
 
 CREATE TABLE Contents (

@@ -3,8 +3,8 @@ from weakref import WeakValueDictionary, ref
 from advene import _RAISE
 from advene.model.backends import iter_backends, NoBackendClaiming
 from advene.model import ModelError
-from advene.model.core.element \
-  import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
+from advene.model.core.element import PackageElement, MEDIA, ANNOTATION, \
+  RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
 from advene.model.core.media import Media
 from advene.model.core.annotation import Annotation
 from advene.model.core.relation import Relation
@@ -238,15 +238,25 @@ class Package(object, WithMetaMixin, DirtyMixin):
 
     def _get_meta(self, key, default=_RAISE):
         "will be wrapped by the WithMetaMixin"
-        r = self._backend.get_meta(self._id, "", None, key)            
-        if r is None:
+        tpl = self._backend.get_meta(self._id, "", None, key)            
+        if tpl is None:
             if default is _RAISE: raise KeyError(key)
             r = default
+        elif tpl[1]:
+            r = self.get_element(tpl[0], default)
+        else:
+            r = tpl[0]
         return r
 
     def _set_meta(self, key, val):
         "will be wrapped by the WithMetaMixin"
-        self._backend.set_meta(self._id, "", None, key, val)
+        if isinstance(val, PackageElement):
+            assert self._can_reference(val) # guaranteed by meta.py
+            val = val.make_idref_for(self)
+            val_is_idref = True
+        else:
+            val_is_idref = False
+        self._backend.set_meta(self._id, "", None, key, val, val_is_idref)
 
     def create_media(self, id, url, frame_of_reference):
         assert not self.has_element(id)

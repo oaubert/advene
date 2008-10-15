@@ -35,12 +35,3 @@ Open questions
   lists...) to implement __getitem__. I do not see the real added value since,
   if you know the id, you would rather call package[id] than package.own[id]
   or package.own.annotations[id]. To discuss...
-
-- in the cinelab application model, some metadata properties are assumed to
-  contain id-refs. However, the core model (and the backend) do not know those
-  are id-refs, and do not, e.g., update them on a renaming...
-  Should the core model distinguish free-text meta-data from id-ref metadata,
-  or should the cinelab implementation manage those meta-data alone.
-  Note that the second solution might be expensive (instanciating all elements
-  possibly containin the metadata, just to check if it is there and requires
-  updating...)

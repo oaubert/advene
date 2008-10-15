@@ -1157,6 +1157,9 @@ class _SqliteBackend(object):
                 execute("UPDATE Tagged SET tag_p = ? " \
                          "WHERE package = ? AND tag_p = ?",
                         args)
+                execute("UPDATE Meta SET value_p = ? " \
+                         "WHERE package = ? AND value_p = ?",
+                        args)
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not update", e)
@@ -1219,6 +1222,12 @@ class _SqliteBackend(object):
                  "WHERE package in (" + "?," * len(package_ids) + ")" \
                    "AND element_i = ? " \
                    "AND package || ' ' || element_p IN (%s)" % q1
+            execute(q2, args)
+            # metadata references
+            q2 = "UPDATE Meta SET value_i = ? " \
+                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                   "AND value_i = ? " \
+                   "AND package || ' ' || value_p IN (%s)" % q1
             execute(q2, args)
         except InternalError:#sqlite.Error, e:
             execute("ROLLBACK")
@@ -1379,40 +1388,64 @@ class _SqliteBackend(object):
     # meta-data management
 
     def iter_meta(self, package_id, id, element_type):
-        """
-        Iter over the metadata, sorting keys in alphabetical order.
+        """Iter over the metadata, sorting keys in alphabetical order.
+
+        Yield tuples of the form (key, val, val_is_idref) (cf. `get_meta` and
+        `set_meta`).
+
         If package metadata is targeted, id should be an empty string (in
         that case, element_type will be ignored).
         """
         assert _DF or id == "" or self.has_element(package_id, id, element_type)
-        q = """SELECT key, value FROM Meta
+        q = """SELECT key, value, value_p, value_i FROM Meta
                WHERE package = ? AND element = ? ORDER BY key"""
-        r = ( (d[0], d[1])
-               for d in self._conn.execute(q, (package_id, id)) )
+        r = ( (d[0],
+               d[2] and "%s:%s" % (d[2], d[3]) or d[3] or d[1],
+               d[3] != "",
+              ) for d in self._conn.execute(q, (package_id, id)) )
         return _FlushableIterator(r, self)
 
     def get_meta(self, package_id, id, element_type, key):
-        """
-        Return the given metadata of the identified element.
+        """Return the given metadata of the identified element.
+
+        Return a tuple of the form (val, val_is_idref) where the second item is
+        a boolean, indicating whether the first item must be interpreted as an
+        id-ref, or None if the element has no metadata with that key.
+
         If package metadata is targeted, id should be an empty string (in
         that case, element_type will be ignored).
         """
         assert _DF or id == "" or self.has_element(package_id, id, element_type)
-        q = """SELECT value FROM Meta
+        q = """SELECT value, value_p, value_i FROM Meta
                WHERE package = ? AND element = ? AND KEY = ?"""
         d = self._curs.execute(q, (package_id, id, key,)).fetchone()
         if d is None:
             return None
+        elif d[2]:
+            return (d[1] and "%s:%s" % (d[1], d[2]) or d[2], True)
         else:
-            return d[0]
+            return (d[0], False)
 
-    def set_meta(self, package_id, id, element_type, key, val):
-        """
-        Return the given metadata of the identified element.
+    def set_meta(self, package_id, id, element_type, key, val, val_is_idref):
+        """Set the given metadata of the identified element.
+
+        Paramter ``val_is_idref`` indicates whether parameter ``val`` must be
+        interpreted as an id-ref rather than a plain string. Note that ``val`` 
+        can also be None to unset the corresponding metadata; in that case,
+        val_is_idref is ignored.
+
         If package metadata is targeted, id should be an empty string (in
         that case, element_type will be ignored).
         """
         assert _DF or id == "" or self.has_element(package_id, id, element_type)
+
+        if val is not None and val_is_idref:
+            val_p, val_i = _split_id_ref(val)
+            val = ""
+        else:
+            val_p = ""
+            val_i = ""
+
         q = """SELECT value FROM Meta
                WHERE package = ? AND element = ? and key = ?"""
         c = self._curs.execute(q, (package_id, id, key))
@@ -1420,14 +1453,14 @@ class _SqliteBackend(object):
 
         if d is None:
             if val is not None:
-                q = """INSERT INTO Meta (package, element, key, value)
-                       VALUES (?,?,?,?)"""
-                args = (package_id, id, key, val)
+                q = """INSERT INTO Meta
+                       VALUES (?,?,?,?,?,?)"""
+                args = (package_id, id, key, val, val_p, val_i)
         else:
             if val is not None:
-                q = """UPDATE Meta SET value = ?
+                q = """UPDATE Meta SET value = ?, value_p = ?, value_i = ?
                        WHERE package = ? AND element = ? AND key = ?"""
-                args = (val, package_id, id, key)
+                args = (val, val_p, val_i, package_id, id, key)
             else:
                 q = """DELETE FROM Meta
                        WHERE package = ? AND element = ? AND key = ?"""

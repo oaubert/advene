@@ -9,8 +9,9 @@ import advene.model.core.dirty as dirty
 ## uncomment the following to disable differed cleaning
 #dirty.DirtyMixin = dirty.DirtyMixinInstantCleaning
 
-from advene.model.core.content import PACKAGED_ROOT
 import advene.model.backends.sqlite as backend_sqlite
+from advene.model.core.content import PACKAGED_ROOT
+from advene.model.core.element import PackageElement
 from advene.model.core.package import Package
 
 
@@ -60,14 +61,20 @@ if __name__ == "__main__":
     content_file = join(base, "a1.txt")
     if exists (content_file): unlink (content_file)
 
-    Package.make_metadata_property ("dc#Creator", "dc_creator")
+    Package.make_metadata_property ("http://purl.org/dc/elements/1.1/creator",
+                                    "dc_creator")
+    PackageElement.make_metadata_property (
+        "http://purl.org/dc/elements/1.1/creator",
+        "dc_creator")
 
     p = Package(package_url, create=True)
     #trace_wrap_all (p._backend)
 
+    advene_ns = "http://advene.liris.cnrs.fr/ns/%s"
+
     p.dc_creator = "pchampin"
     m1 = p.create_media("m1", "http://champin.net/stream.avi",
-        "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0")
+        advene_ns % "frame_of_reference/ms;o=0")
     a1 = p.create_annotation("a1", m1, 20, 30, "text/plain")
     a2 = p.create_annotation("a2", m1, 0, 20, "text/plain")
     r1 = p.create_relation("r1", "text/plain")
@@ -80,10 +87,15 @@ if __name__ == "__main__":
     else:
         raise Exception, "duplicate ID did raise any ModelException..."
 
+    p.set_meta(advene_ns % "meta/main_media", m1)
+
     a1.begin += 1
     p.set_meta(PACKAGED_ROOT, pathname2url(base))
     a1.content_url = "packaged:/a1.txt"
     a1.content_data = "You, stupid woman!"
+    a1.dc_creator = "rartois"
+
+    a2.set_meta(advene_ns % "meta/created_from", a1)
 
     # testing as_file with internal data
     c = a2.content
@@ -101,8 +113,10 @@ if __name__ == "__main__":
     f.truncate()
     print c.data
     f.close()
-    
 
+    a1.set_meta(advene_ns % "meta/foo", "bar")
+    a2.set_meta(advene_ns % "meta/foo", "bar")
+    
     print [a._id for a in p.own.annotations]
     print p.get("a1") # no backend call, since a1 is cached (variable a1)
     print p["a2"] # no backend call, since a2 is cached (variable a2)
@@ -133,6 +147,9 @@ if __name__ == "__main__":
     print id(a1) == id(p.get_element ("a1"))
     print a1.content_data
     print p.dc_creator
+    print p.get_meta(advene_ns % "meta/main_media")
     print a1.begin
+    print a1.dc_creator
+    print a2.get_meta(advene_ns % "meta/created_from")
 
     l = None; a1 = None; a2 = None; p.close(); p = None
