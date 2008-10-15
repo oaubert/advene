@@ -49,6 +49,7 @@ if int(cherrypy.__version__.split('.')[0]) < 3:
 from advene.model.cam.package import Package
 from advene.model.tales import AdveneContext
 from advene.model.exceptions import NoSuchElementError, UnreachableImportError
+
 from simpletal.simpleTALES import PathNotFoundException
 from simpletal.simpleTAL import TemplateParseException
 
@@ -655,12 +656,13 @@ class Packages(Common):
             <a href="%(levelup)s">Up one level</a> |
             Next level :
             <select name="path" onchange="submit()">
+            <option selected></option>"
             """) % {
                     'location': self.location_bar (),
                     'levelup': levelup})
-
+            
             if hasattr (objet, 'view'):
-                res.append ("<option selected>view</option>")
+                res.append ("<option>view</option>")
 
             res.append ("\n".join(
                 ["""<option>%s</option>""" % c for c in auto_components]))
@@ -865,6 +867,8 @@ class AdveneWebServer:
         @type port: int
         """
         self.controller=controller
+        self.urlbase = u"http://localhost:%d/" % port
+
         settings = {
             'global': {
                 'server.socket_port' : port,
