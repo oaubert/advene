@@ -540,6 +540,12 @@ class Package(object, WithMetaMixin, WithEventsMixin):
 
     # element creation
 
+    # NB: the element constructor is called *before* the backend method
+    # because the former makes some conversion between elements and id-refs,
+    # that we need to property invoke the backend method.
+    # This is why elements have an _initialize method, invoked after they have
+    # been actually created in the backend.
+
     def create_media(self, id, url, frame_of_reference=DEFAULT_FOREF):
         """FIXME: missing docstring.
         """
@@ -547,6 +553,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         r = self.media_factory(self, id, url, frame_of_reference)
         self._backend.create_media(self._id, id, url, frame_of_reference)
         self.emit("created::media", r)
+        r._initialize()
         return r
 
     def create_annotation(self, id, media, begin, end,
@@ -559,6 +566,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         self._backend.create_annotation(self._id, id, r.media_id, begin, end,
                                         mimetype, r.content_model_id, url)
         self.emit("created::annotation", r)
+        r._initialize()
         return r
 
     def create_relation(self, id, mimetype="x-advene/none", model=None,
@@ -571,6 +579,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
                                       mimetype, r.content_model_id, url)
         r.extend(members) # let r do it, with all the checking it needs
         self.emit("created::relation", r)
+        r._initialize()
         return r
 
     def create_view(self, id, mimetype, model=None, url=""):
@@ -581,6 +590,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         self._backend.create_view(self._id, id,
                                   mimetype, r.content_model_id, url)
         self.emit("created::view", r)
+        r._initialize()
         return r
 
     def create_resource(self, id, mimetype, model=None, url=""):
@@ -591,6 +601,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         self._backend.create_resource(self._id, id,
                                       mimetype, r.content_model_id, url)
         self.emit("created::resource", r)
+        r._initialize()
         return r
 
     def create_tag(self, id):
@@ -600,6 +611,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         r = self.tag_factory(self, id)
         self._backend.create_tag(self._id, id)
         self.emit("created::tag", r)
+        r._initialize()
         return r
 
     def create_list(self, id, items=()):
@@ -620,6 +632,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         self._backend.create_query(self._id, id,
                                    mimetype, r.content_model_id, url)
         self.emit("created::query", r)
+        r._initialize()
         return r
 
     def create_import(self, id, package):
@@ -648,7 +661,9 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         called elsewhere (it would corrupt the package w.r.t. imports).
         """
         self._backend.create_import(self._id, id, url, uri)
-        return self.get(id)
+        r = self.get(id)
+        r._initialize()
+        return r
 
     # tags management
 

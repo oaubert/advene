@@ -16,6 +16,7 @@ from advene.model.core.package import Package as CorePackage
 from advene.model.core.all_group import AllGroup as CoreAllGroup
 from advene.model.core.own_group import OwnGroup as CoreOwnGroup
 
+from datetime import datetime
 from warnings import warn
 from weakref import ref as wref
 
@@ -234,6 +235,9 @@ class Package(CorePackage):
         ns = self._get_namespaces_as_dict()
         ns.setdefault(DC_NS_PREFIX, "dc")
         self._set_namespaces_with_dict(ns)
+        now = datetime.now().isoformat()
+        self.created = now
+        self.modified = now
 
     def create_tag(self, id):
         """
@@ -348,7 +352,12 @@ class Package(CorePackage):
 
 _bootstrap_ref = lambda: None
 
-Package.make_metadata_property(DC_NS_PREFIX + "creator", "dc_creator")
-Package.make_metadata_property(DC_NS_PREFIX + "description", "dc_description")
-Package.make_metadata_property(RDFS_NS_PREFIX + "seeAlso", "rdfs_seeAlso")
-# TODO more
+Package.make_metadata_property(DC_NS_PREFIX + "creator", default="")
+Package.make_metadata_property(DC_NS_PREFIX + "contributor", default="")
+Package.make_metadata_property(DC_NS_PREFIX + "created")
+Package.make_metadata_property(DC_NS_PREFIX + "modified")
+
+Package.make_metadata_property(DC_NS_PREFIX + "title")
+Package.make_metadata_property(DC_NS_PREFIX + "description")
+
+Package.make_metadata_property(RDFS_NS_PREFIX + "seeAlso")

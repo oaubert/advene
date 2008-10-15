@@ -4,9 +4,15 @@ from advene.model.cam.exceptions import SemanticError, UnsafeUseWarning
 from advene.model.core.element import PackageElement
 from advene.model.tales import tales_context_function
 
+from datetime import datetime
 from warnings import warn
 
 class CamElement(PackageElement):
+    def _initialize(self):
+        now = datetime.now().isoformat()
+        self.created = now
+        self.modified = now
+
     def set_meta(self, key, value, val_is_idref=False, _guard=True):
         if _guard:
             if key == CAMSYS_TYPE:
@@ -72,8 +78,12 @@ class CamElement(PackageElement):
         return self.iter_user_tags(refpkg)
 
 
-CamElement.make_metadata_property(DC_NS_PREFIX + "creator", "dc_creator")
-CamElement.make_metadata_property(DC_NS_PREFIX + "description", 
-                                  "dc_description")
-CamElement.make_metadata_property(RDFS_NS_PREFIX + "seeAlso", "rdfs_seeAlso")
-# TODO more
+CamElement.make_metadata_property(DC_NS_PREFIX + "creator", default="")
+CamElement.make_metadata_property(DC_NS_PREFIX + "contributor", default="")
+CamElement.make_metadata_property(DC_NS_PREFIX + "created")
+CamElement.make_metadata_property(DC_NS_PREFIX + "modified")
+
+CamElement.make_metadata_property(DC_NS_PREFIX + "title")
+CamElement.make_metadata_property(DC_NS_PREFIX + "description")
+
+CamElement.make_metadata_property(RDFS_NS_PREFIX + "seeAlso")

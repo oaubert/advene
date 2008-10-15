@@ -25,12 +25,26 @@ RESOURCE   = 'R'
 class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
     def __init__(self, owner, id):
+        """
+        Element basic initialization. 
+
+        NB: __init__ is usually invoked *before* the element has been added to
+        the backend, so no operation should be performed that require the
+        backend to *know* the element. For this, see `_initialize`.
+        """
         self._id             = id
         self._owner          = owner
         self._weight         = 0
         self._deleted        = False
         self._event_delegate = ElementEventDelegate(self)
         owner._elements[id] = self # cache to prevent duplicate instanciation
+
+    def _initialize(self):
+        """
+        This method is invoked once after the element has been created *and*
+        stored in the backend.
+        """
+        pass
 
     def make_id_in(self, pkg):
         """Compute an id-ref for this element in the context of the given package.

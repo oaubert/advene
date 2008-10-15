@@ -1,7 +1,7 @@
 Important improvements
 ======================
 
-- implement cam mandatory metadata, making them always present
+- fix problem in utest/serpar.py with "created" and "modified" metadata
 
 - check in can_reference that "embeded" elements are not references outside
   their embeding elements
