@@ -646,7 +646,10 @@ class ElementCollection(object):
 
     @property
     def _tales_first(self):
-        return self.__iter__().next()
+        try:
+            return self.__iter__().next()
+        except StopIteration:
+            return None
 
     @property
     def _tales_rest(self):
