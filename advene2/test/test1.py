@@ -120,6 +120,7 @@ if __name__ == "__main__":
     print [a._id for a in p.own.annotations]
     print p.get("a1") # no backend call, since a1 is cached (variable a1)
     print p["a2"] # no backend call, since a2 is cached (variable a2)
+    print m1.unit, m1.origin
 
     NB = 10
     print "creating %s annotations" % NB
