@@ -373,17 +373,19 @@ def get_valid_members (el):
         l.extend(pl)
 
     pl=sorted(name
-            for (name, method) in inspect.getmembers(el)
-            if name in ('first', 'rest') 
-            or (isinstance(method, types.MethodType) 
-                and len(inspect.getargspec(method)[0]) == 1 + len(inspect.getargspec(method)[3] or [])
-                and not name.startswith('_')
-                and not name == 'close')
-            or (isinstance(method, types.BuiltinMethodType)
-                and not name.startswith('_')
-                # No inspect.getargspec: guess from the docstring
-                and ('()' in method.__doc__.splitlines()[0]
-                     or '([' in method.__doc__.splitlines()[0])))
+              for (name, method) in inspect.getmembers(el)
+              if name in ('first', 'rest') 
+              or (isinstance(method, types.MethodType) 
+                  and len(inspect.getargspec(method)[0]) == 1 + len(inspect.getargspec(method)[3] or [])
+                  and not name.startswith('_')
+                  and not name == 'close')
+              or (isinstance(method, types.BuiltinMethodType)
+                  and not name.startswith('_')
+                  # No inspect.getargspec: guess from the docstring
+                  # No parameters
+                  and ('()' in (method.__doc__ or '').splitlines()[0]
+                       # Or only optional parameters
+                       or '([' in (method.__doc__ or '').splitlines()[0])))
     if pl:
         l.append(_('---- Methods ----'))
         l.extend(pl)
