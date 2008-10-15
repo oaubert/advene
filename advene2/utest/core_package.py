@@ -1,14 +1,13 @@
 import gc
-from os import tmpnam, unlink
-from os.path import abspath, split
+from os import fdopen, rmdir, unlink
+from os.path import abspath, join, split
+from tempfile import mkdtemp
 from unittest import TestCase, main
 from urllib import pathname2url
-from warnings  import filterwarnings
 
 from advene.model.core.package import Package
 from advene.model.backends.sqlite import _set_module_debug
 
-filterwarnings("ignore", "tmpnam is a potential security risk to your program")
 _set_module_debug(True) # enable all asserts in backend_sqlite
 
 
@@ -27,7 +26,8 @@ class TestCreation(TestCase):
 
 class TestImports(TestCase):
     def setUp(self):
-        self.db = tmpnam()
+        self.dirname = mkdtemp()
+        self.db = join(self.dirname, "db")
         self.url = "sqlite:%s" % pathname2url(self.db)
         self.p1 = Package(self.url+";p1", create=True)
         self.p2 = Package(self.url+";p2", create=True)
@@ -167,6 +167,7 @@ class TestImports(TestCase):
 
     def tearDown(self):
         unlink(self.db)
+        rmdir(self.dirname)
 
 if __name__ == "__main__":
     main()

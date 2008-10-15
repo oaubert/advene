@@ -1,9 +1,9 @@
 from pysqlite2 import dbapi2 as sqlite
-from os        import tmpnam, unlink
-from os.path   import exists
+from os        import path, rmdir, unlink
+from os.path   import abspath, exists, join
+from tempfile  import mkdtemp
 from unittest  import TestCase, main
 from urllib    import pathname2url
-from warnings  import filterwarnings
 
 from advene.model.backends.sqlite \
   import claims_for_create, create, claims_for_bind, bind, IN_MEMORY_URL, \
@@ -26,7 +26,6 @@ T = {
   "i": IMPORT,
 }
 
-filterwarnings("ignore", "tmpnam is a potential security risk to your program")
 _set_module_debug(True) # enable all asserts in backend_sqlite
 
 class P:
@@ -44,13 +43,16 @@ class P:
 
 class TestCreateBackend(TestCase):
     def setUp(self):
-        self.filename = tmpnam()
+        self.dirname = mkdtemp()
+        self.filename = join(self.dirname, "db")
         self.url1 = "sqlite:%s" % pathname2url(self.filename)
         self.url2 = "%s;foo" % self.url1
 
     def tearDown(self):
         if exists(self.filename):
             unlink(self.filename)
+        if exists(self.dirname):
+            rmdir(self.dirname)
         del P._L[:] # not required, but saves memory
 
     def _touch_filename(self):
@@ -151,7 +153,8 @@ class TestCreateBackend(TestCase):
 
 class TestBindBackend(TestCase):
     def setUp(self):
-        self.filename = tmpnam()
+        self.dirname = mkdtemp()
+        self.filename = path.join(self.dirname, "db")
         self.url1 = "sqlite:%s" % pathname2url(self.filename)
         self.url2 = "%s;foo" % self.url1
         self.b, self.i = create(P(self.url2))
@@ -160,6 +163,8 @@ class TestBindBackend(TestCase):
     def tearDown(self):
         if exists(self.filename):
             unlink(self.filename)
+        if exists(self.dirname):
+            rmdir(self.dirname)
         del P._L[:] # not required, but saves memory
 
     def test_claim_non_existing(self):
@@ -242,13 +247,16 @@ class TestBindBackend(TestCase):
 
 class TestPackageHandling(TestCase):
     def setUp(self):
-        self.filename = tmpnam()
+        self.dirname = mkdtemp()
+        self.filename = path.join(self.dirname, "db")
         self.url1 = "sqlite:%s" % pathname2url(self.filename)
         self.url2 = "%s;foo" % self.url1
 
     def tearDown(self):
         if exists(self.filename):
             unlink(self.filename)
+        if exists(self.dirname):
+            rmdir(self.dirname)
         del P._L[:] # not required, but saves memory
 
     def test_url(self):
@@ -295,7 +303,8 @@ class TestPackageHandling(TestCase):
 
 class TestCache(TestCase):
     def setUp(self):
-        self.filename = tmpnam()
+        self.dirname = mkdtemp()
+        self.filename = path.join(self.dirname, "db")
         self.url1 = "sqlite:%s" % pathname2url(self.filename)
         self.url2 = "%s;foo" % self.url1
         self.url3 = "%s;bar" % self.url1
@@ -305,6 +314,7 @@ class TestCache(TestCase):
         if self.b:
             self.b.close(self.i)
         unlink(self.filename)
+        rmdir(self.dirname)
         del P._L[:] # not required, but saves memory
 
     def test_same_url(self):

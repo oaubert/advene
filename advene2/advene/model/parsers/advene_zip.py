@@ -4,12 +4,12 @@ Unstable and experimental parser implementation.
 See `advene.model.parsers.advene_xml` for the reference implementation.
 """
 
-from os import mkdir, path, tmpfile, tmpnam
+from os import mkdir, path, tmpfile
 import sys
+from tempfile import mkdtemp
 from urllib import url2pathname, pathname2url
 from urlparse import urlparse, urljoin
 from urllib2 import urlopen, URLError
-from warnings import filterwarnings
 from zipfile import BadZipfile, ZipFile
 
 from advene.model.consts import PACKAGED_ROOT
@@ -104,10 +104,7 @@ class _Parser(object):
 
     def __init__(self, file_, package):
         assert claims_for_parse(file_) > 0
-        filterwarnings("ignore",
-            "tmpnam is a potential security risk to your program")
-        self.dir = dir = tmpnam()
-        mkdir(dir)
+        self.dir = dir = mkdtemp()
 
         if hasattr(file_, "seek"):
             g = None

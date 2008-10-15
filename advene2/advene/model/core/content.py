@@ -12,10 +12,10 @@ the form e.content_X, which might be slightly more efficient (less lookup). May
 be the former should be eventually deprecated...
 """
 
-from os import mkdir, path, tmpfile, tmpnam, unlink
+from os import mkdir, path, tmpfile, unlink
+from tempfile import mkdtemp
 from urllib2 import urlopen, url2pathname
 from urlparse import urljoin, urlparse
-from warnings import filterwarnings
 from weakref import ref
 
 from advene.model.consts import _RAISE, PACKAGED_ROOT
@@ -514,10 +514,7 @@ class ContentDataFile(object):
 
 
 def create_temporary_packaged_root(package):
-    filterwarnings("ignore",
-        "tmpnam is a potential security risk to your program")
-    dir = tmpnam()
-    mkdir(dir)
+    dir = mkdtemp()
     package.set_meta(PACKAGED_ROOT, dir)
     # TODO use notification to clean it when package is closed
     return dir

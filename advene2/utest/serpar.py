@@ -1,9 +1,9 @@
 """Unit test for serialization and parsing."""
 
-from os import tmpnam, unlink, path
+from os import fdopen, path, unlink
+from tempfile import mkstemp
 from unittest import TestCase, main
 from urllib import pathname2url
-from warnings  import filterwarnings
 
 import advene.model.backends.sqlite as backend_sqlite
 from advene.model.core.diff import diff_packages
@@ -16,11 +16,11 @@ from core_diff import fill_package_step_by_step
 
 
 backend_sqlite._set_module_debug(True) # enable assert statements
-filterwarnings("ignore", "tmpnam is a potential security risk to your program")
 
 class TestAdveneXml(TestCase):
     def setUp(self):
-        self.filename = tmpnam() + ".bxp"
+        fd, self.filename = mkstemp(suffix=xml.EXTENSION)
+        fdopen(fd).close()
         self.url = "file:" + pathname2url(self.filename)
         self.p1 = Package("file:/tmp/p1", create=True)
 
@@ -44,7 +44,8 @@ class TestAdveneXml(TestCase):
 
 class TestAdveneZip(TestCase):
     def setUp(self):
-        self.filename = tmpnam() + ".bzp"
+        fd, self.filename = mkstemp(suffix=zip.EXTENSION)
+        fdopen(fd).close()
         self.url = "file:" + pathname2url(self.filename)
         self.p1 = Package("file:/tmp/p1", create=True)
 

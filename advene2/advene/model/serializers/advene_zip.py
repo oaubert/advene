@@ -4,7 +4,7 @@ Unstable and experimental serializer implementation.
 See `advene.model.serializers.advene_xml` for the reference implementation.
 """
 
-from os import listdir, mkdir, path, tmpnam
+from os import listdir, mkdir, path
 from os.path import exists, isdir
 from urllib import pathname2url, url2pathname
 from urlparse import urlparse

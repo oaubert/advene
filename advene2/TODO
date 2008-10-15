@@ -55,9 +55,6 @@ Misc
 - remove "unstable and experimental" in parser and serializer docstrings (once
   it is stabilized and tested, that is ;)
 
-- find a better alternative to tmpnam in advene_zip's (parser and serialiser),
-  as well as content.py
-
 - use notification of events, once implemented, to clean the package root
   created by parsers/advene_zip.py and content.py
 

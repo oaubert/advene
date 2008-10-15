@@ -1,9 +1,9 @@
 import gc
-from os import path, tmpnam, unlink
+from os import fdopen, path, rmdir, unlink
 from os.path import abspath, exists, split
+from tempfile import mkdtemp
 from urllib import pathname2url, url2pathname
 from unittest import TestCase, main
-from warnings  import filterwarnings
 
 from advene.model.backends.sqlite import _set_module_debug
 from advene.model.core.content import PACKAGED_ROOT
@@ -13,7 +13,6 @@ from advene.model.core.package import Package, UnreachableImportError, \
                                       NoSuchElementError
 from advene.model.exceptions import ModelError
 
-filterwarnings("ignore", "tmpnam is a potential security risk to your program")
 _set_module_debug(True) # enable all asserts in backend_sqlite
 
 dc_creator = "http://purl.org/dc/elements/1.1/creator"
@@ -56,7 +55,7 @@ class TestElements(TestCase):
         self.assertEqual("I shall say this only once", e.content.data)
 
         # external content (url)
-        url = "file:" + pathname2url(__file__)
+        url = "file:" + pathname2url(abspath(__file__))
         e.content_url = url
         f = open(__file__); lines = f.read(); f.close()
         self.assertEqual(url, e.content_url)
@@ -613,7 +612,8 @@ class TestElements(TestCase):
 
 class TestUnreachable(TestCase):
     def setUp(self):
-        self.filename = tmpnam()
+        self.dirname = mkdtemp()
+        self.filename = path.join(self.dirname, "db")
         self.url1 = "sqlite:" + pathname2url(self.filename)
         self.url2 = self.url1 + ";foo"
         self.url3 = self.url2 + ";bar"
@@ -646,6 +646,7 @@ class TestUnreachable(TestCase):
 
     def tearDown(self):
         unlink(self.filename)
+        rmdir(self.dirname)
 
     def make_import_unreachable(self):
         p1 = Package(self.url1)
