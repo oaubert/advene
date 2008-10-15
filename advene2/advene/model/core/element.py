@@ -361,6 +361,7 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         See also `iter_my_tag_ids`.
         """
         return self._iter_my_tags_or_tag_ids(package, inherited, True)
+
     def iter_my_tag_ids(self, package=None, inherited=True, _get=0):
         """Iter over the id-refs of the tags associated with this element in
         ``package``.
@@ -605,7 +606,7 @@ class ElementCollection(object):
             return r
 
     def __repr__(self):
-        return "[" + ",".join(e.id for e in self) + "]"
+        return "[" + ",".join(self.keys()) + "]"
 
     def get(self, key, default=None):
         e = self._owner.get(key)
@@ -617,7 +618,7 @@ class ElementCollection(object):
             return default
 
     def keys(self):
-        return [ e.make_id_for(self._owner) for e in self ]
+        return [ e.make_id_in(self._owner) for e in self ]
 
     _allow_filter = True
 
