@@ -1526,7 +1526,7 @@ class AdveneController(object):
             name=p.url
         old_url = p.url
 
-        p.save_as(name)
+        p.save_as(name, erase=True)
         p._modified = False
 
         self.notify ("PackageSave", package=p)
