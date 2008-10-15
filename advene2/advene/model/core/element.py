@@ -4,12 +4,12 @@ I define the common super-class of all package element classes.
 
 from advene.model.core.meta   import WithMetaMixin
 from advene.model.events      import ElementEventDelegate, WithEventsMixin
-from advene.model.tales       import tales_context_function
+from advene.model.tales       import tales_property, tales_use_as_context
 from advene.util.alias        import alias
 from advene.util.autoproperty import autoproperty
 from advene.util.session      import session
 
-from itertools import chain
+from itertools import chain, islice
 
 # the following constants must be used as values of a property ADVENE_TYPE
 # in all subclasses of PackageElement
@@ -373,10 +373,13 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         self._decrease_weight()
         return super(PackageElement, self).disconnect(handler_id)
 
-    @tales_context_function
-    def _tales_my_tags(self, context):
-        refpkg = context.globals["refpkg"]
-        return self.iter_my_tags(refpkg)
+    @tales_property
+    @tales_use_as_context("refpkg")
+    def _tales_my_tags(self, context_package):
+        class TagCollection(ElementCollection):
+            __iter__ = lambda s: self.iter_my_tags(context_package)
+            __contains__ = lambda s,x: self.has_tag(x, context_package)
+        return TagCollection(self._owner)
 
 
 class DeletedPackageElement(object):
@@ -391,3 +394,117 @@ class DeletedPackageElement(object):
     are deleted.
     """
     pass
+
+
+class ElementCollection(object):
+    """
+    A base-class for coder-friendly and TAL-friendly element collections.
+
+    Subclasses must override either __iter__ or both __len__ and __getitem__.
+
+    In most cases, it is a good idea to override __contains__, and __len__
+    (even if the subclass is overriding __iter__).
+
+    The class attribute _allow_filtering can also be overridden to disallow
+    the use of the filter method.
+    """
+    def __init__(self, owner_package):
+        self._owner = owner_package
+
+    def __iter__(self):
+        """
+        Default implementation relying on __len__ and __getitem__.
+        """
+        for i in xrange(len(self)):
+            yield self[i]
+
+    def __len__(self):
+        """
+        Default (and inefficient) implementation relying on __iter__.
+        """
+        return len(list(self))
+
+    def __getitem__(self, key):
+        """
+        Default implementation relying on __iter__.
+        """
+        if isinstance(key, int):
+            if key >= 0:
+                for i,j in enumerate(self):
+                    if i == key:
+                        return j
+                raise IndexError, key
+            else:
+                return list(self)[key]
+        elif isinstance(key, slice):
+            if key.step is None or key.step > 0:
+                print "===", key.start, key.stop, key.step
+                key = key.indices(self.__len__())
+                return list(islice(self, *key))
+            else:
+                return list(self)[key]
+        else:
+            r = self.get(key)
+            if r is None:
+                raise KeyError(key)
+            return r
+
+    def __contains__(self, item):
+        """
+        Default and inefficient implementation relying on __iter__.
+        Override if possible.
+        """
+        for i in self:
+            if item == i:
+                return True
+
+    def __repr__(self):
+        return "[" + ",".join(e.id for e in self) + "]"
+
+    def get(self, key):
+        e = self._owner.get(key)
+        if e in self:
+            return e
+        else:
+            return None
+
+    _allow_filterin = True
+
+    def filter(self, **kw):
+        """
+        Use underlying iter method with the given keywords to make a filtered
+        version of that collection.
+        """
+        if not self._allow_filter:
+            raise TypeError("filtering is not allowed on %r") % self
+        class FilteredCollection(ElementCollection):
+            def __iter__ (self):
+                return self.__iter__(**kw)
+            def __len__(self):
+                return self.__len__(**kw)
+            def filter(self, **kw):
+                raise NotImplementedError("can not filter twice")
+        return FilteredCollection(self)
+
+    @property
+    def _tales_size(self):
+        """Return the size of the group.
+        """
+        return self.__len__()
+
+    @property
+    def _tales_first(self):
+        return self.__iter__().next()
+
+    @property
+    def _tales_rest(self):
+        class RestCollection(ElementCollection):
+            def __iter__(self):
+                it = self.__iter__()
+                it.next()
+                for i in it: yield i
+            def __len__(self):
+                return self.__len__()-1
+            def filter(self, **kw):
+                raise NotImplementedError("RestCollection can not be filtered")
+        return RestCollection(self)

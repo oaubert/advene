@@ -935,8 +935,8 @@ class BasicController:
         self.aliases={}
 
     def build_context(self, here=None, alias=None):
-        c=AdveneContext()
-        c.addGlobal('here', here)
+        c=AdveneContext(here)
+        c.addGlobal("refpkg", here)
         return c
 
     def queue_action(self, action, *p, **kw):

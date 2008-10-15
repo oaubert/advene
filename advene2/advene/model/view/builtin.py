@@ -30,7 +30,7 @@ def get_output_mimetype(view):
     element the view is applied to.
     """
     global _methods
-    params = _parse_params(view.content_data)
+    params = view.content_parsed
     return _methods[params["method"]].info["output_mimetype"]
 
 def apply_to(view, obj):

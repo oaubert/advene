@@ -5,6 +5,7 @@ This class is intended to be used only inside class Package.
 """
 
 from advene.model.core.group import GroupMixin
+from advene.util.autoproperty import autoproperty
 
 class OwnGroup(GroupMixin, object):
 
@@ -15,6 +16,10 @@ class OwnGroup(GroupMixin, object):
 
     def __init__(self, owner):
         self._owner = owner
+
+    @autoproperty
+    def _get_owner(self):
+        return self._owner
 
     def __contains__(self, element):
         # the element is constructed, so if it belongs to the package, it must

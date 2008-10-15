@@ -1,8 +1,8 @@
 from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX
 from advene.model.cam.consts import CAM_TYPE, CAMSYS_TYPE
 from advene.model.cam.exceptions import SemanticError, UnsafeUseWarning
-from advene.model.core.element import PackageElement
-from advene.model.tales import tales_context_function
+from advene.model.core.element import PackageElement, ElementCollection
+from advene.model.tales import tales_property, tales_use_as_context
 
 from datetime import datetime
 from warnings import warn
@@ -63,8 +63,9 @@ class CamElement(PackageElement):
             type_id = type.make_id_in(package)
             return ( i for i in all if i != type_id )
 
-    @tales_context_function
-    def _tales_my_tags(self, context):
+    @tales_property
+    @tales_use_as_context("refpkg")
+    def _tales_my_tags(self, context_package):
         """
         Iter over all the user-tags of this element in the context of the
         reference package.
@@ -74,8 +75,9 @@ class CamElement(PackageElement):
         all tags). Since TAL is mostly user-oriented, this semantic shift is
         not considered harmful.
         """
-        refpkg = context.globals["refpkg"]
-        return self.iter_my_user_tags(refpkg)
+        class TagCollection(ElementCollection):
+            __iter__ = lambda s: self.iter_my_user_tags(context_package)
+        return TagCollection(self._owner)
 
 
 CamElement.make_metadata_property(DC_NS_PREFIX + "creator", default="")

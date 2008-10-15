@@ -37,8 +37,8 @@ class _Session(object):
         L = self._lock
         thread_id = get_ident()
         L.acquire()
-        d = self._dicts.get(thread_id)
         try:
+            d = self._dicts.get(thread_id)
             if d is None or name not in d:
                 return self._default[name]
             else:
@@ -56,24 +56,24 @@ class _Session(object):
         thread_id = get_ident()
         _dicts = self._dicts
         L.acquire()
-        d = _dicts.get(thread_id)
-        if d is None: d = _dicts[thread_id] = {}
         try:
+            d = _dicts.get(thread_id)
+            if d is None: d = _dicts[thread_id] = {}
             d[name] = value
         finally:
-                        L.release()
+            L.release()
 
     def __delattr__(self, name):
         if name[0] == "_":
-            return object.__setattr__(self, name, value)
+            return object.__delattr__(self, name)
 
         L = self._lock
         thread_id = get_ident()
         _dicts = self._dicts
         L.acquire()
-        d = _dicts.get(thread_id)
-        if d is None: d = _dicts[thread_id] = {}
         try:
+            d = _dicts.get(thread_id)
+            if d is None: d = _dicts[thread_id] = {}
             del d[name]
         finally:
             L.release()

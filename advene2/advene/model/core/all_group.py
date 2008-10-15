@@ -2,6 +2,7 @@
 """
 
 from advene.model.core.group import GroupMixin
+from advene.util.autoproperty import autoproperty
 from advene.util.itertools import interclass
 
 class AllGroup(GroupMixin, object):
@@ -15,6 +16,10 @@ class AllGroup(GroupMixin, object):
 
     def __init__(self, owner):
         self._owner = owner
+
+    @autoproperty
+    def _get_owner(self):
+        return self._owner
 
     def __contains__(self, element):
         eo = element._owner

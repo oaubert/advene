@@ -80,7 +80,7 @@ class Tag(PackageElement, GroupMixin):
         # _iter_elements_or_element_ids.
         # However, for efficiency reasons, that private method and
         # iter_element_ids have been merged into one. Both names are necessary
-        # because the "public" iter_my_tag_ids may be overridden while the
+        # because the "public" iter_elements_ids may be overridden while the
         # "private" method should not. Hence that alias.
         pass
 
@@ -98,4 +98,25 @@ class Tag(PackageElement, GroupMixin):
             return element.has_tag(self, package, False)
         else:
             return list(element.iter_taggers(self, package))
- 
+
+    def __wrap_with_tales_context__(self, context):
+        return ContextualizedTag(self, context)
+
+
+class ContextualizedTag(GroupMixin, object):
+    def __init__(self, tag, context):
+        self._t = tag
+        self._p = context.locals.get("refpkg") or context.globals.get("refpkg")
+
+    def __iter__(self):
+        return self._t.iter_elements(package=self._p)
+
+    def __getattr__(self, name):
+
+        if name[0] != "_" or name.startswith("_tales_"):
+            return getattr(self._t, name)
+        else:
+            raise AttributeError(name)
+
+    def __repr__(self):
+        return repr(self._t) + "#contextualized#"

@@ -32,20 +32,42 @@ def tales_context_function(f):
     is invoked with the context as its argument (rather than without any
     argument for other functions).
 
-    See advene.model.core.element and advene.model.core.tag for examples.
+    :see-also: `tales_use_context`
     """
     f.tales_type = "context-function"
     return f
 
-def tales_auto_call(f):
+def tales_property(f):
     """
-    Decorator for TALES auto-called functions.
+    Decorator for TALES property.
 
-    An auto-called function will be called (with the context as its sole 
-    parameter) even if it has a subpath or if no-call is used.
+    A TALES property is similar in use to python's properties:
+    it will automatically be called (with the context as its sole parameter)
+    *even* if it has a subpath or if ``no-call:`` is used.
+
+    :see-also: `tales_use_context`
     """
     f.tales_type = "auto-call"
     return f
+
+def tales_use_as_context(var):
+    """
+    Decorator with 1 argument to be used with TALES properties and
+    context-functions (or it will have no effect).
+
+    If the function expects a specific context variable rather than the context
+    itself, the name of the variable can be specified with this decorator.
+
+    Example::
+        @tales_property
+        @tales_use_as_context("refpkg")
+        def some_method(self, a_package):
+            ...
+    """
+    def the_actual_decorator(f):
+        f.tales_context_variable = var
+        return f
+    return the_actual_decorator
 
 
 class AdveneContext(simpleTALES.Context):
@@ -79,11 +101,16 @@ class AdveneContext(simpleTALES.Context):
                 # stop traversing, path remaining path to val
                 return val(pathList[i+2:])
             elif tales_type == "auto-call":
-                val = val(self)
+                variable_context = getattr(val, "tales_context_variable", None)
+                if variable_context is None:
+                    param = self
+                else:
+                    param = self._traverse_first(variable_context)
+                val = val(param)
         if canCall and tales_type != "auto-call":
             val = self._eval(val)
         return val
-    
+
     def _traverse_first(self, path):
         if path.startswith("?"):
             path = self._eval(self._traverse_first(self, path[1:]))
@@ -95,8 +122,14 @@ class AdveneContext(simpleTALES.Context):
         else:
             raise simpleTALES.PATHNOTFOUNDEXCEPTION
         return r
-        
+
     def _traverse_next(self, val, path):
+        # wrap current object with TALES context if possible
+        # (see for example advene.model.core.tag)
+        wrapper = getattr(val, "__wrap_with_tales_context__", None)
+        if wrapper is not None:
+            val = wrapper(self)
+        # search different attributes/method for the given path
         protected = "_tales_%s" % path
         if getattr(val, "tales_type", None) == "path1-function":
             return val(path)
@@ -116,10 +149,14 @@ class AdveneContext(simpleTALES.Context):
     def _eval(self, val):
         if callable(val):
             if getattr(val, "tales_type", None) == "context-function":
-                return val(self)
+                variable_context = getattr(val, "tales_context_variable", None)
+                if variable_context is None:
+                    param = self
+                else:
+                    param = self._traverse_first(variable_context)
+                return val(param)
             else:
                 return val()
         else:
             return val
-
 
