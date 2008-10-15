@@ -1993,11 +1993,8 @@ class AdveneController(object):
     <a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s"></img></a><br>""") % { 
                     'title': self.get_title(element),
                     'id': element.id,
-                    # FIXME
-                    #'href': 'http://localhost:1234' + ctx.evaluate('here/player_url'),
-                    #'imgurl': 'http://localhost:1234' + ctx.evaluate('here/snapshot_url'),
-                    'href': "FIXME",
-                    'imgurl': "FIXME",
+                    'href': ctx.evaluate('here/player_url'),
+                    'imgurl': ctx.evaluate('here/snapshot_url'),
                     })
             v.content.data="\n".join(data)
             self.notify('ViewCreate', view=v, immediate=True)
