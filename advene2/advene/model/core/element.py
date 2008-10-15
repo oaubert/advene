@@ -48,7 +48,6 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         self._id             = id
         self._owner          = owner
         self._weight         = 0
-        self._deleted        = False
         self._event_delegate = ElementEventDelegate(self)
         owner._elements[id] = self # cache to prevent duplicate instanciation
 
@@ -93,14 +92,9 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         return r
 
     def delete(self):
-        if self._deleted: return
-        self._deleted = True
-        #self.__class__ = DestroyedPackageElement
         self._owner._backend.delete_element(self._owner._id, self._id,
                                             self.ADVENE_TYPE)
-        # TODO the following is a quick and dirty solution to have the rest of
-        # the implementation work once an element has been deleted.
-        # This should be reconsidered, and maybe improved.
+        self.__class__ = DeletedPackageElement
         del self._owner._elements[self._id]
 
     def emit(self, detailed_signal, *args):
@@ -299,4 +293,16 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         refpkg = context.globals["refpkg"]
         return self.iter_my_tags(refpkg)
 
-# TODO: provide class DestroyedPackageElement.
+
+class DeletedPackageElement(object):
+    """
+    I am just a dummy class to which deleted elements are mutated.
+
+    That way, they are no longer usable, preventing their owner from
+    unknowingly handling an element that has actually been deleted.
+
+    Note however that good practices should be to register to the deletion
+    event on the elements you reference, so as to be notified as soon as they
+    are deleted.
+    """
+    pass
