@@ -2,20 +2,52 @@
 I define the class of annotations.
 """
 
-from PackageElement    import PackageElement, ANNOTATION
+from weakref import ref
+
+from advene            import RAISE
+from PackageElement    import PackageElement, ANNOTATION, MEDIA
 from WithContentMixin  import WithContentMixin
 
 class Annotation (PackageElement, WithContentMixin):
 
     ADVENE_TYPE = ANNOTATION
 
-    def __init__ (self, owner, id, media_id, begin, end):
+    def __init__ (self, owner, id, media, begin, end):
         PackageElement.__init__ (self, owner, id)
-        self._media_id = media_id
-        self._begin    = begin
-        self._end      = end
+        if not hasattr (media, "ADVENE_TYPE"):
+            # internally, we sometimes pass backend data directly,
+            # where media is an id-ref rather than a Media instance
+            media = owner.get_element (media, RAISE)
+        self._set_media (media, _init=True)
+        self._begin = begin
+        self._end   = end
+
+    def __str__ (self):
+        return "Annotation(%s,%s,%s)" % \
+               (self._media_idref, self._begin, self._end)
 
     def __cmp__ (self, other):
         return self._begin - other._begin \
             or self._end - other._end \
-            or cmp (self._media_id, other._media_id)
+            or cmp (self._media_idref, other._media_idref)
+
+    def _get_media (self, default=None):
+        m = self._media_wref()
+        if m is None:
+            m = self._owner.get_element (self.media_idref, default)
+            if m is not default:
+                self._media_wref = ref (m)
+        return m
+
+    def _set_media (self, media, _init=False):
+        o = self._owner
+
+        assert media.ADVENE_TYPE == MEDIA
+        assert o._can_reference (media)
+
+        midref = media.make_idref_for (o)
+        if not _init:
+            o._backend.update_annotation (o._id, self.id,
+                                          midref, self.begin, self.end)
+        self._media_idref = midref
+        self._media_wref  = ref (media)

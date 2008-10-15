@@ -1,13 +1,6 @@
 """
 I define the common super-class of all package element classes.
-
-Note that package element have a 3-states life cylcle:
- 0: constructed, but not yet fully initialized by the backend
- 1: initialized and ready to be used and/or modified
- 2: destroyed, so not usable anymore
 """
-
-# TODO maybe the notion of state is no more relevant
 
 from sets import Set
 
@@ -36,10 +29,11 @@ class PackageElement (object, WithMetaMixin):
         self._id    = id
         self._owner = owner
         self._destroyed = True
+        owner._elements[id] = self # cache to prevent duplicate instanciation
 
-    def make_id_for (self, pkg):
+    def make_idref_for (self, pkg):
         """
-        Compute the extended id for this element in the context of the given
+        Compute the id-ref for this element in the context of the given
         package.
         """
         if self in pkg._own:
@@ -79,16 +73,22 @@ class PackageElement (object, WithMetaMixin):
 
     def destroy (self):
         if self._destroyed: return
-        self._owner._backend.destroy (self._id)
+        #self._owner._backend.destroy (self._id) # TODO
         self._destroyed = True
         self.__class__ = DestroyedPackageElement
         
     def _get_id(self):
         return self._id
 
+    def _get_uriref (self):
+        o = self._owner
+        u = o._uri or o._url
+        return "%s#%s" % (u, self._id)
+
     def _get_meta (self, key, default):
         "will be wrapped by the WithMetaMixin"
-        r = self._owner._backend.get_meta (self._id, self.ADVENE_TYPE , key)            
+        r = self._owner._backend.get_meta (self._owner._id, self._id,
+                                           self.ADVENE_TYPE , key)            
         if r is None:
             if default is RAISE: raise KeyError, key
             r = default

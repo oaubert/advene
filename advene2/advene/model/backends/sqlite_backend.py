@@ -213,6 +213,7 @@ def _split_uri_ref (uri_ref):
     sharp = uri_ref.find("#")
     return uri_ref[:sharp], uri_ref[sharp+1:]
 
+
 class _SqliteBackend (object):
 
     def __init__ (self, path, conn, readonly, force):
@@ -235,6 +236,14 @@ class _SqliteBackend (object):
         self._readonly = readonly
 
     def close (self):
+        """
+        Close the backend. Has the effect of closing, for example, underlying
+        connexions to other services. As a consequence, this method should not
+        be invoked by individual packages, for a backend instance may be shared
+        by several packages. A package should rather ensure that it maintains
+        no reference to the backend instance, so that the garbage collector
+        can delete it, which will invoke the close method (see __del__ below).
+        """
         self._conn.close()
 
     def __del__ (self):
@@ -287,8 +296,11 @@ class _SqliteBackend (object):
             raise InternalError ("could not insert", e)
 
     def create_annotation (self, package_id, id, media, begin, end):
+        """
+        ``media`` is the id-ref of an own or directly imported media.
+        """
         # assertions for debug
-        assert (isinstance (begin, int) and begin >  0), begin
+        assert (isinstance (begin, int) and begin >= 0), begin
         assert (isinstance (  end, int) and   end >= begin), (begin, end)
 
         p,s = _split_id_ref (media) # also assert that media has len<=2
@@ -411,6 +423,7 @@ class _SqliteBackend (object):
         """
         Yield tuples of the form (MEDIA, package_id, id, url,).
         """
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
         assert ( id is None  or   id_alt is None), ( id,  id_alt)
         assert (url is None  or  url_alt is None), (url, url_alt)
 
@@ -441,7 +454,7 @@ class _SqliteBackend (object):
                 args.append(i)
             q += ")"
 
-        for i in self._conn.execute (q, args): yield i
+        return self._conn.execute (q, args)
 
     def get_annotations (self, package_ids,
                             id=None,    id_alt=None,
@@ -452,7 +465,10 @@ class _SqliteBackend (object):
         """
         Yield tuples of the form
         (ANNOTATION, package_id, id, media, begin, end,).
+        ``media`` is the uri-ref of a media ;
+        ``media_alt`` is an iterable of uri-refs.
         """
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
         assert (   id is None  or     id_alt is None)
         assert (media is None  or  media_alt is None)
         assert (begin is None  or  begin_min is None and begin_max is None)
@@ -492,6 +508,7 @@ class _SqliteBackend (object):
             q += ")"
         # NB: media is managed as media_alt (cf. above)
         if media_alt is not None:
+            p_url = "sqlite:%s" % self._path
             q += "AND ("
             for m in media_alt:
                 media_u, media_i = _split_uri_ref (m)
@@ -501,7 +518,7 @@ class _SqliteBackend (object):
                      "  (media_p = i.id AND  ? IN (i.uri, i.url)) ) ) OR "
                 args.append (media_i)
                 args.append (media_u)
-                args.append ("sqlite:%s" % self._path)
+                args.append (p_url)
                 args.append (media_u)
             q += "0) "
         if begin is not None:
@@ -523,43 +540,68 @@ class _SqliteBackend (object):
             q += " AND a.fend <= ?"
             args.append (end_max)
 
-        for i in self._conn.execute (q, args): yield i
+        return self._conn.execute (q, args)
 
-    def get_relations (self, package_ids, id=None, id_alt=None):
+    def get_relations (self, package_ids,
+                       id=None, id_alt=None):
         """
         Yield tuples of the form (RELATION, package_id, id,).
         """
-        return self._get_simple_elements (package_ids, RELATION, id, id_alt)
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
+
+        selectfrom, where, args = \
+            self._make_element_query (package_ids, RELATION, id, id_alt)
+        return self._conn.execute (selectfrom+where, args)
 
     def get_views (self, package_ids, id=None, id_alt=None):
         """
         Yield tuples of the form (VIEW, package_id, id,).
         """
-        return self._get_simple_elements (package_ids, VIEW, id, id_alt)
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
+
+        selectfrom, where, args = \
+            self._make_element_query (package_ids, VIEW, id, id_alt)
+        return self._conn.execute (selectfrom+where, args)
 
     def get_resources (self, package_ids, id=None, id_alt=None):
         """
         Yield tuples of the form (RESOURCE, package_id, id,).
         """
-        return self._get_simple_elements (package_ids, RESOURCE, id, id_alt)
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
+
+        selectfrom, where, args = \
+            self._make_element_query (package_ids, RESOURCE, id, id_alt)
+        return self._conn.execute (selectfrom+where, args)
 
     def get_tags (self, package_ids, id=None, id_alt=None):
         """
         Yield tuples of the form (TAG, package_id, id,).
         """
-        return self._get_simple_elements (package_ids, TAG, id, id_alt)
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
+
+        selectfrom, where, args = \
+            self._make_element_query (package_ids, TAG, id, id_alt)
+        return self._conn.execute (selectfrom+where, args)
 
     def get_lists (self, package_ids, id=None, id_alt=None):
         """
         Yield tuples of the form (LIST, package_id, id,).
         """
-        return self._get_simple_elements (package_ids, LIST, id, id_alt)
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
+
+        selectfrom, where, args = \
+            self._make_element_query (package_ids, LIST, id, id_alt)
+        return self._conn.execute (selectfrom+where, args)
 
     def get_queries (self, package_ids, id=None, id_alt=None):
         """
         Yield tuples of the form (QUERY, package_id, id,).
         """
-        return self._get_simple_elements (package_ids, QUERY, id, id_alt)
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
+
+        selectfrom, where, args = \
+            self._make_element_query (package_ids, QUERY, id, id_alt)
+        return self._conn.execute (selectfrom+where, args)
 
     def get_imports (self, package_ids,
                        id=None,   id_alt=None,
@@ -569,6 +611,7 @@ class _SqliteBackend (object):
         """
         Yield tuples of the form (IMPORT, package_id, id, url, uri).
         """
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
         assert ( id is None  or   id_alt is None)
         assert (url is None  or  url_alt is None)
         assert (uri is None  or  uri_alt is None)
@@ -610,44 +653,49 @@ class _SqliteBackend (object):
                 args.append(i)
             q += ")"
 
-        for i in self._conn.execute (q, args): yield i
+        return self._conn.execute (q, args)
 
-    def _get_simple_elements (self, package_ids, element_type,
+    def _make_element_query (self, package_ids, element_type,
                               id=None, id_alt=None):
         """
-        Yield tuples of the form (element_type, package_id, id,).
-        Useful for all elements that have that form of tuple.
+        Return the selectfrom part of the query, the where part of the query,
+        and the argument list, of a query returning all the elements 
+        matching the parameters.
         """
-        assert (id is None  or  id_alt is None)
+        assert (id is None or id_alt is None)
 
-        q = "SELECT typ, package, id FROM Elements WHERE package in ("
+        s = "SELECT typ, package, id FROM Elements"
+        w = " WHERE package in ("
         args = []
 
         for p in package_ids:
-            q += "?,"
+            w += "?,"
             args.append (p)
-        q += ")"
+        w += ")"
 
-        q += " AND typ = ?"
+        w += " AND typ = ?"
         args.append (element_type)
 
         if id is not None:
-            q += " AND id = ?"
+            w += " AND id = ?"
             args.append (id)
         if id_alt is not None:
-            q += " AND id IN ("
+            w += " AND id IN ("
             for i in id_alt:
-                q += "?,"
+                w += "?,"
                 args.append(i)
-            q += ")"
+            w += ")"
 
-        for i in self._conn.execute (q, args): yield i
+        return s,w,args
 
     # content
 
     def get_content (self, package_id, id, element_type):
         """
+        Return a tuple (mimetype, data, schema_idref).
         In this implementation, element_type will always be ignored.
+        Note that ``schema_idref`` will be an empty string if no schema is
+        specified (never None).
         """
         # TODO manage schema and url
         q = "SELECT mimetype, data, join_id_ref(schema_p,schema_i) as schema " \
@@ -657,6 +705,11 @@ class _SqliteBackend (object):
         return cur.fetchone() or None
 
     def update_content (self, package_id, id, mimetype, data, schema):
+        """
+        Update the content of the identified element.
+        ``schema`` is the id-ref of an own or directly imported resource,
+        or an empty string to specify no schema (not None).
+        """
         if len (schema) > 0:
             p,s = _split_id_ref (schema) # also assert that schema has len<=2
             assert p == "" or self.has_element(package_id,p,IMPORT), p
@@ -689,6 +742,7 @@ class _SqliteBackend (object):
 
     def get_meta (self, package_id, id, element_type, key):
         """
+        Return the given metadata of the identified element.
         id should be an empty string if package metadata is required,
         and element_type will be ignored.
 
@@ -703,7 +757,10 @@ class _SqliteBackend (object):
 
     def set_meta (self, package_id, id, element_type, key, val):
         """
+        Return the given metadata of the identified element.
         id should be an empty string if package metadata is required,
+        and element_type will be ignored.
+        id should be an empty string if package metadata is targetted,
         and element_type will be ignored.
 
         In this implementation, element_type will always be ignored.
@@ -734,6 +791,7 @@ class _SqliteBackend (object):
     def insert_member (self, package_id, id, member, pos):
         """
         Insert a member at the given position.
+        ``member`` is the id-ref of an own or directly imported member.
         ``pos`` may be any value between -1 and n (inclusive), where n is the
         current number of members.
         If -1, the member will be appended at the end (**note** that this is
@@ -752,7 +810,7 @@ class _SqliteBackend (object):
         try:
             c = self._conn.cursor()
             c.execute ("UPDATE RelationMembers SET ord=ord+1 "
-                       "WHERE package = ? AND relation = ? AND ord > ?",
+                       "WHERE package = ? AND relation = ? AND ord >= ?",
                        (package_id, id, pos))
             c.execute ("INSERT INTO RelationMembers VALUES (?,?,?,?,?)",
                        (package_id, id, pos, p, s))
@@ -762,11 +820,18 @@ class _SqliteBackend (object):
             raise InternalError ("could not update or insert", e)
 
     def count_members (self, package_id, id):
+        """
+        Count the members of the identified relations.
+        """
         q = "SELECT count(ord) FROM RelationMembers "\
             "WHERE package = ? AND relation = ?"
         return self._conn.execute (q, (package_id, id)).fetchone()[0]
 
     def get_member (self, package_id, id, pos):
+        """
+        Return the id-ref of the member at the given position in the identified
+        relation.
+        """
         if __debug__:
             c = self.count_members (package_id, id)
             assert (-c <= pos < c)
@@ -781,6 +846,9 @@ class _SqliteBackend (object):
         return self._conn.execute (q, (package_id, id, pos)).fetchone()[0]
 
     def iter_members (self, package_id, id):
+        """
+        Iter over all the members of the identified relation.
+        """
         q = "SELECT join_id_ref(member_p,member_i) AS member " \
             "FROM RelationMembers " \
             "WHERE package = ? AND relation = ? ORDER BY ord"
@@ -788,9 +856,50 @@ class _SqliteBackend (object):
             yield r[0]
 
     def remove_member (self, package_id, id, pos):
-        raise NotImplementedError
+        """
+        Remobv the member at the given position in the identified relation.
+        """
+        assert (0 <= pos < self.count_members (package_id, id))
+        assert (0 <= pos < self.count_members (package_id, id))
+
+        try:
+            c = self._conn.cursor()
+            c.execute ("DELETE FROM RelationMembers "
+                       "WHERE package = ? AND relation = ? AND ord = ?",
+                       (package_id, id, pos))
+            c.execute ("UPDATE RelationMembers SET ord=ord-1 "
+                       "WHERE package = ? AND relation = ? AND ord > ?",
+                       (package_id, id, pos))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not delete or update", e)
 
     def get_relations_with_member (self, member, package_ids, pos=None):
-        raise NotImplementedError
+        """
+        Return tuples of the form (RELATION, package_id, id) of all the 
+        relations having the given member, at the given position if given.
+        """
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
+
+        member_u, member_i = _split_uri_ref (member)
+
+        q = "SELECT DISTINCT ?, e.package, e.id FROM Elements e " \
+            "JOIN Packages p ON e.package = p.id "\
+            "JOIN RelationMembers m " \
+              "ON e.package = m.package and e.id = m.relation " \
+            "LEFT JOIN Imports i ON m.member_p = i.id " \
+            "WHERE member_i = ? AND ("\
+              "(member_p = ''   AND  ? IN (p.uri, ?||e.package)) OR " \
+              "(member_p = i.id AND  ? IN (i.uri, i.url)))"
+
+        p_url = "sqlite:%s" % self._path
+        args = [RELATION, member_i, member_u, p_url, member_u]
+
+        if pos is not None:
+            q += " AND ord = ?"
+            args.append (pos)
+
+        return self._conn.execute (q, args)
 
     # end of the class

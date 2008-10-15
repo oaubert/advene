@@ -1,4 +1,3 @@
-from advene.model.backends.sqlite.SqliteBackend import SqliteBackend
 from advene.model.core.Package import Package
 
 from os import unlink
@@ -32,40 +31,39 @@ if __name__ == "__main__":
     Package.make_metadata_property ("dc#Creator", "dc_creator")
 
     p = Package.create (uri)
-    trace_wrap_all (p._backend)
+    #trace_wrap_all (p._backend)
 
-    #sys.exit(0)
-
-    p.create_stream("s1", "http://champin.net/stream.avi")
-    p.create_annotation("a1", "s1", 20, 30)
-    p.create_annotation("a2", "s1", 0, 20)
+    m1 = p.create_media("m1", "http://champin.net/stream.avi")
+    p.create_annotation("a1", m1, 20, 30)
+    p.create_annotation("a2", m1, 0, 20)
     p.create_relation("r1")
-    p.create_bag("b1")
     print [a._id for a in p.own.annotations]
     print p.get_element ("a1")
     print p.get_element ("a2")
-    p.get_element("a1").content._set_data ("hello")
+    p.get_element("a1").content.data = "hello"
     p.dc_creator = "pchampin"
 
-    p.close()
+    NB = 1000
+    print "creating %s annotations" % NB
+    for i in range(NB):
+        p.create_annotation("aa%s" % i, m1, i*10, i*10+9)
+    print "done"
+
+    p._backend._conn.close() # force backend to close connexion
+    p._backend = None # force backend out of the cache
+
     print
 
 
+    print "about to re-load package"
     p = Package.bind (uri)
-    trace_wrap_all (p._backend)
+    print "package loaded"
+    #trace_wrap_all (p._backend)
 
     l = list (p.own.annotations)
-    print [a._id for a in p.own.annotations]
+    #print [a._id for a in p.own.annotations]
     a1 = p.get_element ("a1")
     a2 = p.get_element ("a2")
-    print a1, p.get_element ("a1")
-    print a1.content._get_data()
+    print id(a1) == id(p.get_element ("a1"))
+    print a1.content.data
     print p.dc_creator
-    p.close()
-    print
-
-    p = Package.bind (uri)
-    trace_wrap_all (p._backend)
-    print p.get_element ("a1")
-    print p.get_element ("a1").content
-    print p.get_element ("a1")

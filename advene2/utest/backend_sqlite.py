@@ -266,6 +266,8 @@ class TestCreateElement (TestCase):
             self.fail (e) # raised by create_annotation
         self.assert_ (self.be.has_element (self.pid, "a1"))
         self.assert_ (self.be.has_element (self.pid, "a1", ANNOTATION))
+        self.assertEquals ((ANNOTATION, self.pid, "a1", "m1", 10, 20),
+                           self.be.get_element (self.pid, "a1"))
         # check that it has a content
         self.assertNotEqual (self.be.get_content (self.pid, "a1", ANNOTATION),
                              None)
@@ -409,6 +411,8 @@ class TestHandleElements (TestCase):
             self.be.create_query      (*self.q1)
             self.be.create_query      (*self.q2)
 
+            self.be.update_uri (self.pid2, self.i1_uri)
+
             self.m3 = (self.pid2, "m3", self.m3_url)
             self.a5 = (self.pid2, "a5", "m3", 25, 30)
             self.a6 = (self.pid2, "a6", "m3", 35, 45)
@@ -519,7 +523,7 @@ class TestHandleElements (TestCase):
         self.assertEqual (ref,
             get ((self.pid1, self.pid2), id_alt=("a6", "a4", "a2",),))
 
-        media3 = "%s#m3" % self.url2
+        media3 = "%s#m3" % self.i1_uri
         ref = [self.a4, self.a5, self.a6]
         self.assertEqual (ref,
             get ((self.pid1, self.pid2), media=media3,))
@@ -792,8 +796,33 @@ class TestHandleElements (TestCase):
         self.assertEqual ("a2", self.be.get_member (self.pid1, "r1", 1))
         self.assertEqual (["a1", "a2"],
                           list (self.be.iter_members (self.pid1, "r1")))
-        # TODO finish that
+
+        self.be.insert_member (self.pid1, "r1", "i1:a5", 1)
+        self.assertEqual (3, self.be.count_members (self.pid1, "r1"))
+        self.assertEqual (   "a1", self.be.get_member (self.pid1, "r1", 0))
+        self.assertEqual ("i1:a5", self.be.get_member (self.pid1, "r1", 1))
+        self.assertEqual (   "a2", self.be.get_member (self.pid1, "r1", 2))
+        self.assertEqual (["a1", "i1:a5", "a2"],
+                          list (self.be.iter_members (self.pid1, "r1")))
             
+        self.be.remove_member (self.pid1, "r1", 0)
+        self.assertEqual (2, self.be.count_members (self.pid1, "r1"))
+        self.assertEqual ("i1:a5", self.be.get_member (self.pid1, "r1", 0))
+        self.assertEqual (   "a2", self.be.get_member (self.pid1, "r1", 1))
+        self.assertEqual (["i1:a5", "a2"],
+                          list (self.be.iter_members (self.pid1, "r1")))
+
+        self.be.insert_member (self.pid1, "r2", "a1", -1)
+        self.be.insert_member (self.pid2, "r3", "a6", -1)
+        self.be.insert_member (self.pid2, "r3", "a5", -1)
+        rel_w_member = self.be.get_relations_with_member
+        pids = (self.pid1, self.pid2,)
+        r1_uri_ref = "%s#a5" % self.i1_uri
+        self.assertEqual (frozenset ((RELATION,)+i for i in [self.r1, self.r3]),
+                          frozenset (rel_w_member (r1_uri_ref, pids)))
+        self.assertEqual (frozenset ([(RELATION,)+self.r1,]),
+                          frozenset (rel_w_member (r1_uri_ref, pids, 0)))
+
 
 class TestRetrieveDataWithSameId (TestCase):
     def setUp (self):

@@ -11,4 +11,3 @@ class Relation (PackageElement, WithContentMixin):
 
     def __init__ (self, owner, id):
         PackageElement.__init__ (self, owner, id)
-        self._content   = None

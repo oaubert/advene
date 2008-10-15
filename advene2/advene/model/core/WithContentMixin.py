@@ -11,8 +11,9 @@ class WithContentMixin:
         # TODO manage schema and url
         c = getattr (self, "_cached_content", None)
         if c is None:
-            mimetype, data = \
-                self._owner._backend.get_content (self._id, self.ADVENE_TYPE)
-            c = Content (self, mimetype, data)
+            o = self._owner
+            mimetype, data, schema_idref = \
+                o._backend.get_content (o._id, self._id, self.ADVENE_TYPE)
+            c = Content (self, mimetype, data, schema_idref)
             self._cached_content = c
         return c
