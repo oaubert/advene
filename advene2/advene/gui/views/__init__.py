@@ -297,7 +297,7 @@ class AdhocView(object):
             v=self.controller.package.get(ident)
             if v is None:
                 create=True
-                v=self.controller.package.createView(ident=ident, clazz='package')
+                v=self.controller.package.create_view(id=ident, mimetype='application/x-advene-adhoc-view')
             else:
                 # Existing view. Check that it is already an adhoc-view
                 if v.content.mimetype != 'application/x-advene-adhoc-view':
@@ -306,12 +306,8 @@ class AdhocView(object):
                 create=False
                 self.controller.notify('ElementEditBegin', element=v, immediate=True)
             v.title=title
-            v.author=config.data.userid
-            v.date=self.controller.get_timestamp()
-
             self.save_parameters(v.content, options, arguments)
             if create:
-                self.controller.package.views.append(v)
                 self.controller.notify("ViewCreate", view=v)
             else:
                 self.controller.notify("ViewEditEnd", view=v)
@@ -335,16 +331,9 @@ class AdhocView(object):
         if title is None:
             title=ident
         # Create the view
-        v=self.controller.package.createView(
-            ident=ident,
-            author=config.data.userid,
-            date=self.controller.get_timestamp(),
-            clazz='*',
-            content_mimetype="text/html",
-            )
+        v=self.controller.package.create_view(ident=ident, mimetype="text/html")
         v.title=title
         v.content.data=self.as_html()
-        self.controller.package.views.append(v)
         self.controller.notify('ViewCreate', view=v)
         d=dialog.message_dialog(_("View successfully exported as %s.\nOpen it in the web browser ?") % v.title, icon=gtk.MESSAGE_QUESTION)
         if d:

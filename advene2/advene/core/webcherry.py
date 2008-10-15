@@ -1796,12 +1796,9 @@ class Packages(Common):
 
                 update_arg('mimetype', 'content_mimetype', 'text/html')
                 update_arg('class', 'clazz', 'package')
-                update_arg('author', 'author', config.data.userid)
-                kw['content_data']=data
-                kw['date']=self.controller.get_timestamp()
                 try:
-                    v = objet.createView(**kw)
-                    objet.views.append(v)
+                    v = objet.create_view(id=kw['ident'], mimetype=kw['mimetype'])
+                    v.content_data=data
                 except Exception, e:
                     return self.send_error(500,
                                            _("<p>Error while creating view %(id)s</p><pre>%(error)s</pre>") % {

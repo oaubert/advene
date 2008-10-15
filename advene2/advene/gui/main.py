@@ -3448,8 +3448,7 @@ class AdveneGUI(Connect):
         v=self.controller.package.get(ident)
         if v is None:
             create=True
-            v=self.controller.package.createView(ident=ident, clazz='package')
-            v.content.mimetype='application/x-advene-workspace-view'
+            v=self.controller.package.create_view(ident=ident, mimetype='application/x-advene-workspace-view')
         else:
             # Existing view. Check that it is already an workspace-view
             if v.content.mimetype != 'application/x-advene-workspace-view':
@@ -3457,18 +3456,15 @@ class AdveneGUI(Connect):
                 return True
             create=False
         v.title=title
-        v.author=config.data.userid
-        v.date=self.controller.get_timestamp()
 
         workspace=self.workspace_serialize()
         stream=StringIO.StringIO()
         helper.indent(workspace)
         ET.ElementTree(workspace).write(stream, encoding='utf-8')
-        v.content.setData(stream.getvalue())
+        v.content.data=stream.getvalue()
         stream.close()
 
         if create:
-            self.controller.package.views.append(v)
             self.controller.notify("ViewCreate", view=v)
         else:
             self.controller.notify("ViewEditEnd", view=v)
