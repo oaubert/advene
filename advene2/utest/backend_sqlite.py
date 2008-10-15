@@ -454,6 +454,8 @@ class TestHandleElements(TestCase):
 
             self.foref = "http://advene.liris.cnrs.fr/" \
                          "ns/frame_of_reference/ms;o=0"
+            self.foref2 = "http://advene.liris.cnrs.fr/" \
+                         "ns/frame_of_reference/ms;o=1000"
             self.m1_url = "http://example.com/m1.avi"
             self.m2_url = "http://example.com/m2.avi"
             self.m3_url = "http://example.com/m3.avi"
@@ -461,7 +463,7 @@ class TestHandleElements(TestCase):
             self.i2_url = "http://example.com/advene/db2"
 
             self.m1 = (self.pid1, "m1", self.m1_url, self.foref)
-            self.m2 = (self.pid1, "m2", self.m2_url, self.foref)
+            self.m2 = (self.pid1, "m2", self.m2_url, self.foref2)
             self.a1 = (self.pid1, "a1", "i1:m3", 15, 20) + content
             self.a2 = (self.pid1, "a2", "m1", 10, 30) + content
             self.a3 = (self.pid1, "a3", "m2", 10, 20) + content
@@ -605,6 +607,14 @@ class TestHandleElements(TestCase):
         ref = frozenset([self.m1, self.m3])
         self.assertEqual(ref,
             get((self.pid1, self.pid2), url_alt=(self.m1_url, self.m3_url),))
+
+        ref = frozenset([self.m1, self.m3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), foref=self.foref,))
+
+        ref = frozenset([self.m1, self.m2, self.m3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), foref_alt=(self.foref, self.foref2)))
 
         # mixing several criteria
 
