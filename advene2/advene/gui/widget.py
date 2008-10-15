@@ -248,8 +248,10 @@ class AnnotationWidget(GenericColorButtonWidget):
         self.connect('key-press-event', self.keypress, self.annotation)
         self.connect('enter-notify-event', lambda b, e: b.grab_focus() and True)
         self.connect('drag-data-get', self.drag_sent)
-        self.connect('drag-begin', self._drag_begin)
-        self.connect('drag-end', self._drag_end)
+        # drag_set_icon_cursor does not work on native Gtk on MacOS X
+        if not (config.data.os == 'darwin' and not os.environ.get('DISPLAY')):
+            self.connect('drag-begin', self._drag_begin)
+            self.connect('drag-end', self._drag_end)
         # The widget can generate drags
         self.drag_source_set(gtk.gdk.BUTTON1_MASK,
                              config.data.drag_type['annotation']
@@ -550,7 +552,9 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         GenericColorButtonWidget.__init__(self, element=annotationtype, container=container)
         self.connect('key-press-event', self.keypress, self.annotationtype)
         self.connect('enter-notify-event', lambda b, e: b.grab_focus() and True)
-        self.connect('drag-begin', self._drag_begin)
+        # drag_set_icon_cursor does not work on native Gtk on MacOS X
+        if not (config.data.os == 'darwin' and not os.environ.get('DISPLAY')):
+            self.connect('drag-begin', self._drag_begin)
 
     def set_highlight(self, b):
         self.highlight=b
@@ -642,7 +646,9 @@ class TagWidget(GenericColorButtonWidget):
         self.tag=tag
         self.width=60
         GenericColorButtonWidget.__init__(self, element=tag, container=container)
-        self.connect('drag-begin', self._drag_begin)
+        # drag_set_icon_cursor does not work on native Gtk on MacOS X
+        if not (config.data.os == 'darwin' and not os.environ.get('DISPLAY')):
+            self.connect('drag-begin', self._drag_begin)
         self.drag_source_set(gtk.gdk.BUTTON1_MASK,
                              config.data.drag_type['tag'],
                              gtk.gdk.ACTION_LINK)
@@ -947,8 +953,10 @@ class TimestampRepresentation(gtk.Button):
             widget._icon.destroy()
             widget._icon=None
             return True
-        self.connect('drag-begin', _drag_begin)
-        self.connect('drag-end', _drag_end)
+        # drag_set_icon_cursor does not work on native Gtk on MacOS X
+        if not (config.data.os == 'darwin' and not os.environ.get('DISPLAY')):
+            self.connect('drag-begin', _drag_begin)
+            self.connect('drag-end', _drag_end)
 
         def enter_bookmark(widget, event):
             self.controller.notify('BookmarkHighlight', timestamp=self.value, immediate=True)
