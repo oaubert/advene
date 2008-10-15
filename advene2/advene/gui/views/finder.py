@@ -66,6 +66,15 @@ class ListNode(Node):
             else:
                 yield Node(e)
 
+class ViewsNode(Node):
+    """Classifies views among static/dynamic/adhoc/administrative.
+    """
+    def children(self):
+        yield ListNode( [ v for v in self.element if helper.get_view_type(v) == 'static' and not v.id.startswith('_')], _("Static views"))
+        yield ListNode( [ v for v in self.element if helper.get_view_type(v) == 'dynamic' and not v.id.startswith('_') ], _("Dynamic views"))
+        yield ListNode( [ v for v in self.element if helper.get_view_type(v) == 'adhoc' and not v.id.startswith('_') ], _("Adhoc views"))
+        yield ListNode( [ v for v in self.element if v.id.startswith('_') ], _("Admin views"))
+
 class GroupNode(Node):
     def children(self):
         l=dir(self.element)
@@ -81,7 +90,10 @@ class GroupNode(Node):
             ('user_tags', _("Tags")),
             ):
             if attname in l:
-                yield ListNode(getattr(self.element, attname), label)
+                if attname == 'views':
+                    yield ViewsNode(self.element.views, label)
+                else:
+                    yield ListNode(getattr(self.element, attname), label)
 
 class PackageNode(Node):
     def children(self):
