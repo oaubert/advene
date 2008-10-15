@@ -1,6 +1,8 @@
 Needed improvements
 ===================
 
+- replace package session with threading.local
+
 - auto-update of creator/created/contributor/modified. For package,
    update contributor/modified upon package saving.
 
