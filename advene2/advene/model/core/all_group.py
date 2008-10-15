@@ -39,21 +39,23 @@ class AllGroup(GroupMixin):
             for i in be.iter_medias(pdict):
                 yield pdict[i[1]].get_element(i)
 
-    def iter_annotations(self, media=None, medias=None,
+    def iter_annotations(self, media=None,
                                begin=None, begin_min=None, begin_max=None,
                                end=None, end_min=None, end_max=None,
                                at=None):
         """FIXME: missing docstring.
         """
         o = self._owner
-        if media is not None:
+
+        if hasattr(media, '_get_uriref'):
             media = media._get_uriref()
-        if medias is not None:
-            medias = (m._get_uriref() for m in medias)
+        elif media is not None:
+            # It should be a sequence/iterator of medias
+            media = (m._get_uriref() for m in media)
         if at is not None:
             begin_max = end_min = at
         def annotation_iterator(be, pdict):
-            for i in be.iter_annotations(pdict, None, None, media, medias,
+            for i in be.iter_annotations(pdict, None, media,
                                                 begin, begin_min, begin_max,
                                                 end, end_min, end_max):
                 yield pdict[i[1]].get_element(i)
@@ -128,18 +130,19 @@ class AllGroup(GroupMixin):
         return sum( be.media_count(pdict)
                     for be, pdict in o._backends_dict.items() )
 
-    def annotation_count(self, media=None, medias=None,
+    def annotation_count(self, media=None,
                                begin=None, begin_min=None, begin_max=None,
                                end=None, end_min=None, end_max=None,
                                at=None):
         o = self._owner
-        if media is not None:
+        if hasattr(media, '_get_uriref'):
             media = media._get_uriref()
-        if medias is not None:
-            medias = (m._get_uriref() for m in medias)
+        elif media is not None:
+            # It should be a sequence/iterator of medias
+            media = (m._get_uriref() for m in media)
         if at is not None:
             begin_max = end_min = at
-        return sum( be.annotation_count(pdict, None, None, media, medias,
+        return sum( be.annotation_count(pdict, None, media,
                                                begin, begin_min, begin_max,
                                                end, end_min, end_max)
                     for be, pdict in o._backends_dict.items() )

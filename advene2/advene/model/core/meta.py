@@ -10,7 +10,7 @@ from advene.utils.sorted_dict import SortedDict
 class WithMetaMixin:
     """Metadata access mixin.
 
-    I factorize all metradata-related code for classes Package and
+    I factorize all metadata-related code for classes Package and
     PackageElement.
 
     I also provide an alias mechanism to make frequent metadata easily
@@ -125,7 +125,7 @@ class WithMetaMixin:
         return self.get_meta_id(key, default, False)
 
     def get_meta_id(self, key, default=_RAISE, _return_id=True):
-        """Return the metadata (string or element) associated to the given key.
+        """Return the metadata id (string or element) associated to the given key.
 
         The returned value is a string with a special attribute ``is_id``
         indicating if it represents the id-ref of an element.

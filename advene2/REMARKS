@@ -45,7 +45,6 @@
     id-ref vs. id
     ADVENE_TYPE
 
-
 * Content: deprecated content.XXX in favor of content_XXX ? Not sure
   if it is a good idea, I have a bad feeling here.
 
@@ -67,12 +66,8 @@ quel mode l'ouvrir avant d'avoir l'opération correspondante
 (get_content_data / set_content_data)
 
 The handling of missing elements:
-    * list.iter_items: yield idref for missing elements: dangerous ? Maybe
-      better yield None ?
+    * list.iter_items: yield idref for missing elements: dangerous ? Maybe better yield None ?
     
     * relations.__iter__: yet another behaviour (raise exception). To unify also (+ iter_members)
     
     * tag.iter_elements: 2 possible behaviours for missing elements (through yield_idrefs param)
-    
-
-

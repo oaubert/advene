@@ -29,19 +29,20 @@ class OwnGroup(GroupMixin):
         for i in o._backend.iter_medias((o._id,)):
             yield o.get_element(i)
 
-    def iter_annotations(self, media=None, medias=None,
+    def iter_annotations(self, media=None,
                                begin=None, begin_min=None, begin_max=None,
                                end=None, end_min=None, end_max=None,
                                at=None):
-        if media is not None:
+        if hasattr(media, '_get_uriref'):
             media = media._get_uriref()
-        if medias is not None:
-            medias = (m._get_uriref() for m in medias)
+        elif media is not None:
+            # It should be a sequence/iterator of medias
+            media = (m._get_uriref() for m in media)
         if at is not None:
             begin_max = end_min = at
         o = self._owner
         for i in o._backend.iter_annotations((o._id,), None, None,
-                                              media, medias,
+                                              media,
                                               begin, begin_min, begin_max,
                                               end, end_min, end_max):
             yield o.get_element(i)
@@ -98,14 +99,15 @@ class OwnGroup(GroupMixin):
         o = self._owner
         return o._backend.media_count((o._id,))
 
-    def annotation_count(self, media=None, medias=None,
+    def annotation_count(self, media=None,
                                 begin=None, begin_min=None, begin_max=None,
                                 end=None, end_min=None, end_max=None,
                                 at=None):
-        if media is not None:
+        if hasattr(media, '_get_uriref'):
             media = media._get_uriref()
-        if medias is not None:
-            medias = (m._get_uriref() for m in medias)
+        elif media is not None:
+            # It should be a sequence/iterator of medias
+            media = (m._get_uriref() for m in media)
         if at is not None:
             begin_max = end_min = at
         o = self._owner
