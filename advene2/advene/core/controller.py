@@ -499,13 +499,15 @@ class AdveneController(object):
             c=self.build_context()
             source=c.evaluate(source)
 
+        # Replace standard \n/\t escape, because \ are parsed by shlex
+        words=words.replace('\\n', '%n').replace('\\t', '%t')
         try:
-            words=[ unicode(w, 'utf8') for w in shlex.split(searched.encode('utf8')) ]
+            words=[ unicode(w, 'utf8').replace('%n', "\n").replace('%t', "\t") for w in shlex.split(searched.encode('utf8')) ]
         except ValueError:
             # Unbalanced quote. Just do a split along whitespace, the
             # user may be looking for a string with a quote and not
             # know it should be escaped.
-            words=searched.split()
+            words=[ unicode(w, 'utf8').replace('%n', "\n").replace('%t', "\t") for w in searched.encode('utf8').split() ]
 
         mandatory=[ w[1:] for w in words if w.startswith('+') ]
         exceptions=[ w[1:] for w in words if w.startswith('-') ]
