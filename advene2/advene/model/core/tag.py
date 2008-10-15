@@ -105,6 +105,10 @@ class Tag(PackageElement, GroupMixin):
             return list(element.iter_taggers(self, package))
 
     def __wrap_with_tales_context__(self, context):
+        """
+        This method is used by adveve.model.tales, when the TALES processor
+        wants to traverse the given object.
+        """
         return ContextualizedTag(self, context)
 
 
@@ -117,7 +121,6 @@ class ContextualizedTag(GroupMixin, object):
         return self._t.iter_elements(package=self._p)
 
     def __getattr__(self, name):
-
         if name[0] != "_" or name.startswith("_tales_"):
             return getattr(self._t, name)
         else:

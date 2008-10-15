@@ -1,9 +1,18 @@
 * use of reserved keywords (id): should we allow this ?
 
+  pa: I prefer it that way (more readable, easier to write), although I know it
+      is discourages. In that case, I think it is benign since parameters named
+      id are very unlikely to be callable, so the risk of an undetected clash
+      is very limited.
+
 * some standard metadata (dc_description, dc_author,etc) should return '' if not set,
   not raise an exception, or always be initialized.
 
+  pa: added in TODO
+
 * how to get owner/root package from element ? -> _owner, hidden ?
+
+  pa: actually, Element has a read-only property "owner"
 
 * autoproperties: define docstrings ? Cf a.content.model? in ipython
 

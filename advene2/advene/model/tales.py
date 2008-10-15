@@ -1,3 +1,31 @@
+"""
+TODO docstring
+
+Special TALES attributes
+========================
+
+Although TALES will search the attributes and item of an object when traversing
+it, it may be useful in some situations to provide TALES with specific
+attributes and methods.
+
+Naming convention
+-----------------
+
+When traversing object o with path element "a", TALES with first look for an attribute or method named "_tales_a". This allows classes to provide additional attributes, or even to override existing attributes in TALES.
+
+Method decorators
+-----------------
+
+This module provides a set of decorators (all functions named ``tales_X``) to be used with methods (either standard or TALES specific -- see `Naming convention`_) to customize the way TALES uses those methods.
+
+Wrapping
+--------
+
+In some cases, the naming convention and method decorators are not sufficient (i.e. when a mixin class should use the TALES specific version of an underlying method). For those cases, classes may provide the ``__wrap_with_tales_context__`` method. TALES will look for this method just before attempting to traverse an object, and if found, will replace that object by the result of the method.
+
+Note that the wrapping will happen just before traversing: TALES will never return a wrapped object as the result of an expression.
+
+"""
 from simpletal import simpleTALES
 
 AdveneTalesException=simpleTALES.PathNotFoundException

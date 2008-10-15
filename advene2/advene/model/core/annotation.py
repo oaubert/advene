@@ -6,6 +6,7 @@ from advene.model.consts import _RAISE
 from advene.model.core.element import PackageElement, ElementCollection, \
                                       ANNOTATION, MEDIA, RESOURCE
 from advene.model.core.content import WithContentMixin
+from advene.model.tales import tales_property
 from advene.util.autoproperty import autoproperty
 from advene.util.session import session
 
@@ -211,30 +212,33 @@ class Annotation(PackageElement, WithContentMixin):
             __iter__ = annotation.iter_relations
             __len__ = annotation.count_relations
             def __contains__(self, r):
-                return self in r
+                return annotation in r
         return AnnotationRelations(session.package)
 
     @property
-    def incoming_relations(annotation):
-        class IncomingRelations(ElementCollection):
-            def __iter__(self):
-                return annotation.iter_relations(position=0)
-            def __len__(self):
-                return annotation.count_relations(position=0)
-            def __contains__(self, r):
-                return self in r
-            _allow_filter=False
-        return IncomingRelations(session.package)
+    def incoming_relations(self):
+        return self.relations.filter(position=0)
 
     @property
-    def outgoing_relations(annotation):
-        class OutgoingRelations(ElementCollection):
-            def __iter__(self):
-                return annotation.iter_relations(position=1)
-            def __len__(self):
-                return annotation.count_relations(position=1)
+    def outgoing_relations(self):
+        return self.relations.filter(position=1)
+
+    @tales_property
+    def _tales_relations(annotation, context):
+        p = context.locals.get("refpkg") or context.globals.get("refpkg")
+        class TalesAnnotationRelations(ElementCollection):
+            def __iter__(self, position=None):
+                return annotation.iter_relations(p, position)
+            def __len__(self, position=None):
+                return annotation.count_relations(p, position)
             def __contains__(self, r):
                 return self in r
-            _allow_filter=False
-        return OutgoingRelations(session.package)
+        return TalesAnnotationRelations(p)
 
+    @tales_property
+    def _tales_incoming_relations(self, context):
+        return self._tales_relations(context).filter(position=0)
+
+    @tales_property
+    def _tales_outgoing_relations(self, context):
+        return self._tales_relations(context).filter(position=1)

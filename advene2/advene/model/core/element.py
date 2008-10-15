@@ -536,21 +536,21 @@ class ElementCollection(object):
 
     _allow_filter = True
 
-    def filter(self, **kw):
+    def filter(collection, **kw):
         """
         Use underlying iter method with the given keywords to make a filtered
         version of that collection.
         """
-        if not self._allow_filter:
-            raise TypeError("filtering is not allowed on %r") % self
+        if not collection._allow_filter:
+            raise TypeError("filtering is not allowed on %r") % collection
         class FilteredCollection(ElementCollection):
             def __iter__ (self):
-                return self.__iter__(**kw)
+                return collection.__iter__(**kw)
             def __len__(self):
-                return self.__len__(**kw)
+                return collection.__len__(**kw)
             def filter(self, **kw):
                 raise NotImplementedError("can not filter twice")
-        return FilteredCollection(self)
+        return FilteredCollection(collection._owner)
 
     @property
     def _tales_size(self):
