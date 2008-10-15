@@ -4,7 +4,7 @@ I define the class of annotations.
 
 from advene.model.consts import _RAISE
 from advene.model.core.element import PackageElement, ElementCollection, \
-                                      ANNOTATION, MEDIA, RESOURCE
+                                      ANNOTATION, MEDIA, RESOURCE, RELATION
 from advene.model.core.content import WithContentMixin
 from advene.model.tales import tales_property
 from advene.util.autoproperty import autoproperty
@@ -212,7 +212,8 @@ class Annotation(PackageElement, WithContentMixin):
             __iter__ = annotation.iter_relations
             __len__ = annotation.count_relations
             def __contains__(self, r):
-                return annotation in r
+                return getattr(r, "ADVENE_TYPE", None) == RELATION \
+                   and annotation in r
         return AnnotationRelations(session.package)
 
     @property
@@ -232,7 +233,8 @@ class Annotation(PackageElement, WithContentMixin):
             def __len__(self, position=None):
                 return annotation.count_relations(p, position)
             def __contains__(self, r):
-                return self in r
+                return getattr(r, "ADVENE_TYPE", None) == RELATION \
+                   and annotation in r
         return TalesAnnotationRelations(p)
 
     @tales_property

@@ -105,7 +105,7 @@ class GroupMixin:
             __iter__ = group.iter_medias
             __len__ = group.count_medias
             def __contains__(self, e):
-                return e is not None and e.ADVENE_TYPE == MEDIA and e in group
+                return getattr(e, "ADVENE_TYPE", None) == MEDIA and e in group
         return GroupMedias(group.owner)
 
     @property
@@ -114,7 +114,8 @@ class GroupMixin:
             __iter__ = group.iter_annotations
             __len__ = group.count_annotations
             def __contains__(self, e):
-                return e is not None and e.ADVENE_TYPE == ANNOTATION and e in group
+                return getattr(e, "ADVENE_TYPE", None) == ANNOTATION \
+                   and e in group
         return GroupAnnotations(group.owner)
 
     @property
@@ -123,7 +124,8 @@ class GroupMixin:
             __iter__ = group.iter_relations
             __len__ = group.count_relations
             def __contains__(self, e):
-                return e is not None and e.ADVENE_TYPE == RELATION and e in group
+                return getattr(e, "ADVENE_TYPE", None) == RELATION \
+                   and e in group
         return GroupRelations(group.owner)
 
     @property
@@ -132,7 +134,7 @@ class GroupMixin:
             __iter__ = group.iter_views
             __len__ = group.count_views
             def __contains__(self, e):
-                return e is not None and e.ADVENE_TYPE == VIEW and e in group
+                return getattr(e, "ADVENE_TYPE", None) == VIEW and e in group
         return GroupViews(group.owner)
 
     @property
@@ -141,7 +143,8 @@ class GroupMixin:
             __iter__ = group.iter_resources
             __len__ = group.count_resources
             def __contains__(self, e):
-                return e is not None and e.ADVENE_TYPE == RESOURCE and e in group
+                return getattr(e, "ADVENE_TYPE", None) == RESOURCE \
+                   and e in group
         return GroupResources(group.owner)
 
     @property
@@ -150,7 +153,7 @@ class GroupMixin:
             __iter__ = group.iter_tags
             __len__ = group.count_tags
             def __contains__(self, e):
-                return e is not None and e.ADVENE_TYPE == TAG and e in group
+                return getattr(e, "ADVENE_TYPE", None) == TAG and e in group
         return GroupTags(group.owner)
 
     @property
@@ -159,7 +162,7 @@ class GroupMixin:
             __iter__ = group.iter_lists
             __len__ = group.count_lists
             def __contains__(self, e):
-                return e is not None and e.ADVENE_TYPE == LIST and e in group
+                return getattr(e, "ADVENE_TYPE", None) == LIST and e in group
         return GroupLists(group.owner)
 
     @property
@@ -168,7 +171,7 @@ class GroupMixin:
             __iter__ = group.iter_queries
             __len__ = group.count_queries
             def __contains__(self, e):
-                return e is not None and e.ADVENE_TYPE == QUERY and e in group
+                return getattr(e, "ADVENE_TYPE", None) == QUERY and e in group
         return GroupQueries(group.owner)
 
     @property
@@ -177,7 +180,7 @@ class GroupMixin:
             __iter__ = group.iter_imports
             __len__ = group.count_imports
             def __contains__(self, e):
-                return e is not None and e.ADVENE_TYPE == IMPORT and e in group
+                return getattr(e, "ADVENE_TYPE", None) == IMPORT and e in group
         return GroupImports(group.owner)
 
 

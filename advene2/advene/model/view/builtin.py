@@ -44,7 +44,7 @@ def apply_to(view, obj):
         return _methods[method](obj, **params)
     except TypeError, e:
         raise ContentHandlingError(*e.args)
-    
+
 
 # specific to this handler
 

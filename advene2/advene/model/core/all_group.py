@@ -22,6 +22,8 @@ class AllGroup(GroupMixin, object):
         return self._owner
 
     def __contains__(self, element):
+        if not hasattr(element, "ADVENE_TYPE"):
+            return False
         eo = element._owner
         so = self._owner
         if so is eo:

@@ -24,7 +24,7 @@ class OwnGroup(GroupMixin, object):
     def __contains__(self, element):
         # the element is constructed, so if it belongs to the package, it must
         # be present in its _elements attribute
-        return element._owner is self._owner \
+        return getattr(element, "_owner", None) is self._owner \
            and element._id in self._owner._elements
 
     def iter_medias(self):

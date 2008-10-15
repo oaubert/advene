@@ -61,7 +61,7 @@ class CamGroupMixin(GroupMixin):
             __iter__ = group.iter_user_tags
             __len__ = group.count_user_tags
             def __contains__(self, e):
-                return e.ADVENE_TYPE == TAG \
+                return getattr(e, "ADVENE_TYPE", None) == TAG \
                        and e.get_meta(CAMSYS_TYPE, None) is None \
                        and e in group
         return GroupUserTags(group)
@@ -72,7 +72,7 @@ class CamGroupMixin(GroupMixin):
             __iter__ = group.iter_annotation_types
             __len__ = group.count_annotation_types
             def __contains__(self, e):
-                return e.ADVENE_TYPE == TAG \
+                return getattr(e, "ADVENE_TYPE", None) == TAG \
                        and e.get_meta(CAMSYS_TYPE, None) \
                            == "annotation-type" \
                        and e in group
@@ -84,7 +84,7 @@ class CamGroupMixin(GroupMixin):
             __iter__ = group.iter_relation_types
             __len__ = group.count_relation_types
             def __contains__(self, e):
-                return e.ADVENE_TYPE == TAG \
+                return getattr(e, "ADVENE_TYPE", None) == TAG \
                        and e.get_meta(CAMSYS_TYPE, None) \
                            == "relation-type" \
                        and e in group
@@ -96,7 +96,7 @@ class CamGroupMixin(GroupMixin):
             __iter__ = group.iter_user_lists
             __len__ = group.count_user_lists
             def __contains__(self, e):
-                return e.ADVENE_TYPE == LIST \
+                return getattr(e, "ADVENE_TYPE", None) == LIST \
                        and e.get_meta(CAMSYS_TYPE, None) is None \
                        and e in group
         return GroupUserLists(group)
@@ -107,7 +107,7 @@ class CamGroupMixin(GroupMixin):
             __iter__ = group.iter_schemas
             __len__ = group.count_schemas
             def __contains__(self, e):
-                return e.ADVENE_TYPE == LIST \
+                return getattr(e, "ADVENE_TYPE", None) == LIST \
                        and e.get_meta(CAMSYS_TYPE, None) == "schema" \
                        and e in group
         return GroupSchemas(group)

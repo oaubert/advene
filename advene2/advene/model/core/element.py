@@ -515,15 +515,6 @@ class ElementCollection(object):
                 raise KeyError(key)
             return r
 
-    def __contains__(self, item):
-        """
-        Default and inefficient implementation relying on __iter__.
-        Override if possible.
-        """
-        for i in self:
-            if item == i:
-                return True
-
     def __repr__(self):
         return "[" + ",".join(e.id for e in self) + "]"
 
