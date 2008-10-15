@@ -4,7 +4,8 @@ from time import time
 from advene.model.core.diff import diff_packages
 from advene.model.core.media import FOREF_PREFIX
 from advene.model.core.package import Package
-from advene.model.serializers.advene_xml import serialize_to
+import advene.model.serializers.advene_xml as xml
+import advene.model.serializers.advene_zip as zip
 
 _t = 0
 
@@ -34,17 +35,35 @@ if __name__ == "__main__":
 
     f = open("test/test_big.bxp", "w")
     measure_time() # take origin
-    serialize_to(p, f)
-    measure_time("serializing")
+    xml.serialize_to(p, f)
+    measure_time("serializing XML")
     f.close()
 
     measure_time() # take origin
     q = Package("file:test/test_big.bxp")
-    measure_time("parsing")
+    measure_time("parsing XML")
 
     diff = diff_packages(p, q)
     measure_time("checking parsed package")
-    assert len(diff) == 0
+    assert len(diff) == 0, diff
 
-    list(q.all.annotations)
+    f = open("test/test_big.bzp", "w")
+    measure_time() # take origin
+    zip.serialize_to(p, f)
+    measure_time("serializing ZIP")
+    f.close()
+
+    measure_time() # take origin
+    r = Package("file:test/test_big.bzp")
+    measure_time("parsing ZIP")
+
+    diff = diff_packages(p, r)
+    measure_time("checking parsed package")
+    assert len(diff) == 1, diff # the PACKAGED_ROOT metadata is different
+
+    list(r.all.annotations)
     measure_time("building annotations list")
+
+    p.close()
+    q.close()
+    r.close()
