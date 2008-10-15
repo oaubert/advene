@@ -12,21 +12,19 @@ class Tag(PackageElement):
     def __init__(self, owner, id):
         PackageElement.__init__(self, owner, id)
 
-    def iter_elements(self, package, inherited=True, yield_ids=False):
+    def iter_elements(self, package, inherited=True):
         """Iter over the elements associated with this tag in ``package``.
 
         If ``inherited`` is set to False, the elements associated by imported
         packages of ``package`` will not be yielded.
 
-        If an element is unreachable, an exception will be raised at the time
-        it must be yielded, unless yield_ids is set to True, in which case
-        the id-ref of the element is yielded instead.
+        If an element is unreachable, None is yielded.
 
-        See also `iter_elements_ids`.
+        See also `iter_element_ids`.
         """
-        return self.iter_elements_ids(package, inherited, yield_ids and 1 or 2)
+        return self.iter_element_ids(package, inherited, True)
 
-    def iter_elements_ids(self, package, inherited=True, _try_get=0):
+    def iter_element_ids(self, package, inherited=True, _get=False):
         """Iter over the id-refs of the elements associated with this tag in
         ``package``.
 
@@ -36,19 +34,13 @@ class Tag(PackageElement):
         See also `iter_elements`.
         """
         # this actually also implements iter_elements
-        if _try_get == 1: # yield_ids is true
-            default = None
-        else: # yield_ids is false
-            default = _RAISE
         u = self._get_uriref()
         if not inherited:
             pids = (package._id,)
             get_element = package.get_element
             for pid, eid in package._backend.iter_elements_with_tag(pids, u):
-                if _try_get:
-                    y = package.get_element(eid, default)
-                    if y is None: # only possible when yield_ids is true
-                        y = eid
+                if _get:
+                    y = package.get_element(eid, None)
                 else:
                     y = eid
                 yield y
@@ -56,10 +48,8 @@ class Tag(PackageElement):
             for be, pdict in package._backends_dict.iteritems():
                 for pid, eid in be.iter_elements_with_tag(pdict, u):
                     p = pdict[pid]
-                    if _try_get:
-                        y = p.get_element(eid, default)
-                        if y is None: # only possible when yield_ids is true
-                            y = package.make_id_for(p, eid)
+                    if _get:
+                        y = p.get_element(eid, None)
                     else:
                         y = package.make_id_for(p, eid)
                     yield y

@@ -84,21 +84,19 @@ class PackageElement(object, WithMetaMixin):
 
     # tag management
 
-    def iter_tags(self, package, inherited=True, yield_ids=False):
+    def iter_tags(self, package, inherited=True):
         """Iter over the tags associated with this element in ``package``.
 
         If ``inherited`` is set to False, the tags associated by imported
         packages of ``package`` will not be yielded.
 
-        If a tag is unreachable, an exception will be raised at the time it
-        must be yielded, unless yield_ids is set to True, in which case the
-        id-ref of the tag is yielded instead.
+        If a tag is unreachable, None is yielded.
 
-        See also `iter_tags_ids`.
+        See also `iter_tag_ids`.
         """
-        return self.iter_tags_ids(package, inherited, yield_ids and 1 or 2)
+        return self.iter_tag_ids(package, inherited, True)
 
-    def iter_tags_ids(self, package, inherited=True, _try_get=0):
+    def iter_tag_ids(self, package, inherited=True, _get=0):
         """Iter over the id-refs of the tags associated with this element in
         ``package``.
 
@@ -108,19 +106,13 @@ class PackageElement(object, WithMetaMixin):
         See also `iter_tags`.
         """
         # this actually also implements iter_tags
-        if _try_get == 1: # yield_ids is true
-            default = None
-        else: # yield_ids is false
-            default = _RAISE
         u = self._get_uriref()
         if not inherited:
             pids = (package._id,)
             get_element = package.get_element
             for pid, tid in package._backend.iter_tags_with_element(pids, u):
-                if _try_get:
-                    y = package.get_element(tid, default)
-                    if y is None: # only possible when yield_ids is true
-                        y = tid
+                if _get:
+                    y = package.get_element(tid, None)
                 else:
                     y = tid
                 yield y
@@ -128,10 +120,8 @@ class PackageElement(object, WithMetaMixin):
             for be, pdict in package._backends_dict.iteritems():
                 for pid, tid in be.iter_tags_with_element(pdict, u):
                     p = pdict[pid]
-                    if _try_get:
-                        y = p.get_element(tid, default)
-                        if y is None: # only possible when yield_ids is true
-                            y = package.make_id_for(p, tid)
+                    if _get:
+                        y = p.get_element(tid, None)
                     else:
                         y = package.make_id_for(p, tid)
                     yield y

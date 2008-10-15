@@ -43,12 +43,15 @@ class List(PackageElement, WithContentMixin, GroupMixin):
     def __iter__(self):
         """Iter over the items of this list.
 
-        If the list contains unreachable items, an exception will be raised
-        at the time of yielding those items.
+        If the list contains unreachable items, None is yielded instead.
 
-        See also `iter_items`.
+        See also `iter_item_ids`.
         """
-        return self.iter_items(False)
+        for i,y in enumerate(self._cache):
+            y = y() # follow weak ref
+            if y is None:
+                y = self.get_item(i, None)
+            yield y
 
     def __getitem__(self, i):
         """Return item with index i, or raise an exception if the item is
@@ -136,34 +139,10 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         for e in elements:
             self.append(e)
 
-    def iter_items(self, _ids=True):
-        """Iter over the items of this list.
+    def iter_item_ids(self):
+        """Iter over the id-refs of the items of this list.
 
-        If the list contains unreachable items, their id-ref will be yielded 
-        instead.
-
-        Note: this should not be mistaken for the `iteritems` method of 
-        dictionaries; advene lists are list-like, not dict-like.
-
-        See also `__iter__` and `iter_items_ids`.
-        """
-        # NB: internally, _ids can be passed False to force exceptions
-        if _ids:
-            default = None
-        else:
-            default = _RAISE
-        for i,y in enumerate(self._cache):
-            y = y() # follow weak ref
-            if y is None: # not in cache or dead weakref
-                y = self.get_item(i, default)
-                if y is None: # only possible when _ids is true
-                    y = self.get_item_id(i)
-            yield y
-
-    def iter_items_ids(self):
-        """Iter over the id-refs of th items of this list.
-
-        See also `iter_items`.
+        See also `__iter__`.
         """
         for i,y in enumerate(self._ids):
             if y is not None:

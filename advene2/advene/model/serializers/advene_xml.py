@@ -144,7 +144,7 @@ class _Serializer(object):
     def _serialize_relation(self, r, xrelations):
         xr = SubElement(xrelations, "relation", id=r.id)
         xmembers = SubElement(xr, "members")
-        for m in r.iter_members_ids():
+        for m in r.iter_member_ids():
             SubElement(xmembers, "member", {"id-ref":m})
         if len(xmembers) == 0:
             xr.remove(xmembers)
@@ -155,7 +155,7 @@ class _Serializer(object):
     def _serialize_list(self, L, xlists):
         xL = SubElement(xlists, "list", id=L.id)
         xitems = SubElement(xL, "items")
-        for i in L.iter_items_ids():
+        for i in L.iter_item_ids():
             SubElement(xitems, "item", {"id-ref":i})
         if len(xitems) == 0:
             xr.remove(xitems)
@@ -164,7 +164,7 @@ class _Serializer(object):
 
     def _serialize_tag(self, t, ximports):
         xt = SubElement(ximports, "tag", id=t.id)
-        L = [ id for id in t.iter_elements_ids(self.package, False)
+        L = [ id for id in t.iter_element_ids(self.package, False)
                     if id.find(":") > 0 ]
         if L:
             ximp = SubElement(xt, "imported-elements")
@@ -238,7 +238,7 @@ class _Serializer(object):
             
     def _serialize_element_tags(self, elt, xelt):
         xtags = SubElement(xelt, "tags")
-        for t in elt.iter_tags_ids(self.package, inherited=False):
+        for t in elt.iter_tag_ids(self.package, inherited=False):
             SubElement(xtags, "tag", {"id-ref":t})
         if len(xtags) == 0:
             xelt.remove(xtags)

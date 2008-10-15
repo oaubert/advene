@@ -294,40 +294,31 @@ class TestElements(TestCase):
 
         get_item = getattr(L, "get_%s" % name)
         get_id = getattr(L, "get_%s_id" % name)
-        iter_items = getattr(L, "iter_%ss" % name)
-        iter_ids = getattr(L, "iter_%ss_ids" % name)
+        iter_ids = getattr(L, "iter_%s_ids" % name)
 
         self.assertEqual([], list(L))
-        self.assertEqual([], list(iter_items()))
         self.assertEqual([], list(iter_ids()))
         L.append(a[2])
         self.assertEqual([a[2],], list(L))
-        self.assertEqual([a[2],], list(iter_items()))
         self.assertEqual([a[2].id,], list(iter_ids()))
         L.insert(0,a[1])
         self.assertEqual([a[1], a[2]], list(L))
-        self.assertEqual([a[1], a[2]], list(iter_items()))
         self.assertEqual([a[1].id, a[2].id], list(iter_ids()))
         L.insert(2,a[4])
         self.assertEqual([a[1], a[2], a[4]], list(L))
-        self.assertEqual([a[1], a[2], a[4]], list(iter_items()))
         self.assertEqual([a[1].id, a[2].id, a[4].id], list(iter_ids()))
         L.insert(100,a[5])
         self.assertEqual([a[1], a[2], a[4], a[5]], list(L))
-        self.assertEqual([a[1], a[2], a[4], a[5]], list(iter_items()))
         self.assertEqual([a[1].id, a[2].id, a[4].id, a[5].id], 
                          list(iter_ids()))
         L.insert(-2,a[3])
         self.assertEqual(a[1:6], list(L))
-        self.assertEqual(a[1:6], list(iter_items()))
         self.assertEqual([ i.id for i in a[1:6] ], list(iter_ids()))
         L.insert(-6,a[0])
         self.assertEqual(a[0:6], list(L))
-        self.assertEqual(a[0:6], list(iter_items()))
         self.assertEqual([ i.id for i in a[0:6] ], list(iter_ids()))
         L.extend(a[6:9])
         self.assertEqual(a[0:9], list(L))
-        self.assertEqual(a[0:9], list(iter_items()))
         self.assertEqual([ i.id for i in a[0:9] ], list(iter_ids()))
 
         for i in xrange(9):
@@ -341,7 +332,6 @@ class TestElements(TestCase):
 
         del L[5]
         self.assertEqual(a[10:15]+a[16:19], list(L))
-        self.assertEqual(a[10:15]+a[16:19], list(iter_items()))
         self.assertEqual([i.id for i in a[10:15]+a[16:19] ], list(iter_ids()))
         L.insert(5,a[15])
 
@@ -358,25 +348,21 @@ class TestElements(TestCase):
         L[2:4] = a[0:9]
         b[2:4] = a[0:9]
         self.assertEqual(b, list(L))
-        self.assertEqual(b, list(iter_items()))
         self.assertEqual([ i.id for i in b ], list(iter_ids()))
 
         L[:] = a[0:10]
         b[:] = a[0:10]
         self.assertEqual(b, list(L))
-        self.assertEqual(b, list(iter_items()))
         self.assertEqual([ i.id for i in b ], list(iter_ids()))
 
         L[9:0:-2] = a[19:10:-2]
         b[9:0:-2] = a[19:10:-2]
         self.assertEqual(b, list(L))
-        self.assertEqual(b, list(iter_items()))
         self.assertEqual([ i.id for i in b ], list(iter_ids()))
 
         del L[0::2]
         del b[0::2]
         self.assertEqual(b, list(L))
-        self.assertEqual(b, list(iter_items()))
         self.assertEqual([ i.id for i in b ], list(iter_ids()))
 
     def _test_with_tag(self, e):
@@ -402,33 +388,33 @@ class TestElements(TestCase):
         eq(frozenset((t1, t2)), frozenset(tm.iter_tags(p)))
         eq(frozenset((t1,)), frozenset(ta1.iter_tags(p)))
         eq(frozenset((t2,)), frozenset(ta2.iter_tags(p)))
-        eq(ids((t1, t3), p), frozenset(e.iter_tags_ids(p)))
-        eq(ids((t1, t2), p), frozenset(tm.iter_tags_ids(p)))
-        eq(ids((t1,), p), frozenset(ta1.iter_tags_ids(p)))
-        eq(ids((t2,), p), frozenset(ta2.iter_tags_ids(p)))
+        eq(ids((t1, t3), p), frozenset(e.iter_tag_ids(p)))
+        eq(ids((t1, t2), p), frozenset(tm.iter_tag_ids(p)))
+        eq(ids((t1,), p), frozenset(ta1.iter_tag_ids(p)))
+        eq(ids((t2,), p), frozenset(ta2.iter_tag_ids(p)))
 
         eq(frozenset((t1, t3)), frozenset(e.iter_tags(p, 0)))
         eq(frozenset((t1, t2)), frozenset(tm.iter_tags(p, 0)))
         eq(frozenset((t1,)), frozenset(ta1.iter_tags(p, 0)))
         eq(frozenset((t2,)), frozenset(ta2.iter_tags(p, 0)))
-        eq(ids((t1, t3), p), frozenset(e.iter_tags_ids(p, 0)))
-        eq(ids((t1, t2), p), frozenset(tm.iter_tags_ids(p, 0)))
-        eq(ids((t1,), p), frozenset(ta1.iter_tags_ids(p, 0)))
-        eq(ids((t2,), p), frozenset(ta2.iter_tags_ids(p, 0)))
+        eq(ids((t1, t3), p), frozenset(e.iter_tag_ids(p, 0)))
+        eq(ids((t1, t2), p), frozenset(tm.iter_tag_ids(p, 0)))
+        eq(ids((t1,), p), frozenset(ta1.iter_tag_ids(p, 0)))
+        eq(ids((t2,), p), frozenset(ta2.iter_tag_ids(p, 0)))
 
         eq(frozenset((tm, ta1, e)), frozenset(t1.iter_elements(p)))
         eq(frozenset((tm, ta2)), frozenset(t2.iter_elements(p)))
         eq(frozenset((e,)), frozenset(t3.iter_elements(p)))
-        eq(ids((tm, ta1, e), p), frozenset(t1.iter_elements_ids(p)))
-        eq(ids((tm, ta2), p), frozenset(t2.iter_elements_ids(p)))
-        eq(ids((e,), p), frozenset(t3.iter_elements_ids(p)))
+        eq(ids((tm, ta1, e), p), frozenset(t1.iter_element_ids(p)))
+        eq(ids((tm, ta2), p), frozenset(t2.iter_element_ids(p)))
+        eq(ids((e,), p), frozenset(t3.iter_element_ids(p)))
 
         eq(frozenset((tm, ta1, e)), frozenset(t1.iter_elements(p, 0)))
         eq(frozenset((tm, ta2)), frozenset(t2.iter_elements(p, 0)))
         eq(frozenset((e,)), frozenset(t3.iter_elements(p, 0)))
-        eq(ids((tm, ta1, e), p), frozenset(t1.iter_elements_ids(p, 0)))
-        eq(ids((tm, ta2), p), frozenset(t2.iter_elements_ids(p, 0)))
-        eq(ids((e,), p), frozenset(t3.iter_elements_ids(p, 0)))
+        eq(ids((tm, ta1, e), p), frozenset(t1.iter_element_ids(p, 0)))
+        eq(ids((tm, ta2), p), frozenset(t2.iter_element_ids(p, 0)))
+        eq(ids((e,), p), frozenset(t3.iter_element_ids(p, 0)))
 
         q = self.q
         q.create_import("i", self.p)
@@ -442,49 +428,49 @@ class TestElements(TestCase):
         eq(frozenset((t1, t2, t3)), frozenset(tm.iter_tags(q)))
         eq(frozenset((t1, t2)), frozenset(ta1.iter_tags(q)))
         eq(frozenset((t1, t2)), frozenset(ta2.iter_tags(q)))
-        eq(ids((t1, t2, t3), q), frozenset(e.iter_tags_ids(q)))
-        eq(ids((t1, t2, t3), q), frozenset(tm.iter_tags_ids(q)))
-        eq(ids((t1, t2), q), frozenset(ta1.iter_tags_ids(q)))
-        eq(ids((t1, t2), q), frozenset(ta2.iter_tags_ids(q)))
+        eq(ids((t1, t2, t3), q), frozenset(e.iter_tag_ids(q)))
+        eq(ids((t1, t2, t3), q), frozenset(tm.iter_tag_ids(q)))
+        eq(ids((t1, t2), q), frozenset(ta1.iter_tag_ids(q)))
+        eq(ids((t1, t2), q), frozenset(ta2.iter_tag_ids(q)))
 
         eq(frozenset((t2, t3)), frozenset(e.iter_tags(q, 0)))
         eq(frozenset((t3,)), frozenset(tm.iter_tags(q, 0)))
         eq(frozenset((t2,)), frozenset(ta1.iter_tags(q, 0)))
         eq(frozenset((t1,)), frozenset(ta2.iter_tags(q, 0)))
-        eq(ids((t2, t3), q), frozenset(e.iter_tags_ids(q, 0)))
-        eq(ids((t3,), q), frozenset(tm.iter_tags_ids(q, 0)))
-        eq(ids((t2,), q), frozenset(ta1.iter_tags_ids(q, 0)))
-        eq(ids((t1,), q), frozenset(ta2.iter_tags_ids(q, 0)))
+        eq(ids((t2, t3), q), frozenset(e.iter_tag_ids(q, 0)))
+        eq(ids((t3,), q), frozenset(tm.iter_tag_ids(q, 0)))
+        eq(ids((t2,), q), frozenset(ta1.iter_tag_ids(q, 0)))
+        eq(ids((t1,), q), frozenset(ta2.iter_tag_ids(q, 0)))
  
         eq(frozenset((t1, t3)), frozenset(e.iter_tags(p)))
         eq(frozenset((t1, t2)), frozenset(tm.iter_tags(p)))
         eq(frozenset((t1,)), frozenset(ta1.iter_tags(p)))
         eq(frozenset((t2,)), frozenset(ta2.iter_tags(p)))
-        eq(ids((t1, t3), p), frozenset(e.iter_tags_ids(p)))
-        eq(ids((t1, t2), p), frozenset(tm.iter_tags_ids(p)))
-        eq(ids((t1,), p), frozenset(ta1.iter_tags_ids(p)))
-        eq(ids((t2,), p), frozenset(ta2.iter_tags_ids(p)))
+        eq(ids((t1, t3), p), frozenset(e.iter_tag_ids(p)))
+        eq(ids((t1, t2), p), frozenset(tm.iter_tag_ids(p)))
+        eq(ids((t1,), p), frozenset(ta1.iter_tag_ids(p)))
+        eq(ids((t2,), p), frozenset(ta2.iter_tag_ids(p)))
 
         eq(frozenset((tm, ta1, ta2, e)), frozenset(t1.iter_elements(q)))
         eq(frozenset((tm, ta1, ta2, e)), frozenset(t2.iter_elements(q)))
         eq(frozenset((tm, e)), frozenset(t3.iter_elements(q)))
-        eq(ids((tm, ta1, ta2, e), q), frozenset(t1.iter_elements_ids(q)))
-        eq(ids((tm, ta1, ta2, e), q), frozenset(t2.iter_elements_ids(q)))
-        eq(ids((tm, e), q), frozenset(t3.iter_elements_ids(q)))
+        eq(ids((tm, ta1, ta2, e), q), frozenset(t1.iter_element_ids(q)))
+        eq(ids((tm, ta1, ta2, e), q), frozenset(t2.iter_element_ids(q)))
+        eq(ids((tm, e), q), frozenset(t3.iter_element_ids(q)))
 
         eq(frozenset((ta2,)), frozenset(t1.iter_elements(q, 0)))
         eq(frozenset((ta1, e)), frozenset(t2.iter_elements(q, 0)))
         eq(frozenset((tm, e)), frozenset(t3.iter_elements(q, 0)))
-        eq(ids((ta2,), q), frozenset(t1.iter_elements_ids(q, 0)))
-        eq(ids((ta1, e), q), frozenset(t2.iter_elements_ids(q, 0)))
-        eq(ids((tm, e), q), frozenset(t3.iter_elements_ids(q, 0)))
+        eq(ids((ta2,), q), frozenset(t1.iter_element_ids(q, 0)))
+        eq(ids((ta1, e), q), frozenset(t2.iter_element_ids(q, 0)))
+        eq(ids((tm, e), q), frozenset(t3.iter_element_ids(q, 0)))
 
         eq(frozenset((tm, ta1, e)), frozenset(t1.iter_elements(p)))
         eq(frozenset((tm, ta2)), frozenset(t2.iter_elements(p)))
         eq(frozenset((e,)), frozenset(t3.iter_elements(p)))
-        eq(ids((tm, ta1, e), p), frozenset(t1.iter_elements_ids(p)))
-        eq(ids((tm, ta2), p), frozenset(t2.iter_elements_ids(p)))
-        eq(ids((e,), p), frozenset(t3.iter_elements_ids(p)))
+        eq(ids((tm, ta1, e), p), frozenset(t1.iter_element_ids(p)))
+        eq(ids((tm, ta2), p), frozenset(t2.iter_element_ids(p)))
+        eq(ids((e,), p), frozenset(t3.iter_element_ids(p)))
 
         eq(frozenset((p,)), frozenset(e.iter_taggers(t1, q)))
         eq(frozenset((p,)), frozenset(e.iter_taggers(t1, p)))
@@ -508,17 +494,17 @@ class TestElements(TestCase):
 
         p.dissociate_tag(e, t3)
         eq(frozenset((t1, t2, t3)), frozenset(e.iter_tags(q)))
-        eq(ids((t1, t2, t3), q), frozenset(e.iter_tags_ids(q)))
+        eq(ids((t1, t2, t3), q), frozenset(e.iter_tag_ids(q)))
         eq(frozenset((t2, t3)), frozenset(e.iter_tags(q, 0)))
-        eq(ids((t2, t3), q), frozenset(e.iter_tags_ids(q, 0)))
+        eq(ids((t2, t3), q), frozenset(e.iter_tag_ids(q, 0)))
         eq(frozenset((t1,)), frozenset(e.iter_tags(p)))
-        eq(ids((t1,), p), frozenset(e.iter_tags_ids(p)))
+        eq(ids((t1,), p), frozenset(e.iter_tag_ids(p)))
         eq(frozenset((tm, e)), frozenset(t3.iter_elements(q)))
-        eq(ids((tm, e), q), frozenset(t3.iter_elements_ids(q)))
+        eq(ids((tm, e), q), frozenset(t3.iter_element_ids(q)))
         eq(frozenset((tm, e)), frozenset(t3.iter_elements(q, 0)))
-        eq(ids((tm, e), q), frozenset(t3.iter_elements_ids(q, 0)))
+        eq(ids((tm, e), q), frozenset(t3.iter_element_ids(q, 0)))
         eq(frozenset(()), frozenset(t3.iter_elements(p)))
-        eq(ids((), p), frozenset(t3.iter_elements_ids(p)))
+        eq(ids((), p), frozenset(t3.iter_element_ids(p)))
         eq(frozenset((q,)), frozenset(e.iter_taggers(t3, q)))
         eq(frozenset(), frozenset(e.iter_taggers(t3, p)))
         self.assert_(e.has_tag(t3, q))
@@ -530,17 +516,17 @@ class TestElements(TestCase):
 
         q.dissociate_tag(e, t3)
         eq(frozenset((t1, t2)), frozenset(e.iter_tags(q)))
-        eq(ids((t1, t2), q), frozenset(e.iter_tags_ids(q)))
+        eq(ids((t1, t2), q), frozenset(e.iter_tag_ids(q)))
         eq(frozenset((t2,)), frozenset(e.iter_tags(q, 0)))
-        eq(ids((t2,), q), frozenset(e.iter_tags_ids(q, 0)))
+        eq(ids((t2,), q), frozenset(e.iter_tag_ids(q, 0)))
         eq(frozenset((t1,)), frozenset(e.iter_tags(p)))
-        eq(ids((t1,), p), frozenset(e.iter_tags_ids(p)))
+        eq(ids((t1,), p), frozenset(e.iter_tag_ids(p)))
         eq(frozenset((tm,)), frozenset(t3.iter_elements(q)))
-        eq(ids((tm,), q), frozenset(t3.iter_elements_ids(q)))
+        eq(ids((tm,), q), frozenset(t3.iter_element_ids(q)))
         eq(frozenset((tm,)), frozenset(t3.iter_elements(q, 0)))
-        eq(ids((tm,), q), frozenset(t3.iter_elements_ids(q, 0)))
+        eq(ids((tm,), q), frozenset(t3.iter_element_ids(q, 0)))
         eq(frozenset(()), frozenset(t3.iter_elements(p)))
-        eq(ids((), p), frozenset(t3.iter_elements_ids(p)))
+        eq(ids((), p), frozenset(t3.iter_element_ids(p)))
         eq(frozenset(), frozenset(e.iter_taggers(t3, q)))
         eq(frozenset(), frozenset(e.iter_taggers(t3, p)))
         self.assert_(not e.has_tag(t3, q))
@@ -691,10 +677,8 @@ class TestUnreachable(TestCase):
         self.assertEquals("p2:a2", r.get_member_id(1))
         self.assertRaises(exception_type, r.__getitem__, 1)
         self.assertEquals(None, r.get_member(1))
-        iter(r).next() # no exception before the actual yield
-        self.assertRaises(exception_type, list, iter(r))
-        self.assertEquals([a1, "p2:a2",], list(r.iter_members()))
-        self.assertEquals(["a1", "p2:a2",], list(r.iter_members_ids()))
+        self.assertEquals([a1, None,], list(r))
+        self.assertEquals(["a1", "p2:a2",], list(r.iter_member_ids()))
         p1.close()
 
     @_make_both_tests
@@ -705,10 +689,8 @@ class TestUnreachable(TestCase):
         self.assertEquals("p2:model", L.get_item_id(1))
         self.assertRaises(exception_type, L.__getitem__, 1)
         self.assertEquals(None, L.get_item(1))
-        iter(L).next() # no exception before the actual yield
-        self.assertRaises(exception_type, list, iter(L))
-        self.assertEquals([a1, "p2:model",], list(L.iter_items()))
-        self.assertEquals(["a1", "p2:model",], list(L.iter_items_ids()))
+        self.assertEquals([a1, None,], list(L))
+        self.assertEquals(["a1", "p2:model",], list(L.iter_item_ids()))
         p1.close()
 
     @_make_both_tests
@@ -759,17 +741,13 @@ class TestUnreachable(TestCase):
         a1 = p1["a1"]
         t1 = p1["t1"]
         self.assertEquals(frozenset(("t1", "p2:t2")),
-                                    frozenset(a1.iter_tags_ids(p1)))
-        self.assertEquals(frozenset((t1, "p2:t2")),
-            frozenset(a1.iter_tags(p1, yield_ids=True)))
-        a1.iter_tags(p1).next() # no exception before the actual yield
-        self.assertRaises(exception_type, list, a1.iter_tags(p1))
+                                    frozenset(a1.iter_tag_ids(p1)))
+        self.assertEquals(frozenset((t1, None)),
+            frozenset(a1.iter_tags(p1)))
         self.assertEquals(frozenset(("a1", "p2:a2")),
-                                    frozenset(t1.iter_elements_ids(p1)))
-        self.assertEquals(frozenset((a1, "p2:a2")),
-            frozenset(t1.iter_elements(p1, yield_ids=True)))
-        t1.iter_elements(p1).next() # no exception before the actual yield
-        self.assertRaises(exception_type, list, t1.iter_elements(p1))
+                                    frozenset(t1.iter_element_ids(p1)))
+        self.assertEquals(frozenset((a1, None)),
+            frozenset(t1.iter_elements(p1)))
         p1.close()
 
 if __name__ == "__main__":

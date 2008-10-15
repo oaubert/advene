@@ -81,8 +81,8 @@ def _diff_attr(elt1, elt2, attr):
     return []
 
 def _diff_members(r1, r2):
-    l1 = list(enumerate(r1.iter_members_ids()))
-    l2 = list(enumerate(r2.iter_members_ids()))
+    l1 = list(enumerate(r1.iter_member_ids()))
+    l2 = list(enumerate(r2.iter_member_ids()))
     r = []
     for i1, i2 in _xzip(l1, l2, lambda x: x[0]):
         if i1 is None:
@@ -98,8 +98,8 @@ def _diff_members(r1, r2):
     return r
 
 def _diff_items(l1, l2):
-    m1 = list(enumerate(l1.iter_items_ids()))
-    m2 = list(enumerate(l2.iter_items_ids()))
+    m1 = list(enumerate(l1.iter_item_ids()))
+    m2 = list(enumerate(l2.iter_item_ids()))
     r = []
     for i1, i2 in _xzip(m1, m2, lambda x: x[0]):
         if i1 is None:
@@ -115,9 +115,9 @@ def _diff_items(l1, l2):
     return r
 
 def _diff_imported_elements(t1, t2):
-    l1 = [ i for i in enumerate(t1.iter_elements_ids(t1._owner)) 
+    l1 = [ i for i in enumerate(t1.iter_element_ids(t1._owner)) 
              if ":" in i[1] ]
-    l2 = [ i for i in enumerate(t2.iter_elements_ids(t2._owner)) 
+    l2 = [ i for i in enumerate(t2.iter_element_ids(t2._owner)) 
              if ":" in i[1] ]
     r = []
     for e1, e2 in _xzip(l1, l2, lambda x: x):
@@ -137,8 +137,8 @@ def _diff_contents(elt1, elt2):
     return r
 
 def _diff_tags(e1, e2):
-    l1 = list(enumerate(e1.iter_tags_ids(e1._owner)))
-    l2 = list(enumerate(e2.iter_tags_ids(e2._owner)))
+    l1 = list(enumerate(e1.iter_tag_ids(e1._owner)))
+    l2 = list(enumerate(e2.iter_tag_ids(e2._owner)))
     r = []
     for t1, t2 in _xzip(l1, l2, lambda x: x):
         if t1 is None:

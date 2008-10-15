@@ -9,10 +9,7 @@ Important improvements
 - augment backend method iter_tags_with_element with attributes tag_with_prefix
   and tag_exclude_prefix ; may be symetric iter_elements_with_tags
 
-- there should be only 2 ways of itering over collections:
-  - yielding elemements or None when unreachable
-  - yieldings ids
- -> update the code accordingly
+- change iter_meta and iter_meta_ids
 
 - remove all list generations ending with "," in backends/sqlite.py
 

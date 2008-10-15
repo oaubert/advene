@@ -44,12 +44,14 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
     def __iter__(self):
         """Iter over the members of this relation.
 
-        If the relation contains unreachable members, an exception will be
-        raised at the time of yielding those members.
+        If the relation contains unreachable members, None is yielded.
 
-        See also `iter_members`.
+        See also `iter_member_ids`.
         """
-        return self.iter_members(False)
+        for i,m in enumerate(self._cache):
+            if m is None:
+                m = self.get_member(i, None)
+            yield m
 
     def __getitem__(self, i):
         """Return member with index i, or raise an exception if the item is
@@ -137,30 +139,10 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         for a in annotations:
             self.append(a)
 
-    def iter_members(self, _ids=True):
-        """Iter over the members of this relation.
-
-        If the relation contains unreachable members, their id-ref will be
-        yielded instead.
-
-        See also `__iter__` and `iter_members_ids`.
-        """
-        # NB: internally, _ids can be passed False to force exceptions
-        if _ids:
-            default = None
-        else:
-            default = _RAISE
-        for i,m in enumerate(self._cache):
-            if m is None:
-                m = self.get_member(i, default)
-                if m is None: # only possible when _ids is true
-                    m = self.get_member_id(i)
-            yield m
-
-    def iter_members_ids(self):
+    def iter_member_ids(self):
         """Iter over the id-refs of the members of this relation.
 
-        See also `iter_members` and `member_ids`.
+        See also `__iter__`.
         """
         for i,m in enumerate(self._ids):
             if m is not None:
