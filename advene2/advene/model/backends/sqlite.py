@@ -1,5 +1,12 @@
 """
-I am the reference API for advene backends.
+I am the reference implementation for advene backends modules.
+
+A backend module can be registered by invoking
+`advene.model.backends.register` with the module as its sole argument. It must
+implement 4 functions: `claims_for_create` , `claims_for_bind` , create_ and 
+bind_ . The two latters return a *backend instance* with a standard API, for
+which `_SqliteBackend` provides a reference implementation.
+
 """
 
 #TODO: the backend does not ensure an exclusive access to the sqlite file.
@@ -28,15 +35,20 @@ IN_MEMORY_URL = "sqlite::memory:"
 def claims_for_create(url):
     """Is this backend able to create a package to the given URL ?
 
-    Not that the semantics of this function is not to test whether the package
-    already exists, but only to check that the given URL is compatible with
-    this backend.
+    Checks whether the URL is recognized, and whether the requested package
+    does not already exist in the database.
     """
     if not url.startswith("sqlite:"): return False
 
     path, pkgid = _strip_url(url)
 
-    if path == ":memory:": return True
+    # in memory database
+    if path == ":memory:":
+        bi = _cache.get(":memory:")
+        if bi is None:
+            return True
+        else:
+            return not _contains_package(bi._conn, pkgid)
 
     # persistent (file) database
     if not exists(path):
@@ -55,12 +67,18 @@ def claims_for_create(url):
         return r
 
 def create(package, force=False, url=None):
-    """Create a _SqliteBackend instance for the given package.
+    """Creates a new package and return backend instance and package id.
 
-    Return the backend an the package id.
-    @param package: an object with attributes url and readonly
-    @param force: should the package be created even if it exists?
-    @param url: backend-wise URL to be used if different for package.url
+    Parameters
+    ----------
+    package
+      an object with attribute ``url``, which will be used as the backend URL
+      unless parameter `url` is also provided.
+    force
+      should the package be created (i.e. re-initialized) even if it exists?
+    url
+      URL to be used if ``package.url`` is not adapted to this backend (useful
+      for parsed-into-backend packages)
     """
     url = url or package.url
     assert(claims_for_create(url)), "url = %r" % url
@@ -119,8 +137,10 @@ def create(package, force=False, url=None):
     return b, pkgid
 
 def claims_for_bind(url):
-    """
-    Is this backend able to bind to the given URL ?
+    """Is this backend able to bind to the given URL ?
+
+    Checks whether the URL is recognized, and whether the requested package
+    does already exist in the database.
     """
     if not url.startswith("sqlite:"): return False
 
@@ -148,12 +168,20 @@ def claims_for_bind(url):
         return r
 
 def bind(package, force=False, url=None):
-    """Create a _SqliteBackend instance for the given package.
+    """Bind to an existing package at the given URL.
 
     Return the backend an the package id.
-    @param package: an object with attributes url and readonly
-    @param force: should the package be open even if it is locked?
-    @param url: backend-wise URL to be used if different for package.url
+
+    Parameters
+    ----------
+    package
+      an object with attributes ``readonly`` and ``url``, which will be used as
+      the backend URL unless parameter `url` is also provided.
+    force
+      should the package be opened even if it is being used?
+    url
+      URL to be used if ``package.url`` is not adapted to this backend (useful
+      for parsed-into-backend packages)
     """
     url = url or package.url
     assert(claims_for_bind(url)), url
@@ -273,47 +301,69 @@ class _FlushableIterator(object):
 
 
 class _SqliteBackend(object):
+    """I am the reference implementation of advene backend instances.
 
-    def __init__(self, path, conn, force):
-        """
-        Is not part of the interface. Instances must be created either with
-        the L{create} or the L{bind} module functions.
+    A number of conventions are used in all methods.
 
-        Create a backend, and bind it to the given URL.
-        """
+    Method naming rationale
+    =======================
 
-        self._path = path
-        self._conn = conn
-        self._curs = conn.cursor()
-        # NB: self._curs is to be used for any *internal* operations
-        # Iterators intended for *external* use must be based on a new cursor.
-        conn.create_function("join_id_ref", 2,
-                              lambda p,s: p and "%s:%s" % (p,s) or s)
-        conn.create_function("regexp", 2,
-                              lambda r,l: re.search(r,l) is not None )
-        # NB: for a reason I don't know, the defined function regexp
-        # receives the righthand operand first, then the lefthand operand...
-        # hence the lambda function above
-        self._bound = WeakValueDictWithCallback(self._check_unused)
-        # NB: the callback ensures that even if packages "forget" to close
-        # themselves, once they are garbage collected, we check if the
-        # connexion to sqlite can be closed.
-        self._iterators = WeakKeyDictionary()
-        # _iterators is used to store all the iterators returned by iter_*
-        # methods, and force them to flush their underlying cursor anytime
-        # an modification of the database is about to happen
+    When the parameters *or* return type of methods depend on the element type
+    they handle, distinct methods with the element type in their name are 
+    defined (e.g. `create_annotation` vs. `create_view`). On the other hand, if
+    neither the parameters nor the return value change (type-wise) w.r.t. the
+    element type, a single method is defined, with the element type as a
+    parameter (e.g. `delete_element`).
 
-    def _bind(self, package_id, package):
-        d = self._bound
-        old = d.get(package_id)
-        if old is not None:
-            raise PackageInUse(old)
+    Note that, as far as the rule above is concerned, tuples of different size
+    have different types, as well as iterators yielding objects of different
+    types.
+
+    Note also there is a notable exception to that rule: `get_element`, which
+    does not expect the type of an element, but returns a tuple with all the
+    elements attributes. A protocol forcing to first get the element type,
+    then call the appropriate method, whould have been more regular but
+    inconvenient, and probably less efficient.
+
+    Parameter names and semantics
+    =============================
+
+    package_id
+      the package id as returned in second position by `create` or `bind`. The
+      operation will apply to that particular package.
+
+    package_ids
+      an iterable of package ids as described above. The operation will apply
+      in one shot on all these packages.
+
+    id
+      an element id. This is always used in conjunction with ``package_id``.
+
+    element_type
+      one of the constants defined in `advene.model.core.element`. It is always
+      used in conjunction with ``package_id`` and ``id`` and *must* be 
+      consistent with them (i.e. be the type of the identified element if it
+      exists). The behaviour of the method is *unspecified* if ``element_type``
+      is not consistent. As a consequence, the fact that this particular
+      implementation ignores an inconsistent ``element_type`` and works anyway
+      must *not* be relied on.
+    """
+
+    # begin of the backend interface
+
+    # package related methods
+
+    def get_uri(self, package_id):
+        q = "SELECT uri FROM Packages WHERE id = ?"
+        return self._curs.execute(q, (package_id,)).fetchone()[0]
+
+    def update_uri(self, package_id, uri):
+        q = "UPDATE Packages SET uri = ? WHERE id = ?"
+        execute = self._curs.execute
         try:
-            self._curs.execute("UPDATE Packages SET url = ? WHERE id = ?",
-                               (package.url, package_id,))
+            execute(q, (uri, package_id,))
         except sqlite.Error, e:
             raise InternalError("could not update", e)
-        d[package_id] = package
 
     def close(self, package_id):
         """Inform the backend that a given package will no longer be used.
@@ -333,63 +383,7 @@ class _SqliteBackend(object):
             del d[package_id]
         self._check_unused(package_id)
 
-    def _check_unused(self, package_id):
-        conn = self._conn
-        if conn is not None and len(self._bound) == 0:
-            #print "DEBUG:", __file__, \
-            #      "about to close SqliteBackend", self._path
-            try:
-                self._curs.execute("UPDATE Packages SET url = ?", ("",))
-            finally:
-                conn.close()
-            self._conn = None
-            self._curs = None
-            # the following is necessary to break a cyclic reference:
-            # self._bound references self._check_unused, which, as a bound
-            # method, references self
-            self._bound = None
-            # the following is not stricly necessary, but does no harm ;)
-            if self._path in _cache: del _cache[self._path]
-
-    def _begin_transaction(self, mode=""):
-        """Begin a transaction.
-
-        This method must *always* be used to begin a transaction (do *not* use
-        `self._curs.execute("BEGIN")` directly. See `_FlushableIterator`_ .
-        """
-        for i in self._iterators.iterkeys():
-            i.flush()
-        self._curs.execute("BEGIN %s" % mode)
-        
-    # package uri
-
-    def get_uri(self, package_id):
-        q = "SELECT uri FROM Packages WHERE id = ?"
-        return self._curs.execute(q, (package_id,)).fetchone()[0]
-
-    def update_uri(self, package_id, uri):
-        q = "UPDATE Packages SET uri = ? WHERE id = ?"
-        execute = self._curs.execute
-        try:
-            execute(q, (uri, package_id,))
-        except sqlite.Error, e:
-            raise InternalError("could not update", e)
-
-    # creation
-
-    def _create_element(self, execute, package_id, id, element_type):
-        """Perform controls and insertions common to all elements.
-
-        NB: This starts a transaction that must be commited by caller.
-        """
-        # check that the id is not in use
-        self._begin_transaction("IMMEDIATE")
-        c = execute("SELECT id FROM Elements WHERE package = ? AND id = ?",
-                    (package_id, id,))
-        if c.fetchone() is not None:
-            raise ModelError("id in use: %s" % id)
-        execute("INSERT INTO Elements VALUES (?,?,?)",
-                (package_id, id, element_type))
+    # element creation
 
     def create_media(self, package_id, id, url):
         """Create a new media with the given data.
@@ -544,7 +538,7 @@ class _SqliteBackend(object):
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
 
-    # retrieval
+    # element retrieval
 
     def has_element(self, package_id, id, element_type=None):
         """
@@ -815,32 +809,7 @@ class _SqliteBackend(object):
         r = self._conn.execute(q, args)
         return _FlushableIterator(r, self)
 
-    def _make_element_query(self, package_ids, element_type,
-                              id=None, id_alt=None):
-        """
-        Return the selectfrom part of the query, the where part of the query,
-        and the argument list, of a query returning all the elements 
-        matching the parameters.
-        """
-        assert(id is None or id_alt is None)
-
-        s = "SELECT typ, package, id FROM Elements"
-        w = " WHERE package in (" + "?," * len(package_ids) + ") "\
-            " AND typ = ?"
-        args = list(package_ids) + [element_type,]
-        if id is not None:
-            w += " AND id = ?"
-            args.append(id)
-        if id_alt is not None:
-            w += " AND id IN ("
-            for i in id_alt:
-                w += "?,"
-                args.append(i)
-            w += ")"
-
-        return s,w,args
-
-    # updating
+    # element updating
 
     def update_media(self, package_id, id, url):
         assert self.has_element(package_id, id, MEDIA)
@@ -884,7 +853,7 @@ class _SqliteBackend(object):
             self._conn.rollback()
             raise InternalError("error in updating", e)
 
-    # renaming
+    # element renaming
 
     def rename_element(self, package_id, old_id, element_type, new_id):
         """Rename an own elemenent of package_id.
@@ -893,7 +862,7 @@ class _SqliteBackend(object):
         identified element, or the behaviour of this method is unspecified.
 
         NB: This does not update references to that element. For that, you must
-        also use `rename_references`_. This however does update the id-ref of
+        also use `rename_references`. This however does update the id-ref of
         imported elements if the renamed element is an import.
         """
         assert self.has_element(package_id, old_id, element_type)
@@ -1020,21 +989,58 @@ class _SqliteBackend(object):
             raise InternalError("could not update", e)
         execute("COMMIT")
 
-    # TODO
+    # element deletion
 
-    # deletion
+    def delete_element(self, package_id, id, element_type):
+        """Delete the identified element.
 
-    # TODO
+        NB: This does not delete references to that element, *even* in the same
+        package. The appropriate methods (`iter_annotations`,
+        `iter_relations_with_member`, etc.) must be used to detect and delete 
+        those references prior to deletion.
+        """
+        assert self.has_element(package_id, id, element_type)
 
-    # content
+        # NB: all the queries after the first one (and hence the transaction)
+        # are only required because sqlite does not implement foreign keys;
+        # with an "ON DELETE CASCADE", the deletion in Elements would suffice.
+
+        self._begin_transaction("IMMEDIATE")
+        execute = self._curs.execute
+        args = (package_id, id)
+        try:
+            execute("DELETE FROM Elements WHERE package = ? AND id = ?", args)
+            if element_type in (ANNOTATION, RELATION, VIEW, RESOURCE, QUERY):
+                execute("DELETE FROM Contents " \
+                         "WHERE package = ? AND element = ?",
+                        args)
+            
+            if element_type == MEDIA:
+                execute("DELETE FROM Medias WHERE package = ? AND id = ?",
+                        args)
+            elif element_type == ANNOTATION:
+                execute("DELETE FROM Annotations WHERE package = ? AND id = ?",
+                        args)
+            elif element_type == RELATION:
+                execute("DELETE FROM RelationMembers " \
+                         "WHERE package = ? AND relation = ?",
+                        args)
+            elif element_type == LIST:
+                execute("DELETE FROM ListItems WHERE package = ? AND list = ?",
+                        args)
+        except sqlite.Error, e:
+            execute("ROLLBACK")
+            raise InternalError("could not delete", e)
+        execute("COMMIT")
+
+    # content management
 
     def get_content(self, package_id, id, element_type):
         """
-        Return a tuple(mimetype, data, schema_idref).
+        Return a tuple(mimetype, data, schema_idref) or None if the element has
+        no content or does not exist.
         Note that ``schema_idref`` will be an empty string if no schema is
-        specified (never None).
         """
-        assert self.has_element(package_id, id, element_type)
         q = "SELECT mimetype, data, join_id_ref(schema_p,schema_i) as schema " \
             "FROM Contents " \
             "WHERE package = ? AND element = ?"
@@ -1065,7 +1071,7 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             raise InternalError("could not update", e)
 
-    # meta-data
+    # meta-data management
 
     def iter_meta(self, package_id, id, element_type):
         """
@@ -1127,7 +1133,7 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             raise InternalError("could not %s" % q[:6], e)
 
-    # relation members
+    # relation members management
 
     def insert_member(self, package_id, id, member, pos, n=-1):
         """
@@ -1189,8 +1195,9 @@ class _SqliteBackend(object):
     def count_members(self, package_id, id):
         """
         Count the members of the identified relations.
+
+        This should return 0 if the relation does not exist.
         """
-        assert self.has_element(package_id, id, RELATION)
         q = "SELECT count(ord) FROM RelationMembers "\
             "WHERE package = ? AND relation = ?"
         return self._curs.execute(q, (package_id, id)).fetchone()[0]
@@ -1278,7 +1285,7 @@ class _SqliteBackend(object):
         r = self._conn.execute(q, args)
         return _FlushableIterator(r, self)
 
-    # list items
+    # list items management
 
     def insert_item(self, package_id, id, item, pos, n=-1):
         """
@@ -1340,8 +1347,9 @@ class _SqliteBackend(object):
     def count_items(self, package_id, id):
         """
         Count the items of the identified lists.
+
+        This should return 0 if the list does not exist.
         """
-        assert self.has_element(package_id, id, LIST)
         q = "SELECT count(ord) FROM ListItems "\
             "WHERE package = ? AND list = ?"
         return self._curs.execute(q, (package_id, id)).fetchone()[0]
@@ -1429,7 +1437,7 @@ class _SqliteBackend(object):
         r = self._conn.execute(q, args)
         return _FlushableIterator(r, self)
 
-    # tagged elements
+    # tagged elements management
 
     def associate_tag(self, package_id, element, tag):
         """Associate a tag to an element.
@@ -1535,7 +1543,116 @@ class _SqliteBackend(object):
         r = ( i[0] for i in self._conn.execute(q, args) )
         return _FlushableIterator(r, self)
 
-    # end of the class
+    # end of the backend interface
+
+    def __init__(self, path, conn, force):
+        """
+        Is not part of the interface. Instances must be created either with
+        the L{create} or the L{bind} module functions.
+
+        Create a backend, and bind it to the given URL.
+        """
+
+        self._path = path
+        self._conn = conn
+        self._curs = conn.cursor()
+        # NB: self._curs is to be used for any *internal* operations
+        # Iterators intended for *external* use must be based on a new cursor.
+        conn.create_function("join_id_ref", 2,
+                              lambda p,s: p and "%s:%s" % (p,s) or s)
+        conn.create_function("regexp", 2,
+                              lambda r,l: re.search(r,l) is not None )
+        # NB: for a reason I don't know, the defined function regexp
+        # receives the righthand operand first, then the lefthand operand...
+        # hence the lambda function above
+        self._bound = WeakValueDictWithCallback(self._check_unused)
+        # NB: the callback ensures that even if packages "forget" to close
+        # themselves, once they are garbage collected, we check if the
+        # connexion to sqlite can be closed.
+        self._iterators = WeakKeyDictionary()
+        # _iterators is used to store all the iterators returned by iter_*
+        # methods, and force them to flush their underlying cursor anytime
+        # an modification of the database is about to happen
+
+    def _bind(self, package_id, package):
+        d = self._bound
+        old = d.get(package_id)
+        if old is not None:
+            raise PackageInUse(old)
+        try:
+            self._curs.execute("UPDATE Packages SET url = ? WHERE id = ?",
+                               (package.url, package_id,))
+        except sqlite.Error, e:
+            raise InternalError("could not update", e)
+        d[package_id] = package
+
+    def _check_unused(self, package_id):
+        conn = self._conn
+        if conn is not None and len(self._bound) == 0:
+            #print "DEBUG:", __file__, \
+            #      "about to close SqliteBackend", self._path
+            try:
+                self._curs.execute("UPDATE Packages SET url = ?", ("",))
+            finally:
+                conn.close()
+            self._conn = None
+            self._curs = None
+            # the following is necessary to break a cyclic reference:
+            # self._bound references self._check_unused, which, as a bound
+            # method, references self
+            self._bound = None
+            # the following is not stricly necessary, but does no harm ;)
+            if self._path in _cache: del _cache[self._path]
+
+    def _begin_transaction(self, mode=""):
+        """Begin a transaction.
+
+        This method must *always* be used to begin a transaction (do *not* use
+        `self._curs.execute("BEGIN")` directly. See `_FlushableIterator` .
+        """
+        for i in self._iterators.iterkeys():
+            i.flush()
+        self._curs.execute("BEGIN %s" % mode)
+        
+    def _create_element(self, execute, package_id, id, element_type):
+        """Perform controls and insertions common to all elements.
+
+        NB: This starts a transaction that must be commited by caller.
+        """
+        # check that the id is not in use
+        self._begin_transaction("IMMEDIATE")
+        c = execute("SELECT id FROM Elements WHERE package = ? AND id = ?",
+                    (package_id, id,))
+        if c.fetchone() is not None:
+            raise ModelError("id in use: %s" % id)
+        execute("INSERT INTO Elements VALUES (?,?,?)",
+                (package_id, id, element_type))
+
+    def _make_element_query(self, package_ids, element_type,
+                              id=None, id_alt=None):
+        """
+        Return the selectfrom part of the query, the where part of the query,
+        and the argument list, of a query returning all the elements 
+        matching the parameters.
+        """
+        assert(id is None or id_alt is None)
+
+        s = "SELECT typ, package, id FROM Elements"
+        w = " WHERE package in (" + "?," * len(package_ids) + ") "\
+            " AND typ = ?"
+        args = list(package_ids) + [element_type,]
+        if id is not None:
+            w += " AND id = ?"
+            args.append(id)
+        if id_alt is not None:
+            w += " AND id IN ("
+            for i in id_alt:
+                w += "?,"
+                args.append(i)
+            w += ")"
+
+        return s,w,args
+
 
 # NB: the wrapping of cursors into _FlushableIterators could be implemented
 # as a decorator on all iter_* functions. However

@@ -77,45 +77,52 @@ class TestCreateBackend(TestCase):
             claims_for_create(self.url1)
         )
 
-    def test_claim_new_file_with_fragment(self):
+    def test_claim_new_file_with_pid(self):
         self.assert_( 
             claims_for_create(self.url2)
         )
 
-    def test_claim_existing_fragment(self):
+    def test_claim_existing_pid(self):
         b, i = create(P(self.url2))
+        b.close(i)
         self.assert_(
             not claims_for_create("%s;foo" % self.url1)
         )
-        b.close(i)
 
-    def test_claim_new_fragment(self):
+    def test_claim_new_pid(self):
         b, i = create(P(self.url2))
+        b.close(i)
         self.assert_(
             claims_for_create("%s;bar" % self.url1)
         )
-        b.close(i)
 
     def test_claim_memory(self):
         self.assert_( 
             claims_for_create(IN_MEMORY_URL)
         )
 
-    def test_create_without_fragment(self):
+    def test_claim_memory_existing_pid(self):
+        b, i = create(P(IN_MEMORY_URL+";foo"))
+        self.assert_(
+            not claims_for_create(IN_MEMORY_URL+";foo")
+        )
+        b.close(i)
+
+    def test_create_without_pid(self):
         b, i = create(P(self.url1))
         self.assert_(
             claims_for_bind(self.url1)
         )
         b.close(i)
 
-    def test_create_with_fragment(self):
+    def test_create_with_pid(self):
         b, i = create(P(self.url2))
         self.assert_(
             claims_for_bind(self.url2)
         )
         b.close(i)
 
-    def test_create_new_fragment(self):
+    def test_create_new_pid(self):
         b, i = create(P(self.url1))
         create(P(self.url2))
         self.assert_(
@@ -180,22 +187,22 @@ class TestBindBackend(TestCase):
             not claims_for_bind(self.url2)
         )
 
-    def test_claim_wrong_fragment(self):
+    def test_claim_wrong_pid(self):
         self.assert_(
             not claims_for_bind("%s;bar" % self.url1)
         )
 
-    def test_claim_without_fragment(self):
+    def test_claim_without_pid(self):
         self.assert_(
             claims_for_bind(self.url1)
         )
     
-    def test_claim_with_fragment(self):
+    def test_claim_with_pid(self):
         self.assert_(
             claims_for_bind(self.url2)
         )
 
-    def test_claim_with_other_fragment(self):
+    def test_claim_with_other_pid(self):
         url3 = "%s;bar" % self.url1
         b, i = create(P(url3))
         self.assert_(
@@ -203,15 +210,15 @@ class TestBindBackend(TestCase):
         )
         b.close(i)
 
-    def test_bind_without_fragment(self):
+    def test_bind_without_pid(self):
         b, i = bind(P(self.url1))
         b.close (i)
 
-    def test_bind_with_fragment(self):
+    def test_bind_with_pid(self):
         self.b.close (self.i)
         self.b, self.i = bind(P(self.url2))
 
-    def test_bind_with_other_fragment(self):
+    def test_bind_with_other_pid(self):
         url3 = "%s;bar" % self.url1
         b, i = create(P(url3))
         b.close(i)
@@ -258,19 +265,19 @@ class TestCache(TestCase):
     def test_same_url(self):
         self.assertRaises(PackageInUse, bind, P(self.url2))
 
-    def test_add_fragment(self):
+    def test_add_pid(self):
         b, i = create(P(self.url3))
         self.assertEqual(self.b, b)
         b.close(i)
 
-    def test_different_fragment(self):
+    def test_different_pid(self):
         b, i = create(P(self.url3))
         b.close(i)
         b, i = bind(P(self.url3))
         self.assertEqual(self.b, b)
         b.close(i)
 
-    def test_no_fragment(self):
+    def test_no_pid(self):
         b, i = bind(P(self.url1))
         self.assertEqual(self.b, b)
         b.close(i)
@@ -1320,6 +1327,108 @@ class TestRenameElement(TestCase):
                        (self.pid1, "i1:a6"), (self.pid1, "i2:a5"),]),
             frozenset(self.be.iter_elements_with_tag(pids, t3_uri, ))
         )
+
+
+class TestDeleteElement(TestCase):
+    def setUp(self):
+        self.url1 = IN_MEMORY_URL
+        self.url2 = "%s;foo" % self.url1
+        self.be, self.pid = create(P(self.url2))
+
+    def tearDown(self):
+        self.be.close(self.pid)
+        del P._L[:] # not required, but saves memory
+
+    def test_delete_media(self):
+        self.be.create_media(self.pid, "m1", "http://example.com/m1.avi")
+        try:
+            self.be.delete_element(self.pid, "m1", MEDIA)
+        except Exception, e:
+            self.fail(e) # raised by delete_element
+        self.assert_(not self.be.has_element(self.pid, "m1"))
+        self.assert_(not self.be.has_element(self.pid, "m1", MEDIA))
+
+    def test_delete_annotation(self):
+        self.be.create_media(self.pid, "m1", "http://example.com/m1.avi")
+        self.be.create_annotation(self.pid, "a4", "m1", 10, 20)
+        try:
+            self.be.delete_element(self.pid, "a4", ANNOTATION)
+        except Exception, e:
+            self.fail(e) # raised by delete_element
+        self.assert_(not self.be.has_element(self.pid, "a4"))
+        self.assert_(not self.be.has_element(self.pid, "a4", ANNOTATION))
+        self.assertEqual(None, self.be.get_content(self.pid, "a4", ANNOTATION))
+
+    def test_delete_relation(self):
+        self.be.create_relation(self.pid, "r1")
+        try:
+            self.be.delete_element(self.pid, "r1", RELATION)
+        except Exception, e:
+            self.fail(e) # raised by delete_element
+        self.assert_(not self.be.has_element(self.pid, "r1"))
+        self.assert_(not self.be.has_element(self.pid, "r1", RELATION))
+        self.assertEqual(None, self.be.get_content(self.pid, "r1", RELATION))
+        self.assertEqual(0, self.be.count_members(self.pid, "r1"))
+
+    def test_delete_view(self):
+        self.be.create_view(self.pid, "v1")
+        try:
+            self.be.delete_element(self.pid, "v1", VIEW)
+        except Exception, e:
+            raise
+            self.fail(e) # raised by delete_element
+        self.assert_(not self.be.has_element(self.pid, "v1"))
+        self.assert_(not self.be.has_element(self.pid, "v1", VIEW))
+        self.assertEqual(None, self.be.get_content(self.pid, "v1", VIEW))
+
+    def test_delete_resource(self):
+        self.be.create_resource(self.pid, "R1")
+        try:
+            self.be.delete_element(self.pid, "R1", RESOURCE)
+        except Exception, e:
+            self.fail(e) # raised by delete_element
+        self.assert_(not self.be.has_element(self.pid, "R1"))
+        self.assert_(not self.be.has_element(self.pid, "R1", RESOURCE))
+        self.assertEqual(None, self.be.get_content(self.pid, "R1", RESOURCE))
+
+    def test_delete_tag(self):
+        self.be.create_tag(self.pid, "t1")
+        try:
+            self.be.delete_element(self.pid, "t1", TAG)
+        except Exception, e:
+            self.fail(e) # raised by delete_element
+        self.assert_(not self.be.has_element(self.pid, "t1"))
+        self.assert_(not self.be.has_element(self.pid, "t1", TAG))
+
+    def test_delete_list(self):
+        self.be.create_list(self.pid, "l1")
+        try:
+            self.be.delete_element(self.pid, "l1", LIST)
+        except Exception, e:
+            self.fail(e) # raised by delete_element
+        self.assert_(not self.be.has_element(self.pid, "l1"))
+        self.assert_(not self.be.has_element(self.pid, "l1", LIST))
+        self.assertEqual(0, self.be.count_items(self.pid, "l1"))
+
+    def test_delete_query(self):
+        self.be.create_query(self.pid, "q1")
+        try:
+            self.be.delete_element(self.pid, "q1", QUERY)
+        except Exception, e:
+            self.fail(e) # raised by delete_element
+        self.assert_(not self.be.has_element(self.pid, "q1"))
+        self.assert_(not self.be.has_element(self.pid, "q1", QUERY))
+        self.assertEqual(None, self.be.get_content(self.pid, "q1", QUERY))
+
+    def test_delete_import(self):
+        self.be.create_import(self.pid, "i1",
+                              "http://example.com/advene/db", "",)
+        try:
+            self.be.delete_element(self.pid, "i1", IMPORT)
+        except Exception, e:
+            self.fail(e) # raised by delete_element
+        self.assert_(not self.be.has_element(self.pid, "i1"))
+        self.assert_(not self.be.has_element(self.pid, "i1", IMPORT))
 
 
 class TestRobustIterations(TestCase):

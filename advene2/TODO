@@ -1,6 +1,11 @@
 Important improvements
 ======================
 
+- implement in the backend a method to find contents (especially with a given
+  schema)
+
+- implement in the backend a method to find id-refs with the given import
+
 - finish the implementation of _SqliteBackend
 
 - in sqlite bind and create, lock (exclusive) the database before the claim,
