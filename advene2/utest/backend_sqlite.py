@@ -111,25 +111,26 @@ class TestCreateBackend(TestCase):
 
     def test_create_without_pid(self):
         b, i = create(P(self.url1))
+        b.close(i)
         self.assert_(
             claims_for_bind(self.url1)
         )
-        b.close(i)
 
     def test_create_with_pid(self):
         b, i = create(P(self.url2))
+        b.close(i)
         self.assert_(
             claims_for_bind(self.url2)
         )
-        b.close(i)
 
     def test_create_new_pid(self):
         b, i = create(P(self.url1))
-        create(P(self.url2))
+        b.close(i)
+        b, i = create(P(self.url2))
+        b.close(i)
         self.assert_(
             claims_for_bind(self.url2)
         )
-        b.close(i)
 
     def test_create_in_memory(self):
         b,p = create(P(IN_MEMORY_URL))
@@ -148,12 +149,11 @@ class TestBindBackend(TestCase):
         self.url1 = "sqlite:%s" % self.filename
         self.url2 = "%s;foo" % self.url1
         self.b, self.i = create(P(self.url2))
+        self.b.close(self.i)
 
     def tearDown(self):
         if exists(self.filename):
             unlink(self.filename)
-        if self.b:
-            self.b.close (self.i)
         del P._L[:] # not required, but saves memory
 
     def test_claim_non_existing(self):
@@ -163,7 +163,6 @@ class TestBindBackend(TestCase):
         )
 
     def test_claim_wrong_format(self):
-        self.b.close(self.i)
         self.b = None
         f = open(self.filename, 'w'); f.write("foo"); f.close()
         self.assert_(
@@ -206,18 +205,18 @@ class TestBindBackend(TestCase):
     def test_claim_with_other_pid(self):
         url3 = "%s;bar" % self.url1
         b, i = create(P(url3))
+        b.close(i)
         self.assert_(
             claims_for_bind(url3)
         )
-        b.close(i)
 
     def test_bind_without_pid(self):
         b, i = bind(P(self.url1))
         b.close (i)
 
     def test_bind_with_pid(self):
-        self.b.close (self.i)
-        self.b, self.i = bind(P(self.url2))
+        b, i = bind(P(self.url2))
+        b.close (i)
 
     def test_bind_with_other_pid(self):
         url3 = "%s;bar" % self.url1
@@ -227,8 +226,8 @@ class TestBindBackend(TestCase):
         b.close(i)
 
     def test_bind_with_other_url(self):
-        self.b.close (self.i)
-        self.b, self.i = bind(P("http://example.com/a_package"), url=self.url2)
+        b, i = bind(P("http://example.com/a_package"), url=self.url2)
+        b.close (i)
 
 
 class TestPackageHandling(TestCase):

@@ -20,6 +20,8 @@ implementations).
 See the reference implementation `advene.model.backend.sqlite`.
 """
 
+from exceptions import BaseException
+
 # backend register functions
 
 def iter_backends():
@@ -34,16 +36,48 @@ def unregister_backend(b):
     global _backends
     _backends.remove(b)
 
+# utility class
+
+class ClaimFailure(object):
+    """Failure code of a claims_for_* method.
+
+    A ClaimFailure always has a False truth value. Furthermore, it has an
+    ``exception`` attribute containing, if not None, an exception explaining
+    the failure.
+    """
+
+    def __init__(self, exception=None):
+        self.exception = exception
+
+    def __nonzero__(self):
+        return False
+
+    def __repr__(self):
+        return "ClaimFailure(%r)" % self.exception
+
 # backend related exceptions
 
 class NoBackendClaiming(Exception):
     pass
 
+class WrongFormat(Exception):
+    """
+    I am raised whenever a backend is badly formatted.
+    """
+    pass
+
+class NoSuchPackage(Exception):
+    """
+    I am raised whenever a backend is required for an inexisting package.
+    """
+    pass
+
 class PackageInUse(Exception):
     """
-    I am raised whenever an atempt is made to bind a Package instance to a
-    backend already bound. The message can either be the other Package
-    instance, if available, or the package_id.
+    I am raised whenever an attempt is made to bind a Package instance to a
+    backend already bound, or to create an existing (bound or not) Package.
+    The message can either be the other Package instance, if available, or the
+    package backend url.
     """
     def __str__ (self):
         if isinstance(self.message, basestring):

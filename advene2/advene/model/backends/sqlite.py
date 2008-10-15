@@ -16,12 +16,14 @@ which `_SqliteBackend` provides a reference implementation.
 #      differently each package in the database.
 
 from pysqlite2 import dbapi2 as sqlite
+from os        import unlink
 from os.path   import exists, isdir, join, split
 from weakref   import WeakKeyDictionary, WeakValueDictionary
 import re
 
 from advene.model import ModelError
-from advene.model.backends import InternalError, PackageInUse
+from advene.model.backends \
+  import ClaimFailure, NoSuchPackage, InternalError, PackageInUse, WrongFormat
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
 from advene.utils.reftools import WeakValueDictWithCallback
@@ -59,35 +61,50 @@ def claims_for_create(url):
     """Is this backend able to create a package to the given URL ?
 
     Checks whether the URL is recognized, and whether the requested package
-    does not already exist in the database.
+    does not already exist at that URL.
+
+    When the result of that method is False, it must be a `ClaimFailure` rather
+    than a `bool`. If it has no exception, then the URL is not recognized at
+    all. If it has an exception, then the URL is recognized, but attempting
+    to create the package will raise that exception.
     """
-    if not url.startswith("sqlite:"): return False
+    if not url.startswith("sqlite:"): return ClaimFailure()
 
     path, pkgid = _strip_url(url)
 
-    # in memory database
-    if path == ":memory:":
-        bi = _cache.get(":memory:")
-        if bi is None:
-            return True
+    # if already loaded
+    bi = _cache.get(path)
+    if bi is not None:
+        p = bi._bound.get(pkgid)
+        if p is not None:
+            return ClaimFailure(PackageInUse(p))
+        elif _contains_package(bi._conn, pkgid):
+            return ClaimFailure(PackageInUse(url))
         else:
-            return not _contains_package(bi._conn, pkgid)
+            return True
 
-    # persistent (file) database
+    # in new memory database
+    if path == ":memory:":
+        return True
+
+    # new connexion to persistent (file) database
     if not exists(path):
         # check that file can be created
-        path = split(path)[0]
-        if not isdir(path): return False
+        try:
+            open(path, "w").close()
+        except IOError, e:
+            return ClaimFailure(e)
+        unlink(path)
         return True
     else:
-        # check that file is a correct database (created by this backend)
-        cx = _get_connection(path)
-        if cx is None: return False
-        # check that file does not already contains the required pkg
-        # NB: in ":memory:", cx is the connection to the cached backend
+        try:
+            cx = _get_connection(path)
+        except Exception, e:
+            return ClaimFailure(e)
+        if cx is None: return ClaimFailure(WrongFormat(path))
         r = not _contains_package(cx, pkgid)
         cx.close()
-        return r
+        return r or ClaimFailure(PackageInUse(url))
 
 def create(package, force=False, url=None):
     """Creates a new package and return backend instance and package id.
@@ -104,33 +121,30 @@ def create(package, force=False, url=None):
       for parsed-into-backend packages)
     """
     url = url or package.url
-    assert _DF or (claims_for_create(url)), "url = %r" % url
     if force:
         raise NotImplementedError("This backend can not force creation of "
-                                   "existing package")
+                                  "an exitsing package")
+    r = claims_for_create(url)
+    if not r:
+        raise r.exception or RuntimeError("Unrecognized URL")
 
     path, pkgid = _strip_url(url)
     b = _cache.get(path)
     if b is not None:
         conn = b._conn
         curs = b._curs
-        already = b._bound.get(pkgid)
-        if already is not None:
-            raise PackageInUse(already)
-        elif _contains_package(conn, pkgid):
-            raise PackageInUse(pkgid)
         b._begin_transaction("EXCLUSIVE")
     else:
         # check the following *before* sqlite.connect creates the file!
         must_init = (path == ":memory:" or not exists(path))
         conn = sqlite.connect(path, isolation_level=None)
         curs = conn.cursor()
+        curs.execute("BEGIN EXCLUSIVE")
         if must_init:
             # initialize database
             f = open(join(split(__file__)[0], "sqlite_init.sql"))
             sql = f.read()
             f.close()
-            curs.execute("BEGIN EXCLUSIVE")
             try:
                 curs.executescript(sql)
                 curs.execute("INSERT INTO Version VALUES (?)",
@@ -139,14 +153,9 @@ def create(package, force=False, url=None):
                              (_DEFAULT_PKGID, "", "",))
             except sqlite.OperationalError, e:
                 curs.execute("ROLLBACK")
-                raise RuntimeError("%s - SQL:\n%s" % (e, query))
-        elif _contains_package(conn, pkgid):
-            raise PackageInUse(pkgid)
-        else:
-            curs.execute("BEGIN EXCLUSIVE")
+                raise InternalError("could not initialize schema", e)
         b = _SqliteBackend(path, conn, force)
         _cache[path] = b
-
     try:
         if pkgid != _DEFAULT_PKGID:
             conn.execute("INSERT INTO Packages VALUES (?,?,?)",
@@ -166,31 +175,41 @@ def claims_for_bind(url):
 
     Checks whether the URL is recognized, and whether the requested package
     does already exist in the database.
+
+    When the result of that method is False, it must be a `ClaimFailure` rather
+    than a `bool`. If it has no exception, then the URL is not recognized at
+    all. If it has an exception, then the URL is recognized, but attempting
+    to create the package will raise that exception.
     """
-    if not url.startswith("sqlite:"): return False
+    if not url.startswith("sqlite:"): return ClaimFailure()
 
     path, pkgid = _strip_url(url)
 
-    if path == ":memory:":
-        be = _cache.get(":memory:")
-        if be is None:
-            # in_memory backend is not in used, so it must be created
-            return False
+    # if already loaded
+    be = _cache.get(path)
+    if be is not None:
+        p = be._bound.get(pkgid)
+        if p:
+            return ClaimFailure(PackageInUse(p))
         else:
-            # in_memory backend is in use, exitsing package can be bound
-            return _contains_package(be._conn, pkgid)
+            return _contains_package(be._conn, pkgid) \
+                or ClaimFailure(NoSuchPackage(pkgid))
 
-    # persistent (file) database
-    if not exists(path):
-        return False
-    else:
-        # check that file is a correct database (created by this backend)
+    # new memory or persistent (file) database
+    if path == ":memory:" or not exists(path):
+        return ClaimFailure(NoSuchPackage(url))
+
+    # check that file is a correct database (created by this backend)
+    try:
         cx = _get_connection(path)
-        if cx is None: return False
-        # check that file does contains the required pkg
-        r = _contains_package(cx, pkgid)
-        cx.close()
-        return r
+    except Exception, e:
+        return ClaimFailure(e)
+    if cx is None:
+        return ClaimFailure(WrongFormat(path))
+    # check that file does contains the required pkg
+    r = _contains_package(cx, pkgid)
+    cx.close()
+    return r or ClaimFailure(NoSuchPackage(url))
 
 def bind(package, force=False, url=None):
     """Bind to an existing package at the given URL.
@@ -209,10 +228,12 @@ def bind(package, force=False, url=None):
       for parsed-into-backend packages)
     """
     url = url or package.url
-    assert _DF or (claims_for_bind(url)), url
     if force:
         raise NotImplementedError("This backend can not force access to "
                                    "locked package")
+    r = claims_for_bind(url)
+    if not r:
+        raise r.exception or RuntimeError("Unrecognized URL")
 
     path, pkgid = _strip_url(url)
     b = _cache.get(path)

@@ -1,19 +1,9 @@
 Important improvements
 ======================
 
-- in sqlite bind and create, lock (exclusive) the database before the claim,
-  to prevent race conditions
-
-- change (again) semantics of claim_for_* in backend. A backend should claim
-  a URL for create, even if the package exists (no one else will claim it
-  anyway, and when attempting ot create it, we will get an exception, which is
-  more informative).
-
 - improve all_group implementation by factorizing same backend operations
 
 - implement read or write locking, "force", and "readonly" in _SqliteBackend
-
-- implement file-based backends, and builtin backend
 
 - change asserts in advene.model.core into ModelException, when needed
 
