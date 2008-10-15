@@ -5,6 +5,7 @@ from weakref import ref
 from advene import _RAISE
 from advene.utils.sorted_dict import SortedDict
 from advene.model.core.dirty import DirtyMixin
+from advene.model.exceptions import ModelError
 
 class WithMetaMixin(DirtyMixin):
     """Metadata access mixin.
