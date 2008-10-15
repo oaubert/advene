@@ -1533,7 +1533,22 @@ class TestReferences(TestCase):
         assert q.get("R01") is R01
         assert q.get("a01").content_model is R01
         assert p.get("a3").content_model is R01
-        
+
+        # fake name clash
+        a2 = q.get("a01")
+        a2.id = "a2"
+        assert not q.has_element("a01")
+        assert q.get("a2") is a01
+        assert a2 is p.meta["key"]
+        assert a2 in list(q.get("at01").iter_elements(q))
+        assert a2 is q.get("r1")[0]
+        assert a2 is p.get("r3")[1]
+        assert a2 is q.get("L1")[1]
+        assert a2 in p.get("L3")
+
+        # real name clash
+        self.assertRaises(AssertionError, setattr, p.get("a2"), "id", "a3")
+
 
 if __name__ == "__main__":
     main()
