@@ -326,6 +326,9 @@ class Package(object, WithMetaMixin, WithEventsMixin):
 
     @autoproperty
     def _get_url(self):
+        """
+        The URL from which this package has been fetched.
+        """
         return self._url
 
     @autoproperty
@@ -334,6 +337,12 @@ class Package(object, WithMetaMixin, WithEventsMixin):
 
     @autoproperty
     def _get_uri(self):
+        """
+        The URI identifying this package.
+
+        It may be different from the URL from which the package has actually
+        been fetched.
+        """
         r = self._uri
         if r is None:
             r = self._uri = self._backend.get_uri(self._id) 

@@ -21,6 +21,9 @@ class Media(PackageElement):
 
     @autoproperty
     def _get_url(self):
+        """
+        The URL from which the media can be fetched.
+        """
         return self._url
 
     @autoproperty

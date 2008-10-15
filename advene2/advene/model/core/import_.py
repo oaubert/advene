@@ -26,6 +26,9 @@ class Import(PackageElement):
 
     @autoproperty
     def _get_url(self):
+        """
+        The URL to which this import fetches the imported package.
+        """
         return self._url
 
     @autoproperty
@@ -38,6 +41,12 @@ class Import(PackageElement):
 
     @autoproperty
     def _get_uri(self):
+        """
+        The URI identifying the imported package.
+
+        It may be different from the physical URL from which the imported
+        package has actually been fetched.
+        """
         return self._uri
 
     @autoproperty

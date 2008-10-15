@@ -125,6 +125,12 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
     @autoproperty
     def _get_uriref(self):
+        """
+        The URI-ref identifying this element.
+
+        It is built from the URI of its owner package, suffixed with the id
+        of the element as a fragment-id (#).
+        """
         o = self._owner
         u = o._uri or o._url
         return "%s#%s" % (u, self._id)
