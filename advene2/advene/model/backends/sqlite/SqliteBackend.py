@@ -13,25 +13,39 @@ from advene.model.core.PackageElement import MEDIA, ANNOTATION, RELATION, VIEW, 
 
 BACKEND_VERSION = "0.1"
 
+IN_MEMORY_URL = "sqlite::memory:"
+
 
 def claims_for_create (url):
     """
     Is this backend able to create a package to the given URL ?
     """
-    if url[:7] != "sqlite:": return False
+    if url[:5] != "file:" and url[:7] != "sqlite:": return False
 
     path, pkgid = _strip_url (url)
 
-    if not exists (url):
+    if path == ":memory:":
+        be = _cache.get (":memory:")
+        if be is None:
+            # in_memory backend is not in used, so it will be created
+            return True
+        else:
+            # in_memory backend is in use,
+            # so existing packages can not be created
+            return not _contains_package (be._conn, pkgid)
+
+    # persistent (file) database
+    if not exists (path):
         # check that file can be created
-        url = split (url)[0]
-        if not isdir (url): return False
+        path = split (path)[0]
+        if not isdir (path): return False
         return True
     else:
         # check that file is a correct database (created by this backend)
         cx = _get_connection (path)
         if cx is None: return False
         # check that file does not already contains the required pkg
+        # NB: in ":memory:", cx is the connection to the cached backend
         r = not _contains_package (cx, pkgid)
         cx.close()
         return r
@@ -42,32 +56,39 @@ def create (url):
 
     Return
     """
-    assert (_SqliteBackend.claims_for_create (url))
+    assert (claims_for_create (url))
 
     path, pkgid = _strip_url (url)
 
     b = _cache.get (path)
     if b is None:
         # check the following *before* sqlite.connect creates the file!
-        must_init = (path == ":memory:" or not exists path)
+        must_init = (path == ":memory:" or not exists(path))
         conn = sqlite.connect (path)
         if must_init:
             # initialize database
             f = open (join (split (__file__)[0], "init.sql"))
             sql = f.read()
             f.close()
-            for query in sql.split(";"):
-                conn.execute (query)
-            conn.execute ("INSERT INTO Version VALUES (?)", BACKEND_VERSION)
+            try:
+                for query in sql.split(";"):
+                    conn.execute (query)
+            except sqlite.OperationalError, e:
+                raise RuntimeError, "%s - SQL:\n%s" % (e, query)
+            conn.execute ("INSERT INTO Version VALUES (?)", (BACKEND_VERSION,))
             conn.execute ("INSERT INTO Packages VALUES (?,?)",
-                          pkgid, uuid4(),)
-            if pkgid != DEFAULT_PKDID:
-                conn.execute ("INSERT INTO Packages VALUES (?)",
-                              pkgid, uuid4(),)
+                          (_DEFAULT_PKGID, str(uuid4()),))
             conn.commit()
-
-        b = _SqliteBackend (conn, False, False)
+        b = _SqliteBackend (path, conn, False, False)
         _cache[path] = b
+    else:
+        conn = b._conn
+
+    if pkgid != _DEFAULT_PKGID:
+        conn.execute ("INSERT INTO Packages VALUES (?,?)",
+                      (pkgid, str(uuid4()),))
+        conn.commit()
+
 
     return b, pkgid
 
@@ -75,11 +96,21 @@ def claims_for_bind (url):
     """
     Is this backend able to bind to the given URL ?
     """
-    if url[:7] != "sqlite:": return False
+    if url[:5] != "file:" and url[:7] != "sqlite:": return False
 
     path, pkgid = _strip_url (url)
 
-    if not exists (url):
+    if path == ":memory:":
+        be = _cache.get (":memory:")
+        if be is None:
+            # in_memory backend is not in used, so it must be created
+            return False
+        else:
+            # in_memory backend is in use, exitsing package can be bound
+            return _contains_package (be._conn, pkgid)
+
+    # persistent (file) database
+    if not exists (path):
         return False
     else:
         # check that file is a correct database (created by this backend)
@@ -97,19 +128,19 @@ def bind (url, readonly=False, force=False):
     @param readonly: should the package be open in read-only mode?
     @param force: should the package be open even if it is locked?
     """
-    assert (_SqliteBackend.claims_for_bind (url))
+    assert (claims_for_bind (url))
     if force:
         raise Exception ("This backend can not force access to locked "
                          "package")
 
-    if url[:7] != "sqlite:": return False
+    if url[:5] != "file:" and url[:7] != "sqlite:": return False
 
     path, pkgid = _strip_url (url)
 
     b = _cache.get (path)
     if b is None:
         conn = sqlite.connect (path)
-        b = _SqliteBackend (conn, False, False)
+        b = _SqliteBackend (path, conn, False, False)
         _cache[path] = b
 
     return b, pkgid
@@ -121,29 +152,36 @@ _DEFAULT_PKGID = ""
 
 def _strip_url (url):
     """
-    Strip URL from its scheme ("sqlite:") and separate path and fragment.
+    Strip URL from its scheme ("file:" or "sqlite:") and separate path and
+    fragment.
     """
+    if url[0] == "f": # file:
+        scheme = 5
+    else: # sqlite:
+        scheme = 7
     sharp = url.find('#')
     if sharp != -1:
-        return url[7:-sharp], url[sharp+1:]
+        return url[scheme:sharp], url[sharp+1:]
     else:
-        return url[7:], DEFAULT_PKDID
+        return url[scheme:], _DEFAULT_PKGID
 
 def _get_connection (path):
     try:
-        cx = sqlite.content (path)
+        cx = sqlite.connect (path)
         c = cx.execute ("select version from Version")
         for v in c:
             if v[0] != BACKEND_VERSION: return None
         return cx
         
+    except sqlite.DatabaseError:
+        return None
     except sqlite.OperationalError:
         return None
 
 def _contains_package (cx, pkgid):
-    if pkgid == DEFAULT_PKDID:
+    if pkgid == _DEFAULT_PKGID:
         return True
-    c = cx.execute ("select id from Packages where id = ?", pkgid)
+    c = cx.execute ("select id from Packages where id = ?", (pkgid,))
     for i in c:
         return True
     return False
@@ -151,7 +189,7 @@ def _contains_package (cx, pkgid):
 
 class _SqliteBackend (object):
 
-    def __init__ (self, conn, readonly, force):
+    def __init__ (self, path, conn, readonly, force):
         """
         Is not part of the interface. Instances must be created either with
         the L{create} or the L{bind} static methods.
@@ -159,10 +197,18 @@ class _SqliteBackend (object):
         Create a backend, and bind it to the given URL.
         """
 
+        self._path = path
         self._conn = conn
         conn.create_function ("regexp", 2,
-                              lambda l,r: re.search(r,l) is not None
+                              lambda l,r: re.search(r,l) is not None )
         self._readonly = readonly
+
+    def __del__ (self):
+        #print "=== About to collect SqliteBackend", self._path
+        try:
+            self._conn.close()
+        except sqlite.OperationalError:
+            pass
 
     def close (self):
         self._conn.close()
@@ -176,7 +222,7 @@ class _SqliteBackend (object):
         the given type.
         """
         q = "SELECT typ FROM Elements WHERE package = ? and id = ?"
-        for i in self._conn.execute (q, package_id, id):
+        for i in self._conn.execute (q, (package_id, id,)):
             return element_type is None or i[0] == element_type
         return False
 
@@ -187,7 +233,7 @@ class _SqliteBackend (object):
         """
 
         q = "SELECT typ FROM Elements WHERE package = ? AND id = ?"
-        l = list (self._conn.execute (q, package_id, id))
+        l = list (self._conn.execute (q, (package_id, id,)))
         if len (l) == 0:
             return None
         t = l[0][0]
@@ -244,8 +290,8 @@ class _SqliteBackend (object):
         """
         assert (   id is None  or     id_regexp is None)
         assert (media is None  or  media_regexp is None)
-        assert (begin is None  or  begin_min is None and begin_max is None
-        assert (  end is None  or    end_min is None and   end_max is None
+        assert (begin is None  or  begin_min is None and begin_max is None)
+        assert (  end is None  or    end_min is None and   end_max is None)
 
         q = """SELECT ?, id, media, fbegin, fend FROM Annotations
                WHERE package in ("""
@@ -399,7 +445,7 @@ class _SqliteBackend (object):
         # TODO manage schema and url
         q = """SELECT mimetype, data FROM Contents
                WHERE package = ? AND element = ?"""
-        cur = self._conn.execute (q, package_id, id)
+        cur = self._conn.execute (q, (package_id, id,))
         return cur.fetchone() or (None, None)
 
     def update_content (self, package_id, content):
@@ -440,7 +486,7 @@ class _SqliteBackend (object):
         """
         q = """SELECT value FROM Meta
                WHERE package = ? AND element = ? AND KEY = ?"""
-        c = self._conn.execute (q, (package_id, id, key))
+        c = self._conn.execute (q, (package_id, id, key,))
         d = c.fetchone()
         if d is None: return None
         else:         return d[0]

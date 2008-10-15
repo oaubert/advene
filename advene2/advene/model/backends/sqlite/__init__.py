@@ -1,5 +1,5 @@
 from advene.model.backends import register_backend
 
-import SqliteBackeng
+import SqliteBackend
 
 register_backend (SqliteBackend)

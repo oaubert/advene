@@ -104,7 +104,7 @@ CREATE TABLE Tagged (
   package TEXT NOT NULL,
   element TEXT NOT NULL,
   tag     TEXT NOT NULL,
-  PRIMARY KEY (package, uri, tag),
-  -- uri must be the uuid-ref of an own or imported element
-  -- tag must be the uuid-ref of an own or imported element
+  PRIMARY KEY (package, element, tag)
+  -- element must be the uuid-ref of an own or imported element
+  -- tag must be the uuid-ref of an own or imported tag
 );
