@@ -2,10 +2,9 @@ from advene.model.consts import DC_NS_PREFIX
 from advene.util.session import session
 
 from datetime import datetime
-from os import getlogin
 
 def _make_bookkeeping_data():
-    return datetime.now().isoformat(), session.user or getlogin()
+    return datetime.now().isoformat(), session.user
 
 CREATOR = DC_NS_PREFIX + "creator"
 CREATED = DC_NS_PREFIX + "created"
