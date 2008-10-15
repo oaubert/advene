@@ -954,6 +954,8 @@ class AdveneController(object):
     def current_media(self):
         """Current media instance.
         """
+        if self.package is None:
+            return None
         try:
             media=self.package._current_media
         except AttributeError:
