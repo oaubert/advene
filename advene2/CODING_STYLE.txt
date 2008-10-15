@@ -5,8 +5,7 @@ use underscored_names (python style) for attributes and methods
 use CaptializedNames (java style) for class names
 NB: some classes could be function; they may be named in python_style
 
-a module intended to contain a class must be named after that class
-a module containing utility function must be named in python style
+module names are lowercase, short-names (preferably meaningful).
 packages must be named in python style
 
 words composing an identifier should always be separated (in the appropriate
