@@ -1,3 +1,19 @@
+- in backends bind and create, make claim methods lock the database, to prevent
+  race conditions
+
+- improve all_group implementation by factorizing same backend operations
+  (in progress)
+
+- finish the implementation of _SqliteBackend
+
+- implement force and readonly in _SqliteBackend
+
+- implement file-based backends, and builtin backend
+
+- make dirty/clean more aggressive: creation of elements should be added to
+  their cleaning operations, but beware: that involves cleaning elements on
+  which they depend -- e.g. before creating an annotation, its media must
+  be clean -- because it may require creation too
 
 - implement "external" contents (url attribute)
 
@@ -6,8 +22,8 @@
 - make content data independant from other attributes (mimetype, schema) in
   the backend and update the API accordingly
 
-- make content metadata and length of list-like elements available directly
-  (i.e. from get_element)
+- make content metadata of elements with content, and length of list-like
+  elements available directly (i.e. from get_element)
 
 - remove unused code in advene/utils once we are sure we won't use it
 

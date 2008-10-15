@@ -147,7 +147,7 @@ class Relation(PackageElement, WithContentMixin):
         idref = a.make_idref_for(o)
         L.insert(i,a)
         self.add_cleaning_operation(o._backend.insert_member,
-                                    o._id, self._id, idref, i)
+                                    o._id, self._id, idref, i, len(L))
         
     def append(self, a):
         assert a.ADVENE_TYPE == ANNOTATION
@@ -160,7 +160,7 @@ class Relation(PackageElement, WithContentMixin):
         idref = a.make_idref_for(o)
         L.append(a)
         self.add_cleaning_operation(o._backend.insert_member,
-                                    o._id, self._id, idref, -1)
+                                    o._id, self._id, idref, -1, len(L))
 
     def extend(self, annotations):
         for a in annotations:

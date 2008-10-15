@@ -31,6 +31,16 @@ class NoBackendClaiming(Exception):
     pass
 
 class PackageInUse(Exception):
+    """
+    I am raised whenever an atempt is made to bind a Package instance to a
+    backend already bound. The message can either be the other Package
+    instance, if available, or the package_id.
+    """
+    def __str__ (self):
+        if isinstance(self.message, basestring):
+            return self.message
+        else:
+            return self.message._id # a package instance
     pass
 
 class InternalError(Exception):

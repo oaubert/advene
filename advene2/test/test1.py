@@ -14,11 +14,15 @@ from advene.model.core.package import Package
 uri = "sqlite:%s" % (join (split (__file__)[0], "test1.db"))
 #uri = "sqlite::memory:"
 
+_indent = []
 def trace_wrapper (f):
     def wrapped (*args, **kw):
-        print "===", f.__name__, (args or ""), (kw or "")
+        global _indent
+        print "===%s" % "".join(_indent), f.__name__, (args or ""), (kw or "")
+        _indent.append("  ")
         r = f (*args, **kw)
-        print "===", f.__name__, "->", r
+        _indent.pop()
+        print "===%s" % "".join(_indent), f.__name__, "->", r
         return r
     return wrapped
 
@@ -58,10 +62,10 @@ if __name__ == "__main__":
     a2 = p.create_annotation("a2", m1, 0, 20)
     p.get_element("a1").content_data = "hello"
     r1 = p.create_relation("r1")
-    r1.extend((a1, a2))
     print [a._id for a in p.own.annotations]
     print p.get("a1")
     print p["a2"]
+    r1.extend((a1, a2))
     
 
     NB = 10
@@ -69,6 +73,7 @@ if __name__ == "__main__":
     for i in range(NB):
         p.create_annotation("aa%s" % i, m1, i*10, i*10+9)
     print "done"
+
     r1.insert(1, p.get("aa1"))
 
     bw = ref(p._backend)

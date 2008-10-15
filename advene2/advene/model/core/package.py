@@ -36,7 +36,8 @@ class Package(object, WithMetaMixin, DirtyMixin):
 
     __metaclass__ = AutoPropertiesMetaclass
 
-    def __init__(self, url, create=False, readonly=False, force=False):
+    def __init__(self, url, create=False, readonly=False, force=False,
+                 _imported_by=None):
         assert not (create and readonly)
         self._url      = url
         self._readonly = readonly
@@ -61,17 +62,57 @@ class Package(object, WithMetaMixin, DirtyMixin):
         self._elements = WeakValueDictionary()
         self._own      = lambda: None
         self._all      = lambda: None
-        self._uri      = backend.get_uri(package_id)
+        self._uri      = None
 
+        if _imported_by is None:
+            _imported_by = []
         self._imports_dict = imports_dict = {}
-        for _, id, url, uri in backend.iter_imports((package_id,)):
-            p = Package(url)
-            if p is None: p = Package(uri)
-            # NB: even there, p could still be None
-            if p is not None and uri != p._uri:
+        self._backends_dict = None # not yet constructed
+        for _, _, iid, url, uri in backend.iter_imports((package_id,)):
+            for importer in _imported_by:
+                if importer.url == url or uri and importer.uri == uri:
+                    p = importer
+                    break
+            else:
+                _ib = _imported_by + [self,]
+                p = Package(url, _imported_by=_ib)
+                if p is None: p = Package(uri, _imported_by=_ib)
+            if p is None:
                 pass # TODO: issue a warning, may be change automatically...
                      # I think a hook function would be the good solution
-            imports_dict[id] = p
+            elif uri != p._uri:
+                pass # TODO: issue a warning, may be change automatically...
+                     # I think a hook function would be the good solution
+            imports_dict[iid] = p
+
+        in_construction = {}
+        self._build_backend_dict(in_construction, {}, self)
+        self._backends_dict = in_construction
+        
+
+    @staticmethod
+    def _build_backend_dict(bed, visited, p):
+        visited[p] = 1
+        if p._backends_dict is not None:
+            # already constructed, reuse it
+            for backend, ids in p._backends_dict.iteritems():
+                L = bed.get(backend)
+                if L is None:
+                    L = bed[backend] = []
+                for i in ids:
+                    if i not in L:
+                        L.append(i)
+        else:
+            # not yet constructed, add p information for p itself...
+            L = bed.get(p._backend)
+            if L is None:
+                L = bed[p._backend] = []
+            L.append(p._id)
+            # ... and recurse into unvisited imports
+            for q in p._imports_dict.itervalues():
+                if q not in visited:
+                    Package._build_backend_dict(bed, visited, q)
+        
 
     def close (self):
         """Free all external resources used by the package's backend.
@@ -99,12 +140,16 @@ class Package(object, WithMetaMixin, DirtyMixin):
         return self._readonly
 
     def _get_uri(self):
-        return self._uri
+        r = self._uri
+        if r is None:
+            r = self._uri = self._backend.get_uri(self._id) 
+        return r
 
     def _set_uri(self, uri):
         if uri is None: uri = ""
         self._uri = uri
-        self._backend.set_uri(self._id, uri)
+        self.add_cleaning_operation_once(self._backend.set_uri,
+                                         self._id, self._uri)
 
     def __eq__(self, other):
         return isinstance(other, Package) and (
@@ -227,18 +272,15 @@ class Package(object, WithMetaMixin, DirtyMixin):
         self._backend.create_query(self._id, id)
         return Query(self, id)
 
-    def create_import(self, id, url):
+    def create_import(self, id, package):
         assert not self.has_element(id)
-        p = Package.bind(url) or Package.bind(uri)
-
-        if p is not None:
-            uri = ""
-            # TODO raise a warning? an exception?
-        else:
-            uri = p._uri
-        self._backend.create_import(self._id, id, url, uri)
-        self._imports_dict[id] = p
-        return Import(self, id, uri)
+        assert not [ p for p in self._imports_dict.itervalues()
+                     if p.url == package.url
+                     or p.uri and p.uri == package.uri ]
+        uri = package.uri # may access the backend
+        self._backend.create_import(self._id, id, package._url, package.uri)
+        self._imports_dict[id] = package
+        return Import(self, id, package._url, uri)
 
     def _get_own(self):
         r = self._own()

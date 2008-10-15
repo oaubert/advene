@@ -925,7 +925,7 @@ class _SqliteBackend(object):
 
     # relation members
 
-    def insert_member(self, package_id, id, member, pos):
+    def insert_member(self, package_id, id, member, pos, n=-1):
         """
         Insert a member at the given position.
         ``member`` is the id-ref of an own or directly imported member.
@@ -934,8 +934,12 @@ class _SqliteBackend(object):
         If -1, the member will be appended at the end (**note** that this is
         not the same behaviour as ``list.insert`` in python2.5).
         If non-negative, the member will be inserted at that position.
+
+        NB: the total number of members, n, if known, may be provided, as an
+        optimization.
         """
-        n = self.count_members(package_id, id)
+        if n < 0:
+            n = self.count_members(package_id, id)
         assert -1 <= pos <= n, pos
         p,s = _split_id_ref(member) # also assert that member has depth < 2
         assert p != "" or self.has_element(package_id, s, ANNOTATION), member
@@ -984,18 +988,22 @@ class _SqliteBackend(object):
             "WHERE package = ? AND relation = ?"
         return self._curs.execute(q, (package_id, id)).fetchone()[0]
 
-    def get_member(self, package_id, id, pos):
+    def get_member(self, package_id, id, pos, n=-1):
         """
         Return the id-ref of the member at the given position in the identified
         relation.
+
+        NB: the total number of members, n, if known, may be provided, as an
+        optimization.
         """
         if __debug__:
-            c = self.count_members(package_id, id)
-            assert -c <= pos < c, pos
+            n = self.count_members(package_id, id)
+            assert -n <= pos < n, pos
 
         if pos < 0:
-            c = self.count_members(package_id, id)
-            pos += c
+            if n < 0:
+                n = self.count_members(package_id, id)
+            pos += n
 
         q = "SELECT join_id_ref(member_p,member_i) AS member " \
             "FROM RelationMembers "\
@@ -1062,7 +1070,7 @@ class _SqliteBackend(object):
 
     # list items
 
-    def insert_item(self, package_id, id, item, pos):
+    def insert_item(self, package_id, id, item, pos, n=-1):
         """
         Insert an item at the given position.
         ``item`` is the id-ref of an own or directly imported item.
@@ -1071,8 +1079,12 @@ class _SqliteBackend(object):
         If -1, the item will be appended at the end (**note** that this is
         not the same behaviour as ``list.insert`` in python2.5).
         If non-negative, the item will be inserted at that position.
+
+        NB: the total number of members, n, if known, may be provided, as an
+        optimization.
         """
-        n = self.count_items(package_id, id)
+        if n < 0:
+            n = self.count_items(package_id, id)
         assert -1 <= pos <= n, pos
         p,s = _split_id_ref(item) # also assert that item has depth < 2
         assert p != "" or self.has_element(package_id, s), item
@@ -1121,18 +1133,22 @@ class _SqliteBackend(object):
             "WHERE package = ? AND list = ?"
         return self._curs.execute(q, (package_id, id)).fetchone()[0]
 
-    def get_item(self, package_id, id, pos):
+    def get_item(self, package_id, id, pos, n=-1):
         """
         Return the id-ref of the item at the given position in the identified
         list.
+
+        NB: the total number of members, n, if known, may be provided, as an
+        optimization.
         """
         if __debug__:
-            c = self.count_items(package_id, id)
-            assert -c <= pos < c, pos
+            n = self.count_items(package_id, id)
+            assert -n <= pos < n, pos
 
         if pos < 0:
-            c = self.count_items(package_id, id)
-            pos += c
+            if n < 0:
+                n = self.count_items(package_id, id)
+            pos += n
 
         q = "SELECT join_id_ref(item_p,item_i) AS item " \
             "FROM ListItems "\
