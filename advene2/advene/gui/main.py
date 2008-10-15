@@ -97,7 +97,6 @@ from advene.gui.util import get_small_stock_button, image_from_position, dialog,
 from advene.gui.views import AdhocViewParametersParser
 import advene.gui.views.timeline
 #import advene.gui.views.activebookmarks
-#from advene.gui.views.bookmarks import Bookmarks
 #from advene.gui.edit.rules import EditRuleSet
 #from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
@@ -110,14 +109,10 @@ from advene.gui.views.accumulatorpopup import AccumulatorPopup
 #import advene.gui.edit.properties
 #import advene.gui.edit.montage
 #from advene.gui.edit.timeadjustment import TimeAdjustment
-#from advene.gui.views.transcription import TranscriptionView
-#from advene.gui.edit.transcribe import TranscriptionEdit
 from advene.gui.views.viewbook import ViewBook
 from advene.gui.views.html import HTMLView
 #from advene.gui.views.scroller import ScrollerView
 #from advene.gui.views.caption import CaptionView
-#from advene.gui.views.editaccumulator import EditAccumulator
-#from advene.gui.views.tagbag import TagBag
 #import advene.gui.views.annotationdisplay
 from simpletal import simpleTAL
 
@@ -1753,9 +1748,7 @@ class AdveneGUI(Connect):
                 self.log(_("Cannot identify the adhoc view %s") % name.id)
                 return None
 
-        if name == 'tagbag':
-            view=TagBag(self.controller, parameters=parameters, tags=list(self.controller.get_defined_tags()))
-        elif name == 'transcription':
+        if name == 'transcription':
             kwargs={ 'controller': self.controller,
                      'parameters': parameters }
             if 'source' in kw:
@@ -1774,8 +1767,7 @@ class AdveneGUI(Connect):
                     kwargs['source']="here/annotationTypes/%s/annotations/sorted" % at.id
                     if label is None:
                         label=self.controller.get_title(at)
-
-            view = TranscriptionView(**kwargs)
+            view = self.registered_adhoc_views[name](**kwargs)
         elif name == 'webbrowser' or name == 'htmlview':
             if destination != 'popup' and HTMLView._engine is not None:
                 view = HTMLView(controller=self.controller)
@@ -1790,7 +1782,7 @@ class AdveneGUI(Connect):
                 filename=kw['filename']
             except KeyError:
                 filename=None
-            view=TranscriptionEdit(controller=self.controller, filename=filename, parameters=parameters, **kw)
+            view=self.registered_adhoc_views[name](controller=self.controller, filename=filename, parameters=parameters, **kw)
         elif name == 'edit':
             try:
                 element=kw['element']
@@ -1800,7 +1792,7 @@ class AdveneGUI(Connect):
                 return None
             view=get_edit_popup(element, self.controller)
         elif name == 'editaccumulator':
-            view=EditAccumulator(controller=self.controller, scrollable=True)
+            view=self.registered_adhoc_views[name](controller=self.controller, scrollable=True)
             if not self.edit_accumulator:
                 # The first opened accumulator becomes the default one.
                 self.edit_accumulator=view
