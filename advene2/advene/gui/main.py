@@ -2374,11 +2374,8 @@ class AdveneGUI(Connect):
                     sc=self.controller.package.get_element_by_id(scid)
                     if sc is None:
                         # Create the schema
-                        sc=self.controller.package.createSchema(ident=scid)
-                        sc.author=config.data.userid
-                        sc.date=self.controller.get_timestamp()
+                        sc=self.controller.package.create_schema(id=scid)
                         sc.title=sctitle
-                        self.controller.package.schemas.append(sc)
                         self.controller.notify('SchemaCreate', schema=sc)
                     elif isinstance(sc, Schema):
                         # Warn the user that he is reusing an existing one
@@ -2388,14 +2385,11 @@ class AdveneGUI(Connect):
                         d.destroy()
                         return None
                 # Create the type
-                at=sc.createAnnotationType(ident=atid)
-                at.author=config.data.userid
-                at.date=self.controller.get_timestamp()
+                at=sc.create_annotation_type(id=atid)
                 at.title=attitle
                 at.mimetype=mimetype_selector.get_current_element()
-                at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
-                at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
-                sc.annotation_types.append(at)
+                at.color=self.controller.package._color_palette.next()
+                at.element_color='here/tag_color'
                 self.controller.notify('AnnotationTypeCreate', annotationtype=at)
                 self.edit_element(at, modal=True)
         else:
@@ -2464,11 +2458,8 @@ class AdveneGUI(Connect):
                 sc=self.controller.package.get_element_by_id(scid)
                 if sc is None:
                     # Create the schema
-                    sc=self.controller.package.createSchema(ident=scid)
-                    sc.author=config.data.userid
-                    sc.date=self.controller.get_timestamp()
+                    sc=self.controller.package.create_schema(id=scid)
                     sc.title=sctitle
-                    self.controller.package.schemas.append(sc)
                     self.controller.notify('SchemaCreate', schema=sc)
                     self.edit_element(sc, modal=True)
                 else:

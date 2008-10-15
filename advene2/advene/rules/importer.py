@@ -41,25 +41,21 @@ class EventHistoryImporter(GenericImporter):
         start=f[0]['timestamp']
         end=start
         id_="Traces"
-        schema=self.package.get_element_by_id(id_)
+        schema=self.package.get(id_)
         for e in f:
             type_ = e['event_name']
-            type = self.package.get_element_by_id(type_)
+            type = self.package.get(type_)
             if (type is None):
                 #Annotation type creation
                 self.package._idgenerator.add(type_)
-                type=schema.createAnnotationType(
-                    ident=type_)
-                type.author=config.data.userid
-                type.date=time.strftime("%Y-%m-%d")
-                type.title=type_
-                type.mimetype='application/x-advene-structured'
-                type.setMetaData(config.data.namespace, 'color', self.package._color_palette.next())
-                type.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
-                schema.annotationTypes.append(type)
+                at=schema.create_annotation_type(id=type_)
+                at.title=type_
+                at.mimetype='application/x-advene-structured'
+                at.color=self.package._color_palette.next()
+                at.element_color='here/tag_color'
 
             d={
-                'type': type,
+                'type': at,
                 'begin': e['timestamp'] - start,
                 'duration': 50,
                 'timestamp': e['timestamp'],
