@@ -127,6 +127,11 @@ class List(PackageElement):
             self.append(a)
 
     def get_item(self, i, default=None):
+        """Return item with index i, or default if it can not be retrieved.
+
+        Use self[i] instead, unless you want to avoid exceptions on retrieval
+        errors. Note also that IndexErrors are not avoided by this method.
+        """
         L = self._cache
         if L is None:
             self.__len__() # prepare cache
@@ -134,8 +139,8 @@ class List(PackageElement):
         r = L[i] # also ensures that i is a valid index
         if r is None:
             o = self._owner
-            id = o._backend.get_item(o._id, self._id, i, default)
-            r = o.get_element(id)
+            id = o._backend.get_item(o._id, self._id, i)
+            r = o.get_element(id, default)
             if r is not default: L[i] = r
         return r
 

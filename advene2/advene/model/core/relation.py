@@ -4,6 +4,7 @@ I define the class of relations.
 
 from weakref import ref
 
+from advene import _RAISE
 from advene.model.core.element \
   import PackageElement, ANNOTATION, RELATION
 from advene.model.core.content import WithContentMixin
@@ -46,7 +47,7 @@ class Relation(PackageElement, WithContentMixin):
 
     def __getitem__(self, i):
         if isinstance(i, slice): return self._get_slice(i)
-        return self.get_member(i)
+        return self.get_member(i, _RAISE)
 
     def __setitem__(self, i, a):
         if isinstance(i, slice): return self._set_slice(i, a)
@@ -135,6 +136,11 @@ class Relation(PackageElement, WithContentMixin):
             self.append(a)
 
     def get_member(self, i, default=None):
+        """Return element with index i, or default if it can not be retrieved.
+
+        Use self[i] instead, unless you want to avoid exceptions on retrieval
+        errors. Note also that IndexErrors are not avoided by this method.
+        """
         L = self._cache
         if L is None:
             self.__len__() # prepare cache
@@ -142,8 +148,8 @@ class Relation(PackageElement, WithContentMixin):
         r = L[i] # also ensures that i is a valid index
         if r is None:
             o = self._owner
-            id = o._backend.get_member(o._id, self._id, i, default)
-            r = o.get_element(id)
+            id = o._backend.get_member(o._id, self._id, i)
+            r = o.get_element(id, default)
             if r is not default: L[i] = r
         return r
 
