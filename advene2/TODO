@@ -1,3 +1,12 @@
+Needed improvements
+===================
+
+- annotationtype.mimetype (could handle jokers such as None, '*' or text/*')
+
+- transient properties for volatile objects: cannot use transient meta
+   since it requires a string as data. Use properties, or mark object
+   as non-volatile?
+
 Important improvements
 ======================
 
