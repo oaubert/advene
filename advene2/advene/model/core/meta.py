@@ -317,7 +317,7 @@ class WithMetaMixin(object):
 
     def _get_ns_dict(self):
         if hasattr(self, "ADVENE_TYPE"):
-            package = self.ownet
+            package = self.owner
         else:
             package = self
         namespaces = {}
