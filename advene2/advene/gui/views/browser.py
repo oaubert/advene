@@ -86,12 +86,16 @@ class BrowserColumn:
             ls.append([att])
         return ls
 
-    def update(self, element=None, name=""):
+    def update(self, element=None, name="", expand_generator=False):
         self.model=element
         self.liststore.clear()
-        if hasattr(self.model, '__iter__') and not hasattr(self.model, '__getitem__'):
-            # We have a generator. Propose to convert it to a list.
-            self.liststore.append([self.convert_to_list])
+        if 'generator' in repr(self.model):
+            if expand_generator:
+                for e in self.model:
+                    self.liststore.append([ e ])
+            else:
+                # We have a generator. Propose to convert it to a list.
+                self.liststore.append([self.convert_to_list])
         for att in helper.get_valid_members(element):
             self.liststore.append([att])
         self.name=name
@@ -106,7 +110,7 @@ class BrowserColumn:
             return True
         if att == self.convert_to_list:
             # Convert the data to a list
-            self.update(list(self.model), self.name)
+            self.update(self.model, self.name, expand_generator=True)
             return
         if att.startswith('----'):
             return True
