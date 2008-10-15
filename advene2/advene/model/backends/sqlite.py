@@ -10,7 +10,7 @@ I am the reference API for advene backends.
 
 from pysqlite2 import dbapi2 as sqlite
 from os.path   import exists, isdir, join, split
-from weakref   import WeakValueDictionary
+from weakref   import WeakKeyDictionary, WeakValueDictionary
 import re
 
 from advene.model import ModelError
@@ -72,40 +72,50 @@ def create(package, force=False, url=None):
     b = _cache.get(path)
     if b is not None:
         conn = b._conn
+        curs = b._curs
         already = b._bound.get(pkgid)
         if already is not None:
             raise PackageInUse(already)
         elif _contains_package(conn, pkgid):
             raise PackageInUse(pkgid)
+        b._begin_transaction("EXCLUSIVE")
     else:
         # check the following *before* sqlite.connect creates the file!
         must_init = (path == ":memory:" or not exists(path))
-        conn = sqlite.connect(path)
+        conn = sqlite.connect(path, isolation_level=None)
+        curs = conn.cursor()
         if must_init:
             # initialize database
             f = open(join(split(__file__)[0], "sqlite_init.sql"))
             sql = f.read()
             f.close()
             try:
-                for query in sql.split(";"):
-                    conn.execute(query)
-                conn.execute("INSERT INTO Version VALUES (?)",
+                curs.execute("BEGIN EXCLUSIVE")
+                curs.executescript(sql)
+                curs.execute("INSERT INTO Version VALUES (?)",
                              (BACKEND_VERSION,))
-                conn.execute("INSERT INTO Packages VALUES (?,?,?)", 
+                curs.execute("INSERT INTO Packages VALUES (?,?,?)", 
                              (_DEFAULT_PKGID, "", "",))
-                conn.commit()
             except sqlite.OperationalError, e:
-                conn.rollback()
+                curs.execute("ROLLBACK")
                 raise RuntimeError("%s - SQL:\n%s" % (e, query))
         elif _contains_package(conn, pkgid):
             raise PackageInUse(pkgid)
         b = _SqliteBackend(path, conn, force)
         _cache[path] = b
 
-    if pkgid != _DEFAULT_PKGID:
-        conn.execute("INSERT INTO Packages VALUES (?,?,?)", (pkgid, "", "",))
-    conn.commit()
-    b._bind(pkgid, package)
+    try:
+        if pkgid != _DEFAULT_PKGID:
+            conn.execute("INSERT INTO Packages VALUES (?,?,?)",
+                         (pkgid, "", "",))
+        b._bind(pkgid, package)
+    except sqlite.Error, e:
+        curs.execute("ROLLBACK")
+        raise InternalError("could not update", e)
+    except InternalError:
+        curs.execute("ROLLBACK")
+        raise
+    curs.execute("COMMIT")
     return b, pkgid
 
 def claims_for_bind(url):
@@ -154,10 +164,16 @@ def bind(package, force=False, url=None):
     path, pkgid = _strip_url(url)
     b = _cache.get(path)
     if b is None:
-        conn = sqlite.connect(path)
+        conn = sqlite.connect(path, isolation_level=None)
         b = _SqliteBackend(path, conn, force)
         _cache[path] = b
-    b._bind(pkgid, package)
+    b._begin_transaction("EXCLUSIVE")
+    try:
+        b._bind(pkgid, package)
+    except InternalError:
+        b._curs.execute("ROLLBACK")
+        raise
+    b._curs.execute("COMMIT")
     return b, pkgid
 
 
@@ -218,6 +234,21 @@ def _split_uri_ref(uri_ref):
     return uri_ref[:sharp], uri_ref[sharp+1:]
 
 
+
+class _FlushableIterator(object):
+    __slots__ = ["_cursor", "__weakref__",]
+    def __init__ (self, cursor, backend):
+        self._cursor = cursor
+        backend._iterators[self] = True
+    def __iter__ (self):
+        return self
+    def flush(self):
+        """Flush the underlying cursor."""
+        self._cursor = iter(list(self._cursor))
+    def next(self):
+        return self._cursor.next()
+
+
 class _SqliteBackend(object):
 
     def __init__(self, path, conn, force):
@@ -230,6 +261,9 @@ class _SqliteBackend(object):
 
         self._path = path
         self._conn = conn
+        self._curs = conn.cursor()
+        # NB: self._curs is to be used for any *internal* operations
+        # Iterators intended for *external* use must be based on a new cursor.
         conn.create_function("join_id_ref", 2,
                               lambda p,s: p and "%s:%s" % (p,s) or s)
         conn.create_function("regexp", 2,
@@ -241,16 +275,21 @@ class _SqliteBackend(object):
         # NB: the callback ensures that even if packages "forget" to close
         # themselves, once they are garbage collected, we check if the
         # connexion to sqlite can be closed.
+        self._iterators = WeakKeyDictionary()
+        # _iterators is used to store all the iterators returned by iter_*
+        # methods, and force them to flush their underlying cursor anytime
+        # an modification of the database is about to happen
 
     def _bind(self, package_id, package):
         d = self._bound
         old = d.get(package_id)
         if old is not None:
             raise PackageInUse(old)
-        conn = self._conn
-        conn.execute("UPDATE Packages SET url = ? WHERE id = ?",
-                     (package.url, package_id,))
-        conn.commit()
+        try:
+            self._curs.execute("UPDATE Packages SET url = ? WHERE id = ?",
+                               (package.url, package_id,))
+        except sqlite.Error, e:
+            raise InternalError("could not update", e)
         d[package_id] = package
 
     def close(self, package_id):
@@ -263,10 +302,11 @@ class _SqliteBackend(object):
         d = self._bound
         m = d.get(package_id) # keeping a ref on it prevents it to disappear
         if m is not None:     # in the meantime...
-            conn = self._conn
-            conn.execute("UPDATE Packages SET url = ? WHERE id = ?",
-                         ("", package_id,))
-            conn.commit()
+            try:
+                self._curs.execute("UPDATE Packages SET url = ? WHERE id = ?",
+                                   ("", package_id,))
+            except sqlite.Error, e:
+                raise InternalError("could not update", e)
             del d[package_id]
         self._check_unused(package_id)
 
@@ -275,10 +315,12 @@ class _SqliteBackend(object):
         if conn is not None and len(self._bound) == 0:
             #print "DEBUG:", __file__, \
             #      "about to close SqliteBackend", self._path
-            conn.execute("UPDATE Packages SET url = ?", ("",))
-            conn.commit()
-            conn.close()
+            try:
+                self._curs.execute("UPDATE Packages SET url = ?", ("",))
+            finally:
+                conn.close()
             self._conn = None
+            self._curs = None
             # the following is necessary to break a cyclic reference:
             # self._bound references self._check_unused, which, as a bound
             # method, references self
@@ -286,46 +328,52 @@ class _SqliteBackend(object):
             # the following is not stricly necessary, but does no harm ;)
             if self._path in _cache: del _cache[self._path]
 
+    def _begin_transaction(self, mode=""):
+        for i in self._iterators.iterkeys():
+            i.flush()
+        self._curs.execute("BEGIN %s" % mode)
+        
     # package uri
 
     def get_uri(self, package_id):
         q = "SELECT uri FROM Packages WHERE id = ?"
-        return self._conn.execute(q, (package_id,)).fetchone()[0]
+        return self._curs.execute(q, (package_id,)).fetchone()[0]
 
     def update_uri(self, package_id, uri):
         q = "UPDATE Packages SET uri = ? WHERE id = ?"
+        execute = self._curs.execute
         try:
-            self._conn.execute(q, (uri, package_id,))
-            self._conn.commit()
+            execute(q, (uri, package_id,))
         except sqlite.Error, e:
-            self._conn.rollback()
             raise InternalError("could not update", e)
 
     # creation
 
-    def _create_element_cursor(self, package_id, id, element_type):
+    def _create_element(self, execute, package_id, id, element_type):
+        """Perform controls and insertions common to all elements.
+
+        NB: This starts a transaction that must be commited by caller.
         """
-        Makes common control and return the cursor to be used.
-        Starts a transaction that must be commited by caller.
-        """
-        c = self._conn.cursor()
         # check that the id is not in use
-        c.execute("SELECT id FROM Elements WHERE package = ? AND id = ?",
-                   (package_id, id,))
+        self._begin_transaction("IMMEDIATE")
+        c = execute("SELECT id FROM Elements WHERE package = ? AND id = ?",
+                    (package_id, id,))
         if c.fetchone() is not None:
-            raise ModelError("id in use: %i", id)
-        c.execute("INSERT INTO Elements VALUES (?,?,?)",
-                   (package_id, id, element_type))
-        return c
+            raise ModelError("id in use: %s" % id)
+        execute("INSERT INTO Elements VALUES (?,?,?)",
+                (package_id, id, element_type))
 
     def create_media(self, package_id, id, url):
+        c = self._curs
+        _create_element = self._create_element
+        execute = self._curs.execute
         try:
-            c = self._create_element_cursor(package_id, id, MEDIA)
-            c.execute("INSERT INTO Medias VALUES (?,?,?)",
-                       (package_id, id, url))
-            self._conn.commit()
+            _create_element(execute, package_id, id, MEDIA)
+            execute("INSERT INTO Medias VALUES (?,?,?)",
+                    (package_id, id, url))
+            execute("COMMIT")
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("could not insert", e)
 
     def create_annotation(self, package_id, id, media, begin, end):
@@ -338,81 +386,97 @@ class _SqliteBackend(object):
         p,s = _split_id_ref(media) # also assert that media has depth < 2
         assert p != "" or self.has_element(package_id, s, MEDIA), media
 
+        _create_element = self._create_element
+        execute = self._curs.execute
         try:
-            c = self._create_element_cursor(package_id, id, ANNOTATION)
-            c.execute("INSERT INTO Annotations VALUES (?,?,?,?,?,?)",
-                       (package_id, id, p, s, begin, end))
-            c.execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", "",""))
-            self._conn.commit()
+            _create_element(execute, package_id, id, ANNOTATION)
+            execute("INSERT INTO Annotations VALUES (?,?,?,?,?,?)",
+                    (package_id, id, p, s, begin, end))
+            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
+                    (package_id, id, "text/plain", "", "",""))
+            execute("COMMIT")
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("could not insert", e)
 
     def create_relation(self, package_id, id):
+        _create_element = self._create_element
+        execute = self._curs.execute
         try:
-            c = self._create_element_cursor(package_id, id, RELATION)
-            c.execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
-                       (package_id, id, "", "", "", ""))
-            self._conn.commit()
+            _create_element(execute, package_id, id, RELATION)
+            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
+                    (package_id, id, "", "", "", ""))
+            execute("COMMIT")
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("error in creating", e)
 
     def create_view(self, package_id, id):
+        _create_element = self._create_element
+        execute = self._curs.execute
         try:
-            c = self._create_element_cursor(package_id, id, VIEW)
-            c.execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", "", ""))
-            self._conn.commit()
+            _create_element(execute, package_id, id, VIEW)
+            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
+                    (package_id, id, "text/plain", "", "", ""))
+            execute("COMMIT")
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("error in creating", e)
 
     def create_resource(self, package_id, id):
+        _create_element = self._create_element
+        execute = self._curs.execute
         try:
-            c = self._create_element_cursor(package_id, id, RESOURCE)
-            c.execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", "", ""))
-            self._conn.commit()
+            _create_element(execute, package_id, id, RESOURCE)
+            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
+                    (package_id, id, "text/plain", "", "", ""))
+            execute("COMMIT")
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("error in creating", e)
 
     def create_tag(self, package_id, id):
+        _create_element = self._create_element
+        execute = self._curs.execute
         try:
-            c = self._create_element_cursor(package_id, id, TAG)
-            self._conn.commit()
+            _create_element(execute, package_id, id, TAG)
+            execute("COMMIT")
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("error in creating", e)
 
     def create_list(self, package_id, id):
+        _create_element = self._create_element
+        execute = self._curs.execute
         try:
-            c = self._create_element_cursor(package_id, id, LIST)
-            self._conn.commit()
+            _create_element(execute, package_id, id, LIST)
+            execute("COMMIT")
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("error in creating", e)
 
     def create_query(self, package_id, id):
+        _create_element = self._create_element
+        execute = self._curs.execute
         try:
-            c = self._create_element_cursor(package_id, id, QUERY)
-            c.execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", "", ""))
-            self._conn.commit()
+            _create_element(execute, package_id, id, QUERY)
+            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
+                    (package_id, id, "text/plain", "", "", ""))
+            execute("COMMIT")
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("error in creating",e)
         
     def create_import(self, package_id, id, url, uri):
+        _create_element = self._create_element
+        execute = self._curs.execute
         try:
-            c = self._create_element_cursor(package_id, id, IMPORT)
-            c.execute("INSERT INTO Imports VALUES (?,?,?,?)",
-                       (package_id, id, url, uri))
-            self._conn.commit()
+            _create_element(execute, package_id, id, IMPORT)
+            execute("INSERT INTO Imports VALUES (?,?,?,?)",
+                    (package_id, id, url, uri))
+            execute("COMMIT")
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("error in creating", e)
 
     # retrieval
@@ -424,7 +488,7 @@ class _SqliteBackend(object):
         the given type.
         """
         q = "SELECT typ FROM Elements WHERE package = ? and id = ?"
-        for i in self._conn.execute(q, (package_id, id,)):
+        for i in self._curs.execute(q, (package_id, id,)):
             return element_type is None or i[0] == element_type
         return False
 
@@ -435,7 +499,7 @@ class _SqliteBackend(object):
         """
 
         q = "SELECT typ FROM Elements WHERE package = ? AND id = ?"
-        r = self._conn.execute(q, (package_id, id,)).fetchone()
+        r = self._curs.execute(q, (package_id, id,)).fetchone()
         if r is None:
             return None
         t = r[0]
@@ -481,7 +545,8 @@ class _SqliteBackend(object):
                 args.append(i)
             q += ")"
 
-        return self._conn.execute(q, args)
+        r = self._conn.execute(q, args)
+        return _FlushableIterator(r, self)
 
     def iter_annotations(self, package_ids,
                          id=None,    id_alt=None,
@@ -561,7 +626,8 @@ class _SqliteBackend(object):
 
         q += " ORDER BY fbegin, fend, media_p, media_i"
 
-        return self._conn.execute(q, args)
+        r = self._conn.execute(q, args)
+        return _FlushableIterator(r, self)
 
     def iter_relations(self, package_ids,
                        id=None, id_alt=None):
@@ -572,7 +638,8 @@ class _SqliteBackend(object):
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, RELATION, id, id_alt)
-        return self._conn.execute(selectfrom+where, args)
+        r = self._conn.execute(selectfrom+where, args)
+        return _FlushableIterator(r, self)
 
     def iter_views(self, package_ids, id=None, id_alt=None):
         """
@@ -582,7 +649,8 @@ class _SqliteBackend(object):
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, VIEW, id, id_alt)
-        return self._conn.execute(selectfrom+where, args)
+        r = self._conn.execute(selectfrom+where, args)
+        return _FlushableIterator(r, self)
 
     def iter_resources(self, package_ids, id=None, id_alt=None):
         """
@@ -592,7 +660,8 @@ class _SqliteBackend(object):
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, RESOURCE, id, id_alt)
-        return self._conn.execute(selectfrom+where, args)
+        r = self._conn.execute(selectfrom+where, args)
+        return _FlushableIterator(r, self)
 
     def iter_tags(self, package_ids, id=None, id_alt=None):
         """
@@ -602,7 +671,8 @@ class _SqliteBackend(object):
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, TAG, id, id_alt)
-        return self._conn.execute(selectfrom+where, args)
+        r = self._conn.execute(selectfrom+where, args)
+        return _FlushableIterator(r, self)
 
     def iter_lists(self, package_ids, id=None, id_alt=None):
         """
@@ -612,7 +682,8 @@ class _SqliteBackend(object):
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, LIST, id, id_alt)
-        return self._conn.execute(selectfrom+where, args)
+        r = self._conn.execute(selectfrom+where, args)
+        return _FlushableIterator(r, self)
 
     def iter_queries(self, package_ids, id=None, id_alt=None):
         """
@@ -622,7 +693,8 @@ class _SqliteBackend(object):
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, QUERY, id, id_alt)
-        return self._conn.execute(selectfrom+where, args)
+        r = self._conn.execute(selectfrom+where, args)
+        return _FlushableIterator(r, self)
 
     def iter_imports(self, package_ids,
                       id=None,   id_alt=None,
@@ -668,7 +740,8 @@ class _SqliteBackend(object):
                 args.append(i)
             q += ")"
 
-        return self._conn.execute(q, args)
+        r = self._conn.execute(q, args)
+        return _FlushableIterator(r, self)
 
     def _make_element_query(self, package_ids, element_type,
                               id=None, id_alt=None):
@@ -698,13 +771,12 @@ class _SqliteBackend(object):
     # updating
 
     def update_media(self, package_id, id, url):
+        execute = self._curs.execute
         try:
-            self._conn.execute("UPDATE Medias SET url = ? "
-                                "WHERE package = ? AND id = ?",
-                                (url, package_id, id,))
-            self._conn.commit()
+            execute("UPDATE Medias SET url = ? "
+                     "WHERE package = ? AND id = ?",
+                    (url, package_id, id,))
         except sqlite.Error, e:
-            self._conn.rollback()
             raise InternalError("could not update", e)
 
     def update_annotation(self, package_id, id, media, begin, end):
@@ -717,22 +789,22 @@ class _SqliteBackend(object):
         p,s = _split_id_ref(media) # also assert that media has depth < 2
         assert p != "" or self.has_element(package_id, s, MEDIA), media
 
+        execute = self._curs.execute
         try:
-            self._conn.execute("UPDATE Annotations SET media_p = ?, "
-                                "media_i = ?, fbegin = ?, fend = ? "
-                                "WHERE package = ? and id = ?",
-                                (p, s, begin, end, package_id, id,))
-            self._conn.commit()
+            execute("UPDATE Annotations SET media_p = ?, "
+                     "media_i = ?, fbegin = ?, fend = ? "
+                     "WHERE package = ? and id = ?",
+                    (p, s, begin, end, package_id, id,))
         except sqlite.Error, e:
             self._conn.rollback()
             raise InternalError("could not update", e)
 
     def update_import(self, package_id, id, url, uri):
+        execute = self._curs.execute
         try:
-            self._conn.execute("UPDATE Imports SET url = ?, uri = ? "
-                                "WHERE package = ? and id = ?",
-                                (url, uri, package_id, id,))
-            self._conn.commit()
+            execute("UPDATE Imports SET url = ?, uri = ? "
+                     "WHERE package = ? and id = ?",
+                    (url, uri, package_id, id,))
         except sqlite.Error, e:
             self._conn.rollback()
             raise InternalError("error in updating", e)
@@ -761,8 +833,7 @@ class _SqliteBackend(object):
         q = "SELECT mimetype, data, join_id_ref(schema_p,schema_i) as schema " \
             "FROM Contents " \
             "WHERE package = ? AND element = ?"
-        cur = self._conn.execute(q, (package_id, id,))
-        return cur.fetchone() or None
+        return self._curs.execute(q, (package_id, id,)).fetchone() or None
 
     def update_content(self, package_id, id, mimetype, data, schema):
         """
@@ -780,9 +851,12 @@ class _SqliteBackend(object):
         q = "UPDATE Contents "\
             "SET mimetype = ?, data = ?, schema_p = ?, schema_i = ? "\
             "WHERE package = ? AND element = ?"
-        args = ( mimetype, data, p, s, package_id, id,)
-        cur = self._conn.execute(q, args)
-        self._conn.commit()
+        args = (mimetype, data, p, s, package_id, id,)
+        execute = self._curs.execute
+        try:
+            execute(q, args)
+        except sqlite.Error, e:
+            raise InternalError("could not update", e)
 
     # meta-data
 
@@ -794,11 +868,9 @@ class _SqliteBackend(object):
         """
         q = """SELECT key, value FROM Meta
                WHERE package = ? AND element = ? ORDER BY key"""
-        c = self._conn.execute(q, (package_id, id))
-        d = c.fetchone()
-        while d is not None:
-            yield d[0],d[1]
-            d = c.fetchone()
+        r = ( (d[0], d[1])
+               for d in self._conn.execute(q, (package_id, id)) )
+        return _FlushableIterator(r, self)
 
     def get_meta(self, package_id, id, element_type, key):
         """
@@ -810,8 +882,7 @@ class _SqliteBackend(object):
         """
         q = """SELECT value FROM Meta
                WHERE package = ? AND element = ? AND KEY = ?"""
-        c = self._conn.execute(q, (package_id, id, key,))
-        d = c.fetchone()
+        d = self._curs.execute(q, (package_id, id, key,)).fetchone()
         if d is None:
             return None
         else:
@@ -829,24 +900,28 @@ class _SqliteBackend(object):
         """
         q = """SELECT value FROM Meta
                WHERE package = ? AND element = ? and key = ?"""
-        c = self._conn.execute(q, (package_id, id, key))
+        c = self._curs.execute(q, (package_id, id, key))
         d = c.fetchone()
 
         if d is None:
             if val is not None:
                 q = """INSERT INTO Meta (package, element, key, value)
                        VALUES (?,?,?,?)"""
-                self._conn.execute(q, (package_id, id, key, val))
+                args = (package_id, id, key, val)
         else:
             if val is not None:
                 q = """UPDATE Meta SET value = ?
                        WHERE package = ? AND element = ? AND key = ?"""
-                self._conn.execute(q, (val, package_id, id, key))
+                args = (val, package_id, id, key)
             else:
                 q = """DELETE FROM Meta
                        WHERE package = ? AND element = ? AND key = ?"""
-                self._conn.execute(q, (package_id, id, key))
-        self._conn.commit()
+                args = (package_id, id, key)
+        execute = self._curs.execute
+        try:
+            execute(q, args)
+        except sqlite.Error, e:
+            raise InternalError("could not %s" % q[:6], e)
 
     # relation members
 
@@ -866,20 +941,22 @@ class _SqliteBackend(object):
         assert p != "" or self.has_element(package_id, s, ANNOTATION), member
         if pos == -1:
             pos = n
+        execute = self._curs.execute
+        executemany = self._curs.executemany
+        updates = ((package_id, id, i) for i in xrange(n, pos-1, -1))
+        self._begin_transaction()
         try:
-            c = self._conn.cursor()
             # sqlite does not seem to be able to do the following updates in
             # one query (unicity constraint breaks), so...
-            for i in xrange(n, pos-1, -1):
-                c.execute("UPDATE RelationMembers SET ord=ord+1 "
-                           "WHERE package = ? AND relation = ? AND ord = ?",
-                           (package_id, id, i))
-            c.execute("INSERT INTO RelationMembers VALUES (?,?,?,?,?)",
-                       (package_id, id, pos, p, s))
-            self._conn.commit()
+            executemany("UPDATE RelationMembers SET ord=ord+1 "
+                         "WHERE package = ? AND relation = ? AND ord = ?",
+                        updates)
+            execute("INSERT INTO RelationMembers VALUES (?,?,?,?,?)",
+                    (package_id, id, pos, p, s))
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("could not update or insert", e)
+        execute("COMMIT")
 
     def update_member(self, package_id, id, member, pos):
         """
@@ -891,14 +968,12 @@ class _SqliteBackend(object):
         p,s = _split_id_ref(member) # also assert that member has depth < 2
         assert p != "" or self.has_element(package_id, s, ANNOTATION), member
 
+        execute = self._curs.execute
         try:
-            c = self._conn.cursor()
-            c.execute("UPDATE RelationMembers SET member_p = ?, member_i = ? "
-                       "WHERE package = ? AND relation = ? AND ord = ?",
-                       (p, s, package_id, id, pos))
-            self._conn.commit()
+            execute("UPDATE RelationMembers SET member_p = ?, member_i = ? "
+                     "WHERE package = ? AND relation = ? AND ord = ?",
+                    (p, s, package_id, id, pos))
         except sqlite.Error, e:
-            self._conn.rollback()
             raise InternalError("could not update", e)
 
     def count_members(self, package_id, id):
@@ -907,7 +982,7 @@ class _SqliteBackend(object):
         """
         q = "SELECT count(ord) FROM RelationMembers "\
             "WHERE package = ? AND relation = ?"
-        return self._conn.execute(q, (package_id, id)).fetchone()[0]
+        return self._curs.execute(q, (package_id, id)).fetchone()[0]
 
     def get_member(self, package_id, id, pos):
         """
@@ -925,7 +1000,7 @@ class _SqliteBackend(object):
         q = "SELECT join_id_ref(member_p,member_i) AS member " \
             "FROM RelationMembers "\
             "WHERE package = ? AND relation = ? AND ord = ?"
-        return self._conn.execute(q, (package_id, id, pos)).fetchone()[0]
+        return self._curs.execute(q, (package_id, id, pos)).fetchone()[0]
 
     def iter_members(self, package_id, id):
         """
@@ -939,22 +1014,23 @@ class _SqliteBackend(object):
 
     def remove_member(self, package_id, id, pos):
         """
-        Remobv the member at the given position in the identified relation.
+        Remove the member at the given position in the identified relation.
         """
         assert 0 <= pos < self.count_members(package_id, id), pos
 
+        execute = self._curs.execute
+        self._begin_transaction()
         try:
-            c = self._conn.cursor()
-            c.execute("DELETE FROM RelationMembers "
-                       "WHERE package = ? AND relation = ? AND ord = ?",
-                       (package_id, id, pos))
-            c.execute("UPDATE RelationMembers SET ord=ord-1 "
-                       "WHERE package = ? AND relation = ? AND ord > ?",
-                       (package_id, id, pos))
-            self._conn.commit()
+            execute("DELETE FROM RelationMembers "
+                     "WHERE package = ? AND relation = ? AND ord = ?",
+                    (package_id, id, pos))
+            execute("UPDATE RelationMembers SET ord=ord-1 "
+                     "WHERE package = ? AND relation = ? AND ord > ?",
+                    (package_id, id, pos))
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("could not delete or update", e)
+        execute("COMMIT")
 
     def iter_relations_with_member(self, package_ids, member, pos=None):
         """
@@ -981,7 +1057,8 @@ class _SqliteBackend(object):
         if pos is not None:
             q += " AND ord = ?"
             args.append(pos)
-        return self._conn.execute(q, args)
+        r = self._conn.execute(q, args)
+        return _FlushableIterator(r, self)
 
     # list items
 
@@ -1001,20 +1078,22 @@ class _SqliteBackend(object):
         assert p != "" or self.has_element(package_id, s), item
         if pos == -1:
             pos = n
+        execute = self._curs.execute
+        executemany = self._curs.executemany
+        updates = ((package_id, id, i) for i in xrange(n, pos-1, -1))
+        self._begin_transaction()
         try:
-            c = self._conn.cursor()
             # sqlite does not seem to be able to do the following updates in
             # one query (unicity constraint breaks), so...
-            for i in xrange(n, pos-1, -1):
-                c.execute("UPDATE ListItems SET ord=ord+1 "
+            executemany("UPDATE ListItems SET ord=ord+1 "
                            "WHERE package = ? AND list = ? AND ord = ?",
-                           (package_id, id, i))
-            c.execute("INSERT INTO ListItems VALUES (?,?,?,?,?)",
-                       (package_id, id, pos, p, s))
-            self._conn.commit()
+                        updates)
+            execute("INSERT INTO ListItems VALUES (?,?,?,?,?)",
+                    (package_id, id, pos, p, s))
         except sqlite.Error, e:
-            self._conn.rollback()
+            execute("ROLLBACK")
             raise InternalError("could not update or insert", e)
+        execute("COMMIT")
 
     def update_item(self, package_id, id, item, pos):
         """
@@ -1026,14 +1105,12 @@ class _SqliteBackend(object):
         p,s = _split_id_ref(item) # also assert that item has depth < 2
         assert p != "" or self.has_element(package_id, s), item
 
+        execute = self._curs.execute
         try:
-            c = self._conn.cursor()
-            c.execute("UPDATE ListItems SET item_p = ?, item_i = ? "
+            execute("UPDATE ListItems SET item_p = ?, item_i = ? "
                        "WHERE package = ? AND list = ? AND ord = ?",
-                       (p, s, package_id, id, pos))
-            self._conn.commit()
+                      (p, s, package_id, id, pos))
         except sqlite.Error, e:
-            self._conn.rollback()
             raise InternalError("could not update", e)
 
     def count_items(self, package_id, id):
@@ -1042,7 +1119,7 @@ class _SqliteBackend(object):
         """
         q = "SELECT count(ord) FROM ListItems "\
             "WHERE package = ? AND list = ?"
-        return self._conn.execute(q, (package_id, id)).fetchone()[0]
+        return self._curs.execute(q, (package_id, id)).fetchone()[0]
 
     def get_item(self, package_id, id, pos):
         """
@@ -1060,7 +1137,7 @@ class _SqliteBackend(object):
         q = "SELECT join_id_ref(item_p,item_i) AS item " \
             "FROM ListItems "\
             "WHERE package = ? AND list = ? AND ord = ?"
-        return self._conn.execute(q, (package_id, id, pos)).fetchone()[0]
+        return self._curs.execute(q, (package_id, id, pos)).fetchone()[0]
 
     def iter_items(self, package_id, id):
         """
@@ -1074,22 +1151,24 @@ class _SqliteBackend(object):
 
     def remove_item(self, package_id, id, pos):
         """
-        Remobv the item at the given position in the identified list.
+        Remove the item at the given position in the identified list.
         """
         assert 0 <= pos < self.count_items(package_id, id), pos
 
+        execute = self._curs.execute
+        self._begin_transaction()
         try:
-            c = self._conn.cursor()
-            c.execute("DELETE FROM ListItems "
-                       "WHERE package = ? AND list = ? AND ord = ?",
-                       (package_id, id, pos))
-            c.execute("UPDATE ListItems SET ord=ord-1 "
-                       "WHERE package = ? AND list = ? AND ord > ?",
-                       (package_id, id, pos))
-            self._conn.commit()
+            execute("DELETE FROM ListItems "
+                     "WHERE package = ? AND list = ? AND ord = ?",
+                    (package_id, id, pos))
+            execute("UPDATE ListItems SET ord=ord-1 "
+                     "WHERE package = ? AND list = ? AND ord > ?",
+                    (package_id, id, pos))
         except sqlite.Error, e:
+            execute("ROLLBACK")
             self._conn.rollback()
             raise InternalError("could not delete or update", e)
+        execute("COMMIT")
 
     def iter_lists_with_item(self, package_ids, item, pos=None):
         """
@@ -1115,7 +1194,8 @@ class _SqliteBackend(object):
         if pos is not None:
             q += " AND ord = ?"
             args.append(pos)
-        return self._conn.execute(q, args)
+        r = self._conn.execute(q, args)
+        return _FlushableIterator(r, self)
 
     # tagged elements
 
@@ -1128,13 +1208,11 @@ class _SqliteBackend(object):
         eltp, elts = _split_id_ref(element) # also assert that it has depth < 2
         tagp, tags = _split_id_ref(tag) # also assert that tag has depth < 2
 
-        conn = self._conn
+        execute = self._curs.execute
         try:
-            conn.execute("INSERT OR IGNORE INTO Tagged VALUES (?,?,?,?,?)",
-                         (package_id, eltp, elts, tagp, tags))
-            conn.commit()
+            execute("INSERT OR IGNORE INTO Tagged VALUES (?,?,?,?,?)",
+                    (package_id, eltp, elts, tagp, tags))
         except sqlite.Error, e:
-            conn.rollback()
             raise InternalError("could not insert", e)
 
     def dissociate_tag(self, package_id, element, tag):
@@ -1146,15 +1224,13 @@ class _SqliteBackend(object):
         eltp, elts = _split_id_ref(element) # also assert that it has depth < 2
         tagp, tags = _split_id_ref(tag) # also assert that tag has depth < 2
 
-        conn = self._conn
+        execute = self._curs.execute
         try:
-            conn.execute("DELETE FROM Tagged WHERE package = ? "
-                         "AND element_p = ? AND element_i = ? "
-                         "AND tag_p = ? AND tag_i = ?",
-                         (package_id, eltp, elts, tagp, tags))
-            conn.commit()
+            execute("DELETE FROM Tagged WHERE package = ? "
+                     "AND element_p = ? AND element_i = ? "
+                     "AND tag_p = ? AND tag_i = ?",
+                    (package_id, eltp, elts, tagp, tags))
         except sqlite.Error, e:
-            conn.rollback()
             raise InternalError("could not delete", e)
 
     def iter_tags_with_element(self, package_ids, element):
@@ -1175,7 +1251,8 @@ class _SqliteBackend(object):
             "  (element_p = i.id AND  ? IN (i.uri, i.url)))"
         args = list(package_ids) + [element_i, element_u, element_u]
 
-        return self._conn.execute(q, args)
+        r = self._conn.execute(q, args)
+        return _FlushableIterator(r, self)
 
     def iter_elements_with_tag(self, package_ids, tag):
         """Iter over all the elements associated to tag in the given packages.
@@ -1195,7 +1272,8 @@ class _SqliteBackend(object):
             "  (tag_p = i.id AND  ? IN (i.uri, i.url)))"
         args = list(package_ids) + [tag_i, tag_u, tag_u]
 
-        return self._conn.execute(q, args)
+        r = self._conn.execute(q, args)
+        return _FlushableIterator(r, self)
 
     def iter_tagging(self, package_ids, element, tag):
         """Iter over all the packages associating element to tag.
@@ -1222,8 +1300,18 @@ class _SqliteBackend(object):
         args = list(package_ids) \
              + [element_i, element_u, element_u, tag_i, tag_u, tag_u,]
 
-        for i in self._conn.execute(q, args):
-            yield i[0]
+        r = ( i[0] for i in self._conn.execute(q, args) )
+        return _FlushableIterator(r, self)
 
 
     # end of the class
+
+# NB: all iter_* functions must return a _FlushableIterator which stores itself 
+# in the _iterators attribute of the backend.
+# all methods modifying the DB must use _begin_transaction to start a 
+# transaction, in order to flush the iterators stored in _iterators (or the commit will fail).
+# both behaviour could have been implemented as decorators for the
+# corresponding methods, but
+#  - "classical" (i.e. wrapping) decorators have a high overhead
+#  - "smart" (i.e. code-modifying) decorators are hard to write
+# so for the moment, we opt for old-school copy/paste...

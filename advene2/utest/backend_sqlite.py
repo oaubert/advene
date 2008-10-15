@@ -6,7 +6,7 @@ from warnings  import filterwarnings
 
 from advene.model.backends.sqlite \
   import claims_for_create, create, claims_for_bind, bind, IN_MEMORY_URL, \
-         PackageInUse
+         PackageInUse, InternalError
 from advene.model.core.content import Content
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
@@ -144,7 +144,8 @@ class TestBindBackend(TestCase):
     def tearDown(self):
         if exists(self.filename):
             unlink(self.filename)
-        self.b.close (self.i)
+        if self.b:
+            self.b.close (self.i)
         del P._L[:] # not required, but saves memory
 
     def test_claim_non_existing(self):
@@ -155,6 +156,7 @@ class TestBindBackend(TestCase):
 
     def test_claim_wrong_format(self):
         self.b.close(self.i)
+        self.b = None
         f = open(self.filename, 'w'); f.write("foo"); f.close()
         self.assert_(
             not claims_for_bind(self.url2)
@@ -276,8 +278,8 @@ class TestCache(TestCase):
     def test_forget(self):
         old_id = id(self.b)
         self.b.close(self.i)
-        b, i = bind(P(self.url2))
-        self.assertNotEqual(old_id, id(b))
+        self.b, self.i = bind(P(self.url2))
+        self.assertNotEqual(old_id, id(self.b))
 
 
 class TestCreateElement(TestCase):
@@ -645,7 +647,7 @@ class TestHandleElements(TestCase):
         self.assertEqual(ref,
             get((self.pid1, self.pid2,), id_alt=("r1","r3"),))
 
-    def test_get_view(self):
+    def test_iter_views(self):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
@@ -1029,6 +1031,155 @@ class TestHandleElements(TestCase):
         self.be.dissociate_tag(self.pid1, "i1:a5", "i1:t3")
         self.be.dissociate_tag(self.pid2, "a5",    "t3")
         self.be.dissociate_tag(self.pid2, "a6",    "t3")
+
+    def test_independant_iterations(self):
+        b = self.be
+        # populate package to get non empty lists
+        b.set_meta(self.pid1, "", "", "pac#test", "foo")
+        b.insert_member(self.pid1, "r1", "a1", -1)
+        b.insert_member(self.pid1, "r1", "i1:a5", -1)
+        b.insert_item(self.pid1, "l1", "r1", -1)
+        b.insert_item(self.pid1, "l1", "i1:r3", -1)
+        b.associate_tag(self.pid1, "a1",    "t1")
+        b.associate_tag(self.pid1, "a1",    "i1:t3")
+        b.associate_tag(self.pid1, "i1:a5", "t1")
+
+        pids = (self.pid1, self.pid2,)
+        iter_methods = {
+            "iter_medias": [pids,],
+            "iter_annotations": [pids,],
+            "iter_relations": [pids,],
+            "iter_views": [pids,],
+            "iter_resources": [pids,],
+            "iter_tags": [pids,],
+            "iter_lists": [pids,],
+            "iter_queries": [pids,],
+            "iter_imports": [pids,],
+            "iter_meta": [self.pid1, "", ""],
+            "iter_members": [self.pid1, "r1",],
+            "iter_relations_with_member": [pids, "%s#a1" % self.url1,],
+            "iter_items": [self.pid1, "l1",],
+            "iter_lists_with_item": [pids, "%s#r1" % self.url1,],
+            "iter_tags_with_element": [pids, "%s#a1" % self.url1,],
+            "iter_elements_with_tag": [pids, "%s#t1" % self.url1,],
+            "iter_tagging": [pids, "%s#a1" % self.url1, "%s#t1" % self.url1,],
+            # TODO add referrers searching methods
+        }
+        for n, args in iter_methods.iteritems():
+            m = getattr(b, n)
+            ref = list(m(*args))
+            assert ref, n # lists should be non-empty
+            for n2, args2 in iter_methods.iteritems():
+                test = []
+                for i in m(*args):
+                    if len(test) == 1:
+                       m2 = getattr(b, n2)
+                       list(m2(*args2)) # try to parasit enclosing iteration
+                    test.append(i)
+                self.assertEquals(ref, test, n)
+
+
+class TestUpdateDuringIteration(TestCase):
+    def setUp(self):
+        # reuse the bunch of code defined in TestHandleElements:
+        TestHandleElements.__dict__["setUp"](self)
+        try:
+            b = self.be
+            # populate package to get non empty lists
+            b.set_meta(self.pid1, "", "", "pac#test", "foo")
+            b.insert_member(self.pid1, "r1", "a1", -1)
+            b.insert_member(self.pid1, "r1", "i1:a5", -1)
+            b.insert_item(self.pid1, "l1", "r1", -1)
+            b.insert_item(self.pid1, "l1", "i1:r3", -1)
+            b.associate_tag(self.pid1, "a1",    "t1")
+            b.associate_tag(self.pid1, "a1",    "i1:t3")
+            b.associate_tag(self.pid1, "i1:a5", "t1")
+        except:
+            self.tearDown()
+            raise
+
+    def tearDown(self):
+        TestHandleElements.__dict__["tearDown"](self)
+
+    def test_all(self):
+        # This method actually performs several tests and call setUp and 
+        # tearDown between each; this is a bit dirty, but was the fastest way
+        # to do it...
+        # (beside, meta-programming would not have been very legible... ;)
+
+        pids = (self.pid1, self.pid2)
+        iter_methods = {
+            "iter_medias": [pids,],
+            "iter_annotations": [pids,],
+            "iter_relations": [pids,],
+            "iter_views": [pids,],
+            "iter_resources": [pids,],
+            "iter_tags": [pids,],
+            "iter_lists": [pids,],
+            "iter_queries": [pids,],
+            "iter_imports": [pids,],
+            "iter_meta": [self.pid1, "", ""],
+            "iter_members": [self.pid1, "r1",],
+            "iter_relations_with_member": [pids, "%s#a1" % self.url1,],
+            "iter_items": [self.pid1, "l1",],
+            "iter_lists_with_item": [pids, "%s#r1" % self.url1,],
+            "iter_tags_with_element": [pids, "%s#a1" % self.url1,],
+            "iter_elements_with_tag": [pids, "%s#t1" % self.url1,],
+            "iter_tagging": [pids, "%s#a1" % self.url1, "%s#t1" % self.url1,],
+            # TODO add referrers searching methods
+        }
+        update_functions = {
+            create: [P(IN_MEMORY_URL+";baz"),],
+            bind: [P(IN_MEMORY_URL+";bar"),],
+        }
+        update_methods = {
+            #"close": [,], rather tested with bind and create
+            "update_uri": [self.pid1, "urn:1234",],
+            "create_media": [self.pid1, "mX", "file:///tmp/mX.ogm",],
+            "create_annotation": [self.pid1, "aX", "m1", 0, 10,],
+            "create_relation": [self.pid1, "rX",],
+            "create_view": [self.pid1, "vX",],
+            "create_resource": [self.pid1, "RX",],
+            "create_tag": [self.pid1, "tX",],
+            "create_list": [self.pid1, "lX",],
+            "create_query": [self.pid1, "qX",],
+            "create_import": [self.pid1, "iX", "file:///tmp/pkg", ""],
+            "update_media": [self.pid1, "m1", "file:///tmp/mX.ogm",],
+            "update_annotation": [self.pid1, "a1", "m1", 0, 666,],
+            "update_import": [self.pid1, "i1", "file:///tmp/pkg", ""],
+            "update_content": [self.pid1, "a1", "test/html", "", "",],
+            "set_meta": [self.pid1, "", "", "pac#test2", "bar",],
+            "insert_member": [self.pid1, "r1", "a3", -1],
+            "update_member": [self.pid1, "r1", "a4", 0],
+            "remove_member": [self.pid1, "r1", 0],
+            "insert_item": [self.pid1, "l1", "r2", -1],
+            "update_item": [self.pid1, "l1", "r2", 0],
+            "remove_item": [self.pid1, "l1", 0],
+            "associate_tag": [self.pid1, "a2", "t1",],
+            "dissociate_tag": [self.pid1, "t1", "t1",],
+            # TODO add renaming methods and destroying methods
+        }
+        for n, args in iter_methods.iteritems():
+            b = self.be
+            m = getattr(b, n)
+            ref = list(m(*args))
+            assert ref, n # lists should be non-empty
+            test = []
+            for i in m(*args):
+                if len(test) == 1:
+                    for n2, args2 in update_methods.iteritems():
+                        try:
+                            getattr(b, n2)(*args2)
+                        except InternalError, e:
+                            self.fail("%s during %s raise:\n %s" % (n2, n, e))
+                        except sqlite.Error, e:
+                            self.fail("%s during %s raise:\n %s" % (n2, n, e))
+                    create(P(IN_MEMORY_URL+";bar")); self.be.close(";bar")
+                    bind(P(IN_MEMORY_URL+";bar")); self.be.close(";bar")
+                test.append(i)
+            self.assertEquals(ref, test, n)
+            self.tearDown()
+            self.setUp()
 
 
 class TestRetrieveDataWithSameId(TestCase):
