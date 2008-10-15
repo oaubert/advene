@@ -12,7 +12,6 @@ from itertools import chain
 from xml.etree.cElementTree import Element, ElementTree, SubElement
 
 from advene.model.consts import ADVENE_XML
-from advene.model.content.register import iter_textual_mimetypes
 from advene.model.serializers.unserialized import iter_unserialized_meta_prefix
 
 NAME = "Generic Advene XML"
