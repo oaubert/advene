@@ -15,8 +15,9 @@ from advene.model.core.tag import Tag
 from advene.model.core.list import List
 from advene.model.core.query import Query
 from advene.model.core.import_ import Import
+from advene.model.core.group import GroupMixin
 
-class OwnGroup(object):
+class OwnGroup(GroupMixin):
 
     # TODO : methods giving access to filters,
     # e.g. def iter_medias(id=None, id_alt=None, url=None, url_alt=None)
@@ -30,102 +31,48 @@ class OwnGroup(object):
         return element._owner is self._owner \
            and element._id in self._owner._elements
 
-    @property
-    def medias(owngroup):
-        o = owngroup._owner
-        class OwnMedias(object):
-            def __iter__(self):
-                for i in o._backend.iter_medias((o._id,)):
-                    yield o.get_element(i)
-            def __contains__(self, e):
-                return e.ADVENE_TYPE == MEDIA and e in owngroup
-        return OwnMedias()
+    def iter_medias(self):
+        o = self._owner
+        for i in o._backend.iter_medias((o._id,)):
+            yield o.get_element(i)
 
-    @property
-    def annotations(owngroup):
-        o = owngroup._owner
-        class OwnAnnotations(object):
-            def __iter__(self):
-                for i in o._backend.iter_annotations((o._id,)):
-                    yield o.get_element(i)
-            def __contains__(self, e):
-                return e.ADVENE_TYPE == ANNOTATION and e in owngroup
-        return OwnAnnotations()
+    def iter_annotations(self):
+        o = self._owner
+        for i in o._backend.iter_annotations((o._id,)):
+            yield o.get_element(i)
 
-    @property
-    def relations(owngroup):
-        o = owngroup._owner
-        class OwnRelations(object):
-            def __iter__(self):
-                for i in o._backend.iter_relations((o._id,)):
-                    yield o.get_element(i)
-            def __contains__(self, e):
-                return e.ADVENE_TYPE == RELATION and e in owngroup
-        return OwnRelations()
+    def iter_relations(self):
+        o = self._owner
+        for i in o._backend.iter_relations((o._id,)):
+            yield o.get_element(i)
 
-    @property
-    def views(owngroup):
-        o = owngroup._owner
-        class OwnViews(object):
-            def __iter__(self):
-                for i in o._backend.iter_views((o._id,)):
-                    yield o.get_element(i)
-            def __contains__(self, e):
-                return e.ADVENE_TYPE == VIEW and e in owngroup
-        return OwnViews()
+    def iter_views(self):
+        o = self._owner
+        for i in o._backend.iter_views((o._id,)):
+            yield o.get_element(i)
 
-    @property
-    def resources(owngroup):
-        o = owngroup._owner
-        class OwnResources(object):
-            def __iter__(self):
-                for i in o._backend.iter_resources((o._id,)):
-                    yield o.get_element(i)
-            def __contains__(self, e):
-                return e.ADVENE_TYPE == RESOURCE and e in owngroup
-        return OwnResources()
+    def iter_resources(self):
+        o = self._owner
+        for i in o._backend.iter_resources((o._id,)):
+            yield o.get_element(i)
 
-    @property
-    def tags(owngroup):
-        o = owngroup._owner
-        class OwnTags(object):
-            def __iter__(self):
-                for i in o._backend.iter_tags((o._id,)):
-                    yield o.get_element(i)
-            def __contains__(self, e):
-                return e.ADVENE_TYPE == TAG and e in owngroup
-        return OwnTags()
+    def iter_tags(self):
+        o = self._owner
+        for i in o._backend.iter_tags((o._id,)):
+            yield o.get_element(i)
 
-    @property
-    def lists(owngroup):
-        o = owngroup._owner
-        class OwnLists(object):
-            def __iter__(self):
-                for i in o._backend.iter_lists((o._id,)):
-                    yield o.get_element(i)
-            def __contains__(self, e):
-                return e.ADVENE_TYPE == LIST and e in owngroup
-        return OwnLists()
+    def iter_lists(self):
+        o = self._owner
+        for i in o._backend.iter_lists((o._id,)):
+            yield o.get_element(i)
 
-    @property
-    def queries(owngroup):
-        o = owngroup._owner
-        class OwnQueries(object):
-            def __iter__(self):
-                for i in o._backend.iter_queries((o._id,)):
-                    yield o.get_element(i)
-            def __contains__(self, e):
-                return e.ADVENE_TYPE == QUERY and e in owngroup
-        return OwnQueries()
+    def iter_queries(self):
+        o = self._owner
+        for i in o._backend.iter_queries((o._id,)):
+            yield o.get_element(i)
 
-    @property
-    def imports(owngroup):
-        o = owngroup._owner
-        class OwnImports(object):
-            def __iter__(self):
-                for i in o._backend.iter_imports((o._id,)):
-                    yield o.get_element(i)
-            def __contains__(self, e):
-                return e.ADVENE_TYPE == IMPORT and e in owngroup
-        return OwnImports()
+    def iter_imports(self):
+        o = self._owner
+        for i in o._backend.iter_imports((o._id,)):
+            yield o.get_element(i)
 

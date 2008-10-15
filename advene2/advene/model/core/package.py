@@ -382,6 +382,12 @@ class Package(object, WithMetaMixin, DirtyMixin):
             c = parent.get(c)
         return r
 
+    def __iter__(self):
+        # even if it is not implemented, defining __iter__ is useful, because
+        # otherwise, python will try to iter passing integers to __getitem__,
+        # and that makes very strange error messages...
+        raise ValueError("not iterable, use X.own or X.all instead")
+
     # element creation
 
     def create_media(self, id, url, frame_of_reference):

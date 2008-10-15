@@ -6,8 +6,9 @@ from advene import _RAISE
 from advene.model.core.element \
   import PackageElement, ANNOTATION, RELATION
 from advene.model.core.content import WithContentMixin
+from advene.model.core.group import GroupMixin
 
-class Relation(PackageElement, WithContentMixin):
+class Relation(PackageElement, WithContentMixin, GroupMixin):
     """
     I expose the protocol of a basic collection, to give access to the members
     of a relation. I also try to efficiently cache the results I know.
