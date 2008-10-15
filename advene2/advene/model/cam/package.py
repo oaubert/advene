@@ -367,10 +367,10 @@ _bootstrap_ref = lambda: None
 
 Package.make_metadata_property(DC_NS_PREFIX + "creator", default="")
 Package.make_metadata_property(DC_NS_PREFIX + "contributor", default="")
-Package.make_metadata_property(DC_NS_PREFIX + "created", default=None)
-Package.make_metadata_property(DC_NS_PREFIX + "modified", default=None)
+Package.make_metadata_property(DC_NS_PREFIX + "created", default="")
+Package.make_metadata_property(DC_NS_PREFIX + "modified", default="")
 
-Package.make_metadata_property(DC_NS_PREFIX + "title", default=None)
-Package.make_metadata_property(DC_NS_PREFIX + "description", default=None)
+Package.make_metadata_property(DC_NS_PREFIX + "title", default="")
+Package.make_metadata_property(DC_NS_PREFIX + "description", default="")
 
 Package.make_metadata_property(RDFS_NS_PREFIX + "seeAlso", default=None)

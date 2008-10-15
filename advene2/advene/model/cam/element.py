@@ -88,11 +88,11 @@ _make_meta = CamElementMixin.make_metadata_property
 
 _make_meta(DC_NS_PREFIX + "creator", default="")
 _make_meta(DC_NS_PREFIX + "contributor", default="")
-_make_meta(DC_NS_PREFIX + "created", default=None)
-_make_meta(DC_NS_PREFIX + "modified", default=None)
+_make_meta(DC_NS_PREFIX + "created", default="")
+_make_meta(DC_NS_PREFIX + "modified", default="")
 
-_make_meta(DC_NS_PREFIX + "title", default=None)
-_make_meta(DC_NS_PREFIX + "description", default=None)
+_make_meta(DC_NS_PREFIX + "title", default="")
+_make_meta(DC_NS_PREFIX + "description", default="")
 
 _make_meta(RDFS_NS_PREFIX + "seeAlso", default=None)
 
