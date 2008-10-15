@@ -127,14 +127,18 @@ class Parser(XmlParserBase):
         be function2 rather than function that will be invoked.
         """
         colon = id.find(":")
-        if colon > -1:
+        if colon > 0:
             elt = id
             do_it_now = self.package.get(id[:colon]) is not None
         else:
             elt = self.package.get(id)
             do_it_now = elt is not None
         if do_it_now:
-            function(elt)
+            try_enter_no_event_section(elt, function)
+            try:
+                function(elt)
+            finally:
+                try_exit_no_event_section(elt, function)
         else:
             self._postponed.append((function2 or function, id))
 
@@ -187,28 +191,40 @@ class Parser(XmlParserBase):
         self.manage_package_subelements()
         for f, id in self._postponed:
             if ":" in id and id[0] != ":": # imported
-                elt = id
+                f(id)
             else:
                 elt = self.package.get(id)
-            f(elt)
+                try_enter_no_event_section(elt, f)
+                try:
+                    f(elt)
+                finally:
+                    try_exit_no_event_section(elt, f)
 
     def handle_import(self):
         id = self.get_attribute("id")
         url = self.get_attribute("url")
         uri = self.get_attribute("uri", "")
         elt = self.package._create_import_in_parser(id, url, uri)
-        self.optional_sequence("tags", element=elt)
-        self.optional("meta", elt)
+        elt.enter_no_event_section()
+        try:
+            self.optional_sequence("tags", element=elt)
+            self.optional("meta", elt)
+        finally:
+            elt.exit_no_event_section()
 
     def handle_tag(self, element=None):
         if element is None:
             # tag definition in package
             id = self.get_attribute("id")
             elt = self.package.create_tag(id)
-            self.optional_sequence("imported-elements", items_name="element",
-                                   advene_tag=elt)
-            self.optional_sequence("tags", element=elt)
-            self.optional("meta", elt)
+            elt.enter_no_event_section()
+            try:
+                self.optional_sequence(
+                    "imported-elements", items_name="element", advene_tag=elt)
+                self.optional_sequence("tags", element=elt)
+                self.optional("meta", elt)
+            finally:
+                elt.exit_no_event_section()
         else:
             # tag association in element
             id = self.get_attribute("id-ref")
@@ -220,15 +236,22 @@ class Parser(XmlParserBase):
         url = self.get_attribute("url")
         foref = self.get_attribute("frame-of-reference")
         elt = self.package.create_media(id, url, foref)
-
-        self.optional_sequence("tags", element=elt)
-        self.optional("meta", elt)
+        elt.enter_no_event_section()
+        try:
+            self.optional_sequence("tags", element=elt)
+            self.optional("meta", elt)
+        finally:
+            elt.exit_no_event_section()
 
     def handle_resource(self):
         id = self.get_attribute("id")
         elt = self.required("content", self.package.create_resource, id)
-        self.optional_sequence("tags", element=elt)
-        self.optional("meta", elt)
+        elt.enter_no_event_section()
+        try:
+            self.optional_sequence("tags", element=elt)
+            self.optional("meta", elt)
+        finally:
+            elt.exit_no_event_section()
 
     def handle_annotation(self):
         id = self.get_attribute("id")
@@ -251,40 +274,60 @@ class Parser(XmlParserBase):
             raise ParserError("end is before begin in %s" % id)
         elt = self.required("content", self.package.create_annotation,
                                        id, media, begin, end)
-        self.optional_sequence("tags", element=elt)
-        self.optional("meta", elt)
+        elt.enter_no_event_section()
+        try:
+            self.optional_sequence("tags", element=elt)
+            self.optional("meta", elt)
+        finally:
+            elt.exit_no_event_section()
 
     def handle_relation(self):
         id = self.get_attribute("id")
         elt = self.package.create_relation(id, "x-advene/none")
-        self.optional_sequence("members", elt)
         def update_content_info(mimetype, model, url):
             elt.content_mimetype = mimetype
             elt.content_model = model
             elt.content_url = url
             return elt
-        self.optional("content", update_content_info)
-        self.optional_sequence("tags", element=elt)
-        self.optional("meta", elt)
+        elt.enter_no_event_section()
+        try:
+            self.optional_sequence("members", elt)
+            self.optional("content", update_content_info)
+            self.optional_sequence("tags", element=elt)
+            self.optional("meta", elt)
+        finally:
+            elt.exit_no_event_section()
 
     def handle_view(self):
         id = self.get_attribute("id")
         elt = self.required("content", self.package.create_view, id)
-        self.optional_sequence("tags", element=elt)
-        self.optional("meta", elt)
+        elt.enter_no_event_section()
+        try:
+            self.optional_sequence("tags", element=elt)
+            self.optional("meta", elt)
+        finally:
+            elt.exit_no_event_section()
 
     def handle_query(self):
         id = self.get_attribute("id")
         elt = self.required("content", self.package.create_query, id)
-        self.optional_sequence("tags", element=elt)
-        self.optional("meta", elt)
+        elt.enter_no_event_section()
+        try:
+            self.optional_sequence("tags", element=elt)
+            self.optional("meta", elt)
+        finally:
+            elt.exit_no_event_section()
 
     def handle_list(self):
         id = self.get_attribute("id")
         elt = self.package.create_list(id)
-        self.optional_sequence("items", elt, [0])
-        self.optional_sequence("tags", element=elt)
-        self.optional("meta", elt)
+        elt.enter_no_event_section()
+        try:
+            self.optional_sequence("items", elt, [0])
+            self.optional_sequence("tags", element=elt)
+            self.optional("meta", elt)
+        finally:
+            elt.exit_no_event_section()
 
     # utility methods
 
@@ -300,9 +343,17 @@ class Parser(XmlParserBase):
                                   key)
             val = child.get("id-ref")
             if val is None:
-                obj.set_meta(key, child.text, False)
+                obj.enter_no_event_section()
+                try:
+                    obj.set_meta(key, child.text, False)
+                finally:
+                    obj.exit_no_event_section()
             elif ":" in val and val[0] != ":": # imported
-                obj.set_meta(key, val, True)
+                obj.enter_no_event_section()
+                try:
+                    obj.set_meta(key, val, True)
+                finally:
+                    obj.exit_no_event_section()
             else:
                 self.do_or_postpone(val, partial(obj.set_meta, key))
 
@@ -326,7 +377,11 @@ class Parser(XmlParserBase):
                     data = base64.decodestring(data)
                 else:
                     raise ParserError("encoding %s is not supported", encoding)
-            elt.content_data = data
+            elt.enter_no_event_section()
+            try:
+                elt.content_data = data
+            finally:
+                elt.exit_no_event_section()
         return elt
 
     def handle_member(self, relation):
@@ -354,5 +409,14 @@ class Parser(XmlParserBase):
         # both tag and element should be imported, so no check
         self.package.associate_tag(elt_id, tag_id)
 
+def try_enter_no_event_section(elt, function):
+    getattr(elt, "enter_no_event_section", lambda: None)()
+    im_self = getattr(function, "im_self", None)
+    getattr(im_self, "enter_no_event_section", lambda: None)()
+
+def try_exit_no_event_section(elt, function):
+    im_self = getattr(function, "im_self", None)
+    getattr(im_self, "exit_no_event_section", lambda: None)()
+    getattr(elt, "exit_no_event_section", lambda: None)()
 
 #

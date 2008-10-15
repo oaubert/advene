@@ -19,14 +19,14 @@ if __name__ == "__main__":
     p = None
 
     measure_time() # take origin
-    #p = Package("file:examples/nosferatu.czp")
+    p = Package("file:examples/nosferatu.czp")
     measure_time("loading time")
 
     session.package = p
 
     def the_test():
-        global p
-        p = Package("file:examples/nosferatu.czp")
+        #global p
+        #p = Package("file:examples/nosferatu.czp")
         pass
 
     measure_time() # take origin

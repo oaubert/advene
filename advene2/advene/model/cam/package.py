@@ -311,34 +311,60 @@ class Package(CorePackage):
         """FIXME: missing docstring.
         """
         at = super(Package, self).create_tag(id)
-        at._set_camsys_type("annotation-type")
+        at.enter_no_event_section()
+        try:
+            at._set_camsys_type("annotation-type")
+        finally:
+            at.exit_no_event_section()
         return at
 
     def create_relation_type(self, id):
         """FIXME: missing docstring.
         """
         rt = super(Package, self).create_tag(id)
-        rt._set_camsys_type("relation-type")
+        rt.enter_no_event_section()
+        try:
+            rt._set_camsys_type("relation-type")
+        finally:
+            rt.exit_no_event_section()
         return rt
 
     def create_annotation(self, id, media, begin, end,
                                 mimetype, model=None, url="", type=None):
         """FIXME: missing docstring.
         """
+        assert type is None or hasattr(type, "ADVENE_TYPE") \
+            or type.find(":") > 0 # strict ID-ref
         a = super(Package, self).create_annotation(id, media, begin, end,
                                                    mimetype, model, url)
         if type:
-            a.type = type
+            type_is_element = hasattr(type, "ADVENE_TYPE")
+            a.enter_no_event_section()
+            if type_is_element: type.enter_no_event_section()
+            try:
+                a.type = type
+            finally:
+                if type_is_element: type.exit_no_event_section()
+                a.exit_no_event_section()
         return a
 
     def create_relation(self, id, mimetype="x-advene/none", model=None,
                         url="", members=(), type=None):
         """FIXME: missing docstring.
         """
+        assert type is None or hasattr(type, "ADVENE_TYPE") \
+            or type.find(":") > 0 # strict ID-ref
         r = super(Package, self).create_relation(id, mimetype, model, url,
                                                  members)
         if type:
-            r.type = type
+            type_is_element = hasattr(type, "ADVENE_TYPE")
+            r.enter_no_event_section()
+            if type_is_element: type.enter_no_event_section()
+            try:
+                r.type = type
+            finally:
+                if type_is_element: type.exit_no_event_section()
+                r.exit_no_event_section()
         return r
 
     def create_list(self, id, items=()):
@@ -360,7 +386,11 @@ class Package(CorePackage):
         """FIXME: missing docstring.
         """
         sc = super(Package, self).create_list(id, items)
-        sc._set_camsys_type("schema")
+        sc.enter_no_event_section()
+        try:
+            sc._set_camsys_type("schema")
+        finally:
+            sc.exit_no_event_section()
         return sc
 
     def associate_tag(self, element, tag):
