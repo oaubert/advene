@@ -60,7 +60,8 @@ class WithMetaMixin(DirtyMixin):
                 if val is None: # not found in cache or reference was lost
                     if v_is_idref:
                         val = p.get_element(v, default)
-                        cache[key] = (ref(val), v)
+                        if hasattr(val, "ADVENE_TYPE"): # can still be default
+                            cache[key] = (ref(val), v)
                     else:
                         val = cache[key] = v
                 yield key, val
