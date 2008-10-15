@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<ruleset xmlns='http://liris.cnrs.fr/advene/ruleset'>
+<ruleset>
   <rule name='Take snapshot on begin'>
     <event name='AnnotationBegin'/>
     <action name='Snapshot'>
