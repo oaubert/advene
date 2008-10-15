@@ -139,7 +139,7 @@ def create(package, force=False, url=None):
     else:
         # check the following *before* sqlite.connect creates the file!
         must_init = (path == ":memory:" or not exists(path))
-        conn = sqlite.connect(path, isolation_level=None)
+        conn = sqlite.connect(path, isolation_level=None, check_same_thread=False)
         curs = conn.cursor()
         curs.execute("BEGIN EXCLUSIVE")
         if must_init:
