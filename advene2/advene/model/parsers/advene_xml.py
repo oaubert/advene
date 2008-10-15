@@ -2,6 +2,7 @@
 Unstable and experimental parser implementation.
 """
 
+import base64
 from functools import partial
 from os import path
 from os.path import exists
@@ -35,7 +36,6 @@ class Parser(XmlParserBase):
         parser is pretty sure it can handle the URL.
         """
         r = 0
-
         if hasattr(file_, "seek"):
             # try to open it as xml file and get the root element
             t = file_.tell()
@@ -310,6 +310,7 @@ class Parser(XmlParserBase):
         mimetype = self.get_attribute("mimetype")
         url = self.get_attribute("url", "")
         model = self.get_attribute("model", "")
+        encoding = self.get_attribute("encoding", "")
         elt = creation_method(*args + (mimetype, "", url))
         self.do_or_postpone(model, elt._set_content_model)
         elem = self.complete_current()
@@ -320,6 +321,11 @@ class Parser(XmlParserBase):
             raise ParserError("content can not have both url (%s) and data" %
                               url)
         elif data:
+            if encoding:
+                if encoding == "base64":
+                    data = base64.decodestring(data)
+                else:
+                    raise ParseError("encoding %s is not supported", encoding)
             elt.content_data = data
         return elt
 

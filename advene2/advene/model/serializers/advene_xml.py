@@ -7,6 +7,7 @@ of forward references, which makes the work of the parser more difficult.
 Forward references are nevetheless still possible in meta-data, tag associated to another tag, list containing another list
 """
 
+import base64
 from itertools import chain
 from xml.etree.cElementTree import Element, ElementTree, SubElement
 
@@ -209,7 +210,12 @@ class _Serializer(object):
                 # TODO manage packaged: URLs
                 xc.set("url", elt.content_url)
             else:
-                xc.text = elt.content_data
+                data = elt.content_data
+                if not elt.content_mimetype.startswith("text") \
+                and not elt.content_mimetype.startswith("image/svg"):
+                    data = base64.encodestring(data)
+                    xc.set("encoding", "base64")
+                xc.text = data
 
     def _serialize_meta(self, obj, xobj):
         xm = SubElement(xobj, "meta")

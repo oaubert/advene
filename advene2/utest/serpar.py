@@ -128,6 +128,24 @@ class TestAdveneXml(TestCase):
         p2.close()
         unlink(self.filename2)
 
+    def test_base64(self):
+        p1 = self.p1
+        r = p1.create_resource("r", "application/binary")
+        r.content_data = "\x01\x02\x03"
+
+        f = open(self.filename2, "w")
+        self.serpar.serialize_to(p1, f)
+        f.close()
+        try:
+            p2 = self.pkgcls(self.url)
+        except ParserError, e:
+            self.fail("ParserError: %s (%s)" % (e.args[0], self.filename2))
+        diff = self.fix_diff(diff_packages(p1, p2))
+        self.assertEqual([], diff, (diff, self.filename2))
+        p2.close()
+        unlink(self.filename2)
+
+
 class TestAdveneZip(TestAdveneXml):
     serpar = zip
 
