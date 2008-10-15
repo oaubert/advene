@@ -1,3 +1,4 @@
+import gc
 from unittest import TestCase, main
 
 from advene.model.core.Package import Package
@@ -5,13 +6,30 @@ from advene.model.core.Package import Package
 class TestElements(TestCase):
     def setUp(self):
         self.p = Package.create("sqlite::memory:")
-        self.m = self.p.create_media("m1", "http://example.com/m1.avi")
+        self.p.create_media("m1", "http://example.com/m1.avi")
 
     def tearDown(self):
         self.p = None
+        gc.collect()
+
+    def test_annotation(self):
+        p = self.p
+        m = p["m1"]
+        a = p.create_annotation("a1", m, 10, 20)
+        self.assertEqual( m, a.media)
+        self.assertEqual(10, a.begin)
+        self.assertEqual(20, a.end)
+        a.begin += 5
+        self.assertEqual(15, a.begin)
+        a.end += 10
+        self.assertEqual(30, a.end)
+        m2 = p.create_media("m2", "http://example.com/m2.avi")
+        a.media = m2
+        self.assertEqual(m2, a.media)
 
     def test_relation_members(self):
-        m, p = self.m, self.p
+        p = self.p
+        m = p["m1"]
         a = [None,] * 20
         for i in xrange(20):
             a[i] = p.create_annotation("a%s" % i, m, i*10, i*10+19)

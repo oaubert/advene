@@ -35,7 +35,7 @@ if __name__ == "__main__":
     #trace_wrap_all (p._backend)
 
     m1 = p.create_media("m1", "http://champin.net/stream.avi")
-    p.create_annotation("a1", m1, 20, 30)
+    a1 = p.create_annotation("a1", m1, 20, 30)
     p.create_annotation("a2", m1, 0, 20)
     p.create_relation("r1")
     print [a._id for a in p.own.annotations]
@@ -43,15 +43,17 @@ if __name__ == "__main__":
     print p["a2"]
     p.get_element("a1").content.data = "hello"
     p.dc_creator = "pchampin"
+    a1.begin += 1
+    
 
-    NB = 1000
+    NB = 10
     print "creating %s annotations" % NB
     for i in range(NB):
         p.create_annotation("aa%s" % i, m1, i*10, i*10+9)
     print "done"
 
     # ensure that backend is collected
-    a = None; m1 = None; p = None; gc.collect()
+    a1 = None; a = None; m1 = None; p = None; gc.collect()
 
     print
 
@@ -67,5 +69,6 @@ if __name__ == "__main__":
     print id(a1) == id(p.get_element ("a1"))
     print a1.content.data
     print p.dc_creator
+    print a1.begin
 
     l = None; a1 = None; a2 = None; p = None

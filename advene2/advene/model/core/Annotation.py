@@ -51,3 +51,21 @@ class Annotation (PackageElement, WithContentMixin):
                                           midref, self.begin, self.end)
         self._media_idref = midref
         self._media_wref  = ref (media)
+
+    def _get_begin (self):
+        return self._begin
+
+    def _set_begin (self, val):
+        o = self._owner
+        o._backend.update_annotation (o._id, self._id,
+                                      self._media_idref, val, self._end)
+        self._begin = val
+
+    def _get_end (self):
+        return self._end
+
+    def _set_end (self, val):
+        o = self._owner
+        o._backend.update_annotation (o._id, self._id,
+                                      self._media_idref, self._begin, val)
+        self._end = val
