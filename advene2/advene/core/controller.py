@@ -1930,6 +1930,64 @@ class AdveneController(object):
         self.self_loop()
         return True
 
+    def create_static_view(self, elements=None):
+        """Create a static view from the given elements.
+        """
+        if not elements:
+            return None
+        if isinstance(elements[0], Annotation):
+            p=self.package
+            ident=p._idgenerator.get_id(View)
+            v=p.create_view(id=ident, mimetype='text/html')
+            if len(elements) > 1:
+                v.title=_("Comment on set of %d annotations") % len(elements)
+            else:
+                v.title=_("Comment on %s") % self.get_title(elements[0])
+
+            p._idgenerator.add(ident)
+
+            data=[]
+            for element in elements:
+                ctx=self.build_context(element)
+                data.append(_("""<h1>Comment on %(title)s</h1>
+    <a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s"></img></a><br>""") % { 
+                    'title': self.get_title(element),
+                    'id': element.id,
+                    # FIXME
+                    #'href': 'http://localhost:1234' + ctx.evaluate('here/player_url'),
+                    #'imgurl': 'http://localhost:1234' + ctx.evaluate('here/snapshot_url'),
+                    'href': "FIXME",
+                    'imgurl': "FIXME",
+                    })
+            v.content.data="\n".join(data)
+            self.notify('ViewCreate', view=v, immediate=True)
+            return v
+        elif isinstance(elements[0], AnnotationType):
+            p=self.package
+            ident=p._idgenerator.get_id(View)
+            v=p.create_view(id=ident, mimetype='text/html')
+            at_title=self.get_title(elements[0])
+            v.title=_("List of %s annotations") % at_title
+            p._idgenerator.add(ident)
+
+            data=["""<div tal:define="at package/annotation_types/%s">""" % elements[0].id,
+                  """<h1>List of <em tal:content="at/representation">%s</em> annotations</h1>""" % at_title,
+                  """<div style="float:left; height:200; width:250" tal:repeat="a at/annotations">
+<p style="text-align: center">
+<a title="Play this annotation" tal:attributes="href a/player_url">
+	<img style="border:1px solid #FFCCCC; height:100px; width:160px;" class="screenshot" alt="" tal:attributes="src a/snapshot_url" />
+	<br>
+	<strong tal:content="a/representation">Content</strong>
+</a><br>
+<span style="font-size: 0.8em">(<span tal:content="a/fragment/formatted/begin">Begin timestamp</span> - <span tal:content="a/fragment/formatted/end">End timestamp</span>)</span>
+<br> 
+</p>
+</div></div>"""]
+            v.content.data="\n".join(data)
+            self.notify('ViewCreate', view=v, immediate=True)
+            return v
+        return None
+
 if __name__ == '__main__':
     # Try to find if we are in a development tree.
     (moduledir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
