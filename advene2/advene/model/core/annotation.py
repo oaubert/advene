@@ -20,7 +20,7 @@ class Annotation(PackageElement, WithContentMixin):
         if not hasattr(media, "ADVENE_TYPE"):
             # internally, we sometimes pass backend data directly,
             # where media is an id-ref rather than a Media instance
-            self._media_idref = media
+            self._media_id = media
             self._media = None
         else:
             self._set_media(media, _init=True)
@@ -32,24 +32,24 @@ class Annotation(PackageElement, WithContentMixin):
 
     def __str__(self):
         return "Annotation(%s,%s,%s)" % \
-               (self._media_idref, self._begin, self._end)
+               (self._media_id, self._begin, self._end)
 
     def __cmp__(self, other):
         return self._begin - other._begin \
             or self._end - other._end \
-            or cmp(self._media_idref, other._media_idref)
+            or cmp(self._media_id, other._media_id)
 
     def get_media(self, default=None):
         """Return the media associated to this annotation.
 
         If the media is unreachable, the ``default`` value is returned.
 
-        See also `media` and `media_idref`.
+        See also `media` and `media_id`.
         """
         r = self._media
         if r is None:
             r = self._media = \
-                self._owner.get_element(self._media_idref, default)
+                self._owner.get_element(self._media_id, default)
         return r
 
     @autoproperty
@@ -58,7 +58,7 @@ class Annotation(PackageElement, WithContentMixin):
 
         If the media instance is unreachable, an exception is raised.
 
-        See also `get_media` and `media_idref`.
+        See also `get_media` and `media_id`.
         """
         return self.get_media(_RAISE)
 
@@ -69,14 +69,14 @@ class Annotation(PackageElement, WithContentMixin):
         assert media.ADVENE_TYPE == MEDIA
         assert o._can_reference(media)
 
-        midref = media.make_idref_in(o)
-        self._media_idref = midref
+        mid = media.make_id_in(o)
+        self._media_id = mid
         self._media = media
         if not _init:
             self.__store()
 
     @autoproperty
-    def _get_media_idref(self):
+    def _get_media_id(self):
         """The id-ref of this annotation's media.
 
         This is a read-only property giving the id-ref of the resource held
@@ -87,7 +87,7 @@ class Annotation(PackageElement, WithContentMixin):
 
         See also `get_media` and `media`.
         """
-        return self._media_idref
+        return self._media_id
 
     @autoproperty
     def _get_begin(self):
@@ -127,4 +127,4 @@ class Annotation(PackageElement, WithContentMixin):
     def __store(self):
         o = self._owner
         o._backend.update_annotation(o._id, self._id,
-                                     self._media_idref, self._begin, self._end)
+                                     self._media_id, self._begin, self._end)

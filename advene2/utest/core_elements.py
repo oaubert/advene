@@ -144,26 +144,26 @@ class TestElements(TestCase):
         # schema
         self.assertEqual(None, e.content_schema)
         self.assertEqual(None, e.content.schema)
-        self.assertEqual("", e.content_schema_idref)
-        self.assertEqual("", e.content.schema_idref)
+        self.assertEqual("", e.content_schema_id)
+        self.assertEqual("", e.content.schema_id)
         s = e._owner.create_resource("myschema", "test/plain")
         e.content_schema = s
         self.assertEqual(s, e.content_schema)
         self.assertEqual(s, e.content.schema)
-        self.assertEqual("myschema", e.content_schema_idref)
-        self.assertEqual("myschema", e.content.schema_idref)
+        self.assertEqual("myschema", e.content_schema_id)
+        self.assertEqual("myschema", e.content.schema_id)
         e.content_schema = None
         self.assertEqual(None, e.content_schema)
         self.assertEqual(None, e.content.schema)
-        self.assertEqual("", e.content_schema_idref)
-        self.assertEqual("", e.content.schema_idref)
+        self.assertEqual("", e.content_schema_id)
+        self.assertEqual("", e.content.schema_id)
         s.delete()
 
         # empty content
         if e.ADVENE_TYPE == RELATION:
             e.content_mimetype = "x-advene/none"
             self.assertEqual(None, e.content_schema)
-            self.assertEqual("", e.content_schema_idref)
+            self.assertEqual("", e.content_schema_id)
             self.assertEqual("", e.content_url)
             self.assertEqual("", e.content_data)
             self.assertRaises(ModelError, setattr, e, "content_schema", s)
@@ -180,13 +180,13 @@ class TestElements(TestCase):
     def _test_with_meta(self, e):
 
         def test_is_list():
-            def has_idref(a): return hasattr(a, "ADVENE_TYPE")
-            def idref(a): return has_idref(a) and a.id or a
+            def has_id(a): return hasattr(a, "ADVENE_TYPE")
+            def id(a): return has_id(a) and a.id or a
             eq = self.assertEqual
-            refid = [ (k, idref(v)) for k, v in ref ]
-            refiid = [ (k, has_idref(v)) for k, v in ref ]
-            def mapisid1(L): return [ i.is_idref for i in L ]
-            def mapisid2(L): return [ (k, v.is_idref) for k, v in L ]
+            refid = [ (k, id(v)) for k, v in ref ]
+            refiid = [ (k, has_id(v)) for k, v in ref ]
+            def mapisid1(L): return [ i.is_id for i in L ]
+            def mapisid2(L): return [ (k, v.is_id) for k, v in L ]
 
             eq(ref, list(e.iter_meta()))
             eq(ref, e.meta.items())
@@ -197,17 +197,17 @@ class TestElements(TestCase):
             eq([v for k,v in ref], e.meta.values())
             eq([v for k,v in ref], list(e.meta.itervalues()))
 
-            eq(refid, list(e.iter_meta_idrefs()))
-            eq(refid, e.meta.items_idrefs())
-            eq(refid, list(e.meta.iteritems_idrefs()))
-            eq([v for k,v in refid], e.meta.values_idrefs())
-            eq([v for k,v in refid], list(e.meta.itervalues_idrefs()))
+            eq(refid, list(e.iter_meta_ids()))
+            eq(refid, e.meta.items_ids())
+            eq(refid, list(e.meta.iteritems_ids()))
+            eq([v for k,v in refid], e.meta.values_ids())
+            eq([v for k,v in refid], list(e.meta.itervalues_ids()))
 
-            eq(refiid, mapisid2(e.iter_meta_idrefs()))
-            eq(refiid, mapisid2(e.meta.items_idrefs()))
-            eq(refiid, mapisid2(e.meta.iteritems_idrefs()))
-            eq([v for k,v in refiid], mapisid1(e.meta.values_idrefs()))
-            eq([v for k,v in refiid], mapisid1(e.meta.itervalues_idrefs()))
+            eq(refiid, mapisid2(e.iter_meta_ids()))
+            eq(refiid, mapisid2(e.meta.items_ids()))
+            eq(refiid, mapisid2(e.meta.iteritems_ids()))
+            eq([v for k,v in refiid], mapisid1(e.meta.values_ids()))
+            eq([v for k,v in refiid], mapisid1(e.meta.itervalues_ids()))
 
         def test_has_item(k, v):
             self.assert_(e.meta.has_key(k))
@@ -220,41 +220,41 @@ class TestElements(TestCase):
             self.assertEqual(v, e.meta.pop(k)); e.meta[k] = v
             self.assertEqual(v, e.meta.pop(k, None)); e.meta[k] = v
             if hasattr(v, "ADVENE_TYPE"):
-                idref = v.make_idref_in(self.p)
-                self.assertEqual(idref, e.get_meta_idref(k))
-                self.assertEqual(idref, e.get_meta_idref(k, "!"))
-                self.assertEqual(idref, e.meta.get_idref(k))
-                self.assertEqual(idref, e.meta.get_idref(k, "!"))
-                self.assertEqual(idref, e.meta.pop_idref(k)); e.meta[k] = v
-                self.assertEqual(idref, e.meta.pop_idref(k, "!")); e.meta[k]= v
-                self.assert_(e.get_meta_idref(k).is_idref)
-                self.assert_(e.meta.get_idref(k).is_idref)
-                self.assert_(e.meta.pop_idref(k).is_idref); e.meta[k] = v
+                id = v.make_id_in(self.p)
+                self.assertEqual(id, e.get_meta_id(k))
+                self.assertEqual(id, e.get_meta_id(k, "!"))
+                self.assertEqual(id, e.meta.get_id(k))
+                self.assertEqual(id, e.meta.get_id(k, "!"))
+                self.assertEqual(id, e.meta.pop_id(k)); e.meta[k] = v
+                self.assertEqual(id, e.meta.pop_id(k, "!")); e.meta[k]= v
+                self.assert_(e.get_meta_id(k).is_id)
+                self.assert_(e.meta.get_id(k).is_id)
+                self.assert_(e.meta.pop_id(k).is_id); e.meta[k] = v
             else:
-                self.assertEqual(v, e.get_meta_idref(k))
-                self.assertEqual(v, e.get_meta_idref(k, "!"))
-                self.assertEqual(v, e.meta.get_idref(k))
-                self.assertEqual(v, e.meta.get_idref(k, "!"))
-                self.assertEqual(v, e.meta.pop_idref(k)); e.meta[k] = v
-                self.assertEqual(v, e.meta.pop_idref(k, "!")); e.meta[k] = v
-                self.assert_(not e.get_meta_idref(k).is_idref)
-                self.assert_(not e.meta.get_idref(k).is_idref)
-                self.assert_(not e.meta.pop_idref(k).is_idref); e.meta[k] = v
+                self.assertEqual(v, e.get_meta_id(k))
+                self.assertEqual(v, e.get_meta_id(k, "!"))
+                self.assertEqual(v, e.meta.get_id(k))
+                self.assertEqual(v, e.meta.get_id(k, "!"))
+                self.assertEqual(v, e.meta.pop_id(k)); e.meta[k] = v
+                self.assertEqual(v, e.meta.pop_id(k, "!")); e.meta[k] = v
+                self.assert_(not e.get_meta_id(k).is_id)
+                self.assert_(not e.meta.get_id(k).is_id)
+                self.assert_(not e.meta.pop_id(k).is_id); e.meta[k] = v
 
         def test_has_not_item(k):
             self.assert_(not e.meta.has_key(k))
             self.assertRaises(KeyError, e.get_meta, k)
-            self.assertRaises(KeyError, e.get_meta_idref, k)
+            self.assertRaises(KeyError, e.get_meta_id, k)
             self.assertRaises(KeyError, e.meta.__getitem__, k)
             self.assertRaises(KeyError, e.meta.pop, k)
-            self.assertRaises(KeyError, e.meta.pop_idref, k)
+            self.assertRaises(KeyError, e.meta.pop_id, k)
             self.assertEqual("!", e.get_meta(k, "!"))
-            self.assertEqual("!", e.get_meta_idref(k, "!"))
+            self.assertEqual("!", e.get_meta_id(k, "!"))
             self.assertEqual(None, e.meta.get(k))
             self.assertEqual("!", e.meta.get(k, "!"))
-            self.assertEqual("!", e.meta.get_idref(k, "!"))
+            self.assertEqual("!", e.meta.get_id(k, "!"))
             self.assertEqual("!", e.meta.pop(k, "!"))
-            self.assertEqual("!", e.meta.pop_idref(k, "!"))
+            self.assertEqual("!", e.meta.pop_id(k, "!"))
 
         info = self.p.create_resource("info", "text/html")
         ref = []
@@ -293,57 +293,56 @@ class TestElements(TestCase):
         p = self.p
 
         get_item = getattr(L, "get_%s" % name)
-        get_idref = getattr(L, "get_%s_idref" % name)
+        get_id = getattr(L, "get_%s_id" % name)
         iter_items = getattr(L, "iter_%ss" % name)
-        iter_idrefs = getattr(L, "iter_%ss_idrefs" % name)
+        iter_ids = getattr(L, "iter_%ss_ids" % name)
 
         self.assertEqual([], list(L))
         self.assertEqual([], list(iter_items()))
-        self.assertEqual([], list(iter_idrefs()))
+        self.assertEqual([], list(iter_ids()))
         L.append(a[2])
         self.assertEqual([a[2],], list(L))
         self.assertEqual([a[2],], list(iter_items()))
-        self.assertEqual([a[2].id,], list(iter_idrefs()))
+        self.assertEqual([a[2].id,], list(iter_ids()))
         L.insert(0,a[1])
         self.assertEqual([a[1], a[2]], list(L))
         self.assertEqual([a[1], a[2]], list(iter_items()))
-        self.assertEqual([a[1].id, a[2].id], list(iter_idrefs()))
+        self.assertEqual([a[1].id, a[2].id], list(iter_ids()))
         L.insert(2,a[4])
         self.assertEqual([a[1], a[2], a[4]], list(L))
         self.assertEqual([a[1], a[2], a[4]], list(iter_items()))
-        self.assertEqual([a[1].id, a[2].id, a[4].id], list(iter_idrefs()))
+        self.assertEqual([a[1].id, a[2].id, a[4].id], list(iter_ids()))
         L.insert(100,a[5])
         self.assertEqual([a[1], a[2], a[4], a[5]], list(L))
         self.assertEqual([a[1], a[2], a[4], a[5]], list(iter_items()))
         self.assertEqual([a[1].id, a[2].id, a[4].id, a[5].id], 
-                         list(iter_idrefs()))
+                         list(iter_ids()))
         L.insert(-2,a[3])
         self.assertEqual(a[1:6], list(L))
         self.assertEqual(a[1:6], list(iter_items()))
-        self.assertEqual([ i.id for i in a[1:6] ], list(iter_idrefs()))
+        self.assertEqual([ i.id for i in a[1:6] ], list(iter_ids()))
         L.insert(-6,a[0])
         self.assertEqual(a[0:6], list(L))
         self.assertEqual(a[0:6], list(iter_items()))
-        self.assertEqual([ i.id for i in a[0:6] ], list(iter_idrefs()))
+        self.assertEqual([ i.id for i in a[0:6] ], list(iter_ids()))
         L.extend(a[6:9])
         self.assertEqual(a[0:9], list(L))
         self.assertEqual(a[0:9], list(iter_items()))
-        self.assertEqual([ i.id for i in a[0:9] ], list(iter_idrefs()))
+        self.assertEqual([ i.id for i in a[0:9] ], list(iter_ids()))
 
         for i in xrange(9):
             self.assertEqual(a[i], L[i])
             self.assertEqual(a[i], get_item(i))
-            self.assertEqual(a[i].id, get_idref(i))
+            self.assertEqual(a[i].id, get_id(i))
             L[i] = a[i+10]
             self.assertEqual(a[i+10], L[i])
             self.assertEqual(a[i+10], get_item(i))
-            self.assertEqual(a[i+10].id, get_idref(i))
+            self.assertEqual(a[i+10].id, get_id(i))
 
         del L[5]
         self.assertEqual(a[10:15]+a[16:19], list(L))
         self.assertEqual(a[10:15]+a[16:19], list(iter_items()))
-        self.assertEqual([i.id for i in a[10:15]+a[16:19] ],
-                         list(iter_idrefs()))
+        self.assertEqual([i.id for i in a[10:15]+a[16:19] ], list(iter_ids()))
         L.insert(5,a[15])
 
 
@@ -360,25 +359,25 @@ class TestElements(TestCase):
         b[2:4] = a[0:9]
         self.assertEqual(b, list(L))
         self.assertEqual(b, list(iter_items()))
-        self.assertEqual([ i.id for i in b ], list(iter_idrefs()))
+        self.assertEqual([ i.id for i in b ], list(iter_ids()))
 
         L[:] = a[0:10]
         b[:] = a[0:10]
         self.assertEqual(b, list(L))
         self.assertEqual(b, list(iter_items()))
-        self.assertEqual([ i.id for i in b ], list(iter_idrefs()))
+        self.assertEqual([ i.id for i in b ], list(iter_ids()))
 
         L[9:0:-2] = a[19:10:-2]
         b[9:0:-2] = a[19:10:-2]
         self.assertEqual(b, list(L))
         self.assertEqual(b, list(iter_items()))
-        self.assertEqual([ i.id for i in b ], list(iter_idrefs()))
+        self.assertEqual([ i.id for i in b ], list(iter_ids()))
 
         del L[0::2]
         del b[0::2]
         self.assertEqual(b, list(L))
         self.assertEqual(b, list(iter_items()))
-        self.assertEqual([ i.id for i in b ], list(iter_idrefs()))
+        self.assertEqual([ i.id for i in b ], list(iter_ids()))
 
     def _test_with_tag(self, e):
         p = self.p
@@ -395,41 +394,41 @@ class TestElements(TestCase):
         p.associate_tag(e, t1)
         p.associate_tag(e, t3)
 
-        def idrefs(elts, p):
-            return frozenset( t.make_idref_in(p) for t in elts )       
+        def ids(elts, p):
+            return frozenset( t.make_id_in(p) for t in elts )       
         eq = self.assertEqual
  
         eq(frozenset((t1, t3)), frozenset(e.iter_tags(p)))
         eq(frozenset((t1, t2)), frozenset(tm.iter_tags(p)))
         eq(frozenset((t1,)), frozenset(ta1.iter_tags(p)))
         eq(frozenset((t2,)), frozenset(ta2.iter_tags(p)))
-        eq(idrefs((t1, t3), p), frozenset(e.iter_tags_idrefs(p)))
-        eq(idrefs((t1, t2), p), frozenset(tm.iter_tags_idrefs(p)))
-        eq(idrefs((t1,), p), frozenset(ta1.iter_tags_idrefs(p)))
-        eq(idrefs((t2,), p), frozenset(ta2.iter_tags_idrefs(p)))
+        eq(ids((t1, t3), p), frozenset(e.iter_tags_ids(p)))
+        eq(ids((t1, t2), p), frozenset(tm.iter_tags_ids(p)))
+        eq(ids((t1,), p), frozenset(ta1.iter_tags_ids(p)))
+        eq(ids((t2,), p), frozenset(ta2.iter_tags_ids(p)))
 
         eq(frozenset((t1, t3)), frozenset(e.iter_tags(p, 0)))
         eq(frozenset((t1, t2)), frozenset(tm.iter_tags(p, 0)))
         eq(frozenset((t1,)), frozenset(ta1.iter_tags(p, 0)))
         eq(frozenset((t2,)), frozenset(ta2.iter_tags(p, 0)))
-        eq(idrefs((t1, t3), p), frozenset(e.iter_tags_idrefs(p, 0)))
-        eq(idrefs((t1, t2), p), frozenset(tm.iter_tags_idrefs(p, 0)))
-        eq(idrefs((t1,), p), frozenset(ta1.iter_tags_idrefs(p, 0)))
-        eq(idrefs((t2,), p), frozenset(ta2.iter_tags_idrefs(p, 0)))
+        eq(ids((t1, t3), p), frozenset(e.iter_tags_ids(p, 0)))
+        eq(ids((t1, t2), p), frozenset(tm.iter_tags_ids(p, 0)))
+        eq(ids((t1,), p), frozenset(ta1.iter_tags_ids(p, 0)))
+        eq(ids((t2,), p), frozenset(ta2.iter_tags_ids(p, 0)))
 
         eq(frozenset((tm, ta1, e)), frozenset(t1.iter_elements(p)))
         eq(frozenset((tm, ta2)), frozenset(t2.iter_elements(p)))
         eq(frozenset((e,)), frozenset(t3.iter_elements(p)))
-        eq(idrefs((tm, ta1, e), p), frozenset(t1.iter_elements_idrefs(p)))
-        eq(idrefs((tm, ta2), p), frozenset(t2.iter_elements_idrefs(p)))
-        eq(idrefs((e,), p), frozenset(t3.iter_elements_idrefs(p)))
+        eq(ids((tm, ta1, e), p), frozenset(t1.iter_elements_ids(p)))
+        eq(ids((tm, ta2), p), frozenset(t2.iter_elements_ids(p)))
+        eq(ids((e,), p), frozenset(t3.iter_elements_ids(p)))
 
         eq(frozenset((tm, ta1, e)), frozenset(t1.iter_elements(p, 0)))
         eq(frozenset((tm, ta2)), frozenset(t2.iter_elements(p, 0)))
         eq(frozenset((e,)), frozenset(t3.iter_elements(p, 0)))
-        eq(idrefs((tm, ta1, e), p), frozenset(t1.iter_elements_idrefs(p, 0)))
-        eq(idrefs((tm, ta2), p), frozenset(t2.iter_elements_idrefs(p, 0)))
-        eq(idrefs((e,), p), frozenset(t3.iter_elements_idrefs(p, 0)))
+        eq(ids((tm, ta1, e), p), frozenset(t1.iter_elements_ids(p, 0)))
+        eq(ids((tm, ta2), p), frozenset(t2.iter_elements_ids(p, 0)))
+        eq(ids((e,), p), frozenset(t3.iter_elements_ids(p, 0)))
 
         q = self.q
         q.create_import("i", self.p)
@@ -443,49 +442,49 @@ class TestElements(TestCase):
         eq(frozenset((t1, t2, t3)), frozenset(tm.iter_tags(q)))
         eq(frozenset((t1, t2)), frozenset(ta1.iter_tags(q)))
         eq(frozenset((t1, t2)), frozenset(ta2.iter_tags(q)))
-        eq(idrefs((t1, t2, t3), q), frozenset(e.iter_tags_idrefs(q)))
-        eq(idrefs((t1, t2, t3), q), frozenset(tm.iter_tags_idrefs(q)))
-        eq(idrefs((t1, t2), q), frozenset(ta1.iter_tags_idrefs(q)))
-        eq(idrefs((t1, t2), q), frozenset(ta2.iter_tags_idrefs(q)))
+        eq(ids((t1, t2, t3), q), frozenset(e.iter_tags_ids(q)))
+        eq(ids((t1, t2, t3), q), frozenset(tm.iter_tags_ids(q)))
+        eq(ids((t1, t2), q), frozenset(ta1.iter_tags_ids(q)))
+        eq(ids((t1, t2), q), frozenset(ta2.iter_tags_ids(q)))
 
         eq(frozenset((t2, t3)), frozenset(e.iter_tags(q, 0)))
         eq(frozenset((t3,)), frozenset(tm.iter_tags(q, 0)))
         eq(frozenset((t2,)), frozenset(ta1.iter_tags(q, 0)))
         eq(frozenset((t1,)), frozenset(ta2.iter_tags(q, 0)))
-        eq(idrefs((t2, t3), q), frozenset(e.iter_tags_idrefs(q, 0)))
-        eq(idrefs((t3,), q), frozenset(tm.iter_tags_idrefs(q, 0)))
-        eq(idrefs((t2,), q), frozenset(ta1.iter_tags_idrefs(q, 0)))
-        eq(idrefs((t1,), q), frozenset(ta2.iter_tags_idrefs(q, 0)))
+        eq(ids((t2, t3), q), frozenset(e.iter_tags_ids(q, 0)))
+        eq(ids((t3,), q), frozenset(tm.iter_tags_ids(q, 0)))
+        eq(ids((t2,), q), frozenset(ta1.iter_tags_ids(q, 0)))
+        eq(ids((t1,), q), frozenset(ta2.iter_tags_ids(q, 0)))
  
         eq(frozenset((t1, t3)), frozenset(e.iter_tags(p)))
         eq(frozenset((t1, t2)), frozenset(tm.iter_tags(p)))
         eq(frozenset((t1,)), frozenset(ta1.iter_tags(p)))
         eq(frozenset((t2,)), frozenset(ta2.iter_tags(p)))
-        eq(idrefs((t1, t3), p), frozenset(e.iter_tags_idrefs(p)))
-        eq(idrefs((t1, t2), p), frozenset(tm.iter_tags_idrefs(p)))
-        eq(idrefs((t1,), p), frozenset(ta1.iter_tags_idrefs(p)))
-        eq(idrefs((t2,), p), frozenset(ta2.iter_tags_idrefs(p)))
+        eq(ids((t1, t3), p), frozenset(e.iter_tags_ids(p)))
+        eq(ids((t1, t2), p), frozenset(tm.iter_tags_ids(p)))
+        eq(ids((t1,), p), frozenset(ta1.iter_tags_ids(p)))
+        eq(ids((t2,), p), frozenset(ta2.iter_tags_ids(p)))
 
         eq(frozenset((tm, ta1, ta2, e)), frozenset(t1.iter_elements(q)))
         eq(frozenset((tm, ta1, ta2, e)), frozenset(t2.iter_elements(q)))
         eq(frozenset((tm, e)), frozenset(t3.iter_elements(q)))
-        eq(idrefs((tm, ta1, ta2, e), q), frozenset(t1.iter_elements_idrefs(q)))
-        eq(idrefs((tm, ta1, ta2, e), q), frozenset(t2.iter_elements_idrefs(q)))
-        eq(idrefs((tm, e), q), frozenset(t3.iter_elements_idrefs(q)))
+        eq(ids((tm, ta1, ta2, e), q), frozenset(t1.iter_elements_ids(q)))
+        eq(ids((tm, ta1, ta2, e), q), frozenset(t2.iter_elements_ids(q)))
+        eq(ids((tm, e), q), frozenset(t3.iter_elements_ids(q)))
 
         eq(frozenset((ta2,)), frozenset(t1.iter_elements(q, 0)))
         eq(frozenset((ta1, e)), frozenset(t2.iter_elements(q, 0)))
         eq(frozenset((tm, e)), frozenset(t3.iter_elements(q, 0)))
-        eq(idrefs((ta2,), q), frozenset(t1.iter_elements_idrefs(q, 0)))
-        eq(idrefs((ta1, e), q), frozenset(t2.iter_elements_idrefs(q, 0)))
-        eq(idrefs((tm, e), q), frozenset(t3.iter_elements_idrefs(q, 0)))
+        eq(ids((ta2,), q), frozenset(t1.iter_elements_ids(q, 0)))
+        eq(ids((ta1, e), q), frozenset(t2.iter_elements_ids(q, 0)))
+        eq(ids((tm, e), q), frozenset(t3.iter_elements_ids(q, 0)))
 
         eq(frozenset((tm, ta1, e)), frozenset(t1.iter_elements(p)))
         eq(frozenset((tm, ta2)), frozenset(t2.iter_elements(p)))
         eq(frozenset((e,)), frozenset(t3.iter_elements(p)))
-        eq(idrefs((tm, ta1, e), p), frozenset(t1.iter_elements_idrefs(p)))
-        eq(idrefs((tm, ta2), p), frozenset(t2.iter_elements_idrefs(p)))
-        eq(idrefs((e,), p), frozenset(t3.iter_elements_idrefs(p)))
+        eq(ids((tm, ta1, e), p), frozenset(t1.iter_elements_ids(p)))
+        eq(ids((tm, ta2), p), frozenset(t2.iter_elements_ids(p)))
+        eq(ids((e,), p), frozenset(t3.iter_elements_ids(p)))
 
         eq(frozenset((p,)), frozenset(e.iter_taggers(t1, q)))
         eq(frozenset((p,)), frozenset(e.iter_taggers(t1, p)))
@@ -509,17 +508,17 @@ class TestElements(TestCase):
 
         p.dissociate_tag(e, t3)
         eq(frozenset((t1, t2, t3)), frozenset(e.iter_tags(q)))
-        eq(idrefs((t1, t2, t3), q), frozenset(e.iter_tags_idrefs(q)))
+        eq(ids((t1, t2, t3), q), frozenset(e.iter_tags_ids(q)))
         eq(frozenset((t2, t3)), frozenset(e.iter_tags(q, 0)))
-        eq(idrefs((t2, t3), q), frozenset(e.iter_tags_idrefs(q, 0)))
+        eq(ids((t2, t3), q), frozenset(e.iter_tags_ids(q, 0)))
         eq(frozenset((t1,)), frozenset(e.iter_tags(p)))
-        eq(idrefs((t1,), p), frozenset(e.iter_tags_idrefs(p)))
+        eq(ids((t1,), p), frozenset(e.iter_tags_ids(p)))
         eq(frozenset((tm, e)), frozenset(t3.iter_elements(q)))
-        eq(idrefs((tm, e), q), frozenset(t3.iter_elements_idrefs(q)))
+        eq(ids((tm, e), q), frozenset(t3.iter_elements_ids(q)))
         eq(frozenset((tm, e)), frozenset(t3.iter_elements(q, 0)))
-        eq(idrefs((tm, e), q), frozenset(t3.iter_elements_idrefs(q, 0)))
+        eq(ids((tm, e), q), frozenset(t3.iter_elements_ids(q, 0)))
         eq(frozenset(()), frozenset(t3.iter_elements(p)))
-        eq(idrefs((), p), frozenset(t3.iter_elements_idrefs(p)))
+        eq(ids((), p), frozenset(t3.iter_elements_ids(p)))
         eq(frozenset((q,)), frozenset(e.iter_taggers(t3, q)))
         eq(frozenset(), frozenset(e.iter_taggers(t3, p)))
         self.assert_(e.has_tag(t3, q))
@@ -531,17 +530,17 @@ class TestElements(TestCase):
 
         q.dissociate_tag(e, t3)
         eq(frozenset((t1, t2)), frozenset(e.iter_tags(q)))
-        eq(idrefs((t1, t2), q), frozenset(e.iter_tags_idrefs(q)))
+        eq(ids((t1, t2), q), frozenset(e.iter_tags_ids(q)))
         eq(frozenset((t2,)), frozenset(e.iter_tags(q, 0)))
-        eq(idrefs((t2,), q), frozenset(e.iter_tags_idrefs(q, 0)))
+        eq(ids((t2,), q), frozenset(e.iter_tags_ids(q, 0)))
         eq(frozenset((t1,)), frozenset(e.iter_tags(p)))
-        eq(idrefs((t1,), p), frozenset(e.iter_tags_idrefs(p)))
+        eq(ids((t1,), p), frozenset(e.iter_tags_ids(p)))
         eq(frozenset((tm,)), frozenset(t3.iter_elements(q)))
-        eq(idrefs((tm,), q), frozenset(t3.iter_elements_idrefs(q)))
+        eq(ids((tm,), q), frozenset(t3.iter_elements_ids(q)))
         eq(frozenset((tm,)), frozenset(t3.iter_elements(q, 0)))
-        eq(idrefs((tm,), q), frozenset(t3.iter_elements_idrefs(q, 0)))
+        eq(ids((tm,), q), frozenset(t3.iter_elements_ids(q, 0)))
         eq(frozenset(()), frozenset(t3.iter_elements(p)))
-        eq(idrefs((), p), frozenset(t3.iter_elements_idrefs(p)))
+        eq(ids((), p), frozenset(t3.iter_elements_ids(p)))
         eq(frozenset(), frozenset(e.iter_taggers(t3, q)))
         eq(frozenset(), frozenset(e.iter_taggers(t3, p)))
         self.assert_(not e.has_tag(t3, q))
@@ -669,7 +668,7 @@ class TestUnreachable(TestCase):
     @_make_both_tests
     def test_schema(self, exception_type):
         p1 = Package(self.url1)
-        self.assertEquals("p2:schema", p1["a1"].content_schema_idref)
+        self.assertEquals("p2:schema", p1["a1"].content_schema_id)
         self.assertRaises(exception_type,
                           getattr, p1["a1"], "content_schema")
         self.assertEquals(None, p1["a1"].get_content_schema(None))
@@ -678,7 +677,7 @@ class TestUnreachable(TestCase):
     @_make_both_tests
     def test_media(self, exception_type):
         p1 = Package(self.url1)
-        self.assertEquals("p2:m", p1["a1"].media_idref)
+        self.assertEquals("p2:m", p1["a1"].media_id)
         self.assertRaises(exception_type,
                           getattr, p1["a1"], "media")
         self.assertEquals(None, p1["a1"].get_media(None))
@@ -689,13 +688,13 @@ class TestUnreachable(TestCase):
         p1 = Package(self.url1)
         r = p1["r"]
         a1 = p1["a1"]
-        self.assertEquals("p2:a2", r.get_member_idref(1))
+        self.assertEquals("p2:a2", r.get_member_id(1))
         self.assertRaises(exception_type, r.__getitem__, 1)
         self.assertEquals(None, r.get_member(1))
         iter(r).next() # no exception before the actual yield
         self.assertRaises(exception_type, list, iter(r))
         self.assertEquals([a1, "p2:a2",], list(r.iter_members()))
-        self.assertEquals(["a1", "p2:a2",], list(r.iter_members_idrefs()))
+        self.assertEquals(["a1", "p2:a2",], list(r.iter_members_ids()))
         p1.close()
 
     @_make_both_tests
@@ -703,13 +702,13 @@ class TestUnreachable(TestCase):
         p1 = Package(self.url1)
         L = p1["l"]
         a1 = p1["a1"]
-        self.assertEquals("p2:schema", L.get_item_idref(1))
+        self.assertEquals("p2:schema", L.get_item_id(1))
         self.assertRaises(exception_type, L.__getitem__, 1)
         self.assertEquals(None, L.get_item(1))
         iter(L).next() # no exception before the actual yield
         self.assertRaises(exception_type, list, iter(L))
         self.assertEquals([a1, "p2:schema",], list(L.iter_items()))
-        self.assertEquals(["a1", "p2:schema",], list(L.iter_items_idrefs()))
+        self.assertEquals(["a1", "p2:schema",], list(L.iter_items_ids()))
         p1.close()
 
     @_make_both_tests
@@ -717,12 +716,12 @@ class TestUnreachable(TestCase):
         p1 = Package(self.url1)
         self.assertEqual(None, p1.get_meta(rdfs_seeAlso, None))
         self.assertEqual("!", p1.get_meta(rdfs_seeAlso, "!"))
-        self.assertEqual("p2:m", p1.get_meta_idref(rdfs_seeAlso, "!"))
+        self.assertEqual("p2:m", p1.get_meta_id(rdfs_seeAlso, "!"))
         self.assertRaises(exception_type, p1.get_meta, rdfs_seeAlso)
         self.assertEqual(None, p1.meta.get(rdfs_seeAlso))
         self.assertEqual("!", p1.meta.get(rdfs_seeAlso, "!"))
-        self.assertEqual("p2:m", p1.meta.get_idref(rdfs_seeAlso))
-        self.assertEqual("p2:m", p1.meta.get_idref(rdfs_seeAlso, "!"))
+        self.assertEqual("p2:m", p1.meta.get_id(rdfs_seeAlso))
+        self.assertEqual("p2:m", p1.meta.get_id(rdfs_seeAlso, "!"))
         self.assertRaises(exception_type, p1.meta.__getitem__, rdfs_seeAlso)
 
         d = p1["desc"]
@@ -730,9 +729,9 @@ class TestUnreachable(TestCase):
                (rdfs_seeAlso, "p2:m"),]
         refiid = [False, True, True,]
         def mapiid1(L):
-            return [ v.is_idref for v in L ]
+            return [ v.is_id for v in L ]
         def mapiid2(L):
-            return [ v.is_idref for k, v in L ]
+            return [ v.is_id for k, v in L ]
         i = p1.iter_meta(); i.next(); i.next() # no raise before actual yield
         p1.meta.keys() # no exception when iterating over keys only
         list(p1.meta.iterkeys()) # no exception when iterating over keys only
@@ -742,15 +741,15 @@ class TestUnreachable(TestCase):
         self.assertRaises(exception_type, list, p1.meta.itervalues())
         self.assertRaises(exception_type, p1.meta.items)
         self.assertRaises(exception_type, p1.meta.values)
-        self.assertEqual(ref, list(p1.iter_meta_idrefs()))
-        self.assertEqual(ref, list(p1.meta.iteritems_idrefs()))
-        self.assertEqual(ref, p1.meta.items_idrefs())
-        self.assertEqual([v for k,v in ref], list(p1.meta.itervalues_idrefs()))
-        self.assertEqual([v for k,v in ref], p1.meta.values_idrefs())
-        self.assertEqual(refiid, mapiid2(p1.meta.iteritems_idrefs()))
-        self.assertEqual(refiid, mapiid2(p1.meta.items_idrefs()))
-        self.assertEqual(refiid, mapiid1(p1.meta.itervalues_idrefs()))
-        self.assertEqual(refiid, mapiid1(p1.meta.values_idrefs()))
+        self.assertEqual(ref, list(p1.iter_meta_ids()))
+        self.assertEqual(ref, list(p1.meta.iteritems_ids()))
+        self.assertEqual(ref, p1.meta.items_ids())
+        self.assertEqual([v for k,v in ref], list(p1.meta.itervalues_ids()))
+        self.assertEqual([v for k,v in ref], p1.meta.values_ids())
+        self.assertEqual(refiid, mapiid2(p1.meta.iteritems_ids()))
+        self.assertEqual(refiid, mapiid2(p1.meta.items_ids()))
+        self.assertEqual(refiid, mapiid1(p1.meta.itervalues_ids()))
+        self.assertEqual(refiid, mapiid1(p1.meta.values_ids()))
         
         p1.close()
 
@@ -760,15 +759,15 @@ class TestUnreachable(TestCase):
         a1 = p1["a1"]
         t1 = p1["t1"]
         self.assertEquals(frozenset(("t1", "p2:t2")),
-                                    frozenset(a1.iter_tags_idrefs(p1)))
+                                    frozenset(a1.iter_tags_ids(p1)))
         self.assertEquals(frozenset((t1, "p2:t2")),
-            frozenset(a1.iter_tags(p1, yield_idrefs=True)))
+            frozenset(a1.iter_tags(p1, yield_ids=True)))
         a1.iter_tags(p1).next() # no exception before the actual yield
         self.assertRaises(exception_type, list, a1.iter_tags(p1))
         self.assertEquals(frozenset(("a1", "p2:a2")),
-                                    frozenset(t1.iter_elements_idrefs(p1)))
+                                    frozenset(t1.iter_elements_ids(p1)))
         self.assertEquals(frozenset((a1, "p2:a2")),
-            frozenset(t1.iter_elements(p1, yield_idrefs=True)))
+            frozenset(t1.iter_elements(p1, yield_ids=True)))
         t1.iter_elements(p1).next() # no exception before the actual yield
         self.assertRaises(exception_type, list, t1.iter_elements(p1))
         p1.close()

@@ -1290,8 +1290,8 @@ class _SqliteBackend(object):
     def get_content_info(self, package_id, id, element_type):
         """Return information about the content of an element, or None.
 
-        The information is a tuple of the form (mimetype, schema_idref, url),
-        where ``schema_idref`` and ``url`` can be empty strings.
+        The information is a tuple of the form (mimetype, schema_id, url),
+        where ``schema_id`` and ``url`` can be empty strings.
 
         None is returned if the element does not exist or has no content.
 
@@ -1307,7 +1307,7 @@ class _SqliteBackend(object):
                             mimetype, schema, url):
         """Update the content information of the identified element.
 
-        ``schema`` is the id-ref of an own or directly imported resource,
+        ``schema`` is the id of an own or directly imported resource,
         or an empty string to specify no schema (not None).
 
         If ``url`` is not an empty string, any data stored in the backend for
@@ -1398,7 +1398,7 @@ class _SqliteBackend(object):
     def iter_meta(self, package_id, id, element_type):
         """Iter over the metadata, sorting keys in alphabetical order.
 
-        Yield tuples of the form (key, val, val_is_idref) (cf. `get_meta` and
+        Yield tuples of the form (key, val, val_is_id) (cf. `get_meta` and
         `set_meta`).
 
         If package metadata is targeted, id should be an empty string (in
@@ -1416,7 +1416,7 @@ class _SqliteBackend(object):
     def get_meta(self, package_id, id, element_type, key):
         """Return the given metadata of the identified element.
 
-        Return a tuple of the form (val, val_is_idref) where the second item is
+        Return a tuple of the form (val, val_is_id) where the second item is
         a boolean, indicating whether the first item must be interpreted as an
         id-ref, or None if the element has no metadata with that key.
 
@@ -1434,20 +1434,20 @@ class _SqliteBackend(object):
         else:
             return (d[0], False)
 
-    def set_meta(self, package_id, id, element_type, key, val, val_is_idref):
+    def set_meta(self, package_id, id, element_type, key, val, val_is_id):
         """Set the given metadata of the identified element.
 
-        Paramter ``val_is_idref`` indicates whether parameter ``val`` must be
+        Parameter ``val_is_id`` indicates whether parameter ``val`` must be
         interpreted as an id-ref rather than a plain string. Note that ``val`` 
         can also be None to unset the corresponding metadata; in that case,
-        val_is_idref is ignored.
+        val_is_id is ignored.
 
         If package metadata is targeted, id should be an empty string (in
         that case, element_type will be ignored).
         """
         assert _DF or id == "" or self.has_element(package_id, id, element_type)
 
-        if val is not None and val_is_idref:
+        if val is not None and val_is_id:
             val_p, val_i = _split_id_ref(val)
             val = ""
         else:

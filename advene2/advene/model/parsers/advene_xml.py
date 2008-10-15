@@ -188,9 +188,8 @@ class _Parser(XmlParserBase):
             self.optional("meta", id, TAG)
         else:
             # tag association in element
-            idref = self.get_attribute("id-ref")
-            self.do_or_postpone(idref,
-                                be.associate_tag, pid, element_id, idref)
+            id = self.get_attribute("id-ref")
+            self.do_or_postpone(id, be.associate_tag, pid, element_id, id)
 
     def handle_media(self):
         be = self.backend
@@ -287,7 +286,7 @@ class _Parser(XmlParserBase):
             if val is None:
                be.set_meta(pid, owner_id, typ, key, child.text, False)
             else:
-               is_idref = True
+               is_id = True
                self.do_or_postpone(val,
                    be.set_meta, pid, owner_id, typ, key, val, True)
 
@@ -314,8 +313,8 @@ class _Parser(XmlParserBase):
         # members already added
         be = self.backend
         pid = self.package_id
-        idref = self.get_attribute("id-ref")
-        be.insert_member(pid, relation_id, idref, -1, count[0])
+        id = self.get_attribute("id-ref")
+        be.insert_member(pid, relation_id, id, -1, count[0])
         count[0] += 1
 
     def handle_item(self, list_id, count):
@@ -324,23 +323,22 @@ class _Parser(XmlParserBase):
         # members already added
         be = self.backend
         pid = self.package_id
-        idref = self.get_attribute("id-ref")
-        self.do_or_postpone(idref,
-                            be.insert_item, pid, list_id, idref, -1, count[0])
+        id = self.get_attribute("id-ref")
+        self.do_or_postpone(id, be.insert_item, pid, list_id, id, -1, count[0])
         count[0] += 1
 
     def handle_element(self, tag_id):
         be = self.backend
         pid = self.package_id
-        idref = self.get_attribute("id-ref")
-        be.associate_tag(pid, idref, tag_id)
+        id = self.get_attribute("id-ref")
+        be.associate_tag(pid, id, tag_id)
 
     def handle_association(self):
         be = self.backend
         pid = self.package_id
-        elt_idref = self.get_attribute("element")
-        tag_idref = self.get_attribute("tag")
-        be.associate_tag(pid, elt_idref, tag_idref)
+        elt_id = self.get_attribute("element")
+        tag_id = self.get_attribute("tag")
+        be.associate_tag(pid, elt_id, tag_id)
 
 
 #

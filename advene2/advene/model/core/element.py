@@ -28,7 +28,7 @@ class PackageElement(object, WithMetaMixin):
         self._deleted = False
         owner._elements[id] = self # cache to prevent duplicate instanciation
 
-    def make_idref_in(self, pkg):
+    def make_id_in(self, pkg):
         """Compute an id-ref for this element in the context of the given package.
         """
         if self._owner is pkg:
@@ -84,21 +84,21 @@ class PackageElement(object, WithMetaMixin):
 
     # tag management
 
-    def iter_tags(self, package, inherited=True, yield_idrefs=False):
+    def iter_tags(self, package, inherited=True, yield_ids=False):
         """Iter over the tags associated with this element in ``package``.
 
         If ``inherited`` is set to False, the tags associated by imported
         packages of ``package`` will not be yielded.
 
         If a tag is unreachable, an exception will be raised at the time it
-        must be yielded, unless yield_idrefs is set to True, in which case the
+        must be yielded, unless yield_ids is set to True, in which case the
         id-ref of the tag is yielded instead.
 
-        See also `iter_tags_idrefs`.
+        See also `iter_tags_ids`.
         """
-        return self.iter_tags_idrefs(package, inherited, yield_idrefs and 1 or 2)
+        return self.iter_tags_ids(package, inherited, yield_ids and 1 or 2)
 
-    def iter_tags_idrefs(self, package, inherited=True, _try_get=0):
+    def iter_tags_ids(self, package, inherited=True, _try_get=0):
         """Iter over the id-refs of the tags associated with this element in
         ``package``.
 
@@ -108,9 +108,9 @@ class PackageElement(object, WithMetaMixin):
         See also `iter_tags`.
         """
         # this actually also implements iter_tags
-        if _try_get == 1: # yield_idrefs is true
+        if _try_get == 1: # yield_ids is true
             default = None
-        else: # yield_idrefs is false
+        else: # yield_ids is false
             default = _RAISE
         u = self._get_uriref()
         if not inherited:
@@ -119,7 +119,7 @@ class PackageElement(object, WithMetaMixin):
             for pid, tid in package._backend.iter_tags_with_element(pids, u):
                 if _try_get:
                     y = package.get_element(tid, default)
-                    if y is None: # only possible when yield_idrefs is true
+                    if y is None: # only possible when yield_ids is true
                         y = tid
                 else:
                     y = tid
@@ -130,10 +130,10 @@ class PackageElement(object, WithMetaMixin):
                     p = pdict[pid]
                     if _try_get:
                         y = p.get_element(tid, default)
-                        if y is None: # only possible when yield_idrefs is true
-                            y = package.make_idref_for(p, tid)
+                        if y is None: # only possible when yield_ids is true
+                            y = package.make_id_for(p, tid)
                     else:
-                        y = package.make_idref_for(p, tid)
+                        y = package.make_id_for(p, tid)
                     yield y
 
     def iter_taggers(self, tag, package):

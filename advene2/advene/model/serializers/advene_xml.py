@@ -134,9 +134,9 @@ class _Serializer(object):
         self._serialize_meta(m, xm)
 
     def _serialize_annotation(self, a, xannotations):
-        midref = a.media_idref
+        mid = a.media_id
         xa = SubElement(xannotations, "annotation", id=a.id,
-                       media=midref, begin=str(a.begin), end=str(a.end))
+                       media=mid, begin=str(a.begin), end=str(a.end))
         self._serialize_content(a, xa)
         self._serialize_element_tags(a, xa)
         self._serialize_meta(a, xa)
@@ -144,7 +144,7 @@ class _Serializer(object):
     def _serialize_relation(self, r, xrelations):
         xr = SubElement(xrelations, "relation", id=r.id)
         xmembers = SubElement(xr, "members")
-        for m in r.iter_members_idrefs():
+        for m in r.iter_members_ids():
             SubElement(xmembers, "member", {"id-ref":m})
         if len(xmembers) == 0:
             xr.remove(xmembers)
@@ -155,7 +155,7 @@ class _Serializer(object):
     def _serialize_list(self, L, xlists):
         xL = SubElement(xlists, "list", id=L.id)
         xitems = SubElement(xL, "items")
-        for i in L.iter_items_idrefs():
+        for i in L.iter_items_ids():
             SubElement(xitems, "item", {"id-ref":i})
         if len(xitems) == 0:
             xr.remove(xitems)
@@ -164,8 +164,8 @@ class _Serializer(object):
 
     def _serialize_tag(self, t, ximports):
         xt = SubElement(ximports, "tag", id=t.id)
-        L = [ idref for idref in t.iter_elements_idrefs(self.package, False)
-                    if idref.find(":") > 0 ]
+        L = [ id for id in t.iter_elements_ids(self.package, False)
+                    if id.find(":") > 0 ]
         if L:
             ximp = SubElement(xt, "imported-elements")
             for i in L:
@@ -204,8 +204,8 @@ class _Serializer(object):
         if elt.content_mimetype != "x-advene/none":
             xc = SubElement(xelt, "content",
                            mimetype=elt.content_mimetype)
-            if elt.content_schema_idref:
-                xc.set("schema", elt.content_schema_idref)
+            if elt.content_schema_id:
+                xc.set("schema", elt.content_schema_id)
             if elt.content_url:
                 # TODO manage packaged: URLs
                 xc.set("url", elt.content_url)
@@ -216,7 +216,7 @@ class _Serializer(object):
         xm = SubElement(xobj, "meta")
         umps = chain(iter_unserialized_meta_prefix(), [None,])
         ump = umps.next() # there is at least one (PARSER_META_PREFIX)
-        for k,v in obj.iter_meta_idrefs():
+        for k,v in obj.iter_meta_ids():
             if ump and k.startswith(ump):
                 continue
             while ump and k > ump: ump = umps.next()
@@ -229,7 +229,7 @@ class _Serializer(object):
                 xkeyval = SubElement(xm, tag, xmlns=ns)
             else:
                 xkeyval = SubElement(xm, "%s:%s" % (prefix, tag))
-            if v.is_idref:
+            if v.is_id:
                 xkeyval.set("id-ref", v)
             else:
                 xkeyval.text = v
@@ -238,7 +238,7 @@ class _Serializer(object):
             
     def _serialize_element_tags(self, elt, xelt):
         xtags = SubElement(xelt, "tags")
-        for t in elt.iter_tags_idrefs(self.package, inherited=False):
+        for t in elt.iter_tags_ids(self.package, inherited=False):
             SubElement(xtags, "tag", {"id-ref":t})
         if len(xtags) == 0:
             xelt.remove(xtags)

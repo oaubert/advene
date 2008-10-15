@@ -61,12 +61,12 @@ class WithContentMixin:
     modified.
     """
 
-    __mimetype     = None
-    __schema_idref = None
-    __schema_wref  = staticmethod(lambda: None)
-    __url          = None
-    __data         = None # backend data, unless __as_file is not None
-    __as_file      = None 
+    __mimetype    = None
+    __schema_id   = None
+    __schema_wref = staticmethod(lambda: None)
+    __url         = None
+    __data        = None # backend data, unless __as_file is not None
+    __as_file     = None 
 
     __cached_content = staticmethod(lambda: None)
 
@@ -78,7 +78,7 @@ class WithContentMixin:
         """Load the content info (mimetype, schema, url)."""
         # should actually never be called
         o = self._owner
-        self.__mimetype, self.__schema_idref, self.__url = \
+        self.__mimetype, self.__schema_id, self.__url = \
             o._backend.get_content_info(o._id, self._id, self.ADVENE_TYPE)
 
     def __store_info(self):
@@ -86,7 +86,7 @@ class WithContentMixin:
         o = self._owner
         o._backend.update_content_info(o._id, self._id, self.ADVENE_TYPE,
                                        self.__mimetype or "",
-                                       self.__schema_idref or "",
+                                       self.__schema_id or "",
                                        self.__url or "")
 
     def __store_data(self):
@@ -101,19 +101,19 @@ class WithContentMixin:
         Return None if that content has no schema.
         If the schema can not be retrieved, the default value is returned.
 
-        See also `content_schema` and `content_schema_idref`.
+        See also `content_schema` and `content_schema_id`.
         """
         # NB: if the default value is _RAISE and the schema is unreachable,
         # and exception will be raised.
 
-        idref = self.__schema_idref
-        if idref is None:
+        mid = self.__schema_id
+        if mid is None:
             self._load_content_info()
-            idref = self.__schema_idref
-        if idref:
+            mid = self.__schema_id
+        if mid:
             m = self.__schema_wref()
             if m is None:
-                m = self._owner.get_element(self.__schema_idref, default)
+                m = self._owner.get_element(self.__schema_id, default)
                 if m is not default:
                     self._media_wref = ref(m)
             return m
@@ -192,7 +192,7 @@ class WithContentMixin:
         None if that content has no schema.  
         If the schema can not be retrieved, an exception is raised.
 
-        See also `get_content_schema` and `content_schema_idref`.
+        See also `get_content_schema` and `content_schema_id`.
         """
         return self.get_content_schema(_RAISE)
 
@@ -202,28 +202,28 @@ class WithContentMixin:
         """
         # if _init is True, no backend operation is performed,
         # and resource may be an id-ref rather than an element
-        if not _init and self.__schema_idref is None:
+        if not _init and self.__schema_id is None:
             self._load_content_info()
         if self.__mimetype == "x-advene/none" and (not _init or resource):
             raise ModelError("Can not set schema of empty content")
         op = self._owner
         if resource is None or _init and resource == "":
-            self.__schema_idref = ""
+            self.__schema_id = ""
             if self.__schema_wref():
                 del self.__schema_wref
         elif _init and isinstance(resource, basestring):
-            self.__schema_idref = resource
+            self.__schema_id = resource
         else:
             if not op._can_reference(resource):
                 raise ModelError("Package %s can not reference resource %s" %
-                                 op.uri, resource.make_idref_in(op))
-            self.__schema_idref = resource.make_idref_in(op)
+                                 op.uri, resource.make_id_in(op))
+            self.__schema_id = resource.make_id_in(op)
             self.__schema_wref  = ref(resource)
         if not _init:
             self.__store_info()
 
     @autoproperty
-    def _get_content_schema_idref(self):
+    def _get_content_schema_id(self):
         """The id-ref of the content schema, or an empty string.
 
         This is a read-only property giving the id-ref of the resource held
@@ -234,7 +234,7 @@ class WithContentMixin:
 
         See also `get_content_schema` and `content_schema`.
         """
-        return self.__schema_idref or ""
+        return self.__schema_id or ""
 
     @autoproperty
     def _get_content_url(self):
@@ -406,7 +406,7 @@ class Content(object):
         return self._owner_elt._set_content_schema(schema)
 
     @autoproperty
-    def _get_schema_idref(self):
+    def _get_schema_id(self):
         """The id-ref of the schema, or None.
 
         This is a read-only property giving the id-ref of the resource held
@@ -415,7 +415,7 @@ class Content(object):
         Note that this property is accessible even if the corresponding
         schema is unreachable.
         """
-        return self._owner_elt._get_content_schema_idref()
+        return self._owner_elt._get_content_schema_id()
 
     @autoproperty
     def _get_url(self):

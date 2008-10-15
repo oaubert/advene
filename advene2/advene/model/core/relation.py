@@ -15,10 +15,10 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
     """
 
     # Caching is performed as follow:
-    # __init__ retrieves the number of members, and builds self.__idrefs
+    # __init__ retrieves the number of members, and builds self.__ids
     # and self.__cache, a list of id-refs and instances respectively.
     # Whenever an index is accessed, the member if retrieved from self.__cache.
-    # If None, its id-ref is retrieved from self.__idrefs and the element is
+    # If None, its id-ref is retrieved from self.__ids and the element is
     # retrieved from the package. If the id-ref is None, the id-ref is
     # retrieved from the backend.
 
@@ -32,11 +32,11 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
 
         if _new:
             self._cache = []
-            self._idrefs = []
+            self._ids = []
         else:
             c = owner._backend.count_members(owner._id, self._id)
             self._cache = [None,] * c
-            self._idrefs = [None,] * c
+            self._ids = [None,] * c
 
     def __len__(self):
         return len(self._cache)
@@ -55,7 +55,7 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         """Return member with index i, or raise an exception if the item is
         unreachable.
 
-        See also `get_member`  and `get_member_idref`.
+        See also `get_member`  and `get_member_id`.
         """
         if isinstance(i, slice): return self._get_slice(i)
         else: return self.get_member(i, _RAISE)
@@ -65,14 +65,14 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         assert getattr(a, "ADVENE_TYPE", None) == ANNOTATION
         o = self._owner
         assert o._can_reference(a)
-        idref = a.make_idref_in(o)
-        self._idrefs[i] = idref
+        aid = a.make_id_in(o)
+        self._ids[i] = aid
         self._cache[i] = a
-        o._backend.update_member(o._id, self._id, idref, i)
+        o._backend.update_member(o._id, self._id, aid, i)
 
     def __delitem__(self, i):
         if isinstance(i, slice): return self._del_slice(i)
-        del self._idrefs[i] # also guarantees that is is a valid index
+        del self._ids[i] # also guarantees that is is a valid index
         del self._cache[i]
         o = self._owner
         o._backend.remove_member(o._id, self._id, i)
@@ -114,10 +114,10 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         if i > c : i = c
         if i < -c: i = 0
         if i < 0 : i += c 
-        idref = a.make_idref_in(o)
-        self._idrefs.insert(i,idref)
+        aid = a.make_id_in(o)
+        self._ids.insert(i,aid)
         self._cache.insert(i,a)
-        o._backend.insert_member(o._id, self._id, idref, i, c)
+        o._backend.insert_member(o._id, self._id, aid, i, c)
         # NB: it is important to pass to the backend the length c computed
         # *before* inserting the member
         
@@ -125,11 +125,11 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         assert getattr(a, "ADVENE_TYPE", None) == ANNOTATION
         o = self._owner
         assert o._can_reference(a)
-        idref = a.make_idref_in(o)
+        aid = a.make_id_in(o)
         c = len(self._cache)
-        self._idrefs.append(idref)
+        self._ids.append(aid)
         self._cache.append(a)
-        o._backend.insert_member(o._id, self._id, idref, -1, c)
+        o._backend.insert_member(o._id, self._id, aid, -1, c)
         # NB: it is important to pass to the backend the length c computed
         # *before* appending the member
 
@@ -137,36 +137,36 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         for a in annotations:
             self.append(a)
 
-    def iter_members(self, _idrefs=True):
+    def iter_members(self, _ids=True):
         """Iter over the members of this relation.
 
         If the relation contains unreachable members, their id-ref will be
         yielded instead.
 
-        See also `__iter__` and `iter_members_idrefs`.
+        See also `__iter__` and `iter_members_ids`.
         """
-        # NB: internally, _idrefs can be passed False to force exceptions
-        if _idrefs:
+        # NB: internally, _ids can be passed False to force exceptions
+        if _ids:
             default = None
         else:
             default = _RAISE
         for i,m in enumerate(self._cache):
             if m is None:
                 m = self.get_member(i, default)
-                if m is None: # only possible when _idrefs is true
-                    m = self.get_member_idref(i)
+                if m is None: # only possible when _ids is true
+                    m = self.get_member_id(i)
             yield m
 
-    def iter_members_idrefs(self):
+    def iter_members_ids(self):
         """Iter over the id-refs of the members of this relation.
 
-        See also `iter_members` and `member_idrefs`.
+        See also `iter_members` and `member_ids`.
         """
-        for i,m in enumerate(self._idrefs):
+        for i,m in enumerate(self._ids):
             if m is not None:
                 yield m
             else:
-                yield self.get_member_idref(i)
+                yield self.get_member_id(i)
 
     def get_member(self, i, default=None):
         """Return element with index i, or default if it can not be retrieved.
@@ -177,34 +177,34 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         Note that if ``i`` is an invalid index, an IndexError will still be
         raised.
 
-        See also `__getitem__`  and `get_member_idref`.
+        See also `__getitem__`  and `get_member_id`.
         """
         # NB: internally, default can be passed _RAISE to force exceptions
         assert isinstance(i, int)
         r = self._cache[i]
         if r is None:
             o = self._owner
-            idref = self._idrefs[i]
-            if idref is None:
+            rid = self._ids[i]
+            if rid is None:
                 c = len(self._cache)
                 i = xrange(c)[i] # check index and convert negative
-                idref = self._idrefs[i] = \
+                rid = self._ids[i] = \
                     o._backend.get_member(o._id, self._id, i)
-            r = self._cache[i] = o.get_element(idref, default)
+            r = self._cache[i] = o.get_element(rid, default)
         return r
 
-    def get_member_idref(self, i):
+    def get_member_id(self, i):
         """Return id-ref of the element with index i.
 
         See also `__getitem__`  and `get_member`.
         """
         assert isinstance(i, int)
-        r = self._idrefs[i]
+        r = self._ids[i]
         if r is None:
             o = self._owner
-            c = len(self._idrefs)
+            c = len(self._ids)
             i = xrange(c)[i] # check index and convert negative
-            r = self._idrefs[i] = o._backend.get_member(o._id, self._id, i)
+            r = self._ids[i] = o._backend.get_member(o._id, self._id, i)
         return r
 
 #

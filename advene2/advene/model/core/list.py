@@ -16,10 +16,10 @@ class List(PackageElement, WithContentMixin, GroupMixin):
     """
 
     # Caching is performed as follow:
-    # __init__ retrieves the number of items, and builds self.__idrefs
+    # __init__ retrieves the number of items, and builds self.__ids
     # and self._cache, a list of id-refs and weakrefs respectively.
     # Whenever an index is accessed, the item if retrieved from self._cache.
-    # If None, its id-ref is retrieved from self.__idrefs and the item is
+    # If None, its id-ref is retrieved from self.__ids and the item is
     # retrieved from the package. If the id-ref is None, the id-ref is
     # retrieved from the backend.
 
@@ -31,11 +31,11 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         PackageElement.__init__(self, owner, id)
         if _new:
             self._cache = []
-            self._idrefs = []
+            self._ids   = []
         else:
             c = owner._backend.count_items(owner._id, self._id)
             self._cache = [lambda: None,] * c
-            self._idrefs = [None,] * c
+            self._ids = [None,] * c
 
     def __len__(self):
         return len(self._cache)
@@ -54,7 +54,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         """Return item with index i, or raise an exception if the item is
         unreachable.
 
-        See also `get_item`  and `get_item_idref`.
+        See also `get_item`  and `get_item_id`.
         """
         if isinstance(i, slice): return self._get_slice(i)
         else: return self.get_item(i, _RAISE)
@@ -64,14 +64,14 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         assert hasattr(a, "ADVENE_TYPE")
         o = self._owner
         assert o._can_reference(a)
-        idref = a.make_idref_in(o)
-        self._idrefs[i] = idref
+        aid = a.make_id_in(o)
+        self._ids[i] = aid
         self._cache[i] = ref(a)
-        o._backend.update_item(o._id, self._id, idref, i)
+        o._backend.update_item(o._id, self._id, aid, i)
 
     def __delitem__(self, i):
         if isinstance(i, slice): return self._del_slice(i)
-        del self._idrefs[i] # also guarantees that is is a valid index
+        del self._ids[i] # also guarantees that is is a valid index
         del self._cache[i]
         o = self._owner
         o._backend.remove_item(o._id, self._id, i)
@@ -113,10 +113,10 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         if i > c : i = c
         if i < -c: i = 0
         if i < 0 : i += c 
-        idref = a.make_idref_in(o)
-        self._idrefs.insert(i,idref)
+        aid = a.make_id_in(o)
+        self._ids.insert(i,aid)
         self._cache.insert(i,ref(a))
-        o._backend.insert_item(o._id, self._id, idref, i, c)
+        o._backend.insert_item(o._id, self._id, aid, i, c)
         # NB: it is important to pass to the backend the length c computed
         # *before* inserting the item
         
@@ -124,11 +124,11 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         assert hasattr(a, "ADVENE_TYPE")
         o = self._owner
         assert o._can_reference(a)
-        idref = a.make_idref_in(o)
+        aid = a.make_id_in(o)
         c = len(self._cache)
-        self._idrefs.append(idref)
+        self._ids.append(aid)
         self._cache.append(ref(a))
-        o._backend.insert_item(o._id, self._id, idref, -1, c)
+        o._backend.insert_item(o._id, self._id, aid, -1, c)
         # NB: it is important to pass to the backend the length c computed
         # *before* appending the item
 
@@ -136,7 +136,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         for e in elements:
             self.append(e)
 
-    def iter_items(self, _idrefs=True):
+    def iter_items(self, _ids=True):
         """Iter over the items of this list.
 
         If the list contains unreachable items, their id-ref will be yielded 
@@ -145,10 +145,10 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         Note: this should not be mistaken for the `iteritems` method of 
         dictionaries; advene lists are list-like, not dict-like.
 
-        See also `__iter__` and `iter_items_idrefs`.
+        See also `__iter__` and `iter_items_ids`.
         """
-        # NB: internally, _idrefs can be passed False to force exceptions
-        if _idrefs:
+        # NB: internally, _ids can be passed False to force exceptions
+        if _ids:
             default = None
         else:
             default = _RAISE
@@ -156,20 +156,20 @@ class List(PackageElement, WithContentMixin, GroupMixin):
             y = y() # follow weak ref
             if y is None: # not in cache or dead weakref
                 y = self.get_item(i, default)
-                if y is None: # only possible when _idrefs is true
-                    y = self.get_item_idref(i)
+                if y is None: # only possible when _ids is true
+                    y = self.get_item_id(i)
             yield y
 
-    def iter_items_idrefs(self):
+    def iter_items_ids(self):
         """Iter over the id-refs of th items of this list.
 
         See also `iter_items`.
         """
-        for i,y in enumerate(self._idrefs):
+        for i,y in enumerate(self._ids):
             if y is not None:
                 yield y
             else:
-                yield self.get_item_idref(i)
+                yield self.get_item_id(i)
 
     def get_item(self, i, default=None):
         """Return item with index i, or default if it can not be retrieved.
@@ -177,34 +177,34 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         Note that if ``i`` is an invalid index, an IndexError will still be
         raised.
 
-        See also `__getitem__` and `get_item_idref`.
+        See also `__getitem__` and `get_item_id`.
         """
         # NB: internally, default can be passed _RAISE to force exceptions
         assert isinstance(i, int)
         r = self._cache[i]()
         if r is None:
             o = self._owner
-            idref = self._idrefs[i]
-            if idref is None:
+            rid = self._ids[i]
+            if rid is None:
                 c = len(self._cache)
                 i = xrange(c)[i] # check index and convert negative
-                idref = self._idrefs[i] = \
+                rid = self._ids[i] = \
                     o._backend.get_item(o._id, self._id, i)
-            r = o.get_element(idref, default)
+            r = o.get_element(rid, default)
             if r is not default:
                 self._cache[i] = ref(r)
         return r
 
-    def get_item_idref(self, i):
+    def get_item_id(self, i):
         """Return id-ref of the item with index i.
 
         See also `__getitem__`  and `get_item`.
         """
         assert isinstance(i, int)
-        r = self._idrefs[i]
+        r = self._ids[i]
         if r is None:
             o = self._owner
-            c = len(self._idrefs)
+            c = len(self._ids)
             i = xrange(c)[i] # check index and convert negative
-            r = self._idrefs[i] = o._backend.get_item(o._id, self._id, i)
+            r = self._ids[i] = o._backend.get_item(o._id, self._id, i)
         return r

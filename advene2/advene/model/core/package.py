@@ -350,13 +350,13 @@ class Package(object, WithMetaMixin):
     def has_element(self, id):
         return id in self._elements or self._backend.has_element(self._id, id)
 
-    def get_element(self, idref, default=_RAISE):
+    def get_element(self, id, default=_RAISE):
         """Get the element with the given id-ref.
 
         If the element does not exist, an exception is raised (see below) 
         unless ``default`` is provided, in which case its value is returned.
         
-        An `UnreachableImportError` is raised if the idref involves an
+        An `UnreachableImportError` is raised if the given id involves an
         nonexistant or unreachable import. A `NoSuchElementError` is raised if
         the last item of the id-ref is not the id of an element in the 
         corresponding package.
@@ -376,16 +376,16 @@ class Package(object, WithMetaMixin):
         # string, in which case the tuple will be used to create the element
         # instead of retrieving it from the backend.
 
-        if not isinstance(idref, basestring):
-            tuple = idref
-            idref = tuple[2]
+        if not isinstance(id, basestring):
+            tuple = id
+            id = tuple[2]
         else:
             tuple = None
-        colon = idref.find(":")
+        colon = id.find(":")
         if colon <= 0:
-            return self._get_own_element(idref, tuple, default)
+            return self._get_own_element(id, tuple, default)
         else:
-            imp = idref[:colon]
+            imp = id[:colon]
             pkg = self._imports_dict.get(imp)
             if pkg is None:
                 if default is _RAISE:
@@ -393,10 +393,10 @@ class Package(object, WithMetaMixin):
                 else:
                     return default
             else:
-                return pkg.get_element(idref[colon+1:], default)
+                return pkg.get_element(id[colon+1:], default)
 
-    def get(self, idref, default=None):
-        return self.get_element(idref, default)
+    def get(self, id, default=None):
+        return self.get_element(id, default)
 
     def get_element_by_uriref(self, uriref, default_RAISE):
         """Get the element with the given uri-ref.
@@ -405,7 +405,7 @@ class Package(object, WithMetaMixin):
         unless ``defalut`` is provided, in which case its value is returned.
         
         FIXME: copied from get_element, but not adapted.
-        An `UnreachableImportError` is raised if the idref involves an
+        An `UnreachableImportError` is raised if the given id involves an
         nonexistant or unreachable import. A `NoSuchElementError` is raised if
         the last item of the id-ref is not the id of an element in the 
         corresponding package.
@@ -446,16 +446,16 @@ class Package(object, WithMetaMixin):
         o = element._owner
         return o is self  or  o in self._imports_dict.values()
 
-    def make_idref_for (self, pkg, idref):
+    def make_id_for (self, pkg, id):
         """Compute an id-ref in this package for an element.
 
-        The element is identified by ``idref`` in the package ``pkg``. It is of
+        The element is identified by ``id`` in the package ``pkg``. It is of
         course assumed that pkg is imported by this package.
 
-        See also `PackageElement.make_idref_in`.
+        See also `PackageElement.make_id_in`.
         """
         if self is pkg:
-            return idref
+            return id
 
         # breadth first search in the import graph
         queue   = self._imports_dict.items()
@@ -477,7 +477,7 @@ class Package(object, WithMetaMixin):
                 current += 1
         if not found:
             raise ValueError("Element is not reachable from that package")
-        r = idref
+        r = id
         c = queue[current]
         while c is not None:
             r = "%s:%s" % (c[0], r)
@@ -504,13 +504,13 @@ class Package(object, WithMetaMixin):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        media_idref = media.make_idref_in(self)
+        media_id = media.make_id_in(self)
         if schema is not None:
-            schema_idref = schema.make_idref_in(self)
+            schema_id = schema.make_id_in(self)
         else:
-            schema_idref = ""
-        self._backend.create_annotation(self._id, id, media_idref, begin, end,
-                                        mimetype, schema_idref, url)
+            schema_id = ""
+        self._backend.create_annotation(self._id, id, media_id, begin, end,
+                                        mimetype, schema_id, url)
         return Annotation(self, id, media, begin, end, mimetype, schema, url)
 
     def create_relation(self, id, mimetype="x-advene/none", schema=None,
@@ -519,11 +519,11 @@ class Package(object, WithMetaMixin):
         """
         assert not self.has_element(id)
         if schema is not None:
-            schema_idref = schema.make_idref_in(self)
+            schema_id = schema.make_id_in(self)
         else:
-            schema_idref = ""
+            schema_id = ""
         self._backend.create_relation(self._id, id,
-                                      mimetype, schema_idref, url)
+                                      mimetype, schema_id, url)
         r = Relation(self, id, mimetype, schema, url, True)
         for m in members:
             # let the relation do it, with all the checking it needs
@@ -535,10 +535,10 @@ class Package(object, WithMetaMixin):
         """
         assert not self.has_element(id)
         if schema is not None:
-            schema_idref = schema.make_idref_in(self)
+            schema_id = schema.make_id_in(self)
         else:
-            schema_idref = ""
-        self._backend.create_view(self._id, id, mimetype, schema_idref, url)
+            schema_id = ""
+        self._backend.create_view(self._id, id, mimetype, schema_id, url)
         return View(self, id, mimetype, schema, url)
 
     def create_resource(self, id, mimetype, schema=None, url=""):
@@ -546,11 +546,10 @@ class Package(object, WithMetaMixin):
         """
         assert not self.has_element(id)
         if schema is not None:
-            schema_idref = schema.make_idref_in(self)
+            schema_id = schema.make_id_in(self)
         else:
-            schema_idref = ""
-        self._backend.create_resource(self._id, id,
-                                      mimetype, schema_idref, url)
+            schema_id = ""
+        self._backend.create_resource(self._id, id, mimetype, schema_id, url)
         return Resource(self, id, mimetype, schema, url)
 
     def create_tag(self, id):
@@ -576,10 +575,10 @@ class Package(object, WithMetaMixin):
         """
         assert not self.has_element(id)
         if schema is not None:
-            schema_idref = schema.make_idref_in(self)
+            schema_id = schema.make_id_in(self)
         else:
-            schema_idref = ""
-        self._backend.create_query(self._id, id, mimetype, schema_idref, url)
+            schema_id = ""
+        self._backend.create_query(self._id, id, mimetype, schema_id, url)
         return Query(self, id, mimetype, schema, url)
 
     def create_import(self, id, package):
@@ -608,14 +607,14 @@ class Package(object, WithMetaMixin):
         assert self._can_reference(tag)
         assert tag.ADVENE_TYPE == TAG
         if element._owner is self:
-            idref_e = element._id
+            id_e = element._id
         else:
-            idref_e = element.make_idref_in(self)
+            id_e = element.make_id_in(self)
         if tag._owner is self:
-            idref_t = tag._id
+            id_t = tag._id
         else:
-            idref_t = tag.make_idref_in(self)
-        self._backend.associate_tag(self._id, idref_e, idref_t)
+            id_t = tag.make_id_in(self)
+        self._backend.associate_tag(self._id, id_e, id_t)
         # TODO make tagging dirtiable -- requires also changes in tag-related
         # methods of PackageElement and Tag
 
@@ -626,14 +625,14 @@ class Package(object, WithMetaMixin):
         assert self._can_reference(tag)
         assert tag.ADVENE_TYPE == TAG
         if element._owner is self:
-            idref_e = element._id
+            id_e = element._id
         else:
-            idref_e = element.make_idref_in(self)
+            id_e = element.make_id_in(self)
         if tag._owner is self:
-            idref_t = tag._id
+            id_t = tag._id
         else:
-            idref_t = tag.make_idref_in(self)
-        self._backend.dissociate_tag(self._id, idref_e, idref_t)
+            id_t = tag.make_id_in(self)
+        self._backend.dissociate_tag(self._id, id_e, id_t)
         # TODO make tagging dirtiable -- requires also changes in tag-related
         # methods of PackageElement and Tag
 

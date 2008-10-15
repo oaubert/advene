@@ -11,8 +11,6 @@ Important improvements
 
 - rename schema to model (in content.py and associate)
 
-- replace idref by id anywhere its appropriate (improve l=readability)
-
 - there should be only 2 ways of itering over collections:
   - yielding elemements or None when unreachable
   - yieldings ids

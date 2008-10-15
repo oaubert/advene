@@ -24,7 +24,7 @@ class WithMetaMixin:
     # mixing "pure" strings, id-refs and elements would seem too cumbersome...
 
     __cache = None # SortedDict of all known metadata
-                   # values are either string or (weakref, idref)
+                   # values are either string or (weakref, id)
     __cache_is_complete = False # is self.__cache complete?
 
     def iter_meta(self):
@@ -34,7 +34,7 @@ class WithMetaMixin:
         element. An exception will be raised whenever an unreachable element is
         to be yielded.
 
-        See also `iter_meta_idrefs`.
+        See also `iter_meta_ids`.
         """
         if hasattr(self, "ADVENE_TYPE"):
             p = self._owner
@@ -61,8 +61,8 @@ class WithMetaMixin:
             cache = self.__cache
             if cache is None:
                 cache = self.__cache = SortedDict()
-            for k, v, v_is_idref in p._backend.iter_meta(p._id, eid, typ):
-                if v_is_idref:
+            for k, v, v_is_id in p._backend.iter_meta(p._id, eid, typ):
+                if v_is_id:
                     # it is no use looking in cache: if the element is in it,
                     # then it will also be in the package's cache, and the
                     # retrieval from the package will be as efficient
@@ -74,11 +74,11 @@ class WithMetaMixin:
                 yield k, v
             self.__cache_is_complete = True
 
-    def iter_meta_idrefs(self):
+    def iter_meta_ids(self):
         """Iter over all the metadata of this object.
 
         Yields (key, value) pairs, where the value is a string with a special
-        attribute ``is_idref`` indicating if it represents the id-ref of an
+        attribute ``is_id`` indicating if it represents the id-ref of an
         element.
 
         See also `iter_meta`.
@@ -105,8 +105,8 @@ class WithMetaMixin:
         else:
             # retrieve data from backend
             cache = self.__cache
-            for k, v, v_is_idref in p._backend.iter_meta(p._id, eid, typ):
-                yield k, metadata_value(v, v_is_idref)
+            for k, v, v_is_id in p._backend.iter_meta(p._id, eid, typ):
+                yield k, metadata_value(v, v_is_id)
 
     def get_meta(self, key, default=_RAISE):
         """Return the metadata (string or element) associated to the given key.
@@ -118,20 +118,20 @@ class WithMetaMixin:
         All exceptions can be avoided by providing a ``default`` value, that
         will be returned instead of raising an exception.
         """
-        return self.get_meta_idref(key, default, False)
+        return self.get_meta_id(key, default, False)
 
-    def get_meta_idref(self, key, default=_RAISE, _return_idref=True):
+    def get_meta_id(self, key, default=_RAISE, _return_id=True):
         """Return the metadata (string or element) associated to the given key.
 
-        The returned value is a string with a special attribute ``is_idref``
+        The returned value is a string with a special attribute ``is_id``
         indicating if it represents the id-ref of an element.
 
         If no metadata is associated to the given key, a KeyError is raised,
         unless ``default`` is provideded, in which case its value is returned
         instead.
         """
-        # NB: this method actually implement both get_meta and get_meta_idrefs,
-        # with the flag _return_idref to choose between the two.
+        # NB: this method actually implement both get_meta and get_meta_ids,
+        # with the flag _return_id to choose between the two.
 
         if hasattr(self, "ADVENE_TYPE"):
             p = self._owner
@@ -147,28 +147,28 @@ class WithMetaMixin:
 
         val = cache.get((key))
         if isinstance(val, tuple):
-            if _return_idref:
+            if _return_id:
                 val = metadata_value(val[1], True)
             else:
-                wref, the_idref = val
+                wref, the_id = val
                 val = wref()
                 if val is None:
-                    val = p.get_element(the_idref, default)
+                    val = p.get_element(the_id, default)
                     if val is not default:
-                        cache[key] = (ref(val), the_idref)
+                        cache[key] = (ref(val), the_id)
         elif isinstance(val, basestring):
-            if _return_idref:
+            if _return_id:
                 val = metadata_value(val, False)
         elif val is None: # could also be KeyError
             tpl = p._backend.get_meta(p._id, eid, typ, key)
             if tpl is None:
                 val = cache[key] = KeyError
             else:
-                if _return_idref:
+                if _return_id:
                     val = metadata_value(*tpl)
                 elif tpl[1]:
-                    the_idref = tpl[0]
-                    val = p.get_element(the_idref, default)
+                    the_id = tpl[0]
+                    val = p.get_element(the_id, default)
                     if val is not default:
                         cache[key] = (ref(val), tpl[0])
                 else:
@@ -199,17 +199,17 @@ class WithMetaMixin:
         if hasattr(val, "ADVENE_TYPE"):
             if not p._can_reference(val):
                 raise ModelError, "Element should be directy imported"
-            vstr = val.make_idref_in(p)
-            vstr_is_idref = True
+            vstr = val.make_id_in(p)
+            vstr_is_id = True
             val = (ref(val), vstr)
         else:
             vstr = str(val)
-            vstr_is_idref = False
+            vstr_is_id = False
         cache = self.__cache
         if cache is None:
             cache = self.__cache = SortedDict()
         cache[key] = val
-        p._backend.set_meta(p._id, eid, typ, key, vstr, vstr_is_idref)
+        p._backend.set_meta(p._id, eid, typ, key, vstr, vstr_is_id)
 
     def del_meta(self, key):
         """Delete the metadata.
@@ -266,9 +266,9 @@ class WithMetaMixin:
 class _MetaDict(object):
     """A dict-like object representing the metadata of an object.
 
-    Note that many methods have an equivalent with suffix ``_idref`` or 
-    ``_idrefs`` which use `get_meta_idref` instead of `get_meta` and 
-    `iter_meta_idrefs` instead of `iter_meta`, respectively.
+    Note that many methods have an equivalent with suffix ``_id`` or 
+    ``_ids`` which use `get_meta_id` instead of `get_meta` and 
+    `iter_meta_ids` instead of `iter_meta`, respectively.
     """ 
 
     __slots__ = ["_owner",]
@@ -286,7 +286,7 @@ class _MetaDict(object):
         return self._owner.get_meta(k)
 
     def __iter__(self):
-        return ( k for k, _ in self._owner.iter_meta_idrefs() )
+        return ( k for k, _ in self._owner.iter_meta_ids() )
 
     def __len__(self):
         return len(list(iter(self)))
@@ -304,8 +304,8 @@ class _MetaDict(object):
     def get(self, k, v=None):
         return self._owner.get_meta(k, v)
 
-    def get_idref(self, k, v=None):
-        return self._owner.get_meta_idref(k, v)
+    def get_id(self, k, v=None):
+        return self._owner.get_meta_id(k, v)
 
     def has_key(self, k):
         return self._owner.get_meta(k, None) is not None
@@ -313,26 +313,26 @@ class _MetaDict(object):
     def items(self):
         return list(self._owner.iter_meta())
 
-    def items_idrefs(self):
-        return list(self._owner.iter_meta_idrefs())
+    def items_ids(self):
+        return list(self._owner.iter_meta_ids())
 
     def iteritems(self):
         return self._owner.iter_meta()
 
-    def iteritems_idrefs(self):
-        return self._owner.iter_meta_idrefs()
+    def iteritems_ids(self):
+        return self._owner.iter_meta_ids()
 
     def iterkeys(self):
-        return ( k for k, _ in self._owner.iter_meta_idrefs() )
+        return ( k for k, _ in self._owner.iter_meta_ids() )
 
     def itervalues(self):
         return ( v for _, v in self._owner.iter_meta() )
 
-    def itervalues_idrefs(self):
-        return ( v for _, v in self._owner.iter_meta_idrefs() )
+    def itervalues_ids(self):
+        return ( v for _, v in self._owner.iter_meta_ids() )
 
     def keys(self):
-        return [ k for k, _ in self._owner.iter_meta_idrefs() ]
+        return [ k for k, _ in self._owner.iter_meta_ids() ]
 
     def pop(self, k, d=_RAISE):
         v = self._owner.get_meta(k, None)
@@ -345,8 +345,8 @@ class _MetaDict(object):
             self._owner.del_meta(k)
         return v
 
-    def pop_idref(self, k, d=_RAISE):
-        v = self._owner.get_meta_idref(k, None)
+    def pop_id(self, k, d=_RAISE):
+        v = self._owner.get_meta_id(k, None)
         if v is None:
             if d is _RAISE:
                 raise KeyError, k
@@ -366,8 +366,8 @@ class _MetaDict(object):
             self._owner.del_meta(k)
             return v
 
-    def popitem_idref(self):
-        it = self._owner.iter_meta_idrefs()
+    def popitem_id(self):
+        it = self._owner.iter_meta_ids()
         try:
             k, v = it.next()
         except StopIteration:
@@ -398,12 +398,12 @@ class _MetaDict(object):
     def values(self):
         return [ v for _, v in self._owner.iter_meta() ]
 
-    def values_idrefs(self):
-        return [ v for _, v in self._owner.iter_meta_idrefs() ]
+    def values_ids(self):
+        return [ v for _, v in self._owner.iter_meta_ids() ]
 
 
 class metadata_value(str):
-    def __new__ (cls, val, is_idref):
+    def __new__ (cls, val, is_id):
         return str.__new__(cls, val)
-    def __init__ (self, val, is_idref):
-        self.is_idref = is_idref
+    def __init__ (self, val, is_id):
+        self.is_id = is_id

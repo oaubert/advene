@@ -10,7 +10,7 @@ def diff_medias(m1, m2):
          + _diff_meta(m1, m2)
 
 def diff_annotations(a1, a2):
-    return _diff_attr(a1, a2, "media_idref") \
+    return _diff_attr(a1, a2, "media_id") \
          + _diff_attr(a1, a2, "begin") \
          + _diff_attr(a1, a2, "end") \
          + _diff_contents(a1, a2) \
@@ -81,8 +81,8 @@ def _diff_attr(elt1, elt2, attr):
     return []
 
 def _diff_members(r1, r2):
-    l1 = list(enumerate(r1.iter_members_idrefs()))
-    l2 = list(enumerate(r2.iter_members_idrefs()))
+    l1 = list(enumerate(r1.iter_members_ids()))
+    l2 = list(enumerate(r2.iter_members_ids()))
     r = []
     for i1, i2 in _xzip(l1, l2, lambda x: x[0]):
         if i1 is None:
@@ -98,8 +98,8 @@ def _diff_members(r1, r2):
     return r
 
 def _diff_items(l1, l2):
-    m1 = list(enumerate(l1.iter_items_idrefs()))
-    m2 = list(enumerate(l2.iter_items_idrefs()))
+    m1 = list(enumerate(l1.iter_items_ids()))
+    m2 = list(enumerate(l2.iter_items_ids()))
     r = []
     for i1, i2 in _xzip(m1, m2, lambda x: x[0]):
         if i1 is None:
@@ -115,9 +115,9 @@ def _diff_items(l1, l2):
     return r
 
 def _diff_imported_elements(t1, t2):
-    l1 = [ i for i in enumerate(t1.iter_elements_idrefs(t1._owner)) 
+    l1 = [ i for i in enumerate(t1.iter_elements_ids(t1._owner)) 
              if ":" in i[1] ]
-    l2 = [ i for i in enumerate(t2.iter_elements_idrefs(t2._owner)) 
+    l2 = [ i for i in enumerate(t2.iter_elements_ids(t2._owner)) 
              if ":" in i[1] ]
     r = []
     for e1, e2 in _xzip(l1, l2, lambda x: x):
@@ -129,7 +129,7 @@ def _diff_imported_elements(t1, t2):
 
 def _diff_contents(elt1, elt2):
     r = _diff_attr(elt1, elt2, "content_mimetype") \
-         + _diff_attr(elt1, elt2, "content_schema_idref") \
+         + _diff_attr(elt1, elt2, "content_schema_id") \
          + _diff_attr(elt1, elt2, "content_url")
     if elt1.content_url == elt2.content_url \
     and (not elt1.content_url or elt1.content_url.startswith("packaged:")):
@@ -137,8 +137,8 @@ def _diff_contents(elt1, elt2):
     return r
 
 def _diff_tags(e1, e2):
-    l1 = list(enumerate(e1.iter_tags_idrefs(e1._owner)))
-    l2 = list(enumerate(e2.iter_tags_idrefs(e2._owner)))
+    l1 = list(enumerate(e1.iter_tags_ids(e1._owner)))
+    l2 = list(enumerate(e2.iter_tags_ids(e2._owner)))
     r = []
     for t1, t2 in _xzip(l1, l2, lambda x: x):
         if t1 is None:
@@ -154,14 +154,14 @@ def _diff_meta(obj1, obj2):
     else:
         id = ""
         typ = ""
-    m1 = list(obj1.iter_meta_idrefs())
-    m2 = list(obj2.iter_meta_idrefs())
+    m1 = list(obj1.iter_meta_ids())
+    m2 = list(obj2.iter_meta_ids())
     r = []
     for i1, i2 in _xzip(m1, m2, lambda x: x[0]):
         if i1 is None:
             r.append(("set_meta", id, typ, i2[0], None, None))
         elif i2 is None or i1 != i2:
-            r.append(("set_meta", id, typ, i1[0], i1[1], i1[1].is_idref))
+            r.append(("set_meta", id, typ, i1[0], i1[1], i1[1].is_id))
     return r
             
 def _diff_elt_lists(p1, p2, name):
