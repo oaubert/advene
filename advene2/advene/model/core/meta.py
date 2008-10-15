@@ -61,18 +61,21 @@ class WithMetaMixin(DirtyMixin):
                 yield key, val
         self.__cache_is_complete = True
 
-    def get_meta(self, key, default=_RAISE):
+    def get_meta(self, key, default=_RAISE, safe=False):
         """Return the metadata associated to the given key.
 
         The returned value can be either an
         `advene.model.core.elemenet.PackageElement` or a string.
 
-        If the given key does not exist: an KeyError is raised if default is 
-        not given, else default is returned.
+        If the given key does not exist: an KeyError is raised if ``default``
+        is not given, else default is returned.
 
-        If the metadata refers to an element but that element can not be
-        reached, an UnreachableElement exception is raised, else default is
-        returned.
+        If the metadata refers to an element, the behaviour depends on both
+        attributes ``default`` and ``safe``. In unsafe mode (the default),
+        the element itself will be returned. If it is not reachable, an
+        UnreachableElement exception is raised, unless a ``default`` value is
+        provided, in which case that default value is returned. In safe mode
+        (setting ``safe`` to True), the id-ref of the element is returned.
         """
         if hasattr(self, "ADVENE_TYPE"):
             p = self._owner
@@ -91,15 +94,18 @@ class WithMetaMixin(DirtyMixin):
             wref, idref = val
             val = wref()
             if val is None:
-                val = p.get_element(idref, default)
-                cache[key] = (ref(val), idref)
+                val = p.get_element(idref, safe and idref or default)
+                if val is not idref and val is not default:
+                    cache[key] = (ref(val), idref)
         elif val is None:
             tpl = p._backend.get_meta(p._id, eid, typ, key)
             if tpl is None:
                 val = cache[key] = KeyError
             elif tpl[1]:
-                val = p.get_element(tpl[0], default)
-                cache[key] = (ref(val), tpl[0])
+                idref = tpl[0]
+                val = p.get_element(idref, safe and idref or default)
+                if val is not idref and val is not default:
+                    cache[key] = (ref(val), tpl[0])
             else:
                 val = cache[key] = tpl[0]
         if val is KeyError:
