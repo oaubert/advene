@@ -310,7 +310,7 @@ class Indexer:
         self.index={
             'views': set(),
             }
-        self.regexp=re.compile(r'[^\w\d_]+')
+        self.regexp=re.compile(r'[^\w\d_]+', re.UNICODE)
         self.size_limit=5
 
     def get_words(self, s):
@@ -373,8 +373,9 @@ class Indexer:
         elif isinstance(context, Annotation):
             s=self.index.get(context.type.id, [])
         elif isinstance(context, gtk.TextBuffer):
-            s=set(self.get_words(context.get_text(*context.get_bounds())))
-            s=self.index['views']
+            # The replace clause transforms the timestamp placeholders into spaces.
+            s=set(self.get_words(unicode(context.get_slice(*context.get_bounds()).replace('\xef\xbf\xbc', ' '))))
+            s.update(self.index['views'])
         else:
             s=self.index['views']
 

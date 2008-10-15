@@ -518,6 +518,10 @@ def get_filename(title=_("Open a file"),
 
     def update_preview(chooser):
         filename=chooser.get_preview_filename()
+        if filename is not None:
+            # The returned filename is a utf8-encoded string. Convert
+            # it to unicode.
+            filename=unicode(filename, 'utf-8')
         setattr(preview, '_filename', filename)
         if filename and (filename.endswith('.xml') or filename.endswith('.czp')):
             preview.set_label(_("Press to\ndisplay\ninformation"))
@@ -603,7 +607,10 @@ def get_filename(title=_("Open a file"),
     fs.destroy()
 
     if filename is not None and not isinstance(filename, unicode):
-        filename=unicode(filename, _fs_encoding)
+        # Strangely, specifying _fs_encoding crashes with accented
+        # characters on win32.
+        # filename=unicode(filename, _fs_encoding)
+        filename=unicode(filename)
 
     if alias:
         return filename, al
