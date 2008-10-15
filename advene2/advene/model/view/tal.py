@@ -49,8 +49,8 @@ def apply_to(view, obj, refpkg=None):
     f.close()
 
     # should we cache the compiled template for future uses,
-    # and recompile it only when the content is changed?
-    # the problem is that external contents may be changed without notification
+    # and recompile it only when the content is modified?
+    # the problem is that external contents may be modified without notification
     # (or rely on f.headers['date'], but that would require to hack content.py
     #  to make that field *always* present - might be a good idea...)
 

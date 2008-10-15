@@ -20,13 +20,13 @@ class CamElementMixin(PackageElement):
     def set_meta(self, key, value, val_is_idref=False, _guard=True):
         if _guard:
             if key == CAMSYS_TYPE:
-                raise SemanticError("cam:system-type can not be changed")
+                raise SemanticError("cam:system-type can not be modified")
         return super(CamElementMixin, self).set_meta(key, value, val_is_idref)
 
     def del_meta(self, key, _guard=True):
         if _guard:
             if key == CAMSYS_TYPE:
-                raise SemanticError("cam:system-type can not be changed")
+                raise SemanticError("cam:system-type can not be modified")
         return super(CamElementMixin, self).del_meta(key)
 
     def iter_my_tags(self, package=None, inherited=True, _guard=True):

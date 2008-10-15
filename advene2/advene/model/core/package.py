@@ -292,7 +292,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
                       erase=False):
         """Save the package under the given `filename`.
 
-        If `change_url` is set, the URL of the package will be changed to the
+        If `change_url` is set, the URL of the package will be modified to the
         corresponding ``file:`` URL.
 
         A specific serializer module can be provided, else the extension of the
@@ -349,10 +349,10 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     @autoproperty
     def _set_uri(self, uri):
         if uri is None: uri = ""
-        self.emit("pre-changed::uri", "uri", uri)
+        self.emit("pre-modified::uri", "uri", uri)
         self._uri = uri
         self._backend.update_uri(self._id, self._uri)
-        self.emit("changed::uri", "uri", uri)
+        self.emit("modified::uri", "uri", uri)
         # TODO the following could be replaced by event handlers in imports
         for pkg, iid in self._importers.iteritems():
             imp = pkg[iid]
@@ -414,7 +414,6 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         # NB: internally, get_element can be passed a tuple instead of a
         # string, in which case the tuple will be used to create the element
         # instead of retrieving it from the backend.
-
         if not isinstance(id, basestring):
             tuple = id
             id = tuple[2]

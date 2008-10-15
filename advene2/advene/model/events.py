@@ -114,44 +114,44 @@ class WithEventsMixin:
 # *before* the actual change takes place. This can be useful for handlers
 # requiring the state preceding the change (like EDL).
 #
-# signal:`changed`
+# signal:`modified`
 # ----------------
 #
-# Emitted everytime an attribute is changed in the object
+# Emitted everytime an attribute is modified in the object
 # 
 # detail:: (depending on the object type) uri, url, frame_of_reference, media,
 #          begin, end
 # params::
 #     * the attribute name
-#     * the new value of the changed attribute
+#     * the new value of the modified attribute
 #
 # This signal also has a "pre-" form.
 
-gobject.signal_new("pre-changed", EventDelegate,
+gobject.signal_new("pre-modified", EventDelegate,
                    gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
                    gobject.TYPE_NONE, (object,object,))
 
-gobject.signal_new("changed", EventDelegate,
+gobject.signal_new("modified", EventDelegate,
                    gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
                    gobject.TYPE_NONE, (object,object,))
 
-# signal:`changed-meta`
+# signal:`modified-meta`
 # -------------------
 #
-# Emitted everytime a meta-data is created/changed in the object
+# Emitted everytime a meta-data is created/modified in the object
 # 
-# detail:: the URL key of the created/changed metadata
+# detail:: the URL key of the created/modified metadata
 # params::
 #     * the URL key of the metadata
-#     * the new value of the changed meta-data (None if deleted)
+#     * the new value of the modified meta-data (None if deleted)
 #
 # This signal also has a "pre-" form.
 
-gobject.signal_new("pre-changed-meta", EventDelegate,
+gobject.signal_new("pre-modified-meta", EventDelegate,
                    gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
                    gobject.TYPE_NONE, (object,object,))
 
-gobject.signal_new("changed-meta", EventDelegate,
+gobject.signal_new("modified-meta", EventDelegate,
                    gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
                    gobject.TYPE_NONE, (object,object,))
 
@@ -197,7 +197,7 @@ gobject.signal_new("closed", PackageEventDelegate,
 # the signal named after that element type.
 #
 # The detail for this signal is the name of the corresponding element signal,
-# without its detail. E.g. media::changed, list::pre-changed-items...
+# without its detail. E.g. media::modified, list::pre-modified-items...
 #
 # signal:: media, annotation, relation, tag, list, query, view, resource,
 #          import
@@ -249,14 +249,14 @@ gobject.signal_new("import", PackageEventDelegate,
 # Element signals
 # ===============
 #
-# signal:`changed-items`
+# signal:`modified-items`
 # ----------------------
 #
 # Emitted for lists and relations when the structure of their items changes.
 #
 # params::
 #     * a slice with only positive indices, relative to the old structure,
-#       embeding all the changed indices
+#       embeding all the modified indices
 #     * a python list representing the new structure of the slice
 #
 # NB: because of the current implementation, some operations (set a slice,
@@ -266,24 +266,24 @@ gobject.signal_new("import", PackageEventDelegate,
 #
 # This signal also has a "pre-" form.
 
-gobject.signal_new("pre-changed-items", ElementEventDelegate,
+gobject.signal_new("pre-modified-items", ElementEventDelegate,
                    gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (object, object,))
 
-gobject.signal_new("changed-items", ElementEventDelegate,
+gobject.signal_new("modified-items", ElementEventDelegate,
                    gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (object, object,))
 
-# signal:`changed-content-data`
+# signal:`modified-content-data`
 # -----------------------------
 #
-# Emitted for elements with content when their content data is changed.
+# Emitted for elements with content when their content data is modified.
 #
 # params::
 #     * TODO: find a way to represent a versatile (i.e. text or binary) diff.
 #       Can be None if such a diff mechanism is not implemented.
 
-gobject.signal_new("changed-content-data", ElementEventDelegate,
+gobject.signal_new("modified-content-data", ElementEventDelegate,
                    gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (object,))
 

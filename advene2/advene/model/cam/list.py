@@ -26,5 +26,5 @@ class Schema(List):
     The class of annotation types.
     """
     # This class is automatically transtyped from List (and back) when 
-    # CAMSYS_TYPE is changed. See List.set_meta
+    # CAMSYS_TYPE is modified. See List.set_meta
     pass

@@ -36,10 +36,10 @@ class Media(PackageElement):
 
     @autoproperty
     def _set_url(self, url):
-        self.emit("pre-changed::url", "url", url)
+        self.emit("pre-modified::url", "url", url)
         self._url = url
         self.__store()
-        self.emit("changed::url", "url", url)
+        self.emit("modified::url", "url", url)
 
     @autoproperty
     def _get_frame_of_reference(self):
@@ -47,12 +47,12 @@ class Media(PackageElement):
 
     @autoproperty
     def _set_frame_of_reference(self, frame_of_reference):
-        self.emit("pre-changed::frame_of_reference",
+        self.emit("pre-modified::frame_of_reference",
                   "frame_of_reference", frame_of_reference)
         self._frame_of_reference = frame_of_reference
         self.__store()
         self._update_unit_and_origin()
-        self.emit("changed::frame_of_reference",
+        self.emit("modified::frame_of_reference",
                   "frame_of_reference", frame_of_reference)
 
     @autoproperty

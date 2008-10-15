@@ -61,10 +61,10 @@ class Import(PackageElement, GroupMixin):
     @autoproperty
     def _set_url(self, url):
         assert url, "URL cannot be empty"
-        self.emit("pre-changed::url", "url", url)
+        self.emit("pre-modified::url", "url", url)
         self._url = url
         self.__store()
-        self.emit("changed::url", "url", url)
+        self.emit("modified::url", "url", url)
 
     @autoproperty
     def _get_uri(self):
@@ -78,10 +78,10 @@ class Import(PackageElement, GroupMixin):
 
     @autoproperty
     def _set_uri(self, uri):
-        self.emit("pre-changed::uri", "uri", uri)
+        self.emit("pre-modified::uri", "uri", uri)
         self._uri = uri
         self.__store()
-        self.emit("changed::uri", "uri", uri)
+        self.emit("modified::uri", "uri", uri)
 
     @autoproperty
     def _get_package(self):

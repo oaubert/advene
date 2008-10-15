@@ -107,11 +107,11 @@ class Annotation(PackageElement, WithContentMixin):
     @autoproperty
     def _set_media(self, media):
         mid = self._check_reference(self._owner, media, MEDIA, True)
-        self.emit("pre-changed::media", "media", media)
+        self.emit("pre-modified::media", "media", media)
         self._media_id = mid
         self._media = media
         self.__store()
-        self.emit("changed::media", "media", media)
+        self.emit("modified::media", "media", media)
 
     @autoproperty
     def _get_media_id(self):
@@ -133,10 +133,10 @@ class Annotation(PackageElement, WithContentMixin):
 
     @autoproperty
     def _set_begin(self, val):
-        self.emit("pre-changed::begin", "begin", val)
+        self.emit("pre-modified::begin", "begin", val)
         self._begin = val
         self.__store()
-        self.emit("changed::begin", "begin", val)
+        self.emit("modified::begin", "begin", val)
 
     @autoproperty
     def _get_end(self):
@@ -144,21 +144,21 @@ class Annotation(PackageElement, WithContentMixin):
 
     @autoproperty
     def _set_end(self, val):
-        self.emit("pre-changed::end", "end", val)
+        self.emit("pre-modified::end", "end", val)
         self._end = val
         self.__store()
-        self.emit("changed::end", "end", val)
+        self.emit("modified::end", "end", val)
 
     @autoproperty
     def _get_duration(self):
         """The duration of this annotation.
 
         This property is a shortcut for ``self.end - self.begin``. Setting it
-        will update self.end accordingly, leaving self.begin unchanged.
+        will update self.end accordingly, leaving self.begin unmodified.
         return self._end - self._begin.
 
-        This property will also be changed by setting self.begin or self.end,
-        since each one of these properties leaves the other one unchanged when set.
+        This property will also be modified by setting self.begin or self.end,
+        since each one of these properties leaves the other one unmodified when set.
         """
         return self._end - self._begin
 

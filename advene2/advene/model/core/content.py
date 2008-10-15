@@ -254,10 +254,10 @@ class WithContentMixin:
             self._set_content_data("")
         else:
             self._check_content(mimetype)
-        self.emit("pre-changed::content_mimetype", "content_mimetype", mimetype)
+        self.emit("pre-modified::content_mimetype", "content_mimetype", mimetype)
         self.__mimetype = mimetype
         self.__store_info()
-        self.emit("changed::content_mimetype", "content_mimetype", mimetype)
+        self.emit("modified::content_mimetype", "content_mimetype", mimetype)
         self._update_content_handler()
 
     @autoproperty
@@ -280,7 +280,7 @@ class WithContentMixin:
         resource_id = self._check_reference(self._owner, resource, RESOURCE)
         self._check_content(model_id=resource_id)
         op = self._owner
-        self.emit("pre-changed::content_model", "content_model", resource)
+        self.emit("pre-modified::content_model", "content_model", resource)
         if resource_id is not resource:
             self.__model_id = resource_id
             if resource is not None:
@@ -295,7 +295,7 @@ class WithContentMixin:
             else:
                 self.__model_id = unicode(resource_id)
         self.__store_info()
-        self.emit("changed::content_model", "content_model", resource)
+        self.emit("modified::content_model", "content_model", resource)
 
     @autoproperty
     def _get_content_model_id(self):
@@ -374,12 +374,12 @@ class WithContentMixin:
                 # don't need to remove data from backend, that will be done
                 # when setting URL
 
-        self.emit("pre-changed::content_url", "content_url", url)
+        self.emit("pre-modified::content_url", "content_url", url)
         self.__url = url
         self.__store_info()
         if not url:
             self.__store_data()
-        self.emit("changed::content_url", "content_url", url)
+        self.emit("modified::content_url", "content_url", url)
 
     @autoproperty
     def _get_content_data(self):
@@ -439,7 +439,7 @@ class WithContentMixin:
             diff = None # TODO make a diff object
             self.__data = data
             self.__store_data()
-        self.emit("changed-content-data", diff)
+        self.emit("modified-content-data", diff)
 
     @autoproperty
     def _get_content_parsed(self):
@@ -457,7 +457,6 @@ class WithContentMixin:
             c = Content(self)
             self.__cached_content = ref(c)
         return c
-
 
 class Content(object):
     """A class for content objects.

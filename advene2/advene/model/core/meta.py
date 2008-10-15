@@ -224,10 +224,10 @@ class WithMetaMixin:
         if cache is None:
             cache = self.__cache = SortedDict()
 
-        self.emit("pre-changed-meta::" + key, key, val)
+        self.emit("pre-modified-meta::" + key, key, val)
         cache[key] = val
         p._backend.set_meta(p._id, eid, typ, key, vstr, vstr_is_id)
-        self.emit("changed-meta::" + key, key, val)
+        self.emit("modified-meta::" + key, key, val)
 
     def del_meta(self, key):
         """Delete the metadata.
@@ -243,11 +243,11 @@ class WithMetaMixin:
             eid = ""
             typ = ""
         cache = self.__cache
-        self.emit("pre-changed-meta::" + key, key, None)
+        self.emit("pre-modified-meta::" + key, key, None)
         if cache is not None and key in cache:
             del cache[key]
         p._backend.set_meta(p._id, eid, typ, key, None, False)
-        self.emit("changed-meta::" + key, key, None)
+        self.emit("modified-meta::" + key, key, None)
 
     @property
     def meta(self):
