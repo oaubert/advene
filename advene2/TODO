@@ -1,8 +1,6 @@
 Important improvements
 ======================
 
-- improve all_group implementation by factorizing same backend operations
-
 - implement read or write locking, "force", and "readonly" in _SqliteBackend
 
 Minor improvements, to do one day

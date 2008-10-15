@@ -45,24 +45,30 @@ class Package(object, WithMetaMixin, DirtyMixin):
         self._backend = None
         if create:
             for b in iter_backends():
-                if b.claims_for_create(url):
+                claims = b.claims_for_create(url)
+                if claims:
                     backend, package_id = b.create(self, force)
                     break
+                elif claims.exception:
+                    raise claims.exception
             else:
                 raise NoBackendClaiming("create %s" % url)
         else: # bind
             for b in iter_backends():
-                if b.claims_for_bind(url):
+                claims = b.claims_for_bind(url)
+                if claims:
                     backend, package_id = b.bind(self, force)
                     break
+                elif claims.exception:
+                    raise claims.exception
             else:
                 raise NoBackendClaiming("bind %s" % url)
 
         self._backend  = backend
         self._id       = package_id
         self._elements = WeakValueDictionary()
-        self._own      = lambda: None
-        self._all      = lambda: None
+        self._own_wref = lambda: None
+        self._all_wref = lambda: None
         self._uri      = None
 
         if _imported_by is None:
@@ -87,32 +93,35 @@ class Package(object, WithMetaMixin, DirtyMixin):
             imports_dict[iid] = p
 
         in_construction = {}
-        self._build_backend_dict(in_construction, {}, self)
+        # iterative depth-first exploration of the import graph
+        visited = {}; queue = [self,]
+        while queue:
+            p = queue[-1]
+            visited[p] = 1
+            if p._backends_dict is not None:
+                # already constructed, reuse it
+                for backend, ids in p._backends_dict.iteritems():
+                    d = in_construction.get(backend)
+                    if d is None:
+                        d = in_construction[backend] = {}
+                    for i,q in ids.items():
+                        if i not in d:
+                            d[i] = q
+                queue.pop(-1)
+            else:
+                # not yet constructed, add p information for p itself...
+                d = in_construction.get(p._backend)
+                if d is None:
+                    d = in_construction[p._backend] = {}
+                d[p._id] = p
+                # ... and recurse into unvisited imports
+                for q in p._imports_dict.itervalues():
+                    if q not in visited:
+                        queue.append(q)
+                        break
+                else:
+                    queue.pop(-1)
         self._backends_dict = in_construction
-        
-
-    @staticmethod
-    def _build_backend_dict(bed, visited, p):
-        visited[p] = 1
-        if p._backends_dict is not None:
-            # already constructed, reuse it
-            for backend, ids in p._backends_dict.iteritems():
-                L = bed.get(backend)
-                if L is None:
-                    L = bed[backend] = []
-                for i in ids:
-                    if i not in L:
-                        L.append(i)
-        else:
-            # not yet constructed, add p information for p itself...
-            L = bed.get(p._backend)
-            if L is None:
-                L = bed[p._backend] = []
-            L.append(p._id)
-            # ... and recurse into unvisited imports
-            for q in p._imports_dict.itervalues():
-                if q not in visited:
-                    Package._build_backend_dict(bed, visited, q)
         
 
     def close (self):
@@ -169,10 +178,19 @@ class Package(object, WithMetaMixin, DirtyMixin):
         If necessary, it is made from backend data, then stored (as a weak ref)
         in self._elements to prevent several instances of the same element to
         be produced.
+
+        NB: internally, get_emement can be passed a tuple instead of a string,
+        in which case the tuple will be used to create the element instead
+        of retrieving it from the backend.
         """
+        if not isinstance(id, basestring):
+            tuple = id
+            id = tuple[2]
+        else:
+            tuple = None
         colon = id.find(":")
         if colon <= 0:
-            return self._get_own_element(id, default)
+            return self._get_own_element(id, tuple, default)
         else:
             imp = id[:colon]
             pkg = self._imports_dict.get(imp)
@@ -188,7 +206,7 @@ class Package(object, WithMetaMixin, DirtyMixin):
 
     __getitem__ = get_element
 
-    def _get_own_element(self, id, default=_RAISE):
+    def _get_own_element(self, id, tuple=None, default=_RAISE):
         """
         Get the element whose id is given.
         Id may be a simple id or a path id.
@@ -199,7 +217,7 @@ class Package(object, WithMetaMixin, DirtyMixin):
         """
         r = self._elements.get(id)
         if r is None:
-            c = self._backend.get_element(self._id, id)
+            c = tuple or self._backend.get_element(self._id, id)
             if c is None:
                 if default is _RAISE:
                     raise KeyError(id)
@@ -307,17 +325,17 @@ class Package(object, WithMetaMixin, DirtyMixin):
         return Import(self, id, package._url, uri)
 
     def _get_own(self):
-        r = self._own()
+        r = self._own_wref()
         if r is None:
             r = OwnGroup(self)
-            self._own = ref(r)
+            self._own_wref = ref(r)
         return r
 
     def _get_all(self):
-        r = self._all()
+        r = self._all_wref()
         if r is None:
             r = AllGroup(self)
-            self._own = ref(r)
+            self._al_wref = ref(r)
         return r
 
     # reference finding (find all the own or imported elements referencing a

@@ -3,6 +3,15 @@ from unittest import TestCase, main
 from advene.utils.itertools import *
 from advene.utils.itertools import _IterHead
 
+class Sortable(object):
+    def __init__(self, i):
+        self.i = i
+    def __cmp__(self, other):
+        assert isinstance(other, Sortable), `other`
+        return cmp(self.i, other.i)
+    def __repr__(self):
+        return str(self.i)
+
 class TestIterHead(TestCase):
     def test1 (self):
         ih = _IterHead(iter([1,2,3,4]))
@@ -52,6 +61,13 @@ class TestInterclass(TestCase):
             list(interclass(self.l1, self.l1)),
             self.l1,
         )
+
+    def test_not_compatable_with_None(self):
+        l1 = [ Sortable(i) for i in range(0,20,2) ]
+        l2 = [ Sortable(i) for i in range(1,6,2) ]
+        r = l1 + l2
+        r.sort()
+        self.assertEqual(r, list(interclass(l1,l2,[])))
 
 if __name__ == "__main__":
      main()

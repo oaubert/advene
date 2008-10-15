@@ -36,7 +36,7 @@ class OwnGroup(object):
         class OwnMedias(object):
             def __iter__(self):
                 for i in o._backend.iter_medias((o._id,)):
-                    yield Media(o, *i[2:])
+                    yield o.get_element(i)
             def __contains__(self, e):
                 return e.ADVENE_TYPE == MEDIA and e in owngroup
         return OwnMedias()
@@ -44,11 +44,10 @@ class OwnGroup(object):
     @property
     def annotations(owngroup):
         o = owngroup._owner
-        e = o._elements
         class OwnAnnotations(object):
             def __iter__(self):
                 for i in o._backend.iter_annotations((o._id,)):
-                    yield e.get(i[2]) or Annotation(o, *i[2:])
+                    yield o.get_element(i)
             def __contains__(self, e):
                 return e.ADVENE_TYPE == ANNOTATION and e in owngroup
         return OwnAnnotations()
@@ -56,11 +55,10 @@ class OwnGroup(object):
     @property
     def relations(owngroup):
         o = owngroup._owner
-        e = o._elements
         class OwnRelations(object):
             def __iter__(self):
                 for i in o._backend.iter_relations((o._id,)):
-                    yield e.get(i[2]) or Relations(o, *i[2:])
+                    yield o.get_element(i)
             def __contains__(self, e):
                 return e.ADVENE_TYPE == RELATION and e in owngroup
         return OwnRelations()
@@ -68,11 +66,10 @@ class OwnGroup(object):
     @property
     def views(owngroup):
         o = owngroup._owner
-        e = o._elements
         class OwnViews(object):
             def __iter__(self):
                 for i in o._backend.iter_views((o._id,)):
-                    yield e.get(i[2]) or View(o, *i[2:])
+                    yield o.get_element(i)
             def __contains__(self, e):
                 return e.ADVENE_TYPE == VIEW and e in owngroup
         return OwnViews()
@@ -80,11 +77,10 @@ class OwnGroup(object):
     @property
     def resources(owngroup):
         o = owngroup._owner
-        e = o._elements
         class OwnResources(object):
             def __iter__(self):
                 for i in o._backend.iter_resources((o._id,)):
-                    yield e.get(i[2]) or Resource(o, *i[2:])
+                    yield o.get_element(i)
             def __contains__(self, e):
                 return e.ADVENE_TYPE == RESOURCE and e in owngroup
         return OwnResources()
@@ -92,11 +88,10 @@ class OwnGroup(object):
     @property
     def tags(owngroup):
         o = owngroup._owner
-        e = o._elements
         class OwnTags(object):
             def __iter__(self):
                 for i in o._backend.iter_tags((o._id,)):
-                    yield e.get(i[2]) or Tag(o, *i[2:])
+                    yield o.get_element(i)
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG and e in owngroup
         return OwnTags()
@@ -104,11 +99,10 @@ class OwnGroup(object):
     @property
     def lists(owngroup):
         o = owngroup._owner
-        e = o._elements
         class OwnLists(object):
             def __iter__(self):
                 for i in o._backend.iter_lists((o._id,)):
-                    yield e.get(i[2]) or List(o, *i[2:])
+                    yield o.get_element(i)
             def __contains__(self, e):
                 return e.ADVENE_TYPE == LIST and e in owngroup
         return OwnLists()
@@ -116,11 +110,10 @@ class OwnGroup(object):
     @property
     def queries(owngroup):
         o = owngroup._owner
-        e = o._elements
         class OwnQueries(object):
             def __iter__(self):
                 for i in o._backend.iter_queries((o._id,)):
-                    yield e.get(i[2]) or Query(o, *i[2:])
+                    yield o.get_element(i)
             def __contains__(self, e):
                 return e.ADVENE_TYPE == QUERY and e in owngroup
         return OwnQueries()
@@ -128,11 +121,10 @@ class OwnGroup(object):
     @property
     def imports(owngroup):
         o = owngroup._owner
-        e = o._elements
         class OwnImports(object):
             def __iter__(self):
                 for i in o._backend.iter_imports((o._id,)):
-                    yield e.get(i[2]) or Imports(o, *i[2:])
+                    yield o.get_element(i)
             def __contains__(self, e):
                 return e.ADVENE_TYPE == IMPORT and e in owngroup
         return OwnImports()

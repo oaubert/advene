@@ -2,8 +2,6 @@
 I define the common super-class of all package element classes.
 """
 
-from sets import Set
-
 from advene                      import _RAISE
 from advene.model.core.dirty     import DirtyMixin
 from advene.model.core.meta      import WithMetaMixin
@@ -37,31 +35,28 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
         Compute the id-ref for this element in the context of the given
         package.
         """
-        if self in pkg.own:
+        if self._owner is pkg:
             return self._id
 
         # breadth first search in the import graph
         queue   = pkg._imports_dict.items()
-        current = 0
-        visited = Set()
+        current = 0 # use a cursor rather than actual pop
+        visited = {pkg:True}
         parent  = {}
         found = False
         while not found and current < len(queue):
             prefix,p = queue[current]
-            visited.append(p)
-
-            for prefix2,p2 in p._imports_dict.iteritems():
-                if p2 not in visited:
-                    queue.append((prefix2,p2))
-                    parent[(prefix2,p2)] = (prefix,p)
-                    if self in p2.own:
-                        found = True
-                        break
-            current += 1
-
+            if p is self._owner:
+                found = True
+            else:
+                visited[p] = True
+                for prefix2,p2 in p._imports_dict.iteritems():
+                    if p2 not in visited:
+                        queue.append((prefix2,p2))
+                        parent[(prefix2,p2)] = (prefix,p)
+                current += 1
         if not found:
             raise ValueError("Element is not reachable from that package")
-
         r = self._id
         c = queue[current]
         while c is not None:

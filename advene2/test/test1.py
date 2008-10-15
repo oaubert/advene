@@ -86,11 +86,12 @@ if __name__ == "__main__":
 
     # testing as_file with internal data
     c = a2.content
+    c.data = "good <em>moaning</em>"
+    print c.data
     f = c.as_file
     print f.info()["content-type"]
     c.mimetype = "text/html"
     print f.info()["content-type"]
-    c.data = "good <em>moaning</em>"
     f.seek(0,2) # seek end of file
     pos = f.tell()
     f.write(" I have a missage fur you")

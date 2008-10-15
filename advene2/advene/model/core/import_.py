@@ -29,13 +29,16 @@ class Import(PackageElement):
         self._uri = uri
         self.add_cleaning_operation_once(self.__clean)
 
+    def _get_package(self):
+        return self._imported
+
     def __clean(self):
         o = self.owner
         o._backend.update_import(o._id, self._id, url, uri)
 
     # group interface
 
-    def __in__(self, element):
+    def __contains__(self, element):
         return element in self._imported._all
 
     @property
@@ -73,3 +76,11 @@ class Import(PackageElement):
     @property
     def queries(self):
         return self._imported._all.queries
+
+    # dict interface
+
+    def __getitem__ (self, i):
+        return self._imported[i]
+
+    def get(self, i, default=None):
+        return self._imported.get(i, default)

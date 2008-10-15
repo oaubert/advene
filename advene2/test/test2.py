@@ -89,9 +89,30 @@ if __name__ == "__main__":
     # reconnect backends
     dummya = Package("sqlite:%s" % filea)
     dummyb = Package("sqlite:%s" % fileb)
-    trace_wrap_all(dummya._backend)
-    trace_wrap_all(dummyb._backend)
+    #trace_wrap_all(dummya._backend)
+    #trace_wrap_all(dummyb._backend)
 
     print
 
     p1 = Package(url1)
+    p3 = p1["p3"].package
+    p4 = p3["p4"].package
+    p5 = p3["p5"].package
+    p6 = p5["p6"].package
+
+    m4 = p4.create_media("m4", "http://example.com/m4.ogm")
+    m6 = p6.create_media("m6", "http://example.com/m6.ogm")
+    a3 = p3.create_annotation("a3", m4, 30, 39, "text/plain")
+    a5 = p5.create_annotation("a5", m6, 50, 59, "text/plain")
+
+    print [i.id for i in p3.own.annotations]
+    print [i.id for i in p4.own.medias]
+    print [i.id for i in p5.own.annotations]
+    print [i.id for i in p6.own.medias]
+    print
+    print [i.id for i in p3.all.medias]
+    print [i.id for i in p3.all.annotations]
+    print [i.id for i in p5.all.medias]
+    print [i.id for i in p5.all.annotations]
+    print [i.id for i in p1.all.medias]
+    print [i.id for i in p1.all.annotations]

@@ -22,18 +22,18 @@ def interclass(*iterables):
     doublons.
     """
     h = [ _IterHead(iter(i)) for i in iterables ]
+    h = [ ih for ih in h if ih.head is not None ] # remove empty iterators
     heapify(h)
     prev = None
 
     while h:
         ih = h[0]
         ihh = ih.head
-        if ihh is not None:
-            if ihh != prev:
-                yield ihh
-                prev = ihh
-            ih.fetch_next()
-        # ih.head may have changed with fetch_next, so don't use ihh anymore:
+        if prev is None or ihh != prev:
+            yield ihh
+            prev = ihh
+        ih.fetch_next()
+        # ih.head has probably changed with fetch_next, don't use ihh anymore:
         if ih.head is not None:
             heapreplace(h, ih)
         else:
