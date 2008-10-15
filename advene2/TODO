@@ -14,9 +14,9 @@ Needed improvements
 Important improvements
 ======================
 
-- finish the implementation of utest/core_package test_modify_X methods
+- add the synchronized decorator to all methods that need it
 
-- implement Package.get_by_uriref(uriref)
+- finish the implementation of utest/core_package test_modify_X methods
 
 - export advene1 -> advene2 (in advene1)
 

@@ -6,6 +6,8 @@ object do not inherit GObject, since they do not provide other functionalities
 than events.
 """
 
+from advene.util.synchronized import enter_cs, exit_cs
+
 import gobject
 
 class EventDelegate(gobject.GObject):
@@ -41,6 +43,7 @@ class WithEventsMixin(object):
     """
 
     __event_delegate = None
+    __disabling_count = 0
 
     def connect(self, detailed_signal, handler, *args):
         """
@@ -98,7 +101,7 @@ class WithEventsMixin(object):
         The additional parameters must match the number and type of the
         required signal handler parameters.
         """
-        if self.__event_delegate is not None:
+        if self.__event_delegate is not None and self.__disabling_count == 0:
             return self.__event_delegate.emit(detailed_signal, *args)
 
     def emit_lazy(self, lazy_params):
@@ -125,6 +128,28 @@ class WithEventsMixin(object):
     handler_is_connected = has_handler
     handler_block = block_handler
     handler_unblock = unblock_handler
+
+    # advene specific methods
+
+    def enter_no_event_section(self):
+        """
+        Disable all event emission for this object, until
+        `exit_no_event_section` is called.
+
+        Not also that a "no event section is a critical section for the object
+        (in the sense of the `advene.util.synchronized` module).
+        """
+        enter_cs(self)
+        self.__disabling_count += 1
+
+    def exit_no_event_section(self):
+        """
+        Re-enables all event emission for this object.
+
+        :see-also: `enter_no_event_section`
+        """
+        self.__disabling_count -= 1
+        exit_cs(self)
 
 
 # Common signals
