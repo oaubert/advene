@@ -135,7 +135,7 @@ class EditElementPopup (AdhocView):
         if self._widget is None:
             vbox=gtk.VBox()
 
-            vbox.pack_start(self.make_widget())
+            vbox.pack_start(self.make_widget(editable=self.editable))
 
             # Button bar
             hbox = gtk.HButtonBox()
@@ -300,9 +300,6 @@ class EditElementPopup (AdhocView):
         self.key_cb[gtk.keysyms.Return] = self.validate_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
 
-        w=self.make_widget (editable=self.editable)
-        self.vbox.add (w)
-
         if self.editable:
             title=_("Edit %s") % self.get_title()
         else:
@@ -373,15 +370,15 @@ class EditElementPopup (AdhocView):
                               types=None,
                               labels=None):
         """Shortcut for creating an Attributes form and registering it."""
-        f = EditAttributesForm (element, controller=self.controller)
-        f.set_attributes (fields)
+        f = EditAttributesForm(element, controller=self.controller)
+        f.set_attributes(fields)
         if editable and editables is not None:
-            f.set_editable (editables)
+            f.set_editables(editables)
         if types is not None:
-            f.set_types (types)
+            f.set_types(types)
         if labels is not None:
-            f.set_labels (labels)
-        self.register_form (f)
+            f.set_labels(labels)
+        self.register_form(f)
         return f
 
 class EditAnnotationPopup (EditElementPopup):
@@ -418,7 +415,7 @@ class EditAnnotationPopup (EditElementPopup):
                                                'contributor', 'modified'),
                                        types={ 'type': 'advene' },
                                        editable=editable,
-                                       editables=('author', 'date', 'contributor'),
+                                       editables=('contributor'),
                                        labels={'id':     _('Id'),
                                                'type':   _('Type'),
                                                'uriref':    _('URI'),
@@ -501,7 +498,7 @@ class EditRelationPopup (EditElementPopup):
                                                'contributor', 'modified'),
                                        types={ 'type': 'advene' },
                                        editable=editable,
-                                       editables=('author', 'date', 'contributor'),
+                                       editables=('contributor'),
                                        labels={'id':     _('Id'),
                                                'type':   _('Type'),
                                                'uriref':    _('URI'),
@@ -578,7 +575,7 @@ class EditViewPopup (EditElementPopup):
                                                'contributor', 'modified'),
                                        types={ },
                                        editable=editable,
-                                       editables=('author', 'date', 'contributor'),
+                                       editables=(),
                                        labels={'id':     _('Id'),
                                                'uriref':    _('URI'),
                                                'creator': _('Creator'),
@@ -633,7 +630,7 @@ class EditQueryPopup (EditElementPopup):
                                                'contributor', 'modified'),
                                        types={ },
                                        editable=editable,
-                                       editables=('author', 'date', 'contributor'),
+                                       editables=(),
                                        labels={'id':     _('Id'),
                                                'uriref':    _('URI'),
                                                'creator': _('Creator'),
@@ -670,10 +667,11 @@ class EditPackagePopup (EditElementPopup):
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uriref',
                                                'creator', 'created',
-                                               'contributor', 'modified'),
+                                               'contributor', 'modified',
+                                               'description'),
                                        types={ },
                                        editable=editable,
-                                       editables=('author', 'date', 'contributor'),
+                                       editables=('description'),
                                        labels={'id':     _('Id'),
                                                'uriref':    _('URI'),
                                                'creator': _('Creator'),
@@ -682,14 +680,6 @@ class EditPackagePopup (EditElementPopup):
                                                'modified': _('Modified'),
                                                }
                                        )
-        vbox.pack_start(f.get_view(), expand=False)
-
-        f = EditMetaForm(title=_("Description"),
-                         element=self.element, name='description',
-                         namespaceid='dc', controller=self.controller,
-                         editable=editable,
-                         tooltip=_("Textual description of the package"))
-        self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
         f = EditMetaForm(title=_("Default dynamic view"),
@@ -756,7 +746,7 @@ class EditAnnotationTypePopup (EditElementPopup):
                                               'element_color': 'tales',
                                               'representaiton': 'tales'},
                                        editable=editable,
-                                       editables=('author', 'date', 'contributor'),
+                                       editables=('contributor', 'description', 'representation', 'color', 'element_color'),
                                        labels={'id':     _('Id'),
                                                'uriref':    _('URI'),
                                                'creator': _('Creator'),
@@ -791,7 +781,7 @@ class EditRelationTypePopup (EditElementPopup):
                                               'element_color': 'tales',
                                               'representaiton': 'tales'},
                                        editable=editable,
-                                       editables=('author', 'date', 'contributor'),
+                                       editables=('contributor', 'description', 'representation', 'color', 'element_color'),
                                        labels={'id':     _('Id'),
                                                'uriref':    _('URI'),
                                                'creator': _('Creator'),
@@ -835,7 +825,7 @@ class EditResourcePopup (EditElementPopup):
                                                'contributor', 'modified'),
                                        types={ },
                                        editable=editable,
-                                       editables=('author', 'date', 'contributor'),
+                                       editables=(),
                                        labels={'id':     _('Id'),
                                                'uriref':    _('URI'),
                                                'creator': _('Creator'),
@@ -1619,7 +1609,7 @@ class EditAttributesForm (EditForm):
     def set_attributes (self, attlist):
         self.attributes = attlist
 
-    def set_editable (self, attlist):
+    def set_editables(self, attlist):
         self.editable = attlist
 
     def set_labels (self, dic):
