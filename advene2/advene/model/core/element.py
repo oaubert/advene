@@ -87,7 +87,7 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         owner._elements[id] = self # cache to prevent duplicate instanciation
 
     @classmethod
-    def instantiate(cls, owner, id):
+    def instantiate(cls, owner, id, *args):
         """
         Factory method to create an instance from backend data.
 

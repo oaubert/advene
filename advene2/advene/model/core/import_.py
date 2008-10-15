@@ -17,8 +17,8 @@ class Import(PackageElement, GroupMixin):
     _imported = None
 
     @classmethod
-    def instantiate(cls, owner, id, url, uri):
-        r = super(Import, cls).instantiate(owner, id)
+    def instantiate(cls, owner, id, url, uri, *args):
+        r = super(Import, cls).instantiate(owner, id, id, url, uri, *args)
         r._url = url
         r._uri = uri
         r._imported = owner._imports_dict.get(id)

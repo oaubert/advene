@@ -6,8 +6,8 @@ from advene.model.core.list import List as CoreList
 class List(CoreList, CamGroupMixin, CamElementMixin) :
 
     @classmethod
-    def instantiate(cls, owner, id):
-        r = super(List, cls).instantiate(owner, id)
+    def instantiate(cls, owner, id, *args):
+        r = super(List, cls).instantiate(owner, id, *args)
         r._transtype()
         return r
 

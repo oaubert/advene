@@ -15,8 +15,8 @@ class View(PackageElement, WithContentMixin):
     _handler = None
 
     @classmethod
-    def instantiate(cls, owner, id, mimetype, model, url):
-        r = super(View, cls).instantiate(owner, id)
+    def instantiate(cls, owner, id, mimetype, model, url, *args):
+        r = super(View, cls).instantiate(owner, id, mimetype, model, url, *args)
         r._instantiate_content(mimetype, model, url)
         return r
 

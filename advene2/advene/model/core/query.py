@@ -9,8 +9,9 @@ class Query(PackageElement, WithContentMixin):
     ADVENE_TYPE = QUERY 
 
     @classmethod
-    def instantiate(cls, owner, id, mimetype, model, url):
-        r = super(Query, cls).instantiate(owner, id)
+    def instantiate(cls, owner, id, mimetype, model, url, *args):
+        r = super(Query, cls) \
+                .instantiate(owner, id, id, mimetype, model, url, *args)
         r._instantiate_content(mimetype, model, url)
         return r
 

@@ -10,8 +10,9 @@ class Resource(PackageElement, WithContentMixin):
     ADVENE_TYPE = RESOURCE
 
     @classmethod
-    def instantiate(cls, owner, id, mimetype, model, url):
-        r = super(Resource, cls).instantiate(owner, id)
+    def instantiate(cls, owner, id, mimetype, model, url, *args):
+        r = super(Resource, cls) \
+                .instantiate(owner, id, mimetype, model, url, *args)
         r._instantiate_content(mimetype, model, url)
         return r
 

@@ -21,9 +21,9 @@ class Tag(PackageElement, GroupMixin):
         super(Tag, self).__init__(owner, id, *a)
 
     @classmethod
-    def create_new(cls, owner, id):
+    def create_new(cls, owner, id, *args):
         owner._backend.create_tag(owner._id, id)
-        return cls.instantiate(owner, id)
+        return cls.instantiate(owner, id, *args)
 
     def __iter__(self):
         # required by GroupMixin

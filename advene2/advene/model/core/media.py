@@ -20,8 +20,8 @@ class Media(PackageElement):
     _origin = None
 
     @classmethod
-    def instantiate(cls, owner, id, url, frame_of_reference):
-        r = super(Media, cls).instantiate(owner, id)
+    def instantiate(cls, owner, id, url, frame_of_reference, *args):
+        r = super(Media, cls).instantiate(owner, id, *args)
         r._url = url
         r._frame_of_reference = frame_of_reference
         r._update_unit_and_origin()

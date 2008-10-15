@@ -32,8 +32,8 @@ class List(PackageElement, WithContentMixin, GroupMixin):
     _ids = None
 
     @classmethod
-    def instantiate(cls, owner, id):
-        r = super(List, cls).instantiate(owner, id)
+    def instantiate(cls, owner, id, *args):
+        r = super(List, cls).instantiate(owner, id, *args)
         c = owner._backend.count_items(owner._id, id)
         r._cache = [lambda: None,] * c
         r._ids = [None,] * c

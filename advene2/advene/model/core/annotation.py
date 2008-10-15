@@ -27,11 +27,12 @@ class Annotation(PackageElement, WithContentMixin):
 
     @classmethod
     def instantiate(cls, owner, id,
-                    media, begin, end, mimetype, model, url):
+                    media, begin, end, mimetype, model, url, *args):
         """
         Factory method to create an instance based on backend data.
         """
-        r = super(Annotation, cls).instantiate(owner, id)
+        r = super(Annotation, cls).instantiate(
+                    owner, id, media, begin, end, mimetype, model, url, *args)
         r._begin = begin
         r._end = end
         r._media_id = media

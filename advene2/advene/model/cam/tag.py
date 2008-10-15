@@ -9,8 +9,8 @@ CAM_ELEMENT_CONSTRAINT = CAM_NS_PREFIX + "element-constraint"
 class Tag(CoreTag, CamElementMixin):
 
     @classmethod
-    def instantiate(cls, owner, id):
-        r = super(Tag, cls).instantiate(owner, id)
+    def instantiate(cls, owner, id, *args):
+        r = super(Tag, cls).instantiate(owner, id, *args)
         r._transtype()
         return r
 

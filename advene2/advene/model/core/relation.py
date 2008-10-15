@@ -29,8 +29,9 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
     _ids = None
 
     @classmethod
-    def instantiate(cls, owner, id, mimetype, model, url):
-        r = super(Relation, cls).instantiate(owner, id)
+    def instantiate(cls, owner, id, mimetype, model, url, *args):
+        r = super(Relation, cls). \
+                instantiate(owner, id, mimetype, url, model, *args)
         r._instantiate_content(mimetype, model, url)
         c = owner._backend.count_members(owner._id, id)
         r._cache = [None,] * c
