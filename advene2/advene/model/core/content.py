@@ -1,7 +1,12 @@
+"""
+I define class Content and a mixin class WithContentMixin for all types of
+elements that can have a content.
+"""
+
 from weakref import ref
 
 from advene import RAISE
-from advene.utils.AutoPropertiesMetaclass import AutoPropertiesMetaclass
+from advene.utils.autoproperties import AutoPropertiesMetaclass
 
 class Content(object):
 
@@ -73,4 +78,15 @@ class Content(object):
                                      self.mimetype, self.data, idref)
         self._schema_idref = idref
         self._schema_wref  = wref
-        
+
+class WithContentMixin:
+    @property
+    def content(self):
+        c = getattr(self, "_cached_content", None)
+        if c is None:
+            o = self._owner
+            mimetype, data, schema_idref = \
+                o._backend.get_content(o._id, self._id, self.ADVENE_TYPE)
+            c = Content(self, mimetype, data, schema_idref)
+            self._cached_content = c
+        return c

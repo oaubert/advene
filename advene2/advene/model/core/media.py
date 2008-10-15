@@ -2,7 +2,7 @@
 I define the class of medias.
 """
 
-from advene.model.core.PackageElement import PackageElement, MEDIA
+from advene.model.core.element import PackageElement, MEDIA
 
 class Media(PackageElement):
 

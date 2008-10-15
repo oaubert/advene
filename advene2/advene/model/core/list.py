@@ -2,7 +2,7 @@
 I define the class List.
 """
 
-from advene.model.core.PackageElement import PackageElement, LIST
+from advene.model.core.element import PackageElement, LIST
 
 class List(PackageElement):
 

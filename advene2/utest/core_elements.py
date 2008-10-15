@@ -1,7 +1,7 @@
 import gc
 from unittest import TestCase, main
 
-from advene.model.core.Package import Package
+from advene.model.core.package import Package
 
 class TestElements(TestCase):
     def setUp(self):

@@ -1,9 +1,9 @@
-from advene.model.core.Package import Package
-
 from os import unlink
 from os.path import exists, join, split
 import gc
 import sys
+
+from advene.model.core.package import Package
 
 uri = "sqlite:%s" % (join (split (__file__)[0], "test1.db"))
 #uri = "sqlite::memory:"

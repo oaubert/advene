@@ -4,10 +4,10 @@ from os.path   import exists
 from unittest  import TestCase, main
 from warnings  import filterwarnings
 
-from advene.model.backends.sqlite_backend \
+from advene.model.backends.sqlite \
   import claims_for_create, create, claims_for_bind, bind, IN_MEMORY_URL
-from advene.model.core.Content import Content
-from advene.model.core.PackageElement \
+from advene.model.core.content import Content
+from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
 
 # the following may seem redundant, but we do not want the tests to be

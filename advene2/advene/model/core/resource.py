@@ -2,8 +2,8 @@
 I define the class of resources.
 """
 
-from advene.model.core.PackageElement   import PackageElement, RESOURCE
-from advene.model.core.WithContentMixin import WithContentMixin
+from advene.model.core.element import PackageElement, RESOURCE
+from advene.model.core.content import WithContentMixin
 
 class Resource(PackageElement, WithContentMixin):
 

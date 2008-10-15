@@ -5,8 +5,8 @@ I define the class of annotations.
 from weakref import ref
 
 from advene import RAISE
-from advene.model.core.PackageElement import PackageElement, ANNOTATION, MEDIA
-from advene.model.core.WithContentMixin import WithContentMixin
+from advene.model.core.element import PackageElement, ANNOTATION, MEDIA
+from advene.model.core.content import WithContentMixin
 
 class Annotation(PackageElement, WithContentMixin):
 

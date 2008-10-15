@@ -4,9 +4,9 @@ I define the class of relations.
 
 from weakref import ref
 
-from advene.model.core.PackageElement \
+from advene.model.core.element \
   import PackageElement, ANNOTATION, RELATION
-from advene.model.core.WithContentMixin import WithContentMixin
+from advene.model.core.content import WithContentMixin
 
 class Relation(PackageElement, WithContentMixin):
     """

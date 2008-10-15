@@ -1,8 +1,8 @@
 """
 I define the class Filter.
 """
-from advene.model.core.PackageElement   import PackageElement, QUERY
-from advene.model.core.WithContentMixin import WithContentMixin
+from advene.model.core.element import PackageElement, QUERY
+from advene.model.core.content import WithContentMixin
 
 class Query(PackageElement, WithContentMixin):
 

@@ -15,7 +15,8 @@ import re
 
 from advene.model import ModelError
 from advene.model.backends import InternalError
-from advene.model.core.PackageElement import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
+from advene.model.core.element \
+  import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
 
 
 BACKEND_VERSION = "0.1"

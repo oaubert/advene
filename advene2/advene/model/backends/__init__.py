@@ -8,7 +8,7 @@ A consequence of the dependance-requirement is that consistency checking is norm
 
 TODO: more documentation.
 
-See the reference implementation ``sqlite_backend``_.
+See the reference implementation ``advene.model.backend.sqlite``_.
 """
 
 # backend register functions
@@ -44,8 +44,8 @@ class InternalError(Exception):
 _backends = []
 
 # default registration
-# NB: do not import sooner, because sqlite_backend relies on the definitions
-#     above
-import advene.model.backends.sqlite_backend
+# NB: do not import sooner, because the sqlite backend relies on the
+#     definitions above
+import advene.model.backends.sqlite
 
-register_backend(sqlite_backend)
+register_backend(sqlite)

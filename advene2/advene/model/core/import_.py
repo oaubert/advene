@@ -2,7 +2,7 @@
 I define the class Import.
 """
 
-from advene.model.core.PackageElement import PackageElement, IMPORT
+from advene.model.core.element import PackageElement, IMPORT
 
 class Import(PackageElement):
 

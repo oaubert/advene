@@ -2,7 +2,7 @@
 I define the class Tag.
 """
 
-from advene.model.core.PackageElement import PackageElement, TAG
+from advene.model.core.element import PackageElement, TAG
 
 class Tag(PackageElement):
 

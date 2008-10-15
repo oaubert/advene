@@ -4,17 +4,17 @@ I define the class OwnGroup.
 This class is intended to be used only inside class Package.
 """
 
-from advene.model.core.PackageElement \
+from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
-from advene.model.core.Media import Media
-from advene.model.core.Annotation import Annotation
-from advene.model.core.Relation import Relation
-from advene.model.core.View import View
-from advene.model.core.Resource import Resource
-from advene.model.core.Tag import Tag
-from advene.model.core.List import List
-from advene.model.core.Query import Query
-from advene.model.core.Import import Import
+from advene.model.core.media import Media
+from advene.model.core.annotation import Annotation
+from advene.model.core.relation import Relation
+from advene.model.core.view import View
+from advene.model.core.resource import Resource
+from advene.model.core.tag import Tag
+from advene.model.core.list import List
+from advene.model.core.query import Query
+from advene.model.core.import_ import Import
 
 class OwnGroup(object):
 

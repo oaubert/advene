@@ -4,9 +4,9 @@ I define the common super-class of all package element classes.
 
 from sets import Set
 
-from advene                               import RAISE
-from advene.model.core.WithMetaMixin      import WithMetaMixin
-from advene.utils.AutoPropertiesMetaclass import AutoPropertiesMetaclass
+from advene                      import RAISE
+from advene.model.core.meta      import WithMetaMixin
+from advene.utils.autoproperties import AutoPropertiesMetaclass
 
 # the following constants must be used as values of a property ADVENE_TYPE
 # in all subclasses of PackageElement
