@@ -35,6 +35,7 @@ from advene.model.cam.relation import Relation
 from advene.model.cam.view import View
 from advene.model.cam.resource import Resource
 from advene.model.cam.query import Query
+from advene.model.cam.media import Media
 import advene.rules.elements
 import advene.gui.popup
 import advene.util.helper as helper
@@ -537,6 +538,35 @@ class ResourceColumn(FinderColumn):
         vbox.show_all()
         return vbox
 CLASS2COLUMN[Resource]=ResourceColumn
+
+class MediaColumn(FinderColumn):
+    def update(self, node=None):
+        self.node=node
+        self.id_label.set_text(self.node.element.id)
+        self.url_label.set_text(self.node.element.url)
+        return True
+
+    def build_widget(self):
+        vbox=gtk.VBox()
+
+        l=gtk.Button(_("Media"), use_underline=False)
+        vbox.pack_start(l, expand=False)
+        self.id_label=gtk.Label(self.node.element.id)
+        self.url_label=gtk.Label(self.node.element.url)
+
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_('Id')), expand=False)
+        hb.pack_start(self.id_label)
+        vbox.pack_start(hb, expand=False)
+
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_('URL')), expand=False)
+        hb.pack_start(self.url_label)
+        vbox.pack_start(hb, expand=False)
+
+        vbox.show_all()
+        return vbox
+CLASS2COLUMN[Media]=MediaColumn
 
 class Finder(AdhocView):
     view_name = _("Package finder")
