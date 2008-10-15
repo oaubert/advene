@@ -708,7 +708,7 @@ class Menu:
             add_item(_('Open adhoc view'), self.open_adhoc_view, element)
         elif t == 'static' and element.matchFilter['class'] in ('package', '*'):
             add_item(_('Open in web browser'), open_in_browser, element)
-        if 'html' in element.content.mimetype and helper.get_id(element.rootPackage.views, '_richedit'):
+        if 'html' in element.content.mimetype and self.controller.package.get('_richedit') is not None:
             # The richedit view is available. Propose to use it.
             add_item(_('Edit in the WYSIWYG editor'), wysiwyg_edit, element)
         return

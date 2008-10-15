@@ -305,7 +305,7 @@ class Common:
         """Activate the given stbv id.
         """
         if stbvid is not None:
-            stbv=helper.get_id(self.controller.package.views, stbvid)
+            stbv=self.controller.package.get(stbvid)
             if stbv is None:
                 raise cherrypy.HTTPError(400, _('Unknown STBV identifier: %s') % stbvid)
         else:

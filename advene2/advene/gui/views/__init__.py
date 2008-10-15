@@ -294,7 +294,7 @@ class AdhocView(object):
                 # Cancel view saving
                 return True
 
-            v=helper.get_id(self.controller.package.views, ident)
+            v=self.controller.package.get(ident)
             if v is None:
                 create=True
                 v=self.controller.package.createView(ident=ident, clazz='package')
