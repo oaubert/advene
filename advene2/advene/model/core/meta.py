@@ -211,7 +211,7 @@ class WithMetaMixin:
             vstr_is_id = True
             val = (ref(val), vstr)
         elif val_is_idref:
-            assert ":" in val, val # only strict id-ref allowed as str
+            assert ":" in val, "Only strict id-ref allowed (no :)"
             if not p._can_reference(val):
                 raise ModelError, "Element or import does not exist %s" % val
             vstr = val
@@ -426,7 +426,7 @@ class _MetaDict(object):
             return v
 
     def setdefault(self, k, d=""):
-        assert isinstance(d, basestring) or hasattr(d, "ADVENE_TYPE")
+        assert isinstance(d, basestring) or hasattr(d, "ADVENE_TYPE"), "Default value must be a string or an Advene element"
         v = self._owner.get_meta(k, None)
         if v is None:
             self._owner.set_meta(k, d)

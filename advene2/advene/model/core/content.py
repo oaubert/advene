@@ -154,7 +154,7 @@ class WithContentMixin:
                     raise IOError("content already opened as a file")
                 o = self._owner
                 prefix = o.get_meta(PACKAGED_ROOT, None)
-                assert prefix is not None
+                assert prefix is not None, "No root is specified for packaged: paths"
                 base = url2pathname(urlparse(prefix).path)
                 filename = path.join(base, url2pathname(url[10:]))
                 f = self.__as_file = PackagedDataFile(filename, self)
@@ -239,7 +239,7 @@ class WithContentMixin:
             self.__model_id = resource.make_id_in(op)
             self.__model_wref  = ref(resource)
         else:
-            assert _init or ":" not in resource
+            assert _init or ":" not in resource, "resource is not a strict id-ref and _init is False"
             self.__model_id = unicode(resource)
         if not _init:
             self.__store_info()

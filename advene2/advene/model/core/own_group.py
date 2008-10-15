@@ -46,7 +46,7 @@ class OwnGroup(GroupMixin, object):
             yield o.get_element(i)
 
     def iter_relations(self, member=None, position=None):
-        assert position is None or member
+        assert position is None or member, "If position is specified, member should be specified too."
         o = self._owner
         if member is None:
             for i in o._backend.iter_relations((o._id,)):
@@ -73,7 +73,7 @@ class OwnGroup(GroupMixin, object):
             yield o.get_element(i)
 
     def iter_lists(self, item=None, position=None):
-        assert position is None or item
+        assert position is None or item, "If position is specified, item should be specified too."
         o = self._owner
         if item is None:
             for i in o._backend.iter_lists((o._id,)):

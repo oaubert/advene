@@ -36,5 +36,5 @@ class Annotation(CoreAnnotation, CamElement):
         return super(Annotation, self).del_meta(key, _guard)
 
 Annotation.make_metadata_property(CAM_TYPE, "type", default=None, doc="""
-The type of this annotation, created with Package.create_annotation_type().
+The type of this annotation, created with Package.create_annotation_type(). May be None if undefined.
 """)

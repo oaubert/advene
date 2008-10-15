@@ -75,7 +75,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         @param force: ???
         @type force: boolean
         """
-        assert not (create and readonly)
+        assert not (create and readonly), "Cannot create a read-only package"
         self._url = url = _make_absolute(url)
         self._readonly = readonly
         self._backend = None
@@ -558,7 +558,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def create_media(self, id, url, frame_of_reference=DEFAULT_FOREF):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id)
+        assert not self.has_element(id), "The identifier %s already exists" % id
         r = self.media_factory(self, id, url, frame_of_reference)
         self._backend.create_media(self._id, id, url, frame_of_reference)
         self.emit("created::media", r)
@@ -569,7 +569,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
                                 mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id)
+        assert not self.has_element(id), "The identifier %s already exists" % id
         r = self.annotation_factory(self, id, media, begin, end,
                                               mimetype, model, url)
         self._backend.create_annotation(self._id, id, r.media_id, begin, end,
@@ -582,7 +582,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
                         url="", members=()):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id)
+        assert not self.has_element(id), "The identifier %s already exists" % id
         r = self.relation_factory(self, id, mimetype, model, url, True)
         self._backend.create_relation(self._id, id,
                                       mimetype, r.content_model_id, url)
@@ -594,7 +594,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def create_view(self, id, mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id)
+        assert not self.has_element(id), "The identifier %s already exists" % id
         r = self.view_factory(self, id, mimetype, model, url)
         self._backend.create_view(self._id, id,
                                   mimetype, r.content_model_id, url)
@@ -605,7 +605,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def create_resource(self, id, mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id)
+        assert not self.has_element(id), "The identifier %s already exists" % id
         r =  self.resource_factory(self, id, mimetype, model, url)
         self._backend.create_resource(self._id, id,
                                       mimetype, r.content_model_id, url)
@@ -616,7 +616,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def create_tag(self, id):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id)
+        assert not self.has_element(id), "The identifier %s already exists" % id
         r = self.tag_factory(self, id)
         self._backend.create_tag(self._id, id)
         self.emit("created::tag", r)
@@ -626,7 +626,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def create_list(self, id, items=()):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id)
+        assert not self.has_element(id), "The identifier %s already exists" % id
         L = self.list_factory(self, id, True)
         self._backend.create_list(self._id, id)
         L.extend(items) # let L do it, with all the checking it needs
@@ -636,7 +636,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def create_query(self, id, mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id)
+        assert not self.has_element(id), "The identifier %s already exists" % id
         r = self.query_factory(self, id, mimetype, model, url)
         self._backend.create_query(self._id, id,
                                    mimetype, r.content_model_id, url)
@@ -647,12 +647,12 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def create_import(self, id, package):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id)
-        assert package is not self
+        assert not self.has_element(id), "The identifier %s already exists" % id
+        assert package is not self, "A package cannot import itself"
         assert not [ p for p in self._imports_dict.itervalues()
                      if p is not None and
                       (p.url == package.url or p.uri and p.uri == package.uri)
-                   ]
+                   ], "Package already imported"
         uri = package.uri # may access the backend
         self._backend.create_import(self._id, id, package._url, package.uri)
 
@@ -688,7 +688,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """
         assert self._can_reference(element), element
         assert self._can_reference(tag), tag
-        assert getattr(tag, "ADVENE_TYPE", TAG) == TAG # if element, must be tag
+        assert getattr(tag, "ADVENE_TYPE", TAG) == TAG, "The tag should be a Tag"
 
         elt_owner = getattr(element, "_owner", None)
         if elt_owner:
@@ -697,7 +697,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
             else:
                 id_e = element.make_id_in(self)
         else:
-            assert ":" in element # only strict id-refs allowed as str
+            assert ":" in element, "Only strict id-refs are allowed (no :)"
             id_e = unicode(element)
         tag_owner = getattr(tag, "_owner", None)
         if tag_owner:
@@ -706,7 +706,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
             else:
                 id_t = tag.make_id_in(self)
         else:
-            assert ":" in tag # only strict id-refs allowed as str
+            assert ":" in tag, "Only strict id-refs are allowed (no :)"
             id_t = unicode(tag)
 
         self._backend.associate_tag(self._id, id_e, id_t)
@@ -716,9 +716,9 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def dissociate_tag(self, element, tag):
         """Dissociate the given element to the given tag on behalf of this package.
         """
-        assert self._can_reference(element)
-        assert self._can_reference(tag)
-        assert getattr(tag, "ADVENE_TYPE", TAG) == TAG # if element, must be tag
+        assert self._can_reference(element), element
+        assert self._can_reference(tag), tag
+        assert getattr(tag, "ADVENE_TYPE", TAG) == TAG, "The tag should be a Tag"
 
         elt_owner = getattr(element, "_owner", None)
         if elt_owner:
@@ -727,7 +727,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
             else:
                 id_e = element.make_id_in(self)
         else:
-            assert ":" in element # only strict id-refs allowed as str
+            assert ":" in element, "Only strict id-refs are allowed (no :)"
             id_e = unicode(element)
         tag_owner = getattr(tag, "_owner", None)
         if tag_owner:
@@ -736,7 +736,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
             else:
                 id_t = tag.make_id_in(self)
         else:
-            assert ":" in tag # only strict id-refs allowed as str
+            assert ":" in tag, "Only strict id-refs are allowed (no :)"
             id_t = unicode(tag)
 
         self._backend.dissociate_tag(self._id, id_e, id_t)

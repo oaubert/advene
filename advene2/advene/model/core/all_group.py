@@ -26,7 +26,7 @@ class AllGroup(GroupMixin, object):
             id = eo._id
             ids = so._backends_dict.get(be)
             if ids and id in ids:
-                assert be.has_element(element._id)
+                assert be.has_element(element._id), "Internal error: %s is not in the backend." % element._id
                 # since the instance is there and working,
                 # it must be in the backend
                 return True
@@ -67,7 +67,7 @@ class AllGroup(GroupMixin, object):
     def iter_relations(self, member=None, position=None):
         """FIXME: missing docstring.
         """
-        assert position is None or member
+        assert position is None or member, "If position is specified, member should be specified too."
         o = self._owner
         if member is None:
             for be, pdict in o._backends_dict.items():
@@ -83,7 +83,8 @@ class AllGroup(GroupMixin, object):
     def iter_lists(self, item=None, position=None):
         """FIXME: missing docstring.
         """
-        assert position is None or item
+        assert position is None or item, "If position is specified, item should be specified too."
+
         o = self._owner
         if item is None:
             for be, pdict in o._backends_dict.items():

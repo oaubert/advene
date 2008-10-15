@@ -64,9 +64,10 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
 
     def __setitem__(self, i, a):
         if isinstance(i, slice): return self._set_slice(i, a)
-        assert getattr(a, "ADVENE_TYPE", None) == ANNOTATION
+        assert getattr(a, "ADVENE_TYPE", None) == ANNOTATION, "A relation member must be an Annotation"
         o = self._owner
-        assert o._can_reference(a)
+        assert o._can_reference(a), "The relation owner %s cannot reference %s" % (str(o), str(a))
+
         aid = a.make_id_in(o)
         s = slice(i, i+1)
         L = [a,]
@@ -118,13 +119,13 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
     def insert(self, i, a):
         # this method accepts a strict id-ref instead of a real element
         o = self._owner
-        assert o._can_reference(a)
+        assert o._can_reference(a), "The relation owner %s cannot reference %s" % (str(o), str(a))
         if hasattr(a, "ADVENE_TYPE"):
             assert a.ADVENE_TYPE == ANNOTATION
             aid = a.make_id_in(o)
         else:
             aid = unicode(a)
-            assert ":" in aid # only strict id-refs allowed as str
+            assert ":" in aid, "Only strict id-refs allowed (no :)"
             a = None
         c = len(self._cache)
         if i > c : i = c
@@ -139,13 +140,13 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
     def append(self, a):
         # this method accepts a strict id-ref instead of a real element
         o = self._owner
-        assert o._can_reference(a)
+        assert o._can_reference(a), "The relation owner %s cannot reference %s" % (str(o), str(a))
         if hasattr(a, "ADVENE_TYPE"):
             assert a.ADVENE_TYPE == ANNOTATION
             aid = a.make_id_in(o)
         else:
             aid = unicode(a)
-            assert ":" in aid # only strict id-refs allowed as str
+            assert ":" in aid, "Only strict id-refs allowed (no :)"
             a = None
         c = len(self._cache)
         s = slice(c,c)
@@ -185,7 +186,7 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         See also `__getitem__`  and `get_member_id`.
         """
         # NB: internally, default can be passed _RAISE to force exceptions
-        assert isinstance(i, int)
+        assert isinstance(i, (int, long)), "The index must be an integer"
         r = self._cache[i]
         if r is None:
             o = self._owner
@@ -203,7 +204,7 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
 
         See also `__getitem__`  and `get_member`.
         """
-        assert isinstance(i, int)
+        assert isinstance(i, (int, long)), "The index must be an integer"
         r = self._ids[i]
         if r is None:
             o = self._owner

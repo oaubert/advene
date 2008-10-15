@@ -33,7 +33,7 @@ class Import(PackageElement):
 
     @autoproperty
     def _set_url(self, url):
-        assert url
+        assert url, "URL cannot be empty"
         self.emit("pre-changed::url", "url", url)
         self._url = url
         self.__store()
