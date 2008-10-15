@@ -10,7 +10,8 @@ from advene.model.cam.tag import Tag
 from advene.model.cam.list import List
 from advene.model.cam.query import Query
 from advene.model.cam.import_ import Import
-from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX
+from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX, \
+                                PARSER_META_PREFIX
 from advene.model.core.package import Package as CorePackage
 from advene.model.core.all_group import AllGroup as CoreAllGroup
 from advene.model.core.own_group import OwnGroup as CoreOwnGroup
@@ -230,6 +231,10 @@ class Package(CorePackage):
                 _bootstrap_ref = wref(b)
             self.create_import("cam", b)
 
+        ns = self._get_namespaces_as_dict()
+        ns.setdefault(DC_NS_PREFIX, "dc")
+        self._set_namespaces_with_dict(ns)
+
     def create_tag(self, id):
         """
         This method is inherited from core.Package but is unsafe on
@@ -298,7 +303,7 @@ class Package(CorePackage):
     def create_schema(self, id, items=()):
         """FIXME: missing docstring.
         """
-        sc = super(Package, self).create_list(id)
+        sc = super(Package, self).create_list(id, items)
         sc.set_meta(CAMSYS_NS_PREFIX+"type", "schema", _guard=0)
         return sc
 

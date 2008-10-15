@@ -5,7 +5,7 @@ from urllib import pathname2url, url2pathname
 from urllib2 import URLError
 from weakref import WeakKeyDictionary, WeakValueDictionary, ref
 
-from advene.model.consts import _RAISE
+from advene.model.consts import _RAISE, PARSER_META_PREFIX
 from advene.model.backends.exceptions import PackageInUse
 from advene.model.backends.register import iter_backends
 import advene.model.backends.sqlite as sqlite_backend
@@ -676,6 +676,32 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     # given element) -- combination of several backend methods
     # TODO -- or is this 
 
+    # namespaces management
+
+    def _get_namespaces_as_dict(self):
+        """
+        Return a dict representing the parser-meta:namespaces metadata, with
+        URIs as keys and prefixes as values.
+
+        Note that changing this dict does not affect the metadata. For this,
+        use ``_set_namespaces_with_dict``.
+        """
+        r = {}
+        prefixes = self.get_meta(PARSER_META_PREFIX+"namespaces" , "")
+        for line in prefixes.split("\n"):
+            if line:
+                prefix, uri = line.split(" ")
+                r[uri] = prefix
+        return r
+
+    def _set_namespaces_with_dict(self, d):
+        """
+        Set the parser-meta:namespaces metadata with a dict like the one
+        returned by ``_get_namespaces_as_dict``.
+        """
+        s = "\n".join( "%s %s" % (prefix, uri)
+                       for uri, prefix in d.iteritems() )
+        self.set_meta(PARSER_META_PREFIX+"namespaces", s)
 
 def _make_absolute(url):
     abscurdir = abspath(curdir)

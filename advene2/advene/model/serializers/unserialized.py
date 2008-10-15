@@ -7,7 +7,7 @@ from advene.model.consts import PARSER_META_PREFIX
 def iter_unserialized_meta_prefix():
     """Iter over all the metadata key prefixes that must not be serialized.
 
-    Note that they are serialized in lexicographic order.
+    Note that they are iterated in lexicographic order.
     """
     return iter(_unserialized_meta_prefixes)
 

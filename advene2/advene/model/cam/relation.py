@@ -9,6 +9,9 @@ _cam_type = CAM_NS_PREFIX + "type"
 _cam_system_type = CAMSYS_NS_PREFIX + "type"
 
 class Relation(CamGroupMixin, CoreRelation, CamElement):
+    def __iter__(self):
+        # necessary to override CamGroupMixin __iter__
+        return CoreList.__iter__(self)
 
     def set_meta(self, key, value, _guard=True):
         if key == _cam_type:

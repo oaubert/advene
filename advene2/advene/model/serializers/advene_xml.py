@@ -1,5 +1,5 @@
 """
-Unstable and experimental serializer implementation.
+Generic serializer implementation.
 
 Note that the order chosen for XML elements (imports, tags, medias, resources,
 annotations, relations, views, queries, lists) is designed to limit the number
@@ -43,14 +43,11 @@ class _Serializer(object):
     def serialize(self):
         """Perform the actual serialization."""
         namespaces = self.namespaces = {}
-        root = self.root = Element("package", xmlns=ADVENE_XML)
+        root = self.root = Element("package", xmlns=self.default_ns)
         package = self.package
-        prefixes = package.get_meta(PARSER_META_PREFIX + "namespaces", "")
-        for line in prefixes.split("\n"):
-            if line:
-                prefix, uri = line.split(" ")
-                root.set("xmlns:%s" % prefix, uri)
-                namespaces[uri] = prefix
+        namespaces = package._get_namespaces_as_dict()
+        for uri, prefix in namespaces.iteritems():
+            root.set("xmlns:%s" % prefix, uri)
         if package.uri:
             root.set("uri", package.uri)
         # package meta-data
@@ -124,25 +121,27 @@ class _Serializer(object):
 
         self.package = package
         self.file = file_
+        self.unserialized_meta_prefixes = list(iter_unserialized_meta_prefix())
+        self.default_ns = ADVENE_XML
 
     # element serializers
 
-    def _serialize_media(self, m, xmedias):
-        xm = SubElement(xmedias, "media", id=m.id, url=m.url,
+    def _serialize_media(self, m, xmedias, tagname="media"):
+        xm = SubElement(xmedias, tagname, id=m.id, url=m.url,
                         **{"frame-of-reference": m.frame_of_reference})
         self._serialize_element_tags(m, xm)
         self._serialize_meta(m, xm)
 
-    def _serialize_annotation(self, a, xannotations):
+    def _serialize_annotation(self, a, xannotations, tagname="annotation"):
         mid = a.media_id
-        xa = SubElement(xannotations, "annotation", id=a.id,
+        xa = SubElement(xannotations, tagname, id=a.id,
                        media=mid, begin=str(a.begin), end=str(a.end))
         self._serialize_content(a, xa)
         self._serialize_element_tags(a, xa)
         self._serialize_meta(a, xa)
 
-    def _serialize_relation(self, r, xrelations):
-        xr = SubElement(xrelations, "relation", id=r.id)
+    def _serialize_relation(self, r, xrelations, tagname="relation"):
+        xr = SubElement(xrelations, tagname, id=r.id)
         xmembers = SubElement(xr, "members")
         for m in r.iter_member_ids():
             SubElement(xmembers, "member", {"id-ref":m})
@@ -152,8 +151,8 @@ class _Serializer(object):
         self._serialize_element_tags(r, xr)
         self._serialize_meta(r, xr)
 
-    def _serialize_list(self, L, xlists):
-        xL = SubElement(xlists, "list", id=L.id)
+    def _serialize_list(self, L, xlists, tagname="list"):
+        xL = SubElement(xlists, tagname, id=L.id)
         xitems = SubElement(xL, "items")
         for i in L.iter_item_ids():
             SubElement(xitems, "item", {"id-ref":i})
@@ -162,8 +161,8 @@ class _Serializer(object):
         self._serialize_element_tags(L, xL)
         self._serialize_meta(L, xL)
 
-    def _serialize_tag(self, t, ximports):
-        xt = SubElement(ximports, "tag", id=t.id)
+    def _serialize_tag(self, t, ximports, tagname="tag"):
+        xt = SubElement(ximports, tagname, id=t.id)
         L = [ id for id in t.iter_element_ids(self.package, False)
                     if id.find(":") > 0 ]
         if L:
@@ -173,26 +172,26 @@ class _Serializer(object):
         self._serialize_element_tags(t, xt)
         self._serialize_meta(t, xt)
 
-    def _serialize_view(self, v, xviews):
-        xv = SubElement(xviews, "view", id=v.id)
+    def _serialize_view(self, v, xviews, tagname="view"):
+        xv = SubElement(xviews, tagname, id=v.id)
         self._serialize_content(v, xv)
         self._serialize_element_tags(v, xv)
         self._serialize_meta(v, xv)
 
-    def _serialize_query(self, q, xqueries):
-        xq = SubElement(xqueries, "query", id=q.id)
+    def _serialize_query(self, q, xqueries, tagname="query"):
+        xq = SubElement(xqueries, tagname, id=q.id)
         self._serialize_content(q, xq)
         self._serialize_element_tags(q, xq)
         self._serialize_meta(q, xq)
 
-    def _serialize_resource(self, r, xresources):
-        xr = SubElement(xresources, "resource", id=r.id)
+    def _serialize_resource(self, r, xresources, tagname="resource"):
+        xr = SubElement(xresources, tagname, id=r.id)
         self._serialize_content(r, xr)
         self._serialize_element_tags(r, xr)
         self._serialize_meta(r, xr)
 
-    def _serialize_import(self, i, ximports):
-        xi = SubElement(ximports, "import", id=i.id, url=i.url)
+    def _serialize_import(self, i, ximports, tagname="import"):
+        xi = SubElement(ximports, tagname, id=i.id, url=i.url)
         if i.uri:
             xi.set("uri", i.uri)
         self._serialize_element_tags(i, xi)
@@ -214,21 +213,27 @@ class _Serializer(object):
 
     def _serialize_meta(self, obj, xobj):
         xm = SubElement(xobj, "meta")
-        umps = chain(iter_unserialized_meta_prefix(), [None,])
-        ump = umps.next() # there is at least one (PARSER_META_PREFIX)
+        umps = chain(self.unserialized_meta_prefixes, [None,])
+        ump = umps.next()
         for k,v in obj.iter_meta_ids():
-            if ump and k.startswith(ump):
-                continue
-            while ump and k > ump: ump = umps.next()
-            if ump and k.startswith(ump):
-                continue # also necessary
+
+            while ump and k > ump:
+                if k.startswith(ump):
+                    k = None # used below to continue outer loop
+                    break
+                else:
+                    ump = umps.next()
+            if k is None: continue
 
             ns, tag = _split_uri_ref(k)
-            prefix = self.namespaces.get(ns)
-            if prefix is None:
-                xkeyval = SubElement(xm, tag, xmlns=ns)
+            if ns == self.default_ns:
+                xkeyval = SubElement(xm, tag)
             else:
-                xkeyval = SubElement(xm, "%s:%s" % (prefix, tag))
+                prefix = self.namespaces.get(ns)
+                if prefix is None:
+                    xkeyval = SubElement(xm, tag, xmlns=ns)
+                else:
+                    xkeyval = SubElement(xm, "%s:%s" % (prefix, tag))
             if v.is_id:
                 xkeyval.set("id-ref", v)
             else:

@@ -37,11 +37,14 @@ def serialize_to(package, file_):
 
 class _Serializer(object):
 
+    _xml_serializer = advene_xml
+    mimetype = MIMETYPE
+
     def serialize(self):
         """Perform the actual serialization."""
         #print "=== serializing directory", self.dir
         f = open(path.join(self.dir, "content.xml"), "w")
-        advene_xml.serialize_to(self.package, f)
+        self._xml_serializer.serialize_to(self.package, f)
         f.close()
 
         z = ZipFile(self.file, "w", self.compression)
@@ -59,7 +62,7 @@ class _Serializer(object):
 
         if not exists(path.join(dir, "mimetype")):
             f = open(path.join(dir, "mimetype"), "w")
-            f.write(MIMETYPE)
+            f.write(self.mimetype)
             f.close()
         if not exists(path.join(dir, "data")):
             mkdir(path.join(dir, "data"))

@@ -1,4 +1,4 @@
-from os import unlink
+from os import unlink, getcwd
 from os.path import exists, join, split
 import gc
 import sys
@@ -12,10 +12,11 @@ from advene.model.cam.package import Package
 
 
 
-base = split(__file__)[0]
+#base = split(__file__)[0]
+base = join(getcwd(), "test")
 
-package_url1 = "file:%s" % (join (base, "test1-cam1.bzp"))
-package_url2 = "file:%s" % (join (base, "test1-cam2.bzp"))
+package_url1 = "file:%s" % (join (base, "test1-cam1.czp"))
+package_url2 = "file:%s" % (join (base, "test1-cam2.czp"))
 advene_ns = "http://advene.liris.cnrs.fr/ns/%s"
 
 
@@ -132,7 +133,9 @@ def main():
     p1.save()
     p2.save()
 
+    return p1, p2
+
 if __name__ == "__main__":
-    main()
+    p1, p2 = main()
 
  
