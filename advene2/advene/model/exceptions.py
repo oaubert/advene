@@ -20,3 +20,10 @@ class UnreachableImportError(KeyError):
     """Raised whenever an element from an unreachable import is sought."""
     pass
 
+class NoContentHandlerError(Exception):
+    """Raised whenever a content can not be handled (view, query....)."""
+    pass
+
+class ContentHandlingError(Exception):
+    """Raised whenever a content handler has an internal error."""
+    pass

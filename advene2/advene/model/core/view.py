@@ -4,6 +4,8 @@ I define the class of views.
 
 from advene.model.core.element import PackageElement, VIEW
 from advene.model.core.content import WithContentMixin
+from advene.model.exceptions import NoContentHandlerError
+from advene.model.view.register import iter_view_handlers
 
 class View(PackageElement, WithContentMixin):
 
@@ -11,7 +13,33 @@ class View(PackageElement, WithContentMixin):
 
     def __init__(self, owner, id, mimetype, schema, url):
         PackageElement.__init__(self, owner, id)
+        self._handler = None
         self._set_content_mimetype(mimetype, _init=True)
         self._set_content_schema(schema, _init=True)
         self._set_content_url(url, _init=True)
 
+    def _update_content_handler(self):
+        m = self.content_mimetype
+        cmax = 0; hmax = None
+        for h in iter_view_handlers():
+            c = h.claims_for_handle(m)
+            if c > cmax:
+                cmax, hmax = c, h
+        if cmax > 0:
+            self._handler = hmax
+        else:
+            # TODO issue a user warning ?
+            self._handler = None
+
+    def apply_to(self, obj):
+        h = self._handler
+        if  h is None:
+            raise NoContentHandlerError(self._get_uriref())
+        return h.apply_to(self, obj)
+
+    @property
+    def output_mimetype(self):
+        h = self._handler
+        if  h is None:
+            raise NoContentHandlerError(self._get_uriref())
+        return h.get_output_mimetype(self)

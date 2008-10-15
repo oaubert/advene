@@ -51,6 +51,14 @@ class WithContentMixin:
     properties can be set or not). Then `content_url` is used to decide between
     the three other kinds of content, in order to decide whether `content_data`
     can be set or not. See the documentation of each property for more detail.
+
+    Content handler
+    ===============
+
+    Some element types, like views and queries, require a content handler which
+    depends on their content's mimetype. This mixin provides a hook method,
+    named `_update_content_handler`, which is invoked after the mimetype is
+    modified.
     """
 
     __mimetype     = None
@@ -61,6 +69,10 @@ class WithContentMixin:
     __as_file      = None 
 
     __cached_content = staticmethod(lambda: None)
+
+    def _update_content_handler(self):
+        """See :class:`WithContentMixin` documentation."""
+        pass
 
     def _load_content_info(self):
         """Load the content info (mimetype, schema, url)."""
@@ -171,6 +183,7 @@ class WithContentMixin:
         self.__mimetype = mimetype
         if not _init:
             self.__store_info()
+        self._update_content_handler()
 
     @autoproperty       
     def _get_content_schema(self):

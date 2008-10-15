@@ -3,7 +3,35 @@ Important improvements
 
 - implement read or write locking, "force", and "readonly" in _SqliteBackend
 
-- implement notification of events
+- implement notification of events (probably with a mixin for registration/
+  unregistration mechanisms)
+
+- implement content handlers for queries and schemas, in the same way it has
+  been done for views
+
+- implement TALES support, and find a *clean* way to add TALES-specific
+  methods; for example, elements should have a tal-method ``tags``, so that
+
+    ``a_package/i:e/tags``
+
+  would be equivalent to the following python:::
+
+    a_package["i:e"].iter_tags(a_package)
+
+  We can see that the first item of the TALES path (``a_package``) is used
+  as a context for following items; that notion of "context" does not exist
+  in python (``a_package`` must be explicitly passed to ``iter_tags``) and it
+  seems like a good idea (explicit is better than implicit). Since TALES does
+  favour no-arguments function, however, the context may help here.
+
+  Other common patterns in TALES are like:
+
+    ``a_package/view/i:v``
+
+  where the second item kind of takes the third as a parameter. This should
+  be cleanly implemented.
+
+  
 
 Minor improvements, to do one day
 =================================
@@ -22,7 +50,8 @@ Misc
 - remove "unstable and experimental" in parser and serializer docstrings (once
   it is stabilized and tested, that is ;)
 
-- find a better alternative to tmpnam in advene_zip's (parser and serialiser)
+- find a better alternative to tmpnam in advene_zip's (parser and serialiser),
+  as well as content.py
 
 - use notification of events, once implemented, to clean the package root
   created by parsers/advene_zip.py and content.py
