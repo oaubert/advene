@@ -178,7 +178,7 @@ class ECAEngine:
             for rule in self.rulesets[type_]:
                 self.ruledict.setdefault(rule.event, []).append(rule)
 
-    def schedule(self, action, context, delay=0):
+    def schedule(self, action, context, delay=0, immediate=False):
         """Schedule an action for execution.
 
         @param action: the action to be executed
@@ -202,7 +202,7 @@ class ECAEngine:
             action.execute(param)
             return True
 
-        if action.immediate:
+        if action.immediate or immediate:
             action.execute(context)
         else:
             if delay:
@@ -423,6 +423,11 @@ class ECAEngine:
                 if p is not None:
                     d['content']= 'package=' + p.title
             self.event_history.append(d)
+        immediate=False
+        if 'immediate' in kw:
+            immediate=True
+            del kw['immediate']
+
         delay=0
         if kw.has_key('delay'):
             delay=long(kw['delay']) / 1000.0
@@ -468,5 +473,5 @@ class ECAEngine:
                 print "Cannot find origin view for ", v
                 pass
             context.setLocal('view', v)
-            self.schedule(rule.action, context, delay=delay)
+            self.schedule(rule.action, context, delay=delay, immediate=immediate)
         context.popLocals()

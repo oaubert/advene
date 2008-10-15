@@ -28,6 +28,7 @@ import urllib
 
 import xml.etree.ElementTree as ET
 
+import advene.core.config as config
 from advene.model.cam.annotation import Annotation
 
 from gettext import gettext as _
@@ -37,18 +38,17 @@ OLD_NS_PREFIX='http://experience.univ-lyon1.fr/advene/ns/advenetool'
 class Event(str):
     """The Event class represents the various defined events in Advene.
     """
-    def __init__(self, name, category, description=''):
-        self.name=name
-        self.category=category
-        self.description=description
-
-def tag(name):
-    return str(ET.QName(OLD_NS_PREFIX, name))
-
 # Warning: if we change the str representation, it messes the indexing
 # in catalog.get_described_events for instance.
 #    def __str__(self):
 #        return "Event %s" % self[:]
+    pass
+    
+def tag(name, old=False):
+    if old:
+        return name
+    else:
+        return str(ET.QName(config.data.namespace, name))
 
 class EtreeMixin:
     """This class defines helper methods for conversion to/from ElementTree.
@@ -62,9 +62,9 @@ class EtreeMixin:
         root=self.to_etree()
         etree=ET.ElementTree(root)
         if stream is None:
-            etree.write(uri)
+            etree.write(uri, encoding='utf-8')
         else:
-            etree.write(stream)
+            etree.write(stream, encoding='utf-8')
 
     def xml_repr(self):
         """Return the XML representation of the instance."""
@@ -79,10 +79,10 @@ class EtreeMixin:
         """
         s=StringIO.StringIO(xmlstring)
         rulenode=ET.parse(s).getroot()
-        self.from_etree(domelement=rulenode, catalog=catalog, origin='XML string')
+        self.from_etree(rulenode, catalog=catalog, origin='XML string')
         s.close()
 
-    def from_xml(self, uri=None, catalog=None):
+    def from_xml(self, uri=None, catalog=None, origin=None):
         """Read the ruleset from a URI.
 
         @param uri: the source URI
@@ -90,7 +90,9 @@ class EtreeMixin:
         @type catalog: ECACatalog
         """
         rulesetnode=ET.parse(uri).getroot()
-        self.from_etree(rulesetnode, catalog=catalog, origin=uri)
+        if origin is None and isinstance(uri, basestring):
+            origin=uri
+        self.from_etree(rulesetnode, catalog=catalog, origin=origin)
 
 class ConditionList(list):
     """A list of conditions.
@@ -275,7 +277,7 @@ class Condition:
         return True
 
     def from_etree(self, node, **kw):
-        if node.tag != tag('condition'):
+        if node.tag != tag('condition') and node.tag != 'condition':
             raise Exception("Bad invocation of Condition.from_etree")
         self.operator=node.attrib.get('operator', 'value')
         if not 'lhs' in node.attrib:
@@ -473,10 +475,12 @@ class Rule(EtreeMixin):
         self.origin=origin
         if catalog is None:
             catalog=ECACatalog()
-        assert rulenode.tag == tag('rule'), "Invalid XML element %s parsed as rule" % rulenode.tag
+        assert rulenode.tag == tag('rule') or rulenode.tag == 'rule', "Invalid XML element %s parsed as rule" % rulenode.tag
         self.name=rulenode.attrib['name']
+        # Old XML versions (no namespace)
+        compatibility=(rulenode.tag == 'rule')
         # Event
-        eventnodes=rulenode.findall(tag('event'))
+        eventnodes=rulenode.findall(tag('event', old=compatibility))
         if len(eventnodes) == 1:
             name=eventnodes[0].attrib['name']
             if catalog.is_event(name):
@@ -489,27 +493,42 @@ class Rule(EtreeMixin):
             raise Exception("Multiple events are associated to rule %s" % self.name)
 
         # Conditions
-        for condnode in rulenode.findall(tag('condition')):
+        for condnode in rulenode.findall(tag('condition', old=compatibility)):
             self.add_condition(Condition().from_etree(condnode, catalog=catalog, origin=origin))
 
         # Set the composition mode for the condition
-        for n in rulenode.findall(tag('composition')):
+        for n in rulenode.findall(tag('composition', old=compatibility)):
             self.condition.composition=n.attrib['value']
 
         # Actions
-        for actionnode in rulenode.findall(tag('action')):
+        for actionnode in rulenode.findall(tag('action', old=compatibility)):
             name=actionnode.attrib['name']
-            if catalog.is_action(name):
-                action=Action(registeredaction=catalog.get_action(name), catalog=catalog)
-            else:
-                # FIXME: we should just display warnings if the action
-                # is not defined ? Or maybe accept it in the case it is defined
-                # in a module loaded later at runtime
-                raise Exception("Undefined action in %s: %s" % (origin, name))
-            for paramnode in actionnode.findall(tag('param')):
-                p_name=paramnode.attrib['name']
-                p_value=paramnode.attrib['value']
-                action.add_parameter(p_name, p_value)
+            param={}
+            for paramnode in actionnode.findall(tag('param', old=compatibility)):
+                param[paramnode.attrib['name']]=paramnode.attrib['value']
+        
+            if not catalog.is_action(name):
+                # Dynamically register a dummy action with the same
+                # name and parameters, so that it can be edited and saved.
+                def unknown_action(context, parameters):
+                    a=catalog.get_action('Message')
+                    a.method(None, { 'message': _("Unknown action %s") % name })
+                    return True
+
+                catalog.register_action(RegisteredAction(
+                        name=name,
+                        method=unknown_action,
+                        description=_("Unknown action %s") % name,
+                        parameters=dict( (name, _("Unknown parameter %s") % name)
+                                         for (name, value) in param.iteritems() ),
+                        defaults=dict(param),
+                        category='unknown',
+                        ))
+                catalog.action_categories['unknown']=_("Unknown actions")
+
+            action=Action(registeredaction=catalog.get_action(name), catalog=catalog)
+            for name, value in param.iteritems():
+                action.add_parameter(name, value)
             self.add_action(action)
         return self
 
@@ -524,13 +543,18 @@ class Rule(EtreeMixin):
                                    {'name': str(self.event) }))
 
         if self.condition != self.default_condition:
-            for cond in self.condition:
-                if cond == self.default_condition:
-                    continue
-                rulenode.append(cond.to_etree())
 
-        rulenode.append(ET.Element(tag('composition'), 
-                                   { 'value': self.condition.composition } ))
+            if isinstance(self.condition, ConditionList):
+                for cond in self.condition:
+                    if cond == self.default_condition:
+                        continue
+                    rulenode.append(cond.to_etree())
+                    rulenode.append(ET.Element(tag('composition'), 
+                                               { 'value': self.condition.composition } ))
+            else:
+                rulenode.append(self.condition.to_etree())
+                rulenode.append(ET.Element(tag('composition'), 
+                                           { 'value': 'and' } ))
 
         if isinstance(self.action, ActionList):
             l=self.action
@@ -606,7 +630,7 @@ class RuleSet(list, EtreeMixin):
     def __init__(self, uri=None, catalog=None, priority=0):
         self.priority=priority
         if uri is not None and catalog is not None:
-            self.from_xml(catalog=catalog, uri=uri)
+            self.from_xml(uri=uri, catalog=catalog)
 
     def add_rule(self, rule):
         """Add a new rule."""
@@ -621,13 +645,15 @@ class RuleSet(list, EtreeMixin):
         @param origin: the source URI
         @type origin: URI
         """
+        assert rulesetnode.tag == tag('ruleset') or rulesetnode.tag == 'ruleset', "Trying to parse %s as a RuleSet" % rulesetnode.tag
+        compatibility=(rulesetnode.tag == 'ruleset')
         if catalog is None:
             catalog=ECACatalog()
-        for rulenode in rulesetnode.findall(tag('rule')):
+        for rulenode in rulesetnode.findall(tag('rule', old=compatibility)):
             rule=Rule(origin=origin, priority=self.priority)
             rule.from_etree(rulenode, catalog=catalog, origin=origin)
             self.append(rule)
-        for rulenode in rulesetnode.findall(tag('subviewlist')):
+        for rulenode in rulesetnode.findall(tag('subviewlist', old=compatibility)):
             rule=SubviewList()
             rule.from_etree(rulenode, catalog=catalog, origin=origin)
             self.append(rule)
@@ -694,22 +720,23 @@ class SimpleQuery(EtreeMixin):
 
         @param querynode: the ElementTree.Element
         """
-        assert querynode.tag == tag('query'), "Invalid tag %s for SimpleQuery" % querynode.tag
+        assert querynode.tag == tag('query') or querynode.tag == 'query', "Invalid tag %s for SimpleQuery" % querynode.tag
 
-        sourcenodes=domelement.findall(tag('source'))
+        compatibility=(querynode.tag == 'query')
+        sourcenodes=querynode.findall(tag('source', old=compatibility))
         assert len(sourcenodes) != 0, "No source associated to query"
         assert len(sourcenodes) == 1, "Multiple sources are associated to query"
         self.source=sourcenodes[0].attrib['value']
 
         # Conditions
-        for condnode in querynode.findall(tag('condition')):
+        for condnode in querynode.findall(tag('condition', old=compatibility)):
             self.add_condition(Condition().from_etree(condnode))
 
         # Set the composition mode for the condition
-        for n in querynode.findall(tag('composition')):
+        for n in querynode.findall(tag('composition', old=compatibility)):
             self.condition.composition=n.attrib['value']
 
-        rnodes=querynode.findall(tag('return'))
+        rnodes=querynode.findall(tag('return', old=compatibility))
         if len(rnodes) == 1:
             self.rvalue=rnodes[0].attrib['value']
         elif len(rnodes) == 0:
@@ -726,8 +753,8 @@ class SimpleQuery(EtreeMixin):
         """
         qnode=ET.Element(tag('query'))
 
-        qnode.append(ET.Element(tag('source', 
-                                    { 'value': self.source })))
+        qnode.append(ET.Element(tag('source'), 
+                                    { 'value': self.source }))
 
         if self.condition is not None:
             if isinstance(self.condition, Condition):
@@ -737,7 +764,7 @@ class SimpleQuery(EtreeMixin):
             for cond in l:
                 if cond is None:
                     continue
-                qnode.append(cond.to_etree(dom))
+                qnode.append(cond.to_etree())
 
             qnode.append(ET.Element(tag('composition'),
                                     { 'value': self.condition.composition }))
@@ -813,10 +840,11 @@ class Quicksearch(EtreeMixin):
     def from_etree(self, element, **kw):
         """Read the SimpleQuery from an ElementTree.Element
 
-        @param domelement: the ElementTree.Element
+        @param element: the ElementTree.Element
         """
-        assert element.tag == tag('quicksearch'), "Invalid tag %s for Quicksearch" % element.tag
-        sourcenode=element.find(tag('source'))
+        assert element.tag == tag('quicksearch') or element.tag == 'quicksearch', "Invalid tag %s for Quicksearch" % element.tag
+        compatibility=(element.tag == 'quicksearch')
+        sourcenode=element.find(tag('source', old=compatibility))
         if sourcenode is not None:
             self.source=sourcenode.attrib['value']
 

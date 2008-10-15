@@ -23,8 +23,7 @@ from gettext import gettext as _
 
 from advene.rules.elements import RegisteredAction, Condition
 from advene.model.tales import AdveneTalesException
-# FIXME: to restore (for get_view_type)
-#import advene.util.helper as helper
+import advene.util.helper as helper
 import subprocess
 import signal
 import os
@@ -618,7 +617,7 @@ class DefaultActionsRepository:
     def OpenStaticView_predefined(self, controller):
         """Return the predefined values.
         """
-        # FIXME: find the appropriate constraint
+        # FIXME: find the appropriate constraint (toplevel)
         return { 'viewid': [ ('string:%s' % v.id, controller.get_title(v))
                              for v in controller.package.all.views
                              if helper.get_view_type(v) == 'static' ] }
