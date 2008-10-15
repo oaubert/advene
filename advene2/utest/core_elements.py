@@ -12,8 +12,7 @@ class TestElements(TestCase):
             pass
 
     def tearDown(self):
-        self.p = None
-        gc.collect()
+        self.p.close()
 
     def test_annotation(self):
         p = self.p

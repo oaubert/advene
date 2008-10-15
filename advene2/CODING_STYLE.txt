@@ -59,29 +59,30 @@ If the optional parameter is a keyword parameter, it should be named "default".
 REFERENCES
 ----------
 
-Weak references are intensievly used, to enable efficient collecting of the
-objects and freeing of resources.
+In order to avoid memory leaks, reference cycle and __del__ methods should be
+avoided. The former prevent automatic freeing of memory when objects are
+unreachable (the garbage collector has to detect the cycle), while the latter
+completely prevents the garbage collector to opperate on reference cycles.
+Stricty speaking, cycles without __del__ or __del__ without cycles are ok, but
+as a rule of thumb, it is better to avoid both.
 
-The rule of thumb is: in a hierarchy of objects, children should strongly
-reference their parent (because they need it for most tasks), while parents
-should only weakly reference their children, and re-generate them whenever
-needed. This is especially true in the backend-supported objects; the backend
-does not keep track of all the objects referencing it, so it is cleaned
-whenever collected by the GC.
+To avoid reference cycles, the use of weak references is recommended. For
+example, Packages do not keep strong references on their elements (because
+there may be too many of them in database-backed packages); it generates them
+on demand and keeps a WeakValueDictionary cache of the generated elements to
+avoid generating twice the same element.
 
-However, there ar exceptions. Contents, for example, are mere *attributes* of
-their parent, and are unlikely to be referenced by themselves, so they will
-keep being regenerated, which might prove costlty (especially for contents
-containing big data). So those objects will be strongly referenced by their
-parent, and will maintain a weak reference to their parent, but a strong
-reference to their grand-parent (i.e. Package), in order to be able to
-re-generate their parents eventually (though this is not likely to happen
-often, since Contents are not expected to be referenced outside their parent).
+To avoid __del__ methods, the callback on weak references can be used to react
+to the deletion of an object, without interfering with the garbage collector.
+The advene.utils.reftools module provides a WeakValueDictWithCallback class,
+which allows to define a global callback on all values of the dictionary. For
+example, the sqlite backend uses it to detect that a package has been collected
+without closing.
 
 Reference Cache
 +++++++++++++++
 
-Of course, reference caches may be implemented to reduce the number of
-collecting-regenerating of objects. Beware however, that the overhead of python
-functions involved in cache management may exceed the benefits... If
+It may be tempting to implement reference caches to prevent objects to be
+repeatedly collected and regenerated. Beware however, that the overhead of
+python functions involved in cache management may exceed the benefits... If
 implemented, this should be thoroughly tested.

@@ -1,4 +1,4 @@
-from weakref import WeakValueDictionary
+from weakref import WeakValueDictionary, ref
 
 from advene import _RAISE
 from advene.model.backends import iter_backends, NoBackendClaiming
@@ -36,8 +36,10 @@ class Package(object, WithMetaMixin):
     __metaclass__ = AutoPropertiesMetaclass
 
     def __init__(self, url, create=False, readonly=False, force=False):
+        assert not (create and readonly)
         self._url      = url
         self._readonly = readonly
+        self._backend = None
         if create:
             for b in iter_backends():
                 if b.claims_for_create(url):
@@ -56,10 +58,11 @@ class Package(object, WithMetaMixin):
         self._backend  = backend
         self._id       = package_id
         self._elements = WeakValueDictionary()
-        self._own      = OwnGroup(self)
-        self._all      = AllGroup(self)
+        self._own      = lambda: None
+        self._all      = lambda: None
         self._uri      = backend.get_uri(package_id)
 
+        self._imports_dict = imports_dict = {}
         for _, id, url, uri in backend.get_imports((package_id,)):
             p = Package(url)
             if p is None: p = Package(uri)
@@ -67,8 +70,15 @@ class Package(object, WithMetaMixin):
             if p is not None and uri != p._uri:
                 pass # TODO: issue a warning, may be change automatically...
                      # I think a hook function would be the good solution
-            dict[id] = p
+            imports_dict[id] = p
 
+    def close (self):
+        """Free all external resources used by the package's backend.
+
+        It is an error to use a package or any of its elements or attributes
+        when the package has been closed. The behaviour is undefined.
+        """
+        self._backend.close(self._id)
 
     def _get_url(self):
         return self._url
@@ -219,10 +229,18 @@ class Package(object, WithMetaMixin):
         return Import(self, id, uri)
 
     def _get_own(self):
-        return self._own
+        r = self._own()
+        if r is None:
+            r = OwnGroup(self)
+            self._own = ref(r)
+        return r
 
     def _get_all(self):
-        return self._all
+        r = self._all()
+        if r is None:
+            r = AllGroup(self)
+            self._own = ref(r)
+        return r
 
 
 class UnreachableImport(Exception):

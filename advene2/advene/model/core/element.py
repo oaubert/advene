@@ -35,20 +35,16 @@ class PackageElement(object, WithMetaMixin):
         Compute the id-ref for this element in the context of the given
         package.
         """
-        if self in pkg._own:
+        if self in pkg.own:
             return self._id
 
         # breadth first search in the import graph
         queue   = pkg._imports_dict.items()
-        current = -1
+        current = 0
         visited = Set()
         parent  = {}
         found = False
         while not found and current < len(queue):
-            # it is important that current is incremented at the *beginning*,
-            # because it is used *outside* the loop. The value after exiting
-            # the loop must be the index of the last used element in queue.
-            current += 1
             prefix,p = queue[current]
             visited.append(p)
 
@@ -56,9 +52,10 @@ class PackageElement(object, WithMetaMixin):
                 if p2 not in visited:
                     queue.append((prefix2,p2))
                     parent[(prefix2,p2)] = (prefix,p)
-                    if self in p2._own:
+                    if self in p2.own:
                         found = True
                         break
+            current += 1
 
         if not found:
             raise ValueError("Element is not reachable from that package")

@@ -55,6 +55,7 @@ if __name__ == "__main__":
     # ensure that backend is collected
     a1 = None; a = None; m1 = None; p = None; gc.collect()
 
+    p.close()
     print
 
     print "about to re-load package"
@@ -71,4 +72,4 @@ if __name__ == "__main__":
     print p.dc_creator
     print a1.begin
 
-    l = None; a1 = None; a2 = None; p = None
+    l = None; a1 = None; a2 = None; p.close(); p = None

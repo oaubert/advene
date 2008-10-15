@@ -14,9 +14,10 @@ from weakref   import WeakValueDictionary
 import re
 
 from advene.model import ModelError
-from advene.model.backends import InternalError
+from advene.model.backends import InternalError, PackageInUse
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
+from advene.utils.reftools import WeakValueDictWithCallback
 
 
 BACKEND_VERSION = "0.1"
@@ -25,22 +26,17 @@ IN_MEMORY_URL = "sqlite::memory:"
 
 
 def claims_for_create(url):
-    """
-    Is this backend able to create a package to the given URL ?
+    """Is this backend able to create a package to the given URL ?
+
+    Not that the semantics of this function is not to test whether the package
+    already exists, but only to check that the given URL is compatible with
+    this backend.
     """
     if not url.startswith("sqlite:"): return False
 
     path, pkgid = _strip_url(url)
 
-    if path == ":memory:":
-        be = _cache.get(":memory:")
-        if be is None:
-            # in_memory backend is not in used, so it will be created
-            return True
-        else:
-            # in_memory backend is in use,
-            # so existing packages can not be created
-            return not _contains_package(be._conn, pkgid)
+    if path == ":memory:": return True
 
     # persistent (file) database
     if not exists(path):
@@ -65,7 +61,7 @@ def create(package, force=False):
     @param package: an object with attributes url and readonly
     @param force: should the package be created even if it exists?
     """
-    url, readonly = package.url, package.readonly
+    url = package.url
     assert(claims_for_create(url)), "url = %r" % url
     if force:
         raise NotImplementedError("This backend can not force creation of "
@@ -73,7 +69,14 @@ def create(package, force=False):
 
     path, pkgid = _strip_url(url)
     b = _cache.get(path)
-    if b is None:
+    if b is not None:
+        conn = b._conn
+        already = b._bound.get(pkgid)
+        if already is not None:
+            raise PackageInUse(already)
+        elif _contains_package(conn, pkgid):
+            raise PackageInUse(pkgid)
+    else:
         # check the following *before* sqlite.connect creates the file!
         must_init = (path == ":memory:" or not exists(path))
         conn = sqlite.connect(path)
@@ -86,20 +89,22 @@ def create(package, force=False):
                 for query in sql.split(";"):
                     conn.execute(query)
                 conn.execute("INSERT INTO Version VALUES (?)",
-                              (BACKEND_VERSION,))
-                conn.execute("INSERT INTO Packages VALUES (?,?)",
-                              (_DEFAULT_PKGID, "",))
+                             (BACKEND_VERSION,))
+                conn.execute("INSERT INTO Packages VALUES (?,?)", 
+                             (_DEFAULT_PKGID, "",))
                 conn.commit()
             except sqlite.OperationalError, e:
                 conn.rollback()
                 raise RuntimeError("%s - SQL:\n%s" % (e, query))
-        b = _SqliteBackend(path, conn, False, False)
+        elif _contains_package(conn, pkgid):
+            raise PackageInUse(pkgid)
+        b = _SqliteBackend(path, conn, force)
         _cache[path] = b
-    else:
-        conn = b._conn
+
     if pkgid != _DEFAULT_PKGID:
         conn.execute("INSERT INTO Packages VALUES (?,?)", (pkgid, "",))
-        conn.commit()
+    conn.commit()
+    b._bind(pkgid, package)
     return b, pkgid
 
 def claims_for_bind(url):
@@ -138,7 +143,7 @@ def bind(package, force=False):
     @param package: an object with attributes url and readonly
     @param force: should the package be open even if it is locked?
     """
-    url, readonly = package.url, package.readonly
+    url = package.url
     assert(claims_for_bind(url)), url
     if force:
         raise NotImplementedError("This backend can not force access to "
@@ -148,8 +153,9 @@ def bind(package, force=False):
     b = _cache.get(path)
     if b is None:
         conn = sqlite.connect(path)
-        b = _SqliteBackend(path, conn, readonly, force)
+        b = _SqliteBackend(path, conn, force)
         _cache[path] = b
+    b._bind(pkgid, package)
     return b, pkgid
 
 
@@ -183,8 +189,6 @@ def _get_connection(path):
         return None
 
 def _contains_package(cx, pkgid):
-    if pkgid == _DEFAULT_PKGID:
-        return True
     c = cx.execute("SELECT id FROM Packages WHERE id = ?", (pkgid,))
     for i in c:
         return True
@@ -214,7 +218,7 @@ def _split_uri_ref(uri_ref):
 
 class _SqliteBackend(object):
 
-    def __init__(self, path, conn, readonly, force):
+    def __init__(self, path, conn, force):
         """
         Is not part of the interface. Instances must be created either with
         the L{create} or the L{bind} static methods.
@@ -231,26 +235,38 @@ class _SqliteBackend(object):
         # NB: for a reason I don't know, the defined function receives the
         # righthand operand first, then the lefthand operand...
         # hence the lambda function above
-        self._readonly = readonly
+        self._bound = WeakValueDictWithCallback(self._check_unused)
+        # NB: the callback ensures that even if packages "forget" to close
+        # themselves, once they are garbage collected, we check if the
+        # connexion to sqlite can be closed.
 
-    def close(self):
-        """
-        Close the backend. Has the effect of closing, for example, underlying
-        connections to other services. As a consequence, this method should not
-        be invoked by individual packages, for a backend instance may be shared
-        by several packages. A package should rather ensure that it maintains
-        no reference to the backend instance, so that the garbage collector
-        can delete it, which will invoke the close method (see __del__ below).
-        """
-        #print "DEBUG:", __file__, "about to close SqliteBackend", self._path
-        self._conn.close()
+    def _bind(self, package_id, package):
+        d = self._bound
+        old = d.get(package_id)
+        if old is not None:
+            raise PackageInUse(old)
+        d[package_id] = package
 
-    def __del__(self):
-        #print "DEBUG:", __file__, "about to close SqliteBackend", self._path
-        try:
-            self.close()
-        except sqlite.OperationalError:
-            pass
+    def close(self, package_id):
+        """Inform the backend that a given package will no longer be used.
+
+        NB: this implementation is robust to packages forgetting to close
+        themselves, i.e. when packages are garbage collected, this is detected
+        and they are automatically unbound.
+        """
+        d = self._bound
+        m = d.get(package_id) # keeping a ref on it prevents it to disappear
+        if m is not None:     # in the meantime...
+            del d[package_id]
+        self._check_unused(package_id)
+
+    def _check_unused(self, package_id):
+        if len(self._bound) == 0:
+            #print "DEBUG:", __file__, \
+            #      "about to close SqliteBackend", self._path
+            self._conn.close()
+            if self._path in _cache:
+                del _cache[self._path]
 
     # package uri
 

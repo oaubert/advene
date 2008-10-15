@@ -1,3 +1,9 @@
+cf. test2.py : _own and _all create a cyclic reference ;
+-- redo utests with and without the cycle
+-- add to unit test the checking of cyclic references for all objects
+-- fix the relation between _own/_all and packages (similar to element/content)
+
+
 - implement "external" contents (url attribute)
 
 - make subcollections (annotations, medias...) of all and own groups dict-like
