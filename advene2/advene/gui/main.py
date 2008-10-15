@@ -2208,7 +2208,6 @@ class AdveneGUI(object):
         for v in self.adhoc_views:
             ev.locals_[v.view_id]=v
         w=ev.popup()
-        self.init_window_size(w, 'evaluator')
 
         return True
 
