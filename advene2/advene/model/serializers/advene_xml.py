@@ -158,7 +158,7 @@ class _Serializer(object):
         for i in L.iter_item_ids():
             SubElement(xitems, "item", {"id-ref":i})
         if len(xitems) == 0:
-            xr.remove(xitems)
+            xL.remove(xitems)
         self._serialize_element_tags(L, xL)
         self._serialize_meta(L, xL)
 

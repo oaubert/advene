@@ -48,6 +48,28 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
             for i in be.iter_tags(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)
 
+    def iter_lists(self, _guard=True):
+        """
+        This method is inherited from CoreAllGroup but is unsafe on
+        cam.Package. Use instead `iter_user_lists`.
+        """
+        if _guard: warn("use iter_user_schemas instead", UnsafeUseWarning, 2)
+        return super(_AllGroup, self).iter_lists()
+
+    def iter_user_lists(self):
+        o = self._owner
+        meta = [(_cam_system_type, None, None)] 
+        for be, pdict in o._backends_dict.items():
+            for i in be.iter_lists(pdict, meta=meta):
+                yield pdict[i[1]].get_element(i)
+
+    def iter_schemas(self):
+        o = self._owner
+        meta = [(_cam_system_type, "schema", False)] 
+        for be, pdict in o._backends_dict.items():
+            for i in be.iter_lists(pdict, meta=meta):
+                yield pdict[i[1]].get_element(i)
+
     def tag_count(self, _guard=True):
         """
         This method is inherited from CoreAllGroup but is unsafe on
@@ -72,6 +94,26 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
         o = self._owner
         meta = [(_cam_system_type, "relation-type", False)] 
         return sum( be.tag_count(pdict, meta=meta)
+                    for be, pdict in o._backends_dict.items() )
+
+    def list_count(self, _guard=True):
+        """
+        This method is inherited from CoreAllGroup but is unsafe on
+        cam.Package. Use instead `user_list_count`.
+        """
+        if _guard: warn("use user_list_count instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).list_count()
+
+    def user_list_count(self):
+        o = self._owner
+        meta = [(_cam_system_type, None, None)] 
+        return sum( be.list_count(pdict, meta=meta)
+                    for be, pdict in o._backends_dict.items() )
+
+    def schema_count(self):
+        o = self._owner
+        meta = [(_cam_system_type, "annotation-type", False)] 
+        return sum( be.list_count(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
 class _OwnGroup(CamGroupMixin, CoreOwnGroup):
@@ -101,6 +143,26 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
           meta=[(_cam_system_type, "relation-type", False)]):
             yield o.get_element(i)
 
+    def iter_lists(self, _guard=True):
+        """
+        This method is inherited from CoreOwnGroup but is unsafe on
+        cam.Package. Use instead `iter_user_lists`.
+        """
+        if _guard: warn("use iter_user_lists instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).iter_lists()
+
+    def iter_user_lists(self):
+        o = self._owner
+        for i in o._backend.iter_lists((o._id,),
+          meta=[(_cam_system_type, None, None)]):
+            yield o.get_element(i)
+
+    def iter_schemas(self):
+        o = self._owner
+        for i in o._backend.iter_lists((o._id,),
+          meta=[(_cam_system_type, "schema", False)]):
+            yield o.get_element(i)
+
     def tag_count(self, _guard=True):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
@@ -123,6 +185,24 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
         o = self._owner
         return o._backend.tag_count((o._id,),
             meta=[(_cam_system_type, "relation-type", False)])
+
+    def list_count(self, _guard=True):
+        """
+        This method is inherited from CoreOwnGroup but is unsafe on
+        cam.Package. Use instead `user_list_count`.
+        """
+        if _guard: warn("use _simple_list_count instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).list_count()
+
+    def user_list_count(self):
+        o = self._owner
+        return o._backend.list_count((o._id,),
+            meta=[(_cam_system_type, None, None)])
+
+    def schema_count(self):
+        o = self._owner
+        return o._backend.list_count((o._id,),
+            meta=[(_cam_system_type, "schema", False)])
 
 class Package(CorePackage):
 
@@ -199,6 +279,28 @@ class Package(CorePackage):
         if type:
             r.type = type
         return r
+
+    def create_list(self, id, items=()):
+        """
+        This method is inherited from core.Package but is unsafe on
+        cam.Package. Use instead `create_user_list`.
+
+        :see: `create_user_list`, `create_schema`
+        """
+        warn("use create_user_list instead", UnsafeUseWarning, 2)
+        return super(Package, self).create_list(id, items)
+
+    def create_user_list(self, id, items=()):
+        """FIXME: missing docstring.
+        """
+        return super(Package, self).create_list(id, items)
+
+    def create_schema(self, id, items=()):
+        """FIXME: missing docstring.
+        """
+        sc = super(Package, self).create_list(id)
+        sc.set_meta(CAMSYS_NS_PREFIX+"type", "schema", _guard=0)
+        return sc
 
     def associate_tag(self, element, tag, _guard=True):
         """

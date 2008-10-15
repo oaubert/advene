@@ -56,8 +56,8 @@ def main():
     at2 = p1.create_annotation_type("at2")
     rt1 = p1.create_relation_type("rt1")
     rt2 = p1.create_relation_type("rt2")
-    sc1 = p1.create_list(":schema:sc1", (at1, rt1))
-    sc2 = p1.create_list(":schema:sc2", (at1, at2, rt2))
+    sc1 = p1.create_schema("sc1", (at1, rt1))
+    li1 = p1.create_user_list("li1", (at1, at2, rt2))
     t1 = p1.create_user_tag("t1")
     t2 = p1.create_user_tag("t2")
 
@@ -107,6 +107,10 @@ def main():
           p2.all.relation_types, len(p2.all.relation_types)
     print p2.own.user_tags, len(p2.own.user_tags), \
           p2.all.user_tags, len(p2.all.user_tags)
+    print p2.own.schemas, len(p2.own.schemas), \
+          p2.all.schemas, len(p2.all.schemas)
+    print p2.own.user_lists, len(p2.own.user_lists), \
+          p2.all.user_lists, len(p2.all.user_lists)
     print
 
 
@@ -122,8 +126,8 @@ def main():
                  [ e.id for e in t3.iter_elements(p2) ]
     print
 
-    print "NB: the following warning is normal when serializing CAM package"\
-          "to .bzp (.czp will be the prefered format)"
+    print "NB: the following warnings are normal when serializing CAM "\
+          "package to .bzp (.czp will be the prefered format)"
 
     p1.save()
     p2.save()

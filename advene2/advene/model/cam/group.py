@@ -1,4 +1,7 @@
+from advene.model.cam.consts import CAMSYS_NS_PREFIX
 from advene.model.core.group import GroupMixin, _GroupCollection
+
+_camsys_type = CAMSYS_NS_PREFIX+"type"
 
 class CamGroupMixin(GroupMixin):
     def iter_user_tags(self):
@@ -14,6 +17,16 @@ class CamGroupMixin(GroupMixin):
     def iter_relation_types(self):
         for t in self.iter_tags():
             if t.get_meta(_cam_system_type, None) == "relation-type":
+                yield t
+
+    def iter_user_lists(self):
+        for t in self.iter_lists():
+            if t.get_meta(_cam_system_type, None) is None:
+                yield t
+
+    def iter_schemas(self):
+        for t in self.iter_lists():
+            if t.get_meta(_cam_system_type, None) == "schema":
                 yield t
 
     def user_tag_count(self):
@@ -32,7 +45,7 @@ class CamGroupMixin(GroupMixin):
             __len__ = group.user_tag_count
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG \
-                       and e.type.id == "user-tag" \
+                       and e.get_meta(_cam_system_type, None) is None \
                        and e in self._g
         return GroupUserTags(group)
 
@@ -43,7 +56,8 @@ class CamGroupMixin(GroupMixin):
             __len__ = group.annotation_type_count
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG \
-                       and e.type.id == "annotation-type" \
+                       and e.get_meta(_cam_system_type, None) \
+                           == "annotation-type" \
                        and e in self._g
         return GroupAnnotationTypes(group)
 
@@ -54,6 +68,29 @@ class CamGroupMixin(GroupMixin):
             __len__ = group.relation_type_count
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG \
-                       and e.type.id == "relation-type" \
+                       and e.get_meta(_cam_system_type, None) \
+                           == "relation-type" \
                        and e in self._g
         return GroupRelationTypes(group)
+
+    @property
+    def user_lists(group):
+        class GroupUserLists(_GroupCollection):
+            __iter__ = group.iter_user_lists
+            __len__ = group.user_list_count
+            def __contains__(self, e):
+                return e.ADVENE_TYPE == LIST \
+                       and e.get_meta(_cam_system_type, None) is None \
+                       and e in self._g
+        return GroupUserLists(group)
+
+    @property
+    def schemas(group):
+        class GroupSchemas(_GroupCollection):
+            __iter__ = group.iter_schemas
+            __len__ = group.schema_count
+            def __contains__(self, e):
+                return e.ADVENE_TYPE == LIST \
+                       and e.get_meta(_cam_system_type, None) == "schema" \
+                       and e in self._g
+        return GroupSchemas(group)

@@ -891,12 +891,12 @@ class _SqliteBackend(object):
         r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
-    def iter_lists(self, package_ids, id=None):
+    def iter_lists(self, package_ids, id=None, meta=None):
         """
         Yield tuples of the form (LIST, package_id, id,).
         """
         selectfrom, where, args = \
-            self._element_query(package_ids, LIST, id)
+            self._element_query(package_ids, LIST, id, meta)
         r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
@@ -1012,12 +1012,12 @@ class _SqliteBackend(object):
                                 args)
         return r.next()[0]
 
-    def list_count(self, package_ids, id=None):
+    def list_count(self, package_ids, id=None, meta=None):
         """
         Return the number of lists matching the criteria.
         """
         selectfrom, where, args = \
-            self._element_query(package_ids, LIST, id)
+            self._element_query(package_ids, LIST, id, meta)
         r = self._conn.execute("select count(*) from (%s)"
                                 % (selectfrom+where),
                                 args)
