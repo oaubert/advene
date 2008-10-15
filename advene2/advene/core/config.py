@@ -464,6 +464,13 @@ class Config(object):
                           type="int", default=None, metavar="WEBSERVER_MODE",
                           help="0: deactivated ; 1: threaded mode.")
 
+        parser.add_option("-f", "--filter",
+                          dest="filter",
+                          action="store",
+                          type="string",
+                          default=None,
+                          help="Export filter. If specified, input files will be automatically converted. Use 'help' to get a list of valid export filters.")
+
         (self.options, self.args) = parser.parse_args()
         if self.options.version:
             print self.get_version_string()

@@ -151,6 +151,35 @@ Advene seems to be either badly installed or badly configured (maybe both).
 Aborting.""" % config.data.path[d]
             sys.exit(1)
 
+    filter=config.data.options.filter
+    if filter == 'help':
+        # List available filters.
+        import advene.core.controller
+        c=advene.core.controller.AdveneController()
+        c.init()
+        print "Available export filters:\n"
+        for v in c.get_export_filters():
+            print "%s\t: %s (.%s extension)" % (v.id, v.title, v.getMetaData(config.data.namespace, 'extension'))
+        sys.exit(0)
+    elif filter is not None:
+        # A filter has been specified.
+        import advene.core.controller
+        c=advene.core.controller.AdveneController()
+        c.init()
+        l=[ v for v in c.get_export_filters() if v.id == filter ]
+        if not l:
+            print "Export filter %s is not defined" % filter
+            sys.exit(1)
+        ext=l[0].getMetaData(config.data.namespace, 'extension')
+        for f in config.data.args:
+            # A filename was provided. Strip the extension.
+            output=".".join((os.path.splitext(f)[0], ext))
+            print "Converting ", f, "into", output
+            c.load_package(f)
+            #FIXME: could trigger events?
+            c.apply_export_filter(l[0], output)
+        sys.exit(0)
+
     gladefile=config.data.advenefile (config.data.gladefilename)
     if not os.path.exists(gladefile):
         print """The %s file does not exist.
