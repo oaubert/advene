@@ -1,5 +1,8 @@
 import advene.model.parsers.advene_xml as advene_xml_parser
 import advene.model.parsers.advene_zip as advene_zip_parser
+import advene.model.parsers.cinelab_xml as cinelab_xml_parser
+import advene.model.parsers.cinelab_zip as cinelab_zip_parser
+
 
 # parser register functions
 
@@ -21,5 +24,7 @@ _parsers = []
 
 # default registration
 
-register_parser(advene_xml_parser)
-register_parser(advene_zip_parser)
+register_parser(advene_xml_parser.Parser)
+register_parser(advene_zip_parser.Parser)
+register_parser(cinelab_xml_parser.Parser)
+register_parser(cinelab_zip_parser.Parser)

@@ -45,6 +45,8 @@ _constructor = {
     IMPORT: "import_factory",
 }
 
+def _noop(*args, **kw): pass
+
 class Package(object, WithMetaMixin, WithEventsMixin):
     """FIXME: missing docstring.
     """
@@ -480,11 +482,11 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         existence in the imported package is *not* checked (but it is checked
         that the import exists).
         """
-        if hasattr(element, "ADVENE_TYPE"):
+        if hasattr(element, "_owner"):
             o = element._owner
             return o is self  or  o in self._imports_dict.values()
         else:
-            path = str(element).split(":")
+            path = unicode(element).split(":")
             if len(path) > 2:
                 return False
             elif len(path) == 2:
@@ -542,8 +544,8 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        self._backend.create_media(self._id, id, url, frame_of_reference)
         r = self.media_factory(self, id, url, frame_of_reference)
+        self._backend.create_media(self._id, id, url, frame_of_reference)
         self.emit("created::media", r)
         return r
 
@@ -552,18 +554,10 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        media_id = media.make_id_in(self)
-        if model is not None:
-            if hasattr(model, "ADVENE_TYPE"):
-                model_id = model.make_id_in(self)
-            else:
-                model_id = str(model)
-        else:
-            model_id = ""
-        self._backend.create_annotation(self._id, id, media_id, begin, end,
-                                        mimetype, model_id, url)
         r = self.annotation_factory(self, id, media, begin, end,
                                               mimetype, model, url)
+        self._backend.create_annotation(self._id, id, r.media_id, begin, end,
+                                        mimetype, r.content_model_id, url)
         self.emit("created::annotation", r)
         return r
 
@@ -572,16 +566,9 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        if model is not None:
-            if hasattr(model, "ADVENE_TYPE"):
-                model_id = model.make_id_in(self)
-            else:
-                model_id = str(model)
-        else:
-            model_id = ""
-        self._backend.create_relation(self._id, id,
-                                      mimetype, model_id, url)
         r = self.relation_factory(self, id, mimetype, model, url, True)
+        self._backend.create_relation(self._id, id,
+                                      mimetype, r.content_model_id, url)
         r.extend(members) # let r do it, with all the checking it needs
         self.emit("created::relation", r)
         return r
@@ -590,15 +577,9 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        if model is not None:
-            if hasattr(model, "ADVENE_TYPE"):
-                model_id = model.make_id_in(self)
-            else:
-                model_id = str(model)
-        else:
-            model_id = ""
-        self._backend.create_view(self._id, id, mimetype, model_id, url)
-        r = View(self, id, mimetype, model, url)
+        r = self.view_factory(self, id, mimetype, model, url)
+        self._backend.create_view(self._id, id,
+                                  mimetype, r.content_model_id, url)
         self.emit("created::view", r)
         return r
 
@@ -606,15 +587,9 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        if model is not None:
-            if hasattr(model, "ADVENE_TYPE"):
-                model_id = model.make_id_in(self)
-            else:
-                model_id = str(model)
-        else:
-            model_id = ""
-        self._backend.create_resource(self._id, id, mimetype, model_id, url)
         r =  self.resource_factory(self, id, mimetype, model, url)
+        self._backend.create_resource(self._id, id,
+                                      mimetype, r.content_model_id, url)
         self.emit("created::resource", r)
         return r
 
@@ -622,8 +597,8 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        self._backend.create_tag(self._id, id)
         r = self.tag_factory(self, id)
+        self._backend.create_tag(self._id, id)
         self.emit("created::tag", r)
         return r
 
@@ -631,8 +606,8 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        self._backend.create_list(self._id, id)
         L = self.list_factory(self, id, True)
+        self._backend.create_list(self._id, id)
         L.extend(items) # let L do it, with all the checking it needs
         self.emit("created::list", L)
         return L
@@ -641,15 +616,9 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        if model is not None:
-            if hasattr(model, "ADVENE_TYPE"):
-                model_id = model.make_id_in(self)
-            else:
-                model_id = str(model)
-        else:
-            model_id = ""
-        self._backend.create_query(self._id, id, mimetype, model_id, url)
         r = self.query_factory(self, id, mimetype, model, url)
+        self._backend.create_query(self._id, id,
+                                   mimetype, r.content_model_id, url)
         self.emit("created::query", r)
         return r
 
@@ -693,51 +662,62 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         used only in situation where robustness to unreachable elements is
         desirable (e.g. parsers).
         """
-        assert self._can_reference(element)
-        assert self._can_reference(tag)
-        assert hasattr(element, "ADVENE_TYPE")  or  element.find(":") != -1
-        assert getattr(tag, "ADVENE_TYPE", None) == TAG  or  tag.find(":")!=-1
+        assert self._can_reference(element), element
+        assert self._can_reference(tag), tag
+        assert getattr(tag, "ADVENE_TYPE", TAG) == TAG # if element, must be tag
 
-        if not hasattr(element, "_owner"):
-            id_e = element
-        elif element._owner is self:
-            id_e = element._id
+        elt_owner = getattr(element, "_owner", None)
+        if elt_owner:
+            if elt_owner is self:
+                id_e = element._id
+            else:
+                id_e = element.make_id_in(self)
         else:
-            id_e = element.make_id_in(self)
-
-        if not hasattr(tag, "_owner"):
-            id_t = tag
-        elif tag._owner is self:
-            id_t = tag._id
+            assert ":" in element # only strict id-refs allowed as str
+            id_e = unicode(element)
+        tag_owner = getattr(tag, "_owner", None)
+        if tag_owner:
+            if tag_owner is self:
+                id_t = tag._id
+            else:
+                id_t = tag.make_id_in(self)
         else:
-            id_t = tag.make_id_in(self)
+            assert ":" in tag # only strict id-refs allowed as str
+            id_t = unicode(tag)
 
         self._backend.associate_tag(self._id, id_e, id_t)
-        element_emit = getattr(element, "emit", None)
-        if element_emit:
-            element.emit("added-tag", tag)
-        tag_emit = getattr(tag, "emit", None)
-        if tag_emit:
-            tag_emit("added", element)
-
+        getattr(element, "emit", _noop)("added-tag", tag)
+        getattr(tag, "emit", _noop)("added", element)
 
     def dissociate_tag(self, element, tag):
         """Dissociate the given element to the given tag on behalf of this package.
         """
         assert self._can_reference(element)
         assert self._can_reference(tag)
-        assert tag.ADVENE_TYPE == TAG
-        if element._owner is self:
-            id_e = element._id
+        assert getattr(tag, "ADVENE_TYPE", TAG) == TAG # if element, must be tag
+
+        elt_owner = getattr(element, "_owner", None)
+        if elt_owner:
+            if elt_owner is self:
+                id_e = element._id
+            else:
+                id_e = element.make_id_in(self)
         else:
-            id_e = element.make_id_in(self)
-        if tag._owner is self:
-            id_t = tag._id
+            assert ":" in element # only strict id-refs allowed as str
+            id_e = unicode(element)
+        tag_owner = getattr(tag, "_owner", None)
+        if tag_owner:
+            if tag_owner is self:
+                id_t = tag._id
+            else:
+                id_t = tag.make_id_in(self)
         else:
-            id_t = tag.make_id_in(self)
+            assert ":" in tag # only strict id-refs allowed as str
+            id_t = unicode(tag)
+
         self._backend.dissociate_tag(self._id, id_e, id_t)
-        element.emit("removed-tag", tag)
-        tag.emit("removed", element)
+        getattr(element, "emit", _noop)("removed-tag", tag)
+        getattr(tag, "emit", _noop)("removed", element)
 
     # reference finding (find all the own or imported elements referencing a
     # given element) -- combination of several backend methods

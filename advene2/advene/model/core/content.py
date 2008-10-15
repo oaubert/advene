@@ -221,12 +221,12 @@ class WithContentMixin:
             self.__model_id = ""
             if self.__model_wref():
                 del self.__model_wref
-        elif isinstance(resource, basestring):
-            assert _init or ":" not in resource
-            self.__model_id = resource
-        else:
+        elif hasattr(resource, "make_id_in"):
             self.__model_id = resource.make_id_in(op)
             self.__model_wref  = ref(resource)
+        else:
+            assert _init or ":" not in resource
+            self.__model_id = unicode(resource)
         if not _init:
             self.__store_info()
             self.emit("changed::content_model", "content_model", resource)

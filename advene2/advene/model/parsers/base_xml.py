@@ -4,7 +4,7 @@ TODO: document the provided classes.
 """
 from xml.etree.ElementTree import iterparse
 
-from advene.model.consts import _RAISE, ADVENE_XML
+from advene.model.consts import _RAISE
 from advene.model.parsers.exceptions import ParserError
 
 class XmlParserBase(object):
@@ -44,6 +44,7 @@ class XmlParserBase(object):
     def __init__(self, file_, package, namespace_uri, root):
         self.file = file_
         self.package = package
+        self.namespace_uri = namespace_uri
         self.tag_template = "{%s}%%s" % namespace_uri
         self.root = root
         self.clear_after_handle = True
@@ -72,9 +73,10 @@ class XmlParserBase(object):
         self.backend = self.package._backend # TODO: remove (deprecated)
         self.package_id = self.package._id # TODO: remove (deprecated)
         self.stream = st = Stream(f)
-        if st.elem.tag != self.tag_template % self.root:
+        expected = self.tag_template % self.root
+        if st.elem.tag != expected:
             raise ParserError("expecting %s, found %s" %
-                              (self.root[self.cut:], self.stream.elem.tag))
+                              (expected, self.stream.elem.tag))
         self._handle([], {})
 
     def required(self, tag, *args, **kw):
@@ -130,12 +132,12 @@ class XmlParserBase(object):
     def _handle(self, args, kw, ):
         stream = self.stream
         elem = self.stream.elem
-        assert elem.tag.startswith("{%s}" % ADVENE_XML)
+        assert elem.tag.startswith("{%s}" % self.namespace_uri)
         n = t = elem.tag[self.cut:]
         i = n.find("-")
         while i >= 0:
             n = n[:i] + "_" + n[i+1:]
-            i = n[i+1:].find()
+            i = n[i+1:].find("-")
         h =  getattr(self, "handle_%s" % n, None)
         if h is None:
             raise NotImplementedError("don't know what to do with tag %s" % t)

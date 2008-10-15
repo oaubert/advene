@@ -123,8 +123,8 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
             assert a.ADVENE_TYPE == ANNOTATION
             aid = a.make_id_in(o)
         else:
-            aid = str(a)
-            assert ":" in aid
+            aid = unicode(a)
+            assert ":" in aid # only strict id-refs allowed as str
             a = None
         c = len(self._cache)
         if i > c : i = c
@@ -144,8 +144,8 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
             assert a.ADVENE_TYPE == ANNOTATION
             aid = a.make_id_in(o)
         else:
-            aid = str(a)
-            assert ":" in aid
+            aid = unicode(a)
+            assert ":" in aid # only strict id-refs allowed as str
             a = None
         c = len(self._cache)
         s = slice(c,c)

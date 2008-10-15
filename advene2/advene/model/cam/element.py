@@ -1,24 +1,21 @@
 from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX
-from advene.model.cam.consts import CAM_NS_PREFIX, CAMSYS_NS_PREFIX
+from advene.model.cam.consts import CAM_TYPE, CAMSYS_TYPE
 from advene.model.cam.exceptions import SemanticError, UnsafeUseWarning
 from advene.model.core.element import PackageElement
 from advene.model.tales import tales_context_function
 
 from warnings import warn
 
-_cam_system_type = CAMSYS_NS_PREFIX + "type"
-_cam_type = CAM_NS_PREFIX + "type"
-
 class CamElement(PackageElement):
-    def set_meta(self, key, value, _guard=True):
+    def set_meta(self, key, value, val_is_idref=False, _guard=True):
         if _guard:
-            if key == _cam_system_type:
+            if key == CAMSYS_TYPE:
                 raise SemanticError("cam:system-type can not be changed")
-        return super(CamElement, self).set_meta(key, value)
+        return super(CamElement, self).set_meta(key, value, val_is_idref)
 
     def del_meta(self, key, _guard=True):
         if _guard:
-            if key == _cam_system_type:
+            if key == CAMSYS_TYPE:
                 raise SemanticError("cam:system-type can not be changed")
         return super(CamElement, self).del_meta(key)
 
@@ -32,7 +29,7 @@ class CamElement(PackageElement):
 
     def iter_user_tags(self, package, inherited=True):
         for t in self._iter_tags(package, inherited, _guard=False):
-            if t.get_meta(_cam_system_type, None) is None:
+            if t.get_meta(CAMSYS_TYPE, None) is None:
                 yield t
 
     def iter_tag_ids(self, package, inherited=True, _guard=True):
@@ -52,7 +49,7 @@ class CamElement(PackageElement):
         # It has been chosen because it is very efficient, not requiring to
         # check tags metadata cam:system-type to decide that they are
         # user-tags.
-        type = self.get_meta(_cam_type, None)
+        type = self.get_meta(CAM_TYPE, None)
         all = super(CamElement, self).iter_tag_ids(package, inherited)
         if type is None:
             return all

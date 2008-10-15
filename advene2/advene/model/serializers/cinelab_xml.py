@@ -4,10 +4,10 @@ Cinelab serializer implementation.
 from bisect import insort
 from xml.etree.cElementTree import Element, ElementTree, SubElement
 
-from advene.model.cam.consts import CAM_XML, CAMSYS_NS_PREFIX
+from advene.model.cam.consts import CAM_XML, CAMSYS_NS_PREFIX, BOOTSTRAP_URI
 from advene.model.consts import PARSER_META_PREFIX
 from advene.model.serializers.advene_xml import _indent
-from advene.model.serializers.advene_xml import _Serializer as _BaseSerializer
+from advene.model.serializers.advene_xml import _Serializer as _AdveneSerializer
 
 NAME = "Cinelab Advene XML"
 
@@ -33,19 +33,21 @@ def serialize_to(package, file_):
     """
     return _Serializer(package, file_).serialize()
 
-class _Serializer(_BaseSerializer):
+
+class _Serializer(_AdveneSerializer):
+    # this implementation tries to maximize the reusing of code from 
+    # _AdveneSerializer. It does so by "luring" it into using some methods
+    # of an element instead of others. This is a bit of a hack, but works
+    # well... It assumes, however, that the parser is *not* multithreaded.
 
     def serialize(self):
         """Perform the actual serialization."""
         namespaces = self.namespaces = {}
         root = self.root = Element("package", xmlns=self.default_ns)
         package = self.package
-        prefixes = package.get_meta(PARSER_META_PREFIX + "namespaces", "")
-        for line in prefixes.split("\n"):
-            if line:
-                prefix, uri = line.split(" ")
-                root.set("xmlns:%s" % prefix, uri)
-                namespaces[uri] = prefix
+        namespaces = package._get_namespaces_as_dict()
+        for uri, prefix in namespaces.iteritems():
+            root.set("xmlns:%s" % prefix, uri)
         if package.uri:
             root.set("uri", package.uri)
         # package meta-data
@@ -128,18 +130,21 @@ class _Serializer(_BaseSerializer):
         _indent(self.root)
         ElementTree(self.root).write(self.file)
 
-
     # end of the public interface
 
     def __init__(self, package, file_):
-        _BaseSerializer.__init__(self, package, file_)
+        _AdveneSerializer.__init__(self, package, file_)
         insort(self.unserialized_meta_prefixes, CAMSYS_NS_PREFIX)
         self.default_ns = CAM_XML
 
+    # luring methods (cf. comment at top of that class)
+    
     def _serialize_element_tags(self, elt, xelt):
-        xtags = SubElement(xelt, "tags")
-        for t in elt.iter_user_tag_ids(self.package, inherited=False):
-            SubElement(xtags, "tag", {"id-ref":t})
-        if len(xtags) == 0:
-            xelt.remove(xtags)
+        # lure `_AdveneXmlParser.handle_tag` into using
+        # `iter_user_tag_ids` instead of `iter_tag_ids`
+        # by overridding method at instance level
+        elt.iter_tag_ids = elt.iter_user_tag_ids
+        _AdveneSerializer._serialize_element_tags(self, elt, xelt)
+        # restore class level method
+        del elt.iter_tag_ids
 

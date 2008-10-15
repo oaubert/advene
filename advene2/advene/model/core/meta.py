@@ -125,7 +125,8 @@ class WithMetaMixin:
         return self.get_meta_id(key, default, False)
 
     def get_meta_id(self, key, default=_RAISE, _return_id=True):
-        """Return the metadata id (string or element) associated to the given key.
+        """
+        Return the metadata id (string or element) associated to the given key.
 
         The returned value is a string with a special attribute ``is_id``
         indicating if it represents the id-ref of an element.
@@ -212,13 +213,14 @@ class WithMetaMixin:
             vstr_is_id = True
             val = (ref(val), vstr)
         elif val_is_idref:
+            assert ":" in val, val # only strict id-ref allowed as str
             if not p._can_reference(val):
                 raise ModelError, "Element or import does not exist %s" % val
             vstr = val
             vstr_is_id = True
             val = (None, val)
         else:
-            vstr = str(val)
+            vstr = unicode(val)
             vstr_is_id = False
         cache = self.__cache
         if cache is None:

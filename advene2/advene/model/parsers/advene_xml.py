@@ -2,6 +2,7 @@
 Unstable and experimental parser implementation.
 """
 
+from functools import partial
 from os import path
 from os.path import exists
 from xml.etree.ElementTree import iterparse
@@ -15,77 +16,76 @@ from advene.model.parsers.exceptions import ParserError
 import advene.model.serializers.advene_xml as serializer
 from advene.utils.files import get_path, is_local
 
-NAME = serializer.NAME
+class Parser(XmlParserBase):
 
-EXTENSION = serializer.EXTENSION
+    NAME = serializer.NAME
+    EXTENSION = serializer.EXTENSION
+    MIMETYPE = serializer.MIMETYPE
+    SERIALIZER = serializer # may be None for some parsers
 
-MIMETYPE = serializer.MIMETYPE
+    @classmethod
+    def claims_for_parse(cls, file_):
+        """Is this parser likely to parse that file-like object?
 
-SERIALIZER = serializer # may be None for some parsers
+        `file_` is a readable file-like object. It is the responsability of the
+        caller to close it.
 
-def claims_for_parse(file_):
-    """Is this parser likely to parse that file-like object?
+        Return an int between 00 and 99, indicating the likelyhood of this parser
+        to handle correctly the given URL. 70 is used as a standard value when the
+        parser is pretty sure it can handle the URL.
+        """
+        r = 0
 
-    `file_` is a readable file-like object. It is the responsability of the
-    caller to close it.
-
-    Return an int between 00 and 99, indicating the likelyhood of this parser
-    to handle correctly the given URL. 70 is used as a standard value when the
-    parser is pretty sure it can handle the URL.
-    """
-    r = 0
-
-    if hasattr(file_, "seek"):
-        # try to open it as xml file and get the root element
-        t = file_.tell()
-        file_.seek(0)
-        it = iterparse(file_, events=("start",))
-        try:
-            ev, el = it.next()
-        except ExpatError, e:
-            return 0
-        else:
-            if el.tag == "{%s}package" % ADVENE_XML:
-                return 80
-            else:
+        if hasattr(file_, "seek"):
+            # try to open it as xml file and get the root element
+            t = file_.tell()
+            file_.seek(0)
+            it = iterparse(file_, events=("start",))
+            try:
+                ev, el = it.next()
+            except ExpatError, e:
                 return 0
-        file_.seek(0)
-        
-    info = getattr(file_, "info", lambda: {})()
-    mimetype = info.get("content-type", "")
-    if mimetype.startswith(MIMETYPE):
-        r = 80
-    else:
-        if mimetype.startswith("application/xml") \
-        or mimetype.startswith("text/xml"):
-            r += 20
-        fpath = get_path(file_)
-        if fpath.endswith(EXTENSION):
-            r += 50
-        elif fpath.endswith(".xml"):
-            r += 20
-    return r
+            else:
+                if el.tag == "{%s}package" % cls._NAMESPACE_URI:
+                    return 80
+                else:
+                    return 0
+            file_.seek(0)
+            
+        info = getattr(file_, "info", lambda: {})()
+        mimetype = info.get("content-type", "")
+        if mimetype.startswith(cls.MIMETYPE):
+            r = 80
+        else:
+            if mimetype.startswith("application/xml") \
+            or mimetype.startswith("text/xml"):
+                r += 20
+            fpath = get_path(file_)
+            if fpath.endswith(cls.EXTENSION):
+                r += 50
+            elif fpath.endswith(".xml"):
+                r += 20
+        return r
 
-def make_parser(file_, package):
-    """Return a parser that will parse `file_` into `package`.
+    @classmethod
+    def make_parser(cls, file_, package):
+        """Return a parser that will parse `file_` into `package`.
 
-    `file_` is a writable file-like object. It is the responsability of the
-    caller to close it.
+        `file_` is a writable file-like object. It is the responsability of the
+        caller to close it.
 
-    The returned object must implement the interface for which
-    :class:`_Parser` is the reference implementation.
-    """
-    return _Parser(file_, package)
+        The returned object must implement the interface for which
+        :class:`_Parser` is the reference implementation.
+        """
+        return cls(file_, package)
 
-def parse_into(file_, package):
-    """A shortcut for ``make_parser(file_, package).parse()``.
+    @classmethod
+    def parse_into(cls, file_, package):
+        """A shortcut for ``make_parser(file_, package).parse()``.
 
-    See also `make_parser`.
-    """
-    _Parser(file_, package).parse()
-
-
-class _Parser(XmlParserBase):
+        See also `make_parser`.
+        """
+        cls(file_, package).parse()
 
     def parse(self):
         "Do the actual parsing."
@@ -99,16 +99,18 @@ class _Parser(XmlParserBase):
                 f = open(mfn)
                 mimetype = f.read()
                 f.close()
-                if mimetype == MIMETYPE:
+                if mimetype == self.MIMETYPE:
                     self.package.set_meta(PACKAGED_ROOT, dirname)
         XmlParserBase.parse(self)
 
     # end of public interface
 
-    def __init__(self, file_, package, namespace_uri=ADVENE_XML,
-                                       root="package"):
-        assert claims_for_parse(file_) > 0
-        XmlParserBase.__init__(self, file_, package, namespace_uri, root)
+    _NAMESPACE_URI = ADVENE_XML
+
+    def __init__(self, file_, package):
+        assert self.__class__.claims_for_parse(file_) > 0
+        XmlParserBase.__init__(self, file_, package, self._NAMESPACE_URI,
+                               "package")
         self._postponed = []
 
     def do_or_postpone(self, id, function, function2=None):
@@ -126,11 +128,14 @@ class _Parser(XmlParserBase):
         If function2 is provided and the invocation is postponed, then it will
         be function2 rather than function that will be invoked.
         """
-        if ":" in id:
+        colon = id.find(":")
+        if colon > -1:
             elt = id
+            do_it_now = self.package.get(id[:colon]) is not None
         else:
-            elt = self.package.get(id, None)
-        if elt is not None:
+            elt = self.package.get(id)
+            do_it_now = elt is not None
+        if do_it_now:
             function(elt)
         else:
             self._postponed.append((function2 or function, id))
@@ -150,16 +155,11 @@ class _Parser(XmlParserBase):
         else:
             stream.pushback()
 
-    def handle_package(self):
-        pa = self.package
-        namespaces = "\n".join([ " ".join(el)
-                                for el in self.ns_stack if el[0] ])
-        if namespaces:
-            pa.set_meta(PARSER_META_PREFIX+"namespaces", namespaces)
-        uri = self.current.get("uri")
-        if uri is not None:
-            pa.uri = uri
-        self.optional("meta", pa)
+    def manage_package_subelements(self):
+        """
+        This method may be overridden by application model parsers having a
+        syntax simiar to the generic advene format - like the cinelab parser.
+        """
         self.optional_sequence("imports")
         self.optional_sequence("tags")
         self.optional_sequence("medias")
@@ -171,8 +171,27 @@ class _Parser(XmlParserBase):
         self.optional_sequence("lists")
         self.optional_sequence("external-tag-associations",
                                items_name="association")
+
+    def handle_package(self):
+        """
+        Subclasses should normally not override this method, but rather
+        `manage_package_subelements`.
+        """
+        pa = self.package
+        namespaces = "\n".join([ " ".join(el)
+                                for el in self.ns_stack if el[0] ])
+        if namespaces:
+            pa.set_meta(PARSER_META_PREFIX+"namespaces", namespaces)
+        uri = self.current.get("uri")
+        if uri is not None:
+            pa.uri = uri
+        self.optional("meta", pa)
+        self.manage_package_subelements()
         for f, id in self._postponed:
-            elt = self.package.get(id)
+            if ":" in id:
+                elt = id
+            else:
+                elt = self.package.get(id)
             f(elt)
 
     def handle_import(self):
@@ -196,7 +215,7 @@ class _Parser(XmlParserBase):
             # tag association in element
             id = self.get_attribute("id-ref")
             self.do_or_postpone(id,
-                lambda tag: self.package.associate_tag(element, tag))
+                                partial(self.package.associate_tag, element))
 
     def handle_media(self):
         id = self.get_attribute("id")
@@ -285,7 +304,7 @@ class _Parser(XmlParserBase):
             elif ":" in val:
                 obj.set_meta(key, val, True)
             else:
-                self.do_or_postpone(val, lambda val: obj.set_meta(key, val))
+                self.do_or_postpone(val, partial(obj.set_meta, key))
 
     def handle_content(self, creation_method, *args):
         mimetype = self.get_attribute("mimetype")
@@ -315,8 +334,7 @@ class _Parser(XmlParserBase):
         # i.e. the length taking into account the postponed elements
         # it is used to insert postponed elements at the right index
         id = self.get_attribute("id-ref")
-        self.do_or_postpone(id, lst.append,
-                                lambda e,p=c[0]: lst.insert(p,e))
+        self.do_or_postpone(id, lst.append, partial(lst.insert, c[0]))
         c[0] += 1
 
     def handle_element(self, advene_tag):

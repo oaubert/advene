@@ -1,4 +1,4 @@
-from advene.model.cam.consts import BOOTSTRAP_URI, CAMSYS_NS_PREFIX
+from advene.model.cam.consts import BOOTSTRAP_URI, CAMSYS_TYPE
 from advene.model.cam.exceptions import UnsafeUseWarning, SemanticError
 from advene.model.cam.group import CamGroupMixin
 from advene.model.cam.media import Media
@@ -30,21 +30,21 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
 
     def iter_user_tags(self):
         o = self._owner
-        meta = [(_cam_system_type, None, None)] 
+        meta = [(CAMSYS_TYPE, None, None)] 
         for be, pdict in o._backends_dict.items():
             for i in be.iter_tags(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)
 
     def iter_annotation_types(self):
         o = self._owner
-        meta = [(_cam_system_type, "annotation-type", False)] 
+        meta = [(CAMSYS_TYPE, "annotation-type", False)] 
         for be, pdict in o._backends_dict.items():
             for i in be.iter_tags(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)
 
     def iter_relation_types(self):
         o = self._owner
-        meta = [(_cam_system_type, "relation-type", False)] 
+        meta = [(CAMSYS_TYPE, "relation-type", False)] 
         for be, pdict in o._backends_dict.items():
             for i in be.iter_tags(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)
@@ -59,14 +59,14 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
 
     def iter_user_lists(self):
         o = self._owner
-        meta = [(_cam_system_type, None, None)] 
+        meta = [(CAMSYS_TYPE, None, None)] 
         for be, pdict in o._backends_dict.items():
             for i in be.iter_lists(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)
 
     def iter_schemas(self):
         o = self._owner
-        meta = [(_cam_system_type, "schema", False)] 
+        meta = [(CAMSYS_TYPE, "schema", False)] 
         for be, pdict in o._backends_dict.items():
             for i in be.iter_lists(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)
@@ -81,19 +81,19 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
 
     def count_user_tags(self):
         o = self._owner
-        meta = [(_cam_system_type, None, None)] 
+        meta = [(CAMSYS_TYPE, None, None)] 
         return sum( be.count_tags(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
     def count_annotation_types(self):
         o = self._owner
-        meta = [(_cam_system_type, "annotation-type", False)] 
+        meta = [(CAMSYS_TYPE, "annotation-type", False)] 
         return sum( be.count_tags(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
     def count_relation_types(self):
         o = self._owner
-        meta = [(_cam_system_type, "relation-type", False)] 
+        meta = [(CAMSYS_TYPE, "relation-type", False)] 
         return sum( be.count_tags(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
@@ -107,13 +107,13 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
 
     def count_user_lists(self):
         o = self._owner
-        meta = [(_cam_system_type, None, None)] 
+        meta = [(CAMSYS_TYPE, None, None)] 
         return sum( be.count_lists(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
     def count_schemas(self):
         o = self._owner
-        meta = [(_cam_system_type, "schema", False)] 
+        meta = [(CAMSYS_TYPE, "schema", False)] 
         return sum( be.count_lists(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
@@ -129,19 +129,19 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
     def iter_user_tags(self):
         o = self._owner
         for i in o._backend.iter_tags((o._id,),
-          meta=[(_cam_system_type, None, None)]):
+          meta=[(CAMSYS_TYPE, None, None)]):
             yield o.get_element(i)
 
     def iter_annotation_types(self):
         o = self._owner
         for i in o._backend.iter_tags((o._id,),
-          meta=[(_cam_system_type, "annotation-type", False)]):
+          meta=[(CAMSYS_TYPE, "annotation-type", False)]):
             yield o.get_element(i)
 
     def iter_relation_types(self):
         o = self._owner
         for i in o._backend.iter_tags((o._id,),
-          meta=[(_cam_system_type, "relation-type", False)]):
+          meta=[(CAMSYS_TYPE, "relation-type", False)]):
             yield o.get_element(i)
 
     def iter_lists(self, _guard=True):
@@ -155,13 +155,13 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
     def iter_user_lists(self):
         o = self._owner
         for i in o._backend.iter_lists((o._id,),
-          meta=[(_cam_system_type, None, None)]):
+          meta=[(CAMSYS_TYPE, None, None)]):
             yield o.get_element(i)
 
     def iter_schemas(self):
         o = self._owner
         for i in o._backend.iter_lists((o._id,),
-          meta=[(_cam_system_type, "schema", False)]):
+          meta=[(CAMSYS_TYPE, "schema", False)]):
             yield o.get_element(i)
 
     def count_tags(self, _guard=True):
@@ -175,17 +175,17 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
     def count_user_tags(self):
         o = self._owner
         return o._backend.count_tags((o._id,),
-            meta=[(_cam_system_type, None, None)])
+            meta=[(CAMSYS_TYPE, None, None)])
 
     def count_annotation_types(self):
         o = self._owner
         return o._backend.count_tags((o._id,),
-            meta=[(_cam_system_type, "annotation-type", False)])
+            meta=[(CAMSYS_TYPE, "annotation-type", False)])
 
     def count_relation_types(self):
         o = self._owner
         return o._backend.count_tags((o._id,),
-            meta=[(_cam_system_type, "relation-type", False)])
+            meta=[(CAMSYS_TYPE, "relation-type", False)])
 
     def count_lists(self, _guard=True):
         """
@@ -198,12 +198,12 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
     def count_user_lists(self):
         o = self._owner
         return o._backend.count_lists((o._id,),
-            meta=[(_cam_system_type, None, None)])
+            meta=[(CAMSYS_TYPE, None, None)])
 
     def count_schemas(self):
         o = self._owner
         return o._backend.count_lists((o._id,),
-            meta=[(_cam_system_type, "schema", False)])
+            meta=[(CAMSYS_TYPE, "schema", False)])
 
 class Package(CorePackage):
 
@@ -255,14 +255,14 @@ class Package(CorePackage):
         """FIXME: missing docstring.
         """
         at = super(Package, self).create_tag(id)
-        at.set_meta(CAMSYS_NS_PREFIX+"type", "annotation-type", _guard=0)
+        at.set_meta(CAMSYS_TYPE, "annotation-type", _guard=0)
         return at
 
     def create_relation_type(self, id):
         """FIXME: missing docstring.
         """
         rt = super(Package, self).create_tag(id)
-        rt.set_meta(CAMSYS_NS_PREFIX+"type", "relation-type", _guard=0)
+        rt.set_meta(CAMSYS_TYPE, "relation-type", _guard=0)
         return rt
 
     def create_annotation(self, id, media, begin, end,
@@ -304,7 +304,7 @@ class Package(CorePackage):
         """FIXME: missing docstring.
         """
         sc = super(Package, self).create_list(id, items)
-        sc.set_meta(CAMSYS_NS_PREFIX+"type", "schema", _guard=0)
+        sc.set_meta(CAMSYS_TYPE, "schema", _guard=0)
         return sc
 
     def associate_tag(self, element, tag, _guard=True):
@@ -327,7 +327,11 @@ class Package(CorePackage):
         """
         FIXME: missing docstring.
         """
-        systemtype = tag.get_meta(_cam_system_type, None)
+        if hasattr(tag, "ADVENE_TYPE"):
+            systemtype = tag.get_meta(CAMSYS_TYPE, None)
+        else:
+            # tag is must be a strict id-ref; assume everything is ok
+            systemtype = None
         if systemtype is not None:
             raise SemanticError("Tag %s is not simple: %s" %
                                 (tag._id, systemtype))
@@ -337,13 +341,12 @@ class Package(CorePackage):
         """
         FIXME: missing docstring.
         """
-        systemtype = tag.get_meta(_cam_system_type, None)
+        systemtype = tag.get_meta(CAMSYS_TYPE, None)
         if systemtype is not None:
             raise SemanticError("Tag %s is not simple: %s", tag._id, systemtype)
         super(Package, self).dissociate_tag(element, tag)
 
 _bootstrap_ref = lambda: None
-_cam_system_type = CAMSYS_NS_PREFIX + "type"
 
 Package.make_metadata_property(DC_NS_PREFIX + "creator", "dc_creator")
 Package.make_metadata_property(DC_NS_PREFIX + "description", "dc_description")
