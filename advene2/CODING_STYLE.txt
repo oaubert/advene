@@ -1,7 +1,7 @@
 PROLOGUE
 --------
 
-Coding styles from PEP 8 [TODO] should be applied, unless explicitly overriden by rules below.
+Coding styles from PEP 8 (http://www.python.org/dev/peps/pep-0008/) should be applied, unless explicitly overriden by rules below.
 
 NAMES
 -----
