@@ -468,6 +468,14 @@ class WithContentMixin:
             return self._get_content_data()
 
     @autoproperty
+    def _set_content_parsed(self, parsed):
+        h = self.__handler
+        if h is not None:
+            return self._set_content_data(h.unparse_content(parsed))
+        else:
+            return self._set_content_data(self, parsed)
+
+    @autoproperty
     def _get_content_as_file(self):
         """
         This property returns a *copy* of this element's content data wrapped in
@@ -556,6 +564,10 @@ class Content(object):
     @autoproperty
     def _get_parsed(self):
         return self._owner_elt._get_content_parsed()
+
+    @autoproperty
+    def _set_parsed(self, parsed):
+        return self._owner_elt._set_content_parsed(parsed)
 
     @autoproperty
     def _get_as_file(self):

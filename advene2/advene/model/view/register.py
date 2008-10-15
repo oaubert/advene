@@ -1,5 +1,6 @@
 import advene.model.view.builtin as builtin
 import advene.model.view.tal as tal
+import advene.model.view.type_constraint as type_constraint
 
 # view_handler register functions
 
@@ -23,3 +24,4 @@ _view_handlers = []
 
 register_view_handler(builtin)
 register_view_handler(tal)
+register_view_handler(type_constraint)

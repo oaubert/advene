@@ -221,6 +221,13 @@ class TestElements(TestCase):
         self.assertEqual(e.content_parsed, d)
         self.assertEqual(e.content.parsed, d)
 
+        d["c"] = "D"
+        d["e"] = "f"
+        del d["a"]
+        e.content_parsed = d
+        self.assertEqual(e.content_parsed, d)
+
+
     def _test_with_meta(self, e):
 
         def test_is_list():

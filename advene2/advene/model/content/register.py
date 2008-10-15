@@ -1,4 +1,4 @@
-import advene.model.content.builtin as builtin
+import advene.model.content.avpairs as avpairs
 
 # content_handler register functions
 
@@ -20,4 +20,4 @@ _content_handlers = []
 
 # default registration
 
-register_content_handler(builtin)
+register_content_handler(avpairs)

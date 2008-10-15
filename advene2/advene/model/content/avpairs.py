@@ -1,4 +1,5 @@
-"""I am the content handler for mimetype application/x-advene-builtin-view.
+"""
+I am the content handler for a set of mimetypes using attribute-value pairs.
 """
 
 import urllib
@@ -12,7 +13,11 @@ def claims_for_handle(mimetype):
     to handle correctly the given mimetype. 70 is used as a standard value when
     the hanlder is pretty sure it can handle the mimetype.
     """
-    if mimetype == "application/x-advene-builtin-view" or mimetype == 'application/x-advene-structured':
+    if mimetype in [
+        "application/x-advene-builtin-view",
+        "application/x-advene-type-constraint",
+        'application/x-advene-structured',
+    ]:
         return 99
     else:
         return 0
@@ -34,4 +39,14 @@ def parse_content(obj):
         else:
             r['_error']=l
             print "Syntax error in content: >%s<" % l.encode('utf8')
+    return r
+
+def unparse_content(obj):
+    """
+    Serializes (or unparse) an object produced by `parse_content` into a
+    string.
+    """
+    r = ""
+    for k,v in obj.iteritems():
+        r += "%s = %s\n" % (k, urllib.quote_plus(v))
     return r

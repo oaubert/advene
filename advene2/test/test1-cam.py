@@ -121,8 +121,13 @@ def main():
                  [ e.id for e in t3.iter_elements(p2) ]
     print
 
-    print "NB: the following warnings are normal when serializing CAM "\
-          "package to .bzp (.czp will be the prefered format)"
+    at1.mimetype = "text/plain"
+    print at1.mimetype
+    print at1.element_constraint.content_data
+    at1.element_constraint = None
+
+    #print "NB: the following warnings are normal when serializing CAM "\
+    #      "package to .bzp (.czp will be the prefered format)"
 
     p1.save()
     p2.save()
@@ -131,5 +136,3 @@ def main():
 
 if __name__ == "__main__":
     p1, p2 = main()
-
- 

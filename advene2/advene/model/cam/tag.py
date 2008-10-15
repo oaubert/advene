@@ -1,6 +1,7 @@
 from advene.model.cam.consts import CAMSYS_TYPE, CAM_NS_PREFIX
 from advene.model.cam.element import CamElementMixin
 from advene.model.core.tag import Tag as CoreTag
+from advene.util.autoproperty import autoproperty
 
 class Tag(CoreTag, CamElementMixin):
 
@@ -30,12 +31,39 @@ class Tag(CoreTag, CamElementMixin):
             newtype = RelationType
         else:
             newtype = Tag
-        if self.__class__ is not newtype:
-            self.__class__ = newtype
+        if self.__class__ is newtype:
+            return
+        if newtype in (AnnotationType, RelationType):
+            if self.element_constraint is None:
+                c = self._owner.create_view(
+                        ":constraint:%s" % self._id,
+                        "application/x-advene-type-constraint",
+                )
+                self.element_constraint = c
+        self.__class__ = newtype
 
 
+class WithTypeConstraintMixin(object):
+    """
+    Implement shortcut attributes to the underlying type-constraint.
+    """
 
-class AnnotationType(Tag):
+    def set_meta(self, key, value, val_is_idref=False, _guard=True):
+        if key == CAM_NS_PREFIX + "element-constraint":
+             raise TypeError, "element-constraint can not be changed"
+
+    @autoproperty
+    def _get_mimetype(self):
+        return self.element_constraint.content_parsed["mimetype"]
+
+    @autoproperty
+    def _set_mimetype(self, mimetype):
+        c = self.element_constraint
+        p = c.content_parsed
+        p["mimetype"] = mimetype
+        c.content_parsed = p
+
+class AnnotationType(WithTypeConstraintMixin, Tag):
     """
     The class of annotation types.
     """
@@ -43,7 +71,7 @@ class AnnotationType(Tag):
     # CAMSYS_TYPE is modified. See Tag.set_meta
     pass
 
-class RelationType(Tag):
+class RelationType(WithTypeConstraintMixin, Tag):
     """
     The class of annotation types.
     """
