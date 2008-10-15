@@ -1799,7 +1799,7 @@ class _SqliteBackend(object):
             "JOIN ListItems m " \
               "ON e.package = m.package and e.id = m.list " \
             "LEFT JOIN Imports i ON m.item_p = i.id " \
-            "WHERE e.package in (" + "?," * len(package_ids) + ")" \
+            "WHERE e.package IN (" + ",".join( "?" for i in package_ids ) + ")"\
             " AND item_i = ? AND ("\
             "  (item_p = ''   AND  ? IN (p.uri, p.url)) OR " \
             "  (item_p = i.id AND  ? IN (i.uri, i.url)))"
