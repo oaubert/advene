@@ -28,6 +28,7 @@ import gobject
 import re
 import __builtin__
 import inspect
+import itertools
 
 class Evaluator:
     """Evaluator popup window.
@@ -521,7 +522,7 @@ class Evaluator:
                     if not expr.endswith('.') and not trailingdot:
                         element='.'+element
                 b.insert_at_cursor(element)
-                if attr+element in completion:
+                if attr is not None and attr+element in completion:
                     self.fill_method_parameters()
 
             if len(completion) > 1:
@@ -542,6 +543,10 @@ class Evaluator:
             begin,end=b.get_bounds()
             cursor=b.get_iter_at_mark(b.get_insert())
         expr=b.get_text(begin, cursor)
+
+        m=re.match('.+[=\(\[\s](.+?)$', expr)
+        if m:
+            expr=m.group(1)
         try:
             res=eval(expr, self.globals_, self.locals_)
         except (Exception, SyntaxError):
@@ -553,6 +558,11 @@ class Evaluator:
             (args, varargs, varkw, defaults)=inspect.getargspec(res)
             if args and args[0] == 'self':
                 args.pop(0)
+                if defaults:
+                    n=len(defaults)
+                    cp=args[:-n]
+                    cp.extend("=".join( (k, repr(v)) ) for (k, v) in itertools.izip(args[-n:], defaults))
+                    args=cp
             if varargs:
                 args.append("*" + varargs)
             if varkw:
