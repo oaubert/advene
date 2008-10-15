@@ -1,3 +1,16 @@
+"""
+Note on events
+==============
+
+The creation events emitted by a CAM package, in addition to the ones emitted by
+a CORE package (see `advene.model.events`), include:!
+ * ``created::user-tag``
+ * ``created::annotation-type``
+ * ``created::relation-type``
+ * ``created::user-list``
+ * ``created::schema``
+"""
+
 from advene.model.cam.consts import BOOTSTRAP_URI, CAMSYS_TYPE
 from advene.model.cam.exceptions import UnsafeUseWarning, SemanticError
 from advene.model.cam.group import CamGroupMixin
@@ -290,6 +303,8 @@ class Package(CorePackage):
         self.connect("created", bk.init)
         self.connect("tag::added", bk.update)
         self.connect("tag::removed", bk.update)
+        self.connect("created::annotation-type", self._create_type_constraint)
+        self.connect("created::relation-type", self._create_type_constraint)
 
     def create_tag(self, id):
         """
@@ -305,28 +320,52 @@ class Package(CorePackage):
     def create_user_tag(self, id):
         """FIXME: missing docstring.
         """
-        return super(Package, self).create_tag(id)
+        t = super(Package, self).create_tag(id)
+        self.emit("created::user-type", t)
+        return t
 
     def create_annotation_type(self, id):
         """FIXME: missing docstring.
         """
-        at = super(Package, self).create_tag(id)
+        # NB: we inhibit the emission of created::tag until the system-type
+        # of the tag is set
+        self.enter_no_event_section()
+        try:
+            at = super(Package, self).create_tag(id)
+        finally:
+            self.exit_no_event_section()
+
         at.enter_no_event_section()
         try:
             at._set_camsys_type("annotation-type")
         finally:
             at.exit_no_event_section()
+
+        self.emit("created::annotation-type", at)
+        # ^ this would create the associated type-constraint
+        self.emit("created::tag", at)
         return at
 
     def create_relation_type(self, id):
         """FIXME: missing docstring.
         """
-        rt = super(Package, self).create_tag(id)
+        # NB: we inhibit the emission of created::tag until the system-type
+        # of the tag is set
+        self.enter_no_event_section()
+        try:
+            rt = super(Package, self).create_tag(id)
+        finally:
+            self.exit_no_event_section()
+
         rt.enter_no_event_section()
         try:
             rt._set_camsys_type("relation-type")
         finally:
             rt.exit_no_event_section()
+
+        self.emit("created::relation-type", rt)
+        # ^ this would create the associated type-constraint
+        self.emit("created::tag", rt)
         return rt
 
     def create_annotation(self, id, media, begin, end,
@@ -335,8 +374,16 @@ class Package(CorePackage):
         """
         assert type is None or hasattr(type, "ADVENE_TYPE") \
             or type.find(":") > 0 # strict ID-ref
-        a = super(Package, self).create_annotation(id, media, begin, end,
-                                                   mimetype, model, url)
+
+        # NB: we inhibit the emission of created::annotation until the type
+        # of the annotation is set
+        self.enter_no_event_section()
+        try:
+            a = super(Package, self).create_annotation(id, media, begin, end,
+                                                       mimetype, model, url)
+        finally:
+            self.exit_no_event_section()
+
         if type:
             type_is_element = hasattr(type, "ADVENE_TYPE")
             a.enter_no_event_section()
@@ -346,6 +393,8 @@ class Package(CorePackage):
             finally:
                 if type_is_element: type.exit_no_event_section()
                 a.exit_no_event_section()
+
+        self.emit("created::annotation", a)
         return a
 
     def create_relation(self, id, mimetype="x-advene/none", model=None,
@@ -354,8 +403,16 @@ class Package(CorePackage):
         """
         assert type is None or hasattr(type, "ADVENE_TYPE") \
             or type.find(":") > 0 # strict ID-ref
-        r = super(Package, self).create_relation(id, mimetype, model, url,
-                                                 members)
+
+        # NB: we inhibit the emission of created::relation until the type
+        # of the relation is set
+        self.enter_no_event_section()
+        try:
+            r = super(Package, self).create_relation(id, mimetype, model, url,
+                                                     members)
+        finally:
+            self.exit_no_event_section()
+
         if type:
             type_is_element = hasattr(type, "ADVENE_TYPE")
             r.enter_no_event_section()
@@ -365,6 +422,8 @@ class Package(CorePackage):
             finally:
                 if type_is_element: type.exit_no_event_section()
                 r.exit_no_event_section()
+
+        self.emit("created::relation", r)
         return r
 
     def create_list(self, id, items=()):
@@ -380,17 +439,29 @@ class Package(CorePackage):
     def create_user_list(self, id, items=()):
         """FIXME: missing docstring.
         """
-        return super(Package, self).create_list(id, items)
+        L = super(Package, self).create_list(id, items)
+        self.emit("created::user-list", L)
+        return L
 
     def create_schema(self, id, items=()):
         """FIXME: missing docstring.
         """
-        sc = super(Package, self).create_list(id, items)
+        # NB: we inhibit the emission of created::list until the system-type
+        # of the list is set
+        self.enter_no_event_section()
+        try:
+            sc = super(Package, self).create_list(id, items)
+        finally:
+            self.exit_no_event_section()
+
         sc.enter_no_event_section()
         try:
             sc._set_camsys_type("schema")
         finally:
             sc.exit_no_event_section()
+
+        self.emit("created::schema", sc)
+        self.emit("created::list", sc)
         return sc
 
     def associate_tag(self, element, tag):
@@ -444,6 +515,22 @@ class Package(CorePackage):
         if systemtype is not None:
             raise SemanticError("Tag %s is not simple: %s", tag._id, systemtype)
         super(Package, self).dissociate_tag(element, tag)
+
+    def _create_type_constraint(self, package, type):
+        """
+        Callback invoked on 'created::tag' to automatically create the
+        type-constraint view associated with annotation/relation types.
+        """
+        c = self.create_view(
+                ":constraint:%s" % type._id,
+                "application/x-advene-type-constraint",
+        )
+        type.enter_no_event_section()
+        try:
+            type.element_constraint = c
+        finally:
+            type.exit_no_event_section()
+
 
     # TALES shortcuts
 

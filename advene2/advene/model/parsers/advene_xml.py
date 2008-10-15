@@ -190,7 +190,7 @@ class Parser(XmlParserBase):
         self.optional("meta", pa)
         self.manage_package_subelements()
         for f, id in self._postponed:
-            if ":" in id and id[0] != ":": # imported
+            if id.find(":") > 0: # imported
                 f(id)
             else:
                 elt = self.package.get(id)
@@ -256,7 +256,7 @@ class Parser(XmlParserBase):
     def handle_annotation(self):
         id = self.get_attribute("id")
         media = self.get_attribute("media")
-        if not ":" in media or media[0] == ":": # same package
+        if media.find(":") <= 0: # same package
             media = self.package.get(media)
         if media is None:
             raise ParserError("unknown media %s" % self.get_attribute("media"))
@@ -348,7 +348,7 @@ class Parser(XmlParserBase):
                     obj.set_meta(key, child.text, False)
                 finally:
                     obj.exit_no_event_section()
-            elif ":" in val and val[0] != ":": # imported
+            elif val.find(":") > 0: # imported
                 obj.enter_no_event_section()
                 try:
                     obj.set_meta(key, val, True)
@@ -411,10 +411,14 @@ class Parser(XmlParserBase):
 
 def try_enter_no_event_section(elt, function):
     getattr(elt, "enter_no_event_section", lambda: None)()
+    # try to also find an element in 'function'
+    function = getattr(function, "func", function) # unwrap partial function
     im_self = getattr(function, "im_self", None)
     getattr(im_self, "enter_no_event_section", lambda: None)()
 
 def try_exit_no_event_section(elt, function):
+    # try to find an element in 'function'
+    function = getattr(function, "func", function) # unwrap partial function
     im_self = getattr(function, "im_self", None)
     getattr(im_self, "exit_no_event_section", lambda: None)()
     getattr(elt, "exit_no_event_section", lambda: None)()

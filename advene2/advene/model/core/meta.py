@@ -241,7 +241,7 @@ class WithMetaMixin(object):
             vstr_is_id = True
             val = (ref(val), vstr)
         elif val_is_idref:
-            assert ":" in val and val[0] != ":", "Expected *strict* id-ref"
+            assert val.find(":") > 0, "Expected *strict* id-ref"
             if not p._can_reference(val):
                 raise ModelError, "Element or import does not exist %s" % val
             vstr = val

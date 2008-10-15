@@ -157,7 +157,7 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
                 return ""
 
         if isinstance(element, basestring):
-            assert ":" in element and element[0] != ":" # imported
+            assert element.find(":") > 0 # imported
             element_id = element
             element = pkg.get(element_id)
             if element is not None and element.ADVENE_TYPE != type:

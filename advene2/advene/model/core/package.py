@@ -545,7 +545,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             o = element._owner
             return o is self  or  o in self._imports_dict.values()
         else:
-            path = unicode(element).split(":")
+            path = _split_idref(unicode(element))
             if len(path) > 2:
                 return False
             elif len(path) == 2:
@@ -699,7 +699,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             else:
                 id_e = element.make_id_in(self)
         else:
-            assert ":" in element and element[0] != ":", "Expected *strict* id-ref"
+            assert element.find(":") > 0, "Expected *strict* id-ref"
             id_e = unicode(element)
         tag_owner = getattr(tag, "_owner", None)
         if tag_owner:
@@ -708,7 +708,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             else:
                 id_t = tag.make_id_in(self)
         else:
-            assert ":" in tag and tag[0] != ":", "Expected *strict* id-ref"
+            assert tag.find(":") > 0, "Expected *strict* id-ref"
             id_t = unicode(tag)
 
         self._backend.associate_tag(self._id, id_e, id_t)
@@ -716,7 +716,8 @@ class Package(WithMetaMixin, WithEventsMixin, object):
         getattr(tag, "emit", _noop)("added", element)
 
     def dissociate_tag(self, element, tag):
-        """Dissociate the given element to the given tag on behalf of this package.
+        """
+        Dissociate the given element to the given tag on behalf of this package.
         """
         assert self._can_reference(element), element
         assert self._can_reference(tag), tag
@@ -729,7 +730,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             else:
                 id_e = element.make_id_in(self)
         else:
-            assert ":" in element and element[0] != ":", "Expected *strict* id-ref"
+            assert element.find(":") > 0, "Expected *strict* id-ref"
             id_e = unicode(element)
         tag_owner = getattr(tag, "_owner", None)
         if tag_owner:
@@ -738,7 +739,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             else:
                 id_t = tag.make_id_in(self)
         else:
-            assert ":" in tag and tag[0] != ":", "Expected *strict* id-ref"     
+            assert tag.find(":") > 0, "Expected *strict* id-ref"
             id_t = unicode(tag)
 
         self._backend.dissociate_tag(self._id, id_e, id_t)
@@ -814,5 +815,17 @@ class Package(WithMetaMixin, WithEventsMixin, object):
     def _tales_resources(self):
         return self.all.resources
 
+
+def _split_idref(idref):
+    """
+    Split an ID-ref into a list of atomic IDs.
+    """
+    path1 = idref.split("::")
+    if len(path1) == 1:
+        return idref.split(":")
+    elif path1[0]:
+        return path1[0].split(":") + [":%s" % path1[1]]
+    else:
+        return [ idref, ]
 
 #

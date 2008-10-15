@@ -180,8 +180,8 @@ class TestCinelabXml(TestAdveneXml):
 
         p.uri = "http://example.com/my-package"; yield 1
         i = p.create_import("i", p3); yield 2
-        at = p.create_annotation_type("at"); yield 2.1
-        rt = p.create_relation_type("rt"); yield 2.2
+        at = p.create_annotation_type("at"); yield 2.25
+        rt = p.create_relation_type("rt"); yield 2.75
         m = p.create_media("m", "http://example.com/m.ogm"); yield 3
         m.set_meta(rdfs_seeAlso, m3); yield 4
         Rb = p.create_resource("Rb", "x-advene/regexp"); yield 5
@@ -190,10 +190,10 @@ class TestCinelabXml(TestAdveneXml):
                                 "text/plain", Rb, type=at); yield 7
         a.content_data = "goog moaning"; yield 8
         a2 = p.create_annotation("a2", m3, 123, 456,
-                                "text/plain", Rb, type=at3); yield 8.1
+                                "text/plain", Rb, type=at3); yield 8.5
         r = p.create_relation("r", members=[a, a3], type=rt); yield 9
         r2 = p.create_relation("r2", "text/plain", type=rt3); yield 10
-        s = p.create_schema("s", items=[at, rt, at3, rt3,]); yield 10.1
+        s = p.create_schema("s", items=[at, rt, at3, rt3,]); yield 10.5
         L = p.create_user_list("L", items=[a, m, r, m3]); yield 11
         t = p.create_user_tag("t"); yield 12
         v = p.create_view("v", "text/html+tag"); yield 13

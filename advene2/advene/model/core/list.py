@@ -150,7 +150,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
             aid = a.make_id_in(o)
         else:
             aid = unicode(a)
-            assert ":" in aid and aid[0] != ":", "Expected *strict* id-ref"
+            assert aid.find(":") > 0, "Expected *strict* id-ref"
             a = None
         c = len(self._cache)
         if i > c : i = c
@@ -174,7 +174,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
             aid = a.make_id_in(o)
         else:
             aid = unicode(a)
-            assert ":" in aid and aid[0] != ":", "Expected *strict* id-ref"
+            assert aid.find(":") > 0, "Expected *strict* id-ref"
             a = None
         c = len(self._cache)
         s = slice(c,c)

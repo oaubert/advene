@@ -1,6 +1,5 @@
 from advene.model.cam.consts import CAMSYS_TYPE, CAM_NS_PREFIX
 from advene.model.cam.element import CamElementMixin
-from advene.model.consts import _RAISE
 from advene.model.core.tag import Tag as CoreTag
 from advene.util.autoproperty import autoproperty
 
@@ -33,17 +32,8 @@ class Tag(CoreTag, CamElementMixin):
             newtype = RelationType
         else:
             newtype = Tag
-        if self.__class__ is newtype:
-            return
-        # NB: the following is now delayed to the first get_meta
-        #if newtype in (AnnotationType, RelationType):
-        #    if self.element_constraint is None:
-        #        c = self._owner.create_view(
-        #                ":constraint:%s" % self._id,
-        #                "application/x-advene-type-constraint",
-        #        )
-        #        self.element_constraint = c
-        self.__class__ = newtype
+        if self.__class__ is not newtype:
+            self.__class__ = newtype
 
 
 class WithTypeConstraintMixin(object):
@@ -51,34 +41,8 @@ class WithTypeConstraintMixin(object):
     Implement shortcut attributes to the underlying type-constraint.
     """
 
-    def _make_constraint(self):
-        c = self._owner.create_view(
-                ":constraint:%s" % self._id,
-                "application/x-advene-type-constraint",
-        )
-        super(WithTypeConstraintMixin, self) \
-                .set_meta(CAM_ELEMENT_CONSTRAINT, c)
-        return c
-
-    def get_meta(self, key, default=_RAISE):
-        if key == CAM_ELEMENT_CONSTRAINT:
-            r = super(WithTypeConstraintMixin, self).get_meta(key, None) \
-                or self._make_constraint()
-        else:
-            r = super(WithTypeConstraintMixin, self).get_meta(key, default)
-        return r
-
-    def get_meta_id(self, key, default=_RAISE):
-        if key == CAM_ELEMENT_CONSTRAINT:
-            r = super(WithTypeConstraintMixin, self).get_meta_id(key, None) \
-                or self._make_constraint().id
-        else:
-            r = super(WithTypeConstraintMixin, self).get_meta_id(key, default)
-        return r
-
     def set_meta(self, key, value, val_is_idref=False):
         if key == CAM_ELEMENT_CONSTRAINT:
-            # do not _make_constraint, since this could be the parser setting it
             expected_id = ":constraint:" + self._id
             if val_is_idref:
                 got_id = value
