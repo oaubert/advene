@@ -942,7 +942,7 @@ class AdveneController(object):
                 arrow=u'->'
             else:
                 arrow=u'\u2192'
-            return arrow + unicode(cleanup(element.title))
+            return arrow + unicode(cleanup(element.title or element.id))
         if hasattr(element, 'title') and element.title:
             return unicode(cleanup(element.title))
         if hasattr(element, 'id') and element.id:
