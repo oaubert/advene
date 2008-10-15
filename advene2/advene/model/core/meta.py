@@ -1,4 +1,5 @@
 from bisect import insort
+from itertools import chain
 from weakref import ref
 
 from advene import _RAISE
@@ -37,6 +38,7 @@ class WithMetaMixin(DirtyMixin):
             typ = ""
 
         if self.__cache_is_complete:
+            # rely completely on cache, since it is complete
             for k, v in self.__cache.iteritems():
                 if isinstance(v, tuple):
                     wref, idref = v
@@ -45,10 +47,13 @@ class WithMetaMixin(DirtyMixin):
                         v = p.get_element(idref, default)
                 yield k, v
         else:
+            # retrieve data from backend *and __dirty*, and cache them
             cache = self.__cache
             if cache is None:
                 cache = self.__cache = SortedDict()
-            for key, v, v_is_idref in p._backend.iter_meta(p._id, eid, typ):
+            iter_backend = p._backend.iter_meta(p._id, eid, typ)
+            iter_all = self._mix_dirty_and_backend(iter_backend)
+            for key, v, v_is_idref in iter_all:
                 val = cache.get(key)
                 if isinstance(val, tuple):
                     val = val[0]() # solve weak reference
@@ -145,7 +150,7 @@ class WithMetaMixin(DirtyMixin):
         cache[key] = val
         dirty = self.__dirty
         if dirty is None:
-            dirty = self.__dirty = {}
+            dirty = self.__dirty = SortedDict()
         dirty[key] = vstr, vstr_is_idref
         self.add_cleaning_operation_once(self.__clean)
 
@@ -165,10 +170,10 @@ class WithMetaMixin(DirtyMixin):
         cache = self.__cache
         if cache is not None and key in cache:
             del cache[key]
-            dirty = self.__dirty
-            if dirty is None:
-                dirty = self.__dirty = {}
-            dirty[key] = None, False
+        dirty = self.__dirty
+        if dirty is None:
+            dirty = self.__dirty = SortedDict()
+        dirty[key] = None, False
         self.add_cleaning_operation_once(self.__clean)
 
     @property
@@ -194,6 +199,51 @@ class WithMetaMixin(DirtyMixin):
             except:
                 dirty[k] = v
                 raise
+
+    def _mix_dirty_and_backend(self, iter_backend):
+        """
+        This method is used in iter_meta.
+
+        It yields values of the form (key, stringvalue, val_is_idref),
+        homogeneous to what the backend method returns.
+
+        However, this method takes into account the __dirty dict, inserting
+        new keys at the right place, overriding changed values, and avoiding
+        deleted keys.
+        """
+        dirty = self.__dirty
+        if dirty is None:
+            dirty = self.__dirty = SortedDict()
+        iter_dirty = ( (k,v[0],v[1]) for k,v in dirty.iteritems() )
+
+        iter_dirty = chain(iter_dirty, [None,]) # eschew StopIteration
+        iter_backend = chain(iter_backend, [None,]) # idem
+
+        next_dirty = iter_dirty.next()
+        next_backend = iter_backend.next()
+        while next_dirty and next_backend:
+            if next_dirty[0] <= next_backend[0]:
+                if next_dirty[0] == next_backend[0]:
+                    # dirty overrides backend
+                    next_backend = iter_backend.next()
+                if next_dirty[1] is not None: # avoid deleted keys
+                    yield next_dirty
+                next_dirty = iter_dirty.next()
+            else:
+                yield next_backend
+                next_backend = iter_backend.next()
+        # flush non-empty one
+        if next_dirty:
+            yield next_dirty
+            for i in iter_dirty:
+                if i is not None:
+                    yield i
+        elif next_backend:
+            yield next_backend
+            for i in iter_backend:
+                if i is not None:
+                    yield i
+
 
     @classmethod
     def make_metadata_property(cls, key, alias=None):

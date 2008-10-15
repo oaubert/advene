@@ -154,5 +154,6 @@ if __name__ == "__main__":
     print a1.dc_creator
     print a2.meta[advene_ns % "meta/created_from"]
     a2.del_meta(advene_ns % "meta/foo")
+    print list(a2.iter_meta())
 
     l = None; a1 = None; a2 = None; p.close(); p = None
