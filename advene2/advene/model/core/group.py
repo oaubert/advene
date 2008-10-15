@@ -185,9 +185,19 @@ class _GroupCollection(object):
     def __init__(self, group):
         self._g = group
 
-    def __get__(self, key):
+    def get(self, key):
         e = self._owner.get(key)
         if e in self:
             return e
         else:
             return None
+
+    def __getitem__(self, key):
+        if isinstance(key, int) or isinstance(key, slice):
+            # TODO optimize this ?
+            return list(self)[key]
+        else:
+            r = self.get(key)
+            if r is None:
+                raise KeyError(key)
+            return r
