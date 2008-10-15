@@ -179,8 +179,6 @@ class GroupMixin:
                 return e.ADVENE_TYPE == IMPORT and e in self._g
         return GroupImports(group)
 
-
-
 class _GroupCollection(object):
     def __init__(self, group):
         self._g = group
@@ -201,3 +199,20 @@ class _GroupCollection(object):
             if r is None:
                 raise KeyError(key)
             return r
+    
+    def size(self):
+        """Return the size of the group.
+        """
+        return self.__len__()
+
+    def first(self):
+        return self.__iter__().next()
+
+    def rest(self):
+        # FIXME: it should return a group ?
+        i=self.__iter__()
+        # Drop the first value
+        i.next()
+        for v in i:
+            yield v
+
