@@ -52,6 +52,7 @@ class WithEventsMixin:
 
     def disconnect(self, handler_id):
         """Disconnect the handler associated to the given handler_id."""
+        assert self.has_handler(handler_id)
         return self._event_delegate.disconnect(handler_id)
 
     def has_handler(self, handler_id):

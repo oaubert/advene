@@ -179,6 +179,29 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         if self._weight == 0:
             self._owner._heavy_elements.remove(self)
 
+    def connect(self, detailed_signal, handler, *args):
+        """
+        Connect a handler to a signal.
+
+        Note that an element with connected signals becomes heavier (i.e. less
+        volatile).
+
+        :see: `WithMetaMixin.connect`
+        """
+        self._increase_weight()
+        return super(PackageElement, self)\
+               .connect(detailed_signal, handler, *args)
+
+    def disconnect(self, handler_id):
+        """
+        Disconnect a handler from a signal.
+
+        :see: `connect`
+        :see: `WithMetaMixin.disconnect`
+        """
+        self._decrease_weight()
+        return super(PackageElement, self).disconnect(handler_id)
+
     @tales_context_function
     def _tales_tags(self, context):
         refpkg = context.globals["refpkg"]
