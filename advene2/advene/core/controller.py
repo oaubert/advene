@@ -1586,7 +1586,7 @@ class AdveneController(object):
         rs=RuleSet()
         rs.from_xml(view.content.get_as_file(),
                     catalog=self.event_handler.catalog,
-                    origin=view.uri)
+                    origin=view.uriref)
 
         parsed_views.append(view)
 
@@ -1604,7 +1604,7 @@ class AdveneController(object):
                     else:
                         rs.from_xml(v.content.get_as_file(),
                                     catalog=self.event_handler.catalog,
-                                    origin=v.uri)
+                                    origin=v.uriref)
                         parsed_views.append(v)
                 subviews=rs.filter_subviews()
 
