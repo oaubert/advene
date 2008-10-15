@@ -7,7 +7,7 @@ class DirtyMixin:
     operations required to update the reference state.
     The readonly property dirty is True whenever there are pending operations.
     The clean method tries to execute all pending operations in the order they
-    were submitted (quite so, see `add_cleaning_operation_once`_).
+    were submitted (quite so, see `add_cleaning_operation_once`).
 
     This mixin also ensure that dirty elements are not garbage collected, by
     keeping a reference on them.
