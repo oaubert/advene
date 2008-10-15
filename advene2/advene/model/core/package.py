@@ -296,6 +296,10 @@ class Package(object, WithMetaMixin, DirtyMixin):
             self._own = ref(r)
         return r
 
+    # reference finding (find all the own or imported elements referencing a
+    # given element) -- combination of several backend methods
+    # TODO
+
 
 class UnreachableImport(Exception):
     pass

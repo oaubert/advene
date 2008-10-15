@@ -12,6 +12,6 @@ for i in listdir(dirname):
         for j in dir(m):
             a = getattr(m,j)
             if isinstance(a,type) and issubclass(a, (TestCase, TestSuite)):
-                globals()[j] = a
+                globals()["%s_%s" % (modulename, j)] = a
 
 main()

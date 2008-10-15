@@ -39,6 +39,12 @@ Content related
 Backend related
 ---------------
 
+- add a local debugging flag, and make all asserts test that one;
+  this would make the backend more efficient, even with __debug__ set
+  (which will probably be the case most of the time in Advene ;)
+  -- also, test if that's really worth it, performance-wise...
+     the time to run the unittest should be a good benchmark
+
 - reflect changes in the import structure in _imports_dict and _backends_dict,
   without having to reload the package
 

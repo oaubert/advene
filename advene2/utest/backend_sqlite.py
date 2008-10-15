@@ -402,6 +402,10 @@ class TestCreateElement(TestCase):
 
 
 class TestHandleElements(TestCase):
+
+    url1 = "http://example.com/p1"
+    url2 = "http://example.com/p2"
+
     def setUp(self):
         try:
             self.url1 = "http://example.com/p1"
@@ -819,13 +823,13 @@ class TestHandleElements(TestCase):
             typ = T[i[1][0]]
             if i[0] is self.pid1: schema = "i1:R3"
             else:              schema = "R3"
-            self.be.update_content(i[0], i[1], mime, data, schema)
+            self.be.update_content(i[0], i[1], typ, mime, data, schema)
             self.assertEqual((mime, data, schema),
                 self.be.get_content(i[0], i[1], typ))
-            self.be.update_content(i[0], i[1], mime, data, "")
+            self.be.update_content(i[0], i[1], typ, mime, data, "")
             self.assertEqual((mime, data, ""),
                 self.be.get_content(i[0], i[1], typ))
-            self.be.update_content(i[0], i[1], "", "", "")
+            self.be.update_content(i[0], i[1], typ, "", "", "")
             self.assertEqual(("", "", ""),
                 self.be.get_content(i[0], i[1], typ))
 
@@ -1032,54 +1036,351 @@ class TestHandleElements(TestCase):
         self.be.dissociate_tag(self.pid2, "a5",    "t3")
         self.be.dissociate_tag(self.pid2, "a6",    "t3")
 
-    def test_independant_iterations(self):
-        b = self.be
-        # populate package to get non empty lists
-        b.set_meta(self.pid1, "", "", "pac#test", "foo")
-        b.insert_member(self.pid1, "r1", "a1", -1)
-        b.insert_member(self.pid1, "r1", "i1:a5", -1)
-        b.insert_item(self.pid1, "l1", "r1", -1)
-        b.insert_item(self.pid1, "l1", "i1:r3", -1)
-        b.associate_tag(self.pid1, "a1",    "t1")
-        b.associate_tag(self.pid1, "a1",    "i1:t3")
-        b.associate_tag(self.pid1, "i1:a5", "t1")
 
-        pids = (self.pid1, self.pid2,)
-        iter_methods = {
-            "iter_medias": [pids,],
-            "iter_annotations": [pids,],
-            "iter_relations": [pids,],
-            "iter_views": [pids,],
-            "iter_resources": [pids,],
-            "iter_tags": [pids,],
-            "iter_lists": [pids,],
-            "iter_queries": [pids,],
-            "iter_imports": [pids,],
-            "iter_meta": [self.pid1, "", ""],
-            "iter_members": [self.pid1, "r1",],
-            "iter_relations_with_member": [pids, "%s#a1" % self.url1,],
-            "iter_items": [self.pid1, "l1",],
-            "iter_lists_with_item": [pids, "%s#r1" % self.url1,],
-            "iter_tags_with_element": [pids, "%s#a1" % self.url1,],
-            "iter_elements_with_tag": [pids, "%s#t1" % self.url1,],
-            "iter_tagging": [pids, "%s#a1" % self.url1, "%s#t1" % self.url1,],
-            # TODO add referrers searching methods
-        }
-        for n, args in iter_methods.iteritems():
-            m = getattr(b, n)
-            ref = list(m(*args))
-            assert ref, n # lists should be non-empty
-            for n2, args2 in iter_methods.iteritems():
-                test = []
-                for i in m(*args):
-                    if len(test) == 1:
-                       m2 = getattr(b, n2)
-                       list(m2(*args2)) # try to parasit enclosing iteration
-                    test.append(i)
-                self.assertEquals(ref, test, n)
+class TestRenameElement(TestCase):
+
+    url1 = TestHandleElements.url1
+    url2 = TestHandleElements.url2
+
+    def setUp(self):
+        # reuse the bunch of code defined in TestHandleElements:
+        TestHandleElements.__dict__["setUp"](self)
+
+    def tearDown(self):
+        TestHandleElements.__dict__["tearDown"](self)
+
+    def test_rename_media(self):
+        mX_url = "file:///tmp/mX"
+        self.be.create_media(self.pid1, "mX", mX_url)
+        self.be.rename_element(self.pid1, "mX", MEDIA, "mY")
+        self.assert_(not self.be.has_element(self.pid1, "mX"))
+        self.assertEqual((MEDIA, self.pid1, "mY", mX_url),
+                         self.be.get_element(self.pid1, "mY"))
+
+    def test_rename_annotation(self):
+        self.be.create_annotation(self.pid1, "aX", "m1", 1, 2)
+        self.be.update_content(self.pid1, "aX", ANNOTATION,
+                               "text/plain", "aX data", "")
+        self.be.rename_element(self.pid1, "aX", ANNOTATION, "aY")
+        self.assert_(not self.be.has_element(self.pid1, "aX"))
+        self.assertEqual((ANNOTATION, self.pid1, "aY", "m1", 1, 2),
+                         self.be.get_element(self.pid1, "aY"))
+        self.assertEqual(("text/plain", "aX data", "",),
+                         self.be.get_content(self.pid1, "aY", ANNOTATION))
+
+    def test_rename_relation(self):
+        self.be.create_relation(self.pid1, "rX")
+        self.be.update_content(self.pid1, "rX", RELATION,
+                               "text/plain", "rX data", "")
+        self.be.insert_member(self.pid1, "rX", "a1", 0)
+        self.be.rename_element(self.pid1, "rX", RELATION, "rY")
+        self.assert_(not self.be.has_element(self.pid1, "rX"))
+        self.assertEqual((RELATION, self.pid1, "rY",),
+                         self.be.get_element(self.pid1, "rY"))
+        self.assertEqual(("text/plain", "rX data", "",),
+                         self.be.get_content(self.pid1, "rY", RELATION))
+        self.assertEqual("a1", self.be.get_member(self.pid1, "rY", 0))
+ 
+    def test_rename_list(self):
+        self.be.create_list(self.pid1, "lX")
+        self.be.insert_item(self.pid1, "lX", "r1", 0)
+        self.be.rename_element(self.pid1, "lX", LIST, "lY")
+        self.assert_(not self.be.has_element(self.pid1, "rX"))
+        self.assertEqual((LIST, self.pid1, "lY",),
+                         self.be.get_element(self.pid1, "lY"))
+        self.assertEqual("r1", self.be.get_item(self.pid1, "lY", 0))
+
+    def test_rename_tag(self):
+        self.be.create_tag(self.pid1, "tX")
+        self.be.rename_element(self.pid1, "tX", TAG, "tY")
+        self.assert_(not self.be.has_element(self.pid1, "tX"))
+        self.assertEqual((TAG, self.pid1, "tY",),
+                         self.be.get_element(self.pid1, "tY"))
+        # tag associations are updated by rename_references, so we do not
+        # test them here
+
+    def test_rename_import(self):
+        iX_url = "file:///tmp/iX"
+        self.be.create_import(self.pid1, "iX", iX_url, "")
+
+        self.be.update_annotation(self.pid1, "a1", "iX:m", 1, 2)
+        self.be.update_content(self.pid1, "a1", ANNOTATION,
+                               "text/plain", "", "iX:R")
+        self.be.insert_member(self.pid1, "r1", "iX:a", 0)
+        self.be.insert_item(self.pid1, "l1", "iX:r", 0)
+        self.be.associate_tag(self.pid1, "a1", "iX:t")
+        self.be.associate_tag(self.pid1, "iX:a", "t1")
+
+        self.be.rename_element(self.pid1, "iX", IMPORT, "iY")
+        self.assert_(not self.be.has_element(self.pid1, "iX"))
+        self.assertEqual((IMPORT, self.pid1, "iY", iX_url, ""),
+                         self.be.get_element(self.pid1, "iY"))
+        self.assertEqual((ANNOTATION, self.pid1, "a1", "iY:m", 1, 2),
+                         self.be.get_element(self.pid1, "a1"))
+        self.assertEqual(("text/plain", "", "iY:R",),
+                         self.be.get_content(self.pid1, "a1", ANNOTATION))
+        self.assertEqual("iY:a", self.be.get_member(self.pid1, "r1", 0))
+        self.assertEqual("iY:r", self.be.get_item(self.pid1, "l1", 0))
+        t_uri = "file:///tmp/iX#t"
+        self.assertEqual([(self.pid1, "a1"),],
+            list(self.be.iter_elements_with_tag((self.pid1,), t_uri)))
+        t1_uri = self.url1 + "#t1"
+        self.assertEqual([(self.pid1, "iY:a"),],
+            list(self.be.iter_elements_with_tag((self.pid1,), t1_uri)))
+
+    def test_rename_view(self):
+        self.be.create_view(self.pid1, "vX",)
+        self.be.update_content(self.pid1, "vX", VIEW,
+                               "text/plain", "vX data", "")
+        self.be.rename_element(self.pid1, "vX", VIEW, "vY")
+        self.assert_(not self.be.has_element(self.pid1, "vX"))
+        self.assertEqual((VIEW, self.pid1, "vY",),
+                         self.be.get_element(self.pid1, "vY"))
+        self.assertEqual(("text/plain", "vX data", "",),
+                         self.be.get_content(self.pid1, "vY", VIEW))
+
+    def test_rename_resource(self):
+        self.be.create_resource(self.pid1, "RX",)
+        self.be.update_content(self.pid1, "RX", RESOURCE,
+                               "text/plain", "RX data", "")
+        self.be.rename_element(self.pid1, "RX", RESOURCE, "RY")
+        self.assert_(not self.be.has_element(self.pid1, "RX"))
+        self.assertEqual((RESOURCE, self.pid1, "RY",),
+                         self.be.get_element(self.pid1, "RY"))
+        self.assertEqual(("text/plain", "RX data", "",),
+                        self.be.get_content(self.pid1, "RY", RESOURCE))
+
+    def test_rename_query(self):
+        self.be.create_query(self.pid1, "qX",)
+        self.be.update_content(self.pid1, "qX", QUERY,
+                               "text/plain", "qX data", "")
+        self.be.rename_element(self.pid1, "qX", QUERY, "qY")
+        self.assert_(not self.be.has_element(self.pid1, "qX"))
+        self.assertEqual((QUERY, self.pid1, "qY",),
+                         self.be.get_element(self.pid1, "qY"))
+        self.assertEqual(("text/plain", "qX data", "",),
+                         self.be.get_content(self.pid1, "qY", QUERY))
+
+    def test_rename_refs_media(self):
+        self.be.create_media(self.pid2, "m4", "file:///tmp/m4")
+        self.be.update_annotation(self.pid1, "a2", "i2:m3", 1, 2) #it's a trap!
+        self.be.update_annotation(self.pid1, "a3", "i1:m4", 1, 2) #it's a trap!
+        pids = (self.pid1, self.pid2)
+        m3_uri = "%s#m3" % self.url2
+        self.be.rename_element(self.pid2, "m3", MEDIA, "renamed")
+        self.be.rename_references(pids, m3_uri, "renamed")
+        self.assertEqual("i1:renamed", self.be.get_element(self.pid1, "a1")[3])
+        self.assertEqual("renamed", self.be.get_element(self.pid2, "a5")[3])
+        self.assertEqual("renamed", self.be.get_element(self.pid2, "a6")[3])
+        # did you fall in the trap?
+        self.assertEqual("i2:m3", self.be.get_element(self.pid1, "a2")[3])
+        self.assertEqual("i1:m4", self.be.get_element(self.pid1, "a3")[3])
+
+        # now only on one package
+        m3_uri = "%s#renamed" % self.url2
+        self.be.rename_element(self.pid2, "renamed", MEDIA, "foo")
+        self.be.rename_references((self.pid2,), m3_uri, "foo")
+        self.assertEqual("i1:renamed", self.be.get_element(self.pid1, "a1")[3])
+        self.assertEqual("foo", self.be.get_element(self.pid2, "a5")[3])
+        self.assertEqual("foo", self.be.get_element(self.pid2, "a6")[3])
+
+    def test_rename_refs_schema(self):
+        self.be.create_resource(self.pid2, "R4") 
+        self.be.update_content(self.pid1, "a1", ANNOTATION,
+                               "test/plain", "", "i1:R3")
+        self.be.update_content(self.pid2, "a5", ANNOTATION,
+                               "test/plain", "", "R3")
+        self.be.update_content(self.pid1, "a2", ANNOTATION,
+                               "test/plain", "", "i2:R3") # it's a trap!
+        self.be.update_content(self.pid1, "a3", ANNOTATION,
+                               "test/plain", "", "i1:R4") # it's a trap!
+        pids = (self.pid1, self.pid2)
+        R3_uri = "%s#R3" % self.url2
+        self.be.rename_element(self.pid2, "R3", RESOURCE, "renamed")
+        self.be.rename_references(pids, R3_uri, "renamed")
+        self.assertEqual("i1:renamed",
+                         self.be.get_content(self.pid1, "a1", ANNOTATION)[2])
+        self.assertEqual("renamed",
+                         self.be.get_content(self.pid2, "a5", ANNOTATION)[2])
+        # did you fall in the traps?
+        self.assertEqual("i2:R3",
+                         self.be.get_content(self.pid1, "a2", ANNOTATION)[2])
+        self.assertEqual("i1:R4",
+                         self.be.get_content(self.pid1, "a3", ANNOTATION)[2])
+
+        # now only on one package
+        R3_uri = "%s#renamed" % self.url2
+        self.be.rename_element(self.pid2, "renamed", RESOURCE, "foo")
+        self.be.rename_references((self.pid2,), R3_uri, "foo")
+        self.assertEqual("i1:renamed",
+                         self.be.get_content(self.pid1, "a1", ANNOTATION)[2])
+        self.assertEqual("foo",
+                         self.be.get_content(self.pid2, "a5", ANNOTATION)[2])
+
+    def test_rename_refs_member(self):
+        self.be.insert_member(self.pid2, "r3", "a6", 0) # it's a trap
+        self.be.insert_member(self.pid2, "r3", "a5", 1)
+        self.be.insert_member(self.pid1, "r1", "i1:a5", 0)
+        self.be.insert_member(self.pid1, "r1", "i2:a5", 1) # it's a trap
+        pids = (self.pid1, self.pid2)
+        a5_uri = "%s#a5" % self.url2
+        self.be.rename_element(self.pid2, "a5", ANNOTATION, "renamed")
+        self.be.rename_references(pids, a5_uri, "renamed")
+        self.assertEqual("renamed", self.be.get_member(self.pid2, "r3", 1))
+        self.assertEqual("i1:renamed", self.be.get_member(self.pid1, "r1", 0))
+        # did you fall in the traps?
+        self.assertEqual("a6", self.be.get_member(self.pid2, "r3", 0))
+        self.assertEqual("i2:a5", self.be.get_member(self.pid1, "r1", 1))
+
+        # now only on one package
+        a5_uri = "%s#renamed" % self.url2
+        self.be.rename_element(self.pid2, "renamed", ANNOTATION, "foo")
+        self.be.rename_references((self.pid2,), a5_uri, "foo")
+        self.assertEqual("foo", self.be.get_member(self.pid2, "r3", 1))
+        self.assertEqual("i1:renamed", self.be.get_member(self.pid1, "r1", 0))
+
+    def test_rename_refs_item(self):
+        self.be.insert_item(self.pid2, "l3", "a6", 0) # it's a trap
+        self.be.insert_item(self.pid2, "l3", "a5", 1)
+        self.be.insert_item(self.pid1, "l1", "i1:a5", 0)
+        self.be.insert_item(self.pid1, "l1", "i2:a5", 1) # it's a trap
+        pids = (self.pid1, self.pid2)
+        a5_uri = "%s#a5" % self.url2
+        self.be.rename_element(self.pid2, "a5", ANNOTATION, "renamed")
+        self.be.rename_references(pids, a5_uri, "renamed")
+        self.assertEqual("renamed", self.be.get_item(self.pid2, "l3", 1))
+        self.assertEqual("i1:renamed", self.be.get_item(self.pid1, "l1", 0))
+        # did you fall in the traps?
+        self.assertEqual("a6", self.be.get_item(self.pid2, "l3", 0))
+        self.assertEqual("i2:a5", self.be.get_item(self.pid1, "l1", 1))
+
+        # now only on one package
+        a5_uri = "%s#renamed" % self.url2
+        self.be.rename_element(self.pid2, "renamed", ANNOTATION, "foo")
+        self.be.rename_references((self.pid2,), a5_uri, "foo")
+        self.assertEqual("foo", self.be.get_item(self.pid2, "l3", 1))
+        self.assertEqual("i1:renamed", self.be.get_item(self.pid1, "l1", 0))
+
+    def test_rename_refs_tag(self):
+        self.be.create_tag(self.pid2, "t4")
+        self.be.associate_tag(self.pid2, "a5", "t3")
+        self.be.associate_tag(self.pid1, "i1:a5", "i1:t3")
+        self.be.associate_tag(self.pid1, "a1", "i1:t3")
+        self.be.associate_tag(self.pid1, "a1", "i2:t3") # it's a trap
+        self.be.associate_tag(self.pid1, "a1", "i1:t4") # it's a trap
+        pids = (self.pid1, self.pid2)
+        t3_uri = "%s#t3" % self.url2
+        self.be.rename_element(self.pid2, "t3", TAG, "renamed")
+        self.be.rename_references(pids, t3_uri, "renamed")
+        a5_uri = "%s#a5" % self.url2
+        self.assertEqual(
+            frozenset([(self.pid1, "i1:renamed"), (self.pid2, "renamed"),]),
+            frozenset(self.be.iter_tags_with_element(pids, a5_uri, ))
+        )
+        # did you fall in the traps?
+        a1_uri = "%s#a1" % self.url1
+        self.assertEqual(
+            frozenset([(self.pid1, "i1:renamed"), (self.pid1, "i2:t3"),
+                       (self.pid1, "i1:t4"),]),
+            frozenset(self.be.iter_tags_with_element(pids, a1_uri, ))
+        )
+
+        # now only on one package
+        t3_uri = "%s#renamed" % self.url2
+        self.be.rename_element(self.pid2, "renamed", TAG, "foo")
+        self.be.rename_references((self.pid2,), t3_uri, "foo")
+        self.assertEqual(
+            frozenset([(self.pid1, "i1:renamed"), (self.pid2, "foo"),]),
+            frozenset(self.be.iter_tags_with_element(pids, a5_uri, ))
+        )
+
+    def test_rename_refs_tagged_elements(self):
+        self.be.associate_tag(self.pid2, "a5", "t3")
+        self.be.associate_tag(self.pid1, "i1:a5", "i1:t3")
+        self.be.associate_tag(self.pid1, "i1:a6", "i1:t3") # it's a trap
+        self.be.associate_tag(self.pid1, "i2:a5", "i1:t3") # it's a trap
+        pids = (self.pid1, self.pid2)
+        a5_uri = "%s#a5" % self.url2
+        self.be.rename_element(self.pid2, "a5", ANNOTATION, "renamed")
+        self.be.rename_references(pids, a5_uri, "renamed")
+        t3_uri = "%s#t3" % self.url2
+        self.assertEqual(
+            frozenset([(self.pid1, "i1:renamed"), (self.pid2, "renamed"),
+                       # did you fall in the traps?
+                       (self.pid1, "i1:a6"), (self.pid1, "i2:a5"),]),
+            frozenset(self.be.iter_elements_with_tag(pids, t3_uri, ))
+        )
+
+        # now only on one package
+        a5_uri = "%s#renamed" % self.url2
+        self.be.rename_element(self.pid2, "renamed", ANNOTATION, "foo")
+        self.be.rename_references((self.pid2,), a5_uri, "foo")
+        self.assertEqual(
+            frozenset([(self.pid1, "i1:renamed"), (self.pid2, "foo"),
+                       (self.pid1, "i1:a6"), (self.pid1, "i2:a5"),]),
+            frozenset(self.be.iter_elements_with_tag(pids, t3_uri, ))
+        )
 
 
-class TestUpdateDuringIteration(TestCase):
+class TestRobustIterations(TestCase):
+
+    pid1 = ""
+    pid2 = ";foo"
+    pid3 = ";bar"
+    url1 = TestHandleElements.url1
+    url2 = TestHandleElements.url2
+    url3 = IN_MEMORY_URL + pid3
+    pids = (pid1, pid2)
+
+    iter_methods = {
+        "iter_medias": [pids,],
+        "iter_annotations": [pids,],
+        "iter_relations": [pids,],
+        "iter_views": [pids,],
+        "iter_resources": [pids,],
+        "iter_tags": [pids,],
+        "iter_lists": [pids,],
+        "iter_queries": [pids,],
+        "iter_imports": [pids,],
+        "iter_meta": [pid1, "", ""],
+        "iter_members": [pid1, "r1",],
+        "iter_relations_with_member": [pids, "%s#a1" % url1,],
+        "iter_items": [pid1, "l1",],
+        "iter_lists_with_item": [pids, "%s#r1" % url1,],
+        "iter_tags_with_element": [pids, "%s#a1" % url1,],
+        "iter_elements_with_tag": [pids, "%s#t1" % url1,],
+        "iter_tagging": [pids, "%s#a1" % url1, "%s#t1" % url1,],
+        # TODO add referrers searching methods
+    }
+
+    update_methods = {
+        "close": None, # rather tested with bind and create
+        "update_uri": [pid1, "urn:1234",],
+        "create_media": [pid1, "mX", "file:///tmp/mX.ogm",],
+        "create_annotation": [pid1, "aX", "m1", 0, 10,],
+        "create_relation": [pid1, "rX",],
+        "create_view": [pid1, "vX",],
+        "create_resource": [pid1, "RX",],
+        "create_tag": [pid1, "tX",],
+        "create_list": [pid1, "lX",],
+        "create_query": [pid1, "qX",],
+        "create_import": [pid1, "iX", "file:///tmp/pkg", ""],
+        "update_media": [pid1, "m1", "file:///tmp/mX.ogm",],
+        "update_annotation": [pid1, "a1", "m1", 0, 666,],
+        "update_import": [pid1, "i1", "file:///tmp/pkg", ""],
+        "update_content": [pid1, "a1", ANNOTATION, "test/html", "", "",],
+        "set_meta": [pid1, "", "", "pac#test2", "bar",],
+        "insert_member": [pid1, "r1", "a3", -1],
+        "update_member": [pid1, "r1", "a4", 0],
+        "remove_member": [pid1, "r1", 0],
+        "insert_item": [pid1, "l1", "r2", -1],
+        "update_item": [pid1, "l1", "r2", 0],
+        "remove_item": [pid1, "l1", 0],
+        "associate_tag": [pid1, "a2", "t1",],
+        "dissociate_tag": [pid1, "t1", "t1",],
+        # TODO add renaming methods and destroying methods
+    }
+
     def setUp(self):
         # reuse the bunch of code defined in TestHandleElements:
         TestHandleElements.__dict__["setUp"](self)
@@ -1101,65 +1402,13 @@ class TestUpdateDuringIteration(TestCase):
     def tearDown(self):
         TestHandleElements.__dict__["tearDown"](self)
 
-    def test_all(self):
+    def test_all_update_during_iter(self):
         # This method actually performs several tests and call setUp and 
         # tearDown between each; this is a bit dirty, but was the fastest way
         # to do it...
         # (beside, meta-programming would not have been very legible... ;)
 
-        pids = (self.pid1, self.pid2)
-        iter_methods = {
-            "iter_medias": [pids,],
-            "iter_annotations": [pids,],
-            "iter_relations": [pids,],
-            "iter_views": [pids,],
-            "iter_resources": [pids,],
-            "iter_tags": [pids,],
-            "iter_lists": [pids,],
-            "iter_queries": [pids,],
-            "iter_imports": [pids,],
-            "iter_meta": [self.pid1, "", ""],
-            "iter_members": [self.pid1, "r1",],
-            "iter_relations_with_member": [pids, "%s#a1" % self.url1,],
-            "iter_items": [self.pid1, "l1",],
-            "iter_lists_with_item": [pids, "%s#r1" % self.url1,],
-            "iter_tags_with_element": [pids, "%s#a1" % self.url1,],
-            "iter_elements_with_tag": [pids, "%s#t1" % self.url1,],
-            "iter_tagging": [pids, "%s#a1" % self.url1, "%s#t1" % self.url1,],
-            # TODO add referrers searching methods
-        }
-        update_functions = {
-            create: [P(IN_MEMORY_URL+";baz"),],
-            bind: [P(IN_MEMORY_URL+";bar"),],
-        }
-        update_methods = {
-            #"close": [,], rather tested with bind and create
-            "update_uri": [self.pid1, "urn:1234",],
-            "create_media": [self.pid1, "mX", "file:///tmp/mX.ogm",],
-            "create_annotation": [self.pid1, "aX", "m1", 0, 10,],
-            "create_relation": [self.pid1, "rX",],
-            "create_view": [self.pid1, "vX",],
-            "create_resource": [self.pid1, "RX",],
-            "create_tag": [self.pid1, "tX",],
-            "create_list": [self.pid1, "lX",],
-            "create_query": [self.pid1, "qX",],
-            "create_import": [self.pid1, "iX", "file:///tmp/pkg", ""],
-            "update_media": [self.pid1, "m1", "file:///tmp/mX.ogm",],
-            "update_annotation": [self.pid1, "a1", "m1", 0, 666,],
-            "update_import": [self.pid1, "i1", "file:///tmp/pkg", ""],
-            "update_content": [self.pid1, "a1", "test/html", "", "",],
-            "set_meta": [self.pid1, "", "", "pac#test2", "bar",],
-            "insert_member": [self.pid1, "r1", "a3", -1],
-            "update_member": [self.pid1, "r1", "a4", 0],
-            "remove_member": [self.pid1, "r1", 0],
-            "insert_item": [self.pid1, "l1", "r2", -1],
-            "update_item": [self.pid1, "l1", "r2", 0],
-            "remove_item": [self.pid1, "l1", 0],
-            "associate_tag": [self.pid1, "a2", "t1",],
-            "dissociate_tag": [self.pid1, "t1", "t1",],
-            # TODO add renaming methods and destroying methods
-        }
-        for n, args in iter_methods.iteritems():
+        for n, args in self.iter_methods.iteritems():
             b = self.be
             m = getattr(b, n)
             ref = list(m(*args))
@@ -1167,7 +1416,8 @@ class TestUpdateDuringIteration(TestCase):
             test = []
             for i in m(*args):
                 if len(test) == 1:
-                    for n2, args2 in update_methods.iteritems():
+                    for n2, args2 in self.update_methods.iteritems():
+                        if args2 is None: continue # special case for close
                         try:
                             getattr(b, n2)(*args2)
                         except InternalError, e:
@@ -1180,6 +1430,21 @@ class TestUpdateDuringIteration(TestCase):
             self.assertEquals(ref, test, n)
             self.tearDown()
             self.setUp()
+
+    def test_independant_iterations(self):
+        for n, args in self.iter_methods.iteritems():
+            b = self.be
+            m = getattr(b, n)
+            ref = list(m(*args))
+            assert ref, n # lists should be non-empty
+            for n2, args2 in self.iter_methods.iteritems():
+                test = []
+                for i in m(*args):
+                    if len(test) == 1:
+                       m2 = getattr(b, n2)
+                       list(m2(*args2)) # try to parasit enclosing iteration
+                    test.append(i)
+                self.assertEquals(ref, test, n)
 
 
 class TestRetrieveDataWithSameId(TestCase):

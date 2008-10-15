@@ -70,8 +70,9 @@ class WithContentMixin(DirtyMixin):
 
     def __clean_metadata(self):
         o = self._owner
-        o._backend.update_content(o._id, self._id, self.__mimetype,
-                                  self.__data, self.__schema_idref)
+        o._backend.update_content(o._id, self._id, self.ADVENE_TYPE,
+                                  self.__mimetype, self.__data,
+                                  self.__schema_idref)
 
     __clean_data = __clean_metadata # not distinguished for the moment
 

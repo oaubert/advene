@@ -236,6 +236,29 @@ def _split_uri_ref(uri_ref):
 
 
 class _FlushableIterator(object):
+    """Cursor based iterator that may flush the cursor whenever needed.
+
+       Transactions to the database cannot be commited while a cursor is
+       being used. So it is unsafe for _SqliteBackend to return cursors direcly
+       because it may hinder further execution of methods using transactions.
+
+       On the other hand, it may be inefficient to flush all cursors into lists 
+       before returning them. This class provides an efficient solution.
+
+       All cursors (or cursor based iterators) are wrapped info a 
+       _FlushableIterator before being returned, and the latter is weakly
+       referenced by the backend instance. Whenever a transaction is started,
+       all known _FlusableIterators are flushed, i.e. they internally change
+       their underlying iterator into a list, so that the transaction can be
+       committed, but users can continue to transparently use them.
+
+       Note that this implementation uses the iterable interface of sqlite
+       cursors rather than the DB-API cursor interface. This is less portable,
+       but allows to wrap iterators that are not cursors but relying on a
+       cursor, e.g.:::
+
+           return _FlusableIterator(( r[1] for r in conn.execute(query) ))
+    """
     __slots__ = ["_cursor", "__weakref__",]
     def __init__ (self, cursor, backend):
         self._cursor = cursor
@@ -268,8 +291,8 @@ class _SqliteBackend(object):
                               lambda p,s: p and "%s:%s" % (p,s) or s)
         conn.create_function("regexp", 2,
                               lambda r,l: re.search(r,l) is not None )
-        # NB: for a reason I don't know, the defined function receives the
-        # righthand operand first, then the lefthand operand...
+        # NB: for a reason I don't know, the defined function regexp
+        # receives the righthand operand first, then the lefthand operand...
         # hence the lambda function above
         self._bound = WeakValueDictWithCallback(self._check_unused)
         # NB: the callback ensures that even if packages "forget" to close
@@ -329,6 +352,11 @@ class _SqliteBackend(object):
             if self._path in _cache: del _cache[self._path]
 
     def _begin_transaction(self, mode=""):
+        """Begin a transaction.
+
+        This method must *always* be used to begin a transaction (do *not* use
+        `self._curs.execute("BEGIN")` directly. See `_FlushableIterator`_ .
+        """
         for i in self._iterators.iterkeys():
             i.flush()
         self._curs.execute("BEGIN %s" % mode)
@@ -364,6 +392,10 @@ class _SqliteBackend(object):
                 (package_id, id, element_type))
 
     def create_media(self, package_id, id, url):
+        """Create a new media with the given data.
+
+        Raise a ModelException if the identifier already exists in the package.
+        """
         c = self._curs
         _create_element = self._create_element
         execute = self._curs.execute
@@ -377,8 +409,13 @@ class _SqliteBackend(object):
             raise InternalError("could not insert", e)
 
     def create_annotation(self, package_id, id, media, begin, end):
-        """
-        ``media`` is the id-ref of an own or directly imported media.
+        """Create a new annotation with the given data.
+
+        @param media the id-ref of an own or direcly imported media
+        @param begin an int, the beginning timepoint of the annotation
+        @param end   an int, the ending timepoint of the annotation
+
+        Raise a ModelException if the identifier already exists in the package.
         """
         assert(isinstance(begin, int) and begin >= 0), begin
         assert(isinstance(  end, int) and   end >= begin), (begin, end)
@@ -400,6 +437,10 @@ class _SqliteBackend(object):
             raise InternalError("could not insert", e)
 
     def create_relation(self, package_id, id):
+        """Create a new empty relation with the given data.
+
+        Raise a ModelException if the identifier already exists in the package.
+        """
         _create_element = self._create_element
         execute = self._curs.execute
         try:
@@ -412,6 +453,10 @@ class _SqliteBackend(object):
             raise InternalError("error in creating", e)
 
     def create_view(self, package_id, id):
+        """Create a new view with the given data.
+
+        Raise a ModelException if the identifier already exists in the package.
+        """
         _create_element = self._create_element
         execute = self._curs.execute
         try:
@@ -424,6 +469,10 @@ class _SqliteBackend(object):
             raise InternalError("error in creating", e)
 
     def create_resource(self, package_id, id):
+        """Create a new resource with the given data.
+
+        Raise a ModelException if the identifier already exists in the package.
+        """
         _create_element = self._create_element
         execute = self._curs.execute
         try:
@@ -436,6 +485,10 @@ class _SqliteBackend(object):
             raise InternalError("error in creating", e)
 
     def create_tag(self, package_id, id):
+        """Create a new tag with the given data.
+
+        Raise a ModelException if the identifier already exists in the package.
+        """
         _create_element = self._create_element
         execute = self._curs.execute
         try:
@@ -446,6 +499,10 @@ class _SqliteBackend(object):
             raise InternalError("error in creating", e)
 
     def create_list(self, package_id, id):
+        """Create a new empty list with the given data.
+
+        Raise a ModelException if the identifier already exists in the package.
+        """
         _create_element = self._create_element
         execute = self._curs.execute
         try:
@@ -456,6 +513,10 @@ class _SqliteBackend(object):
             raise InternalError("error in creating", e)
 
     def create_query(self, package_id, id):
+        """Create a new query with the given data.
+
+        Raise a ModelException if the identifier already exists in the package.
+        """
         _create_element = self._create_element
         execute = self._curs.execute
         try:
@@ -468,6 +529,10 @@ class _SqliteBackend(object):
             raise InternalError("error in creating",e)
         
     def create_import(self, package_id, id, url, uri):
+        """Create a new import with the given data.
+
+        Raise a ModelException if the identifier already exists in the package.
+        """
         _create_element = self._create_element
         execute = self._curs.execute
         try:
@@ -493,22 +558,29 @@ class _SqliteBackend(object):
         return False
 
     def get_element(self, package_id, id):
-        """
-        Return the tuple describing a given element, None if that element does
-        not exist.
+        """Return the tuple describing a given element.
+
+           If the element does not exist, None is returned.
         """
 
-        q = "SELECT typ FROM Elements WHERE package = ? AND id = ?"
+        q = "SELECT e.typ, m.url, join_id_ref(a.media_p, a.media_i), " \
+                   "a.fbegin, a.fend, i.url, i.uri " \
+            "FROM Elements e " \
+            "LEFT JOIN Medias m ON e.package = m.package AND e.id = m.id " \
+            "LEFT JOIN Annotations a " \
+                   "ON e.package = a.package AND e.id = a.id " \
+            "LEFT JOIN Imports i ON e.package = i.package AND e.id = i.id " \
+            "WHERE e.package = ? AND e.id = ?" 
         r = self._curs.execute(q, (package_id, id,)).fetchone()
         if r is None:
             return None
         t = r[0]
         if t == MEDIA:
-            return self.iter_medias((package_id,), id=id).next()
+            return(t, package_id, id,) + r[1:2]
         elif t == ANNOTATION:
-            return self.iter_annotations((package_id,), id=id).next()
+            return(t, package_id, id,) + r[2:5]
         elif t == IMPORT:
-            return self.iter_imports((package_id,), id=id).next()
+            return(t, package_id, id,) + r[5:7]
         else:
             return(t, package_id, id)
 
@@ -771,6 +843,7 @@ class _SqliteBackend(object):
     # updating
 
     def update_media(self, package_id, id, url):
+        assert self.has_element(package_id, id, MEDIA)
         execute = self._curs.execute
         try:
             execute("UPDATE Medias SET url = ? "
@@ -783,6 +856,7 @@ class _SqliteBackend(object):
         """
         ``media`` is the id-ref of an own or directly imported media.
         """
+        assert self.has_element(package_id, id, ANNOTATION)
         assert(isinstance(begin, int) and begin >= 0), begin
         assert(isinstance(  end, int) and   end >= begin), (begin, end)
 
@@ -800,6 +874,7 @@ class _SqliteBackend(object):
             raise InternalError("could not update", e)
 
     def update_import(self, package_id, id, url, uri):
+        assert self.has_element(package_id, id, IMPORT)
         execute = self._curs.execute
         try:
             execute("UPDATE Imports SET url = ?, uri = ? "
@@ -809,11 +884,141 @@ class _SqliteBackend(object):
             self._conn.rollback()
             raise InternalError("error in updating", e)
 
-    # reference finding
-
-    # TODO
-
     # renaming
+
+    def rename_element(self, package_id, old_id, element_type, new_id):
+        """Rename an own elemenent of package_id.
+
+        NB: element_type must be provided and must be the type constant of the
+        identified element, or the behaviour of this method is unspecified.
+
+        NB: This does not update references to that element. For that, you must
+        also use `rename_references`_. This however does update the id-ref of
+        imported elements if the renamed element is an import.
+        """
+        assert self.has_element(package_id, old_id, element_type)
+        assert not self.has_element(package_id, new_id)
+
+        # NB: all the queries after the first one (and hence the transaction)
+        # are only required because sqlite does not implement foreign keys;
+        # with an "ON UPDATE CASCADE", the renaming in Elements would suffice.
+
+        self._begin_transaction("IMMEDIATE")
+        execute = self._curs.execute
+        args = (new_id, package_id, old_id)
+        try:
+            execute("UPDATE Elements SET id = ? WHERE package = ? AND id = ?",
+                    args)
+            if element_type in (ANNOTATION, RELATION, VIEW, RESOURCE, QUERY):
+                execute("UPDATE Contents SET element = ? " \
+                         "WHERE package = ? AND element = ?",
+                        args)
+            
+            if element_type == MEDIA:
+                execute("UPDATE Medias SET id = ? "\
+                         "WHERE package = ? AND id = ?",
+                        args)
+            elif element_type == ANNOTATION:
+                execute("UPDATE Annotations SET id = ? "\
+                         "WHERE package = ? AND id = ?",
+                        args)
+            elif element_type == RELATION:
+                execute("UPDATE RelationMembers SET relation = ? " \
+                         "WHERE package = ? AND relation = ?",
+                        args)
+            elif element_type == LIST:
+                execute("UPDATE ListItems SET list = ? " \
+                         "WHERE package = ? AND list = ?",
+                        args)
+            elif element_type == IMPORT:
+                execute("UPDATE Imports SET id = ? "\
+                         "WHERE package = ? AND id = ?",
+                        args)
+                execute("UPDATE Contents SET schema_p = ? " \
+                         "WHERE package = ? AND schema_p = ?",
+                        args)
+                execute("UPDATE Annotations SET media_p = ? " \
+                         "WHERE package = ? AND media_p = ?",
+                        args)
+                execute("UPDATE RelationMembers SET member_p = ? " \
+                         "WHERE package = ? AND member_p = ?",
+                        args)
+                execute("UPDATE ListItems SET item_p = ? " \
+                         "WHERE package = ? AND item_p = ?",
+                        args)
+                execute("UPDATE Tagged SET element_p = ? " \
+                         "WHERE package = ? AND element_p = ?",
+                        args)
+                execute("UPDATE Tagged SET tag_p = ? " \
+                         "WHERE package = ? AND tag_p = ?",
+                        args)
+        except sqlite.Error, e:
+            execute("ROLLBACK")
+            raise InternalError("could not update", e)
+        execute("COMMIT")
+
+    def rename_references(self, package_ids, old_uriref, new_id):
+        """Reflect the renaming of an element in several packages.
+
+        Apply the change of id of an element (formerly known as old_uriref)
+        in all references to that element in package_ids.
+        """
+        assert not isinstance(package_ids, basestring), "list if ids expected"
+        element_u, element_i = _split_uri_ref(old_uriref)
+        args = [new_id,] + list(package_ids) \
+             + [element_i, element_u, element_u,]
+        q1 = "SELECT p.id || ' ' || i.id " \
+             "FROM Packages p JOIN Imports i ON p.id = i.package " \
+             "WHERE ? in (i.uri, i.url) " \
+             "UNION " \
+             "SELECT p.id || ' ' FROM Packages p " \
+             "WHERE ? in (p.uri, p.url)"
+        # The query above selects all pairs package_id/import_id (where the
+        # second can be "") matching the URI prefix of old_uriref.
+        # It can then be used to know detect id-refs to update.
+        execute = self._curs.execute
+        self._begin_transaction("IMMEDIATE")
+        try:
+            # media references
+            q2 = "UPDATE Annotations SET media_i = ? " \
+                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                   "AND media_i = ? " \
+                   "AND package || ' ' || media_p IN (%s)" % q1
+            execute(q2, args)
+            # schema references
+            q2 = "UPDATE Contents SET schema_i = ? " \
+                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                   "AND schema_i = ? " \
+                   "AND package || ' ' || schema_p IN (%s)" % q1
+            execute(q2, args)
+            # member references
+            q2 = "UPDATE RelationMembers SET member_i = ? " \
+                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                   "AND member_i = ? " \
+                   "AND package || ' ' || member_p IN (%s)" % q1
+            execute(q2, args)
+            # item references
+            q2 = "UPDATE ListItems SET item_i = ? " \
+                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                   "AND item_i = ? " \
+                   "AND package || ' ' || item_p IN (%s)" % q1
+            execute(q2, args)
+            # tags references
+            q2 = "UPDATE Tagged SET tag_i = ? " \
+                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                   "AND tag_i = ? " \
+                   "AND package || ' ' || tag_p IN (%s)" % q1
+            execute(q2, args)
+            # tagged element references
+            q2 = "UPDATE Tagged SET element_i = ? " \
+                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                   "AND element_i = ? " \
+                   "AND package || ' ' || element_p IN (%s)" % q1
+            execute(q2, args)
+        except InternalError:#sqlite.Error, e:
+            execute("ROLLBACK")
+            raise InternalError("could not update", e)
+        execute("COMMIT")
 
     # TODO
 
@@ -826,21 +1031,23 @@ class _SqliteBackend(object):
     def get_content(self, package_id, id, element_type):
         """
         Return a tuple(mimetype, data, schema_idref).
-        In this implementation, element_type will always be ignored.
         Note that ``schema_idref`` will be an empty string if no schema is
         specified (never None).
         """
+        assert self.has_element(package_id, id, element_type)
         q = "SELECT mimetype, data, join_id_ref(schema_p,schema_i) as schema " \
             "FROM Contents " \
             "WHERE package = ? AND element = ?"
         return self._curs.execute(q, (package_id, id,)).fetchone() or None
 
-    def update_content(self, package_id, id, mimetype, data, schema):
+    def update_content(self, package_id, id, element_type,
+                       mimetype, data, schema):
         """
         Update the content of the identified element.
         ``schema`` is the id-ref of an own or directly imported resource,
         or an empty string to specify no schema (not None).
         """
+        assert self.has_element(package_id, id, element_type)
         if schema:
             p,s = _split_id_ref(schema) # also assert that schema has depth < 2
             assert p == "" or self.has_element(package_id,p,IMPORT), p
@@ -863,9 +1070,10 @@ class _SqliteBackend(object):
     def iter_meta(self, package_id, id, element_type):
         """
         Iter over the metadata, sorting keys in alphabetical order.
-
-        In this implementation, element_type will always be ignored.
+        If package metadata is targeted, id should be an empty string (in
+        that case, element_type will be ignored).
         """
+        assert id == "" or self.has_element(package_id, id, element_type)
         q = """SELECT key, value FROM Meta
                WHERE package = ? AND element = ? ORDER BY key"""
         r = ( (d[0], d[1])
@@ -875,11 +1083,10 @@ class _SqliteBackend(object):
     def get_meta(self, package_id, id, element_type, key):
         """
         Return the given metadata of the identified element.
-        id should be an empty string if package metadata is required,
-        and element_type will be ignored.
-
-        In this implementation, element_type will always be ignored.
+        If package metadata is targeted, id should be an empty string (in
+        that case, element_type will be ignored).
         """
+        assert id == "" or self.has_element(package_id, id, element_type)
         q = """SELECT value FROM Meta
                WHERE package = ? AND element = ? AND KEY = ?"""
         d = self._curs.execute(q, (package_id, id, key,)).fetchone()
@@ -891,13 +1098,10 @@ class _SqliteBackend(object):
     def set_meta(self, package_id, id, element_type, key, val):
         """
         Return the given metadata of the identified element.
-        id should be an empty string if package metadata is required,
-        and element_type will be ignored.
-        id should be an empty string if package metadata is targetted,
-        and element_type will be ignored.
-
-        In this implementation, element_type will always be ignored.
+        If package metadata is targeted, id should be an empty string (in
+        that case, element_type will be ignored).
         """
+        assert id == "" or self.has_element(package_id, id, element_type)
         q = """SELECT value FROM Meta
                WHERE package = ? AND element = ? and key = ?"""
         c = self._curs.execute(q, (package_id, id, key))
@@ -938,6 +1142,7 @@ class _SqliteBackend(object):
         NB: the total number of members, n, if known, may be provided, as an
         optimization.
         """
+        assert self.has_element(package_id, id, RELATION)
         if n < 0:
             n = self.count_members(package_id, id)
         assert -1 <= pos <= n, pos
@@ -967,6 +1172,7 @@ class _SqliteBackend(object):
         Remobv the member at the given position in the identified relation.
         ``member`` is the id-ref of an own or directly imported member.
         """
+        assert self.has_element(package_id, id, RELATION)
         assert 0 <= pos < self.count_members(package_id, id), pos
 
         p,s = _split_id_ref(member) # also assert that member has depth < 2
@@ -984,6 +1190,7 @@ class _SqliteBackend(object):
         """
         Count the members of the identified relations.
         """
+        assert self.has_element(package_id, id, RELATION)
         q = "SELECT count(ord) FROM RelationMembers "\
             "WHERE package = ? AND relation = ?"
         return self._curs.execute(q, (package_id, id)).fetchone()[0]
@@ -996,6 +1203,7 @@ class _SqliteBackend(object):
         NB: the total number of members, n, if known, may be provided, as an
         optimization.
         """
+        assert self.has_element(package_id, id, RELATION)
         if __debug__:
             n = self.count_members(package_id, id)
             assert -n <= pos < n, pos
@@ -1014,6 +1222,7 @@ class _SqliteBackend(object):
         """
         Iter over all the members of the identified relation.
         """
+        assert self.has_element(package_id, id, RELATION)
         q = "SELECT join_id_ref(member_p,member_i) AS member " \
             "FROM RelationMembers " \
             "WHERE package = ? AND relation = ? ORDER BY ord"
@@ -1024,6 +1233,7 @@ class _SqliteBackend(object):
         """
         Remove the member at the given position in the identified relation.
         """
+        assert self.has_element(package_id, id, RELATION)
         assert 0 <= pos < self.count_members(package_id, id), pos
 
         execute = self._curs.execute
@@ -1083,6 +1293,7 @@ class _SqliteBackend(object):
         NB: the total number of members, n, if known, may be provided, as an
         optimization.
         """
+        assert self.has_element(package_id, id, LIST)
         if n < 0:
             n = self.count_items(package_id, id)
         assert -1 <= pos <= n, pos
@@ -1112,6 +1323,7 @@ class _SqliteBackend(object):
         Remobv the item at the given position in the identified list.
         ``item`` is the id-ref of an own or directly imported item.
         """
+        assert self.has_element(package_id, id, LIST)
         assert 0 <= pos < self.count_items(package_id, id), pos
 
         p,s = _split_id_ref(item) # also assert that item has depth < 2
@@ -1129,6 +1341,7 @@ class _SqliteBackend(object):
         """
         Count the items of the identified lists.
         """
+        assert self.has_element(package_id, id, LIST)
         q = "SELECT count(ord) FROM ListItems "\
             "WHERE package = ? AND list = ?"
         return self._curs.execute(q, (package_id, id)).fetchone()[0]
@@ -1141,6 +1354,7 @@ class _SqliteBackend(object):
         NB: the total number of members, n, if known, may be provided, as an
         optimization.
         """
+        assert self.has_element(package_id, id, LIST)
         if __debug__:
             n = self.count_items(package_id, id)
             assert -n <= pos < n, pos
@@ -1159,6 +1373,7 @@ class _SqliteBackend(object):
         """
         Iter over all the items of the identified list.
         """
+        assert self.has_element(package_id, id, LIST)
         q = "SELECT join_id_ref(item_p,item_i) AS item " \
             "FROM ListItems " \
             "WHERE package = ? AND list = ? ORDER BY ord"
@@ -1169,6 +1384,7 @@ class _SqliteBackend(object):
         """
         Remove the item at the given position in the identified list.
         """
+        assert self.has_element(package_id, id, LIST)
         assert 0 <= pos < self.count_items(package_id, id), pos
 
         execute = self._curs.execute
@@ -1319,15 +1535,10 @@ class _SqliteBackend(object):
         r = ( i[0] for i in self._conn.execute(q, args) )
         return _FlushableIterator(r, self)
 
-
     # end of the class
 
-# NB: all iter_* functions must return a _FlushableIterator which stores itself 
-# in the _iterators attribute of the backend.
-# all methods modifying the DB must use _begin_transaction to start a 
-# transaction, in order to flush the iterators stored in _iterators (or the commit will fail).
-# both behaviour could have been implemented as decorators for the
-# corresponding methods, but
+# NB: the wrapping of cursors into _FlushableIterators could be implemented
+# as a decorator on all iter_* functions. However
 #  - "classical" (i.e. wrapping) decorators have a high overhead
 #  - "smart" (i.e. code-modifying) decorators are hard to write
 # so for the moment, we opt for old-school copy/paste...
