@@ -18,7 +18,7 @@ which `_SqliteBackend` provides a reference implementation.
 from pysqlite2 import dbapi2 as sqlite
 from os        import unlink
 from os.path   import exists, isdir, join, split
-from urllib    import url2pathname
+from urllib    import url2pathname, pathname2url
 from weakref   import WeakKeyDictionary, WeakValueDictionary
 import re
 
@@ -32,7 +32,7 @@ from advene.utils.reftools import WeakValueDictWithCallback
 
 BACKEND_VERSION = "1.2"
 
-IN_MEMORY_URL = "sqlite::memory:"
+IN_MEMORY_URL = "sqlite:%3Amemory%3A"
 
 _DF = True # means that assert will succeed, i.e. *no* debug
 
@@ -401,6 +401,10 @@ class _SqliteBackend(object):
     # begin of the backend interface
 
     # package related methods
+
+    def get_bound_url(self, package_id):
+        """Return the backend-URL the given package is bound to."""
+        return "sqlite:%s%s" % (pathname2url(self._path), package_id)
 
     def get_uri(self, package_id):
         q = "SELECT uri FROM Packages WHERE id = ?"

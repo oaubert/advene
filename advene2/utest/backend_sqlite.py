@@ -116,6 +116,7 @@ class TestCreateBackend(TestCase):
         self.assert_(
             claims_for_bind(self.url1)
         )
+        self.assertEqual(self.url1, b.get_bound_url(i))
 
     def test_create_with_pid(self):
         b, i = create(P(self.url2))
@@ -123,6 +124,7 @@ class TestCreateBackend(TestCase):
         self.assert_(
             claims_for_bind(self.url2)
         )
+        self.assertEqual(self.url2, b.get_bound_url(i))
 
     def test_create_new_pid(self):
         b, i = create(P(self.url1))
@@ -132,15 +134,18 @@ class TestCreateBackend(TestCase):
         self.assert_(
             claims_for_bind(self.url2)
         )
+        self.assertEqual(self.url2, b.get_bound_url(i))
 
     def test_create_in_memory(self):
         b,p = create(P(IN_MEMORY_URL))
         self.assert_(b._path, ":memory:")
+        self.assertEqual(IN_MEMORY_URL, b.get_bound_url(p))
         b.close(p)
 
     def test_create_with_other_url(self):
         b,p = create(P("http://example.com/a_package"), url=IN_MEMORY_URL)
         self.assert_(b._path, ":memory:")
+        self.assertEqual(IN_MEMORY_URL, b.get_bound_url(p))
         b.close(p)
 
 
@@ -213,10 +218,12 @@ class TestBindBackend(TestCase):
 
     def test_bind_without_pid(self):
         b, i = bind(P(self.url1))
+        self.assertEqual(self.url1, b.get_bound_url(i))
         b.close (i)
 
     def test_bind_with_pid(self):
         b, i = bind(P(self.url2))
+        self.assertEqual(self.url2, b.get_bound_url(i))
         b.close (i)
 
     def test_bind_with_other_pid(self):
@@ -224,10 +231,12 @@ class TestBindBackend(TestCase):
         b, i = create(P(url3))
         b.close(i)
         b, i = bind(P(url3))
+        self.assertEqual(url3, b.get_bound_url(i))
         b.close(i)
 
     def test_bind_with_other_url(self):
         b, i = bind(P("http://example.com/a_package"), url=self.url2)
+        self.assertEqual(self.url2, b.get_bound_url(i))
         b.close (i)
 
 
