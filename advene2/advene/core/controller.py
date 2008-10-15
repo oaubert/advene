@@ -1607,9 +1607,9 @@ class AdveneController(object):
                         self.log(_("Infinite loop in STBV %(name)s: the %(imp)s view is invoked multiple times.") % { 'name': self.get_title(view),
                                                                                                                       'imp': self.get_title(v) })
                     else:
-                        rs.from_xml(v.content.as_file,
-                                    catalog=self.event_handler.catalog,
-                                    origin=v.uriref)
+                        f=v.content.as_file
+                        rs.from_xml(f, catalog=self.event_handler.catalog, origin=v.uriref)
+                        f.close()
                         parsed_views.append(v)
                 subviews=rs.filter_subviews()
 

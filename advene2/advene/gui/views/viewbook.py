@@ -248,10 +248,15 @@ class ViewBook(AdhocView):
                 view=self.controller.gui.open_adhoc_view(name, label=label, destination=self.location)
             elif 'name' in data:
                 name=data['name']
+                def stbv_name(v):
+                    f=v.content.as_file
+                    n=ET.parse(f).getroot().attrib.get('id')
+                    f.close()
+                    return f                    
                 saved=[ v
                         for v in self.controller.package.all.views
                         if v.content.mimetype == 'application/x-advene-adhoc-view'
-                        and ET.parse(v.content.as_file).getroot().attrib.get('id') == name ]
+                        and stbv_name(v) == name ]
                 if name == 'transcription':
                     menu=gtk.Menu()
                     i=gtk.MenuItem(_("Open a new transcription for..."))

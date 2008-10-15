@@ -1706,7 +1706,9 @@ class AdveneGUI(Connect):
         view=None
         if isinstance(name, View):
             if name.content.mimetype == 'application/x-advene-workspace-view':
-                tree=ET.parse(name.content.as_file)
+                f=name.content.as_file
+                tree=ET.parse(f)
+                f.close()
 
                 if kw.get('ask', True):
                     d = gtk.Dialog(title=_("Restoring workspace..."),
@@ -1746,7 +1748,9 @@ class AdveneGUI(Connect):
             # Parse the content, extract the view id
             # Override parameters
             parameters=name.content
-            p=AdhocViewParametersParser(name.content.as_file)
+            f=name.content.as_file
+            p=AdhocViewParametersParser(f)
+            f.close()
             if p.view_id:
                 if label is None:
                     label=name.title
@@ -3550,14 +3554,16 @@ class AdveneGUI(Connect):
                 return True
 
             kw = {}
+            f=filter.content.as_file            
             if filter.content.mimetype is None or filter.content.mimetype.startswith('text/'):
                 compiler = simpleTAL.HTMLTemplateCompiler()
-                compiler.parseTemplate(filter.content.as_file, 'utf-8')
+                compiler.parseTemplate(f, 'utf-8')
                 compiler.getTemplate().expand (context=ctx, outputFile=stream, outputEncoding='utf-8')
             else:
                 compiler = simpleTAL.XMLTemplateCompiler ()
-                compiler.parseTemplate(filter.content.as_file)
+                compiler.parseTemplate(f)
                 compiler.getTemplate().expand (context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
+            f.close()
             stream.close()
             self.log(_("Data exported to %s") % filename)
         fs.destroy()
