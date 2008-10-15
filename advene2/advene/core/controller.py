@@ -955,9 +955,12 @@ class AdveneController(object):
         """Current media instance.
         """
         try:
-            return self.package._current_media
+            media=self.package._current_media
         except AttributeError:
-            return None
+            media=None
+        if not media and len(self.package.own.medias):
+            media=self.package.own.medias[0]
+        return media
         
     def get_current_mediafile(self, package=None):
         """Return the current mediafile for the given package.
