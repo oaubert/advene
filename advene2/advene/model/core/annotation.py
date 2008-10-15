@@ -291,3 +291,20 @@ class Annotation(PackageElement, WithContentMixin):
     @tales_property
     def _tales_outgoing_relations(self, context):
         return self._tales_relations(context).filter(position=1)
+
+    @tales_property
+    def _tales_snapshot_url(self, context):
+        options=context.globals['options']
+        controller=options['controller']
+        url=controller.server.urlbase +  "packages/%s/imagecache/%s/%d" % (options['aliases'][self.owner],
+                                                                           self.media.id,
+                                                                           self.begin)
+        return url
+
+    @tales_property
+    def _tales_player_url(self, context):
+        options=context.globals['options']
+        controller=options['controller']
+        url=controller.server.urlbase +  "media/%s/play/%d" % (self.media.id,
+                                                               self.begin)
+        return url
