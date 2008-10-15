@@ -231,22 +231,44 @@ class TestBindBackend(TestCase):
         self.b, self.i = bind(P("http://example.com/a_package"), url=self.url2)
 
 
-class TestPackageUri(TestCase):
+class TestPackageHandling(TestCase):
+    def setUp(self):
+        self.filename = tmpnam()
+        self.url1 = "sqlite:%s" % self.filename
+        self.url2 = "%s;foo" % self.url1
+
+    def tearDown(self):
+        if exists(self.filename):
+            unlink(self.filename)
+        del P._L[:] # not required, but saves memory
+
     def test_uri(self):
         be, pid1 = create(P(IN_MEMORY_URL))
         _ , pid2 = create(P("%s;foo" % IN_MEMORY_URL))
-        for pid in(pid1, pid2,):
-            be.update_uri(pid, "urn:foobar")
-            self.assertEqual("urn:foobar", be.get_uri(pid))
-            be.update_uri(pid, "urn:toto")
-            self.assertEqual("urn:toto", be.get_uri(pid))
-            be.update_uri(pid, "")
-            self.assertEqual("", be.get_uri(pid))
-        be.close(pid1)
+        try:
+            for pid in(pid1, pid2,):
+                be.update_uri(pid, "urn:foobar")
+                self.assertEqual("urn:foobar", be.get_uri(pid))
+                be.update_uri(pid, "urn:toto")
+                self.assertEqual("urn:toto", be.get_uri(pid))
+                be.update_uri(pid, "")
+                self.assertEqual("", be.get_uri(pid))
+        finally:
+            be.close(pid1)
+            be.close(pid2)
+
+    def test_close(self):
+        be, pid2 = create(P(self.url2))
+        be.close(pid2)
+        be, pid2 = bind(P(self.url2))
         be.close(pid2)
 
-    def tearDown(self):
-        del P._L[:] # not required, but saves memory
+    def test_delete(self):
+        be, pid2 = create(P(self.url2))
+        be.delete(pid2)
+        be, pid2 = create(P(self.url2))
+        be.close(pid2)
+
 
 
 class TestCache(TestCase):

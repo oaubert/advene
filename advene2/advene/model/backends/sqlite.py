@@ -130,8 +130,8 @@ def create(package, force=False, url=None):
             f = open(join(split(__file__)[0], "sqlite_init.sql"))
             sql = f.read()
             f.close()
+            curs.execute("BEGIN EXCLUSIVE")
             try:
-                curs.execute("BEGIN EXCLUSIVE")
                 curs.executescript(sql)
                 curs.execute("INSERT INTO Version VALUES (?)",
                              (BACKEND_VERSION,))
@@ -142,6 +142,8 @@ def create(package, force=False, url=None):
                 raise RuntimeError("%s - SQL:\n%s" % (e, query))
         elif _contains_package(conn, pkgid):
             raise PackageInUse(pkgid)
+        else:
+            curs.execute("BEGIN EXCLUSIVE")
         b = _SqliteBackend(path, conn, force)
         _cache[path] = b
 
@@ -403,6 +405,41 @@ class _SqliteBackend(object):
                                    ("", package_id,))
             except sqlite.Error, e:
                 raise InternalError("could not update", e)
+            del d[package_id]
+        self._check_unused(package_id)
+
+    def delete(self, package_id):
+        """Delete from the backend all the data about a bound package.
+
+        Obviously, a deleted package does not need to be closed.
+        """
+        d = self._bound
+        m = d.get(package_id) # keeping a ref on it prevents it to disappear
+        if m is not None:     # in the meantime...
+            execute = self._curs.execute
+            args = [package_id,]
+
+            # NB: all the queries after the first one (and hence the 
+            # transaction) are only required because sqlite does not implement
+            # foreign keys; with an "ON DELETE CASCADE", the deletion in
+            # Packages would suffice
+            
+            self._begin_transaction("IMMEDIATE")
+            try:
+                execute("DELETE FROM Packages WHERE id = ?", args)
+                execute("DELETE FROM Elements WHERE package = ?", args)
+                execute("DELETE FROM Meta WHERE package = ?", args)
+                execute("DELETE FROM Contents WHERE package = ?", args)
+                execute("DELETE FROM Medias WHERE package = ?", args)
+                execute("DELETE FROM Annotations WHERE package = ?", args)
+                execute("DELETE FROM RelationMembers WHERE package = ?", args)
+                execute("DELETE FROM ListItems WHERE package = ?", args)
+                execute("DELETE FROM Imports WHERE package = ?", args)
+                execute("DELETE FROM Tagged WHERE package = ?", args)
+            except sqlite.Error, e:
+                execute("ROLLBACK")
+                raise InternalError("could not delete", e)
+            execute("COMMIT")
             del d[package_id]
         self._check_unused(package_id)
 
