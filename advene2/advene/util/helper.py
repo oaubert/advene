@@ -29,6 +29,7 @@ import re
 import zipfile
 import urllib
 import unicodedata
+import types
 
 from gettext import gettext as _
 
@@ -372,7 +373,16 @@ def get_valid_members (el):
         l.append(_('---- Attributes ----'))
         l.extend(pl)
 
-    l.append(_('---- Methods ----'))
+    pl=[ name
+         for (name, method) in inspect.getmembers(el)
+         if name in ('first', 'rest') 
+         or (isinstance(method, types.MethodType) 
+         and len(inspect.getargspec(method)[0]) == 1 + len(inspect.getargspec(method)[3] or [])
+         and not name.startswith('_'))
+         and not name == 'close' ]
+    if pl:
+        l.append(_('---- Methods ----'))
+        l.extend(pl)
     # Global methods
     # FIXME 
     # l.extend (AdveneContext.defaultMethods ())
