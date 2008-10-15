@@ -1,4 +1,4 @@
-from advene import RAISE
+from advene import _RAISE
 
 class WithMetaMixin:
     """
@@ -13,12 +13,12 @@ class WithMetaMixin:
 
     # TODO : do the actual caching
 
-    def get_meta(self, key, default=None):
+    def get_meta(self, key, default=_RAISE):
         """
         Return the metadata with given key.
 
-        If the given key does not exist: an KeyError is raised if default is RAISE, else default is 
-        returned.
+        If the given key does not exist: an KeyError is raised if default is 
+        _RAISE, else default is returned.
         """
         return self._get_meta(key, default)
 

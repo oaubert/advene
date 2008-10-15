@@ -1,6 +1,6 @@
 from weakref import WeakValueDictionary
 
-from advene import RAISE
+from advene import _RAISE
 from advene.model.backends import iter_backends
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
@@ -89,7 +89,7 @@ class Package(object, WithMetaMixin):
     def has_element(self, id):
         return self._backend.has_element(self._id, id)
 
-    def get_element(self, id, default=None):
+    def get_element(self, id, default=_RAISE):
         """
         Get the element whose id is given; it can be either a simple id or a
         path id.
@@ -105,7 +105,7 @@ class Package(object, WithMetaMixin):
             imp = id[:colon]
             pkg = self._imports_dict.get(imp)
             if pkg is None:
-                if default is RAISE:
+                if default is _RAISE:
                     raise UnreachableImport(imp)
                 else:
                     return default
@@ -116,7 +116,7 @@ class Package(object, WithMetaMixin):
 
     __getitem__ = get_element
 
-    def _get_own_element(self, id, default=None):
+    def _get_own_element(self, id, default):
         """
         Get the element whose id is given.
         Id may be a simple id or a path id.
@@ -129,7 +129,7 @@ class Package(object, WithMetaMixin):
         if r is None:
             c = self._backend.get_element(self._id, id)
             if c is None:
-                if default is RAISE:
+                if default is _RAISE:
                     raise KeyError(id)
                 r = default
             else:
@@ -150,7 +150,7 @@ class Package(object, WithMetaMixin):
         "will be wrapped by the WithMetaMixin"
         r = self._backend.get_meta(self._id, "", None, key)            
         if r is None:
-            if default is RAISE: raise KeyError(key)
+            if default is _RAISE: raise KeyError(key)
             r = default
         return r
 

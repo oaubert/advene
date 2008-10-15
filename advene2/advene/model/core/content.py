@@ -5,7 +5,7 @@ elements that can have a content.
 
 from weakref import ref
 
-from advene import RAISE
+from advene import _RAISE
 from advene.utils.autoproperties import AutoPropertiesMetaclass
 
 class Content(object):
@@ -50,12 +50,12 @@ class Content(object):
                                    self._mimetype, data, self._schema_idref)
         self._data = data
 
-    def _get_schema(self, default=RAISE):
+    def _get_schema(self, default=_RAISE):
         """
-        Return the resource used as the schema of that content, or None.
-        Note that the default behaviour is to raise an exception if the schema
-        can not be retrieved, because None is a possible value (some contents
-        do not define a schema).
+        Return the resource used as the schema of that content, or None if this
+        content has no schema.
+        If the schema can not be retrieved, an exception is raised, unless the
+        default parameter is provided, in which case it will be returned.
         """
         m = self._schema_wref()
         if m is None and self._schema_idref != "":

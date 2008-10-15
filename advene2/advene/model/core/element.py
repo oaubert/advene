@@ -4,7 +4,7 @@ I define the common super-class of all package element classes.
 
 from sets import Set
 
-from advene                      import RAISE
+from advene                      import _RAISE
 from advene.model.core.meta      import WithMetaMixin
 from advene.utils.autoproperties import AutoPropertiesMetaclass
 
@@ -89,7 +89,7 @@ class PackageElement(object, WithMetaMixin):
         r = self._owner._backend.get_meta(self._owner._id, self._id,
                                            self.ADVENE_TYPE , key)            
         if r is None:
-            if default is RAISE: raise KeyError(key)
+            if default is _RAISE: raise KeyError(key)
             r = default
         return r
 

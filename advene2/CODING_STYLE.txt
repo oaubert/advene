@@ -41,19 +41,19 @@ implementations
 Exception
 +++++++++
 
-whenever possible, the raising of an exception should be avoidable, for 
-optization concerns. A good practice is to accept an optional parameter which 
-would be the default value to be returned on errors. E.g.:::
+When a method can not return the expected result, the default behaviour should
+be to raise an exception. However, the raising of an exception should be
+avoidable, for optization concerns. A good practice is to accept an optional
+parameter which would be the default value to be returned. E.g.:::
 
   # the following raises an exception if foo is absent
   f = my_package.get_element("foo")
   # the following returns None if foo is absent
   f = my_package.get_element("foo", None)
   # alternative with a keyword optional parameter
-  f = my_package.get_element("foo", if_absent=None)
+  f = my_package.get_element("foo", default=None)
 
-If the optional parameter is a keyword parameter, its name should be explicit
-with respect to the semantics of the method.
+If the optional parameter is a keyword parameter, it should be named "default".
 
 
 REFERENCES

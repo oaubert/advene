@@ -4,7 +4,7 @@ I define the class of annotations.
 
 from weakref import ref
 
-from advene import RAISE
+from advene import _RAISE
 from advene.model.core.element import PackageElement, ANNOTATION, MEDIA
 from advene.model.core.content import WithContentMixin
 
@@ -17,7 +17,7 @@ class Annotation(PackageElement, WithContentMixin):
         if not hasattr(media, "ADVENE_TYPE"):
             # internally, we sometimes pass backend data directly,
             # where media is an id-ref rather than a Media instance
-            media = owner.get_element(media, RAISE)
+            media = owner.get_element(media)
         self._set_media(media, _init=True)
         self._begin = begin
         self._end   = end
@@ -31,7 +31,7 @@ class Annotation(PackageElement, WithContentMixin):
             or self._end - other._end \
             or cmp(self._media_idref, other._media_idref)
 
-    def _get_media(self, default=None):
+    def _get_media(self, default=_RAISE):
         m = self._media_wref()
         if m is None:
             m = self._owner.get_element(self.media_idref, default)
