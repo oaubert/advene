@@ -616,6 +616,9 @@ class ElementCollection(object):
         else:
             return default
 
+    def keys(self):
+        return [ e.make_id_for(self._owner) for e in self ]
+
     _allow_filter = True
 
     def filter(collection, **kw):
