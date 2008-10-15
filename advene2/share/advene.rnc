@@ -1,0 +1,183 @@
+# Advene XML format description
+# RNC Tutorial: http://relaxng.org/compact-tutorial-20030326.html
+
+# Dublin Core model
+namespace dc = "http://purl.org/dc/elements/1.1/"
+
+# Cinelab Application Model:
+namespace cam = "http://liris.cnrs.fr/advene/cinelab/1.1/"
+
+# XML Schema datatypes
+datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+grammar {
+   ## Naming identifiers
+   identifier = xsd:ID { pattern = "^([a-zA-Z_][a-zA-Z0-9_]*|:[a-zA-Z0-9_:]*)$" }
+
+   ## Import identifiers have supplementary restrictions
+   importidentifier = xsd:ID { pattern = "^[a-zA-Z_][a-zA-Z0-9_]*$" }
+
+   ## Identifier references allow imported elements (beginning with : )
+   identifierref = xsd:IDREF { pattern = "^[a-zA-Z_:][a-zA-Z0-9_:]*$" }
+
+   TALESexpression = text
+
+   constraint_meta_element = element cam:constraint {
+        # Reference an existing view/test
+	attribute idref { identifierref }
+   }
+
+   uri_meta_element = element cam:uri { xsd:anyURI }
+
+   common_meta_elements = element dc:creator { text }
+    & element dc:contributor { text }
+    & element dc:created { xsd:dateTime }
+    & element dc:modified { xsd:dateTime }
+    & element dc:title { text }?
+      # The description attribute may be externalized
+    & element dc:description { ( attribute href { xsd:anyURI } | text ) }?
+    # Almost any element can define a color (annotation, annotation-type, view, tag...)
+    & element cam:color { TALESexpression }?
+    # Allow to have user-defined metadata items
+    & element item { attribute name { identifier }, ( attribute href { xsd:anyURI } | text ) }*
+
+   # The content of an annotation- and relation-type
+   type_element = attribute id { identifier },
+      element meta {
+         common_meta_elements
+       & constraint_meta_element?
+       & element cam:representation { TALESexpression }?
+       & element cam:item_color { TALESexpression }?
+      }
+
+   ## A non-empty content has a mimetype, and defines its data either
+   ## through a reference to an external resource, or through its
+   ## #DATA section.
+   content_element = element content {
+      ( empty
+       |
+         (attribute mimetype { text },
+            (
+               attribute href { xsd:anyURI }
+             |
+               text
+            )
+         )
+      )
+   }
+
+   start = element package {
+      attribute id { identifier }
+    &
+      element meta { common_meta_elements }
+    &
+      element medias {
+         element media {
+            attribute id { identifier },
+            attribute href { xsd:anyURI },
+            # Unit defaults to ms
+            attribute unit { "ms" | "frame" }?,
+            # Origin defaults to 0
+            attribute origin { xsd:long }?,
+            element meta {
+               common_meta_elements
+             & element dc:duration { xsd:duration }?
+             & uri_meta_element?
+            }
+         }*
+      }
+    &
+      element imports {
+         element import {
+            attribute id { importidentifier },
+            attribute href { xsd:anyURI },
+            element meta { 
+                common_meta_elements 
+              & uri_meta_element?
+            }
+         }*
+      }
+    & 
+      element annotations {
+         element annotation {
+            attribute id { identifier },
+            attribute media { identifierref },
+            attribute begin { xsd:long },
+            attribute end { xsd:long },
+            attribute type { identifierref },
+            element meta {
+               common_meta_elements
+            },
+            content_element
+         }*
+      }
+    &
+      element relations {
+         element relation {
+            attribute id { identifier },
+            attribute type { identifierref },
+            element meta { common_meta_elements },
+            element members {
+               list { identifierref+ }
+            },
+            content_element
+         }*
+      }
+    &
+      element queries {
+         element query {
+            attribute id { identifier },
+            element meta {
+               common_meta_elements,
+               constraint_meta_element?
+            },
+            content_element
+         }*
+      }
+    &
+      element types {
+         element annotation-type { type_element }*
+       & element relation-type { type_element }*
+      }
+    &
+      element views {
+        element view {
+            attribute id { identifier },
+            element meta {
+                  common_meta_elements,
+                  constraint_meta_element?
+               },
+            content_element
+        }*
+      }
+    &
+      element resources {
+         element resource {
+            attribute id { identifier },
+            element meta { common_meta_elements },
+            content_element
+         }*
+      }
+    &
+      element groups {
+         element \list {
+            attribute id { identifier },
+            element meta {
+               common_meta_elements,
+               constraint_meta_element?
+            },
+            element members {
+               list { identifierref+ }
+            },
+            content_element
+         }*
+       &
+         element tag {
+            attribute id { identifier },
+            element meta {
+               common_meta_elements
+            }
+         }*
+      }
+   }
+}

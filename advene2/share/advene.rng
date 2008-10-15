@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<grammar datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://experience.univ-lyon1.fr/advene/ns" xmlns="http://relaxng.org/ns/structure/1.0">
+  <start>
+    <element name="package">
+      <ref name="id.attr"/>
+      <ref name="meta.content"/>
+      <element name="imports">
+        <zeroOrMore>
+          <element name="import">
+            <ref name="href.attr"/>
+            <attribute name="as">
+              <data type="NCName"/>
+            </attribute>
+            <zeroOrMore>
+              <element name="source">
+                <ref name="href.attr"/>
+              </element>
+          </zeroOrMore>
+        </element>
+      </zeroOrMore>
+      </element>
+      <interleave>
+        <element name="annotations">
+          <zeroOrMore>
+            <ref name="use.element"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <choice>
+              <ref name="annotation.element"/>
+              <ref name="relation.element"/>
+            </choice>
+          </zeroOrMore>
+        </element>
+        <element name="queries">
+          <zeroOrMore>
+            <element name="query">
+              <choice>
+                <group>
+                  <ref name="href.attr"/>
+                </group>
+                <ref name="query.content"/>
+              </choice>
+            </element>
+          </zeroOrMore>
+        </element>
+        <element name="schemas">
+          <oneOrMore>
+            <element name="schema">
+              <choice>
+                <ref name="href.attr"/>
+                <ref name="schema.content"/>
+              </choice>
+            </element>
+          </oneOrMore>
+        </element>
+        <element name="views">
+          <zeroOrMore>
+            <element name="view">
+              <choice>
+                <group>
+                  <ref name="href.attr"/>
+                </group>
+                <ref name="view.content"/>
+              </choice>
+            </element>
+          </zeroOrMore>
+        </element>
+      </interleave>
+    </element>
+  </start>
+
+
+
+  <!-- annotations -->
+
+  <define name="annotation.element">
+    <element name="annotation">
+      <ref name="id.attr"/>
+      <ref name="type.attr"/>
+      <ref name="meta.content"/>
+      <ref name="fragment.element"/>
+      <optional>
+        <ref name="context.element"/>
+      </optional>
+      <optional>
+        <ref name="content.element"/>
+      </optional>
+    </element>
+  </define>
+
+  <define name="relation.element">
+    <element name="relation">
+      <ref name="id.attr"/>
+      <ref name="type.attr"/>
+      <ref name="meta.content"/>
+      <element name='members'>
+        <oneOrMore>
+          <element name="member">
+            <ref name="href.attr"/>
+          </element>
+        </oneOrMore>
+      </element>
+      <optional>
+        <ref name="content.element"/>
+      </optional>
+    </element>
+  </define>
+
+  <define name="use.element">
+    <element name="use-from">
+      <ref name="href.attr"/>
+      <zeroOrMore>
+        <element name="in-schema">
+          <ref name="href.attr"/>
+        </element>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="fragment.element">
+    <element name="dvd-fragment">
+      <attribute name="discid"/>
+      <attribute name="title">
+        <data type="integer"/>
+      </attribute>
+      <optional>
+        <attribute name="chapter">
+          <data type="integer"/>
+        </attribute>
+      </optional>
+      <attribute name="begin">
+        <ref name="timepoint.type"/>
+      </attribute>
+      <attribute name="end">
+        <ref name="timepoint.type"/>
+      </attribute>
+      <empty/>
+    </element>
+  </define>
+
+  <define name="context.element">
+    <element name="dvd-context">
+      <optional>
+        <attribute name="audio">
+          <data type="integer"/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="subtitle">
+          <data type="integer"/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="angle">
+          <data type="integer"/>
+        </attribute>
+      </optional>
+      <empty/>
+    </element>
+  </define>
+
+  <define name="content.element">
+    <element name="content">
+      <optional>
+        <attribute name="mime-type">
+          <ref name="mime-type.type"/>
+        </attribute>
+      </optional>
+      <choice>
+        <ref name="href.attr"/>
+        <text/>
+        <element>
+          <anyName>
+            <except>
+              <nsName/>
+              <nsName ns=""/>
+            </except>
+          </anyName>
+          <ref name="any.content"/>
+        </element>
+      </choice>
+    </element>
+  </define>
+
+
+
+  <!-- queries -->
+
+  <define name="query.content">
+    <ref name="id.attr"/>
+    <ref name="meta.content"/>
+    <!-- TODO -->
+  </define>
+
+
+
+  <!-- schemas -->
+
+  <define name="schema.content">
+    <ref name="id.attr"/>
+    <ref name="meta.content"/>
+    <element name="annotation-types">
+      <zeroOrMore>
+        <element name="annotation-type">
+          <choice>
+            <ref name="href.attr"/>
+            <ref name="annotation-type.content"/>
+          </choice>
+        </element>
+      </zeroOrMore>
+    </element>
+    <element name="relation-types">
+      <zeroOrMore>
+        <element name="relation-type">
+          <choice>
+            <ref name="href.attr"/>
+            <ref name="relation-type.content"/>
+          </choice>
+        </element>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="annotation-type.content">
+    <ref name="id.attr"/>
+    <ref name="meta.content"/>
+    <optional>
+      <ref name="content-schema.element"/>
+    </optional>
+  </define>
+
+  <define name="relation-type.content">
+    <ref name="id.attr"/>
+    <ref name="meta.content"/>
+    <element name='member-types'>
+      <oneOrMore>
+        <element name="member-type">
+          <ref name="href.attr"/>
+        </element>
+      </oneOrMore>
+    </element>
+    <optional>
+      <ref name="content-schema.element"/>
+    </optional>
+  </define>
+
+  <define name="content-schema.element">
+    <element name="content">
+      <attribute name="mime-type">
+         <ref name="mime-type.type"/>
+      </attribute>
+      <choice>
+        <ref name="href.attr"/>
+        <text/>
+        <element>
+          <anyName>
+            <except>
+              <nsName/>
+              <nsName ns=""/>
+            </except>
+          </anyName>
+          <ref name="any.content"/>
+        </element>
+      </choice>
+    </element>
+  </define>
+
+  <!-- deprecated
+  <define name="content-type.element">
+    <element name="content-type">
+      <attribute name="mime-type">
+        <ref name="mime-type.type"/>
+      </attribute>
+      <optional>
+        <element name="content-schema">
+          <attribute name="mime-type">
+            <ref name="mime-type.type"/>
+          </attribute>
+          <choice>
+            <ref name="href.attr"/>
+            <element>
+              <anyName>
+                <except>
+                  <nsName/>
+                  <nsName ns=""/>
+                </except>
+              </anyName>
+              <ref name="any.content"/>
+            </element>
+          </choice>
+        </element>
+      </optional>
+    </element>
+  </define>
+  -->
+
+  <!-- views -->
+
+  <define name="view.content">
+    <ref name="id.attr"/>
+    <choice>
+      <group>
+        <attribute name="viewable-class">
+          <choice>
+            <value>annotation</value>
+            <value>list</value>
+            <value>relation</value>
+          </choice>
+        </attribute>
+        <optional>
+          <attribute name="viewable-type">
+            <choice>
+              <ref name="uri.type"/>
+              <value>*</value>
+            </choice>
+          </attribute>
+        </optional>
+      </group>
+      <group>
+        <attribute name="viewable-class">
+          <choice>
+            <value>list</value>
+          </choice>
+        </attribute>
+        <optional>
+          <attribute name="viewable-type">
+            <choice>
+              <value>annotation-list</value>
+              <value>annotation-type-list</value>
+              <value>query-list</value>
+              <value>relation-list</value>
+              <value>relation-type-list</value>
+              <value>schema-list</value>
+              <value>view-list</value>
+              <value>*</value>
+            </choice>
+          </attribute>
+        </optional>
+      </group>
+      <group>
+        <attribute name="viewable-class">
+          <choice>
+            <value>content</value>
+          </choice>
+        </attribute>
+        <optional>
+          <attribute name="viewable-type">
+            <ref name="mime-type.type"/>
+          </attribute>
+        </optional>
+      </group>
+      <group>
+        <attribute name="viewable-class">
+          <choice>
+            <value>annotation-type</value>
+            <value>context</value>
+            <value>fragment</value>
+            <value>package</value>
+            <value>query</value>
+            <value>relation-type</value>
+            <value>schema</value>
+            <value>view</value>
+            <value>*</value>
+          </choice>
+        </attribute>
+      </group>
+    </choice>
+    <ref name="meta.content"/>
+    <ref name="content.element"/>
+  </define>
+
+
+
+  <!--
+    ==
+    == COMMON DEFINES
+    ==
+    -->
+
+  <!-- content models -->
+
+  <define name="meta.content">
+    <optional>
+      <attribute name="default-view">
+        <ref name="uri.type"/>
+      </attribute>
+    </optional>
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+    <optional>
+      <element name="meta">
+        <oneOrMore>
+          <element>
+            <anyName>
+              <except>
+                <nsName/>
+                <nsName ns=""/>
+              </except>
+            </anyName>
+            <ref name="any.content"/>
+          </element>
+        </oneOrMore>
+      </element>
+    </optional>
+  </define>
+
+  <define name="any.content">
+    <zeroOrMore>
+      <choice>
+        <text/>
+        <attribute>
+          <anyName/>
+        </attribute>
+        <element>
+          <anyName>
+            <except>
+              <nsName/>
+              <nsName ns=""/>
+            </except>
+          </anyName>
+          <ref name="any.content"/>
+        </element>
+      </choice>
+    </zeroOrMore>
+  </define>
+
+  <!-- attributes models -->
+
+  <define name="href.attr">
+    <attribute name="href" ns="http://www.w3.org/1999/xlink">
+      <ref name="uri.type"/>
+    </attribute>
+  </define>
+
+  <define name="id.attr">
+    <attribute name="id">
+      <ref name="id.type"/>
+    </attribute>
+  </define>
+
+  <define name="type.attr">
+    <attribute name="type">
+      <ref name="uri.type"/>
+    </attribute>
+  </define>
+
+  <!-- datatypes -->
+
+  <define name="id.type">
+    <data type="ID"/>
+  </define>
+
+  <define name="timepoint.type">
+    <data type="duration"/>
+  </define>
+
+  <define name="uri.type">
+    <data type="anyURI"/>
+  </define>
+
+  <define name="mime-type.type">
+    <!-- TODO: find a better way to specify that -->
+    <data type="string"/>
+  </define>
+
+
+  <!--
+    ==
+    == EXTENSIONS
+    ==
+    -->
+
+  <define combine="choice" name="fragment.element">
+    <element name="uri-fragment">
+      <ref name="href.attr"/>
+    </element>
+  </define>
+
+  <define combine="choice" name="fragment.element">
+    <element name="bytecount-fragment">
+      <attribute name="begin">
+        <data type="integer"/>
+      </attribute>
+      <attribute name="end">
+        <data type="integer"/>
+      </attribute>
+    </element>
+    <element name="millisecond-fragment">
+      <attribute name="begin">
+        <data type="integer"/>
+      </attribute>
+      <attribute name="end">
+        <data type="integer"/>
+      </attribute>
+    </element>
+  </define>
+
+  <define combine="choice" name="context.element">
+    <element name="uri-context">
+      <ref name="href.attr"/>
+    </element>
+  </define>
+
+</grammar>

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
+<!--*- mode: xml -*-->
+<glade-interface>
+  <widget class="GtkWindow" id="win">
+    <property name="visible">True</property>
+    <property name="title" translatable="yes">Advene</property>
+    <property name="default_width">800</property>
+    <property name="default_height">600</property>
+    <property name="icon">pixmaps/dvd.png</property>
+    <signal name="key_press_event" handler="on_win_key_press_event"/>
+    <signal name="delete_event" handler="on_exit" object="win"/>
+    <signal name="destroy_event" handler="on_exit" object="win"/>
+    <child>
+      <widget class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <widget class="GtkHBox" id="hbox9">
+            <property name="visible">True</property>
+            <child>
+              <widget class="GtkHandleBox" id="handlebox3">
+                <property name="visible">True</property>
+                <property name="shadow_type">GTK_SHADOW_OUT</property>
+                <child>
+                  <widget class="GtkToolbar" id="toolbar_fileop">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkToolButton" id="toolbutton17">
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Create a new package</property>
+                        <property name="stock_id">gtk-new</property>
+                        <signal name="clicked" handler="on_new1_activate"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkToolButton" id="toolbutton22">
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Open a package file</property>
+                        <property name="is_important">True</property>
+                        <property name="stock_id">gtk-open</property>
+                        <signal name="clicked" handler="on_open1_activate"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkToolButton" id="toolbutton18">
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Save the current package</property>
+                        <property name="is_important">True</property>
+                        <property name="stock_id">gtk-save</property>
+                        <signal name="clicked" handler="on_save1_activate"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkToolButton" id="toolbutton19">
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Save the package with a new name</property>
+                        <property name="stock_id">gtk-save-as</property>
+                        <signal name="clicked" handler="on_save_as1_activate"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkToolButton" id="toolbutton6">
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Select movie file...</property>
+                        <property name="is_important">True</property>
+                        <property name="stock_id">gtk-cdrom</property>
+                        <property name="label">Movie file</property>
+                        <signal name="clicked" handler="on_b_addfile_clicked"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkToolButton" id="toolbutton10">
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Select DVD</property>
+                        <property name="stock_id">gtk-cdrom</property>
+                        <signal name="clicked" handler="on_b_selectdvd_clicked"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkToolButton" id="toolbutton11">
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Quit</property>
+                        <property name="stock_id">gtk-quit</property>
+                        <signal name="clicked" handler="on_exit"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                      </packing>
+                    </child>
+                  </widget>
+                </child>
+              </widget>
+            </child>
+            <child>
+              <widget class="GtkHBox" id="adhoc_hbox">
+                <property name="visible">False</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </widget>
+              <packing>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkHBox" id="search_hbox">
+                <property name="visible">True</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="pack_type">GTK_PACK_END</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkVPaned" id="vpaned">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="position">1</property>
+            <child>
+              <widget class="GtkVBox" id="displayvbox">
+                <property name="visible">True</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </widget>
+              <packing>
+                <property name="resize">True</property>
+                <property name="shrink">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkScrolledWindow" id="scrolledwindow1">
+                <property name="height_request">50</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
+                <child>
+                  <widget class="GtkTextView" id="logmessages">
+                    <property name="height_request">40</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="editable">False</property>
+                    <property name="wrap_mode">GTK_WRAP_CHAR</property>
+                    <property name="cursor_visible">False</property>
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="resize">False</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </widget>
+    </child>
+  </widget>
+</glade-interface>

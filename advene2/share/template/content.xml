@@ -1,0 +1,548 @@
+
+<package xmlns:dc='http://purl.org/dc/elements/1.1/' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns='http://experience.univ-lyon1.fr/advene/ns' xmlns:tst='http://experience.univ-lyon1.fr/advene/ns/test' dc:creator='advene' dc:date='2007-11-27' id='template'>
+  <meta>
+    <tag_colors xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>
+    </tag_colors>
+    <default_utbv xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>index</default_utbv>
+    <default_stbv xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'></default_stbv>
+    <description xmlns='http://purl.org/dc/elements/1.1/'>Template package</description>
+    <title xmlns='http://purl.org/dc/elements/1.1/'>Template package</title>
+  </meta>
+  <imports>
+  </imports>
+  <annotations>
+  </annotations>
+  <queries>
+    <query dc:date='2004-08-26' dc:creator='advene' id='q_previous'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>Previous annotations of the same type</title>
+      </meta>
+      <content mime-type='application/x-advene-simplequery'>&lt;?xml version='1.0' encoding='UTF-8'?>
+&lt;query xmlns='http://liris.cnrs.fr/advene/ruleset'>
+  &lt;source value='here/type/annotations'/>
+  &lt;condition operator='before' rhs='here' lhs='element'/>
+&lt;/query>
+</content>
+    </query>
+    <query dc:date='2004-08-26' dc:creator='advene' id='q_next'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>Following annotation of the same type</title>
+      </meta>
+      <content mime-type='application/x-advene-simplequery'>&lt;?xml version='1.0' encoding='UTF-8'?>
+&lt;query xmlns='http://liris.cnrs.fr/advene/ruleset'>
+  &lt;source value='here/type/annotations'/>
+  &lt;condition operator='before' rhs='element' lhs='here'/>
+&lt;/query>
+</content>
+    </query>
+    <query dc:date='2004-09-14' dc:creator='advene' id='q_next_global'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>Following annotations</title>
+      </meta>
+      <content mime-type='application/x-advene-simplequery'>&lt;?xml version='1.0' encoding='UTF-8'?>
+&lt;query xmlns='http://liris.cnrs.fr/advene/ruleset'>
+  &lt;source value='here/rootPackage/annotations'/>
+  &lt;condition operator='before' rhs='element' lhs='here'/>
+&lt;/query>
+</content>
+    </query>
+    <query dc:date='2004-09-14' dc:creator='advene' id='q_previous_global'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>Previous annotations</title>
+      </meta>
+      <content mime-type='application/x-advene-simplequery'>&lt;?xml version='1.0' encoding='UTF-8'?>
+&lt;query xmlns='http://liris.cnrs.fr/advene/ruleset'>
+  &lt;source value='here/rootPackage/annotations'/>
+  &lt;condition operator='before' rhs='here' lhs='element'/>
+&lt;/query>
+</content>
+    </query>
+  </queries>
+  <schemas>
+    <schema dc:date='2004-06-30' dc:creator='advene' id='simple-text'>
+      <meta>
+        <description xmlns='http://purl.org/dc/elements/1.1/'>Elementary schema</description>
+        <dc:title>Simple text</dc:title>
+        <dc:subject>Schéma élémentaire pour l'annotation avec du simple texte</dc:subject>
+      </meta>
+      <annotation-types>
+        <annotation-type dc:date='2004-06-30' dc:creator='advene' id='annotation'>
+          <meta>
+            <color xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>string:#a5dbeb77a216</color>
+            <representation xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>
+            </representation>
+            <description xmlns='http://purl.org/dc/elements/1.1/'>A simple text annotation</description>
+            <dc:title>Text annotation</dc:title>
+            <dc:subject>Une simple annotation textuelle</dc:subject>
+          </meta>
+          <content-type mime-type='text/plain'/>
+        </annotation-type>
+      </annotation-types>
+      <relation-types>
+        <relation-type dc:date='2004-06-30' dc:creator='advene' id='basic-relation'>
+          <meta>
+            <color xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>string:#5c73d8f96194</color>
+            <dc:title>Simple relation</dc:title>
+            <dc:description>Generic relation between two simple-text annotations</dc:description>
+          </meta>
+          <member-types>
+            <member-type xlink:href=''/>
+            <member-type xlink:href=''/>
+          </member-types>
+          <content-type mime-type='text/plain'/>
+          <!-- TODO eventually, this would be an ad-hoc xml schema
+          <content-type mime-type="text/xml">
+            <schema>...</schema>
+          </content-type>
+          -->
+        </relation-type>
+      </relation-types>
+    </schema>
+  </schemas>
+  <views>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_annotation-view' viewable-class='annotation'>
+      <content mime-type='text/html'>&lt;a tal:attributes="href here/absolute_url; style string:background-color:${here/color | }">annotation &lt;em tal:content="here/id">Id&lt;/em>&lt;/a> (&lt;a tal:attributes="href here/player_url">Play the fragment&lt;/a> | &lt;a href="/media/pause">Pause&lt;/a> | &lt;a href="/media/stop">Stop&lt;/a>)
+</content>
+    </view>
+    <view dc:date='2005-03-15' dc:creator='advene' id='_package-view' viewable-class='package'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>_package-view</title>
+      </meta>
+      <content mime-type='text/html'>&lt;h1>Contents of &lt;em tal:content="here/title">Titre&lt;/em> created by &lt;em tal:content="here/author">Auteur&lt;/em>&lt;/h1>
+
+&lt;p>&lt;em>Note:&lt;/em> some parameters are tunable in the &lt;a href="/admin">administration panel&lt;/a>.&lt;/p>
+
+&lt;h2>&lt;a tal:attributes="href here/annotations/absolute_url">Annotations (&lt;em tal:content="here/annotations/length">Number&lt;/em>)&lt;/a>&lt;/h2>
+
+&lt;table border="1">
+&lt;tr>
+&lt;th>Annotation type&lt;/th>
+&lt;th>MIME Type&lt;/th>
+&lt;th>Annotation count&lt;/th>
+&lt;/tr>
+
+&lt;tr tal:repeat="at here/annotationTypes">
+   &lt;td tal:attributes="style string:background-color:${at/color | }">&lt;a tal:attributes="href at/absolute_url"
+                 tal:content="at/title | at/id">Annotation Type&lt;/a>&lt;/td>
+   &lt;td tal:content="at/mimetype">Mime-Type&lt;/td>
+   &lt;td>&lt;span tal:replace="at/annotations/length">Number&lt;/span>
+           (&lt;a tal:attributes="href string:${at/absolute_url}/view/_annotation_list_view">view&lt;/a>)&lt;/td>
+&lt;/tr>
+&lt;/table>
+
+&lt;h2>&lt;a tal:attributes="href here/relations/absolute_url">Relations (&lt;em tal:content="here/relations/length">Number&lt;/em>)&lt;/a>&lt;/h2>
+
+&lt;table border="1">
+&lt;tr>
+&lt;th>Relation type&lt;/th>
+&lt;th>MIME Type&lt;/th>
+&lt;th>Relation count&lt;/th>
+&lt;/tr>
+
+&lt;tr tal:repeat="rt here/relationTypes">
+   &lt;td>&lt;a tal:attributes="href rt/absolute_url"
+                 tal:content="rt/title | rt/id">Relation Type&lt;/a>&lt;/td>
+   &lt;td tal:content="rt/mimetype">Mime-Type&lt;/td>
+   &lt;td>&lt;span tal:replace="rt/relations/length">Number&lt;/span>
+           (&lt;a tal:attributes="href string:${rt/absolute_url}/view/_relation_list_view">view&lt;/a>)&lt;/td>
+&lt;/tr>
+&lt;/table>
+
+&lt;h2>&lt;a tal:attributes="href string:${here/absolute_url}/views/view/_views-view">Defined views&lt;/a>&lt;/h2>
+
+&lt;span tal:replace="structure here/views/view/_views-view">List of views&lt;/span>
+
+&lt;h2>&lt;a tal:attributes="href string:${here/absolute_url}/schemas">Defined schemas&lt;/a>&lt;/h2>
+&lt;ul>
+  &lt;li tal:repeat="s here/schemas">
+   &lt;a tal:attributes="href s/absolute_url" tal:content="structure s/view/_item-view">Schema&lt;/a>
+  &lt;/li>
+&lt;/ul>
+
+&lt;h2>&lt;a tal:attributes="href string:${here/absolute_url}/queries">Queries&lt;/a>&lt;/h2>
+&lt;ul>
+  &lt;li tal:repeat="q here/queries" tal:content="structure q/view/_query_view">
+  &lt;/li>
+&lt;/ul>
+
+&lt;span tal:condition="here/resources">
+&lt;h2>&lt;a tal:attributes="href here/resources/absolute_url">Resources&lt;/a>&lt;/h2>
+&lt;ul>
+  &lt;li tal:repeat="r here/resources">
+   &lt;a tal:attributes="href r/absolute_url" tal:content="r/id">link&lt;/a>
+  &lt;/li>
+&lt;/ul>
+&lt;/span>
+</content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_bundle-view' viewable-class='list'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>_bundle-view</title>
+      </meta>
+      <content mime-type='text/html'>&lt;ul>
+&lt;li tal:repeat="item here">
+   &lt;a tal:attributes="href item/absolute_url" tal:content="structure item/view/_item-view">Item&lt;/a>
+&lt;/li>
+&lt;/ul></content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_schema-bundle-view' viewable-class='list'>
+      <content mime-type='text/html'>&lt;h1>List of schemas&lt;/h1>
+
+&lt;ul tal:repeat="item here/ids">
+   &lt;a tal:attributes="href item/absolute_url" tal:content="structure item/view/_item-view">Item&lt;/a>
+&lt;/ul></content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_view-view' viewable-class='view'>
+      <content mime-type='text/html'>&lt;p>View &lt;strong tal:content="here/id">Id&lt;/strong> valid for &lt;em tal:content="here/matchFilter">class&lt;/em>&lt;/p>
+&lt;pre tal:content="here/content/data">
+Contenu
+&lt;/pre></content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_annotation-type-view' viewable-class='annotation-type'>
+      <content mime-type='text/html'>&lt;p>Type &lt;a tal:attributes="href here/absolute_url; style string:background-color:${here/color | }">&lt;em tal:content="here/id">id&lt;/em> : &lt;span tal:replace="here/title">Title&lt;/span>&lt;/a>&lt;br />
+&lt;span tal:condition="here/meta/dc/description">
+Description : &lt;em tal:content="here/meta/dc/description">description&lt;/em>&lt;br />
+&lt;/span>
+&lt;a tal:attributes="href here/view/_annotation_list_view/absolute_url" tal:content="string:${here/annotations/length} annotation(s)">Annotation count&lt;/a>&lt;/p></content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_edit-content' viewable-class='*'>
+      <content mime-type='text/html'>&lt;span tal:condition="python: hasattr(here, 'content')">
+&lt;form method="POST" tal:attributes="action here/absolute_url">
+&lt;textarea tal:attributes="cols options/config/edit-width | 60; rows options/config/edit-height | 20" tal:content="here/content/data" rows="20" cols="60" name="data">
+Contenu
+&lt;/textarea>&lt;br />
+&lt;input type="hidden" name="key" value="contentData">
+&lt;input type="hidden" name="action" value="update">
+&lt;input type="submit" value="Valider" />
+&lt;/form>
+&lt;/span>
+
+&lt;span tal:condition="python: not hasattr(here, 'content')">
+&lt;p>Cette vue ne s'applique que sur les éléments possédant un contenu.&lt;/p>
+&lt;/span>
+</content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_generic' viewable-class='*'>
+      <content mime-type='text/html'>&lt;p>Generic view for &lt;span tal:replace="here/uri">URI&lt;/span>&lt;/p>
+</content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_item-view' viewable-class='*'>
+      <content mime-type='text/html'>&lt;span tal:replace="here/viewableClass">Class&lt;/span>
+&lt;strong tal:content="here/id">Id&lt;/strong>
+&lt;span tal:condition="exist: here/matchFilter" comment="is_a_view">
+valid for &lt;em tal:content="here/matchFilter">filtre&lt;/em>
+&lt;/span>
+</content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_schema-view' viewable-class='schema'>
+      <content mime-type='text/html'>&lt;h2>Schema &lt;strong tal:content="here/title | here/id">Title&lt;/strong> (&lt;em tal:content="here/id">Id&lt;/em>)&lt;/h2>
+
+&lt;p>Description : &lt;em tal:content="here/meta/dc/description | string:Non fournie.">Description&lt;/em>&lt;/p>
+
+&lt;p>Defined annotation types:&lt;/p>
+
+&lt;ul>
+  &lt;li tal:repeat="t here/annotationTypes">
+   &lt;span tal:replace="structure t/view/_annotation-type-view">Type&lt;/span>
+&lt;/li>
+&lt;/ul>
+
+&lt;p>Defined relation types:&lt;/p>
+
+&lt;ul>
+  &lt;li tal:repeat="t here/relationTypes">
+   &lt;span tal:replace="structure t/view/_relation-type-view">Type&lt;/span>
+&lt;/li>
+&lt;/ul>
+</content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_add-view' viewable-class='schema'>
+      <content mime-type='text/html'>&lt;h1>Create a new view in the &lt;em tal:content="here/ownerPackage/uri">Nom&lt;/em> package&lt;/h1>
+&lt;form method="POST" tal:attributes="action here/ownerPackage/absolute_url">
+
+&lt;input type="hidden" name="type" value="view">
+&lt;input type="hidden" name="action" value="create">
+
+Id: &lt;input type="text" name="id">&lt;br />
+Valid for: &lt;select name="class">
+&lt;option>*&lt;/option>
+&lt;option>annotation&lt;/option>
+&lt;option>annotation-type&lt;/option>
+&lt;option>content&lt;/option>
+&lt;option>fragment&lt;/option>
+&lt;option>list&lt;/option>
+&lt;option>package&lt;/option>
+&lt;option>query&lt;/option>
+&lt;option>relation&lt;/option>
+&lt;option>relation-type&lt;/option>
+&lt;option>schema&lt;/option>
+&lt;option>view&lt;/option>
+&lt;/select>&lt;br />
+Content:&lt;br />
+&lt;textarea name="data" rows="20" cols="80">
+&lt;/textarea>&lt;br />
+&lt;input type="submit" value="Create">
+&lt;/form>
+</content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_full-view' viewable-class='annotation'>
+      <content mime-type='text/html'>&lt;h1>Annotation &lt;em tal:content="here/id">Id&lt;/em>&lt;/h1>
+
+&lt;p>Begin: &lt;a tal:attributes="href here/fragment/begin/player_url" tal:content="here/fragment/formatted/begin">Begin&lt;/span>&lt;/p>
+&lt;p>End: &lt;a tal:attributes="href here/fragment/end/player_url" tal:content="here/fragment/formatted/end">End&lt;/span>&lt;/p>
+&lt;p>Type: &lt;span tal:replace="here/type">Type&lt;/span>&lt;/p>
+&lt;p>Content type: &lt;span tal:replace="here/content/mimetype">Content-type&lt;/span>&lt;/p>
+&lt;p>&lt;a tal:attributes="href string:${here/content/absolute_url}/data">Content&lt;/a>&lt;/p>
+</content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_views-view' viewable-class='list'>
+      <content mime-type='text/html'>&lt;table border="1">
+  &lt;tr>
+  &lt;th>Id&lt;/th>
+  &lt;th colspan="2">Filter&lt;/th>
+  &lt;th>Actions&lt;/th>
+  &lt;/tr>
+
+ &lt;tr tal:repeat="v here">
+    &lt;td>
+     &lt;a tal:attributes="href v/absolute_url" tal:content="structure v/id">View Id&lt;/a>
+    &lt;/td>
+    &lt;td tal:content="v/matchFilter/class">Class&lt;/td>
+    &lt;td tal:content='structure v/matchFilter/type | string::'>Type&lt;/td>
+    &lt;td>
+&lt;a title="Edit the view" tal:attributes="href string:${v/absolute_url}/view/_edit-content">Edit&lt;/a>
+&lt;span tal:condition='python: v.match(v.rootPackage)'>
+&lt;span  tal:condition='python:not "ruleset" in v.content.mimetype'>
+| &lt;a title="Apply the view on the package" tal:attributes="href string:${v/rootPackage/absolute_url}/view/${v/id}">Apply&lt;/a> &lt;/span>
+&lt;/span>
+&lt;span  tal:condition='python:"ruleset" in v.content.mimetype'>
+| &lt;a title="Activate the dynamic view" tal:attributes="href string:/media/stbv?id=${v/id}">Activate&lt;/a> 
+&lt;/span>
+  &lt;/td>
+  &lt;/tr>
+ 
+&lt;/table>
+</content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_relation-view' viewable-class='relation'>
+      <content mime-type='text/html'>Relation &lt;em tal:content="here/id">Id&lt;/em> between &lt;a href="annotation1" tal:attributes="href here/members/first/absolute_url; style string:background-color:${here/color | }" tal:content="here/members/first/content/data">Annotation 1&lt;/a> and &lt;a href="annotation2" tal:attributes="href here/members/last/absolute_url" tal:content="here/members/last/content/data">Annotation 2&lt;/a></content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_type-view' viewable-class='annotation-type'>
+      <content mime-type='text/html'>&lt;p>Type &lt;em tal:content="here/id">id&lt;/em> : &lt;span tal:replace="here/title">Title&lt;/span>&lt;/p>
+&lt;p>&lt;a here="annotations" tal:attributes="href here/annotations" tal:content="here/annotations/length">annotation count&lt;/a> annotation(s) defined.&lt;/p>
+</content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_relation-type-view' viewable-class='relation-type'>
+      <content mime-type='text/html'>&lt;p>Relation type &lt;a tal:attributes="href here/absolute_url; style string:background-color:${here/color | }">&lt;em tal:content="here/id">id&lt;/em> : &lt;span tal:replace="here/title">Titre&lt;/span>&lt;/a>&lt;br />
+&lt;span tal:condition="here/meta/dc/description">
+Description: &lt;em tal:content="here/meta/dc/description">description&lt;/em>&lt;br />
+&lt;/span>
+&lt;a tal:attributes="href here/relations/absolute_url" tal:content="string:${here/relations/length} relation(s)">relation count&lt;/a> defined relations.&lt;/p></content>
+    </view>
+    <view dc:date='2004-06-08' dc:creator='advene' id='_text-caption' viewable-class='package'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>Affichage des annotations textuelles sur la vidéo</title>
+      </meta>
+      <content mime-type='application/x-advene-ruleset'>&lt;?xml version='1.0' encoding='UTF-8'?>
+&lt;ruleset xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>
+  &lt;rule name='Display of textual annotations'>
+    &lt;event name='AnnotationBegin'/>
+    &lt;condition operator='equals' rhs='string:text/plain' lhs='annotation/content/mimetype'/>
+    &lt;action name='AnnotationCaption'>
+      &lt;param name='message' value='annotation/content/data'/>
+    &lt;/action>
+  &lt;/rule>
+&lt;/ruleset>
+</content>
+    </view>
+    <view dc:date='2004-06-30' dc:creator='advene' id='_annotation_list_view' viewable-class='*'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>_annotation_list_view</title>
+      </meta>
+      <content mime-type='text/html'>&lt;h2>&lt;a tal:attributes="href here/annotations/absolute_url">Annotations of &lt;span tal:replace="here/title | here/id">element&lt;/span> (&lt;em tal:content="here/annotations/length">Number&lt;/em>)&lt;/a>&lt;/h2>
+
+&lt;table width="100%" border="1">
+
+&lt;tr>
+&lt;th>Id&lt;/th>
+&lt;th>Begin&lt;/th>
+&lt;th>End&lt;/th>
+&lt;th>Content&lt;/th>
+&lt;/tr>
+
+&lt;tr tal:repeat="a here/annotations">
+
+&lt;td>
+&lt;a tal:attributes="href a/absolute_url; title a/type/title | a/type/id; style string:background-color:${here/color | }" tal:content="a/id">Id&lt;/a>
+&lt;/td>
+
+&lt;td>
+&lt;a tal:attributes="href a/fragment/begin/player_url ; title string:Play" tal:content="a/fragment/formatted/begin">Begin&lt;/a>
+&lt;/td>
+
+&lt;td>
+&lt;a tal:attributes="href a/fragment/end/player_url ; title string:Play" tal:content="a/fragment/formatted/end">End&lt;/a>
+&lt;/td>
+
+&lt;td tal:content="a/content/data">Content&lt;/td>
+
+&lt;/tr>
+
+&lt;/table>
+</content>
+    </view>
+    <view dc:date='2006-03-15' dc:creator='advene' id='_query_view' viewable-class='query'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>_query_view</title>
+      </meta>
+      <content mime-type='text/html'>Query &lt;em tal:content="here/title">title&lt;/em> (Id &lt;span tal:replace="here/id">id&lt;/span>).</content>
+    </view>
+    <view dc:date='2007-05-15' dc:creator='advene' id='_xml_annotationTypes_view' viewable-class='schema'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>_xml_annotationTypes_view</title>
+      </meta>
+      <content mime-type='application/xml'>&lt;?xml version='1.0' encoding="iso-8859-1"?>
+&lt;annotationTypes>
+&lt;annotationType tal:repeat="b here/annotationTypes" tal:attributes="id b/id">
+&lt;title tal:content="b/title">
+titre
+&lt;/title>
+&lt;/annotationType>
+&lt;/annotationTypes></content>
+    </view>
+    <view dc:date='2007-05-15' dc:creator='advene' id='_xml_annotations_view' viewable-class='annotation-type'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>_xml_annotations_view</title>
+      </meta>
+      <content mime-type='application/xml'>&lt;?xml version='1.0' encoding="iso-8859-1"?>
+&lt;annotations>
+&lt;annotation tal:repeat="c here/annotations" tal:attributes="id c/id">
+&lt;content tal:content="c/representation">
+contenu
+&lt;/content>
+&lt;begin tal:content="c/fragment/formatted/begin">
+begin timecode
+&lt;/begin>
+&lt;end tal:content="c/fragment/formatted/end">
+end timecode
+&lt;/end>
+&lt;/annotation>
+&lt;/annotations></content>
+    </view>
+    <view dc:date='2007-05-15' dc:creator='advene' id='_richedit' viewable-class='view'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>_richedit</title>
+      </meta>
+      <content mime-type='text/html'>&lt;html>
+ 	&lt;head>
+    		&lt;script type="text/javascript" src="/data/fckeditor/fckeditor.js">&lt;/script>
+		&lt;script type="text/javascript">
+		      window.onload = function()
+		      {
+		        var oFCKeditor = new FCKeditor( 'data', '100%', 700, 'AdveneToolBar' ) ;
+			oFCKeditor.Config['myVariable']='plop';
+		        oFCKeditor.BasePath = "/data/fckeditor/" ;
+                        oFCKeditor.Config['EditorAreaCSS'] = '/data/advene.css';
+		        oFCKeditor.ReplaceTextarea() ;
+		      }
+		&lt;/script>
+	&lt;/head>
+  &lt;body>
+	&lt;span tal:condition="python: hasattr(here, 'content')">
+		&lt;form method="POST" tal:attributes="action here/content/data/absolute_url">
+			&lt;textarea tal:attributes="cols options/config/edit-width | 60; rows options/config/edit-height | 20" tal:content="here/content/data" rows="20" cols="60" id="data" name="data">
+			Contenu
+			&lt;/textarea>&lt;br />
+			&lt;input type="hidden" name="action" value="update">
+                        &lt;input type="hidden" name="oldredirect" tal:attributes="url string:/packages/advene/view/${here/id}">
+			&lt;input type="submit" value="Valider" />
+		&lt;/form>
+	&lt;/span>
+	&lt;span tal:condition="python: not hasattr(here, 'content')">
+	&lt;p>Cette vue ne s'applique que sur les éléments possédant un contenu.&lt;/p>
+	&lt;/span>
+  &lt;/body>
+&lt;/html></content>
+    </view>
+    <view dc:date='2007-05-15' dc:creator='advene' id='_richedit_annotation' viewable-class='*'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>_richedit_annotation</title>
+      </meta>
+      <content mime-type='text/html'>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+&lt;html>
+
+&lt;head>
+	&lt;title>Annotation&lt;/title>
+	&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	&lt;meta content="noindex, nofollow" name="robots">
+
+&lt;script type="text/javascript" src="/data/fckeditor/editor/plugins/richedit_annotation/selIMG.js">&lt;/script>
+
+&lt;/head>
+
+&lt;body scroll="no" style="overflow:hidden;">
+&lt;h1> Select the annotation(s) and the options you want to add to your page &lt;/h1>
+&lt;form name="frmMain" id="frmMain">
+		&lt;div id="divType">
+&lt;table id="menuType" cellspacing="0" cellpadding="0" width="100%">
+	&lt;tr>
+		&lt;td class="property-name">Choose your schema :&lt;/td>
+		&lt;td>
+			&lt;select id="schema" name="schema" class="input-select" onChange="sel(createSel)">
+				&lt;option value=""> - &lt;/option>
+                              &lt;option tal:repeat="a here/schemas" tal:attributes="value a/id" tal:content="a/title">
+                                content
+                              &lt;/option>
+                        &lt;/select>
+		&lt;/td>
+	&lt;/tr>
+	&lt;tr>
+		&lt;td class="property-name">Select your annotation type :&lt;/td>
+			&lt;td>
+                                 &lt;select id="annotationTypes" name="annotationTypes" class="input-select" onChange="sel2(createSel2)">
+				&lt;option value=""> - &lt;/option>
+			&lt;/select>
+		&lt;/td>
+	&lt;/tr>
+        &lt;tr>
+              &lt;td> (if you don't select an annotation, a loop on all the annotations of the selected type will be created)&lt;/td>
+              &lt;td>&lt;/td>
+        &lt;/tr>
+	&lt;tr>
+		&lt;td class="property-name">Choose your annotation :&lt;/td>
+			&lt;td>
+                          &lt;select id="annotations" name="annotations" class="input-select">
+				&lt;option value=""> - &lt;/option>
+			&lt;/select>
+		&lt;/td>
+	&lt;/tr>
+
+	&lt;tr>
+		&lt;td class="property-name">&lt;/td>
+		&lt;td>
+		&lt;/td>
+	&lt;/tr>
+	&lt;tr>
+		&lt;td>
+			&lt;input type="checkbox" id="link_img_vlc" name="link_img_vlc" value="none" onclick="linkimg(this)"> Add a link to the player (title &lt;input type="text" id="info_bulle_img" name="info_bulle_img" class="input-text" disabled>)&lt;br />
+			&lt;input type="checkbox" id="time_code" name="time_code" value="none"> Add the timecode&lt;br />
+			&lt;input type="checkbox" id="titre" name="titre" value="none">Add the title of the annotation&lt;br />
+			&lt;input type="checkbox" id="autre_vue" name="autre_vue" value="none" onclick="activevue(this)"> Link to a view applied to this annotation &lt;input type="text" id="vue" name="vue" class="input-text" disabled> &lt;br />
+Title of the link &lt;input type="text" id="titre_vue" name="titre_vue" class="input-text" disabled>&lt;br />
+		&lt;/td>
+	&lt;/tr>
+	&lt;tr>
+		&lt;td>
+			&lt;!--&lt;input type="button" id="btnInsert" class="button" onclick="Ok();" value="Insert"/>-->
+		&lt;/td>
+	&lt;/tr>
+&lt;/table>
+&lt;/div>
+&lt;/form> 
+&lt;/body>
+&lt;/html>
+</content>
+    </view>
+  </views>
+</package>

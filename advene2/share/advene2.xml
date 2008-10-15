@@ -1,0 +1,173 @@
+<package xmlns:xlink='http://www.w3.org/1999/xlink'
+    xmlns:dc='http://purl.org/dc/elements/1.1/'
+    xmlns:advene='http://experience.univ-lyon1.fr/advene/ns/advenetool'
+    xmlns='http://experience.univ-lyon1.fr/advene/ns'  
+    id='test'>
+  <meta>
+    <dc:creator>olivier.aubert@liris.cnrs.fr</dc:creator>
+    <dc:contributor>olivier.aubert@liris.cnrs.fr</dc:contributor>
+    <dc:created>2003-03-28T15:23:42+02:00</dc:created>
+    <dc:modified>2007-03-28T16:43:51+02:00</dc:modified>
+    <advene:default_stbv>start_view</advene:default_stbv>
+    <advene:default_utbv'>index</advene:default_utbv>
+    <dc:description xmlns='http://purl.org/dc/elements/1.1/'>The Advene test package</dc:description>
+    <dc:title xmlns='http://purl.org/dc/elements/1.1/'>Jurannessic</dc:title>
+  </meta>
+
+  <medias>
+    <media id="v1" href="/foo/bar/baz.avi" >
+      <meta>
+   <dc:duration>300000</dc:duration>
+        <dc:description'>A sample video</dc:description>
+        <dc:title'>Jurannessic</dc:title>
+        <dc:creator>advene@liris.cnrs.fr</dc:creator>
+        <dc:contributor>advene@liris.cnrs.fr</dc:contributor>
+        <dc:created>2007-03-28T16:43:51+02:00</dc:created>
+        <dc:modified>2007-03-28T16:43:51+02:00</dc:modified>
+      </meta>
+    </media>
+  </medias>
+
+  <imports>
+  </imports>
+
+  <annotations>
+    <!-- exemple d'annotation avec un contenu internalisé, mais une description externalisée -->
+    <annotation id="a1" media="v1" start="0" end="1000">
+      <meta>
+        <dc:creator>advene@liris.cnrs.fr</dc:creator>
+        <dc:contributor>advene@liris.cnrs.fr</dc:contributor>
+        <dc:created>2007-03-28T16:43:51+02:00</dc:created>
+        <dc:modified>2007-03-28T16:43:51+02:00</dc:modified>
+        <dc:title>Générique</dc:title>
+        <dc:description href="./data/description/a1.txt"/>
+      </meta>
+      <content mimetype="text/plain">Le titre s'affiche</content>
+    </annotation>
+
+    <!-- exemple d'annotation avec un contenu externalisé -->
+    <annotation id="a2" media="v1" start="1200" end="12345">
+      <meta>
+        <dc:creator>advene@liris.cnrs.fr</dc:creator>
+        <dc:contributor>advene@liris.cnrs.fr</dc:contributor>
+        <dc:created>2007-03-28T16:43:51+02:00</dc:created>
+        <dc:modified>2007-03-28T16:43:51+02:00</dc:modified>
+        <dc:title>Générique</dc:title>
+        <dc:description href="./data/a1-meta1.txt"/>
+      </meta>
+      <content mimetype="image/png" href="./data/content/a2.png" />
+    </annotation>
+
+    <annotation id="a3" media="v1" start="1023" end="5000">
+      <meta>
+        <dc:creator>advene@liris.cnrs.fr</dc:creator>
+        <dc:contributor>advene@liris.cnrs.fr</dc:contributor>
+        <dc:created>2007-03-28T16:43:51+02:00</dc:created>
+        <dc:modified>2007-03-28T16:43:51+02:00</dc:modified>
+        <dc:title>Commentaire audio</dc:title>
+      </meta>
+      <content mimetype="audio/mp3" href="./data/content/a3.mp3" />
+    </annotation>
+
+
+  </annotations>
+
+  <relations>
+    <relation id="r1">
+      <meta>
+        <dc:creator>advene@liris.cnrs.fr</dc:creator>
+        <dc:contributor>advene@liris.cnrs.fr</dc:contributor>
+        <dc:created>2007-03-28T16:43:51+02:00</dc:created>
+        <dc:modified>2007-03-28T16:43:51+02:00</dc:modified>
+        <dc:title>Lien plan-image</dc:title>
+      </meta>
+      <members>
+        <member xlink:href='#a1'/>
+        <member xlink:href='#a2'/>
+      </members>
+      <content />
+    </relation>
+
+  </relations>
+
+  <queries>
+    <query id='foo'>
+      <meta>
+        <dc:title>Requete exercice</dc:title>
+        <dc:creator>olivier.aubert@liris.cnrs.fr</dc:creator>
+        <dc:contributor>advene@liris.cnrs.fr</dc:contributor>
+        <dc:created>2006-03-28T16:43:51+02:00</dc:created>
+        <dc:modified>2007-03-28T16:43:51+02:00</dc:modified>
+      </meta>
+      <content mime-type='application/x-advene-simplequery'>&lt;?xml version='1.0' encoding='UTF-8'?>
+&lt;query xmlns='http://liris.cnrs.fr/advene/ruleset'>
+  &lt;source value='here/rootPackage/annotations'/>
+  &lt;condition operator='contains' rhs='string:o' lhs='element/content/data'/>
+  &lt;return value='element/id'/>
+&lt;/query>
+</content>
+    </query>
+
+  </queries>
+
+  <types>
+    <annotation-type id='annotation'>
+      <meta>
+        <dc:creator>olivier.aubert@liris.cnrs.fr</dc:creator>
+        <dc:contributor>advene@liris.cnrs.fr</dc:contributor>
+        <dc:created>2006-03-28T16:43:51+02:00</dc:created>
+        <dc:modified>2007-03-28T16:43:51+02:00</dc:modified>
+        <advene:color>here/tag_color</advene:color>
+        <advene:representation></advene:representation>
+        <dc:description'>A simple text annotation</dc:description>
+        <dc:title>Annotation texte</dc:title>
+      </meta>
+      <content-type mime-type='text/plain' />
+    </annotation-type>
+  </types>
+
+  <views>
+
+    <view id='annotation-view' viewable-class='annotation'>
+      <meta>
+        <dc:creator>olivier.aubert@liris.cnrs.fr</dc:creator>
+        <dc:contributor>advene@liris.cnrs.fr</dc:contributor>
+        <dc:created>2006-03-28T16:43:51+02:00</dc:created>
+        <dc:modified>2007-03-28T16:43:51+02:00</dc:modified>
+        <dc:description'>Basic annotation view</dc:description>
+        <dc:title>Annotation view</dc:title>
+      </meta>      
+      <content mime-type='text/html'>
+&lt;a tal:attributes="href here/absolute_url">annotation &lt;em tal:content="here/id">Id&lt;/em>
+&lt;/a> (&lt;a tal:attributes="href string: /media/play?position=${here/fragment/begin}">Play fragment&lt;/a>
+ | &lt;a href="/media/pause">Pause&lt;/a> | &lt;a href="/media/stop">Stop&lt;/a> )
+</content>
+  </view>
+
+    <view id='v_timeline' viewable-class='package'>
+      <meta>
+        <dc:creator>olivier.aubert@liris.cnrs.fr</dc:creator>
+        <dc:contributor>advene@liris.cnrs.fr</dc:contributor>
+        <dc:created>2006-03-28T16:43:51+02:00</dc:created>
+        <dc:modified>2007-03-28T16:43:51+02:00</dc:modified>
+        <dc:title>My own timeline view</dc:title>
+      </meta>      
+      <content mime-type='application/x-advene-adhoc-view'>&lt;?xml version='1.0' encoding='UTF-8'?>
+&lt;adhoc xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool' id='timeline'>
+  &lt;option name='delete_transmuted' value='False'/>
+  &lt;option name='resize-by-dnd' value='False'/>
+  &lt;option name='autoscroll' value='0'/>
+  &lt;option name='highlight' value='False'/>
+  &lt;option name='display-relation-content' value='True'/>
+  &lt;option name='display-relation-type' value='True'/>
+  &lt;option name='display-relations' value='True'/>
+  &lt;argument name='annotation-type' value='at_global'/>
+  &lt;argument name='annotation-type' value='annotation'/>
+  &lt;argument name='annotation-type' value='at_color'/>
+&lt;/adhoc>
+</content>
+    </view>
+
+</views>
+
+</package>

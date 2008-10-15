@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ruleset xmlns='http://liris.cnrs.fr/advene/ruleset'>
+  <rule name='Take snapshot on begin'>
+    <event name='AnnotationBegin'/>
+    <action name='Snapshot'>
+      <param name='position' value='annotation/fragment/begin'/>
+    </action>
+  </rule>
+  <rule name='Take snapshot on end'>
+    <event name='AnnotationEnd'/>
+    <action name='Snapshot'>
+      <param name='position' value='annotation/fragment/end'/>
+    </action>
+  </rule>
+  <rule name='Package load warning'>
+    <event name='PackageLoad'/>
+    <action name='Message'>
+      <param name='message' value='string:Loaded package ${package/title}'/>
+    </action>
+  </rule>
+</ruleset>
