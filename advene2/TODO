@@ -10,5 +10,7 @@
 
 - remove unused code in advene/utils once we are sure we won't use it
 
+- add support for file-access (rather than getter/setter) to content data
+
 - add indexes in the SQL schema (Annotations.f_begin at least)
   and test its efficiency

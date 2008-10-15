@@ -41,7 +41,7 @@ if __name__ == "__main__":
     print [a._id for a in p.own.annotations]
     print p.get("a1")
     print p["a2"]
-    p.get_element("a1").content.data = "hello"
+    p.get_element("a1").content_data = "hello"
     p.dc_creator = "pchampin"
     a1.begin += 1
     
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     a1 = p.get_element ("a1")
     a2 = p.get_element ("a2")
     print id(a1) == id(p.get_element ("a1"))
-    print a1.content.data
+    print a1.content_data
     print p.dc_creator
     print a1.begin
 

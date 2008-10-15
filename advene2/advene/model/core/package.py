@@ -82,7 +82,7 @@ class Package(object, WithMetaMixin, DirtyMixin):
         It is an error to use a package or any of its elements or attributes
         when the package has been closed. The behaviour is undefined.
         """
-        for e in self._elements:
+        for e in self._elements.itervalues():
             if e.dirty:
                 e.clean()
         self.clean()
