@@ -271,7 +271,7 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         return super(PackageElement, self).disconnect(handler_id)
 
     @tales_context_function
-    def _tales_tags(self, context):
+    def _tales_my_tags(self, context):
         refpkg = context.globals["refpkg"]
         return self.iter_my_tags(refpkg)
 

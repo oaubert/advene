@@ -64,7 +64,7 @@ class CamElement(PackageElement):
             return ( i for i in all if i != type_id )
 
     @tales_context_function
-    def _tales_tags(self, context):
+    def _tales_my_tags(self, context):
         """
         Iter over all the user-tags of this element in the context of the
         reference package.
