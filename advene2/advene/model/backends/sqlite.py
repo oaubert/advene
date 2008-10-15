@@ -148,6 +148,7 @@ def create(package, force=False, url=None):
             f.close()
             try:
                 curs.executescript(sql)
+                curs.execute("BEGIN EXCLUSIVE")
                 curs.execute("INSERT INTO Version VALUES (?)",
                              (BACKEND_VERSION,))
                 curs.execute("INSERT INTO Packages VALUES (?,?,?)",
