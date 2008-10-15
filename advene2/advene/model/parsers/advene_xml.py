@@ -343,6 +343,7 @@ class Parser(XmlParserBase):
                                   key)
             val = child.get("id-ref")
             if val is None:
+                text = child.text or "" # because child.text could be None
                 obj.enter_no_event_section()
                 try:
                     obj.set_meta(key, child.text, False)
