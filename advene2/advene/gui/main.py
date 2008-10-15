@@ -2505,7 +2505,7 @@ class AdveneGUI(Connect):
             ic=self.imagecache
             if ic and ic._modified and config.data.preferences['imagecache-save-on-exit'] != 'never':
                 if config.data.preferences['imagecache-save-on-exit'] == 'ask':
-                    media=self.controller.get_default_media(package=p)
+                    media=self.controller.get_current_mediafile(package=p)
                     response=dialog.yes_no_cancel_popup(title=_("%s snapshots") % media,
                                                              text=_("Do you want to save the snapshots for media %s?") % media)
                     if response == gtk.RESPONSE_CANCEL:
@@ -2746,8 +2746,8 @@ class AdveneGUI(Connect):
 
     def on_import_dvd_chapters1_activate (self, button=None, data=None):
         # FIXME: loosy test
-        if (self.controller.get_default_media() is None
-            or 'dvd' in self.controller.get_default_media()):
+        if (self.controller.get_current_mediafile() is None
+            or 'dvd' in self.controller.get_current_mediafile()):
             if not dialog.message_dialog(
                 _("Do you confirm the creation of annotations matching the DVD chapters?"),
                 icon=gtk.MESSAGE_QUESTION):
@@ -3051,7 +3051,7 @@ class AdveneGUI(Connect):
         vbox=gtk.VBox()
 
         sel=DVDSelect(controller=self.controller,
-                      current=self.controller.get_default_media())
+                      current=self.controller.get_current_mediafile())
         vbox.add(sel.get_widget())
 
         hbox=gtk.HButtonBox()
@@ -3106,7 +3106,7 @@ class AdveneGUI(Connect):
         cache={
             'author': self.controller.package.author,
             'date': self.controller.package.date,
-            'media': self.controller.get_default_media() or "",
+            'media': self.controller.get_current_mediafile() or "",
             'duration': str(self.controller.package.cached_duration),
             'title': self.controller.package.title or ""
             }
@@ -3613,7 +3613,7 @@ class AdveneGUI(Connect):
             pb.old_autosync=ic.autosync
             ic.autosync=True
             if ic.name is None:
-                ic.name=helper.mediafile2id(c.get_default_media())
+                ic.name=helper.mediafile2id(c.get_current_mediafile())
 
             if p.status == p.PauseStatus:
                 # If we were paused, resume from this position

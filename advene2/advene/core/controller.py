@@ -1206,7 +1206,7 @@ class AdveneController(object):
         self.notify('PlayerChange', player=p)
         mediafile = self.get_current_mediafile()
         if mediafile != "":
-            self.set_media(mediafile)
+            self.set_mediafile(mediafile)
         
     def restart_player (self):
         """Restart the media player."""
