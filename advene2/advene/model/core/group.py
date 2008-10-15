@@ -1,6 +1,6 @@
 """I define `GroupMixin`, a helper class to implement groups."""
 
-from itertools import chain
+from itertools import chain, islice
 
 from advene.model.core.element import MEDIA, ANNOTATION, RELATION, LIST, \
                                       TAG, VIEW, QUERY, RESOURCE, IMPORT
@@ -194,28 +194,48 @@ class _GroupCollection(object):
             return None
 
     def __getitem__(self, key):
-        if isinstance(key, int) or isinstance(key, slice):
-            # TODO optimize this ?
-            return list(self)[key]
+        if isinstance(key, int):
+            it = self.__iter__()
+            for i in xtange(key): it.next()
+            return it.next()
+        elif isinstance(key, slice):
+            if slice.step is None or slice.step > 0:
+                key = key.indices(self.__len__())
+                return list(islice(self, key))
+            else:
+                return list(self)[key]
         else:
             r = self.get(key)
             if r is None:
                 raise KeyError(key)
             return r
-    
-    def size(self):
+
+    def __contains__(self, item):
+        """
+        Default and unefficient implementation of __contains__.
+        Override if possible.
+        """
+        for i in self:
+            if item == i:
+                return True
+
+    @property
+    def _tales_size(self):
         """Return the size of the group.
         """
         return self.__len__()
 
-    def first(self):
+    @property
+    def _tales_first(self):
         return self.__iter__().next()
 
-    def rest(self):
-        # FIXME: it should return a group ?
-        i=self.__iter__()
-        # Drop the first value
-        i.next()
-        for v in i:
-            yield v
-
+    @property
+    def _tales_rest(self):
+        class RestCollection(_GroupCollection):
+            def __iter__(self):
+                it = self._g.__iter__()
+                it.next()
+                for i in it: yield i
+            def __len__(self):
+                return self._g.__len__()-1
+        return RestCollection(self)
