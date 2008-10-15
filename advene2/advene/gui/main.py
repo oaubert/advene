@@ -2794,7 +2794,7 @@ class AdveneGUI(object):
             alias=self.controller.aliases[package]
             try:
                 self.controller.save_package (alias=alias)
-            except (OSError, IOError), e:
+            except Exception, e:
                 dialog.message_dialog(_("Could not save the package: %s") % unicode(e),
                                                gtk.MESSAGE_ERROR)
         return True
