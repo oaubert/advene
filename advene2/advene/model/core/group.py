@@ -186,7 +186,7 @@ class _GroupCollection(object):
         self._g = group
 
     def get(self, key):
-        e = self._owner.get(key)
+        e = self._g._owner.get(key)
         if e in self:
             return e
         else:
