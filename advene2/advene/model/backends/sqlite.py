@@ -1719,10 +1719,9 @@ class _SqliteBackend(object):
           yielded
         """
         assert _DF or not isinstance(package_ids, basestring)
-
         member_u, member_i = _split_uri_ref(member)
 
-        q = "SELECT DISTINCT ?, e.package, e.id, c.mimetype, " \
+        q = "SELECT DISTINCT ?, e.package as pid, e.id as eid, c.mimetype, " \
             "  join_id_ref(c.model_p, c.model_i), c.url " \
             "FROM Elements e " \
             "JOIN Contents c ON c.package = e.package AND c.element = e.id " \
@@ -1742,6 +1741,36 @@ class _SqliteBackend(object):
             args.append(pos)
         r = self._conn.execute(q, args)
         return _FlushableIterator(r, self)
+
+    def count_relations_with_member(self, package_ids, member, pos=None):
+        """Count all the relations having the given member.
+
+        Specific parameters
+        -------------------
+        member
+          the uri-ref of the member to be looked for
+        pos
+          if given, only relations having the member at that posirtion are
+          yielded
+        """
+        assert _DF or not isinstance(package_ids, basestring)
+        member_u, member_i = _split_uri_ref(member)
+
+        q = "SELECT DISTINCT m.package, m.relation " \
+            "FROM RelationMembers m " \
+            "JOIN Packages p ON m.package = p.id "\
+            "LEFT JOIN Imports i ON m.member_p = i.id " \
+            "WHERE m.package IN (" \
+            + ",".join( "?" for i in package_ids ) + ")" \
+            " AND member_i = ? AND ("\
+            "  (member_p = ''   AND  ? IN (p.uri, p.url)) OR " \
+            "  (member_p = i.id AND  ? IN (i.uri, i.url)))"
+        args = list(package_ids) + [member_i, member_u, member_u,]
+        if pos is not None:
+            q += " AND m.ord = ?"
+            args.append(pos)
+        r = self._conn.execute("select count(*) from (%s)" % q, args)
+        return r.next()[0]
 
     # list items management
 
@@ -2119,7 +2148,7 @@ class _SqliteBackend(object):
         execute("INSERT INTO Elements VALUES (?,?,?)",
                 (package_id, id, element_type))
 
-    def _element_query(self, package_ids, element_type, 
+    def _element_query(self, package_ids, element_type,
                        id=None, meta=None):
         """
         Return the selectfrom part of the query, the where part of the query,
@@ -2136,7 +2165,7 @@ class _SqliteBackend(object):
         is used to filter elements that have the given (key, value) pair in
         their metadata (value set to None filtering elements having no value
         for the given key).
-         
+
         """
         assert _DF or not isinstance(package_ids, basestring)
 

@@ -203,14 +203,17 @@ class Annotation(PackageElement, WithContentMixin):
         Count all the relations involving this annotation, from the point of
         view of `package`.
 
-        If `position` is provided, only the relation where this annotations is
+        If `position` is providsed, only the relation where this annotations is
         in the given position are counted.
 
         If ``package`` is not provided, the ``package`` session variable is
         used. If the latter is unset, a TypeError is raised.
         """
-        # TODO optimize this (this implies enhancing the backend API)
-        return len(list(self.iter_relations(package, position)))
+        if package is None:
+            package = session.package
+        if package is None:
+            raise TypeError("no package set in session, must be specified")
+        return package.all.count_relations(member=self, position=position)
 
     @property
     def relations(annotation):

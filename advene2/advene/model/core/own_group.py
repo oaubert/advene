@@ -118,9 +118,15 @@ class OwnGroup(GroupMixin, object):
                                            media,
                                            begin, begin_min, begin_max,)
 
-    def count_relations(self):
+    def count_relations(self, member=None, position=None):
+        assert position is None or member is not None
         o = self._owner
-        return o._backend.count_relations((o._id,))
+        if member is None:
+            return o._backend.count_relations((o._id,))
+        else:
+            uri = member.uriref
+            return o._backend.count_relations_with_member((o._id,),
+                                                          uri, position)
 
     def count_views(self):
         o = self._owner

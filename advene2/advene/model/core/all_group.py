@@ -155,10 +155,17 @@ class AllGroup(GroupMixin, object):
                                                end, end_min, end_max)
                     for be, pdict in o._backends_dict.items() )
 
-    def count_relations(self):
+    def count_relations(self, member=None, position=None):
+        assert position is None or member is not None
         o = self._owner
-        return sum( be.count_relations(pdict)
-                    for be, pdict in o._backends_dict.items() )
+        if member is None:
+            return sum( be.count_relations(pdict)
+                        for be, pdict in o._backends_dict.items() )
+        else:
+            uri = member.uriref
+            return sum( be.count_relations_with_member(pdict, uri, position)
+                        for be, pdict in o._backends_dict.items() )
+
 
     def count_views(self):
         o = self._owner

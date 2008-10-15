@@ -1496,10 +1496,10 @@ class TestHandleElements(TestCase):
 
         self.be.insert_member(self.pid1, "r1", "i1:a5", 1)
         compare_to_list(["a4", "i1:a5", "a3",], self.pid1, "r1")
-            
+
         self.be.insert_member(self.pid1, "r1", "a2", 1)
         compare_to_list(["a4", "a2", "i1:a5", "a3",], self.pid1, "r1")
-            
+
         self.be.update_member(self.pid1, "r1", "i1:a6", 0)
         compare_to_list(["i1:a6", "a2", "i1:a5", "a3",], self.pid1, "r1")
 
@@ -1509,23 +1509,29 @@ class TestHandleElements(TestCase):
         self.be.insert_member(self.pid1, "r2", "a4", -1)
         self.be.insert_member(self.pid2, "r3", "a5", -1)
         self.be.insert_member(self.pid2, "r3", "a6", -1)
-        rel_w_member = self.be.iter_relations_with_member
+        c_rel_w_member = self.be.count_relations_with_member
+        i_rel_w_member = self.be.iter_relations_with_member
         pids = (self.pid1, self.pid2,)
         # with url in uri-ref
         a5_uri_ref = "%s#a5" % self.url2
+        self.assertEqual(2, c_rel_w_member(pids, a5_uri_ref,))
         self.assertEqual(frozenset((RELATION,)+i for i in [self.r1, self.r3]),
-                          frozenset(rel_w_member(pids, a5_uri_ref,)))
+                          frozenset(i_rel_w_member(pids, a5_uri_ref,)))
+        self.assertEqual(1, c_rel_w_member(pids, a5_uri_ref, 1))
         self.assertEqual(frozenset([(RELATION,)+self.r1,]),
-                          frozenset(rel_w_member(pids, a5_uri_ref, 1)))
+                          frozenset(i_rel_w_member(pids, a5_uri_ref, 1)))
         # with uri in uri-ref
         a5_uri_ref = "%s#a5" % self.i1_uri
+        self.assertEqual(2, c_rel_w_member(pids, a5_uri_ref,))
         self.assertEqual(frozenset((RELATION,)+i for i in [self.r1, self.r3]),
-                          frozenset(rel_w_member(pids, a5_uri_ref,)))
+                          frozenset(i_rel_w_member(pids, a5_uri_ref,)))
+        self.assertEqual(1, c_rel_w_member(pids, a5_uri_ref, 1))
         self.assertEqual(frozenset([(RELATION,)+self.r1,]),
-                          frozenset(rel_w_member(pids, a5_uri_ref, 1)))
+                          frozenset(i_rel_w_member(pids, a5_uri_ref, 1)))
         # with not all packages
+        self.assertEqual(1, c_rel_w_member((self.pid2,), a5_uri_ref))
         self.assertEqual(frozenset([(RELATION,)+self.r3,]),
-                          frozenset(rel_w_member((self.pid2,), a5_uri_ref)))
+                          frozenset(i_rel_w_member((self.pid2,), a5_uri_ref)))
 
     def test_items(self):
 

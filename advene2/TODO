@@ -59,7 +59,7 @@ Backend related
 - add indexes in the SQL schema (Annotations.f_begin at least)
   and test its efficiency
 
-- implement count_relations_with_members and update Annotation.count_relations
+- implement count_lists_with_items and update all_group and own_group
 
 Misc
 ----
