@@ -291,18 +291,6 @@ class Package(CorePackage):
         self.connect("tag::added", bk.update)
         self.connect("tag::removed", bk.update)
 
-
-    def save(self, serializer=None):
-        super(Package, self).save(serializer)
-
-    def save_as(self, filename, change_url=False, serializer=None, erase=False):
-        self.modified = datetime.now().isoformat()
-        super(Package, self).save_as(self, filename, change_url, serializer,
-                                     erase)
-
-    def close(self):
-        super(Package, self).close()
-
     def create_tag(self, id):
         """
         This method is inherited from core.Package but is unsafe on
