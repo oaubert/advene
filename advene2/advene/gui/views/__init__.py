@@ -263,7 +263,7 @@ class AdhocView(object):
         stream=StringIO.StringIO()
         helper.indent(root)
         ET.ElementTree(root).write(stream, encoding='utf-8')
-        content.setData(stream.getvalue())
+        content.data=stream.getvalue()
         stream.close()
         return True
 
