@@ -509,9 +509,8 @@ class HTMLContentHandler (ContentHandler):
         ctx=self.controller.build_context(annotation)
         d={ 
             'id': annotation.id,
-            # FIXME: should get base server address from somewhere
-            'href': 'http://localhost:1234' + ctx.evaluate('here/player_url'),
-            'imgurl': 'http://localhost:1234' + ctx.evaluate('here/snapshot_url'),
+            'href': ctx.evaluate('here/player_url'),
+            'imgurl': ctx.evaluate('here/snapshot_url'),
             'timestamp': helper.format_time(annotation.begin),
             'content': self.controller.get_title(annotation),
             }
@@ -524,7 +523,7 @@ class HTMLContentHandler (ContentHandler):
         if 'content' in choice:
             data.append("""<span tal:content="a/representation">%(content)s</span>""" % d)
         
-        data.append('</a>')
+        data.append('</a><br>')
 
         self.editor.feed("\n".join(data))
         return True
