@@ -141,12 +141,14 @@ class DummyGlade:
         self.vpaned=gtk.VPaned()
 
         self.displayvbox=gtk.VBox()
-        self.vpaned.add1(self.displayvbox)
+        self.vpaned.pack1(self.displayvbox, resize=True, shrink=False)
 
         sw=gtk.ScrolledWindow()
+        sw.set_policy (gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
+        sw.set_size_request(-1, 40)
         self.logmessages=gtk.TextView()
         sw.add(self.logmessages)
-        self.vpaned.pack2(sw)
+        self.vpaned.pack2(sw, resize=True, shrink=True)
 
         v.add(self.vpaned)
 
