@@ -25,28 +25,28 @@ class CamElement(PackageElement):
                 raise SemanticError("cam:system-type can not be changed")
         return super(CamElement, self).del_meta(key)
 
-    def iter_tags(self, package, inherited=True, _guard=True):
+    def iter_my_tags(self, package, inherited=True, _guard=True):
         """
         This method is inherited from core.Package but is unsafe on
-        cam.Package. Use instead `iter_user_tags`.
+        cam.Package. Use instead `iter_my_user_tags`.
         """
-        if _guard: warn("use iter_user_tags instead", UnsafeUseWarning, 2)
-        return super(CamElement, self).iter_tags(package, inherited)
+        if _guard: warn("use iter_my_user_tags instead", UnsafeUseWarning, 2)
+        return super(CamElement, self).iter_my_tags(package, inherited)
 
-    def iter_user_tags(self, package, inherited=True):
-        for t in self.iter_tags(package, inherited, _guard=False):
+    def iter_my_user_tags(self, package, inherited=True):
+        for t in self.iter_my_tags(package, inherited, _guard=False):
             if t.get_meta(CAMSYS_TYPE, None) is None:
                 yield t
 
-    def iter_tag_ids(self, package, inherited=True, _guard=True):
+    def iter_my_tag_ids(self, package, inherited=True, _guard=True):
         """
         This method is inherited from core.Package but is unsafe on
-        cam.Package. Use instead `iter_user_tag_ids`.
+        cam.Package. Use instead `iter_my_user_tag_ids`.
         """
-        if _guard: warn("use iter_user_tag_ids instead", UnsafeUseWarning, 2)
-        return super(CamElement, self).iter_tag_ids(package, inherited)
+        if _guard: warn("use iter_my_user_tag_ids instead", UnsafeUseWarning, 2)
+        return super(CamElement, self).iter_my_tag_ids(package, inherited)
 
-    def iter_user_tag_ids(self, package, inherited=True, _guard=True):
+    def iter_my_user_tag_ids(self, package, inherited=True, _guard=True):
         """
         FIXME: missing docstring
         """
@@ -56,7 +56,7 @@ class CamElement(PackageElement):
         # check tags metadata cam:system-type to decide that they are
         # user-tags.
         type = self.get_meta(CAM_TYPE, None)
-        all = super(CamElement, self).iter_tag_ids(package, inherited)
+        all = super(CamElement, self).iter_my_tag_ids(package, inherited)
         if type is None:
             return all
         else:
@@ -75,7 +75,7 @@ class CamElement(PackageElement):
         not considered harmful.
         """
         refpkg = context.globals["refpkg"]
-        return self.iter_user_tags(refpkg)
+        return self.iter_my_user_tags(refpkg)
 
 
 CamElement.make_metadata_property(DC_NS_PREFIX + "creator", default="")

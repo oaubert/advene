@@ -144,7 +144,7 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
     # tag management
 
-    def iter_tags(self, package, inherited=True):
+    def iter_my_tags(self, package, inherited=True):
         """Iter over the tags associated with this element in ``package``.
 
         If ``inherited`` is set to False, the tags associated by imported
@@ -152,21 +152,21 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
         If a tag is unreachable, None is yielded.
 
-        See also `iter_tag_ids`.
+        See also `iter_my_tag_ids`.
         """
-        return self._iter_tags_or_tag_ids(package, inherited, True)
+        return self._iter_my_tags_or_tag_ids(package, inherited, True)
 
-    def iter_tag_ids(self, package, inherited=True, _get=0):
+    def iter_my_tag_ids(self, package, inherited=True, _get=0):
         """Iter over the id-refs of the tags associated with this element in
         ``package``.
 
         If ``inherited`` is set to False, the tags associated by imported
         packages of ``package`` will not be yielded.
 
-        See also `iter_tags`.
+        See also `iter_my_tags`.
         """
-        # this actually also implements iter_tags
-        # see _iter_tags_or_tag_ids below
+        # this actually also implements iter_my_tags
+        # see _iter_my_tags_or_tag_ids below
         u = self._get_uriref()
         if not inherited:
             pids = (package._id,)
@@ -187,15 +187,15 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
                         y = package.make_id_for(p, tid)
                     yield y
 
-    @alias(iter_tag_ids)
-    def _iter_tags_or_tag_ids(self):
-        # iter_tag_ids and iter_tags have a common implementation. Normally,
-        # it should be located in a "private" method named
-        # _iter_tags_or_tag_id.
-        # However, for efficiency reasons, that private method and iter_tag_ids
-        # have been merged into one. Both names are necessary necessary because
-        # the "public" iter_tag_ids may be overridden while the "private"
-        # method should not. Hence that alias.
+    @alias(iter_my_tag_ids)
+    def _iter_my_tags_or_tag_ids(self):
+        # iter_my_tag_ids and iter_my_tags have a common implementation.
+        # Normally, it should be located in a "private" method named
+        # _iter_my_tags_or_tag_id.
+        # However, for efficiency reasons, that private method and
+        # iter_my_tag_ids have been merged into one. Both names are necessary
+        # necessary because the "public" iter_my_tag_ids may be overridden
+        # while the "private" method should not. Hence that alias.
         pass
 
     def iter_taggers(self, tag, package):
@@ -273,6 +273,6 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
     @tales_context_function
     def _tales_tags(self, context):
         refpkg = context.globals["refpkg"]
-        return self.iter_tags(refpkg)
+        return self.iter_my_tags(refpkg)
 
 # TODO: provide class DestroyedPackageElement.

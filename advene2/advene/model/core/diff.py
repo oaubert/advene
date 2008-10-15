@@ -134,8 +134,8 @@ def _diff_contents(elt1, elt2):
     return r
 
 def _diff_tags(e1, e2):
-    l1 = list(enumerate(e1.iter_tag_ids(e1._owner)))
-    l2 = list(enumerate(e2.iter_tag_ids(e2._owner)))
+    l1 = list(enumerate(e1.iter_my_tag_ids(e1._owner)))
+    l2 = list(enumerate(e2.iter_my_tag_ids(e2._owner)))
     r = []
     for t1, t2 in _xzip(l1, l2, lambda x: x):
         if t1 is None:

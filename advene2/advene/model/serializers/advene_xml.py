@@ -249,7 +249,7 @@ class _Serializer(object):
             
     def _serialize_element_tags(self, elt, xelt):
         xtags = SubElement(xelt, "tags")
-        for t in elt.iter_tag_ids(self.package, inherited=False):
+        for t in elt.iter_my_tag_ids(self.package, inherited=False):
             SubElement(xtags, "tag", {"id-ref":t})
         if len(xtags) == 0:
             xelt.remove(xtags)

@@ -104,10 +104,10 @@ if __name__ == "__main__":
     print [i.id for i in p1.all.medias]
     print [i.id for i in p1.all.annotations]
     print
-    print [t.id for t in a3.iter_tags(p5)]
-    print [t.id for t in a3.iter_tags(p1, False)]
-    print [t.id for t in a3.iter_tags(p1)]
-    print [i for i in a3.iter_tag_ids(p1)]
+    print [t.id for t in a3.iter_my_tags(p5)]
+    print [t.id for t in a3.iter_my_tags(p1, False)]
+    print [t.id for t in a3.iter_my_tags(p1)]
+    print [i for i in a3.iter_my_tag_ids(p1)]
     print
     print [ e.id for e in t6.iter_elements(p5, False) ]
     print [ e.id for e in t6.iter_elements(p5) ]

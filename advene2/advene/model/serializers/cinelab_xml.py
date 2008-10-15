@@ -140,10 +140,10 @@ class _Serializer(_AdveneSerializer):
     
     def _serialize_element_tags(self, elt, xelt):
         # lure `_AdveneXmlParser.handle_tag` into using
-        # `iter_user_tag_ids` instead of `iter_tag_ids`
+        # `iter_my_user_tag_ids` instead of `iter_my_tag_ids`
         # by overridding method at instance level
-        elt.iter_tag_ids = elt.iter_user_tag_ids
+        elt.iter_my_tag_ids = elt.iter_my_user_tag_ids
         _AdveneSerializer._serialize_element_tags(self, elt, xelt)
         # restore class level method
-        del elt.iter_tag_ids
+        del elt.iter_my_tag_ids
 
