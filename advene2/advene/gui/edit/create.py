@@ -223,7 +223,7 @@ class CreateElementPopup(object):
                 el.content.data=r.xml_repr()
             self.controller.notify('ViewCreate', view=el)
         elif self.type_ == Schema:
-            el=self.parent.createSchema(id=id_)
+            el=self.parent.create_schema(id=id_)
             el.title=title_
             self.controller.notify('SchemaCreate', schema=el)
         elif self.type_ == AnnotationType:
