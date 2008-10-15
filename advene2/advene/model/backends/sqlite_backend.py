@@ -805,7 +805,7 @@ class _SqliteBackend (object):
         If non-negative, the member will be inserted at that position.
         """
         n = self.count_members (package_id, id)
-        assert -1 <= pos <= n
+        assert -1 <= pos <= n, pos
         p,s = _split_id_ref (member) # also assert that member has len<=2
         assert p != "" or self.has_element(package_id, s, ANNOTATION), member
         if pos == -1:
@@ -830,8 +830,7 @@ class _SqliteBackend (object):
         Remobv the member at the given position in the identified relation.
         ``member`` is the id-ref of an own or directly imported member.
         """
-        assert (0 <= pos < self.count_members (package_id, id))
-        assert (0 <= pos < self.count_members (package_id, id))
+        assert 0 <= pos < self.count_members (package_id, id), pos
 
         p,s = _split_id_ref (member) # also assert that member has len<=2
         assert p != "" or self.has_element(package_id, s, ANNOTATION), member
@@ -861,7 +860,7 @@ class _SqliteBackend (object):
         """
         if __debug__:
             c = self.count_members (package_id, id)
-            assert (-c <= pos < c)
+            assert -c <= pos < c, pos
 
         if pos < 0:
             c = self.count_members (package_id, id)
@@ -886,8 +885,7 @@ class _SqliteBackend (object):
         """
         Remobv the member at the given position in the identified relation.
         """
-        assert (0 <= pos < self.count_members (package_id, id))
-        assert (0 <= pos < self.count_members (package_id, id))
+        assert 0 <= pos < self.count_members (package_id, id), pos
 
         try:
             c = self._conn.cursor()
