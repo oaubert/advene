@@ -357,6 +357,11 @@ class AdveneController(object):
         """
         advene.util.importer.register(imp)
 
+    def register_player(self, imp):
+        """Register a video player.
+        """
+        config.data.register_player(imp)
+
     def register_videotime_action(self, t, action):
         """Register an action to be executed when reaching the given movie time.
 
