@@ -527,12 +527,14 @@ class ElementCollection(object):
     def __repr__(self):
         return "[" + ",".join(e.id for e in self) + "]"
 
-    def get(self, key):
+    def get(self, key, default=None):
         e = self._owner.get(key)
-        if e in self:
+        if e is None:
+            return default
+        elif e in self:
             return e
         else:
-            return None
+            return default
 
     _allow_filter = True
 
