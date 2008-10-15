@@ -567,7 +567,7 @@ class SubviewList(list, EtreeMixin):
     def as_views(self, package):
         """Return the Subview list as a list of views, interpreted in the context of package
         """
-        return [ package.get_element_by_id(i) for i in self ]
+        return [ package.get(i) for i in self ]
 
     def from_etree(self, element, catalog=None, origin=None):
         """Read the list from a DOM element.

@@ -469,7 +469,7 @@ class Menu:
             #    i=gtk.SeparatorMenuItem()
             #    submenu.append(i)
             #    for t, l in el.typedRelatedIn.iteritems():
-            #        at=self.controller.package.get_element_by_id(t)
+            #        at=self.controller.package.get(t)
             #        m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
             #        amenu=gtk.Menu()
             #        m.set_submenu(amenu)
@@ -485,7 +485,7 @@ class Menu:
             #    i=gtk.SeparatorMenuItem()
             #    submenu.append(i)
             #    for t, l in el.typedRelatedOut.iteritems():
-            #        at=self.controller.package.get_element_by_id(t)
+            #        at=self.controller.package.get(t)
             #        m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
             #        amenu=gtk.Menu()
             #        m.set_submenu(amenu)
@@ -592,7 +592,7 @@ class Menu:
         """
         p=self.controller.package
         ident='v_caption_%s' % at.id
-        if p.get_element_by_id(ident) is not None:
+        if p.get(ident) is not None:
             dialog.message_dialog(_("A caption dynamic view for %s already seems to exist.") % self.controller.get_title(at))
             return True
         v=p.create_view(id=ident,

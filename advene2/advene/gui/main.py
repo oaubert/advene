@@ -2362,7 +2362,7 @@ class AdveneGUI(Connect):
                 # Creation of a new type.
                 attitle=new_type_title_dialog.title_entry.get_text()
                 atid=new_type_title_dialog.id_entry.get_text()
-                at=self.controller.package.get_element_by_id(atid)
+                at=self.controller.package.get(atid)
                 if at is not None:
                     dialog.message_dialog(_("You specified a annotation-type identifier that already exists. Aborting."))
                     d.destroy()
@@ -2371,7 +2371,7 @@ class AdveneGUI(Connect):
                 if sc == newschema:
                     sctitle=new_schema_title_dialog.title_entry.get_text()
                     scid=new_schema_title_dialog.id_entry.get_text()
-                    sc=self.controller.package.get_element_by_id(scid)
+                    sc=self.controller.package.get(scid)
                     if sc is None:
                         # Create the schema
                         sc=self.controller.package.create_schema(id=scid)
@@ -2455,7 +2455,7 @@ class AdveneGUI(Connect):
             if sc == newschema:
                 sctitle=new_schema_title_dialog.title_entry.get_text()
                 scid=new_schema_title_dialog.id_entry.get_text()
-                sc=self.controller.package.get_element_by_id(scid)
+                sc=self.controller.package.get(scid)
                 if sc is None:
                     # Create the schema
                     sc=self.controller.package.create_schema(id=scid)

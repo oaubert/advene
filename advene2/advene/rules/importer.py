@@ -76,14 +76,11 @@ class EventHistoryImporter(GenericImporter):
             self.init_package(filename='event_history.xml', annotationtypeid='event')
         id_="Traces"
         title_="Traces"
-        schema=self.package.get_element_by_id(id_)
+        schema=self.package.get(id_)
         if schema is None:
             self.package._idgenerator.add(id_)
-            schema=self.package.createSchema(ident=id_)
-            schema.author=config.data.userid
-            schema.date=time.strftime("%Y-%m-%d")
+            schema=self.package.create_schema(id=id_)
             schema.title=title_
-            self.package.schemas.append(schema)
         self.convert(self.iterator(filename))
         return self.package
 register(EventHistoryImporter)
