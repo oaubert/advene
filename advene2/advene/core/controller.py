@@ -1498,7 +1498,7 @@ class AdveneController(object):
         p=context.evaluate('package')
 
         # Cache common fieldnames for structured content
-        for at in p.annotationTypes:
+        for at in p.all.annotation_types:
             if at.mimetype.endswith('/x-advene-structured'):
                 at.meta[config.data.transientns+'fieldnames']=helper.common_fieldnames(at.annotations)
             else:
