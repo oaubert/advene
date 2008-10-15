@@ -1,0 +1,41 @@
+NAMES
+-----
+
+use underscored_names (python style) for attributes and methods
+use CaptializedNames (java style) for class names
+NB: some classes could be function; they may be named in python_style
+
+a module intended to contain a class must be named after that class
+a module containing utility function must be named in python style
+packages must be named in python style
+
+words composing an identifier should always be separated (in the appropriate
+style)
+words should not be abbreviated
+
+method names should start with a verb
+boolean property names should be an adjective
+other property names should be a noun
+iterable property names should be plural
+
+SYNTAX
+------
+
+relative import is authorized only when the module name is a class name
+
+SEMANTIC
+--------
+
+read-only properties should be prefered to methods with only self as parameter
+
+methods and properties should rather return an iterator than another iterable,
+except when the iterable is already available and may be safely returned
+
+as a consequence, generic APIs should stick to iterators, since they should not
+make asumption on the availability of an iterable in the underlying 
+implementations
+
+whenever possible, the raising of an exception should be avoidable, and should
+not be the default behaviour. A good practice is to accept advene.RAISE as a
+special parameter to indicate that an exception should be raised in the
+appropriate case.
