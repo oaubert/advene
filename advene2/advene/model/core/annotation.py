@@ -34,10 +34,32 @@ class Annotation(PackageElement, WithContentMixin):
         return "Annotation(%s,%s,%s)" % \
                (self._media_id, self._begin, self._end)
 
-    def __cmp__(self, other):
+    def _cmp(self, other):
+        """
+        Common implementation for __lt__, __gt__, __le__ and __ge__.
+
+        Do not rename it to __cmp__ because it would be used for __eq__ as
+        well, which is not what we want.
+        """
         return self._begin - other._begin \
             or self._end - other._end \
             or cmp(self._media_id, other._media_id)
+
+    def __lt__(self, other):
+        return getattr(other, "ADVENE_TYPE", None) is ANNOTATION \
+           and self._cmp(other) < 0
+
+    def __le__(self, other):
+        return getattr(other, "ADVENE_TYPE", None) is ANNOTATION \
+           and self._cmp(other) <= 0
+
+    def __gt__(self, other):
+        return getattr(other, "ADVENE_TYPE", None) is ANNOTATION \
+           and self._cmp(other) > 0
+
+    def __ge__(self, other):
+        return getattr(other, "ADVENE_TYPE", None) is ANNOTATION \
+           and self._cmp(other) >= 0
 
     def get_media(self, default=None):
         """Return the media associated to this annotation.
