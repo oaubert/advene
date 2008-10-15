@@ -95,11 +95,11 @@ class OwnGroup(GroupMixin, object):
         for i in o._backend.iter_imports((o._id,), None, url, uri):
             yield o.get_element(i)
 
-    def media_count(self):
+    def count_medias(self):
         o = self._owner
-        return o._backend.media_count((o._id,))
+        return o._backend.count_medias((o._id,))
 
-    def annotation_count(self, media=None,
+    def count_annotations(self, media=None,
                                 begin=None, begin_min=None, begin_max=None,
                                 end=None, end_min=None, end_max=None,
                                 at=None):
@@ -111,34 +111,34 @@ class OwnGroup(GroupMixin, object):
         if at is not None:
             begin_max = end_min = at
         o = self._owner
-        return o._backend.annotation_count((o._id,), None,
+        return o._backend.count_annotations((o._id,), None,
                                            media,
                                            begin, begin_min, begin_max,)
 
-    def relation_count(self):
+    def count_relations(self):
         o = self._owner
-        return o._backend.relation_count((o._id,))
+        return o._backend.count_relations((o._id,))
 
-    def view_count(self):
+    def count_views(self):
         o = self._owner
-        return o._backend.view_count((o._id,))
+        return o._backend.count_views((o._id,))
 
-    def resource_count(self):
+    def count_resources(self):
         o = self._owner
-        return o._backend.resource_count((o._id,))
+        return o._backend.count_resources((o._id,))
 
-    def tag_count(self):
+    def count_tags(self):
         o = self._owner
-        return o._backend.tag_count((o._id,))
+        return o._backend.count_tags((o._id,))
 
-    def list_count(self):
+    def count_lists(self):
         o = self._owner
-        return o._backend.list_count((o._id,))
+        return o._backend.count_lists((o._id,))
 
-    def query_count(self):
+    def count_queries(self):
         o = self._owner
-        return o._backend.query_count((o._id,))
+        return o._backend.count_queries((o._id,))
 
-    def import_count(self, url=None, uri=None):
+    def count_imports(self, url=None, uri=None):
         o = self._owner
-        return o._backend.import_count((o._id,), url, uri)
+        return o._backend.count_imports((o._id,), url, uri)

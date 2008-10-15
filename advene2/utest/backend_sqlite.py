@@ -956,7 +956,7 @@ class TestHandleElements(TestCase):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return self.be.media_count(*a, **k)
+            return self.be.count_medias(*a, **k)
 
         ref = len([self.m1, self.m2, self.m3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -1005,7 +1005,7 @@ class TestHandleElements(TestCase):
         # the following function makes assert expression fit in one line...
 
         def get(*a, **k):
-            return self.be.annotation_count(*a, **k)
+            return self.be.count_annotations(*a, **k)
 
         ref = len([self.a4, self.a3, self.a2, self.a1, self.a5, self.a6,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -1072,7 +1072,7 @@ class TestHandleElements(TestCase):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return self.be.relation_count(*a, **k)
+            return self.be.count_relations(*a, **k)
 
         ref = len([self.r1, self.r2, self.r3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -1094,7 +1094,7 @@ class TestHandleElements(TestCase):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return self.be.view_count(*a, **k)
+            return self.be.count_views(*a, **k)
 
         ref = len([self.v1, self.v2, self.v3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -1116,7 +1116,7 @@ class TestHandleElements(TestCase):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return self.be.resource_count(*a, **k)
+            return self.be.count_resources(*a, **k)
 
         ref = len([self.R1, self.R2, self.R3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -1138,7 +1138,7 @@ class TestHandleElements(TestCase):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return self.be.tag_count(*a, **k)
+            return self.be.count_tags(*a, **k)
 
         ref = len([self.t1, self.t2, self.t3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -1210,7 +1210,7 @@ class TestHandleElements(TestCase):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return self.be.list_count(*a, **k)
+            return self.be.count_lists(*a, **k)
 
         ref = len([self.l1, self.l2, self.l3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -1232,7 +1232,7 @@ class TestHandleElements(TestCase):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return self.be.query_count(*a, **k)
+            return self.be.count_queries(*a, **k)
 
         ref = len([self.q1, self.q2, self.q3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -1254,7 +1254,7 @@ class TestHandleElements(TestCase):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return self.be.import_count(*a, **k)
+            return self.be.count_imports(*a, **k)
 
         ref = len([self.i1, self.i2, self.i3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -1455,7 +1455,7 @@ class TestHandleElements(TestCase):
     def test_members(self):
 
         def compare_to_list(L, pid, rid):
-            self.assertEqual(len(L), self.be.member_count(pid, rid))
+            self.assertEqual(len(L), self.be.count_members(pid, rid))
             for i in xrange(len(L)):
                 self.assertEqual(L[i], self.be.get_member(pid, rid, i))
             self.assertEqual(L, list(self.be.iter_members(pid, rid)))
@@ -1502,7 +1502,7 @@ class TestHandleElements(TestCase):
     def test_items(self):
 
         def compare_to_list(L, pid, rid):
-            self.assertEqual(len(L), self.be.item_count(pid, rid))
+            self.assertEqual(len(L), self.be.count_items(pid, rid))
             for i in xrange(len(L)):
                 self.assertEqual(L[i], self.be.get_item(pid, rid, i))
             self.assertEqual(L, list(self.be.iter_items(pid, rid)))
@@ -1999,7 +1999,7 @@ class TestDeleteElement(TestCase):
         self.assert_(not self.be.has_element(self.pid, "r1", RELATION))
         self.assertEqual(None,
                          self.be.get_content_info(self.pid, "r1", RELATION))
-        self.assertEqual(0, self.be.member_count(self.pid, "r1"))
+        self.assertEqual(0, self.be.count_members(self.pid, "r1"))
 
     def test_delete_view(self):
         self.be.create_view(self.pid, "v1", "text/plain", "", "")
@@ -2040,7 +2040,7 @@ class TestDeleteElement(TestCase):
             self.fail(e) # raised by delete_element
         self.assert_(not self.be.has_element(self.pid, "l1"))
         self.assert_(not self.be.has_element(self.pid, "l1", LIST))
-        self.assertEqual(0, self.be.item_count(self.pid, "l1"))
+        self.assertEqual(0, self.be.count_items(self.pid, "l1"))
 
     def test_delete_query(self):
         self.be.create_query(self.pid, "q1", "text/plain", "", "")

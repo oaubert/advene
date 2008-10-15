@@ -71,38 +71,38 @@ class GroupMixin:
                 yield i
 
 
-    def media_count(self):
+    def count_medias(self):
         return len(list(self.iter_medias))
 
-    def annotation_count(self):
+    def count_annotations(self):
         return len(list(self.iter_annotations))
 
-    def relation_count(self):
+    def count_relations(self):
         return len(list(self.iter_relations))
 
-    def list_count(self):
+    def count_lists(self):
         return len(list(self.iter_lists))
 
-    def tag_count(self):
+    def count_tags(self):
         return len(list(self.iter_tags))
 
-    def view_count(self):
+    def count_views(self):
         return len(list(self.iter_views))
 
-    def query_count(self):
+    def count_queries(self):
         return len(list(self.iter_queries))
 
-    def resource_count(self):
+    def count_resources(self):
         return len(list(self.iter_resources))
 
-    def import_count(self):
+    def count_imports(self):
         return len(list(self.iter_imports))
 
     @property
     def medias(group):
         class GroupMedias(_GroupCollection):
             __iter__ = group.iter_medias
-            __len__ = group.media_count
+            __len__ = group.count_medias
             def __contains__(self, e):
                 return e.ADVENE_TYPE == MEDIA and e in self._g
         return GroupMedias(group)
@@ -111,7 +111,7 @@ class GroupMixin:
     def annotations(group):
         class GroupAnnotations(_GroupCollection):
             __iter__ = group.iter_annotations
-            __len__ = group.annotation_count
+            __len__ = group.count_annotations
             def __contains__(self, e):
                 return e.ADVENE_TYPE == ANNOTATION and e in self._g
         return GroupAnnotations(group)
@@ -120,7 +120,7 @@ class GroupMixin:
     def relations(group):
         class GroupRelations(_GroupCollection):
             __iter__ = group.iter_relations
-            __len__ = group.relation_count
+            __len__ = group.count_relations
             def __contains__(self, e):
                 return e.ADVENE_TYPE == RELATION and e in self._g
         return GroupRelations(group)
@@ -129,7 +129,7 @@ class GroupMixin:
     def views(group):
         class GroupViews(_GroupCollection):
             __iter__ = group.iter_views
-            __len__ = group.view_count
+            __len__ = group.count_views
             def __contains__(self, e):
                 return e.ADVENE_TYPE == VIEW and e in self._g
         return GroupViews(group)
@@ -138,7 +138,7 @@ class GroupMixin:
     def resources(group):
         class GroupResources(_GroupCollection):
             __iter__ = group.iter_resources
-            __len__ = group.resource_count
+            __len__ = group.count_resources
             def __contains__(self, e):
                 return e.ADVENE_TYPE == RESOURCE and e in self._g
         return GroupResources(group)
@@ -147,7 +147,7 @@ class GroupMixin:
     def tags(group):
         class GroupTags(_GroupCollection):
             __iter__ = group.iter_tags
-            __len__ = group.tag_count
+            __len__ = group.count_tags
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG and e in self._g
         return GroupTags(group)
@@ -156,7 +156,7 @@ class GroupMixin:
     def lists(group):
         class GroupLists(_GroupCollection):
             __iter__ = group.iter_lists
-            __len__ = group.list_count
+            __len__ = group.count_lists
             def __contains__(self, e):
                 return e.ADVENE_TYPE == LIST and e in self._g
         return GroupLists(group)
@@ -165,7 +165,7 @@ class GroupMixin:
     def queries(group):
         class GroupQueries(_GroupCollection):
             __iter__ = group.iter_queries
-            __len__ = group.query_count
+            __len__ = group.count_queries
             def __contains__(self, e):
                 return e.ADVENE_TYPE == QUERY and e in self._g
         return GroupQueries(group)
@@ -174,7 +174,7 @@ class GroupMixin:
     def imports(group):
         class GroupImports(_GroupCollection):
             __iter__ = group.iter_imports
-            __len__ = group.import_count
+            __len__ = group.count_imports
             def __contains__(self, e):
                 return e.ADVENE_TYPE == IMPORT and e in self._g
         return GroupImports(group)

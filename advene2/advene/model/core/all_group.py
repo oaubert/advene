@@ -125,12 +125,12 @@ class AllGroup(GroupMixin, object):
             for i in be.iter_resources(pdict):
                 yield pdict[i[1]].get_element(i)
 
-    def media_count(self):
+    def count_medias(self):
         o = self._owner
-        return sum( be.media_count(pdict)
+        return sum( be.count_medias(pdict)
                     for be, pdict in o._backends_dict.items() )
 
-    def annotation_count(self, media=None,
+    def count_annotations(self, media=None,
                                begin=None, begin_min=None, begin_max=None,
                                end=None, end_min=None, end_max=None,
                                at=None):
@@ -142,43 +142,43 @@ class AllGroup(GroupMixin, object):
             media = (m._get_uriref() for m in media)
         if at is not None:
             begin_max = end_min = at
-        return sum( be.annotation_count(pdict, None, media,
+        return sum( be.count_annotations(pdict, None, media,
                                                begin, begin_min, begin_max,
                                                end, end_min, end_max)
                     for be, pdict in o._backends_dict.items() )
 
-    def relation_count(self):
+    def count_relations(self):
         o = self._owner
-        return sum( be.relation_count(pdict)
+        return sum( be.count_relations(pdict)
                     for be, pdict in o._backends_dict.items() )
 
-    def view_count(self):
+    def count_views(self):
         o = self._owner
-        return sum( be.view_count(pdict)
+        return sum( be.count_views(pdict)
                     for be, pdict in o._backends_dict.items() )
 
-    def resource_count(self):
+    def count_resources(self):
         o = self._owner
-        return sum( be.resource_count(pdict)
+        return sum( be.count_resources(pdict)
                     for be, pdict in o._backends_dict.items() )
 
-    def tag_count(self):
+    def count_tags(self):
         o = self._owner
-        return sum( be.tag_count(pdict)
+        return sum( be.count_tags(pdict)
                     for be, pdict in o._backends_dict.items() )
 
-    def list_count(self):
+    def count_lists(self):
         o = self._owner
-        return sum( be.list_count(pdict)
+        return sum( be.count_lists(pdict)
                     for be, pdict in o._backends_dict.items() )
 
-    def query_count(self):
+    def count_queries(self):
         o = self._owner
-        return sum( be.query_count(pdict)
+        return sum( be.count_queries(pdict)
                     for be, pdict in o._backends_dict.items() )
 
-    def import_count(self, url=None, uri=None):
+    def count_imports(self, url=None, uri=None):
         o = self._owner
-        return sum( be.import_count(pdict, url, uri)
+        return sum( be.count_imports(pdict, url, uri)
                     for be, pdict in o._backends_dict.items() )
 

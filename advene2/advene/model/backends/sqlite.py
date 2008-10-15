@@ -927,7 +927,7 @@ class _SqliteBackend(object):
 
     # element counting
 
-    def media_count(self, package_ids,
+    def count_medias(self, package_ids,
                     id=None,
                     url=None,
                     foref=None,
@@ -944,7 +944,7 @@ class _SqliteBackend(object):
                                 args)
         return r.next()[0]
 
-    def annotation_count(self, package_ids,
+    def count_annotations(self, package_ids,
                          id=None,
                          media=None,
                          begin=None, begin_min=None, begin_max=None,
@@ -967,7 +967,7 @@ class _SqliteBackend(object):
                                 args)
         return r.next()[0]
 
-    def relation_count(self, package_ids,
+    def count_relations(self, package_ids,
                        id=None):
         """
         Return the number of relations matching the criteria.
@@ -979,7 +979,7 @@ class _SqliteBackend(object):
                                 args)
         return r.next()[0]
 
-    def view_count(self, package_ids, id=None):
+    def count_views(self, package_ids, id=None):
         """
         Return the number of views matching the criteria.
         """
@@ -990,7 +990,7 @@ class _SqliteBackend(object):
                                 args)
         return r.next()[0]
 
-    def resource_count(self, package_ids, id=None):
+    def count_resources(self, package_ids, id=None):
         """
         Return the number of resources matching the criteria.
         """
@@ -1001,7 +1001,7 @@ class _SqliteBackend(object):
                                 args)
         return r.next()[0]
 
-    def tag_count(self, package_ids, id=None, meta=None):
+    def count_tags(self, package_ids, id=None, meta=None):
         """
         Return the number of tags matching the criteria.
         """
@@ -1012,7 +1012,7 @@ class _SqliteBackend(object):
                                 args)
         return r.next()[0]
 
-    def list_count(self, package_ids, id=None, meta=None):
+    def count_lists(self, package_ids, id=None, meta=None):
         """
         Return the number of lists matching the criteria.
         """
@@ -1023,7 +1023,7 @@ class _SqliteBackend(object):
                                 args)
         return r.next()[0]
 
-    def query_count(self, package_ids, id=None):
+    def count_queries(self, package_ids, id=None):
         """
         Return the number of querties matching the criteria.
         """
@@ -1034,7 +1034,7 @@ class _SqliteBackend(object):
                                 args)
         return r.next()[0]
 
-    def import_count(self, package_ids,
+    def count_imports(self, package_ids,
                      id=None,
                      url=None,
                      uri=None
@@ -1506,7 +1506,7 @@ class _SqliteBackend(object):
         """
         assert _DF or self.has_element(package_id, id, RELATION)
         if n < 0:
-            n = self.member_count(package_id, id)
+            n = self.count_members(package_id, id)
         assert _DF or -1 <= pos <= n, pos
         p,s = _split_id_ref(member) # also assert that member has depth < 2
         assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
@@ -1536,7 +1536,7 @@ class _SqliteBackend(object):
         ``member`` is the id-ref of an own or directly imported member.
         """
         assert _DF or self.has_element(package_id, id, RELATION)
-        assert _DF or 0 <= pos < self.member_count(package_id, id), pos
+        assert _DF or 0 <= pos < self.count_members(package_id, id), pos
 
         p,s = _split_id_ref(member) # also assert that member has depth < 2
         assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
@@ -1550,7 +1550,7 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             raise InternalError("could not update", e)
 
-    def member_count(self, package_id, id):
+    def count_members(self, package_id, id):
         """
         Count the members of the identified relations.
 
@@ -1570,12 +1570,12 @@ class _SqliteBackend(object):
         """
         assert _DF or self.has_element(package_id, id, RELATION)
         if __debug__:
-            n = self.member_count(package_id, id)
+            n = self.count_members(package_id, id)
             assert _DF or -n <= pos < n, pos
 
         if pos < 0:
             if n < 0:
-                n = self.member_count(package_id, id)
+                n = self.count_members(package_id, id)
             pos += n
 
         q = "SELECT join_id_ref(member_p,member_i) AS member " \
@@ -1599,7 +1599,7 @@ class _SqliteBackend(object):
         Remove the member at the given position in the identified relation.
         """
         assert _DF or self.has_element(package_id, id, RELATION)
-        assert _DF or 0 <= pos < self.member_count(package_id, id), pos
+        assert _DF or 0 <= pos < self.count_members(package_id, id), pos
 
         execute = self._curs.execute
         self._begin_transaction()
@@ -1668,7 +1668,7 @@ class _SqliteBackend(object):
         """
         assert _DF or self.has_element(package_id, id, LIST)
         if n < 0:
-            n = self.item_count(package_id, id)
+            n = self.count_items(package_id, id)
         assert _DF or -1 <= pos <= n, pos
         p,s = _split_id_ref(item) # also assert that item has depth < 2
         assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
@@ -1698,7 +1698,7 @@ class _SqliteBackend(object):
         ``item`` is the id-ref of an own or directly imported item.
         """
         assert _DF or self.has_element(package_id, id, LIST)
-        assert _DF or 0 <= pos < self.item_count(package_id, id), pos
+        assert _DF or 0 <= pos < self.count_items(package_id, id), pos
 
         p,s = _split_id_ref(item) # also assert that item has depth < 2
         assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
@@ -1712,7 +1712,7 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             raise InternalError("could not update", e)
 
-    def item_count(self, package_id, id):
+    def count_items(self, package_id, id):
         """
         Count the items of the identified lists.
 
@@ -1732,12 +1732,12 @@ class _SqliteBackend(object):
         """
         assert _DF or self.has_element(package_id, id, LIST)
         if __debug__:
-            n = self.item_count(package_id, id)
+            n = self.count_items(package_id, id)
             assert _DF or -n <= pos < n, pos
 
         if pos < 0:
             if n < 0:
-                n = self.item_count(package_id, id)
+                n = self.count_items(package_id, id)
             pos += n
 
         q = "SELECT join_id_ref(item_p,item_i) AS item " \
@@ -1761,7 +1761,7 @@ class _SqliteBackend(object):
         Remove the item at the given position in the identified list.
         """
         assert _DF or self.has_element(package_id, id, LIST)
-        assert _DF or 0 <= pos < self.item_count(package_id, id), pos
+        assert _DF or 0 <= pos < self.count_items(package_id, id), pos
 
         execute = self._curs.execute
         self._begin_transaction()

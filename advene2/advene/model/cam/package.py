@@ -70,50 +70,50 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
             for i in be.iter_lists(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)
 
-    def tag_count(self, _guard=True):
+    def count_tags(self, _guard=True):
         """
         This method is inherited from CoreAllGroup but is unsafe on
-        cam.Package. Use instead `user_tag_count`.
+        cam.Package. Use instead `count_user_tags`.
         """
-        if _guard: warn("use user_tag_count instead", UnsafeUseWarning, 2)
-        return super(_OwnGroup, self).tag_count()
+        if _guard: warn("use count_user_tags instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).count_tags()
 
-    def user_tag_count(self):
+    def count_user_tags(self):
         o = self._owner
         meta = [(_cam_system_type, None, None)] 
-        return sum( be.tag_count(pdict, meta=meta)
+        return sum( be.count_tags(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
-    def annotation_type_count(self):
+    def count_annotation_types(self):
         o = self._owner
         meta = [(_cam_system_type, "annotation-type", False)] 
-        return sum( be.tag_count(pdict, meta=meta)
+        return sum( be.count_tags(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
-    def relation_type_count(self):
+    def count_relation_types(self):
         o = self._owner
         meta = [(_cam_system_type, "relation-type", False)] 
-        return sum( be.tag_count(pdict, meta=meta)
+        return sum( be.count_tags(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
-    def list_count(self, _guard=True):
+    def count_lists(self, _guard=True):
         """
         This method is inherited from CoreAllGroup but is unsafe on
-        cam.Package. Use instead `user_list_count`.
+        cam.Package. Use instead `count_user_lists`.
         """
-        if _guard: warn("use user_list_count instead", UnsafeUseWarning, 2)
-        return super(_OwnGroup, self).list_count()
+        if _guard: warn("use count_user_lists instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).count_lists()
 
-    def user_list_count(self):
+    def count_user_lists(self):
         o = self._owner
         meta = [(_cam_system_type, None, None)] 
-        return sum( be.list_count(pdict, meta=meta)
+        return sum( be.count_lists(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
-    def schema_count(self):
+    def count_schemas(self):
         o = self._owner
         meta = [(_cam_system_type, "annotation-type", False)] 
-        return sum( be.list_count(pdict, meta=meta)
+        return sum( be.count_lists(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
 class _OwnGroup(CamGroupMixin, CoreOwnGroup):
@@ -163,45 +163,45 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
           meta=[(_cam_system_type, "schema", False)]):
             yield o.get_element(i)
 
-    def tag_count(self, _guard=True):
+    def count_tags(self, _guard=True):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
-        cam.Package. Use instead `user_tag_count`.
+        cam.Package. Use instead `count_user_tags`.
         """
-        if _guard: warn("use _simple_tag_count instead", UnsafeUseWarning, 2)
-        return super(_OwnGroup, self).tag_count()
+        if _guard: warn("use count_user_tags instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).count_tags()
 
-    def user_tag_count(self):
+    def count_user_tags(self):
         o = self._owner
-        return o._backend.tag_count((o._id,),
+        return o._backend.count_tags((o._id,),
             meta=[(_cam_system_type, None, None)])
 
-    def annotation_type_count(self):
+    def count_annotation_types(self):
         o = self._owner
-        return o._backend.tag_count((o._id,),
+        return o._backend.count_tags((o._id,),
             meta=[(_cam_system_type, "annotation-type", False)])
 
-    def relation_type_count(self):
+    def count_relation_types(self):
         o = self._owner
-        return o._backend.tag_count((o._id,),
+        return o._backend.count_tags((o._id,),
             meta=[(_cam_system_type, "relation-type", False)])
 
-    def list_count(self, _guard=True):
+    def count_lists(self, _guard=True):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
-        cam.Package. Use instead `user_list_count`.
+        cam.Package. Use instead `count_user_lists`.
         """
-        if _guard: warn("use _simple_list_count instead", UnsafeUseWarning, 2)
-        return super(_OwnGroup, self).list_count()
+        if _guard: warn("use count_user_lists instead", UnsafeUseWarning, 2)
+        return super(_OwnGroup, self).count_lists()
 
-    def user_list_count(self):
+    def count_user_lists(self):
         o = self._owner
-        return o._backend.list_count((o._id,),
+        return o._backend.count_lists((o._id,),
             meta=[(_cam_system_type, None, None)])
 
-    def schema_count(self):
+    def count_schemas(self):
         o = self._owner
-        return o._backend.list_count((o._id,),
+        return o._backend.count_lists((o._id,),
             meta=[(_cam_system_type, "schema", False)])
 
 class Package(CorePackage):
@@ -222,7 +222,7 @@ class Package(CorePackage):
     def __init__(self, url, create=False, readonly=False, force=False):
         CorePackage.__init__(self, url, create, readonly, force)
         if self.url != BOOTSTRAP_URI and self.uri != BOOTSTRAP_URI \
-        and self.own.import_count(uri=BOOTSTRAP_URI) == 0:
+        and self.own.count_imports(uri=BOOTSTRAP_URI) == 0:
             global _bootstrap_ref
             b = _bootstrap_ref()
             if b is None:

@@ -29,20 +29,20 @@ class CamGroupMixin(GroupMixin):
             if t.get_meta(_cam_system_type, None) == "schema":
                 yield t
 
-    def user_tag_count(self):
+    def count_user_tags(self):
         return len(list(iter_user_tags()))
 
-    def annotation_type_count(self):
+    def count_annotation_types(self):
         return len(list(iter_user_tags()))
 
-    def relation_type_count(self):
+    def count_relation_types(self):
         return len(list(iter_user_tags()))
 
     @property
     def user_tags(group):
         class GroupUserTags(_GroupCollection):
             __iter__ = group.iter_user_tags
-            __len__ = group.user_tag_count
+            __len__ = group.count_user_tags
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG \
                        and e.get_meta(_cam_system_type, None) is None \
@@ -53,7 +53,7 @@ class CamGroupMixin(GroupMixin):
     def annotation_types(group):
         class GroupAnnotationTypes(_GroupCollection):
             __iter__ = group.iter_annotation_types
-            __len__ = group.annotation_type_count
+            __len__ = group.count_annotation_types
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG \
                        and e.get_meta(_cam_system_type, None) \
@@ -65,7 +65,7 @@ class CamGroupMixin(GroupMixin):
     def relation_types(group):
         class GroupRelationTypes(_GroupCollection):
             __iter__ = group.iter_relation_types
-            __len__ = group.relation_type_count
+            __len__ = group.count_relation_types
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG \
                        and e.get_meta(_cam_system_type, None) \
@@ -77,7 +77,7 @@ class CamGroupMixin(GroupMixin):
     def user_lists(group):
         class GroupUserLists(_GroupCollection):
             __iter__ = group.iter_user_lists
-            __len__ = group.user_list_count
+            __len__ = group.count_user_lists
             def __contains__(self, e):
                 return e.ADVENE_TYPE == LIST \
                        and e.get_meta(_cam_system_type, None) is None \
@@ -88,7 +88,7 @@ class CamGroupMixin(GroupMixin):
     def schemas(group):
         class GroupSchemas(_GroupCollection):
             __iter__ = group.iter_schemas
-            __len__ = group.schema_count
+            __len__ = group.count_schemas
             def __contains__(self, e):
                 return e.ADVENE_TYPE == LIST \
                        and e.get_meta(_cam_system_type, None) == "schema" \

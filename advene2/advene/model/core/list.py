@@ -33,7 +33,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
             self._cache = []
             self._ids   = []
         else:
-            c = owner._backend.item_count(owner._id, self._id)
+            c = owner._backend.count_items(owner._id, self._id)
             self._cache = [lambda: None,] * c
             self._ids = [None,] * c
 
