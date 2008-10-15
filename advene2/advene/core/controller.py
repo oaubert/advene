@@ -2041,6 +2041,41 @@ class AdveneController(object):
             return v
         return None
 
+    def get_export_filters(self):
+        importer_package=Package(config.data.advenefile('exporters.xml'))
+        return sorted( ( v
+                         for v in importer_package.own.views
+                         if v.id != 'index' ), key=lambda v: v.title )
+    
+    def apply_export_filter(self, filter, filename):
+        """Apply the given export filename and output the result to filename.
+        """
+        ctx=self.build_context()
+        try:
+            stream=open(filename, 'wb')
+        except Exception, e:
+            self.log(_("Cannot export to %(filename)s: %(e)s") % locals())
+            return True
+
+        kw = {}
+        if filter.content.mimetype is None or filter.content.mimetype.startswith('text/'):
+            compiler = simpleTAL.HTMLTemplateCompiler ()
+            compiler.parseTemplate (filter.content.stream, 'utf-8') 
+            try:
+                compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8')
+            except simpleTALES.ContextContentException, e:
+                self.log(_("Error when exporting: %s") % unicode(e))
+        else:
+            compiler = simpleTAL.XMLTemplateCompiler ()
+            compiler.parseTemplate (filter.content.stream)
+            try:
+                compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
+            except simpleTALES.ContextContentException, e:
+                self.log(_("Error when exporting: %s") % unicode(e))
+        stream.close()
+        self.log(_("Data exported to %s") % filename)
+        return True
+
 if __name__ == '__main__':
     # Try to find if we are in a development tree.
     (moduledir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
