@@ -100,8 +100,9 @@ if __name__ == "__main__":
     p5 = p3["p5"].package
     p6 = p5["p6"].package
 
-    m4 = p4.create_media("m4", "http://example.com/m4.ogm")
-    m6 = p6.create_media("m6", "http://example.com/m6.ogm")
+    foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
+    m4 = p4.create_media("m4", "http://example.com/m4.ogm", foref)
+    m6 = p6.create_media("m6", "http://example.com/m6.ogm", foref)
     a3 = p3.create_annotation("a3", m4, 30, 39, "text/plain")
     a5 = p5.create_annotation("a5", m6, 50, 59, "text/plain")
 

@@ -322,19 +322,23 @@ class TestCreateElement(TestCase):
         del P._L[:] # not required, but saves memory
 
     def test_create_media(self):
+        url = "http://example.com/m1.avi"
+        foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
         try:
-            self.be.create_media(self.pid, "m1", "http://example.com/m1.avi")
+            self.be.create_media(self.pid, "m1", url, foref)
         except Exception, e:
             self.fail(e) # raised by create_media
         self.assert_(self.be.has_element(self.pid, "m1"))
         self.assert_(self.be.has_element(self.pid, "m1", MEDIA))
-        self.assertEquals((MEDIA, self.pid, "m1", "http://example.com/m1.avi"),
+        self.assertEquals((MEDIA, self.pid, "m1", url, foref),
                            self.be.get_element(self.pid, "m1"))
         # check that it has no content
         self.assertEqual(None, self.be.get_content_info(self.pid, "m1", MEDIA))
 
     def test_create_annotation(self):
-        self.be.create_media(self.pid, "m1", "http://example.com/m1.avi")
+        url = "http://example.com/m1.avi"
+        foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
+        self.be.create_media(self.pid, "m1", url, foref)
         a = (ANNOTATION, self.pid, "a4", "m1", 10, 20, "text/plain", "", "") 
         try:
             self.be.create_annotation(*a[1:])
@@ -448,14 +452,16 @@ class TestHandleElements(TestCase):
             self.be, self.pid1 = create(P(self.url1), url=IN_MEMORY_URL)
             _,       self.pid2 = create(P(self.url2), url=IN_MEMORY_URL+";foo")
 
+            self.foref = "http://advene.liris.cnrs.fr/" \
+                         "ns/frame_of_reference/ms;o=0"
             self.m1_url = "http://example.com/m1.avi"
             self.m2_url = "http://example.com/m2.avi"
             self.m3_url = "http://example.com/m3.avi"
             self.i1_uri = "urn:xyz-abc"
             self.i2_url = "http://example.com/advene/db2"
 
-            self.m1 = (self.pid1, "m1", self.m1_url)
-            self.m2 = (self.pid1, "m2", self.m2_url)
+            self.m1 = (self.pid1, "m1", self.m1_url, self.foref)
+            self.m2 = (self.pid1, "m2", self.m2_url, self.foref)
             self.a1 = (self.pid1, "a1", "i1:m3", 15, 20) + content
             self.a2 = (self.pid1, "a2", "m1", 10, 30) + content
             self.a3 = (self.pid1, "a3", "m2", 10, 20) + content
@@ -502,7 +508,7 @@ class TestHandleElements(TestCase):
 
             self.be.update_uri(self.pid2, self.i1_uri)
 
-            self.m3 = (self.pid2, "m3", self.m3_url)
+            self.m3 = (self.pid2, "m3", self.m3_url, self.foref)
             self.a5 = (self.pid2, "a5", "m3", 25, 30) + content
             self.a6 = (self.pid2, "a6", "m3", 35, 45) + content
             self.r3 = (self.pid2, "r3",) + content
@@ -848,9 +854,13 @@ class TestHandleElements(TestCase):
             get((self.pid1, self.pid2), uri_alt=("", self.i1_uri)))
 
     def test_update_media(self):
-        self.be.update_media(self.pid1, "m1", "http://foo.com/m1.avi")
-        self.assertEqual(('m', self.pid1, "m1", "http://foo.com/m1.avi"),
-                         self.be.get_element(self.pid1, "m1"))
+        new_url = "http://foo.com/m1.avi"
+        new_foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/s;o=10"
+        self.be.update_media(self.pid1, "m1", new_url, new_foref)
+        self.assertEqual(
+            ('m', self.pid1, "m1", new_url, new_foref),
+            self.be.get_element(self.pid1, "m1"),
+        )
 
     def test_update_annotation(self):
         self.be.update_annotation(self.pid1, "a1", "m1", 25, 30)
@@ -1148,10 +1158,11 @@ class TestRenameElement(TestCase):
 
     def test_rename_media(self):
         mX_url = "file:///tmp/mX"
-        self.be.create_media(self.pid1, "mX", mX_url)
+        foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
+        self.be.create_media(self.pid1, "mX", mX_url, self.foref)
         self.be.rename_element(self.pid1, "mX", MEDIA, "mY")
         self.assert_(not self.be.has_element(self.pid1, "mX"))
-        self.assertEqual((MEDIA, self.pid1, "mY", mX_url),
+        self.assertEqual((MEDIA, self.pid1, "mY", mX_url, foref),
                          self.be.get_element(self.pid1, "mY"))
 
     def test_rename_annotation(self):
@@ -1257,7 +1268,8 @@ class TestRenameElement(TestCase):
                          self.be.get_content_data(self.pid1, "qY", QUERY))
 
     def test_rename_refs_media(self):
-        self.be.create_media(self.pid2, "m4", "file:///tmp/m4")
+        foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
+        self.be.create_media(self.pid2, "m4", "file:///tmp/m4", foref)
         self.be.update_annotation(self.pid1, "a2", "i2:m3", 1, 2) #it's a trap!
         self.be.update_annotation(self.pid1, "a3", "i1:m4", 1, 2) #it's a trap!
         pids = (self.pid1, self.pid2)
@@ -1428,7 +1440,9 @@ class TestDeleteElement(TestCase):
         del P._L[:] # not required, but saves memory
 
     def test_delete_media(self):
-        self.be.create_media(self.pid, "m1", "http://example.com/m1.avi")
+        url = "http://example.com/m1.avi"
+        foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
+        self.be.create_media(self.pid, "m1", url, foref)
         try:
             self.be.delete_element(self.pid, "m1", MEDIA)
         except Exception, e:
@@ -1437,7 +1451,9 @@ class TestDeleteElement(TestCase):
         self.assert_(not self.be.has_element(self.pid, "m1", MEDIA))
 
     def test_delete_annotation(self):
-        self.be.create_media(self.pid, "m1", "http://example.com/m1.avi")
+        url = "http://example.com/m1.avi"
+        foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
+        self.be.create_media(self.pid, "m1", "http://example.com/m1.avi", foref)
         self.be.create_annotation(self.pid, "a4", "m1", 10, 20,
                                   "text/plain", "", "")
         try:
@@ -1531,6 +1547,7 @@ class TestRobustIterations(TestCase):
     url1 = TestHandleElements.url1
     url2 = TestHandleElements.url2
     url3 = IN_MEMORY_URL + pid3
+    foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
     pids = (pid1, pid2)
     i2_url = "http://example.com/advene/db2#R5"
 
@@ -1559,7 +1576,7 @@ class TestRobustIterations(TestCase):
     update_methods = {
         "update_uri": [pid1, "urn:1234",],
         "close": None, # rather tested with bind and create
-        "create_media": [pid1, "mX", "file:///tmp/mX.ogm",],
+        "create_media": [pid1, "mX", "file:///tmp/mX.ogm", foref],
         "create_annotation": [pid1, "aX", "m1", 0, 10, "text/plain", "", ""],
         "create_relation": [pid1, "rX", "text/plain", "", ""],
         "create_view": [pid1, "vX", "text/plain", "", ""],
@@ -1568,7 +1585,7 @@ class TestRobustIterations(TestCase):
         "create_list": [pid1, "lX",],
         "create_query": [pid1, "qX", "text/plain", "", ""],
         "create_import": [pid1, "iX", "file:///tmp/pkg", ""],
-        "update_media": [pid1, "m1", "file:///tmp/mX.ogm",],
+        "update_media": [pid1, "m1", "file:///tmp/mX.ogm", foref],
         "update_annotation": [pid1, "a1", "m1", 0, 666,],
         "update_import": [pid1, "i1", "file:///tmp/pkg", ""],
         "rename_element": [pid1, "i1", IMPORT, "renamed",],
@@ -1670,8 +1687,9 @@ class TestRetrieveDataWithSameId(TestCase):
             _,       self.pid2 = create(P(self.url2))
 
             self.m_url = "http://example.com/m1.avi"
+            foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
 
-            self.m = ("m", self.m_url)
+            self.m = ("m", self.m_url, foref)
             self.a = ("a", "m", 10, 20,) + content
             self.r = ("r",) + content
             self.v = ("v",) + content

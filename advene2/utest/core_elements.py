@@ -6,10 +6,8 @@ from advene.model.core.package import Package
 class TestElements(TestCase):
     def setUp(self):
         self.p = Package("sqlite::memory:", create=True)
-        try:
-            self.p.create_media("m1", "http://example.com/m1.avi")
-        except Exception:
-            pass
+        self.foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
+        self.p.create_media("m1", "http://example.com/m1.avi", self.foref)
 
     def tearDown(self):
         self.p.close()
@@ -25,7 +23,7 @@ class TestElements(TestCase):
         self.assertEqual(15, a.begin)
         a.end += 10
         self.assertEqual(30, a.end)
-        m2 = p.create_media("m2", "http://example.com/m2.avi")
+        m2 = p.create_media("m2", "http://example.com/m2.avi", self.foref)
         a.media = m2
         self.assertEqual(m2, a.media)
 

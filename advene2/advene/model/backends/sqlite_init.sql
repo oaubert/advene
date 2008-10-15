@@ -65,6 +65,7 @@ CREATE TABLE Medias (
   package TEXT NOT NULL,
   id      TEXT NOT NULL,
   url     TEXT NOT NULL,
+  foref   TEXT NOT NULL, -- Frame Of REFerence
   PRIMARY KEY (package, id),
   FOREIGN KEY (package, id) references Elements (package, id)
   -- typ of the referenced element must me 'm'

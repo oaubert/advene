@@ -248,10 +248,10 @@ class Package(object, WithMetaMixin, DirtyMixin):
         "will be wrapped by the WithMetaMixin"
         self._backend.set_meta(self._id, "", None, key, val)
 
-    def create_media(self, id, url):
+    def create_media(self, id, url, frame_of_reference):
         assert not self.has_element(id)
-        self._backend.create_media(self._id, id, url)
-        return Media(self, id, url)
+        self._backend.create_media(self._id, id, url, frame_of_reference)
+        return Media(self, id, url, frame_of_reference)
 
     def create_annotation(self, id, media, begin, end,
                                 mimetype, schema=None, url=""):

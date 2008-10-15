@@ -29,7 +29,7 @@ from advene.model.core.element \
 from advene.utils.reftools import WeakValueDictWithCallback
 
 
-BACKEND_VERSION = "1.1"
+BACKEND_VERSION = "1.2"
 
 IN_MEMORY_URL = "sqlite::memory:"
 
@@ -466,7 +466,7 @@ class _SqliteBackend(object):
 
     # element creation
 
-    def create_media(self, package_id, id, url):
+    def create_media(self, package_id, id, url, frame_of_reference):
         """Create a new media.
 
         Raise a ModelException if the identifier already exists in the package.
@@ -476,8 +476,8 @@ class _SqliteBackend(object):
         execute = self._curs.execute
         try:
             _create_element(execute, package_id, id, MEDIA)
-            execute("INSERT INTO Medias VALUES (?,?,?)",
-                    (package_id, id, url))
+            execute("INSERT INTO Medias VALUES (?,?,?,?)",
+                    (package_id, id, url, frame_of_reference))
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not insert", e)
@@ -725,7 +725,8 @@ class _SqliteBackend(object):
         If the element does not exist, None is returned.
         """
 
-        q = "SELECT e.typ, m.url, join_id_ref(a.media_p, a.media_i), " \
+        q = "SELECT e.typ, m.url, m.foref, " \
+                   "join_id_ref(a.media_p, a.media_i), " \
                    "a.fbegin, a.fend, i.url, i.uri, c.mimetype, " \
                    "join_id_ref(c.schema_p, c.schema_i), c.url " \
             "FROM Elements e " \
@@ -741,13 +742,13 @@ class _SqliteBackend(object):
             return None
         t = r[0]
         if t == MEDIA:
-            return(t, package_id, id,) + r[1:2]
+            return(t, package_id, id,) + r[1:3]
         elif t == ANNOTATION:
-            return(t, package_id, id,) + r[2:5] + r[7:10]
+            return(t, package_id, id,) + r[3:6] + r[8:11]
         elif t in (RELATION, VIEW, RESOURCE, QUERY):
-            return(t, package_id, id,) + r[7:10]
+            return(t, package_id, id,) + r[8:11]
         elif t == IMPORT:
-            return(t, package_id, id,) + r[5:7]
+            return(t, package_id, id,) + r[6:8]
         else:
             return(t, package_id, id)
 
@@ -802,15 +803,17 @@ class _SqliteBackend(object):
     def iter_medias(self, package_ids,
                     id=None,  id_alt=None,
                     url=None, url_alt=None,
+                    foref=None, foref_alt=None,
                    ):
         """
         Yield tuples of the form(MEDIA, package_id, id, url,).
         """
         assert _DF or not isinstance(package_ids, basestring)
-        assert _DF or ( id is None  or   id_alt is None), ( id,  id_alt)
-        assert _DF or (url is None  or  url_alt is None), (url, url_alt)
+        assert _DF or (   id is None  or     id_alt is None), ( id,  id_alt)
+        assert _DF or (  url is None  or    url_alt is None), (url, url_alt)
+        assert _DF or (foref is None  or  foref_alt is None), (url, url_alt)
 
-        q = "SELECT ?, package, id, url FROM Medias " \
+        q = "SELECT ?, package, id, url, foref FROM Medias " \
             "WHERE package in (" + "?," * len(package_ids) + ")"
         args = [MEDIA,] + list(package_ids)
         if id is not None:
@@ -828,6 +831,15 @@ class _SqliteBackend(object):
         if url_alt is not None:
             q += " AND url IN ("
             for i in url_alt:
+                q += "?,"
+                args.append(i)
+            q += ")"
+        if foref is not None:
+            q += " AND foref = ?"
+            args.append(foref)
+        if foref_alt is not None:
+            q += " AND foref IN ("
+            for i in foref_alt:
                 q += "?,"
                 args.append(i)
             q += ")"
@@ -1034,13 +1046,13 @@ class _SqliteBackend(object):
 
     # element updating
 
-    def update_media(self, package_id, id, url):
+    def update_media(self, package_id, id, url, frame_of_reference):
         assert _DF or self.has_element(package_id, id, MEDIA)
         execute = self._curs.execute
         try:
-            execute("UPDATE Medias SET url = ? "
+            execute("UPDATE Medias SET url = ?, foref = ? "
                      "WHERE package = ? AND id = ?",
-                    (url, package_id, id,))
+                    (url, frame_of_reference, package_id, id,))
         except sqlite.Error, e:
             raise InternalError("could not update", e)
 

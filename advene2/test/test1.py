@@ -66,7 +66,8 @@ if __name__ == "__main__":
     #trace_wrap_all (p._backend)
 
     p.dc_creator = "pchampin"
-    m1 = p.create_media("m1", "http://champin.net/stream.avi")
+    m1 = p.create_media("m1", "http://champin.net/stream.avi",
+        "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0")
     a1 = p.create_annotation("a1", m1, 20, 30, "text/plain")
     a2 = p.create_annotation("a2", m1, 0, 20, "text/plain")
     r1 = p.create_relation("r1", "text/plain")
