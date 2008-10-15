@@ -7,6 +7,6 @@ class Tag(CoreTag, CamElement):
     pass
 
 Tag.make_metadata_property(CAMSYS_TYPE, "system_type")
-Tag.make_metadata_property(CAM_NS_PREFIX + "representation")
-Tag.make_metadata_property(CAM_NS_PREFIX + "color")
-Tag.make_metadata_property(CAM_NS_PREFIX + "element-color")
+Tag.make_metadata_property(CAM_NS_PREFIX + "representation", default=None)
+Tag.make_metadata_property(CAM_NS_PREFIX + "color", default=None)
+Tag.make_metadata_property(CAM_NS_PREFIX + "element-color", default=None)

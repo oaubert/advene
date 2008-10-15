@@ -35,4 +35,6 @@ class Annotation(CoreAnnotation, CamElement):
                 self._owner.dissociate_tag(self, old_type, _guard=False)
         return super(Annotation, self).del_meta(key, _guard)
 
-Annotation.make_metadata_property(CAM_TYPE, "type", default=None)
+Annotation.make_metadata_property(CAM_TYPE, "type", default=None, doc="""
+The type of this annotation, created with Package.create_annotation_type().
+""")

@@ -38,4 +38,6 @@ class Relation(CamGroupMixin, CoreRelation, CamElement):
                 self._owner.dissociate_tag(self, old_type, _guard=False)
         return super(Relation, self).del_meta(key, _guard)
 
-Relation.make_metadata_property(CAM_TYPE, "type", default=None)
+Relation.make_metadata_property(CAM_TYPE, "type", default=None, doc="""
+The type of this relation, created with Package.create_relation_type.
+""")

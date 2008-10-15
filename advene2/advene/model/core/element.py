@@ -5,6 +5,7 @@ I define the common super-class of all package element classes.
 from advene.model.core.meta    import WithMetaMixin
 from advene.model.events       import ElementEventDelegate, WithEventsMixin
 from advene.model.tales        import tales_context_function
+from advene.utils.alias        import alias
 from advene.utils.autoproperty import autoproperty
 
 # the following constants must be used as values of a property ADVENE_TYPE
@@ -128,6 +129,13 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         u = o._uri or o._url
         return "%s#%s" % (u, self._id)
 
+    @autoproperty
+    def _get_owner(self):
+        """
+        The package containing (or owner package) this element.
+        """
+        return self._owner
+
     # tag management
 
     def iter_tags(self, package, inherited=True):
@@ -140,7 +148,7 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
         See also `iter_tag_ids`.
         """
-        return self.iter_tag_ids(package, inherited, True)
+        return self._iter_tags_or_tag_ids(package, inherited, True)
 
     def iter_tag_ids(self, package, inherited=True, _get=0):
         """Iter over the id-refs of the tags associated with this element in
@@ -152,6 +160,7 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         See also `iter_tags`.
         """
         # this actually also implements iter_tags
+        # see _iter_tags_or_tag_ids below
         u = self._get_uriref()
         if not inherited:
             pids = (package._id,)
@@ -171,6 +180,17 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
                     else:
                         y = package.make_id_for(p, tid)
                     yield y
+
+    @alias(iter_tag_ids)
+    def _iter_tags_or_tag_ids(self):
+        # iter_tag_ids and iter_tags have a common implementation. Normally,
+        # it should be located in a "private" method named
+        # _iter_tags_or_tag_id.
+        # However, for efficiency reasons, that private method and iter_tag_ids
+        # have been merged into one. Both names are necessary necessary because
+        # the "public" iter_tag_ids may be overridden while the "private"
+        # method should not. Hence that alias.
+        pass
 
     def iter_taggers(self, tag, package):
         """Iter over all the packages associating this element to ``tag``.

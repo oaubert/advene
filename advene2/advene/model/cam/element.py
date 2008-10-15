@@ -31,10 +31,10 @@ class CamElement(PackageElement):
         cam.Package. Use instead `iter_user_tags`.
         """
         if _guard: warn("use iter_user_tags instead", UnsafeUseWarning, 2)
-        super(CamElement, self).iter_tags(package, inherited)
+        return super(CamElement, self).iter_tags(package, inherited)
 
     def iter_user_tags(self, package, inherited=True):
-        for t in self._iter_tags(package, inherited, _guard=False):
+        for t in self.iter_tags(package, inherited, _guard=False):
             if t.get_meta(CAMSYS_TYPE, None) is None:
                 yield t
 
@@ -80,10 +80,10 @@ class CamElement(PackageElement):
 
 CamElement.make_metadata_property(DC_NS_PREFIX + "creator", default="")
 CamElement.make_metadata_property(DC_NS_PREFIX + "contributor", default="")
-CamElement.make_metadata_property(DC_NS_PREFIX + "created")
-CamElement.make_metadata_property(DC_NS_PREFIX + "modified")
+CamElement.make_metadata_property(DC_NS_PREFIX + "created", default=None)
+CamElement.make_metadata_property(DC_NS_PREFIX + "modified", default=None)
 
-CamElement.make_metadata_property(DC_NS_PREFIX + "title")
-CamElement.make_metadata_property(DC_NS_PREFIX + "description")
+CamElement.make_metadata_property(DC_NS_PREFIX + "title", default=None)
+CamElement.make_metadata_property(DC_NS_PREFIX + "description", default=None)
 
-CamElement.make_metadata_property(RDFS_NS_PREFIX + "seeAlso")
+CamElement.make_metadata_property(RDFS_NS_PREFIX + "seeAlso", default=None)

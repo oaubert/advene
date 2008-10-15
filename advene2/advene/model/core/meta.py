@@ -254,7 +254,7 @@ class WithMetaMixin:
         return _MetaDict(self)
 
     @classmethod
-    def make_metadata_property(cls, key, alias=None, default=_RAISE):
+    def make_metadata_property(cls, key, alias=None, default=_RAISE, doc=None):
         """Attempts to create a python property in cls mapping to metadata key.
 
         If alias is None, key is considered as a URI, and the last part of
@@ -263,6 +263,9 @@ class WithMetaMixin:
         If default is not provided, an exception is raised whenever the
         property is accessed when it is not set. Else, the default value will
         be returned is that case.
+
+        If doc is not None or not provided, a simple docstring will be
+        generated.
 
         Raises an AttributeError if cls already has a member with that name.
 
@@ -284,7 +287,10 @@ class WithMetaMixin:
         def deller(obj):
             return obj.del_meta(key)
 
-        setattr(cls, alias, property(getter, setter, deller))
+        if doc is None:
+            doc = "shortcut for metadata with key\n  <%s>" % key
+
+        setattr(cls, alias, property(getter, setter, deller, doc))
 
     @tales_path1_function
     def _tales_meta(self, path):
