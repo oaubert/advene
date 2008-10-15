@@ -224,6 +224,117 @@ class _SqliteBackend (object):
         except sqlite.OperationalError:
             pass
 
+   # creation
+
+    def _create_element_cursor (self, package_id, id, element_type):
+        """
+        Makes common control and return the cursor to be used.
+        Starts a transaction that must be commited by caller.
+        """
+        c = self._conn.cursor()
+        # check that the id is not in use
+        c.execute ("SELECT id FROM Elements WHERE package = ? AND id = ?",
+                   (package_id, id,))
+        if c.fetchone() is not None:
+            raise ModelError, "id in use: %i", id
+        c.execute ("INSERT INTO Elements VALUES (?,?,?)",
+                   (package_id, id, element_type))
+        return c
+
+    def create_media (self, package_id, id, url):
+        try:
+            c = self._create_element_cursor (package_id, id, MEDIA)
+            c.execute ("INSERT INTO Medias VALUES (?,?,?)",
+                       (package_id, id, url))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not insert", e)
+
+    def create_annotation (self, package_id, id, media, begin, end):
+        # assertions for debug
+        assert (isinstance (begin, int) and begin >  0), begin
+        assert (isinstance (  end, int) and   end >= begin), (begin, end)
+        # asserting that media is indeed the uuid-ref of an own or imported
+        # media is not trivial at all, so we just hope for the best ;)
+
+        try:
+            c = self._create_element_cursor (package_id, id, ANNOTATION)
+            c.execute ("INSERT INTO Annotations VALUES (?,?,?,?,?)",
+                       (package_id, id, media, begin, end))
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
+                       (package_id, id, "text/plain", "", None))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not insert", e)
+
+    def create_relation (self, package_id, id):
+        try:
+            c = self._create_element_cursor (package_id, id, RELATION)
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
+                       (package_id, id, "", "", None))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("error in creating", e)
+
+    def create_view (self, package_id, id):
+        try:
+            c = self._create_element_cursor (package_id, id, VIEW)
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
+                       (package_id, id, "text/plain", "", None))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("error in creating", e)
+
+    def create_resource (self, package_id, id):
+        try:
+            c = self._create_element_cursor (package_id, id, RESOURCE)
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
+                       (package_id, id, "text/plain", "", None))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("error in creating", e)
+
+    def create_tag (self, package_id, id):
+        try:
+            c = self._create_element_cursor (package_id, id, TAG)
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("error in creating", e)
+
+    def create_list (self, package_id, id):
+        try:
+            c = self._create_element_cursor (package_id, id, LIST)
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("error in creating", e)
+
+    def create_query (self, package_id, id):
+        try:
+            c = self._create_element_cursor (package_id, id, QUERY)
+            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
+                       (package_id, id, "text/plain", "", None))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("error in creating",e)
+        
+    def create_import (self, package_id, id, url, uuid):
+        try:
+            c = self._create_element_cursor (package_id, id, IMPORT)
+            c.execute ("INSERT INTO Imports VALUES (?,?,?,?)",
+                       (package_id, id, url, uuid))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("error in creating", e)
+
      # retrieval
 
     def get_uuid (self, package_id):
@@ -562,115 +673,3 @@ class _SqliteBackend (object):
                        WHERE package = ? AND element = ? AND key = ?"""
                 self._conn.execute (q, (package_id, id, key))
         self._conn.commit()
-
-   # creation
-
-    def _create_element_cursor (self, package_id, id, element_type):
-        """
-        Makes common control and return the cursor to be used.
-        Starts a transaction that must be commited by caller.
-        """
-        c = self._conn.cursor()
-        # check that the id is not in use
-        c.execute ("SELECT id FROM Elements WHERE package = ? AND id = ?",
-                   (package_id, id,))
-        if c.fetchone() is not None:
-            raise ModelError, "id in use: %i", id
-        c.execute ("INSERT INTO Elements VALUES (?,?,?)",
-                   (package_id, id, element_type))
-        return c
-
-    def create_media (self, package_id, id, url):
-        try:
-            c = self._create_element_cursor (package_id, id, MEDIA)
-            c.execute ("INSERT INTO Medias VALUES (?,?,?)",
-                       (package_id, id, url))
-            self._conn.commit()
-        except sqlite.Error, e:
-            self._conn.rollback()
-            raise InternalError ("could not insert", e)
-
-    def create_annotation (self, package_id, id, media, begin, end):
-        # assertions for debug
-        assert (isinstance (begin, int) and begin >  0), begin
-        assert (isinstance (  end, int) and   end >= begin), (begin, end)
-        # asserting that media is indeed the uuid-ref of an own or imported
-        # media is not trivial at all, so we just hope for the best ;)
-
-        try:
-            c = self._create_element_cursor (package_id, id, ANNOTATION)
-            c.execute ("INSERT INTO Annotations VALUES (?,?,?,?,?)",
-                       (package_id, id, media, begin, end))
-            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", None))
-            self._conn.commit()
-        except sqlite.Error, e:
-            self._conn.rollback()
-            raise InternalError ("could not insert", e)
-
-    def create_relation (self, package_id, id):
-        try:
-            c = self._create_element_cursor (package_id, id, RELATION)
-            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
-                       (package_id, id, "", "", None))
-            self._conn.commit()
-        except sqlite.Error, e:
-            self._conn.rollback()
-            raise InternalError ("error in creating", e)
-
-    def create_view (self, package_id, id):
-        try:
-            c = self._create_element_cursor (package_id, id, VIEW)
-            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", None))
-            self._conn.commit()
-        except sqlite.Error, e:
-            self._conn.rollback()
-            raise InternalError ("error in creating", e)
-
-    def create_resource (self, package_id, id):
-        try:
-            c = self._create_element_cursor (package_id, id, RESOURCE)
-            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", None))
-            self._conn.commit()
-        except sqlite.Error, e:
-            self._conn.rollback()
-            raise InternalError ("error in creating", e)
-
-    def create_tag (self, package_id, id):
-        try:
-            c = self._create_element_cursor (package_id, id, TAG)
-            self._conn.commit()
-        except sqlite.Error, e:
-            self._conn.rollback()
-            raise InternalError ("error in creating", e)
-
-    def create_list (self, package_id, id):
-        try:
-            c = self._create_element_cursor (package_id, id, LIST)
-            self._conn.commit()
-        except sqlite.Error, e:
-            self._conn.rollback()
-            raise InternalError ("error in creating", e)
-
-    def create_query (self, package_id, id):
-        try:
-            c = self._create_element_cursor (package_id, id, QUERY)
-            c.execute ("INSERT INTO Contents VALUES (?,?,?,?,?)",
-                       (package_id, id, "text/plain", "", None))
-            self._conn.commit()
-        except sqlite.Error, e:
-            self._conn.rollback()
-            raise InternalError ("error in creating",e)
-        
-    def create_import (self, package_id, id, url, uuid):
-        try:
-            c = self._create_element_cursor (package_id, id, IMPORT)
-            c.execute ("INSERT INTO Imports VALUES (?,?,?,?)",
-                       (package_id, id, url, uuid))
-            self._conn.commit()
-        except sqlite.Error, e:
-            self._conn.rollback()
-            raise InternalError ("error in creating", e)
-
