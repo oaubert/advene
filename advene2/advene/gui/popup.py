@@ -701,7 +701,9 @@ class Menu:
             add_item(_('Activate view'), self.activate_stbv, element)
         elif t == 'adhoc':
             add_item(_('Open adhoc view'), self.open_adhoc_view, element)
-        elif t == 'static' and element.matchFilter['class'] in ('package', '*'):
+        #elif t == 'static' and element.matchFilter['class'] in ('package', '*'):
+        # FIXME: check toplevel metadata
+        elif t == 'static':
             add_item(_('Open in web browser'), open_in_browser, element)
         if 'html' in element.content.mimetype and self.controller.package.get('_richedit') is not None:
             # The richedit view is available. Propose to use it.
