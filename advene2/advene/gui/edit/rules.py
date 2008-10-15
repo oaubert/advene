@@ -62,7 +62,7 @@ class EditRuleSet(EditGeneric):
         self.controller=controller
         self.widget=self.build_widget()
         for rule in self.model:
-            self.add_rule(rule)
+            self.add_rule(rule, append=False)
 
     def remove_rule_cb(self, button=None):
         """Remove the currently activated rule."""
@@ -125,7 +125,7 @@ class EditRuleSet(EditGeneric):
         self.add_rule(rule)
         return True
 
-    def add_rule(self, rule):
+    def add_rule(self, rule, append=True):
         # Insert the given rule
         if not self.editable:
             return True
@@ -147,7 +147,7 @@ class EditRuleSet(EditGeneric):
 
         self.editlist.append(edit)
         #print "Model: %d rules" % len(self.model)
-        if not rule in self.model:
+        if append and not rule in self.model:
             self.model.add_rule(rule)
         #print "-> Model: %d rules" % len(self.model)
         self.widget.append_page(edit.get_widget(), eb)
