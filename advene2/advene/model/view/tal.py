@@ -32,7 +32,7 @@ def get_output_mimetype(view):
     return view.content_mimetype[:-4]
 
 def apply_to(view, obj, refpkg=None):
-    f = view.get_content_as_file()
+    f = view.content_as_file
     html = view.content_mimetype.startswith("text/html")
     if html:
         t = simpleTAL.compileHTMLTemplate(f, "utf-8")

@@ -12,6 +12,7 @@ efficient (less lookup). Maybe the former should be eventually
 deprecated...
 """
 
+from cStringIO import StringIO
 from os import path, tmpfile, unlink
 from tempfile import mkdtemp
 from urllib2 import urlopen, url2pathname
@@ -77,13 +78,13 @@ class WithContentMixin:
     modified.
     """
 
-    __mimetype   = None
-    __model_id   = None
+    __mimetype = None
+    __model_id = None
     __model_wref = staticmethod(lambda: None)
-    __url        = None
-    __data       = None # backend data, unless __as_synced_file is not None
-    __as_synced_file    = None
-    __handler    = None
+    __url = None
+    __data = None # backend data, unless __as_synced_file is not None
+    __as_synced_file = None
+    __handler = None
 
     __cached_content = staticmethod(lambda: None)
 
@@ -457,6 +458,22 @@ class WithContentMixin:
             return self._get_content_data()
 
     @autoproperty
+    def _get_content_as_file(self):
+        """
+        Return a *copy* of this emelement's content data wrapped in a file-like
+        object.
+
+        Note that the returned file-like object may be writable, but the
+        written data will *not* be reflected back to the content. Also, if the
+        content data is modified between the moment where this method is called
+        and the moment the file-like object is actually read, thoes changes
+        will not be included in the read data.
+
+        For a synchronized file-like object, see `get_content_as_synced_file`.
+        """
+        return StringIO(self.content_data)
+
+    @autoproperty
     def _get_content(self):
         """Return a `Content` instance representing the content."""
         c = self.__cached_content()
@@ -464,6 +481,7 @@ class WithContentMixin:
             c = Content(self)
             self.__cached_content = ref(c)
         return c
+
 
 class Content(object):
     """A class for content objects.
@@ -477,6 +495,9 @@ class Content(object):
 
     def get_model(self, default=None):
         return self._owner_elt.get_content_model(default)
+
+    def get_as_synced_file(self):
+        return self._owner_elt.get_content_as_synced_file()
 
     @autoproperty
     def _get_mimetype(self):
@@ -526,8 +547,9 @@ class Content(object):
     def _get_parsed(self):
         return self._owner_elt._get_content_parsed()
 
-    def get_as_synced_file(self):
-        return self._owner_elt.get_content_as_synced_file()
+    @autoproperty
+    def _get_as_file(self):
+        return self._owner_elt._get_as_file()
 
 
 class PackagedDataFile(file):

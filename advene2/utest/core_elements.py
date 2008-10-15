@@ -65,10 +65,16 @@ class TestElements(TestCase):
         self.assertEqual(lines, e.content_data)
         self.assertEqual(lines, e.content.data)
 
+        f = e.content_as_file
+        self.assertEqual(lines, f.read())
+        f.close()
+
         f = e.get_content_as_synced_file()
         self.assertEqual(lines, f.read())
         f.close()
 
+        # a second time, to check that the closing of the synced file
+        # allosw to open it again
         f = e.content.get_as_synced_file()
         self.assertEqual(lines, f.read())
         f.close()
