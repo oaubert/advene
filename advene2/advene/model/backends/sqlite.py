@@ -868,8 +868,8 @@ class _SqliteBackend(object):
                         ):
         """
         Yield tuples of the form
-        (ANNOTATION, package_id, id, media, begin, end,), ordered by begin,
-        end and media id-ref.
+        (ANNOTATION, package_id, id, media, begin, end, mimetype, schema, url),
+        ordered by begin, end and media id-ref.
 
         ``media`` is the uri-ref of a media ;
         ``media_alt`` is an iterable of uri-refs.
@@ -946,7 +946,8 @@ class _SqliteBackend(object):
     def iter_relations(self, package_ids,
                        id=None, id_alt=None):
         """
-        Yield tuples of the form (RELATION, package_id, id,).
+        Yield tuples of the form (RELATION, package_id, id, mimetype, schema, 
+        url).
         """
         assert _DF or not isinstance(package_ids, basestring)
 
@@ -957,7 +958,7 @@ class _SqliteBackend(object):
 
     def iter_views(self, package_ids, id=None, id_alt=None):
         """
-        Yield tuples of the form (VIEW, package_id, id,).
+        Yield tuples of the form (VIEW, package_id, id, mimetype, schema, url).
         """
         assert _DF or not isinstance(package_ids, basestring)
 
@@ -968,7 +969,8 @@ class _SqliteBackend(object):
 
     def iter_resources(self, package_ids, id=None, id_alt=None):
         """
-        Yield tuples of the form (RESOURCE, package_id, id,).
+        Yield tuples of the form (RESOURCE, package_id, id, mimetype, schema, 
+        url).
         """
         assert _DF or not isinstance(package_ids, basestring)
 
@@ -1001,7 +1003,8 @@ class _SqliteBackend(object):
 
     def iter_queries(self, package_ids, id=None, id_alt=None):
         """
-        Yield tuples of the form (QUERY, package_id, id,).
+        Yield tuples of the form (QUERY, package_id, id, mimetype, schema,
+        url).
         """
         assert _DF or not isinstance(package_ids, basestring)
 
