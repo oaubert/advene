@@ -124,7 +124,7 @@ def create(package, force=False, url=None):
     url = url or package.url
     if force:
         raise NotImplementedError("This backend can not force creation of "
-                                  "an exitsing package")
+                                  "an existing package")
     r = claims_for_create(url)
     if not r:
         raise r.exception or RuntimeError("Unrecognized URL")

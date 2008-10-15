@@ -3,7 +3,7 @@ from advene.model.core.media import FOREF_PREFIX
 
 frame_of_reference = FOREF_PREFIX + "ms;o=0"
 
-# This demonstrate how to create and save a package
+# This demonstrates how to create and save a package
 
 # create a package with a relative URL
 # NB: this is a *URL*, not a filename (that could be http://...)
