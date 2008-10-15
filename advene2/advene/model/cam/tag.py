@@ -115,7 +115,7 @@ class WithTypeConstraintMixin(object):
 
     @autoproperty
     def _get_mimetype(self):
-        return self.element_constraint.content_parsed["mimetype"] or "*/*"
+        return self.element_constraint.content_parsed.get("mimetype", None) or "*/*"
 
     @autoproperty
     def _set_mimetype(self, mimetype):
