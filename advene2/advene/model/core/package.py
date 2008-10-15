@@ -472,6 +472,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             else:
                 return pkg.get_element(id[colon+1:], default)
 
+    @tales_path1_function
     def get(self, id, default=None):
         n=id.rfind('#')
         if n > 0:
