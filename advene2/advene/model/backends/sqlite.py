@@ -148,7 +148,9 @@ def create(package, force=False, url=None):
             f.close()
             try:
                 curs.executescript(sql)
-                curs.execute("BEGIN EXCLUSIVE")
+                if sqlite.version_info > (2,3,2):
+                    # actually, executescript changed somewhere btw 2.3.2 & 2.3.5
+                    curs.execute("BEGIN EXCLUSIVE")
                 curs.execute("INSERT INTO Version VALUES (?)",
                              (BACKEND_VERSION,))
                 curs.execute("INSERT INTO Packages VALUES (?,?,?)",
