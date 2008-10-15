@@ -10,9 +10,9 @@ from advene.model.core.content import WithContentMixin
 from advene.model.core.group import GroupMixin
 
 class List(PackageElement, WithContentMixin, GroupMixin):
-    """
-    I expose the protocol of a basic collection, to give access to the items
-    of a list. I also try to efficiently cache the results I know.
+    """I expose the protocol of a basic collection, to give access to the items of a list. 
+
+    I also try to efficiently cache the results I know.
     """
 
     # Caching is performed as follow:
@@ -26,6 +26,8 @@ class List(PackageElement, WithContentMixin, GroupMixin):
     ADVENE_TYPE = LIST
 
     def __init__(self, owner, id, _new=False):
+        """FIXME: missing docstring.
+        """
         PackageElement.__init__(self, owner, id)
         if _new:
             self._cache = []
@@ -140,7 +142,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         If the list contains unreachable items, their id-ref will be yielded 
         instead.
 
-        Note: this should not be mistaken for the `iteritem` method of 
+        Note: this should not be mistaken for the `iteritems` method of 
         dictionaries; advene lists are list-like, not dict-like.
 
         See also `__iter__` and `iter_items_idrefs`.

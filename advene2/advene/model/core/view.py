@@ -12,6 +12,8 @@ class View(PackageElement, WithContentMixin):
     ADVENE_TYPE = VIEW
 
     def __init__(self, owner, id, mimetype, schema, url):
+        """FIXME: missing docstring.
+        """
         PackageElement.__init__(self, owner, id)
         self._handler = None
         self._set_content_mimetype(mimetype, _init=True)

@@ -29,9 +29,7 @@ class PackageElement(object, WithMetaMixin):
         owner._elements[id] = self # cache to prevent duplicate instanciation
 
     def make_idref_in(self, pkg):
-        """
-        Compute an id-ref for this element in the context of the given
-        package.
+        """Compute an id-ref for this element in the context of the given package.
         """
         if self._owner is pkg:
             return self._id
@@ -152,8 +150,8 @@ class PackageElement(object, WithMetaMixin):
     def has_tag(self, tag, package, inherited=True):
         """Is this element associated to ``tag`` by ``package``.
 
-        If ``inherited`` is set to False, only returns True if ``package`` 
-        itself associates this element to ``tag``; else returns True also if
+        If ``inherited`` is set to False, only return True if ``package`` 
+        itself associates this element to ``tag``; else return True also if
         the association is inherited from an imported package.
         """
         if not inherited:

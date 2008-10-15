@@ -1,11 +1,12 @@
-"""
-I define class AllGroup.
+"""I define class AllGroup.
 """
 
 from advene.model.core.group import GroupMixin
 from advene.utils.itertools import interclass
 
 class AllGroup(GroupMixin):
+    """FIXME: missing docstring.
+    """
 
     def __init__(self, owner):
         self._owner = owner
@@ -37,6 +38,8 @@ class AllGroup(GroupMixin):
                                begin=None, begin_min=None, begin_max=None,
                                end=None, end_min=None, end_max=None,
                                at=None):
+        """FIXME: missing docstring.
+        """
         o = self._owner
         if media is not None:
             media = media._get_uriref()
@@ -55,6 +58,8 @@ class AllGroup(GroupMixin):
         return interclass(*all_annotation_iterators)
 
     def iter_relations(self, member=None, position=None):
+        """FIXME: missing docstring.
+        """
         assert position is None or member
         o = self._owner
         if member is None:
@@ -69,6 +74,8 @@ class AllGroup(GroupMixin):
                     yield pdict[i[1]].get_element(i)
 
     def iter_lists(self, item=None, position=None):
+        """FIXME: missing docstring.
+        """
         assert position is None or item
         o = self._owner
         if item is None:

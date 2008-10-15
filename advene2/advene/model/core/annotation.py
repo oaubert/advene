@@ -8,10 +8,14 @@ from advene.model.core.content import WithContentMixin
 from advene.utils.autoproperty import autoproperty
 
 class Annotation(PackageElement, WithContentMixin):
+    """FIXME: missing docstring.
+    """
 
     ADVENE_TYPE = ANNOTATION
 
     def __init__(self, owner, id, media, begin, end, mimetype, schema, url):
+        """FIXME: missing docstring.
+        """
         PackageElement.__init__(self, owner, id)
         if not hasattr(media, "ADVENE_TYPE"):
             # internally, we sometimes pass backend data directly,
@@ -50,7 +54,7 @@ class Annotation(PackageElement, WithContentMixin):
 
     @autoproperty
     def _get_media(self):
-        """The media associated to this annotation.
+        """Return the media associated to this annotation.
 
         If the media instance is unreachable, an exception is raised.
 
@@ -112,7 +116,7 @@ class Annotation(PackageElement, WithContentMixin):
         return self._end - self._begin.
 
         This property will also be changed by setting self.begin or self.end,
-        since each of this property leaves the other one unchanged when set.
+        since each one of these properties leaves the other one unchanged when set.
         """
         return self._end - self._begin
 

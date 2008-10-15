@@ -44,8 +44,20 @@ _constructor = {
 }
 
 class Package(object, WithMetaMixin):
-
+    """FIXME: missing docstring.
+    """
     def __init__(self, url, create=False, readonly=False, force=False):
+        """FIXME: missing docstring.
+        
+        @param url: the URL of the package
+        @type url: string
+        @param create: should the package be created ?
+        @type create: boolean
+        @param readonly: should the package be readonly (in the case of loading an existing package) ?
+        @type readonly: boolean
+        @param force: ???
+        @type force: boolean
+        """
         assert not (create and readonly)
         self._url = url = _make_absolute(url)
         self._readonly = readonly
@@ -131,6 +143,8 @@ class Package(object, WithMetaMixin):
         self._update_backends_dict(_firsttime=True)
 
     def _make_transient_backend(self):
+        """FIXME: missing docstring.
+        """
         claimed = False
         i = 0
         while not claimed:
@@ -141,6 +155,8 @@ class Package(object, WithMetaMixin):
         return sqlite_backend.create(self, url=url)
 
     def _update_backends_dict(self, _firsttime=False):
+        """FIXME: missing docstring.
+        """
         def signature(d):
             return dict( (k, v.keys()) for k, v in d.items() )
         if not _firsttime:
@@ -222,6 +238,8 @@ class Package(object, WithMetaMixin):
         self._backend = None
 
     def _finish_close(self):
+        """FIXME: missing docstring.
+        """
         # remove references to imported packages
         self._backends_dict = None
         for p in self._imports_dict.itervalues():
@@ -336,7 +354,7 @@ class Package(object, WithMetaMixin):
         """Get the element with the given id-ref.
 
         If the element does not exist, an exception is raised (see below) 
-        unless ``defalut`` is provided, in which case its value is returned.
+        unless ``default`` is provided, in which case its value is returned.
         
         An `UnreachableImportError` is raised if the idref involves an
         nonexistant or unreachable import. A `NoSuchElementError` is raised if
@@ -354,7 +372,7 @@ class Package(object, WithMetaMixin):
         # referenced anymore (in which case it is safe to construct a new
         # instance).
 
-        # NB: internally, get_emement can be passed a tuple instead of a
+        # NB: internally, get_element can be passed a tuple instead of a
         # string, in which case the tuple will be used to create the element
         # instead of retrieving it from the backend.
 
@@ -386,6 +404,7 @@ class Package(object, WithMetaMixin):
         If the element does not exist, an exception is raised (see below) 
         unless ``defalut`` is provided, in which case its value is returned.
         
+        FIXME: copied from get_element, but not adapted.
         An `UnreachableImportError` is raised if the idref involves an
         nonexistant or unreachable import. A `NoSuchElementError` is raised if
         the last item of the id-ref is not the id of an element in the 
@@ -400,8 +419,8 @@ class Package(object, WithMetaMixin):
     __getitem__ = get_element
 
     def _get_own_element(self, id, tuple=None, default=_RAISE):
-        """
-        Get the element whose id is given.
+        """Get the element whose id is given from the own package's elements.
+
         Id may be a simple id or a path id.
 
         If necessary, it is made from backend data, then stored (as a weak ref)
@@ -422,9 +441,7 @@ class Package(object, WithMetaMixin):
         return r
 
     def _can_reference(self, element):
-        """
-        Return True iff elements is owned or directly imported by this
-        package.
+        """ Return True iff element is owned or directly imported by this package.
         """
         o = element._owner
         return o is self  or  o in self._imports_dict.values()
@@ -476,12 +493,16 @@ class Package(object, WithMetaMixin):
     # element creation
 
     def create_media(self, id, url, frame_of_reference):
+        """FIXME: missing docstring.
+        """
         assert not self.has_element(id)
         self._backend.create_media(self._id, id, url, frame_of_reference)
         return Media(self, id, url, frame_of_reference)
 
     def create_annotation(self, id, media, begin, end,
                                 mimetype, schema=None, url=""):
+        """FIXME: missing docstring.
+        """
         assert not self.has_element(id)
         media_idref = media.make_idref_in(self)
         if schema is not None:
@@ -494,6 +515,8 @@ class Package(object, WithMetaMixin):
 
     def create_relation(self, id, mimetype="x-advene/none", schema=None,
                         url="", members=()):
+        """FIXME: missing docstring.
+        """
         assert not self.has_element(id)
         if schema is not None:
             schema_idref = schema.make_idref_in(self)
@@ -508,6 +531,8 @@ class Package(object, WithMetaMixin):
         return r
 
     def create_view(self, id, mimetype, schema=None, url=""):
+        """FIXME: missing docstring.
+        """
         assert not self.has_element(id)
         if schema is not None:
             schema_idref = schema.make_idref_in(self)
@@ -517,6 +542,8 @@ class Package(object, WithMetaMixin):
         return View(self, id, mimetype, schema, url)
 
     def create_resource(self, id, mimetype, schema=None, url=""):
+        """FIXME: missing docstring.
+        """
         assert not self.has_element(id)
         if schema is not None:
             schema_idref = schema.make_idref_in(self)
@@ -527,11 +554,15 @@ class Package(object, WithMetaMixin):
         return Resource(self, id, mimetype, schema, url)
 
     def create_tag(self, id):
+        """FIXME: missing docstring.
+        """
         assert not self.has_element(id)
         self._backend.create_tag(self._id, id)
         return Tag(self, id)
 
     def create_list(self, id, items=()):
+        """FIXME: missing docstring.
+        """
         assert not self.has_element(id)
         self._backend.create_list(self._id, id)
         L = List(self, id, True)
@@ -541,6 +572,8 @@ class Package(object, WithMetaMixin):
         return L
 
     def create_query(self, id, mimetype, schema=None, url=""):
+        """FIXME: missing docstring.
+        """
         assert not self.has_element(id)
         if schema is not None:
             schema_idref = schema.make_idref_in(self)
@@ -550,6 +583,8 @@ class Package(object, WithMetaMixin):
         return Query(self, id, mimetype, schema, url)
 
     def create_import(self, id, package):
+        """FIXME: missing docstring.
+        """
         assert not self.has_element(id)
         assert package is not self
         assert not [ p for p in self._imports_dict.itervalues()
@@ -567,8 +602,7 @@ class Package(object, WithMetaMixin):
     # tags management
 
     def associate_tag(self, element, tag):
-        """Associate the given element to the given tag on behalf of this
-        package.
+        """Associate the given element to the given tag on behalf of this package.
         """
         assert self._can_reference(element)
         assert self._can_reference(tag)
@@ -586,8 +620,7 @@ class Package(object, WithMetaMixin):
         # methods of PackageElement and Tag
 
     def dissociate_tag(self, element, tag):
-        """Dissociate the given element to the given tag on behalf of this
-        package.
+        """Dissociate the given element to the given tag on behalf of this package.
         """
         assert self._can_reference(element)
         assert self._can_reference(tag)

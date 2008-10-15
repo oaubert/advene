@@ -1,15 +1,15 @@
-"""
-I define class Content and a mixin class WithContentMixin for all types of
+"""I define class Content and a mixin class WithContentMixin for all types of
 elements that can have a content.
 
-Note that Content instances are just place-holder for content-related
-attributes and methods, they do not store data about the content, the data is
+Note that Content instances are just place-holders for content-related
+attributes and methods. They do not store data about the content, the data is
 stored in the element owning the content, thanks to WithContentMixin. This
 makes their on-demand-generation relatively cheap (no data retrieving).
 
-Note also attributes/methods of the form e.content.X are also accessible under
-the form e.content_X, which might be slightly more efficient (less lookup). May
-be the former should be eventually deprecated...
+Note also attributes/methods of the form e.content.X are also
+accessible under the form e.content_X, which might be slightly more
+efficient (less lookup). Maybe the former should be eventually
+deprecated...
 """
 
 from os import mkdir, path, tmpfile, unlink
@@ -32,7 +32,7 @@ class WithContentMixin:
     Note that there are 4 kinds of contents:
 
       backend-stored contents:
-        those content have no URL, and are stored directly in the backend;
+        those contents have no URL, and are stored directly in the backend;
         their data can be modified through this class.
       external contents:
         they have a URL at which their data is stored; their data can not be
@@ -96,9 +96,9 @@ class WithContentMixin:
                                        self.__data or "")
 
     def get_content_schema(self, default=None):
-        """
-        Return the resource used as the schema of the content of this element,
-        or None if that content has no schema.
+        """Return the resource used as the schema of the content of this element.
+
+        Return None if that content has no schema.
         If the schema can not be retrieved, the default value is returned.
 
         See also `content_schema` and `content_schema_idref`.
@@ -119,7 +119,7 @@ class WithContentMixin:
             return m
 
     def get_content_as_file(self):
-        """Returns a file-like object giving access to the content data.
+        """Return a file-like object giving access to the content data.
 
         The file-like object is updatable unless the content is external.
 
@@ -187,9 +187,9 @@ class WithContentMixin:
 
     @autoproperty       
     def _get_content_schema(self):
-        """
-        The resource used as the schema of the content of this element, or None
-        if that content has no schema.
+        """The resource used as the schema of the content of this element.
+
+        None if that content has no schema.  
         If the schema can not be retrieved, an exception is raised.
 
         See also `get_content_schema` and `content_schema_idref`.
@@ -198,6 +198,8 @@ class WithContentMixin:
 
     @autoproperty
     def _set_content_schema(self, resource, _init=False):
+        """FIXME: missing docstring.
+        """
         # if _init is True, no backend operation is performed,
         # and resource may be an id-ref rather than an element
         if not _init and self.__schema_idref is None:
@@ -453,6 +455,10 @@ class PackagedDataFile(file):
     
 
 class ContentDataFile(object):
+    """FIXME: missing docstring.
+
+    R/W file-like object
+    """
     def __init__ (self, element):
         self._element = element
         self._file = f = tmpfile()

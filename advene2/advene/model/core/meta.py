@@ -14,10 +14,12 @@ class WithMetaMixin:
 
     I also provide an alias mechanism to make frequent metadata easily
     accessible as python properties.
+
+    FIXME: expand description with usage example
     """
 
     # NB: unlike other collections in the Advene model, metadata no not provide
-    # meands to get id-ref *only* for unreachable elements. Since metadata
+    # means to get id-ref *only* for unreachable elements. Since metadata
     # already require a test (is the value a string value or an element value)
     # mixing "pure" strings, id-refs and elements would seem too cumbersome...
 
@@ -111,7 +113,7 @@ class WithMetaMixin:
 
         If no metadata is associated to the given key, a KeyError is raised.
         If the given key references an unreachable element, a 
-        `NoSuchEllementError` or `UnreachableImportError` is raised.
+        `NoSuchElementError` or `UnreachableImportError` is raised.
 
         All exceptions can be avoided by providing a ``default`` value, that
         will be returned instead of raising an exception.
@@ -212,7 +214,7 @@ class WithMetaMixin:
     def del_meta(self, key):
         """Delete the metadata.
 
-        Note that if the given key is not in used, this will have no effect.
+        Note that if the given key is not in use, this will have no effect.
         """
         if hasattr(self, "ADVENE_TYPE"):
             p = self._owner
@@ -233,13 +235,14 @@ class WithMetaMixin:
 
     @classmethod
     def make_metadata_property(cls, key, alias=None):
-        """
-        Attempts to create a python property in cls mapping to metadata key.
+        """Attempts to create a python property in cls mapping to metadata key.
 
         If alias is None, key is considered as a URI, and the last part of
         that URI (after # or /) is used.
 
         Raises an AttributeError if cls already has a member with that name.
+
+        FIXME: should attach docstring to the property somehow
         """
         if alias is None:
             cut = max(key.rfind("#"), key.rfind("/"))
