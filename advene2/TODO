@@ -28,12 +28,6 @@ Element related
   which they depend -- e.g. before creating an annotation, its media must
   be clean -- because it may require creation too
 
-Content related
----------------
-
-- find a good way to implement the monitor of files returned by as_file, so as
-  to know when to clean
-
 Backend related
 ---------------
 

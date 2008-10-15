@@ -12,6 +12,7 @@ the form e.content_X, which might be slightly more efficient (less lookup). May
 be the former should be eventually deprecated...
 """
 
+from os import tmpfile
 from urllib import url2pathname
 from weakref import ref
 
@@ -74,6 +75,7 @@ class WithContentMixin(DirtyMixin):
     __schema_wref  = staticmethod(lambda: None)
     __url          = None
     __data         = None
+    __as_file      = None
 
     __cached_content = staticmethod(lambda: None)
 
@@ -104,6 +106,8 @@ class WithContentMixin(DirtyMixin):
             f.write(self.__data)
             f.close()
         else:
+            f = self.__as_file
+            if f: self.__data = f._get_data()
             o._backend.update_content_data(o._id, self._id, self.ADVENE_TYPE,
                                            self.__data or "")
 
@@ -182,13 +186,17 @@ class WithContentMixin(DirtyMixin):
             self._load_content_data()
             url = self.__data
         if url: # non-empty string
-            r = self.__data = self._get_content_as_file(False).read()
+            r = self._get_content_as_file().read()
         else:
-            r = self.__data
-            if r is None:
-                op = self._owner
-                r = self.__data = op._backend. \
-                    get_content_data(op._id, self._id, self.ADVENE_TYPE)
+            f = self.__as_file
+            if f is not None:
+                r = f._get_data()
+            else:
+                r = self.__data
+                if r is None:
+                    op = self._owner
+                    r = self.__data = op._backend. \
+                        get_content_data(op._id, self._id, self.ADVENE_TYPE)
         return r
 
     def _set_content_data(self, data):
@@ -203,10 +211,7 @@ class WithContentMixin(DirtyMixin):
             # NB: the backend must do it by itself,
             # so cleaning the info is not required
 
-    def _get_content_as_file(self, _monitor=True):
-        """_monitor indicates that the content should be closed when the file
-        is closed"""
-        # TODO find a good way to implement the monitoring
+    def _get_content_as_file(self):
         url = self.__url
         if url is None: # should not happen
             self._load_content_data()
@@ -222,9 +227,9 @@ class WithContentMixin(DirtyMixin):
             else:
                 f = urlopen(url)
         else:
-            f = tmpfile()
-            f.write(self._get_content_data())
-            f.seek(0)
+            f = self.__as_file
+            if f is None:
+                f = self.__as_file = ContentDataFile(self)
         return f
         
 
@@ -241,3 +246,70 @@ class WithContentMixin(DirtyMixin):
             c = Content(self)
             self.__cached_content = ref(c)
         return c
+
+
+class ContentDataFile(object):
+    def __init__ (self, element):
+        self._element = element
+        self._file = f = tmpfile()
+        self.flush = f.flush
+        self.fileno = f.fileno
+        self.isatty = f.isatty
+        self.read = f.read
+        self.readlines = f.readlines
+        self.xreadlines = f.xreadlines
+        self.seek = f.seek
+        self.tell = f.tell
+
+        f.write(element._WithContentMixin__data)
+        f.seek(0)
+
+    def _get_data(self):
+        # WARNING: this is not thread safe
+        f = self._file
+        pos = f.tell()
+        f.seek(0)
+        r = f.read()
+        f.seek(pos)
+        return r
+
+    def close(self):
+        self._element._WithContentMixin__data = self._get_data()
+        self._element._WithContentMixin__as_file = None
+        self._file.close()
+        self._element is None
+
+    def truncate(self, *args):
+        self._file.truncate(*args)
+        self._element.add_cleaning_operation_once(
+            self._element._WithContentMixin__clean_data)
+
+    def write(self, str_):
+        self._file.write(str_)
+        self._element.add_cleaning_operation_once(
+            self._element._WithContentMixin__clean_data)
+
+    def writelines(self, seq):
+        self._file.writelines(seq)
+        self._element.add_cleaning_operation_once(
+            self._element._WithContentMixin__clean_data)
+
+    @property
+    def closed(self): return self._file.closed
+
+    @property
+    def encoding(self): return self._file.encoding
+
+    @property
+    def mode(self): return self._file.mode
+
+    @property
+    def name(self): return self._file.name
+
+    @property
+    def newlines(self): return self._file.newlines
+
+    def _get_softspace(self): return self._file.softspace
+    def _set_softspace(self, val): self._file.softspace = val
+    softspace = property(_get_softspace, _set_softspace)
+    
