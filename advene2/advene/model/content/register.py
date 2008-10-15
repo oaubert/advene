@@ -30,7 +30,7 @@ def iter_textual_mimetypes():
     global _textual_mimetypes
     return iter(_textual_mimetypes)
 
-def register_textual_mimetypes(m):
+def register_textual_mimetype(m):
     global _textual_mimetypes
     m = m.split("/")
     _textual_mimetypes.append(m)
@@ -46,4 +46,4 @@ _textual_mimetypes = []
 
 # default registration
 
-register_textual_mimetypes("image/svg")
+register_textual_mimetype("image/svg")
