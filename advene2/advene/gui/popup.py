@@ -460,59 +460,57 @@ class Menu:
             if submenu.get_children():
                 # The submenu was already populated.
                 return False
-            # FIXME
-            #if el.incomingRelations:
-            #    i=gtk.MenuItem(_("Incoming"))
-            #    submenu.append(i)
-            #    i=gtk.SeparatorMenuItem()
-            #    submenu.append(i)
-            #    for t, l in el.typedRelatedIn.iteritems():
-            #        at=self.controller.package.get(t)
-            #        m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
-            #        amenu=gtk.Menu()
-            #        m.set_submenu(amenu)
-            #        amenu.connect('map', build_submenu, at, l)
-            #        submenu.append(m)
-            #if submenu.get_children():
-            #    # There were incoming annotations. Use a separator
-            #    i=gtk.SeparatorMenuItem()
-            #    submenu.append(i)
-            #if el.outgoingRelations:
-            #    i=gtk.MenuItem(_("Outgoing"))
-            #    submenu.append(i)
-            #    i=gtk.SeparatorMenuItem()
-            #    submenu.append(i)
-            #    for t, l in el.typedRelatedOut.iteritems():
-            #        at=self.controller.package.get(t)
-            #        m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
-            #        amenu=gtk.Menu()
-            #        m.set_submenu(amenu)
-            #        amenu.connect('map', build_submenu, at, l)
-            #        submenu.append(m)
-            #submenu.show_all()
+
+            if el.incoming_relations:
+                i=gtk.MenuItem(_("Incoming"))
+                submenu.append(i)
+                i=gtk.SeparatorMenuItem()
+                submenu.append(i)
+                for at, l in el.typed_related_in:
+                    m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
+                    amenu=gtk.Menu()
+                    m.set_submenu(amenu)
+                    amenu.connect('map', build_submenu, at, list(l))
+                    submenu.append(m)
+            if submenu.get_children():
+                # There were incoming annotations. Use a separator
+                i=gtk.SeparatorMenuItem()
+                submenu.append(i)
+            if el.outgoing_relations:
+                i=gtk.MenuItem(_("Outgoing"))
+                submenu.append(i)
+                i=gtk.SeparatorMenuItem()
+                submenu.append(i)
+                for at, l in el.typed_related_out:
+                    m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
+                    amenu=gtk.Menu()
+                    m.set_submenu(amenu)
+                    amenu.connect('map', build_submenu, at, list(l))
+                    submenu.append(m)
+            submenu.show_all()
             return False
 
-        # FIXME
-        #if element.relations:
-        #    i=gtk.MenuItem(_("Related annotations"), use_underline=False)
-        #    submenu=gtk.Menu()
-        #    i.set_submenu(submenu)
-        #    submenu.connect('map', build_related, element)
-        #    menu.append(i)
-        #
-        #    if element.incomingRelations:
-        #        i=gtk.MenuItem(_("Incoming relations"), use_underline=False)
-        #        submenu=gtk.Menu()
-        #        i.set_submenu(submenu)
-        #        submenu.connect('map', build_submenu, element, element.incomingRelations)
-        #        menu.append(i)
-        #
-        #    if element.outgoingRelations:
-        #        i=gtk.MenuItem(_("Outgoing relations"), use_underline=False)
-        #        submenu=gtk.Menu()
-        #        i.set_submenu(submenu)
-        #        submenu.connect('map', build_submenu, element, element.outgoingRelations)
-        #        menu.append(i)
+
+        if element.relations:
+            i=gtk.MenuItem(_("Related annotations"), use_underline=False)
+            submenu=gtk.Menu()
+            i.set_submenu(submenu)
+            submenu.connect('map', build_related, element)
+            menu.append(i)
+        
+            if element.incoming_relations:
+                i=gtk.MenuItem(_("Incoming relations"), use_underline=False)
+                submenu=gtk.Menu()
+                i.set_submenu(submenu)
+                submenu.connect('map', build_submenu, element, element.incoming_relations)
+                menu.append(i)
+        
+            if element.outgoing_relations:
+                i=gtk.MenuItem(_("Outgoing relations"), use_underline=False)
+                submenu=gtk.Menu()
+                i.set_submenu(submenu)
+                submenu.connect('map', build_submenu, element, element.outgoing_relations)
+                menu.append(i)
 
         add_item("")
 
