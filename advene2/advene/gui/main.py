@@ -1976,6 +1976,8 @@ class AdveneGUI(Connect):
         buf.insert_at_cursor (mes)
         endmark = buf.create_mark ("end", buf.get_end_iter (), True)
         self.gui.logmessages.scroll_mark_onscreen (endmark)
+        if config.data.preferences['log-to-terminal']:
+            print unicode(msg).encode('utf-8')
         return
 
     def get_illustrated_text(self, text, position=None, vertical=False, height=40):
