@@ -62,7 +62,7 @@ class Package (object, WithMetaMixin):
         Get the element whose id is given; it can be either a simple id or a
         path id.
 
-        If necessary, it is made by the backend, then stored (as a week ref) in
+        If necessary, it is made by the backend, then stored (as a weak ref) in
         self._elements to prevent several instances of the same element to be
         produced.
         """

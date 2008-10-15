@@ -48,6 +48,7 @@ if __name__ == "__main__":
     p.dc_creator = "pchampin"
 
     p.close()
+    print
 
 
     p = Package.bind (uri)
@@ -60,3 +61,12 @@ if __name__ == "__main__":
     print a1, p.get_element ("a1")
     print a1.content._get_data()
     print p.dc_creator
+    p.close()
+    print
+
+    p = Package.bind (uri)
+    trace_wrap_all (p._backend)
+    print p.get_element ("a1")
+    print p.get_element ("a1").content
+    print p.get_element ("a1")
+    p.close()
