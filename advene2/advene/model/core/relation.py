@@ -75,17 +75,15 @@ class Relation(PackageElement, WithContentMixin):
 
     def __setitem__(self, i, a):
         if isinstance(i, slice): return self._set_slice(i, a)
-        assert a.ADVENE_TYPE == ANNOTATION
+        assert getattr(a, "ADVENE_TYPE", None) == ANNOTATION
         o = self._owner
         assert o._can_reference(a)
         L = self._cache
         if L is None:
             for i in self.__iter__(): pass # generate _cache
             L = self._cache
-        c = len(L)
-        assert -c <= i < c
+        L[i] = a # also guarantees that is is a valid index
         idref = a.make_idref_for(o)
-        L[i] = a
         self.add_cleaning_operation(o._backend.update_member,
                                     o._id, self._id, idref, i)
 
@@ -95,10 +93,8 @@ class Relation(PackageElement, WithContentMixin):
         if L is None:
             for i in self.__iter__(): pass # generate _cache
             L = self._cache
-        c = len(L)
-        assert -c <= i < c
+        del L[i] # also guarantees that is is a valid index
         o = self._owner
-        del L[i]
         self.add_cleaning_operation(o._backend.remove_member,
                                     o._id, self._id, i)
 
@@ -144,7 +140,7 @@ class Relation(PackageElement, WithContentMixin):
             del self[i-offset]
 
     def insert(self, i, a):
-        assert a.ADVENE_TYPE == ANNOTATION
+        assert getattr(a, "ADVENE_TYPE", None) == ANNOTATION
         o = self._owner
         assert o._can_reference(a)
         L = self._cache
@@ -161,7 +157,7 @@ class Relation(PackageElement, WithContentMixin):
                                     o._id, self._id, idref, i, len(L))
         
     def append(self, a):
-        assert a.ADVENE_TYPE == ANNOTATION
+        assert getattr(a, "ADVENE_TYPE", None) == ANNOTATION
         o = self._owner
         assert o._can_reference(a)
         L = self._cache

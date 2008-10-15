@@ -5,8 +5,6 @@ Important improvements
 
 - implement read or write locking, "force", and "readonly" in _SqliteBackend
 
-- change asserts in advene.model.core into ModelException, when needed
-
 Minor improvements, to do one day
 =================================
 

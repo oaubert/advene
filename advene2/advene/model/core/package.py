@@ -237,7 +237,7 @@ class Package(object, WithMetaMixin, DirtyMixin):
 
     def create_annotation(self, id, media, begin, end,
                                 mimetype, schema=None, url=""):
-        if self.has_element(id): raise ModelError("id in use %s", id)
+        assert not self.has_element(id)
         media_idref = media.make_idref_for(self)
         if schema is not None:
             schema_idref = schema.make_idref_for(self)
@@ -297,6 +297,7 @@ class Package(object, WithMetaMixin, DirtyMixin):
 
     def create_import(self, id, package):
         assert not self.has_element(id)
+        assert package is not self
         assert not [ p for p in self._imports_dict.itervalues()
                      if p.url == package.url
                      or p.uri and p.uri == package.uri ]

@@ -9,7 +9,6 @@ import advene.model.core.dirty as dirty
 ## uncomment the following to disable differed cleaning
 #dirty.DirtyMixin = dirty.DirtyMixinInstantCleaning
 
-from advene.model import ModelError
 from advene.model.core.content import PACKAGED_ROOT
 import advene.model.backends.sqlite as backend_sqlite
 from advene.model.core.package import Package
@@ -73,7 +72,7 @@ if __name__ == "__main__":
     r1 = p.create_relation("r1", "text/plain")
     try:
         a2 = p.create_annotation("a2", m1, 0, 20, "text/plain")
-    except ModelError:
+    except AssertionError:
         pass
         # note: no backend call is needed to check that id "a2" is in use,
         # because annotation a2 is cached in the packaged (variable a2)

@@ -71,10 +71,8 @@ class List(PackageElement, WithContentMixin):
         if L is None:
             for i in self.__iter__(): pass # generate _cache
             L = self._cache
-        c = len(L)
-        assert -c <= i < c
+        L[i] = a # also guarantees that i is a valid index
         idref = a.make_idref_for(o)
-        L[i] = a
         self.add_cleaning_operation(o._backend.update_item,
                                     o._id, self._id, idref, i)
 
@@ -84,10 +82,8 @@ class List(PackageElement, WithContentMixin):
         if L is None:
             for i in self.__iter__(): pass # generate _cache
             L = self._cache
-        c = len(L)
-        assert -c <= i < c
+        del L[i] # also guarantees that i is a valid index
         o = self._owner
-        del L[i]
         self.add_cleaning_operation(o._backend.remove_item,
                                     o._id, self._id, i)
 
