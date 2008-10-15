@@ -1,9 +1,27 @@
 from advene.model.cam.consts import CAMSYS_NS_PREFIX
 from advene.model.core.group import GroupMixin, _GroupCollection
 
+from itertools import chain
+
 _camsys_type = CAMSYS_NS_PREFIX+"type"
 
 class CamGroupMixin(GroupMixin):
+    def __iter__(self):
+        return chain(*(
+            self.iter_schemas(),
+            self.iter_annotation_types(),
+            self.iter_relation_types(),
+            self.iter_medias(),
+            self.iter_annotations(),
+            self.iter_relations(),
+            self.iter_user_lists(),
+            self.iter_user_tags(),
+            self.iter_views(),
+            self.iter_queries(),
+            self.iter_resources(),
+            self.iter_imports(),
+        ))
+
     def iter_user_tags(self):
         for t in self.iter_tags():
             if t.get_meta(_cam_system_type, None) is None:
