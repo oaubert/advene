@@ -54,8 +54,8 @@ def register(controller=None):
             defaults={'position': 'string:0'},
             predefined={'position': (
                     ( 'string:0', _("The movie start") ),
-                    ( 'annotation/fragment/begin', _("The annotation begin") ),
-                    ( 'annotation/fragment/end', _("The annotation end") ),
+                    ( 'annotation/begin', _("The annotation begin") ),
+                    ( 'annotation/end', _("The annotation end") ),
                     )},
             category='player',
             )
@@ -66,7 +66,7 @@ def register(controller=None):
             method=ac.PlayerGoto,
             description=_("Go to the given position"),
             parameters={'position': _("Goto position (in ms)")},
-            defaults={'position': 'annotation/fragment/begin'},
+            defaults={'position': 'annotation/begin'},
             predefined=ac.PlayerGoto_predefined,
             category='player',
             )
@@ -110,13 +110,13 @@ def register(controller=None):
             parameters={'message': _("Message to display"),
                         'duration': _("Duration of the caption")},
             defaults={'message': 'annotation/content/data',
-                      'duration': 'annotation/fragment/duration'},
+                      'duration': 'annotation/duration'},
             predefined={'message': (
                     ( 'annotation/content/data', _("The annotation content") ),
                     ),
                         'duration': (
                     ( 'string:1000', _("1 second") ),
-                    ( 'annotation/fragment/duration',_("The annotation duration") )
+                    ( 'annotation/duration',_("The annotation duration") )
                     )},
             category='advanced',
             )
@@ -148,7 +148,7 @@ def register(controller=None):
                       'x': 'string:10',
                       'y': 'string:10',
                       'size': 'string:5',
-                      'duration': 'annotation/fragment/duration'},
+                      'duration': 'annotation/duration'},
             predefined={'shape': (
                     ( 'string:square', _("A square") ),
                     ( 'string:circle', _("A circle") ),
@@ -178,7 +178,7 @@ def register(controller=None):
                     ),
                         'duration': (
                     ( 'string:1000', _("1 second") ),
-                    ( 'annotation/fragment/duration', _("The annotation duration") )
+                    ( 'annotation/duration', _("The annotation duration") )
                     )},
             category='advanced',
             )
@@ -372,12 +372,12 @@ class DefaultActionsRepository:
 
     def PlayerGoto_predefined(self, controller):
         p=[ ( 'string:0', _("The movie start") ),
-            ( 'annotation/fragment/begin', _("The annotation begin") ),
-            ( 'annotation/fragment/end', _("The annotation end") ) ]
+            ( 'annotation/begin', _("The annotation begin") ),
+            ( 'annotation/end', _("The annotation end") ) ]
         for t in controller.package.all.relation_types:
-            p.append( ('annotation/typedRelatedOut/%s/first/fragment/begin' % t.id,
+            p.append( ('annotation/typedRelatedOut/%s/first/begin' % t.id,
                        _("The %s-related outgoing annotation") % controller.get_title(t)) )
-            p.append( ('annotation/typedRelatedIn/%s/first/fragment/begin' % t.id,
+            p.append( ('annotation/typedRelatedIn/%s/first/begin' % t.id,
                        _("The %s-related incoming annotation") % controller.get_title(t)) )
         return { 'position': p }
 
@@ -512,8 +512,8 @@ class DefaultActionsRepository:
             end = c.create_position (value=duration,
                                      key=c.player.MediaTime,
                                      origin=c.player.RelativePosition)
-            #begin = c.create_position (value=annotation.fragment.begin)
-            #end = c.create_position (value=annotation.fragment.end)
+            #begin = c.create_position (value=annotation.begin)
+            #end = c.create_position (value=annotation.end)
             if c.gui and c.gui.captionview:
                 c.gui.captionview.display_text(message.encode('utf8'),
                                                duration)
