@@ -39,6 +39,8 @@ def register(controller):
     controller.register_viewclass(Browser)
 
 class BrowserColumn:
+    convert_to_list='---->' + _('Convert to a a list') + '<----'
+
     def __init__(self, element=None, name="", callback=None, parent=None):
         self.model=element
         self.name=name
@@ -77,6 +79,9 @@ class BrowserColumn:
         ls=gtk.ListStore(str)
         if self.model is None:
             return ls
+        if hasattr(self.model, '__iter__') and not hasattr(self.model, '__getitem__'):
+            # We have a generator. Propose to convert it to a list.
+            ls.append([self.convert_to_list])
         for att in helper.get_valid_members(self.model):
             ls.append([att])
         return ls
@@ -84,6 +89,9 @@ class BrowserColumn:
     def update(self, element=None, name=""):
         self.model=element
         self.liststore.clear()
+        if hasattr(self.model, '__iter__') and not hasattr(self.model, '__getitem__'):
+            # We have a generator. Propose to convert it to a list.
+            self.liststore.append([self.convert_to_list])
         for att in helper.get_valid_members(element):
             self.liststore.append([att])
         self.name=name
@@ -93,12 +101,21 @@ class BrowserColumn:
         self.next=None
         return True
 
-    def row_activated(self, widget, treepath, treecolumn):
-        att=widget.get_model()[treepath[0]][0]
+    def select(self, att):
+        if att is None:
+            return True
+        if att == self.convert_to_list:
+            # Convert the data to a list
+            self.update(list(self.model), self.name)
+            return
         if att.startswith('----'):
             return True
         if self.callback:
             self.callback(self, att)
+
+    def row_activated(self, widget, treepath, treecolumn):
+        att=widget.get_model()[treepath[0]][0]
+        self.select(att)
         return True
 
     def on_column_activation(self, widget):
@@ -114,11 +131,7 @@ class BrowserColumn:
                 store, it = selection.get_selected()
                 if it is not None:
                     att = widget.get_model().get_value (it, 0)
-        if att and att.startswith('----'):
-            return True
-        if att and self.callback:
-            self.callback(self, att)
-            return True
+        self.select(att)
         return False
 
     def on_changed_selection(self, selection, model):
@@ -127,11 +140,7 @@ class BrowserColumn:
             store, it = selection.get_selected()
             if it is not None:
                 att = model.get_value (it, 0)
-        if att and att.startswith('----'):
-            return True
-        if att and self.callback:
-            self.callback(self, att)
-            return True
+        self.select(att)
         return False
 
     def build_widget(self):
