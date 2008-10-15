@@ -46,6 +46,7 @@ import cherrypy
 if int(cherrypy.__version__.split('.')[0]) < 3:
     raise _("The webserver requires version 3.0 of CherryPy at least.")
 
+import advene.util.helper as helper
 from advene.model.cam.package import Package
 from advene.model.tales import AdveneContext
 from advene.model.exceptions import NoSuchElementError, UnreachableImportError
@@ -105,48 +106,6 @@ class Common:
                                      for i in range(len(path))])]
             )
 
-    def get_valid_members (self, el):
-        """Return a list of strings, valid members for the object el in TALES.
-
-        This method is used to generate the contextual completion menu
-        in the web interface and the browser view.
-
-        @param el: the object to examine (often an Advene object)
-        @type el: any
-
-        @return: the list of elements which are members of the object,
-                 in the TALES meaning.
-        @rtype: list
-        """
-        # FIXME: try to sort items in a meaningful way
-
-        # FIXME: return only simple items if not in expert mode
-        l = []
-        try:
-            l.extend(el.ids())
-        except AttributeError:
-            try:
-                l.extend(el.keys())
-            except AttributeError:
-                pass
-        if l:
-            l.insert(0, _('---- Elements ----'))
-
-        pl=[remove_tales_prefix(e[0])
-            for e in inspect.getmembers(type(el))
-            if isinstance(e[1], property) and e[1].fget is not None]
-        if pl:
-            l.append(_('---- Attributes ----'))
-            l.extend(pl)
-
-        l.append(_('---- Methods ----'))
-        # Global methods
-        # l.extend (AdveneContext.defaultMethods ())
-        # User-defined global methods
-        #FIXME l.extend (config.data.global_methods)
-
-        return l
-        
     def no_cache (self):
         """Write the cache-control headers in the response.
 
@@ -642,7 +601,7 @@ class Packages(Common):
             uri=cherrypy.request.path_info
             levelup = uri[:uri.rindex("/")]
             auto_components = [ c
-                                for c in self.get_valid_members (objet)
+                                for c in helper.get_valid_members (objet)
                                 if not c.startswith('----') ]
             auto_components.sort()
             try:
