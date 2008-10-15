@@ -22,11 +22,11 @@ rdfs_seeAlso = "http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso"
 
 class TestElements(TestCase):
     def setUp(self):
-        self.p = Package("sqlite::memory:", create=True, _transient=True)
+        self.p = Package("file:/tmp/p", create=True)
         self.foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
         self.p.create_media("m1", "http://example.com/m1.avi", self.foref)
 
-        self.q = Package("sqlite::memory:;foo", create=True, _transient=True)
+        self.q = Package("file:/tmp/q", create=True)
 
     def tearDown(self):
         self.q.close()
@@ -134,8 +134,8 @@ class TestElements(TestCase):
         # schema
         self.assertEqual(None, e.content_schema)
         self.assertEqual(None, e.content.schema)
-        self.assertEqual(None, e.content_schema_idref)
-        self.assertEqual(None, e.content.schema_idref)
+        self.assertEqual("", e.content_schema_idref)
+        self.assertEqual("", e.content.schema_idref)
         s = e._owner.create_resource("myschema", "test/plain")
         e.content_schema = s
         self.assertEqual(s, e.content_schema)
@@ -145,15 +145,15 @@ class TestElements(TestCase):
         e.content_schema = None
         self.assertEqual(None, e.content_schema)
         self.assertEqual(None, e.content.schema)
-        self.assertEqual(None, e.content_schema_idref)
-        self.assertEqual(None, e.content.schema_idref)
+        self.assertEqual("", e.content_schema_idref)
+        self.assertEqual("", e.content.schema_idref)
         s.delete()
 
         # empty content
         if e.ADVENE_TYPE == RELATION:
             e.content_mimetype = "x-advene/none"
             self.assertEqual(None, e.content_schema)
-            self.assertEqual(None, e.content_schema_idref)
+            self.assertEqual("", e.content_schema_idref)
             self.assertEqual("", e.content_url)
             self.assertEqual("", e.content_data)
             self.assertRaises(ModelError, setattr, e, "content_schema", s)

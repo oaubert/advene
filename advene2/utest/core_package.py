@@ -11,14 +11,17 @@ from advene.model.backends.sqlite import _set_module_debug
 filterwarnings("ignore", "tmpnam is a potential security risk to your program")
 _set_module_debug(True) # enable all asserts in backend_sqlite
 
+
+
 class TestCreation(TestCase):
     # TODO this is not complete
 
-    def test_transient(self):
-        p = Package("sqlite::memory:", create=True, _transient=True)
+    def test_create_transient(self):
+        # use invalid URL scheme to force the package to be transient
+        p = Package("x-invalid-scheme:xyz", create=True)
         p.close()
         # if the second times woirks (with create=True), then transient works
-        p = Package("sqlite::memory:", create=True, _transient=True)
+        p = Package("x-invalid-scheme:xyz", create=True)
         p.close()
         
 

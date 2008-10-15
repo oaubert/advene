@@ -2,7 +2,7 @@
 I define the class of medias.
 """
 
-from advene.model import ADVENE_NS_PREFIX
+from advene.model.consts import ADVENE_NS_PREFIX
 from advene.model.core.element import PackageElement, MEDIA
 from advene.utils.autoproperty import autoproperty
 

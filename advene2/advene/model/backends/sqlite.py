@@ -22,7 +22,7 @@ from urllib    import url2pathname, pathname2url
 from weakref   import WeakKeyDictionary, WeakValueDictionary
 import re
 
-from advene.model.backends \
+from advene.model.backends.exceptions \
   import ClaimFailure, NoSuchPackage, InternalError, PackageInUse, WrongFormat
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
@@ -510,7 +510,7 @@ class _SqliteBackend(object):
 
         Raise a ModelException if the identifier already exists in the package.
         """
-        assert _DF or (isinstance(begin, int) and begin >= 0), begin
+        assert _DF or (isinstance(begin, int) and begin >= 0), `begin`
         assert _DF or (isinstance(end, int) and end >= begin), (begin, end)
         mp,ms = _split_id_ref(media) # also assert that media has depth < 2
         assert _DF or mp == "" or self.has_element(package_id, mp, IMPORT), mp

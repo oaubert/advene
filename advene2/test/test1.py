@@ -9,8 +9,8 @@ import advene.model.core.dirty as dirty
 ## uncomment the following to disable differed cleaning
 #dirty.DirtyMixin = dirty.DirtyMixinInstantCleaning
 
-from advene.model import DC_NS_PREFIX
 import advene.model.backends.sqlite as backend_sqlite
+from advene.model.consts import DC_NS_PREFIX
 from advene.model.core.content import PACKAGED_ROOT
 from advene.model.core.element import PackageElement
 from advene.model.core.package import Package

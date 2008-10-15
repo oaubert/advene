@@ -2,7 +2,7 @@
 I define the class of relations.
 """
 
-from advene import _RAISE
+from advene.model.consts import _RAISE
 from advene.model.core.element \
   import PackageElement, ANNOTATION, RELATION
 from advene.model.core.content import WithContentMixin
@@ -186,7 +186,7 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
             if m is not None:
                 yield m
             else:
-                yield self.get_member(i, _RAISE)
+                yield self.get_member_idref(i)
 
     def get_member(self, i, default=None):
         """Return element with index i, or default if it can not be retrieved.

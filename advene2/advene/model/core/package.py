@@ -1,7 +1,9 @@
 from weakref import WeakKeyDictionary, WeakValueDictionary, ref
 
-from advene import _RAISE
-from advene.model.backends import iter_backends, NoBackendClaiming, PackageInUse
+from advene.model.consts import _RAISE
+from advene.model.backends.exceptions import PackageInUse
+from advene.model.backends.register import iter_backends
+import advene.model.backends.sqlite as sqlite_backend
 from advene.model.core.element import PackageElement, MEDIA, ANNOTATION, \
   RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
 from advene.model.core.media import Media
@@ -18,7 +20,8 @@ from advene.model.core.own_group import OwnGroup
 from advene.model.core.dirty import DirtyMixin
 from advene.model.core.meta import WithMetaMixin
 from advene.model.exceptions import \
-    ModelError, NoSuchElementError, UnreachableImportError
+    ModelError, NoClaimingError, NoSuchElementError, UnreachableImportError
+from advene.model.parsers.register import iter_parsers
 from advene.utils.autoproperty import autoproperty
 
 
@@ -36,13 +39,13 @@ _constructor = {
 
 class Package(object, WithMetaMixin, DirtyMixin):
 
-    def __init__(self, url, create=False, readonly=False, force=False,
-                 _transient=False):
+    def __init__(self, url, create=False, readonly=False, force=False):
         assert not (create and readonly)
         self._url      = url
         self._readonly = readonly
         self._backend = None
-        self._transient = _transient
+        self._transient = False
+        parser = None
         if create:
             for b in iter_backends():
                 claims = b.claims_for_create(url)
@@ -52,8 +55,8 @@ class Package(object, WithMetaMixin, DirtyMixin):
                 elif claims.exception:
                     raise claims.exception
             else:
-                raise NoBackendClaiming("create %s" % url)
-        else: # bind
+                backend, package_id = self._make_transient_backend()
+        else: # bind or load
             for b in iter_backends():
                 claims = b.claims_for_bind(url)
                 if claims:
@@ -62,7 +65,16 @@ class Package(object, WithMetaMixin, DirtyMixin):
                 elif claims.exception:
                     raise claims.exception
             else:
-                raise NoBackendClaiming("bind %s" % url)
+                cmax = 0
+                for p in iter_parsers():
+                    c = p.claims_for_parse(url)
+                    if c > cmax:
+                        cmax = c
+                        parser = p
+                if cmax > 0:
+                    backend, package_id = self._make_transient_backend()
+                else:
+                    raise NoClaimingError("bind %s" % url)
 
         self._backend  = backend
         self._id       = package_id
@@ -70,6 +82,9 @@ class Package(object, WithMetaMixin, DirtyMixin):
         self._own_wref = lambda: None
         self._all_wref = lambda: None
         self._uri      = None
+
+        if parser:
+            parser.parse_into(url, self)
 
         self._imports_dict = imports_dict = {}
         self._importers = WeakKeyDictionary()
@@ -79,11 +94,11 @@ class Package(object, WithMetaMixin, DirtyMixin):
             p = None
             try:
                 p = Package(url)
-            except NoBackendClaiming:
+            except NoClaimingError:
                 if uri:
                     try:
                         p = Package(url)
-                    except NoBackendClaiming:
+                    except NoClaimingError:
                         pass
             except PackageInUse, e:
                 if isinstance(e.message, Package):
@@ -99,6 +114,16 @@ class Package(object, WithMetaMixin, DirtyMixin):
             imports_dict[iid] = p
 
         self._update_backends_dict(_firsttime=True)
+
+    def _make_transient_backend(self):
+        claimed = False
+        i = 0
+        while not claimed:
+            url = "sqlite::memory:;transient-%s" % i
+            i += 1
+            claimed = sqlite_backend.claims_for_create(url)
+        self._transient = True
+        return sqlite_backend.create(self, url=url)
 
     def _update_backends_dict(self, _firsttime=False):
         def signature(d):

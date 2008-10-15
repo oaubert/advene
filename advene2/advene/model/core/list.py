@@ -3,7 +3,7 @@ I define the class of lists.
 """
 from weakref import ref
 
-from advene import _RAISE
+from advene.model.consts import _RAISE
 from advene.model.core.element \
   import PackageElement, LIST
 from advene.model.core.content import WithContentMixin

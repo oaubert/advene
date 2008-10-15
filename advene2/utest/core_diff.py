@@ -1,6 +1,7 @@
 from unittest import TestCase, main
 from urllib import pathname2url
 
+from advene.model.consts import PARSER_META_PREFIX
 from advene.model.core.diff import *
 from advene.model.core.element import PackageElement
 from advene.model.core.media import FOREF_PREFIX
@@ -19,28 +20,19 @@ PackageElement.make_metadata_property(dc_description, "dc_description")
 PackageElement.make_metadata_property(rdfs_seeAlso, "rdfs_seeAlso")
 
 
-def fill_package_step_by_step(p, empty=False, p3=None):
+def fill_package_step_by_step(p, empty=False):
     if empty:
         yield "empty"
-    if p3 is None:
-        p3 = Package("file:/tmp/p3", create=True)
-        m3 = p3.create_media("m3", "http://example.com/m3.ogm", foref)
-        a3 = p3.create_annotation("a3", m3, 123, 456, "text/plain")
-        r3 = p3.create_relation("r3", "text/plain", members=[a3,])
-        L3 = p3.create_list("L3", items=[a3, m3, r3,])
-        t3 = p3.create_tag("t3")
-        v3 = p3.create_view("v3", "text/html+tag")
-        q3 = p3.create_query("q3", "x-advene/rules")
-        R3 = p3.create_resource("R3", "text/css")
-    else:
-        m3 = p3["m3"]
-        a3 = p3["a3"]
-        r3 = p3["r3"]
-        L3 = p3["L3"]
-        t3 = p3["t3"]
-        v3 = p3["v3"]
-        q3 = p3["q3"]
-        R3 = p3["R3"]
+    p3 = Package("urn:xyz", create=True)
+    m3 = p3.create_media("m3", "http://example.com/m3.ogm", foref)
+    a3 = p3.create_annotation("a3", m3, 123, 456, "text/plain")
+    r3 = p3.create_relation("r3", "text/plain", members=[a3,])
+    L3 = p3.create_list("L3", items=[a3, m3, r3,])
+    t3 = p3.create_tag("t3")
+    v3 = p3.create_view("v3", "text/html+tag")
+    q3 = p3.create_query("q3", "x-advene/rules")
+    R3 = p3.create_resource("R3", "text/css")
+
     p.uri = "http://example.com/my-package"; yield 1
     i = p.create_import("i", p3); yield 2
     m = p.create_media("m", "http://example.com/m.ogm", foref); yield 3
@@ -68,31 +60,20 @@ def fill_package_step_by_step(p, empty=False, p3=None):
         p.associate_tag(e, t); yield 21, e.id
         p.associate_tag(e, t3); yield 22, e.id
     p.dc_creator = "pchampin"; yield 23, e.id
-    p.dc_description = "this is a package used for testing comparison"
+    p.dc_description = "this is a package used for testing diff"; yield 24
+    p.set_meta(PARSER_META_PREFIX+"namespaces",
+               "dc http://purl.org/dc/elements/1.1/")
     yield "done"
     
 
 class TestDiffPackage(TestCase):
     def setUp(self):
-        self.p1 = Package("sqlite::memory:;p1", create=True, _transient=True)
-        #self.p1 = Package("file:/tmp/p1", create=True)
-        self.p2 = Package("sqlite::memory:;p2", create=True, _transient=True)
-        #self.p2 = Package("file:/tmp/p2", create=True)
-        self.p3 = p3 = Package("sqlite::memory:;p3", create=True,
-                               _transient=True)
-        m3 = p3.create_media("m3", "http://example.com/m3.ogm", foref)
-        a3 = p3.create_annotation("a3", m3, 123, 456, "text/plain")
-        r3 = p3.create_relation("r3", "text/plain", members=[a3,])
-        L3 = p3.create_list("L3", items=[a3, m3, r3,])
-        t3 = p3.create_tag("t3")
-        v3 = p3.create_view("v3", "text/html+tag")
-        q3 = p3.create_query("q3", "x-advene/rules")
-        R3 = p3.create_resource("R3", "text/css")
+        self.p1 = Package("file:/tmp/p1", create=True)
+        self.p2 = Package("file:/tmp/p2", create=True)
 
     def tearDown(self):
         self.p1.close()
         self.p2.close()
-        self.p3.close()
 
     def test_empty(self):
         p1, p2 = self.p1, self.p2
@@ -101,8 +82,8 @@ class TestDiffPackage(TestCase):
    
     def test_step_by_step(self):
         p1, p2 = self.p1, self.p2
-        fill_p2 = fill_package_step_by_step(p2, p3=self.p3)
-        for i in fill_package_step_by_step(p1, p3=self.p3):
+        fill_p2 = fill_package_step_by_step(p2)
+        for i in fill_package_step_by_step(p1):
             diff = diff_packages(p1, p2)
             self.assertEqual(1, len(diff), (i, diff))
             diff = diff_packages(p2, p1)
@@ -113,7 +94,7 @@ class TestDiffPackage(TestCase):
  
     def test_several_steps(self):
         p1, p2 = self.p1, self.p2
-        for i in fill_package_step_by_step(p1, p3=self.p3):
+        for i in fill_package_step_by_step(p1):
             self.assertNotEqual([], diff_packages(p1, p2), i)
             self.assertNotEqual([], diff_packages(p2, p1), i)
 

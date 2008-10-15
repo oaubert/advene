@@ -17,11 +17,10 @@ from urllib2 import urlopen, url2pathname
 from urlparse import urlparse
 from weakref import ref
 
-from advene import _RAISE
+from advene.model.consts import _RAISE, PARSER_META_PREFIX
 from advene.model.core.dirty import DirtyMixin
 from advene.model.core.element import RELATION
 from advene.model.exceptions import ModelError
-from advene.model.parsers import PARSER_META_PREFIX
 from advene.utils.autoproperty import autoproperty
 
 PACKAGED_ROOT = "%spackage_root" % PARSER_META_PREFIX
@@ -212,7 +211,7 @@ class WithContentMixin(DirtyMixin):
 
         See also `get_content_schema` and `content_schema`.
         """
-        return self.__schema_idref or None
+        return self.__schema_idref or ""
 
     @autoproperty
     def _get_content_url(self):

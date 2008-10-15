@@ -1,5 +1,8 @@
-from advene.model import ADVENE_NS_PREFIX
-from advene.model.serializers import register_unserialized_meta_prefix
+"""
+Parser implementation
+=====================
 
-PARSER_META_PREFIX = "%s%s" % (ADVENE_NS_PREFIX, "parser-meta#")
-register_unserialized_meta_prefix(PARSER_META_PREFIX)
+yet to be done
+
+See reference implementation `advene.model.parsers.advene_xml`.
+"""

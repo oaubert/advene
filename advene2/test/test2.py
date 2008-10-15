@@ -9,9 +9,8 @@ import advene.model.core.dirty as dirty
 ## uncomment the following to disable differed cleaning
 #dirty.DirtyMixin = dirty.DirtyMixinInstantCleaning
 
-from advene.model import DC_NS_PREFIX, RDFS_NS_PREFIX
+from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX, PARSER_META_PREFIX
 from advene.model.core.package import Package
-from advene.model.parsers import PARSER_META_PREFIX
 
 _indent = []
 def trace_wrapper (f):

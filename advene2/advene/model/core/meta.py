@@ -2,10 +2,10 @@ from bisect import insort
 from itertools import chain
 from weakref import ref
 
-from advene import _RAISE
-from advene.utils.sorted_dict import SortedDict
+from advene.model.consts import _RAISE
 from advene.model.core.dirty import DirtyMixin
 from advene.model.exceptions import ModelError
+from advene.utils.sorted_dict import SortedDict
 
 class WithMetaMixin(DirtyMixin):
     """Metadata access mixin.

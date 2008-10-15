@@ -8,6 +8,10 @@ class ModelError(Exception):
     """
     pass
 
+class NoClaimingError(Exception):
+    """Raised whenever no backend nor parser claims a package URL."""
+    pass
+
 class NoSuchElementError(KeyError):
     """Raised whenever an element cannot be found in a package."""
     pass

@@ -25,6 +25,9 @@ Misc
 
 - remove unused code in advene/utils once we are sure we won't use it
 
+- remove "unstable and experimental" in advene_xml's (parser and serializer)
+  docstrings (once it is stabilized and tested, that is ;)
+
 Open questions
 ==============
 

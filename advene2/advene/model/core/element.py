@@ -4,7 +4,7 @@ I define the common super-class of all package element classes.
 
 from itertools import chain
 
-from advene                    import _RAISE
+from advene.model.consts       import _RAISE
 from advene.model.core.dirty   import DirtyMixin
 from advene.model.core.meta    import WithMetaMixin
 from advene.utils.autoproperty import autoproperty

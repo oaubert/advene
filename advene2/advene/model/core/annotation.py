@@ -2,7 +2,7 @@
 I define the class of annotations.
 """
 
-from advene import _RAISE
+from advene.model.consts import _RAISE
 from advene.model.core.element import PackageElement, ANNOTATION, MEDIA
 from advene.model.core.content import WithContentMixin
 from advene.utils.autoproperty import autoproperty
