@@ -1456,6 +1456,8 @@ class _SqliteBackend(object):
                 q = """INSERT INTO Meta
                        VALUES (?,?,?,?,?,?)"""
                 args = (package_id, id, key, val, val_p, val_i)
+            else:
+                q = ""
         else:
             if val is not None:
                 q = """UPDATE Meta SET value = ?, value_p = ?, value_i = ?
@@ -1465,11 +1467,12 @@ class _SqliteBackend(object):
                 q = """DELETE FROM Meta
                        WHERE package = ? AND element = ? AND key = ?"""
                 args = (package_id, id, key)
-        execute = self._curs.execute
-        try:
-            execute(q, args)
-        except sqlite.Error, e:
-            raise InternalError("could not %s" % q[:6], e)
+        if q:
+            execute = self._curs.execute
+            try:
+                execute(q, args)
+            except sqlite.Error, e:
+                raise InternalError("could not %s" % q[:6], e)
 
     # relation members management
 

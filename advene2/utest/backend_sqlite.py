@@ -956,6 +956,9 @@ class TestHandleElements(TestCase):
         value2 = ("oaubert", False)
         for i in self.own + self.imported:
             typ = T[i[1][0]]
+            self.be.set_meta(i[0], i[1], typ, dc_creator, None, False)
+            self.assertEqual(None,
+                self.be.get_meta(i[0], i[1], typ, dc_creator))
             self.be.set_meta(i[0], i[1], typ, dc_creator, *value1)
             self.assertEqual(value1,
                 self.be.get_meta(i[0], i[1], typ, dc_creator))
