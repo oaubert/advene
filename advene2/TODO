@@ -4,13 +4,18 @@ Important improvements
 - in sqlite bind and create, lock (exclusive) the database before the claim,
   to prevent race conditions
 
-- improve all_group implementation by factorizing same backend operations
+- change (again) semantics of claim_for_* in backend. A backend should claim
+  a URL for create, even if the package exists (no one else will claim it
+  anyway, and when attempting ot create it, we will get an exception, which is
+  more informative).
 
-- implement "external" contents (url attribute)
+- improve all_group implementation by factorizing same backend operations
 
 - implement read or write locking, "force", and "readonly" in _SqliteBackend
 
 - implement file-based backends, and builtin backend
+
+- change asserts in advene.model.core into ModelException, when needed
 
 Minor improvements, to do one day
 =================================
@@ -26,13 +31,8 @@ Element related
 Content related
 ---------------
 
-- make content metadata of elements with content, and length of list-like
-  elements available directly (i.e. from get_element)
-
-- make content data independant from other attributes (mimetype, schema) in
-  the backend and update the API accordingly
-
-- add support for file-access (rather than getter/setter) to content data
+- find a good way to implement the monitor of files returned by as_file, so as
+  to know when to clean
 
 Backend related
 ---------------

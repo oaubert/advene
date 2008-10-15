@@ -26,7 +26,7 @@ T = {
 }
 
 filterwarnings("ignore", "tmpnam is a potential security risk to your program")
-_set_module_debug(True) # enable assert statements in backends.sqlite
+_set_module_debug(True) # enable all asserts in backend_sqlite
 
 class P:
     """A dummy package class for testing purpose
@@ -310,103 +310,108 @@ class TestCreateElement(TestCase):
         self.assertEquals((MEDIA, self.pid, "m1", "http://example.com/m1.avi"),
                            self.be.get_element(self.pid, "m1"))
         # check that it has no content
-        self.assertEqual(self.be.get_content(self.pid, "m1", MEDIA),
-                          None) 
+        self.assertEqual(None, self.be.get_content_info(self.pid, "m1", MEDIA))
 
     def test_create_annotation(self):
         self.be.create_media(self.pid, "m1", "http://example.com/m1.avi")
+        a = (ANNOTATION, self.pid, "a4", "m1", 10, 20, "text/plain", "", "") 
         try:
-            self.be.create_annotation(self.pid, "a4", "m1", 10, 20)
+            self.be.create_annotation(*a[1:])
         except Exception, e:
             self.fail(e) # raised by create_annotation
         self.assert_(self.be.has_element(self.pid, "a4"))
         self.assert_(self.be.has_element(self.pid, "a4", ANNOTATION))
-        self.assertEquals((ANNOTATION, self.pid, "a4", "m1", 10, 20),
-                           self.be.get_element(self.pid, "a4"))
-        # check that it has a content
-        self.assertNotEqual(self.be.get_content(self.pid, "a4", ANNOTATION),
-                             None)
+        self.assertEquals(a, self.be.get_element(self.pid, "a4"))
+        # check that it has an empty content
+        self.assertEqual("",
+                         self.be.get_content_data(self.pid, "a4", ANNOTATION))
 
     def test_create_relation(self):
+        r = (RELATION, self.pid, "r1", "text/plain", "", "")
         try:
-            self.be.create_relation(self.pid, "r1")
+            self.be.create_relation(*r[1:])
         except Exception, e:
             self.fail(e) # raised by create_relation
         self.assert_(self.be.has_element(self.pid, "r1"))
         self.assert_(self.be.has_element(self.pid, "r1", RELATION))
-        # check that it has a content
-        self.assertNotEqual(self.be.get_content(self.pid, "r1", RELATION),
-                             None)
+        self.assertEquals(r, self.be.get_element(self.pid, "r1"))
+        # check that it has an empty content
+        self.assertEqual("",
+                         self.be.get_content_data(self.pid, "r1", RELATION))
 
     def test_create_view(self):
+        v = (VIEW, self.pid, "v1", "text/plain", "", "")
         try:
-            self.be.create_view(self.pid, "v1")
+            self.be.create_view(*v[1:])
         except Exception, e:
             self.fail(e) # raised by create_view
         self.assert_(self.be.has_element(self.pid, "v1"))
         self.assert_(self.be.has_element(self.pid, "v1", VIEW))
-        # check that it has a content
-        self.assertNotEqual(self.be.get_content(self.pid, "v1", VIEW),
-                             None)
+        self.assertEqual(v, self.be.get_element(self.pid, "v1"))
+        # check that it has an empty content
+        self.assertEqual("", self.be.get_content_data(self.pid, "v1", VIEW))
 
     def test_create_resource(self):
+        r = (RESOURCE, self.pid, "R1", "text/plain", "", "")
         try:
-            self.be.create_resource(self.pid, "R1")
+            self.be.create_resource(*r[1:])
         except Exception, e:
             self.fail(e) # raised by create_resource
         self.assert_(self.be.has_element(self.pid, "R1"))
         self.assert_(self.be.has_element(self.pid, "R1", RESOURCE))
+        self.assertEqual(r, self.be.get_element(self.pid, "R1"))
         # check that it has a content
-        self.assertNotEqual(self.be.get_content(self.pid, "R1", RESOURCE),
-                             None)
+        self.assertEqual("",
+                         self.be.get_content_data(self.pid, "R1", RESOURCE))
 
     def test_create_tag(self):
+        t = (TAG, self.pid, "t1")
         try:
-            self.be.create_tag(self.pid, "t1")
+            self.be.create_tag(*t[1:])
         except Exception, e:
             self.fail(e) # raised by create_tag
         self.assert_(self.be.has_element(self.pid, "t1"))
         self.assert_(self.be.has_element(self.pid, "t1", TAG))
+        self.assertEqual(t, self.be.get_element(self.pid, "t1"))
         # check that it has no content
-        self.assertEqual(self.be.get_content(self.pid, "t1", TAG),
-                          None)
+        self.assertEqual(None, self.be.get_content_info(self.pid, "t1", TAG))
 
     def test_create_list(self):
+        l = (LIST, self.pid, "l1")
         try:
-            self.be.create_list(self.pid, "l1")
+            self.be.create_list(*l[1:])
         except Exception, e:
             self.fail(e) # raised by create_list
         self.assert_(self.be.has_element(self.pid, "l1"))
         self.assert_(self.be.has_element(self.pid, "l1", LIST))
+        self.assertEqual(l, self.be.get_element(self.pid, "l1"))
         # check that it has no content
-        self.assertEqual(self.be.get_content(self.pid, "l1", LIST),
-                          None)
+        self.assertEqual(None, self.be.get_content_info(self.pid, "l1", LIST))
 
     def test_create_query(self):
+        q = (QUERY, self.pid, "q1", "text/plain", "", "")
         try:
-            self.be.create_query(self.pid, "q1")
+            self.be.create_query(*q[1:])
         except Exception, e:
             self.fail(e) # raised by create_query
         self.assert_(self.be.has_element(self.pid, "q1"))
         self.assert_(self.be.has_element(self.pid, "q1", QUERY))
-        # check that it has a content
-        self.assertNotEqual(self.be.get_content(self.pid, "q1", QUERY),
-                             None)
+        self.assert_(q, self.be.get_element(self.pid, "q1"))
+        # check that it has an empty content
+        self.assertEqual("", self.be.get_content_data(self.pid, "q1", QUERY))
 
     def test_create_import(self):
+        i = (IMPORT, self.pid, "i1", "http://example.com/advene/db", "")
         try:
-            self.be.create_import(self.pid, "i1",
-                                   "http://example.com/advene/db", "",)
+            self.be.create_import(*i[1:])
         except Exception, e:
             self.fail(e) # raised by create_import
         self.assert_(self.be.has_element(self.pid, "i1"))
         self.assert_(self.be.has_element(self.pid, "i1", IMPORT))
-        self.assertEquals((IMPORT, self.pid, "i1",
-                            "http://example.com/advene/db", ""),
-                           self.be.get_element(self.pid, "i1"))
+        self.assertEquals(i, self.be.get_element(self.pid, "i1"))
         # check that it has no content
-        self.assertEqual(self.be.get_content(self.pid, "i1", IMPORT),
-                          None)
+        self.assertEqual(None,
+                         self.be.get_content_info(self.pid, "i1", IMPORT))
 
 
 class TestHandleElements(TestCase):
@@ -416,6 +421,7 @@ class TestHandleElements(TestCase):
 
     def setUp(self):
         try:
+            content = ("text/plain", "", "")
             self.url1 = "http://example.com/p1"
             self.url2 = "http://example.com/p2"
             self.be, self.pid1 = create(P(self.url1), url=IN_MEMORY_URL)
@@ -429,22 +435,22 @@ class TestHandleElements(TestCase):
 
             self.m1 = (self.pid1, "m1", self.m1_url)
             self.m2 = (self.pid1, "m2", self.m2_url)
-            self.a1 = (self.pid1, "a1", "i1:m3", 15, 20)
-            self.a2 = (self.pid1, "a2", "m1", 10, 30)
-            self.a3 = (self.pid1, "a3", "m2", 10, 20)
-            self.a4 = (self.pid1, "a4", "m1", 10, 20)
-            self.r1 = (self.pid1, "r1",)
-            self.r2 = (self.pid1, "r2",)
-            self.v1 = (self.pid1, "v1",)
-            self.v2 = (self.pid1, "v2",)
-            self.R1 = (self.pid1, "R1",)
-            self.R2 = (self.pid1, "R2",)
+            self.a1 = (self.pid1, "a1", "i1:m3", 15, 20) + content
+            self.a2 = (self.pid1, "a2", "m1", 10, 30) + content
+            self.a3 = (self.pid1, "a3", "m2", 10, 20) + content
+            self.a4 = (self.pid1, "a4", "m1", 10, 20) + content
+            self.r1 = (self.pid1, "r1",) + content
+            self.r2 = (self.pid1, "r2",) + content
+            self.v1 = (self.pid1, "v1",) + content
+            self.v2 = (self.pid1, "v2",) + content
+            self.R1 = (self.pid1, "R1",) + content
+            self.R2 = (self.pid1, "R2",) + content
             self.t1 = (self.pid1, "t1",)
             self.t2 = (self.pid1, "t2",)
             self.l1 = (self.pid1, "l1",)
             self.l2 = (self.pid1, "l2",)
-            self.q1 = (self.pid1, "q1",)
-            self.q2 = (self.pid1, "q2",)
+            self.q1 = (self.pid1, "q1",) + content
+            self.q2 = (self.pid1, "q2",) + content
             self.i1 = (self.pid1, "i1", self.url2, self.i1_uri)
             self.i2 = (self.pid1, "i2", self.i2_url, "")
 
@@ -476,14 +482,14 @@ class TestHandleElements(TestCase):
             self.be.update_uri(self.pid2, self.i1_uri)
 
             self.m3 = (self.pid2, "m3", self.m3_url)
-            self.a5 = (self.pid2, "a5", "m3", 25, 30)
-            self.a6 = (self.pid2, "a6", "m3", 35, 45)
-            self.r3 = (self.pid2, "r3",)
-            self.v3 = (self.pid2, "v3",)
-            self.R3 = (self.pid2, "R3",)
+            self.a5 = (self.pid2, "a5", "m3", 25, 30) + content
+            self.a6 = (self.pid2, "a6", "m3", 35, 45) + content
+            self.r3 = (self.pid2, "r3",) + content
+            self.v3 = (self.pid2, "v3",) + content
+            self.R3 = (self.pid2, "R3",) + content
             self.t3 = (self.pid2, "t3",)
             self.l3 = (self.pid2, "l3",)
-            self.q3 = (self.pid2, "q3",)
+            self.q3 = (self.pid2, "q3",) + content
             self.i3 = (self.pid2, "i3", self.i2_url, "")
 
             self.imported = [ self.m3, self.a5, self.a6, self.r3, self.v3,
@@ -530,8 +536,8 @@ class TestHandleElements(TestCase):
             self.assertEqual(self.be.get_element(*i[:2])[1:], i)
 
     def test_iter_references_with_import(self):
-        self.be.update_content(self.pid1, "a2", ANNOTATION,
-                               "test/plain", "", "i1:R3")
+        self.be.update_content_info(self.pid1, "a2", ANNOTATION,
+                                    "text/plain", "i1:R3", "")
         self.be.insert_member(self.pid1, "r1", "i1:a5", 0)
         self.be.insert_item(self.pid1, "l1", "i1:a5", 0)
         self.be.associate_tag(self.pid1, "v1", "i1:t3")
@@ -827,7 +833,8 @@ class TestHandleElements(TestCase):
 
     def test_update_annotation(self):
         self.be.update_annotation(self.pid1, "a1", "m1", 25, 30)
-        self.assertEqual(('a', self.pid1, "a1", "m1", 25, 30),
+        self.assertEqual(('a', self.pid1, "a1", "m1", 25, 30,
+                          "text/plain", "", ""),
                          self.be.get_element(self.pid1, "a1"))
 
     def test_update_import(self):
@@ -839,50 +846,60 @@ class TestHandleElements(TestCase):
 
     def test_content(self):
         mime = "text/html"
-        data = "<em>hello</em> world"
+        data = "good <em>moaning</em>"
+        url = "http://advene.liris.cnrs.fr/index.html"
 
         for i in [self.a4, self.r1, self.v1, self.R1, self.q1,
                   self.a5, self.r3, self.v3, self.q3,]:
             typ = T[i[1][0]]
             if i[0] is self.pid1: schema = "i1:R3"
-            else:              schema = "R3"
-            self.be.update_content(i[0], i[1], typ, mime, data, schema)
-            self.assertEqual((mime, data, schema),
-                self.be.get_content(i[0], i[1], typ))
-            self.be.update_content(i[0], i[1], typ, mime, data, "")
-            self.assertEqual((mime, data, ""),
-                self.be.get_content(i[0], i[1], typ))
-            self.be.update_content(i[0], i[1], typ, "", "", "")
-            self.assertEqual(("", "", ""),
-                self.be.get_content(i[0], i[1], typ))
+            else:                 schema = "R3"
+            # checking various combination of info
+            for info in ((mime, schema, url), (mime, schema, ""),
+                         (mime, "", url), (mime, "", "")):
+                self.be.update_content_info(i[0], i[1], typ, *info)
+                self.assertEqual(info, 
+                                 self.be.get_content_info(i[0], i[1], typ))
+            # checking data
+            self.be.update_content_data(i[0], i[1], typ, data)
+            self.assertEqual(data, self.be.get_content_data(i[0], i[1], typ))
+            self.be.update_content_data(i[0], i[1], typ, "")
+            self.assertEqual("", self.be.get_content_data(i[0], i[1], typ))
+            # checking exclusivity of data and url
+            self.be.update_content_data(i[0], i[1], typ, data)
+            self.be.update_content_info(i[0], i[1], typ, mime, "", url)
+            self.assertEqual("", self.be.get_content_data(i[0], i[1], typ))
+            self.be.update_content_data(i[0], i[1], typ, data)
+            self.assertEqual((mime, "", ""), 
+                             self.be.get_content_info(i[0], i[1], typ))
 
     def test_iter_contents_with_schema(self):
-        self.be.create_resource(self.pid2, "R4")
-        self.be.create_resource(self.pid2, "R5")
-        self.be.update_content(self.pid1, "a1", ANNOTATION,
-                               "test/plain", "", "i1:R3")
-        self.be.update_content(self.pid1, "a2", ANNOTATION,
-                               "test/plain", "", "i2:R3") # it's a trap
-        self.be.update_content(self.pid1, "r2", RELATION,
-                               "test/plain", "", "i1:R3")
-        self.be.update_content(self.pid1, "v1", VIEW,
-                               "test/plain", "", "i1:R3")
-        self.be.update_content(self.pid1, "q2", QUERY,
-                               "test/plain", "", "i1:R3")
-        self.be.update_content(self.pid1, "R1", RESOURCE,
-                               "test/plain", "", "i1:R3")
-        self.be.update_content(self.pid2, "a5", ANNOTATION,
-                               "test/plain", "", "R3")
-        self.be.update_content(self.pid2, "r3", RELATION,
-                               "test/plain", "", "R3")
-        self.be.update_content(self.pid2, "v3", VIEW,
-                               "test/plain", "", "R3")
-        self.be.update_content(self.pid2, "q3", QUERY,
-                               "test/plain", "", "R3")
-        self.be.update_content(self.pid2, "R4", RESOURCE,
-                               "test/plain", "", "R3")
-        self.be.update_content(self.pid2, "R5", RESOURCE,
-                               "test/plain", "", "R4") # it's a trap
+        self.be.create_resource(self.pid2, "R4", "text/plain", "", "")
+        self.be.create_resource(self.pid2, "R5", "text/plain", "", "")
+        self.be.update_content_info(self.pid1, "a1", ANNOTATION,
+                                    "text/plain", "i1:R3", "")
+        self.be.update_content_info(self.pid1, "a2", ANNOTATION,
+                                    "text/plain", "i2:R3", "") # it's a trap
+        self.be.update_content_info(self.pid1, "r2", RELATION,
+                                    "text/plain", "i1:R3", "")
+        self.be.update_content_info(self.pid1, "v1", VIEW,
+                                    "text/plain", "i1:R3", "")
+        self.be.update_content_info(self.pid1, "q2", QUERY,
+                                    "text/plain", "i1:R3", "")
+        self.be.update_content_info(self.pid1, "R1", RESOURCE,
+                                    "text/plain", "i1:R3", "")
+        self.be.update_content_info(self.pid2, "a5", ANNOTATION,
+                                    "text/plain", "R3", "")
+        self.be.update_content_info(self.pid2, "r3", RELATION,
+                                    "text/plain", "R3", "")
+        self.be.update_content_info(self.pid2, "v3", VIEW,
+                                    "text/plain", "R3", "")
+        self.be.update_content_info(self.pid2, "q3", QUERY,
+                                    "text/plain", "R3", "")
+        self.be.update_content_info(self.pid2, "R4", RESOURCE,
+                                    "text/plain", "R3", "")
+        self.be.update_content_info(self.pid2, "R5", RESOURCE,
+                                    "text/plain", "R4", "") # it's a trap
         ref = frozenset([(self.pid1, "a1"), (self.pid1, "r2"),
             (self.pid1, "v1"), (self.pid1, "q2"), (self.pid1, "R1"),
             (self.pid2, "a5"), (self.pid2, "r3"), (self.pid2, "v3"),
@@ -1117,27 +1134,27 @@ class TestRenameElement(TestCase):
                          self.be.get_element(self.pid1, "mY"))
 
     def test_rename_annotation(self):
-        self.be.create_annotation(self.pid1, "aX", "m1", 1, 2)
-        self.be.update_content(self.pid1, "aX", ANNOTATION,
-                               "text/plain", "aX data", "")
+        self.be.create_annotation(self.pid1, "aX", "m1", 1, 2,
+                                  "text/plain", "", "")
+        self.be.update_content_data(self.pid1, "aX", ANNOTATION, "aX data")
         self.be.rename_element(self.pid1, "aX", ANNOTATION, "aY")
         self.assert_(not self.be.has_element(self.pid1, "aX"))
-        self.assertEqual((ANNOTATION, self.pid1, "aY", "m1", 1, 2),
+        self.assertEqual((ANNOTATION, self.pid1, "aY", "m1", 1, 2,
+                          "text/plain", "", ""),
                          self.be.get_element(self.pid1, "aY"))
-        self.assertEqual(("text/plain", "aX data", "",),
-                         self.be.get_content(self.pid1, "aY", ANNOTATION))
+        self.assertEqual("aX data",
+                         self.be.get_content_data(self.pid1, "aY", ANNOTATION))
 
     def test_rename_relation(self):
-        self.be.create_relation(self.pid1, "rX")
-        self.be.update_content(self.pid1, "rX", RELATION,
-                               "text/plain", "rX data", "")
+        self.be.create_relation(self.pid1, "rX", "text/plain", "", "")
+        self.be.update_content_data(self.pid1, "rX", RELATION, "rX data")
         self.be.insert_member(self.pid1, "rX", "a1", 0)
         self.be.rename_element(self.pid1, "rX", RELATION, "rY")
         self.assert_(not self.be.has_element(self.pid1, "rX"))
-        self.assertEqual((RELATION, self.pid1, "rY",),
+        self.assertEqual((RELATION, self.pid1, "rY", "text/plain", "", ""),
                          self.be.get_element(self.pid1, "rY"))
-        self.assertEqual(("text/plain", "rX data", "",),
-                         self.be.get_content(self.pid1, "rY", RELATION))
+        self.assertEqual("rX data",
+                         self.be.get_content_data(self.pid1, "rY", RELATION))
         self.assertEqual("a1", self.be.get_member(self.pid1, "rY", 0))
  
     def test_rename_list(self):
@@ -1163,8 +1180,8 @@ class TestRenameElement(TestCase):
         self.be.create_import(self.pid1, "iX", iX_url, "")
 
         self.be.update_annotation(self.pid1, "a1", "iX:m", 1, 2)
-        self.be.update_content(self.pid1, "a1", ANNOTATION,
-                               "text/plain", "", "iX:R")
+        self.be.update_content_info(self.pid1, "a1", ANNOTATION,
+                                    "text/plain", "iX:R", "")
         self.be.insert_member(self.pid1, "r1", "iX:a", 0)
         self.be.insert_item(self.pid1, "l1", "iX:r", 0)
         self.be.associate_tag(self.pid1, "a1", "iX:t")
@@ -1174,10 +1191,11 @@ class TestRenameElement(TestCase):
         self.assert_(not self.be.has_element(self.pid1, "iX"))
         self.assertEqual((IMPORT, self.pid1, "iY", iX_url, ""),
                          self.be.get_element(self.pid1, "iY"))
-        self.assertEqual((ANNOTATION, self.pid1, "a1", "iY:m", 1, 2),
+        self.assertEqual((ANNOTATION, self.pid1, "a1", "iY:m", 1, 2,
+                          "text/plain", "iY:R", ""),
                          self.be.get_element(self.pid1, "a1"))
-        self.assertEqual(("text/plain", "", "iY:R",),
-                         self.be.get_content(self.pid1, "a1", ANNOTATION))
+        self.assertEqual(("text/plain", "iY:R", ""),
+                         self.be.get_content_info(self.pid1, "a1", ANNOTATION))
         self.assertEqual("iY:a", self.be.get_member(self.pid1, "r1", 0))
         self.assertEqual("iY:r", self.be.get_item(self.pid1, "l1", 0))
         t_uri = "file:///tmp/iX#t"
@@ -1188,37 +1206,34 @@ class TestRenameElement(TestCase):
             list(self.be.iter_elements_with_tag((self.pid1,), t1_uri)))
 
     def test_rename_view(self):
-        self.be.create_view(self.pid1, "vX",)
-        self.be.update_content(self.pid1, "vX", VIEW,
-                               "text/plain", "vX data", "")
+        self.be.create_view(self.pid1, "vX", "text/plain", "", "")
+        self.be.update_content_data(self.pid1, "vX", VIEW, "vX data")
         self.be.rename_element(self.pid1, "vX", VIEW, "vY")
         self.assert_(not self.be.has_element(self.pid1, "vX"))
-        self.assertEqual((VIEW, self.pid1, "vY",),
+        self.assertEqual((VIEW, self.pid1, "vY", "text/plain", "", ""),
                          self.be.get_element(self.pid1, "vY"))
-        self.assertEqual(("text/plain", "vX data", "",),
-                         self.be.get_content(self.pid1, "vY", VIEW))
+        self.assertEqual("vX data",
+                         self.be.get_content_data(self.pid1, "vY", VIEW))
 
     def test_rename_resource(self):
-        self.be.create_resource(self.pid1, "RX",)
-        self.be.update_content(self.pid1, "RX", RESOURCE,
-                               "text/plain", "RX data", "")
+        self.be.create_resource(self.pid1, "RX", "text/plain", "", "")
+        self.be.update_content_data(self.pid1, "RX", RESOURCE, "RX data")
         self.be.rename_element(self.pid1, "RX", RESOURCE, "RY")
         self.assert_(not self.be.has_element(self.pid1, "RX"))
-        self.assertEqual((RESOURCE, self.pid1, "RY",),
+        self.assertEqual((RESOURCE, self.pid1, "RY", "text/plain", "", ""),
                          self.be.get_element(self.pid1, "RY"))
-        self.assertEqual(("text/plain", "RX data", "",),
-                        self.be.get_content(self.pid1, "RY", RESOURCE))
+        self.assertEqual("RX data",
+                         self.be.get_content_data(self.pid1, "RY", RESOURCE))
 
     def test_rename_query(self):
-        self.be.create_query(self.pid1, "qX",)
-        self.be.update_content(self.pid1, "qX", QUERY,
-                               "text/plain", "qX data", "")
+        self.be.create_query(self.pid1, "qX", "text/plain", "", "")
+        self.be.update_content_data(self.pid1, "qX", QUERY, "qX data")
         self.be.rename_element(self.pid1, "qX", QUERY, "qY")
         self.assert_(not self.be.has_element(self.pid1, "qX"))
-        self.assertEqual((QUERY, self.pid1, "qY",),
+        self.assertEqual((QUERY, self.pid1, "qY", "text/plain", "", ""),
                          self.be.get_element(self.pid1, "qY"))
-        self.assertEqual(("text/plain", "qX data", "",),
-                         self.be.get_content(self.pid1, "qY", QUERY))
+        self.assertEqual("qX data",
+                         self.be.get_content_data(self.pid1, "qY", QUERY))
 
     def test_rename_refs_media(self):
         self.be.create_media(self.pid2, "m4", "file:///tmp/m4")
@@ -1244,37 +1259,37 @@ class TestRenameElement(TestCase):
         self.assertEqual("foo", self.be.get_element(self.pid2, "a6")[3])
 
     def test_rename_refs_schema(self):
-        self.be.create_resource(self.pid2, "R4") 
-        self.be.update_content(self.pid1, "a1", ANNOTATION,
-                               "test/plain", "", "i1:R3")
-        self.be.update_content(self.pid2, "a5", ANNOTATION,
-                               "test/plain", "", "R3")
-        self.be.update_content(self.pid1, "a2", ANNOTATION,
-                               "test/plain", "", "i2:R3") # it's a trap!
-        self.be.update_content(self.pid1, "a3", ANNOTATION,
-                               "test/plain", "", "i1:R4") # it's a trap!
+        self.be.create_resource(self.pid2, "R4", "text/plain", "", "") 
+        self.be.update_content_info(self.pid1, "a1", ANNOTATION,
+                                    "text/plain", "i1:R3", "")
+        self.be.update_content_info(self.pid2, "a5", ANNOTATION,
+                                    "text/plain", "R3", "")
+        self.be.update_content_info(self.pid1, "a2", ANNOTATION,
+                                    "text/plain", "i2:R3", "") # it's a trap!
+        self.be.update_content_info(self.pid1, "a3", ANNOTATION,
+                                    "text/plain", "i1:R4", "") # it's a trap!
         pids = (self.pid1, self.pid2)
         R3_uri = "%s#R3" % self.url2
         self.be.rename_element(self.pid2, "R3", RESOURCE, "renamed")
         self.be.rename_references(pids, R3_uri, "renamed")
         self.assertEqual("i1:renamed",
-                         self.be.get_content(self.pid1, "a1", ANNOTATION)[2])
+            self.be.get_content_info(self.pid1, "a1", ANNOTATION)[1])
         self.assertEqual("renamed",
-                         self.be.get_content(self.pid2, "a5", ANNOTATION)[2])
+            self.be.get_content_info(self.pid2, "a5", ANNOTATION)[1])
         # did you fall in the traps?
         self.assertEqual("i2:R3",
-                         self.be.get_content(self.pid1, "a2", ANNOTATION)[2])
+            self.be.get_content_info(self.pid1, "a2", ANNOTATION)[1])
         self.assertEqual("i1:R4",
-                         self.be.get_content(self.pid1, "a3", ANNOTATION)[2])
+            self.be.get_content_info(self.pid1, "a3", ANNOTATION)[1])
 
         # now only on one package
         R3_uri = "%s#renamed" % self.url2
         self.be.rename_element(self.pid2, "renamed", RESOURCE, "foo")
         self.be.rename_references((self.pid2,), R3_uri, "foo")
         self.assertEqual("i1:renamed",
-                         self.be.get_content(self.pid1, "a1", ANNOTATION)[2])
+            self.be.get_content_info(self.pid1, "a1", ANNOTATION)[1])
         self.assertEqual("foo",
-                         self.be.get_content(self.pid2, "a5", ANNOTATION)[2])
+            self.be.get_content_info(self.pid2, "a5", ANNOTATION)[1])
 
     def test_rename_refs_member(self):
         self.be.insert_member(self.pid2, "r3", "a6", 0) # it's a trap
@@ -1402,28 +1417,31 @@ class TestDeleteElement(TestCase):
 
     def test_delete_annotation(self):
         self.be.create_media(self.pid, "m1", "http://example.com/m1.avi")
-        self.be.create_annotation(self.pid, "a4", "m1", 10, 20)
+        self.be.create_annotation(self.pid, "a4", "m1", 10, 20,
+                                  "text/plain", "", "")
         try:
             self.be.delete_element(self.pid, "a4", ANNOTATION)
         except Exception, e:
             self.fail(e) # raised by delete_element
         self.assert_(not self.be.has_element(self.pid, "a4"))
         self.assert_(not self.be.has_element(self.pid, "a4", ANNOTATION))
-        self.assertEqual(None, self.be.get_content(self.pid, "a4", ANNOTATION))
+        self.assertEqual(None,
+                         self.be.get_content_info(self.pid, "a4", ANNOTATION))
 
     def test_delete_relation(self):
-        self.be.create_relation(self.pid, "r1")
+        self.be.create_relation(self.pid, "r1", "text/plain", "", "")
         try:
             self.be.delete_element(self.pid, "r1", RELATION)
         except Exception, e:
             self.fail(e) # raised by delete_element
         self.assert_(not self.be.has_element(self.pid, "r1"))
         self.assert_(not self.be.has_element(self.pid, "r1", RELATION))
-        self.assertEqual(None, self.be.get_content(self.pid, "r1", RELATION))
+        self.assertEqual(None,
+                         self.be.get_content_info(self.pid, "r1", RELATION))
         self.assertEqual(0, self.be.count_members(self.pid, "r1"))
 
     def test_delete_view(self):
-        self.be.create_view(self.pid, "v1")
+        self.be.create_view(self.pid, "v1", "text/plain", "", "")
         try:
             self.be.delete_element(self.pid, "v1", VIEW)
         except Exception, e:
@@ -1431,17 +1449,18 @@ class TestDeleteElement(TestCase):
             self.fail(e) # raised by delete_element
         self.assert_(not self.be.has_element(self.pid, "v1"))
         self.assert_(not self.be.has_element(self.pid, "v1", VIEW))
-        self.assertEqual(None, self.be.get_content(self.pid, "v1", VIEW))
+        self.assertEqual(None, self.be.get_content_info(self.pid, "v1", VIEW))
 
     def test_delete_resource(self):
-        self.be.create_resource(self.pid, "R1")
+        self.be.create_resource(self.pid, "R1", "text/plain", "", "")
         try:
             self.be.delete_element(self.pid, "R1", RESOURCE)
         except Exception, e:
             self.fail(e) # raised by delete_element
         self.assert_(not self.be.has_element(self.pid, "R1"))
         self.assert_(not self.be.has_element(self.pid, "R1", RESOURCE))
-        self.assertEqual(None, self.be.get_content(self.pid, "R1", RESOURCE))
+        self.assertEqual(None,
+                         self.be.get_content_info(self.pid, "R1", RESOURCE))
 
     def test_delete_tag(self):
         self.be.create_tag(self.pid, "t1")
@@ -1463,14 +1482,14 @@ class TestDeleteElement(TestCase):
         self.assertEqual(0, self.be.count_items(self.pid, "l1"))
 
     def test_delete_query(self):
-        self.be.create_query(self.pid, "q1")
+        self.be.create_query(self.pid, "q1", "text/plain", "", "")
         try:
             self.be.delete_element(self.pid, "q1", QUERY)
         except Exception, e:
             self.fail(e) # raised by delete_element
         self.assert_(not self.be.has_element(self.pid, "q1"))
         self.assert_(not self.be.has_element(self.pid, "q1", QUERY))
-        self.assertEqual(None, self.be.get_content(self.pid, "q1", QUERY))
+        self.assertEqual(None, self.be.get_content_info(self.pid, "q1", QUERY))
 
     def test_delete_import(self):
         self.be.create_import(self.pid, "i1",
@@ -1520,13 +1539,13 @@ class TestRobustIterations(TestCase):
         "update_uri": [pid1, "urn:1234",],
         "close": None, # rather tested with bind and create
         "create_media": [pid1, "mX", "file:///tmp/mX.ogm",],
-        "create_annotation": [pid1, "aX", "m1", 0, 10,],
-        "create_relation": [pid1, "rX",],
-        "create_view": [pid1, "vX",],
-        "create_resource": [pid1, "RX",],
+        "create_annotation": [pid1, "aX", "m1", 0, 10, "text/plain", "", ""],
+        "create_relation": [pid1, "rX", "text/plain", "", ""],
+        "create_view": [pid1, "vX", "text/plain", "", ""],
+        "create_resource": [pid1, "RX", "text/plain", "", ""],
         "create_tag": [pid1, "tX",],
         "create_list": [pid1, "lX",],
-        "create_query": [pid1, "qX",],
+        "create_query": [pid1, "qX", "text/plain", "", ""],
         "create_import": [pid1, "iX", "file:///tmp/pkg", ""],
         "update_media": [pid1, "m1", "file:///tmp/mX.ogm",],
         "update_annotation": [pid1, "a1", "m1", 0, 666,],
@@ -1534,7 +1553,8 @@ class TestRobustIterations(TestCase):
         "rename_element": [pid1, "i1", IMPORT, "renamed",],
         "rename_references": [pids, "%s#R5" % i2_url, "renamed",],
         "delete_element": [pid2, "q3", QUERY,],
-        "update_content": [pid1, "a1", ANNOTATION, "test/html", "", "",],
+        "update_content_info": [pid1, "a1", ANNOTATION, "test/html", "", "",],
+        "update_content_data": [pid1, "a1", ANNOTATION, "listen carefuly",],
         "set_meta": [pid1, "", "", "pac#test2", "bar",],
         "insert_member": [pid1, "r1", "a3", -1],
         "update_member": [pid1, "r1", "a4", 0],
@@ -1561,12 +1581,12 @@ class TestRobustIterations(TestCase):
             b.associate_tag(self.pid1, "a1",    "t1")
             b.associate_tag(self.pid1, "a1",    "i1:t3")
             b.associate_tag(self.pid1, "i1:a5", "t1")
-            b.update_content(self.pid1, "a1", ANNOTATION,
-                             "text/plain", "", "i1:R3",)
-            b.update_content(self.pid2, "r3", RELATION,
-                             "text/plain", "", "R3",)
-            b.update_content(self.pid2, "a5", ANNOTATION,
-                             "text/plain", "", "i3:R5",)
+            b.update_content_info(self.pid1, "a1", ANNOTATION,
+                                  "text/plain", "i1:R3", "")
+            b.update_content_info(self.pid2, "r3", RELATION,
+                                  "text/plain", "R3", "")
+            b.update_content_info(self.pid2, "a5", ANNOTATION,
+                                  "text/plain", "i3:R5", "")
         except:
             self.tearDown()
             raise
@@ -1622,6 +1642,7 @@ class TestRobustIterations(TestCase):
 class TestRetrieveDataWithSameId(TestCase):
     def setUp(self):
         try:
+            content = ("text/plain", "", "")
             self.url1 = IN_MEMORY_URL
             self.url2 = "%s;foo" % self.url1
             self.be, self.pid1 = create(P(self.url1))
@@ -1630,13 +1651,13 @@ class TestRetrieveDataWithSameId(TestCase):
             self.m_url = "http://example.com/m1.avi"
 
             self.m = ("m", self.m_url)
-            self.a = ("a", "m", 10, 20)
-            self.r = ("r",)
-            self.v = ("v",)
-            self.R = ("R",)
+            self.a = ("a", "m", 10, 20,) + content
+            self.r = ("r",) + content
+            self.v = ("v",) + content
+            self.R = ("R",) + content
             self.t = ("t",)
             self.l = ("l",)
-            self.q = ("q",)
+            self.q = ("q",) + content
             self.i1 = (self.pid1, "i", self.url2, "")
             self.i2 = (self.pid2, "i", self.url1, "")
 

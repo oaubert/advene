@@ -2,8 +2,6 @@
 I define the class of annotations.
 """
 
-from weakref import ref
-
 from advene import _RAISE
 from advene.model.core.element import PackageElement, ANNOTATION, MEDIA
 from advene.model.core.content import WithContentMixin
@@ -12,15 +10,27 @@ class Annotation(PackageElement, WithContentMixin):
 
     ADVENE_TYPE = ANNOTATION
 
-    def __init__(self, owner, id, media, begin, end):
+    def __init__(self, owner, id, media, begin, end, mimetype, schema, url):
         PackageElement.__init__(self, owner, id)
         if not hasattr(media, "ADVENE_TYPE"):
             # internally, we sometimes pass backend data directly,
             # where media is an id-ref rather than a Media instance
-            media = owner.get_element(media)
-        self._set_media(media, _init=True)
+            self._media_idref = media
+            self._media = None
+        else:
+            self._set_media(media, _init=True)
         self._begin = begin
         self._end   = end
+        self._set_content_mimetype(mimetype, _init=True)
+        if schema:
+            if not hasattr(schema, "ADVENE_TYPE"):
+                # internally, we may sometimes pass backend data directly,
+                # where schema is an id-ref rather than a Media instance
+                schema = owner.get_element(schema)
+        else:
+            schema = None # could be an empty string
+        self._set_content_schema(schema, _init=True)
+        self._set_content_url(url, _init=True)
 
     def __str__(self):
         return "Annotation(%s,%s,%s)" % \
@@ -32,12 +42,11 @@ class Annotation(PackageElement, WithContentMixin):
             or cmp(self._media_idref, other._media_idref)
 
     def _get_media(self, default=_RAISE):
-        m = self._media_wref()
-        if m is None:
-            m = self._owner.get_element(self.media_idref, default)
-            if m is not default:
-                self._media_wref = ref(m)
-        return m
+        r = self._media
+        if r is None:
+            r = self._media = \
+                self._owner.get_element(self._media_idref, default)
+        return r
 
     def _set_media(self, media, _init=False):
         o = self._owner
@@ -47,7 +56,7 @@ class Annotation(PackageElement, WithContentMixin):
 
         midref = media.make_idref_for(o)
         self._media_idref = midref
-        self._media_wref  = ref(media)
+        self._media = media
         if not _init:
             self.add_cleaning_operation_once(self.__clean)
 

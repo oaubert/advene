@@ -48,9 +48,10 @@ CREATE TABLE Contents (
   package  TEXT NOT NULL,
   element  TEXT NOT NULL,
   mimetype TEXT NOT NULL,
-  data     BLOB NOT NULL,
   schema_p TEXT NOT NULL,
   schema_i TEXT NOT NULL,
+  url      TEXT NOT NULL,
+  data     BLOB NOT NULL,
   PRIMARY KEY (package, element),
   FOREIGN KEY (package, element)  references Elements (package, id),
   -- the following foreign key may be violated by empty strings in schema_p

@@ -2,6 +2,7 @@ from weakref import WeakValueDictionary, ref
 
 from advene import _RAISE
 from advene.model.backends import iter_backends, NoBackendClaiming
+from advene.model import ModelError
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
 from advene.model.core.media import Media
@@ -158,7 +159,7 @@ class Package(object, WithMetaMixin, DirtyMixin):
         )
 
     def has_element(self, id):
-        return self._backend.has_element(self._id, id)
+        return id in self._elements or self._backend.has_element(self._id, id)
 
     def get_element(self, id, default=_RAISE):
         """
@@ -234,28 +235,46 @@ class Package(object, WithMetaMixin, DirtyMixin):
         self._backend.create_media(self._id, id, url)
         return Media(self, id, url)
 
-    def create_annotation(self, id, media, begin, end=None):
-        assert not self.has_element(id)
+    def create_annotation(self, id, media, begin, end,
+                                mimetype, schema=None, url=""):
+        if self.has_element(id): raise ModelError("id in use %s", id)
         media_idref = media.make_idref_for(self)
-        if end is None:
-            end = begin
-        self._backend.create_annotation(self._id, id, media_idref, begin, end)
-        return Annotation(self, id, media, begin, end)
+        if schema is not None:
+            schema_idref = schema.make_idref_for(self)
+        else:
+            schema_idref = ""
+        self._backend.create_annotation(self._id, id, media_idref, begin, end,
+                                        mimetype, schema_idref, url)
+        return Annotation(self, id, media, begin, end, mimetype, schema, url)
 
-    def create_relation(self, id):
+    def create_relation(self, id, mimetype, schema=None, url=""):
         assert not self.has_element(id)
-        self._backend.create_relation(self._id, id)
-        return Relation(self, id)
+        if schema is not None:
+            schema_idref = schema.make_idref_for(self)
+        else:
+            schema_idref = ""
+        self._backend.create_relation(self._id, id,
+                                      mimetype, schema_idref, url)
+        return Relation(self, id, mimetype, schema, url)
 
-    def create_view(self, id):
+    def create_view(self, id, mimetype, schema=None, url=""):
         assert not self.has_element(id)
-        self._backend.create_view(self._id, id)
-        return View(self, id)
+        if schema is not None:
+            schema_idref = schema.make_idref_for(self)
+        else:
+            schema_idref = ""
+        self._backend.create_view(self._id, id, mimetype, schema_idref, url)
+        return View(self, id, mimetype, schema, url)
 
-    def create_resource(self, id):
+    def create_resource(self, id, mimetype, schema=None, url=""):
         assert not self.has_element(id)
-        self._backend.create_resource(self._id, id)
-        return Resource(self, id)
+        if schema is not None:
+            schema_idref = schema.make_idref_for(self)
+        else:
+            schema_idref = ""
+        self._backend.create_resource(self._id, id,
+                                      mimetype, schema_idref, url)
+        return Resource(self, id, mimetype, schema, url)
 
     def create_tag(self, id):
         assert not self.has_element(id)
@@ -267,10 +286,14 @@ class Package(object, WithMetaMixin, DirtyMixin):
         self._backend.create_list(self._id, id)
         return List(self, id)
 
-    def create_query(self, id):
+    def create_query(self, id, mimetype, schema=None, url=""):
         assert not self.has_element(id)
-        self._backend.create_query(self._id, id)
-        return Query(self, id)
+        if schema is not None:
+            schema_idref = schema.make_idref_for(self)
+        else:
+            schema_idref = ""
+        self._backend.create_query(self._id, id, mimetype, schema_idref, url)
+        return Query(self, id, mimetype, schema, url)
 
     def create_import(self, id, package):
         assert not self.has_element(id)

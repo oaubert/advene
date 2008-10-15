@@ -27,7 +27,7 @@ from advene.model.core.element \
 from advene.utils.reftools import WeakValueDictWithCallback
 
 
-BACKEND_VERSION = "1.0"
+BACKEND_VERSION = "1.1"
 
 IN_MEMORY_URL = "sqlite::memory:"
 
@@ -409,7 +409,7 @@ class _SqliteBackend(object):
     # element creation
 
     def create_media(self, package_id, id, url):
-        """Create a new media with the given data.
+        """Create a new media.
 
         Raise a ModelException if the identifier already exists in the package.
         """
@@ -420,89 +420,157 @@ class _SqliteBackend(object):
             _create_element(execute, package_id, id, MEDIA)
             execute("INSERT INTO Medias VALUES (?,?,?)",
                     (package_id, id, url))
-            execute("COMMIT")
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not insert", e)
+        execute("COMMIT")
 
-    def create_annotation(self, package_id, id, media, begin, end):
-        """Create a new annotation with the given data.
+    def create_annotation(self, package_id, id, media, begin, end,
+                          mimetype, schema, url):
+        """Create a new annotation and its associated content.
 
-        @param media the id-ref of an own or direcly imported media
-        @param begin an int, the beginning timepoint of the annotation
-        @param end   an int, the ending timepoint of the annotation
+        Specific parameters
+        -------------------
+        media
+          id-ref of the media this annotation refs to
+        begin, end
+          int boundaries of the annotated temporal fragment
+        mimetype
+          the mimetype of the annotation content
+        schema
+          the id-ref of the schema for the annotation content (can be empty)
+        url
+          if non empty, the annotation content will be not be stored, and will
+          be fetched on demand from that URL
 
         Raise a ModelException if the identifier already exists in the package.
         """
         assert _DF or (isinstance(begin, int) and begin >= 0), begin
         assert _DF or (isinstance(end, int) and end >= begin), (begin, end)
-
-        p,s = _split_id_ref(media) # also assert that media has depth < 2
-        assert _DF or p != "" or self.has_element(package_id, s, MEDIA), media
+        mp,ms = _split_id_ref(media) # also assert that media has depth < 2
+        assert _DF or mp == "" or self.has_element(package_id, mp, IMPORT), mp
+        assert _DF or mp != "" or self.has_element(package_id, ms, MEDIA), ms
+        sp,ss = _split_id_ref(schema) # also assert that media has depth < 2
+        assert _DF or sp == "" or self.has_element(package_id, sp, IMPORT), sp
+        assert _DF or sp != "" or ss == "" or \
+            self.has_element(package_id, ss, RESOURCE), ss
 
         _create_element = self._create_element
         execute = self._curs.execute
         try:
             _create_element(execute, package_id, id, ANNOTATION)
             execute("INSERT INTO Annotations VALUES (?,?,?,?,?,?)",
-                    (package_id, id, p, s, begin, end))
-            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
-                    (package_id, id, "text/plain", "", "",""))
-            execute("COMMIT")
+                    (package_id, id, mp, ms, begin, end))
+            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?,?)",
+                    (package_id, id, mimetype, sp, ss, url, "",))
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not insert", e)
+        execute("COMMIT")
 
-    def create_relation(self, package_id, id):
-        """Create a new empty relation with the given data.
+    def create_relation(self, package_id, id, mimetype, schema, url):
+        """Create a new empty relation and its associated content.
+
+        Specific parameters
+        -------------------
+        mimetype
+          the mimetype of the annotation content
+        schema
+          the id-ref of the schema for the annotation content (can be empty)
+        url
+          if non empty, the annotation content will be not be stored, and will
+          be fetched on demand from that URL
 
         Raise a ModelException if the identifier already exists in the package.
         """
+        sp,ss = _split_id_ref(schema) # also assert that media has depth < 2
+        assert _DF or sp == "" or self.has_element(package_id, sp, IMPORT), sp
+        assert _DF or sp != "" or ss == "" or \
+            self.has_element(package_id, ss, RESOURCE), ss
+
         _create_element = self._create_element
         execute = self._curs.execute
         try:
             _create_element(execute, package_id, id, RELATION)
-            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
-                    (package_id, id, "", "", "", ""))
-            execute("COMMIT")
+            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?,?)",
+                    (package_id, id, mimetype, sp, ss, url, ""))
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        execute("COMMIT")
 
-    def create_view(self, package_id, id):
-        """Create a new view with the given data.
+    def create_view(self, package_id, id, mimetype, schema, url):
+        """Create a new view and its associated content.
+
+        Specific parameters
+        -------------------
+        media
+          id-ref of the media this annotation refs to
+        begin, end
+          int boundaries of the annotated temporal fragment
+        mimetype
+          the mimetype of the annotation content
+        schema
+          the id-ref of the schema for the annotation content (can be empty)
+        url
+          if non empty, the annotation content will be not be stored, and will
+          be fetched on demand from that URL
 
         Raise a ModelException if the identifier already exists in the package.
         """
+        sp,ss = _split_id_ref(schema) # also assert that media has depth < 2
+        assert _DF or sp == "" or self.has_element(package_id, sp, IMPORT), sp
+        assert _DF or sp != "" or ss == "" or \
+            self.has_element(package_id, ss, RESOURCE), ss
+
         _create_element = self._create_element
         execute = self._curs.execute
         try:
             _create_element(execute, package_id, id, VIEW)
-            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
-                    (package_id, id, "text/plain", "", "", ""))
-            execute("COMMIT")
+            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?,?)",
+                    (package_id, id, mimetype, sp, ss, url, "",))
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        execute("COMMIT")
 
-    def create_resource(self, package_id, id):
-        """Create a new resource with the given data.
+    def create_resource(self, package_id, id, mimetype, schema, url):
+        """Create a new resource and its associated content.
+
+        Specific parameters
+        -------------------
+        media
+          id-ref of the media this annotation refs to
+        begin, end
+          int boundaries of the annotated temporal fragment
+        mimetype
+          the mimetype of the annotation content
+        schema
+          the id-ref of the schema for the annotation content (can be empty)
+        url
+          if non empty, the annotation content will be not be stored, and will
+          be fetched on demand from that URL
 
         Raise a ModelException if the identifier already exists in the package.
         """
+        sp,ss = _split_id_ref(schema) # also assert that media has depth < 2
+        assert _DF or sp == "" or self.has_element(package_id, sp, IMPORT), sp
+        assert _DF or sp != "" or ss == "" or \
+            self.has_element(package_id, ss, RESOURCE), ss
+
         _create_element = self._create_element
         execute = self._curs.execute
         try:
             _create_element(execute, package_id, id, RESOURCE)
-            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
-                    (package_id, id, "text/plain", "", "", ""))
-            execute("COMMIT")
+            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?,?)",
+                    (package_id, id, mimetype, sp, ss, url, "",))
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        execute("COMMIT")
 
     def create_tag(self, package_id, id):
-        """Create a new tag with the given data.
+        """Create a new tag.
 
         Raise a ModelException if the identifier already exists in the package.
         """
@@ -510,13 +578,13 @@ class _SqliteBackend(object):
         execute = self._curs.execute
         try:
             _create_element(execute, package_id, id, TAG)
-            execute("COMMIT")
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        execute("COMMIT")
 
     def create_list(self, package_id, id):
-        """Create a new empty list with the given data.
+        """Create a new empty list.
 
         Raise a ModelException if the identifier already exists in the package.
         """
@@ -524,29 +592,48 @@ class _SqliteBackend(object):
         execute = self._curs.execute
         try:
             _create_element(execute, package_id, id, LIST)
-            execute("COMMIT")
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        execute("COMMIT")
 
-    def create_query(self, package_id, id):
-        """Create a new query with the given data.
+    def create_query(self, package_id, id, mimetype, schema, url):
+        """Create a new query and its associated content.
+
+        Specific parameters
+        -------------------
+        media
+          id-ref of the media this annotation refs to
+        begin, end
+          int boundaries of the annotated temporal fragment
+        mimetype
+          the mimetype of the annotation content
+        schema
+          the id-ref of the schema for the annotation content (can be empty)
+        url
+          if non empty, the annotation content will be not be stored, and will
+          be fetched on demand from that URL
 
         Raise a ModelException if the identifier already exists in the package.
         """
+        sp,ss = _split_id_ref(schema) # also assert that media has depth < 2
+        assert _DF or sp == "" or self.has_element(package_id, sp, IMPORT), sp
+        assert _DF or sp != "" or ss == "" or \
+            self.has_element(package_id, ss, RESOURCE), ss
+
         _create_element = self._create_element
         execute = self._curs.execute
         try:
             _create_element(execute, package_id, id, QUERY)
-            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?)",
-                    (package_id, id, "text/plain", "", "", ""))
-            execute("COMMIT")
+            execute("INSERT INTO Contents VALUES (?,?,?,?,?,?,?)",
+                    (package_id, id, mimetype, sp, ss, url, "",))
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating",e)
+        execute("COMMIT")
 
     def create_import(self, package_id, id, url, uri):
-        """Create a new import with the given data.
+        """Create a new import.
 
         Raise a ModelException if the identifier already exists in the package.
         """
@@ -556,10 +643,10 @@ class _SqliteBackend(object):
             _create_element(execute, package_id, id, IMPORT)
             execute("INSERT INTO Imports VALUES (?,?,?,?)",
                     (package_id, id, url, uri))
-            execute("COMMIT")
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        execute("COMMIT")
 
     # element retrieval
 
@@ -577,16 +664,19 @@ class _SqliteBackend(object):
     def get_element(self, package_id, id):
         """Return the tuple describing a given element.
 
-           If the element does not exist, None is returned.
+        If the element does not exist, None is returned.
         """
 
         q = "SELECT e.typ, m.url, join_id_ref(a.media_p, a.media_i), " \
-                   "a.fbegin, a.fend, i.url, i.uri " \
+                   "a.fbegin, a.fend, i.url, i.uri, c.mimetype, " \
+                   "join_id_ref(c.schema_p, c.schema_i), c.url " \
             "FROM Elements e " \
             "LEFT JOIN Medias m ON e.package = m.package AND e.id = m.id " \
             "LEFT JOIN Annotations a " \
                    "ON e.package = a.package AND e.id = a.id " \
             "LEFT JOIN Imports i ON e.package = i.package AND e.id = i.id " \
+            "LEFT JOIN Contents c " \
+                   "ON e.package = c.package AND e.id = c.element " \
             "WHERE e.package = ? AND e.id = ?"
         r = self._curs.execute(q, (package_id, id,)).fetchone()
         if r is None:
@@ -595,7 +685,9 @@ class _SqliteBackend(object):
         if t == MEDIA:
             return(t, package_id, id,) + r[1:2]
         elif t == ANNOTATION:
-            return(t, package_id, id,) + r[2:5]
+            return(t, package_id, id,) + r[2:5] + r[7:10]
+        elif t in (RELATION, VIEW, RESOURCE, QUERY):
+            return(t, package_id, id,) + r[7:10]
         elif t == IMPORT:
             return(t, package_id, id,) + r[5:7]
         else:
@@ -709,9 +801,11 @@ class _SqliteBackend(object):
             media_alt = (media,)
 
         q = "SELECT ?, a.package, a.id, " \
-            "       join_id_ref(media_p,media_i) as media, " \
-            "       fbegin, fend " \
+            "       join_id_ref(media_p, media_i) as media, " \
+            "       fbegin, fend, " \
+            "       c.mimetype, join_id_ref(c.schema_p, c.schema_i), c.url " \
             "FROM Annotations a %s " \
+            "JOIN Contents c ON c.package = a.package AND c.element = a.id " \
             "WHERE a.package in (" + "?," * len(package_ids) + ")"
         args = [ANNOTATION,] + list(package_ids)
         if media_alt is not None:
@@ -901,7 +995,8 @@ class _SqliteBackend(object):
         assert _DF or isinstance(  end, int) and   end >= begin, (begin, end)
 
         p,s = _split_id_ref(media) # also assert that media has depth < 2
-        assert _DF or p != "" or self.has_element(package_id, s, MEDIA), media
+        assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
+        assert _DF or p != "" or self.has_element(package_id, s, MEDIA), s
 
         execute = self._curs.execute
         try:
@@ -1106,36 +1201,83 @@ class _SqliteBackend(object):
 
     # content management
 
-    def get_content(self, package_id, id, element_type):
+    def get_content_info(self, package_id, id, element_type):
+        """Return information about the content of an element, or None.
+
+        The information is a tuple of the form (mimetype, schema_idref, url),
+        where ``schema_idref`` and ``url`` can be empty strings.
+
+        None is returned if the element does not exist or has no content.
+
+        Note that this method will not be used often since this information
+        is provided by get_element for all elements having a content.
         """
-        Return a tuple(mimetype, data, schema_idref) or None if the element has
-        no content or does not exist.
-        Note that ``schema_idref`` will be an empty string if no schema is
-        """
-        q = "SELECT mimetype, data, join_id_ref(schema_p,schema_i) as schema " \
+        q = "SELECT mimetype, join_id_ref(schema_p,schema_i) as schema, url " \
             "FROM Contents " \
             "WHERE package = ? AND element = ?"
         return self._curs.execute(q, (package_id, id,)).fetchone() or None
 
-    def update_content(self, package_id, id, element_type,
-                       mimetype, data, schema):
-        """
-        Update the content of the identified element.
+    def update_content_info(self, package_id, id, element_type,
+                            mimetype, schema, url):
+        """Update the content information of the identified element.
+
         ``schema`` is the id-ref of an own or directly imported resource,
         or an empty string to specify no schema (not None).
+
+        If ``url`` is not an empty string, any data stored in the backend for
+        this content will be discarded.
         """
         assert _DF or self.has_element(package_id, id, element_type)
+        assert _DF or element_type in (ANNOTATION,RELATION,VIEW,QUERY,RESOURCE)
         if schema:
             p,s = _split_id_ref(schema) # also assert that schema has depth < 2
             assert _DF or p == "" or self.has_element(package_id,p,IMPORT), p
-            assert _DF or p != "" or self.has_element(package_id,s,RESOURCE), s
+            assert _DF or p != "" or s == "" or \
+                   self.has_element(package_id, s, RESOURCE), s
         else:
             p,s = "",""
 
         q = "UPDATE Contents "\
-            "SET mimetype = ?, data = ?, schema_p = ?, schema_i = ? "\
+            "SET mimetype = ?, schema_p = ?, schema_i = ?, url = ?%s "\
             "WHERE package = ? AND element = ?"
-        args = (mimetype, data, p, s, package_id, id,)
+        args = [mimetype, p, s, url, package_id, id,]
+        if url:
+            q %= ", data = ?"
+            args[4:4] = ["",]
+        else:
+            q %= ""
+        execute = self._curs.execute
+        try:
+            execute(q, args)
+        except sqlite.Error, e:
+            raise InternalError("could not update", e)
+
+    def get_content_data(self, package_id, id, element_type):
+        """Return the stored data, as a string, of the content of an element.
+
+        This method will return an empty string if the content is externally
+        stored (non-empty ``url`` attribute).
+        """
+        assert _DF or self.has_element(package_id, id, element_type)
+        assert _DF or element_type in (ANNOTATION,RELATION,VIEW,QUERY,RESOURCE)
+        q = "SELECT data FROM Contents WHERE package = ? AND element = ?"
+        return self._curs.execute(q, (package_id, id,)).fetchone()[0]
+
+    def update_content_data(self, package_id, id, element_type, data):
+        """Update the content data of the identified element.
+
+        If `data` is not an empty string, the ``url`` attribute of the content
+        will be cleared.
+        """
+        assert _DF or self.has_element(package_id, id, element_type)
+        assert _DF or element_type in (ANNOTATION,RELATION,VIEW,QUERY,RESOURCE)
+        q = "UPDATE Contents SET data = ?%s WHERE package = ? AND element = ?"
+        args = [data, package_id, id,]
+        if data:
+            q %= ", url = ?"
+            args[1:1] = ["",]
+        else:
+            q %= ""
         execute = self._curs.execute
         try:
             execute(q, args)
@@ -1353,17 +1495,24 @@ class _SqliteBackend(object):
         execute("COMMIT")
 
     def iter_relations_with_member(self, package_ids, member, pos=None):
-        """
-        Return tuples of the form (RELATION, package_id, id) of all the
-        relations having the given member, at the given position if given.
+        """Iter tuples representing all the relations having the given member.
 
-        @param member the uri-ref of an annotation
+        Specific parameters
+        -------------------
+        member
+          the uri-ref of the member to be looked for
+        pos
+          if given, only relations having the member at that posirtion are
+          yielded
         """
         assert _DF or not isinstance(package_ids, basestring)
 
         member_u, member_i = _split_uri_ref(member)
 
-        q = "SELECT DISTINCT ?, e.package, e.id FROM Elements e " \
+        q = "SELECT DISTINCT ?, e.package, e.id, c.mimetype, " \
+            "  join_id_ref(c.schema_p, c.schema_i), c.url " \
+            "FROM Elements e " \
+            "JOIN Contents c ON c.package = e.package AND c.element = e.id " \
             "JOIN Packages p ON e.package = p.id "\
             "JOIN RelationMembers m " \
               "ON e.package = m.package and e.id = m.relation " \
@@ -1400,6 +1549,7 @@ class _SqliteBackend(object):
             n = self.count_items(package_id, id)
         assert _DF or -1 <= pos <= n, pos
         p,s = _split_id_ref(item) # also assert that item has depth < 2
+        assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
         assert _DF or p != "" or self.has_element(package_id, s), item
         if pos == -1:
             pos = n
@@ -1429,7 +1579,8 @@ class _SqliteBackend(object):
         assert _DF or 0 <= pos < self.count_items(package_id, id), pos
 
         p,s = _split_id_ref(item) # also assert that item has depth < 2
-        assert _DF or p != "" or self.has_element(package_id, s), item
+        assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
+        assert _DF or p != "" or self.has_element(package_id, s), s
 
         execute = self._curs.execute
         try:
@@ -1540,13 +1691,17 @@ class _SqliteBackend(object):
         @param element the id-ref of an own or directly imported element
         @param tag the id-ref of an own or directly imported tag
         """
-        eltp, elts = _split_id_ref(element) # also assert that it has depth < 2
-        tagp, tags = _split_id_ref(tag) # also assert that tag has depth < 2
+        ep, es = _split_id_ref(element) # also assert that it has depth < 2
+        assert _DF or ep == "" or self.has_element(package_id, ep, IMPORT), ep
+        assert _DF or ep != "" or self.has_element(package_id, es), es
+        tp, ts = _split_id_ref(tag) # also assert that tag has depth < 2
+        assert _DF or tp == "" or self.has_element(package_id, tp, IMPORT), tp
+        assert _DF or tp != "" or self.has_element(package_id, ts, TAG), ts
 
         execute = self._curs.execute
         try:
             execute("INSERT OR IGNORE INTO Tagged VALUES (?,?,?,?,?)",
-                    (package_id, eltp, elts, tagp, tags))
+                    (package_id, ep, es, tp, ts))
         except sqlite.Error, e:
             raise InternalError("could not insert", e)
 
@@ -1556,15 +1711,19 @@ class _SqliteBackend(object):
         @param element the id-ref of an own or directly imported element
         @param tag the id-ref of an own or directly imported tag
         """
-        eltp, elts = _split_id_ref(element) # also assert that it has depth < 2
-        tagp, tags = _split_id_ref(tag) # also assert that tag has depth < 2
+        ep, es = _split_id_ref(element) # also assert that it has depth < 2
+        assert _DF or ep == "" or self.has_element(package_id, ep, IMPORT), ep
+        assert _DF or ep != "" or self.has_element(package_id, es), es
+        tp, ts = _split_id_ref(tag) # also assert that tag has depth < 2
+        assert _DF or tp == "" or self.has_element(package_id, tp, IMPORT), tp
+        assert _DF or tp != "" or self.has_element(package_id, ts, TAG), ts
 
         execute = self._curs.execute
         try:
             execute("DELETE FROM Tagged WHERE package = ? "
                      "AND element_p = ? AND element_i = ? "
                      "AND tag_p = ? AND tag_i = ?",
-                    (package_id, eltp, elts, tagp, tags))
+                    (package_id, ep, es, tp, ts))
         except sqlite.Error, e:
             raise InternalError("could not delete", e)
 
@@ -1729,11 +1888,19 @@ class _SqliteBackend(object):
         Return the selectfrom part of the query, the where part of the query,
         and the argument list, of a query returning all the elements
         matching the parameters.
+
+        If element_type is a type with content, content fields are added.
         """
         assert _DF or id is None or id_alt is None
 
-        s = "SELECT typ, package, id FROM Elements"
-        w = " WHERE package in (" + "?," * len(package_ids) + ") "\
+        s = "SELECT e.typ, e.package, e.id%s FROM Elements e%s"
+        if element_type in (ANNOTATION, RELATION, VIEW, QUERY, RESOURCE):
+            s = s % (", mimetype, join_id_ref(schema_p, schema_i), url",
+                     " JOIN Contents c ON e.package = c.package and "\
+                                           "e.id = c.element")
+        else:
+            s = s % ("", "") 
+        w = " WHERE e.package in (" + "?," * len(package_ids) + ") "\
             " AND typ = ?"
         args = list(package_ids) + [element_type,]
         if id is not None:

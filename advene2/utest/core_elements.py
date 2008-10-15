@@ -17,7 +17,7 @@ class TestElements(TestCase):
     def test_annotation(self):
         p = self.p
         m = p["m1"]
-        a = p.create_annotation("a1", m, 10, 20)
+        a = p.create_annotation("a1", m, 10, 20, "text/plain")
         self.assertEqual( m, a.media)
         self.assertEqual(10, a.begin)
         self.assertEqual(20, a.end)
@@ -90,9 +90,9 @@ class TestElements(TestCase):
         m = p["m1"]
         a = []
         for i in xrange(20):
-            a.append(p.create_annotation("a%s" % i, m, i*10, i*10+19))
+            a.append(p.create_annotation("a%s" % i, m, i*10, i*10+19, "text/plain"))
 
-        r = p.create_relation("r1")
+        r = p.create_relation("r1", "text/plain")
 
         self._test_list_like(r,a)
 
@@ -101,7 +101,7 @@ class TestElements(TestCase):
 
         a = []
         for i in xrange(10):
-            a.append(p.create_relation("r%s" % i))
+            a.append(p.create_relation("r%s" % i, "text/plain"))
         for i in xrange(10):
             a.append(p.create_list("x%s" % i))
 

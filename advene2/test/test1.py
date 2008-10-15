@@ -2,20 +2,26 @@ from os import unlink
 from os.path import exists, join, split
 import gc
 import sys
+from urllib import pathname2url
 from weakref import ref
 
-import advene.model.backends.sqlite as backend_sqlite
 import advene.model.core.dirty as dirty
-
 ## uncomment the following to disable differed cleaning
 #dirty.DirtyMixin = dirty.DirtyMixinInstantCleaning
 
+from advene.model import ModelError
+from advene.model.core.content import PACKAGED_ROOT
+import advene.model.backends.sqlite as backend_sqlite
 from advene.model.core.package import Package
 
-uri = "sqlite:%s" % (join (split (__file__)[0], "test1.db"))
-#uri = "sqlite::memory:"
 
-backend_sqlite._set_module_debug(True)
+
+base = split(__file__)[0]
+
+package_url = "sqlite:%s" % (join (base, "test1.db"))
+#package_url = "sqlite::memory:"
+
+backend_sqlite._set_module_debug(False)
 
 _indent = []
 def trace_wrapper (f):
@@ -51,30 +57,46 @@ def print_elements(p):
 if __name__ == "__main__":
 
 
-    if exists (uri[7:]): unlink (uri[7:])
+    if exists (package_url[7:]): unlink (package_url[7:])
+    content_file = join(base, "a1.txt")
+    if exists (content_file): unlink (content_file)
 
     Package.make_metadata_property ("dc#Creator", "dc_creator")
 
-    p = Package(uri, create=True)
-    trace_wrap_all (p._backend)
+    p = Package(package_url, create=True)
+    #trace_wrap_all (p._backend)
 
     p.dc_creator = "pchampin"
     m1 = p.create_media("m1", "http://champin.net/stream.avi")
-    a1 = p.create_annotation("a1", m1, 20, 30)
+    a1 = p.create_annotation("a1", m1, 20, 30, "text/plain")
+    a2 = p.create_annotation("a2", m1, 0, 20, "text/plain")
+    r1 = p.create_relation("r1", "text/plain")
+    try:
+        a2 = p.create_annotation("a2", m1, 0, 20, "text/plain")
+    except ModelError:
+        pass
+        # note: no backend call is needed to check that id "a2" is in use,
+        # because annotation a2 is cached in the packaged (variable a2)
+    else:
+        raise Exception, "duplicate ID did raise any ModelException..."
+
     a1.begin += 1
-    a2 = p.create_annotation("a2", m1, 0, 20)
-    p.get_element("a1").content_data = "hello"
-    r1 = p.create_relation("r1")
+    p.set_meta(PACKAGED_ROOT, pathname2url(base))
+    a1.content_url = "packaged:/a1.txt"
+    a1.content_data = "You, stupid woman!"
+
+    c = a2.content
+    c.mimetype = "text/html"
+    c.data = "good <em>moaning</em>"
+
     print [a._id for a in p.own.annotations]
-    print p.get("a1")
-    print p["a2"]
-    r1.extend((a1, a2))
-    
+    print p.get("a1") # no backend call, since a1 is cached (variable a1)
+    print p["a2"] # no backend call, since a2 is cached (variable a2)
 
     NB = 10
     print "creating %s annotations" % NB
     for i in range(NB):
-        p.create_annotation("aa%s" % i, m1, i*10, i*10+9)
+        p.create_annotation("aa%s" % i, m1, i*10, i*10+9, "text/plain")
     print "done"
 
     r1.insert(1, p.get("aa1"))
@@ -84,7 +106,7 @@ if __name__ == "__main__":
     print
 
     print "about to re-load package"
-    p = Package(uri)
+    p = Package(package_url)
     # ensure that backend has changed
     assert p._backend is not bw()
     print "package loaded"

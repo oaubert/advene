@@ -63,11 +63,12 @@ Multiple inheritance should only be used with one proper base class and
 so-called mixin classes. Classes should precisely document the methods and
 attribute they expect from the classes using them. It should also define the
 collaborative methods, which should use the super keyword in all their
-implementations, also relying on such methods should be avoided when possible.
+implementations, although relying on such methods should be avoided when
+possible.
 
 Mixin classes should not require initialization (which is what makes them
 similar to Traits, and different from classical base classes). If they need
-private attributes, they could either:
+private attributes, one of the following solutions can be used:
  * the methods can check if the attribute is defined, and define it if not
  * an alternative to checking existence is to define a default value at the
    class level

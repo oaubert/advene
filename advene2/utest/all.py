@@ -2,6 +2,10 @@ from os import path, listdir
 from sys import path as pythonpath
 from unittest import main, TestCase, TestSuite
 
+import advene.model.backends.sqlite as backend_sqlite
+
+backend_sqlite._set_module_debug(True) # enable assert statements
+
 dirname = path.dirname(__file__)
 pythonpath.append(dir)
 
