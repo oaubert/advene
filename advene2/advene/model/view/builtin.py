@@ -35,7 +35,7 @@ def get_output_mimetype(view):
 
 def apply_to(view, obj):
     global _methods
-    params = _parse_params(view.content_data)
+    params = view.content_parsed
     method = params.pop("method")
     m = _methods.get(method, None)
     if m is None:
@@ -65,17 +65,6 @@ def get_method_info(method, default=_RAISE):
     return r
 
 # private implementation
-
-def _parse_params(s):
-    r = {}
-    for line in s.split("\n"):
-        key, val = line.split("=")
-        key = key.strip()
-        val = val.strip()
-        r[key] = val
-    if "method" not in r:
-        raise ContentHandlingError("built-in view method must be given")
-    return r
 
 def _wrap_method(**info):
     def wrapper(f, info=info):

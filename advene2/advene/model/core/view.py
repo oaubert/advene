@@ -21,6 +21,7 @@ class View(PackageElement, WithContentMixin):
         self._set_content_url(url, _init=True)
 
     def _update_content_handler(self):
+        "This overrides WithContentMixin._update_content_hanlder"
         m = self.content_mimetype
         cmax = 0; hmax = None
         for h in iter_view_handlers():
@@ -32,11 +33,9 @@ class View(PackageElement, WithContentMixin):
         else:
             # TODO issue a user warning ?
             self._handler = None
+        super(View, self)._update_content_handler()
 
     def apply_to(self, obj):
-        self._update_content_handler()
-        # TODO: _update_content_handler should rather be associated to the
-        # change of content_mimetype...
         h = self._handler
         if  h is None:
             raise NoContentHandlerError(self._get_uriref())

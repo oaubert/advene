@@ -178,6 +178,18 @@ class TestElements(TestCase):
         e.content_url = ""
         e._owner.del_meta(PACKAGED_ROOT)
 
+        # parsed content
+        s = "a=b\n\n c  =  d "
+        d = {"a":"b", "c":"d"}
+        e.content_data = "a=b\n\n c  =  d "
+        e.content_mimetype = "text/plain"
+        self.assertEqual(e.content_parsed, s)
+        self.assertEqual(e.content.parsed, s)
+        e.content_mimetype = "application/x-advene-builtin-view"
+        self.assertEqual(e.content_parsed, d)
+        self.assertEqual(e.content.parsed, d)
+ 
+
     def _test_with_meta(self, e):
 
         def test_is_list():

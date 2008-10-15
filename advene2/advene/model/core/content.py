@@ -19,6 +19,7 @@ from urlparse import urljoin, urlparse
 from weakref import ref
 
 from advene.model.consts import _RAISE, PACKAGED_ROOT
+from advene.model.content.register import iter_content_handlers
 from advene.model.core.element import RELATION
 from advene.model.exceptions import ModelError
 from advene.utils.autoproperty import autoproperty
@@ -67,12 +68,23 @@ class WithContentMixin:
     __url        = None
     __data       = None # backend data, unless __as_file is not None
     __as_file    = None 
+    __handler    = None
 
     __cached_content = staticmethod(lambda: None)
 
     def _update_content_handler(self):
         """See :class:`WithContentMixin` documentation."""
-        pass
+        # the following updates the handler for content_parsed
+        m = self.__mimetype
+        cmax = 0; hmax = None
+        for h in iter_content_handlers():
+            c = h.claims_for_handle(m)
+            if c > cmax:
+                cmax, hmax = c, h
+        if cmax > 0:
+            self.__handler = hmax
+        else:
+            self.__handler = None
 
     def _load_content_info(self):
         """Load the content info (mimetype, model, url)."""
@@ -381,7 +393,15 @@ class WithContentMixin:
             self.__data = data
             self.__store_data()
         self.emit("changed-content-data", diff)
-        
+
+    @autoproperty
+    def _get_content_parsed(self):
+        h = self.__handler
+        if h is not None:
+            return h.parse_content(self)
+        else:
+            return self._get_content_data()
+
     @autoproperty
     def _get_content(self):
         """Return a `Content` instance representing the content."""
@@ -448,6 +468,10 @@ class Content(object):
     @autoproperty
     def _set_data(self, data):
         return self._owner_elt._set_content_data(data)
+
+    @autoproperty
+    def _get_parsed(self):
+        return self._owner_elt._get_content_parsed()
 
     def get_as_file(self):
         return self._owner_elt.get_content_as_file()
