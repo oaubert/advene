@@ -1872,13 +1872,14 @@ class Packages(Common):
                 except KeyError:
                     id_ = objet._idgenerator.get_id(Annotation)
                 try:
-                    begin=long(query['begin'])
-                    end=long(query['end'])
-                    fragment=MillisecondFragment(begin=begin, end=end)
-                    a=objet.createAnnotation(ident=id_, type=at, fragment=fragment)
+                    a=objet.create_annotation(id=id_, 
+                                              type=at, 
+                                              # FIXME: allow to choose the media
+                                              media=self.controller.current_media,
+                                              begin=long(query['begin']), 
+                                              end=long(query['end']))
                     objet._idgenerator.add(id_)
                     a.content.data = data
-                    objet.annotations.append(a)
                     self.controller.notify("AnnotationCreate", annotation=a)
                 except Exception, e:
                     t, v, tr = sys.exc_info()
