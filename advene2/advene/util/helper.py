@@ -24,6 +24,7 @@ import StringIO
 import inspect
 import md5
 import os
+import sys
 import re
 import zipfile
 import urllib
@@ -189,6 +190,7 @@ def package2id (p):
 
 normalized_re=re.compile(r'LATIN (SMALL|CAPITAL) LETTER (\w)')
 valid_re=re.compile(r'[a-zA-Z0-9_]')
+extended_valid_re=re.compile(r'[ -@a-zA-Z0-9_]')
 
 def title2id(t):
     """Convert a unicode title to a valid id.
@@ -209,6 +211,24 @@ def title2id(t):
                     c=c.lower()
             else:
                 c='_'
+        res.append(c)
+    return "".join(res)
+
+def unaccent(t):
+    """Remove accents from a string.
+    """
+    t=unicode(t)
+    res=[]
+    for c in t:
+        if not extended_valid_re.match(c):
+            # Try to normalize
+            m=normalized_re.search(unicodedata.name(c))
+            if m:
+                c=m.group(2)
+                if m.group(1) == 'SMALL':
+                    c=c.lower()
+            else:
+                c=' '
         res.append(c)
     return "".join(res)
 
@@ -370,6 +390,9 @@ def get_statistics(fname):
     if fname.lower().endswith('.azp'):
         # If the file is a .azp, then it may have a
         # META-INF/statistics.xml file. Use it.
+        # Encoding issues on win32:
+        if isinstance(fname, unicode):
+            fname=fname.encode(sys.getfilesystemencoding())
         try:
             z=zipfile.ZipFile(fname, 'r')
         except Exception, e:
@@ -628,4 +651,12 @@ def overlapping_annotations(t):
                 res.append( (a, b) )
     return res
 
-        
+def common_fieldnames(elements):
+    """Extract common fieldnames from simple structured elements.
+    """
+    regexp=re.compile('^(\w+)=.*')
+    res=set()
+    for e in elements:
+        if e.content.mimetype == 'application/x-advene-structured':
+            res.update( (regexp.findall(l) or [ '_error' ])[0] for l in e.content.data.split('\n') )
+    return res
