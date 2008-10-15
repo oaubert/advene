@@ -17,7 +17,10 @@ CREATE TABLE Version (
 
 CREATE TABLE Packages (
   id  TEXT PRIMARY KEY,
-  uri TEXT NOT NULL
+  uri TEXT NOT NULL,
+  url TEXT NOT NULL 
+  -- column url is set when binding a pattern, to remember with which URL the
+  --  package was open
 );
 
 CREATE TABLE Elements (

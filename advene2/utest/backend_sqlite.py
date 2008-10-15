@@ -128,6 +128,11 @@ class TestCreateBackend(TestCase):
         self.assert_(b._path, ":memory:")
         b.close(p)
 
+    def test_create_with_other_url(self):
+        b,p = create(P("http://example.com/a_package"), url=IN_MEMORY_URL)
+        self.assert_(b._path, ":memory:")
+        b.close(p)
+
 
 class TestBindBackend(TestCase):
     def setUp(self):
@@ -149,6 +154,7 @@ class TestBindBackend(TestCase):
         )
 
     def test_claim_wrong_format(self):
+        self.b.close(self.i)
         f = open(self.filename, 'w'); f.write("foo"); f.close()
         self.assert_(
             not claims_for_bind(self.url2)
@@ -209,6 +215,10 @@ class TestBindBackend(TestCase):
         b.close(i)
         b, i = bind(P(url3))
         b.close(i)
+
+    def test_bind_with_other_url(self):
+        self.b.close (self.i)
+        self.b, self.i = bind(P("http://example.com/a_package"), url=self.url2)
 
 
 class TestPackageUri(TestCase):
@@ -392,10 +402,10 @@ class TestCreateElement(TestCase):
 class TestHandleElements(TestCase):
     def setUp(self):
         try:
-            self.url1 = IN_MEMORY_URL
-            self.url2 = "%s;foo" % self.url1
-            self.be, self.pid1 = create(P(self.url1))
-            _,       self.pid2 = create(P(self.url2))
+            self.url1 = "http://example.com/p1"
+            self.url2 = "http://example.com/p2"
+            self.be, self.pid1 = create(P(self.url1), url=IN_MEMORY_URL)
+            _,       self.pid2 = create(P(self.url2), url=IN_MEMORY_URL+";foo")
 
             self.m1_url = "http://example.com/m1.avi"
             self.m2_url = "http://example.com/m2.avi"
@@ -879,11 +889,21 @@ class TestHandleElements(TestCase):
         self.be.insert_member(self.pid2, "r3", "a6", -1)
         rel_w_member = self.be.get_relations_with_member
         pids = (self.pid1, self.pid2,)
+        # with url in uri-ref
+        a5_uri_ref = "%s#a5" % self.url2
+        self.assertEqual(frozenset((RELATION,)+i for i in [self.r1, self.r3]),
+                          frozenset(rel_w_member(pids, a5_uri_ref,)))
+        self.assertEqual(frozenset([(RELATION,)+self.r1,]),
+                          frozenset(rel_w_member(pids, a5_uri_ref, 1)))
+        # with uri in uri-ref
         a5_uri_ref = "%s#a5" % self.i1_uri
         self.assertEqual(frozenset((RELATION,)+i for i in [self.r1, self.r3]),
                           frozenset(rel_w_member(pids, a5_uri_ref,)))
         self.assertEqual(frozenset([(RELATION,)+self.r1,]),
                           frozenset(rel_w_member(pids, a5_uri_ref, 1)))
+        # with not all packages
+        self.assertEqual(frozenset([(RELATION,)+self.r3,]),
+                          frozenset(rel_w_member((self.pid2,), a5_uri_ref)))
 
     def test_items(self):
 
@@ -916,11 +936,21 @@ class TestHandleElements(TestCase):
         self.be.insert_item(self.pid2, "l3", "a6", -1)
         lst_w_item = self.be.get_lists_with_item
         pids = (self.pid1, self.pid2,)
+        # with url in uri-ref
+        r3_uri_ref = "%s#r3" % self.url2
+        self.assertEqual(frozenset((LIST,)+i for i in [self.l1, self.l3]),
+                          frozenset(lst_w_item(pids, r3_uri_ref,)))
+        self.assertEqual(frozenset([(LIST,)+self.l1,]),
+                          frozenset(lst_w_item(pids, r3_uri_ref, 1)))
+        # with uri in uri-ref
         r3_uri_ref = "%s#r3" % self.i1_uri
         self.assertEqual(frozenset((LIST,)+i for i in [self.l1, self.l3]),
                           frozenset(lst_w_item(pids, r3_uri_ref,)))
         self.assertEqual(frozenset([(LIST,)+self.l1,]),
                           frozenset(lst_w_item(pids, r3_uri_ref, 1)))
+        # with not all packages
+        self.assertEqual(frozenset([(LIST,)+self.l3,]),
+                          frozenset(lst_w_item((self.pid2,), r3_uri_ref)))
 
 
 class TestRetrieveDataWithSameId(TestCase):

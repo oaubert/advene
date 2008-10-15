@@ -54,14 +54,15 @@ def claims_for_create(url):
         cx.close()
         return r
 
-def create(package, force=False):
+def create(package, force=False, url=None):
     """Create a _SqliteBackend instance for the given package.
 
     Return the backend an the package id.
     @param package: an object with attributes url and readonly
     @param force: should the package be created even if it exists?
+    @param url: backend-wise URL to be used if different for package.url
     """
-    url = package.url
+    url = url or package.url
     assert(claims_for_create(url)), "url = %r" % url
     if force:
         raise NotImplementedError("This backend can not force creation of "
@@ -90,8 +91,8 @@ def create(package, force=False):
                     conn.execute(query)
                 conn.execute("INSERT INTO Version VALUES (?)",
                              (BACKEND_VERSION,))
-                conn.execute("INSERT INTO Packages VALUES (?,?)", 
-                             (_DEFAULT_PKGID, "",))
+                conn.execute("INSERT INTO Packages VALUES (?,?,?)", 
+                             (_DEFAULT_PKGID, "", "",))
                 conn.commit()
             except sqlite.OperationalError, e:
                 conn.rollback()
@@ -102,7 +103,7 @@ def create(package, force=False):
         _cache[path] = b
 
     if pkgid != _DEFAULT_PKGID:
-        conn.execute("INSERT INTO Packages VALUES (?,?)", (pkgid, "",))
+        conn.execute("INSERT INTO Packages VALUES (?,?,?)", (pkgid, "", "",))
     conn.commit()
     b._bind(pkgid, package)
     return b, pkgid
@@ -136,14 +137,15 @@ def claims_for_bind(url):
         cx.close()
         return r
 
-def bind(package, force=False):
+def bind(package, force=False, url=None):
     """Create a _SqliteBackend instance for the given package.
 
     Return the backend an the package id.
     @param package: an object with attributes url and readonly
     @param force: should the package be open even if it is locked?
+    @param url: backend-wise URL to be used if different for package.url
     """
-    url = package.url
+    url = url or package.url
     assert(claims_for_bind(url)), url
     if force:
         raise NotImplementedError("This backend can not force access to "
@@ -221,7 +223,7 @@ class _SqliteBackend(object):
     def __init__(self, path, conn, force):
         """
         Is not part of the interface. Instances must be created either with
-        the L{create} or the L{bind} static methods.
+        the L{create} or the L{bind} module functions.
 
         Create a backend, and bind it to the given URL.
         """
@@ -245,6 +247,10 @@ class _SqliteBackend(object):
         old = d.get(package_id)
         if old is not None:
             raise PackageInUse(old)
+        conn = self._conn
+        conn.execute("UPDATE Packages SET url = ? WHERE id = ?",
+                     (package.url, package_id,))
+        conn.commit()
         d[package_id] = package
 
     def close(self, package_id):
@@ -257,14 +263,22 @@ class _SqliteBackend(object):
         d = self._bound
         m = d.get(package_id) # keeping a ref on it prevents it to disappear
         if m is not None:     # in the meantime...
+            conn = self._conn
+            conn.execute("UPDATE Packages SET url = ? WHERE id = ?",
+                         ("", package_id,))
+            conn.commit()
             del d[package_id]
         self._check_unused(package_id)
 
     def _check_unused(self, package_id):
-        if len(self._bound) == 0:
+        conn = self._conn
+        if conn is not None and len(self._bound) == 0:
             #print "DEBUG:", __file__, \
             #      "about to close SqliteBackend", self._path
-            self._conn.close()
+            conn.execute("UPDATE Packages SET url = ?", ("",))
+            conn.commit()
+            conn.close()
+            self._conn = None
             if self._path in _cache:
                 del _cache[self._path]
 
@@ -524,17 +538,15 @@ class _SqliteBackend(object):
             q += ")"
         # NB: media is managed as media_alt (cf. above)
         if media_alt is not None:
-            p_url = "sqlite:%s" % self._path
             q += "AND ("
             for m in media_alt:
                 media_u, media_i = _split_uri_ref(m)
                 q += "(media_i = ? " \
                      " AND (" \
-                     "  (media_p = ''   AND  ? IN (p.uri, ?||a.package)) OR " \
+                     "  (media_p = ''   AND  ? IN (p.uri, p.url)) OR " \
                      "  (media_p = i.id AND  ? IN (i.uri, i.url)) ) ) OR "
                 args.append(media_i)
                 args.append(media_u)
-                args.append(p_url)
                 args.append(media_u)
             q += "0) "
         if begin is not None:
@@ -981,17 +993,18 @@ class _SqliteBackend(object):
             "JOIN RelationMembers m " \
               "ON e.package = m.package and e.id = m.relation " \
             "LEFT JOIN Imports i ON m.member_p = i.id " \
-            "WHERE member_i = ? AND ("\
-              "(member_p = ''   AND  ? IN (p.uri, ?||e.package)) OR " \
-              "(member_p = i.id AND  ? IN (i.uri, i.url)))"
-
-        p_url = "sqlite:%s" % self._path
-        args = [RELATION, member_i, member_u, p_url, member_u]
-
+            "WHERE e.package in ("
+        args = [RELATION,]
+        for p in package_ids:
+            q += "?,"
+            args.append(p)
+        q += ") AND member_i = ? AND ("\
+             "(member_p = ''   AND  ? IN (p.uri, p.url)) OR " \
+             "(member_p = i.id AND  ? IN (i.uri, i.url)))"
+        args.extend([member_i, member_u, member_u,])
         if pos is not None:
             q += " AND ord = ?"
             args.append(pos)
-
         return self._conn.execute(q, args)
 
     # list items
@@ -1116,17 +1129,18 @@ class _SqliteBackend(object):
             "JOIN ListItems m " \
               "ON e.package = m.package and e.id = m.list " \
             "LEFT JOIN Imports i ON m.item_p = i.id " \
-            "WHERE item_i = ? AND ("\
-              "(item_p = ''   AND  ? IN (p.uri, ?||e.package)) OR " \
-              "(item_p = i.id AND  ? IN (i.uri, i.url)))"
-
-        p_url = "sqlite:%s" % self._path
-        args = [LIST, item_i, item_u, p_url, item_u]
-
+            "WHERE e.package in ("
+        args = [LIST,]
+        for p in package_ids:
+            q += "?,"
+            args.append(p)
+        q += ") AND item_i = ? AND ("\
+             "(item_p = ''   AND  ? IN (p.uri, p.url)) OR " \
+             "(item_p = i.id AND  ? IN (i.uri, i.url)))"
+        args.extend([item_i, item_u, item_u,])
         if pos is not None:
             q += " AND ord = ?"
             args.append(pos)
-
         return self._conn.execute(q, args)
 
     # tagged elements
