@@ -22,7 +22,10 @@ E.g.::
     # those variables are only set in the scope of the current thread
 """
 
+import os
+import sys
 from thread import get_ident, allocate_lock
+from shutil import rmtree
 
 class _Session(object):
     def __init__(self, **kw):
@@ -97,7 +100,20 @@ class _Session(object):
         finally:
             L.release()
 
+tempdir_list = []
 
+def cleanup():
+    """Remove the temp. directories used during the session.
+    
+    No check is done to see wether it is in use or not. This
+    method is intended to be used at the end of the application,
+    to clean up the mess.
+    """
+    for d in tempdir_list:
+        print "Cleaning up %s" % d
+        if os.path.isdir(d.encode(sys.getfilesystemencoding())):
+            rmtree(d, ignore_errors=True)
+    
 session = _Session(
     package = None,
     user = None,

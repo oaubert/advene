@@ -24,6 +24,7 @@ from advene.model.core.element import RELATION, RESOURCE
 from advene.model.exceptions import ModelError
 from advene.util.autoproperty import autoproperty
 from advene.util.files import recursive_mkdir
+from advene.util.session import tempdir_list
 
 class WithContentMixin:
     """I provide functionality for elements with a content.
@@ -606,7 +607,8 @@ class ContentDataFile(object):
 
 
 def create_temporary_packaged_root(package):
-    dir = mkdtemp()
-    package.set_meta(PACKAGED_ROOT, dir)
+    d = mkdtemp()
+    tempdir_list.append(d)
+    package.set_meta(PACKAGED_ROOT, d)
     # TODO use notification to clean it when package is closed
-    return dir
+    return d

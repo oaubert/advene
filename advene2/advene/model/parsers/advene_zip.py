@@ -12,8 +12,7 @@ from advene.model.consts import PACKAGED_ROOT
 import advene.model.parsers.advene_xml as advene_xml
 import advene.model.serializers.advene_zip as serializer
 from advene.util.files import get_path, recursive_mkdir
-
-
+from advene.util.session import tempdir_list
 
 class Parser(object):
 
@@ -104,6 +103,7 @@ class Parser(object):
     def __init__(self, file_, package):
         assert self.claims_for_parse(file_) > 0
         self.dir = d = mkdtemp()
+        tempdir_list.append(d)
 
         if hasattr(file_, "seek"):
             g = None
