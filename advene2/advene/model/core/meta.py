@@ -508,8 +508,8 @@ class _MetaDict(object):
 #                 for k,v in self._obj.iter_meta()
 #                 if k.startswith(self._prefix))
 #
-class metadata_value(str):
+class metadata_value(unicode):
     def __new__ (cls, val, is_id):
-        return str.__new__(cls, val)
+        return unicode.__new__(cls, val)
     def __init__ (self, val, is_id):
         self.is_id = is_id

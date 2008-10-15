@@ -13,7 +13,6 @@ CONTRIBUTOR = DC_NS_PREFIX + "contributor"
 MODIFIED = DC_NS_PREFIX + "modified"
 
 def init(package, obj):
-    print "=== init", obj
     d,u = _make_bookkeeping_data()
     obj.enter_no_event_section(); \
         obj.set_meta(CREATOR, u); \
