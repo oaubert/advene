@@ -1,8 +1,6 @@
 Important improvements
 ======================
 
-- implement deletion of package elements
-
 - automatically fill creator/contributor and dates metadata
 
 - prevent annotations/relations to be untyped
@@ -28,7 +26,7 @@ Important improvements
 - implement content handlers for queries and models, in the same way it has
   been done for views
 
-- implement element renaming; ensure that the import "cam" is never renamed
+- ensure that the import "cam" is never renamed
 
 - advene_zip: make unit test with accented filenames stored in the
    package, to ensure that there is no problem with multiplaform

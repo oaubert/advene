@@ -180,7 +180,28 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         """
         return self._id
 
-    # TODO implement renaming by setting id
+    @autoproperty
+    def _set_id(self, new_id):
+        """
+        Rename this element to `new_id`, if it is not already in use in the
+        package, else raises an AssertionError.
+        """
+        o = self._owner
+        assert not o.has_element(new_id)
+        old_id = self._id
+        be = o._backend
+        be.rename_element(o._id, old_id, self.ADVENE_TYPE, new_id)
+        # FIXME: possible optimisation
+        # we could factorize calls to the same backend, in the same fashion
+        # as AllGroup does. Let us wait and see if it is necessary.
+        old_uriref = self.uriref
+        be.rename_references([o._id,], old_uriref, new_id)
+        for p in o._importers.keys():
+            p._backend.rename_references([p._id,], old_uriref, new_id)
+        
+        del o._elements[old_id]
+        o._elements[new_id] = self
+        self._id = new_id
 
     @autoproperty
     def _get_uriref(self):
