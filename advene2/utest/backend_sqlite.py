@@ -900,6 +900,290 @@ class TestHandleElements(TestCase):
         self.assertEqual(ref,
             get((self.pid1, self.pid2), uri_alt=("", self.i1_uri)))
 
+    def test_count_medias(self):
+
+        # the following function makes assert expression fit in one line...
+        def get(*a, **k):
+            return self.be.media_count(*a, **k)
+
+        ref = len([self.m1, self.m2, self.m3,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),))
+
+        ref = len([self.m1, self.m2,])
+        self.assertEqual(ref, get((self.pid1,),))
+
+        ref = len([self.m3,])
+        self.assertEqual(ref, get((self.pid2,),))
+
+        ref = len([self.m1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="m1",))
+
+        ref = len([self.m1, self.m3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), id_alt=("m1","m3"),))
+
+        ref = len([self.m1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), url=self.m1_url,))
+
+        ref = len([self.m1, self.m3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2), url_alt=(self.m1_url, self.m3_url),))
+
+        ref = len([self.m1, self.m3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), foref=self.foref,))
+
+        ref = len([self.m1, self.m2, self.m3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), foref_alt=(self.foref, self.foref2)))
+
+        # mixing several criteria
+
+        ref = len([])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2), id="m1", url=self.m2_url,))
+
+    def test_count_annotations(self):
+
+        # NB: annotations are ordered, so we compare lists
+        # NB: it is IMPORTANT that the identifiers of annotations do not
+        # exactly match their chronological order, for the tests to be
+        # really significant
+
+        # the following function makes assert expression fit in one line...
+
+        def get(*a, **k):
+            return self.be.annotation_count(*a, **k)
+
+        ref = len([self.a4, self.a3, self.a2, self.a1, self.a5, self.a6,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),))
+
+        ref = len([self.a4, self.a3, self.a2, self.a1,])
+        self.assertEqual(ref, get((self.pid1,),))
+
+        ref = len([self.a5, self.a6,])
+        self.assertEqual(ref, get((self.pid2,),))
+
+        ref = len([self.a4,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="a4",))
+
+        ref = len([self.a3, self.a1, self.a6])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2), id_alt=("a6", "a1", "a3",),))
+
+        media2 = "%s#m3" % self.i1_uri
+        ref = len([self.a1, self.a5, self.a6])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2), media=media2,))
+
+        media4_or_3 = ("%s#m1" % self.url1, media2)
+        ref = len([self.a4, self.a2, self.a1, self.a5, self.a6,])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2), media_alt=media4_or_3,))
+
+        ref = len([self.a4, self.a3, self.a2,])
+        self.assertEqual(ref, get((self.pid1, self.pid2), begin=10,))
+
+        ref = len([self.a1, self.a5, self.a6,])
+        self.assertEqual(ref, get((self.pid1, self.pid2), begin_min=15,))
+
+        ref = len([self.a4, self.a3, self.a2, self.a1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2), begin_max=15,))
+
+        ref = len([self.a2, self.a5,])
+        self.assertEqual(ref, get((self.pid1, self.pid2), end=30,))
+
+        ref = len([self.a2, self.a5, self.a6])
+        self.assertEqual(ref, get((self.pid1, self.pid2), end_min=30,))
+
+        ref = len([self.a4, self.a3, self.a2, self.a1, self.a5])
+        self.assertEqual(ref, get((self.pid1, self.pid2), end_max=30,))
+
+        # mixing several criteria
+
+        ref = len([self.a2, self.a5,])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2), begin_max=27, end_min=27,))
+
+        ref = len([self.a2, self.a5,])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2), begin_max=27, end_min=27,))
+
+        ref = len([self.a5,])
+        self.assertEqual(ref, get((self.pid2,), begin_max=27, end_min=27,))
+
+        ref = len([self.a1, self.a5,])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2), media=media2, end_max=30,))
+
+    def test_count_relations(self):
+
+        # the following function makes assert expression fit in one line...
+        def get(*a, **k):
+            return self.be.relation_count(*a, **k)
+
+        ref = len([self.r1, self.r2, self.r3,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),))
+
+        ref = len([self.r1, self.r2,])
+        self.assertEqual(ref, get((self.pid1,),))
+
+        ref = len([self.r3,])
+        self.assertEqual(ref, get((self.pid2,),))
+
+        ref = len([self.r1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="r1",))
+
+        ref = len([self.r1, self.r3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), id_alt=("r1","r3"),))
+
+    def test_count_views(self):
+
+        # the following function makes assert expression fit in one line...
+        def get(*a, **k):
+            return self.be.view_count(*a, **k)
+
+        ref = len([self.v1, self.v2, self.v3,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),))
+
+        ref = len([self.v1, self.v2,])
+        self.assertEqual(ref, get((self.pid1,),))
+
+        ref = len([self.v3,])
+        self.assertEqual(ref, get((self.pid2,),))
+
+        ref = len([self.v1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="v1",))
+
+        ref = len([self.v1, self.v3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), id_alt=("v1","v3"),))
+
+    def test_count_resources(self):
+
+        # the following function makes assert expression fit in one line...
+        def get(*a, **k):
+            return self.be.resource_count(*a, **k)
+
+        ref = len([self.R1, self.R2, self.R3,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),))
+
+        ref = len([self.R1, self.R2,])
+        self.assertEqual(ref, get((self.pid1,),))
+
+        ref = len([self.R3,])
+        self.assertEqual(ref, get((self.pid2,),))
+
+        ref = len([self.R1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="R1",))
+
+        ref = len([self.R1, self.R3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), id_alt=("R1","R3"),))
+
+    def test_count_tags(self):
+
+        # the following function makes assert expression fit in one line...
+        def get(*a, **k):
+            return self.be.tag_count(*a, **k)
+
+        ref = len([self.t1, self.t2, self.t3,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),))
+
+        ref = len([self.t1, self.t2,])
+        self.assertEqual(ref, get((self.pid1,),))
+
+        ref = len([self.t3,])
+        self.assertEqual(ref, get((self.pid2,),))
+
+        ref = len([self.t1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="t1",))
+
+        ref = len([self.t1, self.t3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), id_alt=("t1","t3"),))
+
+    def test_count_lists(self):
+
+        # the following function makes assert expression fit in one line...
+        def get(*a, **k):
+            return self.be.list_count(*a, **k)
+
+        ref = len([self.l1, self.l2, self.l3,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),))
+
+        ref = len([self.l1, self.l2,])
+        self.assertEqual(ref, get((self.pid1,),))
+
+        ref = len([self.l3,])
+        self.assertEqual(ref, get((self.pid2,),))
+
+        ref = len([self.l1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="l1",))
+
+        ref = len([self.l1, self.l3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), id_alt=("l1","l3"),))
+
+    def test_count_queries(self):
+
+        # the following function makes assert expression fit in one line...
+        def get(*a, **k):
+            return self.be.query_count(*a, **k)
+
+        ref = len([self.q1, self.q2, self.q3,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),))
+
+        ref = len([self.q1, self.q2,])
+        self.assertEqual(ref, get((self.pid1,),))
+
+        ref = len([self.q3,])
+        self.assertEqual(ref, get((self.pid2,),))
+
+        ref = len([self.q1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="q1",))
+
+        ref = len([self.q1, self.q3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), id_alt=("q1","q3"),))
+
+    def test_count_imports(self):
+
+        # the following function makes assert expression fit in one line...
+        def get(*a, **k):
+            return self.be.import_count(*a, **k)
+
+        ref = len([self.i1, self.i2, self.i3,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),))
+
+        ref = len([self.i1, self.i2,])
+        self.assertEqual(ref, get((self.pid1,),))
+
+        ref = len([self.i3,])
+        self.assertEqual(ref, get((self.pid2,),))
+
+        ref = len([self.i1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="i1",))
+
+        ref = len([self.i1, self.i3,])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2,), id_alt=("i1","i3"),))
+
+        ref = len([self.i2, self.i3,])
+        self.assertEqual(ref, get((self.pid1, self.pid2), url=self.i2_url,))
+
+        ref = len([self.i1, self.i2, self.i3,])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2), url_alt=(self.url2, self.i2_url),))
+
+        ref = len([self.i1,])
+        self.assertEqual(ref, get((self.pid1, self.pid2), uri=self.i1_uri,))
+
+        ref = len([self.i1, self.i2, self.i3])
+        self.assertEqual(ref,
+            get((self.pid1, self.pid2), uri_alt=("", self.i1_uri)))
+
     def test_update_media(self):
         new_url = "http://foo.com/m1.avi"
         new_foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/s;o=10"
@@ -1069,7 +1353,7 @@ class TestHandleElements(TestCase):
     def test_members(self):
 
         def compare_to_list(L, pid, rid):
-            self.assertEqual(len(L), self.be.count_members(pid, rid))
+            self.assertEqual(len(L), self.be.member_count(pid, rid))
             for i in xrange(len(L)):
                 self.assertEqual(L[i], self.be.get_member(pid, rid, i))
             self.assertEqual(L, list(self.be.iter_members(pid, rid)))
@@ -1116,7 +1400,7 @@ class TestHandleElements(TestCase):
     def test_items(self):
 
         def compare_to_list(L, pid, rid):
-            self.assertEqual(len(L), self.be.count_items(pid, rid))
+            self.assertEqual(len(L), self.be.item_count(pid, rid))
             for i in xrange(len(L)):
                 self.assertEqual(L[i], self.be.get_item(pid, rid, i))
             self.assertEqual(L, list(self.be.iter_items(pid, rid)))
@@ -1613,7 +1897,7 @@ class TestDeleteElement(TestCase):
         self.assert_(not self.be.has_element(self.pid, "r1", RELATION))
         self.assertEqual(None,
                          self.be.get_content_info(self.pid, "r1", RELATION))
-        self.assertEqual(0, self.be.count_members(self.pid, "r1"))
+        self.assertEqual(0, self.be.member_count(self.pid, "r1"))
 
     def test_delete_view(self):
         self.be.create_view(self.pid, "v1", "text/plain", "", "")
@@ -1654,7 +1938,7 @@ class TestDeleteElement(TestCase):
             self.fail(e) # raised by delete_element
         self.assert_(not self.be.has_element(self.pid, "l1"))
         self.assert_(not self.be.has_element(self.pid, "l1", LIST))
-        self.assertEqual(0, self.be.count_items(self.pid, "l1"))
+        self.assertEqual(0, self.be.item_count(self.pid, "l1"))
 
     def test_delete_query(self):
         self.be.create_query(self.pid, "q1", "text/plain", "", "")

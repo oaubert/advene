@@ -8,6 +8,11 @@ class AllGroup(GroupMixin):
     """FIXME: missing docstring.
     """
 
+    # TODO filtering parameters in iter_X and count_X have not been all added
+    # because of a lack of time, not for some good reason.
+    # So they shall be added whenever needed, or systematically when someone
+    # get the time to do it.
+
     def __init__(self, owner):
         self._owner = owner
 
@@ -117,4 +122,60 @@ class AllGroup(GroupMixin):
         for be, pdict in o._backends_dict.items():
             for i in be.iter_resources(pdict):
                 yield pdict[i[1]].get_element(i)
- 
+
+    def media_count(self):
+        o = self._owner
+        return sum( be.media_count(pdict)
+                    for be, pdict in o._backends_dict.items() )
+
+    def annotation_count(self, media=None, medias=None,
+                               begin=None, begin_min=None, begin_max=None,
+                               end=None, end_min=None, end_max=None,
+                               at=None):
+        o = self._owner
+        if media is not None:
+            media = media._get_uriref()
+        if medias is not None:
+            medias = (m._get_uriref() for m in medias)
+        if at is not None:
+            begin_max = end_min = at
+        return sum( be.annotation_count(pdict, None, None, media, medias,
+                                               begin, begin_min, begin_max,
+                                               end, end_min, end_max)
+                    for be, pdict in o._backends_dict.items() )
+
+    def relation_count(self):
+        o = self._owner
+        return sum( be.relation_count(pdict)
+                    for be, pdict in o._backends_dict.items() )
+
+    def view_count(self):
+        o = self._owner
+        return sum( be.view_count(pdict)
+                    for be, pdict in o._backends_dict.items() )
+
+    def resource_count(self):
+        o = self._owner
+        return sum( be.resource_count(pdict)
+                    for be, pdict in o._backends_dict.items() )
+
+    def tag_count(self):
+        o = self._owner
+        return sum( be.tag_count(pdict)
+                    for be, pdict in o._backends_dict.items() )
+
+    def list_count(self):
+        o = self._owner
+        return sum( be.list_count(pdict)
+                    for be, pdict in o._backends_dict.items() )
+
+    def query_count(self):
+        o = self._owner
+        return sum( be.query_count(pdict)
+                    for be, pdict in o._backends_dict.items() )
+
+    def import_count(self):
+        o = self._owner
+        return sum( be.import_count(pdict)
+                    for be, pdict in o._backends_dict.items() )
+

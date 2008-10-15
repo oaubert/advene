@@ -822,34 +822,11 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form(MEDIA, package_id, id, url,).
         """
-        assert _DF or not isinstance(package_ids, basestring)
-        assert _DF or (   id is None  or     id_alt is None), ( id,  id_alt)
-        assert _DF or (  url is None  or    url_alt is None), (url, url_alt)
-        assert _DF or (foref is None  or  foref_alt is None), (url, url_alt)
-
-        q = "SELECT ?, package, id, url, foref FROM Medias " \
-            "WHERE package IN (" + ",".join( "?" for i in package_ids ) + ")"
-        args = [MEDIA,] + list(package_ids)
-        if id is not None:
-            q += " AND id = ?"
-            args.append(id)
-        if id_alt is not None:
-            q += " AND id IN (" + ",".join( "?" for i in id_alt ) + ")"
-            args.extend(id_alt)
-        if url is not None:
-            q += " AND url = ?"
-            args.append(url)
-        if url_alt is not None:
-            q += " AND url IN (" + ",".join( "?" for i in url_alt ) + ")"
-            args.extend(url_alt)
-        if foref is not None:
-            q += " AND foref = ?"
-            args.append(foref)
-        if foref_alt is not None:
-            q += " AND foref IN (" + ",".join( "?" for i in foref_alt ) + ")"
-            args.extend(foref_alt)
-
-        r = self._conn.execute(q, args)
+        selectfrom, where, args = self._media_query(package_ids,
+                                                    id, id_alt,
+                                                    url, url_alt,
+                                                    foref, foref_alt)
+        r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
     def iter_annotations(self, package_ids,
@@ -866,70 +843,14 @@ class _SqliteBackend(object):
         ``media`` is the uri-ref of a media ;
         ``media_alt`` is an iterable of uri-refs.
         """
-        assert _DF or not isinstance(package_ids, basestring)
-        assert _DF or    id is None or    id_alt is None
-        assert _DF or media is None or media_alt is None
-        assert _DF or begin is None or begin_min is None and begin_max is None
-        assert _DF or   end is None or   end_min is None and   end_max is None
-
-        if media is not None:
-            media_alt = (media,)
-
-        q = "SELECT ?, a.package, a.id, " \
-            "       join_id_ref(media_p, media_i) as media, " \
-            "       fbegin, fend, " \
-            "       c.mimetype, join_id_ref(c.model_p, c.model_i), c.url " \
-            "FROM Annotations a %s " \
-            "JOIN Contents c ON c.package = a.package AND c.element = a.id " \
-            "WHERE a.package IN (" + ",".join( "?" for i in package_ids ) + ")"
-        args = [ANNOTATION,] + list(package_ids)
-        if media_alt is not None:
-            q %= "JOIN Packages p ON a.package = p.id "\
-                 "LEFT JOIN Imports i " \
-                 "  ON a.package = i.package AND a.media_p = i.id"
-        else:
-            q %= ""
-        if id is not None:
-            q += " AND a.id = ?"
-            args.append(id)
-        if id_alt is not None:
-            q += " AND a.id IN (" + ",".join( "?" for i in id_alt ) + ")"
-            args.extend(id_alt)
-        # NB: media is managed as media_alt (cf. above)
-        if media_alt is not None:
-            q += "AND ("
-            for m in media_alt:
-                media_u, media_i = _split_uri_ref(m)
-                q += "(media_i = ? " \
-                     " AND (" \
-                     "  (media_p = ''   AND  ? IN (p.uri, p.url)) OR " \
-                     "  (media_p = i.id AND  ? IN (i.uri, i.url)) ) ) OR "
-                args.append(media_i)
-                args.append(media_u)
-                args.append(media_u)
-            q += "0) "
-        if begin is not None:
-            q += " AND a.fbegin = ?"
-            args.append(begin)
-        if begin_min is not None:
-            q += " AND a.fbegin >= ?"
-            args.append(begin_min)
-        if begin_max is not None:
-            q += " AND a.fbegin <= ?"
-            args.append(begin_max)
-        if end is not None:
-            q += " AND a.fend = ?"
-            args.append(end)
-        if end_min is not None:
-            q += " AND a.fend >= ?"
-            args.append(end_min)
-        if end_max is not None:
-            q += " AND a.fend <= ?"
-            args.append(end_max)
-
-        q += " ORDER BY fbegin, fend, media_p, media_i"
-
-        r = self._conn.execute(q, args)
+        selectfrom, where, args = self._annotation_query(
+            package_ids,
+            id, id_alt,
+            media, media_alt,
+            begin, begin_min, begin_max,
+            end, end_min, end_max,
+        )
+        r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
     def iter_relations(self, package_ids,
@@ -938,10 +859,8 @@ class _SqliteBackend(object):
         Yield tuples of the form (RELATION, package_id, id, mimetype, model, 
         url).
         """
-        assert _DF or not isinstance(package_ids, basestring)
-
         selectfrom, where, args = \
-            self._make_element_query(package_ids, RELATION, id, id_alt)
+            self._element_query(package_ids, RELATION, id, id_alt)
         r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
@@ -949,10 +868,8 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (VIEW, package_id, id, mimetype, model, url).
         """
-        assert _DF or not isinstance(package_ids, basestring)
-
         selectfrom, where, args = \
-            self._make_element_query(package_ids, VIEW, id, id_alt)
+            self._element_query(package_ids, VIEW, id, id_alt)
         r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
@@ -961,10 +878,8 @@ class _SqliteBackend(object):
         Yield tuples of the form (RESOURCE, package_id, id, mimetype, model, 
         url).
         """
-        assert _DF or not isinstance(package_ids, basestring)
-
         selectfrom, where, args = \
-            self._make_element_query(package_ids, RESOURCE, id, id_alt)
+            self._element_query(package_ids, RESOURCE, id, id_alt)
         r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
@@ -972,10 +887,8 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (TAG, package_id, id,).
         """
-        assert _DF or not isinstance(package_ids, basestring)
-
         selectfrom, where, args = \
-            self._make_element_query(package_ids, TAG, id, id_alt)
+            self._element_query(package_ids, TAG, id, id_alt)
         r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
@@ -983,10 +896,8 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (LIST, package_id, id,).
         """
-        assert _DF or not isinstance(package_ids, basestring)
-
         selectfrom, where, args = \
-            self._make_element_query(package_ids, LIST, id, id_alt)
+            self._element_query(package_ids, LIST, id, id_alt)
         r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
@@ -995,10 +906,8 @@ class _SqliteBackend(object):
         Yield tuples of the form (QUERY, package_id, id, mimetype, model,
         url).
         """
-        assert _DF or not isinstance(package_ids, basestring)
-
         selectfrom, where, args = \
-            self._make_element_query(package_ids, QUERY, id, id_alt)
+            self._element_query(package_ids, QUERY, id, id_alt)
         r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
@@ -1010,35 +919,139 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (IMPORT, package_id, id, url, uri).
         """
-        assert _DF or not isinstance(package_ids, basestring)
-        assert _DF or  id is None  or   id_alt is None
-        assert _DF or url is None  or  url_alt is None
-        assert _DF or uri is None  or  uri_alt is None
-
-        q = "SELECT ?, package, id, url, uri FROM Imports " \
-            "WHERE package IN (" + ",".join( "?" for i in package_ids ) + ")"
-        args = [IMPORT,] + list(package_ids)
-        if id is not None:
-            q += " AND id = ?"
-            args.append(id)
-        if id_alt is not None:
-            q += " AND id IN (" + ",".join( "?" for i in id_alt ) + ")"
-            args.extend(id_alt)
-        if url is not None:
-            q += " AND url = ?"
-            args.append(url)
-        if url_alt is not None:
-            q += " AND url IN (" + ",".join( "?" for i in url_alt ) + ")"
-            args.extend(url_alt)
-        if uri is not None:
-            q += " AND uri = ?"
-            args.append(uri)
-        if uri_alt is not None:
-            q += " AND uri IN (" + ",".join( "?" for i in uri_alt ) + ")"
-            args.extend(uri_alt)
-
-        r = self._conn.execute(q, args)
+        selectfrom, where, args = self._import_query(package_ids,
+                                                     id, id_alt,
+                                                     url, url_alt,
+                                                     uri, uri_alt,)
+        r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
+
+    # element counting
+
+    def media_count(self, package_ids,
+                    id=None,  id_alt=None,
+                    url=None, url_alt=None,
+                    foref=None, foref_alt=None,
+                   ):
+        """
+        Count the medias matching the criteria.
+        """
+        selectfrom, where, args = self._media_query(package_ids,
+                                                    id, id_alt,
+                                                    url, url_alt,
+                                                    foref, foref_alt)
+        r = self._conn.execute("select count(*) from (%s)"
+                                % (selectfrom+where),
+                                args)
+        return r.next()[0]
+
+    def annotation_count(self, package_ids,
+                         id=None,    id_alt=None,
+                         media=None, media_alt=None,
+                         begin=None, begin_min=None, begin_max=None,
+                         end=None,   end_min=None,   end_max=None,
+                        ):
+        """
+        Return the number of annotations matching the criteria.
+
+        ``media`` is the uri-ref of a media ;
+        ``media_alt`` is an iterable of uri-refs.
+        """
+        selectfrom, where, args = self._annotation_query(
+            package_ids,
+            id, id_alt,
+            media, media_alt,
+            begin, begin_min, begin_max,
+            end, end_min, end_max,
+        )
+        r = self._conn.execute("select count(*) from (%s)"
+                                % (selectfrom+where),
+                                args)
+        return r.next()[0]
+
+    def relation_count(self, package_ids,
+                       id=None, id_alt=None):
+        """
+        Return the number of relations matching the criteria.
+        """
+        selectfrom, where, args = \
+            self._element_query(package_ids, RELATION, id, id_alt)
+        r = self._conn.execute("select count(*) from (%s)"
+                                % (selectfrom+where),
+                                args)
+        return r.next()[0]
+
+    def view_count(self, package_ids, id=None, id_alt=None):
+        """
+        Return the number of views matching the criteria.
+        """
+        selectfrom, where, args = \
+            self._element_query(package_ids, VIEW, id, id_alt)
+        r = self._conn.execute("select count(*) from (%s)"
+                                % (selectfrom+where),
+                                args)
+        return r.next()[0]
+
+    def resource_count(self, package_ids, id=None, id_alt=None):
+        """
+        Return the number of resources matching the criteria.
+        """
+        selectfrom, where, args = \
+            self._element_query(package_ids, RESOURCE, id, id_alt)
+        r = self._conn.execute("select count(*) from (%s)"
+                                % (selectfrom+where),
+                                args)
+        return r.next()[0]
+
+    def tag_count(self, package_ids, id=None, id_alt=None):
+        """
+        Return the number of tags matching the criteria.
+        """
+        selectfrom, where, args = \
+            self._element_query(package_ids, TAG, id, id_alt)
+        r = self._conn.execute("select count(*) from (%s)"
+                                % (selectfrom+where),
+                                args)
+        return r.next()[0]
+
+    def list_count(self, package_ids, id=None, id_alt=None):
+        """
+        Return the number of lists matching the criteria.
+        """
+        selectfrom, where, args = \
+            self._element_query(package_ids, LIST, id, id_alt)
+        r = self._conn.execute("select count(*) from (%s)"
+                                % (selectfrom+where),
+                                args)
+        return r.next()[0]
+
+    def query_count(self, package_ids, id=None, id_alt=None):
+        """
+        Return the number of querties matching the criteria.
+        """
+        selectfrom, where, args = \
+            self._element_query(package_ids, QUERY, id, id_alt)
+        r = self._conn.execute("select count(*) from (%s)"
+                                % (selectfrom+where),
+                                args)
+        return r.next()[0]
+
+    def import_count(self, package_ids,
+                     id=None,   id_alt=None,
+                     url=None,  url_alt=None,
+                     uri=None,  uri_alt=None,
+                    ):
+        """
+        Return the number of imports matching the criteria.
+        """
+        selectfrom, where, args = self._import_query(package_ids,
+                                                     id, id_alt,
+                                                     url, url_alt,
+                                                     uri, uri_alt,)
+        r = self._conn.execute("select count(*) from (%s)"
+                                % (selectfrom+where),
+                                args)
+        return r.next()[0]
 
     # element updating
 
@@ -1495,7 +1508,7 @@ class _SqliteBackend(object):
         """
         assert _DF or self.has_element(package_id, id, RELATION)
         if n < 0:
-            n = self.count_members(package_id, id)
+            n = self.member_count(package_id, id)
         assert _DF or -1 <= pos <= n, pos
         p,s = _split_id_ref(member) # also assert that member has depth < 2
         assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
@@ -1525,7 +1538,7 @@ class _SqliteBackend(object):
         ``member`` is the id-ref of an own or directly imported member.
         """
         assert _DF or self.has_element(package_id, id, RELATION)
-        assert _DF or 0 <= pos < self.count_members(package_id, id), pos
+        assert _DF or 0 <= pos < self.member_count(package_id, id), pos
 
         p,s = _split_id_ref(member) # also assert that member has depth < 2
         assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
@@ -1539,7 +1552,7 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             raise InternalError("could not update", e)
 
-    def count_members(self, package_id, id):
+    def member_count(self, package_id, id):
         """
         Count the members of the identified relations.
 
@@ -1559,12 +1572,12 @@ class _SqliteBackend(object):
         """
         assert _DF or self.has_element(package_id, id, RELATION)
         if __debug__:
-            n = self.count_members(package_id, id)
+            n = self.member_count(package_id, id)
             assert _DF or -n <= pos < n, pos
 
         if pos < 0:
             if n < 0:
-                n = self.count_members(package_id, id)
+                n = self.member_count(package_id, id)
             pos += n
 
         q = "SELECT join_id_ref(member_p,member_i) AS member " \
@@ -1588,7 +1601,7 @@ class _SqliteBackend(object):
         Remove the member at the given position in the identified relation.
         """
         assert _DF or self.has_element(package_id, id, RELATION)
-        assert _DF or 0 <= pos < self.count_members(package_id, id), pos
+        assert _DF or 0 <= pos < self.member_count(package_id, id), pos
 
         execute = self._curs.execute
         self._begin_transaction()
@@ -1657,7 +1670,7 @@ class _SqliteBackend(object):
         """
         assert _DF or self.has_element(package_id, id, LIST)
         if n < 0:
-            n = self.count_items(package_id, id)
+            n = self.item_count(package_id, id)
         assert _DF or -1 <= pos <= n, pos
         p,s = _split_id_ref(item) # also assert that item has depth < 2
         assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
@@ -1687,7 +1700,7 @@ class _SqliteBackend(object):
         ``item`` is the id-ref of an own or directly imported item.
         """
         assert _DF or self.has_element(package_id, id, LIST)
-        assert _DF or 0 <= pos < self.count_items(package_id, id), pos
+        assert _DF or 0 <= pos < self.item_count(package_id, id), pos
 
         p,s = _split_id_ref(item) # also assert that item has depth < 2
         assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
@@ -1701,7 +1714,7 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             raise InternalError("could not update", e)
 
-    def count_items(self, package_id, id):
+    def item_count(self, package_id, id):
         """
         Count the items of the identified lists.
 
@@ -1721,12 +1734,12 @@ class _SqliteBackend(object):
         """
         assert _DF or self.has_element(package_id, id, LIST)
         if __debug__:
-            n = self.count_items(package_id, id)
+            n = self.item_count(package_id, id)
             assert _DF or -n <= pos < n, pos
 
         if pos < 0:
             if n < 0:
-                n = self.count_items(package_id, id)
+                n = self.item_count(package_id, id)
             pos += n
 
         q = "SELECT join_id_ref(item_p,item_i) AS item " \
@@ -1750,7 +1763,7 @@ class _SqliteBackend(object):
         Remove the item at the given position in the identified list.
         """
         assert _DF or self.has_element(package_id, id, LIST)
-        assert _DF or 0 <= pos < self.count_items(package_id, id), pos
+        assert _DF or 0 <= pos < self.item_count(package_id, id), pos
 
         execute = self._curs.execute
         self._begin_transaction()
@@ -2009,15 +2022,17 @@ class _SqliteBackend(object):
         execute("INSERT INTO Elements VALUES (?,?,?)",
                 (package_id, id, element_type))
 
-    def _make_element_query(self, package_ids, element_type,
-                              id=None, id_alt=None):
+    def _element_query(self, package_ids, element_type,
+                       id=None, id_alt=None):
         """
         Return the selectfrom part of the query, the where part of the query,
         and the argument list, of a query returning all the elements
         matching the parameters.
 
+        The result has structure (type, package_id, id,).
         If element_type is a type with content, content fields are added.
         """
+        assert _DF or not isinstance(package_ids, basestring)
         assert _DF or id is None or id_alt is None
 
         s = "SELECT e.typ, e.package, e.id%s FROM Elements e%s"
@@ -2039,6 +2054,170 @@ class _SqliteBackend(object):
             args.extend(id_alt)
 
         return s,w,args
+
+    def _media_query(self, package_ids,
+                     id=None,  id_alt=None,
+                     url=None, url_alt=None,
+                     foref=None, foref_alt=None,
+                    ):
+        """
+        Return the selectfrom part of the query, the where part of the query,
+        and the argument list, of a query returning all the medias matching the
+        parameters.
+
+        The result has structure (MEDIA, package_id, id, url,).
+        """
+        assert _DF or not isinstance(package_ids, basestring)
+        assert _DF or (   id is None  or     id_alt is None), ( id,  id_alt)
+        assert _DF or (  url is None  or    url_alt is None), (url, url_alt)
+        assert _DF or (foref is None  or  foref_alt is None), (url, url_alt)
+
+        q0 = "SELECT ?, package, id, url, foref FROM Medias "
+        q = "WHERE package IN (" + ",".join( "?" for i in package_ids ) + ")"
+        args = [MEDIA,] + list(package_ids)
+        if id is not None:
+            q += " AND id = ?"
+            args.append(id)
+        if id_alt is not None:
+            q += " AND id IN (" + ",".join( "?" for i in id_alt ) + ")"
+            args.extend(id_alt)
+        if url is not None:
+            q += " AND url = ?"
+            args.append(url)
+        if url_alt is not None:
+            q += " AND url IN (" + ",".join( "?" for i in url_alt ) + ")"
+            args.extend(url_alt)
+        if foref is not None:
+            q += " AND foref = ?"
+            args.append(foref)
+        if foref_alt is not None:
+            q += " AND foref IN (" + ",".join( "?" for i in foref_alt ) + ")"
+            args.extend(foref_alt)
+
+        return q0, q, args
+
+    def _annotation_query(self, package_ids,
+                          id=None,    id_alt=None,
+                          media=None, media_alt=None,
+                          begin=None, begin_min=None, begin_max=None,
+                          end=None,   end_min=None,   end_max=None,
+                         ):
+        """
+        Return the selectfrom part of the query, the where part of the query,
+        and the argument list, of a query returning all the annotations
+        matching the parameters.
+
+        The result has structure (ANNOTATION, package_id, id, media, begin,
+        end, mimetype, model, url), ordered by begin, end and media id-ref.
+
+        ``media`` is the uri-ref of a media ;
+        ``media_alt`` is an iterable of uri-refs.
+        """
+        assert _DF or not isinstance(package_ids, basestring)
+        assert _DF or    id is None or    id_alt is None
+        assert _DF or media is None or media_alt is None
+        assert _DF or begin is None or begin_min is None and begin_max is None
+        assert _DF or   end is None or   end_min is None and   end_max is None
+
+        if media is not None:
+            media_alt = (media,)
+
+        q0 = "SELECT ?, a.package, a.id, " \
+             "       join_id_ref(media_p, media_i) as media, " \
+             "       fbegin, fend, " \
+             "       c.mimetype, join_id_ref(c.model_p, c.model_i), c.url " \
+             "FROM Annotations a %s " \
+             "JOIN Contents c ON c.package = a.package AND c.element = a.id "
+        q = "WHERE a.package IN (" + ",".join( "?" for i in package_ids ) + ")"
+        args = [ANNOTATION,] + list(package_ids)
+        if media_alt is not None:
+            q0 %= "JOIN Packages p ON a.package = p.id "\
+                 "LEFT JOIN Imports i " \
+                 "  ON a.package = i.package AND a.media_p = i.id"
+        else:
+            q0 %= ""
+        if id is not None:
+            q += " AND a.id = ?"
+            args.append(id)
+        if id_alt is not None:
+            q += " AND a.id IN (" + ",".join( "?" for i in id_alt ) + ")"
+            args.extend(id_alt)
+        # NB: media is managed as media_alt (cf. above)
+        if media_alt is not None:
+            q += "AND ("
+            for m in media_alt:
+                media_u, media_i = _split_uri_ref(m)
+                q += "(media_i = ? " \
+                     " AND (" \
+                     "  (media_p = ''   AND  ? IN (p.uri, p.url)) OR " \
+                     "  (media_p = i.id AND  ? IN (i.uri, i.url)) ) ) OR "
+                args.append(media_i)
+                args.append(media_u)
+                args.append(media_u)
+            q += "0) "
+        if begin is not None:
+            q += " AND a.fbegin = ?"
+            args.append(begin)
+        if begin_min is not None:
+            q += " AND a.fbegin >= ?"
+            args.append(begin_min)
+        if begin_max is not None:
+            q += " AND a.fbegin <= ?"
+            args.append(begin_max)
+        if end is not None:
+            q += " AND a.fend = ?"
+            args.append(end)
+        if end_min is not None:
+            q += " AND a.fend >= ?"
+            args.append(end_min)
+        if end_max is not None:
+            q += " AND a.fend <= ?"
+            args.append(end_max)
+
+        q += " ORDER BY fbegin, fend, media_p, media_i"
+
+        return q0, q, args
+
+    def _import_query(self, package_ids,
+                      id=None,   id_alt=None,
+                      url=None,  url_alt=None,
+                      uri=None,  uri_alt=None,
+                    ):
+        """
+        Return the selectfrom part of the query, the where part of the query,
+        and the argument list, of a query returning all the imports matching
+        the parameters.
+
+        The result has structure (IMPORT, package_id, id, url, uri).
+        """
+        assert _DF or not isinstance(package_ids, basestring)
+        assert _DF or  id is None  or   id_alt is None
+        assert _DF or url is None  or  url_alt is None
+        assert _DF or uri is None  or  uri_alt is None
+
+        q0 = "SELECT ?, package, id, url, uri FROM Imports "
+        q = "WHERE package IN (" + ",".join( "?" for i in package_ids ) + ")"
+        args = [IMPORT,] + list(package_ids)
+        if id is not None:
+            q += " AND id = ?"
+            args.append(id)
+        if id_alt is not None:
+            q += " AND id IN (" + ",".join( "?" for i in id_alt ) + ")"
+            args.extend(id_alt)
+        if url is not None:
+            q += " AND url = ?"
+            args.append(url)
+        if url_alt is not None:
+            q += " AND url IN (" + ",".join( "?" for i in url_alt ) + ")"
+            args.extend(url_alt)
+        if uri is not None:
+            q += " AND uri = ?"
+            args.append(uri)
+        if uri_alt is not None:
+            q += " AND uri IN (" + ",".join( "?" for i in uri_alt ) + ")"
+            args.extend(uri_alt)
+
+        return q0, q, args
 
 
 # NB: the wrapping of cursors into _FlushableIterators could be implemented

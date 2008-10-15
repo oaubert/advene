@@ -34,7 +34,7 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
             self._cache = []
             self._ids = []
         else:
-            c = owner._backend.count_members(owner._id, self._id)
+            c = owner._backend.member_count(owner._id, self._id)
             self._cache = [None,] * c
             self._ids = [None,] * c
 
