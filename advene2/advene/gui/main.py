@@ -2547,7 +2547,7 @@ class AdveneGUI(object):
         # updated in the handle_new_type/schema_selection callback.            
         new_schema_dialog=gtk.VBox()
 
-        schemas=list(self.controller.package.schemas)
+        schemas=list(self.controller.package.all.schemas)
         newschema=helper.TitledElement(value=None,
                                        title=_("Create a new schema"))
         schemas.append(newschema)
