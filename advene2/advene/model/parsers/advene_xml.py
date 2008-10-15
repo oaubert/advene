@@ -133,7 +133,6 @@ class _Parser(XmlParserBase):
         elem = stream.elem
         if stream.event == "start" \
         and elem.tag == self.tag_template % tag:
-            self.required(items_name, *args, **kw)
             self.sequence(items_name, *args, **kw)
             self._check_end(elem)
         else:
