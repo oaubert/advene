@@ -164,7 +164,9 @@ class Config(object):
             'edit-height': 25,
             }
 
-        self.namespace = "http://experience.univ-lyon1.fr/advene/ns/advenetool"
+        self.namespace="http://experience.univ-lyon1.fr/advene/ns/advenetool"
+        self.transientns="http://advene.liris.cnrs.fr/ns/transient/"
+        #advene.model.serializers.unserialized.register_unzerialized_meta_prefix(ton_prefixe)
 
         # These files are stored in the resources directory
         self.templatefilename = "template.azp"
