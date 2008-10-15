@@ -219,7 +219,7 @@ class Package(object, WithMetaMixin, DirtyMixin):
     def _set_uri(self, uri):
         if uri is None: uri = ""
         self._uri = uri
-        self.add_cleaning_operation_once(self._backend.set_uri,
+        self.add_cleaning_operation_once(self._backend.update_uri,
                                          self._id, self._uri)
 
     @autoproperty
