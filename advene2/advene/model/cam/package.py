@@ -77,7 +77,7 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
         cam.Package. Use instead `count_user_tags`.
         """
         if _guard: warn("use count_user_tags instead", UnsafeUseWarning, 2)
-        return super(_OwnGroup, self).count_tags()
+        return super(_AllGroup, self).count_tags()
 
     def count_user_tags(self):
         o = self._owner
@@ -103,7 +103,7 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
         cam.Package. Use instead `count_user_lists`.
         """
         if _guard: warn("use count_user_lists instead", UnsafeUseWarning, 2)
-        return super(_OwnGroup, self).count_lists()
+        return super(_AllGroup, self).count_lists()
 
     def count_user_lists(self):
         o = self._owner
