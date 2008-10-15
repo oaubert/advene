@@ -318,7 +318,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
         Note that the file will be silently erased if it already exists.
         """
         p = urlparse(self._url)
-        if p.scheme != "file":
+        if p.scheme not in ('file', ''):
             raise ValueError("Can not save to URL %s" % self._url)
         filename = url2pathname(p.path)
 
