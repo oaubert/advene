@@ -31,8 +31,7 @@ class WithMetaMixin:
         """Iter over all the metadata of this object.
 
         Yields (key, value) pairs, where the value is either a string or an
-        element. An exception will be raised whenever an unreachable element is
-        to be yielded.
+        element. If the element is unreachable, value is None.
 
         See also `iter_meta_ids`.
         """
@@ -54,11 +53,12 @@ class WithMetaMixin:
                     tpl = v
                     v = tpl[0]()
                     if v is None:
-                        v = p.get_element(tpl[1], _RAISE)
+                        v = p.get_element(tpl[1], None)
                 yield k, v
         else:
             # retrieve data from backend and cache them
             cache = self.__cache
+            complete = True
             if cache is None:
                 cache = self.__cache = SortedDict()
             for k, v, v_is_id in p._backend.iter_meta(p._id, eid, typ):
@@ -66,13 +66,16 @@ class WithMetaMixin:
                     # it is no use looking in cache: if the element is in it,
                     # then it will also be in the package's cache, and the
                     # retrieval from the package will be as efficient
-                    e = p.get_element(v, _RAISE)
-                    cache[k] = (ref(e), v)
+                    e = p.get_element(v, None)
+                    if e is not None:
+                        cache[k] = (ref(e), v)
+                    else:
+                        complete = False
                     v = e
                 else:
                     cache[k] = v
                 yield k, v
-            self.__cache_is_complete = True
+            self.__cache_is_complete = complete
 
     def iter_meta_ids(self):
         """Iter over all the metadata of this object.

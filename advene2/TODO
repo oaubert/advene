@@ -9,8 +9,6 @@ Important improvements
 - augment backend method iter_tags_with_element with attributes tag_with_prefix
   and tag_exclude_prefix ; may be symetric iter_elements_with_tags
 
-- change iter_meta and iter_meta_ids
-
 - remove all list generations ending with "," in backends/sqlite.py
 
 - replace executescript by a list of execute in backends/sqlite.py -- 

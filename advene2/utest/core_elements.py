@@ -709,6 +709,8 @@ class TestUnreachable(TestCase):
         d = p1["desc"]
         ref = [(dc_creator, "pchampin"), (dc_description, "desc"),
                (rdfs_seeAlso, "p2:m"),]
+        ref2 = [(dc_creator, "pchampin"), (dc_description, d),
+                (rdfs_seeAlso, None),]
         refiid = [False, True, True,]
         def mapiid1(L):
             return [ v.is_id for v in L ]
@@ -718,11 +720,12 @@ class TestUnreachable(TestCase):
         p1.meta.keys() # no exception when iterating over keys only
         list(p1.meta.iterkeys()) # no exception when iterating over keys only
         list(p1.meta) # no exception when iterating over keys only
-        self.assertRaises(exception_type, list, p1.iter_meta())
-        self.assertRaises(exception_type, list, p1.meta.iteritems())
-        self.assertRaises(exception_type, list, p1.meta.itervalues())
-        self.assertRaises(exception_type, p1.meta.items)
-        self.assertRaises(exception_type, p1.meta.values)
+
+        self.assertEquals(ref2, list(p1.iter_meta()))
+        self.assertEquals(ref2, list(p1.meta.iteritems()))
+        self.assertEquals(ref2, p1.meta.items())
+        self.assertEquals([v for k,v in ref2], list(p1.meta.itervalues()))
+        self.assertEquals([v for k,v in ref2], p1.meta.values())
         self.assertEqual(ref, list(p1.iter_meta_ids()))
         self.assertEqual(ref, list(p1.meta.iteritems_ids()))
         self.assertEqual(ref, p1.meta.items_ids())
