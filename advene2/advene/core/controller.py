@@ -319,6 +319,15 @@ class AdveneController(object):
         """
         self.gui=gui
 
+    def register_event(self, name, description, modifying=False):
+        """Register a new event.
+        """
+        catalog=self.event_handler.catalog
+        catalog.basic_events.append(name)
+        catalog.event_names[name]=description
+        if modifying:
+            catalog.modifying_events.add(name)
+        
     def register_view(self, view):
         """Register a view.
         """
