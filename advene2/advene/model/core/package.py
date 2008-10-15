@@ -423,6 +423,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         if colon <= 0:
             return self._get_own_element(id, tuple, default)
         else:
+            assert tuple is None # tuple should not be used for imported elts
             imp = id[:colon]
             pkg = self._imports_dict.get(imp)
             if pkg is None:

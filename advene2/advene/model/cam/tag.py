@@ -3,18 +3,37 @@ from advene.model.cam.element import CamElementMixin
 from advene.model.core.tag import Tag as CoreTag
 
 class Tag(CoreTag, CamElementMixin):
+
+    @classmethod
+    def instantiate(cls, owner, id):
+        r = super(Tag, cls).instantiate(owner, id)
+        r._transtype()
+        return r
+
     def set_meta(self, key, value, val_is_idref=False, _guard=True):
-        # transtype Tag when CAMSYS_TYPE is updated
         if key == CAMSYS_TYPE:
-            if value == "annotation-type":
-                newtype = AnnotationType
-            elif value == "relation-type":
-                newtype = RelationType
-            else:
-                newtype = Tag
-            if self.__class__ is not newtype:
-                self.__class__ = newtype
+            self._transtype(value)
         return super(Tag, self).set_meta(key, value, val_is_idref, _guard)
+
+    def _transtype(self, systype=None):
+        """
+        Transtypes this Tag to the appropriate subclass according to the given
+        systype (assumed to be the current or future systype).
+
+        If systype is omitted, it is retrieved from the metadata.
+        """
+        if systype is None:
+            systype = self.get_meta(CAMSYS_TYPE, None)
+        if systype == "annotation-type":
+            newtype = AnnotationType
+        elif systype == "relation-type":
+            newtype = RelationType
+        else:
+            newtype = Tag
+        if self.__class__ is not newtype:
+            self.__class__ = newtype
+
+
 
 class AnnotationType(Tag):
     """

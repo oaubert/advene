@@ -37,7 +37,7 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
 
     def iter_annotation_types(self):
         o = self._owner
-        meta = [(CAMSYS_TYPE, "annotation-type", False)] 
+        meta = [(CAMSYS_TYPE, "annotation-type", False)]
         for be, pdict in o._backends_dict.items():
             for i in be.iter_tags(pdict, meta=meta):
                 yield pdict[i[1]].get_element(i)

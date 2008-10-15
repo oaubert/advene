@@ -3,6 +3,14 @@ Important improvements
 
 - finish the implementation of utest/core_package test_modify_X methods
 
+- implement annotations.__in__(self, an_int)
+
+- implement methods to access relations in Annotation
+
+- implement Package.get_by_uriref(uriref)
+
+- export advene1 -> advene2 (in advene1)
+
 - automatically fill creator/contributor and dates metadata
 
 - prevent annotations/relations to be untyped
