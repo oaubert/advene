@@ -1,10 +1,10 @@
 from advene.model.cam.consts import CAM_TYPE, CAMSYS_TYPE
-from advene.model.cam.element import CamElement
+from advene.model.cam.element import CamElementMixin
 from advene.model.cam.exceptions import SemanticError
 from advene.model.core.annotation import Annotation as CoreAnnotation
 from advene.model.core.element import TAG
 
-class Annotation(CoreAnnotation, CamElement):
+class Annotation(CoreAnnotation, CamElementMixin):
 
     def set_meta(self, key, value, val_is_idref=False, _guard=True):
         if key == CAM_TYPE:

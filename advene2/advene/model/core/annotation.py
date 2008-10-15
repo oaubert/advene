@@ -3,9 +3,11 @@ I define the class of annotations.
 """
 
 from advene.model.consts import _RAISE
-from advene.model.core.element import PackageElement, ANNOTATION, MEDIA
+from advene.model.core.element import PackageElement, \
+                                      ANNOTATION, MEDIA, RESOURCE
 from advene.model.core.content import WithContentMixin
 from advene.util.autoproperty import autoproperty
+
 
 class Annotation(PackageElement, WithContentMixin):
     """FIXME: missing docstring.
@@ -13,22 +15,40 @@ class Annotation(PackageElement, WithContentMixin):
 
     ADVENE_TYPE = ANNOTATION
 
-    def __init__(self, owner, id, media, begin, end, mimetype, model, url):
-        """FIXME: missing docstring.
+    @classmethod
+    def instantiate(cls, owner, id,
+                    media, begin, end, mimetype, model, url):
         """
-        PackageElement.__init__(self, owner, id)
-        if not hasattr(media, "ADVENE_TYPE"):
-            # internally, we sometimes pass backend data directly,
-            # where media is an id-ref rather than a Media instance
-            self._media_id = media
-            self._media = None
-        else:
-            self._set_media(media, _init=True)
-        self._begin = begin
-        self._end   = end
-        self._set_content_mimetype(mimetype, _init=True)
-        self._set_content_model(model, _init=True)
-        self._set_content_url(url, _init=True)
+        Factory method to create an instance based on backend data.
+        """
+        r = super(Annotation, cls).instantiate(owner, id)
+        r._begin = begin
+        r._end = end
+        r._media_id = media
+        r._media = None
+        r._instantiate_content(mimetype, model, url)
+        return r
+
+    @classmethod
+    def create_new(cls, owner, id,
+                   media, begin, end, mimetype, model, url):
+        """
+        Factory method to create a new instance both in memory and backend.
+        """
+        media_id = PackageElement._check_reference(owner, media, MEDIA, True)
+        begin = int(begin)
+        end = int(end)
+        model_id = PackageElement._check_reference(owner, model, RESOURCE)
+        cls._check_content_cls(mimetype, model_id, url)
+        owner._backend.create_annotation(owner._id, id, media_id, begin, end,
+                                         mimetype, model_id, url)
+        r = cls.instantiate(owner, id, media_id, begin, end,
+                            mimetype, model_id, url)
+        if media is not media_id:
+            # we have the instance, let's cache it now
+            r._media = media
+        return r
+
 
     def __str__(self):
         return "Annotation(%s,%s,%s)" % \
@@ -85,20 +105,13 @@ class Annotation(PackageElement, WithContentMixin):
         return self.get_media(_RAISE)
 
     @autoproperty
-    def _set_media(self, media, _init=False):
-        o = self._owner
-
-        assert media.ADVENE_TYPE == MEDIA
-        assert o._can_reference(media)
-
-        mid = media.make_id_in(o)
-        if not _init:
-            self.emit("pre-changed::media", "media", media)
+    def _set_media(self, media):
+        mid = self._check_reference(self._owner, media, MEDIA, True)
+        self.emit("pre-changed::media", "media", media)
         self._media_id = mid
         self._media = media
-        if not _init:
-            self.__store()
-            self.emit("changed::media", "media", media)
+        self.__store()
+        self.emit("changed::media", "media", media)
 
     @autoproperty
     def _get_media_id(self):

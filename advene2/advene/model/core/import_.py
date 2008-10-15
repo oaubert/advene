@@ -2,20 +2,47 @@
 I define the class Import.
 """
 
-from advene.model.exceptions import UnreachableImportError
+from advene.model.exceptions import ModelError, UnreachableImportError
+from advene.model.core.group import GroupMixin
 from advene.model.core.element import PackageElement, IMPORT
 from advene.util.autoproperty import autoproperty
- 
 
-class Import(PackageElement):
+class Import(PackageElement, GroupMixin):
 
-    ADVENE_TYPE = IMPORT 
+    ADVENE_TYPE = IMPORT
 
-    def __init__(self, owner, id, url, uri):
-        PackageElement.__init__(self, owner, id)
-        self._url = url
-        self._uri = uri
-        self._imported = owner._imports_dict.get(id)
+    @classmethod
+    def instantiate(cls, owner, id, url, uri):
+        r = super(Import, cls).instantiate(owner, id)
+        r._url = url
+        r._uri = uri
+        r._imported = owner._imports_dict.get(id)
+        return r
+
+    @classmethod
+    def create_new(cls, owner, id, package):
+        if id in owner._imports_dict:
+            # we can not wait for the backend to check that,
+            # because we will only create the import element in the backend
+            # when the internal structures of the packages are successfuly
+            # updated, so we need to be sure everything is ok
+            raise ModelError("Already have an import named %s" % id)
+        if package is owner:
+            raise ModelError("A package cannot import itself")
+        if [ p for p in owner._imports_dict.itervalues()
+                     if p is not None and
+                      (p.url == package.url or p.uri and p.uri == package.uri)
+        ]:
+            raise ModelError("Package already imported", p)
+
+        url, uri = package.url, package.uri # may access the backend
+        owner._imports_dict[id] = package
+        owner._update_backends_dict()
+        package._importers[owner] = id
+
+        owner._backend.create_import(owner._id, id, url, uri)
+        r = cls.instantiate(owner, id, url, uri)
+        return r
 
     def delete(self):
         super(Import, self).delete()
@@ -67,66 +94,57 @@ class Import(PackageElement):
         o = self._owner
         o._backend.update_import(o._id, self._id, self._url, self._uri)
 
-    # group interface
-
     def __contains__(self, element):
         if not self._imported:
             raise UnreachableImportError(self._id)
         return element in self._imported.own
 
-    @property
-    def medias(self):
-        if not self._imported:
-            raise UnreachableImportError(self._id)
-        return self._imported.own.medias
+    # group interface
 
-    @property
-    def annotations(self):
+    def iter_medias(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported.own.annotations
+        return self._imported.own.iter_medias()
 
-    @property
-    def relations(self):
+    def iter_annotations(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported.own.relations
+        return self._imported.own.iter_annotations()
 
-    @property
-    def views(self):
+    def iter_relations(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported.own.views
+        return self._imported.own.iter_relations()
 
-    @property
-    def resources(self):
+    def iter_views(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported.own.resources
+        return self._imported.own.iter_views()
 
-    @property
-    def tags(self):
+    def iter_resources(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported.own.tags
+        return self._imported.own.iter_resources()
 
-    @property
-    def lists(self):
+    def iter_tags(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported.own.lists
+        return self._imported.own.iter_tags()
 
-    @property
-    def imports(self):
+    def iter_lists(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported.own.imports
+        return self._imported.own.iter_lists()
 
-    @property
-    def queries(self):
+    def iter_imports(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported.own.queries
+        return self._imported.own.iter_imports()
+
+    def iter_queries(self):
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        return self._imported.own.iter_queries()
 
     # dict interface
 

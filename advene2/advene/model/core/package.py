@@ -65,7 +65,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
 
     def __init__(self, url, create=False, readonly=False, force=False):
         """FIXME: missing docstring.
-        
+
         @param url: the URL of the package
         @type url: string
         @param create: should the package be created ?
@@ -101,7 +101,6 @@ class Package(object, WithMetaMixin, WithEventsMixin):
                 elif claims.exception:
                     raise claims.exception
             else:
-                
                 try:
                     f = smart_urlopen(url)
                 except URLError:
@@ -322,7 +321,6 @@ class Package(object, WithMetaMixin, WithEventsMixin):
             self._url = url = "file:" + pathname2url(filename)
             self._backend.update_url(self._id, self._url)
             self._serializer = serializer
-        
 
     @autoproperty
     def _get_url(self):
@@ -396,7 +394,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
 
         If the element does not exist, an exception is raised (see below) 
         unless ``default`` is provided, in which case its value is returned.
-        
+
         An `UnreachableImportError` is raised if the given id involves an
         nonexistant or unreachable import. A `NoSuchElementError` is raised if
         the last item of the id-ref is not the id of an element in the 
@@ -442,16 +440,16 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def get_element_by_uriref(self, uriref, default_RAISE):
         """Get the element with the given uri-ref.
 
-        If the element does not exist, an exception is raised (see below) 
+        If the element does not exist, an exception is raised (see below)
         unless ``default`` is provided, in which case its value is returned.
-        
+
         FIXME: copied from get_element, but not adapted.
         An `UnreachableImportError` is raised if the given id involves an
         nonexistant or unreachable import. A `NoSuchElementError` is raised if
-        the last item of the id-ref is not the id of an element in the 
+        the last item of the id-ref is not the id of an element in the
         corresponding package.
 
-        Note that packages are also similar to python dictionaries, so 
+        Note that packages are also similar to python dictionaries, so
         `__getitem__` and `get` can also be used to get elements.
         """
         sharp = uriref.index("#")
@@ -478,7 +476,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
             else:
                 type, init = c[0], c[2:]
                 factory = getattr(self, _constructor[type])
-                r = factory(self, *init)
+                r = factory.instantiate(self, *init)
                 # NB: PackageElement.__init__ stores instances in _elements
         return r
 
@@ -549,129 +547,81 @@ class Package(object, WithMetaMixin, WithEventsMixin):
 
     # element creation
 
-    # NB: the element constructor is called *before* the backend method
-    # because the former makes some conversion between elements and id-refs,
-    # that we need to property invoke the backend method.
-    # This is why elements have an _initialize method, invoked after they have
-    # been actually created in the backend.
-
     def create_media(self, id, url, frame_of_reference=DEFAULT_FOREF):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id), "The identifier %s already exists" % id
-        r = self.media_factory(self, id, url, frame_of_reference)
-        self._backend.create_media(self._id, id, url, frame_of_reference)
+        r = self.media_factory.create_new(self, id, url, frame_of_reference)
         self.emit("created::media", r)
-        r._initialize()
         return r
 
     def create_annotation(self, id, media, begin, end,
                                 mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id), "The identifier %s already exists" % id
-        r = self.annotation_factory(self, id, media, begin, end,
-                                              mimetype, model, url)
-        self._backend.create_annotation(self._id, id, r.media_id, begin, end,
-                                        mimetype, r.content_model_id, url)
+        r = self.annotation_factory.create_new(
+            self, id, media, begin, end, mimetype, model, url)
         self.emit("created::annotation", r)
-        r._initialize()
         return r
 
     def create_relation(self, id, mimetype="x-advene/none", model=None,
                         url="", members=()):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id), "The identifier %s already exists" % id
-        r = self.relation_factory(self, id, mimetype, model, url, True)
-        self._backend.create_relation(self._id, id,
-                                      mimetype, r.content_model_id, url)
-        r.extend(members) # let r do it, with all the checking it needs
+        r = self.relation_factory.create_new(self, id, mimetype, model, url, members)
         self.emit("created::relation", r)
-        r._initialize()
         return r
 
     def create_view(self, id, mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id), "The identifier %s already exists" % id
-        r = self.view_factory(self, id, mimetype, model, url)
-        self._backend.create_view(self._id, id,
-                                  mimetype, r.content_model_id, url)
+        r = self.view_factory.create_new(self, id, mimetype, model, url)
         self.emit("created::view", r)
-        r._initialize()
         return r
 
     def create_resource(self, id, mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id), "The identifier %s already exists" % id
-        r =  self.resource_factory(self, id, mimetype, model, url)
-        self._backend.create_resource(self._id, id,
-                                      mimetype, r.content_model_id, url)
+        r =  self.resource_factory.create_new(self, id, mimetype, model, url)
         self.emit("created::resource", r)
-        r._initialize()
         return r
 
     def create_tag(self, id):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id), "The identifier %s already exists" % id
-        r = self.tag_factory(self, id)
-        self._backend.create_tag(self._id, id)
+        r = self.tag_factory.create_new(self, id)
         self.emit("created::tag", r)
-        r._initialize()
         return r
 
     def create_list(self, id, items=()):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id), "The identifier %s already exists" % id
-        L = self.list_factory(self, id, True)
-        self._backend.create_list(self._id, id)
-        L.extend(items) # let L do it, with all the checking it needs
-        self.emit("created::list", L)
-        return L
+        r = self.list_factory.create_new(self, id, items)
+        self.emit("created::list", r)
+        return r
 
     def create_query(self, id, mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id), "The identifier %s already exists" % id
-        r = self.query_factory(self, id, mimetype, model, url)
-        self._backend.create_query(self._id, id,
-                                   mimetype, r.content_model_id, url)
+        r = self.query_factory.create_new(self, id, mimetype, model, url)
         self.emit("created::query", r)
-        r._initialize()
         return r
 
     def create_import(self, id, package):
         """FIXME: missing docstring.
         """
-        assert not self.has_element(id), "The identifier %s already exists" % id
-        assert package is not self, "A package cannot import itself"
-        assert not [ p for p in self._imports_dict.itervalues()
-                     if p is not None and
-                      (p.url == package.url or p.uri and p.uri == package.uri)
-                   ], "Package already imported"
-        uri = package.uri # may access the backend
-        self._backend.create_import(self._id, id, package._url, package.uri)
-
-        self._imports_dict[id] = package
-        self._update_backends_dict()
-        package._importers[self] = id
-        r = self.import_factory(self, id, package._url, uri)
+        r = self.import_factory.create_new(self, id, package)
         self.emit("created::import", r)
         return r
 
     def _create_import_in_parser(self, id, url, uri):
         """
-        As it name implies, this method is stricly reserced to parsers for
+        As it name implies, this method is stricly reserved to parsers for
         creating imports without actually loading them. It *must not* be
         called elsewhere (it would corrupt the package w.r.t. imports).
         """
         self._backend.create_import(self._id, id, url, uri)
         r = self.get(id)
-        r._initialize()
         return r
 
     # tags management

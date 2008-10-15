@@ -4,7 +4,7 @@ I define the class of relations.
 
 from advene.model.consts import _RAISE
 from advene.model.core.element \
-  import PackageElement, ANNOTATION, RELATION
+  import PackageElement, ANNOTATION, RELATION, RESOURCE
 from advene.model.core.content import WithContentMixin
 from advene.model.core.group import GroupMixin
 
@@ -24,19 +24,24 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
 
     ADVENE_TYPE = RELATION
 
-    def __init__(self, owner, id, mimetype, model, url, _new=False):
-        PackageElement.__init__(self, owner, id)
-        self._set_content_mimetype(mimetype, _init=True)
-        self._set_content_model(model, _init=True)
-        self._set_content_url(url, _init=True)
+    @classmethod
+    def instantiate(cls, owner, id, mimetype, model, url):
+        r = super(Relation, cls).instantiate(owner, id)
+        r._instantiate_content(mimetype, model, url)
+        c = owner._backend.count_members(owner._id, id)
+        r._cache = [None,] * c
+        r._ids = [None,] * c
+        return r
 
-        if _new:
-            self._cache = []
-            self._ids = []
-        else:
-            c = owner._backend.count_members(owner._id, self._id)
-            self._cache = [None,] * c
-            self._ids = [None,] * c
+    @classmethod
+    def create_new(cls, owner, id, mimetype, model, url, members=()):
+        model_id = PackageElement._check_reference(owner, model, RESOURCE)
+        cls._check_content_cls(mimetype, model_id, url)
+        owner._backend.create_relation(owner._id, id, mimetype, model_id, url)
+        r = cls.instantiate(owner, id, mimetype, model_id, url)
+        if members:
+            r.extend(members)
+        return r
 
     def __len__(self):
         return len(self._cache)
@@ -108,7 +113,7 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
                                  % (len(annotations), len(indices)))
             for i,j in enumerate(indices):
                 self.__setitem__(j, annotations[i])
-        
+
     def _del_slice(self,s):
         c = len(self._cache)
         indices = range(c)[s]
@@ -136,7 +141,7 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         o._backend.insert_member(o._id, self._id, aid, i, c)
         # NB: it is important to pass to the backend the length c computed
         # *before* inserting the member
-        
+
     def append(self, a):
         # this method accepts a strict id-ref instead of a real element
         o = self._owner

@@ -53,7 +53,7 @@ def fill_package_step_by_step(p, empty=False):
     p.set_meta(PARSER_META_PREFIX+"namespaces",
                "dc http://purl.org/dc/elements/1.1/")
     yield "done"
-    
+
 class TestDiffPackage(TestCase):
     def setUp(self):
         self.p1 = Package("file:/tmp/p1", create=True)
@@ -77,9 +77,11 @@ class TestDiffPackage(TestCase):
             diff = diff_packages(p2, p1)
             self.assertEqual(1, len(diff), (i, diff))
             fill_p2.next()
-            self.assertEqual([], diff_packages(p1, p2), i)
-            self.assertEqual([], diff_packages(p2, p1), i)
- 
+            diff = diff_packages(p1, p2)
+            self.assertEqual([], diff, "%s\n%r" % (i, diff))
+            diff = diff_packages(p2, p1)
+            self.assertEqual([], diff, "%s\n%r" % (i, diff))
+
     def test_several_steps(self):
         p1, p2 = self.p1, self.p2
         for i in fill_package_step_by_step(p1):

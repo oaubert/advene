@@ -575,14 +575,16 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, [])
 
     def test_modify_relation(self):
-        assert(False) # TODO
         k = DC_NS_PREFIX + "creator"
-        hid = self.p1.connect("annotation::changed", self.elt_handler)
+        hid = self.p1.connect("relation::changed-items", self.elt_handler)
         m = self.p1.create_media("m", "file:/tmp/foo.avi")
         m2 = self.p2.create_media("m", "file:/tmp/foo.avi")
         a = self.p1.create_annotation("a", m, 10, 20, "text/plain")
         a2 = self.p2.create_annotation("a", m2, 10, 20, "text/plain")
-        self.assertEqual(self.buf, [])
+        r = self.p1.create_relation("r", members=[a, a,])
+        r2 = self.p2.create_relation("r", members=[a2,])
+        self.assertEqual(len(self.buf), 2) # initial members cause changes
+        del self.buf[:]
         def do_changes(_=[1]):
             i = _[0] = _[0] + 1
             m.url = "file:/tmp/foo%s.avi" % i
@@ -590,30 +592,88 @@ class TestEvents(TestCase):
             m.set_meta(k, "creator%s" % i)
             a.end = 100 + i
             a.set_meta(k, "creator%s" % i)
+            r.append(a)
+            r2.append(a2)
+            r.set_meta(k, "creator%s" % i)
+            r2.set_meta(k, "creator%s" % i)
 
         do_changes()
-        self.assertEqual(self.buf, [(self.p1, a, "changed", ("end", a.end,)),])
+        self.assertEqual(self.buf,
+                         [(self.p1, r, "changed-items", (slice(2,2), [a,])),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("annotation::pre-changed", self.elt_handler)
+        hid = self.p1.connect("relation::pre-changed-items", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-                         [(self.p1, a, "pre-changed", ("end", a.end,)),])
+            [(self.p1, r, "pre-changed-items",(slice(3,3), [a,])),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("annotation::changed-meta", self.elt_handler)
+        hid = self.p1.connect("relation::changed-meta", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-                         [(self.p1, a, "changed-meta", (k, a.get_meta(k))),])
+            [(self.p1, r, "changed-meta", (k, r.get_meta(k))),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("annotation::pre-changed-meta", self.elt_handler)
+        hid = self.p1.connect("relation::pre-changed-meta", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-            [(self.p1, a, "pre-changed-meta", (k, a.get_meta(k))),])
+            [(self.p1, r, "pre-changed-meta", (k, r.get_meta(k))),])
+        del self.buf[:]
+        self.p1.disconnect(hid)
+
+        do_changes()
+        self.assertEqual(self.buf, [])
+
+    def test_modify_list(self):
+        k = DC_NS_PREFIX + "creator"
+        hid = self.p1.connect("list::changed-items", self.elt_handler)
+        m = self.p1.create_media("m", "file:/tmp/foo.avi")
+        m2 = self.p2.create_media("m", "file:/tmp/foo.avi")
+        a = self.p1.create_annotation("a", m, 10, 20, "text/plain")
+        a2 = self.p2.create_annotation("a", m2, 10, 20, "text/plain")
+        L = self.p1.create_list("L", items=[a, m,])
+        L2 = self.p2.create_list("L", items=[m2, a2,])
+        self.assertEqual(len(self.buf), 2) # initial members cause changes
+        del self.buf[:]
+        def do_changes(_=[1]):
+            i = _[0] = _[0] + 1
+            m.url = "file:/tmp/foo%s.avi" % i
+            m2.url = "file:/tmp/foo%s.avi" % i
+            m.set_meta(k, "creator%s" % i)
+            a.end = 100 + i
+            a.set_meta(k, "creator%s" % i)
+            L.append(a)
+            L2.append(a2)
+            L.set_meta(k, "creator%s" % i)
+            L2.set_meta(k, "creator%s" % i)
+
+        do_changes()
+        self.assertEqual(self.buf,
+                         [(self.p1, L, "changed-items", (slice(2,2), [a,])),])
+        del self.buf[:]
+        self.p1.disconnect(hid)
+
+        hid = self.p1.connect("list::pre-changed-items", self.elt_handler)
+        do_changes()
+        self.assertEqual(self.buf,
+            [(self.p1, L, "pre-changed-items",(slice(3,3), [a,])),])
+        del self.buf[:]
+        self.p1.disconnect(hid)
+
+        hid = self.p1.connect("list::changed-meta", self.elt_handler)
+        do_changes()
+        self.assertEqual(self.buf,
+            [(self.p1, L, "changed-meta", (k, L.get_meta(k))),])
+        del self.buf[:]
+        self.p1.disconnect(hid)
+
+        hid = self.p1.connect("list::pre-changed-meta", self.elt_handler)
+        do_changes()
+        self.assertEqual(self.buf,
+            [(self.p1, L, "pre-changed-meta", (k, L.get_meta(k))),])
         del self.buf[:]
         self.p1.disconnect(hid)
 

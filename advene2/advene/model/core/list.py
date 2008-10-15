@@ -16,7 +16,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
     """
 
     # Caching is performed as follow:
-    # __init__ retrieves the number of items, and builds self.__ids
+    # `instantiate` retrieves the number of items, and builds self.__ids
     # and self._cache, a list of id-refs and weakrefs respectively.
     # Whenever an index is accessed, the item if retrieved from self._cache.
     # If None, its id-ref is retrieved from self.__ids and the item is
@@ -25,17 +25,21 @@ class List(PackageElement, WithContentMixin, GroupMixin):
 
     ADVENE_TYPE = LIST
 
-    def __init__(self, owner, id, _new=False):
-        """FIXME: missing docstring.
-        """
-        PackageElement.__init__(self, owner, id)
-        if _new:
-            self._cache = []
-            self._ids   = []
-        else:
-            c = owner._backend.count_items(owner._id, self._id)
-            self._cache = [lambda: None,] * c
-            self._ids = [None,] * c
+    @classmethod
+    def instantiate(cls, owner, id):
+        r = super(List, cls).instantiate(owner, id)
+        c = owner._backend.count_items(owner._id, id)
+        r._cache = [lambda: None,] * c
+        r._ids = [None,] * c
+        return r
+
+    @classmethod
+    def create_new(cls, owner, id, items=()):
+        owner._backend.create_list(owner._id, id)
+        r = cls.instantiate(owner, id)
+        if items:
+            r.extend(items)
+        return r
 
     def __len__(self):
         return len(self._cache)
@@ -107,7 +111,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
                                  % (len(elements), len(indices)))
             for i,j in enumerate(indices):
                 self.__setitem__(j, elements[i])
-        
+
     def _del_slice(self,s):
         c = len(self._cache)
         indices = range(c)[s]
@@ -139,7 +143,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         o._backend.insert_item(o._id, self._id, aid, i, c)
         # NB: it is important to pass to the backend the length c computed
         # *before* inserting the item
-        
+
     def append(self, a):
         # this method accepts a strict id-ref instead of a real element
         o = self._owner

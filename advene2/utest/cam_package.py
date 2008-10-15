@@ -18,5 +18,6 @@ class TestInherit(TestCase):
         # (assuming of course that *all* differing behaviours are otherwise
         # tested here)
 
+
 if __name__ == "__main__":
     main()

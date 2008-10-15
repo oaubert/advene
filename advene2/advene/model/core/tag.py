@@ -17,8 +17,13 @@ class Tag(PackageElement, GroupMixin):
 
     ADVENE_TYPE = TAG 
 
-    def __init__(self, owner, id):
-        PackageElement.__init__(self, owner, id)
+    def __init__(self, owner, id, *a):
+        super(Tag, self).__init__(owner, id, *a)
+
+    @classmethod
+    def create_new(cls, owner, id):
+        owner._backend.create_tag(owner._id, id)
+        return cls.instantiate(owner, id)
 
     def __iter__(self):
         # required by GroupMixin

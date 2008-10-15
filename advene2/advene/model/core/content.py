@@ -20,7 +20,7 @@ from weakref import ref
 
 from advene.model.consts import _RAISE, PACKAGED_ROOT
 from advene.model.content.register import iter_content_handlers
-from advene.model.core.element import RELATION
+from advene.model.core.element import RELATION, RESOURCE
 from advene.model.exceptions import ModelError
 from advene.util.autoproperty import autoproperty
 from advene.util.files import recursive_mkdir
@@ -48,10 +48,24 @@ class WithContentMixin:
 
     It follows that content-related properties are not independant from one
     another. Property `content_mimetype` has higher priority, as it is used to
-    decide whether the content is empty or not (hence whether the other 
+    decide whether the content is empty or not (hence whether the other
     properties can be set or not). Then `content_url` is used to decide between
     the three other kinds of content, in order to decide whether `content_data`
     can be set or not. See the documentation of each property for more detail.
+
+    Content initialization
+    ======================
+
+    According to CODING_STYLE, a mixin class should not require any
+    initialization. However, whenever an element is instantiated from backend
+    data, its content information are available, so it would be a waste of
+    CPU time (and possibly network traffic) to reload those info from the
+    backend from the sake of purity.
+
+    Hence, this class provides a method _instantiate_content, to be used as an
+    optimizationin the instantiate class method of element classes.
+    However, the implementation does not rely on the fact that the mixin will
+    be initialized with this method.
 
     Content handler
     ===============
@@ -67,10 +81,59 @@ class WithContentMixin:
     __model_wref = staticmethod(lambda: None)
     __url        = None
     __data       = None # backend data, unless __as_file is not None
-    __as_file    = None 
+    __as_file    = None
     __handler    = None
 
     __cached_content = staticmethod(lambda: None)
+
+    def _instantiate_content(self, mimetype, model, url):
+        """
+        No integrity constraint is checked: the backend is assumed to be sane.
+        """
+        self.__mimetype = mimetype
+        self.__model_id = model
+        self.__url = url
+
+    def _check_content(self, mimetype=None, model_id=None, url=None):
+        """
+        Check that the provided values (assumed to be the future values of
+        the corresponding attributes) are valid and consistent (with each other
+        *and* with unmodified attributes).
+
+        NB: we do *not* check that model_id identifies a resource. Use
+        _check_reference for that.
+        """
+        if mimetype is not None:
+            if len(mimetype.split("/")) != 2:
+                raise ModelError("%r does not look like a mimetype" % mimetype)
+            if mimetype == "x-advene/none":
+                if self.ADVENE_TYPE != RELATION:
+                    raise ModelError("Only relations may have an empty content")
+                if model_id is None and self.__model_id != "":
+                    raise ModelError("Empty content must have no model")
+                if url is None and self.__url != "":
+                    raise ModelError("Empty content must have no URL")
+        if model_id is not None:
+            if model_id != "":
+                if mimetype == "x-advene/none" \
+                or mimetype is None and self.__mimetype == "x-advene/none":
+                    raise ModelError("Can not set model of empty content")
+        if url is not None:
+            if url != "":
+                if mimetype == "x-advene/none" \
+                or mimetype is None and self.__mimetype == "x-advene/none":
+                    raise ModelError("Can not set URL of empty content")
+
+    @classmethod
+    def _check_content_cls(cls, mimetype, model, url, _func=_check_content):
+        """
+        This is a classmethod variant of _check_content, to be use in
+        _instantiate (note that all parameters must be provided in this
+        variant).
+        """
+        # it happens that luring _check_content into using cls as self works
+        # and prevents us from writing redundant code
+        _func(cls, mimetype, model, url)
 
     def _update_content_handler(self):
         """See :class:`WithContentMixin` documentation."""
@@ -88,7 +151,7 @@ class WithContentMixin:
 
     def _load_content_info(self):
         """Load the content info (mimetype, model, url)."""
-        # should actually never be called
+        # should actually never be called if _instantiate is used.
         o = self._owner
         self.__mimetype, self.__model_id, self.__url = \
             o._backend.get_content_info(o._id, self._id, self.ADVENE_TYPE)
@@ -143,7 +206,7 @@ class WithContentMixin:
         See also `content_data`.
         """
         url = self.__url
-        if url is None: # should not happen, but that's safer
+        if url is None:
             self._load_content_info()
             url = self.__url
 
@@ -175,36 +238,33 @@ class WithContentMixin:
         unsettable. Note that it is only possible for relations.
         """
         r = self.__mimetype
-        if r is None: # should not happen, but that's safer
+        if r is None:
             self._load_content_info()
             r = self.__mimetype
         return r
 
     @autoproperty
-    def _set_content_mimetype(self, mimetype, _init=False):
-        if not _init and self.__mimetype is None: # shouldn't happen, but safer
+    def _set_content_mimetype(self, mimetype):
+        if self.__mimetype is None:
             self._load_content_info()
         if mimetype == "x-advene/none":
-            if  self.ADVENE_TYPE != RELATION:
-                raise ModelError("Only relations may have an empty content")
-            elif not _init:
-                self._set_content_model(None)
-                self._set_content_url("")
-                self._set_content_data("")
-        if not _init:
-            self.emit("pre-changed::content_mimetype", "content_mimetype",
-                      mimetype)
+            self._check_content(mimetype, "", "")
+            self._set_content_model(None)
+            self._set_content_url("")
+            self._set_content_data("")
+        else:
+            self._check_content(mimetype)
+        self.emit("pre-changed::content_mimetype", "content_mimetype", mimetype)
         self.__mimetype = mimetype
-        if not _init:
-            self.__store_info()
-            self.emit("changed::content_mimetype", "content_mimetype", mimetype)
+        self.__store_info()
+        self.emit("changed::content_mimetype", "content_mimetype", mimetype)
         self._update_content_handler()
 
-    @autoproperty       
+    @autoproperty
     def _get_content_model(self):
         """The resource used as the model of the content of this element.
 
-        None if that content has no model.  
+        None if that content has no model.
         If the model can not be retrieved, an exception is raised.
 
         See also `get_content_model` and `content_model_id`.
@@ -212,38 +272,30 @@ class WithContentMixin:
         return self.get_content_model(_RAISE)
 
     @autoproperty
-    def _set_content_model(self, resource, _init=False):
+    def _set_content_model(self, resource):
         """FIXME: missing docstring.
         """
-        # if _init is True, no backend operation is performed,
-        # and resource may be an id-ref rather than an element
-        # else, resource may be only a strict id-ref
-        if not _init and self.__model_id is None:
+        if self.__model_id is None:
             self._load_content_info()
-        if self.__mimetype == "x-advene/none" and (not _init or resource):
-            raise ModelError("Can not set model of empty content")
+        resource_id = self._check_reference(self._owner, resource, RESOURCE)
+        self._check_content(model_id=resource_id)
         op = self._owner
-        if resource and not op._can_reference(resource):
-            if hasattr(op, "ADVENE_TYPE"):
-                resource = op.make_id_for(resource)
-            raise ModelError("Package %s can not reference resource %s" %
-                             (op.uri, resource))
-
-        if not _init:
-            self.emit("pre-changed::content_model", "content_model", resource)
-        if resource is None or _init and resource == "":
-            self.__model_id = ""
+        self.emit("pre-changed::content_model", "content_model", resource)
+        if resource_id is not resource:
+            self.__model_id = resource_id
+            if resource is not None:
+                self.__model_wref  = ref(resource)
+            elif self.__model_wref() is not None:
+                del self.__model_wref
+        else:
             if self.__model_wref():
                 del self.__model_wref
-        elif hasattr(resource, "make_id_in"):
-            self.__model_id = resource.make_id_in(op)
-            self.__model_wref  = ref(resource)
-        else:
-            assert _init or ":" not in resource, "resource is not a strict id-ref and _init is False"
-            self.__model_id = unicode(resource)
-        if not _init:
-            self.__store_info()
-            self.emit("changed::content_model", "content_model", resource)
+            if resource is None:
+                self.__model_id = ""
+            else:
+                self.__model_id = unicode(resource_id)
+        self.__store_info()
+        self.emit("changed::content_model", "content_model", resource)
 
     @autoproperty
     def _get_content_model_id(self):
@@ -282,18 +334,13 @@ class WithContentMixin:
         return r
 
     @autoproperty
-    def _set_content_url(self, url, _init=False):
+    def _set_content_url(self, url):
         """See `_get_content_url`."""
-        if not _init and self.__url is None: # should not happen, but safer
+        if self.__url is None: # should not happen, but safer
             self._load_content_info()
-        if self.__mimetype == "x-advene/none" and (not _init or url):
-            raise ModelError("Can not set URL of empty content")
         if url == self.__url:
-            return
-        if _init:
-            self.__url = url
-            return
-
+            return # no need to perform the complicate things below
+        self._check_content(url=url)
         oldurl = self.__url
         if oldurl.startswith("packaged:"):
             # delete packaged data
@@ -327,14 +374,14 @@ class WithContentMixin:
                 # don't need to remove data from backend, that will be done
                 # when setting URL
 
-        self.emit("pre-changed::content_url", "content_url", url)       
+        self.emit("pre-changed::content_url", "content_url", url)
         self.__url = url
         self.__store_info()
         if not url:
             self.__store_data()
-        self.emit("changed::content_url", "content_url", url)       
+        self.emit("changed::content_url", "content_url", url)
 
-    @autoproperty       
+    @autoproperty
     def _get_content_data(self):
         """This property holds the data of the content.
 
@@ -492,7 +539,7 @@ class PackagedDataFile(file):
         self._element._WithContentMixin__as_file = None
         file.close(self)
         self._element = None
-    
+
 
 class ContentDataFile(object):
     """FIXME: missing docstring.

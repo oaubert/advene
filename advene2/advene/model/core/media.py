@@ -13,11 +13,19 @@ class Media(PackageElement):
 
     ADVENE_TYPE = MEDIA
 
-    def __init__(self, owner, id, url, frame_of_reference=DEFAULT_FOREF):
-        PackageElement.__init__(self, owner, id)
-        self._url = url
-        self._frame_of_reference = frame_of_reference
-        self._update_unit_and_origin()
+    @classmethod
+    def instantiate(cls, owner, id, url, frame_of_reference):
+        r = super(Media, cls).instantiate(owner, id)
+        r._url = url
+        r._frame_of_reference = frame_of_reference
+        r._update_unit_and_origin()
+        return r
+
+    @classmethod
+    def create_new(cls, owner, id, url, frame_of_reference, *a):
+        owner._backend.create_media(owner._id, id, url, frame_of_reference)
+        r = cls.instantiate(owner, id, url, frame_of_reference)
+        return r
 
     @autoproperty
     def _get_url(self):

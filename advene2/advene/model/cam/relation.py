@@ -1,11 +1,11 @@
 from advene.model.cam.consts import CAM_TYPE, CAMSYS_TYPE
-from advene.model.cam.element import CamElement
+from advene.model.cam.element import CamElementMixin
 from advene.model.cam.exceptions import SemanticError
 from advene.model.cam.group import CamGroupMixin
 from advene.model.core.relation import Relation as CoreRelation
 from advene.model.core.element import TAG
 
-class Relation(CamGroupMixin, CoreRelation, CamElement):
+class Relation(CamGroupMixin, CoreRelation, CamElementMixin):
     def __iter__(self):
         # necessary to override CamGroupMixin __iter__
         return CoreRelation.__iter__(self)

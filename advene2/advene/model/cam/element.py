@@ -4,26 +4,30 @@ from advene.model.cam.exceptions import SemanticError, UnsafeUseWarning
 from advene.model.core.element import PackageElement, ElementCollection
 from advene.model.tales import tales_property, tales_use_as_context
 
-from datetime import datetime
 from warnings import warn
 
-class CamElement(PackageElement):
-    def _initialize(self):
-        now = datetime.now().isoformat()
-        self.created = now
-        self.modified = now
+class CamElementMixin(PackageElement):
+    """
+    This mixin class implement the behaviour specific to the Cinelab
+    Application Model.
+    It must necessarily be mixed in a subclass of PackageElement. To ensure
+    correct MRO, it explicitly inherit PackageElement, but it is indeed a mixin
+    class (having no implication in instance creation).
+    """
+
+    # inheriting object is required because we use super()
 
     def set_meta(self, key, value, val_is_idref=False, _guard=True):
         if _guard:
             if key == CAMSYS_TYPE:
                 raise SemanticError("cam:system-type can not be changed")
-        return super(CamElement, self).set_meta(key, value, val_is_idref)
+        return super(CamElementMixin, self).set_meta(key, value, val_is_idref)
 
     def del_meta(self, key, _guard=True):
         if _guard:
             if key == CAMSYS_TYPE:
                 raise SemanticError("cam:system-type can not be changed")
-        return super(CamElement, self).del_meta(key)
+        return super(CamElementMixin, self).del_meta(key)
 
     def iter_my_tags(self, package=None, inherited=True, _guard=True):
         """
@@ -31,7 +35,7 @@ class CamElement(PackageElement):
         cam.Package. Use instead `iter_my_user_tags`.
         """
         if _guard: warn("use iter_my_user_tags instead", UnsafeUseWarning, 2)
-        return super(CamElement, self).iter_my_tags(package, inherited)
+        return super(CamElementMixin, self).iter_my_tags(package, inherited)
 
     def iter_my_user_tags(self, package=None, inherited=True):
         for t in self.iter_my_tags(package, inherited, _guard=False):
@@ -44,7 +48,7 @@ class CamElement(PackageElement):
         cam.Package. Use instead `iter_my_user_tag_ids`.
         """
         if _guard: warn("use iter_my_user_tag_ids instead", UnsafeUseWarning, 2)
-        return super(CamElement, self).iter_my_tag_ids(package, inherited)
+        return super(CamElementMixin, self).iter_my_tag_ids(package, inherited)
 
     def iter_my_user_tag_ids(self, package=None, inherited=True, _guard=True):
         """
@@ -56,7 +60,7 @@ class CamElement(PackageElement):
         # check tags metadata cam:system-type to decide that they are
         # user-tags.
         type = self.get_meta(CAM_TYPE, None)
-        all = super(CamElement, self).iter_my_tag_ids(package, inherited)
+        all = super(CamElementMixin, self).iter_my_tag_ids(package, inherited)
         if type is None:
             return all
         else:
@@ -80,13 +84,15 @@ class CamElement(PackageElement):
         return TagCollection(self._owner)
 
 
-CamElement.make_metadata_property(DC_NS_PREFIX + "creator", default="")
-CamElement.make_metadata_property(DC_NS_PREFIX + "contributor", default="")
-CamElement.make_metadata_property(DC_NS_PREFIX + "created", default=None)
-CamElement.make_metadata_property(DC_NS_PREFIX + "modified", default=None)
+_make_meta = CamElementMixin.make_metadata_property
 
-CamElement.make_metadata_property(DC_NS_PREFIX + "title", default=None)
-CamElement.make_metadata_property(DC_NS_PREFIX + "description", default=None)
+_make_meta(DC_NS_PREFIX + "creator", default="")
+_make_meta(DC_NS_PREFIX + "contributor", default="")
+_make_meta(DC_NS_PREFIX + "created", default=None)
+_make_meta(DC_NS_PREFIX + "modified", default=None)
 
-CamElement.make_metadata_property(RDFS_NS_PREFIX + "seeAlso", default=None)
+_make_meta(DC_NS_PREFIX + "title", default=None)
+_make_meta(DC_NS_PREFIX + "description", default=None)
+
+_make_meta(RDFS_NS_PREFIX + "seeAlso", default=None)
 

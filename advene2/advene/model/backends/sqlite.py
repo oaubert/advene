@@ -6,7 +6,6 @@ A backend module can be registered by invoking
 implement 4 functions: `claims_for_create` , `claims_for_bind` , create_ and
 bind_ . The two latters return a *backend instance* with a standard API, for
 which `_SqliteBackend` provides a reference implementation.
-
 """
 
 #TODO: the backend does not ensure an exclusive access to the sqlite file.
@@ -36,6 +35,9 @@ BACKEND_VERSION = "1.2"
 IN_MEMORY_URL = "sqlite:%3Amemory%3A"
 
 _DF = True # means that assert will succeed, i.e. *no* debug
+# this flag exists so that assertion do not impair efficiency *even* in
+# non-optimized mode (because advene is bound to be in non-optimized mode
+# for quite a long time ;-) )
 
 def _get_module_debug():
     """Return the state of the module's debug flag.
@@ -154,6 +156,10 @@ def create(package, force=False, url=None):
             except sqlite.OperationalError, e:
                 curs.execute("ROLLBACK")
                 raise InternalError("could not initialize model", e)
+            except:
+                curs.execute("ROLLBACK")
+                raise
+
         b = _SqliteBackend(path, conn, force)
         _cache[path] = b
     try:
@@ -164,7 +170,7 @@ def create(package, force=False, url=None):
     except sqlite.Error, e:
         curs.execute("ROLLBACK")
         raise InternalError("could not update", e)
-    except InternalError:
+    except:
         curs.execute("ROLLBACK")
         raise
     curs.execute("COMMIT")
@@ -247,6 +253,9 @@ def bind(package, force=False, url=None):
     except InternalError:
         b._curs.execute("ROLLBACK")
         raise
+    except:
+        b._curs.execute("ROLLBACK")
+        raise
     b._curs.execute("COMMIT")
     return b, pkgid
 
@@ -298,8 +307,7 @@ def _split_id_ref(id_ref):
     if colon <= 0:
         return "", id_ref
     prefix, suffix = id_ref[:colon], id_ref[colon+1:]
-    colon = suffix.find(":")
-    assert _DF or colon <= 0, "id-path has length > 2"
+    assert _DF or suffix.find(":") <= 0, "id-path has length > 2"
     return prefix, suffix
 
 def _split_uri_ref(uri_ref):
@@ -464,7 +472,7 @@ class _SqliteBackend(object):
             # transaction) are only required because sqlite does not implement
             # foreign keys; with an "ON DELETE CASCADE", the deletion in
             # Packages would suffice
-            
+
             self._begin_transaction("IMMEDIATE")
             try:
                 execute("DELETE FROM Packages WHERE id = ?", args)
@@ -480,6 +488,9 @@ class _SqliteBackend(object):
             except sqlite.Error, e:
                 execute("ROLLBACK")
                 raise InternalError("could not delete", e)
+            except:
+                execute("ROLLBACK")
+                raise
             execute("COMMIT")
             del d[package_id]
         self._check_unused(package_id)
@@ -501,6 +512,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not insert", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def create_annotation(self, package_id, id, media, begin, end,
@@ -544,6 +558,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not insert", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def create_relation(self, package_id, id, mimetype, model, url):
@@ -575,6 +592,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def create_view(self, package_id, id, mimetype, model, url):
@@ -606,6 +626,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def create_resource(self, package_id, id, mimetype, model, url):
@@ -637,6 +660,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def create_tag(self, package_id, id):
@@ -651,6 +677,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def create_list(self, package_id, id):
@@ -665,6 +694,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def create_query(self, package_id, id, mimetype, model, url):
@@ -696,6 +728,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating",e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def create_import(self, package_id, id, url, uri):
@@ -712,6 +747,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     # element retrieval
@@ -1084,6 +1122,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             self._conn.rollback()
             raise InternalError("could not update", e)
+        except:
+            self._conn.rollback()
+            raise
 
     def update_import(self, package_id, id, url, uri):
         assert _DF or self.has_element(package_id, id, IMPORT)
@@ -1095,6 +1136,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             self._conn.rollback()
             raise InternalError("error in updating", e)
+        except:
+            self._conn.rollback()
+            raise
 
     # element renaming
 
@@ -1170,6 +1214,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not update", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def rename_references(self, package_ids, old_uriref, new_id):
@@ -1247,6 +1294,9 @@ class _SqliteBackend(object):
         except InternalError, e:#sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not update", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     # element deletion
@@ -1291,6 +1341,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not delete", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     # content management
@@ -1561,6 +1614,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not update or insert", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def update_member(self, package_id, id, member, pos):
@@ -1646,6 +1702,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not delete or update", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def iter_relations_with_member(self, package_ids, member, pos=None):
@@ -1723,6 +1782,9 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("could not update or insert", e)
+        except:
+            execute("ROLLBACK")
+            raise
         execute("COMMIT")
 
     def update_item(self, package_id, id, item, pos):
@@ -1809,6 +1871,10 @@ class _SqliteBackend(object):
             execute("ROLLBACK")
             self._conn.rollback()
             raise InternalError("could not delete or update", e)
+        except:
+            execute("ROLLBACK")
+            self._conn.rollback()
+            raise
         execute("COMMIT")
 
     def iter_lists_with_item(self, package_ids, item, pos=None):

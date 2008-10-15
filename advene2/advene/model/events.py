@@ -98,7 +98,7 @@ class WithEventsMixin:
         Any signal handlers in the list still to be run will not be
         invoked.
         """
-        return self._stop_emi(detailed_signal)
+        return self._event_delegate.stop_emission(detailed_signal)
 
     # synonyms for the sake of readability in GTK applications
 

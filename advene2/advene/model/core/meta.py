@@ -309,8 +309,7 @@ class WithMetaMixin:
                 prefix, uri = line.split(" ")
                 namespaces[prefix] = uri
         return namespaces
-        
-        
+
 
 class _MetaDict(object):
     """A dict-like object representing the metadata of an object.

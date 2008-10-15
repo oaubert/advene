@@ -2,12 +2,13 @@
 I define the common super-class of all package element classes.
 """
 
-from advene.model.core.meta   import WithMetaMixin
-from advene.model.events      import ElementEventDelegate, WithEventsMixin
-from advene.model.tales       import tales_property, tales_use_as_context
-from advene.util.alias        import alias
+from advene.model.core.meta import WithMetaMixin
+from advene.model.events import ElementEventDelegate, WithEventsMixin
+from advene.model.exceptions import ModelError
+from advene.model.tales import tales_property, tales_use_as_context
+from advene.util.alias import alias
 from advene.util.autoproperty import autoproperty
-from advene.util.session      import session
+from advene.util.session import session
 
 from itertools import chain, islice
 
@@ -41,24 +42,83 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
     def __init__(self, owner, id):
         """
-        Element basic initialization.
-
-        NB: __init__ is usually invoked *before* the element has been added to
-        the backend, so no operation should be performed that require the
-        backend to *know* the element. For this, see `_initialize`.
+        Must not be used directly, nor overridden.
+        Use class methods instantiate or create_new instead.
         """
-        self._id             = id
-        self._owner          = owner
-        self._weight         = 0
+        self._id = id
+        self._owner = owner
+        self._weight = 0
         self._event_delegate = ElementEventDelegate(self)
         owner._elements[id] = self # cache to prevent duplicate instanciation
 
-    def _initialize(self):
+    @classmethod
+    def instantiate(cls, owner, id):
         """
-        This method is invoked once after the element has been created *and*
-        stored in the backend.
+        Factory method to create an instance from backend data.
+
+        This method expect the exact data from the backend, so it does not
+        need to be tolerant or to check consistency (the backend is assumed to
+        be sane).
         """
-        pass
+        r = cls(owner, id)
+        return r
+
+    @classmethod
+    def create_new(cls, owner, id):
+        """
+        Factory method to create a new instance both in memory and backend.
+
+        This method will usually perform checks and conversions from its actual
+        arguments to the data expected to the backend. It is responsible for
+        1/ storing the data in the backend and 2/ initializing the instance
+        (for which it may reuse instantiate to reduce redundancy).
+
+        Note that this method *should* be tolerant w.r.t. its parameters,
+        especially accepting both element instances or ID-refs.
+
+        NB: this method does nothing and must not be invoked by superclasses
+        (indeed, it raises an exception).
+        """
+        raise NotImplementedError("must be overridden in subclasses")
+
+    @staticmethod
+    def _check_reference(pkg, element, type=None, required=False):
+        """
+        Raise a ModelError if element is not referenceable by pkg, and (if
+        provided) if it has not the given type. Furthermore, if required is set
+        to True, raise a ModelError if element is None (else None is silently
+        ignored).
+
+        Note that element may be a strict ID-ref, in which case this method
+        will do its best to check its type, but will *succeed silently* if the
+        element is unreachable (because parsers need to be able to add
+        unreachable elements).
+
+        Also, return the ID-ref of that element in this element's owner package,
+        for this information is usually useful in the situations where a check
+        is performed. If element is None, return "".
+        """
+        if element is None or element == "":
+            if required:
+                raise ModelError("required element")
+            else:
+                return ""
+
+        elttype = getattr(element, "ADVENE_TYPE", None)
+        if elttype is not None and type is not None and elttype != type:
+            raise ModelError("type mismatch", element, type)
+        if not pkg._can_reference(element):
+            raise ModelError("can not reference", pkg, element)
+        if elttype is None and type is not None:
+            element = pkg.get(element)
+            if element is not None and element.ADVENE_TYPE != type:
+                raise ModelError("type mismatch", element, type)
+        # if no exception was raised
+        if elttype is None:
+            return element
+        else:
+            return element.make_id_in(pkg)
+
 
     def make_id_in(self, pkg):
         """Compute an id-ref for this element in the context of the given package.

@@ -1,8 +1,8 @@
 from advene.model.cam.consts import CAMSYS_TYPE, CAM_NS_PREFIX
-from advene.model.cam.element import CamElement
+from advene.model.cam.element import CamElementMixin
 from advene.model.core.tag import Tag as CoreTag
 
-class Tag(CoreTag, CamElement):
+class Tag(CoreTag, CamElementMixin):
     def set_meta(self, key, value, val_is_idref=False, _guard=True):
         # transtype Tag when CAMSYS_TYPE is updated
         if key == CAMSYS_TYPE:

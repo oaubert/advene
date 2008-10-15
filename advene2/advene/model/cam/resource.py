@@ -1,5 +1,5 @@
-from advene.model.cam.element import CamElement
+from advene.model.cam.element import CamElementMixin
 from advene.model.core.resource import Resource as CoreResource
 
-class Resource(CoreResource, CamElement):
+class Resource(CoreResource, CamElementMixin):
     pass

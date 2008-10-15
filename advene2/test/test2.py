@@ -2,7 +2,7 @@ from os import unlink
 from os.path import exists, join, split
 
 from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX, PARSER_META_PREFIX
-from advene.model.cam.package import Package
+from advene.model.core.package import Package
 
 _indent = []
 def trace_wrapper (f):
@@ -68,9 +68,8 @@ if __name__ == "__main__":
     #trace_wrap_all(p1._backend)
     #trace_wrap_all(p4._backend)
 
-    foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
-    m4 = p4.create_media("m4", "http://example.com/m4.ogm", foref)
-    m6 = p6.create_media("m6", "http://example.com/m6.ogm", foref)
+    m4 = p4.create_media("m4", "http://example.com/m4.ogm")
+    m6 = p6.create_media("m6", "http://example.com/m6.ogm")
     a3 = p3.create_annotation("a3", m4, 30, 39, "text/plain")
     a5 = p5.create_annotation("a5", m6, 50, 59, "text/plain")
     t2 = p2.create_tag("t2")
@@ -84,7 +83,7 @@ if __name__ == "__main__":
     p5.associate_tag(a5, t6)
     p1.associate_tag(a3, t2)
 
-    m3 = p3.create_media("m3", "urn:xyz", foref)
+    m3 = p3.create_media("m3", "urn:xyz")
     r3 = p3.create_relation("r3", members=[a5, a3])
     L3 = p3.create_list("L3", items=[a5, r3, a3])
     v3 = p3.create_view("v3", "text/plain")

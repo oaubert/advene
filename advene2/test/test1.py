@@ -6,6 +6,7 @@ import advene.model.backends.sqlite as backend_sqlite
 from advene.model.consts import DC_NS_PREFIX
 from advene.model.core.content import PACKAGED_ROOT
 from advene.model.core.package import Package
+from advene.model.exceptions import ModelError
 
 base = split(__file__)[0]
 
@@ -58,10 +59,8 @@ if __name__ == "__main__":
     r1 = p.create_relation("r1")
     try:
         a2 = p.create_annotation("a2", m1, 0, 20, "text/plain")
-    except AssertionError:
+    except ModelError:
         pass
-        # note: no backend call is needed to check that id "a2" is in use,
-        # because annotation a2 is cached in the packaged (variable a2)
     else:
         raise Exception, "duplicate ID did raise any ModelException..."
 
@@ -78,7 +77,7 @@ if __name__ == "__main__":
 
     a1.set_meta(advene_ns % "meta/foo", "bar")
     a2.meta[advene_ns % "meta/foo"] = "bar"
-    
+
     print [a._id for a in p.own.annotations]
     print p.get("a1") # no backend call, since a1 is cached (variable a1)
     print p["a2"] # no backend call, since a2 is cached (variable a2)
