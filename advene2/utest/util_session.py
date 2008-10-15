@@ -1,17 +1,18 @@
 from unittest import TestCase, main
 from threading import Event, Thread
 
-from advene.util.session import session
+from advene.util.session import session, get_session_defaults
 
 class TestSession(TestCase):
     def setUp(self):
-        pass
+        for k in get_session_defaults():
+            delattr(session, k)
 
     def tearDown(self):
         pass
 
     def testDir(self):
-        ref = ["package", "user"]
+        ref = get_session_defaults().keys()
         self.assertEquals(frozenset(session._dir()), frozenset(ref))
         session.x_info = "more info"
         self.assertEquals(frozenset(session._dir()),
@@ -20,11 +21,12 @@ class TestSession(TestCase):
         self.assertEquals(frozenset(session._dir()), frozenset(ref))
 
     def testSingleThreadRWD(self):
-        self.assertEquals(session.user, None)
-        session.user = "pchampin"
-        self.assertEquals(session.user, "pchampin")
-        del session.user
-        self.assertEquals(session.user, None)
+        for k,v in get_session_defaults().iteritems():
+            self.assertEquals(getattr(session, k), v)
+            setattr(session, k, "foobar")
+            self.assertEquals(getattr(session, k), "foobar")
+            delattr(session, k)
+            self.assertEquals(getattr(session, k), v)
 
     def testSingleThreadRWDX(self):
         self.assertRaises(AttributeError, lambda: session.x_info)
@@ -80,4 +82,4 @@ class TestSession(TestCase):
         self.assertEquals(check, [True, False,])
 
 if __name__ == "__main__":
-                main()
+    main()

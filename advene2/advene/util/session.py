@@ -4,9 +4,11 @@ A module for managing session-wide global data.
 This module provides the ``session`` object, storing variables on a per-thread
 basis: each thread has its own values for the session variables.
 
-A set of session variables are predefined and have a default value (use
-``session._dir()`` to get a list of them). User-defined session variables can
-be used butg must be prefixed with "x_".
+A set of session variables are predefined and have a default value (the dict
+``get_session_defaults`` returns them in a dict). User-defined session
+variables can be used but must be prefixed with "x_". Note that deleting a
+predefined session variable does not actually deletes it but restores it to its 
+default value.
 
 All errors (trying to read or delete an non-existant session variable, or
 trying to set an invalid one) raise AttributeError.
@@ -24,38 +26,30 @@ import sys
 from threading import local
 from shutil import rmtree
 
-class _Session(object):
-    def __init__(self, **kw):
-        self._default = dict(kw)
-        self._data = local()
+_session_defaults = {"package": None, "user": os.getlogin()}
 
-    def __getattr__(self, name):
-        r = getattr(self._data, name, None)
-        if r is None:
-            try:
-                r = self._default[name]
-            except KeyError, e:
-                raise AttributeError(*e.args)
-        return r
+def get_session_defaults():
+    return _session_defaults.copy()
+
+class _Session(local):
+    def __init__(self):
+        for k,v in _session_defaults.iteritems():
+            self.__dict__[k] = v
 
     def __setattr__(self, name, value):
-        if name[0] == "_":
-            return object.__setattr__(self, name, value)
-        if name not in self._default and name[:2] != "x_":
+        if not hasattr(self, name) and name[:2] != "x_":
             raise AttributeError("%s is not a session variable "
                                  "(use 'x_%s' instead)" % (name, name))
-        setattr(self._data, name, value)
+        self.__dict__[name] = value
 
     def __delattr__(self, name):
-        if name[0] == "_":
-            return object.__delattr__(self, name)
-        delattr(self._data, name)
+        if hasattr(self, name) and name[:2] != "x_":
+            setattr(self, name, _session_defaults[name])
+        else:
+            del self.__dict__[name]
 
     def _dir(self):
-        r1 = frozenset(self._default.iterkeys())
-        r2 = frozenset(i for i in dir(self._data) if i[0] != "_")
-        r = r1.union(r2)
-        return list(r)
+        return [ n for n in dir(self) if n[0] != "_" ]
 
 tempdir_list = []
 
@@ -71,6 +65,4 @@ def cleanup():
         if os.path.isdir(d.encode(sys.getfilesystemencoding())):
             rmtree(d, ignore_errors=True)
 
-session = _Session(
-    package = None,
-    user = None,)
+session = _Session()
