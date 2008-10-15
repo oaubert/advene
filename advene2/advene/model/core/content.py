@@ -20,7 +20,8 @@ from urlparse import urljoin, urlparse
 from weakref import ref
 
 from advene.model.consts import _RAISE, PACKAGED_ROOT
-from advene.model.content.register import iter_content_handlers
+from advene.model.content.register import iter_content_handlers, \
+                                          iter_textual_mimetypes
 from advene.model.core.element import RELATION, RESOURCE
 from advene.model.exceptions import ModelError
 from advene.util.autoproperty import autoproperty
@@ -279,6 +280,23 @@ class WithContentMixin:
         self._update_content_handler()
 
     @autoproperty
+    def _get_content_is_textual(self):
+        """
+        This property indicates if this element's content data can be handled
+        as text.
+
+        It uses the mimetypes registered with
+        `advene.model.content.register.register_textual_mimetype`.
+        """
+        t1,t2 = self._get_content_mimetype().split("/")
+        if t1 == "text":
+            return True
+        for m1,m2 in iter_textual_mimetypes():
+            if m1 == "*" or m1 == t1 and m2 == "*" or m2 == t2:
+                return True
+        return False
+
+    @autoproperty
     def _get_content_model(self):
         """The resource used as the model of the content of this element.
 
@@ -524,6 +542,16 @@ class Content(object):
     @autoproperty
     def _set_mimetype(self, mimetype):
         return self._owner_elt._set_content_mimetype(mimetype)
+
+    @autoproperty
+    def _get_is_textual(self):
+        """
+        This property indicates if this content's data can be handled as text.
+
+        It uses the mimetypes registered with
+        `advene.model.content.register.register_textual_mimetype`.
+        """
+        return self._owner_elt._get_content_is_textual()
 
     @autoproperty
     def _get_model(self):

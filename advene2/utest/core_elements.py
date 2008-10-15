@@ -72,6 +72,14 @@ class TestElements(TestCase):
         e.content_mimetype = "text/html"
         self.assertEqual("text/html", e.content_mimetype)
         self.assertEqual("text/html", e.content.mimetype)
+        self.assert_(e.content_is_textual)
+        self.assert_(e.content.is_textual)
+        e.content.mimetype = "application/binary"
+        self.assert_(not e.content_is_textual)
+        self.assert_(not e.content.is_textual)
+        e.content.mimetype = "image/svg"
+        self.assert_(e.content_is_textual)
+        self.assert_(e.content.is_textual)
         e.content.mimetype = "text/plain"
         self.assertEqual("text/plain", e.content_mimetype)
         self.assertEqual("text/plain", e.content.mimetype)

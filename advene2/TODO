@@ -13,15 +13,6 @@ Needed improvements
 
 - absolute_url global method ??
 
-- Encoding issues when using accented characters in atributes
-
-- auto-update of creator/created/contributor/modified. For package,
-   update contributor/modified upon package saving.
-
-- annotation_type.schemas
-
-- text-types registration mechanism (i.e. those not serialized in base64)
-
 Important improvements
 ======================
 

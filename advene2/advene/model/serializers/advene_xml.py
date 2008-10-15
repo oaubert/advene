@@ -12,6 +12,7 @@ from itertools import chain
 from xml.etree.cElementTree import Element, ElementTree, SubElement
 
 from advene.model.consts import ADVENE_XML
+from advene.model.content.register import iter_textual_mimetypes
 from advene.model.serializers.unserialized import iter_unserialized_meta_prefix
 
 NAME = "Generic Advene XML"
@@ -211,8 +212,7 @@ class _Serializer(object):
                 xc.set("url", elt.content_url)
             else:
                 data = elt.content_data
-                if not elt.content_mimetype.startswith("text") \
-                and not elt.content_mimetype.startswith("image/svg"):
+                if not elt.content_is_textual:
                     data = base64.encodestring(data)
                     xc.set("encoding", "base64")
                 xc.text = data
@@ -246,7 +246,7 @@ class _Serializer(object):
                 xkeyval.text = v
         if len(xm) == 0:
             xobj.remove(xm)
-            
+
     def _serialize_element_tags(self, elt, xelt):
         xtags = SubElement(xelt, "tags")
         for t in elt.iter_my_tag_ids(self.package, inherited=False):
@@ -261,7 +261,7 @@ class _Serializer(object):
             xxt = SubElement(xx, "association", element=e, tag=t)
         if len(xx) == 0:
             xpackage.remove(xx)
-            
+
 
 def _indent(elem, level=0):
     """from http://effbot.org/zone/element-lib.htm#prettyprint"""
