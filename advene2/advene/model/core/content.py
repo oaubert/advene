@@ -179,12 +179,14 @@ class WithContentMixin:
                 self._set_content_model(None)
                 self._set_content_url("")
                 self._set_content_data("")
-        self.emit("pre-changed::content_mimetype", "content_mimetype", mimetype)
+        if not _init:
+            self.emit("pre-changed::content_mimetype", "content_mimetype",
+                      mimetype)
         self.__mimetype = mimetype
         if not _init:
             self.__store_info()
+            self.emit("changed::content_mimetype", "content_mimetype", mimetype)
         self._update_content_handler()
-        self.emit("changed::content_mimetype", "content_mimetype", mimetype)
 
     @autoproperty       
     def _get_content_model(self):

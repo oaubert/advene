@@ -845,6 +845,9 @@ class TestEvents(TestCase):
                                             (obj.id, tag.id))
         self.default_handler(obj, tag)
 
+    def element_handler(self, obj, element, removed=None):
+        self.tag_handler(element, obj, removed)
+
     def test_changed_meta(self):
         k = DC_NS_PREFIX + "creator"
         k2 = DC_NS_PREFIX + "title"

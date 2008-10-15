@@ -19,6 +19,20 @@ QUERY      = 'q'
 VIEW       = 'v'
 RESOURCE   = 'R'
 
+def get_advene_type_label(typ):
+    return {
+        MEDIA      : 'media',
+        ANNOTATION : 'annotation',
+        RELATION   : 'relation',
+        TAG        : 'tag',
+        LIST       : 'list',
+        IMPORT     : 'import',
+        QUERY      : 'query',
+        VIEW       : 'view',
+        RESOURCE   : 'resource',
+    }[typ]
+
+
 class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
     def __init__(self, owner, id):
@@ -93,20 +107,10 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         package signal corresponding to each element signal.
         """
         WithEventsMixin.emit(self, detailed_signal, *args)
-        s = {
-            MEDIA      : 'media',
-            ANNOTATION : 'annotation',
-            RELATION   : 'relation',
-            TAG        : 'tag',
-            LIST       : 'list',
-            IMPORT     : 'import',
-            QUERY      : 'query',
-            VIEW       : 'view',
-            RESOURCE   : 'resource',
-        }[self.ADVENE_TYPE]
         colon = detailed_signal.find(":")
         if colon > 0: detailed_signal = detailed_signal[:colon]
-        s = "%s::%s" % (s, detailed_signal)
+        s = "%s::%s" % (get_advene_type_label(self.ADVENE_TYPE),
+                        detailed_signal)
         self._owner.emit(s, self, detailed_signal, args)
 
     @autoproperty

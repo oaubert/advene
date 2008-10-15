@@ -70,12 +70,13 @@ class Annotation(PackageElement, WithContentMixin):
         assert o._can_reference(media)
 
         mid = media.make_id_in(o)
-        self.emit("pre-changed::media", "media", media)
+        if not _init:
+            self.emit("pre-changed::media", "media", media)
         self._media_id = mid
         self._media = media
         if not _init:
             self.__store()
-        self.emit("changed::media", "media", media)
+            self.emit("changed::media", "media", media)
 
     @autoproperty
     def _get_media_id(self):
