@@ -440,10 +440,11 @@ class ECAEngine:
         except KeyError:
             return
 
-        rules=[ rule
-                for rule in a
-                if rule.condition.match(context) ]
-        rules.sort(lambda a, b: cmp(b.priority, a.priority))
+        rules=sorted( (rule
+                       for rule in a
+                       if rule.condition.match(context) ),
+                      key=lambda e: e.priority,
+                      reverse=True)
 
         context.pushLocals()
         for rule in rules:
