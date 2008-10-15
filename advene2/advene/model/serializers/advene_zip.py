@@ -76,7 +76,7 @@ def _recurse(z, dir, base=""):
             _recurse(z, abs, path.join(base, f))
         else:
             #print "=== zipping", path.join(base, f)
-            z.write(abs, path.join(base, f))
+            z.write(abs, path.join(base, f).encode('utf-8'))
 
 
 if __name__ == "__main__":
