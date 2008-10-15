@@ -48,6 +48,7 @@ if int(cherrypy.__version__.split('.')[0]) < 3:
 
 from advene.model.core.package import Package
 from advene.model.tales import AdveneContext
+from advene.model.exceptions import NoSuchElementError, UnreachableImportError
 from simpletal.simpleTALES import PathNotFoundException
 from simpletal.simpleTAL import TemplateParseException
 
@@ -552,7 +553,15 @@ class Packages(Common):
             self.start_html (_("Error"), duplicate_title=True)
             res.append (_("""The TALES expression %s is not valid.""") % tales)
             res.append (unicode(e.args).encode('utf-8'))
-            return
+            return "".join(res)
+        except NoSuchElementError, e:
+            self.start_html (_("Error"), duplicate_title=True)
+            res.append (_("""The element %s cannot be found.""") % unicode(e))
+            return "".join(res)
+        except UnreachableImportError, e:
+            self.start_html (_("Error"), duplicate_title=True)
+            res.append (_("""The element %s is in a package which could not be imported.""") % unicode(e))
+            return "".join(res)
 
         # FIXME:
         # Principe: si l'objet est un viewable, on appelle la
