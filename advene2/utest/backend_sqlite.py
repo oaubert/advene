@@ -485,6 +485,7 @@ class TestHandleElements(TestCase):
             self.be.create_tag(*self.t3)
             self.be.create_list(*self.l3)
             self.be.create_query(*self.q3)
+            self.be.update_uri(self.pid2, self.i1_uri)
         except:
             self.tearDown()
             raise
@@ -951,6 +952,81 @@ class TestHandleElements(TestCase):
         # with not all packages
         self.assertEqual(frozenset([(LIST,)+self.l3,]),
                           frozenset(lst_w_item((self.pid2,), r3_uri_ref)))
+
+    def test_tagged(self):
+        self.be.associate_tag(self.pid1, "a1",    "t1")
+        self.be.associate_tag(self.pid1, "i1:a5", "t1")
+        self.be.associate_tag(self.pid1, "a2",    "i1:t3")
+        self.be.associate_tag(self.pid1, "i1:a5", "i1:t3")
+        self.be.associate_tag(self.pid2, "a6",    "t3")
+
+        a1 = frozenset(((self.pid1, "a1"),))
+        a2 = frozenset(((self.pid1, "a2"),))
+        a5i = frozenset(((self.pid1, "i1:a5"),))
+        a5 = frozenset(((self.pid2, "a5"),))
+        a6 = frozenset(((self.pid2, "a6"),))
+        pids = (self.pid1, self.pid2,)
+
+        self.assertEqual( a1.union(a5i),
+            frozenset(self.be.iter_tagged(pids, "%s#t1" % self.url1))
+        )
+
+        self.assertEqual( a2.union(a5i).union(a6),
+            frozenset(self.be.iter_tagged(pids, "%s#t3" % self.url2))
+        )
+
+        self.assertEqual( a2.union(a5i).union(a6),
+            frozenset(self.be.iter_tagged(pids, "%s#t3" % self.i1_uri))
+        )
+
+        self.assertEqual( a2.union(a5i),
+            frozenset(self.be.iter_tagged((self.pid1,), "%s#t3" % self.i1_uri))
+        )
+
+        t1 = frozenset(((self.pid1, "t1"),))
+        t3i = frozenset(((self.pid1, "i1:t3"),))
+        t3 = frozenset(((self.pid2, "t3"),))
+
+        self.assertEquals( t1,
+            frozenset(self.be.iter_tags(pids, "%s#a1" % self.url1))
+        )
+
+        self.assertEquals( t1.union(t3i),
+            frozenset(self.be.iter_tags(pids, "%s#a5" % self.url2))
+        )
+
+        self.assertEquals( t1.union(t3i),
+            frozenset(self.be.iter_tags(pids, "%s#a5" % self.i1_uri))
+        )
+
+        self.be.associate_tag(self.pid2, "a5", "t3")
+
+        self.assertEquals( t1.union(t3i).union(t3),
+            frozenset(self.be.iter_tags(pids, "%s#a5" % self.i1_uri))
+        )
+
+        self.assertEquals( t3,
+            frozenset(self.be.iter_tags((self.pid2,), "%s#a5" % self.i1_uri))
+        )
+
+        self.assertEquals( frozenset((self.pid1, self.pid2)), frozenset(self.
+         be.iter_tagging(pids, "%s#a5" % self.url2, "%s#t3" % self.i1_uri))
+        )
+
+        self.assertEquals( frozenset((self.pid1, self.pid2)), frozenset(self.
+         be.iter_tagging(pids, "%s#a5" % self.i1_uri, "%s#t3" % self.url2))
+        )
+
+        self.assertEquals( frozenset(), frozenset(self.be.
+         iter_tagging((self.pid1,), "%s#a3" % self.i1_uri, "%s#t6" % self.url2))
+        )
+
+        self.be.dissociate_tag(self.pid1, "a1",    "t1")
+        self.be.dissociate_tag(self.pid1, "i1:a5", "t1")
+        self.be.dissociate_tag(self.pid1, "a2",    "i1:t3")
+        self.be.dissociate_tag(self.pid1, "i1:a5", "i1:t3")
+        self.be.dissociate_tag(self.pid2, "a5",    "t3")
+        self.be.dissociate_tag(self.pid2, "a6",    "t3")
 
 
 class TestRetrieveDataWithSameId(TestCase):

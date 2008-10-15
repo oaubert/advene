@@ -331,7 +331,7 @@ class _SqliteBackend(object):
         assert(isinstance(begin, int) and begin >= 0), begin
         assert(isinstance(  end, int) and   end >= begin), (begin, end)
 
-        p,s = _split_id_ref(media) # also assert that media has len<=2
+        p,s = _split_id_ref(media) # also assert that media has depth < 2
         assert p != "" or self.has_element(package_id, s, MEDIA), media
 
         try:
@@ -451,18 +451,13 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form(MEDIA, package_id, id, url,).
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
         assert( id is None  or   id_alt is None), ( id,  id_alt)
         assert(url is None  or  url_alt is None), (url, url_alt)
 
-        q = "SELECT ?, package, id, url FROM Medias WHERE package in ("
-        args = [MEDIA,]
-
-        for p in package_ids:
-            q += "?,"
-            args.append(p)
-        q += ")"
-
+        q = "SELECT ?, package, id, url FROM Medias " \
+            "WHERE package in (" + "?," * len(package_ids) + ")"
+        args = [MEDIA,] + list(package_ids)
         if id is not None:
             q += " AND id = ?"
             args.append(id)
@@ -498,7 +493,7 @@ class _SqliteBackend(object):
         ``media`` is the uri-ref of a media ;
         ``media_alt`` is an iterable of uri-refs.
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
         assert(   id is None  or     id_alt is None)
         assert(media is None  or  media_alt is None)
         assert(begin is None  or  begin_min is None and begin_max is None)
@@ -511,22 +506,14 @@ class _SqliteBackend(object):
             "       join_id_ref(media_p,media_i) as media, " \
             "       fbegin, fend " \
             "FROM Annotations a %s " \
-            "WHERE a.package in ("
-
+            "WHERE a.package in (" + "?," * len(package_ids) + ")"
+        args = [ANNOTATION,] + list(package_ids)
         if media_alt is not None:
             q %= "JOIN Packages p ON a.package = p.id "\
                  "LEFT JOIN Imports i " \
                  "  ON a.package = i.package AND a.media_p = i.id"
         else:
             q %= ""
-
-        args = [ANNOTATION,]
-
-        for p in package_ids:
-            q += "?,"
-            args.append(p)
-        q += ")"
-
         if id is not None:
             q += " AND a.id = ?"
             args.append(id)
@@ -577,7 +564,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (RELATION, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, RELATION, id, id_alt)
@@ -587,7 +574,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (VIEW, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, VIEW, id, id_alt)
@@ -597,7 +584,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (RESOURCE, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, RESOURCE, id, id_alt)
@@ -607,7 +594,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (TAG, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, TAG, id, id_alt)
@@ -617,7 +604,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (LIST, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, LIST, id, id_alt)
@@ -627,7 +614,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (QUERY, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, QUERY, id, id_alt)
@@ -641,20 +628,14 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (IMPORT, package_id, id, url, uri).
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
         assert( id is None  or   id_alt is None)
         assert(url is None  or  url_alt is None)
         assert(uri is None  or  uri_alt is None)
 
         q = "SELECT ?, package, id, url, uri FROM Imports " \
-            "WHERE package in ("
-        args = [IMPORT,]
-
-        for p in package_ids:
-            q += "?,"
-            args.append(p)
-        q += ")"
-
+            "WHERE package in (" + "?," * len(package_ids) + ")"
+        args = [IMPORT,] + list(package_ids)
         if id is not None:
             q += " AND id = ?"
             args.append(id)
@@ -695,17 +676,9 @@ class _SqliteBackend(object):
         assert(id is None or id_alt is None)
 
         s = "SELECT typ, package, id FROM Elements"
-        w = " WHERE package in ("
-        args = []
-
-        for p in package_ids:
-            w += "?,"
-            args.append(p)
-        w += ")"
-
-        w += " AND typ = ?"
-        args.append(element_type)
-
+        w = " WHERE package in (" + "?," * len(package_ids) + ") "\
+            " AND typ = ?"
+        args = list(package_ids) + [element_type,]
         if id is not None:
             w += " AND id = ?"
             args.append(id)
@@ -737,7 +710,7 @@ class _SqliteBackend(object):
         assert(isinstance(begin, int) and begin >= 0), begin
         assert(isinstance(  end, int) and   end >= begin), (begin, end)
 
-        p,s = _split_id_ref(media) # also assert that media has len<=2
+        p,s = _split_id_ref(media) # also assert that media has depth < 2
         assert p != "" or self.has_element(package_id, s, MEDIA), media
 
         try:
@@ -794,7 +767,7 @@ class _SqliteBackend(object):
         or an empty string to specify no schema (not None).
         """
         if schema:
-            p,s = _split_id_ref(schema) # also assert that schema has len<=2
+            p,s = _split_id_ref(schema) # also assert that schema has depth < 2
             assert p == "" or self.has_element(package_id,p,IMPORT), p
             assert p != "" or self.has_element(package_id,s,RESOURCE), schema
         else:
@@ -885,7 +858,7 @@ class _SqliteBackend(object):
         """
         n = self.count_members(package_id, id)
         assert -1 <= pos <= n, pos
-        p,s = _split_id_ref(member) # also assert that member has len<=2
+        p,s = _split_id_ref(member) # also assert that member has depth < 2
         assert p != "" or self.has_element(package_id, s, ANNOTATION), member
         if pos == -1:
             pos = n
@@ -911,7 +884,7 @@ class _SqliteBackend(object):
         """
         assert 0 <= pos < self.count_members(package_id, id), pos
 
-        p,s = _split_id_ref(member) # also assert that member has len<=2
+        p,s = _split_id_ref(member) # also assert that member has depth < 2
         assert p != "" or self.has_element(package_id, s, ANNOTATION), member
 
         try:
@@ -983,8 +956,10 @@ class _SqliteBackend(object):
         """
         Return tuples of the form (RELATION, package_id, id) of all the 
         relations having the given member, at the given position if given.
+
+        @param member the uri-ref of an annotation
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
 
         member_u, member_i = _split_uri_ref(member)
 
@@ -993,15 +968,12 @@ class _SqliteBackend(object):
             "JOIN RelationMembers m " \
               "ON e.package = m.package and e.id = m.relation " \
             "LEFT JOIN Imports i ON m.member_p = i.id " \
-            "WHERE e.package in ("
-        args = [RELATION,]
-        for p in package_ids:
-            q += "?,"
-            args.append(p)
-        q += ") AND member_i = ? AND ("\
-             "(member_p = ''   AND  ? IN (p.uri, p.url)) OR " \
-             "(member_p = i.id AND  ? IN (i.uri, i.url)))"
-        args.extend([member_i, member_u, member_u,])
+            " WHERE e.package in (" + "?," * len(package_ids) + ")" \
+            " AND member_i = ? AND ("\
+            "  (member_p = ''   AND  ? IN (p.uri, p.url)) OR " \
+            "  (member_p = i.id AND  ? IN (i.uri, i.url)))"
+        args = [RELATION,] + list(package_ids) \
+                           + [member_i, member_u, member_u,]
         if pos is not None:
             q += " AND ord = ?"
             args.append(pos)
@@ -1021,7 +993,7 @@ class _SqliteBackend(object):
         """
         n = self.count_items(package_id, id)
         assert -1 <= pos <= n, pos
-        p,s = _split_id_ref(item) # also assert that item has len<=2
+        p,s = _split_id_ref(item) # also assert that item has depth < 2
         assert p != "" or self.has_element(package_id, s), item
         if pos == -1:
             pos = n
@@ -1047,7 +1019,7 @@ class _SqliteBackend(object):
         """
         assert 0 <= pos < self.count_items(package_id, id), pos
 
-        p,s = _split_id_ref(item) # also assert that item has len<=2
+        p,s = _split_id_ref(item) # also assert that item has depth < 2
         assert p != "" or self.has_element(package_id, s), item
 
         try:
@@ -1119,8 +1091,10 @@ class _SqliteBackend(object):
         """
         Return tuples of the form (LIST, package_id, id) of all the 
         lists having the given item, at the given position if given.
+
+        @param item the uri-ref of an element
         """
-        assert not isinstance(package_ids, basestring), "*iterable* of package_ids expected"
+        assert not isinstance(package_ids, basestring), "list if ids expected"
 
         item_u, item_i = _split_uri_ref(item)
 
@@ -1129,15 +1103,11 @@ class _SqliteBackend(object):
             "JOIN ListItems m " \
               "ON e.package = m.package and e.id = m.list " \
             "LEFT JOIN Imports i ON m.item_p = i.id " \
-            "WHERE e.package in ("
-        args = [LIST,]
-        for p in package_ids:
-            q += "?,"
-            args.append(p)
-        q += ") AND item_i = ? AND ("\
-             "(item_p = ''   AND  ? IN (p.uri, p.url)) OR " \
-             "(item_p = i.id AND  ? IN (i.uri, i.url)))"
-        args.extend([item_i, item_u, item_u,])
+            "WHERE e.package in (" + "?," * len(package_ids) + ")" \
+            " AND item_i = ? AND ("\
+            "  (item_p = ''   AND  ? IN (p.uri, p.url)) OR " \
+            "  (item_p = i.id AND  ? IN (i.uri, i.url)))"
+        args = [LIST,] + list(package_ids) + [item_i, item_u, item_u,]
         if pos is not None:
             q += " AND ord = ?"
             args.append(pos)
@@ -1145,6 +1115,111 @@ class _SqliteBackend(object):
 
     # tagged elements
 
-    # TODO 
+    def associate_tag(self, package_id, element, tag):
+        """Associate a tag to an element.
+
+        @param element the id-ref of an own or directly imported element
+        @param tag the id-ref of an own or directly imported tag
+        """
+        eltp, elts = _split_id_ref(element) # also assert that it has depth < 2
+        tagp, tags = _split_id_ref(tag) # also assert that tag has depth < 2
+
+        conn = self._conn
+        try:
+            conn.execute("INSERT OR IGNORE INTO Tagged VALUES (?,?,?,?,?)",
+                         (package_id, eltp, elts, tagp, tags))
+            conn.commit()
+        except sqlite.Error, e:
+            conn.rollback()
+            raise InternalError("could not insert", e)
+
+    def dissociate_tag(self, package_id, element, tag):
+        """Dissociate a tag from an element.
+
+        @param element the id-ref of an own or directly imported element
+        @param tag the id-ref of an own or directly imported tag
+        """
+        eltp, elts = _split_id_ref(element) # also assert that it has depth < 2
+        tagp, tags = _split_id_ref(tag) # also assert that tag has depth < 2
+
+        conn = self._conn
+        try:
+            conn.execute("DELETE FROM Tagged WHERE package = ? "
+                         "AND element_p = ? AND element_i = ? "
+                         "AND tag_p = ? AND tag_i = ?",
+                         (package_id, eltp, elts, tagp, tags))
+            conn.commit()
+        except sqlite.Error, e:
+            conn.rollback()
+            raise InternalError("could not delete", e)
+
+    def iter_tags(self, package_ids, element):
+        """Iter over all the tags associated to element in the given packages.
+
+        @param element the uri-ref of an element
+        """
+        assert not isinstance(package_ids, basestring), "list if ids expected"
+
+        element_u, element_i = _split_uri_ref(element)
+        q = "SELECT t.package, join_id_ref(tag_p, tag_i) " \
+            "FROM Tagged t " \
+            "JOIN Packages p ON t.package = p.id " \
+            "LEFT JOIN Imports i ON t.element_p = i.id " \
+            "WHERE t.package in (" + "?," * len(package_ids) + ")" \
+            " AND element_i = ? AND ("\
+            "  (element_p = ''   AND  ? IN (p.uri, p.url)) OR " \
+            "  (element_p = i.id AND  ? IN (i.uri, i.url)))"
+        args = list(package_ids) + [element_i, element_u, element_u]
+
+        return self._conn.execute(q, args)
+
+    def iter_tagged(self, package_ids, tag):
+        """Iter over all the elements associated to tag in the given packages.
+
+        @param tag the uri-ref of a tag
+        """
+        assert not isinstance(package_ids, basestring), "list if ids expected"
+
+        tag_u, tag_i = _split_uri_ref(tag)
+        q = "SELECT t.package, join_id_ref(element_p, element_i) " \
+            "FROM Tagged t " \
+            "JOIN Packages p ON t.package = p.id " \
+            "LEFT JOIN Imports i ON t.tag_p = i.id " \
+            "WHERE t.package in (" + "?," * len(package_ids) + ")" \
+            " AND tag_i = ? AND ("\
+            "  (tag_p = ''   AND  ? IN (p.uri, p.url)) OR " \
+            "  (tag_p = i.id AND  ? IN (i.uri, i.url)))"
+        args = list(package_ids) + [tag_i, tag_u, tag_u]
+
+        return self._conn.execute(q, args)
+
+    def iter_tagging(self, package_ids, element, tag):
+        """Iter over all the packages associating element to tag.
+
+        @param element the uri-ref of an element
+        @param tag the uri-ref of a tag
+        """
+        assert not isinstance(package_ids, basestring), "list if ids expected"
+
+        element_u, element_i = _split_uri_ref(element)
+        tag_u, tag_i = _split_uri_ref(tag)
+        q = "SELECT t.package " \
+            "FROM Tagged t " \
+            "JOIN Packages p ON t.package = p.id " \
+            "LEFT JOIN Imports ie ON t.element_p = ie.id " \
+            "LEFT JOIN Imports it ON t.tag_p = it.id " \
+            "WHERE t.package in (" + "?," * len(package_ids) + ")" \
+            " AND element_i = ? AND ("\
+            "  (element_p = ''    AND  ? IN (p.uri,  p.url)) OR " \
+            "  (element_p = ie.id AND  ? IN (ie.uri, ie.url)))" \
+            " AND tag_i = ? AND ("\
+            "  (tag_p = ''    AND  ? IN (p.uri,  p.url)) OR " \
+            "  (tag_p = it.id AND  ? IN (it.uri, it.url)))"
+        args = list(package_ids) \
+             + [element_i, element_u, element_u, tag_i, tag_u, tag_u,]
+
+        for i in self._conn.execute(q, args):
+            yield i[0]
+
 
     # end of the class
