@@ -63,61 +63,61 @@ class Import(PackageElement):
     def __contains__(self, element):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return element in self._imported._all
+        return element in self._imported.own
 
     @property
     def medias(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported._all.medias
+        return self._imported.own.medias
 
     @property
     def annotations(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported._all.annotations
+        return self._imported.own.annotations
 
     @property
     def relations(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported._all.relations
+        return self._imported.own.relations
 
     @property
     def views(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported._all.views
+        return self._imported.own.views
 
     @property
     def resources(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported._all.resources
+        return self._imported.own.resources
 
     @property
     def tags(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported._all.tags
+        return self._imported.own.tags
 
     @property
     def lists(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported._all.lists
+        return self._imported.own.lists
 
     @property
     def imports(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported._all.imports
+        return self._imported.own.imports
 
     @property
     def queries(self):
         if not self._imported:
             raise UnreachableImportError(self._id)
-        return self._imported._all.queries
+        return self._imported.own.queries
 
     # dict interface
 
