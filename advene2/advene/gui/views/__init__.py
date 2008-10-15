@@ -184,7 +184,9 @@ class AdhocView(object):
                 return opt, arg
             if  m != 'application/x-advene-adhoc-view':
                 return opt, arg
-            p=AdhocViewParametersParser(param.stream)
+            f=param.as_file
+            p=AdhocViewParametersParser(f)
+            f.close()
         elif ET.iselement(param):
             p=AdhocViewParametersParser(param)
         else:
