@@ -4,20 +4,36 @@ from advene.model.cam.group import CamGroupMixin
 from advene.model.core.list import List as CoreList
 
 class List(CamGroupMixin, CoreList, CamElementMixin) :
+
+    @classmethod
+    def instantiate(cls, owner, id):
+        r = super(List, cls).instantiate(owner, id)
+        r._transtype()
+        return r
+
     def __iter__(self):
         # necessary to override CamGroupMixin __iter__
         return CoreList.__iter__(self)
 
     def set_meta(self, key, value, val_is_idref=False, _guard=True):
-        # transtype List when CAMSYS_TYPE is updated
         if key == CAMSYS_TYPE:
-            if value == "schema":
-                newtype = Schema
-            else:
-                newtype = List
-            if self.__class__ is not newtype:
-                self.__class__ = newtype
+            self._transtype(value)
         return super(List, self).set_meta(key, value, val_is_idref, _guard)
+
+    def _transtype(self, systype=None):
+        """
+        Transtypes this List to Schema if its systype is 'schema'.
+
+        If systype is omitted, it is retrieved from the metadata.
+        """
+        if systype is None:
+            systype = self.get_meta(CAMSYS_TYPE, None)
+        if systype == "schema":
+            newtype = Schema
+        else:
+            newtype = List
+        if self.__class__ is not newtype:
+            self.__class__ = newtype
 
 List.make_metadata_property(CAMSYS_TYPE, "system_type", default=None)
 

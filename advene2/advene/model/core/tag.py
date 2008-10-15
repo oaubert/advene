@@ -15,7 +15,7 @@ from advene.util.session import session
 
 class Tag(PackageElement, GroupMixin):
 
-    ADVENE_TYPE = TAG 
+    ADVENE_TYPE = TAG
 
     def __init__(self, owner, id, *a):
         super(Tag, self).__init__(owner, id, *a)
