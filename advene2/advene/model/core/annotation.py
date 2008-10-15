@@ -252,14 +252,14 @@ class Annotation(PackageElement, WithContentMixin):
     def typed_related_in(self):
         """List of tuples (relation type, list of related incoming annotations)
         """
-        return [ (at, (r[1] for r in l)) for (at, l) in 
+        return [ (at, [r[1] for r in l]) for (at, l) in 
                  itertools.groupby(self.incoming_relations, key=lambda e: e.type) ]
     
     @property
     def typed_related_out(self):
         """List of tuples (relation type, list of related outgoing annotations)
         """
-        return [ (at, (r[0] for r in l)) for (at, l) in 
+        return [ (at, [r[0] for r in l]) for (at, l) in 
                  itertools.groupby(self.outgoing_relations, key=lambda e: e.type) ]
 
     @tales_property
