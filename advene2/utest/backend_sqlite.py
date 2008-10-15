@@ -866,7 +866,7 @@ class TestHandleElements(TestCase):
         self.be.set_meta(self.pid1, "t2", TAG, "foo", "world", 0)
         self.be.set_meta(self.pid1, "t1", TAG, "bar", "i1:t3", 1)
         self.be.set_meta(self.pid2, "t3", TAG, "bar", "t3", 1)
-        t3u = "%s#t3" % self.url2
+        t3u = "%s#t3" % self.i1_uri
 
         ref = frozenset([self.t3])
         self.assertEqual(ref, get((self.pid1, self.pid2,),
@@ -1200,7 +1200,7 @@ class TestHandleElements(TestCase):
         self.be.set_meta(self.pid1, "t2", TAG, "foo", "world", 0)
         self.be.set_meta(self.pid1, "t1", TAG, "bar", "i1:t3", 1)
         self.be.set_meta(self.pid2, "t3", TAG, "bar", "t3", 1)
-        t3u = "%s#t3" % self.url2
+        t3u = "%s#t3" % self.i1_uri
 
         ref = len([self.t3])
         self.assertEqual(ref, get((self.pid1, self.pid2,),
@@ -1551,16 +1551,18 @@ class TestHandleElements(TestCase):
         self.be.insert_member(self.pid1, "r2", "a4", -1)
         self.be.insert_member(self.pid2, "r3", "a5", -1)
         self.be.insert_member(self.pid2, "r3", "a6", -1)
-        c_rel_w_member = self.be.count_relations_with_member
-        i_rel_w_member = self.be.iter_relations_with_member
+        def c_rel_w_member(pids, member, pos=None):
+                return self.be.count_relations(pids, member=member, pos=pos)
+        def i_rel_w_member(pids, member, pos=None):
+                return self.be.iter_relations(pids, member=member, pos=pos)
         pids = (self.pid1, self.pid2,)
-        # with url in uri-ref
+        # with url in uri-ref -- wrong, since there is a uri
         a5_uri_ref = "%s#a5" % self.url2
-        self.assertEqual(2, c_rel_w_member(pids, a5_uri_ref,))
-        self.assertEqual(frozenset((RELATION,)+i for i in [self.r1, self.r3]),
+        self.assertNotEqual(2, c_rel_w_member(pids, a5_uri_ref,))
+        self.assertNotEqual(frozenset((RELATION,)+i for i in [self.r1, self.r3]),
                           frozenset(i_rel_w_member(pids, a5_uri_ref,)))
-        self.assertEqual(1, c_rel_w_member(pids, a5_uri_ref, 1))
-        self.assertEqual(frozenset([(RELATION,)+self.r1,]),
+        self.assertNotEqual(1, c_rel_w_member(pids, a5_uri_ref, 1))
+        self.assertNotEqual(frozenset([(RELATION,)+self.r1,]),
                           frozenset(i_rel_w_member(pids, a5_uri_ref, 1)))
         # with uri in uri-ref
         a5_uri_ref = "%s#a5" % self.i1_uri
@@ -1591,10 +1593,10 @@ class TestHandleElements(TestCase):
 
         self.be.insert_item(self.pid1, "l1", "i1:r3", 1)
         compare_to_list(["a4", "i1:r3", "a3",], self.pid1, "l1")
-            
+
         self.be.insert_item(self.pid1, "l1", "r2", 1)
         compare_to_list(["a4", "r2", "i1:r3", "a3",], self.pid1, "l1")
-            
+
         self.be.update_item(self.pid1, "l1", "i1:a6", 0)
         compare_to_list(["i1:a6", "r2", "i1:r3", "a3",], self.pid1, "l1")
 
@@ -1604,23 +1606,36 @@ class TestHandleElements(TestCase):
         self.be.insert_item(self.pid1, "l2", "a4", -1)
         self.be.insert_item(self.pid2, "l3", "r3", -1)
         self.be.insert_item(self.pid2, "l3", "a6", -1)
-        lst_w_item = self.be.iter_lists_with_item
+        def c_lst_w_item(pids, item, pos=None):
+            return self.be.count_lists(pids, item=item, pos=pos)
+        def i_lst_w_item(pids, item, pos=None):
+            return self.be.iter_lists(pids, item=item, pos=pos)
         pids = (self.pid1, self.pid2,)
-        # with url in uri-ref
+        # with url in uri-ref -- wrong, since the package has a URI
         r3_uri_ref = "%s#r3" % self.url2
-        self.assertEqual(frozenset((LIST,)+i for i in [self.l1, self.l3]),
-                          frozenset(lst_w_item(pids, r3_uri_ref,)))
-        self.assertEqual(frozenset([(LIST,)+self.l1,]),
-                          frozenset(lst_w_item(pids, r3_uri_ref, 1)))
+        self.assertNotEqual(2,
+                            c_lst_w_item(pids, r3_uri_ref,))
+        self.assertNotEqual(frozenset((LIST,)+i for i in [self.l1, self.l3]),
+                          frozenset(i_lst_w_item(pids, r3_uri_ref,)))
+        self.assertNotEqual(1,
+                          c_lst_w_item(pids, r3_uri_ref, 1))
+        self.assertNotEqual(frozenset([(LIST,)+self.l1,]),
+                          frozenset(i_lst_w_item(pids, r3_uri_ref, 1)))
         # with uri in uri-ref
         r3_uri_ref = "%s#r3" % self.i1_uri
+        self.assertEqual(2,
+                          c_lst_w_item(pids, r3_uri_ref,))
         self.assertEqual(frozenset((LIST,)+i for i in [self.l1, self.l3]),
-                          frozenset(lst_w_item(pids, r3_uri_ref,)))
+                          frozenset(i_lst_w_item(pids, r3_uri_ref,)))
+        self.assertEqual(1,
+                          c_lst_w_item(pids, r3_uri_ref, 1))
         self.assertEqual(frozenset([(LIST,)+self.l1,]),
-                          frozenset(lst_w_item(pids, r3_uri_ref, 1)))
+                          frozenset(i_lst_w_item(pids, r3_uri_ref, 1)))
         # with not all packages
+        self.assertEqual(1,
+                          c_lst_w_item((self.pid2,), r3_uri_ref))
         self.assertEqual(frozenset([(LIST,)+self.l3,]),
-                          frozenset(lst_w_item((self.pid2,), r3_uri_ref)))
+                          frozenset(i_lst_w_item((self.pid2,), r3_uri_ref)))
 
     def test_tagged(self):
         self.be.associate_tag(self.pid1, "a1",    "t1")
@@ -2166,9 +2181,7 @@ class TestRobustIterations(TestCase):
         "iter_contents_with_model": [pids, "%s#R3" % url2,],
         "iter_meta": [pid1, "", ""],
         "iter_members": [pid1, "r1",],
-        "iter_relations_with_member": [pids, "%s#a1" % url1,],
         "iter_items": [pid1, "l1",],
-        "iter_lists_with_item": [pids, "%s#r1" % url1,],
         "iter_tags_with_element": [pids, "%s#a1" % url1,],
         "iter_elements_with_tag": [pids, "%s#t1" % url1,],
         "iter_taggers": [pids, "%s#a1" % url1, "%s#t1" % url1,],

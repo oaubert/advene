@@ -196,13 +196,17 @@ class Annotation(PackageElement, WithContentMixin):
 
     # relation management shortcuts
 
-    def iter_relations(self, package=None, position=None):
+    def iter_relations(self, package=None, position=None, inherited=True):
         """
         Iter over all the relations involving this annotation, from the point of
         view of `package`.
 
         If `position` is provided, only the relation where this annotations is
         in the given position are yielded.
+
+        If `inherited` is True (default), all the relations imported by the
+        package are searched, else only proper relations of the package are
+        searched.
 
         If ``package`` is not provided, the ``package`` session variable is
         used. If the latter is unset, a TypeError is raised.
@@ -211,7 +215,11 @@ class Annotation(PackageElement, WithContentMixin):
             package = session.package
         if package is None:
             raise TypeError("no package set in session, must be specified")
-        return package.all.iter_relations(member=self, position=position)
+        if inherited:
+            g = package.all
+        else:
+            g = package.own
+        return g.iter_relations(member=self, position=position)
 
     def count_relations(self, package=None, position=None):
         """
@@ -267,7 +275,7 @@ class Annotation(PackageElement, WithContentMixin):
         """
         return [ (at, [r[1] for r in l]) for (at, l) in 
                  itertools.groupby(self.incoming_relations, key=lambda e: e.type) ]
-    
+
     @property
     def typed_related_out(self):
         """List of tuples (relation type, list of related outgoing annotations)

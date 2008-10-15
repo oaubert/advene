@@ -2,6 +2,7 @@
 """
 
 from advene.model.core.group import GroupMixin
+from advene.model.core.own_group import _prepare_meta
 from advene.util.autoproperty import autoproperty
 from advene.util.itertools import interclass
 
@@ -74,39 +75,29 @@ class AllGroup(GroupMixin, object):
     def iter_relations(self, member=None, position=None):
         """FIXME: missing docstring.
         """
-        assert position is None or member, "If position is specified, member should be specified too."
-        o = self._owner
-        if member is None:
-            for be, pdict in o._backends_dict.items():
-                for i in be.iter_relations(pdict):
-                    yield pdict[i[1]].get_element(i)
-        else:
-            member = member._get_uriref()
-            for be, pdict in o._backends_dict.items():
-                for i in be.iter_relations_with_member(pdict, member,
-                                                       position):
-                    yield pdict[i[1]].get_element(i)
-
-    def iter_lists(self, item=None, position=None):
-        """FIXME: missing docstring.
-        """
-        assert position is None or item, "If position is specified, item should be specified too."
-
-        o = self._owner
-        if item is None:
-            for be, pdict in o._backends_dict.items():
-                for i in be.iter_lists(pdict):
-                    yield pdict[i[1]].get_element(i)
-        else:
-            item = item._get_uriref()
-            for be, pdict in o._backends_dict.items():
-                for i in be.iter_lists_with_item(pdict, item, position):
-                    yield pdict[i[1]].get_element(i)
-
-    def iter_tags(self):
+        assert position is None or member is not None
+        if member: member = member._get_uriref()
         o = self._owner
         for be, pdict in o._backends_dict.items():
-            for i in be.iter_tags(pdict):
+            for i in be.iter_relations(pdict, None, member, position):
+                yield pdict[i[1]].get_element(i)
+
+    def iter_lists(self, item=None, position=None, meta=None):
+        """FIXME: missing docstring.
+        """
+        assert position is None or item is not None
+        if item: item = item._get_uriref()
+        if meta: meta = _prepare_meta(meta)
+        o = self._owner
+        for be, pdict in o._backends_dict.items():
+            for i in be.iter_lists(pdict, None, item, position, meta):
+                yield pdict[i[1]].get_element(i)
+
+    def iter_tags(self, meta=None):
+        if meta: meta = _prepare_meta(meta)
+        o = self._owner
+        for be, pdict in o._backends_dict.items():
+            for i in be.iter_tags(pdict, None, meta):
                 yield pdict[i[1]].get_element(i)
 
     def iter_imports(self, url=None, uri=None):
@@ -157,14 +148,10 @@ class AllGroup(GroupMixin, object):
 
     def count_relations(self, member=None, position=None):
         assert position is None or member is not None
+        if member: member = member._get_uriref()
         o = self._owner
-        if member is None:
-            return sum( be.count_relations(pdict)
-                        for be, pdict in o._backends_dict.items() )
-        else:
-            uri = member.uriref
-            return sum( be.count_relations_with_member(pdict, uri, position)
-                        for be, pdict in o._backends_dict.items() )
+        return sum( be.count_relations(pdict, None, member, position)
+                    for be, pdict in o._backends_dict.items() )
 
     def count_views(self):
         o = self._owner
@@ -176,14 +163,18 @@ class AllGroup(GroupMixin, object):
         return sum( be.count_resources(pdict)
                     for be, pdict in o._backends_dict.items() )
 
-    def count_tags(self):
+    def count_tags(self, meta=None):
+        if meta: meta = _prepare_meta(meta)
         o = self._owner
-        return sum( be.count_tags(pdict)
+        return sum( be.count_tags(pdict, None, meta)
                     for be, pdict in o._backends_dict.items() )
 
-    def count_lists(self):
+    def count_lists(self, item=None, position=None, meta=None):
+        assert position is None or item is not None
+        if item: item = item._get_uriref()
+        if meta: meta = _prepare_meta(meta)
         o = self._owner
-        return sum( be.count_lists(pdict)
+        return sum( be.count_lists(pdict, None, item, position, meta)
                     for be, pdict in o._backends_dict.items() )
 
     def count_queries(self):

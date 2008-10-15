@@ -319,44 +319,6 @@ def _split_uri_ref(uri_ref):
     return uri_ref[:sharp], uri_ref[sharp+1:]
 
 
-
-class _FlushableIterator(object):
-    """Cursor based iterator that may flush the cursor whenever needed.
-
-       Transactions to the database cannot be commited while a cursor is
-       being used. So it is unsafe for _SqliteBackend to return cursors direcly
-       because it may hinder further execution of methods using transactions.
-
-       On the other hand, it may be inefficient to flush all cursors into lists
-       before returning them. This class provides an efficient solution.
-
-       All cursors (or cursor based iterators) are wrapped info a
-       _FlushableIterator before being returned, and the latter is weakly
-       referenced by the backend instance. Whenever a transaction is started,
-       all known _FlushableIterators are flushed, i.e. they internally change
-       their underlying iterator into a list, so that the transaction can be
-       committed, but users can continue to transparently use them.
-
-       Note that this implementation uses the iterable interface of sqlite
-       cursors rather than the DB-API cursor interface. This is less portable,
-       but allows to wrap iterators that are not cursors but relying on a
-       cursor, e.g.:::
-
-           return _FlusableIterator(( r[1] for r in conn.execute(query) ), be)
-    """
-    __slots__ = ["_cursor", "__weakref__",]
-    def __init__ (self, cursor, backend):
-        self._cursor = cursor
-        backend._iterators[self] = True
-    def __iter__ (self):
-        return self
-    def flush(self):
-        """Flush the underlying cursor."""
-        self._cursor = iter(list(self._cursor))
-    def next(self):
-        return self._cursor.next()
-
-
 class _SqliteBackend(object):
     """I am the reference implementation of advene backend instances.
 
@@ -954,11 +916,18 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form(MEDIA, package_id, id, url,).
         """
-        selectfrom, where, args = self._media_query(package_ids,
-                                                    id,
-                                                    url,
-                                                    foref)
-        r = self._conn.execute(selectfrom+where, args)
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT ?, e.package, e.id, e.url, e.foref",
+            "FROM Medias e",
+            args = [MEDIA,]
+        )
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if url: q.add_column_filter("e.url", url)
+        if foref: q.add_column_filter("e.foref", foref)
+
+        r = self._conn.execute(*q.exe())
         return _FlushableIterator(r, self)
 
     def iter_annotations(self, package_ids,
@@ -974,34 +943,62 @@ class _SqliteBackend(object):
 
         ``media`` is the uri-ref of a media or an iterable of uri-refs.
         """
-        selectfrom, where, args = self._annotation_query(
-            package_ids,
-            id,
-            media,
-            begin, begin_min, begin_max,
-            end, end_min, end_max,
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT ?, e.package, e.id, join_id_ref(e.media_p, e.media_i),"
+                  " e.fbegin, e.fend",
+            "FROM Annotations e",
+            args = [ANNOTATION,]
         )
-        r = self._conn.execute(selectfrom+where, args)
+        q.add_content_columns()
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if media: q.add_media_filter(media)
+        if begin: q.append(" AND e.fbegin = ?", begin)
+        if begin_min: q.append(" AND e.fbegin >= ?", begin_min)
+        if begin_max: q.append(" AND e.fbegin <= ?", begin_max)
+        if end: q.append(" AND e.fend = ?", end)
+        if end_min: q.append(" AND e.fend >= ?", end_min)
+        if end_max: q.append(" AND e.fend <= ?", end_max)
+        q.append(" ORDER BY fbegin, fend, media_p, media_i")
+        r = self._conn.execute(*q.exe())
         return _FlushableIterator(r, self)
 
-    def iter_relations(self, package_ids,
-                       id=None):
+    def iter_relations(self, package_ids, id=None, member=None, pos=None):
         """
         Yield tuples of the form (RELATION, package_id, id, mimetype, model, 
         url).
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, RELATION, id)
-        r = self._conn.execute(selectfrom+where, args)
+        assert _DF or not isinstance(package_ids, basestring)
+        assert _DF or pos is None or member is not None
+        q = _Query(
+            "SELECT e.typ, e.package, e.id",
+            "FROM Elements e",
+            "WHERE e.typ = ?",
+            args = [RELATION,]
+        )
+        q.add_content_columns()
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if member: q.add_member_filter(member, pos)
+        r = self._conn.execute(*q.exe())
         return _FlushableIterator(r, self)
 
     def iter_views(self, package_ids, id=None):
         """
         Yield tuples of the form (VIEW, package_id, id, mimetype, model, url).
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, VIEW, id)
-        r = self._conn.execute(selectfrom+where, args)
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT e.typ, e.package, e.id",
+            "FROM Elements e",
+            "WHERE e.typ = ?",
+            args = [VIEW,]
+        )
+        q.add_content_columns()
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        r = self._conn.execute(*q.exe())
         return _FlushableIterator(r, self)
 
     def iter_resources(self, package_ids, id=None):
@@ -1009,27 +1006,53 @@ class _SqliteBackend(object):
         Yield tuples of the form (RESOURCE, package_id, id, mimetype, model, 
         url).
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, RESOURCE, id)
-        r = self._conn.execute(selectfrom+where, args)
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT e.typ, e.package, e.id",
+            "FROM Elements e",
+            "WHERE e.typ = ?",
+            args = [RESOURCE,]
+        )
+        q.add_content_columns()
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        r = self._conn.execute(*q.exe())
         return _FlushableIterator(r, self)
 
     def iter_tags(self, package_ids, id=None, meta=None):
         """
         Yield tuples of the form (TAG, package_id, id,).
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, TAG, id, meta)
-        r = self._conn.execute(selectfrom+where, args)
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT e.typ, e.package, e.id",
+            "FROM Elements e",
+            "WHERE e.typ = ?",
+            args = [TAG,]
+        )
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if meta: q.add_meta_filter(meta)
+        r = self._conn.execute(*q.exe())
         return _FlushableIterator(r, self)
 
-    def iter_lists(self, package_ids, id=None, meta=None):
+    def iter_lists(self, package_ids, id=None, item=None, pos=None, meta=None):
         """
         Yield tuples of the form (LIST, package_id, id,).
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, LIST, id, meta)
-        r = self._conn.execute(selectfrom+where, args)
+        assert _DF or not isinstance(package_ids, basestring)
+        assert _DF or pos is None or item is not None
+        q = _Query(
+            "SELECT e.typ, e.package, e.id",
+            "FROM Elements e",
+            "WHERE e.typ = ?",
+            args = [LIST,]
+        )
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if item: q.add_item_filter(item, pos)
+        if meta: q.add_meta_filter(meta)
+        r = self._conn.execute(*q.exe())
         return _FlushableIterator(r, self)
 
     def iter_queries(self, package_ids, id=None):
@@ -1037,9 +1060,17 @@ class _SqliteBackend(object):
         Yield tuples of the form (QUERY, package_id, id, mimetype, model,
         url).
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, QUERY, id)
-        r = self._conn.execute(selectfrom+where, args)
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT e.typ, e.package, e.id",
+            "FROM Elements e",
+            "WHERE e.typ = ?",
+            args = [QUERY,]
+        )
+        q.add_content_columns()
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        r = self._conn.execute(*q.exe())
         return _FlushableIterator(r, self)
 
     def iter_imports(self, package_ids,
@@ -1050,11 +1081,17 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (IMPORT, package_id, id, url, uri).
         """
-        selectfrom, where, args = self._import_query(package_ids,
-                                                     id,
-                                                     url,
-                                                     uri,)
-        r = self._conn.execute(selectfrom+where, args)
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT ?, e.package, e.id, e.url, e.uri",
+            "FROM Imports e",
+            args = [IMPORT,]
+        )
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if url: q.add_column_filter("e.url", url)
+        if uri: q.add_column_filter("e.uri", uri)
+        r = self._conn.execute(*q.exe())
         return _FlushableIterator(r, self)
 
     # element counting
@@ -1067,13 +1104,18 @@ class _SqliteBackend(object):
         """
         Count the medias matching the criteria.
         """
-        selectfrom, where, args = self._media_query(package_ids,
-                                                    id,
-                                                    url,
-                                                    foref)
-        r = self._conn.execute("select count(*) from (%s)"
-                                % (selectfrom+where),
-                                args)
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT e.package, e.id",
+            "FROM Medias e",
+        )
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if url: q.add_column_filter("e.url", url)
+        if foref: q.add_column_filter("e.foref", foref)
+        q.wrap_in_count()
+
+        r = self._conn.execute(*q.exe())
         return r.next()[0]
 
     def count_annotations(self, package_ids,
@@ -1087,83 +1129,171 @@ class _SqliteBackend(object):
 
         ``media`` is the uri-ref of a media or an iterable of uri-refs.
         """
-        selectfrom, where, args = self._annotation_query(
-            package_ids,
-            id,
-            media,
-            begin, begin_min, begin_max,
-            end, end_min, end_max,
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT e.package, e.id",
+            "FROM Annotations e",
         )
-        r = self._conn.execute("select count(*) from (%s)"
-                                % (selectfrom+where),
-                                args)
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if media: q.add_media_filter(media)
+        if begin: q.append(" AND e.fbegin = ?", begin)
+        if begin_min: q.append(" AND e.fbegin >= ?", begin_min)
+        if begin_max: q.append(" AND e.fbegin <= ?", begin_max)
+        if end: q.append(" AND e.fend = ?", end)
+        if end_min: q.append(" AND e.fend >= ?", end_min)
+        if end_max: q.append(" AND e.fend <= ?", end_max)
+        q.wrap_in_count()
+        r = self._conn.execute(*q.exe())
         return r.next()[0]
 
-    def count_relations(self, package_ids,
-                       id=None):
+    def count_relations(self, package_ids, id=None, member=None, pos=None):
         """
         Return the number of relations matching the criteria.
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, RELATION, id)
-        r = self._conn.execute("select count(*) from (%s)"
-                                % (selectfrom+where),
-                                args)
+        assert _DF or not isinstance(package_ids, basestring)
+        assert _DF or pos is None or member is not None
+        if member is None:
+            q = _Query(
+                "SELECT e.package, e.id",
+                "FROM Elements e",
+                "WHERE e.typ = ?",
+                args = [RELATION,]
+            )
+        else:
+            m_u, m_i = _split_uri_ref(member)
+
+            #q = _Query(
+            #    "SELECT DISTINCT rm.package, rm.relation",
+            #    "FROM RelationMembers rm "
+            #    "JOIN UriBases u ON u.package = rm.package "
+            #                    "AND u.prefix = rm.member_p",
+            #    "WHERE u.uri_base = ? AND rm.member_i = ?",
+            #    [m_u, m_i],
+            #    pid = "rm.package", eid = "rm.relation"
+            #)
+
+            # since UriBases (above) hinders efficiency, replace with:
+            q = _Query(
+                "SELECT DISTINCT rm.package, rm.relation",
+                "FROM RelationMembers rm "
+                "JOIN Packages p ON p.id = rm.package "
+                "LEFT JOIN Imports i ON i.package = rm.package "
+                                    "AND i.id = rm.member_p",
+                "WHERE rm.member_i = ? "
+                "AND ("
+                 "(member_p = '' AND (p.uri = '' AND ? = p.url OR ? = p.uri))"
+                 " OR "
+                 "(member_p = i.id AND (i.uri = '' AND ? = i.url OR ? = i.uri))"
+                ")",
+                [m_i, m_u, m_u, m_u, m_u],
+                pid = "rm.package", eid = "rm.relation"
+            )
+            if pos is not None: q.append(" AND rm.ord = ?", pos)
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        q.wrap_in_count()
+        r = self._conn.execute(*q.exe())
         return r.next()[0]
 
     def count_views(self, package_ids, id=None):
         """
         Return the number of views matching the criteria.
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, VIEW, id)
-        r = self._conn.execute("select count(*) from (%s)"
-                                % (selectfrom+where),
-                                args)
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT e.package, e.id",
+            "FROM Elements e",
+            "WHERE e.typ = ?",
+            args = [VIEW,]
+        )
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        q.wrap_in_count()
+        r = self._conn.execute(*q.exe())
         return r.next()[0]
 
     def count_resources(self, package_ids, id=None):
         """
         Return the number of resources matching the criteria.
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, RESOURCE, id)
-        r = self._conn.execute("select count(*) from (%s)"
-                                % (selectfrom+where),
-                                args)
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT e.package, e.id",
+            "FROM Elements e",
+            "WHERE e.typ = ?",
+            args = [RESOURCE,]
+        )
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        q.wrap_in_count()
+        r = self._conn.execute(*q.exe())
         return r.next()[0]
 
     def count_tags(self, package_ids, id=None, meta=None):
         """
         Return the number of tags matching the criteria.
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, TAG, id, meta)
-        r = self._conn.execute("select count(*) from (%s)"
-                                % (selectfrom+where),
-                                args)
+        assert _DF or not isinstance(package_ids, basestring)
+        q = _Query(
+            "SELECT e.package, e.id",
+            "FROM Elements e",
+            "WHERE e.typ = ?",
+            args = [TAG,]
+        )
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if meta: q.add_meta_filter(meta)
+        q.wrap_in_count()
+        r = self._conn.execute(*q.exe())
         return r.next()[0]
 
-    def count_lists(self, package_ids, id=None, meta=None):
+    def count_lists(self, package_ids, id=None, item=None, pos=None, meta=None):
         """
         Return the number of lists matching the criteria.
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, LIST, id, meta)
-        r = self._conn.execute("select count(*) from (%s)"
-                                % (selectfrom+where),
-                                args)
+        assert _DF or not isinstance(package_ids, basestring)
+        assert _DF or pos is None or item is not None
+        if item is None:
+            q = _Query(
+                "SELECT e.package, e.id",
+                "FROM Elements e",
+                "WHERE e.typ = ?",
+                args = [LIST,]
+            )
+        else:
+            i_u, i_i = _split_uri_ref(item)
+            q = _Query(
+                "SELECT DISTINCT li.package, li.list",
+                "FROM ListItems li "
+                "JOIN UriBases u ON u.package = li.package "
+                                "AND u.prefix = li.item_p",
+                "WHERE u.uri_base = ? AND li.item_i = ?",
+                [i_u, i_i],
+                pid = "li.package", eid = "li.list"
+            )
+            if pos is not None: q.append(" AND li.ord = ?", pos)
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if meta: q.add_meta_filter(meta)
+        q.wrap_in_count()
+        r = self._conn.execute(*q.exe())
         return r.next()[0]
 
     def count_queries(self, package_ids, id=None):
         """
         Return the number of querties matching the criteria.
         """
-        selectfrom, where, args = \
-            self._element_query(package_ids, QUERY, id)
-        r = self._conn.execute("select count(*) from (%s)"
-                                % (selectfrom+where),
-                                args)
+        q = _Query(
+            "SELECT e.package, e.id",
+            "FROM Elements e",
+            "WHERE e.typ = ?",
+            args = [QUERY,]
+        )
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        q.wrap_in_count()
+        r = self._conn.execute(*q.exe())
         return r.next()[0]
 
     def count_imports(self, package_ids,
@@ -1174,13 +1304,16 @@ class _SqliteBackend(object):
         """
         Return the number of imports matching the criteria.
         """
-        selectfrom, where, args = self._import_query(package_ids,
-                                                     id,
-                                                     url,
-                                                     uri)
-        r = self._conn.execute("select count(*) from (%s)"
-                                % (selectfrom+where),
-                                args)
+        q = _Query(
+            "SELECT e.package, e.id",
+            "FROM Imports e",
+        )
+        q.add_packages_filter(package_ids)
+        if id: q.add_id_filter(id)
+        if url: q.add_column_filter("e.url", url)
+        if uri: q.add_column_filter("e.uri", uri)
+        q.wrap_in_count()
+        r = self._conn.execute(*q.exe())
         return r.next()[0]
 
     # element updating
@@ -1424,8 +1557,8 @@ class _SqliteBackend(object):
         """Delete the identified element.
 
         NB: This does not delete references to that element, *even* in the same
-        package. The appropriate methods (`iter_annotations`,
-        `iter_relations_with_member`, etc.) must be used to detect and delete
+        package. The appropriate methods (`iter_references`,
+        `iter_references_with_import`) must be used to detect and delete
         those references prior to deletion.
         """
         assert _DF or self.has_element(package_id, id, element_type)
@@ -1827,71 +1960,6 @@ class _SqliteBackend(object):
             raise
         execute("COMMIT")
 
-    def iter_relations_with_member(self, package_ids, member, pos=None):
-        """Iter tuples representing all the relations having the given member.
-
-        Specific parameters
-        -------------------
-        member
-          the uri-ref of the member to be looked for
-        pos
-          if given, only relations having the member at that posirtion are
-          yielded
-        """
-        assert _DF or not isinstance(package_ids, basestring)
-        member_u, member_i = _split_uri_ref(member)
-
-        q = "SELECT DISTINCT ?, e.package as pid, e.id as eid, c.mimetype, " \
-            "  join_id_ref(c.model_p, c.model_i), c.url " \
-            "FROM Elements e " \
-            "JOIN Contents c ON c.package = e.package AND c.element = e.id " \
-            "JOIN Packages p ON e.package = p.id "\
-            "JOIN RelationMembers m " \
-              "ON e.package = m.package and e.id = m.relation " \
-            "LEFT JOIN Imports i ON m.member_p = i.id " \
-            "WHERE e.package IN (" \
-            + ",".join( "?" for i in package_ids ) + ")" \
-            " AND member_i = ? AND ("\
-            "  (member_p = ''   AND  ? IN (p.uri, p.url)) OR " \
-            "  (member_p = i.id AND  ? IN (i.uri, i.url)))"
-        args = [RELATION,] + list(package_ids) \
-                           + [member_i, member_u, member_u,]
-        if pos is not None:
-            q += " AND ord = ?"
-            args.append(pos)
-        r = self._conn.execute(q, args)
-        return _FlushableIterator(r, self)
-
-    def count_relations_with_member(self, package_ids, member, pos=None):
-        """Count all the relations having the given member.
-
-        Specific parameters
-        -------------------
-        member
-          the uri-ref of the member to be looked for
-        pos
-          if given, only relations having the member at that posirtion are
-          yielded
-        """
-        assert _DF or not isinstance(package_ids, basestring)
-        member_u, member_i = _split_uri_ref(member)
-
-        q = "SELECT DISTINCT m.package, m.relation " \
-            "FROM RelationMembers m " \
-            "JOIN Packages p ON m.package = p.id "\
-            "LEFT JOIN Imports i ON m.member_p = i.id " \
-            "WHERE m.package IN (" \
-            + ",".join( "?" for i in package_ids ) + ")" \
-            " AND member_i = ? AND ("\
-            "  (member_p = ''   AND  ? IN (p.uri, p.url)) OR " \
-            "  (member_p = i.id AND  ? IN (i.uri, i.url)))"
-        args = list(package_ids) + [member_i, member_u, member_u,]
-        if pos is not None:
-            q += " AND m.ord = ?"
-            args.append(pos)
-        r = self._conn.execute("select count(*) from (%s)" % q, args)
-        return r.next()[0]
-
     # list items management
 
     def insert_item(self, package_id, id, item, pos, n=-1):
@@ -2025,33 +2093,6 @@ class _SqliteBackend(object):
             self._conn.rollback()
             raise
         execute("COMMIT")
-
-    def iter_lists_with_item(self, package_ids, item, pos=None):
-        """
-        Return tuples of the form (LIST, package_id, id) of all the
-        lists having the given item, at the given position if given.
-
-        @param item the uri-ref of an element
-        """
-        assert _DF or not isinstance(package_ids, basestring)
-
-        item_u, item_i = _split_uri_ref(item)
-
-        q = "SELECT DISTINCT ?, e.package, e.id FROM Elements e " \
-            "JOIN Packages p ON e.package = p.id "\
-            "JOIN ListItems m " \
-              "ON e.package = m.package and e.id = m.list " \
-            "LEFT JOIN Imports i ON m.item_p = i.id " \
-            "WHERE e.package IN (" + ",".join( "?" for i in package_ids ) + ")"\
-            " AND item_i = ? AND ("\
-            "  (item_p = ''   AND  ? IN (p.uri, p.url)) OR " \
-            "  (item_p = i.id AND  ? IN (i.uri, i.url)))"
-        args = [LIST,] + list(package_ids) + [item_i, item_u, item_u,]
-        if pos is not None:
-            q += " AND ord = ?"
-            args.append(pos)
-        r = self._conn.execute(q, args)
-        return _FlushableIterator(r, self)
 
     # tagged elements management
 
@@ -2268,242 +2309,203 @@ class _SqliteBackend(object):
         execute("INSERT INTO Elements VALUES (?,?,?)",
                 (package_id, id, element_type))
 
-    def _element_query(self, package_ids, element_type,
-                       id=None, meta=None):
-        """
-        Return the selectfrom part of the query, the where part of the query,
-        and the argument list, of a query returning all the elements
-        matching the parameters.
 
-        The result has structure (type, package_id, id,).
-        If element_type is a type with content, content fields are added.
+class _FlushableIterator(object):
+    """Cursor based iterator that may flush the cursor whenever needed.
 
-        The meta parameter, if given, is an iterable of triples of the form
-        (key, value, uriref_flag). If uriref_flag is false, the value is
-        interpreted as a string; if it is true, the value is interpreted as the
-        uri-ref of an element. Note that value can also be None. This parameter
-        is used to filter elements that have the given (key, value) pair in
-        their metadata (value set to None filtering elements having no value
-        for the given key).
+       Transactions to the database cannot be commited while a cursor is
+       being used. So it is unsafe for _SqliteBackend to return cursors direcly
+       because it may hinder further execution of methods using transactions.
 
-        """
-        assert _DF or not isinstance(package_ids, basestring)
+       On the other hand, it may be inefficient to flush all cursors into lists
+       before returning them. This class provides an efficient solution.
 
-        s = "SELECT e.typ, e.package, e.id%s FROM Elements e%s"
-        args = []
+       All cursors (or cursor based iterators) are wrapped info a
+       _FlushableIterator before being returned, and the latter is weakly
+       referenced by the backend instance. Whenever a transaction is started,
+       all known _FlushableIterators are flushed, i.e. they internally change
+       their underlying iterator into a list, so that the transaction can be
+       committed, but users can continue to transparently use them.
 
-        if element_type in (ANNOTATION, RELATION, VIEW, QUERY, RESOURCE):
-            s = s % (", mimetype, join_id_ref(model_p, model_i), url",
-                     " JOIN Contents c ON e.package = c.package and "\
-                                           "e.id = c.element")
-        else:
-            s = s % ("", "") # remove %s's
-        w = " WHERE e.package IN (" \
-            + ",".join( "?" for i in package_ids ) + ")" \
-            " AND typ = ?"
-        args.extend(package_ids)
-        args.append(element_type)
+       Note that this implementation uses the iterable interface of sqlite
+       cursors rather than the DB-API cursor interface. This is less portable,
+       but allows to wrap iterators that are not cursors but relying on a
+       cursor, e.g.:::
 
-        if isinstance(id, basestring):
-            w += " AND id = ?"
-            args.append(id)
-        elif id is not None:
-            w += " AND id IN (" + ",".join( "?" for i in id ) + ")"
-            args.extend(id)
-
-        if meta is None: meta = ()
-        for k,v,u in meta:
-           if v is None:
-               w += " AND 0 == (SELECT count(*) FROM Meta m "\
-                          "WHERE m.package = e.package AND m.element = e.id "\
-                          "AND m.key = ?)"
-               args.append(k)
-           elif not u:
-               w += " AND 1 == (SELECT count(*) FROM Meta m "\
-                          "WHERE m.package = e.package AND m.element = e.id "\
-                          "AND m.key = ? AND m.value = ?)"
-               args.extend([k, v])
-           else:
-               v_u, v_i = _split_uri_ref(v)
-               w += " AND e.id in ("\
-                       "SELECT m.element FROM Meta m "\
-                       "JOIN Imports i ON e.package = i.package "\
-                       "WHERE ? in (i.url, i.uri) "\
-                       "AND m.package = e.package AND m.element = e.id "\
-                       "AND m.key = ? AND m.value_p = i.id AND m.value_i = ? "\
-                       "UNION "\
-                       "SELECT m.element FROM Meta m "\
-                       "JOIN Packages p ON e.package = p.id "\
-                       "WHERE ? in (p.url, p.uri) "\
-                       "AND m.package = e.package AND m.element = e.id "\
-                       "AND m.key = ? AND m.value_p = '' AND m.value_i = ?)"
-               args.extend([v_u, k, v_i, v_u, k, v_i])
-
-        return s,w,args
-
-    def _media_query(self, package_ids,
-                     id=None,
-                     url=None,
-                     foref=None,
-                    ):
-        """
-        Return the selectfrom part of the query, the where part of the query,
-        and the argument list, of a query returning all the medias matching the
-        parameters.
-
-        The result has structure (MEDIA, package_id, id, url,).
-        """
-        assert _DF or not isinstance(package_ids, basestring)
-
-        q0 = "SELECT ?, package, id, url, foref FROM Medias "
-        q = "WHERE package IN (" + ",".join( "?" for i in package_ids ) + ")"
-        args = [MEDIA,] + list(package_ids)
-
-        if isinstance(id, basestring):
-            q += " AND id = ?"
-            args.append(id)
-        elif id is not None:
-            q += " AND id IN (" + ",".join( "?" for i in id ) + ")"
-            args.extend(id)
-
-        if isinstance(url, basestring):
-            q += " AND url = ?"
-            args.append(url)
-        elif url is not None:
-            q += " AND url IN (" + ",".join( "?" for i in url ) + ")"
-            args.extend(url)
-
-        if isinstance(foref, basestring):
-            q += " AND foref = ?"
-            args.append(foref)
-        elif foref is not None:
-            q += " AND foref IN (" + ",".join( "?" for i in foref ) + ")"
-            args.extend(foref)
-
-        return q0, q, args
-
-    def _annotation_query(self, package_ids,
-                          id=None,
-                          media=None,
-                          begin=None, begin_min=None, begin_max=None,
-                          end=None,   end_min=None,   end_max=None,
-                         ):
-        """
-        Return the selectfrom part of the query, the where part of the query,
-        and the argument list, of a query returning all the annotations
-        matching the parameters.
-
-        The result has structure (ANNOTATION, package_id, id, media, begin,
-        end, mimetype, model, url), ordered by begin, end and media id-ref.
-
-        ``media`` is the uri-ref of a media or an iterable of uri-refs.
-        """
-        assert _DF or not isinstance(package_ids, basestring)
-
-        if isinstance(media, basestring):
-            media = (media, )
-        q0 = "SELECT ?, a.package, a.id, " \
-             "       join_id_ref(media_p, media_i) as media, " \
-             "       fbegin, fend, " \
-             "       c.mimetype, join_id_ref(c.model_p, c.model_i), c.url " \
-             "FROM Annotations a %s " \
-             "JOIN Contents c ON c.package = a.package AND c.element = a.id "
-        q = "WHERE a.package IN (" + ",".join( "?" for i in package_ids ) + ")"
-        args = [ANNOTATION,] + list(package_ids)
-        if media is not None:
-            q0 %= "JOIN Packages p ON a.package = p.id "\
-                 "LEFT JOIN Imports i " \
-                 "  ON a.package = i.package AND a.media_p = i.id"
-        else:
-            q0 %= ""
-
-        if isinstance(id, basestring):
-            q += " AND a.id = ?"
-            args.append(id)
-        elif id is not None:
-            q += " AND a.id IN (" + ",".join( "?" for i in id ) + ")"
-            args.extend(id)
-
-        if media is not None:
-            q += "AND ("
-            for m in media:
-                media_u, media_i = _split_uri_ref(m)
-                q += "(media_i = ? " \
-                     " AND (" \
-                     "  (media_p = ''   AND  ? IN (p.uri, p.url)) OR " \
-                     "  (media_p = i.id AND  ? IN (i.uri, i.url)) ) ) OR "
-                args.append(media_i)
-                args.append(media_u)
-                args.append(media_u)
-            q += "0) "
-
-        if begin is not None:
-            q += " AND a.fbegin = ?"
-            args.append(begin)
-        if begin_min is not None:
-            q += " AND a.fbegin >= ?"
-            args.append(begin_min)
-        if begin_max is not None:
-            q += " AND a.fbegin <= ?"
-            args.append(begin_max)
-        if end is not None:
-            q += " AND a.fend = ?"
-            args.append(end)
-        if end_min is not None:
-            q += " AND a.fend >= ?"
-            args.append(end_min)
-        if end_max is not None:
-            q += " AND a.fend <= ?"
-            args.append(end_max)
-
-        q += " ORDER BY fbegin, fend, media_p, media_i"
-
-        return q0, q, args
-
-    def _import_query(self, package_ids,
-                      id=None,
-                      url=None,
-                      uri=None,
-                    ):
-        """
-        Return the selectfrom part of the query, the where part of the query,
-        and the argument list, of a query returning all the imports matching
-        the parameters.
-
-        The result has structure (IMPORT, package_id, id, url, uri).
-        """
-        assert _DF or not isinstance(package_ids, basestring)
-
-        q0 = "SELECT ?, package, id, url, uri FROM Imports "
-        q = "WHERE package IN (" + ",".join( "?" for i in package_ids ) + ")"
-        args = [IMPORT,] + list(package_ids)
-
-        if isinstance(id, basestring):
-            q += " AND id = ?"
-            args.append(id)
-        elif id is not None:
-            q += " AND id IN (" + ",".join( "?" for i in id ) + ")"
-            args.extend(id)
-
-        if isinstance(url, basestring):
-            q += " AND url = ?"
-            args.append(url)
-        elif url is not None:
-            q += " AND url IN (" + ",".join( "?" for i in url ) + ")"
-            args.extend(url)
-
-        if isinstance(uri, basestring):
-            q += " AND uri = ?"
-            args.append(uri)
-        elif uri is not None:
-            q += " AND uri IN (" + ",".join( "?" for i in uri ) + ")"
-            args.extend(uri)
-
-        return q0, q, args
-
+           return _FlusableIterator(( r[1] for r in conn.execute(query) ), be)
+    """
+    __slots__ = ["_cursor", "__weakref__",]
+    def __init__ (self, cursor, backend):
+        self._cursor = cursor
+        backend._iterators[self] = True
+    def __iter__ (self):
+        return self
+    def flush(self):
+        """Flush the underlying cursor."""
+        self._cursor = iter(list(self._cursor))
+    def next(self):
+        return self._cursor.next()
 
 # NB: the wrapping of cursors into _FlushableIterators could be implemented
 # as a decorator on all iter_* functions. However
 #  - "classical" (i.e. wrapping) decorators have a high overhead
 #  - "smart" (i.e. code-modifying) decorators are hard to write
 # so for the moment, we opt for old-school copy/paste...
+
+class _Query(object):
+    """
+    I provide useful functionalities for building SQL queries to the backend
+    schema.
+    """
+
+    def __init__(self, select, from_, where="WHERE 1", args=(),
+                 pid="e.package", eid="e.id"):
+        self.s = select
+        self.f = from_
+        self.w = where
+        self.a = list(args)
+        self.pid = pid
+        self.eid = eid
+
+    def add_package_filter(self, pid):
+        self.w += " AND %(pid)s = ?" % self.__dict__
+        self.a.append(pid)
+
+    def add_packages_filter(self, pids):
+        self.w += " AND %(pid)s IN (%%s)" % self.__dict__
+        self.w %= ",".join( "?" for i in pids )
+        self.a.extend(pids)
+
+    def add_id_filter(self, id):
+        assert id is not None
+        if isinstance(id, basestring):
+            self.w += " AND %(eid)s = ?" % self.__dict__
+            self.a.append(id)
+        else:
+            self.w += " AND %(eid)s IN (%%s)" % self.__dict__
+            self.w %= ",".join( "?" for i in id )
+            self.a.extend(id)
+
+    def add_column_filter(self, column, value):
+        assert value is not None
+        if isinstance(value, basestring):
+            self.w += " AND %s = ?" % (column,)
+            self.a.append(value)
+        else:
+            self.w += " AND %s IN (%%s)" % (column,)
+            self.w %= ",".join( "?" for i in value )
+            self.a.extend(value)
+
+    def add_content_columns(self):
+        self.s += ", c.mimetype, join_id_ref(c.model_p, c.model_i), c.url"
+        self.f += " JOIN Contents c"\
+                  " ON %(pid)s = c.package AND %(eid)s = c.element"\
+                  % self.__dict__
+
+    def add_media_filter(self, media):
+        if isinstance(media, basestring):
+            media = (media,)
+        media = [ _split_uri_ref(m) for m in media ]
+        n = len(media)
+        self.f += " JOIN UriBases mu ON mu.package = %(pid)s "\
+                                   "AND mu.prefix = media_p"\
+                  % self.__dict__
+        self.w += " AND (%s)"\
+                  % " OR ".join(n*["mu.uri_base = ? AND media_i = ?"])
+        self.a.extend(sum(media, ()))
+
+    def add_member_filter(self, member, ord=None):
+            m_u, m_i = _split_uri_ref(member)
+            self.w += " AND EXISTS ("\
+                          "SELECT m.relation FROM RelationMembers m "\
+                          "JOIN UriBases u ON m.package = u.package "\
+                                          "AND m.member_p = u.prefix "\
+                          "WHERE m.package = %(pid)s "\
+                          "AND m.relation = %(eid)s "\
+                          "AND u.uri_base = ? AND m.member_i = ?"\
+                      ")" % self.__dict__
+            self.a.extend([m_u, m_i])
+            if ord is not None:
+                self.w = self.w[:-1] + " AND m.ord = ?)"
+                self.a.append(ord)
+
+    def add_item_filter(self, item, ord=None):
+            i_u, i_i = _split_uri_ref(item)
+            self.w += " AND EXISTS ("\
+                          "SELECT i.list FROM ListItems i "\
+                          "JOIN UriBases u ON i.package = u.package "\
+                                          "AND i.item_p = u.prefix "\
+                          "WHERE i.package = %(pid)s "\
+                          "AND i.list = %(eid)s "\
+                          "AND u.uri_base = ? AND i.item_i = ?"\
+                      ")" % self.__dict__
+            self.a.extend([i_u, i_i])
+            if ord is not None:
+                self.w = self.w[:-1] + " AND i.ord = ?)"
+                self.a.append(ord)
+
+    def add_meta_filter(self, meta):
+        """
+        The meta parameter, is an iterable of triples of the form
+        (key, value, uriref_flag). If uriref_flag is false, the value is
+        interpreted as a string; if it is true, the value is interpreted as the
+        uri-ref of an element. Note that value can also be None. This parameter
+        is used to filter elements that have the given (key, value) pair in
+        their metadata (value set to None filtering elements having no value
+        for the given key).
+        """
+        for k,v,u in meta:
+           if v is None:
+               self.w += " AND NOT EXISTS ("\
+                             "SELECT m.element FROM Meta m "\
+                             "WHERE m.package = %(pid)s "\
+                             "AND m.element = %(eid)s "\
+                             "AND m.key = ?"\
+                         ")" % self.__dict__
+               self.a.append(k)
+           elif not u:
+               self.w += " AND EXISTS ("\
+                             "SELECT m.element FROM Meta m "\
+                             "WHERE m.package = %(pid)s "\
+                             "AND m.element = %(eid)s "\
+                             "AND m.key = ? AND m.value = ?"\
+                         ")" % self.__dict__
+               self.a.extend([k, v])
+           else:
+               v_u, v_i = _split_uri_ref(v)
+               self.w += " AND EXISTS ("\
+                            "SELECT m.element FROM Meta m "\
+                            "JOIN UriBases u  ON m.package = u.package "\
+                                             "AND m.value_p = u.prefix "\
+                            "WHERE m.package = %(pid)s "\
+                            "AND m.element = %(eid)s "\
+                            "AND m.key = ? AND u.uri_base = ? "\
+                            "AND m.value_i = ?"\
+                        ")" % self.__dict__
+               self.a.extend([k, v_u, v_i,])
+
+    def append(self, txt, *args):
+        """
+        Append something at the end of the query.
+
+        This should be used with care, and preferably just before call to exe,
+        since it may break other methods (e.g. appending an ORDER BY
+        statement).
+        """
+        self.w += txt
+        self.a.extend(args)
+
+    def wrap_in_count(self):
+        q,_ = self.exe()
+        self.s = "SELECT COUNT(*)"
+        self.f = "FROM (%s)" % q
+        self.w = "WHERE 1"
+
+    def exe(self):
+        """
+        Return a list of arguments suitable to the ``execute`` methods.
+        """
+        #print "===", self.s, self.f, self.w, self.a
+        return " ".join((self.s, self.f, self.w)), self.a
+
+#

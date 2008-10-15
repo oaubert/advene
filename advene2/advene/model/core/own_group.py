@@ -51,16 +51,12 @@ class OwnGroup(GroupMixin, object):
             yield o.get_element(i)
 
     def iter_relations(self, member=None, position=None):
-        assert position is None or member, "If position is specified, member should be specified too."
-        o = self._owner
-        if member is None:
-            for i in o._backend.iter_relations((o._id,)):
-                yield o.get_element(i)
-        else:
+        assert position is None or member is not None
+        if member:
             member = member._get_uriref()
-            for i in o._backend.iter_relations_with_member((o._id,), member,
-                                                           position):
-                yield o.get_element(i)
+        o = self._owner
+        for i in o._backend.iter_relations((o._id,), None, member, position):
+            yield o.get_element(i)
 
     def iter_views(self):
         o = self._owner
@@ -72,21 +68,19 @@ class OwnGroup(GroupMixin, object):
         for i in o._backend.iter_resources((o._id,)):
             yield o.get_element(i)
 
-    def iter_tags(self):
+    def iter_tags(self, meta=None):
+        if meta: meta = _prepare_meta(meta)
         o = self._owner
-        for i in o._backend.iter_tags((o._id,)):
+        for i in o._backend.iter_tags((o._id,), None, meta):
             yield o.get_element(i)
 
-    def iter_lists(self, item=None, position=None):
-        assert position is None or item, "If position is specified, item should be specified too."
+    def iter_lists(self, item=None, position=None, meta=None):
+        assert position is None or item is not None
+        if item: item = item._get_uriref()
+        if meta: meta = _prepare_meta(meta)
         o = self._owner
-        if item is None:
-            for i in o._backend.iter_lists((o._id,)):
-                yield o.get_element(i)
-        else:
-            item = item._get_uriref()
-            for i in o._backend.iter_lists_with_item((o._id,), item, position):
-                yield o.get_element(i)
+        for i in o._backend.iter_lists((o._id,), None, item, position, meta):
+            yield o.get_element(i)
 
     def iter_queries(self):
         o = self._owner
@@ -120,13 +114,10 @@ class OwnGroup(GroupMixin, object):
 
     def count_relations(self, member=None, position=None):
         assert position is None or member is not None
+        if member:
+            member = member._get_uriref()
         o = self._owner
-        if member is None:
-            return o._backend.count_relations((o._id,))
-        else:
-            uri = member.uriref
-            return o._backend.count_relations_with_member((o._id,),
-                                                          uri, position)
+        return o._backend.count_relations((o._id,), None, member, position)
 
     def count_views(self):
         o = self._owner
@@ -136,13 +127,17 @@ class OwnGroup(GroupMixin, object):
         o = self._owner
         return o._backend.count_resources((o._id,))
 
-    def count_tags(self):
+    def count_tags(self, meta=None):
         o = self._owner
-        return o._backend.count_tags((o._id,))
+        if meta: meta = _prepare_meta(meta)
+        return o._backend.count_tags((o._id,), None, meta)
 
-    def count_lists(self):
+    def count_lists(self, item=None, position=None, meta=None):
+        assert position is None or item is not None
+        if item: item = item._get_uriref()
+        if meta: meta = _prepare_meta(meta)
         o = self._owner
-        return o._backend.count_lists((o._id,))
+        return o._backend.count_lists((o._id,), None, item, position, meta)
 
     def count_queries(self):
         o = self._owner
@@ -151,3 +146,24 @@ class OwnGroup(GroupMixin, object):
     def count_imports(self, url=None, uri=None):
         o = self._owner
         return o._backend.count_imports((o._id,), url, uri)
+
+def _prepare_meta(meta):
+    """
+    Convert parameter meta as expected by the backend.
+
+    The input is a list of pairs (key, value) where value is either None, a
+    unicode or an instance of PackageElement.
+
+    The outpur is a list of 3-uples as expected by the backend.
+    """
+    assert meta is not None
+    r = []
+    for k,v in meta:
+        if v is None:
+            r.append((k, None, None))
+        elif hasattr(v, "_get_uriref"):
+            r.append((k, v._get_uriref(), True))
+        else:
+            r.append((k, unicode(v), False))
+    return r
+#

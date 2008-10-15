@@ -26,8 +26,13 @@ if __name__ == "__main__":
 
     def the_test():
         #global p
-        #p = Package("file:examples/nosferatu.czp")
+        #p = Package("file:examples/nosferatu.czp"
+        [len(a.relations) for a in p.all.annotations]
         pass
+
+    measure_time() # take origin
+    the_test()
+    measure_time("the test took")
 
     measure_time() # take origin
     prof = hotshot.Profile("test/p_nosferatu.prof", lineevents=1)

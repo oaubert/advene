@@ -18,4 +18,5 @@ for i in listdir(dirname):
             if isinstance(a,type) and issubclass(a, (TestCase, TestSuite)):
                 globals()["%s_%s" % (modulename, j)] = a
 
-main()
+if __name__ == "__main__":
+    main()

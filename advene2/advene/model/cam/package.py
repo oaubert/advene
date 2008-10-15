@@ -34,7 +34,7 @@ from weakref import ref as wref
 
 class _AllGroup(CamGroupMixin, CoreAllGroup):
 
-    def iter_tags(self):
+    def iter_tags(self, meta=None):
         """
         This method is inherited from CoreAllGroup but is unsafe on
         cam.Package. Use instead `iter_user_tags`.
@@ -42,119 +42,123 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
         warn("use iter_user_tags instead", UnsafeUseWarning, 2)
         return super(_AllGroup, self).iter_tags()
 
-    def _iter_tags_nowarn(self):
+    def _iter_tags_nowarn(self, meta=None):
         """
         Allows to call iter_tags internally without raising a warning.
         """
-        return super(_AllGroup, self).iter_tags()
+        return super(_AllGroup, self).iter_tags(meta)
 
-    def iter_user_tags(self):
+    def iter_user_tags(self, meta=None):
+        assert meta is None or CAMSYS_TYPE not in ( i[0] for i in meta )
         o = self._owner
-        meta = [(CAMSYS_TYPE, None, None)] 
-        for be, pdict in o._backends_dict.items():
-            for i in be.iter_tags(pdict, meta=meta):
-                yield pdict[i[1]].get_element(i)
+        m = [(CAMSYS_TYPE, None)]
+        if meta: m += meta
+        return super(_AllGroup, self).iter_tags(m)
 
-    def iter_annotation_types(self):
+    def iter_annotation_types(self, meta=None):
+        assert meta is None or CAMSYS_TYPE not in ( i[0] for i in meta )
         o = self._owner
-        meta = [(CAMSYS_TYPE, "annotation-type", False)]
-        for be, pdict in o._backends_dict.items():
-            for i in be.iter_tags(pdict, meta=meta):
-                yield pdict[i[1]].get_element(i)
+        m = [(CAMSYS_TYPE, "annotation-type")]
+        if meta: m += meta
+        return super(_AllGroup, self).iter_tags(m)
 
-    def iter_relation_types(self):
+    def iter_relation_types(self, meta=None):
+        assert meta is None or CAMSYS_TYPE not in ( i[0] for i in meta )
         o = self._owner
-        meta = [(CAMSYS_TYPE, "relation-type", False)] 
-        for be, pdict in o._backends_dict.items():
-            for i in be.iter_tags(pdict, meta=meta):
-                yield pdict[i[1]].get_element(i)
+        m = [(CAMSYS_TYPE, "relation-type")]
+        if meta: m += meta
+        return super(_AllGroup, self).iter_tags(m)
 
-    def iter_lists(self, item=None, position=None):
+    def iter_lists(self, item=None, position=None, meta=None):
         """
         This method is inherited from CoreAllGroup but is unsafe on
         cam.Package. Use instead `iter_user_lists`.
         """
         warn("use iter_user_lists instead", UnsafeUseWarning, 2)
-        return super(_AllGroup, self).iter_lists(item=item, position=position)
+        return super(_AllGroup, self).iter_lists(item, position, meta)
 
-    def _iter_lists_nowarn(self, item=None, position=None):
+    def _iter_lists_nowarn(self, item=None, position=None, meta=None):
         """
         Allows to call iter_lists internally without raising a warning.
         """
-        return super(_AllGroup, self).iter_lists(item=item, position=position)
+        return super(_AllGroup, self).iter_lists(item, position, meta)
 
-    def iter_user_lists(self):
+    def iter_user_lists(self, item=None, position=None, meta=None):
+        assert meta is None or CAMSYS_TYPE not in ( i[0] for i in meta )
         o = self._owner
-        meta = [(CAMSYS_TYPE, None, None)] 
-        for be, pdict in o._backends_dict.items():
-            for i in be.iter_lists(pdict, meta=meta):
-                yield pdict[i[1]].get_element(i)
+        m = [(CAMSYS_TYPE, None)]
+        if meta : m += meta
+        return super(_AllGroup, self).iter_lists(item, position, m)
 
-    def iter_schemas(self):
+    def iter_schemas(self, item=None, position=None, meta=None):
+        assert meta is None or CAMSYS_TYPE not in ( i[0] for i in meta )
         o = self._owner
-        meta = [(CAMSYS_TYPE, "schema", False)] 
-        for be, pdict in o._backends_dict.items():
-            for i in be.iter_lists(pdict, meta=meta):
-                yield pdict[i[1]].get_element(i)
+        m = [(CAMSYS_TYPE, "schema")]
+        if meta: m += meta
+        return super(_AllGroup, self).iter_lists(item, position, m)
 
-    def count_tags(self):
+    def count_tags(self, meta=None):
         """
         This method is inherited from CoreAllGroup but is unsafe on
         cam.Package. Use instead `count_user_tags`.
         """
         warn("use count_user_tags instead", UnsafeUseWarning, 2)
-        return super(_AllGroup, self).count_tags()
+        return super(_AllGroup, self).count_tags(meta)
 
-    def _count_tags_nowarn(self):
+    def _count_tags_nowarn(self, meta=None):
         """
         Allows to call count_tags internally without raising a warning.
         """
-        return super(_AllGroup, self).count_tags()
+        return super(_AllGroup, self).count_tags(meta)
 
-    def count_user_tags(self):
+    def count_user_tags(self, meta=None):
+        assert meta is None or CAMSYS_TYPE not in ( i[0] for i in meta )
         o = self._owner
-        meta = [(CAMSYS_TYPE, None, None)] 
-        return sum( be.count_tags(pdict, meta=meta)
-                    for be, pdict in o._backends_dict.items() )
+        m = [(CAMSYS_TYPE, None)]
+        if meta: m += meta
+        return super(_AllGroup, self).count_tags(m)
 
-    def count_annotation_types(self):
+    def count_annotation_types(self, meta=None):
+        assert meta is None or CAMSYS_TYPE not in ( i[0] for i in meta )
         o = self._owner
-        meta = [(CAMSYS_TYPE, "annotation-type", False)] 
-        return sum( be.count_tags(pdict, meta=meta)
-                    for be, pdict in o._backends_dict.items() )
+        m = [(CAMSYS_TYPE, "annotation-type")]
+        if meta: m += meta
+        return super(_AllGroup, self).count_tags(m)
 
-    def count_relation_types(self):
+    def count_relation_types(self, meta=None):
+        assert meta is None or CAMSYS_TYPE not in ( i[0] for i in meta )
         o = self._owner
-        meta = [(CAMSYS_TYPE, "relation-type", False)] 
-        return sum( be.count_tags(pdict, meta=meta)
-                    for be, pdict in o._backends_dict.items() )
+        m = [(CAMSYS_TYPE, "relation-type")]
+        if meta: m += meta
+        return super(_AllGroup, self).count_tags(m)
 
-    def count_lists(self):
+    def count_lists(self, item=None, position=None, meta=None):
         """
         This method is inherited from CoreAllGroup but is unsafe on
         cam.Package. Use instead `count_user_lists`.
         """
         warn("use count_user_lists instead", UnsafeUseWarning, 2)
-        return super(_AllGroup, self).count_lists()
+        return super(_AllGroup, self).count_lists(item, position, meta)
 
-    def _count_lists_nowarn(self):
+    def _count_lists_nowarn(self, item=None, position=None, meta=None):
         """
         Allows to call count_lists internally without raising a warning.
         """
-        return super(_AllGroup, self).count_lists()
+        return super(_AllGroup, self).count_lists(item, position, meta)
 
-
-    def count_user_lists(self):
+    def count_user_lists(self, item=None, position=None, meta=None):
+        assert meta is None or CAMSYS_TYPE not in ( i[0] for i in meta )
         o = self._owner
-        meta = [(CAMSYS_TYPE, None, None)] 
-        return sum( be.count_lists(pdict, meta=meta)
-                    for be, pdict in o._backends_dict.items() )
+        m = [(CAMSYS_TYPE, None)]
+        if meta: m += meta
+        return super(_AllGroup, self).count_lists(item, position, m)
 
-    def count_schemas(self):
+    def count_schemas(self, item=None, position=None, meta=None):
+        assert meta is None or CAMSYS_TYPE not in ( i[0] for i in meta )
         o = self._owner
-        meta = [(CAMSYS_TYPE, "schema", False)] 
-        return sum( be.count_lists(pdict, meta=meta)
-                    for be, pdict in o._backends_dict.items() )
+        m = [(CAMSYS_TYPE, "schema")]
+        if meta: m += meta
+        return super(_AllGroup, self).count_lists(item, position, m)
 
 class _OwnGroup(CamGroupMixin, CoreOwnGroup):
     def iter_tags(self):
@@ -195,24 +199,24 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
         cam.Package. Use instead `iter_user_lists`.
         """
         warn("use iter_user_lists instead", UnsafeUseWarning, 2)
-        return super(_OwnGroup, self).iter_lists(item=item, position=position)
+        return super(_OwnGroup, self).iter_lists(item, position)
 
     def _iter_lists_nowarn(self, item=None, position=None):
         """
         Allows to call iter_lists internally without raising a warning.
         """
-        return super(_OwnGroup, self).iter_lists(item=item, position=position)
+        return super(_OwnGroup, self).iter_lists(item, position)
 
-    def iter_user_lists(self):
+    def iter_user_lists(self, item=None, position=None):
         o = self._owner
-        for i in o._backend.iter_lists((o._id,),
-          meta=[(CAMSYS_TYPE, None, None)]):
+        meta = [(CAMSYS_TYPE, None, None)]
+        for i in o._backend.iter_lists((o._id,), None, item, position, meta):
             yield o.get_element(i)
 
-    def iter_schemas(self):
+    def iter_schemas(self, item=None, position=None):
         o = self._owner
-        for i in o._backend.iter_lists((o._id,),
-          meta=[(CAMSYS_TYPE, "schema", False)]):
+        meta = [(CAMSYS_TYPE, "schema", False)]
+        for i in o._backend.iter_lists((o._id,), None, item, position, meta):
             yield o.get_element(i)
 
     def count_tags(self):
@@ -244,28 +248,28 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
         return o._backend.count_tags((o._id,),
             meta=[(CAMSYS_TYPE, "relation-type", False)])
 
-    def count_lists(self):
+    def count_lists(self, item=None, position=None):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
         cam.Package. Use instead `count_user_lists`.
         """
         warn("use count_user_lists instead", UnsafeUseWarning, 2)
-        return super(_OwnGroup, self).count_lists()
+        return super(_OwnGroup, self).count_lists(item=item, position=position)
 
-    def _count_lists_nowarn(self):
+    def _count_lists_nowarn(self, item=None, position=None):
         """
         Allows to call count_lists internally without raising a warning.
         """
-        return super(_OwnGroup, self).count_lists()
+        return super(_OwnGroup, self).count_lists(item=item, position=position)
 
-    def count_user_lists(self):
+    def count_user_lists(self, item=None, position=None):
         o = self._owner
-        return o._backend.count_lists((o._id,),
+        return o._backend.count_lists((o._id,), item=item, position=position,
             meta=[(CAMSYS_TYPE, None, None)])
 
-    def count_schemas(self):
+    def count_schemas(self, item=None, position=None):
         o = self._owner
-        return o._backend.count_lists((o._id,),
+        return o._backend.count_lists((o._id,), item=item, position=position,
             meta=[(CAMSYS_TYPE, "schema", False)])
 
 class Package(CorePackage):

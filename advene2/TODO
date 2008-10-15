@@ -76,6 +76,11 @@ Backend related
 
 - implement count_lists_with_items and update all_group and own_group
 
+- it seems that JOIN's with view UriBases are a little less efficient
+  than JOIN's with tables Packages and Imports and an explicit condition
+  so removing UriBases (at least in some queries) would be an interesting
+  optimization (see count_relations as an example)
+
 Misc
 ----
 
@@ -94,6 +99,7 @@ Misc
 
 - make incoming_relations and _tales_incoming_relations dependant on a
   common _get_incoming_relations method, so that they do not diverge
+  (see implementation of my_schemas in advene.model.cam.tag)
 
 Open questions and remarks
 ==========================

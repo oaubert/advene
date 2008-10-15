@@ -652,6 +652,7 @@ class TestElements(TestCase):
         r3.append(a2)
         r4.append(a)
         self.assertEqual(frozenset(a.relations), frozenset([r1,r3,r4]))
+        self.assertEqual(frozenset(a.iter_relations(position=0)), frozenset([r3]))
         self.assertEqual(frozenset(a.relations.filter(position=0)), frozenset([r3]))
         self.assertEqual(frozenset(a.incoming_relations), frozenset([r3]))
         self.assertEqual(frozenset(a.outgoing_relations), frozenset([r4]))
