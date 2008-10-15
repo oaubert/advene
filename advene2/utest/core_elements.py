@@ -1303,6 +1303,57 @@ class TestEvents(TestCase):
         self.i1.uri = "file:/bar.bzp"
         self.assertEqual(self.buf, [])
 
+
+class TestVolatile(TestCase):
+
+    def setUp(self):
+        self.p = Package("urn:1234", True)
+        self.p.create_tag("t1")
+
+    def tearDown(self):
+        self.p.close()
+
+    def test_volatile_elements(self):
+        t1 = self.p.get("t1")
+        # add dummy attribute to t1 ...
+        t1.foo = "bar"
+        # ... but don't keep the volatile instance,
+        del t1
+        # so after garbage collecting...
+        gc.collect()
+        # ...a new realization of the instance should not have that attribute
+        # anymore
+        self.assert_(not hasattr(self.p.get("t1"), "foo"))
+
+    def test_weighted_elements(self):
+        t1 = self.p.get("t1")
+        # add dummy attribute to t1 ...
+        t1.foo = "bar"
+        # ... and make it heavy so that it stays around
+        t1._increase_weight()
+        # ... even when unreferenced
+        del t1
+        # so after garbage collecting...
+        gc.collect()
+        # ... the dummy attribute is still there
+        self.assert_(hasattr(self.p.get("t1"), "foo"))
+
+    def test_unweighted_elements(self):
+        t1 = self.p.get("t1")
+        # add dummy attribute to t1 ...
+        t1.foo = "bar"
+        # ... and make it heavy so that it stays around
+        t1._increase_weight()
+        # ... even when unreferenced
+        del t1
+        # however we make it light again
+        self.p.get("t1")._decrease_weight()
+        # so after garbage collecting...
+        gc.collect()
+        # ...a new realization of the instance should not have that attribute
+        # anymore
+        self.assert_(not hasattr(self.p.get("t1"), "foo"))
+
 if __name__ == "__main__":
     main()
 

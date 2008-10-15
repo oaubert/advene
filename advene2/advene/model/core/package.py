@@ -1,5 +1,6 @@
 from os import curdir
 from os.path import abspath, exists
+from sets import Set
 from urlparse import urljoin, urlparse
 from urllib import pathname2url, url2pathname
 from urllib2 import URLError
@@ -116,12 +117,13 @@ class Package(object, WithMetaMixin, WithEventsMixin):
                     f.close()
                     raise NoClaimingError("bind %s" % url)
 
-        self._backend  = backend
-        self._id       = package_id
-        self._elements = WeakValueDictionary()
-        self._own_wref = lambda: None
-        self._all_wref = lambda: None
-        self._uri      = None
+        self._backend        = backend
+        self._id             = package_id
+        self._elements       = WeakValueDictionary() # weakref cache
+        self._heavy_elements = Set() # strong refs for heavy elements
+        self._own_wref       = lambda: None
+        self._all_wref       = lambda: None
+        self._uri            = None
         self._event_delegate = PackageEventDelegate(self)
 
         if parser:

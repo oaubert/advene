@@ -25,11 +25,12 @@ RESOURCE   = 'R'
 class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
     def __init__(self, owner, id):
-        self._id    = id
-        self._owner = owner
-        self._deleted = False
-        owner._elements[id] = self # cache to prevent duplicate instanciation
+        self._id             = id
+        self._owner          = owner
+        self._weight         = 0
+        self._deleted        = False
         self._event_delegate = ElementEventDelegate(self)
+        owner._elements[id] = self # cache to prevent duplicate instanciation
 
     def make_id_in(self, pkg):
         """Compute an id-ref for this element in the context of the given package.
@@ -154,6 +155,29 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
             return bool(list(it))
         else:
             return list(self.iter_taggers(tag, package))
+
+    # reference management
+
+    def _increase_weight(self):
+        """
+        Elements are created with weight 0. Increasing its weight is equivalent
+        to creating a strong reference to it, making it not volatile. Once the
+        reason for keeping the element is gone, the weight should be decreased
+        again with `_decrease_weight`.
+        """
+        # FIXME: this is not threadsafe !
+        self._weight += 1
+        if self._weight == 1:
+            self._owner._heavy_elements.add(self)
+
+    def _decrease_weight(self):
+        """
+        :see: _increase_weight
+        """
+        # FIXME: this is not threadsafe !
+        self._weight -= 1
+        if self._weight == 0:
+            self._owner._heavy_elements.remove(self)
 
     @tales_context_function
     def _tales_tags(self, context):
