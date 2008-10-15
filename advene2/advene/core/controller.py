@@ -28,7 +28,8 @@ The X{AdveneEventHandler} is used by the application to handle events
 notifications and actions triggering.
 """
 
-import sys, time
+import sys
+import time
 import os
 import cgi
 import socket
@@ -1234,7 +1235,6 @@ class AdveneController(object):
         """
         if uri is None or uri == "":
             uri=tempfile.mkstemp(suffix='.czp')[1]
-            print "create package", uri
             self.package = Package(url=uri,
                                    create=True)
             alias='new_pkg'
@@ -1264,7 +1264,10 @@ class AdveneController(object):
                 self.activate_package(default_alias)
             return
         else:
-            p = Package (url=uri)
+            t=time.time()
+            p = Package(url=uri)
+            dur=time.time()-t
+            self.log("Loaded package in %f seconds" % dur)
             # FIXME: some sanity checks about imported packages ?
             self.package=p
 
