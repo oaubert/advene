@@ -844,35 +844,26 @@ class _SqliteBackend(object):
         assert _DF or (foref is None  or  foref_alt is None), (url, url_alt)
 
         q = "SELECT ?, package, id, url, foref FROM Medias " \
-            "WHERE package in (" + "?," * len(package_ids) + ")"
+            "WHERE package IN (" + ",".join( "?" for i in package_ids ) + ")"
         args = [MEDIA,] + list(package_ids)
         if id is not None:
             q += " AND id = ?"
             args.append(id)
         if id_alt is not None:
-            q += " AND id IN ("
-            for i in id_alt:
-                q += "?,"
-                args.append(i)
-            q += ")"
+            q += " AND id IN (" + ",".join( "?" for i in id_alt ) + ")"
+            args.extend(id_alt)
         if url is not None:
             q += " AND url = ?"
             args.append(url)
         if url_alt is not None:
-            q += " AND url IN ("
-            for i in url_alt:
-                q += "?,"
-                args.append(i)
-            q += ")"
+            q += " AND url IN (" + ",".join( "?" for i in url_alt ) + ")"
+            args.extend(url_alt)
         if foref is not None:
             q += " AND foref = ?"
             args.append(foref)
         if foref_alt is not None:
-            q += " AND foref IN ("
-            for i in foref_alt:
-                q += "?,"
-                args.append(i)
-            q += ")"
+            q += " AND foref IN (" + ",".join( "?" for i in foref_alt ) + ")"
+            args.extend(foref_alt)
 
         r = self._conn.execute(q, args)
         return _FlushableIterator(r, self)
@@ -906,7 +897,7 @@ class _SqliteBackend(object):
             "       c.mimetype, join_id_ref(c.schema_p, c.schema_i), c.url " \
             "FROM Annotations a %s " \
             "JOIN Contents c ON c.package = a.package AND c.element = a.id " \
-            "WHERE a.package in (" + "?," * len(package_ids) + ")"
+            "WHERE a.package IN (" + ",".join( "?" for i in package_ids ) + ")"
         args = [ANNOTATION,] + list(package_ids)
         if media_alt is not None:
             q %= "JOIN Packages p ON a.package = p.id "\
@@ -918,11 +909,8 @@ class _SqliteBackend(object):
             q += " AND a.id = ?"
             args.append(id)
         if id_alt is not None:
-            q += " AND a.id IN ("
-            for i in id_alt:
-                q += "?,"
-                args.append(i)
-            q += ")"
+            q += " AND a.id IN (" + ",".join( "?" for i in id_alt ) + ")"
+            args.extend(id_alt)
         # NB: media is managed as media_alt (cf. above)
         if media_alt is not None:
             q += "AND ("
@@ -1044,32 +1032,26 @@ class _SqliteBackend(object):
         assert _DF or uri is None  or  uri_alt is None
 
         q = "SELECT ?, package, id, url, uri FROM Imports " \
-            "WHERE package in (" + ",".join( [ "?" for e in package_ids ]) + ")"
+            "WHERE package IN (" + ",".join( "?" for i in package_ids ) + ")"
         args = [IMPORT,] + list(package_ids)
         if id is not None:
             q += " AND id = ?"
             args.append(id)
         if id_alt is not None:
-            q += " AND id IN ("
-            q += ",".join( [ "?" for e in id_alt ] )
+            q += " AND id IN (" + ",".join( "?" for i in id_alt ) + ")"
             args.extend(id_alt)
-            q += ")"
         if url is not None:
             q += " AND url = ?"
             args.append(url)
         if url_alt is not None:
-            q += " AND url IN ("
-            q += ",".join( [ "?" for e in url_alt ] )
-            args.extend(id_alt)
-            q += ")"
+            q += " AND url IN (" + ",".join( "?" for i in url_alt ) + ")"
+            args.extend(url_alt)
         if uri is not None:
             q += " AND uri = ?"
             args.append(uri)
         if uri_alt is not None:
-            q += " AND uri IN ("
-            q += ",".join( [ "?" for e in uri_alt ] )
-            args.extend(id_alt)
-            q += ")"
+            q += " AND uri IN (" + ",".join( "?" for i in uri_alt ) + ")"
+            args.extend(uri_alt)
 
         r = self._conn.execute(q, args)
         return _FlushableIterator(r, self)
@@ -1207,10 +1189,10 @@ class _SqliteBackend(object):
              + [element_i, element_u, element_u,]
         q1 = "SELECT p.id || ' ' || i.id " \
              "FROM Packages p JOIN Imports i ON p.id = i.package " \
-             "WHERE ? in (i.uri, i.url) " \
+             "WHERE ? IN (i.uri, i.url) " \
              "UNION " \
              "SELECT p.id || ' ' FROM Packages p " \
-             "WHERE ? in (p.uri, p.url)"
+             "WHERE ? IN (p.uri, p.url)"
         # The query above selects all pairs package_id/import_id (where the
         # second can be "") matching the URI prefix of old_uriref.
         # It can then be used to know detect id-refs to update.
@@ -1219,43 +1201,50 @@ class _SqliteBackend(object):
         try:
             # media references
             q2 = "UPDATE Annotations SET media_i = ? " \
-                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                 "WHERE package IN (" \
+                   + ",".join( "?" for i in package_ids ) + ")" \
                    "AND media_i = ? " \
                    "AND package || ' ' || media_p IN (%s)" % q1
             execute(q2, args)
             # schema references
             q2 = "UPDATE Contents SET schema_i = ? " \
-                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                 "WHERE package IN (" \
+                   + ",".join( "?" for i in package_ids ) + ")" \
                    "AND schema_i = ? " \
                    "AND package || ' ' || schema_p IN (%s)" % q1
             execute(q2, args)
             # member references
             q2 = "UPDATE RelationMembers SET member_i = ? " \
-                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                 "WHERE package IN (" \
+                   + ",".join( "?" for i in package_ids ) + ")" \
                    "AND member_i = ? " \
                    "AND package || ' ' || member_p IN (%s)" % q1
             execute(q2, args)
             # item references
             q2 = "UPDATE ListItems SET item_i = ? " \
-                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                 "WHERE package IN (" \
+                   + ",".join( "?" for i in package_ids ) + ")" \
                    "AND item_i = ? " \
                    "AND package || ' ' || item_p IN (%s)" % q1
             execute(q2, args)
             # tags references
             q2 = "UPDATE Tagged SET tag_i = ? " \
-                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                 "WHERE package IN (" \
+                   + ",".join( "?" for i in package_ids ) + ")" \
                    "AND tag_i = ? " \
                    "AND package || ' ' || tag_p IN (%s)" % q1
             execute(q2, args)
             # tagged element references
             q2 = "UPDATE Tagged SET element_i = ? " \
-                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                 "WHERE package IN (" \
+                   + ",".join( "?" for i in package_ids ) + ")" \
                    "AND element_i = ? " \
                    "AND package || ' ' || element_p IN (%s)" % q1
             execute(q2, args)
             # metadata references
             q2 = "UPDATE Meta SET value_i = ? " \
-                 "WHERE package in (" + "?," * len(package_ids) + ")" \
+                 "WHERE package IN (" \
+                   + ",".join( "?" for i in package_ids ) + ")" \
                    "AND value_i = ? " \
                    "AND package || ' ' || value_p IN (%s)" % q1
             execute(q2, args)
@@ -1407,7 +1396,8 @@ class _SqliteBackend(object):
         q = "SELECT c.package, c.element FROM Contents c " \
             "JOIN Packages p ON c.package = p.id "\
             "LEFT JOIN Imports i ON c.schema_p = i.id " \
-            " WHERE c.package in (" + "?," * len(package_ids) + ")" \
+            "WHERE c.package IN (" \
+            + ",".join( "?" for i in package_ids ) + ")" \
             " AND schema_i = ? AND ("\
             "  (schema_p = ''   AND  ? IN (p.uri, p.url)) OR " \
             "  (schema_p = i.id AND  ? IN (i.uri, i.url)))"
@@ -1653,7 +1643,8 @@ class _SqliteBackend(object):
             "JOIN RelationMembers m " \
               "ON e.package = m.package and e.id = m.relation " \
             "LEFT JOIN Imports i ON m.member_p = i.id " \
-            " WHERE e.package in (" + "?," * len(package_ids) + ")" \
+            "WHERE e.package IN (" \
+            + ",".join( "?" for i in package_ids ) + ")" \
             " AND member_i = ? AND ("\
             "  (member_p = ''   AND  ? IN (p.uri, p.url)) OR " \
             "  (member_p = i.id AND  ? IN (i.uri, i.url)))"
@@ -1875,7 +1866,8 @@ class _SqliteBackend(object):
             "FROM Tagged t " \
             "JOIN Packages p ON t.package = p.id " \
             "LEFT JOIN Imports i ON t.element_p = i.id " \
-            "WHERE t.package in (" + "?," * len(package_ids) + ")" \
+            "WHERE t.package IN (" \
+            + ",".join( "?" for i in package_ids ) + ")" \
             " AND element_i = ? AND ("\
             "  (element_p = ''   AND  ? IN (p.uri, p.url)) OR " \
             "  (element_p = i.id AND  ? IN (i.uri, i.url)))"
@@ -1896,7 +1888,8 @@ class _SqliteBackend(object):
             "FROM Tagged t " \
             "JOIN Packages p ON t.package = p.id " \
             "LEFT JOIN Imports i ON t.tag_p = i.id " \
-            "WHERE t.package in (" + "?," * len(package_ids) + ")" \
+            "WHERE t.package IN (" \
+            + ",".join( "?" for i in package_ids ) + ")" \
             " AND tag_i = ? AND ("\
             "  (tag_p = ''   AND  ? IN (p.uri, p.url)) OR " \
             "  (tag_p = i.id AND  ? IN (i.uri, i.url)))"
@@ -1920,7 +1913,8 @@ class _SqliteBackend(object):
             "JOIN Packages p ON t.package = p.id " \
             "LEFT JOIN Imports ie ON t.element_p = ie.id " \
             "LEFT JOIN Imports it ON t.tag_p = it.id " \
-            "WHERE t.package in (" + "?," * len(package_ids) + ")" \
+            "WHERE t.package IN (" \
+            + ",".join( "?" for i in package_ids ) + ")" \
             " AND element_i = ? AND ("\
             "  (element_p = ''    AND  ? IN (p.uri,  p.url)) OR " \
             "  (element_p = ie.id AND  ? IN (ie.uri, ie.url)))" \
@@ -2049,18 +2043,16 @@ class _SqliteBackend(object):
                                            "e.id = c.element")
         else:
             s = s % ("", "") 
-        w = " WHERE e.package in (" + "?," * len(package_ids) + ") "\
+        w = " WHERE e.package IN (" \
+            + ",".join( "?" for i in package_ids ) + ")" \
             " AND typ = ?"
         args = list(package_ids) + [element_type,]
         if id is not None:
             w += " AND id = ?"
             args.append(id)
         if id_alt is not None:
-            w += " AND id IN ("
-            for i in id_alt:
-                w += "?,"
-                args.append(i)
-            w += ")"
+            w += " AND id IN (" + ",".join( "?" for i in id_alt ) + ")"
+            args.extend(id_alt)
 
         return s,w,args
 
