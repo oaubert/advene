@@ -1,20 +1,65 @@
-from weakref import ref, ReferenceType
+from bisect import insort
+from weakref import ref
 
 from advene import _RAISE
+from advene.utils.sorted_dict import SortedDict
 from advene.model.core.dirty import DirtyMixin
 
 class WithMetaMixin(DirtyMixin):
     """Metadata access mixin.
 
-    I factrorize all metradata-related code for classes Package and
+    I factorize all metradata-related code for classes Package and
     PackageElement.
 
     I also provide an alias mechanism to make frequent metadata easily
     accessible as python properties.
     """
 
-    __cache = {}   # global dict, keys are (self, metadata-key)
-    __dirty = None # local dict, generated for each instance by set_meta
+    __cache = None # SortedDict of all known metadata
+                   # values are either string or (weakref, idref)
+    __dirty = None # dict of dirty metadata
+                   # values are (val_as_string, val_is_idref)
+    __cache_is_complete = False # is self.__cache complete?
+
+    def iter_meta(self, default=_RAISE):
+        """Iter over all the metadata of self.
+
+        If default is provided, its value is returned instead of unreachable
+        elements. Else, an UnreachableElement exception is raised.
+        """
+        if hasattr(self, "ADVENE_TYPE"):
+            p = self._owner
+            eid = self._id
+            typ = self.ADVENE_TYPE
+        else:
+            p = self
+            eid = ""
+            typ = ""
+
+        if self.__cache_is_complete:
+            for k, v in self.__cache.iteritems():
+                if isinstance(v, tuple):
+                    wref, idref = v
+                    v = wref()
+                    if v is None:
+                        v = p.get_element(idref, default)
+                yield k, v
+        else:
+            cache = self.__cache
+            if cache is None:
+                cache = self.__cache = SortedDict()
+            for key, v, v_is_idref in p._backend.iter_meta(p._id, eid, typ):
+                val = cache.get(key)
+                if isinstance(val, tuple):
+                    val = val[0]() # solve weak reference
+                if val is None: # not found in cache or reference was lost
+                    if v_is_idref:
+                        val = p.get_element(v, default)
+                        cache[key] = (ref(val), v)
+                    else:
+                        val = cache[key] = v
+                yield key, val
+        self.__cache_is_complete = True
 
     def get_meta(self, key, default=_RAISE):
         """Return the metadata associated to the given key.
@@ -29,27 +74,34 @@ class WithMetaMixin(DirtyMixin):
         reached, an UnreachableElement exception is raised, else default is
         returned.
         """
+        if hasattr(self, "ADVENE_TYPE"):
+            p = self._owner
+            eid = self._id
+            typ = self.ADVENE_TYPE
+        else:
+            p = self
+            eid = ""
+            typ = ""
         cache = self.__cache
-        val = cache.get((self, key))
-        if isinstance(val, ReferenceType):
-            val = val()
-        if val is None:
-            if hasattr(self, "ADVENE_TYPE"):
-                p = self._owner
-                eid = self._id
-                typ = self.ADVENE_TYPE
-            else:
-                p = self
-                eid = ""
-                typ = ""
+        if cache is None:
+            cache = self.__cache = SortedDict()
+
+        val = cache.get((key))
+        if isinstance(val, tuple):
+            wref, idref = val
+            val = wref()
+            if val is None:
+                val = p.get_element(idref, default)
+                cache[key] = (ref(val), idref)
+        elif val is None:
             tpl = p._backend.get_meta(p._id, eid, typ, key)
             if tpl is None:
-                val = KeyError
+                val = cache[key] = KeyError
             elif tpl[1]:
                 val = p.get_element(tpl[0], default)
+                cache[key] = (ref(val), tpl[0])
             else:
-                val = tpl[0]
-            cache[self,key] = val
+                val = cache[key] = tpl[0]
         if val is KeyError:
             if default is _RAISE:
                 raise KeyError(key)
@@ -77,15 +129,45 @@ class WithMetaMixin(DirtyMixin):
                 raise ModelError, "Element should be directy imported"
             vstr = val.make_idref_for(p)
             vstr_is_idref = True
+            val = (ref(val), vstr)
         else:
             vstr = str(val)
             vstr_is_idref = False
+        cache = self.__cache
+        if cache is None:
+            cache = self.__cache = SortedDict()
+        cache[key] = val
         dirty = self.__dirty
         if dirty is None:
             dirty = self.__dirty = {}
-        self.__cache[self,key] = val
         dirty[key] = vstr, vstr_is_idref
         self.add_cleaning_operation_once(self.__clean)
+
+    def del_meta(self, key):
+        """Delete the metadata.
+
+        Note that if the given key is not in used, this will have no effect.
+        """
+        if hasattr(self, "ADVENE_TYPE"):
+            p = self._owner
+            eid = self._id
+            typ = self.ADVENE_TYPE
+        else:
+            p = self
+            eid = ""
+            typ = ""
+        cache = self.__cache
+        if cache is not None and key in cache:
+            del cache[key]
+            dirty = self.__dirty
+            if dirty is None:
+                dirty = self.__dirty = {}
+            dirty[key] = None, False
+        self.add_cleaning_operation_once(self.__clean)
+
+    @property
+    def meta(self):
+        return _MetaDict(self)
 
     def __clean(self):
         dirty = self.__dirty
@@ -131,7 +213,103 @@ class WithMetaMixin(DirtyMixin):
             return obj.set_meta(key, val)
 
         def deller(obj):
-            return self.set_meta(key, None)
+            return self.del_meta(key)
 
         setattr(cls, alias, property(getter, setter, deller))
- 
+
+class _MetaDict(object):
+    """A dict-like object representing the metadata of an object.""" 
+
+    __slots__ = ["_owner",]
+
+    def __init__ (self, owner):
+        self._owner = owner
+
+    def __contains__(self, k):
+        return self.get_meta(k, None) is not None
+
+    def __delitem__(self, k):
+        return self._owner.del_meta(k)
+
+    def __getitem__(self, k):
+        return self._owner.get_meta(k)
+
+    def __iter__(self):
+        return ( k for k, _ in self._owner.iter_meta() )
+
+    def __len__(self):
+        return len(list(iter(self)))
+
+    def __setitem__(self, k, v):
+        return self._owner.set_meta(k, v)
+
+    def clear(self):
+        for k in self.keys():
+            self._owner.del_meta(k)
+
+    def copy(self):
+        return dirt(self)
+
+    def get(self, k, v=None):
+        return self._owner.get_meta(k, v)
+
+    def has_key(self, k):
+        return self._owne.get_meta(k, None) is not None
+
+    def items(self):
+        return list(self._owner.iter_meta())
+
+    def iteritems(self):
+        return self._owner.iter_meta()
+
+    def iterkeys(self):
+        return ( k for k, _ in self._owner.iter_meta() )
+
+    def itervalues(self):
+        return ( v for _, v in self._owner.iter_meta() )
+
+    def keys(self):
+        return [ k for k, _ in self._owner.iter_meta() ]
+
+    def pop(self, k, d=_RAISE):
+        v = self._owner.get_meta(k, None)
+        if v is None:
+            if d is _RAISE:
+                raise KeyError, k
+            else:
+                v = d
+        else:
+            self._owner.del_meta(k)
+        return v
+
+    def popitem(self):
+        it = self._owner.iter_meta()
+        try:
+            k, v = it.next()
+        except StopIteration:
+            raise KeyError()
+        else:
+            self._owner.del_meta(k)
+            return v
+
+    def setdefault(self, k, d=""):
+        assert isinstance(d, basestring) or hasattr(d, "ADVENE_TYPE")
+        v = self._owner.get_meta(k, None)
+        if v is None:
+            self._owner.set_meta(k, d)
+            v = d
+        return v
+
+    def update(self, e=None, **f):
+        e_keys = getattr(e, "keys", None)
+        if callable(e_keys):
+            for k in e_keys():
+                self._owner.set_meta(k, e[k])
+        elif e is not None:
+            for k, v in e:
+                self._owner.set_meta(k, v)
+        for k, v in f.iteritems():
+            self._owner.set_meta(k, v)
+
+    def values(self):
+        return [ v for _, v in self._owner.iter_meta() ]

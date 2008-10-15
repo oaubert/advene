@@ -87,7 +87,7 @@ if __name__ == "__main__":
     else:
         raise Exception, "duplicate ID did raise any ModelException..."
 
-    p.set_meta(advene_ns % "meta/main_media", m1)
+    p.meta[advene_ns % "meta/main_media"] = m1
 
     a1.begin += 1
     a1.duration += 1
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     f.close()
 
     a1.set_meta(advene_ns % "meta/foo", "bar")
-    a2.set_meta(advene_ns % "meta/foo", "bar")
+    a2.meta[advene_ns % "meta/foo"] = "bar"
     
     print [a._id for a in p.own.annotations]
     print p.get("a1") # no backend call, since a1 is cached (variable a1)
@@ -152,6 +152,7 @@ if __name__ == "__main__":
     print p.get_meta(advene_ns % "meta/main_media")
     print a1.begin, a1.duration, a1.end
     print a1.dc_creator
-    print a2.get_meta(advene_ns % "meta/created_from")
+    print a2.meta[advene_ns % "meta/created_from"]
+    a2.del_meta(advene_ns % "meta/foo")
 
     l = None; a1 = None; a2 = None; p.close(); p = None
