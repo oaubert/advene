@@ -36,7 +36,9 @@ Important improvements
   where the second item kind of takes the third as a parameter. This should
   be cleanly implemented.
 
-  
+- advene_zip: make unit test with accented filenames stored in the
+   package, to ensure that there is no problem with multiplaform
+   encodings
 
 Minor improvements, to do one day
 =================================
