@@ -26,6 +26,12 @@ T = {
 
 filterwarnings("ignore", "tmpnam is a potential security risk to your program")
 
+class P:
+    """A dummy package class for testing purpose"""
+    def __init__ (self, url, readonly=False):
+        self.url = url
+        self.readonly = readonly
+
 class TestCreateBackend(TestCase):
     def setUp(self):
         self.filename = tmpnam()
@@ -68,13 +74,13 @@ class TestCreateBackend(TestCase):
         )
 
     def test_claim_existing_fragment(self):
-        create(self.url2)
+        create(P(self.url2))
         self.assert_(
             not claims_for_create("%s;foo" % self.url1)
         )
 
     def test_claim_new_fragment(self):
-        create(self.url2)
+        create(P(self.url2))
         self.assert_(
             claims_for_create("%s;bar" % self.url1)
         )
@@ -85,26 +91,26 @@ class TestCreateBackend(TestCase):
         )
 
     def test_create_without_fragment(self):
-        create(self.url1)
+        create(P(self.url1))
         self.assert_(
             claims_for_bind(self.url1)
         )
 
     def test_create_with_fragment(self):
-        create(self.url2)
+        create(P(self.url2))
         self.assert_(
             claims_for_bind(self.url2)
         )
 
     def test_create_new_fragment(self):
-        create(self.url1)
-        create(self.url2)
+        create(P(self.url1))
+        create(P(self.url2))
         self.assert_(
             claims_for_bind(self.url2)
         )
 
     def test_create_in_memory(self):
-        b,p = create(IN_MEMORY_URL)
+        b,p = create(P(IN_MEMORY_URL))
         self.assert_(b._path, ":memory:")
 
 
@@ -113,7 +119,7 @@ class TestBindBackend(TestCase):
         self.filename = tmpnam()
         self.url1 = "sqlite:%s" % self.filename
         self.url2 = "%s;foo" % self.url1
-        create(self.url2)
+        create(P(self.url2))
 
     def tearDown(self):
         if exists(self.filename):
@@ -166,27 +172,27 @@ class TestBindBackend(TestCase):
 
     def test_claim_with_other_fragment(self):
         url3 = "%s;bar" % self.url1
-        create(url3)
+        create(P(url3))
         self.assert_(
             claims_for_bind(url3)
         )
 
     def test_bind_without_fragment(self):
-        bind(self.url1)
+        bind(P(self.url1))
 
     def test_bind_with_fragment(self):
-        bind(self.url2)
+        bind(P(self.url2))
 
     def test_bind_with_other_fragment(self):
         url3 = "%s;bar" % self.url1
-        create(url3)
-        bind(url3)
+        create(P(url3))
+        bind(P(url3))
 
 
 class TestPackageUri(TestCase):
     def test_uri(self):
-        be, pid1 = create(IN_MEMORY_URL)
-        _ , pid2 = create("%s;foo" % IN_MEMORY_URL)
+        be, pid1 = create(P(IN_MEMORY_URL))
+        _ , pid2 = create(P("%s;foo" % IN_MEMORY_URL))
         for pid in(pid1, pid2,):
             be.update_uri(pid, "urn:foobar")
             self.assertEqual("urn:foobar", be.get_uri(pid))
@@ -202,33 +208,33 @@ class TestCache(TestCase):
         self.url1 = "sqlite:%s" % self.filename
         self.url2 = "%s;foo" % self.url1
         self.url3 = "%s;bar" % self.url1
-        self.created = create(self.url2)
+        self.created = create(P(self.url2))
 
     def tearDown(self):
         self.created = None
         unlink(self.filename)
 
     def test_same_url(self):
-        bound = bind(self.url2)
+        bound = bind(P(self.url2))
         self.assertEqual(self.created, bound)
 
     def test_add_fragment(self):
-        newly_created = create(self.url3)
+        newly_created = create(P(self.url3))
         self.assertEqual(self.created[0], newly_created[0])
 
     def test_different_fragment(self):
-        create(self.url3)
-        bound = bind(self.url3)
+        create(P(self.url3))
+        bound = bind(P(self.url3))
         self.assertEqual(self.created[0], bound[0])
 
     def test_no_fragment(self):
-        bound = bind(self.url1)
+        bound = bind(P(self.url1))
         self.assertEqual(self.created[0], bound[0])
 
     def test_forget(self):
         old_id = id(self.created[0])
         self.created = None
-        bound = bind(self.url2)
+        bound = bind(P(self.url2))
         self.assertNotEqual(old_id, id(bound[0]))
 
 
@@ -236,7 +242,7 @@ class TestCreateElement(TestCase):
     def setUp(self):
         self.url1 = IN_MEMORY_URL
         self.url2 = "%s;foo" % self.url1
-        self.be, self.pid = create(self.url2)
+        self.be, self.pid = create(P(self.url2))
 
     def tearDown(self):
         self.be = None # ensure that the backend will be removed from the cache
@@ -355,8 +361,8 @@ class TestHandleElements(TestCase):
         try:
             self.url1 = IN_MEMORY_URL
             self.url2 = "%s;foo" % self.url1
-            self.be, self.pid1 = create(self.url1)
-            _,       self.pid2 = create(self.url2)
+            self.be, self.pid1 = create(P(self.url1))
+            _,       self.pid2 = create(P(self.url2))
 
             self.m1_url = "http://example.com/m1.avi"
             self.m2_url = "http://example.com/m2.avi"
@@ -887,8 +893,8 @@ class TestRetrieveDataWithSameId(TestCase):
         try:
             self.url1 = IN_MEMORY_URL
             self.url2 = "%s;foo" % self.url1
-            self.be, self.pid1 = create(self.url1)
-            _,       self.pid2 = create(self.url2)
+            self.be, self.pid1 = create(P(self.url1))
+            _,       self.pid2 = create(P(self.url2))
 
             self.m_url = "http://example.com/m1.avi"
 

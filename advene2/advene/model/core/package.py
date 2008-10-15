@@ -1,7 +1,7 @@
 from weakref import WeakValueDictionary
 
 from advene import _RAISE
-from advene.model.backends import iter_backends
+from advene.model.backends import iter_backends, NoBackendClaiming
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
 from advene.model.core.media import Media
@@ -31,46 +31,50 @@ _constructor = {
     IMPORT: Import,
 }
 
-
 class Package(object, WithMetaMixin):
 
     __metaclass__ = AutoPropertiesMetaclass
 
-    @staticmethod
-    def create(url):
-        for b in iter_backends():
-            if b.claims_for_create(url):
-                be, pid = b.create(url)
-                return Package(url, be, pid)
+    def __init__(self, url, create=False, readonly=False, force=False):
+        self._url      = url
+        self._readonly = readonly
+        if create:
+            for b in iter_backends():
+                if b.claims_for_create(url):
+                    backend, package_id = b.create(self, force)
+                    break
+            else:
+                raise NoBackendClaiming("create %s" % url)
+        else: # bind
+            for b in iter_backends():
+                if b.claims_for_bind(url):
+                    backend, package_id = b.bind(self, force)
+                    break
+            else:
+                raise NoBackendClaiming("bind %s" % url)
 
-    @staticmethod
-    def bind(url, readonly=False, force=False):
-        for b in iter_backends():
-            if b.claims_for_bind(url):
-                be, pid = b.bind(url, readonly, force)
-                return Package(url, be, pid)
-
-
-    def __init__(self, url, backend, package_id):
-        "DO NOT USE IT. Use Package.bind or Package.create instead"
-        self._url          = url
-        self._backend      = backend
-        self._id           = package_id
-        self._imports_dict = {}
+        self._backend  = backend
+        self._id       = package_id
+        self._elements = WeakValueDictionary()
+        self._own      = OwnGroup(self)
+        self._all      = AllGroup(self)
+        self._uri      = backend.get_uri(package_id)
 
         for _, id, url, uri in backend.get_imports((package_id,)):
-            p = Package.bind(url)
-            if p is None: p = Package.bind(uri)
+            p = Package(url)
+            if p is None: p = Package(uri)
             # NB: even there, p could still be None
             if p is not None and uri != p._uri:
                 pass # TODO: issue a warning, may be change automatically...
                      # I think a hook function would be the good solution
             dict[id] = p
 
-        self._elements     = WeakValueDictionary()
-        self._own          = OwnGroup(self)
-        self._all          = AllGroup(self)
-        self._uri          = backend.get_uri(package_id)
+
+    def _get_url(self):
+        return self._url
+
+    def _get_readonly(self):
+        return self._readonly
 
     def _get_uri(self):
         return self._uri

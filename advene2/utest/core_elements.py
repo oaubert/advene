@@ -5,7 +5,7 @@ from advene.model.core.package import Package
 
 class TestElements(TestCase):
     def setUp(self):
-        self.p = Package.create("sqlite::memory:")
+        self.p = Package("sqlite::memory:", create=True)
         try:
             self.p.create_media("m1", "http://example.com/m1.avi")
         except Exception:

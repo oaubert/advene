@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     Package.make_metadata_property ("dc#Creator", "dc_creator")
 
-    p = Package.create (uri)
+    p = Package(uri, create=True)
     #trace_wrap_all (p._backend)
 
     m1 = p.create_media("m1", "http://champin.net/stream.avi")
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     print
 
     print "about to re-load package"
-    p = Package.bind (uri)
+    p = Package(uri)
     print "package loaded"
     #trace_wrap_all (p._backend)
 

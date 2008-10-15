@@ -58,16 +58,20 @@ def claims_for_create(url):
         cx.close()
         return r
 
-def create(url):
-    """
-    Create a _SqliteBackend instance for a new URL which will be created.
+def create(package, force=False):
+    """Create a _SqliteBackend instance for the given package.
 
-    Return
+    Return the backend an the package id.
+    @param package: an object with attributes url and readonly
+    @param force: should the package be created even if it exists?
     """
+    url, readonly = package.url, package.readonly
     assert(claims_for_create(url)), "url = %r" % url
+    if force:
+        raise NotImplementedError("This backend can not force creation of "
+                                   "existing package")
 
     path, pkgid = _strip_url(url)
-
     b = _cache.get(path)
     if b is None:
         # check the following *before* sqlite.connect creates the file!
@@ -93,12 +97,9 @@ def create(url):
         _cache[path] = b
     else:
         conn = b._conn
-
     if pkgid != _DEFAULT_PKGID:
         conn.execute("INSERT INTO Packages VALUES (?,?)", (pkgid, "",))
         conn.commit()
-
-
     return b, pkgid
 
 def claims_for_bind(url):
@@ -130,28 +131,25 @@ def claims_for_bind(url):
         cx.close()
         return r
 
-def bind(url, readonly=False, force=False):
-    """
-    Create a _SqliteBackend instance from the existing URL.
-    @param url: the URL to open
-    @param readonly: should the package be open in read-only mode?
+def bind(package, force=False):
+    """Create a _SqliteBackend instance for the given package.
+
+    Return the backend an the package id.
+    @param package: an object with attributes url and readonly
     @param force: should the package be open even if it is locked?
     """
+    url, readonly = package.url, package.readonly
     assert(claims_for_bind(url)), url
     if force:
         raise NotImplementedError("This backend can not force access to "
                                    "locked package")
 
-    if not url.startswith("sqlite:"): return False
-
     path, pkgid = _strip_url(url)
-
     b = _cache.get(path)
     if b is None:
         conn = sqlite.connect(path)
-        b = _SqliteBackend(path, conn, False, False)
+        b = _SqliteBackend(path, conn, readonly, force)
         _cache[path] = b
-
     return b, pkgid
 
 
