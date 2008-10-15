@@ -2,6 +2,7 @@ from advene.model.core.Package import Package
 
 from os import unlink
 from os.path import exists, join, split
+import gc
 import sys
 
 uri = "sqlite:%s" % (join (split (__file__)[0], "test1.db"))
@@ -38,8 +39,8 @@ if __name__ == "__main__":
     p.create_annotation("a2", m1, 0, 20)
     p.create_relation("r1")
     print [a._id for a in p.own.annotations]
-    print p.get_element ("a1")
-    print p.get_element ("a2")
+    print p.get("a1")
+    print p["a2"]
     p.get_element("a1").content.data = "hello"
     p.dc_creator = "pchampin"
 
@@ -49,11 +50,10 @@ if __name__ == "__main__":
         p.create_annotation("aa%s" % i, m1, i*10, i*10+9)
     print "done"
 
-    p._backend._conn.close() # force backend to close connexion
-    p._backend = None # force backend out of the cache
+    # ensure that backend is collected
+    a = None; m1 = None; p = None; gc.collect()
 
     print
-
 
     print "about to re-load package"
     p = Package.bind (uri)
@@ -67,3 +67,5 @@ if __name__ == "__main__":
     print id(a1) == id(p.get_element ("a1"))
     print a1.content.data
     print p.dc_creator
+
+    l = None; a1 = None; a2 = None; p = None

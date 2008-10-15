@@ -112,6 +112,10 @@ class Package (object, WithMetaMixin):
             else:
                 return pkg.get_element (id[colon+1:], default)
 
+    get = get_element
+
+    __getitem__ = get_element
+
     def _get_own_element (self, id, default=None):
         """
         Get the element whose id is given.
