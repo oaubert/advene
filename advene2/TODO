@@ -18,8 +18,6 @@ Needed improvements
 - auto-update of creator/created/contributor/modified. For package,
    update contributor/modified upon package saving.
 
-- implement annotations.__in__(self, an_int) (used in rules)
-
 - annotation_type.schemas
 
 - text-types registration mechanism (i.e. those not serialized in base64)
