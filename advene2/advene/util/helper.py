@@ -354,32 +354,36 @@ def get_valid_members (el):
     """
     # FIXME: try to sort items in a meaningful way
 
-    # FIXME: return only simple items if not in expert mode
     l = []
     try:
-        l.extend(el.ids())
+        l.extend(sorted(el.ids()))
     except AttributeError:
         try:
-            l.extend(el.keys())
+            l.extend(sorted(el.keys()))
         except AttributeError:
             pass
     if l:
         l.insert(0, _('---- Elements ----'))
 
-    pl=[e[0].replace('_tales_', '')
-        for e in inspect.getmembers(type(el))
-        if isinstance(e[1], property) and e[1].fget is not None]
+    pl=sorted(e[0].replace('_tales_', '')
+            for e in inspect.getmembers(type(el))
+            if isinstance(e[1], property) and e[1].fget is not None)
     if pl:
         l.append(_('---- Attributes ----'))
         l.extend(pl)
 
-    pl=[ name
-         for (name, method) in inspect.getmembers(el)
-         if name in ('first', 'rest') 
-         or (isinstance(method, types.MethodType) 
-         and len(inspect.getargspec(method)[0]) == 1 + len(inspect.getargspec(method)[3] or [])
-         and not name.startswith('_'))
-         and not name == 'close' ]
+    pl=sorted(name
+            for (name, method) in inspect.getmembers(el)
+            if name in ('first', 'rest') 
+            or (isinstance(method, types.MethodType) 
+                and len(inspect.getargspec(method)[0]) == 1 + len(inspect.getargspec(method)[3] or [])
+                and not name.startswith('_')
+                and not name == 'close')
+            or (isinstance(method, types.BuiltinMethodType)
+                and not name.startswith('_')
+                # No inspect.getargspec: guess from the docstring
+                and ('()' in method.__doc__.splitlines()[0]
+                     or '([' in method.__doc__.splitlines()[0])))
     if pl:
         l.append(_('---- Methods ----'))
         l.extend(pl)
