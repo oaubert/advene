@@ -254,6 +254,8 @@ class TestCreateElement (TestCase):
             self.fail (e) # raised by create_media
         self.assert_ (self.be.has_element (self.pid, "m1"))
         self.assert_ (self.be.has_element (self.pid, "m1", MEDIA))
+        self.assertEquals ((MEDIA, self.pid, "m1", "http://example.com/m1.avi"),
+                           self.be.get_element (self.pid, "m1"))
         # check that it has no content
         self.assertEqual (self.be.get_content (self.pid, "m1", MEDIA),
                           None) 
@@ -346,6 +348,9 @@ class TestCreateElement (TestCase):
             self.fail (e) # raised by create_import
         self.assert_ (self.be.has_element (self.pid, "i1"))
         self.assert_ (self.be.has_element (self.pid, "i1", IMPORT))
+        self.assertEquals ((IMPORT, self.pid, "i1",
+                            "http://example.com/advene/db", ""),
+                           self.be.get_element (self.pid, "i1"))
         # check that it has no content
         self.assertEqual (self.be.get_content (self.pid, "i1", IMPORT),
                           None)
