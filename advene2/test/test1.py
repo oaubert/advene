@@ -90,6 +90,7 @@ if __name__ == "__main__":
     p.set_meta(advene_ns % "meta/main_media", m1)
 
     a1.begin += 1
+    a1.duration += 1
     p.set_meta(PACKAGED_ROOT, pathname2url(base))
     a1.content_url = "packaged:/a1.txt"
     a1.content_data = "You, stupid woman!"
@@ -149,7 +150,7 @@ if __name__ == "__main__":
     print a1.content_data
     print p.dc_creator
     print p.get_meta(advene_ns % "meta/main_media")
-    print a1.begin
+    print a1.begin, a1.duration, a1.end
     print a1.dc_creator
     print a2.get_meta(advene_ns % "meta/created_from")
 

@@ -74,6 +74,12 @@ class Annotation(PackageElement, WithContentMixin):
         self._end = val
         self.add_cleaning_operation_once(self.__clean)
 
+    def _get_duration(self):
+        return self._end - self._begin
+
+    def _set_duration(self, val):
+        self._set_end(self._begin + val)
+
     def __clean(self):
         o = self._owner
         o._backend.update_annotation(o._id, self._id,
