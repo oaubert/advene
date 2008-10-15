@@ -172,6 +172,8 @@ class WithContentMixin(DirtyMixin):
         if not _init and self.__url is None: # should not happen
             self._load_content_info()
         if url != self.__url: # prevents to erase the data cache for no reason
+            assert not url.startswith("packaged:") \
+                or self._owner.get_meta(PACKAGED_ROOT, None) is not None
             self.__url = url
             if not _init:
                 self.add_cleaning_operation_once(self.__clean_info)
