@@ -1071,6 +1071,28 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             raise InternalError("could not update", e)
 
+    def iter_contents_with_schema(self, package_ids, schema):
+        """
+        Return tuples of the form (package_id, id) of all the 
+        elements with a content having the given schema.
+
+        @param schema the uri-ref of a resource
+        """
+        assert not isinstance(package_ids, basestring), "list if ids expected"
+
+        schema_u, schema_i = _split_uri_ref(schema)
+
+        q = "SELECT c.package, c.element FROM Contents c " \
+            "JOIN Packages p ON c.package = p.id "\
+            "LEFT JOIN Imports i ON c.schema_p = i.id " \
+            " WHERE c.package in (" + "?," * len(package_ids) + ")" \
+            " AND schema_i = ? AND ("\
+            "  (schema_p = ''   AND  ? IN (p.uri, p.url)) OR " \
+            "  (schema_p = i.id AND  ? IN (i.uri, i.url)))"
+        args =  list(package_ids) + [schema_i, schema_u, schema_u,]
+        r = self._conn.execute(q, args)
+        return _FlushableIterator(r, self)
+
     # meta-data management
 
     def iter_meta(self, package_id, id, element_type):

@@ -840,6 +840,42 @@ class TestHandleElements(TestCase):
             self.assertEqual(("", "", ""),
                 self.be.get_content(i[0], i[1], typ))
 
+    def test_iter_contents_with_schema(self):
+        self.be.create_resource(self.pid2, "R4")
+        self.be.create_resource(self.pid2, "R5")
+        self.be.update_content(self.pid1, "a1", ANNOTATION,
+                               "test/plain", "", "i1:R3")
+        self.be.update_content(self.pid1, "a2", ANNOTATION,
+                               "test/plain", "", "i2:R3") # it's a trap
+        self.be.update_content(self.pid1, "r2", RELATION,
+                               "test/plain", "", "i1:R3")
+        self.be.update_content(self.pid1, "v1", VIEW,
+                               "test/plain", "", "i1:R3")
+        self.be.update_content(self.pid1, "q2", QUERY,
+                               "test/plain", "", "i1:R3")
+        self.be.update_content(self.pid1, "R1", RESOURCE,
+                               "test/plain", "", "i1:R3")
+        self.be.update_content(self.pid2, "a5", ANNOTATION,
+                               "test/plain", "", "R3")
+        self.be.update_content(self.pid2, "r3", RELATION,
+                               "test/plain", "", "R3")
+        self.be.update_content(self.pid2, "v3", VIEW,
+                               "test/plain", "", "R3")
+        self.be.update_content(self.pid2, "q3", QUERY,
+                               "test/plain", "", "R3")
+        self.be.update_content(self.pid2, "R4", RESOURCE,
+                               "test/plain", "", "R3")
+        self.be.update_content(self.pid2, "R5", RESOURCE,
+                               "test/plain", "", "R4") # it's a trap
+        ref = frozenset([(self.pid1, "a1"), (self.pid1, "r2"),
+            (self.pid1, "v1"), (self.pid1, "q2"), (self.pid1, "R1"),
+            (self.pid2, "a5"), (self.pid2, "r3"), (self.pid2, "v3"),
+            (self.pid2, "q3"), (self.pid2, "R4"),])
+        pids = (self.pid1, self.pid2)
+        R3_uri = "%s#R3" % self.url2
+        self.assertEqual(ref,
+            frozenset(self.be.iter_contents_with_schema(pids, R3_uri)))
+
     def test_metadata(self):
         dc_creator = "http://purl.org/dc/elements/1.1/creator"
         value1 = "pchampin"
