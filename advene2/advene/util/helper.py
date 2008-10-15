@@ -365,7 +365,7 @@ def get_valid_members (el):
     if l:
         l.insert(0, _('---- Elements ----'))
 
-    pl=[e[0]
+    pl=[e[0].replace('_tales_', '')
         for e in inspect.getmembers(type(el))
         if isinstance(e[1], property) and e[1].fget is not None]
     if pl:
