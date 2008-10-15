@@ -10,6 +10,10 @@ RDFS_NS_PREFIX = "http://www.w3.org/2000/01/rdf-schema#"
 # other advene-related namespace URIs
 ADVENE_XML = "%s%s" % (ADVENE_NS_PREFIX, "advene-xml/0.1")
 
+# common metadata
+
+PACKAGED_ROOT = "%spackage_root" % PARSER_META_PREFIX
+
 # implementation-related constant
 # used as the ``default`` parameter to specify that an exception should be
 # raised on default

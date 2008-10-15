@@ -17,13 +17,11 @@ from urllib2 import urlopen, url2pathname
 from urlparse import urlparse
 from weakref import ref
 
-from advene.model.consts import _RAISE, PARSER_META_PREFIX
+from advene.model.consts import _RAISE, PACKAGED_ROOT
 from advene.model.core.dirty import DirtyMixin
 from advene.model.core.element import RELATION
 from advene.model.exceptions import ModelError
 from advene.utils.autoproperty import autoproperty
-
-PACKAGED_ROOT = "%spackage_root" % PARSER_META_PREFIX
 
 class WithContentMixin(DirtyMixin):
     """I provide functionality for elements with a content.
@@ -130,7 +128,7 @@ class WithContentMixin(DirtyMixin):
                 o = self._owner
                 prefix = o.get_meta(PACKAGED_ROOT, None)
                 assert prefix is not None
-                base = url2pathname(urlparse(prefix)[2])
+                base = url2pathname(urlparse(prefix).path)
                 filename = path.join(base, url2pathname(url[10:]))
                 f = self.__as_file = PackagedDataFile(filename, self)
             else:

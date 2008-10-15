@@ -6,6 +6,7 @@ annotations, relations, views, queries, lists) is designed to limit the number
 of forward references, which makes the work of the parser more difficult.
 Forward references are nevetheless still possible in meta-data, tag associated to another tag, list containing another list
 """
+
 from itertools import chain
 from xml.etree.cElementTree import Element, ElementTree, SubElement
 

@@ -2,11 +2,14 @@
 Unstable and experimental parser implementation.
 """
 
+from os import path
+from os.path import exists
+from urllib import pathname2url, url2pathname
 from urllib2 import urlopen, URLError
 from urlparse import urlparse
 from xml.etree.ElementTree import tostring
 
-from advene.model.consts import ADVENE_XML, PARSER_META_PREFIX
+from advene.model.consts import ADVENE_XML, PARSER_META_PREFIX, PACKAGED_ROOT
 from advene.model.core.element import MEDIA, ANNOTATION, RELATION, LIST, TAG, \
                                       VIEW, QUERY, RESOURCE, IMPORT
 from advene.model.parsers.base_xml import XmlParserBase
@@ -55,7 +58,6 @@ def parse_into(url, package):
 
     See also `make_parser`.
     """
-    assert claims_for_parse(url) > 0
     _Parser(url, package).parse()
 
 
@@ -63,11 +65,21 @@ class _Parser(XmlParserBase):
 
     def parse(self):
         "Do the actual parsing."
+        url = self.url
+        if url.startswith("file:") and url.endswith("content.xml"):
+            # looks like this is a manually-unzipped package,
+            filename = url2pathname(urlparse(url).path)
+            dirname = path.split(filename)[0]
+            if exists(path.join(dirname, "mimetype")):
+                # it is now very likely that this is a manually-unzipped pkg
+                root = "file:" + url2pathname(dirname)
+                self.package.set_meta(PACKAGED_ROOT, root)
         XmlParserBase.parse(self)
 
     # end of public interface
 
     def __init__(self, url, package, namespace_uri=ADVENE_XML, root="package"):
+        assert claims_for_parse(url) > 0
         XmlParserBase.__init__(self, url, package, namespace_uri, root)
         self._differed = []
 

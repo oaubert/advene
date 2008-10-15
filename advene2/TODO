@@ -3,6 +3,8 @@ Important improvements
 
 - implement read or write locking, "force", and "readonly" in _SqliteBackend
 
+- implement notification of events
+
 Minor improvements, to do one day
 =================================
 
@@ -25,8 +27,13 @@ Misc
 
 - remove unused code in advene/utils once we are sure we won't use it
 
-- remove "unstable and experimental" in advene_xml's (parser and serializer)
-  docstrings (once it is stabilized and tested, that is ;)
+- remove "unstable and experimental" in parser and serializer docstrings (once
+  it is stabilized and tested, that is ;)
+
+- find a better alternative to tmpnam in advene_zip's (parser and serialiser)
+
+- use notification of events, once implemented, to clean the package root
+  created by advene_zip serializer and parser
 
 Open questions
 ==============

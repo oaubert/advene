@@ -1,4 +1,5 @@
 import advene.model.parsers.advene_xml as advene_xml_parser
+import advene.model.parsers.advene_zip as advene_zip_parser
 
 # parser register functions
 
@@ -21,3 +22,4 @@ _parsers = []
 # default registration
 
 register_parser(advene_xml_parser)
+register_parser(advene_zip_parser)
