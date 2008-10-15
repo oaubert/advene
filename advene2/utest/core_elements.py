@@ -1406,6 +1406,78 @@ class TestVolatile(TestCase):
         # anymore
         self.assert_(not hasattr(self.p.get("t1"), "foo"))
 
+
+class TestIterReferences(TestCase):
+    def test_iter_references(self):
+        from advene.model.cam.package import Package
+        p = Package("transient:1", create=True)
+        q = Package("transient:2", create=True)
+
+        m1 = q.create_media("m1", "http://example.com/m1.avi")
+        at1 = q.create_annotation_type("at1")
+        rt1 = q.create_relation_type("rt1")
+        a1 = q.create_annotation("a1", m1, 0, 42, "text/plain", type=at1)
+        r1 = q.create_relation("r1", type=rt1, members=[a1,])
+        L1 = q.create_user_list("L1", items=[m1, a1, r1,])
+        t1 = q.create_user_tag("t1")
+        R1 = q.create_resource("R1", "text/plain")
+        a1.content_model = R1
+
+        p.create_import("i", q)
+        m2 = p.create_media("m2", "http://example.com/m2.avi")
+        at2 = p.create_annotation_type("at2")
+        rt2 = p.create_relation_type("rt2")
+        a2 = p.create_annotation("a2", m2, 0, 42, "text/plain", type=at2)
+        r2 = p.create_relation("r2", type=rt2, members=[a2,])
+        L2 = p.create_user_list("L2", items=[m2, a2, r2,])
+        t2 = p.create_user_tag("t2")
+        R2 = p.create_resource("R2", "text/plain")
+        a2.content_model = R2
+
+        a3 = p.create_annotation("a3", m1, 1, 2, "text/plain", type=at1)
+        a3.content_model=R1
+        r3 = p.create_relation("r3", members=[a2, a1,], type=rt2)
+        L3 = p.create_user_list("L3", items=[a1, m1,])
+
+        p.meta["key"] = a1
+        p.associate_user_tag(a1, t1)
+
+        def check(it1, it2=None):
+            if it2 is None: print list(it1) # debugging
+            else:
+                #self.assertEqual(frozenset(it1), frozenset(it2))
+                try:
+                    s1 = frozenset(it1)
+                    s2 = frozenset(it2)
+                    self.assertEqual(s1, s2)
+                except AssertionError, e:
+                    print "+++", s1.difference(s2)
+                    print "---", s2.difference(s1)
+                    raise e
+
+        from advene.model.cam.consts import CAM_TYPE as ct
+        check(at1.iter_references(), [
+            ("tagging", q, a1), ("tagging", p, a3),
+            ("meta", a1, ct), ("meta", a3, ct),
+        ])
+
+        check(a1.iter_references(), [
+            ("tagged", q, at1), ("tagged", p, t1),
+            ("item", L1), ("item", L3),
+            ("member", r1), ("member", r3),
+            ("meta", p, "key"),
+        ])
+
+        check(m1.iter_references(), [
+            ("media", a1), ("media", a3),
+            ("item", L1), ("item", L3),
+        ])
+
+
+        check(R1.iter_references(), [
+            ("content_model", a1), ("content_model", a3),
+        ])
+
 if __name__ == "__main__":
     main()
 

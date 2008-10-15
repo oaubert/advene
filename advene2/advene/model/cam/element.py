@@ -87,3 +87,4 @@ CamElement.make_metadata_property(DC_NS_PREFIX + "title", default=None)
 CamElement.make_metadata_property(DC_NS_PREFIX + "description", default=None)
 
 CamElement.make_metadata_property(RDFS_NS_PREFIX + "seeAlso", default=None)
+
