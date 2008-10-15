@@ -1,12 +1,7 @@
 """I am the content handler for mimetype application/x-advene-builtin-view.
 """
 
-from inspect import getargspec
-
-from advene.model.consts import _RAISE
-from advene.model.core.element import \
-    MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
-from advene.model.exceptions import ContentHandlingError
+import urllib
 
 # general handler interface
 
@@ -27,13 +22,15 @@ def parse_content(obj):
     Parse the content of the given package element, and return the produced
     object.
     """
-    s = obj.content_data
     r = {}
-    for line in s.split("\n"):
-        line = line.strip()
-        if line == "": continue
-        key, val = line.split("=")
-        key = key.strip()
-        val = val.strip()
-        r[key] = val
+    for l in obj.content_data.splitlines():
+        if not l:
+            continue
+        if '=' in l:
+            key, val = l.split("=", 1)
+            key = key.strip()
+            r[key] = urllib.unquote_plus(val)
+        else:
+            r['_error']=l 
+            print "Syntax error in content: >%s<" % l.encode('utf8')
     return r
