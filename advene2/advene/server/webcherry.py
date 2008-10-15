@@ -52,6 +52,12 @@ from advene.model.exceptions import NoSuchElementError, UnreachableImportError
 from simpletal.simpleTALES import PathNotFoundException
 from simpletal.simpleTAL import TemplateParseException
 
+def remove_tales_prefix(name):
+    if name.startswith("_tales_"):
+        return name[7:]
+    else:
+        return name
+
 DEBUG = True
 class Common:
     """Common functionalities for all cherrypy nodes.
@@ -125,7 +131,7 @@ class Common:
         if l:
             l.insert(0, _('---- Elements ----'))
 
-        pl=[e[0]
+        pl=[remove_tales_prefix(e[0])
             for e in inspect.getmembers(type(el))
             if isinstance(e[1], property) and e[1].fget is not None]
         if pl:

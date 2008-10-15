@@ -344,7 +344,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         r = self._all_wref()
         if r is None:
             r = AllGroup(self)
-            self._al_wref = ref(r)
+            self._all_wref = ref(r)
         return r
 
     @property

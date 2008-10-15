@@ -8,7 +8,7 @@ from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
 from advene.model.core.group import GroupMixin
 
-class OwnGroup(GroupMixin):
+class OwnGroup(GroupMixin, object):
 
     # TODO filtering parameters in iter_X and count_X have not been all added
     # because of a lack of time, not for some good reason.
