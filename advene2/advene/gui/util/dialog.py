@@ -519,7 +519,7 @@ def get_filename(title=_("Open a file"),
     def update_preview(chooser):
         filename=chooser.get_preview_filename()
         setattr(preview, '_filename', filename)
-        if filename and (filename.endswith('.xml') or filename.endswith('.azp')):
+        if filename and (filename.endswith('.xml') or filename.endswith('.czp')):
             preview.set_label(_("Press to\ndisplay\ninformation"))
             if alias:
                 alias_entry.set_text(generate_alias(filename))
@@ -565,8 +565,8 @@ def get_filename(title=_("Open a file"),
     for name, descr, exts in (
         ('any', _("Any type of file"), ( '*', ) ),
         ('advene',
-         _("Advene files (.xml, .azp, .apl)"),
-         ('*.xml', '*.azp', '*.apl')),
+         _("Advene files (.xml, .czp, .apl)"),
+         ('*.xml', '*.czp', '*.apl')),
         ('session', _("Advene session (.apl)"), ( '*.apl', ) ),
         ('video', _("Video files"), [ "*%s" % e for e in config.data.video_extensions ])
         ):
