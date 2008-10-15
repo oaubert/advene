@@ -340,7 +340,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
         """
         p = urlparse(url)
         if p.scheme not in ('file', ''):
-            raise ValueError("Can not save to URL %s" % filename)
+            raise ValueError("Can not save to URL %s" % url)
         filename = url2pathname(p.path)
 
         if exists(filename) and not erase:
