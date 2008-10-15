@@ -1496,7 +1496,7 @@ class AdveneController(object):
             return []
 
     @property
-    def get_utbv_list(self):
+    def utbv_list(self):
         """Return the list of valid UTBV for the current package.
 
         Returns a list of tuples (title, url) for each UTBV in the
