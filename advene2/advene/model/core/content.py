@@ -549,7 +549,7 @@ class Content(object):
 
     @autoproperty
     def _get_as_file(self):
-        return self._owner_elt._get_as_file()
+        return self._owner_elt._get_content_as_file()
 
 
 class PackagedDataFile(file):
