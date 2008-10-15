@@ -15,6 +15,7 @@ from advene.model.core.query import Query
 from advene.model.core.import_ import Import
 from advene.model.core.all_group import AllGroup
 from advene.model.core.own_group import OwnGroup
+from advene.model.core.dirty import DirtyMixin
 from advene.model.core.meta import WithMetaMixin
 from advene.utils.autoproperties import AutoPropertiesMetaclass
 
@@ -31,7 +32,7 @@ _constructor = {
     IMPORT: Import,
 }
 
-class Package(object, WithMetaMixin):
+class Package(object, WithMetaMixin, DirtyMixin):
 
     __metaclass__ = AutoPropertiesMetaclass
 
@@ -75,9 +76,16 @@ class Package(object, WithMetaMixin):
     def close (self):
         """Free all external resources used by the package's backend.
 
+        If the package has dirty elements, clean them (since they are dirty,
+        they can not be garbage collected, so they must be in _elements).
+
         It is an error to use a package or any of its elements or attributes
         when the package has been closed. The behaviour is undefined.
         """
+        for e in self._elements:
+            if e.dirty:
+                e.clean()
+        self.clean()
         self._backend.close(self._id)
 
     def _get_url(self):
@@ -130,7 +138,7 @@ class Package(object, WithMetaMixin):
 
     __getitem__ = get_element
 
-    def _get_own_element(self, id, default):
+    def _get_own_element(self, id, default=_RAISE):
         """
         Get the element whose id is given.
         Id may be a simple id or a path id.
@@ -160,7 +168,7 @@ class Package(object, WithMetaMixin):
         o = element._owner
         return o is self  or  o in self._imports_dict.values()
 
-    def _get_meta(self, key, default):
+    def _get_meta(self, key, default=_RAISE):
         "will be wrapped by the WithMetaMixin"
         r = self._backend.get_meta(self._id, "", None, key)            
         if r is None:

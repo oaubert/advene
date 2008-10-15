@@ -5,6 +5,7 @@ I define the common super-class of all package element classes.
 from sets import Set
 
 from advene                      import _RAISE
+from advene.model.core.dirty     import DirtyMixin
 from advene.model.core.meta      import WithMetaMixin
 from advene.utils.autoproperties import AutoPropertiesMetaclass
 
@@ -20,7 +21,7 @@ QUERY      = 'q'
 VIEW       = 'v'
 RESOURCE   = 'R'
 
-class PackageElement(object, WithMetaMixin):
+class PackageElement(object, WithMetaMixin, DirtyMixin):
 
     __metaclass__ = AutoPropertiesMetaclass
 
@@ -29,6 +30,7 @@ class PackageElement(object, WithMetaMixin):
         self._owner = owner
         self._destroyed = True
         owner._elements[id] = self # cache to prevent duplicate instanciation
+        self._dirty = False
 
     def make_idref_for(self, pkg):
         """
@@ -81,7 +83,7 @@ class PackageElement(object, WithMetaMixin):
         u = o._uri or o._url
         return "%s#%s" % (u, self._id)
 
-    def _get_meta(self, key, default):
+    def _get_meta(self, key, default=_RAISE):
         "will be wrapped by the WithMetaMixin"
         r = self._owner._backend.get_meta(self._owner._id, self._id,
                                            self.ADVENE_TYPE , key)            

@@ -53,9 +53,9 @@ if __name__ == "__main__":
     print "done"
 
     # ensure that backend is collected
-    a1 = None; a = None; m1 = None; p = None; gc.collect()
+    a1 = None; a = None; m1 = None;
 
-    p.close()
+    p.close(); p = None; gc.collect()
     print
 
     print "about to re-load package"

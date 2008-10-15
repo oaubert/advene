@@ -1,9 +1,11 @@
 from advene import _RAISE
+from advene.model.core.dirty import DirtyMixin
 
-class WithMetaMixin:
-    """
+class WithMetaMixin(DirtyMixin):
+    """Metadata access mixin.
+
     I am a mixin for a class with methods _get_meta(self, key) and _set_meta
-    (self, key, val). I provide them with equivalent methods get_meta and
+    (self, key, val). I provide equivalent methods get_meta and
     set_meta method, that cache the values of metadata to reduce access to
     the backend.
 
@@ -11,19 +13,45 @@ class WithMetaMixin:
     accessible as python properties.
     """
 
-    # TODO : do the actual caching
+    __cache = {}   # global dict, keys are (self, metadata-key)
+    __dirty = None # local dict, generated for each instance set_meta
 
     def get_meta(self, key, default=_RAISE):
-        """
-        Return the metadata with given key.
+        """Return the metadata with given key.
 
         If the given key does not exist: an KeyError is raised if default is 
         _RAISE, else default is returned.
         """
-        return self._get_meta(key, default)
+        cache = self.__cache
+        val = cache.get((self,key))
+        if val is None:
+            val = self._get_meta(key, None)
+            if val is None: val = _RAISE
+            cache[self,key] = val # cache _RAISE to remember the key is absent
+        if val is _RAISE:
+            if default is _RAISE:
+                raise KeyError, key
+            else:
+                val = default
+        return val
 
     def set_meta(self, key, val):
-        return self._set_meta(key, val)
+        dirty = self.__dirty
+        if dirty is None:
+            dirty = self.__dirty = {}
+        self.__cache[self,key] = val
+        dirty[key] = val
+        self.add_cleaning_operation(self.__clean)
+
+    def __clean(self):
+        dirty = self.__dirty
+        while dirty:
+            k,v = dirty.popitem()
+            try:
+                self._set_meta(k,v)
+            except:
+                dirty[k] = v
+                raise
 
     @classmethod
     def make_metadata_property(cls, key, alias=None):

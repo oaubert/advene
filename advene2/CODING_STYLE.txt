@@ -10,6 +10,7 @@ NAMES
 * use CaptializedNames (java style) for class names
 * NB: some "factory" functions are sometimes implemented as classes; those may 
 be named in python_style
+* `Mixin classes`_ names should always end with "Mixin"
 
 * module names are lowercase, short-names (preferably meaningful).
 * packages must be named in python style
@@ -54,6 +55,26 @@ parameter which would be the default value to be returned. E.g.:::
   f = my_package.get_element("foo", default=None)
 
 If the optional parameter is a keyword parameter, it should be named "default".
+
+Mixin classes
++++++++++++++
+
+Multiple inheritance should only be used with one proper base class and
+so-called mixin classes. Classes should precisely document the methods and
+attribute they expect from the classes using them. It should also define the
+collaborative methods, which should use the super keyword in all their
+implementations, also relying on such methods should be avoided when possible.
+
+Mixin classes should not require initialization (which is what makes them
+similar to Traits, and different from classical base classes). If they need
+private attributes, they could either:
+ * the methods can check if the attribute is defined, and define it if not
+ * an alternative to checking existence is to define a default value at the
+   class level
+ * the methods can use a class attribute dict, using id(self) as keys
+
+Whichever solution is chosen, mixin attributes must use name mangling ("__"
+prefix) to reduce the risk of name clash.
 
 
 REFERENCES
