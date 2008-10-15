@@ -23,6 +23,7 @@ from advene.model.core.import_ import Import
 from advene.model.core.all_group import AllGroup
 from advene.model.core.own_group import OwnGroup
 from advene.model.core.meta import WithMetaMixin
+from advene.model.core.events import PackageEventDelegate, WithEventsMixin
 from advene.model.exceptions import \
     ModelError, NoClaimingError, NoSuchElementError, UnreachableImportError
 from advene.model.parsers.register import iter_parsers
@@ -43,7 +44,7 @@ _constructor = {
     IMPORT: Import,
 }
 
-class Package(object, WithMetaMixin):
+class Package(object, WithMetaMixin, WithEventsMixin):
     """FIXME: missing docstring.
     """
     def __init__(self, url, create=False, readonly=False, force=False):
@@ -108,6 +109,7 @@ class Package(object, WithMetaMixin):
         self._own_wref = lambda: None
         self._all_wref = lambda: None
         self._uri      = None
+        self._event_delegate = PackageEventDelegate(self)
 
         if parser:
             parser.parse_into(f, self)
@@ -236,6 +238,7 @@ class Package(object, WithMetaMixin):
         else:
             self._backend.close(self._id)
         self._backend = None
+        self.emit("closed", self._url, self._uri)
 
     def _finish_close(self):
         """FIXME: missing docstring.
@@ -319,8 +322,11 @@ class Package(object, WithMetaMixin):
     @autoproperty
     def _set_uri(self, uri):
         if uri is None: uri = ""
+        self.emit("pre-changed::uri", "uri", uri)
         self._uri = uri
         self._backend.update_uri(self._id, self._uri)
+        self.emit("changed::uri", "uri", uri)
+        # TODO the following could be replaced by event handlers in imports
         for pkg, iid in self._importers.iteritems():
             imp = pkg[iid]
             imp._set_uri(uri)
@@ -402,7 +408,7 @@ class Package(object, WithMetaMixin):
         """Get the element with the given uri-ref.
 
         If the element does not exist, an exception is raised (see below) 
-        unless ``defalut`` is provided, in which case its value is returned.
+        unless ``default`` is provided, in which case its value is returned.
         
         FIXME: copied from get_element, but not adapted.
         An `UnreachableImportError` is raised if the given id involves an
@@ -497,7 +503,9 @@ class Package(object, WithMetaMixin):
         """
         assert not self.has_element(id)
         self._backend.create_media(self._id, id, url, frame_of_reference)
-        return Media(self, id, url, frame_of_reference)
+        r = Media(self, id, url, frame_of_reference)
+        self.emit("created::media", r)
+        return r
 
     def create_annotation(self, id, media, begin, end,
                                 mimetype, model=None, url=""):
@@ -511,7 +519,9 @@ class Package(object, WithMetaMixin):
             model_id = ""
         self._backend.create_annotation(self._id, id, media_id, begin, end,
                                         mimetype, model_id, url)
-        return Annotation(self, id, media, begin, end, mimetype, model, url)
+        r = Annotation(self, id, media, begin, end, mimetype, model, url)
+        self.emit("created::annotation", r)
+        return r
 
     def create_relation(self, id, mimetype="x-advene/none", model=None,
                         url="", members=()):
@@ -525,9 +535,8 @@ class Package(object, WithMetaMixin):
         self._backend.create_relation(self._id, id,
                                       mimetype, model_id, url)
         r = Relation(self, id, mimetype, model, url, True)
-        for m in members:
-            # let the relation do it, with all the checking it needs
-            r.append(m)
+        r.extend(members) # let r do it, with all the checking it needs
+        self.emit("created::relation", r)
         return r
 
     def create_view(self, id, mimetype, model=None, url=""):
@@ -539,7 +548,9 @@ class Package(object, WithMetaMixin):
         else:
             model_id = ""
         self._backend.create_view(self._id, id, mimetype, model_id, url)
-        return View(self, id, mimetype, model, url)
+        r = View(self, id, mimetype, model, url)
+        self.emit("created::view", r)
+        return r
 
     def create_resource(self, id, mimetype, model=None, url=""):
         """FIXME: missing docstring.
@@ -550,14 +561,18 @@ class Package(object, WithMetaMixin):
         else:
             model_id = ""
         self._backend.create_resource(self._id, id, mimetype, model_id, url)
-        return Resource(self, id, mimetype, model, url)
+        r =  Resource(self, id, mimetype, model, url)
+        self.emit("created::resource", r)
+        return r
 
     def create_tag(self, id):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
         self._backend.create_tag(self._id, id)
-        return Tag(self, id)
+        r = Tag(self, id)
+        self.emit("created::tag", r)
+        return r
 
     def create_list(self, id, items=()):
         """FIXME: missing docstring.
@@ -565,9 +580,8 @@ class Package(object, WithMetaMixin):
         assert not self.has_element(id)
         self._backend.create_list(self._id, id)
         L = List(self, id, True)
-        for i in items:
-            # let the list do it, with all the checking it needs
-            L.append(i)
+        L.extend(items) # let L do it, with all the checking it needs
+        self.emit("created::list", L)
         return L
 
     def create_query(self, id, mimetype, model=None, url=""):
@@ -579,7 +593,9 @@ class Package(object, WithMetaMixin):
         else:
             model_id = ""
         self._backend.create_query(self._id, id, mimetype, model_id, url)
-        return Query(self, id, mimetype, model, url)
+        r = Query(self, id, mimetype, model, url)
+        self.emit("created::query", r)
+        return r
 
     def create_import(self, id, package):
         """FIXME: missing docstring.
@@ -596,7 +612,9 @@ class Package(object, WithMetaMixin):
         self._imports_dict[id] = package
         self._update_backends_dict()
         package._importers[self] = id
-        return Import(self, id, package._url, uri)
+        r = Import(self, id, package._url, uri)
+        self.emit("created::import", r)
+        return r
 
     # tags management
 
@@ -615,8 +633,6 @@ class Package(object, WithMetaMixin):
         else:
             id_t = tag.make_id_in(self)
         self._backend.associate_tag(self._id, id_e, id_t)
-        # TODO make tagging dirtiable -- requires also changes in tag-related
-        # methods of PackageElement and Tag
 
     def dissociate_tag(self, element, tag):
         """Dissociate the given element to the given tag on behalf of this package.
@@ -633,12 +649,10 @@ class Package(object, WithMetaMixin):
         else:
             id_t = tag.make_id_in(self)
         self._backend.dissociate_tag(self._id, id_e, id_t)
-        # TODO make tagging dirtiable -- requires also changes in tag-related
-        # methods of PackageElement and Tag
 
     # reference finding (find all the own or imported elements referencing a
     # given element) -- combination of several backend methods
-    # TODO
+    # TODO -- or is this 
 
 
 def _make_absolute(url):

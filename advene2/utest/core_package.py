@@ -5,11 +5,14 @@ from tempfile import mkdtemp
 from unittest import TestCase, main
 from urllib import pathname2url
 
+from advene.model.consts import DC_NS_PREFIX
+from advene.model.core.media import FOREF_PREFIX
 from advene.model.core.package import Package
 from advene.model.backends.sqlite import _set_module_debug
 
 _set_module_debug(True) # enable all asserts in backend_sqlite
 
+FOREF = FOREF_PREFIX+"ms;o=0"
 
 
 class TestCreation(TestCase):
@@ -19,7 +22,7 @@ class TestCreation(TestCase):
         # use invalid URL scheme to force the package to be transient
         p = Package("x-invalid-scheme:xyz", create=True)
         p.close()
-        # if the second times woirks (with create=True), then transient works
+        # if the second times works (with create=True), then transient works
         p = Package("x-invalid-scheme:xyz", create=True)
         p.close()
         
@@ -175,6 +178,298 @@ class TestImports(TestCase):
             pass
         unlink(self.db)
         rmdir(self.dirname)
+
+
+class TestEvents(TestCase):
+    def setUp(self):
+        self.dirname = mkdtemp()
+        self.db = join(self.dirname, "db")
+        self.url = "sqlite:%s" % pathname2url(self.db)
+        self.p1 = Package(self.url+";p1", create=True)
+        self.p2 = Package(self.url+";p2", create=True)
+        self.buf = []
+        self.callback_errors = []
+
+    def tearDown(self):
+        try:
+            if self.p1 and not self.p1.closed: self.p1.close()
+            if self.p2 and not self.p2.closed: self.p2.close()
+        except ValueError: 
+            pass
+        unlink(self.db)
+        rmdir(self.dirname)
+
+    def default_handler(self, *args):
+        self.buf.append(args)
+
+    def attr_handler(self, *args):
+        val = getattr(args[0], args[1])
+        if len(args) == 4 and args[-1] == "pre":
+            args = args[:-1]
+            if val == args[2]:
+                self.callback_errors.append("%s should not be %r yet",
+                                            args[1], args[2])
+        else:
+            if val != args[2]:
+                self.callback_errors.append("%s = %r, should be %r",
+                                            args[1], val, args[2])
+        self.default_handler(*args)
+
+    def meta_handler(self, *args):
+        val = args[0].get_meta(args[1], None)
+        if len(args) == 4 and args[-1] == "pre":
+            args = args[:-1]
+            if val == args[2]:
+                self.callback_errors.append("%s should not be %r yet",
+                                            args[1], args[2])
+        else:
+            if val != args[2]:
+                self.callback_errors.append("%s : %r, should be %r",
+                                            args[1], val, args[2])
+        self.default_handler(*args)
+
+    def test_create_media(self):
+        self.p1.connect("created::media", self.default_handler)
+        m = self.p2.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        a = self.p2.create_annotation("a", m, 10, 20, "text/plain")
+        self.assertEqual(self.buf, [])
+        m = self.p1.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [(self.p1, m,),])
+
+    def test_create_annotation(self):
+        self.p1.connect("created::annotation", self.default_handler)
+        m = self.p2.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        a = self.p2.create_annotation("a", m, 10, 20, "text/plain")
+        self.assertEqual(self.buf, [])
+        m = self.p1.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        a = self.p1.create_annotation("a", m, 10, 20, "text/plain")
+        self.assertEqual(self.buf, [(self.p1, a,),])
+
+    def test_create_relation(self):
+        self.p1.connect("created::relation", self.default_handler)
+        r = self.p2.create_relation("r")
+        self.assertEqual(self.buf, [])
+        m = self.p1.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        r = self.p1.create_relation("r")
+        self.assertEqual(self.buf, [(self.p1, r,),])
+
+    def test_create_list(self):
+        self.p1.connect("created::list", self.default_handler)
+        L = self.p2.create_list("L")
+        self.assertEqual(self.buf, [])
+        m = self.p1.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        L = self.p1.create_list("L")
+        self.assertEqual(self.buf, [(self.p1, L,),])
+
+    def test_create_tag(self):
+        self.p1.connect("created::tag", self.default_handler)
+        t = self.p2.create_tag("t")
+        self.assertEqual(self.buf, [])
+        m = self.p1.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        t = self.p1.create_tag("t")
+        self.assertEqual(self.buf, [(self.p1, t,),])
+
+    def test_create_query(self):
+        self.p1.connect("created::query", self.default_handler)
+        q = self.p2.create_query("q", "text/plain")
+        self.assertEqual(self.buf, [])
+        m = self.p1.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        q = self.p1.create_query("q", "text/plain")
+        self.assertEqual(self.buf, [(self.p1, q,),])
+
+    def test_create_view(self):
+        self.p1.connect("created::view", self.default_handler)
+        v = self.p2.create_view("v", "text/plain")
+        self.assertEqual(self.buf, [])
+        m = self.p1.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        v = self.p1.create_view("v", "text/plain")
+        self.assertEqual(self.buf, [(self.p1, v,),])
+
+    def test_create_resource(self):
+        self.p1.connect("created::resource", self.default_handler)
+        r = self.p2.create_resource("r", "text/plain")
+        self.assertEqual(self.buf, [])
+        m = self.p1.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        r = self.p1.create_resource("r", "text/plain")
+        self.assertEqual(self.buf, [(self.p1, r,),])
+
+    def test_create_import(self):
+        self.p1.connect("created::import", self.default_handler)
+        i = self.p2.create_import("i", self.p1)
+        self.assertEqual(self.buf, [])
+        m = self.p1.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        i = self.p1.create_import("i", self.p2)
+        self.assertEqual(self.buf, [(self.p1, i,),])
+
+    def test_create_any(self):
+        self.p1.connect("created", self.default_handler)
+        m = self.p2.create_media("m", "file:/tmp/foo.avi", FOREF)
+        self.assertEqual(self.buf, [])
+        a = self.p2.create_annotation("a", m, 10, 20, "text/plain")
+        self.assertEqual(self.buf, [])
+        r = self.p2.create_relation("r")
+        self.assertEqual(self.buf, [])
+        L = self.p2.create_list("L")
+        self.assertEqual(self.buf, [])
+        t = self.p2.create_tag("t")
+        self.assertEqual(self.buf, [])
+        q = self.p2.create_query("q", "text/plain")
+        self.assertEqual(self.buf, [])
+        v = self.p2.create_view("v", "text/plain")
+        self.assertEqual(self.buf, [])
+        R = self.p2.create_resource("R", "text/plain")
+        self.assertEqual(self.buf, [])
+        i = self.p2.create_import("i", self.p1)
+        self.assertEqual(self.buf, [])
+
+        ref = []
+        m = self.p1.create_media("m", "file:/tmp/foo.avi", FOREF)
+        ref += [(self.p1, m),]
+        self.assertEqual(self.buf, ref)
+        a = self.p1.create_annotation("a", m, 10, 20, "text/plain")
+        ref += [(self.p1, a),]
+        self.assertEqual(self.buf, ref)
+        r = self.p1.create_relation("r")
+        ref += [(self.p1, r),]
+        self.assertEqual(self.buf, ref)
+        L = self.p1.create_list("L")
+        ref += [(self.p1, L),]
+        self.assertEqual(self.buf, ref)
+        t = self.p1.create_tag("t")
+        ref += [(self.p1, t),]
+        self.assertEqual(self.buf, ref)
+        q = self.p1.create_query("q", "text/plain")
+        ref += [(self.p1, q),]
+        self.assertEqual(self.buf, ref)
+        v = self.p1.create_view("v", "text/plain")
+        ref += [(self.p1, v),]
+        self.assertEqual(self.buf, ref)
+        R = self.p1.create_resource("R", "text/plain")
+        ref += [(self.p1, R),]
+        self.assertEqual(self.buf, ref)
+        i = self.p1.create_import("i", self.p2)
+        ref += [(self.p1, i),]
+        self.assertEqual(self.buf, ref)
+
+    def test_closed(self):
+        self.p1.connect("closed", self.default_handler)
+        self.p2.close()
+        self.assertEqual(self.buf, [])
+        ref = [(self.p1, self.p1.url, self.p1.uri)]
+        self.p1.close()
+        self.assertEqual(self.buf, ref)
+
+    def test_changed_uri(self):
+        self.p1.connect("changed::uri", self.attr_handler)
+        self.p2.uri = "urn:12345"
+        self.assertEqual(self.buf, [])
+        self.p1.uri = "urn:67890"
+        self.assertEqual(self.buf, [(self.p1, "uri", "urn:67890"),])
+        self.assertEqual(self.callback_errors, [])
+
+    def test_changed_any(self):
+        self.p1.connect("changed", self.attr_handler)
+        self.p2.uri = "urn:12345"
+        self.assertEqual(self.buf, [])
+        self.p1.uri = "urn:67890"
+        self.assertEqual(self.buf, [(self.p1, "uri", "urn:67890"),])
+        self.assertEqual(self.callback_errors, [])
+
+    def test_pre_changed_uri(self):
+        self.p1.connect("pre-changed::uri", self.attr_handler, "pre")
+        self.p2.uri = "urn:12345"
+        self.assertEqual(self.buf, [])
+        self.p1.uri = "urn:67890"
+        self.assertEqual(self.buf, [(self.p1, "uri", "urn:67890"),])
+        self.assertEqual(self.callback_errors, [])
+
+    def test_pre_changed_any(self):
+        self.p1.connect("pre-changed", self.attr_handler, "pre")
+        self.p2.uri = "urn:12345"
+        self.assertEqual(self.buf, [])
+        self.p1.uri = "urn:67890"
+        self.assertEqual(self.buf, [(self.p1, "uri", "urn:67890"),])
+        self.assertEqual(self.callback_errors, [])
+
+    def test_changed_meta(self):
+        k = DC_NS_PREFIX + "creator"
+        k2 = DC_NS_PREFIX + "title"
+        self.p1.connect("changed-meta::" + k, self.meta_handler)
+        self.p1.set_meta(k2, "hello world")
+        self.assertEqual(self.buf, [])
+        self.p2.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [])
+        self.p1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [(self.p1, k, "pchampin"),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.p1.del_meta(k2)
+        self.assertEqual(self.buf, [])
+        self.p2.del_meta(k)
+        self.assertEqual(self.buf, [])
+        self.p1.del_meta(k)
+        self.assertEqual(self.buf, [(self.p1, k, None)])
+        self.assertEqual(self.callback_errors, [])
+
+    def test_changed_meta_any(self):
+        k = DC_NS_PREFIX + "creator"
+        self.p1.connect("changed-meta", self.meta_handler)
+        self.p2.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [])
+        self.p1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [(self.p1, k, "pchampin"),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.p2.del_meta(k)
+        self.assertEqual(self.buf, [])
+        self.p1.del_meta(k)
+        self.assertEqual(self.buf, [(self.p1, k, None)])
+        self.assertEqual(self.callback_errors, [])
+
+    def test_pre_changed_meta(self):
+        k = DC_NS_PREFIX + "creator"
+        k2 = DC_NS_PREFIX + "title"
+        self.p1.connect("pre-changed-meta::" + k, self.meta_handler, "pre")
+        self.p1.set_meta(k2, "hello world")
+        self.assertEqual(self.buf, [])
+        self.p2.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [])
+        self.p1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [(self.p1, k, "pchampin"),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.p1.del_meta(k2)
+        self.assertEqual(self.buf, [])
+        self.p2.del_meta(k)
+        self.assertEqual(self.buf, [])
+        self.p1.del_meta(k)
+        self.assertEqual(self.buf, [(self.p1, k, None)])
+        self.assertEqual(self.callback_errors, [])
+
+    def test_pre_changed_meta_any(self):
+        k = DC_NS_PREFIX + "creator"
+        self.p1.connect("pre-changed-meta", self.meta_handler, "pre")
+        self.p2.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [])
+        self.p1.set_meta(k, "pchampin")
+        self.assertEqual(self.buf, [(self.p1, k, "pchampin"),])
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.p2.del_meta(k)
+        self.assertEqual(self.buf, [])
+        self.p1.del_meta(k)
+        self.assertEqual(self.buf, [(self.p1, k, None)])
+        self.assertEqual(self.callback_errors, [])
 
 if __name__ == "__main__":
     main()

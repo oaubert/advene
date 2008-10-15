@@ -5,6 +5,7 @@ I define the common super-class of all package element classes.
 from itertools import chain
 
 from advene.model.consts       import _RAISE
+from advene.model.core.events  import ElementEventDelegate, WithEventsMixin
 from advene.model.core.meta    import WithMetaMixin
 from advene.model.tales        import tales_context_function
 from advene.utils.autoproperty import autoproperty
@@ -21,13 +22,14 @@ QUERY      = 'q'
 VIEW       = 'v'
 RESOURCE   = 'R'
 
-class PackageElement(object, WithMetaMixin):
+class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
     def __init__(self, owner, id):
         self._id    = id
         self._owner = owner
         self._deleted = False
         owner._elements[id] = self # cache to prevent duplicate instanciation
+        self._event_delegate = ElementEventDelegate(self)
 
     def make_id_in(self, pkg):
         """Compute an id-ref for this element in the context of the given package.
