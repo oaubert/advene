@@ -23,12 +23,12 @@ class CamElement(PackageElement):
     def iter_tags(self, package, inherited=True, _guard=True):
         """
         This method is inherited from core.Package but is unsafe on
-        cam.Package. Use instead `iter_simple_tags`.
+        cam.Package. Use instead `iter_user_tags`.
         """
-        if _guard: warn("use iter_simple_tags instead", UnsafeUseWarning, 2)
+        if _guard: warn("use iter_user_tags instead", UnsafeUseWarning, 2)
         super(Package, self).associate_tag(element, tag)
 
-    def iter_simple_tags(self, package, inherited=True):
+    def iter_user_tags(self, package, inherited=True):
         for t in self._iter_tags(package, inherited, _guard=False):
             if t.get_meta(_cam_system_type, None) is None:
                 yield t

@@ -22,12 +22,12 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
     def iter_tags(self, _guard=True):
         """
         This method is inherited from CoreAllGroup but is unsafe on
-        cam.Package. Use instead `iter_simple_tags`.
+        cam.Package. Use instead `iter_user_tags`.
         """
-        if _guard: warn("use iter_simple_tags instead", UnsafeUseWarning, 2)
+        if _guard: warn("use iter_user_tags instead", UnsafeUseWarning, 2)
         return super(_AllGroup, self).iter_tags()
 
-    def iter_simple_tags(self):
+    def iter_user_tags(self):
         o = self._owner
         meta = [(_cam_system_type, None, None)] 
         for be, pdict in o._backends_dict.items():
@@ -51,24 +51,24 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
     def tag_count(self, _guard=True):
         """
         This method is inherited from CoreAllGroup but is unsafe on
-        cam.Package. Use instead `simple_tag_count`.
+        cam.Package. Use instead `user_tag_count`.
         """
-        if _guard: warn("use simple_tag_count instead", UnsafeUseWarning, 2)
+        if _guard: warn("use user_tag_count instead", UnsafeUseWarning, 2)
         return super(_OwnGroup, self).tag_count()
 
-    def simple_tags_count(self):
+    def user_tag_count(self):
         o = self._owner
         meta = [(_cam_system_type, None, None)] 
         return sum( be.tag_count(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
-    def annotation_types_count(self):
+    def annotation_type_count(self):
         o = self._owner
         meta = [(_cam_system_type, "annotation-type", False)] 
         return sum( be.tag_count(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
-    def relation_types_count(self):
+    def relation_type_count(self):
         o = self._owner
         meta = [(_cam_system_type, "relation-type", False)] 
         return sum( be.tag_count(pdict, meta=meta)
@@ -78,12 +78,12 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
     def iter_tags(self, _guard=True):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
-        cam.Package. Use instead `iter_simple_tags`.
+        cam.Package. Use instead `iter_user_tags`.
         """
-        if _guard: warn("use iter_simple_tags instead", UnsafeUseWarning, 2)
+        if _guard: warn("use iter_user_tags instead", UnsafeUseWarning, 2)
         return super(_OwnGroup, self).iter_tags()
 
-    def iter_simple_tags(self):
+    def iter_user_tags(self):
         o = self._owner
         for i in o._backend.iter_tags((o._id,),
           meta=[(_cam_system_type, None, None)]):
@@ -104,22 +104,22 @@ class _OwnGroup(CamGroupMixin, CoreOwnGroup):
     def tag_count(self, _guard=True):
         """
         This method is inherited from CoreOwnGroup but is unsafe on
-        cam.Package. Use instead `simple_tag_count`.
+        cam.Package. Use instead `user_tag_count`.
         """
         if _guard: warn("use _simple_tag_count instead", UnsafeUseWarning, 2)
         return super(_OwnGroup, self).tag_count()
 
-    def simple_tags_count(self):
+    def user_tag_count(self):
         o = self._owner
         return o._backend.tag_count((o._id,),
             meta=[(_cam_system_type, None, None)])
 
-    def annotation_types_count(self):
+    def annotation_type_count(self):
         o = self._owner
         return o._backend.tag_count((o._id,),
             meta=[(_cam_system_type, "annotation-type", False)])
 
-    def relation_types_count(self):
+    def relation_type_count(self):
         o = self._owner
         return o._backend.tag_count((o._id,),
             meta=[(_cam_system_type, "relation-type", False)])
@@ -153,15 +153,15 @@ class Package(CorePackage):
     def create_tag(self, id):
         """
         This method is inherited from core.Package but is unsafe on
-        cam.Package. Use instead `create_simple_tag`.
+        cam.Package. Use instead `create_user_tag`.
 
-        :see: `create_simple_tag`, `create_annotation_type`, 
+        :see: `create_user_tag`, `create_annotation_type`, 
               `create_relation_type`
         """
-        warn("use create_simple_tag instead", UnsafeUseWarning, 2)
+        warn("use create_user_tag instead", UnsafeUseWarning, 2)
         return super(Package, self).create_tag(id)
 
-    def create_simple_tag(self, id):
+    def create_user_tag(self, id):
         """FIXME: missing docstring.
         """
         return super(Package, self).create_tag(id)
@@ -203,20 +203,20 @@ class Package(CorePackage):
     def associate_tag(self, element, tag, _guard=True):
         """
         This method is inherited from core.Package but is unsafe on
-        cam.Package. Use instead `associate_simple_tag`.
+        cam.Package. Use instead `associate_user_tag`.
         """
-        if _guard: warn("use associate_simple_tag instead", UnsafeUseWarning, 2)
+        if _guard: warn("use associate_user_tag instead", UnsafeUseWarning, 2)
         super(Package, self).associate_tag(element, tag)
 
     def dissociate_tag(self, element, tag, _guard=True):
         """
         This method is inherited from core.Package but is unsafe on
-        cam.Package. Use instead `dissociate_simple_tag`.
+        cam.Package. Use instead `dissociate_user_tag`.
         """
-        if _guard: warn("use associate_simple_tag instead", UnsafeUseWarning, 2)
+        if _guard: warn("use associate_user_tag instead", UnsafeUseWarning, 2)
         super(Package, self).dissociate_tag(element, tag)
 
-    def associate_simple_tag(self, element, tag):
+    def associate_user_tag(self, element, tag):
         """
         FIXME: missing docstring.
         """
@@ -226,7 +226,7 @@ class Package(CorePackage):
                                 (tag._id, systemtype))
         super(Package, self).associate_tag(element, tag)
 
-    def dissociate_simple_tag(self, element, tag):
+    def dissociate_user_tag(self, element, tag):
         """
         FIXME: missing docstring.
         """

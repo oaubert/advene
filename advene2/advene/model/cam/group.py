@@ -1,7 +1,7 @@
 from advene.model.core.group import GroupMixin, _GroupCollection
 
 class CamGroupMixin(GroupMixin):
-    def iter_simple_tags(self):
+    def iter_user_tags(self):
         for t in self.iter_tags():
             if t.get_meta(_cam_system_type, None) is None:
                 yield t
@@ -16,20 +16,20 @@ class CamGroupMixin(GroupMixin):
             if t.get_meta(_cam_system_type, None) == "relation-type":
                 yield t
 
-    def simple_tags_count(self):
-        return len(list(iter_simple_tags()))
+    def user_tag_count(self):
+        return len(list(iter_user_tags()))
 
-    def annotation_types_count(self):
-        return len(list(iter_simple_tags()))
+    def annotation_type_count(self):
+        return len(list(iter_user_tags()))
 
-    def relation_types_count(self):
-        return len(list(iter_simple_tags()))
+    def relation_type_count(self):
+        return len(list(iter_user_tags()))
 
     @property
-    def simple_tags(group):
+    def user_tags(group):
         class GroupUserTags(_GroupCollection):
-            __iter__ = group.iter_simple_tags
-            __len__ = group.simple_tags_count
+            __iter__ = group.iter_user_tags
+            __len__ = group.user_tag_count
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG \
                        and e.type.id == "user-tag" \
@@ -40,7 +40,7 @@ class CamGroupMixin(GroupMixin):
     def annotation_types(group):
         class GroupAnnotationTypes(_GroupCollection):
             __iter__ = group.iter_annotation_types
-            __len__ = group.annotation_types_count
+            __len__ = group.annotation_type_count
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG \
                        and e.type.id == "annotation-type" \
@@ -51,7 +51,7 @@ class CamGroupMixin(GroupMixin):
     def relation_types(group):
         class GroupRelationTypes(_GroupCollection):
             __iter__ = group.iter_relation_types
-            __len__ = group.relation_types_count
+            __len__ = group.relation_type_count
             def __contains__(self, e):
                 return e.ADVENE_TYPE == TAG \
                        and e.type.id == "relation-type" \

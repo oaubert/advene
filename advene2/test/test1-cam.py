@@ -58,8 +58,8 @@ def main():
     rt2 = p1.create_relation_type("rt2")
     sc1 = p1.create_list(":schema:sc1", (at1, rt1))
     sc2 = p1.create_list(":schema:sc2", (at1, at2, rt2))
-    t1 = p1.create_simple_tag("t1")
-    t2 = p1.create_simple_tag("t2")
+    t1 = p1.create_user_tag("t1")
+    t2 = p1.create_user_tag("t2")
 
     m1 = p1.create_media("m1", "http://example.com/foo.avi")
     a1 = p1.create_annotation("a1", m1, 0, 100, "text/plain", type=at1)
@@ -68,8 +68,8 @@ def main():
     r1 = p1.create_relation("r1", members=(a1, a2))
     r2 = p1.create_relation("r2", members=(a3, a2))
 
-    p1.associate_simple_tag(m1, t1)
-    p1.associate_simple_tag(a1, t1)
+    p1.associate_user_tag(m1, t1)
+    p1.associate_user_tag(a1, t1)
 
     for i in p1.own:
         i.dc_creator = "pchampin"
@@ -84,11 +84,11 @@ def main():
     a5 = p2.create_annotation("a5", m1, 40, 50, "text/plain", type=at2)
     r4 = p2.create_relation("r4", members=(a5, a2))
 
-    t3 = p2.create_simple_tag("t3")
-    p2.associate_simple_tag(a1, t3)
-    p2.associate_simple_tag(a2, t3)
-    p2.associate_simple_tag(a5, t1)
-    p2.associate_simple_tag(a5, t2)
+    t3 = p2.create_user_tag("t3")
+    p2.associate_user_tag(a1, t3)
+    p2.associate_user_tag(a2, t3)
+    p2.associate_user_tag(a5, t1)
+    p2.associate_user_tag(a5, t2)
 
     print [ i.id for i in p1.own ]
     print [ i.id for i in p1.all ]
@@ -105,8 +105,8 @@ def main():
           p2.all.annotation_types, len(p2.all.annotation_types)
     print p2.own.relation_types, len(p2.own.relation_types), \
           p2.all.relation_types, len(p2.all.relation_types)
-    print p2.own.simple_tags, len(p2.own.simple_tags), \
-          p2.all.simple_tags, len(p2.all.simple_tags)
+    print p2.own.user_tags, len(p2.own.user_tags), \
+          p2.all.user_tags, len(p2.all.user_tags)
     print
 
 
