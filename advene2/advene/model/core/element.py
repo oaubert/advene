@@ -100,11 +100,11 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
         must be yielded, unless yield_idrefs is set to True, in which case the
         id-ref of the tag is yielded instead.
 
-        See also `iter_tag_idrefs`.
+        See also `iter_tags_idrefs`.
         """
-        return self.iter_tag_idrefs(package, inherited, yield_idrefs and 1 or 2)
+        return self.iter_tags_idrefs(package, inherited, yield_idrefs and 1 or 2)
 
-    def iter_tag_idrefs(self, package, inherited=True, _try_get=0):
+    def iter_tags_idrefs(self, package, inherited=True, _try_get=0):
         """Iter over the id-refs of the tags associated with this element in
         ``package``.
 

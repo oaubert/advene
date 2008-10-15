@@ -24,10 +24,10 @@ class Tag(PackageElement):
 
         See also `iter_elements_idrefs`.
         """
-        return self.iter_element_idrefs(package, inherited,
-                                        yield_idrefs and 1 or 2)
+        return self.iter_elements_idrefs(package, inherited,
+                                         yield_idrefs and 1 or 2)
 
-    def iter_element_idrefs(self, package, inherited=True, _try_get=0):
+    def iter_elements_idrefs(self, package, inherited=True, _try_get=0):
         """Iter over the id-refs of the elements associated with this tag in
         ``package``.
 

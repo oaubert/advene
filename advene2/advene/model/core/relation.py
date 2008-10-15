@@ -162,7 +162,7 @@ class Relation(PackageElement, WithContentMixin):
         If the relation contains unreachable members, their id-ref will be
         yielded instead.
 
-        See also `__iter__` and `iter_member_idrefs`.
+        See also `__iter__` and `iter_members_idrefs`.
         """
         # NB: internally, _idrefs can be passed False to force exceptions
         if _idrefs:
@@ -176,10 +176,10 @@ class Relation(PackageElement, WithContentMixin):
                     m = self.get_member_idref(i)
             yield m
 
-    def iter_member_idrefs(self):
+    def iter_members_idrefs(self):
         """Iter over the id-refs of the members of this relation.
 
-        See also `iter_members`.
+        See also `iter_members` and `member_idrefs`.
         """
         for i,m in enumerate(self._idrefs):
             if m is not None:

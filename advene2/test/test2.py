@@ -126,11 +126,11 @@ if __name__ == "__main__":
     print [t.id for t in a3.iter_tags(p5)]
     print [t.id for t in a3.iter_tags(p1, False)]
     print [t.id for t in a3.iter_tags(p1)]
-    print [i for i in a3.iter_tag_idrefs(p1)]
+    print [i for i in a3.iter_tags_idrefs(p1)]
     print
     print [ e.id for e in t6.iter_elements(p5, False) ]
     print [ e.id for e in t6.iter_elements(p5) ]
-    print [ i for i in t6.iter_element_idrefs(p5) ]
+    print [ i for i in t6.iter_elements_idrefs(p5) ]
 
     print a3.content_mimetype
     a3.content_mimetype = "text/html"

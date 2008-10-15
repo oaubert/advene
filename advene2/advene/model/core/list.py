@@ -162,7 +162,7 @@ class List(PackageElement, WithContentMixin):
         Note: this should not be mistaken for the `iteritem` method of 
         dictionaries; advene lists are list-like, not dict-like.
 
-        See also `__iter__` and `iter_item_idrefs`.
+        See also `__iter__` and `iter_items_idrefs`.
         """
         # NB: internally, _idrefs can be passed False to force exceptions
         if _idrefs:
@@ -177,7 +177,7 @@ class List(PackageElement, WithContentMixin):
                     y = self.get_item_idref(i)
             yield y
 
-    def iter_item_idrefs(self):
+    def iter_items_idrefs(self):
         """Iter over the id-refs of th items of this list.
 
         See also `iter_items`.
