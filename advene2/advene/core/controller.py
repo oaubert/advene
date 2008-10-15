@@ -1979,7 +1979,7 @@ class AdveneController(object):
 	<br>
 	<strong tal:content="a/representation">Content</strong>
 </a><br>
-<span style="font-size: 0.8em">(<span tal:content="a/fragment/formatted/begin">Begin timestamp</span> - <span tal:content="a/fragment/formatted/end">End timestamp</span>)</span>
+<span style="font-size: 0.8em">(<span tal:content="a/formatted/begin">Begin timestamp</span> - <span tal:content="a/formatted/end">End timestamp</span>)</span>
 <br> 
 </p>
 </div></div>"""]
