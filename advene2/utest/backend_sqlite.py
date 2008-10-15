@@ -2,6 +2,7 @@ from pysqlite2 import dbapi2 as sqlite
 from os        import tmpnam, unlink
 from os.path   import exists
 from unittest  import TestCase, main
+from urllib    import pathname2url
 from warnings  import filterwarnings
 
 from advene.model.backends.sqlite \
@@ -44,7 +45,7 @@ class P:
 class TestCreateBackend(TestCase):
     def setUp(self):
         self.filename = tmpnam()
-        self.url1 = "sqlite:%s" % self.filename
+        self.url1 = "sqlite:%s" % pathname2url(self.filename)
         self.url2 = "%s;foo" % self.url1
 
     def tearDown(self):
@@ -146,7 +147,7 @@ class TestCreateBackend(TestCase):
 class TestBindBackend(TestCase):
     def setUp(self):
         self.filename = tmpnam()
-        self.url1 = "sqlite:%s" % self.filename
+        self.url1 = "sqlite:%s" % pathname2url(self.filename)
         self.url2 = "%s;foo" % self.url1
         self.b, self.i = create(P(self.url2))
         self.b.close(self.i)
@@ -233,7 +234,7 @@ class TestBindBackend(TestCase):
 class TestPackageHandling(TestCase):
     def setUp(self):
         self.filename = tmpnam()
-        self.url1 = "sqlite:%s" % self.filename
+        self.url1 = "sqlite:%s" % pathname2url(self.filename)
         self.url2 = "%s;foo" % self.url1
 
     def tearDown(self):
@@ -273,7 +274,7 @@ class TestPackageHandling(TestCase):
 class TestCache(TestCase):
     def setUp(self):
         self.filename = tmpnam()
-        self.url1 = "sqlite:%s" % self.filename
+        self.url1 = "sqlite:%s" % pathname2url(self.filename)
         self.url2 = "%s;foo" % self.url1
         self.url3 = "%s;bar" % self.url1
         self.b, self.i = create(P(self.url2))

@@ -18,6 +18,7 @@ which `_SqliteBackend` provides a reference implementation.
 from pysqlite2 import dbapi2 as sqlite
 from os        import unlink
 from os.path   import exists, isdir, join, split
+from urllib    import url2pathname
 from weakref   import WeakKeyDictionary, WeakValueDictionary
 import re
 
@@ -258,14 +259,16 @@ _DEFAULT_PKGID = ""
 def _strip_url(url):
     """
     Strip URL from its scheme ("sqlite:") and separate path and
-    fragment.
+    fragment. Also convert path from url to OS-specific pathname expression.
     """
     scheme = 7
     semicolon = url.find(';')
     if semicolon != -1:
-        return url[scheme:semicolon], url[semicolon:]
+        path, pkgid =  url[scheme:semicolon], url[semicolon:]
     else:
-        return url[scheme:], _DEFAULT_PKGID
+        path, pkgid = url[scheme:], _DEFAULT_PKGID
+    path = url2pathname(path)
+    return path, pkgid
 
 def _get_connection(path):
     try:
