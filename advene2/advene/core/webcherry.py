@@ -1828,7 +1828,7 @@ class Packages(Common):
                 for k in ('relationtype', 'member1', 'member2'):
                     if not query.has_key(k):
                         return self.send_error(500, _("Missing %s parameter") % k)
-                rt = context.evaluate("here/relationTypes/%s" % query['relationtype'])
+                rt = context.evaluate("here/all/relation_types/%s" % query['relationtype'])
                 if rt is None:
                     return self.send_error(500, _("Relation type %s does not exist") % query['relationtype'])
                 try:
