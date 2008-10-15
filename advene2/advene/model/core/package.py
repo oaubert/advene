@@ -1,3 +1,4 @@
+from urllib2 import URLError
 from weakref import WeakKeyDictionary, WeakValueDictionary, ref
 
 from advene.model.consts import _RAISE
@@ -22,6 +23,7 @@ from advene.model.exceptions import \
     ModelError, NoClaimingError, NoSuchElementError, UnreachableImportError
 from advene.model.parsers.register import iter_parsers
 from advene.utils.autoproperty import autoproperty
+from advene.utils.files import smart_urlopen
 
 
 _constructor = {
@@ -64,15 +66,21 @@ class Package(object, WithMetaMixin):
                 elif claims.exception:
                     raise claims.exception
             else:
+                
+                try:
+                    f = smart_urlopen(url)
+                except URLError:
+                    raise NoClaimingError("bind %s (URLError)" % url)
                 cmax = 0
                 for p in iter_parsers():
-                    c = p.claims_for_parse(url)
+                    c = p.claims_for_parse(f)
                     if c > cmax:
                         cmax = c
                         parser = p
                 if cmax > 0:
                     backend, package_id = self._make_transient_backend()
                 else:
+                    f.close()
                     raise NoClaimingError("bind %s" % url)
 
         self._backend  = backend
@@ -83,7 +91,8 @@ class Package(object, WithMetaMixin):
         self._uri      = None
 
         if parser:
-            parser.parse_into(url, self)
+            parser.parse_into(f, self)
+            f.close()
 
         self._imports_dict = imports_dict = {}
         self._importers = WeakKeyDictionary()

@@ -4,87 +4,116 @@ Unstable and experimental parser implementation.
 
 from os import path
 from os.path import exists
-from urllib import pathname2url, url2pathname
-from urllib2 import urlopen, URLError
-from urlparse import urlparse
-from xml.etree.ElementTree import tostring
+from xml.etree.ElementTree import iterparse
+from xml.parsers.expat import ExpatError
 
 from advene.model.consts import ADVENE_XML, PARSER_META_PREFIX, PACKAGED_ROOT
 from advene.model.core.element import MEDIA, ANNOTATION, RELATION, LIST, TAG, \
                                       VIEW, QUERY, RESOURCE, IMPORT
 from advene.model.parsers.base_xml import XmlParserBase
 from advene.model.parsers.exceptions import ParserError
+import advene.model.serializers.advene_xml as serializer
+from advene.utils.files import get_path, is_local
 
-NAME = "Generic Advene XML"
+NAME = serializer.NAME
 
-def claims_for_parse(url):
-    """Is this parser likely to parse that URL?
+EXTENSION = serializer.EXTENSION
+
+MIMETYPE = serializer.MIMETYPE
+
+SERIALIZER = serializer # may be None for some parsers
+
+def claims_for_parse(file_):
+    """Is this parser likely to parse that file-like object?
+
+    `file_` is a readable file-like object. It is the responsability of the
+    caller to close it.
 
     Return an int between 00 and 99, indicating the likelyhood of this parser
     to handle correctly the given URL. 70 is used as a standard value when the
     parser is pretty sure it can handle the URL.
     """
     r = 0
-    try:
-        f = urlopen(url)
-    except URLError:
-        return 0
-    i = f.info()
-    mimetype = i["content-type"]
-    if mimetype.startswith("application/x-advene-bxp"):
+
+    if hasattr(file_, "seek"):
+        # try to open it as xml file and get the root element
+        t = file_.tell()
+        file_.seek(0)
+        it = iterparse(file_, events=("start",))
+        try:
+            ev, el = it.next()
+        except ExpatError, e:
+            return 0
+        else:
+            if el.tag == "{%s}package" % ADVENE_XML:
+                return 80
+            else:
+                return 0
+        file_.seek(0)
+        
+    info = getattr(file_, "info", lambda: {})()
+    mimetype = info.get("content-type", "")
+    if mimetype.startswith(MIMETYPE):
         r = 80
     else:
         if mimetype.startswith("application/xml") \
         or mimetype.startswith("text/xml"):
-            r += 30
-        path = urlparse(url).path.lower()
-        if path.endswith(".bxp"):
-            r += 40
-        elif path.endswith(".xml"):
             r += 20
-    f.close()
+        fpath = get_path(file_)
+        if fpath.endswith(EXTENSION):
+            r += 50
+        elif fpath.endswith(".xml"):
+            r += 20
     return r
 
-def make_parser(url, package):
-    """Return a parser that will parse `url` into `package`.
+def make_parser(file_, package):
+    """Return a parser that will parse `file_` into `package`.
+
+    `file_` is a writable file-like object. It is the responsability of the
+    caller to close it.
 
     The returned object must implement the interface for which
     :class:`_Parser` is the reference implementation.
     """
-    return _Parser(url, package)
+    return _Parser(file_, package)
 
-def parse_into(url, package):
-    """A shortcut for ``make_parser(url, package).parse()``.
+def parse_into(file_, package):
+    """A shortcut for ``make_parser(file_, package).parse()``.
 
     See also `make_parser`.
     """
-    _Parser(url, package).parse()
+    _Parser(file_, package).parse()
 
 
 class _Parser(XmlParserBase):
 
     def parse(self):
         "Do the actual parsing."
-        url = self.url
-        if url.startswith("file:") and url.endswith("content.xml"):
+        file_ = self.file
+        fpath = get_path(file_)
+        if is_local(file_) and fpath.endswith("content.xml"):
             # looks like this is a manually-unzipped package,
-            filename = url2pathname(urlparse(url).path)
-            dirname = path.split(filename)[0]
-            if exists(path.join(dirname, "mimetype")):
-                # it is now very likely that this is a manually-unzipped pkg
-                self.package.set_meta(PACKAGED_ROOT, dirname)
+            dirname = path.split(fpath)[0]
+            mfn = path.join(dirname, "mimetype")
+            if exists(mfn):
+                f = open(mfn)
+                mimetype = f.read()
+                f.close()
+                if mimetype == MIMETYPE:
+                    self.package.set_meta(PACKAGED_ROOT, dirname)
         XmlParserBase.parse(self)
 
     # end of public interface
 
-    def __init__(self, url, package, namespace_uri=ADVENE_XML, root="package"):
-        assert claims_for_parse(url) > 0
-        XmlParserBase.__init__(self, url, package, namespace_uri, root)
-        self._differed = []
+    def __init__(self, file_, package, namespace_uri=ADVENE_XML,
+                                       root="package"):
+        assert claims_for_parse(file_) > 0
+        XmlParserBase.__init__(self, file_, package, namespace_uri, root)
+        self._postponed = []
 
-    def do_or_differ(self, id, function, *args, **kw):
+    def do_or_postpone(self, id, function, *args, **kw):
         """If id has been created in backend, execute function,
-           else differ its execution.
+           else postpone its execution.
 
         This is useful because some elements in the serialization may refer to
         other elements that are defined further.
@@ -92,7 +121,7 @@ class _Parser(XmlParserBase):
         if ":" in id or self.backend.has_element(self.package_id, id):
             function(*args, **kw)
         else:
-            self._differed.append((function, args, kw))
+            self._postponed.append((function, args, kw))
 
     def optional_sequence(self, tag, *args, **kw):
         items_name = kw.pop("items_name", None)
@@ -133,7 +162,7 @@ class _Parser(XmlParserBase):
         self.optional_sequence("lists")
         self.optional_sequence("external-tag-associations",
                                items_name="association")
-        for f, a, k in self._differed:
+        for f, a, k in self._postponed:
             f(*a, **k)
 
     def handle_import(self):
@@ -160,7 +189,8 @@ class _Parser(XmlParserBase):
         else:
             # tag association in element
             idref = self.get_attribute("id-ref")
-            self.do_or_differ(idref, be.associate_tag, pid, element_id, idref)
+            self.do_or_postpone(idref,
+                                be.associate_tag, pid, element_id, idref)
 
     def handle_media(self):
         be = self.backend
@@ -258,7 +288,7 @@ class _Parser(XmlParserBase):
                be.set_meta(pid, owner_id, typ, key, child.text, False)
             else:
                is_idref = True
-               self.do_or_differ(val,
+               self.do_or_postpone(val,
                    be.set_meta, pid, owner_id, typ, key, val, True)
 
     def handle_content(self, typ, backend_method, element_id, *args):
@@ -295,8 +325,8 @@ class _Parser(XmlParserBase):
         be = self.backend
         pid = self.package_id
         idref = self.get_attribute("id-ref")
-        self.do_or_differ(idref,
-                          be.insert_item, pid, list_id, idref, -1, count[0])
+        self.do_or_postpone(idref,
+                            be.insert_item, pid, list_id, idref, -1, count[0])
         count[0] += 1
 
     def handle_element(self, tag_id):

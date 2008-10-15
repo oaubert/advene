@@ -16,21 +16,24 @@ import advene.model.serializers.advene_xml as advene_xml
 
 NAME = "Generic Advene Zipped Package"
 
-SUGGESTED_EXTENSION = "bzp" # Advene-2 Zipped Package
+EXTENSION = ".bzp" # Advene-2 Zipped Package
 
-def make_serializer(package, file):
-    """Return a serializer that will serialize `package` to `file`.
+MIMETYPE = "application/x-advene-bzp"
 
-    `file` is a writable file-like object.
+def make_serializer(package, file_):
+    """Return a serializer that will serialize `package` to `file_`.
+
+    `file_` is a writable file-like object. It is the responsability of the
+    caller to close it.
     """
-    return _Serializer(package, file)
+    return _Serializer(package, file_)
 
-def serialize_to(package, file):
+def serialize_to(package, file_):
     """A shortcut for ``make_serializer(package, file).serialize()``.
 
     See also `make_serializer`.
     """
-    return _Serializer(package, file).serialize()
+    return _Serializer(package, file_).serialize()
 
 class _Serializer(object):
 
@@ -45,7 +48,7 @@ class _Serializer(object):
         _recurse(z, self.dir)
         z.close()
 
-    def __init__(self, package, file, compression=None):
+    def __init__(self, package, file_, compression=None):
         if compression is None:
             self.compression = ZIP_DEFLATED
         else:
@@ -56,14 +59,14 @@ class _Serializer(object):
 
         if not exists(path.join(dir, "mimetype")):
             f = open(path.join(dir, "mimetype"), "w")
-            f.write("application/x-advene-bzp")
+            f.write(MIMETYPE)
             f.close()
         if not exists(path.join(dir, "data")):
             mkdir(path.join(dir, "data"))
 
             
         self.package = package
-        self.file = file
+        self.file = file_
 
 
 def _recurse(z, dir, base=""):

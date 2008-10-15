@@ -11,30 +11,31 @@ from itertools import chain
 from xml.etree.cElementTree import Element, ElementTree, SubElement
 
 from advene.model.consts import ADVENE_XML, PARSER_META_PREFIX
-from advene.model.core.element import MEDIA, ANNOTATION, RELATION, LIST, TAG, \
-                                      VIEW, QUERY, RESOURCE, IMPORT
 from advene.model.serializers.unserialized import iter_unserialized_meta_prefix
 
 NAME = "Generic Advene XML"
 
-SUGGESTED_EXTENSION = "bxp" # Advene-2 Xml Package
+EXTENSION = ".bxp" # Advene-2 Xml Package
 
-def make_serializer(package, file):
-    """Return a serializer that will serialize `package` to `file`.
+MIMETYPE = "application/x-advene-bxp"
 
-    `file` is a writable file-like object.
+def make_serializer(package, file_):
+    """Return a serializer that will serialize `package` to `file_`.
+
+    `file_` is a writable file-like object. It is the responsability of the
+    caller to close it.
 
     The returned object must implement the interface for which
     :class:`_Serializer` is the reference implementation.
     """
-    return _Serializer(package, file)
+    return _Serializer(package, file_)
 
-def serialize_to(package, file):
-    """A shortcut for ``make_serializer(package, file).serialize()``.
+def serialize_to(package, file_):
+    """A shortcut for ``make_serializer(package, file_).serialize()``.
 
     See also `make_serializer`.
     """
-    return _Serializer(package, file).serialize()
+    return _Serializer(package, file_).serialize()
 
 
 class _Serializer(object):
@@ -116,13 +117,13 @@ class _Serializer(object):
 
     # end of the public interface
 
-    def __init__(self, package, file):
+    def __init__(self, package, file_):
 
         # this will be ugly, because ElementTree in python 2.5 does not handle
         # custom namespace prefix, so we just handle them ourselves
 
         self.package = package
-        self.file = file
+        self.file = file_
 
     # element serializers
 

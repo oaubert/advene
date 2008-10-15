@@ -40,8 +40,8 @@ class XmlParserBase(object):
     See `advene.model.parsers.advene_xml` for an example.
     """
 
-    def __init__(self, url, package, namespace_uri, root):
-        self.url = url
+    def __init__(self, file_, package, namespace_uri, root):
+        self.file = file_
         self.package = package
         self.tag_template = "{%s}%%s" % namespace_uri
         self.root = root
@@ -67,7 +67,7 @@ class XmlParserBase(object):
             return r
 
     def parse(self):
-        f = urlopen(self.url)
+        f = self.file
         self.backend = self.package._backend
         self.package_id = self.package._id
         self.stream = st = Stream(f)
@@ -75,7 +75,6 @@ class XmlParserBase(object):
             raise ParserError("expecting %s, found %s" %
                               (self.root[self.cut:], self.stream.elem.tag))
         self._handle([], {})
-        f.close()
 
     def required(self, tag, *args, **kw):
         stream = self.stream
@@ -179,6 +178,9 @@ class Stream(object):
     the last yielded item.
     """
     def __init__(self, filelike):
+        if hasattr(filelike, "seek"):
+            # may be required, because claims_for_url messes with seek
+            filelike.seek(0)
         self._it = iterparse(filelike,
                              events=("start", "end", "start-ns", "end-ns",))
         self.namespaces = []
