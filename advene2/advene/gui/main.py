@@ -2696,6 +2696,14 @@ class AdveneGUI(Connect):
                 # Add a pertinent extension
                 filename = filename + '.czp'
 
+            if os.path.exists(filename):
+                if dialog.message_dialog(_("The file %s already exists. Overwrite it?") % filename,
+                                         icon=gtk.MESSAGE_QUESTION):
+                    os.remove(filename)
+                else:
+                    self.log(_("Cancelled package saving."))
+                    return True
+
             # Save the current workspace
             save=False
             if config.data.preferences['save-default-workspace'] == 'always':
