@@ -566,16 +566,20 @@ class TestHandleElements(TestCase):
             self.assertEqual(self.be.get_element(*i[:2])[1:], i)
 
     def test_iter_references_with_import(self):
+        key = "http://www.w3.org/2000/01/rdf-schema#seeAlso"
         self.be.update_content_info(self.pid1, "a2", ANNOTATION,
                                     "text/plain", "i1:R3", "")
         self.be.insert_member(self.pid1, "r1", "i1:a5", 0)
         self.be.insert_item(self.pid1, "l1", "i1:a5", 0)
         self.be.associate_tag(self.pid1, "v1", "i1:t3")
         self.be.associate_tag(self.pid1, "i1:a5", "t1")
+        self.be.set_meta(self.pid1, "a1", ANNOTATION, key, "i1:a5", True)
+        self.be.set_meta(self.pid1, "", "", key, "i1:a6", True)
         ref = frozenset([("a1", "media", "i1:m3"),
             ("a2", "content_schema", "i1:R3"), ("r1", 0, "i1:a5"),
             ("l1", 0, "i1:a5"), ("", ":tag", "i1:t3"),
-            ("", ":tagged", "i1:a5"),])
+            ("", ":tagged", "i1:a5"), ("", "meta %s" % key, "i1:a6"),
+            ("a1", "meta %s" % key, "i1:a5"),])
 
         self.assertEqual(ref,
             frozenset(self.be.iter_references_with_import(self.pid1, "i1",)))

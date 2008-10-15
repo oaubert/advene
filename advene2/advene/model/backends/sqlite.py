@@ -769,6 +769,9 @@ class _SqliteBackend(object):
           and attribute name with an element as its value
             in that case, the imported element is the value of the attribute
             for the element or package identified by the first item.
+          the string "meta %s" where %s is a metadata key
+            in that case, the imported element is the value of that metadata
+            for the element or package identified by the first item.
           the special string ":tag"
             the imported element is a tag, to which this package identified by
             the first item associates at least one element.
@@ -795,10 +798,13 @@ class _SqliteBackend(object):
                UNION
                SELECT ?, ?, element_i FROM Tagged
                  WHERE package = ? AND element_p = ?
+               UNION
+               SELECT element, ?||key, value_i FROM Meta
+                 WHERE package = ? AND value_p = ?
             """
         args = ["media", package_id, id, "content_schema", package_id, id,
                 package_id, id, package_id, id, "", ":tag", package_id, id,
-                "", ":tagged", package_id, id,]
+                "", ":tagged", package_id, id, "meta ", package_id, id]
         c = self._conn.execute(q, args)
         r = ( (i[0], i[1], "%s:%s" % (id, i[2])) for i in c )
         return _FlushableIterator(r, self)
