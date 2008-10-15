@@ -1846,11 +1846,12 @@ class AdveneController(object):
             s=StringIO.StringIO()
             traceback.print_exc (file = s)
             self.log(_("Raised exception in update_status: %s") % str(e), s.getvalue())
-        if self.status2eventname.has_key (status) and notify:
-            self.notify (self.status2eventname[status],
-                             position=position,
-                             position_before=position_before,
-                             immediate=True)
+        en=self.status2eventname.get(status, None)
+        if en and notify:
+            self.notify (en,
+                         position=position,
+                         position_before=position_before,
+                         immediate=True)
         return
 
     def position_update (self):
