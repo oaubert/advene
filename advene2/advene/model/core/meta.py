@@ -6,17 +6,15 @@ from advene.model.core.dirty import DirtyMixin
 class WithMetaMixin(DirtyMixin):
     """Metadata access mixin.
 
-    I am a mixin for a class with methods _get_meta(self, key), _set_meta
-    (self, key, val) and _can_reference(self, element). I provide methods
-    get_meta and set_meta method, that cache the values of metadata to reduce
-    access to the backend.
+    I factrorize all metradata-related code for classes Package and
+    PackageElement.
 
     I also provide an alias mechanism to make frequent metadata easily
     accessible as python properties.
     """
 
     __cache = {}   # global dict, keys are (self, metadata-key)
-    __dirty = None # local dict, generated for each instance set_meta
+    __dirty = None # local dict, generated for each instance by set_meta
 
     def get_meta(self, key, default=_RAISE):
         """Return the metadata associated to the given key.
@@ -36,27 +34,25 @@ class WithMetaMixin(DirtyMixin):
         if isinstance(val, ReferenceType):
             val = val()
         if val is None:
-            try:
-                val = self._get_meta(key)
-            except KeyError, e:
-                val = cache[self, key] = _RAISE # caching _RAISE
-                if default is _RAISE:
-                    raise
-                else:
-                    return default
-            except UnreachableElement, e:
-                if default is _RAISE:
-                    raise
-                else:
-                    raise default
+            if hasattr(self, "ADVENE_TYPE"):
+                p = self._owner
+                eid = self._id
+                typ = self.ADVENE_TYPE
             else:
-                if hasattr(val, "ADVENE_TYPE"):
-                    cache[self, key] = ref(val)
-                else:
-                    cache[self, key] = val
-        elif val is _RAISE: # cached _RAISE
+                p = self
+                eid = ""
+                typ = ""
+            tpl = p._backend.get_meta(p._id, eid, typ, key)
+            if tpl is None:
+                val = KeyError
+            elif tpl[1]:
+                val = p.get_element(tpl[0], default)
+            else:
+                val = tpl[0]
+            cache[self,key] = val
+        if val is KeyError:
             if default is _RAISE:
-                raise KeyError, key
+                raise KeyError(key)
             else:
                 val = default
         return val
@@ -68,24 +64,45 @@ class WithMetaMixin(DirtyMixin):
         must be directly imported by the package of self, or a ModelError will
         be raised.
         """
-        if hasattr(val, "ADVENE_TYPE") and not self._can_reference(val):
-            raise ModelError, "Element should be directy imported"
+        if hasattr(self, "ADVENE_TYPE"):
+            p = self._owner
+            eid = self._id
+            typ = self.ADVENE_TYPE
         else:
-            val = str(val)
-
+            p = self
+            eid = ""
+            typ = ""
+        if hasattr(val, "ADVENE_TYPE"):
+            if not p._can_reference(val):
+                raise ModelError, "Element should be directy imported"
+            vstr = val.make_idref_for(p)
+            vstr_is_idref = True
+        else:
+            vstr = str(val)
+            vstr_is_idref = False
         dirty = self.__dirty
         if dirty is None:
             dirty = self.__dirty = {}
         self.__cache[self,key] = val
-        dirty[key] = val
+        dirty[key] = vstr, vstr_is_idref
         self.add_cleaning_operation_once(self.__clean)
 
     def __clean(self):
         dirty = self.__dirty
+        if dirty:
+            if hasattr(self, "ADVENE_TYPE"):
+                p = self._owner
+                eid = self._id
+                typ = self.ADVENE_TYPE
+            else:
+                p = self
+                eid = ""
+                typ = ""
         while dirty:
             k,v = dirty.popitem()
+            val, val_is_idref = v
             try:
-                self._set_meta(k,v)
+                p._backend.set_meta(p._id, eid, typ, k, val, val_is_idref)
             except:
                 dirty[k] = v
                 raise

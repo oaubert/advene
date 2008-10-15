@@ -27,7 +27,6 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
         self._destroyed = True
         owner._elements[id] = self # cache to prevent duplicate instanciation
         self._dirty = False
-        self._can_reference = owner._can_reference # required by WithMetaMixin
 
     def make_idref_for(self, pkg):
         """
@@ -78,32 +77,6 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
         o = self._owner
         u = o._uri or o._url
         return "%s#%s" % (u, self._id)
-
-    def _get_meta(self, key, default=_RAISE):
-        "will be wrapped by the WithMetaMixin"
-        tpl = self._owner._backend.get_meta(self._owner._id, self._id,
-                                            self.ADVENE_TYPE, key)            
-
-        if tpl is None:
-            if default is _RAISE: raise KeyError(key)
-            r = default
-        elif tpl[1]:
-            r = self._owner.get_element(tpl[0], default)
-        else:
-            r = tpl[0]
-        return r
-
-    def _set_meta(self, key, val):
-        "will be wrapped by the WithMetaMixin"
-        o = self._owner
-        if isinstance(val, PackageElement):
-            assert self._can_reference(val) # guaranteed by meta.py
-            val = val.make_idref_for(o)
-            val_is_idref = True
-        else:
-            val_is_idref = False
-        o._backend.set_meta(o._id, self._id, self.ADVENE_TYPE, key, val,
-                            val_is_idref)
 
 
 # TODO: provide class DestroyedPackageElement.

@@ -238,28 +238,6 @@ class Package(object, WithMetaMixin, DirtyMixin):
         o = element._owner
         return o is self  or  o in self._imports_dict.values()
 
-    def _get_meta(self, key, default=_RAISE):
-        "will be wrapped by the WithMetaMixin"
-        tpl = self._backend.get_meta(self._id, "", None, key)            
-        if tpl is None:
-            if default is _RAISE: raise KeyError(key)
-            r = default
-        elif tpl[1]:
-            r = self.get_element(tpl[0], default)
-        else:
-            r = tpl[0]
-        return r
-
-    def _set_meta(self, key, val):
-        "will be wrapped by the WithMetaMixin"
-        if isinstance(val, PackageElement):
-            assert self._can_reference(val) # guaranteed by meta.py
-            val = val.make_idref_for(self)
-            val_is_idref = True
-        else:
-            val_is_idref = False
-        self._backend.set_meta(self._id, "", None, key, val, val_is_idref)
-
     def create_media(self, id, url, frame_of_reference):
         assert not self.has_element(id)
         self._backend.create_media(self._id, id, url, frame_of_reference)
