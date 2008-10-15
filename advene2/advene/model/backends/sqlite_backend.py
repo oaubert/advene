@@ -968,4 +968,139 @@ class _SqliteBackend (object):
 
         return self._conn.execute (q, args)
 
+    # list items
+
+    def insert_item (self, package_id, id, item, pos):
+        """
+        Insert an item at the given position.
+        ``item`` is the id-ref of an own or directly imported item.
+        ``pos`` may be any value between -1 and n (inclusive), where n is the
+        current number of items.
+        If -1, the item will be appended at the end (**note** that this is
+        not the same behaviour as ``list.insert`` in python2.5).
+        If non-negative, the item will be inserted at that position.
+        """
+        n = self.count_items (package_id, id)
+        assert -1 <= pos <= n, pos
+        p,s = _split_id_ref (item) # also assert that item has len<=2
+        assert p != "" or self.has_element(package_id, s), item
+        if pos == -1:
+            pos = n
+        try:
+            c = self._conn.cursor()
+            # sqlite does not seem to be able to do the following updates in
+            # one query (unicity constraint breaks), so...
+            for i in xrange(n, pos-1, -1):
+                c.execute ("UPDATE ListItems SET ord=ord+1 "
+                           "WHERE package = ? AND list = ? AND ord = ?",
+                           (package_id, id, i))
+            c.execute ("INSERT INTO ListItems VALUES (?,?,?,?,?)",
+                       (package_id, id, pos, p, s))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not update or insert", e)
+
+    def update_item (self, package_id, id, item, pos):
+        """
+        Remobv the item at the given position in the identified list.
+        ``item`` is the id-ref of an own or directly imported item.
+        """
+        assert 0 <= pos < self.count_items (package_id, id), pos
+
+        p,s = _split_id_ref (item) # also assert that item has len<=2
+        assert p != "" or self.has_element(package_id, s), item
+
+        try:
+            c = self._conn.cursor()
+            c.execute ("UPDATE ListItems SET item_p = ?, item_i = ? "
+                       "WHERE package = ? AND list = ? AND ord = ?",
+                       (p, s, package_id, id, pos))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not update", e)
+
+    def count_items (self, package_id, id):
+        """
+        Count the items of the identified lists.
+        """
+        q = "SELECT count(ord) FROM ListItems "\
+            "WHERE package = ? AND list = ?"
+        return self._conn.execute (q, (package_id, id)).fetchone()[0]
+
+    def get_item (self, package_id, id, pos):
+        """
+        Return the id-ref of the item at the given position in the identified
+        list.
+        """
+        if __debug__:
+            c = self.count_items (package_id, id)
+            assert -c <= pos < c, pos
+
+        if pos < 0:
+            c = self.count_items (package_id, id)
+            pos += c
+
+        q = "SELECT join_id_ref(item_p,item_i) AS item " \
+            "FROM ListItems "\
+            "WHERE package = ? AND list = ? AND ord = ?"
+        return self._conn.execute (q, (package_id, id, pos)).fetchone()[0]
+
+    def iter_items (self, package_id, id):
+        """
+        Iter over all the items of the identified list.
+        """
+        q = "SELECT join_id_ref(item_p,item_i) AS item " \
+            "FROM ListItems " \
+            "WHERE package = ? AND list = ? ORDER BY ord"
+        for r in self._conn.execute (q, (package_id, id)):
+            yield r[0]
+
+    def remove_item (self, package_id, id, pos):
+        """
+        Remobv the item at the given position in the identified list.
+        """
+        assert 0 <= pos < self.count_items (package_id, id), pos
+
+        try:
+            c = self._conn.cursor()
+            c.execute ("DELETE FROM ListItems "
+                       "WHERE package = ? AND list = ? AND ord = ?",
+                       (package_id, id, pos))
+            c.execute ("UPDATE ListItems SET ord=ord-1 "
+                       "WHERE package = ? AND list = ? AND ord > ?",
+                       (package_id, id, pos))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not delete or update", e)
+
+    def get_lists_with_item (self, item, package_ids, pos=None):
+        """
+        Return tuples of the form (LIST, package_id, id) of all the 
+        lists having the given item, at the given position if given.
+        """
+        assert not isinstance (package_ids, basestring), "*iterable* of package_ids expected"
+
+        item_u, item_i = _split_uri_ref (item)
+
+        q = "SELECT DISTINCT ?, e.package, e.id FROM Elements e " \
+            "JOIN Packages p ON e.package = p.id "\
+            "JOIN ListItems m " \
+              "ON e.package = m.package and e.id = m.list " \
+            "LEFT JOIN Imports i ON m.item_p = i.id " \
+            "WHERE item_i = ? AND ("\
+              "(item_p = ''   AND  ? IN (p.uri, ?||e.package)) OR " \
+              "(item_p = i.id AND  ? IN (i.uri, i.url)))"
+
+        p_url = "sqlite:%s" % self._path
+        args = [LIST, item_i, item_u, p_url, item_u]
+
+        if pos is not None:
+            q += " AND ord = ?"
+            args.append (pos)
+
+        return self._conn.execute (q, args)
+
     # end of the class

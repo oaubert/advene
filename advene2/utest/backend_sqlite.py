@@ -850,6 +850,43 @@ class TestHandleElements (TestCase):
         self.assertEqual (frozenset ([(RELATION,)+self.r1,]),
                           frozenset (rel_w_member (a5_uri_ref, pids, 1)))
 
+    def test_items (self):
+
+        def compare_to_list (L, pid, rid):
+            self.assertEqual (len(L), self.be.count_items (pid, rid))
+            for i in xrange(len(L)):
+                self.assertEqual (L[i], self.be.get_item (pid, rid, i))
+            self.assertEqual (L, list (self.be.iter_items (pid, rid)))
+
+        self.be.insert_item (self.pid1, "l1", "a4", -1)
+        compare_to_list (["a4",], self.pid1, "l1")
+
+        self.be.insert_item (self.pid1, "l1", "a3", -1)
+        compare_to_list (["a4", "a3",], self.pid1, "l1")
+
+        self.be.insert_item (self.pid1, "l1", "i1:r3", 1)
+        compare_to_list (["a4", "i1:r3", "a3",], self.pid1, "l1")
+            
+        self.be.insert_item (self.pid1, "l1", "r2", 1)
+        compare_to_list (["a4", "r2", "i1:r3", "a3",], self.pid1, "l1")
+            
+        self.be.update_item (self.pid1, "l1", "i1:a6", 0)
+        compare_to_list (["i1:a6", "r2", "i1:r3", "a3",], self.pid1, "l1")
+
+        self.be.remove_item (self.pid1, "l1", 0)
+        compare_to_list (["r2", "i1:r3", "a3",], self.pid1, "l1")
+
+        self.be.insert_item (self.pid1, "l2", "a4", -1)
+        self.be.insert_item (self.pid2, "l3", "r3", -1)
+        self.be.insert_item (self.pid2, "l3", "a6", -1)
+        lst_w_item = self.be.get_lists_with_item
+        pids = (self.pid1, self.pid2,)
+        r3_uri_ref = "%s#r3" % self.i1_uri
+        self.assertEqual (frozenset ((LIST,)+i for i in [self.l1, self.l3]),
+                          frozenset (lst_w_item (r3_uri_ref, pids)))
+        self.assertEqual (frozenset ([(LIST,)+self.l1,]),
+                          frozenset (lst_w_item (r3_uri_ref, pids, 1)))
+
 
 class TestRetrieveDataWithSameId (TestCase):
     def setUp (self):
