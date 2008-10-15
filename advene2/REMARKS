@@ -92,3 +92,11 @@ The handling of missing elements:
     * relations.__iter__: yet another behaviour (raise exception). To unify also (+ iter_members)
     
     * tag.iter_elements: 2 possible behaviours for missing elements (through yield_idrefs param)
+
+-- 
+
+* Implement __in__, __cmp__, etc for annotation (if pos in annotation:... )
+
+* package.get_by_uri ?? Or have p.get also handle URIs (split fragment and check base URI)
+
+* annotation a: how to get a.relations ? a.incomingRelations, a.outgoingRelations...
