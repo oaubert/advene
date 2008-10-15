@@ -54,7 +54,8 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         if relation.startswith(":item "):
             index = int(relation[6:])
             self._ids[index] = new_idref
-            self._cache[index] = ref(element) # just in case both were None
+            if element is not None:
+                self._cache[index] = ref(element) # just in case both were None
         else:
             try:
                 super(List, self) \

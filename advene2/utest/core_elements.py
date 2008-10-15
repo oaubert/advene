@@ -1574,10 +1574,9 @@ class TestReferences(TestCase):
         assert "i:at01" in list(p.get("a3").iter_my_tag_ids(p))
 
         q.get("a1").id = "a01"
-        self.assertEqual(p.get_meta_id("key"), "i:a01")
         assert not q.has_element("a1")
         assert q.has_element("a01")
-        self.assertEqual(p.meta.get_id("key"),  "i:a01")
+        self.assertEqual(p.get_meta_id("key"), "i:a01")
         assert "a01" in list(q.get("at01").iter_element_ids(q))
         self.assertEqual(q.get("r1").get_member_id(0), "a01")
         self.assertEqual(p.get("r3").get_member_id(1), "i:a01")
@@ -1590,16 +1589,27 @@ class TestReferences(TestCase):
         self.assertEqual(q.get("a01").content_model_id, "R01")
         self.assertEqual(p.get("a3").content_model_id, "i:R01")
 
+        p.get("i").id = "j"
+        assert not p.has_element("i")
+        assert p.has_element("j")
+        assert p.get("i:a01") is None
+        assert p.get("j:a01") is not None
+        assert "j:at01" in p.get("a3").iter_my_tag_ids(p)
+        assert "j:at01" in list(p.get("a3").iter_my_tag_ids(p))
+        self.assertEqual(p.get_meta_id("key"), "j:a01")
+        self.assertEqual(p.get("r3").get_member_id(1), "j:a01")
+        assert "j:a01" in p.get("L3").iter_item_ids()
+
         # fake name clash: a2 exists in p, but not in q
         q.get("a01").id = "a2"
         assert not q.has_element("a01")
         assert q.has_element("a2")
-        self.assertEqual(p.meta.get_id("key"), "i:a2")
+        self.assertEqual(p.meta.get_id("key"), "j:a2")
         assert "a2" in q.get("at01").iter_element_ids(q)
         self.assertEqual(q.get("r1").get_member_id(0), "a2")
-        self.assertEqual(p.get("r3").get_member_id(1), "i:a2")
+        self.assertEqual(p.get("r3").get_member_id(1), "j:a2")
         self.assertEqual(q.get("L1").get_item_id(1), "a2")
-        assert "i:a2" in p.get("L3").iter_item_ids()
+        assert "j:a2" in p.get("L3").iter_item_ids()
 
         # real name clash
         self.assertRaises(AssertionError, setattr, p.get("a2"), "id", "a3")

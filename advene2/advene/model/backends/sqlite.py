@@ -889,11 +889,11 @@ class _SqliteBackend(object):
     def iter_references_with_import(self, package_id, id):
         """Iter over all the elements relying on the identified import.
 
-        Yields 2-tuples where the first item is either an element id-ref
+        Yields 3-tuples where the first item is either an element id-ref
         or an empty string to identify the package itself and the third item is
-        the id-ref of an element imported through the import in question. The
-        second item describes the relation between the first and third ones. It
-        can be either:
+        the id (without the importe prefix) of an element imported through the
+        import in question. The second item describes the relation between the
+        first and third ones. It can be either:
           an attribute name with an element as its value
             in that case, the imported element is the value of the attribute
             for the element or package identified by the first item.
@@ -938,8 +938,7 @@ class _SqliteBackend(object):
             """
         args = [package_id, id, ] * 7
         c = self._conn.execute(q, args)
-        r = ( (i[0], i[1], "%s:%s" % (id, i[2])) for i in c )
-        return _FlushableIterator(r, self)
+        return _FlushableIterator(c, self)
 
     def iter_medias(self, package_ids,
                     id=None,

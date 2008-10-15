@@ -126,11 +126,20 @@ class Package(WithMetaMixin, WithEventsMixin, object):
         self._own_wref       = lambda: None
         self._all_wref       = lambda: None
         self._uri            = None
-        self._event_delegate = PackageEventDelegate(self)
-        self._imports_dict   = imports_dict = {}
-        self._importers      = WeakKeyDictionary()
-        self._backends_dict  = None
 
+        # the structure of the import graph is stored in the three following
+        # attributes
+        self._imports_dict   = imports_dict = {}
+            # keys are the id of the import element
+            # values are the corresponding package
+        self._importers      = WeakKeyDictionary()
+            # keys are packages directly importing self
+            # values are the id of the import element in the importer package
+        self._backends_dict  = None
+            # this dict contains all the imported package (direct or indirect).
+            # it is updated by the _update_backends_dict method
+            # keys are backends
+            # values are dicts with package-ids as keys, and packages as values
 
         if parser:
             parser.parse_into(f, self)
@@ -163,6 +172,12 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             imports_dict[iid] = p
 
         self._update_backends_dict(_firsttime=True)
+
+    def _make_event_delegate(self):
+        """
+        Required by WithEventsMixin.
+        """
+        return PackageEventDelegate(self)
 
     def _make_transient_backend(self):
         """FIXME: missing docstring.

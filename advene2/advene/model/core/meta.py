@@ -32,7 +32,11 @@ class WithMetaMixin(object):
         """
         if relation.startswith(":meta ") and self.__cache is not None:
             key = relation[6:]
-            self.__cache[key] = (ref(element), new_idref)
+            if element is not None:
+                wref = ref(element)
+            else:
+                wref = lambda: None
+            self.__cache[key] = (wref, new_idref)
         else:
             try:
                 super(WithMetaMixin, self) \

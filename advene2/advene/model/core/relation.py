@@ -54,7 +54,8 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         if relation.startswith(":member "):
             index = int(relation[8:])
             self._ids[index] = new_idref
-            self._cache[index] = element # just in case both were None
+            if element is not None:
+                self._cache[index] = element # just in case both were None
         else:
             try:
                 super(Relation, self) \

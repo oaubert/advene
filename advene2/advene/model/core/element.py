@@ -75,7 +75,6 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
     _id = None
     _owner = None
     _weight = 0
-    _event_delegate = None
 
     def __init__(self, owner, id):
         """
@@ -85,7 +84,6 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         self._id = id
         self._owner = owner
         self._weight = 0
-        self._event_delegate = ElementEventDelegate(self)
         owner._elements[id] = self # cache to prevent duplicate instanciation
 
     @classmethod
@@ -276,18 +274,6 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         self.__class__ = DeletedPackageElement
         del self._owner._elements[self._id]
 
-    def emit(self, detailed_signal, *args):
-        """
-        Override WithEventsMixin.emit in order to automatically emit the
-        package signal corresponding to each element signal.
-        """
-        WithEventsMixin.emit(self, detailed_signal, *args)
-        colon = detailed_signal.find(":")
-        if colon > 0: detailed_signal = detailed_signal[:colon]
-        s = "%s::%s" % (get_advene_type_label(self.ADVENE_TYPE),
-                        detailed_signal)
-        self._owner.emit(s, self, detailed_signal, args)
-
     @autoproperty
     def _get_id(self):
         """
@@ -337,14 +323,34 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
                     e = p._elements.get(eid) # only update *instantiated* elts
                     if e is not None:
                         e._update_caches(old_idref, new_idref, self, rel)
+        # furthermore, if this element is an import, all id-refs using this
+        # import must be updated
+        # NB: since this method is embeded in a property, it can not easily
+        # be overloaded, that is why we implement this here rather than in
+        # import_.py
+        if self.ADVENE_TYPE is not IMPORT: return
+        del o._imports_dict[old_id]
+        o._imports_dict[new_id] = self._imported
+        self._imported._importers[o] = new_id
+        for eid, rel, ref \
+        in o._backend.iter_references_with_import(o._id, new_id):
+            old_idref = "%s:%s" % (old_id, ref)
+            new_idref = "%s:%s" % (new_id, ref)
+            if eid == "":
+                o._update_caches(old_idref, new_idref, None, rel)
+            else:
+                e = o._elements.get(eid) # only update *instantiated* elts
+                if e is not None:
+                    e._update_caches(old_idref, new_idref, None, rel)
 
     def _update_caches(self, old_idref, new_idref, element, relation):
         """
         This cooperative method is used to update all caches when an element
-        in the cache is renamed. The old_idref, new_idref and the element
-        itself are provided, as well as the relation (as represented by
-        backend methods `iter_references` and `iter_references_with_import`)
-        with this element.
+        in the cache is renamed. The old_idref and new_idref are provided,
+        as well as the relation (as represented by backend methods
+        `iter_references` and `iter_references_with_import`) with this element.
+        The renamed element may be provided or be None, depending on the
+        situation.
         """
         super(PackageElement, self) \
             ._update_caches(old_idref, new_idref, element, relation)
@@ -497,6 +503,26 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         if self._weight == 0:
             self._owner._heavy_elements.remove(self)
 
+    # events management
+
+    def _make_event_delegate(self):
+        """
+        Required by WithEventsMixin
+        """
+        return ElementEventDelegate(self)
+
+    def emit(self, detailed_signal, *args):
+        """
+        Override WithEventsMixin.emit in order to automatically emit the
+        package signal corresponding to each element signal.
+        """
+        WithEventsMixin.emit(self, detailed_signal, *args)
+        colon = detailed_signal.find(":")
+        if colon > 0: detailed_signal = detailed_signal[:colon]
+        s = "%s::%s" % (get_advene_type_label(self.ADVENE_TYPE),
+                        detailed_signal)
+        self._owner.emit(s, self, detailed_signal, args)
+
     def connect(self, detailed_signal, handler, *args):
         """
         Connect a handler to a signal.
@@ -504,11 +530,11 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         Note that an element with connected signals becomes heavier (i.e. less
         volatile).
 
-        :see: `WithMetaMixin.connect`
+        :see: `WithEventsMixin.connect`
         """
+        r = super(PackageElement, self).connect(detailed_signal, handler, *args)
         self._increase_weight()
-        return super(PackageElement, self)\
-               .connect(detailed_signal, handler, *args)
+        return r
 
     def disconnect(self, handler_id):
         """
@@ -517,8 +543,9 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         :see: `connect`
         :see: `WithMetaMixin.disconnect`
         """
+        r = super(PackageElement, self).disconnect(handler_id)
         self._decrease_weight()
-        return super(PackageElement, self).disconnect(handler_id)
+        return r
 
     @tales_property
     @tales_use_as_context("refpkg")

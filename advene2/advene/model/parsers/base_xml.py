@@ -192,7 +192,7 @@ class Stream(object):
         self._prev = None
         self._next = None
         self.forward()
-        
+
     @property
     def event(self):
         return self._event

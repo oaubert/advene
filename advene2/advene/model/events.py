@@ -36,8 +36,11 @@ def _handler_wrapper(gobj, *args):
 class WithEventsMixin(object):
     """
     This mixin class assumes that the mixed-in class will provide a
-    `_event_delegate` attribute valued with an instance of EventDelegate.
+    `_make_event_delegate` method returning an instance of the appropriate
+    subclass of EventDelegate.
     """
+
+    __event_delegate = None
 
     def connect(self, detailed_signal, handler, *args):
         """
@@ -46,14 +49,16 @@ class WithEventsMixin(object):
 
         Return the handler_id, which can be used to disconnect the handler.
         """
+        if self.__event_delegate is None:
+            self.__event_delegate = self._make_event_delegate()
         wrapper_args = list(args) + [handler,]
-        return self._event_delegate.connect(detailed_signal, _handler_wrapper,
-                                            *wrapper_args)
+        return self.__event_delegate.connect(detailed_signal, _handler_wrapper,
+                                             *wrapper_args)
 
     def disconnect(self, handler_id):
         """Disconnect the handler associated to the given handler_id."""
         assert self.has_handler(handler_id), "Handler-id %d is not connected" % handler_id
-        return self._event_delegate.disconnect(handler_id)
+        return self.__event_delegate.disconnect(handler_id)
 
     def has_handler(self, handler_id):
         """
@@ -62,7 +67,8 @@ class WithEventsMixin(object):
         NB: this has been renamed from GObject.handler_is_connected to comply
         with Advene coding style (methode names should start with a verb).
         """
-        return self._event_delegate.handler_is_connected(handler_id)
+        return self.__event_delegate is not None \
+           and self.__event_delegate.handler_is_connected(handler_id)
 
     def block_handler(self, handler_id):
         """
@@ -72,7 +78,8 @@ class WithEventsMixin(object):
         NB: this has been renamed from GObject.handler_block to comply
         with Advene coding style (methode names should start with a verb).
         """
-        return self._event_delegate.handler_block(handler_id)
+        assert self.has_handler(handler_id), "Handler-id %d is not connected" % handler_id
+        return self.__event_delegate.handler_block(handler_id)
 
     def unblock_handler(self, handler_id):
         """
@@ -82,7 +89,8 @@ class WithEventsMixin(object):
         NB: this has been renamed from GObject.handler_unblock to comply
         with Advene coding style (methode names should start with a verb).
         """
-        return self._event_delegate.handler_unblock(handler_id)
+        assert self.has_handler(handler_id), "Handler-id %d is not connected" % handler_id
+        return self.__event_delegate.handler_unblock(handler_id)
 
     def emit(self, detailed_signal, *args):
         """
@@ -90,7 +98,8 @@ class WithEventsMixin(object):
         The additional parameters must match the number and type of the
         required signal handler parameters.
         """
-        return self._event_delegate.emit(detailed_signal, *args)
+        if self.__event_delegate is not None:
+            return self.__event_delegate.emit(detailed_signal, *args)
 
     def stop_emission(self, detailed_signal):
         """
@@ -98,7 +107,8 @@ class WithEventsMixin(object):
         Any signal handlers in the list still to be run will not be
         invoked.
         """
-        return self._event_delegate.stop_emission(detailed_signal)
+        assert self.__event_delegate is not None
+        return self.__event_delegate.stop_emission(detailed_signal)
 
     # synonyms for the sake of readability in GTK applications
 

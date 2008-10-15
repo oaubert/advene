@@ -646,11 +646,11 @@ class TestHandleElements(TestCase):
         self.be.associate_tag(self.pid1, "i1:a5", "t1")
         self.be.set_meta(self.pid1, "a1", ANNOTATION, key, "i1:a5", True)
         self.be.set_meta(self.pid1, "", "", key, "i1:a6", True)
-        ref = frozenset([("a1", "media", "i1:m3"),
-            ("a2", "content_model", "i1:R3"), ("r1", ":member 0", "i1:a5"),
-            ("l1", ":item 0", "i1:a5"), ("", ":tag", "i1:t3"),
-            ("", ":tagged", "i1:a5"), ("", ":meta %s" % key, "i1:a6"),
-            ("a1", ":meta %s" % key, "i1:a5"),])
+        ref = frozenset([("a1", "media", "m3"),
+            ("a2", "content_model", "R3"), ("r1", ":member 0", "a5"),
+            ("l1", ":item 0", "a5"), ("", ":tag", "t3"),
+            ("", ":tagged", "a5"), ("", ":meta %s" % key, "a6"),
+            ("a1", ":meta %s" % key, "a5"),])
 
         self.assertEqual(ref,
             frozenset(self.be.iter_references_with_import(self.pid1, "i1",)))
