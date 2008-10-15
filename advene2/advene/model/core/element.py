@@ -44,9 +44,12 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
 
     Package elements are unique volatile instances:
-    * unique, because it is enforced that the same element will never be
-      represented by two distinct instances; hence, elements can be compared
-      with the ``is`` operator as well as ``==``
+
+    * unique, because it is enforced that the same element will never
+      be represented at a given time by two distinct instances; hence,
+      elements can be compared with the ``is`` operator as well as
+      ``==``
+
     * volatile, because it is not guaranteed that, at two instants, the
       instance representing a given element will be the same; unused instances
       may be freed at any time, and a new instance will be created on demand.
