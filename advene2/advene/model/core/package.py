@@ -11,7 +11,7 @@ from advene.model.backends.register import iter_backends
 import advene.model.backends.sqlite as sqlite_backend
 from advene.model.core.element import PackageElement, MEDIA, ANNOTATION, \
   RELATION, TAG, LIST, IMPORT, QUERY, VIEW, RESOURCE
-from advene.model.core.media import Media
+from advene.model.core.media import Media, DEFAULT_FOREF
 from advene.model.core.annotation import Annotation
 from advene.model.core.relation import Relation
 from advene.model.core.view import View
@@ -498,7 +498,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
 
     # element creation
 
-    def create_media(self, id, url, frame_of_reference):
+    def create_media(self, id, url, frame_of_reference=DEFAULT_FOREF):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)

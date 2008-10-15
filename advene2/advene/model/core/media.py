@@ -7,12 +7,13 @@ from advene.model.core.element import PackageElement, MEDIA
 from advene.utils.autoproperty import autoproperty
 
 FOREF_PREFIX = "%s%s" % (ADVENE_NS_PREFIX, "frame_of_reference/")
+DEFAULT_FOREF = FOREF_PREFIX + "ms;o=0"
 
 class Media(PackageElement):
 
     ADVENE_TYPE = MEDIA
 
-    def __init__(self, owner, id, url, frame_of_reference):
+    def __init__(self, owner, id, url, frame_of_reference=DEFAULT_FOREF):
         PackageElement.__init__(self, owner, id)
         self._url = url
         self._frame_of_reference = frame_of_reference
