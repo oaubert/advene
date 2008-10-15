@@ -3,13 +3,11 @@
   <rule name='Take snapshot on begin'>
     <event name='AnnotationBegin'/>
     <action name='Snapshot'>
-      <param name='position' value='annotation/fragment/begin'/>
     </action>
   </rule>
   <rule name='Take snapshot on end'>
     <event name='AnnotationEnd'/>
     <action name='Snapshot'>
-      <param name='position' value='annotation/fragment/end'/>
     </action>
   </rule>
   <rule name='Package load warning'>
