@@ -1191,6 +1191,7 @@ class _SqliteBackend(object):
         # The query above selects all pairs package_id/import_id (where the
         # second can be "") matching the URI prefix of old_uriref.
         # It can then be used to know detect id-refs to update.
+        # (see also iter_meta_refs)
         execute = self._curs.execute
         self._begin_transaction("IMMEDIATE")
         try:
@@ -1488,6 +1489,38 @@ class _SqliteBackend(object):
                 execute(q, args)
             except sqlite.Error, e:
                 raise InternalError("could not %s" % q[:6], e)
+
+    def iter_meta_refs(self, package_ids, uriref, element_type):
+        """
+        Iter over the metadata whose value is a reference to the element
+        identified by uriref.
+
+        The returned iterator yields triples of the form
+        (package_id, element_id, metadata_key) where element_id is the empty
+        string for package metadata.d
+        """
+        assert _DF or not isinstance(package_ids, basestring)
+        element_u, element_i = _split_uri_ref(uriref)
+        q1 = "SELECT p.id || ' ' || i.id " \
+             "FROM Packages p JOIN Imports i ON p.id = i.package " \
+             "WHERE ? IN (i.uri, i.url) " \
+             "UNION " \
+             "SELECT p.id || ' ' FROM Packages p " \
+             "WHERE ? IN (p.uri, p.url)"
+        # The query above selects all pairs package_id/import_id (where the
+        # second can be "") matching the URI prefix of old_uriref.
+        # It can then be used to know detect id-refs to update.
+        # (see also rename_references)
+        q2 = "SELECT package, element, key " \
+             "FROM Meta " \
+             "WHERE package IN (" \
+               + ",".join( "?" for i in package_ids ) + ")" \
+               "AND value_i = ? " \
+               "AND package || ' ' || value_p IN (%s)" % q1
+        args = list(package_ids) \
+             + [element_i, element_u, element_u,]
+        r = self._conn.execute(q2, args)
+        return _FlushableIterator(r, self)
 
     # relation members management
 

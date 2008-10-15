@@ -870,7 +870,6 @@ class TestHandleElements(TestCase):
                                    meta=[("foo", "world", 0),
                                          ("bar", t3u, 1,)]))
 
-
     def test_iter_lists(self):
 
         # the following function makes assert expression fit in one line...
@@ -1450,6 +1449,36 @@ class TestHandleElements(TestCase):
                 self.be.set_meta(i[0], i[1], typ, p, v1, v2)
             self.assertEqual(items_sorted, list(
                 self.be.iter_meta(i[0], i[1], typ)))
+
+    def test_iter_meta_refs(self):
+        self.be.set_meta(self.pid1, "", "", "trap", "i2:m3", True)
+        self.be.set_meta(self.pid1, "m1", MEDIA, "trap", "i2:m3", True)
+        self.be.set_meta(self.pid2, "", "", "trap", "i3:m3", True)
+        self.be.set_meta(self.pid2, "m3", MEDIA, "trap", "i3:m3", True)
+
+        self.be.set_meta(self.pid1, "", "", "key1", "i1:m3", True)
+        self.be.set_meta(self.pid1, "", "", "key2", "i1:m3", True)
+        self.be.set_meta(self.pid1, "m1", MEDIA, "key3", "i1:m3", True)
+        self.be.set_meta(self.pid1, "m2", MEDIA, "key4", "i1:m3", True)
+        self.be.set_meta(self.pid2, "", "", "key1", "m3", True)
+        self.be.set_meta(self.pid2, "", "", "key5", "m3", True)
+        self.be.set_meta(self.pid2, "m3", MEDIA, "key2", "m3", True)
+        self.be.set_meta(self.pid2, "a5", ANNOTATION, "key6", "m3", True)
+
+        pids = (self.pid1, self.pid2)
+        uriref = self.url2 + "#m3"
+        ref = frozenset(self.be.iter_meta_refs(pids, uriref, MEDIA))
+        self.assertEquals(ref,
+                          frozenset([
+                              (self.pid1, "", "key1",),
+                              (self.pid1, "", "key2",),
+                              (self.pid1, "m1", "key3",),
+                              (self.pid1, "m2", "key4",),
+                              (self.pid2, "", "key1",),
+                              (self.pid2, "", "key5",),
+                              (self.pid2, "m3", "key2",),
+                              (self.pid2, "a5", "key6",),
+        ]))
 
     def test_members(self):
 
