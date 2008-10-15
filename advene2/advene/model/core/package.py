@@ -240,6 +240,23 @@ class Package(WithMetaMixin, WithEventsMixin, object):
                 for p in self._importers:
                     p._update_backends_dict()
 
+    def _get_referrers(self):
+        """
+        Return a dict whose keys are backends, and whose values are dicts
+        whose keys are package ids, and whose keys are packages. This
+        dict contains all the direct importers of this package, plus this
+        package itself.
+        """
+        # FIXME should this be maintained at all time rather than
+        # re-generated on demand?
+        r = {}
+        for p, iid in list(self._importers.iteritems()) + [(self, ""),]:
+            d = r.get(p._backend)
+            if d is None:
+                d = r[p._backend] = {}
+            d[p._id] = p
+        return r
+
     def close (self):
         """Free all external resources used by the package's backend.
 

@@ -618,18 +618,21 @@ class TestHandleElements(TestCase):
             frozenset(self.be.iter_references([self.pid1], u2 % "m3")))
 
         self.assertEqual(frozenset([
-                (pid1, "a2", "content_model"), (pid1, "", ":tagged"),
+                (pid1, "a2", "content_model"), (pid1, "", ":tagged t1"),
             ]),
             frozenset(self.be.iter_references([self.pid1], u2 % "R3")))
 
         self.assertEqual(frozenset([
                 (pid1, "r1", ":member 0"), (pid1, "l1", ":item 0"),
-                (pid1, "", ":tagged"), (pid1, "a1", ":meta "+key),
+                (pid1, "", ":tagged t1"), (pid1, "a1", ":meta "+key),
             ]),
             frozenset(self.be.iter_references([self.pid1], u2 % "a5")))
 
-        self.assertEqual(frozenset([(pid1, "", ":tag"),]),
+        self.assertEqual(frozenset([(pid1, "", ":tag v1"),]),
             frozenset(self.be.iter_references([self.pid1], u2 % "t3")))
+
+        self.assertEqual(frozenset([(pid1, "", ":tagged i1:t3"),]),
+            frozenset(self.be.iter_references([self.pid1], self.url1 + "#v1")))
 
         self.assertEqual(frozenset([
                 (pid1, "", ":meta "+key),
@@ -648,8 +651,8 @@ class TestHandleElements(TestCase):
         self.be.set_meta(self.pid1, "", "", key, "i1:a6", True)
         ref = frozenset([("a1", "media", "m3"),
             ("a2", "content_model", "R3"), ("r1", ":member 0", "a5"),
-            ("l1", ":item 0", "a5"), ("", ":tag", "t3"),
-            ("", ":tagged", "a5"), ("", ":meta %s" % key, "a6"),
+            ("l1", ":item 0", "a5"), ("", ":tag v1", "t3"),
+            ("", ":tagged t1", "a5"), ("", ":meta %s" % key, "a6"),
             ("a1", ":meta %s" % key, "a5"),])
 
         self.assertEqual(ref,

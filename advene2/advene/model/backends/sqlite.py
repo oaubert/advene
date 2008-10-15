@@ -818,13 +818,15 @@ class _SqliteBackend(object):
             the first item identifies a relation, and its i'th item is the
             identified element
           the string ":meta %s" where %s is a metadata key
-            in that case, the itdentified element is the value of that metadata
+            in that case, the identified element is the value of that metadata
             for the element or package identified by the first item.
-          the string ":tag"
+          the string ":tag %s" where %s is an id-ref
             the identified element is a tag, to which this package identified
-            by the first parameter associates at least one element.
-          the string ":tagged"
-            this package associates at least one tag to the identified element.
+            by the first parameter associates the element identified by the
+            id-ref.
+          the string ":tagged %s" where %s is an id-ref
+            this package associates the identified element the tag identified
+            by the id-ref.
 
         The attribute names that may be returned are ``media`` and
         ``content_model``.
@@ -860,14 +862,14 @@ class _SqliteBackend(object):
                WHERE l.package IN %(pid_list)s
                AND uri_base = ? AND item_i = ?
             UNION
-               SELECT t.package, '', ':tag'
+               SELECT t.package, '', ':tag '||join_id_ref(element_p, element_i)
                FROM Tagged t
                JOIN UriBases u ON t.package = u.package
                                AND tag_p = prefix
                WHERE t.package IN %(pid_list)s
                AND uri_base = ? AND tag_i = ?
             UNION
-               SELECT t.package, '', ':tagged'
+               SELECT t.package, '', ':tagged '||join_id_ref(tag_p, tag_i)
                FROM Tagged t
                JOIN UriBases u ON t.package = u.package
                                AND element_p = prefix
@@ -906,11 +908,13 @@ class _SqliteBackend(object):
           the string ":meta %s" where %s is a metadata key
             in that case, the imported element is the value of that metadata
             for the element or package identified by the first item.
-          the string ":tag"
-            the imported element is a tag, to which this package identified by
-            the first item associates at least one element.
-          the string ":tagged"
-            this package associates at least one tag to the imported element.
+          the string ":tag %s" where %s is an id-ref
+            the identified element is a tag, to which this package identified
+            by the first parameter associates the element identified by the
+            id-ref.
+          the string ":tagged %s" where %s is an id-ref
+            this package associates the identified element the tag identified
+            by the id-ref.
 
         The attribute names that may be returned are ``media`` and
         ``content_model``.
@@ -927,13 +931,15 @@ class _SqliteBackend(object):
                SELECT list, ':item '||ord, item_i FROM ListItems
                  WHERE package = ? AND item_p = ?
                UNION
-               SELECT '', ':tag', tag_i FROM Tagged
+               SELECT '', ':tag '||join_id_ref(element_p, element_i), tag_i
+               FROM Tagged
                  WHERE package = ? AND tag_p = ?
                UNION
-               SELECT '', ':tagged', element_i FROM tagged
+               SELECT '', ':tagged '||join_id_ref(tag_p, tag_i), element_i
+               FROM Tagged
                  WHERE package = ? AND element_p = ?
                UNION
-               SELECT element, ':meta '||key, value_i FROM meta
+               SELECT element, ':meta '||key, value_i FROM Meta
                  WHERE package = ? AND value_p = ?
             """
         args = [package_id, id, ] * 7

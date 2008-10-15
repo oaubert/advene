@@ -1514,7 +1514,10 @@ class TestReferences(TestCase):
             else:
                 #self.assertEqual(frozenset(it1), frozenset(it2))
                 try:
-                    s1 = frozenset(it1)
+                    s1 = frozenset(
+                        (r.reference_type, r.referrer, r.reference_parameter)
+                        for r in it1
+                    )
                     s2 = frozenset(it2)
                     self.assertEqual(s1, s2)
                 except AssertionError, e:
@@ -1536,24 +1539,24 @@ class TestReferences(TestCase):
         R1 = q.get("R1")
 
         check(at1.iter_references(), [
-            ("tagging", q, a1), ("tagging", p, a3),
+            (":tag", q, a1), (":tag", p, a3),
         ])
 
         check(a1.iter_references(), [
-            ("tagged", q, at1), ("tagged", p, t1),
-            ("item", L1), ("item", L3),
-            ("member", r1), ("member", r3),
-            ("meta", p, "key"),
+            (":tagged", q, at1), (":tagged", p, t1),
+            (":item", L1, 1), (":item", L3, 0),
+            (":member", r1, 0), (":member", r3, 1),
+            (":meta", p, "key"),
         ])
 
         check(m1.iter_references(), [
-            ("media", a1), ("media", a3),
-            ("item", L1), ("item", L3),
+            ("media", a1, None), ("media", a3, None),
+            (":item", L1, 0), (":item", L3, 1),
         ])
 
 
         check(R1.iter_references(), [
-            ("content_model", a1), ("content_model", a3),
+            ("content_model", a1, None), ("content_model", a3, None),
         ])
 
     def _do_test_rename(self):

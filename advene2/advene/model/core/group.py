@@ -33,6 +33,7 @@ class GroupMixin(object):
 
     def iter_annotations(self):
         for i in self:
+            import pydb; pydb.set_trace()
             if i.ADVENE_TYPE == ANNOTATION:
                 yield i
 

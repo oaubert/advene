@@ -2,15 +2,17 @@
 I define the common super-class of all package element classes.
 """
 
+from advene.model.consts import _RAISE
 from advene.model.core.meta import WithMetaMixin
 from advene.model.events import ElementEventDelegate, WithEventsMixin
-from advene.model.exceptions import ModelError
+from advene.model.exceptions import ModelError, UnreachableImportError, \
+                                    NoSuchElementError
 from advene.model.tales import tales_property, tales_use_as_context
 from advene.util.alias import alias
 from advene.util.autoproperty import autoproperty
 from advene.util.session import session
 
-from itertools import chain, islice
+from itertools import islice
 
 # the following constants must be used as values of a property ADVENE_TYPE
 # in all subclasses of PackageElement
@@ -217,56 +219,30 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
 
         References are searched in the given package. If no package is given,
         references are searched in this element's owner package and in all
-        packages that are currently loaded and directly importing 
-        imported packages if ``inherited`` is True.
+        packages that are currently loaded and directly importing this
+        packages.
         """
-        # TODO: this method is deprecated, must be removed
         o = self._owner
         if package is None:
-            it = self.iter_references
-            # FIXME: possible optimisation:
-            # this could be optimized by factorizing calls to the
-            # same backend (in the same fashion as AllGroup).
-            # However, this would complicate implementation, so let's wait
-            # and see if performande is critical here.
-            for i in chain(it(o), *( it(p) for p in o._importers.iterkeys() )):
-                yield i
-            return
-
-        typ = self.ADVENE_TYPE
-        grp = package.own
-        be = package._backend
-        pids = [package._id,]
-
-        # meta references
-        for (_,e,k) in be.iter_meta_refs(pids, self.uriref, typ):
-            if e: e = package.get(e)
-            yield ("meta", e or package, k)
-        # tags
-        for t in self.iter_my_tags(package, inherited=False):
-            yield ("tagged", package, t)
-        # tagged elements
-        if typ is TAG:
-            for e in self.iter_elements(package, inherited=False):
-                yield ("tagging", package, e)
-        # lists
-        for L in grp.iter_lists(item=self):
-            yield ("item", L)
-        # relation
-        if self.ADVENE_TYPE is ANNOTATION:
-            for r in grp.iter_relations(member=self):
-                yield ("member", r)
-        # media
-        if self.ADVENE_TYPE is MEDIA:
-            for a in grp.iter_annotations(media=self):
-                yield ("media", a)
-        # content_model
-        if self.ADVENE_TYPE is RESOURCE:
-            for (_,e) in be.iter_contents_with_model(pids, self.uriref):
-                e = package.get(e)
-                yield ("content_model", e)
+            referrers = o._get_referrers()
+        else:
+            referrers = {package._backend : {package._id : package}}
+        for be, d in referrers.iteritems():
+            for pid, eid, rel in be.iter_references(d, self._get_uriref()):
+                yield Reference(self, d[pid], eid, rel)
 
     def delete(self):
+        """
+        Delete this element.
+
+        If the element is known to be referenced by other elements,
+        all remaining references are cut (but the referer elements are
+        not deleted). Note that this does not guarantees that some
+        references the the deleted element will not continue to exist in
+        packages that are not currently loaded.
+        """
+        for r in self.iter_references():
+            r.cut()
         self._owner._backend.delete_element(self._owner._id, self._id,
                                             self.ADVENE_TYPE)
         self.__class__ = DeletedPackageElement
@@ -289,18 +265,11 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         importers = o._importers
         assert not o.has_element(new_id)
         old_id = self._id
-        # grouping importers by backend, for optimizing loops
-        # FIXME may be this should be maintained at all time by the package?
-        ibe_dict = {}
-        for p, iid in list(importers.iteritems()) + [(o, ""),]:
-            d = ibe_dict.get(p._backend)
-            if d is None:
-                d = ibe_dict[p._backend] = {}
-            d[p._id] = p
         # renaming in the owner package
         o._backend.rename_element(o._id, old_id, self.ADVENE_TYPE, new_id)
         # best effort renaming in all (known) importing packages
         old_uriref = self.uriref
+        ibe_dict = o._get_referrers()
         for be, d in ibe_dict.iteritems():
             be.rename_references(d, old_uriref, new_id)
         # actually renaming
@@ -684,3 +653,66 @@ class ElementCollection(object):
             def filter(self, **kw):
                 raise NotImplementedError("RestCollection can not be filtered")
         return RestCollection(self)
+
+
+class Reference(object):
+    """
+    An object representing a reference from an element or package to an
+    element.
+    """
+    def __init__(self, referree, package, element_id, relation):
+        self._f = referree
+        self._p = package
+        self._e = element_id
+        self._r = relation
+
+    @property
+    def referrer(self):
+        eid = self._e
+        if eid == "":
+            return self._p
+        else:
+            return self._p.get(eid, _RAISE)
+
+    @property
+    def reference_type(self):
+        return self._r.split(" ")[0]
+
+    @property
+    def reference_parameter(self):
+        L = self._r.split(" ")
+        if len(L) == 1:
+            return None
+        elif L[0] in (":item", ":member"):
+            return int(L[1])
+        elif L[0].startswith(":tag"): # :tag or :tagged
+            try:
+                return self._p.get(L[1])
+            except UnreachableImportError:
+                return L[1]
+            except NoSuchElementError:
+                return L[1]
+        else:
+            return L[1]
+
+    def cut(self):
+        L = self._r.split(" ")
+        typ = L[0]
+        referrer = self.referrer
+        if typ in (":item", ":member"):
+            del referrer[int(L[1])]
+        elif typ == ":tag":
+            p = self._p
+            tagged = p.get(L[1]) or L[1]
+            p.dissociate_tag(tagged, self._f)
+        elif typ == ":tagged":
+            p = self._p
+            tag = p.get(L[1]) or L[1]
+            p.dissociate_tag(self._f, tag)
+        elif typ == ":meta":
+            referrer.del_meta(L[1])
+        else:
+            setattr(referrer, typ, None)
+
+    def replace(self, other):
+        raise NotImplementedError()
