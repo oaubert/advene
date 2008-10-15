@@ -797,40 +797,41 @@ class TestHandleElements (TestCase):
                 self.be.iter_meta (i[0], i[1], typ)))
 
     def test_members (self):
+
+        def compare_to_list (L, pid, rid):
+            self.assertEqual (len(L), self.be.count_members (pid, rid))
+            for i in xrange(len(L)):
+                self.assertEqual (L[i], self.be.get_member (pid, rid, i))
+            self.assertEqual (L, list (self.be.iter_members (pid, rid)))
+
         self.be.insert_member (self.pid1, "r1", "a4", -1)
-        self.assertEqual (1, self.be.count_members (self.pid1, "r1"))
+        compare_to_list (["a4",], self.pid1, "r1")
+
         self.be.insert_member (self.pid1, "r1", "a3", -1)
-        self.assertEqual (2, self.be.count_members (self.pid1, "r1"))
-        self.assertEqual ("a4", self.be.get_member (self.pid1, "r1", 0))
-        self.assertEqual ("a3", self.be.get_member (self.pid1, "r1", 1))
-        self.assertEqual (["a4", "a3"],
-                          list (self.be.iter_members (self.pid1, "r1")))
+        compare_to_list (["a4", "a3",], self.pid1, "r1")
 
         self.be.insert_member (self.pid1, "r1", "i1:a5", 1)
-        self.assertEqual (3, self.be.count_members (self.pid1, "r1"))
-        self.assertEqual (   "a4", self.be.get_member (self.pid1, "r1", 0))
-        self.assertEqual ("i1:a5", self.be.get_member (self.pid1, "r1", 1))
-        self.assertEqual (   "a3", self.be.get_member (self.pid1, "r1", 2))
-        self.assertEqual (["a4", "i1:a5", "a3"],
-                          list (self.be.iter_members (self.pid1, "r1")))
+        compare_to_list (["a4", "i1:a5", "a3",], self.pid1, "r1")
             
+        self.be.insert_member (self.pid1, "r1", "a2", 1)
+        compare_to_list (["a4", "a2", "i1:a5", "a3",], self.pid1, "r1")
+            
+        self.be.update_member (self.pid1, "r1", "i1:a6", 0)
+        compare_to_list (["i1:a6", "a2", "i1:a5", "a3",], self.pid1, "r1")
+
         self.be.remove_member (self.pid1, "r1", 0)
-        self.assertEqual (2, self.be.count_members (self.pid1, "r1"))
-        self.assertEqual ("i1:a5", self.be.get_member (self.pid1, "r1", 0))
-        self.assertEqual (   "a3", self.be.get_member (self.pid1, "r1", 1))
-        self.assertEqual (["i1:a5", "a3"],
-                          list (self.be.iter_members (self.pid1, "r1")))
+        compare_to_list (["a2", "i1:a5", "a3",], self.pid1, "r1")
 
         self.be.insert_member (self.pid1, "r2", "a4", -1)
-        self.be.insert_member (self.pid2, "r3", "a6", -1)
         self.be.insert_member (self.pid2, "r3", "a5", -1)
+        self.be.insert_member (self.pid2, "r3", "a6", -1)
         rel_w_member = self.be.get_relations_with_member
         pids = (self.pid1, self.pid2,)
-        r1_uri_ref = "%s#a5" % self.i1_uri
+        a5_uri_ref = "%s#a5" % self.i1_uri
         self.assertEqual (frozenset ((RELATION,)+i for i in [self.r1, self.r3]),
-                          frozenset (rel_w_member (r1_uri_ref, pids)))
+                          frozenset (rel_w_member (a5_uri_ref, pids)))
         self.assertEqual (frozenset ([(RELATION,)+self.r1,]),
-                          frozenset (rel_w_member (r1_uri_ref, pids, 0)))
+                          frozenset (rel_w_member (a5_uri_ref, pids, 1)))
 
 
 class TestRetrieveDataWithSameId (TestCase):

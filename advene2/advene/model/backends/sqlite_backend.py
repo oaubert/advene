@@ -244,11 +244,11 @@ class _SqliteBackend (object):
         no reference to the backend instance, so that the garbage collector
         can delete it, which will invoke the close method (see __del__ below).
         """
-        #print "=== About to close SqliteBackend", self._path
+        #print "DEBUG:", __file__, "about to close SqliteBackend", self._path
         self._conn.close()
 
     def __del__ (self):
-        #print "=== About to collect SqliteBackend", self._path
+        #print "DEBUG:", __file__, "about to close SqliteBackend", self._path
         try:
             self.close()
         except sqlite.OperationalError:
@@ -714,7 +714,7 @@ class _SqliteBackend (object):
         ``schema`` is the id-ref of an own or directly imported resource,
         or an empty string to specify no schema (not None).
         """
-        if len (schema) > 0:
+        if schema:
             p,s = _split_id_ref (schema) # also assert that schema has len<=2
             assert p == "" or self.has_element(package_id,p,IMPORT), p
             assert p != "" or self.has_element(package_id,s,RESOURCE), schema
@@ -756,8 +756,10 @@ class _SqliteBackend (object):
                WHERE package = ? AND element = ? AND KEY = ?"""
         c = self._conn.execute (q, (package_id, id, key,))
         d = c.fetchone()
-        if d is None: return None
-        else:         return d[0]
+        if d is None:
+            return None
+        else:
+            return d[0]
 
     def set_meta (self, package_id, id, element_type, key, val):
         """
@@ -802,26 +804,47 @@ class _SqliteBackend (object):
         not the same behaviour as ``list.insert`` in python2.5).
         If non-negative, the member will be inserted at that position.
         """
-        assert (-1 <= pos <= self.count_members (package_id, id))
-        assert (-1 <= pos <= self.count_members (package_id, id))
-
+        n = self.count_members (package_id, id)
+        assert -1 <= pos <= n
         p,s = _split_id_ref (member) # also assert that member has len<=2
         assert p != "" or self.has_element(package_id, s, ANNOTATION), member
-
         if pos == -1:
-            pos = self.count_members (package_id, id)
-
+            pos = n
         try:
             c = self._conn.cursor()
-            c.execute ("UPDATE RelationMembers SET ord=ord+1 "
-                       "WHERE package = ? AND relation = ? AND ord >= ?",
-                       (package_id, id, pos))
+            # sqlite does not seem to be able to do the following updates in
+            # one query (unicity constraint breaks), so...
+            for i in xrange(n, pos-1, -1):
+                c.execute ("UPDATE RelationMembers SET ord=ord+1 "
+                           "WHERE package = ? AND relation = ? AND ord = ?",
+                           (package_id, id, i))
             c.execute ("INSERT INTO RelationMembers VALUES (?,?,?,?,?)",
                        (package_id, id, pos, p, s))
             self._conn.commit()
         except sqlite.Error, e:
             self._conn.rollback()
             raise InternalError ("could not update or insert", e)
+
+    def update_member (self, package_id, id, member, pos):
+        """
+        Remobv the member at the given position in the identified relation.
+        ``member`` is the id-ref of an own or directly imported member.
+        """
+        assert (0 <= pos < self.count_members (package_id, id))
+        assert (0 <= pos < self.count_members (package_id, id))
+
+        p,s = _split_id_ref (member) # also assert that member has len<=2
+        assert p != "" or self.has_element(package_id, s, ANNOTATION), member
+
+        try:
+            c = self._conn.cursor()
+            c.execute ("UPDATE RelationMembers SET member_p = ?, member_i = ? "
+                       "WHERE package = ? AND relation = ? AND ord = ?",
+                       (p, s, package_id, id, pos))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not update", e)
 
     def count_members (self, package_id, id):
         """
