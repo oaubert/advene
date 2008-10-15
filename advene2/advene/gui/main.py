@@ -100,7 +100,7 @@ import advene.gui.views.timeline
 #from advene.gui.edit.rules import EditRuleSet
 #from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
-#from advene.gui.edit.create import CreateElementPopup
+from advene.gui.edit.create import CreateElementPopup
 #from advene.gui.edit.merge import Merger
 #from advene.gui.edit.importer import ExternalImporter
 from advene.gui.evaluator import Evaluator

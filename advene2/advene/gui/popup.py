@@ -41,7 +41,7 @@ from advene.model.cam.query import Query
 from advene.rules.elements import RuleSet, Rule, Event, Condition, Action
 
 from advene.gui.util import image_from_position, dialog
-#from advene.gui.edit.create import CreateElementPopup
+from advene.gui.edit.create import CreateElementPopup
 import advene.util.helper as helper
 
 class Menu:

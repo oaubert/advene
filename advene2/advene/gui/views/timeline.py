@@ -33,7 +33,7 @@ from advene.model.cam.tag import RelationType
 from advene.model.cam.annotation import Annotation
 from advene.model.cam.relation import Relation
 from advene.gui.views import AdhocView
-#from advene.gui.edit.create import CreateElementPopup
+from advene.gui.edit.create import CreateElementPopup
 from advene.gui.util import png_to_pixbuf
 from advene.gui.util import decode_drop_parameters
 import advene.gui.popup
