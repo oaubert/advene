@@ -895,7 +895,7 @@ class AdveneController(object):
         if isinstance(element, unicode) or isinstance(element, str):
             return element
         if isinstance(element, Annotation) or isinstance(element, Relation):
-            if representation is not None and representation != "":
+            if representation:
                 c=self.build_context(here=element)
                 try:
                     r=c.evaluate(representation)
@@ -905,21 +905,20 @@ class AdveneController(object):
                     r=element.id
                 return cleanup(r)
 
-            expr=element.type.representation
-            if expr is None or expr == '' or re.match('^\s+', expr):
+            representation=element.type.representation
+            if not representation or re.match('^\s+', representation):
                 r=element.content.data
                 if element.content.mimetype == 'image/svg+xml':
                     return "SVG graphics"
                 if not r:
                     r=element.id
                 return cleanup(r)
-
             else:
                 c=self.build_context(here=element)
                 try:
-                    r=c.evaluate(expr)
-                except AdveneTalesException, e:
-                    print "Exception in get_title for ", element.id, ':', unicode(e).encode('utf-8')
+                    r=c.evaluate(representation)
+                except (AdveneTalesException, KeyError, AttributeError), e:
+                    print "Exception in get_title for ", element.id, '(', representation, '):', unicode(e).encode('utf-8')
                     r=element.content.data.splitlines()[0]
                 if not r:
                     r=element.id
