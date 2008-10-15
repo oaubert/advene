@@ -60,6 +60,8 @@ from advene.model.cam.package import Package
 from advene.model.cam.annotation import Annotation
 from advene.model.cam.relation import Relation
 from advene.model.cam.tag import AnnotationType, RelationType
+from advene.model.cam.list import Schema
+from advene.model.cam.resource import Resource
 from advene.model.consts import DC_NS_PREFIX, ADVENE_NS_PREFIX
 import advene.util.session
 from advene.model.cam.view import View
@@ -744,19 +746,22 @@ class AdveneController(object):
         # Set the package._modified state
         # This does not really belong here, but it is the more convenient and
         # maybe more effective way to implement it
-        if event_name in self.modifying_events:
+
+        # FIXME FIXME: this should be implemented through the model's signals
+
+        #if event_name in self.modifying_events:
             # Find the element's package
             # Kind of hackish... This information should be clearly available somewhere
-            el_name=event_name.lower().replace('create','').replace('editend','').replace('delete', '')
-            el=kw[el_name]
-            p=el.owner
-            p._modified = True
-            if event_name.endswith('Delete'):
-                # We removed an element, so remove its id from the _idgenerator set
-                p._idgenerator.remove(el.id)
-            elif event_name.endswith('Create'):
-                # We created an element. Make sure its id is registered in the _idgenerator
-                p._idgenerator.add(el.id)
+            #el_name=event_name.lower().replace('create','').replace('editend','').replace('delete', '')
+            #el=kw[el_name]
+            #p=el.owner
+            #p._modified = True
+            #if event_name.endswith('Delete'):
+            #    # We removed an element, so remove its id from the _idgenerator set
+            #    p._idgenerator.remove(el.id)
+            #elif event_name.endswith('Create'):
+            #    # We created an element. Make sure its id is registered in the _idgenerator
+            #    p._idgenerator.add(el.id)
 
         if 'immediate' in kw:
             self.event_handler.notify(event_name, *param, **kw)
@@ -1066,17 +1071,49 @@ class AdveneController(object):
         if uri:
             self.package.imagecache[media.id].load (helper.mediafile2id (uri))
 
-    def delete_element (self, el, immediate_notify=False):
+    def delete_element (self, el, immediate_notify=False, batch_id=None):
         """Delete an element from its package.
 
         Take care of all dependencies (for instance, annotations which
         have relations.
-        
-        FIXME: to rewrite completely.
-        FIXMEFIXME: a toolkit should be provided by the model for this
         """
-        print "FIXME: element suppression is not implemented"
-        self.log("FIXME: element suppression is not implemented")
+        if isinstance(el, Annotation):
+            # We iterate on a copy of relations, since it may be
+            # modified during the loop
+            self.notify('ElementEditBegin', element=el, immediate=True)
+            for r in el.relations[:]:
+                self.delete_element(r, immediate_notify=immediate_notify, batch_id=batch_id)
+            # We have to notify before actually deleting, since the
+            # reference is no more valid thereafter.
+            self.notify('AnnotationDelete', annotation=el, immediate=immediate_notify, batch=batch_id)
+            el.delete()
+        elif isinstance(el, Relation):
+            self.notify('RelationDelete', relation=el, immediate=immediate_notify)
+            el.delete()
+        elif isinstance(el, AnnotationType):
+            for a in el.annotations:
+                self.delete_element(a, immediate_notify=True, batch_id=batch_id)
+            self.notify('AnnotationTypeDelete', annotationtype=el, immediate=immediate_notify)
+            el.delete()
+        elif isinstance(el, RelationType):
+            for r in el.relations:
+                self.delete_element(r, immediate_notify=True, batch_id=batch_id)
+            self.notify('RelationTypeDelete', relationtype=el, immediate=immediate_notify)
+            el.delete()
+        elif isinstance(el, Schema):
+            self.notify('SchemaDelete', schema=el, immediate=immediate_notify)
+            el.delete()
+        elif isinstance(el, View):
+            self.notify('ElementEditBegin', element=el, immediate=True)
+            self.notify('ViewDelete', view=el, immediate=immediate_notify, batch=batch_id)
+            el.delete()
+        elif isinstance(el, Query):
+            self.notify('ElementEditBegin', element=el, immediate=True)            
+            self.notify('QueryDelete', query=el, immediate=immediate_notify, batch=batch_id)
+            el.delete()
+        elif isinstance(el, Resource):
+            self.notify('ResourceDelete', resource=el, immediate=immediate_notify)
+            el.delete()
         return True
 
     def transmute_annotation(self, annotation, annotationType, move=False, position=None, notify=True):
