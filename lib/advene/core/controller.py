@@ -191,6 +191,7 @@ class AdveneController(object):
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
         self.modifying_events = self.event_handler.catalog.modifying_events
         self.event_queue = []
+        self.tracers=[]
 
         # Load default actions
         advene.rules.actions.register(self)
@@ -316,6 +317,11 @@ class AdveneController(object):
         """
         self.gui=gui
 
+    def register_tracer(self, tracer):
+        """Register a trace builder
+        """
+        self.tracers.append(tracer)
+        
     def register_event(self, name, description, modifying=False):
         """Register a new event.
         """
