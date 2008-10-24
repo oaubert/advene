@@ -81,7 +81,7 @@ class TraceBuilder:
         self.__package=package
         self.controller.event_handler.register_view(self)
         self.trace = Trace()
-            
+
     def receive(self, obj):
         # obj : received event
         ev = op = ac = None
@@ -98,7 +98,7 @@ class TraceBuilder:
         #     modif.append(i(obj))
         # self.alert_registered(modif)
         # wich could then be used in a more general way by the receiver
-        
+
     def packEvent(self, obj):
         self.controller.update_snapshot(self.controller.player.current_position_value)
         ev_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
@@ -126,7 +126,7 @@ class TraceBuilder:
             elif isinstance(obj['element'],advene.model.view.View):
                 obj['view']=obj['element']
             elif isinstance(obj['element'],advene.model.package.Package):
-                obj['package']=obj['element']   
+                obj['package']=obj['element']
         if 'uri' in obj:
             obj['content']='movie="'+str(obj['uri'])+'"'
             elem_name='movie'
@@ -139,7 +139,7 @@ class TraceBuilder:
                       'type=' + elem.type.id,
                       'mimetype=' + elem.type.mimetype,
                       'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
-		            )
+                            )
                 elem_name='annotation'
                 elem_id=elem.id
         elif 'relation' in obj:
@@ -150,7 +150,7 @@ class TraceBuilder:
                       'type=' + elem.type.id,
                       'mimetype=' + elem.type.mimetype,
                       'source=' + elem.members[0].id,
-                      'dest=' + elem.members[1].id ) 
+                      'dest=' + elem.members[1].id )
                     )
                 elem_name='relation'
                 elem_id=elem.id
@@ -197,13 +197,13 @@ class TraceBuilder:
         elif 'package' in obj:
             elem=obj['package']
             if elem is not None:
-                ev_content= 'package=' + elem.title 
+                ev_content= 'package=' + elem.title
                 elem_name='package'
                 elem_id=elem.title
         ev = Event(ev_name, ev_time, ev_activity_time, ev_snapshot, ev_content, ev_movie, ev_movie_time, elem_name, elem_id)
         self.trace.add_to_trace('events', ev)
         return ev
-        
+
     def packOperation(self, obj):
         op_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
         op_time = time.time()
@@ -232,7 +232,7 @@ class TraceBuilder:
             elif isinstance(obj['element'],advene.model.view.View):
                 obj['view']=obj['element']
             elif isinstance(obj['element'],advene.model.package.Package):
-                obj['package']=obj['element']   
+                obj['package']=obj['element']
         if 'uri' in obj:
             obj['content']='movie="'+str(obj['uri'])+'"'
             elem_name='movie'
@@ -245,7 +245,7 @@ class TraceBuilder:
                       'type=' + elem.type.id,
                       'mimetype=' + elem.type.mimetype,
                       'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
-		            )
+                            )
                 elem_name='annotation'
                 elem_id=elem.id
         elif 'relation' in obj:
@@ -256,7 +256,7 @@ class TraceBuilder:
                       'type=' + elem.type.id,
                       'mimetype=' + elem.type.mimetype,
                       'source=' + elem.members[0].id,
-                      'dest=' + elem.members[1].id ) 
+                      'dest=' + elem.members[1].id )
                     )
                 elem_name='relation'
                 elem_id=elem.id
@@ -303,7 +303,7 @@ class TraceBuilder:
         elif 'package' in obj:
             elem=obj['package']
             if elem is not None:
-                op_content= 'package=' + elem.title 
+                op_content= 'package=' + elem.title
                 elem_name='package'
                 elem_id=elem.title
         op = Operation(op_name, op_time, op_activity_time, op_content, op_snapshot, op_movie, op_movie_time, elem_name, elem_id)
@@ -345,7 +345,7 @@ class TraceBuilder:
         self.trace.add_to_trace('actions', ac)
         self.opened_actions[type]=ac
         return ac
-    
+
     def alert_registered(self, event, operation, action):
         for i in self.registered_views:
             i.receive(self.trace, event, operation, action)
@@ -433,7 +433,7 @@ class Trace:
 
     def list_all(self):
         for i in self.levels.keys():
-            print "Trace niveau \'%s\'" % i 
+            print "Trace niveau \'%s\'" % i
             for t in self.levels[i]:
                 print "    %s : \'%s\'" % (t,t.name)
         return
@@ -512,7 +512,7 @@ class Action:
     def add_operation(self, operation):
         self.operations.append(operation)
         self.set_time(1,operation.time)
-        
+
     def set_time(self, choice, newtime):
         offset = newtime - self.time[choice]
         self.time[choice]=newtime

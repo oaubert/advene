@@ -37,7 +37,6 @@ from advene.gui.widget import TimestampRepresentation
 
 def register(controller):
     controller.register_viewclass(EventAccumulator)
-    
 
 name="Trace view"
 
@@ -139,7 +138,7 @@ class EventAccumulator(AdhocView):
     def build_widget(self):
         mainbox = gtk.VBox()
         btnbar=gtk.HBox()
-     
+
         # choix details
         if len(self.tracer.trace.levels.keys())<=0:
             print "EventAccumulator error : no trace level"
@@ -181,7 +180,7 @@ class EventAccumulator(AdhocView):
                 #refreshing display
                 self.receive(self.tracer.trace)
                 return
-            
+
             btimeLabel = self.options['time']
             btime = gtk.Button(btimeLabel)
             btime.set_size_request(60, 20)
@@ -189,7 +188,7 @@ class EventAccumulator(AdhocView):
             btnbar.pack_start(btime, expand=False)
             btime.connect('clicked', time_changed)
             btnbar.pack_start(gtk.VSeparator())
-        
+
         # choix max
         def max_changed(w):
             self.options['max_size']=int(w.get_value())
@@ -207,11 +206,11 @@ class EventAccumulator(AdhocView):
         self.btn_filter = gtk.Button(_(' Filters'))
         #self.btn_filter.connect('clicked', self.open_filters)
         btnbar.pack_start(self.btn_filter, expand=False)
-        
+
         self.init_btn_filter = gtk.Button(_(' Reset filters'))
         self.init_btn_filter.connect('clicked', self.init_filters)
         btnbar.pack_start(self.init_btn_filter, expand=False)
-        
+
         mainbox.pack_start(btnbar, expand=False)
         mainbox.pack_start(gtk.HSeparator(), expand=False)
         self.accuBox=gtk.VBox()
@@ -260,11 +259,11 @@ class EventAccumulator(AdhocView):
         else:
             self.showTrace(trace.levels[self.options['detail']])
         self.scroll_win()
-        
+
     def showTrace(self, level):
         # generic trace display
         return
-        
+
     def showEvents(self, tracelevel, event):
         #adjust the current display to the modified trace
         if event is not None:
@@ -296,7 +295,7 @@ class EventAccumulator(AdhocView):
                     #print "%s %s" % (self.size, i.name)
                     self.packEvent(i)
         return
-    
+
     def showOperations(self, tracelevel, operation):
         #adjust the current display to the modified trace
         if operation is not None:
@@ -358,13 +357,13 @@ class EventAccumulator(AdhocView):
             return
         elif action == self.latest['nav_action']:
             self.update_last_action_box(action, True)
-            return            
+            return
         if self.size>=self.options['max_size']:
             self.unpackEvent()
         self.size = self.size + 1
         self.packAction(action)
         return
-    
+
     def packAction(self, obj_evt):
         vb=gtk.VBox()
         if obj_evt.name == 'Navigation':
@@ -386,7 +385,7 @@ class EventAccumulator(AdhocView):
             vb.add(gtk.HSeparator())
             self.accuBox.pack_start(vb, expand=False)
             self.accuBox.show_all()
-    
+
     def packEvent(self, obj_evt):
         if obj_evt is not None:
             self.latest['events']=obj_evt
@@ -396,7 +395,7 @@ class EventAccumulator(AdhocView):
             vb.add(gtk.HSeparator())
             self.accuBox.pack_start(vb, expand=False)
             self.accuBox.show_all()
-        
+
     def unpackEvent(self):
         self.accuBox.remove(self.accuBox.get_children()[0])
         self.size = self.size-1
@@ -486,7 +485,7 @@ class EventAccumulator(AdhocView):
             else:
                 comp = _('an unknown item')
             entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
-       
+
         entete = gtk.Label(entetestr.encode("UTF-8"))
         hb = gtk.HBox()
         box = gtk.EventBox()
@@ -550,12 +549,12 @@ class EventAccumulator(AdhocView):
                 self.DetB.set_label('operations')
                 #FIXME color change of the reset button when applying a filter
                 self.init_btn_filter.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#962A1C"))
-                self.receive(self.tracer.trace) 
+                self.receive(self.tracer.trace)
             return
         box.add(entete)
         box.connect('button-press-event', box_pressed, obj_evt.operations)
         hb.pack_start(box, expand=False)
-        return hb         
+        return hb
 
     def destroy(self, source=None, event=None):
         self.controller.tracers[0].unregister_view(self)
@@ -564,7 +563,7 @@ class EventAccumulator(AdhocView):
 
 
 
-#TODO   
+#TODO
 #       des moyens d'actions depuis les events
 #       filtrage pre et post visu
 #       recherche dans la trace
