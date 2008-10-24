@@ -514,9 +514,14 @@ class AdveneController(object):
             # Special search.
             res=[]
             for i in searched.split():
-                e=p.get_element_by_id(i)
-                if e is not None:
-                    res.append(e)
+                if '*' in i:
+                    # Joker.
+                    i=i.replace('*', '.*')
+                    res.extend( e for e in p.all if re.match(i, e.id))
+                else:
+                    e=p.get(i)
+                    if e is not None:
+                        res.append(e)
             return res
         else:
             c=self.build_context()
