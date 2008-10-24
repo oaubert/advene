@@ -27,11 +27,7 @@ Widgets can register with this trace builder to receive the trace.
 
 import time
 
-from gettext import gettext as _
-
 import advene.core.config as config
-from advene.gui.util import png_to_pixbuf
-import advene.util.helper as helper
 import urllib
 import advene.model.view
 
