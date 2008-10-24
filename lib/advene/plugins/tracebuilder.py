@@ -417,7 +417,7 @@ class Trace:
         if (not self.levels.has_key(level)) or self.levels.has_key(new_name) or level == 'actions' or level == 'operations':
             print 'You cannot rename operations and actions levels'
             return None
-        self.levels[newname]=self.levels[level]
+        self.levels[new_name]=self.levels[level]
         del self.levels[level]
         return self.levels[new_name]
 
