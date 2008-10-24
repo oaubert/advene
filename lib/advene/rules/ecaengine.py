@@ -75,7 +75,7 @@ class ECAEngine:
         self.catalog=advene.rules.elements.ECACatalog()
         self.scheduler=sched.scheduler(time.time, time.sleep)
         self.schedulerthread=threading.Thread(target=self.scheduler.run)
-
+        self.views_to_notify=[]
     def get_state(self):
         """Return a state of the current rulesets.
 
@@ -254,6 +254,13 @@ class ECAEngine:
         """
         self.catalog.register_action(registered_action)
 
+    def register_view(self, view):
+        self.views_to_notify.append(view)
+
+    def unregister_view(self, view):
+        self.views_to_notify.remove(view)
+
+
     def internal_rule(self, event=None, condition=None, method=None):
         """Declare an internal rule used by the application.
 
@@ -335,85 +342,10 @@ class ECAEngine:
             d=dict(kw)
             d['event_name'] = event_name
             d['parameters'] = param
-            # Store timestamp in ms since the application start
-            d['timestamp'] = (time.time() - config.data.startup_time) * 1000
-            d['movie'] = self.controller.player.get_default_media()
-            d['movietime'] = self.controller.player.current_position_value
-	        # package uri annotation relation annotationtype relationtype schema
-	        # Logging content depending on keys
-            if 'uri' in d:
-                d['content']='movie="'+str(d['uri'])+'"'
-            if 'element' in d:
-                if isinstance(d['element'],advene.model.annotation.Annotation):
-                    #print "%s" % d['element']
-                    d['annotation']=d['element']
-                elif isinstance(d['element'],advene.model.annotation.Relation):
-                    d['relation']=d['element']
-                elif isinstance(d['element'],advene.model.schema.AnnotationType):
-                    d['annotationtype']=d['element']
-                elif isinstance(d['element'],advene.model.schema.RelationType):
-                    d['relationtype']=d['element']
-                elif isinstance(d['element'],advene.model.schema.Schema):
-                    d['schema']=d['element']
-                elif isinstance(d['element'],advene.model.view.View):
-                    d['view']=d['element']
-                elif isinstance(d['element'],advene.model.package.Package):
-                    d['package']=d['element']
-            if 'annotation' in d:
-                a=d['annotation']
-                if a is not None:
-                    d['content']= "\n".join(
-		            ( 'annotation=' + a.id,
-                      'type=' + a.type.id,
-                      'mimetype=' + a.type.mimetype,
-                      'content="'+ urllib.quote(a.content.data.encode('utf-8'))+'"')
-		            )
-            elif 'relation' in d:
-                r=d['relation']
-                if r is not None:
-                    d['content']= "\n".join(
-                    ( 'relation=' + r.id,
-                      'type=' + r.type.id,
-                      'mimetype=' + r.type.mimetype,
-                      'source=' + r.members[0].id,
-                      'dest=' + r.members[1].id ) 
-                    )
-            elif 'annotationtype' in d:
-                at=d['annotationtype']
-                if at is not None:
-                    d['content']= "\n".join(
-                    ('annotationtype='+at.id,
-                     'schema=' + at.schema.id,
-                     'mimetype=' + at.mimetype)
-                    )
-            elif 'relationtype' in d:
-                rt=d['relationtype']
-                if rt is not None:
-                    d['content']= "\n".join(
-                    ('relationtype=' + rt.id,
-                     'schema=' + rt.schema.id,
-                     'mimetype=' + rt.mimetype)
-                    )
-            elif 'schema' in d:
-                s=d['schema']
-                if s is not None:
-                    d['content']= 'schema=' + s.id
-            elif 'view' in d:
-                v=d['view']
-                if v is not None:
-                    if isinstance(v, advene.model.view.View):
-                        d['content']= "\n".join(
-                        ('view=' + v.id,
-                         'content="'+ urllib.quote(v.content.data.encode('utf-8'))+'"')
-                        )
-                    else:
-                        d['content']= 'view=' + str(v)
-            elif 'package' in d:
-                p=d['package']
-                if p is not None:
-                    d['content']= 'package=' + p.title
             self.event_history.append(d)
-
+            for v in self.views_to_notify:
+                # should only be TraceBuilder plugin or other trace building system
+                v.receive(d)
         immediate=False
         if 'immediate' in kw:
             immediate=True
