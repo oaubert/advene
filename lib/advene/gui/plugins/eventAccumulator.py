@@ -43,7 +43,7 @@ name="Trace view"
 
 class EventAccumulator(AdhocView):
     view_name = _("Trace")
-    view_id = 'trace_1'
+    view_id = 't1'
     tooltip=("Trace of Advene Events")
     def __init__ (self, controller=None, parameters=None, package=None):
         super(EventAccumulator, self).__init__(controller=controller)
@@ -53,7 +53,7 @@ class EventAccumulator(AdhocView):
         self.filters = {
             'content': '',
             'objects': [],
-            'events': ['AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight'],
+            'events': ['AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PopupDisplay'],
             'operations': [],
             'actions': [],
         }
@@ -65,10 +65,19 @@ class EventAccumulator(AdhocView):
             'eventsBox': None,
             'operationsBox': None,
             'actionsBox': None,
+            'nav_action':None,
+            'nav_actionBox':None,
         }
         self.events_names= {
-            'AnnotationBegin': _('Begining of an annotation'),
+            'AnnotationBegin': _('Beginning of an annotation'),
             'AnnotationEnd': _('End of an annotation'),
+            'BookmarkHighlight': _('Highlighting a bookmark'),
+            'BookmarkUnhighlight': _('Unhighlighting a bookmark'),
+            'PackageLoad': _('Loading a package'),
+            'PopupDisplay': _('Displaying a popup'),
+            'MediaChange': _('Changing the media'),
+            'PackageActivate': _('Activating a package'),
+            'ApplicationStart': _('Starting the application'),
         }
         self.operations_names = {
             'AnnotationCreate': _('Creating an annotation'),
@@ -115,11 +124,11 @@ class EventAccumulator(AdhocView):
             self.__package=controller.package
         self.tracer = self.controller.tracers[0]
         #self.cached_trace = None
+        self.DetB = None
         self.accuBox = None
-        self.comboD = None
-        self.comboT = None
         self.sc = None
         self.btn_filter = None
+        self.init_btn_filter = None
         self.widget = self.build_widget()
         self.widget.connect("destroy", self.destroy)
         #registering plugin with trace builder
@@ -149,6 +158,7 @@ class EventAccumulator(AdhocView):
                 return
             bdetLabel = self.options['detail']
             bdet = gtk.Button(bdetLabel)
+            self.DetB = bdet
             bdet.set_size_request(60, 20)
             btnbar.pack_start(gtk.Label(_(' Details : ')), expand=False)
             btnbar.pack_start(bdet, expand=False)
@@ -198,6 +208,10 @@ class EventAccumulator(AdhocView):
         #self.btn_filter.connect('clicked', self.open_filters)
         btnbar.pack_start(self.btn_filter, expand=False)
         
+        self.init_btn_filter = gtk.Button(_(' Reset filters'))
+        self.init_btn_filter.connect('clicked', self.init_filters)
+        btnbar.pack_start(self.init_btn_filter, expand=False)
+        
         mainbox.pack_start(btnbar, expand=False)
         mainbox.pack_start(gtk.HSeparator(), expand=False)
         self.accuBox=gtk.VBox()
@@ -207,6 +221,18 @@ class EventAccumulator(AdhocView):
         self.sw.set_vadjustment(gtk.Adjustment(value = 208, lower = 0, upper=208, step_incr=52, page_incr=208, page_size=208))
         mainbox.pack_start(self.sw)
         return mainbox
+
+    def init_filters(self, w):
+        self.filters = {
+            'content': '',
+            'objects': [],
+            'events': ['AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PopupDisplay'],
+            'operations': [],
+            'actions': [],
+        }
+        #FIXME default color
+        self.init_btn_filter.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#000000"))
+        self.receive(self.tracer.trace)
 
     def scroll_win(self):
         a = self.sw.get_vadjustment()
@@ -224,11 +250,11 @@ class EventAccumulator(AdhocView):
                 return
             self.showEvents(trace.levels[self.options['detail']], event)
         if self.options['detail'] == 'operations':
-            if (operation is not None and operation.name in self.filters['events']):
+            if (operation is not None and operation.name in self.filters['operations']):
                 return
             self.showOperations(trace.levels[self.options['detail']], operation)
         elif self.options['detail'] == 'actions':
-            if (action is not None and action.name in self.filters['events']):
+            if (action is not None and action.name in self.filters['actions']):
                 return
             self.showActions(trace.levels[self.options['detail']], action)
         else:
@@ -274,6 +300,8 @@ class EventAccumulator(AdhocView):
     def showOperations(self, tracelevel, operation):
         #adjust the current display to the modified trace
         if operation is not None:
+            if len(self.filters['objects'])>0 and operation not in self.filters['objects']:
+                return
             if self.size>=self.options['max_size']:
                 self.unpackEvent()
             self.size = self.size + 1
@@ -286,10 +314,18 @@ class EventAccumulator(AdhocView):
                 return
             trace_max = max(0, len(tracelevel))
             trace_min = max(0, trace_max-self.options['max_size'])
+            #FIXME : need to handle multiple filters
+            if len(self.filters['objects'])>0:
+                t_temp = trace_max
+                while t_temp > trace_min and trace_min > 0:
+                    if operation not in self.filters['objects']:
+                        trace_min = trace_min-1
+                    t_temp = t_temp -1
             for i in tracelevel[trace_min:trace_max]:
-                self.size = self.size + 1
-                #print "%s %s" % (self.size, i.name)
-                self.packOperation(i)
+                if len(self.filters['objects'])<=0 or i in self.filters['objects']:
+                    self.size = self.size + 1
+                    #print "%s %s" % (self.size, i.name)
+                    self.packOperation(i)
         return
 
     def showActions(self, tracelevel, action):
@@ -320,6 +356,9 @@ class EventAccumulator(AdhocView):
             # same action as before, we just need to refresh it
             self.update_last_action_box(action)
             return
+        elif action == self.latest['nav_action']:
+            self.update_last_action_box(action, True)
+            return            
         if self.size>=self.options['max_size']:
             self.unpackEvent()
         self.size = self.size + 1
@@ -327,8 +366,11 @@ class EventAccumulator(AdhocView):
         return
     
     def packAction(self, obj_evt):
-        self.latest['actions'] = obj_evt
         vb=gtk.VBox()
+        if obj_evt.name == 'Navigation':
+            self.latest['nav_action'] = obj_evt
+            self.latest['nav_actionBox'] = self.build_action_box(obj_evt)
+        self.latest['actions'] = obj_evt
         self.latest['actionsBox'] = self.build_action_box(obj_evt)
         vb.add(self.latest['actionsBox'])
         vb.add(gtk.HSeparator())
@@ -359,8 +401,11 @@ class EventAccumulator(AdhocView):
         self.accuBox.remove(self.accuBox.get_children()[0])
         self.size = self.size-1
 
-    def update_last_action_box(self, obj_evt):
-        tup = gtk.tooltips_data_get(self.latest['actionsBox'])
+    def update_last_action_box(self, obj_evt, nav=False):
+        if nav:
+            tup = gtk.tooltips_data_get(self.latest['nav_actionBox'])
+        else:
+            tup = gtk.tooltips_data_get(self.latest['actionsBox'])
         if tup is None:
             return
         corpsstr = ""
@@ -381,16 +426,34 @@ class EventAccumulator(AdhocView):
         # tooltip with event infos
         # image containing snapshot of the event
         # label with the time of the event
-        corpsstr = ""
+        corpsstr = ''
+        entetestr = ''
         if obj_evt.content is not None:
             corpsstr = urllib.unquote(obj_evt.content)
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
         if self.options['time'] == 'activity':
             ev_time = helper.format_time(obj_evt.activity_time)
-        entetestr = "%s : %s" % (ev_time, obj_evt.name)
+        if obj_evt.name in self.events_names.keys():
+            entetestr = "%s : %s" % (ev_time, self.events_names[obj_evt.name])
+        elif obj_evt.name in self.operations_names.keys():
+            entetestr = "%s : %s" % (ev_time, self.operations_names[obj_evt.name])
+        elif obj_evt.name in self.incomplete_operations_names.keys():
+            comp = ''
+            ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
+            #print "%s %s %s" % (self.controller.package, obj_evt.concerned_object['id'], ob)
+            if isinstance(ob, advene.model.annotation.Annotation):
+                comp = _('an annotation')
+            elif isinstance(ob,advene.model.annotation.Relation):
+                comp = _('a relation')
+            else:
+                comp = _('an unknown item')
+            entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
+        else:
+            print "unlabelled event : %s" % obj_evt.name
+            entetestr = "%s : %s" % (ev_time, obj_evt.name)
         entete = gtk.Label(entetestr.encode("UTF-8"))
         hb = gtk.HBox()
-        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , True)
+        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , False)
         if tr is not None:
             hb.pack_start(tr, expand=False)
             hb.pack_start(gtk.VSeparator(), expand=False)
@@ -427,13 +490,13 @@ class EventAccumulator(AdhocView):
         entete = gtk.Label(entetestr.encode("UTF-8"))
         hb = gtk.HBox()
         box = gtk.EventBox()
-        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , True)
+        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , False)
         if tr is not None:
             hb.pack_start(tr, expand=False)
             hb.pack_start(gtk.VSeparator(), expand=False)
         if corpsstr != "":
             self.toolTips.set_tip(box,corpsstr)
-        def box_pressed(w, event, id, mtime):
+        def box_pressed(w, event, id):
             #print "%s %s" % (id, mtime)
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
                 if id is not None:
@@ -444,17 +507,9 @@ class EventAccumulator(AdhocView):
                         self.controller.gui.edit_element(obj)
                     else:
                         print "item %s no longuer exists" % id
-#                else:
-                    #print mtime
-#                    c=self.controller
-#                    pos = c.create_position (value=mtime,
-#                                     key=c.player.MediaTime,
-#                                     origin=c.player.AbsolutePosition)
-#                    c.update_status (status="set", position=pos)
-                    #need to check if id is None then go to movietime
             return
         box.add(entete)
-        box.connect('button-press-event', box_pressed, obj_evt.concerned_object['id'], obj_evt.movietime)
+        box.connect('button-press-event', box_pressed, obj_evt.concerned_object['id'])
         hb.pack_start(box, expand=False)
         return hb
 
@@ -463,8 +518,6 @@ class EventAccumulator(AdhocView):
         # tooltip with event infos
         # image containing snapshot of the event
         # label with the time of the event
-        snap = obj_evt.snapshot
-        pix = png_to_pixbuf(snap,height=50)
         act = obj_evt.name
         act_begin = time.strftime("%H:%M:%S", time.localtime(obj_evt.time[0]))
         if self.options['time'] == 'activity':
@@ -480,16 +533,28 @@ class EventAccumulator(AdhocView):
             else:
                 corpsstr += urllib.unquote( op_time + " : " + op.name + " ( " + op.concerned_object['name'] + " : " + op.concerned_object['id'] + " )\n")
         entete = gtk.Label(entetestr.encode("UTF-8"))
-        #i = gtk.image_new_from_pixbuf(pix) pygtk2.12
-        i = gtk.Image()
-        i.set_from_pixbuf(pix)
         hb = gtk.HBox()
-        if i is not None:
-            hb.pack_start(i, expand=False)
+        box = gtk.EventBox()
+        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , False)
+        if tr is not None:
+            hb.pack_start(tr, expand=False)
             hb.pack_start(gtk.VSeparator(), expand=False)
-        hb.pack_start(entete, expand=False)
         if corpsstr != "":
             self.toolTips.set_tip(hb,corpsstr)
+        def box_pressed(w, event, ops):
+            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+                #FIXME : need to change details in another way
+                self.filters['objects']=[]
+                self.filters['objects'].extend(ops)
+                self.options['detail']='operations'
+                self.DetB.set_label('operations')
+                #FIXME color change of the reset button when applying a filter
+                self.init_btn_filter.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#962A1C"))
+                self.receive(self.tracer.trace) 
+            return
+        box.add(entete)
+        box.connect('button-press-event', box_pressed, obj_evt.operations)
+        hb.pack_start(box, expand=False)
         return hb         
 
     def destroy(self, source=None, event=None):
