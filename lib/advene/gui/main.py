@@ -401,7 +401,7 @@ class AdveneGUI(object):
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
             ('montage', _("Dynamic montage"), 'montage.png'),
             ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
-            ('t1', _("Trace"), 'finder.png'),
+            ('trace', _("Trace"), 'trace.png'),
             ):
             if name in ('browser', 'schemaeditor', 't1') and not config.data.preferences['expert-mode']:
                 continue

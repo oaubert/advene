@@ -40,7 +40,7 @@ name="Trace view"
 
 class EventAccumulator(AdhocView):
     view_name = _("Trace")
-    view_id = 't1'
+    view_id = 'trace'
     tooltip=("Trace of Advene Events")
     def __init__ (self, controller=None, parameters=None, package=None):
         super(EventAccumulator, self).__init__(controller=controller)
