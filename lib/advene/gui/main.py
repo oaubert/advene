@@ -3297,43 +3297,12 @@ class AdveneGUI(object):
         ew=advene.gui.edit.properties.EditNotebook(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
 
-        ew.add_title(_("GUI"))
-        ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"),
-                      {
-                "English": 'C',
-                "Francais": 'fr_FR',
-                _("System default"): '',
-                })
-        ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
-                    -1, 20)
-        ew.add_checkbox(_("Remember window size"), "remember-window-size", _("Remember the size of opened windows"))
-        ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
-        ew.add_spin(_("Bookmark snapshot width"), 'bookmark-snapshot-width', _("Width of the snapshots representing bookmarks"), 50, 400)
-        ew.add_spin(_("Bookmark snapshot precision"), 'bookmark-snapshot-precision', _("Precision (in ms) of the displayed bookmark snapshots."), 25, 500)
+        ew.add_title(_("Paths"))
 
-        ew.add_title(_("Time-related"))
-        ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 100, 30000)
-        ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 100, 30000)
-        ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 10000)
-        ew.add_spin(_("Second scroll increment"), "second-scroll-increment", _("On most annotations, control+shift+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 10000)
-
-        ew.add_title(_("General"))
-        ew.add_checkbox(_("Daily update check"), 'update-check', _("Daily check for updates on the Advene website"))
-        ew.add_option(_("On exit,"), 'imagecache-save-on-exit',
-                      _("How to handle screenshots on exit"),
-                      {
-                _("never save screenshots"): 'never',
-                _("always save screenshots"): 'always',
-                _("ask before saving screenshots"): 'ask',
-                })
-        ew.add_option(_("Auto-save"), 'package-auto-save',
-                      _("Data auto-save functionality"),
-                      {
-                _("is desactivated"): 'never',
-                _("is done automatically"): 'always',
-                _("is done after confirmation"): 'ask',
-                })
-        ew.add_spin(_("Auto-save interval"), 'package-auto-save-interval', _("Interval (in ms) between package auto-saves"), 1000, 60 * 60 * 1000)
+        ew.add_dir_selector(_("Data"), "data", _("Standard directory for data files"))
+        ew.add_dir_selector(_("Movie path"), "moviepath", _("List of directories (separated by %s) to search for movie files (_ means package directory)") % os.path.pathsep)
+        ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
+        ew.add_dir_selector(_("Player"), "plugins", _("Directory of the video player"))
 
         ew.add_title(_("Standard views"))
 
@@ -3356,12 +3325,43 @@ class AdveneGUI(object):
         ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
         ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
 
-        ew.add_title(_("Paths"))
+        ew.add_title(_("General"))
+        ew.add_checkbox(_("Daily update check"), 'update-check', _("Daily check for updates on the Advene website"))
+        ew.add_option(_("On exit,"), 'imagecache-save-on-exit',
+                      _("How to handle screenshots on exit"),
+                      {
+                _("never save screenshots"): 'never',
+                _("always save screenshots"): 'always',
+                _("ask before saving screenshots"): 'ask',
+                })
+        ew.add_option(_("Auto-save"), 'package-auto-save',
+                      _("Data auto-save functionality"),
+                      {
+                _("is desactivated"): 'never',
+                _("is done automatically"): 'always',
+                _("is done after confirmation"): 'ask',
+                })
+        ew.add_spin(_("Auto-save interval"), 'package-auto-save-interval', _("Interval (in ms) between package auto-saves"), 1000, 60 * 60 * 1000)
 
-        ew.add_dir_selector(_("Data"), "data", _("Standard directory for data files"))
-        ew.add_dir_selector(_("Movie path"), "moviepath", _("List of directories (separated by %s) to search for movie files (_ means package directory)") % os.path.pathsep)
-        ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
-        ew.add_dir_selector(_("Player"), "plugins", _("Directory of the video player"))
+        ew.add_title(_("GUI"))
+        ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"),
+                      {
+                "English": 'C',
+                "Francais": 'fr_FR',
+                _("System default"): '',
+                })
+        ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
+                    -1, 20)
+        ew.add_checkbox(_("Remember window size"), "remember-window-size", _("Remember the size of opened windows"))
+        ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
+        ew.add_spin(_("Bookmark snapshot width"), 'bookmark-snapshot-width', _("Width of the snapshots representing bookmarks"), 50, 400)
+        ew.add_spin(_("Bookmark snapshot precision"), 'bookmark-snapshot-precision', _("Precision (in ms) of the displayed bookmark snapshots."), 25, 500)
+
+        ew.add_title(_("Time-related"))
+        ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 100, 30000)
+        ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 100, 30000)
+        ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 10000)
+        ew.add_spin(_("Second scroll increment"), "second-scroll-increment", _("On most annotations, control+shift+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 10000)
 
         ew.add_title(_("Timeline parameters"))
         ew.add_spin(_("Font size"), 'font-size', _("Font size for annotation widgets"), 4, 20)
