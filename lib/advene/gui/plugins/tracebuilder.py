@@ -46,8 +46,8 @@ class TraceBuilder:
         self.controller=controller
         self.operations = []
         self.registered_views = []
-        self.actions = []
         self.opened_actions = {}
+        self.filtered_events = ['AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight']
         self.action_types = ['Annotation', 'Restructuration', 'Navigation', 'Classification', 'View building']
         self.operation_mapping = {
         'AnnotationCreate':0,
@@ -108,6 +108,9 @@ class TraceBuilder:
         ev_movie = self.controller.player.get_default_media()
         ev_movie_time = self.controller.player.current_position_value
         ev_content = ''
+        elem=None
+        elem_name = None
+        elem_id = None
         # Logging content depending on keys
         if 'element' in obj:
             if isinstance(obj['element'],advene.model.annotation.Annotation):
@@ -197,7 +200,7 @@ class TraceBuilder:
                 ev_content= 'package=' + elem.title 
                 elem_name='package'
                 elem_id=elem.title
-        ev = Event(ev_name, ev_time, ev_activity_time, ev_snapshot, ev_content)
+        ev = Event(ev_name, ev_time, ev_activity_time, ev_snapshot, ev_content, ev_movie, ev_movie_time, elem_name, elem_id)
         self.trace.add_to_trace('events', ev)
         return ev
         
@@ -321,16 +324,26 @@ class TraceBuilder:
         if type == "Undefined":
             type = self.find_action_name(obj)
             # traiter les edit
+        if type in self.opened_actions.keys():
+            # an action is already opened for this event
+            ac = self.opened_actions[type]
+            if type == "Navigation" and (ope.name == "PlayerStop" or ope.name == "PlayerPause"):
+                del self.opened_actions[type]
+            ac.add_operation(ope)
+            return ac
+        for t in self.opened_actions.keys():
+            if t != "Navigation":
+                del self.opened_actions[t]
         # verifier que ce n'est pas la meme que la derniere
-        if len(self.trace.levels['actions'])>0:
-            if self.trace.levels['actions'][len(self.trace.levels['actions'])-1].name == type:
-                ac = self.trace.levels['actions'][len(self.trace.levels['actions'])-1]
-                ac.add_operation(ope)
+#        if len(self.trace.levels['actions'])>0:
+#            if self.trace.levels['actions'][len(self.trace.levels['actions'])-1].name == type:
+#                ac = self.trace.levels['actions'][len(self.trace.levels['actions'])-1]
+#                ac.add_operation(ope)
                 #mise a jour des temps de fin, contenu, liste operations
-                
-                return ac
-        ac = Action(name=type, begintime=ope.time, endtime=None, acbegintime=ope.activity_time, acendtime=None, content=None, snap=ope.snapshot, movie=ope.movie, operations=[ope])
+#                return ac
+        ac = Action(name=type, begintime=ope.time, endtime=None, acbegintime=ope.activity_time, acendtime=None, content=None, snap=ope.snapshot, movie=ope.movie, movietime=ope.movietime, operations=[ope])
         self.trace.add_to_trace('actions', ac)
+        self.opened_actions[type]=ac
         return ac
     
     def alert_registered(self, event, operation, action):
@@ -426,12 +439,24 @@ class Trace:
         return
 
 class Event:
-    def __init__(self, name, time, actime, snap, content):
+    def __init__(self, name, time, actime, snap, content, movie, movietime, obj, obj_id):
         self.name = name
         self.time = time
         self.activity_time = actime
         self.snapshot = snap
         self.content = content
+        self.movie = movie
+        self.movietime = movietime
+        self.comment = ''
+        self.concerned_object = {
+            'name':obj,
+            'id':obj_id,
+        }
+
+    def change_comment(self, comment=''):
+        self.comment = comment
+        return
+
 
 class Operation:
     def __init__(self, name, time, actime, content, snap, movie, movietime, obj, obj_id):
@@ -444,19 +469,24 @@ class Operation:
         self.snapshot = snap
         self.movie = movie
         self.movietime = movietime
+        self.comment = ''
         self.concerned_object = {
             'name':obj,
             'id':obj_id,
         }
 
+    def change_comment(self, comment=''):
+        self.comment = comment
+        return
 
 class Action:
-    def __init__(self, name, begintime, endtime, acbegintime, acendtime, content, snap, movie, operations):
+    def __init__(self, name, begintime, endtime, acbegintime, acendtime, content, snap, movie, movietime, operations):
         self.operations=[]
         self.time = [0,0]
         self.activity_time=[0,0]
         self.name = name
         self.time[0] = begintime
+        self.comment = ''
         if endtime is not None:
             self.time[1] = endtime
         else:
@@ -471,8 +501,13 @@ class Action:
             self.content = content
         self.snapshot = snap
         self.movie = movie
+        self.movietime = movietime
         if operations is not None:
             self.operations = operations
+
+    def change_comment(self, comment=''):
+        self.comment = comment
+        return
 
     def add_operation(self, operation):
         self.operations.append(operation)
