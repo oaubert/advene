@@ -33,6 +33,7 @@ from advene.gui.util import png_to_pixbuf
 import advene.util.helper as helper
 import urllib
 import advene.model.view
+from advene.gui.widget import TimestampRepresentation
 
 def register(controller):
     controller.register_viewclass(EventAccumulator)
@@ -51,6 +52,10 @@ class EventAccumulator(AdhocView):
         self.size = 0
         self.filters = {
             'content': '',
+            'objects': [],
+            'events': ['AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight'],
+            'operations': [],
+            'actions': [],
         }
         self.times=[_('real'), _('activity')]
         self.latest = {
@@ -60,6 +65,10 @@ class EventAccumulator(AdhocView):
             'eventsBox': None,
             'operationsBox': None,
             'actionsBox': None,
+        }
+        self.events_names= {
+            'AnnotationBegin': _('Begining of an annotation'),
+            'AnnotationEnd': _('End of an annotation'),
         }
         self.operations_names = {
             'AnnotationCreate': _('Creating an annotation'),
@@ -211,10 +220,16 @@ class EventAccumulator(AdhocView):
         # action : the new or latest modified action
         #print "received : action %s, operation %s, event %s" % (action, operation, event)
         if self.options['detail'] == 'events':
+            if (event is not None and event.name in self.filters['events']):
+                return
             self.showEvents(trace.levels[self.options['detail']], event)
         if self.options['detail'] == 'operations':
+            if (operation is not None and operation.name in self.filters['events']):
+                return
             self.showOperations(trace.levels[self.options['detail']], operation)
         elif self.options['detail'] == 'actions':
+            if (action is not None and action.name in self.filters['events']):
+                return
             self.showActions(trace.levels[self.options['detail']], action)
         else:
             self.showTrace(trace.levels[self.options['detail']])
@@ -227,6 +242,8 @@ class EventAccumulator(AdhocView):
     def showEvents(self, tracelevel, event):
         #adjust the current display to the modified trace
         if event is not None:
+            #if event.name in self.filters['events']:
+            #    return
             if self.size>=self.options['max_size']:
                 self.unpackEvent()
             self.size = self.size + 1
@@ -239,10 +256,19 @@ class EventAccumulator(AdhocView):
                 return
             trace_max = max(0, len(tracelevel))
             trace_min = max(0, trace_max-self.options['max_size'])
+            t_temp = trace_max-1
+            #print 'First min %s' % trace_min
+            while t_temp > trace_min and trace_min>0:
+                if tracelevel[t_temp].name in self.filters['events']:
+                    #print 'Ignored %s' % tracelevel[t_temp].name
+                    trace_min = trace_min-1
+                t_temp = t_temp-1
+            #print 'Final min %s' % trace_min
             for i in tracelevel[trace_min:trace_max]:
-                self.size = self.size + 1
-                #print "%s %s" % (self.size, i.name)
-                self.packEvent(i)
+                if i.name not in self.filters['events']:
+                    self.size = self.size + 1
+                    #print "%s %s" % (self.size, i.name)
+                    self.packEvent(i)
         return
     
     def showOperations(self, tracelevel, operation):
@@ -355,8 +381,6 @@ class EventAccumulator(AdhocView):
         # tooltip with event infos
         # image containing snapshot of the event
         # label with the time of the event
-        snap = obj_evt.snapshot
-        pix = png_to_pixbuf(snap,height=50)
         corpsstr = ""
         if obj_evt.content is not None:
             corpsstr = urllib.unquote(obj_evt.content)
@@ -365,12 +389,10 @@ class EventAccumulator(AdhocView):
             ev_time = helper.format_time(obj_evt.activity_time)
         entetestr = "%s : %s" % (ev_time, obj_evt.name)
         entete = gtk.Label(entetestr.encode("UTF-8"))
-        #i = gtk.image_new_from_pixbuf(pix) pygtk2.12
-        i = gtk.Image()
-        i.set_from_pixbuf(pix)
         hb = gtk.HBox()
-        if i is not None:
-            hb.pack_start(i, expand=False)
+        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , True)
+        if tr is not None:
+            hb.pack_start(tr, expand=False)
             hb.pack_start(gtk.VSeparator(), expand=False)
         hb.pack_start(entete, expand=False)
         if corpsstr != "":
@@ -382,8 +404,6 @@ class EventAccumulator(AdhocView):
         # tooltip with event infos
         # image containing snapshot of the event
         # label with the time of the event
-        snap = obj_evt.snapshot
-        pix = png_to_pixbuf(snap,height=50)
         corpsstr = ''
         if obj_evt.content is not None:
             corpsstr = urllib.unquote(obj_evt.content)
@@ -403,18 +423,14 @@ class EventAccumulator(AdhocView):
             else:
                 comp = _('an unknown item')
             entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
-            
-        
+       
         entete = gtk.Label(entetestr.encode("UTF-8"))
-        #i = gtk.image_new_from_pixbuf(pix) pygtk2.12
-        i = gtk.Image()
-        i.set_from_pixbuf(pix)
         hb = gtk.HBox()
         box = gtk.EventBox()
-        if i is not None:
-            hb.pack_start(i, expand=False)
+        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , True)
+        if tr is not None:
+            hb.pack_start(tr, expand=False)
             hb.pack_start(gtk.VSeparator(), expand=False)
-        hb.pack_start(entete, expand=False)
         if corpsstr != "":
             self.toolTips.set_tip(box,corpsstr)
         def box_pressed(w, event, id, mtime):
@@ -428,18 +444,19 @@ class EventAccumulator(AdhocView):
                         self.controller.gui.edit_element(obj)
                     else:
                         print "item %s no longuer exists" % id
-                else:
+#                else:
                     #print mtime
-                    c=self.controller
-                    pos = c.create_position (value=mtime,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-                    c.update_status (status="set", position=pos)
+#                    c=self.controller
+#                    pos = c.create_position (value=mtime,
+#                                     key=c.player.MediaTime,
+#                                     origin=c.player.AbsolutePosition)
+#                    c.update_status (status="set", position=pos)
                     #need to check if id is None then go to movietime
             return
-        box.add(hb)
+        box.add(entete)
         box.connect('button-press-event', box_pressed, obj_evt.concerned_object['id'], obj_evt.movietime)
-        return box
+        hb.pack_start(box, expand=False)
+        return hb
 
     def build_action_box(self, obj_evt):
         # build the widget to present an event :
