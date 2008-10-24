@@ -3281,7 +3281,7 @@ class AdveneGUI(object):
                         'package-auto-save', 'package-auto-save-interval',
                         'bookmark-snapshot-width', 'bookmark-snapshot-precision',
                         'save-default-workspace', 'restore-default-workspace',
-                        'tts-language', )
+                        'tts-language', 'record-actions' )
         cache={
             'data': config.data.path['data'],
             'plugins': config.data.path['plugins'],
@@ -3350,10 +3350,12 @@ class AdveneGUI(object):
                 "Francais": 'fr_FR',
                 _("System default"): '',
                 })
+        ew.add_checkbox(_("Record activity trace"), "record-actions", _("Record activity trace"))
+        ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
+
         ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
                     -1, 20)
         ew.add_checkbox(_("Remember window size"), "remember-window-size", _("Remember the size of opened windows"))
-        ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
         ew.add_spin(_("Bookmark snapshot width"), 'bookmark-snapshot-width', _("Width of the snapshots representing bookmarks"), 50, 400)
         ew.add_spin(_("Bookmark snapshot precision"), 'bookmark-snapshot-precision', _("Precision (in ms) of the displayed bookmark snapshots."), 25, 500)
 
