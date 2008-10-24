@@ -1373,10 +1373,6 @@ class AdveneGUI(object):
         try:
             p.set_widget(self.drawable)
         except AttributeError:
-            if config.data.os == 'win32':
-                self.visual_id=self.drawable.window.handle
-            else:
-                self.visual_id=self.drawable.window.xid
             p.set_visual(self.visual_id)
         self.update_control_toolbar(self.player_toolbar)
         # Hook the player control keypress.
