@@ -5,8 +5,7 @@ PO_DIR = po
 DOMAIN = advene
 
 POTFILES: FORCE
-	echo ../share/advene.glade > POTFILES
-	grep -r --include=\*.py -l '\b_(' ../lib >> POTFILES
+	grep -r --include=\*.py -l '\b_(' ../lib > POTFILES
 FORCE:
 
 pot: POTFILES
