@@ -52,7 +52,7 @@ class EventAccumulator(AdhocView):
         self.filters = {
             'content': '',
         }
-        self.times=['real', 'activity']
+        self.times=[_('real'), _('activity')]
         self.latest = {
             'events': None,
             'operations': None,
@@ -62,31 +62,31 @@ class EventAccumulator(AdhocView):
             'actionsBox': None,
         }
         self.operations_names = {
-            'AnnotationCreate': 'Creating an annotation',
-            'AnnotationEditEnd': 'Validating edition of an annotation',
-            'AnnotationDelete': 'Deleting an annotation',
-            'RelationCreate': 'Creating a relation',
-            'AnnotationMerge': 'Merging annotations',
-            'AnnotationMove': 'Moving an annotation',
-            'PlayerStart': 'Starting playback',
-            'PlayerStop': 'Ending playback',
-            'PlayerPause': 'Pausing playback',
-            'PlayerResume': 'Resuming playback',
-            'PlayerSet': 'Moving to a position in the movie',
-            'ViewActivation': 'Activating a view',
-            'AnnotationTypeCreate': 'Creating an annotation type',
-            'RelationTypeCreate': 'Creating a relation type',
-            'RelationTypeDelete': 'Deleting a relation type',
-            'AnnotationTypeDelete': 'Deleting a relation type',
-            'AnnotationTypeEditEnd': 'Ending edition of an annotation type',
-            'RelationTypeEditEnd': 'Ending edition of a relation type',
-            'ViewCreate': 'Creating a view',
-            'ViewEditEnd': 'Ending edition of a view',
+            'AnnotationCreate': _('Creating an annotation'),
+            'AnnotationEditEnd': _('Validating edition of an annotation'),
+            'AnnotationDelete': _('Deleting an annotation'),
+            'RelationCreate': _('Creating a relation'),
+            'AnnotationMerge': _('Merging annotations'),
+            'AnnotationMove': _('Moving an annotation'),
+            'PlayerStart': _('Starting playback'),
+            'PlayerStop': _('Ending playback'),
+            'PlayerPause': _('Pausing playback'),
+            'PlayerResume': _('Resuming playback'),
+            'PlayerSet': _('Moving to a position in the movie'),
+            'ViewActivation': _('Activating a view'),
+            'AnnotationTypeCreate': _('Creating an annotation type'),
+            'RelationTypeCreate': _('Creating a relation type'),
+            'RelationTypeDelete': _('Deleting a relation type'),
+            'AnnotationTypeDelete': _('Deleting a relation type'),
+            'AnnotationTypeEditEnd': _('Ending edition of an annotation type'),
+            'RelationTypeEditEnd': _('Ending edition of a relation type'),
+            'ViewCreate': _('Creating a view'),
+            'ViewEditEnd': _('Ending edition of a view'),
         }
         self.incomplete_operations_names = {
-            'ElementEditBegin': 'Beginning edition',
-            'ElementEditDestroy': 'Ending edition',
-            'ElementEditCancel': 'Canceling edition',
+            'ElementEditBegin': _('Beginning edition'),
+            'ElementEditDestroy': _('Ending edition'),
+            'ElementEditCancel': _('Canceling edition'),
         }
         #self.contextual_actions = (
         #    (_("Save view"), self.save_view),
@@ -94,8 +94,8 @@ class EventAccumulator(AdhocView):
         #    )
         self.options = {
             'max_size': 20,
-            'time': 'real', #real or activity
-            'detail': 'events', #depending on tracer.trace.levels (basically : operations or actions)
+            'time': _('real'), #real or activity
+            'detail': 'operations', #depending on tracer.trace.levels (basically : events, operations or actions)
             }
         #opt, arg = self.load_parameters(parameters)
         #self.options.update(opt)
@@ -141,7 +141,7 @@ class EventAccumulator(AdhocView):
             bdetLabel = self.options['detail']
             bdet = gtk.Button(bdetLabel)
             bdet.set_size_request(60, 20)
-            btnbar.pack_start(gtk.Label(' Details : '), expand=False)
+            btnbar.pack_start(gtk.Label(_(' Details : ')), expand=False)
             btnbar.pack_start(bdet, expand=False)
             bdet.connect('clicked', details_changed)
             btnbar.pack_start(gtk.VSeparator())
@@ -166,7 +166,7 @@ class EventAccumulator(AdhocView):
             btimeLabel = self.options['time']
             btime = gtk.Button(btimeLabel)
             btime.set_size_request(60, 20)
-            btnbar.pack_start(gtk.Label(' Time : '), expand=False)
+            btnbar.pack_start(gtk.Label(_(' Time : ')), expand=False)
             btnbar.pack_start(btime, expand=False)
             btime.connect('clicked', time_changed)
             btnbar.pack_start(gtk.VSeparator())
@@ -176,7 +176,7 @@ class EventAccumulator(AdhocView):
             self.options['max_size']=int(w.get_value())
             self.receive(self.tracer.trace)
             return
-        btnbar.pack_start(gtk.Label(' Max. : '), expand=False)
+        btnbar.pack_start(gtk.Label(_(' Max. : ')), expand=False)
         self.sc = gtk.HScale(gtk.Adjustment ( value=20, lower=5, upper=100, step_incr=1, page_incr=5, page_size=5))
         self.sc.set_size_request(100, 10)
         self.sc.set_digits(0)
@@ -185,7 +185,7 @@ class EventAccumulator(AdhocView):
         btnbar.pack_start(self.sc, expand=False)
         btnbar.pack_start(gtk.VSeparator())
 
-        self.btn_filter = gtk.Button(" Filters")
+        self.btn_filter = gtk.Button(_(' Filters'))
         #self.btn_filter.connect('clicked', self.open_filters)
         btnbar.pack_start(self.btn_filter, expand=False)
         
@@ -397,11 +397,11 @@ class EventAccumulator(AdhocView):
             ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
             #print "%s %s %s" % (self.controller.package, obj_evt.concerned_object['id'], ob)
             if isinstance(ob, advene.model.annotation.Annotation):
-                comp = 'an annotation'
+                comp = _('an annotation')
             elif isinstance(ob,advene.model.annotation.Relation):
-                comp = 'a relation'
+                comp = _('a relation')
             else:
-                comp = 'an unknown item'
+                comp = _('an unknown item')
             entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
             
         
@@ -482,10 +482,8 @@ class EventAccumulator(AdhocView):
 
 
 
-#TODO   une classe event
-#       une classe action
-#       une structure de stockage de la trace
+#TODO   
 #       des moyens d'actions depuis les events
 #       filtrage pre et post visu
 #       recherche dans la trace
-#       passage action -> event
+
