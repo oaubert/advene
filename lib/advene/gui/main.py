@@ -401,8 +401,9 @@ class AdveneGUI(object):
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
             ('montage', _("Dynamic montage"), 'montage.png'),
             ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
+            ('t1', _("Trace"), 'finder.png'),
             ):
-            if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
+            if name in ('browser', 'schemaeditor', 't1') and not config.data.preferences['expert-mode']:
                 continue
             if name != 'webbrowser' and not name in self.registered_adhoc_views:
                 self.log("Missing basic adhoc view %s" % name)
