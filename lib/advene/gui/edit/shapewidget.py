@@ -1468,8 +1468,8 @@ def main():
     else:
         i=gtk.Image()
         i.set_from_file(bg)
-
         ed=ShapeEditor(background=i)
+        ed.drawer.add_object(Image(name='background', uri=os.path.basename(bg)))
     win.add(ed.widget)
 
     win.show_all()
