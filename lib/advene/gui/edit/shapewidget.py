@@ -659,6 +659,10 @@ class Image(Rectangle):
         @return: the SVG representation
         @rtype: elementtree.Element
         """
+        self.x=0
+        self.y=0
+        self.width=size[0]
+        self.height=size[1]
         attrib=dict(self.svg_attrib)
         attrib.update(self.coords2xml(relative, size))
         attrib['name']=self.name
