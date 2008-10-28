@@ -136,6 +136,34 @@ class SchemaEditor (AdhocView):
         self.update_list_schemas()
         vbox.pack_start(self.listeSchemas, expand=False)
 
+        def popup_menu(widget, event):
+            retval = False
+            button = event.button
+            x = int(event.x)
+            y = int(event.y)
+
+            if button == 3:
+                if event.window is widget.get_bin_window():
+                    model = widget.get_model()
+                    t = widget.get_path_at_pos(x, y)
+                    if t is not None:
+                        path, col, cx, cy = t
+                        schema=model[path][0]
+                        widget.get_selection().select_path(path)
+                        
+                        menu=gtk.Menu()
+                        
+                        i=gtk.MenuItem(_("Delete"))
+                        i.connect("activate", lambda e: self.delSchema(schema))
+                        menu.append(i)
+
+                        menu.show_all()
+                        menu.popup(None, None, None, button, event.time)
+                        retval = True
+            return retval
+
+        self.listeSchemas.connect('button-press-event', popup_menu)
+
         vbox.add(self.TE)
         self.hboxEspaceSchema.pack2(vbox)
         #self.hboxEspaceSchema.set_position(150)
@@ -264,6 +292,7 @@ class SchemaEditor (AdhocView):
         return True
     
     def update_schema(self, schema=None, event=None):
+        self.update_list_schemas()
         if schema in self.openedschemas:
             self.setup_canvas()
         return True
@@ -352,18 +381,15 @@ class SchemaEditor (AdhocView):
         if schema:
             self.update_list_schemas()
 
-    def delSchema(self, w):
-        # FIXME
-        return True
-        #sc = self.listeSchemas.get_current_element()
+    def delSchema(self, sc):
         tsc = sc.title
         if (sc is None):
             return False
-        if (dialog.message_dialog(label="Voulez-vous effacer le schema %s ?" % tsc, icon=gtk.MESSAGE_QUESTION, callback=None)):
-            self.controller.delete_element(sc)
-            self.update_list_schemas(None)
+        if dialog.message_dialog(label="Voulez-vous effacer le schema %s ?" % tsc, icon=gtk.MESSAGE_QUESTION, callback=None):
             if sc in self.openedschemas:
                 self.removeSchemaFromArea(sc)
+            self.controller.delete_element(sc)
+            self.update_list_schemas()
             return True
         else:
             return False
