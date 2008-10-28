@@ -349,10 +349,11 @@ class Player:
         return "dvd://%s" % str(title)
 
     def check_uri(self):
-        if gst.uri_is_valid(self.player.get_property('uri')):
+        uri=self.player.get_property('uri')
+        if uri and gst.uri_is_valid(uri):
             return True
         else:
-            print "Invalid URI", self.player.get_property('uri')
+            print "Invalid URI", str(uri)
             return False
 
     def log(self, *p):
