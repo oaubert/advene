@@ -1206,7 +1206,7 @@ class ShapeDrawer:
                 })
         bg=[ o[0] for o in self.objects if isinstance(o, Image) and o.name == 'background' ]
         if bg:
-            # There is background. Put it first.
+            # There is a background. Put it first.
             bg=bg[0]
             # Force the background image dimension
             bg.x=0
