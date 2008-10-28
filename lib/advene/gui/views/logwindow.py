@@ -42,6 +42,7 @@ def register(controller):
 class LogWindow(AdhocView):
     view_name = _("Links")
     view_id = 'linksview'
+    tooltip = _("URL stack")
     def __init__ (self, controller=None):
         super(LogWindow, self).__init__(controller=controller)
         self.close_on_package_load = False

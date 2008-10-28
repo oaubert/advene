@@ -51,6 +51,7 @@ def register(controller):
 class TagBag(AdhocView):
     view_name = _("Tag Bag")
     view_id = 'tagbag'
+    tooltip = _("Bag of tags")
     def __init__(self, controller=None, parameters=None, tags=None, vertical=True):
         super(TagBag, self).__init__(controller=controller)
         self.close_on_package_load = False
