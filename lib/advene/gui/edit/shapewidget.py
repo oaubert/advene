@@ -1424,6 +1424,13 @@ class ShapeEditor:
             fs.destroy()
             return True
 
+        def save_svg(b):
+            tree=ET.ElementTree(self.drawer.get_svg(relative=False))
+            f=open('/tmp/shapewidget.svg', 'w')
+            tree.write(f, encoding='utf-8')
+            f.close()
+            return True
+
         b=gtk.Button(_("Dump SVG"))
         b.connect('clicked', dump_svg)
         control.pack_start(b, expand=False)
@@ -1431,6 +1438,11 @@ class ShapeEditor:
         b=gtk.Button(_("Load SVG"))
         b.connect('clicked', load_svg)
         control.pack_start(b, expand=False)
+
+        if True:
+            b=gtk.Button(_("Save SVG"))
+            b.connect('clicked', save_svg)
+            control.pack_start(b, expand=False)
 
         hbox.pack_start(control, expand=False)
         vbox.show_all()
