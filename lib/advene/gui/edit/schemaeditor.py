@@ -36,7 +36,6 @@ except ImportError:
 import cairo
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.gui.views import AdhocView
-from advene.gui.util import get_pixmap_button
 from advene.gui.util import dialog
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.elements import get_edit_popup
@@ -93,44 +92,56 @@ class SchemaEditor (AdhocView):
         self.widget = self.build_widget()
 
     def build_widget(self):
-        #hbox containing Schema menu and buttons
-        hboxMenu = gtk.HBox(spacing=5)
-        self.listeSchemas = dialog.list_selector_widget(
-            members=[ (s, s.getTitle()) for s in self.controller.package.getSchemas()])
-        hboxMenu.pack_start(self.listeSchemas, expand=True)
-        boutonSuppr = gtk.Button(label="Supprimer", stock=gtk.STOCK_DELETE)
-        boutonModif = gtk.Button(label="Modifier", stock=gtk.STOCK_OPEN)
-        boutonNew = gtk.Button(label="Nouveau", stock=gtk.STOCK_NEW)
-        hboxMenu.pack_start(boutonModif, expand=False)
-        hboxMenu.pack_start(boutonSuppr, expand=False)
-        hboxMenu.pack_start(boutonNew, expand=False)
-        boutonModif.connect('clicked', self.openSchema )
-        boutonSuppr.connect('clicked', self.delSchema)
-        boutonNew.connect('clicked', self.newSchema)
-
         #HPaned containing schema area and Type explorer and Constraint explorer
         self.hboxEspaceSchema = gtk.HPaned()
         #   schema area
         self.schemaArea = self.createSchemaArea()
         self.openedschemas = []
         self.hboxEspaceSchema.pack1(self.schemaArea, resize=True)
+
+        vbox=gtk.VBox()
         #   type explorer
         self.TE= TypeExplorer(self.controller, self.controller.package)
-        self.hboxEspaceSchema.pack2(self.TE)
+
+        # Store (schema, schema title, is_displayed?)
+        store=gtk.ListStore( object, str, bool )
+
+        self.listeSchemas = gtk.TreeView(store)
+
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn(_('Schema'), renderer, text=1)
+        column.set_resizable(True)
+
+        self.listeSchemas.append_column(column)
+        renderer = gtk.CellRendererToggle()
+        renderer.set_property('activatable', True)
+
+        def toggled_schema(rend, path, model, col):
+            schema=model[path][0]
+            if schema in self.openedschemas:
+                # Undisplay
+                self.removeSchemaFromArea(schema)
+                model[path][col]=False
+            else:
+                if len(self.openedschemas) >= 4:
+                    self.log("Too many opened schemas")
+                    return True
+                self.openSchema(schema)
+                model[path][col]=True
+            return True
+        renderer.connect('toggled', toggled_schema, store, 2)
+        column = gtk.TreeViewColumn(_('Display'), renderer, active=2)
+        self.listeSchemas.append_column(column)
+        self.listeSchemas.show_all()
+        self.update_list_schemas()
+        vbox.pack_start(self.listeSchemas, expand=False)
+
+        vbox.add(self.TE)
+        self.hboxEspaceSchema.pack2(vbox)
         #self.hboxEspaceSchema.set_position(150)
         self.hboxEspaceSchema.show_all()
 
-        #main vbox.
-        vbox=gtk.VBox()
-        vbox.pack_start(hboxMenu, expand=False, padding=10)
-        vbox.pack_start(gtk.HSeparator(), expand=False)
-        vbox.pack_start(self.hboxEspaceSchema, expand=True)
-        vbox.pack_start(gtk.HSeparator(), expand=False)
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        #sw.add_events(gtk.gdk.BUTTON_PRESS_MASK)
-        sw.add_with_viewport(vbox)
-        return sw
+        return self.hboxEspaceSchema
 
     def createSchemaArea(self):
         #Constraint explorer
@@ -321,14 +332,11 @@ class SchemaEditor (AdhocView):
         self.update_model(None)
         return True
 
-    def update_list_schemas(self, active_element=None):
-        store, i = dialog.generate_list_model( elements = [ (s, s.getTitle()) for s in self.controller.package.getSchemas()],active_element=active_element)
-        self.listeSchemas.set_model(store)
-        if i is None:
-            i = store.get_iter_first()
-        if i is not None:
-            self.listeSchemas.set_active_iter(i)
-
+    def update_list_schemas(self):
+        store=self.listeSchemas.get_model()
+        store.clear()
+        for s in self.controller.package.schemas:
+            store.append( [ s, self.controller.get_title(s), s in self.openedschemas ] )
 
 ##
 #
@@ -342,10 +350,12 @@ class SchemaEditor (AdhocView):
                                     controller=self.controller)
         schema=cr.popup(modal=True)
         if schema:
-            self.update_list_schemas( active_element=schema)
+            self.update_list_schemas()
 
     def delSchema(self, w):
-        sc = self.listeSchemas.get_current_element()
+        # FIXME
+        return True
+        #sc = self.listeSchemas.get_current_element()
         tsc = sc.title
         if (sc is None):
             return False
@@ -358,9 +368,7 @@ class SchemaEditor (AdhocView):
         else:
             return False
 
-
-    def openSchema(self, w):
-        schema = self.listeSchemas.get_current_element()
+    def openSchema(self, schema):
         if (schema is None):
             print "Error opening schema : None"
             return
