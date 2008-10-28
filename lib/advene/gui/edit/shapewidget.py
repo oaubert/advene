@@ -479,16 +479,23 @@ class Text(Rectangle):
 
     def __init__(self, name=SHAPENAME, color="green"):
         super(Text, self).__init__(name, color)
+        self.linewidth=1
         self.text='Some text'
         self.textsize=20
 
     def render(self, pixmap, invert=False):
         width, height=pixmap.get_size()
         context=pixmap.cairo_create()
-        context.move_to(self.x, self.y)
+
         context.select_font_face("Helvetica", cairo.FONT_SLANT_NORMAL,
                                  cairo.FONT_WEIGHT_NORMAL)
         context.set_font_size(self.textsize)
+
+        extents=context.text_extents(self.text)
+
+        # Fix width, height attributes
+        self.width = extents[2]
+        self.height = extents[3]
 
         # FIXME: does not work correctly...
         if invert:
@@ -497,6 +504,7 @@ class Text(Rectangle):
         rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1.0)
         context.set_source_rgba(*rgba)
 
+        context.move_to(self.x, self.y)
         try:
             context.show_text(self.text)
             self.width, self.height = context.text_extents(self.text)[2:4]
