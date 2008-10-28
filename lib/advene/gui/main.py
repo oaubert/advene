@@ -300,11 +300,17 @@ class AdveneGUI(object):
             (gtk.STOCK_OPEN, self.on_open1_activate, _("Open a package file")),
             (gtk.STOCK_SAVE, self.on_save1_activate, _("Save the current package")),
             (gtk.STOCK_SAVE_AS, self.on_save_as1_activate, _("Save the package with a new name")),
-            (gtk.STOCK_FLOPPY, self.on_b_addfile_clicked, _("Select movie file...")),
+            ('moviefile.png', self.on_b_addfile_clicked, _("Select movie file...")),
             (gtk.STOCK_CDROM, self.on_b_selectdvd_clicked, _("Select DVD")),
             (gtk.STOCK_QUIT, self.on_exit, _("Quit")),
             ):
-            b=gtk.ToolButton(stock)
+            if stock.startswith('gtk-'):
+                b=gtk.ToolButton(stock)
+            else:
+                b=gtk.ToolButton()
+                i=gtk.Image()
+                i.set_from_file( config.data.advenefile( ('pixmaps', stock ) ) )
+                b.set_icon_widget(i)
             b.set_tooltip(self.tooltips, tip)
             b.connect('clicked', callback)
             self.gui.fileop_toolbar.insert(b, -1)
