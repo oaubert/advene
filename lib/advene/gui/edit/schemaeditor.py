@@ -56,7 +56,7 @@ def register(controller):
 class SchemaEditor (AdhocView):
     view_name = _("Schema Editor")
     view_id = 'schemaeditor'
-    tooltip=("Editor view of Advene schemas")
+    tooltip=("Graphical editor of Advene schemas")
     def __init__ (self, controller=None, parameters=None, package=None):
         super(SchemaEditor, self).__init__(controller=controller)
         self.close_on_package_load = False
