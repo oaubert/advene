@@ -549,7 +549,11 @@ class Text(Rectangle):
         attrib.update(self.coords2xml(relative, size))
         attrib['name']=self.name
         attrib['stroke']=self.color
-        attrib['style']="stroke-width:%d" % self.linewidth
+        if self.filled:
+            attrib['fill']=self.color
+        else:
+            attrib['fill']='none'
+        attrib['style']="stroke-width:%d; font-family: sans-serif; font-size: %d" % (self.linewidth, self.textsize)
         e=ET.Element('text', attrib=attrib)
         e.text=self.text
         if self.link:
