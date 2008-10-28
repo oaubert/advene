@@ -480,6 +480,7 @@ class Text(Rectangle):
     def __init__(self, name=SHAPENAME, color="green"):
         super(Text, self).__init__(name, color)
         self.linewidth=1
+        self.filled=True
         self.text='Some text'
         self.textsize=20
 
