@@ -604,9 +604,9 @@ class Image(Rectangle):
              ('width', 0),
              ('height', 1) )
 
-    def __init__(self, name=SHAPENAME, color="green"):
+    def __init__(self, name=SHAPENAME, color="green", uri=''):
         super(Image, self).__init__(name, color)
-        self.uri=''
+        self.uri=uri
 
     def render(self, pixmap, invert=False):
         # FIXME
