@@ -35,6 +35,7 @@ import os
 import gtk
 import cairo
 import urllib
+import re
 
 try:
     import advene.util.ElementTree as ET
@@ -48,6 +49,8 @@ from gettext import gettext as _
 
 COLORS = [ 'red', 'green', 'blue', 'black', 'white', 'gray', 'yellow' ]
 SVGNS = 'http://www.w3.org/2000/svg'
+
+stroke_width_re=re.compile(r'stroke-width:\s*(\d+)')
 
 defined_shape_classes=[]
 
@@ -165,8 +168,9 @@ class Shape(object):
         s.filled=( element.attrib.get('fill', 'none') != 'none' )
         s.color=element.attrib['stroke']
         style=element.attrib['style']
-        if style.startswith('stroke-width:'):
-            s.linewidth=int(style.replace('stroke-width:', ''))
+        m=stroke_width_re.search(style)
+        if m:
+            s.linewidth=int(m.group(1))
         c=cls.xml2coords(cls.coords, element.attrib, context.dimensions())
         for n, v in c.iteritems():
             setattr(s, n, v)
@@ -531,8 +535,9 @@ class Text(Rectangle):
         s.color=element.attrib['stroke']
         s.text=element.text
         style=element.attrib['style']
-        if style.startswith('stroke-width:'):
-            s.linewidth=int(style.replace('stroke-width:', ''))
+        m=stroke_width_re.search(style)
+        if m:
+            s.linewidth=int(m.group(1))
         c=cls.xml2coords(cls.coords, element.attrib, context.dimensions())
         for n, v in c.iteritems():
             setattr(s, n, v)
