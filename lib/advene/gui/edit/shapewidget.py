@@ -1299,6 +1299,7 @@ class ShapeDrawer:
                         o.y=0
                         o.width=self.canvaswidth=p.get_width()
                         o.height=self.canvasheight=p.get_height()
+                        self.widget.set_size_request(self.canvaswidth, self.canvasheight)
                     else:
                         self.objects.append( (o, o.name) )
                     break
