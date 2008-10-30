@@ -504,7 +504,7 @@ class Text(Rectangle):
 
         # FIXME: does not work correctly...
         if invert:
-            context.set_operator(cairo.OPERATOR_XOR)
+            context.set_operator(cairo.OPERATOR_ADD)
         color=gtk.gdk.color_parse(self.color)
         rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1.0)
         context.set_source_rgba(*rgba)
