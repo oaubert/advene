@@ -591,10 +591,13 @@ class Text(Rectangle):
             hb.pack_start(widget, expand=False)
             return hb
 
-        # URI
+        # Text
         textsel = gtk.Entry()
         textsel.set_text(self.text)
-        vbox.pack_start(label_widget(_("Text"), textsel), expand=False)
+        l=label_widget(_("Text"), textsel)
+        vbox.pack_start(l, expand=False)
+        # Put the text at the beginning
+        vbox.reorder_child(l, 0)
         vbox.widgets['text']=textsel
 
         # Text size
@@ -602,7 +605,9 @@ class Text(Rectangle):
         textsizesel.set_range(4, 80)
         textsizesel.set_increments(1, 4)
         textsizesel.set_value(self.textsize)
-        vbox.pack_start(label_widget(_("Textsize"), textsizesel), expand=False)
+        l=label_widget(_("Textsize"), textsizesel)
+        vbox.pack_start(l, expand=False)
+        vbox.reorder_child(l, 1)
         vbox.widgets['textsize']=textsizesel
 
         return vbox
@@ -822,6 +827,7 @@ class Line(Rectangle):
         draw_arrow = gtk.CheckButton(_("Draw an arrow"))
         draw_arrow.set_active(self.arrow)
         vbox.pack_start(draw_arrow)
+        vbox.reorder_child(draw_arrow, 0)
         vbox.widgets['arrow']=draw_arrow
 
         # Arrow size
@@ -829,7 +835,9 @@ class Line(Rectangle):
         arrowsize.set_range(1, 40)
         arrowsize.set_increments(1, 4)
         arrowsize.set_value(self.arrowwidth)
-        vbox.pack_start(label_widget(_("Arrow size"), arrowsize), expand=False)
+        l=label_widget(_("Arrow size"), arrowsize)
+        vbox.pack_start(l, expand=False)
+        vbox.reorder_child(l, 1)
         vbox.widgets['arrowwidth']=arrowsize
         return vbox
 
