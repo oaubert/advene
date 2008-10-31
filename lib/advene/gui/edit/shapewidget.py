@@ -1356,6 +1356,14 @@ class ShapeEditor:
 
     This component provides an example of using ShapeWidget.
     """
+    key_mapping={
+        gtk.keysyms.l: Line,
+        gtk.keysyms.r: Rectangle,
+        gtk.keysyms.t: Text,
+        gtk.keysyms.c: Circle,
+        #gtk.keysyms.i: Image,
+        }
+
     def __init__(self, background=None):
         self.background=None
         self.drawer=ShapeDrawer(callback=self.callback,
@@ -1365,6 +1373,22 @@ class ShapeEditor:
         self.colors = COLORS
         self.defaultcolor = self.colors[0]
         self.widget=self.build_widget()
+        self.widget.connect('key-press-event', self.key_press_event)
+
+    def key_press_event(self, widget, event):
+        cl=self.key_mapping.get(event.keyval, None)
+        if cl is not None:
+            try:
+                # Select the appropriate shape
+                i=self.shapes.index(cl)
+                self.shapeselector.set_active(i)
+                return True
+            except IndexError:
+                # Maybe a method
+                if callable(cl):
+                    cl(widget, event)
+                    return True
+        return False
 
     def callback(self, l):
         if l[0][0] is None or l[1][0] is None:
@@ -1463,9 +1487,9 @@ class ShapeEditor:
             self.drawer.shape_class = self.shapes[combobox.get_active()]
             return True
 
-        shapeselector = self.build_selector( [ s.SHAPENAME for s in self.shapes ],
-                                            changeshape )
-        control.pack_start(shapeselector, expand=False)
+        self.shapeselector = self.build_selector( [ s.SHAPENAME for s in self.shapes ],
+                                                  changeshape )
+        control.pack_start(self.shapeselector, expand=False)
 
         def changecolor(combobox):
             self.defaultcolor = self.colors[combobox.get_active()]
@@ -1514,6 +1538,7 @@ class ShapeEditor:
 
         hbox.pack_start(control, expand=False)
         vbox.show_all()
+
         return vbox
 
 def main():
