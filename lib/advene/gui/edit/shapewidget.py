@@ -52,6 +52,7 @@ COLORS = [ 'red', 'green', 'blue', 'black', 'white', 'gray', 'yellow' ]
 SVGNS = 'http://www.w3.org/2000/svg'
 
 stroke_width_re=re.compile(r'stroke-width:\s*(\d+)')
+arrow_width_re=re.compile(r'#arrow(\d+)')
 
 defined_shape_classes=[]
 
@@ -840,6 +841,13 @@ class Line(Rectangle):
         vbox.reorder_child(l, 1)
         vbox.widgets['arrowwidth']=arrowsize
         return vbox
+
+    def post_parse(self):
+        """Handle arrow markers.
+        """
+        if 'marker-end' in self.svg_attrib:
+            self.arrow=True
+            self.arrowwidth=int(arrow_width_re.findall(self.svg_attrib['marker-end'])[0])
 
     def get_svg(self, relative=False, size=None):
         """
