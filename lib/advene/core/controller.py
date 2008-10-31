@@ -2338,25 +2338,25 @@ class AdveneController(object):
     def create_static_view(self, elements=None):
         """Create a static view from the given elements.
         """
+        p=self.package
+        ident=p._idgenerator.get_id(View)
+        v=p.createView(
+            ident=ident,
+            author=config.data.userid,
+            date=self.get_timestamp(),
+            clazz='package',
+            content_mimetype='text/html'
+            )
+        p.views.append(v)
+        p._idgenerator.add(ident)
         if not elements:
-            return None
+            self.notify('ViewCreate', view=v, immediate=True)
+            return v
         if isinstance(elements[0], Annotation):
-            p=self.package
-            ident=p._idgenerator.get_id(View)
-            v=p.createView(
-                ident=ident,
-                author=config.data.userid,
-                date=self.get_timestamp(),
-                clazz='package',
-                content_mimetype='text/html'
-                )
             if len(elements) > 1:
                 v.title=_("Comment on set of %d annotations") % len(elements)
             else:
                 v.title=_("Comment on %s") % self.get_title(elements[0])
-            p.views.append(v)
-            p._idgenerator.add(ident)
-
             data=[]
             for element in elements:
                 ctx=self.build_context(element)
@@ -2368,18 +2368,7 @@ class AdveneController(object):
                     'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
                     })
             v.content.data="\n".join(data)
-            self.notify('ViewCreate', view=v, immediate=True)
-            return v
         elif isinstance(elements[0], AnnotationType):
-            p=self.package
-            ident=p._idgenerator.get_id(View)
-            v=p.createView(
-                ident=ident,
-                author=config.data.userid,
-                date=self.get_timestamp(),
-                clazz='package',
-                content_mimetype='text/html'
-                )
             at_title=self.get_title(elements[0])
             v.title=_("List of %s annotations") % at_title
             p.views.append(v)
@@ -2399,9 +2388,8 @@ class AdveneController(object):
 </p>
 </div></div>"""]
             v.content.data="\n".join(data)
-            self.notify('ViewCreate', view=v, immediate=True)
-            return v
-        return None
+        self.notify('ViewCreate', view=v, immediate=True)
+        return v
 
     def get_export_filters(self):
         importer_package=Package(uri=config.data.advenefile('exporters.xml'))
