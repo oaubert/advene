@@ -381,10 +381,12 @@ class Shape(object):
                 if n in edit.widgets:
                     setattr(self, n, edit.widgets[n].get_text())
             self.color = COLORS[edit.widgets['color'].get_active()]
-            for n in ('linewidth', 'textsize'):
+            for n in ('linewidth', 'textsize', 'arrowwidth'):
                 if n in edit.widgets:
                     setattr(self, n, int(edit.widgets[n].get_value()))
-            self.filled = edit.widgets['filled'].get_active()
+            for n in ('filled', 'arrow'):
+                if n in edit.widgets:
+                    setattr(self, n, edit.widgets[n].get_active())
             return True
 
         return False
@@ -717,6 +719,7 @@ class Line(Rectangle):
     def __init__(self, name=SHAPENAME, color="green", arrow=False):
         super(Line, self).__init__(name, color)
         self.arrow=arrow
+        self.arrowwidth=10
 
     def set_bounds(self, bounds):
         self.x1, self.y1 = bounds[0]
@@ -739,8 +742,8 @@ class Line(Rectangle):
                   self.y2)
         if self.arrow:
             theta=atan2( self.width, self.height )
-            ox=6
-            oy=10
+            ox=self.arrowwidth / 2 + 1
+            oy=self.arrowwidth
             pixmap.draw_polygon(gc,
                                 True,
                                 ( (self.x2, self.y2),
@@ -804,6 +807,31 @@ class Line(Rectangle):
                  and y > min(self.y1, self.y2)
                  and y < max(self.y1, self.y2)
                  and abs(y - (a * x + b)) < self.tolerance )
+
+    def edit_properties_widget(self):
+        """Build a widget to edit the shape properties.
+        """
+        vbox=super(Line, self).edit_properties_widget()
+
+        def label_widget(label, widget):
+            hb=gtk.HBox()
+            hb.add(gtk.Label(label))
+            hb.pack_start(widget, expand=False)
+            return hb
+
+        draw_arrow = gtk.CheckButton(_("Draw an arrow"))
+        draw_arrow.set_active(self.arrow)
+        vbox.pack_start(draw_arrow)
+        vbox.widgets['arrow']=draw_arrow
+
+        # Arrow size
+        arrowsize = gtk.SpinButton()
+        arrowsize.set_range(1, 40)
+        arrowsize.set_increments(1, 4)
+        arrowsize.set_value(self.arrowwidth)
+        vbox.pack_start(label_widget(_("Arrow size"), arrowsize), expand=False)
+        vbox.widgets['arrowwidth']=arrowsize
+        return vbox
 
 class Circle(Rectangle):
     """A Circle shape.
