@@ -205,9 +205,9 @@ class Shape(object):
             a=ET.Element('a', attrib={ 'xlink:href': self.link,
                                        'title': self.link_label or _("Link to %s") % self.link })
             a.append(e)
-            return a
+            yield a
         else:
-            return e
+            yield e
 
     def copy_from(self, shape, style=False):
         """Copy data from another shape.
@@ -568,9 +568,9 @@ class Text(Rectangle):
             a=ET.Element('a', attrib={ 'xlink:href': self.link,
                                        'title': self.link_label })
             a.append(e)
-            return a
+            yield a
         else:
-            return e
+            yield e
 
     def __contains__(self, point):
         # We cannot use the inherited method, since text is draw *above* x,y
@@ -685,9 +685,9 @@ class Image(Rectangle):
             a=ET.Element('a', attrib={ 'xlink:href': self.link,
                                        'title': self.link_label or _("Link to %s") % self.link })
             a.append(e)
-            return a
+            yield a
         else:
-            return e
+            yield e
 
     def edit_properties_widget(self):
         """Build a widget to edit the shape properties.
@@ -841,6 +841,41 @@ class Line(Rectangle):
         vbox.widgets['arrowwidth']=arrowsize
         return vbox
 
+    def get_svg(self, relative=False, size=None):
+        """
+        <defs><marker id="myMarker" viewBox="0 0 10 10" refX="1" refY="5" 
+        markerUnits="strokeWidth" orient="auto"
+        markerWidth="4" markerHeight="3">
+        <polyline points="0,0 10,5 0,10 1,5" fill="darkblue" />
+        </marker></defs>
+        """
+        e=super(Line, self).get_svg(relative, size).next()
+        if self.arrow:
+            if e.tag == 'a' or e.tag == ET.QName(SVGNS, 'a'):
+                # It is a link. Use the child.
+                el=e[0]
+            else:
+                el=e
+            defs=ET.Element('defs')
+            marker=ET.Element('marker', {
+                    'id': "arrow%d" % self.arrowwidth,
+                    'viewBox': "0 0 10 10",
+                    'refX': '5',
+                    'refY': '5',
+                    'orient': 'auto',
+                    'markerWidth': str(self.arrowwidth / 2 + 1),
+                    'markerHeight': str(self.arrowwidth) })
+            defs.append(marker)
+            marker.append(ET.Element('polyline', {
+                        'points': "0,0 10,5 0,10 1,5",
+                        'fill': self.color }))
+            el.attrib['marker-end']='url(#arrow%d)' % self.arrowwidth
+            yield defs
+            yield e
+        else:
+            yield e
+        
+
 class Circle(Rectangle):
     """A Circle shape.
 
@@ -951,7 +986,7 @@ class Link(Shape):
         @rtype: elementtree.Element
         """
         print "Should not happen..."
-        return None
+        yield None
 
 class ShapeDrawer:
     """Widget allowing to draw and edit shapes.
@@ -1295,14 +1330,16 @@ class ShapeDrawer:
             if hasattr(bg, '_pixbuf'):
                 bg.width=bg._pixbuf.get_width()
                 bg.height=bg._pixbuf.get_height()
-            root.append(bg.get_svg(relative=relative, size=size))
+            for e in bg.get_svg(relative=relative, size=size):
+                root.append(e)
         else:
             bg=None
         for o in self.objects:
             if o == bg:
                 # The background already has been added
                 continue
-            root.append(o[0].get_svg(relative=relative, size=size))
+            for e in o[0].get_svg(relative=relative, size=size):
+                root.append(e)
         ET_indent(root)
         return root
 
