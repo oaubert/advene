@@ -1356,14 +1356,6 @@ class ShapeEditor:
 
     This component provides an example of using ShapeWidget.
     """
-    key_mapping={
-        gtk.keysyms.l: Line,
-        gtk.keysyms.r: Rectangle,
-        gtk.keysyms.t: Text,
-        gtk.keysyms.c: Circle,
-        #gtk.keysyms.i: Image,
-        }
-
     def __init__(self, background=None):
         self.background=None
         self.drawer=ShapeDrawer(callback=self.callback,
@@ -1372,6 +1364,15 @@ class ShapeEditor:
 
         self.colors = COLORS
         self.defaultcolor = self.colors[0]
+
+        self.key_mapping={
+            gtk.keysyms.l: Line,
+            gtk.keysyms.r: Rectangle,
+            gtk.keysyms.t: Text,
+            gtk.keysyms.c: Circle,
+            #gtk.keysyms.i: Image,
+            }
+
         self.widget=self.build_widget()
         self.widget.connect('key-press-event', self.key_press_event)
 
@@ -1383,7 +1384,7 @@ class ShapeEditor:
                 i=self.shapes.index(cl)
                 self.shapeselector.set_active(i)
                 return True
-            except IndexError:
+            except ValueError:
                 # Maybe a method
                 if callable(cl):
                     cl(widget, event)
@@ -1564,6 +1565,7 @@ def main():
         ed=ShapeEditor(background=i)
         ed.drawer.add_object(Image(name='background', uri=os.path.basename(bg)))
     win.add(ed.widget)
+    ed.key_mapping[gtk.keysyms.q]=lambda w, e: gtk.main_quit()
 
     win.show_all()
 
