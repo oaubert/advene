@@ -1,3 +1,16 @@
+* annotationdisplay: handle x-advene-zone
+
+* ssa import filter
+
+* svg editor: add a "advene_comment" field to the svg source (similar
+   to label in advene zones)
+
+* htmleditor: put edit source/wysiwyg in the toolbar
+
+* htmleditor: copy/paste
+
+* annotation table view: display snapshots
+
 * finder: filter (global or by column), grouping (by column)
 
 * HTMLeditor: implement basic css parsing (cf python-cssutils)
@@ -2514,3 +2527,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * investigate cherrypy crash when displaying a dialog (-> catch exception)
 
 * command line conversion option
+
+* create static view : add to adhoc-views toolbar
+
