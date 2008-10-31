@@ -27,7 +27,7 @@ import StringIO
 import advene.core.config as config
 from advene.gui.edit.elements import ContentHandler, TextContentHandler
 from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle, ShapeEditor
-from advene.gui.util import image_from_position, dialog, decode_drop_parameters
+from advene.gui.util import image_from_position, dialog, decode_drop_parameters, get_pixmap_toolbutton
 
 from advene.gui.edit.rules import EditRuleSet, EditQuery
 from advene.rules.elements import RuleSet, SimpleQuery
@@ -598,6 +598,7 @@ class HTMLContentHandler (ContentHandler):
         self.view = gtk.VBox()
 
         tb=gtk.Toolbar()
+        vbox.toolbar=tb
         tb.set_style(gtk.TOOLBAR_ICONS)
         for (icon, tooltip, action) in (
             (gtk.STOCK_BOLD, _("Bold"), lambda i: self.editor.apply_html_tag('b')),
@@ -655,6 +656,9 @@ class HTMLContentHandler (ContentHandler):
                                                    controller=self.controller,
                                                    parent=self.parent)
                 self.sourceview.widget=self.sourceview.get_view()
+                b=get_pixmap_toolbutton('xml.png', edit_wysiwyg)
+                b.set_tooltip(self.tooltips, _("WYSIWYG editor"))
+                self.sourceview.widget.toolbar.insert(b, 0)
 
             vbox.foreach(vbox.remove)
             vbox.add(self.sourceview.widget)
@@ -665,6 +669,10 @@ class HTMLContentHandler (ContentHandler):
             self.editing_source=True
             vbox.show_all()
             return True
+
+        b=get_pixmap_toolbutton('xml.png', edit_source)
+        b.set_tooltip(self.tooltips, _("Edit HTML source"))
+        tb.insert(b, 0)
 
         # FIXME: this test should be activated for the release
         #if config.data.preferences['expert-mode']:

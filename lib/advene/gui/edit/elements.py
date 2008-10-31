@@ -49,7 +49,7 @@ from advene.model.query import Query
 from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.browser import Browser
 from advene.gui.views.tagbag import TagBag
-from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, get_pixmap_toolbutton, name2color
 from advene.gui.util.completer import Completer
 import advene.gui.popup
 from advene.gui.widget import AnnotationRepresentation, RelationRepresentation
@@ -147,34 +147,14 @@ class EditElementPopup (AdhocView):
             b.connect('clicked', self.apply_cb)
             hbox.add (b)
 
-            def apply_and_open(b):
-                self.apply_cb(b, None)
-                # Open in web browser
-                ctx=self.controller.build_context()
-                url=ctx.evaluateValue('here/absolute_url')
-                self.controller.open_url('/'.join( (url, 'view', self.element.id) ))
-                return True
-
-            def apply_and_activate(b):
-                self.apply_cb(b, None)
-                self.controller.activate_stbv(self.element)
-                p=self.controller.player
-                if p.status == p.PauseStatus:
-                    self.controller.update_status('resume')
-                elif p.status == p.PlayingStatus:
-                    pass
-                else:
-                    self.controller.update_status('start')
-                return True
-
             if isinstance(self.element, View):
                 t = helper.get_view_type(self.element)
                 if t == 'static' and self.element.matchFilter['class'] in ('package', '*'):
-                    b = get_pixmap_button( 'web.png', apply_and_open)
+                    b = get_pixmap_button( 'web.png', self.apply_and_open)
                     self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
                     hbox.add(b)
                 elif t == 'dynamic':
-                    b = get_small_stock_button( gtk.STOCK_MEDIA_PLAY, apply_and_activate)
+                    b = get_small_stock_button( gtk.STOCK_MEDIA_PLAY, self.apply_and_activate)
                     self.controller.gui.tooltips.set_tip(b, _("Apply changes and activate the view"))
                     hbox.add(b)
 
@@ -250,6 +230,26 @@ class EditElementPopup (AdhocView):
         if self.apply_cb(button, event):
             self.controller.notify("ElementEditEnd", element=self.element, comment="Window closed")
             self.close()
+        return True
+
+    def apply_and_open(self, b):
+        self.apply_cb(b, None)
+        # Open in web browser
+        ctx=self.controller.build_context()
+        url=ctx.evaluateValue('here/absolute_url')
+        self.controller.open_url('/'.join( (url, 'view', self.element.id) ))
+        return True
+
+    def apply_and_activate(self, b):
+        self.apply_cb(b, None)
+        self.controller.activate_stbv(self.element)
+        p=self.controller.player
+        if p.status == p.PauseStatus:
+            self.controller.update_status('resume')
+        elif p.status == p.PlayingStatus:
+            pass
+        else:
+            self.controller.update_status('start')
         return True
 
     def close_cb (self, button=None, data=None):
@@ -604,6 +604,24 @@ class EditViewPopup (EditElementPopup):
                              mimetypeeditable=editable, parent=self.element)
         f.set_editable (editable)
         t = f.get_view ()
+        tb=getattr(f.content_handler_widget, 'toolbar', None)
+        if tb is not None:
+            # Add appropriate buttons to toolbar
+            b = gtk.ToolButton (gtk.STOCK_OK)
+            b.connect('clicked', self.apply_cb)
+            self.controller.gui.tooltips.set_tip(b, _("Apply changes"))
+            tb.insert(b, -1)
+
+            b = gtk.ToolButton (gtk.STOCK_CLOSE)
+            b.connect('clicked', self.close_cb)
+            self.controller.gui.tooltips.set_tip(b, _("Close window"))
+            tb.insert(b, -1)
+
+            if helper.get_view_type(self.element) == 'static' and self.element.matchFilter['class'] in ('package', '*'):
+                b = get_pixmap_toolbutton( 'web.png', self.apply_and_open)
+                self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
+                tb.insert(b, -1)
+
         self.register_form (f)
         vbox.pack_start (self.framed(t, _("Content")), expand=True)
 
@@ -1278,6 +1296,7 @@ class TextContentHandler (ContentHandler):
 
         if not compact:
             tb=gtk.Toolbar()
+            vbox.toolbar=tb
             tb.set_style(gtk.TOOLBAR_ICONS)
 
             b=gtk.ToolButton()
