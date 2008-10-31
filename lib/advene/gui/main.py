@@ -408,10 +408,11 @@ class AdveneGUI(object):
             ('montage', _("Dynamic montage"), 'montage.png'),
             ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
             ('trace', _("Trace"), 'trace.png'),
+            ('comment', _("Edit a comment view"), 'comment.png')
             ):
             if name in ('browser', 'schemaeditor', 't1') and not config.data.preferences['expert-mode']:
                 continue
-            if name != 'webbrowser' and not name in self.registered_adhoc_views:
+            if name not in ('webbrowser', 'comment') and not name in self.registered_adhoc_views:
                 self.log("Missing basic adhoc view %s" % name)
                 continue
             b=gtk.Button()
@@ -1944,6 +1945,12 @@ class AdveneGUI(object):
                     self.edit_accumulator = None
                     return False
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
+        elif name == 'comment':
+            print "Creating view"
+            v=self.controller.create_static_view(elements=[])
+            label=_("Comment")
+            v.title=label
+            view=get_edit_popup(v, controller=self.controller)
         elif name in self.registered_adhoc_views:
             view=self.registered_adhoc_views[name](controller=self.controller,
                                                    parameters=parameters, **kw)
