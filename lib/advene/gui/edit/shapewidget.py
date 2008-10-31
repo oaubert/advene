@@ -36,6 +36,7 @@ import gtk
 import cairo
 import urllib
 import re
+from math import atan2, cos, sin
 
 try:
     import advene.util.ElementTree as ET
@@ -713,10 +714,13 @@ class Line(Rectangle):
              ('x2', 0),
              ('y2', 1) )
 
+    def __init__(self, name=SHAPENAME, color="green", arrow=False):
+        super(Line, self).__init__(name, color)
+        self.arrow=arrow
+
     def set_bounds(self, bounds):
         self.x1, self.y1 = bounds[0]
         self.x2, self.y2 = bounds[1]
-
         self.width = int(self.x2 - self.x1)
         self.height = int(self.y2 - self.y1)
 
@@ -733,6 +737,19 @@ class Line(Rectangle):
                   self.y1,
                   self.x2,
                   self.y2)
+        if self.arrow:
+            theta=atan2( self.width, self.height )
+            ox=6
+            oy=10
+            pixmap.draw_polygon(gc,
+                                True,
+                                ( (self.x2, self.y2),
+                                  (int(self.x2 - ox * cos(theta) - oy * sin(theta)),
+                                   int(self.y2 + ox * sin(theta) - oy * cos(theta)) ),
+                                  (int(self.x2 + ox * cos(theta) - oy * sin(theta)),
+                                   int(self.y2 - ox * sin(theta) - oy * cos(theta)) ),
+                                  )
+                                )                                  
         return
 
     def translate(self, vector):
