@@ -112,6 +112,8 @@ class AnnotationDisplay(AdhocView):
                 'imagecontents': None,
                 }
         else:
+            # FIXME: there should be a generic content handler
+            # mechanism for basic display of various contents
             col=self.controller.get_element_color(self.annotation)
             if col:
                 title='<span background="%s">Annotation <b>%s</b></span>' % (col, self.annotation.id)
@@ -120,7 +122,14 @@ class AnnotationDisplay(AdhocView):
             d={ 'title': title,
                 'begin': helper.format_time(self.annotation.fragment.begin),
                 'end': helper.format_time(self.annotation.fragment.end) }
+            svg_data=None
             if self.annotation.content.mimetype.startswith('image/'):
+                svg_data=self.annotation.content.data
+            elif self.annotation.content.mimetype == 'application/x-advene-zone':
+                # Build svg
+                data=self.annotation.content.parsed()
+                svg_data='''<svg xmlns='http://www.w3.org/2000/svg' version='1' viewBox="0 0 320 300" x='0' y='0' width='320' height='200'><%(shape)s style="fill:none;stroke:green;stroke-width:2;" width="%(width)s%%" height="%(height)s%%" x="%(x)s%%" y="%(y)s%%"></rect></svg>''' % data
+            if svg_data:
                 # SVG autodetection does not seem to work too well. Let's help it.
                 if 'svg' in self.annotation.content.mimetype:
                     try:
@@ -132,7 +141,7 @@ class AnnotationDisplay(AdhocView):
                     loader = gtk.gdk.PixbufLoader()
                 if loader is not None:
                     try:
-                        loader.write (self.annotation.content.data)
+                        loader.write (svg_data)
                         loader.close ()
                         p = loader.get_pixbuf ()
                         width = p.get_width()
