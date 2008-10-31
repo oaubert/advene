@@ -948,6 +948,10 @@ class Link(Shape):
 class ShapeDrawer:
     """Widget allowing to draw and edit shapes.
 
+    Note: the specified background image is not saved in the generated
+    SVG. If it should be present in the output, it must be added
+    (through add_object) as an Image object with the name 'background'.
+
     @ivar callback: method called when the button is released.
     @type callback: method taking a rectangle as parameter
 
