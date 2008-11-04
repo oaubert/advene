@@ -2371,8 +2371,6 @@ class AdveneController(object):
         elif isinstance(elements[0], AnnotationType):
             at_title=self.get_title(elements[0])
             v.title=_("List of %s annotations") % at_title
-            p.views.append(v)
-            p._idgenerator.add(ident)
 
             data=["""<div tal:define="at package/annotationTypes/%s">""" % elements[0].id,
                   """<h1>List of <em tal:content="at/representation">%s</em> annotations</h1>""" % at_title,
