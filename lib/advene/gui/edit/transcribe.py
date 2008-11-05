@@ -1164,7 +1164,8 @@ class TranscriptionEdit(AdhocView):
 
         i=gtk.Image()
         i.set_from_file(config.data.advenefile( ( 'pixmaps', 'clock.png') ))
-        b=gtk.ToggleToolButton(icon_widget=i)
+        b=gtk.ToggleToolButton()
+        b.set_icon_widget(i)
         b.set_label(_("Autoinsert"))
         b.set_active(self.options['autoinsert'])
         b.set_tooltip(self.tooltips, _("Automatically insert marks"))
