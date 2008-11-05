@@ -1155,17 +1155,16 @@ class TranscriptionEdit(AdhocView):
             self.options[option_name]=t.get_active()
             return True
 
-        b=gtk.ToggleToolButton(stock_id=gtk.STOCK_JUMP_TO)
+        b=gtk.ToggleToolButton(gtk.STOCK_JUMP_TO)
         b.set_active(self.options['autoscroll'])
         b.set_tooltip(self.tooltips, _("Automatically scroll to the mark position when playing"))
         b.connect('toggled', handle_toggle, 'autoscroll')
         b.set_label(_("Autoscroll"))
         tb.insert(b, -1)
 
-        b=gtk.ToggleToolButton()
         i=gtk.Image()
         i.set_from_file(config.data.advenefile( ( 'pixmaps', 'clock.png') ))
-        b.set_icon_widget(i)
+        b=gtk.ToggleToolButton(icon_widget=i)
         b.set_label(_("Autoinsert"))
         b.set_active(self.options['autoinsert'])
         b.set_tooltip(self.tooltips, _("Automatically insert marks"))

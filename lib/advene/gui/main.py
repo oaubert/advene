@@ -307,10 +307,9 @@ class AdveneGUI(object):
             if stock.startswith('gtk-'):
                 b=gtk.ToolButton(stock)
             else:
-                b=gtk.ToolButton()
                 i=gtk.Image()
                 i.set_from_file( config.data.advenefile( ('pixmaps', stock ) ) )
-                b.set_icon_widget(i)
+                b=gtk.ToolButton(icon_widget=i)
             b.set_tooltip(self.tooltips, tip)
             b.connect('clicked', callback)
             self.gui.fileop_toolbar.insert(b, -1)
@@ -1178,7 +1177,7 @@ class AdveneGUI(object):
                         self.controller.event_handler.remove_rule(self.annotation_loop_rule, type_="internal")
             return True
 
-        self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
+        self.loop_toggle_button=gtk.ToggleToolButton(gtk.STOCK_REFRESH)
         self.update_loop_button()
         self.loop_toggle_button.connect('toggled', loop_toggle_cb)
         self.player_toolbar.insert(self.loop_toggle_button, -1)

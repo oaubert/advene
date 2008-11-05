@@ -374,7 +374,7 @@ class Montage(AdhocView):
         ti.add(b)
         tb.insert(ti, -1)
 
-        b=gtk.ToolButton(stock_id=gtk.STOCK_MEDIA_PLAY)
+        b=gtk.ToolButton(gtk.STOCK_MEDIA_PLAY)
         b.set_tooltip(self.controller.gui.tooltips, _("Play the montage"))
         b.connect('clicked', self.play)
         tb.insert(b, -1)
@@ -400,11 +400,11 @@ class Montage(AdhocView):
             self.zoom_adjustment.value=self.zoom_adjustment.value * factor
             return True
 
-        b=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
+        b=gtk.ToolButton(gtk.STOCK_ZOOM_OUT)
         b.connect('clicked', zoom, 1.3)
         tb.insert(b, -1)
 
-        b=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
+        b=gtk.ToolButton(gtk.STOCK_ZOOM_IN)
         b.connect('clicked', zoom, .7)
         tb.insert(b, -1)
 
@@ -423,7 +423,7 @@ class Montage(AdhocView):
         ti.add(self.zoom_combobox)
         tb.insert(ti, -1)
 
-        b=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_100)
+        b=gtk.ToolButton(gtk.STOCK_ZOOM_100)
         b.connect('clicked', lambda i: self.zoom_adjustment.set_value(1.0))
         tb.insert(b, -1)
 
@@ -440,10 +440,9 @@ class Montage(AdhocView):
             for a in set( [ w.annotation for w in self.contents ] ):
                 self.controller.notify(event, annotation=a)
             return True
-        b=gtk.ToggleToolButton()
         i=gtk.Image()
         i.set_from_file(config.data.advenefile( ( 'pixmaps', 'highlight.png') ))
-        b.set_icon_widget(i)
+        b=gtk.ToggleToolButton(icon_widget=i)
         b.highlight=True
         b.connect('clicked', toggle_highlight)
         tb.insert(b, -1)

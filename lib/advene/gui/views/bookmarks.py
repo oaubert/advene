@@ -25,7 +25,7 @@ import urllib
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
-from advene.gui.util import get_small_stock_button, dialog
+from advene.gui.util import get_small_stock_button, dialog, get_pixmap_toolbutton
 from advene.gui.util import decode_drop_parameters
 from advene.gui.util.completer import Completer
 from advene.gui.views import AdhocView
@@ -245,9 +245,7 @@ class Bookmarks(AdhocView):
             (gtk.STOCK_SAVE, self.save_view, _("Save view")),
             ):
             if icon.endswith('.png'):
-                i=gtk.Image()
-                i.set_from_file(config.data.advenefile( ( 'pixmaps', icon) ))
-                b=gtk.ToolButton(icon_widget=i)
+                b=get_pixmap_toolbutton(icon)
             else:
                 b=gtk.ToolButton(stock_id=icon)
             b.set_tooltip(self.controller.gui.tooltips, tip)

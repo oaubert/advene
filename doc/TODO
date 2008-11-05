@@ -1,3 +1,5 @@
+* put adhoc view buttons into ToolItem and make it a toolbar
+
 * ssa import filter
 
 * svg editor: add a "advene_comment" field to the svg source (similar

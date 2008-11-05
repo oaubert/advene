@@ -27,7 +27,7 @@ import urllib
 
 # Advene part
 import advene.core.config as config
-from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf, get_pixmap_toolbutton
 from advene.gui.util import encode_drop_parameters, decode_drop_parameters, shaped_window_from_xpm, arrow_right_xpm
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
@@ -510,11 +510,8 @@ class ActiveBookmarks(AdhocView):
         i.add(b)
         tb.insert(i, -1)
 
-        i=gtk.Image()
-        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
-        b=gtk.ToolButton(icon_widget=i)
+        b=get_pixmap_toolbutton('set-to-now.png', bookmark_current_time)
         b.set_tooltip(self.controller.gui.tooltips, _("Insert a bookmark for the current video time"))
-        b.connect('clicked', bookmark_current_time)
         tb.insert(b, -1)
 
         i=gtk.ToolItem()

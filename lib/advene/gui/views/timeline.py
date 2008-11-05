@@ -40,7 +40,7 @@ from advene.gui.util import decode_drop_parameters
 
 from advene.gui.views.annotationdisplay import AnnotationDisplay
 import advene.util.helper as helper
-from advene.gui.util import dialog, name2color, get_small_stock_button, get_pixmap_button
+from advene.gui.util import dialog, name2color, get_small_stock_button, get_pixmap_button, get_pixmap_toolbutton
 from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget, GenericColorButtonWidget
 
 name="Timeline view plugin"
@@ -2988,12 +2988,8 @@ class TimeLine(AdhocView):
         tb.insert(b, -1)
 
         # Selection menu
-        b=gtk.ToolButton()
-        i=gtk.Image()
-        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'selection.png') ))
-        b.set_icon_widget(i)
+        b=get_pixmap_toolbutton('selection.png', self.selection_menu)
         b.set_tooltip(self.tooltips, _('Selection actions'))
-        b.connect('clicked', self.selection_menu)
         tb.insert(b, -1)
         b.set_sensitive(False)
         self.selection_button=b

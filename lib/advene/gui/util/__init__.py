@@ -78,10 +78,9 @@ def get_pixmap_button(pixmap, callback=None, *p):
     return b
 
 def get_pixmap_toolbutton(pixmap, callback=None, *p):
-    b=gtk.ToolButton()
     i=gtk.Image()
     i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-    b.set_icon_widget(i)
+    b=gtk.ToolButton(icon_widget=i)
     i.show()
     if callback:
         b.connect('clicked', callback, *p)

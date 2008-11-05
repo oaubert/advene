@@ -607,12 +607,12 @@ class EditViewPopup (EditElementPopup):
         tb=getattr(f.content_handler_widget, 'toolbar', None)
         if tb is not None:
             # Add appropriate buttons to toolbar
-            b = gtk.ToolButton (gtk.STOCK_OK)
+            b = gtk.ToolButton(gtk.STOCK_OK)
             b.connect('clicked', self.apply_cb)
             self.controller.gui.tooltips.set_tip(b, _("Apply changes"))
             tb.insert(b, -1)
 
-            b = gtk.ToolButton (gtk.STOCK_CLOSE)
+            b = gtk.ToolButton(gtk.STOCK_CLOSE)
             b.connect('clicked', self.close_cb)
             self.controller.gui.tooltips.set_tip(b, _("Close window"))
             tb.insert(b, -1)
@@ -1299,30 +1299,24 @@ class TextContentHandler (ContentHandler):
             vbox.toolbar=tb
             tb.set_style(gtk.TOOLBAR_ICONS)
 
-            b=gtk.ToolButton()
-            b.set_stock_id(gtk.STOCK_OPEN)
+            b=gtk.ToolButton(gtk.STOCK_OPEN)
             b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
             b.connect('clicked', self.content_open)
             tb.insert(b, -1)
 
-            b=gtk.ToolButton()
-            b.set_stock_id(gtk.STOCK_SAVE)
+            b=gtk.ToolButton(gtk.STOCK_SAVE)
             b.set_tooltip(self.tooltips, _("Save to a file (C-s)"))
             b.connect('clicked', self.content_save)
             tb.insert(b, -1)
 
-            b=gtk.ToolButton()
-            b.set_stock_id(gtk.STOCK_REFRESH)
+            b=gtk.ToolButton(gtk.STOCK_REFRESH)
             b.set_tooltip(self.tooltips, _("Reload the file (C-r)"))
             b.connect('clicked', self.content_reload)
             tb.insert(b, -1)
 
             if config.data.preferences['expert-mode']:
-                i=gtk.Image()
-                i.set_from_file(config.data.advenefile( ('pixmaps', 'browser.png') ))
-                b=gtk.ToolButton(icon_widget=i)
+                b=get_pixmap_toolbutton('browser.png', self.browser_open)
                 b.set_tooltip(self.tooltips, _("Insert a value from the browser (C-i)"))
-                b.connect('clicked', self.browser_open)
                 tb.insert(b, -1)
 
             vbox.pack_start(tb, expand=False)
@@ -1353,13 +1347,11 @@ class TextContentHandler (ContentHandler):
                 return True
 
             if not compact:
-                b=gtk.ToolButton()
-                b.set_stock_id(gtk.STOCK_UNDO)
+                b=gtk.ToolButton(gtk.STOCK_UNDO)
                 b.connect('clicked', undo)
                 tb.insert(b, -1)
 
-                b=gtk.ToolButton()
-                b.set_stock_id(gtk.STOCK_REDO)
+                b=gtk.ToolButton(gtk.STOCK_REDO)
                 b.connect('clicked', redo)
                 tb.insert(b, -1)
 
@@ -1520,20 +1512,17 @@ class GenericContentHandler (ContentHandler):
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
 
-        b=gtk.ToolButton()
-        b.set_stock_id(gtk.STOCK_OPEN)
+        b=gtk.ToolButton(gtk.STOCK_OPEN)
         b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
         b.connect('clicked', self.content_open)
         tb.insert(b, -1)
 
-        b=gtk.ToolButton()
-        b.set_stock_id(gtk.STOCK_SAVE)
+        b=gtk.ToolButton(gtk.STOCK_SAVE)
         b.set_tooltip(self.tooltips, _('Save to a file (C-s)'))
         b.connect('clicked', self.content_save)
         tb.insert(b, -1)
 
-        b=gtk.ToolButton()
-        b.set_stock_id(gtk.STOCK_REFRESH)
+        b=gtk.ToolButton(gtk.STOCK_REFRESH)
         b.set_tooltip(self.tooltips, _('Reload the file (C-r)'))
         b.connect('clicked', self.content_reload)
         tb.insert(b, -1)

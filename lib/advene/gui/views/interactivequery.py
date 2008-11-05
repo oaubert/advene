@@ -32,7 +32,7 @@ from advene.model.bundle import AbstractBundle
 from advene.rules.elements import SimpleQuery, Condition, Quicksearch
 from advene.model.annotation import Annotation
 from advene.model.tal.context import AdveneTalesException
-from advene.gui.util import dialog, get_small_stock_button
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_toolbutton
 
 from advene.gui.views import AdhocView
 import advene.gui.evaluator
@@ -504,9 +504,7 @@ class InteractiveResult(AdhocView):
                     (gtk.STOCK_FIND_AND_REPLACE, _("Search and replace strings in the annotations content"), self.search_replace),
                     ):
                     if icon.endswith('.png'):
-                        i=gtk.Image()
-                        i.set_from_file(config.data.advenefile( ( 'pixmaps', icon) ))
-                        ti=gtk.ToolButton(icon_widget=i)
+                        ti=get_pixmap_toolbutton(icon)
                     else:
                         ti=gtk.ToolButton(stock_id=icon)
                     ti.connect('clicked', action)
@@ -519,25 +517,21 @@ class InteractiveResult(AdhocView):
                 gtable=GenericTable(controller=self.controller, elements=self.result)
                 v.add(gtable.widget)
 
-                ti=gtk.ToolButton(stock_id=gtk.STOCK_CONVERT)
+                ti=gtk.ToolButton(gtk.STOCK_CONVERT)
                 ti.connect('clicked', lambda b: gtable.csv_export())
                 ti.set_tooltip(self.controller.gui.tooltips, _("Export table"))
                 tb.insert(ti, -1)
                 self.table=gtable
 
 
-            i=gtk.Image()
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'editaccumulator.png') ))
-            ti=gtk.ToolButton(icon_widget=i)
-            ti.connect('clicked', lambda b: self.open_in_edit_accumulator(self.table.get_elements()))
+            ti=get_pixmap_toolbutton('editaccumulator.png', 
+                                     lambda b: self.open_in_edit_accumulator(self.table.get_elements()))
             ti.set_tooltip(self.controller.gui.tooltips, _("Edit elements"))
             tb.insert(ti, -1)
 
             if config.data.preferences['expert-mode']:
-                i=gtk.Image()
-                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'python.png') ))
-                ti=gtk.ToolButton(icon_widget=i)
-                ti.connect('clicked', lambda b: self.open_in_evaluator(self.table.get_elements()))
+                ti=get_pixmap_toolbutton('python.png',
+                                         lambda b: self.open_in_evaluator(self.table.get_elements()))
                 ti.set_tooltip(self.controller.gui.tooltips, _("Open in python evaluator"))
                 tb.insert(ti, -1)
         else:
