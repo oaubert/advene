@@ -380,6 +380,7 @@ class SchemaEditor (AdhocView):
         schema=cr.popup(modal=True)
         if schema:
             self.update_list_schemas()
+            self.openSchema(schema)
 
     def delSchema(self, sc):
         tsc = sc.title
@@ -942,43 +943,47 @@ class SchemaEditor (AdhocView):
             return False
 
         self.TE.initWithType(None)
+        openedschema = True
         if len(self.openedschemas)<=0:
-            return False
+            openedschema=False
         canvas = item.get_canvas()
         self.drawFocusOn(canvas)
         schema = self.findSchemaFromXY(event.x, event.y)
-
-        def newRel(w, canvas, schema):
-            self.addRelationTypeGroup(canvas, schema)
-            return True
-        def newAnn(w, canvas, schema, x, y):
-            self.addAnnotationTypeGroup(canvas, schema, rx=x, ry=y)
-            return True
-        def pick_color(w, schema):
-            self.controller.gui.update_color(schema)
-        def hide(w, schema):
-            self.removeSchemaFromArea(schema)
-        def menuView(w, schema):
-            self.create_view_based_on(schema)
         menu = gtk.Menu()
-        itemM = gtk.MenuItem(_("Select a color"))
-        itemM.connect('activate', pick_color, schema)
+        itemM = gtk.MenuItem(_("New Schema"))
+        itemM.connect("activate", self.newSchema )
         menu.append(itemM)
-        itemM = gtk.MenuItem(_("New Annotation Type"))
-        itemM.connect('activate', newAnn, canvas, schema, event.x, event.y )
-        menu.append(itemM)
-        itemM = gtk.MenuItem(_("New Relation Type"))
-        itemM.connect('activate', newRel, canvas, schema )
-        menu.append(itemM)
-        itemM = gtk.MenuItem(_("Hide this schema"))
-        itemM.connect('activate', hide, schema )
-        menu.append(itemM)
-        itemM = gtk.MenuItem(_("Create HTML view"))
-        itemM.connect('activate', menuView, schema )
-        menu.append(itemM)
-        itemM = gtk.MenuItem(_("Export drawing to pdf"))
-        itemM.connect('activate', self.export_to_pdf, canvas)
-        menu.append(itemM)
+        if openedschema:
+            def newRel(w, canvas, schema):
+                self.addRelationTypeGroup(canvas, schema)
+                return True
+            def newAnn(w, canvas, schema, x, y):
+                self.addAnnotationTypeGroup(canvas, schema, rx=x, ry=y)
+                return True
+            def pick_color(w, schema):
+                self.controller.gui.update_color(schema)
+            def hide(w, schema):
+                self.removeSchemaFromArea(schema)
+            def menuView(w, schema):
+                self.create_view_based_on(schema)
+            itemM = gtk.MenuItem(_("Select a color"))
+            itemM.connect('activate', pick_color, schema)
+            menu.append(itemM)
+            itemM = gtk.MenuItem(_("New Annotation Type"))
+            itemM.connect('activate', newAnn, canvas, schema, event.x, event.y )
+            menu.append(itemM)
+            itemM = gtk.MenuItem(_("New Relation Type"))
+            itemM.connect('activate', newRel, canvas, schema )
+            menu.append(itemM)
+            itemM = gtk.MenuItem(_("Hide this schema"))
+            itemM.connect('activate', hide, schema )
+            menu.append(itemM)
+            itemM = gtk.MenuItem(_("Create HTML view"))
+            itemM.connect('activate', menuView, schema )
+            menu.append(itemM)
+            itemM = gtk.MenuItem(_("Export drawing to pdf"))
+            itemM.connect('activate', self.export_to_pdf, canvas)
+            menu.append(itemM)
         #itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
         #itemM.connect("activate", menuMove, canvas )
         #menu.append(itemM)
