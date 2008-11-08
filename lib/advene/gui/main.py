@@ -134,6 +134,10 @@ class DummyGlade:
 
         self.adhoc_hbox=gtk.HBox()
         hb.pack_start(self.adhoc_hbox, expand=True)
+
+        self.traces_switch=gtk.HBox()
+        hb.pack_start(self.traces_switch, expand=False)
+        
         self.search_hbox=gtk.HBox()
         hb.pack_start(self.search_hbox, expand=False)
         v.pack_start(hb, expand=False)
@@ -426,6 +430,29 @@ class AdveneGUI(object):
                               config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
             hb.pack_start(b, expand=False)
         hb.show_all()
+        tsb = self.gui.traces_switch
+        b=gtk.Button()
+        i=gtk.Image()
+        def trace_toggle(w):
+            if config.data.preferences['record-actions']:
+                config.data.preferences['record-actions']=False
+                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
+                self.tooltips.set_tip(b, _('Tracing : off'))
+            else:
+                config.data.preferences['record-actions']=True
+                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
+                self.tooltips.set_tip(b, _('Tracing : on'))
+            return
+        if config.data.preferences['record-actions']:
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
+            self.tooltips.set_tip(b, _('Tracing : on'))
+        else:
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
+            self.tooltips.set_tip(b, _('Tracing : off'))
+        b.add(i)
+        b.connect('clicked', trace_toggle)
+        tsb.pack_start(b, expand=False)
+        tsb.show_all()
 
         self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
         self.quicksearch_entry=gtk.Entry()
