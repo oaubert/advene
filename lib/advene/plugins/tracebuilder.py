@@ -97,7 +97,7 @@ class TraceBuilder:
 
     def packEvent(self, obj):
         self.controller.update_snapshot(self.controller.player.current_position_value)
-        ev_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
+        #ev_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
         ev_time = time.time()
         ev_activity_time = (time.time() - config.data.startup_time) * 1000
         ev_name = obj['event_name']
@@ -196,12 +196,13 @@ class TraceBuilder:
                 ev_content= 'package=' + elem.title
                 elem_name='package'
                 elem_id=elem.title
-        ev = Event(ev_name, ev_time, ev_activity_time, ev_snapshot, ev_content, ev_movie, ev_movie_time, elem_name, elem_id)
+        ev = Event(ev_name, ev_time, ev_activity_time, ev_content, ev_movie, ev_movie_time, elem_name, elem_id)
+        #ev = Event(ev_name, ev_time, ev_activity_time, ev_snapshot, ev_content, ev_movie, ev_movie_time, elem_name, elem_id)
         self.trace.add_to_trace('events', ev)
         return ev
 
     def packOperation(self, obj):
-        op_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
+        #op_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
         op_time = time.time()
         op_activity_time = (time.time() - config.data.startup_time) * 1000
         op_name = obj['event_name']
@@ -302,7 +303,8 @@ class TraceBuilder:
                 op_content= 'package=' + elem.title
                 elem_name='package'
                 elem_id=elem.title
-        op = Operation(op_name, op_time, op_activity_time, op_content, op_snapshot, op_movie, op_movie_time, elem_name, elem_id)
+        op = Operation(op_name, op_time, op_activity_time, op_content, op_movie, op_movie_time, elem_name, elem_id)
+        #op = Operation(op_name, op_time, op_activity_time, op_content, op_snapshot, op_movie, op_movie_time, elem_name, elem_id)
         self.trace.add_to_trace('operations', op)
         return op
 
@@ -337,7 +339,7 @@ class TraceBuilder:
 #                ac.add_operation(ope)
                 #mise a jour des temps de fin, contenu, liste operations
 #                return ac
-        ac = Action(name=type, begintime=ope.time, endtime=None, acbegintime=ope.activity_time, acendtime=None, content=None, snap=ope.snapshot, movie=ope.movie, movietime=ope.movietime, operations=[ope])
+        ac = Action(name=type, begintime=ope.time, endtime=None, acbegintime=ope.activity_time, acendtime=None, content=None, movie=ope.movie, movietime=ope.movietime, operations=[ope])
         self.trace.add_to_trace('actions', ac)
         self.opened_actions[type]=ac
         return ac
@@ -435,11 +437,10 @@ class Trace:
         return
 
 class Event:
-    def __init__(self, name, time, actime, snap, content, movie, movietime, obj, obj_id):
+    def __init__(self, name, time, actime, content, movie, movietime, obj, obj_id):
         self.name = name
         self.time = time
         self.activity_time = actime
-        self.snapshot = snap
         self.content = content
         self.movie = movie
         self.movietime = movietime
@@ -455,14 +456,13 @@ class Event:
 
 
 class Operation:
-    def __init__(self, name, time, actime, content, snap, movie, movietime, obj, obj_id):
+    def __init__(self, name, time, actime, content, movie, movietime, obj, obj_id):
         self.name = name
         self.time = time
         self.activity_time = actime
         self.content = ''
         if content is not None:
             self.content = content
-        self.snapshot = snap
         self.movie = movie
         self.movietime = movietime
         self.comment = ''
@@ -476,7 +476,7 @@ class Operation:
         return
 
 class Action:
-    def __init__(self, name, begintime, endtime, acbegintime, acendtime, content, snap, movie, movietime, operations):
+    def __init__(self, name, begintime, endtime, acbegintime, acendtime, content, movie, movietime, operations):
         self.operations=[]
         self.time = [0,0]
         self.activity_time=[0,0]
@@ -495,7 +495,6 @@ class Action:
         self.content = ''
         if content is not None:
             self.content = content
-        self.snapshot = snap
         self.movie = movie
         self.movietime = movietime
         if operations is not None:
