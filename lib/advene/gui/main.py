@@ -414,7 +414,7 @@ class AdveneGUI(object):
             ('trace', _("Trace"), 'trace.png'),
             ('comment', _("Edit a comment view"), 'comment.png')
             ):
-            if name in ('browser', 'schemaeditor', 't1') and not config.data.preferences['expert-mode']:
+            if name in ('browser', 'schemaeditor', 'trace') and not config.data.preferences['expert-mode']:
                 continue
             if name not in ('webbrowser', 'comment') and not name in self.registered_adhoc_views:
                 self.log("Missing basic adhoc view %s" % name)
@@ -430,31 +430,33 @@ class AdveneGUI(object):
                               config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
             hb.pack_start(b, expand=False)
         hb.show_all()
-        tsb = self.gui.traces_switch
-        b=gtk.Button()
-        i=gtk.Image()
-        def trace_toggle(w):
+
+        if config.data.preferences['expert-mode']:
+            tsb = self.gui.traces_switch
+            b=gtk.Button()
             i=gtk.Image()
+            def trace_toggle(w):
+                i=gtk.Image()
+                if config.data.preferences['record-actions']:
+                    config.data.preferences['record-actions']=False
+                    i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
+                    self.tooltips.set_tip(b, _('Tracing : off'))
+                else:
+                    config.data.preferences['record-actions']=True
+                    i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
+                    self.tooltips.set_tip(b, _('Tracing : on'))
+                w.set_image(i)
+                return
             if config.data.preferences['record-actions']:
-                config.data.preferences['record-actions']=False
-                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
-                self.tooltips.set_tip(b, _('Tracing : off'))
-            else:
-                config.data.preferences['record-actions']=True
                 i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
                 self.tooltips.set_tip(b, _('Tracing : on'))
-            w.set_image(i)
-            return
-        if config.data.preferences['record-actions']:
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
-            self.tooltips.set_tip(b, _('Tracing : on'))
-        else:
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
-            self.tooltips.set_tip(b, _('Tracing : off'))
-        b.add(i)
-        b.connect('clicked', trace_toggle)
-        tsb.pack_start(b, expand=False)
-        tsb.show_all()
+            else:
+                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
+                self.tooltips.set_tip(b, _('Tracing : off'))
+            b.add(i)
+            b.connect('clicked', trace_toggle)
+            tsb.pack_start(b, expand=False)
+            tsb.show_all()
 
         self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
         self.quicksearch_entry=gtk.Entry()
