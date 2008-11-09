@@ -84,7 +84,8 @@ class TraceBuilder:
         ev = self.packEvent(obj)
         if ev.name in self.operation_mapping.keys():
             op = self.packOperation(obj)
-            ac = self.packAction(obj, op)
+            if op is not None:
+                ac = self.packAction(obj, op)
         #else:
         #    print "Not an operation : %s" % ev.name
         self.alert_registered(ev, op, ac)
@@ -303,6 +304,11 @@ class TraceBuilder:
                 op_content= 'package=' + elem.title
                 elem_name='package'
                 elem_id=elem.title
+        if self.trace.levels['operations']:
+            prev = self.trace.levels['operations'][-1]
+            #print '%s %s , %s %s' % (op_name, prev.name, prev.concerned_object['id'], elem_id)
+            if op_name == 'ElementEditDestroy' and (prev.name == 'ElementEditDestroy' or prev.name == 'ElementEditEnd' or prev.name == 'AnnotationEditEnd' or prev.name == 'AnnotationTypeEditEnd' or prev.name == 'RelationTypeEditEnd') and prev.concerned_object['id'] == elem_id:
+                return
         op = Operation(op_name, op_time, op_activity_time, op_content, op_movie, op_movie_time, elem_name, elem_id)
         #op = Operation(op_name, op_time, op_activity_time, op_content, op_snapshot, op_movie, op_movie_time, elem_name, elem_id)
         self.trace.add_to_trace('operations', op)
