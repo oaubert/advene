@@ -32,6 +32,8 @@ import advene.util.helper as helper
 import urllib
 import advene.model.view
 from advene.gui.widget import TimestampRepresentation
+from advene.rules.elements import ECACatalog
+import advene.core.config as config
 
 def register(controller):
     controller.register_viewclass(EventAccumulator)
@@ -65,7 +67,9 @@ class EventAccumulator(AdhocView):
             'nav_action':None,
             'nav_actionBox':None,
         }
+        # ECACatalog event_names et set(())
         self.events_names= {
+            'DurationUpdate': _('Updating duration of the movie'),
             'AnnotationBegin': _('Beginning of an annotation'),
             'AnnotationEnd': _('End of an annotation'),
             'BookmarkHighlight': _('Highlighting a bookmark'),
@@ -74,6 +78,7 @@ class EventAccumulator(AdhocView):
             'PopupDisplay': _('Displaying a popup'),
             'MediaChange': _('Changing the media'),
             'PackageActivate': _('Activating a package'),
+            'PackageSave': _('Saving a package'),
             'ApplicationStart': _('Starting the application'),
         }
         self.operations_names = {
@@ -100,8 +105,9 @@ class EventAccumulator(AdhocView):
         }
         self.incomplete_operations_names = {
             'ElementEditBegin': _('Beginning edition'),
-            'ElementEditDestroy': _('Ending edition'),
+            'ElementEditDestroy': _('Canceling edition'),
             'ElementEditCancel': _('Canceling edition'),
+            'ElementEditEnd': _('Ending edition'),
         }
         #self.contextual_actions = (
         #    (_("Save view"), self.save_view),
@@ -125,6 +131,7 @@ class EventAccumulator(AdhocView):
         self.accuBox = None
         self.sc = None
         self.btn_filter = None
+        self.init_btn_evb = None
         self.init_btn_filter = None
         self.widget = self.build_widget()
         self.widget.connect("destroy", self.destroy)
@@ -204,10 +211,11 @@ class EventAccumulator(AdhocView):
         self.btn_filter = gtk.Button(_(' Filters'))
         #self.btn_filter.connect('clicked', self.open_filters)
         btnbar.pack_start(self.btn_filter, expand=False)
-
-        self.init_btn_filter = gtk.Button(_(' Reset filters'))
+        
+        self.init_btn_filter = gtk.Button()
         self.init_btn_filter.connect('clicked', self.init_filters)
         btnbar.pack_start(self.init_btn_filter, expand=False)
+        self.filter_active(False)
 
         mainbox.pack_start(btnbar, expand=False)
         mainbox.pack_start(gtk.HSeparator(), expand=False)
@@ -228,8 +236,21 @@ class EventAccumulator(AdhocView):
             'actions': [],
         }
         #FIXME default color
-        self.init_btn_filter.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#000000"))
+        self.filter_active(False)
         self.receive(self.tracer.trace)
+
+    def filter_active(self, activate):
+        #for i in [gtk.STATE_NORMAL, gtk.STATE_ACTIVE, gtk.STATE_PRELIGHT, gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE]:
+        #    self.init_btn_evb.modify_bg(i, gtk.gdk.color_parse(color))
+        #    self.init_btn_evb.modify_fg(i, gtk.gdk.color_parse(color))
+        i=gtk.Image()
+        if activate:
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'filters_off.png') ))
+        else:
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'filters_on.png') ))
+        self.init_btn_filter.set_image(i)
+  
+        
 
     def scroll_win(self):
         a = self.sw.get_vadjustment()
@@ -430,20 +451,20 @@ class EventAccumulator(AdhocView):
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
         if self.options['time'] == 'activity':
             ev_time = helper.format_time(obj_evt.activity_time)
-        if obj_evt.name in self.events_names.keys():
-            entetestr = "%s : %s" % (ev_time, self.events_names[obj_evt.name])
-        elif obj_evt.name in self.operations_names.keys():
-            entetestr = "%s : %s" % (ev_time, self.operations_names[obj_evt.name])
+        if obj_evt.name in self.events_names.keys() or obj_evt.name in self.operations_names.keys():
+            entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
+            if obj_evt.concerned_object['id']:
+                entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
         elif obj_evt.name in self.incomplete_operations_names.keys():
             comp = ''
             ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
             #print "%s %s %s" % (self.controller.package, obj_evt.concerned_object['id'], ob)
             if isinstance(ob, advene.model.annotation.Annotation):
-                comp = _('an annotation')
+                comp = _('an annotation (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.annotation.Relation):
-                comp = _('a relation')
+                comp = _('an relation (%s)') % obj_evt.concerned_object['id']
             else:
-                comp = _('an unknown item')
+                comp = _('an unknown item (%s)') % obj_evt.concerned_object['id']
             entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
         else:
             print "unlabelled event : %s" % obj_evt.name
@@ -471,19 +492,23 @@ class EventAccumulator(AdhocView):
         if self.options['time'] == 'activity':
             ev_time = helper.format_time(obj_evt.activity_time)
         if obj_evt.name in self.operations_names.keys():
-            entetestr = "%s : %s" % (ev_time, self.operations_names[obj_evt.name])
-        else:
+            entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
+            if obj_evt.concerned_object['id']:
+                entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
+        elif obj_evt.name in self.incomplete_operations_names.keys():
             comp = ''
             ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
             #print "%s %s %s" % (self.controller.package, obj_evt.concerned_object['id'], ob)
             if isinstance(ob, advene.model.annotation.Annotation):
-                comp = _('an annotation')
+                comp = _('an annotation (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.annotation.Relation):
-                comp = _('a relation')
+                comp = _('an relation (%s)') % obj_evt.concerned_object['id']
             else:
-                comp = _('an unknown item')
+                comp = _('an unknown item (%s)') % obj_evt.concerned_object['id']
             entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
-
+        else:
+            print "unlabelled event : %s" % obj_evt.name
+            entetestr = "%s : %s" % (ev_time, obj_evt.name)
         entete = gtk.Label(entetestr.encode("UTF-8"))
         hb = gtk.HBox()
         box = gtk.EventBox()
@@ -546,7 +571,7 @@ class EventAccumulator(AdhocView):
                 self.options['detail']='operations'
                 self.DetB.set_label('operations')
                 #FIXME color change of the reset button when applying a filter
-                self.init_btn_filter.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#962A1C"))
+                self.filter_active(True)
                 self.receive(self.tracer.trace)
             return
         box.add(entete)
