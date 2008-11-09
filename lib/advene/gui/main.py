@@ -434,6 +434,7 @@ class AdveneGUI(object):
         b=gtk.Button()
         i=gtk.Image()
         def trace_toggle(w):
+            i=gtk.Image()
             if config.data.preferences['record-actions']:
                 config.data.preferences['record-actions']=False
                 i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
@@ -442,6 +443,7 @@ class AdveneGUI(object):
                 config.data.preferences['record-actions']=True
                 i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
                 self.tooltips.set_tip(b, _('Tracing : on'))
+            w.set_image(i)
             return
         if config.data.preferences['record-actions']:
             i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
