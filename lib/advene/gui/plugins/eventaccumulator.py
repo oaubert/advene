@@ -97,7 +97,7 @@ class EventAccumulator(AdhocView):
             'AnnotationTypeCreate': _('Creating an annotation type'),
             'RelationTypeCreate': _('Creating a relation type'),
             'RelationTypeDelete': _('Deleting a relation type'),
-            'AnnotationTypeDelete': _('Deleting a relation type'),
+            'AnnotationTypeDelete': _('Deleting an annotation type'),
             'AnnotationTypeEditEnd': _('Ending edition of an annotation type'),
             'RelationTypeEditEnd': _('Ending edition of a relation type'),
             'ViewCreate': _('Creating a view'),
@@ -109,6 +109,7 @@ class EventAccumulator(AdhocView):
             'ElementEditCancel': _('Canceling edition'),
             'ElementEditEnd': _('Ending edition'),
         }
+
         #self.contextual_actions = (
         #    (_("Save view"), self.save_view),
         #    (_("Save default options"), self.save_default_options),
@@ -209,7 +210,7 @@ class EventAccumulator(AdhocView):
         btnbar.pack_start(gtk.VSeparator())
 
         self.btn_filter = gtk.Button(_(' Filters'))
-        #self.btn_filter.connect('clicked', self.open_filters)
+        self.btn_filter.connect('clicked', self.modify_filters)
         btnbar.pack_start(self.btn_filter, expand=False)
         
         self.init_btn_filter = gtk.Button()
@@ -227,11 +228,100 @@ class EventAccumulator(AdhocView):
         mainbox.pack_start(self.sw)
         return mainbox
 
+
+    def modify_filters(self, w):
+        w=gtk.Window(gtk.WINDOW_TOPLEVEL)
+        def level_changed(w, options):
+            v=w.get_label()
+            i=self.tracer.trace.levels.keys().index(v)+1
+            if i>=len(self.tracer.trace.levels.keys()):
+                i=0
+            v=self.tracer.trace.levels.keys()[i]
+            w.set_label(v)
+            self.show_options(options, v)
+            options.show_all()
+            return
+        vb = gtk.VBox()
+        levelslab = self.options['detail']
+        levels = gtk.Button(levelslab)
+        vb.pack_start(levels, expand=False)
+        #levels.set_size_request(60, 20)
+        vb.pack_start(gtk.HSeparator(), expand=False)
+        options = gtk.VBox()
+        self.show_options(options, levelslab)
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw.set_size_request(600, 480)
+        sw.add_with_viewport(options)
+        vb.pack_start(sw, expand=False)
+        vb.pack_start(gtk.HSeparator(), expand=False)
+        def options_quit(w, window):
+            window.destroy()
+            return
+        hbb = gtk.HBox()
+        btn_q = gtk.Button(_('Quitter'))
+        hbb.pack_end(btn_q, expand=False)
+        btn_q.connect('clicked', options_quit, w)
+        vb.pack_end(hbb, expand=False)
+        levels.connect('clicked', level_changed, options)
+        w.set_name(_('Defining Filters'))
+        w.add(vb)
+        w.show_all()
+        #sw.connect
+        
+    def show_options(self, options, levelslab):
+        for ob in options.get_children():
+            options.remove(ob)
+        def option_clicked(w, name, levelslab):
+            #print '%s %s %s' % (name, w.get_active(), levelslab)
+            if w.get_active():
+                self.filters[levelslab].remove(name)
+            else:
+                self.filters[levelslab].append(name)
+            self.receive(self.tracer.trace)
+            return
+        if levelslab == 'events':
+            for i in self.events_names.keys():
+                option = gtk.CheckButton(self.events_names[i])
+                options.pack_start(option, expand=False)
+                if i in self.filters[levelslab]:
+                    option.set_active(False)
+                else:
+                    option.set_active(True)
+                option.connect('toggled', option_clicked, i, levelslab)
+        if levelslab == 'events' or levelslab == 'operations':
+            for i in self.operations_names.keys():
+                option = gtk.CheckButton(self.operations_names[i])
+                options.pack_start(option, expand=False)
+                if i in self.filters[levelslab]:
+                    option.set_active(False)
+                else:
+                    option.set_active(True)
+                option.connect('toggled', option_clicked, i, levelslab)
+            for i in self.incomplete_operations_names.keys():
+                option = gtk.CheckButton(self.incomplete_operations_names[i])
+                options.pack_start(option, expand=False)
+                if i in self.filters[levelslab]:
+                    option.set_active(False)
+                else:
+                    option.set_active(True)
+                option.connect('toggled', option_clicked, i, levelslab)
+        if levelslab == 'actions':
+            for i in self.tracer.action_types:
+                option = gtk.CheckButton(i)
+                options.pack_start(option, expand=False)
+                if i in self.filters[levelslab]:
+                    option.set_active(False)
+                else:
+                    option.set_active(True)
+                option.connect('toggled', option_clicked, i, levelslab)
+        return
+
     def init_filters(self, w):
         self.filters = {
             'content': '',
             'objects': [],
-            'events': ['AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PopupDisplay'],
+            'events': ['DurationUpdate','AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PopupDisplay'],
             'operations': [],
             'actions': [],
         }
@@ -317,8 +407,10 @@ class EventAccumulator(AdhocView):
 
     def showOperations(self, tracelevel, operation):
         #adjust the current display to the modified trace
+        filter_obj = (len(self.filters['objects'])>0)
+        #print filter_obj
         if operation is not None:
-            if len(self.filters['objects'])>0 and operation not in self.filters['objects']:
+            if filter_obj and operation not in self.filters['objects']:
                 return
             if self.size>=self.options['max_size']:
                 self.unpackEvent()
@@ -332,15 +424,13 @@ class EventAccumulator(AdhocView):
                 return
             trace_max = max(0, len(tracelevel))
             trace_min = max(0, trace_max-self.options['max_size'])
-            #FIXME : need to handle multiple filters
-            if len(self.filters['objects'])>0:
-                t_temp = trace_max
-                while t_temp > trace_min and trace_min > 0:
-                    if operation not in self.filters['objects']:
-                        trace_min = trace_min-1
-                    t_temp = t_temp -1
+            t_temp = trace_max
+            while t_temp > trace_min and trace_min > 0:
+                if (filter_obj and operation not in self.filters['objects']) or operation in self.filters['operations']:
+                    trace_min = trace_min-1
+                t_temp = t_temp -1
             for i in tracelevel[trace_min:trace_max]:
-                if len(self.filters['objects'])<=0 or i in self.filters['objects']:
+                if (not filter_obj or i in self.filters['objects']) and i.name not in self.filters['operations']:
                     self.size = self.size + 1
                     #print "%s %s" % (self.size, i.name)
                     self.packOperation(i)
@@ -357,14 +447,20 @@ class EventAccumulator(AdhocView):
             trace_max = max(0, len(tracelevel))
             trace_min = max(0, trace_max-self.options['max_size'])
             #print "min %s, max %s" % (trace_min, trace_max)
+            t_temp = trace_max
+            while t_temp > trace_min and trace_min > 0:
+                if action.name == "Undefined" or action in self.filters['actions']:
+                    trace_min = trace_min-1
+                t_temp = t_temp -1
             for i in tracelevel[trace_min:trace_max]:
                 if i.name == "Undefined":
                     print "Undefined action for object %s" % i
                     pass
-                #print "%s %s" % (self.size, i.name)
-                self.size = self.size + 1
-                #print "pack %s" % i
-                self.packAction(i)
+                if i.name not in self.filters['actions']:
+                    #print "%s %s" % (self.size, i.name)
+                    self.size = self.size + 1
+                    #print "pack %s" % i
+                    self.packAction(i)
             return
         #adjust the current display to the modified trace
         if action.name == "Undefined":
