@@ -1022,6 +1022,7 @@ class ECACatalog:
         'MediaChange':            _("Modification of the associated media"),
         'BookmarkHighlight':      _("Highlight a bookmark"),
         'BookmarkUnhighlight':    _("Unhighlight a bookmark"),
+        'DurationUpdate':         _("Updating duration of the movie"),
         }
 
     # Events that set the controller.modified state
