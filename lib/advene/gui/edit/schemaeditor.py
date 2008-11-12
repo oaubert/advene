@@ -1373,12 +1373,13 @@ class RelationTypeGroup (Group):
                                     parent=schema,
                                     controller=self.controller)
             rt=cr.popup(modal=True)
-            if (rt is None):
+            if rt is None:
                 return None
             self.type=rt
             if not self.members:
-                pop = get_edit_popup (self.type, self.controller)
-                pop.edit(modal=True)
+                self.controller.gui.edit_element(self.type)
+                #pop = get_edit_popup (self.type, self.controller)
+                #pop.edit(modal=True)
             else:
                 # FIXME if more than 2 members
                 self.type.hackedMemberTypes=( '#' + self.members[0].id, '#' + self.members[1].id )
