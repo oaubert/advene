@@ -217,6 +217,9 @@ class EventAccumulator(AdhocView):
         self.init_btn_filter.connect('clicked', self.init_filters)
         btnbar.pack_start(self.init_btn_filter, expand=False)
         self.filter_active(False)
+        exp_b = gtk.Button(_('Export'))
+        exp_b.connect('clicked', self.export)
+        btnbar.pack_start(exp_b, expand=False)
 
         mainbox.pack_start(btnbar, expand=False)
         mainbox.pack_start(gtk.HSeparator(), expand=False)
@@ -228,6 +231,10 @@ class EventAccumulator(AdhocView):
         mainbox.pack_start(self.sw)
         return mainbox
 
+    def export(self, w):
+        self.tracer.export()
+        print 'Export done.'
+        return
 
     def modify_filters(self, w):
         w=gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -426,7 +433,7 @@ class EventAccumulator(AdhocView):
             trace_min = max(0, trace_max-self.options['max_size'])
             t_temp = trace_max
             while t_temp > trace_min and trace_min > 0:
-                if (filter_obj and operation not in self.filters['objects']) or operation in self.filters['operations']:
+                if (filter_obj and tracelevel[t_temp] not in self.filters['objects']) or tracelevel[t_temp].name in self.filters['operations']:
                     trace_min = trace_min-1
                 t_temp = t_temp -1
             for i in tracelevel[trace_min:trace_max]:
@@ -449,7 +456,7 @@ class EventAccumulator(AdhocView):
             #print "min %s, max %s" % (trace_min, trace_max)
             t_temp = trace_max
             while t_temp > trace_min and trace_min > 0:
-                if action.name == "Undefined" or action in self.filters['actions']:
+                if tracelevel[t_temp].name == "Undefined" or tracelevel[t_temp].name in self.filters['actions']:
                     trace_min = trace_min-1
                 t_temp = t_temp -1
             for i in tracelevel[trace_min:trace_max]:
@@ -559,6 +566,7 @@ class EventAccumulator(AdhocView):
                 comp = _('an annotation (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.annotation.Relation):
                 comp = _('an relation (%s)') % obj_evt.concerned_object['id']
+                #FIXME add annotationtypes and relationtypes
             else:
                 comp = _('an unknown item (%s)') % obj_evt.concerned_object['id']
             entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
