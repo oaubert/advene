@@ -34,7 +34,7 @@ class CachedString:
 
     def __str__(self):
         try:
-            return open(self._filename).read()
+            return open(self._filename, 'rb').read()
         except (IOError, OSError):
             return ''
 
