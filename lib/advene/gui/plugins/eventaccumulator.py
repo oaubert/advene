@@ -566,7 +566,16 @@ class EventAccumulator(AdhocView):
                 comp = _('an annotation (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.annotation.Relation):
                 comp = _('an relation (%s)') % obj_evt.concerned_object['id']
-                #FIXME add annotationtypes and relationtypes
+            elif isinstance(ob,advene.model.schema.AnnotationType):
+                comp = _('an annotation type (%s)') % obj_evt.concerned_object['id']
+            elif isinstance(ob,advene.model.schema.RelationType):
+                comp = _('a relation type (%s)') % obj_evt.concerned_object['id']
+            elif isinstance(ob,advene.model.schema.Schema):
+                comp = _('a schema (%s)') % obj_evt.concerned_object['id']
+            elif isinstance(ob,advene.model.view.View):
+                comp = _('a view (%s)') % obj_evt.concerned_object['id']
+            elif isinstance(ob,advene.model.package.Package):
+                comp = _('a package (%s)') % obj_evt.concerned_object['id']
             else:
                 comp = _('an unknown item (%s)') % obj_evt.concerned_object['id']
             entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
@@ -607,6 +616,16 @@ class EventAccumulator(AdhocView):
                 comp = _('an annotation (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.annotation.Relation):
                 comp = _('an relation (%s)') % obj_evt.concerned_object['id']
+            elif isinstance(ob,advene.model.schema.AnnotationType):
+                comp = _('an annotation type (%s)') % obj_evt.concerned_object['id']
+            elif isinstance(ob,advene.model.schema.RelationType):
+                comp = _('a relation type (%s)') % obj_evt.concerned_object['id']
+            elif isinstance(ob,advene.model.schema.Schema):
+                comp = _('a schema (%s)') % obj_evt.concerned_object['id']
+            elif isinstance(ob,advene.model.view.View):
+                comp = _('a view (%s)') % obj_evt.concerned_object['id']
+            elif isinstance(ob,advene.model.package.Package):
+                comp = _('a package (%s)') % obj_evt.concerned_object['id']
             else:
                 comp = _('an unknown item (%s)') % obj_evt.concerned_object['id']
             entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
