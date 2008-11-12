@@ -105,8 +105,11 @@ class TraceBuilder:
         print "Data exported to %s" % fname
         return True
 
+    def convert_old_trace(self, fname):
+        return
+
     def import_trace(self, fname):
-        print 'impoting trace from %s' % fname
+        print 'importing trace from %s' % fname
         if not os.path.exists(fname):
             oldfname=fname
             fname = os.path.join(config.data.path['settings'],oldfname)
