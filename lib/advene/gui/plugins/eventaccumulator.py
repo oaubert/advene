@@ -431,7 +431,7 @@ class EventAccumulator(AdhocView):
                 return
             trace_max = max(0, len(tracelevel))
             trace_min = max(0, trace_max-self.options['max_size'])
-            t_temp = trace_max
+            t_temp = trace_max-1
             while t_temp > trace_min and trace_min > 0:
                 if (filter_obj and tracelevel[t_temp] not in self.filters['objects']) or tracelevel[t_temp].name in self.filters['operations']:
                     trace_min = trace_min-1
@@ -454,7 +454,7 @@ class EventAccumulator(AdhocView):
             trace_max = max(0, len(tracelevel))
             trace_min = max(0, trace_max-self.options['max_size'])
             #print "min %s, max %s" % (trace_min, trace_max)
-            t_temp = trace_max
+            t_temp = trace_max-1
             while t_temp > trace_min and trace_min > 0:
                 if tracelevel[t_temp].name == "Undefined" or tracelevel[t_temp].name in self.filters['actions']:
                     trace_min = trace_min-1
