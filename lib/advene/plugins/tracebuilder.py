@@ -123,8 +123,11 @@ class TraceBuilder:
         self.opened_actions = {}
         for ev in tr.event:
             ev_content = ''
-            if ev.nodeType is xml.dom.Node.TEXT_NODE:
-                ev_content = ev.data.encode('utf-8')
+            evn=None
+            if ev.childNodes:
+                evn=ev.childNodes[0]
+            if evn and evn.nodeType is xml.dom.Node.TEXT_NODE:
+                ev_content = evn.data.encode('utf-8')
             if ev.o_name=="None":
                 ev.o_name=None
             if ev.o_id=="None":
