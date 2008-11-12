@@ -30,6 +30,12 @@ import time
 import advene.core.config as config
 import urllib
 import advene.model.view
+import advene.util.ElementTree as ET
+import os
+import advene.util.helper as helper
+import advene.util.handyxml as handyxml
+import xml.dom
+
 
 def register(controller):
     controller.register_tracer(TraceBuilder(controller))
@@ -77,6 +83,88 @@ class TraceBuilder:
         self.__package=package
         self.controller.event_handler.register_view(self)
         self.trace = Trace()
+
+    def export(self):
+        print 'exporting trace...'
+        fname="event.evt"
+        fname = os.path.join( config.data.path['settings'], fname )
+        try:
+            stream=open(fname, 'wb')
+        except (OSError, IOError), e:
+            self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
+            return True
+        tr=ET.Element('trace')
+        id_e = 0
+        #everything can be rebuild from events.
+        for e in self.trace.levels['events']:
+            id_e = id_e + 1
+            tr.append(e.export(id_e))
+        helper.indent(tr)
+        ET.ElementTree(tr).write(stream, encoding='utf-8')
+        stream.close()
+        print "Data exported to %s" % fname
+        return True
+
+    def import_trace(self, fname):
+        print 'impoting trace from %s' % fname
+        if not os.path.exists(fname):
+            oldfname=fname
+            fname = os.path.join(config.data.path['settings'],oldfname)
+            print "%s not found, trying %s" % (oldfname,fname)
+            if not os.path.exists(fname):
+                print "%s not found, giving up." % fname
+                return False
+        tr=handyxml.xml(fname, forced=True)
+        self.lid=0
+        if tr.node.nodeName != 'trace':
+            print "This does not look like a trace file."
+            return
+        self.trace = Trace()
+        self.opened_actions = {}
+        for ev in tr.event:
+            ev_content = ''
+            if ev.nodeType is xml.dom.Node.TEXT_NODE:
+                ev_content = ev.data.encode('utf-8')
+            if ev.o_name=="None":
+                ev.o_name=None
+            if ev.o_id=="None":
+                ev.o_id=None
+            evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id)
+            evt.change_comment(ev.comment)
+            self.trace.add_to_trace('events', evt)
+            if evt.name in self.operation_mapping.keys():
+                op = Operation(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id)
+                self.trace.add_to_trace('operations', op)
+                if op is not None:
+                    if ev.name in self.operation_mapping.keys():
+                        ac_t = self.operation_mapping[ev.name]
+                    else:
+                        continue
+                    type = "Undefined"
+                    if ac_t < len(self.action_types):
+                        type = self.action_types[ac_t]
+                    if type == "Undefined":
+                        if ev.o_name=='annotation' or ev.o_name=='relation':
+                            type="Restructuration"
+                        elif ev.o_name=='annotationtype' or ev.o_name=='relationtype' or ev.o_name=='schema':
+                            type="Classification"
+                        elif ev.o_name=='view':
+                            type="View building"
+                    if type in self.opened_actions.keys():
+                        # an action is already opened for this event
+                        ac = self.opened_actions[type]
+                        if type == "Navigation" and (op.name == "PlayerStop" or op.name == "PlayerPause"):
+                            del self.opened_actions[type]
+                        ac.add_operation(op)
+                        continue
+                    for t in self.opened_actions.keys():
+                        if t != "Navigation":
+                            del self.opened_actions[t]
+                    ac = Action(name=type, begintime=op.time, endtime=None, acbegintime=op.activity_time, acendtime=None, content=None, movie=op.movie, movietime=op.movietime, operations=[op])
+                    self.trace.add_to_trace('actions', ac)
+                    self.opened_actions[type]=ac
+        self.alert_registered(None, None, None)
+        return True
 
     def receive(self, obj):
         # obj : received event
@@ -159,7 +247,7 @@ class TraceBuilder:
                      'schema=' + elem.schema.id,
                      'mimetype=' + elem.mimetype)
                     )
-                elem_name='annotation type'
+                elem_name='annotationtype'
                 elem_id=elem.id
         elif 'relationtype' in obj:
             elem=obj['relationtype']
@@ -169,7 +257,7 @@ class TraceBuilder:
                      'schema=' + elem.schema.id,
                      'mimetype=' + elem.mimetype)
                     )
-                elem_name='relation type'
+                elem_name='relationtype'
                 elem_id=elem.id
         elif 'schema' in obj:
             elem=obj['schema']
@@ -266,7 +354,7 @@ class TraceBuilder:
                      'schema=' + elem.schema.id,
                      'mimetype=' + elem.mimetype)
                     )
-                elem_name='annotation type'
+                elem_name='annotationtype'
                 elem_id=elem.id
         elif 'relationtype' in obj:
             elem=obj['relationtype']
@@ -276,7 +364,7 @@ class TraceBuilder:
                      'schema=' + elem.schema.id,
                      'mimetype=' + elem.mimetype)
                     )
-                elem_name='relation type'
+                elem_name='relationtype'
                 elem_id=elem.id
         elif 'schema' in obj:
             elem=obj['schema']
@@ -456,6 +544,13 @@ class Event:
             'id':obj_id,
         }
 
+    def export(self, n_id):
+        e = ET.Element('event', id='e'+str(n_id), 
+                name=self.name, time=str(self.time),
+                ac_time=str(self.activity_time), movie=self.movie, m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']))
+        e.text = self.content
+        return e
+
     def change_comment(self, comment=''):
         self.comment = comment
         return
@@ -476,6 +571,12 @@ class Operation:
             'name':obj,
             'id':obj_id,
         }
+
+    def export(self, n_id):
+        e = ET.Element('operation', id='o'+str(n_id), name=self.name, time=str(self.time),
+                ac_time=str(self.activity_time), movie=self.movie, m_time=str(self.movietime), comment=self.comment, o_name=self.concerned_object['name'], o_id=self.concerned_object['id'])
+        e.text = self.content
+        return e
 
     def change_comment(self, comment=''):
         self.comment = comment
