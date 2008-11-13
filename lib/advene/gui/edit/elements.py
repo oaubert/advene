@@ -823,19 +823,27 @@ class EditAnnotationTypePopup (EditElementPopup):
         vbox = gtk.VBox()
 
         f = self.make_registered_form (element=self.element,
-                                       fields=('id', 'uri', 'title',
-                                               'author', 'date', 'mimetype'),
+                                       fields=('title', 'mimetype'),
                                        editable=editable,
-                                       editables=('author', 'date', 'title',
-                                                  'mimetype'),
+                                       editables=('title', 'mimetype' ),
+                                       labels={ 'title':     _('Title'),
+                                                'mimetype': _('MIME Type')
+                                                }
+                                       )
+        vbox.pack_start (f.get_view (), expand=False)
+
+        f = self.make_registered_form (element=self.element,
+                                       fields=('id', 'uri',
+                                               'author', 'date'),
+                                       editable=editable,
+                                       editables=('author', 'date', 'title'),
                                        labels={'id':     _('Id'),
                                                'uri':    _('URI'),
-                                               'title':  _('Title'),
                                                'author': _('Author'),
                                                'date':   _('Date'),
-                                               'mimetype': _('MIME Type')}
+                                               }
                                        )
-        vbox.add(f.get_view())
+        vbox.add(self.expandable(f.get_view(), expanded=False))
 
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
@@ -887,19 +895,27 @@ class EditRelationTypePopup (EditElementPopup):
         vbox=gtk.VBox()
 
         f = self.make_registered_form (element=self.element,
-                                       fields=('id', 'uri', 'title',
-                                               'author', 'date', 'mimetype'),
+                                       fields=('title', 'mimetype'),
                                        editable=editable,
-                                       editables=('author', 'date', 'title',
-                                                  'mimetype'),
+                                       editables=('title', 'mimetype' ),
+                                       labels={ 'title':     _('Title'),
+                                                'mimetype': _('MIME Type')
+                                                }
+                                       )
+        vbox.pack_start (f.get_view (), expand=False)
+
+        f = self.make_registered_form (element=self.element,
+                                       fields=('id', 'uri',
+                                               'author', 'date'),
+                                       editable=editable,
+                                       editables=('author', 'date', 'title'),
                                        labels={'id':     _('Id'),
                                                'uri':    _('URI'),
-                                               'title':  _('Title'),
                                                'author': _('Author'),
                                                'date':   _('Date'),
-                                               'mimetype': _('MIME Type')}
+                                               }
                                        )
-        vbox.add(f.get_view ())
+        vbox.add(self.expandable(f.get_view(), expanded=False))
 
         members=[ ('#'+at.id, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
         members.append( ('', _("Any annotation type")) )
