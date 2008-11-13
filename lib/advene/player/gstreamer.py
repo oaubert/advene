@@ -469,7 +469,9 @@ class Player:
             self.overlay.begin=self.position2value(begin)
             self.overlay.end=self.position2value(end)
             self.overlay.filename=tempfile.mktemp('.svg', 'adv')
-            open(self.overlay.filename, 'w').write(message)
+            f=open(self.overlay.filename, 'w')
+            f.write(message)
+            f.close()
             self.imageoverlay.props.image_name=self.overlay.filename
             return True
         
