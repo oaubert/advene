@@ -34,7 +34,10 @@ class CachedString:
 
     def __str__(self):
         try:
-            return open(self._filename, 'rb').read()
+            f=open(self._filename, 'rb')
+            data=f.read()
+            f.close()
+            return data
         except (IOError, OSError):
             return ''
 
@@ -67,8 +70,9 @@ class ImageCache(dict):
     """
     # The content of the not_yet_available_file file. We could use
     # CachedString but as it is frequently used, let us keep it in memory.
-    not_yet_available_image = TypedString(open(config.data.advenefile( ( 'pixmaps', 
-                                                                         'notavailable.png' ) ), 'rb').read())
+    f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
+    not_yet_available_image = TypedString(f.read())
+    f.close()
     not_yet_available_image.contenttype='image/png'
 
     def __init__ (self, name=None, epsilon=20):
