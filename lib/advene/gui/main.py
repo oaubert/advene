@@ -221,11 +221,11 @@ class AdveneGUI(object):
 
         menu_definition=(
             (_("_File"), (
-                    ( _("gtk-new"), self.on_new1_activate, "" ),
-                    ( _("gtk-open"), self.on_open1_activate, "" ),
-                    ( _("gtk-save"), self.on_save1_activate, "" ),
-                    ( _("gtk-save-as"), self.on_save_as1_activate, "" ),
-                    ( _("gtk-close"), self.on_close1_activate, "" ),
+                    ( "gtk-new", self.on_new1_activate, "" ),
+                    ( "gtk-open", self.on_open1_activate, "" ),
+                    ( "gtk-save", self.on_save1_activate, "" ),
+                    ( "gtk-save-as", self.on_save_as1_activate, "" ),
+                    ( "gtk-close", self.on_close1_activate, "" ),
                     ( "", None, "" ),
                     ( _("Save session"), self.on_save_session1_activate, _("Save the current session (list of opened packages)") ),
                     ( _("Save workspace"), (
@@ -244,13 +244,13 @@ class AdveneGUI(object):
                     ( _("Export..."), self.on_export_activate, _("Export data to another format") ),
                     ( _("Website export..."), self.on_website_export_activate, _("Export views to a website") ),
                     ( "", None, "" ),
-                    ( _("gtk-quit"), self.on_exit, "" ),
+                    ( "gtk-quit", self.on_exit, "" ),
                     ( "", None, "" ),
                     ), "" ),
             (_("_Edit"), (
-                    ( _("gtk-undo"), self.on_undo1_activate, "" ),
-                    ( _("gtk-find"), self.on_find1_activate, "" ),
-                    ( _("gtk-delete"), self.on_delete1_activate, "" ),
+                    ( "gtk-undo", self.on_undo1_activate, "" ),
+                    ( "gtk-find", self.on_find1_activate, "" ),
+                    ( "gtk-delete", self.on_delete1_activate, "" ),
                     ( _("Create"), (
                             ( _("Schema"), self.on_create_schema_activate, "" ),
                             ( _("View"), self.on_create_view_activate, "" ),
@@ -291,7 +291,7 @@ class AdveneGUI(object):
                     ( _("No package"), None, "" ),
                     ), "" ),
             (_("_Help"), (
-                    ( _("gtk-help"), self.on_help1_activate, "" ),
+                    ( "gtk-help", self.on_help1_activate, "" ),
                     ( _("Get support"), self.on_support1_activate, "" ),
                     ( _("Check for updates"), self.check_for_update, "" ),
                     ( _("Display shortcuts"), self.on_helpshortcuts_activate, "" ),
