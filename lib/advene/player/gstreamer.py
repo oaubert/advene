@@ -265,8 +265,6 @@ class Player:
         #control.set("ypos", 0, 0)
         #control.set("ypos", 5 * gst.SECOND, 200)
 
-
-
         if sink == 'ximagesink':
             print "Using ximagesink."
             filter = gst.element_factory_make("capsfilter", "filter")
@@ -279,8 +277,13 @@ class Player:
             # http://bugzilla.gnome.org/show_bug.cgi?id=339201 is
             # solved...
             #self.scale=gst.element_factory_make('videoscale')
-            self.video_sink.add(self.captioner, filter, csp, self.imagesink)
-            gst.element_link_many(self.captioner, filter, csp, self.imagesink)
+            if self.imageoverlay is not None:
+                self.video_sink.add(self.captioner, self.imageoverlay, filter, csp, self.imagesink)
+                gst.element_link_many(self.captioner, self.imageoverlay, filter, csp, self.imagesink)
+            else:
+                self.video_sink.add(self.captioner, filter, csp, self.imagesink)
+                gst.element_link_many(self.captioner, filter, csp, self.imagesink)
+
         elif self.captioner is not None:
             if self.imageoverlay is not None:
                 self.video_sink.add(self.captioner, self.imageoverlay, self.imagesink)
