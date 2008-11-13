@@ -2569,7 +2569,6 @@ class AdveneGUI(object):
                 at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
                 sc.annotationTypes.append(at)
                 self.controller.notify('AnnotationTypeCreate', annotationtype=at)
-                self.edit_element(at, modal=True)
         else:
             at=None
         d.destroy()
