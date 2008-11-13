@@ -196,7 +196,7 @@ class TraceBuilder:
         ev_time = time.time()
         ev_activity_time = (time.time() - config.data.startup_time) * 1000
         ev_name = obj['event_name']
-        ev_movie = self.controller.get_default_media()
+        ev_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
         ev_movie_time = self.controller.player.current_position_value
         ev_content = ''
         elem=None
@@ -302,7 +302,7 @@ class TraceBuilder:
         op_activity_time = (time.time() - config.data.startup_time) * 1000
         op_name = obj['event_name']
         #op_params = obj['parameters']
-        op_movie = self.controller.get_default_media()
+        op_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
         op_movie_time = self.controller.player.current_position_value
         op_content = None
         elem=None
