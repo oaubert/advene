@@ -600,7 +600,7 @@ class Player:
             self.display_text('', -1, -1)
         if self.overlay.filename and (s.position < self.overlay.begin
                                       or s.position > self.overlay.end):
-            self.imageoverlay.props.image_name=''
+            self.imageoverlay.props.pixbuf=None
             self.overlay.begin=-1
             self.overlay.end=-1
             os.unlink(self.overlay.filename)
