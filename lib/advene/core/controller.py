@@ -2361,7 +2361,7 @@ class AdveneController(object):
             for element in elements:
                 ctx=self.build_context(element)
                 data.append(_("""<h1>Comment on %(title)s</h1>
-    <a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s"></img></a><br>%(title)s<br>""") % { 
+    <a tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s"></img></a><br>%(title)s<br>""") % { 
                     'title': self.get_title(element),
                     'id': element.id,
                     'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
