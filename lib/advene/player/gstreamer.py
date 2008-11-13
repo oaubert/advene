@@ -443,7 +443,9 @@ class Player:
 
         try:
             b=self.player.props.frame.copy()
-        except SystemError:
+        except (SystemError, AttributeError):
+            # AttributeError: in some cases, props.frame is None, so
+            # copy() is not available.
             return None
 
         f=self.convert_snapshot(b)
