@@ -2641,7 +2641,6 @@ class AdveneGUI(object):
                     sc.title=sctitle
                     self.controller.package.schemas.append(sc)
                     self.controller.notify('SchemaCreate', schema=sc)
-                    self.edit_element(sc, modal=True)
                 else:
                     dialog.message_dialog(_("You specified an existing identifier. Aborting."))
                     d.destroy()
