@@ -2358,6 +2358,12 @@ class AdveneGUI(object):
                 # Need to save
                 l=[ alias for (alias, p) in self.controller.packages.iteritems() if p._modified and alias != 'advene' ]
                 if l:
+                    if self.controller.tracers and config.data.preferences['record-actions']:
+                        try:
+                            fn = self.controller.tracers[0].export()
+                            print "trace exported to %s" % fn
+                        except (e):
+                            print "error exporting : %s" % e
                     if config.data.preferences['package-auto-save'] == 'always':
                         self.controller.queue_action(do_save, l)
                     else:
