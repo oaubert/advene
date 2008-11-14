@@ -93,10 +93,8 @@ class TraceBuilder:
             self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             return None
         tr=ET.Element('trace')
-        id_e = 0
         #everything can be rebuild from events.
-        for e in self.trace.levels['events']:
-            id_e = id_e + 1
+        for (id_e, e) in enumerate(self.trace.levels['events']):
             tr.append(e.export(id_e))
         helper.indent(tr)
         ET.ElementTree(tr).write(stream, encoding='utf-8')
