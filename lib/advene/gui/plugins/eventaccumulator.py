@@ -68,41 +68,8 @@ class EventAccumulator(AdhocView):
             'nav_actionBox':None,
         }
         # ECACatalog event_names et set(())
-        self.events_names= {
-            'DurationUpdate': _('Updating duration of the movie'),
-            'AnnotationBegin': _('Beginning of an annotation'),
-            'AnnotationEnd': _('End of an annotation'),
-            'BookmarkHighlight': _('Highlighting a bookmark'),
-            'BookmarkUnhighlight': _('Unhighlighting a bookmark'),
-            'PackageLoad': _('Loading a package'),
-            'PopupDisplay': _('Displaying a popup'),
-            'MediaChange': _('Changing the media'),
-            'PackageActivate': _('Activating a package'),
-            'PackageSave': _('Saving a package'),
-            'ApplicationStart': _('Starting the application'),
-        }
-        self.operations_names = {
-            'AnnotationCreate': _('Creating an annotation'),
-            'AnnotationEditEnd': _('Validating edition of an annotation'),
-            'AnnotationDelete': _('Deleting an annotation'),
-            'RelationCreate': _('Creating a relation'),
-            'AnnotationMerge': _('Merging annotations'),
-            'AnnotationMove': _('Moving an annotation'),
-            'PlayerStart': _('Starting playback'),
-            'PlayerStop': _('Ending playback'),
-            'PlayerPause': _('Pausing playback'),
-            'PlayerResume': _('Resuming playback'),
-            'PlayerSet': _('Moving to a position in the movie'),
-            'ViewActivation': _('Activating a view'),
-            'AnnotationTypeCreate': _('Creating an annotation type'),
-            'RelationTypeCreate': _('Creating a relation type'),
-            'RelationTypeDelete': _('Deleting a relation type'),
-            'AnnotationTypeDelete': _('Deleting an annotation type'),
-            'AnnotationTypeEditEnd': _('Ending edition of an annotation type'),
-            'RelationTypeEditEnd': _('Ending edition of a relation type'),
-            'ViewCreate': _('Creating a view'),
-            'ViewEditEnd': _('Ending edition of a view'),
-        }
+        self.events_names= ['DurationUpdate','AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PackageLoad','PopupDisplay','MediaChange','PackageActivate','PackageSave','ApplicationStart']
+        self.operations_names = ['AnnotationCreate','AnnotationEditEnd','AnnotationDelete','RelationCreate','AnnotationMerge','AnnotationMove','PlayerStart','PlayerStop','PlayerPause','PlayerResume','PlayerSet','ViewActivation','AnnotationTypeCreate','RelationTypeCreate','RelationTypeDelete','AnnotationTypeDelete','AnnotationTypeEditEnd','RelationTypeEditEnd','ViewCreate','ViewEditEnd']
         self.incomplete_operations_names = {
             'ElementEditBegin': _('Beginning edition'),
             'ElementEditDestroy': _('Canceling edition'),
@@ -300,8 +267,8 @@ class EventAccumulator(AdhocView):
             self.receive(self.tracer.trace)
             return
         if levelslab == 'events':
-            for i in self.events_names.keys():
-                option = gtk.CheckButton(self.events_names[i])
+            for i in self.events_names:
+                option = gtk.CheckButton( ECACatalog.event_names[i])
                 options.pack_start(option, expand=False)
                 if i in self.filters[levelslab]:
                     option.set_active(False)
@@ -309,8 +276,8 @@ class EventAccumulator(AdhocView):
                     option.set_active(True)
                 option.connect('toggled', option_clicked, i, levelslab)
         if levelslab == 'events' or levelslab == 'operations':
-            for i in self.operations_names.keys():
-                option = gtk.CheckButton(self.operations_names[i])
+            for i in self.operations_names:
+                option = gtk.CheckButton( ECACatalog.event_names[i])
                 options.pack_start(option, expand=False)
                 if i in self.filters[levelslab]:
                     option.set_active(False)
@@ -568,11 +535,11 @@ class EventAccumulator(AdhocView):
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
         if self.options['time'] == 'activity':
             ev_time = helper.format_time(obj_evt.activity_time)
-        if obj_evt.name in self.events_names.keys() or obj_evt.name in self.operations_names.keys():
+        if obj_evt.name in self.events_names or obj_evt.name in self.operations_names:
             if ECACatalog.event_names[obj_evt.name]:
                 entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
             else:
-                entetestr = "%s : %s" % (ev_time, "Event not defined")
+                entetestr = "%s : %s" % (ev_time, "Event not described")
             if obj_evt.concerned_object['id']:
                 entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
         elif obj_evt.name in self.incomplete_operations_names.keys():
@@ -621,11 +588,11 @@ class EventAccumulator(AdhocView):
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
         if self.options['time'] == 'activity':
             ev_time = helper.format_time(obj_evt.activity_time)
-        if obj_evt.name in self.operations_names.keys():
+        if obj_evt.name in self.operations_names:
             if ECACatalog.event_names[obj_evt.name]:
                 entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
             else:
-                entetestr = "%s : %s" % (ev_time, self.operations_names[obj_evt.name])
+                entetestr = "%s : %s" % (ev_time, "Operation not described")
             if obj_evt.concerned_object['id']:
                 entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
         elif obj_evt.name in self.incomplete_operations_names.keys():
