@@ -594,9 +594,10 @@ class Event:
         }
 
     def export(self, n_id):
+        #print "%s %s %s %s %s %s %s %s %s %s" % ('e'+str(n_id), self.name, str(self.time), str(self.activity_time), self.movie, str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), self.content)
         e = ET.Element('event', id='e'+str(n_id), 
                 name=self.name, time=str(self.time),
-                ac_time=str(self.activity_time), movie=self.movie, m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']))
+                ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']))
         e.text = self.content
         return e
 
