@@ -85,14 +85,14 @@ class TraceBuilder:
         self.trace = Trace()
 
     def export(self):
-        print 'exporting trace...'
-        fname="event.evt"
+        #print 'exporting trace...'
+        fname="Trace_advene_%s.evt" % time.strftime("%d_%m_%y_%H_%M_%S", time.localtime(time.time()))
         fname = os.path.join( config.data.path['settings'], fname )
         try:
             stream=open(fname, 'wb')
         except (OSError, IOError), e:
             self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
-            return True
+            return None
         tr=ET.Element('trace')
         id_e = 0
         #everything can be rebuild from events.
@@ -102,10 +102,52 @@ class TraceBuilder:
         helper.indent(tr)
         ET.ElementTree(tr).write(stream, encoding='utf-8')
         stream.close()
-        print "Data exported to %s" % fname
-        return True
+        #print "Data exported to %s" % fname
+        return fname
 
     def convert_old_trace(self, fname):
+        #FIXME : complete the import and do not use handyxml.
+        print 'importing trace from %s' % fname
+        if not os.path.exists(fname):
+            oldfname=fname
+            fname = os.path.join(config.data.path['settings'],oldfname)
+            print "%s not found, trying %s" % (oldfname,fname)
+            if not os.path.exists(fname):
+                print "%s not found, giving up." % fname
+                return False
+        pk=handyxml.xml(fname, forced=True)
+        lid=0
+        if pk.node.nodeName != 'package':
+            print "This does not look like a trace file."
+            return False
+        self.trace = Trace()
+        self.opened_actions = {}
+        if pk.annotations:
+            for an in pk.annotations[0].annotation:
+                an_content = ''
+                an_ac_time='0'
+                an_m_time='0'
+                an_movie_time='0'
+                evn=None
+                if an.childNodes:
+                    an_ac_time=an.childNodes[1].getAttribute('begin')
+                if an.content:
+                    if an.content[0].childNodes:
+                        evn=an.content[0].childNodes[0]
+                        if evn and evn.nodeType is xml.dom.Node.TEXT_NODE:
+                            an_content = evn.data.encode('utf-8')
+                an_name = an.type[1:]
+                an_time=an_ac_time
+                if an_content.find('position='):
+                    d= an_content.find('position=')
+                    e = an_content.find('\n',an_content.find('position='))
+                    an_m_time=an_content[d:e]
+                #evt = Event(an_name, float(an_time), float(an_ac_time), an_content, an_movie, float(an_m_time), an_o_name, an_o_id)
+                #evt.change_comment(ev.comment)
+                #self.trace.add_to_trace('events', evt)
+                print '%s %s %s' % (an_name, an_ac_time, an_content)
+
+                
         return
 
     def import_trace(self, fname):
@@ -118,13 +160,14 @@ class TraceBuilder:
                 print "%s not found, giving up." % fname
                 return False
         tr=handyxml.xml(fname, forced=True)
-        self.lid=0
+        lid=0
         if tr.node.nodeName != 'trace':
             print "This does not look like a trace file."
-            return
+            return False
         self.trace = Trace()
         self.opened_actions = {}
         for ev in tr.event:
+            lid = lid+1
             ev_content = ''
             evn=None
             if ev.childNodes:
@@ -170,6 +213,7 @@ class TraceBuilder:
                     self.trace.add_to_trace('actions', ac)
                     self.opened_actions[type]=ac
         self.alert_registered(None, None, None)
+        print "%s events imported" % lid
         return True
 
     def receive(self, obj):
