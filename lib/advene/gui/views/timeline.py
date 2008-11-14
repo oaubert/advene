@@ -930,7 +930,9 @@ class TimeLine(AdhocView):
     def create_annotation_type(self, *p):
         at=None
         if self.controller.gui:
-            at=self.controller.gui.on_create_annotation_type_activate()
+            at=self.controller.gui.ask_for_annotation_type(text=_("Creation of a new annotation type"),
+                                                           create=True,
+                                                           force_create=True)
         return at
 
     def create_annotation(self, position, type, duration=None, content=None):
