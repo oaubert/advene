@@ -1572,6 +1572,9 @@ class AdveneGUI(object):
     def init_window_size(self, window, name):
         """Initialize window size according to stored values.
         """
+        if name == 'editwindow':
+            # Do not update position/size for edit popups
+            return True
         if config.data.preferences['remember-window-size']:
             s=config.data.preferences['windowsize'].setdefault(name, (640,480))
             window.resize(*s)
