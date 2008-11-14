@@ -63,6 +63,8 @@ class EditRuleSet(EditGeneric):
         self.widget=self.build_widget()
         for rule in self.model:
             self.add_rule(rule, append=False)
+        # Focus on the first rule
+        self.widget.set_current_page(0)
 
     def get_packed_widget(self):
         """Return an enriched widget (with rules add and remove buttons)."""
@@ -86,7 +88,7 @@ class EditRuleSet(EditGeneric):
                       action=action)
             self.add_rule(rule)
             return True
-
+        
         def add_subview_cb(button=None):
             if not self.editable:
                 return True
