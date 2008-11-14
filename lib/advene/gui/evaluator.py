@@ -567,7 +567,9 @@ class Evaluator:
                 args.append("*" + varargs)
             if varkw:
                 args.append("**" + varkw)
-        elif inspect.isbuiltin(res) and res.__doc__:
+        #elif inspect.isbuiltin(res) and res.__doc__:
+        # isbuiltin does not work
+        elif callable(res) and res.__doc__:
             # Extract parameters from docstring
             args=re.findall('\((.*?)\)', res.__doc__.splitlines()[0])
 
