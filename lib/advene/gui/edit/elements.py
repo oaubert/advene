@@ -799,14 +799,15 @@ class EditSchemaPopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
-        f = EditMetaForm(title=_("Item color"),
-                         element=self.element, name='item_color',
-                         namespaceid='advenetool', controller=self.controller,
-                         editable=editable,
-                         tooltip=_("TALES expression returning a color for the items contained by the element"),
-                         type='color')
-        self.register_form(f)
-        vbox.pack_start(f.get_view(), expand=False)
+        if config.data.preferences['expert-mode']:
+            f = EditMetaForm(title=_("Item color"),
+                             element=self.element, name='item_color',
+                             namespaceid='advenetool', controller=self.controller,
+                             editable=editable,
+                             tooltip=_("TALES expression returning a color for the items contained by the element"),
+                             type='color')
+            self.register_form(f)
+            vbox.pack_start(f.get_view(), expand=False)
 
         return vbox
 
@@ -872,14 +873,15 @@ class EditAnnotationTypePopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
-        f = EditMetaForm(title=_("Item color"),
-                         element=self.element, name='item_color',
-                         namespaceid='advenetool', controller=self.controller,
-                         editable=editable,
-                         tooltip=_("TALES expression returning a color for the items contained by the element"),
-                         type='color')
-        self.register_form(f)
-        vbox.pack_start(f.get_view(), expand=False)
+        if config.data.preferences['expert-mode']:
+            f = EditMetaForm(title=_("Item color"),
+                             element=self.element, name='item_color',
+                             namespaceid='advenetool', controller=self.controller,
+                             editable=editable,
+                             tooltip=_("TALES expression returning a color for the items contained by the element"),
+                             type='color')
+            self.register_form(f)
+            vbox.pack_start(f.get_view(), expand=False)
         return vbox
 
 class EditRelationTypePopup (EditElementPopup):
