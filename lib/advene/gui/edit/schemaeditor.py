@@ -743,7 +743,7 @@ class SchemaEditor (AdhocView):
             m=advene.gui.popup.Menu(element=item.type, controller=self.controller)
             menu=m.menu
             
-            itemM = gtk.MenuItem(_("Remove Relation Type"))
+            itemM = gtk.MenuItem(_("Remove relation type"))
             itemM.connect('activate', menuRem, item )
             menu.insert(itemM, 1)
             itemM = gtk.MenuItem(_("Create HTML view"))
@@ -812,10 +812,10 @@ class SchemaEditor (AdhocView):
             m=advene.gui.popup.Menu(element=item.type, controller=self.controller)
             menu=m.menu
             menu.insert(gtk.SeparatorMenuItem(), 1)
-            itemM = gtk.MenuItem(_("Remove Annotation Type"))
+            itemM = gtk.MenuItem(_("Remove annotation type"))
             itemM.connect('activate', menuRem, item, schema )
             menu.insert(itemM, 2)
-            itemM = gtk.MenuItem(_("Create Relation Type between this one and..."))
+            itemM = gtk.MenuItem(_("Create relation type between this one and..."))
             ssmenu = gtk.Menu()
             itemM.set_submenu(ssmenu)
             for s in self.controller.package.getSchemas():
@@ -950,7 +950,7 @@ class SchemaEditor (AdhocView):
         self.drawFocusOn(canvas)
         schema = self.findSchemaFromXY(event.x, event.y)
         menu = gtk.Menu()
-        itemM = gtk.MenuItem(_("New Schema"))
+        itemM = gtk.MenuItem(_("New schema"))
         itemM.connect("activate", self.newSchema )
         menu.append(itemM)
         if openedschema:
@@ -969,10 +969,10 @@ class SchemaEditor (AdhocView):
             itemM = gtk.MenuItem(_("Select a color"))
             itemM.connect('activate', pick_color, schema)
             menu.append(itemM)
-            itemM = gtk.MenuItem(_("New Annotation Type"))
+            itemM = gtk.MenuItem(_("New annotation type"))
             itemM.connect('activate', newAnn, canvas, schema, event.x, event.y )
             menu.append(itemM)
-            itemM = gtk.MenuItem(_("New Relation Type"))
+            itemM = gtk.MenuItem(_("New relation type"))
             itemM.connect('activate', newRel, canvas, schema )
             menu.append(itemM)
             itemM = gtk.MenuItem(_("Hide this schema"))
@@ -984,7 +984,7 @@ class SchemaEditor (AdhocView):
             itemM = gtk.MenuItem(_("Export drawing to pdf"))
             itemM.connect('activate', self.export_to_pdf, canvas)
             menu.append(itemM)
-        #itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
+        #itemM = gtk.MenuItem(_("Move annotation type from Schema..."))
         #itemM.connect("activate", menuMove, canvas )
         #menu.append(itemM)
         menu.show_all()
@@ -1036,7 +1036,7 @@ class SchemaEditor (AdhocView):
         #if we want to export only 1/4 schema, we need to change X, Y and translate the frame to the middle of the screen
         canvas.render (cr, None, 1.0)
         cr.show_page ()
-        dialog.message_dialog(u"%s exported !" % name)
+        dialog.message_dialog(u"%s exported" % name)
 
 ### Type Explorer class
 class TypeExplorer (gtk.ScrolledWindow):
