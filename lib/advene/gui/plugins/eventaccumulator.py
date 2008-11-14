@@ -278,7 +278,7 @@ class EventAccumulator(AdhocView):
             window.destroy()
             return
         hbb = gtk.HBox()
-        btn_q = gtk.Button(_('Quitter'))
+        btn_q = gtk.Button(gtk.STOCK_CLOSE)
         hbb.pack_end(btn_q, expand=False)
         btn_q.connect('clicked', options_quit, w)
         vb.pack_end(hbb, expand=False)
