@@ -1628,7 +1628,6 @@ class EditGenericForm(EditForm):
         self.focus=focus
 
     def get_focus(self):
-        print "get_focus", self.title, self.focus
         if self.focus:
             self.entry.grab_focus()
             return True
