@@ -85,9 +85,8 @@ class TraceBuilder:
         self.trace = Trace()
 
     def export(self):
-        #print 'exporting trace...'
-        fname="Trace_advene_%s.evt" % time.strftime("%d_%m_%y_%H_%M_%S", time.localtime(time.time()))
-        fname = os.path.join( config.data.path['settings'], fname )
+        fname=config.data.advenefile(time.strftime("trace_advene-%Y%M%d-%H%M%S"), 
+                                     category='settings')
         try:
             stream=open(fname, 'wb')
         except (OSError, IOError), e:
