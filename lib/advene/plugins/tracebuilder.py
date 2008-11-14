@@ -85,7 +85,7 @@ class TraceBuilder:
         self.trace = Trace()
 
     def export(self):
-        fname=config.data.advenefile(time.strftime("trace_advene-%Y%M%d-%H%M%S"), 
+        fname=config.data.advenefile(time.strftime("trace_advene-%Y%m%d-%H%M%S"), 
                                      category='settings')
         try:
             stream=open(fname, 'wb')
