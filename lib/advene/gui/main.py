@@ -434,26 +434,23 @@ class AdveneGUI(object):
         if config.data.preferences['expert-mode']:
             tsb = self.gui.traces_switch
             b=gtk.Button()
-            i=gtk.Image()
+
             def trace_toggle(w):
                 i=gtk.Image()
                 if config.data.preferences['record-actions']:
                     config.data.preferences['record-actions']=False
                     i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
-                    self.tooltips.set_tip(b, _('Tracing : off'))
+                    self.tooltips.set_tip(b, _('Tracing : ') + _('off'))
                 else:
                     config.data.preferences['record-actions']=True
                     i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
-                    self.tooltips.set_tip(b, _('Tracing : on'))
+                    self.tooltips.set_tip(b, _('Tracing : ') + _('on'))
                 w.set_image(i)
-                return
-            if config.data.preferences['record-actions']:
-                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
-                self.tooltips.set_tip(b, _('Tracing : on'))
-            else:
-                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
-                self.tooltips.set_tip(b, _('Tracing : off'))
-            b.add(i)
+                return            
+            # Invert the preference, so that calling the trace_toggle
+            # will correctly update the button as well as the setting.
+            config.data.preferences['record-actions']=not config.data.preferences['record-actions']
+            trace_toggle(b)
             b.connect('clicked', trace_toggle)
             tsb.pack_start(b, expand=False)
             tsb.show_all()
