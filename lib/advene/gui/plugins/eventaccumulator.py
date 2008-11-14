@@ -232,8 +232,20 @@ class EventAccumulator(AdhocView):
         return mainbox
 
     def export(self, w):
-        self.tracer.export()
-        print 'Export done.'
+        fname = self.tracer.export()
+        d = gtk.Dialog(title="Exporting traces.",
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK
+                                 ))
+        l=gtk.Label("export done to the file %s" % fname)
+        l.set_line_wrap(True)
+        l.show()
+        d.vbox.pack_start(l, expand=False)
+        d.vbox.show_all()
+        d.show()
+        res=d.run()
+        d.destroy()
         return
 
     def modify_filters(self, w):
@@ -387,7 +399,6 @@ class EventAccumulator(AdhocView):
             #    return
             if self.size>=self.options['max_size']:
                 self.unpackEvent()
-            self.size = self.size + 1
             self.packEvent(event)
         else:
             #refreshing the whole trace
@@ -407,7 +418,6 @@ class EventAccumulator(AdhocView):
             #print 'Final min %s' % trace_min
             for i in tracelevel[trace_min:trace_max]:
                 if i.name not in self.filters['events']:
-                    self.size = self.size + 1
                     #print "%s %s" % (self.size, i.name)
                     self.packEvent(i)
         return
@@ -421,7 +431,6 @@ class EventAccumulator(AdhocView):
                 return
             if self.size>=self.options['max_size']:
                 self.unpackEvent()
-            self.size = self.size + 1
             self.packOperation(operation)
         else:
             #refreshing the whole trace
@@ -438,7 +447,6 @@ class EventAccumulator(AdhocView):
                 t_temp = t_temp -1
             for i in tracelevel[trace_min:trace_max]:
                 if (not filter_obj or i in self.filters['objects']) and i.name not in self.filters['operations']:
-                    self.size = self.size + 1
                     #print "%s %s" % (self.size, i.name)
                     self.packOperation(i)
         return
@@ -465,7 +473,6 @@ class EventAccumulator(AdhocView):
                     pass
                 if i.name not in self.filters['actions']:
                     #print "%s %s" % (self.size, i.name)
-                    self.size = self.size + 1
                     #print "pack %s" % i
                     self.packAction(i)
             return
@@ -482,7 +489,6 @@ class EventAccumulator(AdhocView):
             return
         if self.size>=self.options['max_size']:
             self.unpackEvent()
-        self.size = self.size + 1
         self.packAction(action)
         return
 
@@ -497,6 +503,7 @@ class EventAccumulator(AdhocView):
         vb.add(gtk.HSeparator())
         self.accuBox.pack_start(vb, expand=False)
         self.accuBox.show_all()
+        self.size = self.size + 1
 
     def packOperation(self, obj_evt):
         if obj_evt is not None:
@@ -507,6 +514,7 @@ class EventAccumulator(AdhocView):
             vb.add(gtk.HSeparator())
             self.accuBox.pack_start(vb, expand=False)
             self.accuBox.show_all()
+            self.size = self.size + 1
 
     def packEvent(self, obj_evt):
         if obj_evt is not None:
@@ -517,11 +525,17 @@ class EventAccumulator(AdhocView):
             vb.add(gtk.HSeparator())
             self.accuBox.pack_start(vb, expand=False)
             self.accuBox.show_all()
+            self.size = self.size + 1
 
     def unpackEvent(self):
-        self.accuBox.remove(self.accuBox.get_children()[0])
-        self.size = self.size-1
-
+        if self.accuBox.get_children():
+            self.accuBox.remove(self.accuBox.get_children()[0])
+        else:
+            print "no event to unpack ? %s" % self.size
+        if self.size>0:
+            self.size = self.size-1
+        
+            
     def update_last_action_box(self, obj_evt, nav=False):
         if nav:
             tup = gtk.tooltips_data_get(self.latest['nav_actionBox'])
@@ -555,7 +569,10 @@ class EventAccumulator(AdhocView):
         if self.options['time'] == 'activity':
             ev_time = helper.format_time(obj_evt.activity_time)
         if obj_evt.name in self.events_names.keys() or obj_evt.name in self.operations_names.keys():
-            entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
+            if ECACatalog.event_names[obj_evt.name]:
+                entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
+            else:
+                entetestr = "%s : %s" % (ev_time, "Event not defined")
             if obj_evt.concerned_object['id']:
                 entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
         elif obj_evt.name in self.incomplete_operations_names.keys():
@@ -605,7 +622,10 @@ class EventAccumulator(AdhocView):
         if self.options['time'] == 'activity':
             ev_time = helper.format_time(obj_evt.activity_time)
         if obj_evt.name in self.operations_names.keys():
-            entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
+            if ECACatalog.event_names[obj_evt.name]:
+                entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
+            else:
+                entetestr = "%s : %s" % (ev_time, self.operations_names[obj_evt.name])
             if obj_evt.concerned_object['id']:
                 entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
         elif obj_evt.name in self.incomplete_operations_names.keys():
