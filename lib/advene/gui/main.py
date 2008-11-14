@@ -137,11 +137,11 @@ class DummyGlade:
 
         self.traces_switch=gtk.HBox()
         hb.pack_start(self.traces_switch, expand=False)
-        
+
         self.search_hbox=gtk.HBox()
         hb.pack_start(self.search_hbox, expand=False)
         v.pack_start(hb, expand=False)
-        
+
         self.vpaned=gtk.VPaned()
 
         self.displayvbox=gtk.VBox()
@@ -157,7 +157,7 @@ class DummyGlade:
         v.add(self.vpaned)
 
         self.win.show_all()
-        
+
     def build_menubar(self, items, menu=None):
         """Populate the menu with data taken from items.
         """
@@ -178,7 +178,7 @@ class DummyGlade:
                 i.connect('activate', action)
             if tooltip:
                 self.tooltips.set_tip(i, tooltip)
-            
+
             if name == _("_Select player"):
                 self.select_player_menuitem=i
             elif name == _("Packages"):
@@ -298,7 +298,7 @@ class AdveneGUI(object):
                     ( _("_About"), self.on_about1_activate, "" ),
                     ), "" ),
             )
-    
+
         self.gui = DummyGlade(menu_definition)
         for (stock, callback, tip) in (
             (gtk.STOCK_OPEN, self.on_open1_activate, _("Open a package file")),
@@ -446,7 +446,7 @@ class AdveneGUI(object):
                     i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
                     self.tooltips.set_tip(b, _('Tracing : ') + _('on'))
                 w.set_image(i)
-                return            
+                return
             # Invert the preference, so that calling the trace_toggle
             # will correctly update the button as well as the setting.
             config.data.preferences['record-actions']=not config.data.preferences['record-actions']
@@ -1380,7 +1380,7 @@ class AdveneGUI(object):
             tb=self.player_toolbar
         p=self.controller.player
 
-        buttons=dict( (b.get_stock_id(), b) 
+        buttons=dict( (b.get_stock_id(), b)
                       for b in tb.get_children()
                       if hasattr(b, 'get_stock_id') )
 
@@ -1519,7 +1519,7 @@ class AdveneGUI(object):
         """
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
-        
+
         # Note: beware, the order of buttons is significant here since
         # they can be updated by the updated_player_cb method. In case
         # of modification, ensure that both methods are still
@@ -3663,7 +3663,7 @@ class AdveneGUI(object):
         v=gtk.VBox()
         w.set_title(_("Website export"))
         v.add(gtk.Label(_("Exporting views to a website")))
-        
+
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Output directory")), expand=False)
         dirname_entry=gtk.Entry()
@@ -3688,7 +3688,7 @@ class AdveneGUI(object):
 
         pb=gtk.ProgressBar()
         v.pack_start(pb, expand=False)
-        
+
         def cb(val, msg):
             if val > 0 and val <= 1.0:
                 pb.set_fraction(val)
@@ -3696,7 +3696,7 @@ class AdveneGUI(object):
             while gtk.events_pending():
                 gtk.main_iteration()
             return True
-        
+
         def do_conversion(b):
             d=dirname_entry.get_text()
             if not d:
@@ -3724,7 +3724,7 @@ class AdveneGUI(object):
 
         w.add(v)
 
-        w.show_all()       
+        w.show_all()
         return True
 
     def on_export_activate (self, button=None, data=None):
@@ -3773,7 +3773,7 @@ class AdveneGUI(object):
         res=fs.run()
 
         if res == gtk.RESPONSE_OK:
-            self.controller.apply_export_filter(exporters.get_current_element(), 
+            self.controller.apply_export_filter(exporters.get_current_element(),
                                                 fs.get_filename())
         fs.destroy()
         return True
