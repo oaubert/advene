@@ -981,6 +981,7 @@ class ECACatalog:
         'AnnotationActivate':     _("Activation of an annotation"),
         'AnnotationDeactivate':   _("Deactivation of an annotation"),
         'AnnotationMerge':        _("Merging of two annotations"),
+        'AnnotationMove':         _("Moving an annotation"),
         'RelationActivate':       _("Activation of a relation"),
         'RelationDeactivate':     _("Deactivation of a relation"),
         'RelationCreate':         _("Creation of a new relation"),
