@@ -85,6 +85,7 @@ class SchemaEditor (AdhocView):
         self.timer_motion_max=3
         self.timer_motion=self.timer_motion_max
         self.drag_coordinates=None
+        self.dfont = 22
 
         if package is None and controller is not None:
             package=controller.package
@@ -254,6 +255,12 @@ class SchemaEditor (AdhocView):
         w = gtk.SpinButton (self.zoom_adj, 0.0, 2)
         w.set_size_request (50, -1)
         hbox.pack_start (w, False, False, 0)
+        w = gtk.Button('A+')
+        w.connect('clicked', self.font_up_clicked, canvas)
+        hbox.pack_start (w, False, False, 0)
+        w = gtk.Button('A-')
+        w.connect('clicked', self.font_down_clicked, canvas)
+        hbox.pack_start (w, False, False, 0)
         self.hboxButton = hbox
         canvas.connect('size-allocate', self.sw_resize, self.zoom_adj)
 
@@ -268,6 +275,29 @@ class SchemaEditor (AdhocView):
         
         return schemaArea
 
+    def font_up_clicked(self, w, canvas):
+        root = canvas.get_root_item ()
+        for i in range(0, root.get_n_children()):
+            if hasattr(root.get_child(i), 'type') and root.get_child(i).text:
+                fontsize = root.get_child(i).fontsize
+                self.dfont = root.get_child(i).fontsize = fontsize+3
+                root.get_child(i).text.props.font="Sans Bold %s" % str(self.dfont)
+        for i in self.findSchemaTitles(canvas):
+            i.props.font = "Sans Bold %s" % str(self.dfont)
+        return
+
+    def font_down_clicked(self, w, canvas):
+        root = canvas.get_root_item ()
+        for i in range(0, root.get_n_children()):
+            if hasattr(root.get_child(i), 'type') and root.get_child(i).text:
+                fontsize = root.get_child(i).fontsize
+                self.dfont = root.get_child(i).fontsize = fontsize-3
+                if fontsize >3:
+                    root.get_child(i).text.props.font="Sans Bold %s" % str(self.dfont)
+        for i in self.findSchemaTitles(canvas):
+            i.props.font = "Sans Bold %s" % str(self.dfont)
+        return
+    
     def sw_resize(self, w, size, adj):
         #print adj.get_value()
         self.swX = size.width
@@ -587,7 +617,16 @@ class SchemaEditor (AdhocView):
                                         fill_color = color,
                                         width = -1,
                                         anchor = gtk.ANCHOR_CENTER,
-                                        font = "Sans Bold 20")
+                                        font = "Sans Bold %s" % str(self.dfont))
+    
+    def findSchemaTitles(self, canvas, schema=None):
+        res = []
+        root = canvas.get_root_item ()
+        for i in range(0, root.get_n_children()):
+            if isinstance(root.get_child(i), goocanvas.Text):
+                if schema is None or schema.title == root.get_child(i).props.text:
+                    res.append(root.get_child(i))
+        return res
 
 ###
 #
@@ -597,7 +636,7 @@ class SchemaEditor (AdhocView):
     def addRelationTypeGroup(self, canvas, schema, name=" ", type=None, members=[]):
         if schema is None:
             return
-        cvgroup = RelationTypeGroup(self.controller, canvas, schema, name, type, members)
+        cvgroup = RelationTypeGroup(self.controller, canvas, schema, name, type, members, self.dfont)
         if cvgroup is not None:
             self.setup_rel_signals (cvgroup)
             #self.drawFocusOn(cvgroup)
@@ -648,7 +687,7 @@ class SchemaEditor (AdhocView):
             if part == 2 and len(self.openedschemas)==4:
                 rx = self.sepV.get_bounds().x2 + 20
                 ry = self.sepH.get_bounds().y2 + 60
-        cvgroup = AnnotationTypeGroup(self.controller, canvas, schema, name, type, rx, ry)
+        cvgroup = AnnotationTypeGroup(self.controller, canvas, schema, name, type, rx, ry, self.dfont)
         if cvgroup is not None:
             self.setup_annot_signals(cvgroup, schema)
             self.drawFocusOn(cvgroup.rect)
@@ -1274,7 +1313,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         self.initWithType(self.type)
 
 class AnnotationTypeGroup (Group):
-    def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, rx =0, ry=0):
+    def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, rx =0, ry=0, fontsize=22):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.schema=schema
@@ -1283,6 +1322,7 @@ class AnnotationTypeGroup (Group):
         self.rect = None
         self.text = None
         self.color = "black"
+        self.fontsize=fontsize
         self.rels=[] # rel groups
         if type is None:
             id_ = self.controller.package._idgenerator.get_id(AnnotationType)
@@ -1332,7 +1372,7 @@ class AnnotationTypeGroup (Group):
                                         y = yy,
                                         width = -1,
                                         anchor = gtk.ANCHOR_W,
-                                        font = "Sans Bold 22")
+                                        font = "Sans Bold %s" % str(self.fontsize))
 
     def remove(self):
         while (len(self.rels)>0):
@@ -1358,7 +1398,7 @@ class AnnotationTypeGroup (Group):
             self.text.props.text = self.formattedName()
             
 class RelationTypeGroup (Group):
-    def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, members=[]):
+    def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, members=[], fontsize=22):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.schema=schema
@@ -1366,6 +1406,7 @@ class RelationTypeGroup (Group):
         self.type=type
         self.line=None
         self.text=None
+        self.fontsize=fontsize
         self.color = "black"
         self.members=members
         if self.type is None:
@@ -1453,7 +1494,7 @@ class RelationTypeGroup (Group):
                                         y = yy,
                                         width = -1,
                                         anchor = gtk.ANCHOR_CENTER,
-                                        font = "Sans Bold 22")
+                                        font = "Sans Bold %s" % str(self.fontsize))
     def newLine(self, p, color):
         return goocanvas.Polyline (parent = self,
                                         close_path = False,
