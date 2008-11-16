@@ -41,9 +41,9 @@ def register(controller):
 name="Trace view"
 
 class EventAccumulator(AdhocView):
-    view_name = _("Trace")
+    view_name = _("Traces")
     view_id = 'trace'
-    tooltip=("Trace of Advene Events")
+    tooltip=("Traces of Advene Events")
     def __init__ (self, controller=None, parameters=None, package=None):
         super(EventAccumulator, self).__init__(controller=controller)
         self.close_on_package_load = False
@@ -56,7 +56,7 @@ class EventAccumulator(AdhocView):
             'operations': [],
             'actions': [],
         }
-        self.times=[_('real'), _('activity')]
+        self.times=['real', 'activity']
         self.latest = {
             'events': None,
             'operations': None,
@@ -83,7 +83,7 @@ class EventAccumulator(AdhocView):
         #    )
         self.options = {
             'max_size': 20,
-            'time': _('real'), #real or activity
+            'time': 'real', #real or activity
             'detail': 'operations', #depending on tracer.trace.levels (basically : events, operations or actions)
             }
         #opt, arg = self.load_parameters(parameters)
@@ -132,10 +132,20 @@ class EventAccumulator(AdhocView):
             bdet = gtk.Button(bdetLabel)
             self.DetB = bdet
             bdet.set_size_request(60, 20)
-            btnbar.pack_start(gtk.Label(_(' Details : ')), expand=False)
+            btnbar.pack_start(gtk.Label(_(' Trace : ')), expand=False)
             btnbar.pack_start(bdet, expand=False)
             bdet.connect('clicked', details_changed)
-            btnbar.pack_start(gtk.VSeparator())
+
+        self.btn_filter = gtk.Button(_(' Filters'))
+        self.btn_filter.connect('clicked', self.modify_filters)
+        btnbar.pack_start(self.btn_filter, expand=False)
+        
+        self.init_btn_filter = gtk.Button('RAZ')
+        self.init_btn_filter.connect('clicked', self.init_obj_filter)
+        self.init_btn_filter.set_sensitive(False)
+        btnbar.pack_start(self.init_btn_filter, expand=False)
+        self.filter_active(False)
+        btnbar.pack_start(gtk.VSeparator())
 
         # choix temps
         if len(self.times)<=0:
@@ -176,14 +186,6 @@ class EventAccumulator(AdhocView):
         btnbar.pack_start(self.sc, expand=False)
         btnbar.pack_start(gtk.VSeparator())
 
-        self.btn_filter = gtk.Button(_(' Filters'))
-        self.btn_filter.connect('clicked', self.modify_filters)
-        btnbar.pack_start(self.btn_filter, expand=False)
-        
-        self.init_btn_filter = gtk.Button()
-        self.init_btn_filter.connect('clicked', self.init_filters)
-        btnbar.pack_start(self.init_btn_filter, expand=False)
-        self.filter_active(False)
         exp_b = gtk.Button(_('Export'))
         exp_b.connect('clicked', self.export)
         btnbar.pack_start(exp_b, expand=False)
@@ -245,7 +247,7 @@ class EventAccumulator(AdhocView):
             window.destroy()
             return
         hbb = gtk.HBox()
-        btn_q = gtk.Button(gtk.STOCK_CLOSE)
+        btn_q = gtk.Button(stock=gtk.STOCK_CLOSE)
         hbb.pack_end(btn_q, expand=False)
         btn_q.connect('clicked', options_quit, w)
         vb.pack_end(hbb, expand=False)
@@ -311,21 +313,24 @@ class EventAccumulator(AdhocView):
             'operations': [],
             'actions': [],
         }
-        #FIXME default color
         self.filter_active(False)
         self.receive(self.tracer.trace)
 
+    def init_obj_filter(self, w):
+        self.filters['objects']=[]
+        self.filter_active(False)
+        self.receive(self.tracer.trace)
+        return
+
     def filter_active(self, activate):
-        #for i in [gtk.STATE_NORMAL, gtk.STATE_ACTIVE, gtk.STATE_PRELIGHT, gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE]:
-        #    self.init_btn_evb.modify_bg(i, gtk.gdk.color_parse(color))
-        #    self.init_btn_evb.modify_fg(i, gtk.gdk.color_parse(color))
-        i=gtk.Image()
-        if activate:
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'filters_off.png') ))
-        else:
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'filters_on.png') ))
-        self.init_btn_filter.set_image(i)
-  
+        #i=gtk.Image()
+        #if activate:
+            #i.set_from_file(config.data.advenefile( ( 'pixmaps', 'filters_off.png') ))
+        #else:
+            #i.set_from_file(config.data.advenefile( ( 'pixmaps', 'filters_on.png') ))
+        #self.init_btn_filter.set_image(i)
+        self.init_btn_filter.set_sensitive(activate)
+
         
 
     def scroll_win(self):
