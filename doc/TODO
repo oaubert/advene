@@ -1,7 +1,6 @@
 * tabular adhoc view, with options to export as HTML
 
-* HTML editor: popup menu on images to refresh imagecache (and
-   possibly code)
+* HTML editor: popup menu on images to refresh imagecache (and possibly code)
 
 * ssa import filter
 
