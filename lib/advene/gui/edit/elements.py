@@ -563,7 +563,7 @@ class EditViewPopup (EditElementPopup):
                                        fields=('title', ),
                                        editable=editable,
                                        editables=('title', ),
-                                       labels={ 'title':     _('Title') }
+                                       labels={ 'title':     _('Title (name)') }
                                        )
         vbox.pack_start (f.get_view (), expand=False)
 
@@ -643,7 +643,7 @@ class EditQueryPopup (EditElementPopup):
                                        fields=('title', ),
                                        editable=editable,
                                        editables=('title', ),
-                                       labels={ 'title':     _('Title') }
+                                       labels={ 'title':     _('Title (name)') }
                                        )
         vbox.pack_start (f.get_view (), expand=False)
 
@@ -775,7 +775,7 @@ class EditSchemaPopup (EditElementPopup):
                                        editables=('author', 'date', 'title'),
                                        labels={'id':     _('Id'),
                                                'uri':    _('URI'),
-                                               'title':  _('Title'),
+                                               'title':  _('Title (name)'),
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
@@ -827,7 +827,7 @@ class EditAnnotationTypePopup (EditElementPopup):
                                        fields=('title', 'mimetype'),
                                        editable=editable,
                                        editables=('title', 'mimetype' ),
-                                       labels={ 'title':     _('Title'),
+                                       labels={ 'title':     _('Title (name)'),
                                                 'mimetype': _('MIME Type')
                                                 }
                                        )
@@ -900,7 +900,7 @@ class EditRelationTypePopup (EditElementPopup):
                                        fields=('title', 'mimetype'),
                                        editable=editable,
                                        editables=('title', 'mimetype' ),
-                                       labels={ 'title':     _('Title'),
+                                       labels={ 'title':     _('Title (name)'),
                                                 'mimetype': _('MIME Type')
                                                 }
                                        )
