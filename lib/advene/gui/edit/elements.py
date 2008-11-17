@@ -315,7 +315,7 @@ class EditElementPopup (AdhocView):
                            buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
                                      gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
 
-            d.vbox.add(self.vbox)
+            d.vbox.add(self.widget)
             d.vbox.show_all()
 
             d.connect('key-press-event', dialog.dialog_keypressed_cb)
