@@ -1222,7 +1222,7 @@ class AdveneController(object):
                         break
                 d['name']=name.replace('\n', '\\n')
             else:
-                d['name']='Unknown'
+                d={'name': 'Unknown'}
             d.setdefault('x', 50)
             d.setdefault('y', 50)
             d.setdefault('width', 10)
