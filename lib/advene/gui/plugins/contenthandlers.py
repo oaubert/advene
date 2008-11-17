@@ -637,6 +637,18 @@ class HTMLContentHandler (ContentHandler):
 
         self.view = gtk.VBox()
 
+        def sel_copy(i):
+            self.editor.get_buffer().copy_clipboard(gtk.clipboard_get())
+            return True
+
+        def sel_cut(i):
+            self.editor.get_buffer().cut_clipboard(gtk.clipboard_get())
+            return True
+
+        def sel_paste(i):
+            self.editor.get_buffer().paste_clipboard(gtk.clipboard_get())
+            return True
+
         tb=gtk.Toolbar()
         vbox.toolbar=tb
         tb.set_style(gtk.TOOLBAR_ICONS)
@@ -644,16 +656,25 @@ class HTMLContentHandler (ContentHandler):
             (gtk.STOCK_BOLD, _("Bold"), lambda i: self.editor.apply_html_tag('b')),
             (gtk.STOCK_ITALIC, _("Italic"), lambda i: self.editor.apply_html_tag('i')),
             (gtk.STOCK_UNDERLINE, _("Header"), lambda i: self.editor.apply_html_tag('h2')),
+            (None, None, None),
+            (gtk.STOCK_COPY, _("Copy"), sel_copy),
+            (gtk.STOCK_CUT, _("Cut"), sel_cut),
+            (gtk.STOCK_PASTE, _("Paste"), sel_paste),
+            (None, None, None),
             ):
-            b=gtk.ToolButton(icon)
-            b.connect('clicked', action)
-            b.set_tooltip(self.tooltips, tooltip)
+            if not icon:
+                b=gtk.SeparatorToolItem()
+            else:
+                b=gtk.ToolButton(icon)
+                b.connect('clicked', action)
+                b.set_tooltip(self.tooltips, tooltip)
             tb.insert(b, -1)
             b.show()
 
         if self.editor.can_undo():
             b=gtk.ToolButton(gtk.STOCK_UNDO)
             b.connect('clicked', lambda i: self.editor.undo())
+            b.set_tooltip(self.tooltips, _("Undo"))
             tb.insert(b, -1)
             b.show()
 
