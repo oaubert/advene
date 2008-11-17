@@ -2342,10 +2342,18 @@ class AdveneGUI(object):
             self.audio_mute.set_active(mute)
 
         def do_save(aliases):
-            for alias in aliases:
-                print "Saving ", alias
-                #self.controller.queue_action(self.controller.save_package, None, alias)
-                self.controller.save_package(alias=alias)
+            for alias, p in self.controller.packages.iteritems():
+                if alias == 'advene':
+                    continue
+                if p._modified:
+                    n, e = os.path.splitext(p.uri)
+                    if n.startswith('http:'):
+                        continue
+                    if n.startswith('file://'):
+                        n=n[7:]
+                    n=n+'.backup'+e
+                    print "Temporarily saving ", alias, "as", n
+                    p.save(name=n)
             return True
 
         if self.gui.win.get_title().endswith('(*)') ^ self.controller.package._modified:
@@ -2362,8 +2370,8 @@ class AdveneGUI(object):
                         try:
                             fn = self.controller.tracers[0].export()
                             print "trace exported to %s" % fn
-                        except (e):
-                            print "error exporting : %s" % e
+                        except Exception, e:
+                            print "error exporting trace : %s" % unicode(e).encode('utf-8')
                     if config.data.preferences['package-auto-save'] == 'always':
                         self.controller.queue_action(do_save, l)
                     else:
