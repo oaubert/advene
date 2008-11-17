@@ -1123,7 +1123,7 @@ class AdveneController(object):
         if isinstance(el, Annotation):
             # We iterate on a copy of relations, since it may be
             # modified during the loop
-            self.notify('ElementEditBegin', element=el, immediate=True)
+            self.notify('EditSessionStart', element=el, immediate=True)
             for r in el.relations[:]:
                 [ a.relations.remove(r) for a in r.members if r in a.relations ]
                 self.delete_element(r, immediate_notify=immediate_notify, batch_id=batch_id)
@@ -1153,11 +1153,11 @@ class AdveneController(object):
             p.schemas.remove(el)
             self.notify('SchemaDelete', schema=el, immediate=immediate_notify)
         elif isinstance(el, View):
-            self.notify('ElementEditBegin', element=el, immediate=True)
+            self.notify('EditSessionStart', element=el, immediate=True)
             p.views.remove(el)
             self.notify('ViewDelete', view=el, immediate=immediate_notify, batch=batch_id)
         elif isinstance(el, Query):
-            self.notify('ElementEditBegin', element=el, immediate=True)            
+            self.notify('EditSessionStart', element=el, immediate=True)            
             p.queries.remove(el)
             self.notify('QueryDelete', query=el, immediate=immediate_notify, batch=batch_id)
         elif isinstance(el, Resources) or isinstance(el, ResourceData):
@@ -1185,13 +1185,13 @@ class AdveneController(object):
                 # If delete, then we can simply move the annotation
                 # without deleting it.
                 if notify:
-                    self.notify('ElementEditBegin', element=annotation, immediate=True)
+                    self.notify('EditSessionStart', element=annotation, immediate=True)
                 d=annotation.fragment.duration
                 annotation.fragment.begin=position
                 annotation.fragment.end=position+d
                 if notify:
                     self.notify("AnnotationEditEnd", annotation=annotation, comment="Transmute annotation")
-                    self.notify('ElementEditCancel', element=annotation)
+                    self.notify('EditSessionEnd', element=annotation)
                 return annotation
         ident=self.package._idgenerator.get_id(Annotation)
         an = self.package.createAnnotation(type = annotationType,
@@ -1246,7 +1246,7 @@ class AdveneController(object):
 
         if delete and not annotation.relations:
             if notify:
-                self.notify('ElementEditBegin', element=annotation, immediate=True)
+                self.notify('EditSessionStart', element=annotation, immediate=True)
             self.package.annotations.remove(annotation)
             if notify:
                 self.notify('AnnotationMove', annotation=annotation, comment="Transmute annotation")
@@ -1289,10 +1289,10 @@ class AdveneController(object):
                                            fragment=annotation.fragment.clone())
 
         # Shorten the first one.
-        self.notify('ElementEditBegin', element=annotation, immediate=True)
+        self.notify('EditSessionStart', element=annotation, immediate=True)
         annotation.fragment.end = position
         self.notify("AnnotationEditEnd", annotation=annotation, comment="Duplicate annotation")
-        self.notify('ElementEditCancel', element=annotation)
+        self.notify('EditSessionEnd', element=annotation)
 
         # Shorten the second one
         an.fragment.begin = position
@@ -1308,7 +1308,7 @@ class AdveneController(object):
         """Merge annotation s into annotation d.
         """
         batch_id=object()
-        self.notify('ElementEditBegin', element=d, immediate=True)
+        self.notify('EditSessionStart', element=d, immediate=True)
         if extend_bounds:
             # Extend the annotation bounds (mostly used for same-type
             # annotations)
@@ -1338,7 +1338,7 @@ class AdveneController(object):
         self.notify("AnnotationMerge", annotation=d,comment="Merge annotations", batch=batch_id)
         self.delete_element(s, batch_id=batch_id)
         self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations", batch=batch_id)
-        self.notify('ElementEditCancel', element=d)
+        self.notify('EditSessionEnd', element=d)
         return d
 
     def select_player(self, p):
@@ -2243,7 +2243,7 @@ class AdveneController(object):
                 "RelationTypeDelete", "AnnotationTypeDelete",
                 "AnnotationTypeEditEnd", "RelationTypeEditEnd"]#schema
             v = ["ViewCreate","ViewEditEnd"] # view
-            multi = ["ElementEditBegin","ElementEditEnd","ElementEditDestroy","ElementEditCancel"] # r, c or v
+            multi = ["EditSessionStart","ElementEditEnd","ElementEditDestroy","EditSessionEnd"] # r, c or v
             if atid in a:
                 return "Annotation"
             if atid in r:

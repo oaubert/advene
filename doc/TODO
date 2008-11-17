@@ -8,8 +8,6 @@
 * svg editor: add a "advene_comment" field to the svg source (similar
    to label in advene zones)
 
-* htmleditor: copy/paste
-
 * finder: filter (global or by column), grouping (by column)
 
 * HTMLeditor: implement basic css parsing (cf python-cssutils)
@@ -20,9 +18,6 @@
    ...), recreate it ? Or delete the whole block ?
 
 * Undo for activebookmarks
-
-* Rename ElementEditBegin/ElementEditCancel by
-   EditSessionStart/EditSessionEnd
 
 * Import dialog: use a standard fileselector with a import-filter list
 
@@ -2534,4 +2529,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * annotationdisplay: handle x-advene-zone
 
 * annotation table view: display snapshots
+
+* htmleditor: copy/paste icons
+
+* Rename ElementEditBegin/ElementEditCancel into EditSessionStart/EditSessionEnd
 

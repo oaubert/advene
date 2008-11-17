@@ -968,8 +968,8 @@ class ECACatalog:
 
     # FIXME: Maybe this should be put in an external resource file
     event_names={
-        'ElementEditBegin':       _("Start of the editing of an element"),
-        'ElementEditCancel':      _("Cancel of the editing of an element"),
+        'EditSessionStart':       _("Start of the editing of an element"),
+        'EditSessionEnd':      _("Cancel of the editing of an element"),
         'ElementEditDestroy':     _("Destruction of the edit window of an element"),
         'ElementEditEnd':         _("Validation of the editing of an element"),
         'PackageEditEnd':         _("Ending editing of a package"),

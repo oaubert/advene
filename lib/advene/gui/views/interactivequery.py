@@ -138,7 +138,7 @@ class InteractiveQuery(AdhocView):
         # Overwriting an existing query
         if q:
             create=False
-            self.controller.notify('ElementEditBegin', element=q, immediate=True)
+            self.controller.notify('EditSessionStart', element=q, immediate=True)
         else:
             create=True
             # Create the query
@@ -156,7 +156,7 @@ class InteractiveQuery(AdhocView):
             self.controller.notify('QueryCreate', query=q)
         else:
             self.controller.notify('QueryEditEnd', query=q)
-            self.controller.notify('ElementEditCancel', element=q)
+            self.controller.notify('EditSessionEnd', element=q)
         return q
 
     def validate(self, button=None):
@@ -380,10 +380,10 @@ class InteractiveResult(AdhocView):
             batch_id=object()
             for a in l:
                 if search in a.content.data:
-                    self.controller.notify('ElementEditBegin', element=a, immediate=True)
+                    self.controller.notify('EditSessionStart', element=a, immediate=True)
                     a.content.data = a.content.data.replace(search, replace)
                     self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
-                    self.controller.notify('ElementEditCancel', element=a)
+                    self.controller.notify('EditSessionEnd', element=a)
                     count += 1
             self.log(_('%(search)s has been replaced by %(replace)s in %(count)d annotation(s).') % locals())
         d.destroy()

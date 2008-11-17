@@ -303,7 +303,7 @@ class AdhocView(object):
                     dialog.message_dialog(_("Error: the view %s is not an adhoc view.") % ident)
                     return True
                 create=False
-                self.controller.notify('ElementEditBegin', element=v, immediate=True)
+                self.controller.notify('EditSessionStart', element=v, immediate=True)
             v.title=title
             v.author=config.data.userid
             v.date=self.controller.get_timestamp()
@@ -314,7 +314,7 @@ class AdhocView(object):
                 self.controller.notify("ViewCreate", view=v)
             else:
                 self.controller.notify("ViewEditEnd", view=v)
-                self.controller.notify('ElementEditCancel', element=v)
+                self.controller.notify('EditSessionEnd', element=v)
         return True
 
     def export_as_static_view(self, ident=None):

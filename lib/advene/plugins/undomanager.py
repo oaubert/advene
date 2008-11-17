@@ -57,8 +57,8 @@ class UndoHistory:
         """Register to the appropriate events.
         """
         for (event, method) in (
-            ('ElementEditBegin', self.element_edit_begin),
-            ('ElementEditCancel', self.element_edit_cancel),
+            ('EditSessionStart', self.element_edit_begin),
+            ('EditSessionEnd', self.element_edit_cancel),
             ('ElementEditDestroy', self.element_edit_cancel),
 
             ('AnnotationEditEnd', self.element_edit_end),

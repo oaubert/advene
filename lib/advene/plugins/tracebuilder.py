@@ -72,10 +72,10 @@ class TraceBuilder:
         'RelationTypeEditEnd':3,
         'ViewCreate':4,
         'ViewEditEnd':4,
-        'ElementEditBegin':5,
+        'EditSessionStart':5,
         #'ElementEditEnd':5,
         'ElementEditDestroy':5,
-        'ElementEditCancel':5,
+        'EditSessionEnd':5,
         }
 
         if package is None and controller is not None:

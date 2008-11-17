@@ -85,7 +85,7 @@ def get_edit_popup (el, controller=None, editable=True):
                 return p
     for c in _edit_popup_list:
         if c.can_edit (el):
-            controller.notify('ElementEditBegin', element=el, immediate=True)
+            controller.notify('EditSessionStart', element=el, immediate=True)
             return c(el, controller, editable)
     raise TypeError(_("No edit popup available for element %s") % el)
 
@@ -255,7 +255,7 @@ class EditElementPopup (AdhocView):
 
     def close_cb (self, button=None, data=None):
         """Method called when closing a form."""
-        self.controller.notify("ElementEditCancel", element=self.element, comment="Window closed")
+        self.controller.notify("EditSessionEnd", element=self.element, comment="Window closed")
         return True
 
     def key_pressed_cb (self, widget=None, event=None):

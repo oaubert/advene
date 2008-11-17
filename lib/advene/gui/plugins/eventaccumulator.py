@@ -71,9 +71,9 @@ class EventAccumulator(AdhocView):
         self.events_names= ['DurationUpdate','AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PackageLoad','PopupDisplay','MediaChange','PackageActivate','PackageSave','ApplicationStart']
         self.operations_names = ['AnnotationCreate','AnnotationEditEnd','AnnotationDelete','RelationCreate','AnnotationMerge','AnnotationMove','PlayerStart','PlayerStop','PlayerPause','PlayerResume','PlayerSet','ViewActivation','AnnotationTypeCreate','RelationTypeCreate','RelationTypeDelete','AnnotationTypeDelete','AnnotationTypeEditEnd','RelationTypeEditEnd','ViewCreate','ViewEditEnd']
         self.incomplete_operations_names = {
-            'ElementEditBegin': _('Beginning edition'),
+            'EditSessionStart': _('Beginning edition'),
             'ElementEditDestroy': _('Canceling edition'),
-            'ElementEditCancel': _('Canceling edition'),
+            'EditSessionEnd': _('Canceling edition'),
             'ElementEditEnd': _('Ending edition'),
         }
 
