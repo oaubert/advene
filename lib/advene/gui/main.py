@@ -3352,6 +3352,7 @@ class AdveneGUI(object):
             }
         for k in direct_options:
             cache[k] = config.data.preferences[k]
+        cache['package-auto-save-interval']=cache['package-auto-save-interval']/1000
         ew=advene.gui.edit.properties.EditNotebook(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
 
@@ -3399,7 +3400,7 @@ class AdveneGUI(object):
                 _("is done automatically"): 'always',
                 _("is done after confirmation"): 'ask',
                 })
-        ew.add_spin(_("Auto-save interval"), 'package-auto-save-interval', _("Interval (in ms) between package auto-saves"), 1000, 60 * 60 * 1000)
+        ew.add_spin(_("Auto-save interval"), 'package-auto-save-interval', _("Interval (in seconds) between package auto-saves"), 5, 60 * 60)
 
         ew.add_title(_("GUI"))
         ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"),
@@ -3440,6 +3441,7 @@ class AdveneGUI(object):
 
         res=ew.popup()
         if res:
+            cache['package-auto-save-interval']=cache['package-auto-save-interval']*1000
             for k in direct_options:
                 config.data.preferences[k] = cache[k]
             for k in ('font-size', 'button-height', 'interline-height'):
