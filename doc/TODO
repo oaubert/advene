@@ -1,7 +1,7 @@
+* tabular adhoc view, with options to export as HTML
+
 * HTML editor: popup menu on images to refresh imagecache (and
    possibly code)
-
-* put adhoc view buttons into ToolItem and make it a toolbar
 
 * ssa import filter
 
@@ -9,8 +9,6 @@
    to label in advene zones)
 
 * htmleditor: copy/paste
-
-* annotation table view: display snapshots
 
 * finder: filter (global or by column), grouping (by column)
 
@@ -2534,4 +2532,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * htmleditor: put edit source/wysiwyg in the toolbar
 
 * annotationdisplay: handle x-advene-zone
+
+* annotation table view: display snapshots
 
