@@ -2532,6 +2532,7 @@ class AdveneGUI(object):
         new_schema_dialog.hide()
 
         d.show()
+        d.connect('key-press-event', dialog.dialog_keypressed_cb)
         dialog.center_on_mouse(d)
         res=d.run()
         if res == gtk.RESPONSE_OK:
