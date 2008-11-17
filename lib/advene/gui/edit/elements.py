@@ -1652,6 +1652,9 @@ class EditGenericForm(EditForm):
         hbox.pack_start(self.entry)
 
         if self.type == 'color':
+            if not config.data.preferences['expert-mode']:
+                self.entry.hide()
+                self.entry.set_no_show_all(True)
             b=gtk.ColorButton()
             b.set_use_alpha(False)
 
