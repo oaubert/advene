@@ -30,7 +30,7 @@ import advene.gui.edit.elements
 import advene.gui.popup
 
 import advene.util.helper as helper
-from advene.gui.util import dialog
+from advene.gui.util import dialog, png_to_pixbuf
 
 COLUMN_ELEMENT=0
 COLUMN_CONTENT=1
@@ -41,6 +41,7 @@ COLUMN_END=5
 COLUMN_DURATION=6
 COLUMN_BEGIN_FORMATTED=7
 COLUMN_END_FORMATTED=8
+COLUMN_PIXBUF=9
 
 name="Element tabular view plugin"
 
@@ -81,7 +82,7 @@ class AnnotationTable(AdhocView):
         """Build the ListStore containing the data.
 
         """
-        l=gtk.ListStore(object, str, str, str, long, long, long, str, str)
+        l=gtk.ListStore(object, str, str, str, long, long, long, str, str, gtk.gdk.Pixbuf)
         if not self.elements:
             return l
         for a in self.elements:
@@ -95,6 +96,8 @@ class AnnotationTable(AdhocView):
                            a.fragment.duration,
                            helper.format_time(a.fragment.begin),
                            helper.format_time(a.fragment.end),
+                           png_to_pixbuf(self.controller.package.imagecache[a.fragment.begin],
+                                         height=32)
                            ) )
         return l
 
@@ -116,6 +119,11 @@ class AnnotationTable(AdhocView):
         tree_view.set_search_equal_func(search_content)
 
         columns={}
+        
+        columns['snapshot']=gtk.TreeViewColumn(_("Snapshot"), gtk.CellRendererPixbuf(), pixbuf=COLUMN_PIXBUF)
+        columns['snapshot'].set_reorderable(True)
+        tree_view.append_column(columns['snapshot'])
+
         for (name, label, col) in (
             ('content', _("Content"), COLUMN_CONTENT),
             ('type', _("Type"), COLUMN_TYPE),
@@ -134,7 +142,7 @@ class AnnotationTable(AdhocView):
         self.model.set_sort_column_id(COLUMN_BEGIN, gtk.SORT_ASCENDING)
 
         # Resizable columns: content, type
-        for name in ('content', 'type'):
+        for name in ('content', 'type', 'snapshot'):
             columns[name].set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
             columns[name].set_resizable(True)
             columns[name].set_min_width(40)
