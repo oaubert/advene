@@ -33,6 +33,7 @@ import pango
 import re
 import os
 import struct
+import itertools
 
 try:
     import gtksourceview
@@ -1700,15 +1701,22 @@ class EditGenericForm(EditForm):
         if self.sizegroup is not None:
             self.sizegroup.add_widget(l)
 
-        self.entry=gtk.Entry()
-        if self.tooltip:
-            tt=gtk.Tooltips()
-            tt.set_tip(self.entry, self.tooltip)
-        v=self.getter()
-        if v is None:
-            v=""
-        self.entry.set_text(v)
-        self.entry.set_editable(self.editable)
+        if self.type == 'mimetype':
+            self.entry=gtk.combo_box_entry_new_text()
+            self.entry.append_text(self.getter())
+            for t in itertools.chain(common_content_mimetypes, common_view_mimetypes):
+                self.entry.append_text(t)
+            self.entry.set_active(0)
+        else:
+            self.entry=gtk.Entry()
+            if self.tooltip:
+                tt=gtk.Tooltips()
+                tt.set_tip(self.entry, self.tooltip)
+            v=self.getter()
+            if v is None:
+                v=""
+            self.entry.set_text(v)
+            self.entry.set_editable(self.editable)
         hbox.pack_start(self.entry)
 
         if self.type == 'color':
@@ -1759,12 +1767,19 @@ class EditGenericForm(EditForm):
         v=self.getter()
         if v is None:
             v=""
-        self.entry.set_text(v)
+        if self.type == 'mimetype':
+            self.entry.prepend_text(v)
+            self.entry.set_active(0)
+        else:
+            self.entry.set_text(v)
 
     def update_element(self):
         if not self.editable:
             return False
-        v=unicode(self.entry.get_text())
+        if self.type == 'mimetype':
+            v=unicode(self.entry.get_active_text())
+        else:
+            v=unicode(self.entry.get_text())
         self.setter(v)
         return True
 
