@@ -202,12 +202,13 @@ class EventAccumulator(AdhocView):
 
     def export(self, w):
         fname = self.tracer.export()
-        d = gtk.Dialog(title="Exporting traces.",
+        d = gtk.Dialog(title=_("Exporting traces"),
                        parent=None,
                        flags=gtk.DIALOG_DESTROY_WITH_PARENT,
                        buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK
                                  ))
-        l=gtk.Label("export done to the file %s" % fname)
+        l=gtk.Label(_("Export done to\n%s") % fname)
+        l.set_selectable(True)
         l.set_line_wrap(True)
         l.show()
         d.vbox.pack_start(l, expand=False)
