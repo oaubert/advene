@@ -583,7 +583,10 @@ class HTMLContentHandler (ContentHandler):
         self.editor=HTMLEditor()
         # For debug:
         self.controller.gui.ht=self.editor
-        self.editor.set_text(self.element.data)
+        try:
+            self.editor.set_text(self.element.data)
+        except Exception, e:
+            self.controller.log(_("HTML editor: cannot parse content"))
 
         self.editor.connect('drag-data-received', self.editor_drag_received)
         self.editor.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
