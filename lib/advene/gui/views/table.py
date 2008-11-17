@@ -157,7 +157,7 @@ class AnnotationTable(AdhocView):
                                   ,
                                   gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
 
-        #tree_view.connect('drag-data-get', self.drag_data_get_cb)
+        tree_view.connect('drag-data-get', self.drag_data_get_cb)
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -168,15 +168,21 @@ class AnnotationTable(AdhocView):
         return sw
 
     def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
-        model, it = treeview.get_selection().get_selected()
+        model, paths = treeview.get_selection().get_selected_rows()
 
-        el = model.get_value(it, COLUMN_ELEMENT)
+        els=[ model[p][COLUMN_ELEMENT] for p in paths ]
 
         if targetType == config.data.target_type['annotation']:
-            if not isinstance(el, Annotation):
-                return False
-            selection.set(selection.target, 8, el.uri.encode('utf8'))
+            selection.set(selection.target, 8, "\n".join( e.uri.encode('utf8')
+                                                          for e in els
+                                                          if isinstance(e, Annotation) ))
             return True
+        elif (targetType == config.data.target_type['text-plain']
+              or targetType == config.data.target_type['TEXT']
+              or targetType == config.data.target_type['STRING']):
+            selection.set(selection.target, 8, "\n".join(e.content.data.encode('utf8')
+                                                          for e in els
+                                                          if isinstance(e, Annotation) ))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
