@@ -1,3 +1,6 @@
+* HTML editor: popup menu on images to refresh imagecache (and
+   possibly code)
+
 * put adhoc view buttons into ToolItem and make it a toolbar
 
 * ssa import filter
