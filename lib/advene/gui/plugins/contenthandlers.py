@@ -23,6 +23,7 @@ import os
 import gtk
 import xml.parsers.expat
 import StringIO
+import re
 
 import advene.core.config as config
 from advene.gui.edit.elements import ContentHandler, TextContentHandler
@@ -481,6 +482,41 @@ class HTMLContentHandler (ContentHandler):
             self.sourceview.content_set(self.element.data)
         return True
 
+
+    def populate_popup_cb(self, textview, menu):
+        def open_link(i, m):
+            link=dict(m._attr).get('href', None)
+            if link:
+                pos=re.findall('/media/play/(\d+)', link)
+                if pos:
+                    # A position was specified. Directly use it.
+                    self.controller.update_status('set', long(pos[0]))
+                else:
+                    self.controller.open_url(link)
+            return True
+        def goto_position(i, m):
+            src=dict(m._attr).get('src', None)
+            pos=re.findall('imagecache/(\d+)', src)
+            if pos:
+                self.controller.update_status('set', long(pos[0]))
+            return True
+        ctx=textview.get_current_context()
+
+        if ctx:
+            if ctx[-1]._tag == 'img':
+                # There is an image
+                item=gtk.MenuItem("Image")
+                item.connect('activate', goto_position, ctx[-1])
+                item.show()
+                menu.append(item)
+            l=[ m for m in ctx if m._tag == 'a' ]
+            if l:
+                item=gtk.MenuItem("Open link")
+                item.connect('activate', open_link, l[0])
+                item.show()
+                menu.append(item)
+        return False
+
     def editor_drag_motion(self, widget, drag_context, x, y, timestamp):
         #w=drag_context.get_source_widget()
         (x, y) = widget.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
@@ -597,6 +633,7 @@ class HTMLContentHandler (ContentHandler):
                                   + config.data.drag_type['timestamp'],
                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_ASK )
         self.editor.connect('drag-motion', self.editor_drag_motion)
+        self.editor.connect('populate-popup', self.populate_popup_cb)
 
         self.view = gtk.VBox()
 
