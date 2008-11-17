@@ -2573,6 +2573,7 @@ class AdveneGUI(object):
                 at.mimetype=mimetype_selector.get_current_element()
                 at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
                 at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+                at._fieldnames=[]
                 sc.annotationTypes.append(at)
                 self.controller.notify('AnnotationTypeCreate', annotationtype=at)
         else:
