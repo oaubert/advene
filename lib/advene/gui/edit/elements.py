@@ -657,7 +657,7 @@ class EditQueryPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (self.expandable(f.get_view (), expanded=not compact),
+        vbox.pack_start (self.expandable(f.get_view (),  _("Attributes"), expanded=not compact),
                          expand=False)
 
         f = EditContentForm (self.element.content, controller=self.controller,
@@ -844,7 +844,7 @@ class EditAnnotationTypePopup (EditElementPopup):
                                                'date':   _('Date'),
                                                }
                                        )
-        vbox.add(self.expandable(f.get_view(), expanded=False))
+        vbox.add(self.expandable(f.get_view(),  _("Attributes"), expanded=False))
 
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
@@ -917,7 +917,7 @@ class EditRelationTypePopup (EditElementPopup):
                                                'date':   _('Date'),
                                                }
                                        )
-        vbox.add(self.expandable(f.get_view(), expanded=False))
+        vbox.add(self.expandable(f.get_view(),  _("Attributes"), expanded=False))
 
         members=[ ('#'+at.id, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
         members.append( ('', _("Any annotation type")) )
