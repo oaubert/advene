@@ -559,13 +559,13 @@ class EditViewPopup (EditElementPopup):
     def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
-        f = self.make_registered_form (element=self.element,
-                                       fields=('title', ),
-                                       editable=editable,
-                                       editables=('title', ),
-                                       labels={ 'title':     _('Title (name)') }
-                                       )
-        vbox.pack_start (f.get_view (), expand=False)
+        f = EditAttributeForm(title=_("Title (name)"),
+                              element=self.element, name='title',
+                              controller=self.controller,
+                              editable=editable,
+                              tooltip=_("Name of the view"))
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
 
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri',
@@ -639,13 +639,12 @@ class EditQueryPopup (EditElementPopup):
     def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
-        f = self.make_registered_form (element=self.element,
-                                       fields=('title', ),
-                                       editable=editable,
-                                       editables=('title', ),
-                                       labels={ 'title':     _('Title (name)') }
-                                       )
-        vbox.pack_start (f.get_view (), expand=False)
+        f = EditAttributeForm(title=_("Title (name)"),
+                              element=self.element, name='title',
+                              controller=self.controller,
+                              editable=editable,
+                              tooltip=_("Name of the query"))
+        self.register_form(f)
 
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri',
@@ -693,24 +692,37 @@ class EditPackagePopup (EditElementPopup):
 
     def make_widget (self, editable=False, compact=False):
         vbox=gtk.VBox()
+
+        sg=gtk.SizeGroup(gtk.SIZE_GROUP_HORIZONTAL)
+
+        f = EditAttributeForm(title=_("Title (name)"),
+                              element=self.element, name='title',
+                              controller=self.controller,
+                              editable=editable,
+                              tooltip=_("Name of the package"),
+                              sizegroup=sg)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+
         f = self.make_registered_form (element=self.element,
-                                       fields=('uri', 'title',
+                                       fields=('uri',
                                                'author', 'date'),
                                        editable=editable,
-                                       editables=('author', 'date', 'title'),
+                                       editables=('author', 'date',),
                                        labels={'uri':    _('URI'),
-                                               'title':  _('Title'),
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
 
-        vbox.pack_start(f.get_view(), expand=False)
+        vbox.pack_start (self.expandable(f.get_view (),  _("Attributes"), expanded=False),
+                         expand=False)
 
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Textual description of the package"))
+                         tooltip=_("Textual description of the package"),
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -718,7 +730,8 @@ class EditPackagePopup (EditElementPopup):
                          element=self.element, name='default_stbv',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Dynamic view to activate on package load"))
+                         tooltip=_("Dynamic view to activate on package load"),
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -726,7 +739,8 @@ class EditPackagePopup (EditElementPopup):
                          element=self.element, name='default_utbv',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Static view to open on package load"))
+                         tooltip=_("Static view to open on package load"),
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -734,7 +748,8 @@ class EditPackagePopup (EditElementPopup):
                          element=self.element, name='default_adhoc',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Adhoc view to open on package load"))
+                         tooltip=_("Adhoc view to open on package load"),
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -742,7 +757,8 @@ class EditPackagePopup (EditElementPopup):
                          element=self.element, name='duration',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Cached duration in ms"))
+                         tooltip=_("Cached duration in ms"),
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -750,7 +766,8 @@ class EditPackagePopup (EditElementPopup):
                          element=self.element, name='mediafile',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Location of associated media file"))
+                         tooltip=_("Location of associated media file"),
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -768,25 +785,36 @@ class EditSchemaPopup (EditElementPopup):
     def make_widget (self, editable=True, compact=False):
         vbox=gtk.VBox()
 
+        sg=gtk.SizeGroup(gtk.SIZE_GROUP_HORIZONTAL)
+        f = EditAttributeForm(title=_("Title (name)"),
+                              element=self.element, name='title',
+                              controller=self.controller,
+                              editable=editable,
+                              tooltip=_("Name of the schema"),
+                              sizegroup=sg)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+
         f = self.make_registered_form (element=self.element,
-                                       fields=('id', 'uri', 'title',
+                                       fields=('id', 'uri',
                                                'author', 'date'),
                                        editable=editable,
-                                       editables=('author', 'date', 'title'),
+                                       editables=('author', 'date'),
                                        labels={'id':     _('Id'),
                                                'uri':    _('URI'),
-                                               'title':  _('Title (name)'),
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.add(f.get_view())
+        vbox.pack_start (self.expandable(f.get_view (),  _("Attributes"), expanded=False),
+                         expand=False)
 
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable,
                          tooltip=_("Textual description of the package"),
-                         focus=True)
+                         focus=True,
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -795,7 +823,8 @@ class EditSchemaPopup (EditElementPopup):
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
                          tooltip=_("TALES expression returning a color for the element"),
-                         type='color')
+                         type='color',
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -805,7 +834,8 @@ class EditSchemaPopup (EditElementPopup):
                              namespaceid='advenetool', controller=self.controller,
                              editable=editable,
                              tooltip=_("TALES expression returning a color for the items contained by the element"),
-                             type='color')
+                             type='color',
+                             sizegroup=sg)
             self.register_form(f)
             vbox.pack_start(f.get_view(), expand=False)
 
@@ -823,21 +853,22 @@ class EditAnnotationTypePopup (EditElementPopup):
     def make_widget (self, editable=False, compact=False):
         vbox = gtk.VBox()
 
-        f = self.make_registered_form (element=self.element,
-                                       fields=('title', 'mimetype'),
-                                       editable=editable,
-                                       editables=('title', 'mimetype' ),
-                                       labels={ 'title':     _('Title (name)'),
-                                                'mimetype': _('MIME Type')
-                                                }
-                                       )
-        vbox.pack_start (f.get_view (), expand=False)
+        sg=gtk.SizeGroup(gtk.SIZE_GROUP_HORIZONTAL)
+
+        f = EditAttributeForm(title=_("Title (name)"),
+                              element=self.element, name='title',
+                              controller=self.controller,
+                              editable=editable,
+                              tooltip=_("Name of the type"),
+                              sizegroup=sg)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
 
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri',
                                                'author', 'date'),
                                        editable=editable,
-                                       editables=('author', 'date', 'title'),
+                                       editables=('author', 'date'),
                                        labels={'id':     _('Id'),
                                                'uri':    _('URI'),
                                                'author': _('Author'),
@@ -846,12 +877,23 @@ class EditAnnotationTypePopup (EditElementPopup):
                                        )
         vbox.add(self.expandable(f.get_view(),  _("Attributes"), expanded=False))
 
+        f = EditAttributeForm(title=_("MIME Type"),
+                              element=self.element, name='mimetype',
+                              controller=self.controller,
+                              editable=editable,
+                              tooltip=_("MIMEType of the content"),
+                              type='mimetype',
+                              sizegroup=sg)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable,
                          tooltip=_("Textual description of the package"),
-                         focus=True)
+                         focus=True,
+                         sizegroup=sg)
 
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
@@ -860,7 +902,8 @@ class EditAnnotationTypePopup (EditElementPopup):
                          element=self.element, name='representation',
                          controller=self.controller,
                          editable=editable,
-                         tooltip=_("TALES expression used to get a compact representation of the annotations"))
+                         tooltip=_("TALES expression used to get a compact representation of the annotations"),
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -869,7 +912,8 @@ class EditAnnotationTypePopup (EditElementPopup):
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
                          tooltip=_("TALES expression returning a color for the element"),
-                         type='color')
+                         type='color',
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -879,7 +923,8 @@ class EditAnnotationTypePopup (EditElementPopup):
                              namespaceid='advenetool', controller=self.controller,
                              editable=editable,
                              tooltip=_("TALES expression returning a color for the items contained by the element"),
-                             type='color')
+                             type='color',
+                             sizegroup=sg)
             self.register_form(f)
             vbox.pack_start(f.get_view(), expand=False)
         return vbox
@@ -896,15 +941,25 @@ class EditRelationTypePopup (EditElementPopup):
     def make_widget (self, editable=False, compact=False):
         vbox=gtk.VBox()
 
-        f = self.make_registered_form (element=self.element,
-                                       fields=('title', 'mimetype'),
-                                       editable=editable,
-                                       editables=('title', 'mimetype' ),
-                                       labels={ 'title':     _('Title (name)'),
-                                                'mimetype': _('MIME Type')
-                                                }
-                                       )
-        vbox.pack_start (f.get_view (), expand=False)
+        sg=gtk.SizeGroup(gtk.SIZE_GROUP_HORIZONTAL)
+        f = EditAttributeForm(title=_("Title (name)"),
+                              element=self.element, name='title',
+                              controller=self.controller,
+                              editable=editable,
+                              tooltip=_("Name of the type"),
+                              sizegroup=sg)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+
+        f = EditAttributeForm(title=_("MIME Type"),
+                              element=self.element, name='mimetype',
+                              controller=self.controller,
+                              editable=editable,
+                              tooltip=_("MIMEType of the content"),
+                              type='mimetype',
+                              sizegroup=sg)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
 
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri',
@@ -936,7 +991,8 @@ class EditRelationTypePopup (EditElementPopup):
                          namespaceid='dc', controller=self.controller,
                          editable=editable,
                          tooltip=_("Textual description of the package"),
-                         focus=True)
+                         focus=True,
+                         sizegroup=sg)
 
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
@@ -946,7 +1002,8 @@ class EditRelationTypePopup (EditElementPopup):
                          controller=self.controller,
                          editable=editable,
                          tooltip=_("TALES expression specifying a color"),
-                         type='color')
+                         type='color',
+                         sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -1615,7 +1672,7 @@ class EditFragmentForm(EditForm):
 
 class EditGenericForm(EditForm):
     def __init__(self, title=None, getter=None, setter=None,
-                 controller=None, editable=True, tooltip=None, type=None, focus=False):
+                 controller=None, editable=True, tooltip=None, type=None, focus=False, sizegroup=None):
         self.title=title
         self.getter=getter
         self.setter=setter
@@ -1623,6 +1680,7 @@ class EditGenericForm(EditForm):
         self.editable=editable
         self.entry=None
         self.view=None
+        self.sizegroup=sizegroup
         self.tooltip=tooltip
         self.type=type
         self.focus=focus
@@ -1639,6 +1697,8 @@ class EditGenericForm(EditForm):
 
         l=gtk.Label(self.title)
         hbox.pack_start(l, expand=False)
+        if self.sizegroup is not None:
+            self.sizegroup.add_widget(l)
 
         self.entry=gtk.Entry()
         if self.tooltip:
@@ -1711,7 +1771,7 @@ class EditGenericForm(EditForm):
 class EditMetaForm(EditGenericForm):
     def __init__(self, title=None, element=None, name=None,
                  namespaceid='advenetool', controller=None,
-                 editable=True, tooltip=None, type=None, focus=False):
+                 editable=True, tooltip=None, type=None, focus=False, sizegroup=None):
         getter=self.metadata_get_method(element, name, namespaceid)
         setter=self.metadata_set_method(element, name, namespaceid)
         super(EditMetaForm, self).__init__(title=title,
@@ -1721,7 +1781,24 @@ class EditMetaForm(EditGenericForm):
                                            editable=editable,
                                            tooltip=tooltip,
                                            type=type,
-                                           focus=focus)
+                                           focus=focus,
+                                           sizegroup=sizegroup)
+
+class EditAttributeForm(EditGenericForm):
+    def __init__(self, title=None, element=None, name=None,
+                 controller=None,
+                 editable=True, tooltip=None, type=None, focus=False, sizegroup=None):
+        getter=lambda: getattr(element, name)
+        setter=lambda v: setattr(element, name, v)
+        super(EditAttributeForm, self).__init__(title=title,
+                                                getter=getter,
+                                                setter=setter,
+                                                controller=controller,
+                                                editable=editable,
+                                                tooltip=tooltip,
+                                                type=type,
+                                                focus=focus,
+                                                sizegroup=sizegroup)
 
 class EditAttributesForm (EditForm):
     """Creates an edit form for the given element."""
