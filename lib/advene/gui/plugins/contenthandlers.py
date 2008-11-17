@@ -511,7 +511,7 @@ class HTMLContentHandler (ContentHandler):
             'timestamp': helper.format_time(annotation.fragment.begin),
             'content': self.controller.get_title(annotation),
             }
-        data=[ """<a tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s>""" % d ]
+        data=[ """<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s>""" % d ]
         if 'snapshot' in choice:
         # FIXME: propose various choices (insert timestamp, insert snapshot, etc)
             data.append("""<img width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img><br>""" % d)
