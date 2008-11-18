@@ -558,7 +558,7 @@ class HTMLContentHandler (ContentHandler):
         
         data.append('</a>')
 
-        self.editor.feed("\n".join(data))
+        self.editor.feed("".join(data))
         
         if focus:
             self.grab_focus()
