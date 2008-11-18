@@ -2005,7 +2005,12 @@ class TimeLine(AdhocView):
                 if (y >= p and y <= p + self.button_height) ]
             if a:
                 # Copy/Move to a[0]
-                self.move_or_copy_annotations(sources, a[0], position=self.pixel2unit(self.adjustment.value + x, absolute=True), action=context.actions)
+                if config.data.os == 'win32':
+                    # Control/Shift mods for DND is broken on win32. Force ACTION_ASK.
+                    ac=gtk.gdk.ACTION_ASK
+                else:
+                    ac=context.actions
+                self.move_or_copy_annotations(sources, a[0], position=self.pixel2unit(self.adjustment.value + x, absolute=True), action=ac)
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
