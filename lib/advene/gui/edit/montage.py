@@ -443,7 +443,7 @@ class Montage(AdhocView):
         i=gtk.Image()
         i.set_from_file(config.data.advenefile( ( 'pixmaps', 'highlight.png') ))
         b=gtk.ToggleToolButton()
-        b.set_icon_widget(b)
+        b.set_icon_widget(i)
         b.highlight=True
         b.connect('clicked', toggle_highlight)
         tb.insert(b, -1)
