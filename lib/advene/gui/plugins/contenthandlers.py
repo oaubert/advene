@@ -534,7 +534,7 @@ class HTMLContentHandler (ContentHandler):
         #    pass
         return True
 
-    def insert_annotation_content(self, choice, annotation):
+    def insert_annotation_content(self, choice, annotation, focus=False):
         """
         choice: list of one or more strings: 'snapshot', 'timestamp', 'content'
         """
@@ -559,8 +559,15 @@ class HTMLContentHandler (ContentHandler):
         data.append('</a>')
 
         self.editor.feed("\n".join(data))
-        return True
         
+        if focus:
+            self.grab_focus()
+        return True
+
+    def grab_focus(self, *p):
+        self.editor.grab_focus()
+        return True
+
     def editor_drag_received(self, widget, context, x, y, selection, targetType, time):
         """Handle the drop from an annotation to the editor.
         """
@@ -592,7 +599,7 @@ class HTMLContentHandler (ContentHandler):
                     (_("Snapshot+timestamp+content"), ('snapshot', 'timestamp', 'content')),
                     ):
                     i=gtk.MenuItem(title)
-                    i.connect('activate', (lambda it, ann, data: self.insert_annotation_content(data, ann)), source, choice)
+                    i.connect('activate', (lambda it, ann, data: self.insert_annotation_content(data, ann, focus=True)), source, choice)
                     m.append(i)
                 m.show_all()
                 m.popup(None, None, None, 0, gtk.get_current_event_time())
