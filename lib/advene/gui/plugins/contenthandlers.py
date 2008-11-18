@@ -549,7 +549,6 @@ class HTMLContentHandler (ContentHandler):
             }
         data=[ """<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s>""" % d ]
         if 'snapshot' in choice:
-        # FIXME: propose various choices (insert timestamp, insert snapshot, etc)
             data.append("""<img width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img><br>""" % d)
         if 'timestamp' in choice:
             data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
@@ -606,7 +605,7 @@ class HTMLContentHandler (ContentHandler):
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
-            # FIXME
+            # FIXME: propose various choices (insert all annotations, insert title, etc)
             self.editor.get_buffer().insert_at_cursor(source.title)
             return True
         elif targetType == config.data.target_type['timestamp']:
