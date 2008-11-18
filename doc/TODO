@@ -1,4 +1,4 @@
-* HTML editor: refresh images when cache changes
+* HTML editor: refresh images when cache changes (-> SnapshotUpdated event)
 
 * tabular adhoc view, with options to export as HTML
 
