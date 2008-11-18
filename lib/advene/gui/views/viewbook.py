@@ -214,6 +214,7 @@ class ViewBook(AdhocView):
             v=self.controller.create_static_view(elements=sources)
             p=get_edit_popup(v, controller=self.controller)
             self.add_view(p, name=_("Edit %s") % self.controller.get_title(v))
+            # FIXME: put focus on edit window
             return True
 
         def edit_annotation(a):

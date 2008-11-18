@@ -1,3 +1,5 @@
+* HTML editor: refresh images when cache changes
+
 * tabular adhoc view, with options to export as HTML
 
 * HTML editor: popup menu on images to refresh imagecache (and possibly code)
