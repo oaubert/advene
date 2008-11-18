@@ -74,6 +74,8 @@ class TagBag(AdhocView):
         if l:
             tags=l
         self.tags=tags
+        if self.tags is None:
+            self.tags=[]
 
         self.button_height=24
         self.mainbox=None
