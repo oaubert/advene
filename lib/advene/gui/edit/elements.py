@@ -876,7 +876,7 @@ class EditAnnotationTypePopup (EditElementPopup):
                                                'date':   _('Date'),
                                                }
                                        )
-        vbox.add(self.expandable(f.get_view(),  _("Attributes"), expanded=False))
+        vbox.pack_start(self.expandable(f.get_view(),  _("Attributes"), expanded=False), expand=False)
 
         f = EditAttributeForm(title=_("MIME Type"),
                               element=self.element, name='mimetype',
@@ -899,15 +899,6 @@ class EditAnnotationTypePopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
-        f = EditMetaForm(title=_("Representation"),
-                         element=self.element, name='representation',
-                         controller=self.controller,
-                         editable=editable,
-                         tooltip=_("TALES expression used to get a compact representation of the annotations"),
-                         sizegroup=sg)
-        self.register_form(f)
-        vbox.pack_start(f.get_view(), expand=False)
-
         f = EditMetaForm(title=_("Color"),
                          element=self.element, name='color',
                          namespaceid='advenetool', controller=self.controller,
@@ -918,16 +909,28 @@ class EditAnnotationTypePopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
-        if config.data.preferences['expert-mode']:
-            f = EditMetaForm(title=_("Item color"),
-                             element=self.element, name='item_color',
-                             namespaceid='advenetool', controller=self.controller,
-                             editable=editable,
-                             tooltip=_("TALES expression returning a color for the items contained by the element"),
-                             type='color',
-                             sizegroup=sg)
-            self.register_form(f)
-            vbox.pack_start(f.get_view(), expand=False)
+        abox=gtk.VBox()
+        f = EditMetaForm(title=_("Representation"),
+                         element=self.element, name='representation',
+                         controller=self.controller,
+                         editable=editable,
+                         tooltip=_("TALES expression used to get a compact representation of the annotations"),
+                         sizegroup=sg)
+        self.register_form(f)
+        abox.pack_start(f.get_view(), expand=False)
+
+        f = EditMetaForm(title=_("Item color"),
+                         element=self.element, name='item_color',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable,
+                         tooltip=_("TALES expression returning a color for the items contained by the element"),
+                         type='color',
+                         sizegroup=sg)
+        self.register_form(f)
+        abox.pack_start(f.get_view(), expand=False)
+
+        vbox.pack_start(self.expandable(abox, label=_("Advanced"), expanded=False), expand=False)
+        
         return vbox
 
 class EditRelationTypePopup (EditElementPopup):
