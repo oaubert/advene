@@ -1205,6 +1205,10 @@ class TimeLine(AdhocView):
             item=gtk.MenuItem(_("Duplicate selection to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_selection, sources, dest)
             menu.append(item)
+            item=gtk.MenuItem(_("Move selection to type %s") % dest_title, use_underline=False)
+            item.connect('activate', copy_selection, sources, dest, True)
+            menu.append(item)
+
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
