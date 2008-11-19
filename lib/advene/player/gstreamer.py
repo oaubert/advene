@@ -266,7 +266,6 @@ class Player:
         #control.set("ypos", 5 * gst.SECOND, 200)
 
         if sink == 'ximagesink':
-            print "Using ximagesink."
             filter = gst.element_factory_make("capsfilter", "filter")
             filter.set_property("caps", gst.Caps("video/x-raw-yuv, width=%d, height=%s" % config.data.player['snapshot-dimensions']))
             self.filter=filter
@@ -292,6 +291,7 @@ class Player:
                 self.captioner.link(self.imagesink)
         else:
             self.video_sink.add(self.imagesink)
+        print "gstreamer: using", sink
 
         if self.captioner:
             self.video_sink.add_pad(gst.GhostPad('sink', self.captioner.get_pad('video_sink')))
