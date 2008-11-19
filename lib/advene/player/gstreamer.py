@@ -272,17 +272,15 @@ class Player:
             self.filter=filter
 
             csp=gst.element_factory_make('ffmpegcolorspace')
-            # Do not try to hard to solve the resize problem, before
-            # the gstreamer bug
-            # http://bugzilla.gnome.org/show_bug.cgi?id=339201 is
-            # solved...
-            #self.scale=gst.element_factory_make('videoscale')
+            # The scaling did not work before 2008-10-11, cf 
+            # http://bugzilla.gnome.org/show_bug.cgi?id=339201
+            self.scale=gst.element_factory_make('videoscale')
             if self.imageoverlay is not None:
-                self.video_sink.add(self.captioner, self.imageoverlay, filter, csp, self.imagesink)
-                gst.element_link_many(self.captioner, self.imageoverlay, filter, csp, self.imagesink)
+                self.video_sink.add(self.captioner, self.imageoverlay, filter, csp, self.scale, self.imagesink)
+                gst.element_link_many(self.captioner, self.imageoverlay, filter, csp, self.scale, self.imagesink)
             else:
-                self.video_sink.add(self.captioner, filter, csp, self.imagesink)
-                gst.element_link_many(self.captioner, filter, csp, self.imagesink)
+                self.video_sink.add(self.captioner, filter, csp, self.scale, self.imagesink)
+                gst.element_link_many(self.captioner, filter, csp, self.scale, self.imagesink)
 
         elif self.captioner is not None:
             if self.imageoverlay is not None:
