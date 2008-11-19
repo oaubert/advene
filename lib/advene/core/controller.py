@@ -878,6 +878,7 @@ class AdveneController(object):
                 return True
             if i is not None and i.height != 0:
                 self.package.imagecache[position] = helper.snapshot2png (i)
+                self.notify('SnapshotUpdate', position=position)
         else:
             # FIXME: do something useful (warning) ?
             pass
