@@ -1,3 +1,28 @@
+advene (0.35) unstable; urgency=low
+
+  * Video player plugins can be dynamically selected
+  
+  * Very large medias (like 24h captures) can be edited in the timeline,
+    and precise zoom can be achieved by limiting the timeline range to a
+    specific fragment of the media, through the timeline contextual menu.
+  
+  * New event BrailleInput allows to handle cursor key events from a
+    dynamic view.
+  
+  * Static views output can be exported as a set of HTML files and
+    accompanying resources, that can be put online (File/Website export
+    menu).
+  
+  * Export filters can be activated from the command line.
+  
+  * Activity trace can be recorded and displayed.
+  
+  * Arrows can be drawn in the SVG editor
+  
+  * The autosave features can regularly save backup files.
+  
+ --
+
 advene (0.34) unstable; urgency=low
 
   * Stable release. See the following 0.33 notes for more details.
