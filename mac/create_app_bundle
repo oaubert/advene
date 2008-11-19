@@ -5,6 +5,9 @@ THEMENAME=Leopardish
 # Ensure that we can access /opt
 sudo chmod 755 /opt
 
+# FIXME: to remove once we have installed goocanvas
+[ -f lib/advene/gui/edit/schemaeditor.py ] && rm lib/advene/gui/edit/schemaeditor*
+
 # py2app's modulegraph uses file extensions to determine their nature. So, the fact
 # that the advene main script is without extension prevents it from determining it is python code.
 # There is a hack in the setup.py file that will use the alternate name advene_gui.py on MacOS X.
