@@ -329,6 +329,11 @@ class AdveneGUI(object):
         # Last auto-save time (in ms)
         self.last_auto_save=time.time()*1000
 
+        # n-sized list of last edited/created elements.
+        # n=config.data.preferences['edition-history-size']
+        self.last_edited=[]
+        self.last_created=[]
+
         # Frequently used GUI widgets
         self.slider_move = False
         # Will be initialized in get_visualisation_widget
@@ -412,7 +417,8 @@ class AdveneGUI(object):
             ('montage', _("Dynamic montage"), 'montage.png'),
             ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
             ('trace', _("Trace"), 'trace.png'),
-            ('comment', _("Edit a comment view"), 'comment.png')
+            ('comment', _("Edit a comment view"), 'comment.png'),
+            ('editionhistory', _("Display edition history"), 'xml.png'),
             ):
             if name in ('browser', 'schemaeditor', 'trace') and not config.data.preferences['expert-mode']:
                 continue
@@ -575,6 +581,7 @@ class AdveneGUI(object):
         event=context.evaluateValue('event')
         if annotation.ownerPackage != self.controller.package:
             return True
+        self.updated_element(event, annotation)
         for v in self.adhoc_views:
             try:
                 v.update_annotation(annotation=annotation, event=event)
@@ -605,6 +612,7 @@ class AdveneGUI(object):
         event=context.evaluateValue('event')
         if relation.ownerPackage != self.controller.package:
             return True
+        self.updated_element(event, relation)
         for v in self.adhoc_views:
             try:
                 v.update_relation(relation=relation, event=event)
@@ -627,6 +635,7 @@ class AdveneGUI(object):
         event=context.evaluateValue('event')
         if view.ownerPackage != self.controller.package:
             return True
+        self.updated_element(event, view)
         for v in self.adhoc_views:
             try:
                 v.update_view(view=view, event=event)
@@ -659,6 +668,7 @@ class AdveneGUI(object):
         event=context.evaluateValue('event')
         if query.ownerPackage != self.controller.package:
             return True
+        self.updated_element(event, query)
         for v in self.adhoc_views:
             try:
                 v.update_query(query=query, event=event)
@@ -681,6 +691,7 @@ class AdveneGUI(object):
         event=context.evaluateValue('event')
         if resource.ownerPackage != self.controller.package:
             return True
+        self.updated_element(event, resource)
 
         for v in self.adhoc_views:
             try:
@@ -702,6 +713,7 @@ class AdveneGUI(object):
         event=context.evaluateValue('event')
         if schema.ownerPackage != self.controller.package:
             return True
+        self.updated_element(event, schema)
 
         for v in self.adhoc_views:
             try:
@@ -723,6 +735,7 @@ class AdveneGUI(object):
         event=context.evaluateValue('event')
         if at.ownerPackage != self.controller.package:
             return True
+        self.updated_element(event, at)
         for v in self.adhoc_views:
             try:
                 v.update_annotationtype(annotationtype=at, event=event)
@@ -748,6 +761,7 @@ class AdveneGUI(object):
         event=context.evaluateValue('event')
         if rt.ownerPackage != self.controller.package:
             return True
+        self.updated_element(event, rt)
         for v in self.adhoc_views:
             try:
                 v.update_relationtype(relationtype=rt, event=event)
@@ -761,6 +775,29 @@ class AdveneGUI(object):
             for e in [ e for e in self.edit_popups if e.element == rt ]:
                 e.refresh()
 
+        return True
+
+    def updated_element(self, event, element):
+        if event.endswith('EditEnd'):
+            l=self.last_edited
+        elif event.endswith('Create'):
+            l=self.last_created
+        elif event.endswith('Delete'):
+            try:
+                self.last_edited.remove(element)
+            except ValueError:
+                pass
+            try:
+                self.last_created.remove(element)
+            except ValueError:
+                pass
+            return True
+        else:
+            return True
+        s=config.data.preferences['edition-history-size']
+        l.append(element)
+        if len(l) > s:
+            l.pop(0)
         return True
 
     def handle_element_delete(self, context, parameters):
@@ -1613,7 +1650,7 @@ class AdveneGUI(object):
             pop=None
         else:
 
-            pop.edit (modal=modal)
+            pop.edit(modal=modal)
         return pop
 
     def update_package_list (self):
