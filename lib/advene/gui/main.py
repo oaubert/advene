@@ -360,7 +360,7 @@ class AdveneGUI(object):
                 return True
             return False
 
-        def open_view(widget, name, destination='popup'):
+        def open_view(widget, name, destination='default'):
             self.open_adhoc_view(name, destination=destination)
             return True
 
@@ -384,7 +384,7 @@ class AdveneGUI(object):
             menu=gtk.Menu()
 
             for (label, destination) in (
-                (_("Open this view..."), 'popup'),
+                (_("Open this view..."), 'default'),
                 (_("...in its own window"), 'popup'),
                 (_("...embedded east of the video"), 'east'),
                 (_("...embedded west of the video"), 'west'),
@@ -1632,7 +1632,7 @@ class AdveneGUI(object):
         #print "New size for %s: %s" %  (name, config.data.preferences['windowsize'][name])
         return False
 
-    def edit_element(self, element, modal=False):
+    def edit_element(self, element):
         """Edit the element.
         """
         if self.edit_accumulator and (
@@ -1640,16 +1640,7 @@ class AdveneGUI(object):
             self.edit_accumulator.edit(element)
             return True
 
-        try:
-            pop = get_edit_popup (element, self.controller)
-        except TypeError, e:
-            print (_(u"Error: unable to find an edit popup for %(element)s:\n%(error)s") % {
-                'element': unicode(element),
-                'error': unicode(e)}).encode('latin1')
-            pop=None
-        else:
-
-            pop.edit(modal=modal)
+        pop=self.open_adhoc_view('edit', element=element)
         return pop
 
     def update_package_list (self):
@@ -1893,10 +1884,11 @@ class AdveneGUI(object):
             self.controller.notify("ViewEditEnd", view=v)
         return True
 
-    def open_adhoc_view(self, name, label=None, destination='popup', parameters=None, **kw):
+    def open_adhoc_view(self, name, label=None, destination='default', parameters=None, **kw):
         """Open the given adhoc view.
 
         Destination can be: 'popup', 'south', 'west', 'east', 'fareast' or None.
+        If it is 'default', then it will use config.data.preferences['popup-destination']
 
         In the last case (None), the view is returned initialized, but not
         added to its destination, it is the responsibility of the
@@ -1908,6 +1900,9 @@ class AdveneGUI(object):
         application/x-advene-adhoc-view and open the appropriate view
         with the given parameters.
         """
+        if destination == 'default':
+            destination=config.data.preferences['popup-destination']
+
         view=None
         if isinstance(name, View):
             if name.content.mimetype == 'application/x-advene-workspace-view':
@@ -2002,7 +1997,13 @@ class AdveneGUI(object):
                 element=None
             if element is None:
                 return None
-            view=get_edit_popup(element, self.controller)
+            try:
+                view=get_edit_popup(element, self.controller)
+            except TypeError, e:
+                print (_(u"Error: unable to find an edit popup for %(element)s:\n%(error)s") % {
+                        'element': unicode(element),
+                        'error': unicode(e)}).encode('latin1')
+                view=None
         elif name == 'editaccumulator':
             view=self.registered_adhoc_views[name](controller=self.controller, scrollable=True)
             if not self.edit_accumulator:
@@ -2027,6 +2028,7 @@ class AdveneGUI(object):
         # Store destination and label, used when moving the view
         view._destination=destination
         view.set_label(label or view.view_name)
+
         if destination == 'popup':
             w=view.popup(label=label)
             if isinstance(w, gtk.Window):
@@ -3375,7 +3377,7 @@ class AdveneGUI(object):
                         'package-auto-save', 'package-auto-save-interval',
                         'bookmark-snapshot-width', 'bookmark-snapshot-precision',
                         'save-default-workspace', 'restore-default-workspace',
-                        'tts-language', 'record-actions' )
+                        'tts-language', 'record-actions', 'popup-destination' )
         cache={
             'data': config.data.path['data'],
             'plugins': config.data.path['plugins'],
@@ -3447,6 +3449,16 @@ class AdveneGUI(object):
                 })
         ew.add_checkbox(_("Record activity trace"), "record-actions", _("Record activity trace"))
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
+
+        ew.add_option(_("Open popups"), 'popup-destination',
+                      _("Where should we open adhoc views?"),
+                      {
+                _("as a popup window"): 'popup',
+                _("embedded east of the video"): 'east',
+                _("embedded west of the video"): 'west',
+                _("embedded south of the video"): 'south',
+                _("embedded at the right of the window"): 'fareast',
+                })
 
         ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
                     -1, 20)
@@ -3614,7 +3626,6 @@ class AdveneGUI(object):
                                         force_create=True)
         if at is None:
             return None
-        self.edit_element(at, modal=True)
         return at
 
     def on_create_relation_type_activate (self, button=None, data=None):

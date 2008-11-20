@@ -254,6 +254,9 @@ class Config(object):
             # (in fact, we use the espeak notation for simplicity).
             'tts-language': 'en',
             'edition-history-size': 5,
+            # popup views may be forced into a specific viewbook,
+            # instead of default popup
+            'popup-destination': 'popup',
             }
 
         # Player options
