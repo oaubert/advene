@@ -19,7 +19,7 @@ advene (0.35) unstable; urgency=low
   
   * Arrows can be drawn in the SVG editor
   
-  * The autosave features can regularly save backup files.
+  * The optional autosave feature can regularly save backup files.
   
  --
 
