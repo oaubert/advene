@@ -440,11 +440,11 @@ class AdveneGUI(object):
                 if config.data.preferences['record-actions']:
                     config.data.preferences['record-actions']=False
                     i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
-                    self.tooltips.set_tip(b, _('Tracing : ') + _('off'))
+                    self.tooltips.set_tip(w, _('Tracing : ') + _('off'))
                 else:
                     config.data.preferences['record-actions']=True
                     i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
-                    self.tooltips.set_tip(b, _('Tracing : ') + _('on'))
+                    self.tooltips.set_tip(w, _('Tracing : ') + _('on'))
                 w.set_image(i)
                 return
             # Invert the preference, so that calling the trace_toggle
