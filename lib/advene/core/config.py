@@ -253,6 +253,7 @@ class Config(object):
             # Language used for TTS. Standard 2 char. specification
             # (in fact, we use the espeak notation for simplicity).
             'tts-language': 'en',
+            'edition-history-size': 5,
             }
 
         # Player options
