@@ -417,7 +417,7 @@ class AdveneGUI(object):
             ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
             ('trace', _("Trace"), 'trace.png'),
             ('comment', _("Edit a comment view"), 'comment.png'),
-            ('editionhistory', _("Display edition history"), 'xml.png'),
+            ('editionhistory', _("Display edition history"), 'editionhistory.png'),
             ):
             if name in ('browser', 'schemaeditor', 'trace') and not config.data.preferences['expert-mode']:
                 continue
