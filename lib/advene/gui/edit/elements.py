@@ -294,6 +294,11 @@ class EditElementPopup (AdhocView):
     def edit (self, callback=None, modal=False, label=None):
         """Display the edit window.
         """
+        if self.widget.get_parent():
+            # The widget is already displayed.
+            w=self.widget.get_toplevel()
+            w.set_urgency_hint(True)
+            return self.element
         self.callback=callback
         self.key_cb[gtk.keysyms.Return] = self.validate_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
