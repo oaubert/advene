@@ -111,7 +111,6 @@ from advene.gui.views.viewbook import ViewBook
 from advene.gui.views.html import HTMLView
 from advene.gui.views.scroller import ScrollerView
 from advene.gui.views.caption import CaptionView
-from advene.gui.views.tagbag import TagBag
 
 class DummyGlade:
     """Transition class.
