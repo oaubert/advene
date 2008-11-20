@@ -1,3 +1,5 @@
+* New view: LastEdited with last 5 newly created/edited elements
+
 * HTML editor: refresh images when cache changes (-> SnapshotUpdated event)
 
 * tabular adhoc view, with options to export as HTML
