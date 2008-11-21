@@ -2033,7 +2033,8 @@ class AdveneGUI(object):
             return view
         # Store destination and label, used when moving the view
         view._destination=destination
-        view.set_label(unicode(label or view.view_name))
+        label=unicode(label or view.view_name)
+        view.set_label(label)
 
         if destination == 'popup':
             w=view.popup(label=label)
