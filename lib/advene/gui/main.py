@@ -2009,6 +2009,7 @@ class AdveneGUI(object):
             if view.widget.get_parent() is not None:
                 # Widget is already displayed.
                 view=None
+            label=_("Editing %s") % self.controller.get_title(element)
         elif name == 'editaccumulator':
             view=self.registered_adhoc_views[name](controller=self.controller, scrollable=True)
             if not self.edit_accumulator:
@@ -2032,14 +2033,14 @@ class AdveneGUI(object):
             return view
         # Store destination and label, used when moving the view
         view._destination=destination
-        view.set_label(label or view.view_name)
+        view.set_label(unicode(label or view.view_name))
 
         if destination == 'popup':
             w=view.popup(label=label)
             if isinstance(w, gtk.Window):
                 dialog.center_on_mouse(w)
         elif destination in ('south', 'east', 'west', 'fareast'):
-            self.viewbook[destination].add_view(view, name=label)
+            self.viewbook[destination].add_view(view, name=unicode(label))
         return view
 
     def get_adhoc_view_instance_from_id(self, ident):
