@@ -794,6 +794,8 @@ class AdveneGUI(object):
         else:
             return True
         s=config.data.preferences['edition-history-size']
+        if element in l:
+            l.remove(element)
         l.append(element)
         if len(l) > s:
             l.pop(0)
