@@ -265,32 +265,28 @@ class Player:
         #control.set("ypos", 0, 0)
         #control.set("ypos", 5 * gst.SECOND, 200)
 
-        if sink == 'ximagesink':
+        elements=[]
+        if self.captioner is not None:
+            elements.append(self.captioner)
+        if self.imageoverlay is not None:
+            elements.append(self.imageoverlay)
+        if sink == 'xvimagesink':
+            # Imagesink accepts both rgb/yuv and is able to do scaling itself.
+            elements.append( self.imagesink )
+        else:
             filter = gst.element_factory_make("capsfilter", "filter")
-            filter.set_property("caps", gst.Caps("video/x-raw-yuv, width=%d, height=%s" % config.data.player['snapshot-dimensions']))
-            self.filter=filter
-
+            # Strangely, we have to force different dimensions so that
+            # resizing the ximagesink works later.
+            filter.set_property("caps", gst.Caps("video/x-raw-yuv,width=%d,height=%s" % config.data.player['snapshot-dimensions']))
             csp=gst.element_factory_make('ffmpegcolorspace')
             # The scaling did not work before 2008-10-11, cf 
             # http://bugzilla.gnome.org/show_bug.cgi?id=339201
-            self.scale=gst.element_factory_make('videoscale')
-            if self.imageoverlay is not None:
-                self.video_sink.add(self.captioner, self.imageoverlay, filter, csp, self.scale, self.imagesink)
-                gst.element_link_many(self.captioner, self.imageoverlay, filter, csp, self.scale, self.imagesink)
-            else:
-                self.video_sink.add(self.captioner, filter, csp, self.scale, self.imagesink)
-                gst.element_link_many(self.captioner, filter, csp, self.scale, self.imagesink)
+            scale=gst.element_factory_make('videoscale')
+            elements.extend( (filter, csp, scale, self.imagesink) )
 
-        elif self.captioner is not None:
-            if self.imageoverlay is not None:
-                self.video_sink.add(self.captioner, self.imageoverlay, self.imagesink)
-                self.captioner.link(self.imageoverlay)
-                self.imageoverlay.link(self.imagesink)
-            else:
-                self.video_sink.add(self.captioner, self.imagesink)
-                self.captioner.link(self.imagesink)
-        else:
-            self.video_sink.add(self.imagesink)
+        self.video_sink.add(*elements)
+        gst.element_link_many(*elements)
+
         print "gstreamer: using", sink
 
         if self.captioner:
