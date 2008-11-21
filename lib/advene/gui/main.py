@@ -2006,6 +2006,9 @@ class AdveneGUI(object):
                         'element': unicode(element),
                         'error': unicode(e)}).encode('latin1')
                 view=None
+            if view.widget.get_parent() is not None:
+                # Widget is already displayed.
+                view=None
         elif name == 'editaccumulator':
             view=self.registered_adhoc_views[name](controller=self.controller, scrollable=True)
             if not self.edit_accumulator:
