@@ -60,7 +60,7 @@ class EditionHistory(AdhocView):
         for (w, elements) in ( (self.created, g.last_created),
                                (self.edited, g.last_edited) ):
             w.foreach(w.remove)
-            for e in elements:
+            for e in reversed(elements):
                 b=gtk.Button(self.controller.get_title(e), use_underline=False)
                 b.connect('clicked', (lambda i, el: self.controller.gui.edit_element(el)),
                           e)
