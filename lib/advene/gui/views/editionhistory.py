@@ -64,6 +64,8 @@ class EditionHistory(AdhocView):
                 b=gtk.Button(self.controller.get_title(e), use_underline=False)
                 b.connect('clicked', (lambda i, el: self.controller.gui.edit_element(el)),
                           e)
+                # FIXME: add DND code here
+                
                 w.pack_start(b, expand=False)
         self.widget.show_all()
         return True
@@ -71,27 +73,20 @@ class EditionHistory(AdhocView):
     def build_widget(self):
         hb=gtk.HBox()
 
-        v=gtk.VBox()
+        for (label, attname) in ( (_("Created"), 'created'),
+                                  (_("Edited"), 'edited' ) ):
+            c=gtk.VBox()
+            c.pack_start(gtk.Label(label), expand=False)
+            
+            sw = gtk.ScrolledWindow()
+            sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+            c.add(sw)
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        v.add(sw)
-
-        self.edited=gtk.VBox()
-        sw.add_with_viewport(self.edited)
-    
-        hb.add(v)
-
-        v=gtk.VBox()
-
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        v.add(sw)
-
-        self.created=gtk.VBox()
-        sw.add_with_viewport(self.created)
-    
-        hb.add(v)
+            v=gtk.VBox()
+            sw.add_with_viewport(v)
+            setattr(self, attname, v)
+            
+            hb.add(c)
 
         v.show_all()
         return hb
