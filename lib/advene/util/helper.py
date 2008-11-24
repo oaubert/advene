@@ -21,7 +21,7 @@
 import time
 import StringIO
 import inspect
-import md5
+from hashlib import md5
 import os
 import sys
 import re
