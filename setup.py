@@ -88,11 +88,10 @@ elif sys.platform == 'darwin':
     platform_options['options'] = dict(py2app=dict( 
                     iconfile='mac/Advene.icns',
                     #includes=",".join( [ l.strip() for l in open('mac_includes.txt') ]),
-                    includes="pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be,cPickle,optparse,sets,pprint,cgi,webbrowser,xml.dom.ext.reader.PyExpat,sgmllib,zipfile,shutil,sched,imghdr,BaseHTTPServer,Cookie,ConfigParser,xmlrpclib,Queue,csv,filecmp," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
+                    includes="_hashlib,hashlib,email.header,pango,cairo,gtk,gtk.keysyms,atk,gobject,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be,cPickle,optparse,sets,pprint,cgi,webbrowser,sgmllib,zipfile,shutil,sched,imghdr,BaseHTTPServer,Cookie,ConfigParser,xmlrpclib,Queue,csv,filecmp," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
                     argv_emulation=True,
                     site_packages=True,
-                    #resources=['resources/License.txt'],
-                    #frameworks='foo.framework',
+                    #frameworks='Cairo.framework,Glib.framework,Gtk.framework',
                     plist=dict(
                        CFBundleName               = "Advene",
                        CFBundleShortVersionString = _version,     # must be in X.X.X format
