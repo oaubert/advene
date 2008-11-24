@@ -281,7 +281,7 @@ class "GtkButton" style "button"
 style "paned" = "default"
 {
 
-  GtkPaned::handle_size = 4
+  GtkPaned::handle_size = 5
 }
 
 class "Gtk*Paned" style "paned"
