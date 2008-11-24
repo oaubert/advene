@@ -1,12 +1,7 @@
 #! /bin/sh
 
-THEMENAME=Leopardish
-
 # Ensure that we can access /opt
 sudo chmod 755 /opt
-
-# FIXME: to remove once we have installed goocanvas
-[ -f lib/advene/gui/edit/schemaeditor.py ] && rm lib/advene/gui/edit/schemaeditor*
 
 # py2app's modulegraph uses file extensions to determine their nature. So, the fact
 # that the advene main script is without extension prevents it from determining it is python code.
@@ -30,7 +25,7 @@ rm -rf build dist
 /opt/local/bin/python -m compileall lib/advene
 
 # Add advene, simpletal and cherrypy, which do not seem to be taken into account automatically. Should investigate this...
-(cd lib ; zip -r ../dist/Advene.app/Contents/Resources/lib/python2.4/site-packages.zip  advene  simpletal cherrypy -i \*.pyc )
+(cd lib ; zip -r ../dist/Advene.app/Contents/Resources/lib/python2.5/site-packages.zip  advene  simpletal cherrypy -i \*.pyc )
 # Now try to copy the necessary gtk/pango data files (etc, lib)
 
 # Let us put pango and pixbuf loader modules in the same modules directory
@@ -56,16 +51,6 @@ cat > $Resources/pangorc.in <<EOF
 ModulesPath=@executable_path/../Frameworks/modules
 EOF
 
-# Let's play with pango...
-# Compile libpangohack
-(cd mac ; gcc -o libpangohack.dylib -dynamiclib pangohack.c -Wl,-v -Wall )
-if [ ! -f mac/libpangohack.dylib ]
-then
-  echo "Problem while compiling pangohack"
-  exit 1
-fi
-cp mac/libpangohack.dylib $Resources
-
 # Copy the fonts.conf file
 cp /etc/fonts/fonts.conf $Resources/fonts.conf
 
@@ -87,9 +72,12 @@ cp /opt/local/lib/librsvg-2.2.dylib ${MacOS}/f
 otool -L ${MacOS}/f/librsvg-2.2.dylib  | perl -lne 'print $1 if m!/opt/local/lib/(.+?) !' | while read a ; do if [ ! -e ${MacOS}/f/$a ]; then cp /opt/local/lib/$a ${MacOS}/f ; chmod 755 ${MacOS}/f/$a ; fi ; done
 
 
+# Copy gtk python modules. This will override the py2app way (creating a _gtk.pyc wrapper in the site-packages.zip, which tries to load _gtk.so from lib-dynload, but it crashes)
+cp -r /opt/local/lib/python2.5/site-packages/gtk-2.0/* $Resources/lib/python2.5
+
 echo "Fixing library names ..."
 # fix the libraries we include
-for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so $Resources/lib/gtk-2.0/2.10.0/*/*.so 
+for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so $Resources/lib/gtk-2.0/2.10.0/*/*.so $Resources/lib/python2.5/*.so $Resources/lib/python2.5/*/*.so
 do
     # skip symlinks
     if test ! -L $dylib ; then
@@ -126,7 +114,7 @@ cp -r /opt/local/share/locale/fr/LC_MESSAGES/*.mo ${Resources}/locale/fr/LC_MESS
 # Copy the x11 vlc output module
 cp mac/libx11_plugin.dylib ${Resources}
 
-# Use the shell wrapper (for the pangohack)
+# Use the shell wrapper
 mv ${MacOS}/Advene ${MacOS}/Advene.bin
 cp mac/Advene.wrapper ${MacOS}/Advene
 chmod 755 ${MacOS}/Advene
