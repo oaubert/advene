@@ -169,7 +169,7 @@ def mediafile2id (mediafile):
     @return: an id
     @rtype: string
     """
-    m=md5.md5(mediafile)
+    m=md5(mediafile)
     return m.hexdigest()
 
 def package2id (p):
