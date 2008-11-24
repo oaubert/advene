@@ -103,10 +103,6 @@ if not os.path.exists(config.data.path['resources']):
             # Pango hack
             os.environ['PANGO_SYSCONF_DIR']=d
             os.environ['PANGO_LIB_DIR']=d
-            # The loader takes these environment variable into account on application load.
-            # Hence it cannot work here. This part is moved to a wrapper shell script.
-            #os.environ['DYLD_FORCE_FLAT_NAMESPACE']="1"
-            #os.environ['DYLD_INSERT_LIBRARIES']=os.path.join(d, 'libpangohack.dylib')
 
             # Let us fix the pango.modules and pixbuf.loaders files if necessary
             for n in ('pangorc', 'pango.modules', 'gdk-pixbuf.loaders'):
@@ -117,7 +113,9 @@ if not os.path.exists(config.data.path['resources']):
                 if [ l for l in data if '@executable_path' in l ]:
                     print "Relocating ", n
                     relocated=[ l.replace('@executable_path/..', executable_path_dot_dot) for l in data ]
-                    open(dname, 'w').writelines(relocated)
+                    f=open(dname, 'w')
+                    f.writelines(relocated)
+                    f.close()
 
 if config.data.os == 'win32':
     import _winreg
