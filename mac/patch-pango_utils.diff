@@ -1,0 +1,32 @@
+--- pango/pango-utils.c.ORI	2008-11-24 15:03:04.000000000 +0100
++++ pango/pango-utils.c	2008-11-24 15:04:28.000000000 +0100
+@@ -703,7 +703,13 @@
+     }
+   return result;
+ #else
+-  return SYSCONFDIR "/pango";
++  char * d;
++
++  d = getenv("PANGO_SYSCONF_DIR");
++  if ( ! d )
++      d = SYSCONFDIR "/pango";
++  fprintf(stderr, "Pango: using sysconf dir %s\n", d);
++  return d;
+ #endif
+ }
+ 
+@@ -732,7 +738,13 @@
+     }
+   return result;
+ #else
+-  return LIBDIR "/pango";
++  char * d;
++
++  d = getenv("PANGO_LIB_DIR");
++  if ( ! d )
++      d = LIBDIR "/pango";
++  fprintf(stderr, "Pango: using lib dir %s\n", d);
++  return d;
+ #endif
+ }
+ 
