@@ -548,9 +548,10 @@ class AdveneGUI(object):
         """Return the list of icon pixbuf appropriate for Window.set_icon_list.
         """
         if not hasattr(self, '_icon_list'):
-            self._icon_list=[ gtk.gdk.pixbuf_new_from_file(config.data.advenefile(
+            l=[ gtk.gdk.pixbuf_new_from_file(config.data.advenefile(
                         ( 'pixmaps', 'icon_advene%d.png' % size ) ))
                               for size in (16, 32, 48, 64, 128) ]
+            self._icon_list=[ i for i in l if i is not None ]
         return self._icon_list
 
     def update_player_labels(self):
