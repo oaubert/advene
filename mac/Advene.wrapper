@@ -21,10 +21,15 @@ then
    exit 0
 fi
 
+if [ ! -w ${parent}/Resources ]
+then
+       osascript -e 'tell application "Finder" to display dialog "In order to configure itself, Advene should be able to write in its own directory ${parent}/Resources. Maybe you are directly running from the installer image? Please copy the Advene application to a folder on your local disk."
+       exit 0
+fi
+
 if [ ! -x /Applications/VLC.app ]
 then
-   osascript -e 'tell application "Finder" to display dialog "You should install VLC 0.8.6c (downloadable from http://www.videolan.org/ in /Applications, else Advene will run without video support."'
-   exit 0
+   echo"You should install VLC 0.8.6c (downloadable from http://www.videolan.org/ in /Applications, else Advene will run without video support."'
 else
   x11plugin=/Applications/VLC.app/Contents/MacOS/modules/libx11_plugin.dylib
   if [ ! -e ${x11plugin} ]
@@ -40,9 +45,5 @@ else
 fi
 
 export DISPLAY=localhost:0
-export DYLD_FORCE_FLAT_NAMESPACE=1
-export DYLD_INSERT_LIBRARIES="${parent}/Resources/libpangohack.dylib"
-#themedir=${parent}/Resources/theme
-#[ -e ${themedir} ] && export GTK2_RC_FILES="${themedir}/gtk-2.0/gtkrc"
 
 exec ${d}/Advene.bin $@
