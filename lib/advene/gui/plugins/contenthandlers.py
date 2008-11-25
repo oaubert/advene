@@ -536,20 +536,26 @@ class HTMLContentHandler (ContentHandler):
 
     def insert_annotation_content(self, choice, annotation, focus=False):
         """
-        choice: list of one or more strings: 'snapshot', 'timestamp', 'content'
+        choice: list of one or more strings: 'snapshot', 'timestamp', 'content', 'overlay'
         """
         ctx=self.controller.build_context(annotation)
+        try:
+            urlbase=self.controller.server.urlbase
+        except AttributeError:
+            urlbase='http://localhost:1234'
         d={ 
             'id': annotation.id,
-            # FIXME: should get base server address from somewhere
-            'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
-            'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
+            'href': urlbase + ctx.evaluateValue('here/player_url'),
+            'imgurl': urlbase + ctx.evaluateValue('here/snapshot_url'),
             'timestamp': helper.format_time(annotation.fragment.begin),
             'content': self.controller.get_title(annotation),
+            'urlbase': urlbase,
             }
         data=[ """<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s>""" % d ]
-        if 'snapshot' in choice:
-            data.append("""<img width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img><br>""" % d)
+        if 'overlay' in choice:
+            data.append("""<img title="Click here to play"  width="160" height="100" src="%(urlbase)smedia/overlay/advene/%(id)s"></img><br>""" % d)
+        elif 'snapshot' in choice:
+            data.append("""<img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img><br>""" % d)
         if 'timestamp' in choice:
             data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
         if 'content' in choice:
@@ -591,9 +597,11 @@ class HTMLContentHandler (ContentHandler):
                 m=gtk.Menu()
                 for (title, choice) in (
                     (_("Snapshot only"), ('snapshot', )),
+                    (_("Overlay only"), ('overlay', )),
                     (_("Content only"), ('content', )),
                     (_("Timestamp only"), ('timestamp', )),
                     (_("Snapshot+timestamp"), ('snapshot', 'timestamp')),
+                    (_("Overlay+timestamp"), ('overlay', 'timestamp')),
                     (_("Snapshot+content"), ('snapshot', 'content')),
                     (_("Snapshot+timestamp+content"), ('snapshot', 'timestamp', 'content')),
                     ):
