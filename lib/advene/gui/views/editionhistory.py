@@ -21,11 +21,12 @@
 This view displays a list of last n edited/created elements.
 """
 
-from advene.gui.views import AdhocView
-
 from gettext import gettext as _
 
 import gtk
+
+from advene.gui.views import AdhocView
+import advene.gui.popup
 
 name="EditionHistory view plugin"
 
@@ -56,6 +57,12 @@ class EditionHistory(AdhocView):
         self.refresh()
 
     def refresh(self, *p, **kw):
+        def display_popup(widget, event, element):
+            if event.button == 3:
+                menu = advene.gui.popup.Menu(element, controller=self.controller)
+                menu.popup()
+                return True
+            return False
         g=self.controller.gui
         for (w, elements) in ( (self.created, g.last_created),
                                (self.edited, g.last_edited) ):
@@ -65,7 +72,7 @@ class EditionHistory(AdhocView):
                 b.connect('clicked', (lambda i, el: self.controller.gui.edit_element(el)),
                           e)
                 # FIXME: add DND code here
-                
+                b.connect('button-press-event', display_popup, e)
                 w.pack_start(b, expand=False)
         self.widget.show_all()
         return True
