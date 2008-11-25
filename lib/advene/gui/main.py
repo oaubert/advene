@@ -83,7 +83,7 @@ import advene.util.importer
 from advene.gui.util.completer import Indexer
 
 # GUI elements
-from advene.gui.util import get_small_stock_button, image_from_position, dialog, encode_drop_parameters
+from advene.gui.util import get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
@@ -1634,6 +1634,9 @@ class AdveneGUI(object):
         config.data.preferences['windowposition'][name] = parent.get_position()
         #print "New size for %s: %s" %  (name, config.data.preferences['windowsize'][name])
         return False
+
+    def overlay(self, png_data, svg_data):
+        return overlay_svg(png_data, svg_data)
 
     def edit_element(self, element):
         """Edit the element.
