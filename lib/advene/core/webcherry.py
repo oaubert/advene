@@ -453,6 +453,52 @@ class Media(Common):
         return res
     snapshot.exposed=True
 
+    def overlay(self, *args, **params):
+        """Return the overlayed snapshot for the given annotation.
+        """
+        # snapshot syntax: /media/overlayed/package_alias/id
+        res=[]
+        if not args:
+            res.append(self.start_html (_("Access to packages snapshots"), duplicate_title=True, mode='navigation'))
+            res.append ("<ul>")
+            for alias in self.controller.packages.keys ():
+                res.append ("""<li><a href="/media/snapshot/%s">%s</a></li>""" % (alias, alias))
+            res.append("</ul>")
+            return "".join(res)
+        alias = args[0]
+        try:
+            p=self.controller.packages[alias]
+        except KeyError:
+            return self.send_error(400, _("Unknown package alias"))
+
+        try:
+            a=p.get_element_by_id(args[1])
+        except IndexError:
+            return self.send_error(400, _("Unknown annotation id: %s") % args[1])
+        position=a.fragment.begin
+        if not p.imagecache.is_initialized(position):
+            self.no_cache()
+        snapshot=p.imagecache[position]
+        if 'svg' in a.content.mimetype:
+            # Overlay svg
+            svg_data=a.content.data
+        else:
+            # Generate pseudo-svg with annotation content
+            svg_data="""<svg version='1' preserveAspectRatio="xMinYMin meet" viewBox='0 0 320 200'>
+  <text x='10' y='190' fill="white" font-size="24" stroke="black" font-family="sans-serif">
+%s
+  </text>
+</svg>
+""" % a.content.data
+        if self.controller.gui:
+            img=self.controller.gui.overlay(snapshot, svg_data)
+        else:
+            img=snapshot
+        cherrypy.response.headers['Content-type']='image/png'
+        res.append (str(img))
+        return res
+    overlay.exposed=True
+
     def play(self, position=None, **params):
         """Play the movie.
         """
