@@ -72,8 +72,9 @@ class TreeViewMerger:
             name, s, d, action=l
             store.append(row=[ l,
                                labels.setdefault(name, name),
-                               "%s %s" % (helper.get_type(s),
-                                          self.controller.get_title(s)),
+                               "%s %s (%s)" % (helper.get_type(s),
+                                               self.controller.get_title(s),
+                                               s.id),
                                True ])
         return store
 
