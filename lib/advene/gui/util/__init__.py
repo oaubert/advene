@@ -24,6 +24,7 @@ from gettext import gettext as _
 import gtk
 import gobject
 import cgi
+import StringIO
 
 import advene.core.config as config
 
@@ -59,6 +60,40 @@ def image_from_position(controller, position=None, width=None, height=None):
                                          width=width, height=height)
     i.set_from_pixbuf(pb)
     return i
+
+def overlay_svg(png_data, svg_data):
+    """Overlay svg graphics over a png image.
+    
+    @return: a PNG image
+    """
+    try:
+        loader = gtk.gdk.PixbufLoader('svg')
+    except Exception, e:
+        print "Unable to load the SVG pixbuf loader: ", str(e)
+        loader=None
+    if loader is not None:
+        try:
+            loader.write (svg_data)
+            loader.close ()
+            p = loader.get_pixbuf ()
+            width = p.get_width()
+            height = p.get_height()
+            pixbuf=png_to_pixbuf (png_data).scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+            p.composite(pixbuf, 0, 0, width, height, 0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
+        except gobject.GError, e:
+            # The PNG data was invalid.
+            print "Invalid image data", e
+            pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+    else:
+        pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+    
+    s=StringIO.StringIO()
+    def pixbuf_save_func(buf):
+        s.write(buf)
+        return True
+    pixbuf.save_to_callback(pixbuf_save_func, "png", {"tEXt::key":"Overlayed SVG"})
+
+    return s.getvalue()
 
 def get_small_stock_button(sid, callback=None, *p):
     b=gtk.Button()
