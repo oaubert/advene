@@ -101,8 +101,8 @@ class TreeViewMerger:
             minustag=b.create_tag("minus", background="lightsalmon")
             plustag=b.create_tag("plus", background="palegreen1")
 
-            for l in diff.compare(s.content.data.splitlines(1),
-                                  d.content.data.splitlines(1)):
+            for l in diff.compare(d.content.data.splitlines(1),
+                                  s.content.data.splitlines(1)):
                 if l.startswith('-'):
                     b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), l, minustag)
                 elif l.startswith('+'):
