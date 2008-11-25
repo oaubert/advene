@@ -756,6 +756,9 @@ class AdveneGUI(object):
         elif event.endswith('Create'):
             l=self.last_created
         elif event.endswith('Delete'):
+            # Close the edit popups
+            for e in [ e for e in self.edit_popups if e.element == element ]:
+                e.close()
             try:
                 self.last_edited.remove(element)
             except ValueError:
