@@ -663,6 +663,10 @@ class HTMLContentHandler (ContentHandler):
             self.editor.get_buffer().paste_clipboard(gtk.clipboard_get())
             return True
 
+        def refresh(i):
+            self.editor.refresh()
+            return True
+
         tb=gtk.Toolbar()
         vbox.toolbar=tb
         tb.set_style(gtk.TOOLBAR_ICONS)
@@ -675,6 +679,7 @@ class HTMLContentHandler (ContentHandler):
             (gtk.STOCK_CUT, _("Cut"), sel_cut),
             (gtk.STOCK_PASTE, _("Paste"), sel_paste),
             (None, None, None),
+            (gtk.STOCK_REFRESH, _("Refresh"), refresh),
             ):
             if not icon:
                 b=gtk.SeparatorToolItem()
