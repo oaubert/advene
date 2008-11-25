@@ -84,6 +84,7 @@ class TreeViewMerger:
             diff=difflib.Differ()
 
             w=gtk.Window()
+            w.set_title(_("Difference between original and merged elements"))
 
             v=gtk.VBox()
 
