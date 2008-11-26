@@ -189,6 +189,7 @@ class ViewBook(AdhocView):
 
         if not permanent:
             b=get_pixmap_button('small_detach.png')
+            self.controller.gui.tooltips.set_tip(b, _("Detach view in its own window"))
             b.set_relief(gtk.RELIEF_NONE)
             b.connect('clicked', relocate_view, v, 'popup')
             hb.pack_start(b, expand=False, fill=False)
@@ -197,6 +198,7 @@ class ViewBook(AdhocView):
 
         if not permanent:
             b=get_pixmap_button('small_close.png')
+            self.controller.gui.tooltips.set_tip(b, _("Close view"))
             b.set_relief(gtk.RELIEF_NONE)
             b.connect('clicked', close_view, v)
             hb.pack_start(b, expand=False, fill=False)
