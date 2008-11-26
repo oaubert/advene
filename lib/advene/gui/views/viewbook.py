@@ -99,20 +99,19 @@ class ViewBook(AdhocView):
             self.detach_view(view)
             return True
 
-        def popup_menu(button, event, view):
-
-            def relocate_view(item, v, d):
-                # Reference the widget so that it is not destroyed
-                wid=v.widget
-                if not self.detach_view(v):
-                    return True
-                if d == 'popup':
-                    v.popup(label=v._label)
-                elif d in ('south', 'east', 'west', 'fareast'):
-                    v._destination=d
-                    self.controller.gui.viewbook[d].add_view(v, name=v._label)
+        def relocate_view(item, v, d):
+            # Reference the widget so that it is not destroyed
+            wid=v.widget
+            if not self.detach_view(v):
                 return True
+            if d == 'popup':
+                v.popup(label=v._label)
+            elif d in ('south', 'east', 'west', 'fareast'):
+                v._destination=d
+                self.controller.gui.viewbook[d].add_view(v, name=v._label)
+            return True
 
+        def popup_menu(button, event, view):
             if event.button == 3:
                 menu = gtk.Menu()
                 if not permanent:
@@ -187,6 +186,13 @@ class ViewBook(AdhocView):
                               config.data.drag_type['adhoc-view-instance'],
                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
         hb=gtk.HBox()
+
+        if not permanent:
+            b=get_pixmap_button('small_detach.png')
+            b.set_relief(gtk.RELIEF_NONE)
+            b.connect('clicked', relocate_view, v, 'popup')
+            hb.pack_start(b, expand=False, fill=False)
+            
         hb.pack_start(e, expand=False, fill=False)
 
         if not permanent:
