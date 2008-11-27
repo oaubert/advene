@@ -1025,6 +1025,7 @@ class ECACatalog:
         'BookmarkUnhighlight':    _("Unhighlight a bookmark"),
         'DurationUpdate':         _("Updating duration of the movie"),
         'PopupDisplay':           _("Displaying a popup"),
+        'SnapshotUpdate':         _("Updating a snapshot"),
         }
 
     # Events that set the controller.modified state
