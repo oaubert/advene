@@ -189,9 +189,14 @@ class ViewBook(AdhocView):
 
         if not permanent:
             b=get_pixmap_button('small_detach.png')
-            self.controller.gui.tooltips.set_tip(b, _("Detach view in its own window"))
+            self.controller.gui.tooltips.set_tip(b, _("Detach view in its own window, or drag-and-drop to another zone"))
             b.set_relief(gtk.RELIEF_NONE)
             b.connect('clicked', relocate_view, v, 'popup')
+            b.connect('drag-data-get', label_drag_sent, v)
+            # The widget can generate drags
+            b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                              config.data.drag_type['adhoc-view-instance'],
+                              gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
             hb.pack_start(b, expand=False, fill=False)
             
         hb.pack_start(e, expand=False, fill=False)
