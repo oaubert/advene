@@ -79,6 +79,8 @@ class ViewBook(AdhocView):
 
         Each view is an Advene view, and must have a .widget attribute
         """
+        if v.view_id == 'htmlview':
+            permanent=True
         if name is None:
             try:
                 name=v.view_name
@@ -259,7 +261,8 @@ class ViewBook(AdhocView):
                     return True
                 name=v
                 label=v.title
-                view=self.controller.gui.open_adhoc_view(name, label=label, destination=self.location)
+                view=self.controller.gui.open_adhoc_view(name, label=label, destination=None)
+                self.add_view(view, label=view.view_name)
             elif 'name' in data:
                 name=data['name']
                 saved=[ v
@@ -298,7 +301,8 @@ class ViewBook(AdhocView):
                     menu.show_all()
                     menu.popup(None, None, None, 0, gtk.get_current_event_time())
                 else:
-                    view=self.controller.gui.open_adhoc_view(name, label=label, destination=self.location)
+                    view=self.controller.gui.open_adhoc_view(name, label=label, destination=None)
+                    self.add_view(view, name=view.view_name)
             else:
                 # Bug
                 self.log("Cannot happen")

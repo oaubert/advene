@@ -1958,7 +1958,8 @@ class AdveneGUI(object):
                         label=self.controller.get_title(at)
             view = self.registered_adhoc_views[name](**kwargs)
         elif name == 'webbrowser' or name == 'htmlview':
-            if destination != 'popup' and HTMLView._engine is not None:
+            if destination is None and HTMLView._engine is not None:
+                # Embedded version.
                 view = HTMLView(controller=self.controller)
                 view.open_url(self.controller.get_default_url(alias='advene'))
             elif self.controller.package is not None:
