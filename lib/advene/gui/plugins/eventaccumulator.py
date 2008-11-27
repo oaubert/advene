@@ -52,7 +52,7 @@ class EventAccumulator(AdhocView):
         self.filters = {
             'content': '',
             'objects': [],
-            'events': ['AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PopupDisplay'],
+            'events': ['AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PopupDisplay','SnapshotUpdate'],
             'operations': [],
             'actions': [],
         }
@@ -68,7 +68,7 @@ class EventAccumulator(AdhocView):
             'nav_actionBox':None,
         }
         # ECACatalog event_names et set(())
-        self.events_names= ['DurationUpdate','AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PackageLoad','PopupDisplay','MediaChange','PackageActivate','PackageSave','ApplicationStart']
+        self.events_names= ['DurationUpdate','AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PackageLoad','PopupDisplay','MediaChange','PackageActivate','PackageSave','ApplicationStart','SnapshotUpdate']
         self.operations_names = ['AnnotationCreate','AnnotationEditEnd','AnnotationDelete','RelationCreate','AnnotationMerge','AnnotationMove','PlayerStart','PlayerStop','PlayerPause','PlayerResume','PlayerSet','ViewActivation','AnnotationTypeCreate','RelationTypeCreate','RelationTypeDelete','AnnotationTypeDelete','AnnotationTypeEditEnd','RelationTypeEditEnd','ViewCreate','ViewEditEnd']
         self.incomplete_operations_names = {
             'EditSessionStart': _('Beginning edition'),
@@ -312,7 +312,7 @@ class EventAccumulator(AdhocView):
         self.filters = {
             'content': '',
             'objects': [],
-            'events': ['DurationUpdate','AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PopupDisplay'],
+            'events': ['DurationUpdate','AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PopupDisplay','SnapshotUpdate'],
             'operations': [],
             'actions': [],
         }
