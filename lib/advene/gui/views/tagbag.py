@@ -274,11 +274,9 @@ class TagBag(AdhocView):
                 self.log("Unknown target type for remove drop: %d" % targetType)
             return True
 
-        v.add(sw)
 
         hb=gtk.HBox()
         hb.set_homogeneous(False)
-        v.pack_start(hb, expand=False)
 
         b=get_small_stock_button(gtk.STOCK_DELETE)
 
@@ -295,4 +293,8 @@ class TagBag(AdhocView):
         hb.pack_start(b, expand=False)
 
         v.buttonbox=hb
+
+        v.pack_start(hb, expand=False)
+        v.add(sw)
+
         return v
