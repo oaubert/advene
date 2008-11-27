@@ -172,7 +172,7 @@ class ViewBook(AdhocView):
 
         e=gtk.EventBox()
         if len(name) > 13:
-            shortname=unicode(name[:12]) + u'\u2026'
+            shortname=unicode(name)[:12] + u'\u2026'
         else:
             shortname=name
         l=gtk.Label(shortname)
