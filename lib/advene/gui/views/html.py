@@ -180,6 +180,10 @@ class HTMLView(AdhocView):
         if url is not None:
             self.open_url(url)
 
+    def close(self):
+        # Prevent closing the view, since it crashes the component for now.
+        return False
+
     def notify(self, url=None, label=None):
         if url is not None:
             self.current_url(url)
