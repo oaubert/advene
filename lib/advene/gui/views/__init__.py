@@ -28,7 +28,7 @@ import urllib
 from gettext import gettext as _
 
 from advene.model.content import Content
-from advene.gui.util import dialog
+from advene.gui.util import dialog, get_pixmap_button
 import advene.util.helper as helper
 
 import advene.util.ElementTree as ET
@@ -410,10 +410,10 @@ class AdhocView(object):
             window.buttonbox = self.widget.buttonbox
         else:
             vbox = gtk.VBox()
-            window.add (vbox)
-            vbox.add (self.widget)
-            window.buttonbox = gtk.HButtonBox()
+            window.add(vbox)
+            window.buttonbox = gtk.HBox()
             vbox.pack_start(window.buttonbox, expand=False)
+            vbox.add (self.widget)
 
         # Insert contextual_actions in buttonbox
         if hasattr(self, 'contextual_actions') and self.contextual_actions:
@@ -440,9 +440,9 @@ class AdhocView(object):
                 return True
             return False
 
-        b = gtk.Button(_("Reattach"))
-        b.connect('clicked', self.attach_view, window)
+        b=get_pixmap_button('small_detach.png', self.attach_view, window)
         b.connect('drag-data-get', drag_sent)
+        self.controller.gui.tooltips.set_tip(b, _("Click or drag-and-drop to reattach view"))
         # The widget can generate drags
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['adhoc-view-instance'],
@@ -451,8 +451,7 @@ class AdhocView(object):
         window.own_buttons.append(b)
         window.buttonbox.pack_start(b, expand=False)
 
-        b = gtk.Button(stock=gtk.STOCK_CLOSE)
-
+        b=get_pixmap_button('small_close.png')
         if self.controller and self.controller.gui:
             b.connect('clicked', self.controller.gui.close_view_cb, window, self)
         else:
