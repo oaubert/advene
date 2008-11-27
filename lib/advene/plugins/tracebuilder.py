@@ -147,7 +147,7 @@ class TraceBuilder:
                 
         return
 
-    def import_trace(self, fname):
+    def import_trace(self, fname, reset):
         print 'importing trace from %s' % fname
         if not os.path.exists(fname):
             oldfname=fname
@@ -161,8 +161,9 @@ class TraceBuilder:
         if tr.node.nodeName != 'trace':
             print "This does not look like a trace file."
             return False
-        self.trace = Trace()
-        self.opened_actions = {}
+        if reset:
+            self.trace = Trace()
+            self.opened_actions = {}
         for ev in tr.event:
             lid = lid+1
             ev_content = ''
