@@ -72,7 +72,9 @@ class EventAccumulator(AdhocView):
         self.operations_names = ['AnnotationCreate','AnnotationEditEnd','AnnotationDelete','RelationCreate','AnnotationMerge','AnnotationMove','PlayerStart','PlayerStop','PlayerPause','PlayerResume','PlayerSet','ViewActivation','AnnotationTypeCreate','RelationTypeCreate','RelationTypeDelete','AnnotationTypeDelete','AnnotationTypeEditEnd','RelationTypeEditEnd','ViewCreate','ViewEditEnd']
         self.incomplete_operations_names = {
             'EditSessionStart': _('Beginning edition'),
+            'ElementEditBegin': _('Beginning edition'),
             'ElementEditDestroy': _('Canceling edition'),
+            'ElementEditCancel': _('Canceling edition'),
             'EditSessionEnd': _('Canceling edition'),
             'ElementEditEnd': _('Ending edition'),
         }
@@ -140,7 +142,7 @@ class EventAccumulator(AdhocView):
         self.btn_filter.connect('clicked', self.modify_filters)
         btnbar.pack_start(self.btn_filter, expand=False)
         
-        self.init_btn_filter = gtk.Button('RAZ')
+        self.init_btn_filter = gtk.Button(_('RAZ'))
         self.init_btn_filter.connect('clicked', self.init_obj_filter)
         self.init_btn_filter.set_sensitive(False)
         btnbar.pack_start(self.init_btn_filter, expand=False)
@@ -178,7 +180,7 @@ class EventAccumulator(AdhocView):
             self.receive(self.tracer.trace)
             return
         btnbar.pack_start(gtk.Label(_(' Max. : ')), expand=False)
-        self.sc = gtk.HScale(gtk.Adjustment ( value=20, lower=5, upper=100, step_incr=1, page_incr=5, page_size=5))
+        self.sc = gtk.HScale(gtk.Adjustment ( value=20, lower=5, upper=5000, step_incr=1, page_incr=5, page_size=5))
         self.sc.set_size_request(100, 10)
         self.sc.set_digits(0)
         self.sc.set_value_pos(gtk.POS_LEFT)
@@ -553,22 +555,23 @@ class EventAccumulator(AdhocView):
             ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
             #print "%s %s %s" % (self.controller.package, obj_evt.concerned_object['id'], ob)
             if isinstance(ob, advene.model.annotation.Annotation):
-                comp = _('an annotation (%s)') % obj_evt.concerned_object['id']
+                comp = _('of an annotation (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.annotation.Relation):
-                comp = _('an relation (%s)') % obj_evt.concerned_object['id']
+                comp = _('of a relation (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.schema.AnnotationType):
-                comp = _('an annotation type (%s)') % obj_evt.concerned_object['id']
+                comp = _('of an annotation type (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.schema.RelationType):
-                comp = _('a relation type (%s)') % obj_evt.concerned_object['id']
+                comp = _('of a relation type (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.schema.Schema):
-                comp = _('a schema (%s)') % obj_evt.concerned_object['id']
+                comp = _('of a schema (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.view.View):
-                comp = _('a view (%s)') % obj_evt.concerned_object['id']
+                comp = _('of a view (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.package.Package):
-                comp = _('a package (%s)') % obj_evt.concerned_object['id']
+                comp = _('of a package (%s)') % obj_evt.concerned_object['id']
             else:
-                comp = _('an unknown item (%s)') % obj_evt.concerned_object['id']
-            entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
+                comp = _('of an unknown item (%s)') % obj_evt.concerned_object['id']
+                #print "%s" % ob
+            entetestr = "%s : %s %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
         else:
             print "unlabelled event : %s" % obj_evt.name
             entetestr = "%s : %s" % (ev_time, obj_evt.name)
@@ -603,25 +606,26 @@ class EventAccumulator(AdhocView):
                 entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
         elif obj_evt.name in self.incomplete_operations_names.keys():
             comp = ''
+            # store type of item in the trace
             ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
             #print "%s %s %s" % (self.controller.package, obj_evt.concerned_object['id'], ob)
             if isinstance(ob, advene.model.annotation.Annotation):
-                comp = _('an annotation (%s)') % obj_evt.concerned_object['id']
+                comp = _('of an annotation (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.annotation.Relation):
-                comp = _('an relation (%s)') % obj_evt.concerned_object['id']
+                comp = _('of a relation (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.schema.AnnotationType):
-                comp = _('an annotation type (%s)') % obj_evt.concerned_object['id']
+                comp = _('of an annotation type (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.schema.RelationType):
-                comp = _('a relation type (%s)') % obj_evt.concerned_object['id']
+                comp = _('of a relation type (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.schema.Schema):
-                comp = _('a schema (%s)') % obj_evt.concerned_object['id']
+                comp = _('of a schema (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.view.View):
-                comp = _('a view (%s)') % obj_evt.concerned_object['id']
+                comp = _('of a view (%s)') % obj_evt.concerned_object['id']
             elif isinstance(ob,advene.model.package.Package):
-                comp = _('a package (%s)') % obj_evt.concerned_object['id']
+                comp = _('of a package (%s)') % obj_evt.concerned_object['id']
             else:
-                comp = _('an unknown item (%s)') % obj_evt.concerned_object['id']
-            entetestr = "%s : %s of %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
+                comp = _('of an unknown item (%s)') % obj_evt.concerned_object['id']
+            entetestr = "%s : %s %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
         else:
             print "unlabelled event : %s" % obj_evt.name
             entetestr = "%s : %s" % (ev_time, obj_evt.name)
