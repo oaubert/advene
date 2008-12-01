@@ -1374,14 +1374,14 @@ class AdveneGUI(object):
                 p.set_position(w - 256)
         return a
 
-    def create_bookmark(self, position, insert_after_current=False):
+    def create_bookmark(self, position, insert_after_current=False, comment=None):
         # Capture a screenshot
         self.controller.update_snapshot(position)
         # Insert an active bookmark
         a=self.find_bookmark_view()
 
         if a is not None:
-            b=a.append(position, after_current=insert_after_current)
+            b=a.append(position, after_current=insert_after_current, comment=comment)
             b.grab_focus()
             # We can scroll to the bookmark only after it has
             # been allocated a space (and thus the
