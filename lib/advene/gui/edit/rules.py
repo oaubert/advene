@@ -971,9 +971,19 @@ class EditAction(EditGeneric):
                 return self.catalog.action_categories[element]
 
         c=self.catalog
+        def expert_filter(l, attr=None):
+            if config.data.preferences['expert-mode']:
+                return l
+            else:
+                if attr is None:
+                    # No attribute, directly test value
+                    return [ e for e in l if e != 'expert' ]
+                else:
+                    return [ e for e in l if getattr(e, attr) != 'expert' ]
+
         self.selector=dialog.CategorizedSelector(title=_("Select an action"),
-                                                 elements=c.actions.values(),
-                                                 categories=c.action_categories.keys(),
+                                                 elements=expert_filter(c.actions.values(), 'category'),
+                                                 categories=expert_filter(c.action_categories.keys()),
                                                  current=c.actions[self.current_name],
                                                  description_getter=description_getter,
                                                  category_getter=lambda e: e.category,
