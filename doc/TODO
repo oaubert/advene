@@ -1,3 +1,5 @@
+* See  http://developer.imendio.com/node/300
+
 * tabular adhoc view, with options to export as HTML
 
 * HTML editor: popup menu on images to refresh imagecache (and possibly code)
@@ -2542,4 +2544,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * HTML editor: refresh images when cache changes (-> SnapshotUpdated
    event) or "Refresh" button
+
+* Hide TakeSnapshot action
+
+* CreateBookmark action
 
