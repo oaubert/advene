@@ -205,6 +205,17 @@ def register(controller=None):
             category='popup',
             ))
 
+    controller.register_action(RegisteredAction(
+            name="CreateBookmark",
+            method=ac.action_create_bookmark,
+            description=_("Create a bookmark"),
+            parameters={'position': _("Bookmark position (in ms)"),
+                        'message': _("Bookmark content."), },
+            defaults={'message': 'string:'+_("Bookmark"), 
+                      'position': 'options/controller/player/current_position_value'},
+            category='gui',
+            ))
+
 class DefaultGUIActions:
     def __init__(self, controller=None):
         self.controller=controller
@@ -566,5 +577,17 @@ class DefaultGUIActions:
             b.connect('clicked', handle_response, a.fragment.begin, vbox)
 
         self.gui.popupwidget.display(widget=vbox, timeout=annotation.fragment.duration, title=_("Relation navigation"))
+        return True
+
+
+    def action_create_bookmark(self, context, parameters):
+        """CreateBookmark action.
+
+        Create a boomark.
+        """
+        position=self.parse_parameter(context, parameters, 'position', self.controller.player.current_position_value)
+        message=self.parse_parameter(context, parameters, 'message', _("New bookmark"))
+        
+        self.controller.gui.create_bookmark(position, comment=message)
         return True
 
