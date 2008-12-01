@@ -100,7 +100,7 @@ def register(controller=None):
             method=ac.Snapshot,
             description=_("Take a snapshot"),
             #            parameters={'position': _("Snapshot position (in ms)")}
-            category='advanced',
+            category='expert',
             )
                                )
     controller.register_action(RegisteredAction(

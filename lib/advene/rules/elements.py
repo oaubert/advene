@@ -1070,6 +1070,7 @@ class ECACatalog:
         'popup': _("Popup actions"),
         'sound': _("Sound actions"),
         'state': _("State actions"),
+        'expert': _("Expert actions"),
         }
 
     def __init__(self):
