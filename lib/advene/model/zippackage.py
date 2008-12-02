@@ -131,8 +131,8 @@ class ZipPackage:
                 (n, e) = os.path.splitext(uri)
                 print "Making a local copy of %s" % uri
                 f, self.file_ = tempfile.mkstemp(e, 'adv')
-                f.write(u.read())
-                f.close()
+                os.write(f, u.read())
+                os.close(f)
                 u.close()
 
         if self.file_ is not None:
