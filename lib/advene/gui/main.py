@@ -29,6 +29,9 @@ It also defines GUI-specific actions (DisplayPopup, etc).
 import sys
 import time
 import os
+import subprocess
+import shutil
+import tempfile
 import StringIO
 import textwrap
 import re
@@ -65,7 +68,6 @@ from gettext import gettext as _
 import advene.core.controller
 
 import advene.rules.elements
-import advene.rules.ecaengine
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
@@ -284,6 +286,7 @@ class AdveneGUI(object):
                     ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
                     ( _("_Configure player"), self.on_configure_player1_activate, _("Configure the player") ),
                     ( _("Capture screenshots"), self.generate_screenshots, _("Generate screenshots for the current video") ),
+                    ( _("Detect shots"), self.do_shotdetect, _("Automatically detect shots")),
                     ( _("_Select player"), None, _("Select the player plugin") ),
                     ), "" ),
             (_("Packages"), (
@@ -3929,6 +3932,166 @@ class AdveneGUI(object):
         print "Showing window"
         w.show_all()
         w.set_modal(True)
+
+    def do_shotdetect(self, menuitem):
+        if not os.path.exists(config.data.path['shotdetect']):
+            dialog.message_dialog(_("The <b>shotdetect</b> application does not seem to be installed. Please check that it is present and that its path is correctly specified in preferences." ), icon=gtk.MESSAGE_ERROR)
+            return True
+        p=self.controller.player
+        movie=self.controller.get_default_media()
+        if not movie:
+            # No defined movie.
+            dialog.message_dialog(_("You first must load a movie into Advene" ), icon=gtk.MESSAGE_ERROR)
+            return True
+        if not os.path.exists(movie):
+            dialog.message_dialog(_("The movie %s does not seem to exist.") % movie, icon=gtk.MESSAGE_ERROR)
+            return True
+
+        def do_cancel(b, pb):
+            # Close dialog and do various cleanups
+            shots=getattr(pb, '_shots', None)
+            if shots and shots.poll():
+                if config.data.os == 'win32':
+                    import ctypes
+                    ctypes.windll.kernel32.TerminateProcess(int(shots._handle), -1)
+                else:
+                    print "Killing", shots.pid
+                    try:
+                        os.kill(shots.pid, 9)
+                    except OSError:
+                        pass
+                    os.waitpid(shots.pid, os.WNOHANG)
+            td=getattr(pb, '_tempdir', None)
+            if td and os.path.isdir(td):
+                # Remove temp dir.
+                shutil.rmtree(td, ignore_errors=True)
+            i=getattr(pb, '_watch_id', None)
+            if i:
+                gobject.source_remove(i)
+            pb._window.destroy()
+            return True
+
+        def do_detect(b, pb):
+            b.set_sensitive(False)
+
+            pb._tempdir=unicode(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
+            
+            shot_re=re.compile('Shot log.*?(\d+)')
+
+            argv=[ config.data.path['shotdetect'], 
+                   '-i', gobject.filename_from_utf8(movie.encode('utf8')), 
+                   '-o', gobject.filename_from_utf8(pb._tempdir.encode('utf8')), 
+                   '-s', str(pb._sensitivity.get_value_as_int()) ]
+            #(pid, stdin, stdout, stderr)=gobject.spawn_async(argv,
+            #                                                 standard_error=True)
+            shots=subprocess.Popen( argv, 
+                                    bufsize=0,
+                                    shell=False, 
+                                    stderr=subprocess.PIPE )
+
+            def on_shotdetect_end(p, cond, progressbar):
+                # Detection is over. Import resulting file.
+                try:
+                    i=advene.util.importer.get_importer('shotdetect', controller=self.controller)
+                except Exception:
+                    dialog.message_dialog(_("Cannot import shotdetect output. Did you install the shotdetect software?"),
+                                            icon=gtk.MESSAGE_ERROR)
+                    self.controller.queue_action(do_cancel, None, progressbar)
+                    return True
+                def progress_callback(value=None, label=None):
+                    if value is None:
+                        progressbar.pulse()
+                    else:
+                        progressbar.set_fraction(value)
+                    if label is not None:
+                        progressbar.set_text(label)
+                    while gtk.events_pending():
+                        gtk.main_iteration()
+                    return True
+                i.package=self.controller.package
+                i.callback=progress_callback
+                i.process_file(os.path.join( progressbar._tempdir, 'result.xml' ))
+                self.controller.package._modified = True
+                self.controller.notify('AnnotationTypeCreate', annotationtype=i.annotationtype)
+                self.controller.notify('PackageLoad', package=self.controller.package)
+
+                do_cancel(None, progressbar)
+                msg=_("Detected %s shots") % i.statistics['annotation']
+                dialog.message_dialog(msg)
+                self.log(msg)
+                return False
+
+            def on_shotdetect_io(source, cond, progressbar):
+                if cond == gobject.IO_HUP:
+                    i=getattr(pb, '_watch_id', None)
+                    if i:
+                        gobject.source_remove(i)
+                        p._watch_id=None
+                    gtk.gdk.threads_enter()
+                    on_shotdetect_end(source, cond, progressbar)
+                    gtk.gdk.threads_leave()
+                    return False
+                l=os.read(source, 50)
+                progressbar._read_data += l
+                part=progressbar._read_data.partition('\n')
+                if not part[2]:
+                    # No newline was found. Continue buffering.
+                    return True
+                l=part[0]
+                progressbar._read_data=part[2]
+                ms=shot_re.findall(l)
+                if ms:
+                    timestamp=helper.format_time(long(ms[0]))
+                    progressbar.set_text(_("Detected shot at %s") % timestamp)
+                    d=self.controller.cached_duration
+                    if d > 0:
+                        prg=1.0 * long(ms[0]) / d
+                        progressbar.set_fraction(prg)
+                    else:
+                        progressbar.pulse()
+                return True
+
+            progressbar.set_text(_("Detecting shots from %s") % gobject.filename_display_name(movie))
+            pb._read_data=''
+            pb._shots=shots
+            pb._watch_id=gobject.io_add_watch(shots.stderr.fileno(), gobject.IO_IN | gobject.IO_HUP, on_shotdetect_io, pb)
+            return True
+
+        w=gtk.Window()
+        w.set_title(_("Shot detection"))
+
+        v=gtk.VBox()
+        w.add(v)
+
+        l=gtk.Label()
+        l.set_markup(_("<b>Shot detection</b>\n\nAdvene will try to detect shots from the currently loaded movie. The threshold parameter is used to specify the sensitivity of the algorithm, and should typically be between 50 and 80. If too many shots are detected, try to augment its value."))
+        l.set_line_wrap(True)
+        v.pack_start(l, expand=False)
+
+        progressbar=gtk.ProgressBar()
+        
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Sensitivity")), expand=False)
+        progressbar._sensitivity=gtk.SpinButton(gtk.Adjustment(60, 50, 80, 1, 5))
+        hb.pack_start(progressbar._sensitivity)
+        v.pack_start(hb, expand=False)
+        v.pack_start(progressbar, expand=False)
+
+        progressbar._window=w
+
+        hb=gtk.HBox()
+
+        b=gtk.Button(stock=gtk.STOCK_EXECUTE)
+        b.connect('clicked', do_detect, progressbar)
+        hb.pack_start(b, expand=False)
+
+        b=gtk.Button(stock=gtk.STOCK_CANCEL)
+        b.connect('clicked', do_cancel, progressbar)
+        hb.pack_start(b, expand=False)
+
+        v.pack_start(hb, expand=False)
+        w.show_all()
+        return True
 
 if __name__ == '__main__':
     v = AdveneGUI ()
