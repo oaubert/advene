@@ -3971,6 +3971,11 @@ class AdveneGUI(object):
             i.package=self.controller.package
             i.callback=progress_callback
             i.process_file(filename)
+            if filename.endswith('.txt'):
+                # Intermediary import. Fix some details.
+                at=i.annotationtype
+                at.mimetype='application/x-advene-structured'
+                at.setMetaData(config.data.namespace, "representation", 'here/content/parsed/num')
             self.controller.package._modified = True
             self.controller.notify('AnnotationTypeCreate', annotationtype=i.annotationtype)
             self.controller.notify('PackageLoad', package=self.controller.package)
