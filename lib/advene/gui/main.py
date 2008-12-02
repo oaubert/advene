@@ -3947,7 +3947,39 @@ class AdveneGUI(object):
             dialog.message_dialog(_("The movie %s does not seem to exist.") % movie, icon=gtk.MESSAGE_ERROR)
             return True
 
-        def do_cancel(b, pb):
+        def import_data(progressbar, filename):
+            if filename.endswith('result.xml'):
+                iname='shotdetect'
+            else:
+                iname=filename
+            try:
+                i=advene.util.importer.get_importer(iname, controller=self.controller)
+            except Exception:
+                dialog.message_dialog(_("Cannot import shotdetect output. Did you install the shotdetect software?"),
+                                        icon=gtk.MESSAGE_ERROR)
+                return True
+            def progress_callback(value=None, label=None):
+                if value is None:
+                    progressbar.pulse()
+                else:
+                    progressbar.set_fraction(value)
+                if label is not None:
+                    progressbar.set_text(label)
+                while gtk.events_pending():
+                    gtk.main_iteration()
+                return True
+            i.package=self.controller.package
+            i.callback=progress_callback
+            i.process_file(filename)
+            self.controller.package._modified = True
+            self.controller.notify('AnnotationTypeCreate', annotationtype=i.annotationtype)
+            self.controller.notify('PackageLoad', package=self.controller.package)
+            msg=_("Detected %s shots") % i.statistics['annotation']
+            dialog.message_dialog(msg)
+            self.log(msg)
+            return True
+
+        def do_cancel(b, pb, forced=False):
             # Close dialog and do various cleanups
             shots=getattr(pb, '_shots', None)
             if shots:
@@ -3967,7 +3999,18 @@ class AdveneGUI(object):
             i=getattr(pb, '_watch_id', None)
             if i:
                 gobject.source_remove(i)
-            pb._window.destroy()
+            if forced and pb._datapoints:
+                # Shot detection was cancelled, but we got
+                # intermediary data points. Convert them anyway.
+                (fd, datafile)=tempfile.mkstemp('.txt', text=True)
+                pb._datapoints.insert(0, 0)
+                pb._datapoints.append(self.controller.cached_duration or (pb._datapoints[-1] + 5000))
+                for (i, t) in enumerate(zip( pb._datapoints[:-1], pb._datapoints[1:] )):
+                    os.write(fd, '%d %d num=%d\n' % (t[0], t[1], i + 1))
+                os.close(fd)
+                import_data( pb, datafile )
+                os.unlink(datafile)
+            pb._window.destroy()                
             return True
 
         def do_detect(b, pb):
@@ -3990,34 +4033,9 @@ class AdveneGUI(object):
 
             def on_shotdetect_end(p, cond, progressbar):
                 # Detection is over. Import resulting file.
-                try:
-                    i=advene.util.importer.get_importer('shotdetect', controller=self.controller)
-                except Exception:
-                    dialog.message_dialog(_("Cannot import shotdetect output. Did you install the shotdetect software?"),
-                                            icon=gtk.MESSAGE_ERROR)
-                    self.controller.queue_action(do_cancel, None, progressbar)
-                    return True
-                def progress_callback(value=None, label=None):
-                    if value is None:
-                        progressbar.pulse()
-                    else:
-                        progressbar.set_fraction(value)
-                    if label is not None:
-                        progressbar.set_text(label)
-                    while gtk.events_pending():
-                        gtk.main_iteration()
-                    return True
-                i.package=self.controller.package
-                i.callback=progress_callback
-                i.process_file(os.path.join( progressbar._tempdir, 'result.xml' ))
-                self.controller.package._modified = True
-                self.controller.notify('AnnotationTypeCreate', annotationtype=i.annotationtype)
-                self.controller.notify('PackageLoad', package=self.controller.package)
-
+                import_data(progressbar, os.path.join( progressbar._tempdir, 'result.xml' ))
+                pb._datapoints=[]
                 do_cancel(None, progressbar)
-                msg=_("Detected %s shots") % i.statistics['annotation']
-                dialog.message_dialog(msg)
-                self.log(msg)
                 return False
 
             def on_shotdetect_io(source, cond, progressbar):
@@ -4040,11 +4058,13 @@ class AdveneGUI(object):
                 progressbar._read_data=part[2]
                 ms=shot_re.findall(l)
                 if ms:
-                    timestamp=helper.format_time(long(ms[0]))
+                    ts=long(ms[0])
+                    progressbar._datapoints.append(ts)
+                    timestamp=helper.format_time(ts)
                     progressbar.set_text(_("Detected shot at %s") % timestamp)
                     d=self.controller.cached_duration
                     if d > 0:
-                        prg=1.0 * long(ms[0]) / d
+                        prg=1.0 * ts / d
                         progressbar.set_fraction(prg)
                     else:
                         progressbar.pulse()
@@ -4053,6 +4073,7 @@ class AdveneGUI(object):
             progressbar.set_text(_("Detecting shots from %s") % gobject.filename_display_name(movie))
             pb._read_data=''
             pb._shots=shots
+            pb._datapoints=[]
             pb._watch_id=gobject.io_add_watch(shots.stderr.fileno(), gobject.IO_IN | gobject.IO_HUP, on_shotdetect_io, pb)
             return True
 
@@ -4085,7 +4106,7 @@ class AdveneGUI(object):
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_CANCEL)
-        b.connect('clicked', do_cancel, progressbar)
+        b.connect('clicked', do_cancel, progressbar, True)
         hb.pack_start(b, expand=False)
 
         v.pack_start(hb, expand=False)
