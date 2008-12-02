@@ -3837,6 +3837,15 @@ class AdveneGUI(object):
     def generate_screenshots(self, *p):
         """Generate screenshots.
         """
+        movie=self.controller.get_default_media()
+        if not movie:
+            # No defined movie.
+            dialog.message_dialog(_("You first must load a movie into Advene" ), icon=gtk.MESSAGE_ERROR)
+            return True
+        if not os.path.exists(movie):
+            dialog.message_dialog(_("The movie %s does not seem to exist.") % movie, icon=gtk.MESSAGE_ERROR)
+            return True
+
         c=self.controller
         p=c.player
 
