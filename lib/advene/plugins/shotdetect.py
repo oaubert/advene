@@ -39,7 +39,9 @@ class ShotdetectImporter(GenericImporter):
 
         100 is for the best match (specific extension), 0 is for no match at all.
         """
-        if fname.endswith('.xml'):
+        if fname == 'shotdetect':
+            return 100
+        elif fname.endswith('.xml'):
             return 80
         return 0
     can_handle=staticmethod(can_handle)
