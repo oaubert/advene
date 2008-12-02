@@ -416,6 +416,7 @@ class TextImporter(GenericImporter):
         if self.package is None:
             self.init_package(filename=filename)
         self.ensure_new_type()
+        self.annotationtype=self.defaulttype
         self.convert(self.iterator(f))
         self.progress(1.0)
         return self.package
