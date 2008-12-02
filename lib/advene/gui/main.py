@@ -3950,16 +3950,15 @@ class AdveneGUI(object):
         def do_cancel(b, pb):
             # Close dialog and do various cleanups
             shots=getattr(pb, '_shots', None)
-            if shots and shots.poll():
+            if shots:
                 if config.data.os == 'win32':
                     import ctypes
                     ctypes.windll.kernel32.TerminateProcess(int(shots._handle), -1)
                 else:
-                    print "Killing", shots.pid
                     try:
                         os.kill(shots.pid, 9)
-                    except OSError:
-                        pass
+                    except OSError, e:
+                        print "Cannot kill shotdetect", unicode(e)
                     os.waitpid(shots.pid, os.WNOHANG)
             td=getattr(pb, '_tempdir', None)
             if td and os.path.isdir(td):
