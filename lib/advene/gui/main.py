@@ -3997,15 +3997,14 @@ class AdveneGUI(object):
                     except AttributeError:
                         try:
                             os.kill(shots.pid, 9)
+                            os.waitpid(shots.pid, os.WNOHANG)
                         except OSError, e:
                             print "Cannot kill shotdetect", unicode(e)
-                    os.waitpid(shots.pid, os.WNOHANG)
             td=getattr(pb, '_tempdir', None)
             if td and os.path.isdir(td):
                 # Remove temp dir.
                 shutil.rmtree(td, ignore_errors=True)
-            i=getattr(pb, '_watch_id', None)
-            if i:
+            for i in getattr(pb, '_sources', []):
                 gobject.source_remove(i)
             if forced and pb._datapoints:
                 # Shot detection was cancelled, but we got
@@ -4052,11 +4051,10 @@ class AdveneGUI(object):
                 return False
 
             def on_shotdetect_io(source, cond, progressbar):
-                if cond == gobject.IO_HUP:
-                    i=getattr(pb, '_watch_id', None)
-                    if i:
+                if cond != gobject.IO_IN:
+                    for i in progressbar._sources:
                         gobject.source_remove(i)
-                        p._watch_id=None
+                    progressbar._sources=[]
                     gtk.gdk.threads_enter()
                     on_shotdetect_end(source, cond, progressbar)
                     gtk.gdk.threads_leave()
@@ -4087,7 +4085,9 @@ class AdveneGUI(object):
             pb._read_data=''
             pb._shots=shots
             pb._datapoints=[]
-            pb._watch_id=gobject.io_add_watch(shots.stderr.fileno(), gobject.IO_IN | gobject.IO_HUP, on_shotdetect_io, pb)
+            pb._sources=[]
+            pb._sources.append(gobject.io_add_watch(shots.stderr.fileno(), gobject.IO_IN, on_shotdetect_io, pb))
+            pb._sources.append(gobject.child_watch_add(shots.pid, on_shotdetect_end, pb))
             return True
 
         w=gtk.Window()
