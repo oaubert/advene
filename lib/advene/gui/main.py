@@ -3929,7 +3929,6 @@ class AdveneGUI(object):
         hb.pack_start(b, expand=False)
 
         v.pack_start(hb, expand=False)
-        print "Showing window"
         w.show_all()
         w.set_modal(True)
 
@@ -4035,10 +4034,15 @@ class AdveneGUI(object):
                    '-s', str(pb._sensitivity.get_value_as_int()) ]
             #(pid, stdin, stdout, stderr)=gobject.spawn_async(argv,
             #                                                 standard_error=True)
-            shots=subprocess.Popen( argv, 
-                                    bufsize=0,
-                                    shell=False, 
-                                    stderr=subprocess.PIPE )
+            try:
+                shots=subprocess.Popen( argv, 
+                                        bufsize=0,
+                                        shell=False, 
+                                        stderr=subprocess.PIPE )
+            except OSError, e:
+                dialog.message_dialog(_("Could not run shotdetect: %s") % unicode(e))
+                do_cancel(None, pb)
+                return True
 
             def on_shotdetect_end(p, cond, progressbar):
                 # Detection is over. Import resulting file.
