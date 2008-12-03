@@ -3993,9 +3993,13 @@ class AdveneGUI(object):
                     ctypes.windll.kernel32.TerminateProcess(int(shots._handle), -1)
                 else:
                     try:
-                        os.kill(shots.pid, 9)
-                    except OSError, e:
-                        print "Cannot kill shotdetect", unicode(e)
+                        # Python 2.6 only
+                        shots.terminate()
+                    except AttributeError:
+                        try:
+                            os.kill(shots.pid, 9)
+                        except OSError, e:
+                            print "Cannot kill shotdetect", unicode(e)
                     os.waitpid(shots.pid, os.WNOHANG)
             td=getattr(pb, '_tempdir', None)
             if td and os.path.isdir(td):
