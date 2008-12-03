@@ -3985,6 +3985,8 @@ class AdveneGUI(object):
 
         def do_cancel(b, pb, forced=False):
             # Close dialog and do various cleanups
+
+            # Terminate the process if necessary
             shots=getattr(pb, '_shots', None)
             if shots:
                 if config.data.os == 'win32':
@@ -4000,12 +4002,18 @@ class AdveneGUI(object):
                             os.waitpid(shots.pid, os.WNOHANG)
                         except OSError, e:
                             print "Cannot kill shotdetect", unicode(e)
+
+            # Cleanup temp. dir.
             td=getattr(pb, '_tempdir', None)
             if td and os.path.isdir(td):
                 # Remove temp dir.
                 shutil.rmtree(td, ignore_errors=True)
+
+            # Disconnect event sources
             for i in getattr(pb, '_sources', []):
                 gobject.source_remove(i)
+
+            # Process intermediary data if present.
             if forced and pb._datapoints:
                 # Shot detection was cancelled, but we got
                 # intermediary data points. Convert them anyway.
@@ -4031,8 +4039,6 @@ class AdveneGUI(object):
                    '-i', gobject.filename_from_utf8(movie.encode('utf8')), 
                    '-o', gobject.filename_from_utf8(pb._tempdir.encode('utf8')), 
                    '-s', str(pb._sensitivity.get_value_as_int()) ]
-            #(pid, stdin, stdout, stderr)=gobject.spawn_async(argv,
-            #                                                 standard_error=True)
             try:
                 shots=subprocess.Popen( argv, 
                                         bufsize=0,
@@ -4052,14 +4058,16 @@ class AdveneGUI(object):
 
             def on_shotdetect_io(source, cond, progressbar):
                 if cond != gobject.IO_IN:
-                    for i in progressbar._sources:
-                        gobject.source_remove(i)
-                    progressbar._sources=[]
                     gtk.gdk.threads_enter()
                     on_shotdetect_end(source, cond, progressbar)
                     gtk.gdk.threads_leave()
                     return False
                 l=os.read(source, 50)
+                if not l:
+                    gtk.gdk.threads_enter()
+                    on_shotdetect_end(source, cond, progressbar)
+                    gtk.gdk.threads_leave()
+                    return False                    
                 progressbar._read_data += l
                 part=progressbar._read_data.partition('\n')
                 if not part[2]:
@@ -4082,12 +4090,15 @@ class AdveneGUI(object):
                 return True
 
             progressbar.set_text(_("Detecting shots from %s") % gobject.filename_display_name(movie))
+
             pb._read_data=''
             pb._shots=shots
             pb._datapoints=[]
             pb._sources=[]
-            pb._sources.append(gobject.io_add_watch(shots.stderr.fileno(), gobject.IO_IN, on_shotdetect_io, pb))
-            pb._sources.append(gobject.child_watch_add(shots.pid, on_shotdetect_end, pb))
+            pb._sources.append(gobject.io_add_watch(shots.stderr.fileno(), gobject.IO_IN | gobject.IO_HUP, on_shotdetect_io, pb))
+            # Tried this, instead of relying on IO_HUP :
+            #pb._sources.append(gobject.child_watch_add(shots.pid, on_shotdetect_end, pb))
+            # but it triggered crashes (segv) on linux.
             return True
 
         w=gtk.Window()
