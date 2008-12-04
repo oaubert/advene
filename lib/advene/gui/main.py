@@ -4068,7 +4068,7 @@ class AdveneGUI(object):
                     on_shotdetect_end(source, cond, progressbar)
                     gtk.gdk.threads_leave()
                     return False
-                l=os.read(source, 50)
+                l=source.read(50)
                 if not l:
                     gtk.gdk.threads_enter()
                     on_shotdetect_end(source, cond, progressbar)
@@ -4101,7 +4101,7 @@ class AdveneGUI(object):
             pb._shots=shots
             pb._datapoints=[]
             pb._sources=[]
-            pb._sources.append(gobject.io_add_watch(shots.stderr.fileno(), gobject.IO_IN | gobject.IO_HUP, on_shotdetect_io, pb))
+            pb._sources.append(gobject.io_add_watch(shots.stderr, gobject.IO_IN | gobject.IO_HUP, on_shotdetect_io, pb))
             # Tried this, instead of relying on IO_HUP :
             #pb._sources.append(gobject.child_watch_add(shots.pid, on_shotdetect_end, pb))
             # but it triggered crashes (segv) on linux.
