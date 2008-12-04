@@ -4051,9 +4051,14 @@ class AdveneGUI(object):
 
             def on_shotdetect_end(p, cond, progressbar):
                 # Detection is over. Import resulting file.
-                import_data(progressbar, os.path.join( progressbar._tempdir, 'result.xml' ))
-                pb._datapoints=[]
-                do_cancel(None, progressbar)
+                filename=os.path.join( progressbar._tempdir, 'result.xml' )
+                if os.path.exists(filename):
+                    # If the file does not exist, it should mean that
+                    # the process was killed, so cancel was already
+                    # invoked.
+                    import_data(progressbar, filename)
+                    pb._datapoints=[]
+                    do_cancel(None, progressbar)
                 return False
 
             def on_shotdetect_io(source, cond, progressbar):
