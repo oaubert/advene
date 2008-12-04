@@ -3975,6 +3975,7 @@ class AdveneGUI(object):
                 at=i.annotationtype
                 at.mimetype='application/x-advene-structured'
                 at.setMetaData(config.data.namespace, "representation", 'here/content/parsed/num')
+                at.title=_("Incomplete shots")
             self.controller.package._modified = True
             self.controller.notify('AnnotationTypeCreate', annotationtype=i.annotationtype)
             self.controller.notify('PackageLoad', package=self.controller.package)
