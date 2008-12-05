@@ -37,6 +37,7 @@ import textwrap
 import re
 import urllib2
 import socket
+import threading
 
 import advene.core.config as config
 import advene.core.version
@@ -3946,6 +3947,16 @@ class AdveneGUI(object):
             dialog.message_dialog(_("The movie %s does not seem to exist.") % movie, icon=gtk.MESSAGE_ERROR)
             return True
 
+        def do_gui_operation(function, *args, **kw):
+            def idle_func():
+                gtk.gdk.threads_enter()
+                try:
+                    function(*args, **kw)
+                    return False
+                finally:
+                    gtk.gdk.threads_leave()
+            gobject.idle_add(idle_func)
+
         def import_data(progressbar, filename):
             if filename.endswith('result.xml'):
                 iname='shotdetect'
@@ -3957,13 +3968,8 @@ class AdveneGUI(object):
                 dialog.message_dialog(_("Cannot import shotdetect output. Did you install the shotdetect software?"),
                                         icon=gtk.MESSAGE_ERROR)
                 return True
-            def progress_callback(value=None, label=None):
-                if value is None:
-                    progressbar.pulse()
-                else:
-                    progressbar.set_fraction(value)
-                if label is not None:
-                    progressbar.set_text(label)
+            def progress_callback(value=None, label=''):
+                progressbar.set_label_value(label or '', value)
                 while gtk.events_pending():
                     gtk.main_iteration()
                 return True
@@ -4026,92 +4032,73 @@ class AdveneGUI(object):
                 os.close(fd)
                 import_data( pb, datafile )
                 os.unlink(datafile)
-            pb._window.destroy()                
+            pb._window.destroy()
             return True
 
-        def do_detect(b, pb):
-            b.set_sensitive(False)
+        def on_shotdetect_end(progressbar):
+            # Detection is over. Import resulting file.
+            filename=os.path.join( progressbar._tempdir, 'result.xml' )
+            if os.path.exists(filename):
+                # If the file does not exist, it should mean that
+                # the process was killed, so cancel was already
+                # invoked.
+                import_data(progressbar, filename)
+                progressbar._datapoints=[]
+                do_cancel(None, progressbar)
+            return False
 
-            pb._tempdir=unicode(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
-            
+        def execute_shotdetect(pb):
+            """Execute shotdetect.
+            """
+            pb._datapoints=[]
+
             shot_re=re.compile('Shot log.*?(\d+)')
 
-            argv=[ config.data.path['shotdetect'], 
-                   '-i', gobject.filename_from_utf8(movie.encode('utf8')), 
-                   '-o', gobject.filename_from_utf8(pb._tempdir.encode('utf8')), 
+            argv=[ config.data.path['shotdetect'],
+                   '-i', gobject.filename_from_utf8(movie.encode('utf8')),
+                   '-o', gobject.filename_from_utf8(pb._tempdir.encode('utf8')),
                    '-s', str(pb._sensitivity.get_value_as_int()) ]
             try:
-                shots=subprocess.Popen( argv, 
-                                        bufsize=0,
-                                        shell=False, 
-                                        stderr=subprocess.PIPE )
+                pb._shots=subprocess.Popen( argv,
+                                            bufsize=0,
+                                            shell=False,
+                                            stderr=subprocess.PIPE )
             except OSError, e:
                 dialog.message_dialog(_("Could not run shotdetect: %s") % unicode(e))
                 do_cancel(None, pb)
                 return True
 
-            def on_shotdetect_end(p, cond, progressbar):
-                # Detection is over. Import resulting file.
-                filename=os.path.join( progressbar._tempdir, 'result.xml' )
-                if os.path.exists(filename):
-                    # If the file does not exist, it should mean that
-                    # the process was killed, so cancel was already
-                    # invoked.
-                    import_data(progressbar, filename)
-                    pb._datapoints=[]
-                    do_cancel(None, progressbar)
-                return False
-
-            def on_shotdetect_io(source, cond, progressbar):
-                if cond != gobject.IO_IN:
-                    gtk.gdk.threads_enter()
-                    on_shotdetect_end(source, cond, progressbar)
-                    gtk.gdk.threads_leave()
-                    return False
-                if isinstance(source, int):
-                    l=os.read(source, 50)
-                else:
-                    l=source.read(50)
+            do_gui_operation(pb.set_label_value,
+                             _("Detecting shots from %s") % gobject.filename_display_name(movie),
+                             0.01)
+            while True:
+                l=pb._shots.stderr.readline()
                 if not l:
-                    gtk.gdk.threads_enter()
-                    on_shotdetect_end(source, cond, progressbar)
-                    gtk.gdk.threads_leave()
-                    return False                    
-                progressbar._read_data += l
-                part=progressbar._read_data.partition('\n')
-                if not part[2]:
-                    # No newline was found. Continue buffering.
-                    return True
-                l=part[0]
-                progressbar._read_data=part[2]
+                    break
                 ms=shot_re.findall(l)
                 if ms:
                     ts=long(ms[0])
-                    progressbar._datapoints.append(ts)
-                    timestamp=helper.format_time(ts)
-                    progressbar.set_text(_("Detected shot at %s") % timestamp)
+                    pb._datapoints.append(ts)
                     d=self.controller.cached_duration
                     if d > 0:
                         prg=1.0 * ts / d
-                        progressbar.set_fraction(prg)
                     else:
-                        progressbar.pulse()
-                return True
+                        prg=None
+                    do_gui_operation(pb.set_label_value,
+                                     _("Detected shot at %s") % helper.format_time(ts),
+                                     prg)
 
-            progressbar.set_text(_("Detecting shots from %s") % gobject.filename_display_name(movie))
+            # Detection is over. Import resulting 
+            do_gui_operation(on_shotdetect_end, pb)
+            return False
 
-            pb._read_data=''
-            pb._shots=shots
-            pb._datapoints=[]
-            pb._sources=[]
-            if config.data.os == 'win32':
-                source=shots.stderr
-            else:
-                source=shots.stderr.fileno()
-            pb._sources.append(gobject.io_add_watch(source, gobject.IO_IN | gobject.IO_HUP, on_shotdetect_io, pb))
-            # Tried this, instead of relying on IO_HUP :
-            #pb._sources.append(gobject.child_watch_add(shots.pid, on_shotdetect_end, pb))
-            # but it triggered crashes (segv) on linux.
+        def do_detect(b, pb):
+            b.set_sensitive(False)
+
+            pb._tempdir=unicode(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
+
+            t=threading.Thread(target=execute_shotdetect, args= [ pb ])
+            t.start()
             return True
 
         w=gtk.Window()
@@ -4126,7 +4113,16 @@ class AdveneGUI(object):
         v.pack_start(l, expand=False)
 
         progressbar=gtk.ProgressBar()
-        
+
+        def set_label_value(s, label='', value=None):
+            s.set_text(label)
+            if value is None:
+                progressbar.pulse()
+            else:
+                progressbar.set_fraction(value)
+            return False
+        progressbar.set_label_value=set_label_value.__get__(progressbar)
+
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Sensitivity")), expand=False)
         progressbar._sensitivity=gtk.SpinButton(gtk.Adjustment(60, 50, 80, 1, 5))
