@@ -287,7 +287,7 @@ class AdveneGUI(object):
                     ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
                     ( _("_Configure player"), self.on_configure_player1_activate, _("Configure the player") ),
                     ( _("Capture screenshots"), self.generate_screenshots, _("Generate screenshots for the current video") ),
-                    ( _("Detect shots"), self.do_shotdetect, _("Automatically detect shots")),
+                    ( _("Detect shots"), self.on_shotdetect_activate, _("Automatically detect shots")),
                     ( _("_Select player"), None, _("Select the player plugin") ),
                     ), "" ),
             (_("Packages"), (
@@ -3933,7 +3933,7 @@ class AdveneGUI(object):
         w.show_all()
         w.set_modal(True)
 
-    def do_shotdetect(self, menuitem):
+    def on_shotdetect_activate(self, *p):
         if not os.path.exists(config.data.path['shotdetect']):
             dialog.message_dialog(_("The <b>shotdetect</b> application does not seem to be installed. Please check that it is present and that its path is correctly specified in preferences." ), icon=gtk.MESSAGE_ERROR)
             return True
@@ -3948,6 +3948,10 @@ class AdveneGUI(object):
             return True
 
         def do_gui_operation(function, *args, **kw):
+            """Execute a method in the main loop.
+
+            Ensure that we execute all Gtk operations in the mainloop.
+            """
             def idle_func():
                 gtk.gdk.threads_enter()
                 try:
@@ -3958,6 +3962,12 @@ class AdveneGUI(object):
             gobject.idle_add(idle_func)
 
         def import_data(progressbar, filename):
+            """Import data from filename.
+
+            filename is either result.xml (shotdetect output) or a
+            .txt file (generated from the intermediary data in case of
+            cancellation).
+            """
             if filename.endswith('result.xml'):
                 iname='shotdetect'
             else:
@@ -3991,7 +4001,10 @@ class AdveneGUI(object):
             return True
 
         def do_cancel(b, pb, forced=False):
-            # Close dialog and do various cleanups
+            """Cancel action.
+
+            Close dialog and do various cleanups
+            """
 
             # Terminate the process if necessary
             shots=getattr(pb, '_shots', None)
@@ -4015,10 +4028,6 @@ class AdveneGUI(object):
             if td and os.path.isdir(td):
                 # Remove temp dir.
                 shutil.rmtree(td, ignore_errors=True)
-
-            # Disconnect event sources
-            for i in getattr(pb, '_sources', []):
-                gobject.source_remove(i)
 
             # Process intermediary data if present.
             if forced and pb._datapoints:
@@ -4049,6 +4058,8 @@ class AdveneGUI(object):
 
         def execute_shotdetect(pb):
             """Execute shotdetect.
+
+            This method is meant to be run in its own thread.
             """
             pb._datapoints=[]
 
