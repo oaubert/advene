@@ -4005,6 +4005,9 @@ class AdveneGUI(object):
 
             Close dialog and do various cleanups
             """
+            s=getattr(pb, '_source', None)
+            if s:
+                gobject.source_remove(s)
 
             # Terminate the process if necessary
             shots=getattr(pb, '_shots', None)
@@ -4107,6 +4110,14 @@ class AdveneGUI(object):
             b.set_sensitive(False)
 
             pb._tempdir=unicode(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
+            if config.data.os == 'win32':
+                # Async. reading from a pipe is a mess on win32. A
+                # proper fix should be found, but in the meantime,
+                # give a feedback to the user.
+                def progress():
+                    pb.pulse()
+                    return True
+                pb._source=gobject.timeout_add(500, progress)
 
             t=threading.Thread(target=execute_shotdetect, args= [ pb ])
             t.start()
