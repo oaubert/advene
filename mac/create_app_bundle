@@ -75,9 +75,14 @@ otool -L ${MacOS}/f/librsvg-2.2.dylib  | perl -lne 'print $1 if m!/opt/local/lib
 # Copy gtk python modules. This will override the py2app way (creating a _gtk.pyc wrapper in the site-packages.zip, which tries to load _gtk.so from lib-dynload, but it crashes)
 cp -r /opt/local/lib/python2.5/site-packages/gtk-2.0/* $Resources/lib/python2.5
 
+# Copy gstreamer plugins
+cp -r /opt/local/lib/gstreamer-0.10 ${Resources}/gst-plugins
+cp /opt/local/lib/libgst*-0.10.0.dylib ${Frameworks}
+cat mac/gst-dependencies.txt | while read a; do cp /opt/local/lib/${a} ${Frameworks}; done
+
 echo "Fixing library names ..."
 # fix the libraries we include
-for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so $Resources/lib/gtk-2.0/2.10.0/*/*.so $Resources/lib/python2.5/*.so $Resources/lib/python2.5/*/*.so
+for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so $Resources/lib/gtk-2.0/2.10.0/*/*.so $Resources/lib/python2.5/*.so $Resources/lib/python2.5/*/*.so ${Resources}/gst-plugins/*.so
 do
     # skip symlinks
     if test ! -L $dylib ; then
@@ -118,6 +123,7 @@ cp mac/libx11_plugin.dylib ${Resources}
 mv ${MacOS}/Advene ${MacOS}/Advene.bin
 cp mac/Advene.wrapper ${MacOS}/Advene
 chmod 755 ${MacOS}/Advene
+
 
 # Hide the /opt directory, to make sure that we do not reuse something from there inadvertently
 sudo chmod 000 /opt
