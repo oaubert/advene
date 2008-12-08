@@ -104,6 +104,9 @@ if not os.path.exists(config.data.path['resources']):
             os.environ['PANGO_SYSCONF_DIR']=d
             os.environ['PANGO_LIB_DIR']=d
 
+
+            os.environ['GST_PLUGIN_PATH']=os.path.join( d, 'gst-plugins' )
+
             # Let us fix the pango.modules and pixbuf.loaders files if necessary
             for n in ('pangorc', 'pango.modules', 'gdk-pixbuf.loaders'):
                 sname=os.path.join(d, n + '.in')
