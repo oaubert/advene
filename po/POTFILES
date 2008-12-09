@@ -27,6 +27,7 @@
 ../lib/advene/gui/views/viewplugin.py
 ../lib/advene/gui/views/annotationdisplay.py
 ../lib/advene/gui/views/tree.py
+../lib/advene/gui/views/editionhistory.py
 ../lib/advene/gui/views/timeline.py
 ../lib/advene/gui/views/browser.py
 ../lib/advene/gui/views/html.py
@@ -52,6 +53,7 @@
 ../lib/advene/gui/main.py
 ../lib/advene/gui/util/initialconfig.py
 ../lib/advene/gui/util/dialog.py
+../lib/advene/gui/util/dummy_translations.py
 ../lib/advene/gui/assistants/annotationtype.py
 ../lib/advene/gui/popup.py
 ../lib/advene/model/bundle.py
