@@ -968,6 +968,21 @@ class TimestampRepresentation(gtk.Button):
         self.connect('enter-notify-event', enter_bookmark)
         self.connect('leave-notify-event', leave_bookmark)
 
+        self._rules=[]
+        # React to UpdateSnapshot events
+        def snapshot_update_cb(context, target):
+            if context.globals['position'] == self._value:
+                # Update the representation
+                self.refresh()
+            return True
+        def remove_rules(*p):
+            for r in self._rules:
+                self.controller.event_handler.remove_rule(r, 'internal')
+            return False
+        self._rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
+                                                                        method=snapshot_update_cb))
+        self.connect('destroy', remove_rules)
+        
     def get_value(self):
         return self._value
     def set_value(self, v):
