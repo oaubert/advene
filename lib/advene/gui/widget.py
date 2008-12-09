@@ -1085,6 +1085,7 @@ class TimestampRepresentation(gtk.Button):
         """Invalidate the snapshot image.
         """
         self.controller.package.imagecache.invalidate(self.value, self.epsilon)
+        self.controller.notify('SnapshotUpdate', position=self.value)
         self.refresh()
         return True
 
