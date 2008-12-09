@@ -712,10 +712,8 @@ class HTMLContentHandler (ContentHandler):
         p=gtk.HPaned()
         p.add1(context_data)
         p.add2(sw)
-        if config.data.preferences['expert-mode']:
-            p.set_position(100)
-        else:
-            p.set_position(0)
+        # Hide by default
+        p.set_position(0)
         p.show_all()
         self.view.add(p)
 
