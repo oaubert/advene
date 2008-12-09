@@ -113,10 +113,14 @@ def get_pixmap_button(pixmap, callback=None, *p):
     return b
 
 def get_pixmap_toolbutton(pixmap, callback=None, *p):
-    i=gtk.Image()
-    i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-    b=gtk.ToolButton(icon_widget=i)
-    i.show()
+    if pixmap.startswith('gtk-'):
+        # Stock-id
+        b=gtk.ToolButton(pixmap)
+    else:
+        i=gtk.Image()
+        i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
+        b=gtk.ToolButton(icon_widget=i)
+        i.show()
     if callback:
         b.connect('clicked', callback, *p)
     return b
