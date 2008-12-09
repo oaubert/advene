@@ -135,31 +135,32 @@ class EditElementPopup (AdhocView):
         if self._widget is None:
             vbox=gtk.VBox()
 
-            vbox.pack_start(self.make_widget(editable=self.editable))
+            tb=gtk.Toolbar()
+            tb.set_style(gtk.TOOLBAR_ICONS)
 
-            # Button bar
-            hbox = gtk.HButtonBox()
-
-            b = gtk.Button (stock=gtk.STOCK_OK)
+            b=gtk.ToolButton(gtk.STOCK_OK)
             b.connect('clicked', self.validate_cb)
-            hbox.add (b)
+            self.controller.gui.tooltips.set_tip(b, _("Apply changes and close the edit window"))
+            tb.insert(b, -1)
 
-            b = gtk.Button (stock=gtk.STOCK_APPLY)
+            b=gtk.ToolButton (gtk.STOCK_APPLY)
             b.connect('clicked', self.apply_cb)
-            hbox.add (b)
+            self.controller.gui.tooltips.set_tip(b, _("Apply changes"))
+            tb.insert(b, -1)
 
             if isinstance(self.element, View):
                 t = helper.get_view_type(self.element)
                 if t == 'static' and self.element.matchFilter['class'] in ('package', '*'):
-                    b = get_pixmap_button( 'web.png', self.apply_and_open)
+                    b = get_pixmap_toolbutton( 'web.png', self.apply_and_open)
                     self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
-                    hbox.add(b)
+                    tb.insert(b, -1)
                 elif t == 'dynamic':
-                    b = get_small_stock_button( gtk.STOCK_MEDIA_PLAY, self.apply_and_activate)
+                    b = get_pixmap_toolbutton( gtk.STOCK_MEDIA_PLAY, self.apply_and_activate)
                     self.controller.gui.tooltips.set_tip(b, _("Apply changes and activate the view"))
-                    hbox.add(b)
+                    tb.insert(b, -1)
 
-            vbox.pack_start (hbox, expand=False)
+            vbox.pack_start(tb, expand=False)
+            vbox.pack_start(self.make_widget(editable=self.editable))
 
             def destroy_cb(*p):
                 if self.controller and self.controller.gui: 
@@ -610,24 +611,6 @@ class EditViewPopup (EditElementPopup):
                              mimetypeeditable=editable, parent=self.element)
         f.set_editable (editable)
         t = f.get_view ()
-        tb=getattr(f.content_handler_widget, 'toolbar', None)
-        if tb is not None:
-            # Add appropriate buttons to toolbar
-            b = gtk.ToolButton(gtk.STOCK_OK)
-            b.connect('clicked', self.apply_cb)
-            self.controller.gui.tooltips.set_tip(b, _("Apply changes"))
-            tb.insert(b, -1)
-
-            b = gtk.ToolButton(gtk.STOCK_CLOSE)
-            b.connect('clicked', self.close_cb)
-            self.controller.gui.tooltips.set_tip(b, _("Close window"))
-            tb.insert(b, -1)
-
-            if helper.get_view_type(self.element) == 'static' and self.element.matchFilter['class'] in ('package', '*'):
-                b = get_pixmap_toolbutton( 'web.png', self.apply_and_open)
-                self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
-                tb.insert(b, -1)
-
         self.register_form (f)
         vbox.pack_start (self.framed(t, _("Content")), expand=True)
 
