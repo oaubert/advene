@@ -27,6 +27,7 @@ import gtk
 
 from advene.gui.views import AdhocView
 import advene.gui.popup
+import advene.util.helper as helper
 
 name="EditionHistory view plugin"
 
@@ -68,7 +69,7 @@ class EditionHistory(AdhocView):
                                (self.edited, g.last_edited) ):
             w.foreach(w.remove)
             for e in reversed(elements):
-                b=gtk.Button(self.controller.get_title(e), use_underline=False)
+                b=gtk.Button("\n".join((helper.get_type(e), self.controller.get_title(e))), use_underline=False)
                 b.connect('clicked', (lambda i, el: self.controller.gui.edit_element(el)),
                           e)
                 # FIXME: add DND code here
