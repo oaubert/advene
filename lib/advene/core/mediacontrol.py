@@ -44,8 +44,6 @@ class PlayerFactory:
                     import advene.player.vlcnative as playermodule
             elif p == 'dummy':
                 import advene.player.dummy as playermodule
-            elif p == 'vlcorbit':
-                import advene.player.vlcorbit as playermodule
             elif p == 'mplayer':
                 import advene.player.mplayer as playermodule
             elif p == 'gstreamer':
