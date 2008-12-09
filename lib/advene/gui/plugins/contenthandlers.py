@@ -681,6 +681,8 @@ class HTMLContentHandler (ContentHandler):
             (None, None, None),
             (gtk.STOCK_REFRESH, _("Refresh"), refresh),
             ):
+            if not config.data.preferences['expert-mode'] and icon == gtk.STOCK_REFRESH:
+                continue
             if not icon:
                 b=gtk.SeparatorToolItem()
             else:
