@@ -1518,6 +1518,11 @@ class ShapeEditor:
                     retval = True
         return retval
 
+    def set_background(self, image):
+        self.drawer.background=image
+        # FIXME: check that dimensions are compatible with old one ?
+        self.drawer.plot()
+
     def build_widget(self):
         vbox=gtk.VBox()
 
