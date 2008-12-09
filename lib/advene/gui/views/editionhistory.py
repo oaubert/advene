@@ -72,6 +72,9 @@ class EditionHistory(AdhocView):
                 b=gtk.Button("\n".join((helper.get_type(e), self.controller.get_title(e))), use_underline=False)
                 b.connect('clicked', (lambda i, el: self.controller.gui.edit_element(el)),
                           e)
+                content=getattr(e, 'content', None)
+                if content:
+                    self.controller.gui.tooltips.set_tip(b, content.data)
                 # FIXME: add DND code here
                 b.connect('button-press-event', display_popup, e)
                 w.pack_start(b, expand=False)
