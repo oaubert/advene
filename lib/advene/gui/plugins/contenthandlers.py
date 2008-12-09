@@ -710,9 +710,12 @@ class HTMLContentHandler (ContentHandler):
                 context_data.set_context(self.editor.get_current_context(it))
             return True
         self.editor.get_buffer().connect('mark-set', cursor_moved)
+        sw2=gtk.ScrolledWindow()
+        sw2.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw2.add(context_data)
 
         p=gtk.HPaned()
-        p.add1(context_data)
+        p.add1(sw2)
         p.add2(sw)
         # Hide by default
         p.set_position(0)
