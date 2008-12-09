@@ -2007,7 +2007,7 @@ class AdveneGUI(object):
         elif name == 'comment':
             print "Creating view"
             v=self.controller.create_static_view(elements=[])
-            label=_("Comment")
+            label=_("Comment view (%s)" % time.strftime('%Y%m%d - %H:%M'))
             v.title=label
             view=get_edit_popup(v, controller=self.controller)
         elif name in self.registered_adhoc_views:
