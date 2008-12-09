@@ -44,6 +44,6 @@ else
   fi
 fi
 
-export DISPLAY=localhost:0
+export DISPLAY=:0.0
 
 exec ${d}/Advene.bin $@
