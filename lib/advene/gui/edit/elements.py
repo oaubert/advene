@@ -446,7 +446,14 @@ class EditAnnotationPopup (EditElementPopup):
 
         vbox.pack_start (ex, expand=False)
 
-        f = EditFragmentForm(element=self.element.fragment, controller=self.controller)
+        def begin_callback(t):
+            for c in self.forms:
+                if hasattr(c, 'contentform') and hasattr(c.contentform, 'set_begin'):
+                    c.contentform.set_begin(t)
+            return True
+
+        f = EditFragmentForm(element=self.element.fragment, controller=self.controller,
+                             begin_callback=begin_callback)
         self.register_form (f)
         vbox.pack_start (f.get_view(compact=compact), expand=False)
 
@@ -1618,12 +1625,13 @@ class GenericContentHandler (ContentHandler):
 config.data.register_content_handler(GenericContentHandler)
 
 class EditFragmentForm(EditForm):
-    def __init__(self, element=None, controller=None, editable=True):
+    def __init__(self, element=None, controller=None, editable=True, begin_callback=None):
         self.begin=None
         self.end=None
         self.element = element
         self.controller = controller
         self.editable=editable
+        self.begin_callback=begin_callback
 
     def check_validity(self):
         if self.begin.value >= self.end.value:
@@ -1654,7 +1662,8 @@ class EditFragmentForm(EditForm):
         self.begin=TimeAdjustment(value=self.element.begin,
                                   controller=self.controller,
                                   editable=self.editable,
-                                  compact=compact)
+                                  compact=compact,
+                                  callback=self.begin_callback)
         f=gtk.Frame()
         f.set_label(_("Begin"))
         f.add(self.begin.get_widget())
