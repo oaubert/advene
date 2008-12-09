@@ -4117,10 +4117,12 @@ class AdveneGUI(object):
             b.set_sensitive(False)
 
             pb._tempdir=unicode(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
-            if config.data.os == 'win32':
+            if config.data.os == 'win32' or self.controller.cached_duration <= 0:
                 # Async. reading from a pipe is a mess on win32. A
                 # proper fix should be found, but in the meantime,
-                # give a feedback to the user.
+                # give a feedback to the user.  Do it also when the
+                # movie length is unknown, so that the user can know
+                # there is activity even if no shot is detected.
                 def progress():
                     pb.pulse()
                     return True
