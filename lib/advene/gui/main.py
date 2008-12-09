@@ -4049,6 +4049,13 @@ class AdveneGUI(object):
 
         def on_shotdetect_end(progressbar):
             # Detection is over. Import resulting file.
+
+            # First disconnect the automatic pulse (win32 only)
+            s=getattr(progressbar, '_source', None)
+            if s:
+                gobject.source_remove(s)
+                progressbar._source=None
+
             filename=os.path.join( progressbar._tempdir, 'result.xml' )
             if os.path.exists(filename):
                 # If the file does not exist, it should mean that
