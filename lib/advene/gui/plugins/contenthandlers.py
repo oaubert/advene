@@ -720,10 +720,6 @@ class HTMLContentHandler (ContentHandler):
         def edit_wysiwyg(*p):
             vbox.foreach(vbox.remove)
             vbox.add(self.view)
-
-            b=gtk.Button(_("Edit source"))
-            b.connect('clicked', edit_source)
-            vbox.pack_start(b, expand=False)
             self.editing_source=False
             vbox.show_all()
             return True
@@ -740,10 +736,6 @@ class HTMLContentHandler (ContentHandler):
 
             vbox.foreach(vbox.remove)
             vbox.add(self.sourceview.widget)
-
-            b=gtk.Button(_("WYSIWYG editor"))
-            b.connect('clicked', edit_wysiwyg)
-            vbox.pack_start(b, expand=False)
             self.editing_source=True
             vbox.show_all()
             return True
