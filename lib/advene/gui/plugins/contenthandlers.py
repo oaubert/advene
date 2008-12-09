@@ -597,11 +597,11 @@ class HTMLContentHandler (ContentHandler):
                 m=gtk.Menu()
                 for (title, choice) in (
                     (_("Snapshot only"), ('snapshot', )),
-                    (_("Overlay only"), ('overlay', )),
+                    (_("Overlayed snapshot only"), ('overlay', )),
                     (_("Content only"), ('content', )),
                     (_("Timestamp only"), ('timestamp', )),
                     (_("Snapshot+timestamp"), ('snapshot', 'timestamp')),
-                    (_("Overlay+timestamp"), ('overlay', 'timestamp')),
+                    (_("Overlayed snapshot+timestamp"), ('overlay', 'timestamp')),
                     (_("Snapshot+content"), ('snapshot', 'content')),
                     (_("Snapshot+timestamp+content"), ('snapshot', 'timestamp', 'content')),
                     ):
