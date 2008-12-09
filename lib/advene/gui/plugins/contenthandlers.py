@@ -161,12 +161,19 @@ class SVGContentHandler (ContentHandler):
         self.controller=controller
         self.parent=parent
         self.editable = True
+        # Internal rules defined by the plugin
+        self.rules=[]
         self.fname=None
         self.view = None
         self.sourceview=None
         self.editing_source=False
         self.tooltips=gtk.Tooltips()
 
+    def close(self):
+        for r in self.rules:
+            self.controller.event_handler.remove_rule(r, 'internal')
+        return True
+        
     def set_editable (self, boolean):
         self.editable = boolean
         if self.sourceview:
@@ -267,6 +274,23 @@ class SVGContentHandler (ContentHandler):
         if self.parent is not None and hasattr(self.parent, 'fragment'):
             i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
             self.view = ShapeEditor(background=i)
+
+            def snapshot_update_cb(context, target):
+                if context.globals['position'] == self.parent.fragment.begin:
+                    # Refresh image
+                    i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
+                    self.view.set_background(i)
+                return True
+            self.rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
+                                                                           method=snapshot_update_cb))
+
+            def annotation_update_cb(context, target):
+                i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
+                self.view.set_background(i)
+                return True
+            self.rules.append(self.controller.event_handler.internal_rule (event='AnnotationEditEnd',
+                                                                           method=annotation_update_cb))
+
         else:
             self.view = ShapeEditor()
 
