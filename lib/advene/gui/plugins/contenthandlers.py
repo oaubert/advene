@@ -569,7 +569,7 @@ class HTMLContentHandler (ContentHandler):
         """
         ctx=self.controller.build_context(annotation)
         try:
-            urlbase=self.controller.server.urlbase
+            urlbase=self.controller.server.urlbase.rstrip('/')
         except AttributeError:
             urlbase='http://localhost:1234'
         d={ 
@@ -582,7 +582,7 @@ class HTMLContentHandler (ContentHandler):
             }
         data=[ """<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s>""" % d ]
         if 'overlay' in choice:
-            data.append("""<img title="Click here to play"  width="160" height="100" src="%(urlbase)smedia/overlay/advene/%(id)s"></img><br>""" % d)
+            data.append("""<img title="Click here to play"  width="160" height="100" src="%(urlbase)s/media/overlay/advene/%(id)s"></img><br>""" % d)
         elif 'snapshot' in choice:
             data.append("""<img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img><br>""" % d)
         if 'timestamp' in choice:
