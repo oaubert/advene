@@ -588,16 +588,17 @@ class EditViewPopup (EditElementPopup):
         vbox.pack_start (self.expandable(f.get_view (), _("Attributes"),
                                          expanded=False), expand=False)
 
-        # matchFilter
-        f = self.make_registered_form (element=self.element.matchFilter,
-                                       fields=('class', 'type'),
-                                       editable=editable,
-                                       editables=('class', 'type'),
-                                       labels={'class': _('Class'),
-                                               'type':  _('Type')}
-                                       )
-        vbox.pack_start (self.expandable(f.get_view (), _("Match Filter")),
-                         expand=False)
+        if config.data.preferences['expert-mode']:
+            # matchFilter
+            f = self.make_registered_form (element=self.element.matchFilter,
+                                           fields=('class', 'type'),
+                                           editable=editable,
+                                           editables=('class', 'type'),
+                                           labels={'class': _('Class'),
+                                                   'type':  _('Type')}
+                                           )
+            vbox.pack_start (self.expandable(f.get_view (), _("Match Filter"), expanded=False),
+                             expand=False)
 
         # Tags (not tags in view)
         #f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
@@ -1183,7 +1184,7 @@ class EditContentForm(EditForm):
         if self.element.mimetype == 'application/x-advene-ruleset':
             compact=True
 
-        if not compact:
+        if not compact and config.data.preferences['expert-mode']:
             hbox = gtk.HBox()
             l=gtk.Label(_("MIME Type"))
             hbox.pack_start(l, expand=False)
