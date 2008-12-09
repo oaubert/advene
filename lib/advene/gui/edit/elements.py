@@ -191,6 +191,13 @@ class EditElementPopup (AdhocView):
         for f in self.forms:
             f.refresh()
 
+    def close(self, *p):
+        for f in self.forms:
+            c=getattr(f, 'close', None)
+            if callable(c):
+                c()
+        return super(EditElementPopup, self).close(*p)
+                
     def can_edit (el):
         """Return True if the class can edit the given element.
 
@@ -257,6 +264,7 @@ class EditElementPopup (AdhocView):
     def close_cb (self, button=None, data=None):
         """Method called when closing a form."""
         self.controller.notify("EditSessionEnd", element=self.element, comment="Window closed")
+        self.close()
         return True
 
     def key_pressed_cb (self, widget=None, event=None):
