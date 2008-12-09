@@ -267,6 +267,11 @@ class SVGContentHandler (ContentHandler):
         s.link_label=title
         return False
 
+    def set_begin(self, t):
+        i=image_from_position(self.controller, t, height=160)
+        self.view.set_background(i)
+        return True
+
     def get_view (self, compact=False):
         """Generate a view widget for editing SVG."""
         vbox=gtk.VBox()
