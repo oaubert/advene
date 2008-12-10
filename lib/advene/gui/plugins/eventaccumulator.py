@@ -41,9 +41,9 @@ def register(controller):
 name="Trace view"
 
 class EventAccumulator(AdhocView):
-    view_name = _("Traces")
+    view_name = _("Activity trace")
     view_id = 'trace'
-    tooltip=("Traces of Advene Events")
+    tooltip=("Trace of user activity")
     def __init__ (self, controller=None, parameters=None, package=None):
         super(EventAccumulator, self).__init__(controller=controller)
         self.close_on_package_load = False
@@ -142,7 +142,7 @@ class EventAccumulator(AdhocView):
         self.btn_filter.connect('clicked', self.modify_filters)
         btnbar.pack_start(self.btn_filter, expand=False)
         
-        self.init_btn_filter = gtk.Button(_('RAZ'))
+        self.init_btn_filter = gtk.Button(_('Reset'))
         self.init_btn_filter.connect('clicked', self.init_obj_filter)
         self.init_btn_filter.set_sensitive(False)
         btnbar.pack_start(self.init_btn_filter, expand=False)
@@ -150,14 +150,12 @@ class EventAccumulator(AdhocView):
         btnbar.pack_start(gtk.VSeparator())
 
         # choix temps
-        if len(self.times)<=0:
+        if not self.times:
             print "EventAccumulator error : no times defined"
         else:
             def time_changed(w):
                 v=w.get_label()
-                i=self.times.index(v)+1
-                if i>=len(self.times):
-                    i=0
+                i=(self.times.index(v) + 1) % len(self.times)
                 v=self.times[i]
                 w.set_label(v)
                 #updating options
