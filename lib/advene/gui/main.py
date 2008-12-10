@@ -279,7 +279,6 @@ class AdveneGUI(object):
                     ( "", None, "" ),
                     ( _("Evaluator"), self.on_evaluator2_activate, _("Open python evaluator window") ),
                     ( _("Webserver log"), self.on_webserver_log1_activate, "" ),
-                    ( _("Navigation _History"), self.on_navigationhistory1_activate, _("Display navigation history") ),
                     ( _("_MediaInformation"), self.on_view_mediainformation_activate, _("Display information about the media") ),
                     ), "" ),
             (_("_Player"), (
@@ -1359,20 +1358,6 @@ class AdveneGUI(object):
         self.popupwidget.display_message(_("You can drag and drop view icons (timeline, treeview, transcription...) in this notebook to embed various views."), timeout=10000, title=_("Information"))
 
         return self.pane['fareast']
-
-    def display_imagecache(self):
-        """Debug method.
-
-        Not accessible through the GUI, use the Evaluator window:
-        c.gui.display_imagecache()
-        """
-        k=self.controller.package.imagecache.keys()
-        k.sort()
-        hn=Bookmarks(controller=self.controller,
-                     history=k,
-                     vertical=True)
-        w=hn.popup()
-        return hn, w
 
     def find_bookmark_view(self):
         l=[ w for w in self.adhoc_views if w.view_id == 'activebookmarks' ]
@@ -3189,11 +3174,6 @@ class AdveneGUI(object):
 
         w.show_all()
 
-        return True
-
-    def on_navigationhistory1_activate (self, button=None, data=None):
-        h=Bookmarks(self.controller, self.navigation_history, closable=False)
-        h.popup()
         return True
 
     def on_view_mediainformation_activate (self, button=None, data=None):
