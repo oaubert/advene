@@ -1556,8 +1556,6 @@ class ShapeEditor:
         self.treeview.connect('row-activated', self.remove_item)
         self.treeview.connect('button-press-event', self.tree_view_button_cb)
 
-        control = gtk.VBox()
-
         def set_shape(tb, shape):
             """Update the toolbutton with the appropriate shape information.
             """
@@ -1613,17 +1611,58 @@ class ShapeEditor:
         self.shape_icon.connect('clicked', display_shape_menu)
         tb.insert(self.shape_icon, -1)
 
-        
-        def changecolor(combobox):
-            self.defaultcolor = self.colors[combobox.get_active()]
+
+        def set_color(tb, color):
+            """Update the toolbutton with the appropriate color information.
+            """
+            tb.get_icon_widget().set_markup('<span background="%s">    </span>' % color)
+            tb.set_tooltip(self.tooltips, color)
+            tb._color=color
+            return True
+            
+        def select_color(button, color):
+            self.color_icon.set_color(color)
+            self.defaultcolor=color
+            button.get_toplevel().destroy()
+            return True
+            
+        def display_color_menu(tb):
+            bar=gtk.Toolbar()
+            bar.set_orientation(gtk.ORIENTATION_VERTICAL)
+            bar.set_style(gtk.TOOLBAR_ICONS)
+
+            for color in self.colors:
+                i=gtk.ToolButton(icon_widget=gtk.Label())
+                i.set_visible_horizontal(True)
+                i.set_visible_vertical(True)
+                set_color(i, color)
+                i.connect('clicked', select_color, color)
+                bar.insert(i, -1)
+            
+            w=gtk.Window(type=gtk.WINDOW_POPUP)
+            w.add(bar)
+            w.set_transient_for(tb.get_toplevel())
+            w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_TOOLBAR)
+            w.set_modal(True)
+            bar.show_all()
+            alloc = tb.get_allocation()
+            w.move(alloc.x, alloc.y)
+            w.resize(20, 200)
+            w.show_all()
+
+            def button_press_event(wid, event):
+                wid.destroy()
+                return False
+            w.connect('button-press-event', button_press_event)
+
             return True
 
-        colorselector = self.build_selector( self.colors,
-                                             changecolor )
-        control.pack_start(colorselector, expand=False)
-
-        control.pack_start(self.treeview, expand=False)
-
+        self.color_icon=gtk.ToolButton(icon_widget=gtk.Label())
+        self.color_icon.set_color=set_color.__get__(self.color_icon)
+        self.color_icon.set_color('red')
+        self.color_icon.connect('clicked', display_color_menu)
+        tb.insert(self.color_icon, -1)
+        
         def dump_svg(b):
             s=self.drawer.get_svg(relative=False)
             ET.dump(s)
@@ -1646,20 +1685,28 @@ class ShapeEditor:
             f.close()
             return True
 
-        b=gtk.Button(_("Dump SVG"))
-        b.connect('clicked', dump_svg)
-        control.pack_start(b, expand=False)
+        tb.insert(gtk.SeparatorToolItem(), -1)
 
-        b=gtk.Button(_("Load SVG"))
+        b=gtk.ToolButton(gtk.STOCK_CONVERT)
+        b.set_tooltip(self.tooltips, _("Dump SVG"))
+        b.connect('clicked', dump_svg)
+        tb.insert(b, -1)
+
+        b=gtk.ToolButton(gtk.STOCK_OPEN)
+        b.set_tooltip(self.tooltips, _("Load SVG"))
         b.connect('clicked', load_svg)
-        control.pack_start(b, expand=False)
+        tb.insert(b, -1)
 
         if True:
-            b=gtk.Button(_("Save SVG"))
+            b=gtk.ToolButton(gtk.STOCK_SAVE)
+            b.set_tooltip(self.tooltips, _("Save SVG"))
             b.connect('clicked', save_svg)
-            control.pack_start(b, expand=False)
+            tb.insert(b, -1)
 
+        control = gtk.VBox()
+        control.pack_start(self.treeview, expand=False)
         hbox.pack_start(control, expand=False)
+
         vbox.show_all()
 
         return vbox
