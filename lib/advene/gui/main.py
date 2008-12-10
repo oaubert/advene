@@ -406,12 +406,14 @@ class AdveneGUI(object):
         # Generate the adhoc view buttons
         hb=self.gui.adhoc_hbox
         for name, tip, pixmap in (
-            ('tree', _('Tree view'), 'treeview.png'),
             ('timeline', _('Timeline'), 'timeline.png'),
-            ('transcription', _('Transcription of annotations'), 'transcription.png'),
+            ('tree', _('Tree view'), 'treeview.png'),
             ('finder', _('Package finder'), 'finder.png'),
+            ('transcription', _('Transcription of annotations'), 'transcription.png'),
+
+            ('', '', ''),
             ('transcribe', _('Note-taking editor'), 'transcribe.png'),
-            ('activebookmarks', _('Active bookmarks'), 'activebookmarks.png'),
+            ('activebookmarks', _('Active bookmarks'), 'bookmarks.png'),
             ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
             ('', '', ''),
 
@@ -421,7 +423,7 @@ class AdveneGUI(object):
             ('', '', ''),
 
             ('webbrowser', _('Web browser'), 'web.png'),
-            ('comment', _("Edit a comment view"), 'comment.png'),
+            ('comment', _("Create or open a comment view"), 'comment.png'),
             ('', '', ''),
 
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
