@@ -409,20 +409,30 @@ class AdveneGUI(object):
             ('tree', _('Tree view'), 'treeview.png'),
             ('timeline', _('Timeline'), 'timeline.png'),
             ('transcription', _('Transcription of annotations'), 'transcription.png'),
-            ('browser', _('TALES explorer'), 'browser.png'),
             ('finder', _('Package finder'), 'finder.png'),
-            ('webbrowser', _('Web browser'), 'web.png'),
             ('transcribe', _('Note-taking editor'), 'transcribe.png'),
-            ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
-            ('bookmarks', _('Bookmarks'), 'bookmarks.png'),
             ('activebookmarks', _('Active bookmarks'), 'activebookmarks.png'),
-            ('tagbag', _("Bag of tags"), 'tagbag.png'),
-            ('montage', _("Dynamic montage"), 'montage.png'),
             ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
-            ('trace', _("Trace"), 'trace.png'),
+            ('', '', ''),
+
+            ('tagbag', _("Bag of tags"), 'tagbag.png'),
+            ('browser', _('TALES explorer'), 'browser.png'),
+            ('montage', _("Dynamic montage"), 'montage.png'),
+            ('', '', ''),
+
+            ('webbrowser', _('Web browser'), 'web.png'),
             ('comment', _("Edit a comment view"), 'comment.png'),
+            ('', '', ''),
+
+            ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
             ('editionhistory', _("Display edition history"), 'editionhistory.png'),
+            ('trace', _("Trace"), 'trace.png'),
             ):
+            if not name:
+                # Separator
+                b=gtk.VSeparator()
+                hb.pack_start(b, expand=False, padding=5)
+                continue
             if name in ('browser', 'schemaeditor', 'trace') and not config.data.preferences['expert-mode']:
                 continue
             if name not in ('webbrowser', 'comment') and not name in self.registered_adhoc_views:
