@@ -518,8 +518,10 @@ class DefaultGUIActions:
 
     def action_popup_goto_predefined(self, controller):
         p=self.related_annotation_expressions(controller)
-        p.append( ('annotation/fragment/begin', _('The beginning of the annotation')) )
-        p.append( ('annotation/fragment/end', _('The end of the annotation')) )
+        p.extend( [ ('annotation/fragment/begin', _('The beginning of the annotation')),
+                    ('annotation/fragment/end', _('The end of the annotation')),
+                    ('annotation/query/q_next/first/fragment/begin', _('The next annotation of the same type')),
+                    ('annotation/query/q_prev/first/fragment/begin', _('The previous annotation of the same type')) ] )
         return {
             'description': (
                 ('annotation/content/data', _("The annotation content")),
