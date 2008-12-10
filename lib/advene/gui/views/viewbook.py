@@ -265,10 +265,18 @@ class ViewBook(AdhocView):
                 self.add_view(view, label=view.view_name)
             elif 'name' in data:
                 name=data['name']
-                saved=[ v
-                        for v in self.controller.package.views
-                        if v.content.mimetype == 'application/x-advene-adhoc-view'
-                        and ET.parse(v.content.stream).getroot().attrib['id'] == name ]
+                if name == 'comment':
+                    saved=[ v
+                            for v in self.controller.package.views
+                            if helper.get_view_type(v) == 'static'
+                            and v.matchFilter['class'] == 'package'
+                            and not v.id.startswith('_') ]
+                else:
+                    saved=[ v
+                            for v in self.controller.package.views
+                            if v.content.mimetype == 'application/x-advene-adhoc-view'
+                            and ET.parse(v.content.stream).getroot().attrib['id'] == name ]
+
                 if name == 'transcription':
                     menu=gtk.Menu()
                     i=gtk.MenuItem(_("Open a new transcription for..."))
@@ -296,7 +304,10 @@ class ViewBook(AdhocView):
                         i.set_submenu(sm)
                         for v in saved:
                             i=gtk.MenuItem(v.title, use_underline=False)
-                            i.connect('activate', lambda i, vv: self.controller.gui.open_adhoc_view(vv, label=vv.title, destination=self.location), v)
+                            if name == 'comment':
+                                i.connect('activate', lambda i, vv: self.controller.gui.open_adhoc_view('edit', element=vv, destination=self.location), v)
+                            else:
+                                i.connect('activate', lambda i, vv: self.controller.gui.open_adhoc_view(vv, label=vv.title, destination=self.location), v)
                             sm.append(i)
                     menu.show_all()
                     menu.popup(None, None, None, 0, gtk.get_current_event_time())
