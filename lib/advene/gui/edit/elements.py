@@ -650,6 +650,7 @@ class EditQueryPopup (EditElementPopup):
                               editable=editable,
                               tooltip=_("Name of the query"))
         self.register_form(f)
+        vbox.pack_start(f.get_view (), expand=False)
 
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri',
@@ -661,7 +662,7 @@ class EditQueryPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (self.expandable(f.get_view (),  _("Attributes"), expanded=not compact),
+        vbox.pack_start (self.expandable(f.get_view (),  _("Attributes"), expanded=False),
                          expand=False)
 
         f = EditContentForm (self.element.content, controller=self.controller,
