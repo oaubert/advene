@@ -758,7 +758,7 @@ class Line(Rectangle):
                                   (int(self.x2 + ox * cos(theta) - oy * sin(theta)),
                                    int(self.y2 - ox * sin(theta) - oy * cos(theta)) ),
                                   )
-                                )                                  
+                                )
         return
 
     def translate(self, vector):
@@ -851,7 +851,7 @@ class Line(Rectangle):
 
     def get_svg(self, relative=False, size=None):
         """
-        <defs><marker id="myMarker" viewBox="0 0 10 10" refX="1" refY="5" 
+        <defs><marker id="myMarker" viewBox="0 0 10 10" refX="1" refY="5"
         markerUnits="strokeWidth" orient="auto"
         markerWidth="4" markerHeight="3">
         <polyline points="0,0 10,5 0,10 1,5" fill="darkblue" />
@@ -882,7 +882,7 @@ class Line(Rectangle):
             yield e
         else:
             yield e
-        
+
 
 class Circle(Rectangle):
     """A Circle shape.
@@ -1568,13 +1568,13 @@ class ShapeEditor:
             tb.set_tooltip(self.tooltips, shape.SHAPENAME)
             tb._shape=shape
             return True
-            
+
         def select_shape(button, shape):
             self.shape_icon.set_shape(shape)
             self.drawer.shape_class=shape
             button.get_toplevel().destroy()
             return True
-            
+
         def display_shape_menu(tb):
             bar=gtk.Toolbar()
             bar.set_orientation(gtk.ORIENTATION_VERTICAL)
@@ -1587,7 +1587,7 @@ class ShapeEditor:
                 set_shape(i, shape)
                 i.connect('clicked', select_shape, shape)
                 bar.insert(i, -1)
-            
+
             w=gtk.Window(type=gtk.WINDOW_POPUP)
             w.add(bar)
             w.set_transient_for(tb.get_toplevel())
@@ -1619,13 +1619,13 @@ class ShapeEditor:
             tb.set_tooltip(self.tooltips, color)
             tb._color=color
             return True
-            
+
         def select_color(button, color):
             self.color_icon.set_color(color)
             self.defaultcolor=color
             button.get_toplevel().destroy()
             return True
-            
+
         def display_color_menu(tb):
             bar=gtk.Toolbar()
             bar.set_orientation(gtk.ORIENTATION_VERTICAL)
@@ -1638,7 +1638,7 @@ class ShapeEditor:
                 set_color(i, color)
                 i.connect('clicked', select_color, color)
                 bar.insert(i, -1)
-            
+
             w=gtk.Window(type=gtk.WINDOW_POPUP)
             w.add(bar)
             w.set_transient_for(tb.get_toplevel())
@@ -1662,7 +1662,7 @@ class ShapeEditor:
         self.color_icon.set_color('red')
         self.color_icon.connect('clicked', display_color_menu)
         tb.insert(self.color_icon, -1)
-        
+
         def dump_svg(b):
             s=self.drawer.get_svg(relative=False)
             ET.dump(s)
