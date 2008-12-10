@@ -135,7 +135,9 @@ class HTMLEditor(textview_class, HTMLParser):
          'li': { 'left-margin': 48 },
          'ul': {},
          'ol': {},
-         'tal': { 'background': 'violet' }
+         'tal': { 'background': 'violet',
+                  'editable': False
+                  },
          }
 
     def __init__(self, *cnf, **kw):
