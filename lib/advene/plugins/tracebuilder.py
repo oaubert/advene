@@ -642,12 +642,12 @@ class Action:
         if endtime is not None:
             self.time[1] = endtime
         else:
-            self.time[1] = begintime + 50
+            self.time[1] = begintime + 0.5
         self.activity_time[0] = acbegintime
         if acendtime is not None:
             self.activity_time[1] = acendtime
         else:
-            self.activity_time[1] = acbegintime + 50000
+            self.activity_time[1] = acbegintime + 500
         self.content = ''
         if content is not None:
             self.content = content
@@ -665,7 +665,7 @@ class Action:
         self.set_time(1,operation.time)
 
     def set_time(self, choice, newtime):
-        offset = newtime - self.time[choice]
+        offset = (newtime - self.time[choice])*1000
         self.time[choice]=newtime
         self.activity_time[choice]=self.activity_time[choice] + offset
 
