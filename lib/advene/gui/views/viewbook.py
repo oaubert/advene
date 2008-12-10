@@ -290,7 +290,10 @@ class ViewBook(AdhocView):
                         sm.append(i)
                 elif saved:
                     menu=gtk.Menu()
-                    i=gtk.MenuItem(_("Open a new view"))
+                    if name == 'comment':
+                        i=gtk.MenuItem(_("Create a new comment view"))
+                    else:
+                        i=gtk.MenuItem(_("Open a new view"))
                     i.connect('activate', lambda i: self.controller.gui.open_adhoc_view(name, label=label, destination=self.location))
                     menu.append(i)
                 else:
