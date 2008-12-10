@@ -1,3 +1,16 @@
+* treeview/finder: DND of elements
+
+* timeline: fix continous scrolling. Set zoom 96%, 0h59 in Nosferatu
+
+* editionhistory: DND to viewbook
+
+* svg support for gstreamer/mac
+
+* image quality in gstreamer/mac
+
+* Use http://code.activestate.com/recipes/440554/ to execute
+   shotdetect on win32
+
 * See  http://developer.imendio.com/node/300
 
 * tabular adhoc view, with options to export as HTML
@@ -2548,4 +2561,24 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Hide TakeSnapshot action
 
 * CreateBookmark action
+
+* generated view: title = "Vue de commentaire" + date/heure  (2008/12/08 - 16:10)
+
+* htmleditor: put context viewer in a scrolledwindow
+
+* editionhistory: element type in button + tooltip with content
+
+* gtksourceview for mac ?
+
+* toolbar for edit popup instead of bottom button box
+
+* view edit popup: remove button Edit Wysiwyg + Match filter/MIMETYPE in non expert mode
+
+* SVG editor: refresh background image when timestamp changes
+
+* timestamprepresentation: connect SnapshotUpdate
+
+* shapewidget: put buttons into a toolbar
+
+* fix generated snapshot url in view on macos x
 
