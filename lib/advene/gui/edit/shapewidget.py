@@ -1413,7 +1413,7 @@ class ShapeEditor:
 
     This component provides an example of using ShapeWidget.
     """
-    def __init__(self, background=None):
+    def __init__(self, background=None, pixmap_dir=None):
         self.background=None
         self.drawer=ShapeDrawer(callback=self.callback,
                                 background=background)
@@ -1430,7 +1430,16 @@ class ShapeEditor:
             #gtk.keysyms.i: Image,
             }
 
-        self.widget=self.build_widget()
+        self.pixmap_name={
+            Rectangle: 'shape_rectangle.png',
+            Line: 'shape_arrow.png',
+            Text: 'shape_text.png',
+            Circle: 'shape_ellipse.png',
+            Image: 'shape_image.png',
+            }
+
+        self.tooltips=gtk.Tooltips()
+        self.widget=self.build_widget(pixmap_dir)
         self.widget.connect('key-press-event', self.key_press_event)
 
     def key_press_event(self, widget, event):
@@ -1523,13 +1532,17 @@ class ShapeEditor:
         # FIXME: check that dimensions are compatible with old one ?
         self.drawer.plot()
 
-    def build_widget(self):
+    def build_widget(self, pixmap_dir):
         vbox=gtk.VBox()
 
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS)
+
+        vbox.pack_start(tb, expand=False)
 
         hbox=gtk.HBox()
-        vbox.add(hbox)
 
+        vbox.add(hbox)
 
         hbox.pack_start(self.drawer.widget, True, True, 0)
 
@@ -1545,15 +1558,62 @@ class ShapeEditor:
 
         control = gtk.VBox()
 
-        # FIXME: toolbar at the top
-        def changeshape(combobox):
-            self.drawer.shape_class = self.shapes[combobox.get_active()]
+        def set_shape(tb, shape):
+            """Update the toolbutton with the appropriate shape information.
+            """
+            if pixmap_dir is not None and self.pixmap_name.get(shape, None):
+                i=gtk.image_new_from_file( os.path.join( pixmap_dir, self.pixmap_name.get(shape, None)) )
+                i.show()
+                tb.set_icon_widget(i)
+            else:
+                tb.set_text(shape.SHAPENAME)
+            tb.set_tooltip(self.tooltips, shape.SHAPENAME)
+            tb._shape=shape
+            return True
+            
+        def select_shape(button, shape):
+            self.shape_icon.set_shape(shape)
+            self.drawer.shape_class=shape
+            button.get_toplevel().destroy()
+            return True
+            
+        def display_shape_menu(tb):
+            bar=gtk.Toolbar()
+            bar.set_orientation(gtk.ORIENTATION_VERTICAL)
+            bar.set_style(gtk.TOOLBAR_ICONS)
+
+            for shape in self.shapes:
+                i=gtk.ToolButton()
+                i.set_visible_horizontal(True)
+                i.set_visible_vertical(True)
+                set_shape(i, shape)
+                i.connect('clicked', select_shape, shape)
+                bar.insert(i, -1)
+            
+            w=gtk.Window(type=gtk.WINDOW_POPUP)
+            w.add(bar)
+            w.set_transient_for(tb.get_toplevel())
+            w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_TOOLBAR)
+            w.set_modal(True)
+            alloc = tb.get_allocation()
+            w.move(alloc.x, alloc.y)
+            w.resize(20, 150)
+            w.show_all()
+
+            def button_press_event(wid, event):
+                wid.destroy()
+                return False
+            w.connect('button-press-event', button_press_event)
+
             return True
 
-        self.shapeselector = self.build_selector( [ s.SHAPENAME for s in self.shapes ],
-                                                  changeshape )
-        control.pack_start(self.shapeselector, expand=False)
+        self.shape_icon=gtk.ToolButton()
+        self.shape_icon.set_shape=set_shape.__get__(self.shape_icon)
+        self.shape_icon.set_shape(Rectangle)
+        self.shape_icon.connect('clicked', display_shape_menu)
+        tb.insert(self.shape_icon, -1)
 
+        
         def changecolor(combobox):
             self.defaultcolor = self.colors[combobox.get_active()]
             return True

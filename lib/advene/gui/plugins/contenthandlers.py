@@ -278,7 +278,7 @@ class SVGContentHandler (ContentHandler):
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
             i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
-            self.view = ShapeEditor(background=i)
+            self.view = ShapeEditor(background=i, pixmap_dir=config.data.advenefile('pixmaps'))
 
             def snapshot_update_cb(context, target):
                 if context.globals['position'] == self.parent.fragment.begin:
@@ -297,7 +297,7 @@ class SVGContentHandler (ContentHandler):
                                                                            method=annotation_update_cb))
 
         else:
-            self.view = ShapeEditor()
+            self.view = ShapeEditor(pixmap_dir=config.data.advenefile('pixmaps'))
 
         self.parse_svg()
 
