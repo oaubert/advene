@@ -269,7 +269,7 @@ class ZipPackage:
         if os.path.isdir(fname):
             z=None
         else:
-            z=zipfile.ZipFile(fname, 'w')
+            z=zipfile.ZipFile(fname, 'w', zipfile.ZIP_DEFLATED)
 
         manifest=[]
 
