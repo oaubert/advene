@@ -31,6 +31,7 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.query import Query
+import advene.util.helper as helper
 
 def png_to_pixbuf (png_data, width=None, height=None):
     """Load PNG data into a pixbuf
@@ -267,7 +268,8 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
 
     d={ typ['annotation']: Annotation,
         typ['annotation-type']: AnnotationType,
-        typ['relation-type']: AnnotationType,
+        typ['relation']: Relation,
+        typ['relation-type']: RelationType,
         typ['view']: View,
         typ['query']: Query,
         typ['schema']: Schema }
