@@ -297,3 +297,16 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         print "Unknown target type for drag: %d" % targetType
     return True
 
+def contextual_drag_begin(widget, context, element):
+    context._element=element
+    return True
+
+def enable_drag_source(widget, element, controller):
+    """Initialize support for DND from widget.
+    """
+    # Generic support
+    widget.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                           get_target_types(element),
+                           gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
+    widget.connect('drag-begin', contextual_drag_begin, element)
+    widget.connect('drag-data-get', drag_data_get_cb, controller)
