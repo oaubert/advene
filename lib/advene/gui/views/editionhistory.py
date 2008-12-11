@@ -71,6 +71,13 @@ class EditionHistory(AdhocView):
             w.foreach(w.remove)
             for e in reversed(elements):
                 b=gtk.Button("\n".join((helper.get_type(e), self.controller.get_title(e))), use_underline=False)
+                col=self.controller.get_element_color(e)
+                if col:
+                    try:
+                        color=gtk.gdk.color_parse(col)
+                        style = b.modify_bg(gtk.STATE_NORMAL, color)
+                    except ValueError:
+                        pass
                 b.connect('clicked', (lambda i, el: self.controller.gui.edit_element(el)),
                           e)
                 content=getattr(e, 'content', None)
