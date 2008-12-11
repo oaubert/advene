@@ -123,6 +123,23 @@ class FinderColumn(object):
         self.next=None
         return True
 
+    def drag_begin(self, widget, context):
+        context._element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+        # FIXME: should define appropriate cursor here
+        return True
+
+    def enable_drag_source(self, l):
+        """Enable drag and drop for the l widget.
+
+        Note: we cannot use the generic gui.util.enable_drag_source
+        since the element can dynamically change without updating the callback.
+        """
+        l.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          get_target_types(self.node[DetailedTreeModel.COLUMN_ELEMENT]),
+                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
+        l.connect('drag-begin', self.drag_begin)
+        l.connect('drag-data-get', drag_data_get_cb, self.controller)
+
     def get_label_button(self, name=None):
         """Return a label button for the widget.
         """
@@ -138,19 +155,8 @@ class FinderColumn(object):
                 pass
 
         l.connect('clicked', self.on_column_activation)
-
-        # Enable DND
-        l.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          get_target_types(self.node[DetailedTreeModel.COLUMN_ELEMENT]),
-                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
-        l.connect('drag-begin', self.drag_begin)
-        l.connect('drag-data-get', drag_data_get_cb, self.controller)
+        self.enable_drag_source(l)
         return l
-
-    def drag_begin(self, widget, context):
-        context._element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
-        # FIXME: should define appropriate cursor here
-        return True
 
     def build_widget(self):
         return gtk.Label("Generic finder column")
@@ -411,6 +417,9 @@ class ViewColumn(FinderColumn):
         vbox.pack_start(self.label['info'], expand=False)
         b=self.label['edit']=gtk.Button(_("Edit view"))
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
+        # Enable DND
+        self.enable_drag_source(b)
+        
         vbox.pack_start(b, expand=False)
 
         b=self.label['activate']=gtk.Button(_("Open view"))
@@ -470,6 +479,7 @@ class QueryColumn(FinderColumn):
         vbox.pack_start(self.label['title'], expand=False)
 
         b=self.label['edit']=gtk.Button(_("Edit query"))
+        self.enable_drag_source(b)
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
         vbox.pack_start(b, expand=False)
 
@@ -540,6 +550,7 @@ class ResourceColumn(FinderColumn):
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
         b=self.label['edit']=gtk.Button(_("Edit resource"))
+        self.enable_drag_source(b)
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
         vbox.pack_start(b, expand=False)
         self.preview=gtk.VBox()
