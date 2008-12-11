@@ -31,7 +31,7 @@ from advene.model.resources import Resources, ResourceData
 from advene.model.query import Query
 from advene.model.view import View
 from advene.gui.views import AdhocView
-from advene.gui.util import encode_drop_parameters
+from advene.gui.util import encode_drop_parameters, drag_data_get_cb, get_target_types
 
 import advene.gui.edit.elements
 import advene.gui.popup
@@ -467,7 +467,7 @@ class TreeWidget(AdhocView):
         tree_view.connect('button-release-event', self.on_treeview_button_release_event)
         tree_view.connect('motion-notify-event', self.on_treeview_motion_notify_event)        
 
-        tree_view.connect('drag-data-get', self.drag_data_get_cb)
+        tree_view.connect('drag-data-get', drag_data_get_cb, self.controller)
 
         try:
             # set_enable_tree_lines is available in gtk >= 2.10
@@ -482,42 +482,6 @@ class TreeWidget(AdhocView):
         sw.treeview = tree_view
 
         return sw
-
-    def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
-        typ=config.data.target_type
-        el = context._element
-
-        d={ typ['annotation']: Annotation,
-            typ['annotation-type']: AnnotationType,
-            typ['relation-type']: AnnotationType,
-            typ['view']: View,
-            typ['query']: Query,
-            typ['schema']: Schema }
-        if targetType in d:
-            # Directly pass URIs for Annotation, types and views
-            if not isinstance(el, d[targetType]):
-                return False
-            selection.set(selection.target, 8, el.uri.encode('utf8'))
-            return True
-        elif targetType == typ['adhoc-view']:
-            if not isinstance(el, View):
-                return False
-            if helper.get_view_type(el) != 'adhoc':
-                return False
-            selection.set(selection.target, 8, encode_drop_parameters(id=el.id))
-            return True
-        elif targetType == typ['uri-list']:
-            try:
-                ctx=self.controller.build_context(here=el)
-                uri=ctx.evaluateValue('here/absolute_url')
-            except:
-                uri="No URI for " + unicode(el)
-            selection.set(selection.target, 8, uri.encode('utf8'))
-        elif targetType in (typ['text-plain'], typ['STRING']):
-            selection.set(selection.target, 8, self.controller.get_title(el).encode('utf8'))
-        else:
-            print "Unknown target type for drag: %d" % targetType
-        return True
 
     def on_treeview_button_press_event(self, treeview, event):
         if event.button == 1:
@@ -544,32 +508,7 @@ class TreeWidget(AdhocView):
                     int(x), int(y))
             if threshold:
                 # A drag was started. Setup the appropriate target.
-                el=self.drag_data[3]
-                if isinstance(el, Annotation):
-                    targets= (config.data.drag_type['annotation'] 
-                              + config.data.drag_type['timestamp'] 
-                              + config.data.drag_type['tag'])
-                elif isinstance(el, View):
-                    if helper.get_view_type(el) == 'adhoc':
-                        targets=config.data.drag_type['adhoc-view'] 
-                    else:
-                        targets=config.data.drag_type['view']
-                elif isinstance(el, AnnotationType):
-                    targets=config.data.drag_type['annotation-type']
-                elif isinstance(el, RelationType):
-                    targets=config.data.drag_type['annotation-type']
-                elif isinstance(el, Query):
-                    targets=config.data.drag_type['query']
-                elif isinstance(el, Schema):
-                    targets=config.data.drag_type['schema']
-                # FIXME: Resource
-                else:
-                    targets=[]
-                targets.extend(config.data.drag_type['uri-list']
-                               + config.data.drag_type['text-plain']
-                               + config.data.drag_type['TEXT']
-                               + config.data.drag_type['STRING'])
-
+                targets=get_target_types(self.drag_data[3])
                 actions = gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY
                 button = 1
                 self.drag_context = treeview.drag_begin(targets, actions, button, self.drag_data[2])
