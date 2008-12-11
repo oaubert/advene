@@ -262,7 +262,7 @@ class ViewBook(AdhocView):
                 name=v
                 label=v.title
                 view=self.controller.gui.open_adhoc_view(name, label=label, destination=None)
-                self.add_view(view, label=view.view_name)
+                self.add_view(view, name=view.view_name)
             elif 'name' in data:
                 name=data['name']
                 if name == 'comment':
@@ -336,6 +336,24 @@ class ViewBook(AdhocView):
                 self.add_view(v, name=v._label)
             else:
                 print "Cannot find view ", selection.data
+            return True
+        elif targetType == config.data.target_type['view']:
+            v=self.controller.package.views.get(unicode(selection.data, 'utf8'))
+            if helper.get_view_type(v) in ('static', 'dynamic'):
+                # Edit the view.
+                self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
+            else:
+                print "Unhandled case in viewbook: targetType=view"
+            return True
+        elif targetType == config.data.target_type['query']:
+            v=self.controller.package.queries.get(unicode(selection.data, 'utf8'))
+            if v is not None:
+                self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
+            return True
+        elif targetType == config.data.target_type['schema']:
+            v=self.controller.package.schemas.get(unicode(selection.data, 'utf8'))
+            if v is not None:
+                self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
             return True
         elif targetType == config.data.target_type['annotation-type']:
             at=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
@@ -417,6 +435,8 @@ class ViewBook(AdhocView):
             v=self.controller.gui.open_adhoc_view('activebookmarks', destination=self.location)
             v.append(long(data['timestamp']), comment=data.get('comment', ''))
             return True
+        else:
+            print "Unknown drag target received ", targetType
         return False
 
     def build_widget(self):
@@ -432,6 +452,9 @@ class ViewBook(AdhocView):
                                gtk.DEST_DEFAULT_ALL,
                                config.data.drag_type['adhoc-view'] +
                                config.data.drag_type['adhoc-view-instance'] +
+                               config.data.drag_type['view'] +
+                               config.data.drag_type['query'] +
+                               config.data.drag_type['schema'] +
                                config.data.drag_type['annotation-type'] +
                                config.data.drag_type['annotation'] +
                                config.data.drag_type['timestamp'],
