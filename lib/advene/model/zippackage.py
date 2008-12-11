@@ -101,11 +101,10 @@ class ZipPackage:
         self._tempdir = None
         self.file_ = None
         
-        # os.stat seems to not grok unicode pathnames with
-        # accents. Pass it an encoded string.
-        uri=uri.encode(_fs_encoding)
-        
-        if uri is not None:
+        if uri:
+            # os.stat seems to not grok unicode pathnames with
+            # accents. Pass it an encoded string.
+            uri=uri.encode(_fs_encoding)
             if uri.startswith('file:///'):
                 n=uri[7:]
             else:
