@@ -115,6 +115,43 @@ class FinderColumn(object):
         self.node=node
         return True
 
+    def on_column_activation(self, widget):
+        # Delete all next columns
+        cb=self.next
+        if cb:
+            cb.close()
+        self.next=None
+        return True
+
+    def get_label_button(self, name=None):
+        """Return a label button for the widget.
+        """
+        if not name:
+            name=self.name
+        l=gtk.Button(name, use_underline=False)
+        col=self.node[DetailedTreeModel.COLUMN_COLOR]
+        if col:
+            try:
+                color=gtk.gdk.color_parse(col)
+                style = l.modify_bg(gtk.STATE_NORMAL, color)
+            except ValueError:
+                pass
+
+        l.connect('clicked', self.on_column_activation)
+
+        # Enable DND
+        l.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          get_target_types(self.node[DetailedTreeModel.COLUMN_ELEMENT]),
+                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
+        l.connect('drag-begin', self.drag_begin)
+        l.connect('drag-data-get', drag_data_get_cb, self.controller)
+        return l
+
+    def drag_begin(self, widget, context):
+        context._element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+        # FIXME: should define appropriate cursor here
+        return True
+
     def build_widget(self):
         return gtk.Label("Generic finder column")
 
@@ -176,14 +213,6 @@ class ModelColumn(FinderColumn):
                 # The next node is no more in the current elements.
                 self.next.close()
                 self.next=None
-        return True
-
-    def on_column_activation(self, widget):
-        # Delete all next columns
-        cb=self.next
-        if cb:
-            cb.close()
-        self.next=None
         return True
 
     def on_button_press(self, widget, event):
@@ -371,8 +400,8 @@ class AnnotationColumn(FinderColumn):
     def build_widget(self):
         vbox=gtk.VBox()
 
-        l=gtk.Button(_("Annotation"), use_underline=False)
-        vbox.pack_start(l, expand=False)
+        vbox.pack_start(self.get_label_button(_("Annotation")), expand=False)
+
         self.view=AnnotationDisplay(controller=self.controller, annotation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
         vbox.add(self.view.widget)
         vbox.show_all()
@@ -388,8 +417,7 @@ class RelationColumn(FinderColumn):
     def build_widget(self):
         vbox=gtk.VBox()
 
-        l=gtk.Button(_("Relation"), use_underline=False)
-        vbox.pack_start(l, expand=False)
+        vbox.pack_start(self.get_label_button(_("Relation")), expand=False)
         self.view=RelationDisplay(controller=self.controller, relation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
         vbox.add(self.view.widget)
         vbox.show_all()
@@ -444,7 +472,7 @@ class ViewColumn(FinderColumn):
 
     def build_widget(self):
         vbox=gtk.VBox()
-        vbox.pack_start(gtk.Button(_("View")), expand=False)
+        vbox.pack_start(self.get_label_button(_("View")), expand=False)
         self.label={}
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
@@ -505,7 +533,7 @@ class QueryColumn(FinderColumn):
 
     def build_widget(self):
         vbox=gtk.VBox()
-        vbox.pack_start(gtk.Button(_("Query")), expand=False)
+        vbox.pack_start(self.get_label_button(_("Query")), expand=False)
         self.label={}
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
@@ -576,6 +604,7 @@ class ResourceColumn(FinderColumn):
 
     def build_widget(self):
         vbox=gtk.VBox()
+        vbox.pack_start(self.get_label_button(_("Resource")), expand=False)
         self.label={}
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
