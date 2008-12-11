@@ -28,6 +28,7 @@ import gtk
 from advene.gui.views import AdhocView
 import advene.gui.popup
 import advene.util.helper as helper
+from advene.gui.util import enable_drag_source
 
 name="EditionHistory view plugin"
 
@@ -75,7 +76,7 @@ class EditionHistory(AdhocView):
                 content=getattr(e, 'content', None)
                 if content:
                     self.controller.gui.tooltips.set_tip(b, content.data)
-                # FIXME: add DND code here
+                enable_drag_source(b, e, self.controller)
                 b.connect('button-press-event', display_popup, e)
                 w.pack_start(b, expand=False)
         self.widget.show_all()
