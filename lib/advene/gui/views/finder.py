@@ -29,7 +29,7 @@ from advene.gui.views.tree import DetailedTreeModel
 from advene.gui.views import AdhocView
 from advene.gui.views.annotationdisplay import AnnotationDisplay
 from advene.gui.views.relationdisplay import RelationDisplay
-from advene.model.schema import AnnotationType, RelationType
+from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.resources import ResourceData
@@ -38,6 +38,7 @@ import advene.rules.elements
 import advene.gui.popup
 import advene.util.helper as helper
 import advene.model.tal.context
+from advene.gui.util import encode_drop_parameters
 
 name="Package finder view plugin"
 
@@ -222,6 +223,99 @@ class ModelColumn(FinderColumn):
             return True
         return False
 
+    def on_treeview_button_press_event(self, treeview, event):
+        if event.button == 1:
+            x, y = treeview.get_pointer()
+            row = treeview.get_dest_row_at_pos(int(x), int(y))
+            if row is None:
+                element=None
+            else:
+                element = treeview.get_model()[row[0]][self.COLUMN_NODE][DetailedTreeModel.COLUMN_ELEMENT]
+            self.drag_data=(int(x), int(y), event, element)
+
+    def on_treeview_button_release_event(self, treeview, event):
+        self.drag_data=None
+        self.drag_context=None
+
+    def on_treeview_motion_notify_event(self, treeview, event):
+        if (event.state == gtk.gdk.BUTTON1_MASK 
+            and self.drag_context is None
+            and self.drag_data is not None
+            and self.drag_data[3] is not None):
+            x, y = treeview.get_pointer()
+            threshold = treeview.drag_check_threshold(
+                    self.drag_data[0], self.drag_data[1],
+                    int(x), int(y))
+            if threshold:
+                # A drag was started. Setup the appropriate target.
+                el=self.drag_data[3]
+                if isinstance(el, Annotation):
+                    targets= (config.data.drag_type['annotation'] 
+                              + config.data.drag_type['timestamp'] 
+                              + config.data.drag_type['tag'])
+                elif isinstance(el, View):
+                    if helper.get_view_type(el) == 'adhoc':
+                        targets=config.data.drag_type['adhoc-view'] 
+                    else:
+                        targets=config.data.drag_type['view']
+                elif isinstance(el, AnnotationType):
+                    targets=config.data.drag_type['annotation-type']
+                elif isinstance(el, RelationType):
+                    targets=config.data.drag_type['annotation-type']
+                elif isinstance(el, Query):
+                    targets=config.data.drag_type['query']
+                elif isinstance(el, Schema):
+                    targets=config.data.drag_type['schema']
+                # FIXME: Resource
+                else:
+                    targets=[]
+                targets.extend(config.data.drag_type['uri-list']
+                               + config.data.drag_type['text-plain']
+                               + config.data.drag_type['TEXT']
+                               + config.data.drag_type['STRING'])
+
+                actions = gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY
+                button = 1
+                self.drag_context = treeview.drag_begin(targets, actions, button, self.drag_data[2])
+                # This call does not affect the icon:
+                self.drag_context._element=el
+ 
+    def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
+        typ=config.data.target_type
+        el = context._element
+
+        d={ typ['annotation']: Annotation,
+            typ['annotation-type']: AnnotationType,
+            typ['relation-type']: AnnotationType,
+            typ['view']: View,
+            typ['query']: Query,
+            typ['schema']: Schema }
+        if targetType in d:
+            # Directly pass URIs for Annotation, types and views
+            if not isinstance(el, d[targetType]):
+                return False
+            selection.set(selection.target, 8, el.uri.encode('utf8'))
+            return True
+        elif targetType == typ['adhoc-view']:
+            if not isinstance(el, View):
+                return False
+            if helper.get_view_type(el) != 'adhoc':
+                return False
+            selection.set(selection.target, 8, encode_drop_parameters(id=el.id))
+            return True
+        elif targetType == typ['uri-list']:
+            try:
+                ctx=self.controller.build_context(here=el)
+                uri=ctx.evaluateValue('here/absolute_url')
+            except:
+                uri="No URI for " + unicode(el)
+            selection.set(selection.target, 8, uri.encode('utf8'))
+        elif targetType in (typ['text-plain'], typ['STRING']):
+            selection.set(selection.target, 8, self.controller.get_title(el).encode('utf8'))
+        else:
+            print "Unknown target type for drag: %d" % targetType
+        return True
+
     def build_widget(self):
         vbox=gtk.VBox()
 
@@ -255,6 +349,13 @@ class ModelColumn(FinderColumn):
         self.listview.connect('button-press-event', self.on_button_press)
         self.listview.connect('key-press-event', self.key_pressed_cb)
 
+        self.drag_data=None
+        self.drag_context=None
+        self.listview.connect('button-press-event', self.on_treeview_button_press_event)
+        self.listview.connect('button-release-event', self.on_treeview_button_release_event)
+        self.listview.connect('motion-notify-event', self.on_treeview_motion_notify_event)        
+        self.listview.connect('drag-data-get', self.drag_data_get_cb)
+        
         sw.add(self.listview)
 
         vbox.show_all()
