@@ -27,6 +27,10 @@ import cgi
 import StringIO
 
 import advene.core.config as config
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.annotation import Annotation, Relation
+from advene.model.view import View
+from advene.model.query import Query
 
 def png_to_pixbuf (png_data, width=None, height=None):
     """Load PNG data into a pixbuf
@@ -145,26 +149,6 @@ def name2color(color):
         gtk_color=None
     return gtk_color
 
-def encode_drop_parameters(**kw):
-    """Encode the given parameters as drop parameters.
-    
-    @return: a string
-    """
-    for k in kw:
-        if isinstance(kw[k], unicode):
-            kw[k]=kw[k].encode('utf8')
-        if not isinstance(kw[k], basestring):
-            kw[k]=str(kw[k])
-    return cgi.urllib.urlencode(kw).encode('utf8')
-
-def decode_drop_parameters(data):
-    """Decode the drop parameters.
-
-    @return: a dict.
-    """
-    return dict( (k, unicode(v, 'utf8')) 
-                 for (k, v) in cgi.parse_qsl(unicode(data, 'utf8').encode('utf8')) )
-
 arrow_up_xpm="""13 16 2 1
        c None
 .      c #FF0000
@@ -218,3 +202,96 @@ def shaped_window_from_xpm(xpm):
     win.shape_combine_mask(bitmap, 0, 0)
     gtk.widget_pop_colormap()
     return win
+
+def encode_drop_parameters(**kw):
+    """Encode the given parameters as drop parameters.
+    
+    @return: a string
+    """
+    for k in kw:
+        if isinstance(kw[k], unicode):
+            kw[k]=kw[k].encode('utf8')
+        if not isinstance(kw[k], basestring):
+            kw[k]=str(kw[k])
+    return cgi.urllib.urlencode(kw).encode('utf8')
+
+def decode_drop_parameters(data):
+    """Decode the drop parameters.
+
+    @return: a dict.
+    """
+    return dict( (k, unicode(v, 'utf8')) 
+                 for (k, v) in cgi.parse_qsl(unicode(data, 'utf8').encode('utf8')) )
+
+def get_target_types(el):
+    """Return DND target types for element.
+    """
+    if isinstance(el, Annotation):
+        targets= (config.data.drag_type['annotation'] 
+                  + config.data.drag_type['timestamp'] 
+                  + config.data.drag_type['tag'])
+    elif isinstance(el, View):
+        if helper.get_view_type(el) == 'adhoc':
+            targets=config.data.drag_type['adhoc-view'] 
+        else:
+            targets=config.data.drag_type['view']
+    elif isinstance(el, AnnotationType):
+        targets=config.data.drag_type['annotation-type']
+    elif isinstance(el, RelationType):
+        targets=config.data.drag_type['annotation-type']
+    elif isinstance(el, Query):
+        targets=config.data.drag_type['query']
+    elif isinstance(el, Schema):
+        targets=config.data.drag_type['schema']
+    # FIXME: Resource
+    else:
+        targets=[]
+    targets.extend(config.data.drag_type['uri-list']
+                   + config.data.drag_type['text-plain']
+                   + config.data.drag_type['TEXT']
+                   + config.data.drag_type['STRING'])
+    return targets
+
+def drag_data_get_cb(widget, context, selection, targetType, timestamp, controller):
+    """Generic drag-data-get handler.
+
+    Usage information:
+    this method must be connected passing the controller as user data:
+      widget.connect('drag-data-get', drag_data_get_cb, controller)
+     
+    and the context must has a _element attribute (defined in a
+    'drag-begin' handler for instance).
+    """
+    typ=config.data.target_type
+    el = context._element
+
+    d={ typ['annotation']: Annotation,
+        typ['annotation-type']: AnnotationType,
+        typ['relation-type']: AnnotationType,
+        typ['view']: View,
+        typ['query']: Query,
+        typ['schema']: Schema }
+    if targetType in d:
+        # Directly pass URIs for Annotation, types and views
+        if not isinstance(el, d[targetType]):
+            return False
+        selection.set(selection.target, 8, el.uri.encode('utf8'))
+        return True
+    elif targetType == typ['adhoc-view']:
+        if helper.get_view_type(el) != 'adhoc':
+            return False
+        selection.set(selection.target, 8, encode_drop_parameters(id=el.id))
+        return True
+    elif targetType == typ['uri-list']:
+        try:
+            ctx=controller.build_context(here=el)
+            uri=ctx.evaluateValue('here/absolute_url')
+        except:
+            uri="No URI for " + unicode(el)
+        selection.set(selection.target, 8, uri.encode('utf8'))
+    elif targetType in (typ['text-plain'], typ['STRING']):
+        selection.set(selection.target, 8, controller.get_title(el).encode('utf8'))
+    else:
+        print "Unknown target type for drag: %d" % targetType
+    return True
+
