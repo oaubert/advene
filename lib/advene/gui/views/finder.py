@@ -29,7 +29,7 @@ from advene.gui.views.tree import DetailedTreeModel
 from advene.gui.views import AdhocView
 from advene.gui.views.annotationdisplay import AnnotationDisplay
 from advene.gui.views.relationdisplay import RelationDisplay
-from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.schema import AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.resources import ResourceData
@@ -38,7 +38,7 @@ import advene.rules.elements
 import advene.gui.popup
 import advene.util.helper as helper
 import advene.model.tal.context
-from advene.gui.util import encode_drop_parameters, drag_data_get_cb, get_target_types
+from advene.gui.util import drag_data_get_cb, get_target_types
 
 name="Package finder view plugin"
 
@@ -277,11 +277,12 @@ class ModelColumn(FinderColumn):
                     int(x), int(y))
             if threshold:
                 # A drag was started. Setup the appropriate target.
-                targets=get_target_types(self.drag_data[3])
+                element=self.drag_data[3]
+                targets=get_target_types(element)
                 actions = gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY
                 button = 1
                 self.drag_context = treeview.drag_begin(targets, actions, button, self.drag_data[2])
-                self.drag_context._element=el
+                self.drag_context._element=element
 
     def build_widget(self):
         vbox=gtk.VBox()
