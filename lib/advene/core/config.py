@@ -357,6 +357,7 @@ class Config(object):
             ('color',             53, 'application/x-color'),
             ('adhoc-view-instance', 54, 'application/x-advene-adhoc-view-instance'),
             ('bookmark',          55, 'application/x-advene-bookmark'),
+            ('query',             56, None),
             ('uri-list',          80, 'text/uri-list'),
             ):
             self.target_type[name] = typ
