@@ -1,8 +1,4 @@
-* treeview/finder: DND of elements
-
 * timeline: fix continous scrolling. Set zoom 96%, 0h59 in Nosferatu
-
-* editionhistory: DND to viewbook
 
 * svg support for gstreamer/mac
 
@@ -41,8 +37,6 @@
 * Revamp player API (player.position, player.duration, ...)
 
 * fix players (vlc, gstreamer) to be able to start from a given position
-
-* implement DND from finder columns
 
 * finder: implement set_current_element method
 
@@ -136,17 +130,12 @@ http://code.google.com/p/facilhtml/source/browse/trunk/htmlrender.py
 * Embed VLC:  http://code.revolunet.com/VLCobject/EN
  http://code.revolunet.com/VLCcontrols/EN
 
-* fix DND from treeview (view on SVG widget)
-
 * shapewidget: preserve TAL attributes
 
 * shapewidget: complete support for <image> element. How to deal with
    images as resources ?
 
 * tts: send configure instructions for aplay to the pipe
-
-* shapewidget: handle DND of data to shapes, to associate an
-   annotation to a shape, then have it work as a link.
 
 * adhoc view: imagemap, with DND of annotation to the image
 
@@ -2581,4 +2570,15 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * shapewidget: put buttons into a toolbar
 
 * fix generated snapshot url in view on macos x
+
+* treeview/finder: DND of elements (cf http://www.mail-archive.com/pygtk@daa.com.au/msg16649.html)
+
+* editionhistory: DND to viewbook
+
+* implement DND from finder columns
+
+* fix DND from treeview (view on SVG widget)
+
+* shapewidget: handle DND of data to shapes, to associate an
+   annotation to a shape, then have it work as a link.
 
