@@ -19,7 +19,6 @@
 
 from gettext import gettext as _
 import gtk
-import cgi
 
 import advene.core.config as config
 
@@ -31,7 +30,7 @@ from advene.model.resources import Resources, ResourceData
 from advene.model.query import Query
 from advene.model.view import View
 from advene.gui.views import AdhocView
-from advene.gui.util import encode_drop_parameters, drag_data_get_cb, get_target_types
+from advene.gui.util import drag_data_get_cb, get_target_types
 
 import advene.gui.edit.elements
 import advene.gui.popup
@@ -508,12 +507,13 @@ class TreeWidget(AdhocView):
                     int(x), int(y))
             if threshold:
                 # A drag was started. Setup the appropriate target.
-                targets=get_target_types(self.drag_data[3])
+                element=self.drag_data[3]
+                targets=get_target_types(element)
                 actions = gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY
                 button = 1
                 self.drag_context = treeview.drag_begin(targets, actions, button, self.drag_data[2])
                 # This call does not affect the icon:
-                self.drag_context._element=el
+                self.drag_context._element=element
         
     def get_selected_node (self, tree_view):
         """Return the currently selected node.
