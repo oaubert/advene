@@ -148,16 +148,7 @@ class EditElementPopup (AdhocView):
             self.controller.gui.tooltips.set_tip(b, _("Apply changes"))
             tb.insert(b, -1)
 
-            if isinstance(self.element, View):
-                t = helper.get_view_type(self.element)
-                if t == 'static' and self.element.matchFilter['class'] in ('package', '*'):
-                    b = get_pixmap_toolbutton( 'web.png', self.apply_and_open)
-                    self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
-                    tb.insert(b, -1)
-                elif t == 'dynamic':
-                    b = get_pixmap_toolbutton( gtk.STOCK_MEDIA_PLAY, self.apply_and_activate)
-                    self.controller.gui.tooltips.set_tip(b, _("Apply changes and activate the view"))
-                    tb.insert(b, -1)
+            self.extend_toolbar(tb)
 
             vbox.pack_start(tb, expand=False)
             vbox.pack_start(self.make_widget(editable=self.editable))
@@ -181,6 +172,13 @@ class EditElementPopup (AdhocView):
             self._widget=vbox
 
         return self._widget
+
+    def extend_toolbar(self, tb):
+        """Extend the widget toolbar.
+        
+        Child classes can add their own items to the toolbar.
+        """
+        return True
 
     def register_form (self, f):
         self.forms.append(f)
@@ -370,6 +368,15 @@ class EditElementPopup (AdhocView):
         elif hasattr(self.element, 'schema') and self.element.schema.isImported():
             self.editable=False
 
+        tb=gtk.Toolbar()
+        self.extend_toolbar(tb)
+        if tb.get_children():
+            # There are some items. Display them
+            tb.props.icon_size=gtk.ICON_SIZE_SMALL_TOOLBAR
+            tb.set_style(gtk.TOOLBAR_ICONS)
+            self.vbox.pack_start(tb, expand=False)
+        else:
+            tb.destroy()
         w=self.make_widget (editable=self.editable, compact=True)
         self.vbox.add (w)
         self._widget = self.vbox
@@ -421,9 +428,39 @@ class EditAnnotationPopup (EditElementPopup):
         l.sort(key=lambda a: a.fragment.begin, reverse=(direction == -1))
         if l:
             a=l[0]
-            new=self.controller.gui.edit_element(a)
+            new=self.controller.gui.edit_element(a, destination=self._destination)
             # Validate the current one
             self.validate_cb()
+        return True
+
+    def extend_toolbar(self, tb):
+        if tb.get_children():
+            tb.insert(gtk.SeparatorToolItem(), -1)
+
+        b=get_pixmap_toolbutton(gtk.STOCK_GO_BACK, self.goto, -1)
+        b.set_tooltip(self.controller.gui.tooltips, _("Apply changes and edit previous annotation of same type"))
+        tb.insert(b, -1)
+
+        b=get_pixmap_toolbutton(gtk.STOCK_GO_FORWARD, self.goto, +1)
+        b.set_tooltip(self.controller.gui.tooltips, _("Apply changes and edit next annotation of same type"))
+        tb.insert(b, -1)
+
+        def toggle_highlight(b, ann):
+            if b.highlight:
+                event="AnnotationActivate"
+                label= _("Unhighlight annotation")
+                b.highlight=False
+            else:
+                event="AnnotationDeactivate"
+                label=_("Highlight annotation")
+                b.highlight=True
+            self.controller.gui.tooltips.set_tip(b, label)
+            self.controller.notify(event, annotation=ann)
+            return True
+
+        b=get_pixmap_toolbutton('highlight.png', toggle_highlight, self.element)
+        b.highlight=True
+        tb.insert(b, -1)
         return True
 
     def make_widget (self, editable=True, compact=False):
@@ -472,35 +509,6 @@ class EditAnnotationPopup (EditElementPopup):
         t = f.get_view(compact=compact)
         self.register_form(f)
         vbox.pack_start(t, expand=True)
-
-        hb=gtk.HBox()
-
-        b=get_small_stock_button(gtk.STOCK_GO_BACK, self.goto, -1)
-        self.controller.gui.tooltips.set_tip(b, _("Edit previous annotation of same type"))
-        hb.pack_start(b, expand=False)
-
-        b=get_small_stock_button(gtk.STOCK_GO_FORWARD, self.goto, +1)
-        self.controller.gui.tooltips.set_tip(b, _("Edit next annotation of same type"))
-        hb.pack_start(b, expand=False)
-
-        def toggle_highlight(b, ann):
-            if b.highlight:
-                event="AnnotationActivate"
-                label= _("Unhighlight annotation")
-                b.highlight=False
-            else:
-                event="AnnotationDeactivate"
-                label=_("Highlight annotation")
-                b.highlight=True
-            self.controller.gui.tooltips.set_tip(b, label)
-            self.controller.notify(event, annotation=ann)
-            return True
-
-        b=get_pixmap_button('highlight.png', toggle_highlight, self.element)
-        b.highlight=True
-        hb.pack_start(b, expand=False)
-
-        vbox.pack_start(hb, expand=False)
 
         return vbox
 
@@ -576,6 +584,18 @@ class EditViewPopup (EditElementPopup):
 
     def notify(self, element):
         self.controller.notify("ViewEditEnd", view=element)
+        return True
+
+    def extend_toolbar(self, tb):
+        t = helper.get_view_type(self.element)
+        if t == 'static' and self.element.matchFilter['class'] in ('package', '*'):
+            b = get_pixmap_toolbutton( 'web.png', self.apply_and_open)
+            self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
+            tb.insert(b, -1)
+        elif t == 'dynamic':
+            b = get_pixmap_toolbutton( gtk.STOCK_MEDIA_PLAY, self.apply_and_activate)
+            self.controller.gui.tooltips.set_tip(b, _("Apply changes and activate the view"))
+            tb.insert(b, -1)
         return True
 
     def make_widget (self, editable=True, compact=False):
