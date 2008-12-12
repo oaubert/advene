@@ -1615,7 +1615,7 @@ class AdveneGUI(object):
     def overlay(self, png_data, svg_data):
         return overlay_svg(png_data, svg_data)
 
-    def edit_element(self, element):
+    def edit_element(self, element, destination='default'):
         """Edit the element.
         """
         if self.edit_accumulator and (
@@ -1623,7 +1623,7 @@ class AdveneGUI(object):
             self.edit_accumulator.edit(element)
             return True
 
-        pop=self.open_adhoc_view('edit', element=element)
+        pop=self.open_adhoc_view('edit', element=element, destination=destination)
         return pop
 
     def update_package_list (self):
