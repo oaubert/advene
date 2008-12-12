@@ -434,7 +434,7 @@ class AdveneGUI(object):
                 b=gtk.VSeparator()
                 hb.pack_start(b, expand=False, padding=5)
                 continue
-            if name in ('browser', 'schemaeditor', 'trace') and not config.data.preferences['expert-mode']:
+            if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
                 continue
             if name not in ('webbrowser', 'comment') and not name in self.registered_adhoc_views:
                 self.log("Missing basic adhoc view %s" % name)
@@ -451,29 +451,29 @@ class AdveneGUI(object):
             hb.pack_start(b, expand=False)
         hb.show_all()
 
-        if config.data.preferences['expert-mode']:
-            tsb = self.gui.traces_switch
-            b=gtk.Button()
+        # Trace switch button
+        tsb = self.gui.traces_switch
+        b=gtk.Button()
 
-            def trace_toggle(w):
-                i=gtk.Image()
-                if config.data.preferences['record-actions']:
-                    config.data.preferences['record-actions']=False
-                    i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
-                    self.tooltips.set_tip(w, _('Tracing : ') + _('off'))
-                else:
-                    config.data.preferences['record-actions']=True
-                    i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
-                    self.tooltips.set_tip(w, _('Tracing : ') + _('on'))
-                w.set_image(i)
-                return
-            # Invert the preference, so that calling the trace_toggle
-            # will correctly update the button as well as the setting.
-            config.data.preferences['record-actions']=not config.data.preferences['record-actions']
-            trace_toggle(b)
-            b.connect('clicked', trace_toggle)
-            tsb.pack_start(b, expand=False)
-            tsb.show_all()
+        def trace_toggle(w):
+            i=gtk.Image()
+            if config.data.preferences['record-actions']:
+                config.data.preferences['record-actions']=False
+                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
+                self.tooltips.set_tip(w, _('Tracing : ') + _('off'))
+            else:
+                config.data.preferences['record-actions']=True
+                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
+                self.tooltips.set_tip(w, _('Tracing : ') + _('on'))
+            w.set_image(i)
+            return
+        # Invert the preference, so that calling the trace_toggle
+        # will correctly update the button as well as the setting.
+        config.data.preferences['record-actions']=not config.data.preferences['record-actions']
+        trace_toggle(b)
+        b.connect('clicked', trace_toggle)
+        tsb.pack_start(b, expand=False)
+        tsb.show_all()
 
         self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
         self.quicksearch_entry=gtk.Entry()
