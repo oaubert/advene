@@ -429,13 +429,13 @@ class AdveneGUI(object):
             ('montage', _("Dynamic montage"), 'montage.png'),
             ('', '', ''),
 
-            ('webbrowser', _('Web browser'), 'web.png'),
+            ('webbrowser', _('Open a comment view in the web browser'), 'web.png'),
             ('comment', _("Create or open a comment view"), 'comment.png'),
             ('', '', ''),
 
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
             ('editionhistory', _("Display edition history"), 'editionhistory.png'),
-            ('trace', _("Trace"), 'trace.png'),
+            ('trace', _("Visualise the activity trace"), 'trace.png'),
             ):
             if not name:
                 # Separator
