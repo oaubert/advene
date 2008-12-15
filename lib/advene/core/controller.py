@@ -1343,6 +1343,14 @@ class AdveneController(object):
         # Stop the current player.
         self.player.stop(0)
         self.player.exit()
+        if 'record' in self.player.player_capabilities:
+            # The old player was a recorder. Chances are that we
+            # recorded something. In this case, set the default_media
+            # to the recorded file path.
+            l=self.player.playlist_get_list()
+            if l and not self.get_default_media():
+                self.set_default_media(l[0])
+
         # Start the new one
         self.player=p()
         if not 'record' in p.player_capabilities:
