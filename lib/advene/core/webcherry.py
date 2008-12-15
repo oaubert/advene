@@ -501,6 +501,11 @@ class Media(Common):
 
     def play(self, position=None, **params):
         """Play the movie.
+
+        Optional parameters:
+        - stbv: the id of the dynamic view that should be activated
+        - filename: the filename of the movie
+        - position: the position in ms
         """
         c=self.controller
         if params.has_key('stbv'):
@@ -525,6 +530,9 @@ class Media(Common):
 
     def pause(self, **params):
         """Pause the movie.
+
+        Optional parameters:
+        - stbv: the id of the dynamic view that should be activated
         """
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
@@ -534,6 +542,9 @@ class Media(Common):
 
     def stop(self, **params):
         """Stop the movie.
+
+        Optional parameters:
+        - stbv: the id of the dynamic view that should be activated
         """
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
@@ -543,6 +554,9 @@ class Media(Common):
 
     def resume(self, **params):
         """Resume the movie.
+
+        Optional parameters:
+        - stbv: the id of the dynamic view that should be activated
         """
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
