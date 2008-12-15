@@ -98,7 +98,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         if parent is None:
             # Could not find the element in the cache.
             # It was not yet displayed
-            print "Parent not found"
+            pass
         else:
             # We can determine its path. Get the index for the deleted
             # element from the childrencache.
