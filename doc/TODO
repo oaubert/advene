@@ -1,3 +1,18 @@
+* timeline: down in legend widget -> should scroll the widget vertically
+
+* EditAnnotationPopup: use a Notebook to put Fragment/Attributes/Relations/Tags forms
+
+* htmleditor: make inserted TAL elements gui.Widgets (annotations,
+   selections, annotation types), so that DND works correctly
+
+* gui.main: simple click on Adhocview icon -> share code with viewbook
+   (menu New/open existing).
+
+* Nosferatu: website export: convert play links to link to
+   YouTube/GoogleVideo:
+http://video.google.com/videoplay?docid=-6185283610506001721&ei=zh1GSc-gHqbU2gKF6IG7Cw&q=nosferatu+murnau
+(through a frame)
+
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)
 
 * MXF samples: http://gstreamer.freedesktop.org/media/incoming/mxf/
