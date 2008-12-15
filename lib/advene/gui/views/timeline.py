@@ -2615,6 +2615,17 @@ class TimeLine(AdhocView):
                     if isinstance(w, AnnotationTypeWidget) and w.annotationtype.schema == button.annotationtype.schema:
                         w.set_highlight(True)
                 self.set_annotation(button.annotationtype)
+
+                a=self.legend.get_vadjustment()
+                y=self.legend.child_get_property(button, 'y')
+                if y < a.value:
+                    pos=max(a.lower, y)
+                elif y > a.value + a.page_size:
+                    pos=min(a.upper - a.page_size, y)
+                else:
+                    pos=None
+                if pos is not None:
+                    a.set_value(pos)
                 return False
 
             def focus_out(button, event):
