@@ -74,6 +74,7 @@ pads[1].props.xpos=320
 
 import advene.core.config as config
 import tempfile
+import time
 
 import gobject
 gobject.threads_init()
@@ -561,11 +562,12 @@ class Player:
 
         if status == "start" or status == "set":
             self.position_update()
-            if status == 'start':
-                if self.status == self.PauseStatus:
-                    self.resume (position)
-                elif self.status != self.PlayingStatus:
-                    self.start(position)
+            if self.status == self.PauseStatus:
+                self.resume (position)
+            elif self.status != self.PlayingStatus:
+                print "Starting movie"
+                self.start(position)
+                time.sleep(0.005)
             self.set_media_position(position)
         else:
             if status == "pause":
