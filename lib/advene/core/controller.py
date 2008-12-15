@@ -2525,6 +2525,18 @@ class AdveneController(object):
                 f.write(str(self.package.imagecache[t]))
                 f.close()
 
+            # Extract and copy overlays
+            content=re.sub(r'/media/overlay/[^/]+/([\w\d]+)', r'imagecache/overlay_\1.png', content)
+            for t in re.findall('imagecache/overlay_([\w\d]+).png', content):
+                # FIXME: not robust wrt. multiple packages/videos
+                a=self.package.get_element_by_id(t)
+                if not a:
+                    print "Cannot find annotation %s for overlaying"
+                    continue
+                f=open(os.path.join(imgdir, 'overlay_%s.png' % t), 'wb')
+                f.write(str(self.gui.overlay(self.package.imagecache[a.fragment.begin], a.content.data)))
+                f.close()
+
             # Convert all links
             for link in re.findall(r'''href=['"](.+?)['"> ]''', content):
                 if link in url_translation:
