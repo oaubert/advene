@@ -80,8 +80,6 @@ class Player(object):
         # Status
         PlayingStatus=vlc.PlayingStatus
         PauseStatus=vlc.PauseStatus
-        ForwardStatus=vlc.ForwardStatus
-        BackwardStatus=vlc.BackwardStatus
         InitStatus=vlc.InitStatus
         EndStatus=vlc.EndStatus
         UndefinedStatus=vlc.UndefinedStatus

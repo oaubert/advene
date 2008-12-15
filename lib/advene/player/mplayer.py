@@ -99,11 +99,9 @@ class Player:
     # Status
     PlayingStatus=0
     PauseStatus=1
-    ForwardStatus=2
-    BackwardStatus=3
-    InitStatus=4
-    EndStatus=5
-    UndefinedStatus=6
+    InitStatus=2
+    EndStatus=3
+    UndefinedStatus=4
 
     PositionKeyNotSupported=Exception()
     PositionOriginNotSupported=Exception()

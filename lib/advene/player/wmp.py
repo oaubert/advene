@@ -60,11 +60,9 @@ class Player:
     # Status
     PlayingStatus=0
     PauseStatus=1
-    ForwardStatus=2
-    BackwardStatus=3
-    InitStatus=4
-    EndStatus=5
-    UndefinedStatus=6
+    InitStatus=2
+    EndStatus=3
+    UndefinedStatus=4
 
     # # Exceptions
     # PositionKeyNotSupported=VLC.PositionKeyNotSupported
@@ -76,7 +74,7 @@ class Player:
     # List of status mappings as defined in
     # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmplay/mmp_sdk/playercurrentplaylist.asp
     statusmapping=(UndefinedStatus, EndStatus, PauseStatus, PlayingStatus,
-                   ForwardStatus, BackwardStatus, InitStatus, InitStatus,
+                   PlayingStatus, PlayingStatus, InitStatus, InitStatus,
                    EndStatus, InitStatus, UndefinedStatus, InitStatus)
 
     # Reference of the MediaPlayer Object Model:

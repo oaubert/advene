@@ -584,13 +584,10 @@ class AdveneGUI(object):
         They may change when another player is selected.
         """
         p=self.controller.player
-        self.active_player_status=(p.PlayingStatus, p.PauseStatus,
-                                   p.ForwardStatus, p.BackwardStatus)
+        self.active_player_status=(p.PlayingStatus, p.PauseStatus)
         self.statustext={
             p.PlayingStatus  : _("Playing"),
             p.PauseStatus    : _("Pause"),
-            p.ForwardStatus  : _("Forward"),
-            p.BackwardStatus : _("Backward"),
             p.InitStatus     : _("Init"),
             p.EndStatus      : _("End"),
             p.UndefinedStatus: _("Undefined"),
