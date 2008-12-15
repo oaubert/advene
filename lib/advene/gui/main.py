@@ -1412,6 +1412,15 @@ class AdveneGUI(object):
             buttons[gtk.STOCK_MEDIA_RECORD].set_stock_id(gtk.STOCK_MEDIA_PLAY)
         # else: should not happen.
 
+        if 'record' in p.player_capabilities:
+            for (stock, b) in buttons.iteritems():
+                if stock in (gtk.STOCK_MEDIA_RECORD, gtk.STOCK_MEDIA_STOP, gtk.STOCK_MEDIA_PLAY):
+                    continue
+                b.set_sensitive(False)
+        else:
+            for b in buttons.itervalues():
+                b.set_sensitive(True)
+
         if 'frame-by-frame' in p.player_capabilities:
             buttons[gtk.STOCK_MEDIA_PREVIOUS].show()
             buttons[gtk.STOCK_MEDIA_NEXT].show()
