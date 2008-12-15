@@ -73,6 +73,15 @@ def overlay_svg_as_pixbuf(png_data, svg_data):
     
     @return: a PNG image
     """
+    if not '<svg ' in svg_data:
+        # Generate pseudo-svg with data
+        svg_data="""<svg version='1' preserveAspectRatio="xMinYMin meet" viewBox='0 0 320 200'>
+  <text x='10' y='190' fill="white" font-size="24" stroke="black" font-family="sans-serif">
+%s
+  </text>
+</svg>
+""" % svg_data
+
     try:
         loader = gtk.gdk.PixbufLoader('svg')
     except Exception, e:
