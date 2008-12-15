@@ -33,7 +33,6 @@ import urllib
 import advene.model.view
 from advene.gui.widget import TimestampRepresentation
 from advene.rules.elements import ECACatalog
-import advene.core.config as config
 
 def register(controller):
     controller.register_viewclass(EventAccumulator)
