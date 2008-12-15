@@ -573,17 +573,7 @@ class InteractiveResult(AdhocView):
                                                 'pp': pprint.pformat },
                                        historyfile=config.data.advenefile('evaluator.log', 'settings')
                                        )
-        w=ev.popup()
-        b=gtk.Button(stock=gtk.STOCK_CLOSE)
-
-        def close_evaluator(*p):
-            ev.save_history()
-            w.destroy()
-            return True
-
-        b.connect('clicked', close_evaluator)
-        b.show()
-        ev.hbox.add(b)
+        w=ev.popup(embedded=True)
 
         self.controller.gui.init_window_size(w, 'evaluator')
 
