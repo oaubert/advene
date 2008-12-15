@@ -3658,10 +3658,31 @@ class AdveneGUI(object):
 
     def on_save_workspace_as_package_view1_activate (self, button=None, data=None):
         name=self.controller.package._idgenerator.get_id(View)+'_'+'workspace'
-        title, ident=dialog.get_title_id(title=_("Saving workspace"),
-                                  element_title=name,
-                                  element_id=name,
-                                  text=_("Enter a view name to save the workspace"))
+
+        d = dialog.title_id_dialog(title=_("Saving workspace"),
+                                   element_title=name,
+                                   element_id=name,
+                                   text=_("Enter a view name to save the workspace"))
+        d.default=gtk.CheckButton(_("Default workspace"))
+        self.tooltips.set_tip(d.default, _("Open this workspace when opening the package"))
+        d.vbox.pack_start(d.default)
+        d.show_all()
+        dialog.center_on_mouse(d)
+
+        title=None
+        ident=None
+        default=False
+
+        res=d.run()
+        if res == gtk.RESPONSE_OK:
+            try:
+                title=unicode(d.title_entry.get_text())
+                ident=unicode(d.id_entry.get_text())
+                default=d.default.get_active()
+            except ValueError:
+                pass
+        d.destroy()
+
         if ident is None:
             return True
 
@@ -3691,6 +3712,9 @@ class AdveneGUI(object):
         v.content.setData(stream.getvalue())
         stream.close()
 
+        if default:
+            self.controller.package.setMetaData (config.data.namespace, "default_adhoc", v.id)
+            
         if create:
             self.controller.package.views.append(v)
             self.controller.notify("ViewCreate", view=v)
