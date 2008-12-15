@@ -466,6 +466,20 @@ class EditAnnotationPopup (EditElementPopup):
     def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
+        nb=gtk.Notebook()
+        vbox.pack_start(nb, expand=False)
+
+        def begin_callback(t):
+            for c in self.forms:
+                if hasattr(c, 'contentform') and hasattr(c.contentform, 'set_begin'):
+                    c.contentform.set_begin(t)
+            return True
+
+        f = EditFragmentForm(element=self.element.fragment, controller=self.controller,
+                             begin_callback=begin_callback)
+        self.register_form (f)
+        nb.append_page(f.get_view(compact=compact), gtk.Label(_("Fragment")))
+
         # Annotation data
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'type',
@@ -479,29 +493,15 @@ class EditAnnotationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        ex=self.expandable(f.get_view(), _("Attributes"), expanded=False)
-
-        vbox.pack_start (ex, expand=False)
-
-        def begin_callback(t):
-            for c in self.forms:
-                if hasattr(c, 'contentform') and hasattr(c.contentform, 'set_begin'):
-                    c.contentform.set_begin(t)
-            return True
-
-        f = EditFragmentForm(element=self.element.fragment, controller=self.controller,
-                             begin_callback=begin_callback)
-        self.register_form (f)
-        vbox.pack_start (f.get_view(compact=compact), expand=False)
+        nb.append_page(f.get_view(), gtk.Label(_("Attributes")))
 
         f = EditRelationsForm(element=self.element, controller=self.controller)
         self.register_form(f)
-        vbox.pack_start (self.expandable(f.get_view(), _("Relations"), expanded=not compact),
-                         expand=False)
+        nb.append_page(f.get_view(compact=compact), gtk.Label(_("Relations")))
 
         f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
         self.register_form(f)
-        vbox.pack_start (f.get_view(compact=compact), expand=False)
+        nb.append_page(f.get_view(compact=compact), gtk.Label(_("Tags")))
 
         f = EditContentForm(self.element.content, controller=self.controller,
                             mimetypeeditable=False, parent=self.element)
@@ -509,6 +509,12 @@ class EditAnnotationPopup (EditElementPopup):
         t = f.get_view(compact=compact)
         self.register_form(f)
         vbox.pack_start(t, expand=True)
+
+
+        def select_default(widget):
+            widget.set_current_page(0)
+            return False
+        nb.connect_after('realize', select_default)
 
         return vbox
 
