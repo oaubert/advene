@@ -524,7 +524,7 @@ class Media(Common):
         pos=c.create_position (value=long(position),
                                key=c.player.MediaTime,
                                origin=c.player.AbsolutePosition)
-        c.queue_action( c.update_status, "set", pos )
+        c.queue_action( c.update_status, "start", pos )
         return self.send_no_content()
     play.exposed=True
 
