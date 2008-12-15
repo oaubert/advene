@@ -136,7 +136,6 @@ class HTMLEditor(textview_class, HTMLParser):
          'ul': {},
          'ol': {},
          'tal': { 'background': 'violet',
-                  'editable': False
                   },
          }
 
