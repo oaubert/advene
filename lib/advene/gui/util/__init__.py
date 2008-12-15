@@ -23,6 +23,7 @@ from gettext import gettext as _
 
 import gtk
 import gobject
+import pango
 import cgi
 import StringIO
 
@@ -244,6 +245,8 @@ def get_target_types(el):
         targets=config.data.drag_type['query']
     elif isinstance(el, Schema):
         targets=config.data.drag_type['schema']
+    elif isinstance(el, (int, long)):
+        targets=config.data.drag_type['timestamp']
     # FIXME: Resource
     else:
         targets=[]
@@ -291,14 +294,87 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         except:
             uri="No URI for " + unicode(el)
         selection.set(selection.target, 8, uri.encode('utf8'))
+    elif targetType == typ['timestamp']:
+        if isinstance(el, (int, long)):
+            selection.set(selection.target, 8, str(el))
+        elif isinstance(el, Annotation):
+            selection.set(selection.target, 8, str(el.fragment.begin))
+        else:
+            print "Inconsistent DND target"
+        return True
     elif targetType in (typ['text-plain'], typ['STRING']):
         selection.set(selection.target, 8, controller.get_title(el).encode('utf8'))
     else:
         print "Unknown target type for drag: %d" % targetType
     return True
 
-def contextual_drag_begin(widget, context, element):
+def contextual_drag_begin(widget, context, element, controller):
     context._element=element
+    
+    w=gtk.Window(gtk.WINDOW_POPUP)
+    w.set_decorated(False)
+
+    style=w.get_style().copy()
+    black=gtk.gdk.color_parse('black')
+    white=gtk.gdk.color_parse('white')
+
+    for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                  gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                  gtk.STATE_PRELIGHT):
+        style.bg[state]=black
+        style.fg[state]=white
+        style.text[state]=white
+        #style.base[state]=white
+    w.set_style(style)
+
+    v=gtk.VBox()
+    v.set_style(style)
+
+    if isinstance(element, (int, long, Annotation)):
+        h=gtk.HBox()
+        h.set_style(style)
+        begin=gtk.Image()
+        h.pack_start(begin, expand=False)
+        padding=gtk.HBox()
+        # Padding
+        h.pack_start(padding, expand=True)
+        end=gtk.Image()
+        h.pack_start(end, expand=False)
+        v.pack_start(h, expand=False)
+        l=gtk.Label()
+        l.set_ellipsize(pango.ELLIPSIZE_END)
+        l.set_style(style)
+        v.pack_start(l, expand=False)
+
+        cache=controller.package.imagecache
+        if isinstance(element, (long, int)):
+            begin.set_from_pixbuf(png_to_pixbuf (cache.get(element, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
+            end.hide()
+            padding.hide()
+            l.set_text(helper.format_time(element))
+        elif isinstance(element, Annotation):
+            # It can be an annotation
+            begin.set_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
+            end.set_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.end), width=config.data.preferences['drag-snapshot-width']))
+            end.show()
+            padding.show()
+            col=controller.get_element_color(element)
+            if col is not None:
+                l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (col, controller.get_title(element)))
+            else:
+                l.set_text(controller.get_title(element))
+
+    w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
+
+    w.add(v)
+    w.show_all()
+    widget._icon=w
+    context.set_icon_widget(w, 0, 0)
+    return True
+
+def contextual_drag_end(widget, context):
+    widget._icon.destroy()
+    widget._icon=None
     return True
 
 def enable_drag_source(widget, element, controller):
@@ -308,5 +384,6 @@ def enable_drag_source(widget, element, controller):
     widget.drag_source_set(gtk.gdk.BUTTON1_MASK,
                            get_target_types(element),
                            gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
-    widget.connect('drag-begin', contextual_drag_begin, element)
+    widget.connect('drag-begin', contextual_drag_begin, element, controller)
+    widget.connect('drag-end', contextual_drag_end)
     widget.connect('drag-data-get', drag_data_get_cb, controller)
