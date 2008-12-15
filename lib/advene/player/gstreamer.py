@@ -562,12 +562,12 @@ class Player:
 
         if status == "start" or status == "set":
             self.position_update()
-            if self.status == self.PauseStatus:
-                self.resume (position)
-            elif self.status != self.PlayingStatus:
-                print "Starting movie"
-                self.start(position)
-                time.sleep(0.005)
+            if status == "start":
+                if self.status == self.PauseStatus:
+                    self.resume (position)
+                elif self.status != self.PlayingStatus:
+                    self.start(position)
+                    time.sleep(0.005)
             self.set_media_position(position)
         else:
             if status == "pause":
