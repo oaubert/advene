@@ -1,3 +1,18 @@
+* Generic "ImportFromApplication" module/framework (with progressbar, etc)
+
+* MXF samples: http://gstreamer.freedesktop.org/media/incoming/mxf/
+
+* gui.util: define get_drag_icon(element)
+
+* website export: inject javascript code to deactivate /media links
+   when Advene is not running
+
+* Mac: put modified files (pangorc, modules) into
+   ~/Library/Preferences/advene/files
+
+* EditElementPopup: if destination != popup, add scrolledwidget around
+   widget
+
 * timeline: fix continous scrolling. Set zoom 96%, 0h59 in Nosferatu
 
 * svg support for gstreamer/mac
