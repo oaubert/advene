@@ -27,7 +27,7 @@ import advene.core.config as config
 from advene.core.imagecache import ImageCache
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
-from advene.gui.util import png_to_pixbuf
+from advene.gui.util import png_to_pixbuf, overlay_svg_as_pixbuf
 from advene.model.annotation import Annotation
 from advene.model.schema import AnnotationType
 
@@ -130,30 +130,8 @@ class AnnotationDisplay(AdhocView):
                 data=self.annotation.content.parsed()
                 svg_data='''<svg xmlns='http://www.w3.org/2000/svg' version='1' viewBox="0 0 320 300" x='0' y='0' width='320' height='200'><%(shape)s style="fill:none;stroke:green;stroke-width:2;" width="%(width)s%%" height="%(height)s%%" x="%(x)s%%" y="%(y)s%%"></rect></svg>''' % data
             if svg_data:
-                # SVG autodetection does not seem to work too well. Let's help it.
-                if 'svg' in self.annotation.content.mimetype:
-                    try:
-                        loader = gtk.gdk.PixbufLoader('svg')
-                    except Exception, e:
-                        print "Unable to load the SVG pixbuf loader: ", str(e)
-                        loader=None
-                else:
-                    loader = gtk.gdk.PixbufLoader()
-                if loader is not None:
-                    try:
-                        loader.write (svg_data)
-                        loader.close ()
-                        p = loader.get_pixbuf ()
-                        width = p.get_width()
-                        height = p.get_height()
-                        pixbuf=png_to_pixbuf (self.controller.package.imagecache[self.annotation.fragment.begin]).scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
-                        p.composite(pixbuf, 0, 0, width, height, 0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
-                    except gobject.GError, e:
-                        # The PNG data was invalid.
-                        print "Invalid image data", e
-                        pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
-                else:
-                    pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+                pixbuf=overlay_svg_as_pixbuf(self.controller.package.imagecache[self.annotation.fragment.begin],
+                                             self.annotation.content.data)
                 d['contents']=''
                 d['imagecontents']=pixbuf
             else:
