@@ -61,7 +61,7 @@ class TranscriptionView(AdhocView):
         self.options = {
             'display-bounds': False,
             'display-time': False,
-            'separator': ' ',
+            'separator': '\n',
             # Use the default representation parameter for annotations
             'default-representation': True,
             # If representation is not empty, it is used as a TALES
@@ -105,10 +105,10 @@ class TranscriptionView(AdhocView):
 
         self.quick_options=helper.CircularList( (
             # (separator, display_time)
-            (" ", False),
             ("\n", False),
-            ("\n", True),
+            (" ", False),
             (" ", True),
+            ("\n", True),
             ) )
 
         # Try to determine a default representation
