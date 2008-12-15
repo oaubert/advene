@@ -483,6 +483,8 @@ class Media(Common):
             # Overlay svg
             svg_data=a.content.data
         else:
+            # Overlay annotation title
+            svg_data=self.controller.get_title(a)
             # Generate pseudo-svg with annotation content
             svg_data="""<svg version='1' preserveAspectRatio="xMinYMin meet" viewBox='0 0 320 200'>
   <text x='10' y='190' fill="white" font-size="24" stroke="black" font-family="sans-serif">
