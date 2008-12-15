@@ -67,7 +67,8 @@ def image_from_position(controller, position=None, width=None, height=None):
     i.set_from_pixbuf(pb)
     return i
 
-def overlay_svg(png_data, svg_data):
+def overlay_svg_as_pixbuf(png_data, svg_data):
+    
     """Overlay svg graphics over a png image.
     
     @return: a PNG image
@@ -79,7 +80,7 @@ def overlay_svg(png_data, svg_data):
         loader=None
     if loader is not None:
         try:
-            loader.write (svg_data)
+            loader.write(svg_data)
             loader.close ()
             p = loader.get_pixbuf ()
             width = p.get_width()
@@ -92,13 +93,15 @@ def overlay_svg(png_data, svg_data):
             pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
     else:
         pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
-    
+    return pixbuf
+
+def overlay_svg_as_png(png_data, svg_data):
+    pixbuf=overlay_svg_as_pixbuf(png_data, svg_data)
     s=StringIO.StringIO()
     def pixbuf_save_func(buf):
         s.write(buf)
         return True
     pixbuf.save_to_callback(pixbuf_save_func, "png", {"tEXt::key":"Overlayed SVG"})
-
     return s.getvalue()
 
 def get_small_stock_button(sid, callback=None, *p):

@@ -86,7 +86,7 @@ import advene.util.importer
 from advene.gui.util.completer import Indexer
 
 # GUI elements
-from advene.gui.util import get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg
+from advene.gui.util import get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
@@ -1619,7 +1619,7 @@ class AdveneGUI(object):
         return False
 
     def overlay(self, png_data, svg_data):
-        return overlay_svg(png_data, svg_data)
+        return overlay_svg_as_png(png_data, svg_data)
 
     def edit_element(self, element, destination='default'):
         """Edit the element.
