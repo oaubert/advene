@@ -126,7 +126,18 @@ class Player:
     def build_pipeline(self):
         if self.videofile is None:
             return
-        self.pipeline=gst.parse_launch('v4l2src queue-size=4 ! video/x-raw-yuv,width=352,height=288 ! tee name=tee ! ffmpegcolorspace ! ffenc_mpeg4 bitrate=400000 ! queue ! avimux name=mux ! filesink location=%s  alsasrc device=hw:1,0 ! lame ! mux.  tee. ! queue ! xvimagesink name=sink sync=false' % self.videofile)
+        videofile=self.videofile
+        audiosrc='autoaudiosink'
+        videosink='autovideosink'
+        if config.data.os == 'darwin':
+            videosrc='osxvideosrc'
+        elif config.data.os == 'win32':
+            videosrc='dshowsrcwrapper'
+        else:
+            videosrc='v4l2src queue-size=4'
+            audiosrc='alsasrc device=hw:1,0'
+            #videosink='xvimagesink'
+        self.pipeline=gst.parse_launch('%(videosrc)s ! video/x-raw-yuv,width=352,height=288 ! tee name=tee ! ffmpegcolorspace ! ffenc_mpeg4 bitrate=400000 ! queue ! avimux name=mux ! filesink location=%(videofile)s  %(audiosrc)s ! lame ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
         #self.pipeline=gst.parse_launch('alsasrc name=source device=hw:1,0 ! lame ! filesink location=%s' % self.videofile)
         #self.player = self.pipeline.get_by_name('source')
         self.imagesink=self.pipeline.get_by_name('sink')
@@ -351,8 +362,11 @@ class Player:
 
     def set_visual(self, xid):
         self.xid = xid
-        self.imagesink.set_xwindow_id(self.xid)
-        self.imagesink.set_property('force-aspect-ratio', True)
+        try:
+            self.imagesink.set_xwindow_id(self.xid)
+            self.imagesink.set_property('force-aspect-ratio', True)
+        except AttributeError:
+            pass
         return True
 
     def restart_player(self):
