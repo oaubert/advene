@@ -67,7 +67,7 @@ def image_from_position(controller, position=None, width=None, height=None):
     i.set_from_pixbuf(pb)
     return i
 
-def overlay_svg_as_pixbuf(png_data, svg_data):
+def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
     
     """Overlay svg graphics over a png image.
     
@@ -92,16 +92,24 @@ def overlay_svg_as_pixbuf(png_data, svg_data):
             loader.write(svg_data)
             loader.close ()
             p = loader.get_pixbuf ()
-            width = p.get_width()
-            height = p.get_height()
-            pixbuf=png_to_pixbuf (png_data).scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
-            p.composite(pixbuf, 0, 0, width, height, 0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
+            w = p.get_width()
+            h = p.get_height()
+            pixbuf=png_to_pixbuf (png_data).scale_simple(w, h, gtk.gdk.INTERP_BILINEAR)
+            p.composite(pixbuf, 0, 0, w, h, 0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
         except gobject.GError, e:
             # The PNG data was invalid.
             print "Invalid image data", e
             pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
     else:
         pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+
+    if width and not height:
+        height = 1.0 * width * pixbuf.get_height() / pixbuf.get_width()
+    if height and not width:
+        width = 1.0 * height * pixbuf.get_width() / pixbuf.get_height()
+    if width and height:
+        p=pixbuf.scale_simple(int(width), int(height), gtk.gdk.INTERP_BILINEAR)
+        return p
     return pixbuf
 
 def overlay_svg_as_png(png_data, svg_data):
