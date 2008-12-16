@@ -1,6 +1,6 @@
-* timeline: down in legend widget -> should scroll the widget vertically
-
-* EditAnnotationPopup: use a Notebook to put Fragment/Attributes/Relations/Tags forms
+* Read HIG docs: 
+http://library.gnome.org/devel/hig-book/stable/
+http://development.syllable.org/documentation/interface-guide.html
 
 * htmleditor: make inserted TAL elements gui.Widgets (annotations,
    selections, annotation types), so that DND works correctly
@@ -2611,4 +2611,10 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * shapewidget: handle DND of data to shapes, to associate an
    annotation to a shape, then have it work as a link.
+
+* timeline: down in legend widget -> should scroll the widget vertically
+
+* EditAnnotationPopup: use a Notebook to put Fragment/Attributes/Relations/Tags forms
+
+* tagbag: ask for color when creating a tag
 
