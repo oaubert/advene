@@ -148,7 +148,15 @@ class AnnotationDisplay(AdhocView):
                 else:
                     self.sw['imagecontents'].show_all()
                     self.sw['contents'].hide()
-                    self.label['imagecontents'].set_from_pixbuf(d['imagecontents'])
+                    
+                    pixbuf=d['imagecontents']
+                    w=self.widget.get_allocation().width - 6
+                    width=pixbuf.get_width()
+                    height=pixbuf.get_height()
+                    if width > w:
+                        height = 1.0 * w * height / width
+                        pixbuf=pixbuf.scale_simple(int(w), int(height), gtk.gdk.INTERP_BILINEAR)
+                    self.label['imagecontents'].set_from_pixbuf(pixbuf)
             else:
                 self.label[k].set_text(v)
         if self.annotation is None or isinstance(self.annotation, AnnotationType):
