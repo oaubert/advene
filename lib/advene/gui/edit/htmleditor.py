@@ -154,6 +154,17 @@ class HTMLEditor(textview_class, HTMLParser):
             self.set_buffer(gtksourceview.SourceBuffer())
         self.set_editable(True)
         self.set_wrap_mode(gtk.WRAP_WORD)
+
+        # Class parsers are invoked when meeting a tag with a 'class'
+        # attribute. They can do their own processing of the tag, and
+        # return a widget as well as a method which will be used to
+        # process enclosed elements.
+        # If the method is None, enclosed elements will be processed by 
+        # the standard parser.
+        # Signature: widget, enclosed_processor = parser(tag, attr)
+        self._class_parsers=[]
+        self.enclosed_processor=None
+
         self.__tb = self.get_buffer()
         self.__last = None
         self.__tags = { }
@@ -269,6 +280,17 @@ class HTMLEditor(textview_class, HTMLParser):
                 print "Strange, there should be not tag mark here."
         return cursor
 
+    def insert_widget(self, widget, cursor=None):
+        if cursor is None:
+            cursor = self._get_iter_for_creating_mark()
+
+        anchor=self.__tb.create_child_anchor(cursor)        
+        self.add_child_at_anchor(widget, anchor)
+        anchor._tag=widget._tag
+        anchor._attr=widget._attr
+        anchor.has_tal = [ (k, v) for (k, v) in widget._attr if k.startswith('tal:') ]
+        self.__tags.setdefault(widget._tag, []).append(anchor)
+
     def handle_img(self, tag, attr):
         dattr=dict(attr)
         # Wait maximum 1s for connection
@@ -333,6 +355,9 @@ class HTMLEditor(textview_class, HTMLParser):
             mark._endmark=mark
             self.__tb.insert(cursor, alt)
 
+    def register_class_parser(self, p):
+        self._class_parsers.append(p)
+
     def handle_starttag(self, tag, attr):
         """Tag opening.
 
@@ -340,6 +365,26 @@ class HTMLEditor(textview_class, HTMLParser):
         registered its position so that the format is applied later,
         when closing it.
         """
+        dattr=dict(attr)
+        if self.enclosed_processor is not None:
+            if not self.enclosed_processor('start', tag, dattr):
+                self.enclosed_processor=None
+                return
+
+        if 'class' in dattr:
+            # See if there is a dedicated parser for this class
+            for p in self._class_parsers:
+                widget, self.enclosed_processor = p(tag, dattr)
+                if widget is not None:
+                    cursor = self._get_iter_for_creating_mark()
+                    anchor=self.__tb.create_child_anchor(cursor)        
+                    self.add_child_at_anchor(widget, anchor)
+                    anchor._tag=tag
+                    anchor._attr=attr
+                    anchor.has_tal = [ (k, v) for (k, v) in attr if k.startswith('tal:') ]
+                    self.__tags.setdefault(tag, []).append(anchor)
+                    break
+
         if tag == 'img':
             self.handle_img(tag, attr)
             return
@@ -362,10 +407,7 @@ class HTMLEditor(textview_class, HTMLParser):
         mark._tag=tag
         mark._attr=attr
         mark.has_tal = [ (k, v) for (k, v) in attr if k.startswith('tal:') ]
-        if tag in self.__tags:
-            self.__tags[tag].append(mark)
-        else:
-            self.__tags[tag] = [ mark ]
+        self.__tags.setdefault(tag, []).append(mark)
 
         if tag == 'br':
             self.__tb.insert(cursor, '\n')
@@ -385,6 +427,10 @@ class HTMLEditor(textview_class, HTMLParser):
         characters of tabulation and fall as a simple page of blank
         space. In the first line we do this service.
         """
+        if self.enclosed_processor is not None:
+            if not self.enclosed_processor('data', data):
+                self.enclosed_processor=None
+                return 
         data = ' '.join(data.split()) + ' '
         cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
         self.__tb.insert(cursor, data)
@@ -401,6 +447,11 @@ class HTMLEditor(textview_class, HTMLParser):
         labels and apply the formatting. The process is extremely
         simple.
         """
+        if self.enclosed_processor is not None:
+            if not self.enclosed_processor('end', tag):
+                self.enclosed_processor=None
+                return 
+
         if tag in self.__standalone:
             return
         # Create an end-mark to be able to restore HTML tags
@@ -462,6 +513,10 @@ class HTMLEditor(textview_class, HTMLParser):
             p=i.get_pixbuf()
             if p is not None:
                 fd.write("<img %s></img>" % " ".join( '%s="%s"' % (k, v) for (k, v) in p._attr ))
+
+            p=i.get_child_anchor()
+            if p is not None:
+                fd.write(p.get_widgets()[0].as_html())
 
             for m in i.get_marks():
                 if hasattr(m, '_endtag'):
