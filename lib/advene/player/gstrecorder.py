@@ -118,7 +118,7 @@ class Player:
 
         self.status=Player.UndefinedStatus
         self.current_position_value = 0
-        self.stream_duration = 60 * 60 * 1000
+        self.stream_duration = 0 # 60 * 60 * 1000
         self.relative_position=self.create_position(0,
                                                     origin=self.RelativePosition)
         self.position_update()
@@ -212,6 +212,7 @@ class Player:
         self.pause(position)
 
     def stop(self, position):
+        self.stream_duration=self.current_position
         if self.player is None:
             return
         self.player.set_state(gst.STATE_READY)
@@ -255,9 +256,7 @@ class Player:
         else:
             s.url=self.videofile
 
-        duration = 60 * 60 * 1000
-
-        s.length=duration
+        s.length=0
         s.position=self.current_position()
         s.status=self.current_status()
         return s
