@@ -136,7 +136,7 @@ class Player:
         else:
             videosrc='v4l2src queue-size=4'
             audiosrc='alsasrc device=hw:1,0'
-            #videosink='xvimagesink'
+            videosink='xvimagesink'
         self.pipeline=gst.parse_launch('%(videosrc)s ! video/x-raw-yuv,width=352,height=288 ! tee name=tee ! ffmpegcolorspace ! ffenc_mpeg4 bitrate=400000 ! queue ! avimux name=mux ! filesink location=%(videofile)s  %(audiosrc)s ! lame ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
         #self.pipeline=gst.parse_launch('alsasrc name=source device=hw:1,0 ! lame ! filesink location=%s' % self.videofile)
         #self.player = self.pipeline.get_by_name('source')
