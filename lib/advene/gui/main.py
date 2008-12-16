@@ -967,12 +967,14 @@ class AdveneGUI(object):
                 def select_player(i, p):
                     self.controller.select_player(p)
                     return True
+                if self.controller.player.player_id == ident:
+                    ident="> %s" % ident
+                else:
+                    ident="   %s" % ident
                 i=gtk.MenuItem(ident)
                 i.connect('activate', select_player, p)
                 menu.append(i)
                 i.show()
-                if self.controller.player.player_id == ident:
-                    i.set_sensitive(False)
             return True
 
         menu=gtk.Menu()
