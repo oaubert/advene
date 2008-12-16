@@ -583,10 +583,9 @@ class TimeLine(AdhocView):
     def set_annotation(self, a=None):
         self.quickview.set_annotation(a)
         for v in self._slave_views:
-            try:
-                v.set_annotation(a)
-            except AttributeError:
-                pass
+            m=getattr(v, 'set_annotation', None)
+            if m:
+                m(a)
         if self.bookmarks_to_draw:
             self.bookmarks_to_draw = []
 
