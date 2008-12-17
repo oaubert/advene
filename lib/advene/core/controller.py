@@ -2428,7 +2428,7 @@ class AdveneController(object):
         self.log(_("Data exported to %s") % filename)
         return True
 
-    def website_export(self, destination='/tmp/n', views=None, max_depth=3, progress_callback=None):
+    def website_export(self, destination='/tmp/n', views=None, max_depth=3, progress_callback=None, video_url=None):
         """Export a set of static views to a directory.
 
         The intent of this export is to be able to quickly publish a
@@ -2469,8 +2469,8 @@ class AdveneController(object):
             progress_callback(progress, _("Starting export"))
 
         def unconverted(url, reason):
-            #return 'unconverted.html?' + reason.replace(' ', '_')
-            return url
+            return 'unconverted.html?' + reason.replace(' ', '_')
+            #return url
 
         def export_page(url, depth=0):
             """Export the given URL.
@@ -2563,19 +2563,35 @@ class AdveneController(object):
                     if not '/' in l and l in (v.id for v in self.package.views):
                         # It should be a relative link.
                         url_translation[link]=export_page(os.path.dirname(url)+"/"+link, depth+1)
+                    elif video_url and link.startswith('/media/play'):
+                        l=re.findall(r'/media/play/(\d+)', link)
+                        if l:
+                            # Format: HH:MM:SS.mmm
+                            t=time.strftime("%Hh%Mm%Ss", time.gmtime(long(l[0]) / 1000))
+                            url_translation[link]='%s#%s' % (video_url, t)
+                        else:
+                            url_translation[link]=unconverted(link, 'unhandled link')
                     else:
                         # It is another element.
                         url_translation[link]=unconverted(link, 'unhandled link')
 
             # Replace all URL references.
             for link in re.findall(r'''href=['"](.+?)['"> ]''', content):
-                if link != url_translation[link]:
-                    content=re.sub('''(href=['"])%s(['"> ])''' % link,
-                                   r'''\1''' + url_translation[link] + r'''\2''',
-                                   content)
-
-            # FIXME: Replace actions by javascript code inviting to run Advene (?)
-            content=re.sub(r'''(href=.unconverted.html.)''', r'''onClick="return false;" \1''', content)
+                tr=url_translation[link]
+                if link != tr:
+                    extra=[]
+                    if video_url in tr:
+                        extra.append("target='_blank'")
+                    if 'unconverted' in tr:
+                        extra.append('onClick="return false;"')
+                    if extra:
+                        content=re.sub('''(href=['"])%s(['"> ])''' % link,
+                                       " ".join(extra) + r''' \1''' + tr + r'''\2''',
+                                       content)
+                    else:
+                        content=re.sub('''(href=['"])%s(['"> ])''' % link,
+                                       r'''\1''' + tr + r'''\2''',
+                                       content)
 
             # Write the result.
             f=open(os.path.join(destination, output), 'w')
