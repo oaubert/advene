@@ -3779,6 +3779,13 @@ class AdveneGUI(object):
         hb.pack_start(max_depth, expand=False)
         v.pack_start(hb, expand=False)
 
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Video URL")), expand=False)
+        video_entry=gtk.Entry()
+        self.tooltips.set_tip(video_entry, _("URL for the video, if it is available on a sharing website.\nGoogleVideo only for the moment"))
+        hb.add(video_entry)
+        v.pack_start(hb, expand=False)
+
         pb=gtk.ProgressBar()
         v.pack_start(pb, expand=False)
 
@@ -3794,10 +3801,12 @@ class AdveneGUI(object):
             d=dirname_entry.get_text()
             if not d:
                 return False
+            video=video_entry.get_text()
             b.set_sensitive(False)
             self.controller.website_export(destination=d,
                                            max_depth=max_depth.get_value_as_int(),
-                                           progress_callback=cb)
+                                           progress_callback=cb,
+                                           video_url=video)
             return True
 
         dirname_entry.connect('activate', do_conversion)
