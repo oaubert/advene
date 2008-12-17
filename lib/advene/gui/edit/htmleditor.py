@@ -192,7 +192,11 @@ class HTMLEditor(textview_class, HTMLParser):
                                                  b.get_iter_at_mark(m),
                                                  b.get_iter_at_mark(m._endmark))
                             b.delete_mark(m)
-                            b.delete_mark(m._endmark)
+                            if not m._endmark.get_deleted():
+                                # Could already be deleted (for
+                                # instance, br tag have startmark ==
+                                # endmark)
+                                b.delete_mark(m._endmark)
                         except AttributeError, e:
                             print "Exception for %s" % m._tag, unicode(e).encode('utf-8')
                     elif  hasattr(m, '_endtag'):
