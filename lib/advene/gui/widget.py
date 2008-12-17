@@ -781,7 +781,7 @@ class AnnotationRepresentation(gtk.Button):
         """Handle the drag-sent event.
         """
         if targetType == config.data.target_type['annotation']:
-            
+
             selection.set(selection.target, 8, widget.annotation.uri.encode('utf8'))
         elif targetType == config.data.target_type['uri-list']:
             c=self.controller.build_context(here=widget.annotation)
@@ -848,7 +848,7 @@ class TimestampRepresentation(gtk.Button):
     """
     def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None, visible_label=True):
         """Instanciate a new TimestampRepresentation.
-        
+
         @param value: the timestamp value
         @type value: int
         @param controller: the controller
@@ -982,7 +982,7 @@ class TimestampRepresentation(gtk.Button):
         self._rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
                                                                         method=snapshot_update_cb))
         self.connect('destroy', remove_rules)
-        
+
     def get_value(self):
         return self._value
     def set_value(self, v):
@@ -1068,13 +1068,13 @@ class TimestampRepresentation(gtk.Button):
         """
         data={ 'image_url': 'http:/media/snapshot/advene/%d' % self._value,
                'player_url': 'http:/media/play/%d' % self._value,
-               'timestamp': helper.format_time(self._value) 
+               'timestamp': helper.format_time(self._value)
                }
         ret="""<a href="%(player_url)s"><img width="120" border="0" src="%(image_url)s" alt="" /></a>""" % data
         if with_timestamp:
             ret = ''.join( (ret, """<br /><em><a href="%(player_url)s">%(timestamp)s</a></em>""" % data) )
         return ret
-                          
+
     def set_width(self, w):
         """Set the width of the snapshot and refresh the display.
         """
@@ -1116,11 +1116,11 @@ class TimestampRepresentation(gtk.Button):
         if self.extend_popup_menu is not None:
             self.extend_popup_menu(menu, self)
         menu.show_all()
-        
+
         if popup:
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return menu
-    
+
     def set_color(self, color):
         # FIXME: does not work ATM
         self.modify_bg(gtk.STATE_NORMAL, color)

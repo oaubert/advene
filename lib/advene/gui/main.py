@@ -3722,7 +3722,7 @@ class AdveneGUI(object):
 
         if default:
             self.controller.package.setMetaData (config.data.namespace, "default_adhoc", v.id)
-            
+
         if create:
             self.controller.package.views.append(v)
             self.controller.notify("ViewCreate", view=v)
@@ -4142,7 +4142,7 @@ class AdveneGUI(object):
                                      _("Detected shot at %s") % helper.format_time(ts),
                                      prg)
 
-            # Detection is over. Import resulting 
+            # Detection is over. Import resulting
             do_gui_operation(on_shotdetect_end, pb)
             return False
 

@@ -598,7 +598,7 @@ class Menu:
             content_mimetype='application/x-advene-ruleset'
             )
         v.title=_("Caption %s annotations") % self.controller.get_title(at)
-        
+
         # Build the ruleset
         r=RuleSet()
         catalog=self.controller.event_handler.catalog
@@ -616,7 +616,7 @@ class Menu:
         r.add_rule(rule)
 
         v.content.data=r.xml_repr()
-        
+
         p.views.append(v)
         self.controller.notify('ViewCreate', view=v)
         self.controller.activate_stbv(v)

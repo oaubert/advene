@@ -68,7 +68,7 @@ class ExternalImporter(AdhocView):
             if valid:
                 self.importers.set_active(0)
             self.convert_button.set_sensitive(True)
-            
+
         else:
             # Invalid filenames. Empty importers and disable convert button
             model.append( (_("No valid importer"), None, None) )

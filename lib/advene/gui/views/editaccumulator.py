@@ -129,7 +129,7 @@ class EditAccumulator(AccumulatorPopup):
         l=w._title_label
         l.set_markup('<b>%s</b>' % self.get_short_title(element))
         return True
-            
+
     def update_annotation(self, annotation, event):
         self.update_element(annotation, event)
         return True

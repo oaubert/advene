@@ -100,7 +100,7 @@ class ZipPackage:
         # Temp. directory, a unicode string
         self._tempdir = None
         self.file_ = None
-        
+
         if uri:
             # os.stat seems to not grok unicode pathnames with
             # accents. Pass it an encoded string.

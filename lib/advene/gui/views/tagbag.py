@@ -141,7 +141,7 @@ class TagBag(AdhocView):
         colorbutton.set_color(gtk.gdk.color_parse('red'))
         hb.pack_start(colorbutton, expand=False)
         d.vbox.pack_start(hb, expand=False)
-        
+
         d.connect('key-press-event', dialog.dialog_keypressed_cb)
         d.show_all()
         dialog.center_on_mouse(d)
@@ -157,13 +157,13 @@ class TagBag(AdhocView):
         else:
             tag=None
         d.destroy()
-        
+
         if tag and not tag in self.tags:
             if not re.match('^[\w\d_]+$', tag):
                 dialog.message_dialog(_("The tag contains invalid characters"),
                                                icon=gtk.MESSAGE_ERROR)
                 return True
-            self.tags.append(tag)            
+            self.tags.append(tag)
             self.controller.package._tag_colors[tag]="#%04x%04x%04x" % (color.red, color.green, color.blue)
             self.controller.notify('TagUpdate', tag=tag)
             self.refresh()

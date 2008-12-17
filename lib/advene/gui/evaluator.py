@@ -646,7 +646,7 @@ class Evaluator:
         self.help()
         self.source.grab_focus()
         return window
-    
+
     def status_message(self, m):
         cid=self.statusbar.get_context_id('info')
         message_id=self.statusbar.push(cid, unicode(m))

@@ -419,7 +419,7 @@ class ViewColumn(FinderColumn):
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
         # Enable DND
         self.enable_drag_source(b)
-        
+
         vbox.pack_start(b, expand=False)
 
         b=self.label['activate']=gtk.Button(_("Open view"))

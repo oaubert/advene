@@ -41,7 +41,7 @@ class Event(str):
 #    def __str__(self):
 #        return "Event %s" % self[:]
     pass
-    
+
 def tag(name, old=False):
     if old:
         return name
@@ -50,7 +50,7 @@ def tag(name, old=False):
 
 class EtreeMixin:
     """This class defines helper methods for conversion to/from ElementTree.
-    
+
     The mixed-in class should implement to_etree() and from_etree(element, **kw) methods.
 
     Optional arguments to from_etree can be 'catalog' and 'origin'.
@@ -505,7 +505,7 @@ class Rule(EtreeMixin):
             param={}
             for paramnode in actionnode.findall(tag('param', old=compatibility)):
                 param[paramnode.attrib['name']]=paramnode.attrib['value']
-        
+
             if not catalog.is_action(name):
                 # Dynamically register a dummy action with the same
                 # name and parameters, so that it can be edited and saved.
@@ -538,7 +538,7 @@ class Rule(EtreeMixin):
         """
         rulenode=ET.Element(tag('rule'), { 'name': self.name })
 
-        rulenode.append(ET.Element(tag('event'), 
+        rulenode.append(ET.Element(tag('event'),
                                    {'name': str(self.event) }))
 
         if self.condition != self.default_condition:
@@ -548,11 +548,11 @@ class Rule(EtreeMixin):
                     if cond == self.default_condition:
                         continue
                     rulenode.append(cond.to_etree())
-                    rulenode.append(ET.Element(tag('composition'), 
+                    rulenode.append(ET.Element(tag('composition'),
                                                { 'value': self.condition.composition } ))
             else:
                 rulenode.append(self.condition.to_etree())
-                rulenode.append(ET.Element(tag('composition'), 
+                rulenode.append(ET.Element(tag('composition'),
                                            { 'value': 'and' } ))
 
         if isinstance(self.action, ActionList):
@@ -614,7 +614,7 @@ class SubviewList(list, EtreeMixin):
 
         @return: an ElementTree.Element
         """
-        el=ET.Element("subviewlist", 
+        el=ET.Element("subviewlist",
                       { 'name': self.name,
                         'value': ','.join( self ) } )
         return el
@@ -752,7 +752,7 @@ class SimpleQuery(EtreeMixin):
         """
         qnode=ET.Element(tag('query'))
 
-        qnode.append(ET.Element(tag('source'), 
+        qnode.append(ET.Element(tag('source'),
                                     { 'value': self.source }))
 
         if self.condition is not None:
@@ -864,8 +864,8 @@ class Quicksearch(EtreeMixin):
         qnode=ET.Element(tag('quicksearch'))
 
         qnode.append(ET.Element(tag('source'), { 'value': self.source } ))
-        qnode.append(ET.Element(tag('searched'), 
-                     { 'value': 
+        qnode.append(ET.Element(tag('searched'),
+                     { 'value':
                        urllib.quote(unicode(self.searched).encode('utf-8'))} ))
 
         qnode.append(ET.Element('case_sensitive'),

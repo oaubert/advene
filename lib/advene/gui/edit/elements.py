@@ -154,7 +154,7 @@ class EditElementPopup (AdhocView):
             vbox.pack_start(self.make_widget(editable=self.editable))
 
             def destroy_cb(*p):
-                if self.controller and self.controller.gui: 
+                if self.controller and self.controller.gui:
                     self.controller.gui.unregister_edit_popup(self)
                 return True
             vbox.connect('destroy', destroy_cb)
@@ -175,7 +175,7 @@ class EditElementPopup (AdhocView):
 
     def extend_toolbar(self, tb):
         """Extend the widget toolbar.
-        
+
         Child classes can add their own items to the toolbar.
         """
         return True
@@ -195,7 +195,7 @@ class EditElementPopup (AdhocView):
             if callable(c):
                 c()
         return super(EditElementPopup, self).close(*p)
-                
+
     def can_edit (el):
         """Return True if the class can edit the given element.
 
@@ -961,7 +961,7 @@ class EditAnnotationTypePopup (EditElementPopup):
         abox.pack_start(f.get_view(), expand=False)
 
         vbox.pack_start(self.expandable(abox, label=_("Advanced"), expanded=False), expand=False)
-        
+
         return vbox
 
 class EditRelationTypePopup (EditElementPopup):
@@ -1477,7 +1477,7 @@ class TextContentHandler (ContentHandler):
         if col is not None:
             color=name2color(col)
             self.view.modify_base(gtk.STATE_NORMAL, color)
-            
+
         # Hook the completer component
         if hasattr(self.parent.rootPackage, '_indexer'):
             completer=Completer(textview=self.view,

@@ -243,7 +243,7 @@ class TranscriptionEdit(AdhocView):
                                     ,
                                     gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
         self.textview.connect('drag-data-received', self.textview_drag_received)
-        
+
         # Hook the completer component
         completer=Completer(textview=self.textview,
                             controller=self.controller,
@@ -319,7 +319,7 @@ class TranscriptionEdit(AdhocView):
 
     def insert_timestamp_mark(self, it=None):
         """Insert a timestamp mark with the current player position.
-        
+
         If iter is not specified, insert at the current cursor position.
         """
         t=self.controller.player.current_position_value - self.options['delay']
@@ -418,7 +418,7 @@ class TranscriptionEdit(AdhocView):
                            flags=gtk.DIALOG_DESTROY_WITH_PARENT,
                            buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
                                      gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
-            ta=TimeAdjustment(value=button.value, 
+            ta=TimeAdjustment(value=button.value,
                               controller=self.controller)
             d.vbox.pack_start(ta.widget, expand=False)
             d.show_all()
@@ -804,7 +804,7 @@ class TranscriptionEdit(AdhocView):
         if ignore_next:
             res.extend( ('<strike>', text, '</strike>') )
         else:
-            res.append( text )        
+            res.append( text )
         return ''.join(res)
 
     def save_as_cb(self, button=None):
@@ -1098,7 +1098,7 @@ class TranscriptionEdit(AdhocView):
         self.options['snapshot-size']=size
         for m in self.marks:
             m.set_width(size)
-            
+
     def scale_snaphots_menu(self, i):
         def set_scale(i, s):
             self.set_snapshot_scale(s)

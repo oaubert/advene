@@ -140,7 +140,7 @@ class EventAccumulator(AdhocView):
         self.btn_filter = gtk.Button(_(' Filters'))
         self.btn_filter.connect('clicked', self.modify_filters)
         btnbar.pack_start(self.btn_filter, expand=False)
-        
+
         self.init_btn_filter = gtk.Button(_('Reset'))
         self.init_btn_filter.connect('clicked', self.init_obj_filter)
         self.init_btn_filter.set_sensitive(False)
@@ -256,7 +256,7 @@ class EventAccumulator(AdhocView):
         w.add(vb)
         w.show_all()
         #sw.connect
-        
+
     def show_options(self, options, levelslab):
         for ob in options.get_children():
             options.remove(ob)
@@ -331,7 +331,7 @@ class EventAccumulator(AdhocView):
         #self.init_btn_filter.set_image(i)
         self.init_btn_filter.set_sensitive(activate)
 
-        
+
 
     def scroll_win(self):
         a = self.sw.get_vadjustment()
@@ -506,8 +506,8 @@ class EventAccumulator(AdhocView):
             print "no event to unpack ? %s" % self.size
         if self.size>0:
             self.size = self.size-1
-        
-            
+
+
     def update_last_action_box(self, obj_evt, nav=False):
         if nav:
             tup = gtk.tooltips_data_get(self.latest['nav_actionBox'])

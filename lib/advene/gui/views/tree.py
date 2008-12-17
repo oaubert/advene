@@ -464,7 +464,7 @@ class TreeWidget(AdhocView):
         self.drag_data=None
         tree_view.connect('button-press-event', self.on_treeview_button_press_event)
         tree_view.connect('button-release-event', self.on_treeview_button_release_event)
-        tree_view.connect('motion-notify-event', self.on_treeview_motion_notify_event)        
+        tree_view.connect('motion-notify-event', self.on_treeview_motion_notify_event)
 
         tree_view.connect('drag-data-get', drag_data_get_cb, self.controller)
 
@@ -497,7 +497,7 @@ class TreeWidget(AdhocView):
         self.drag_context=None
 
     def on_treeview_motion_notify_event(self, treeview, event):
-        if (event.state == gtk.gdk.BUTTON1_MASK 
+        if (event.state == gtk.gdk.BUTTON1_MASK
             and self.drag_context is None
             and self.drag_data is not None
             and self.drag_data[3] is not None):
@@ -514,7 +514,7 @@ class TreeWidget(AdhocView):
                 self.drag_context = treeview.drag_begin(targets, actions, button, self.drag_data[2])
                 # This call does not affect the icon:
                 self.drag_context._element=element
-        
+
     def get_selected_node (self, tree_view):
         """Return the currently selected node.
 

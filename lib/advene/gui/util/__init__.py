@@ -68,9 +68,9 @@ def image_from_position(controller, position=None, width=None, height=None):
     return i
 
 def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
-    
+
     """Overlay svg graphics over a png image.
-    
+
     @return: a PNG image
     """
     if not '<svg' in svg_data:
@@ -174,22 +174,22 @@ def name2color(color):
 arrow_up_xpm="""13 16 2 1
        c None
 .      c #FF0000
-      .      
-     ...     
-    .....    
-   .......   
-  .........  
- ........... 
+      .
+     ...
+    .....
+   .......
+  .........
+ ...........
 .............
-     ...     
-     ...     
-     ...     
-     ...     
-     ...     
-     ...     
-     ...     
-     ...     
-     ...     
+     ...
+     ...
+     ...
+     ...
+     ...
+     ...
+     ...
+     ...
+     ...
 """.splitlines()
 
 arrow_right_xpm="""16 13 2 1
@@ -227,7 +227,7 @@ def shaped_window_from_xpm(xpm):
 
 def encode_drop_parameters(**kw):
     """Encode the given parameters as drop parameters.
-    
+
     @return: a string
     """
     for k in kw:
@@ -242,19 +242,19 @@ def decode_drop_parameters(data):
 
     @return: a dict.
     """
-    return dict( (k, unicode(v, 'utf8')) 
+    return dict( (k, unicode(v, 'utf8'))
                  for (k, v) in cgi.parse_qsl(unicode(data, 'utf8').encode('utf8')) )
 
 def get_target_types(el):
     """Return DND target types for element.
     """
     if isinstance(el, Annotation):
-        targets= (config.data.drag_type['annotation'] 
-                  + config.data.drag_type['timestamp'] 
+        targets= (config.data.drag_type['annotation']
+                  + config.data.drag_type['timestamp']
                   + config.data.drag_type['tag'])
     elif isinstance(el, View):
         if helper.get_view_type(el) == 'adhoc':
-            targets=config.data.drag_type['adhoc-view'] 
+            targets=config.data.drag_type['adhoc-view']
         else:
             targets=config.data.drag_type['view']
     elif isinstance(el, AnnotationType):
@@ -282,7 +282,7 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
     Usage information:
     this method must be connected passing the controller as user data:
       widget.connect('drag-data-get', drag_data_get_cb, controller)
-     
+
     and the context must has a _element attribute (defined in a
     'drag-begin' handler for instance).
     """
@@ -330,7 +330,7 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
 
 def contextual_drag_begin(widget, context, element, controller):
     context._element=element
-    
+
     w=gtk.Window(gtk.WINDOW_POPUP)
     w.set_decorated(False)
 

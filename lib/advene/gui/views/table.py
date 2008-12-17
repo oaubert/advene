@@ -119,7 +119,7 @@ class AnnotationTable(AdhocView):
         tree_view.set_search_equal_func(search_content)
 
         columns={}
-        
+
         columns['snapshot']=gtk.TreeViewColumn(_("Snapshot"), gtk.CellRendererPixbuf(), pixbuf=COLUMN_PIXBUF)
         columns['snapshot'].set_reorderable(True)
         tree_view.append_column(columns['snapshot'])

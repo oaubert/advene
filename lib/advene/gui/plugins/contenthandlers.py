@@ -169,7 +169,7 @@ class SVGContentHandler (ContentHandler):
         for r in self.rules:
             self.controller.event_handler.remove_rule(r, 'internal')
         return True
-        
+
     def set_editable (self, boolean):
         self.editable = boolean
         if self.sourceview:

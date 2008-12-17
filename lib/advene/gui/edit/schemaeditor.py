@@ -151,9 +151,9 @@ class SchemaEditor (AdhocView):
                         path, col, cx, cy = t
                         schema=model[path][0]
                         widget.get_selection().select_path(path)
-                        
+
                         menu=gtk.Menu()
-                        
+
                         i=gtk.MenuItem(_("Delete"))
                         i.connect("activate", lambda e: self.delSchema(schema))
                         menu.append(i)
@@ -201,7 +201,7 @@ class SchemaEditor (AdhocView):
                 # Vertical scroll
                 a = scrolled_win.get_vadjustment()
                 incr = a.step_increment
-                
+
             if event.direction == gtk.gdk.SCROLL_DOWN:
                 val = a.value + incr
                 if val > a.upper - a.page_size:
@@ -218,7 +218,7 @@ class SchemaEditor (AdhocView):
                     val = a.upper - a.page_size
                 if val != a.value:
                     a.value = val
-            
+
             return True
         canvas.connect('scroll-event', on_background_scroll)
 
@@ -229,9 +229,9 @@ class SchemaEditor (AdhocView):
                 return False
             if not self.drag_coordinates:
                 self.drag_coordinates=(event.x_root, event.y_root)
-                return False            
+                return False
             x, y = self.drag_coordinates
-            
+
             a=scrolled_win.get_hadjustment()
             v=a.value + x - event.x_root
             if v > a.lower and v < a.upper:
@@ -240,7 +240,7 @@ class SchemaEditor (AdhocView):
             v=a.value + y - event.y_root
             if v > a.lower and v < a.upper:
                 a.value=v
-            
+
             self.drag_coordinates= (event.x_root, event.y_root)
             return False
         canvas.connect('motion-notify-event', on_background_motion)
@@ -272,7 +272,7 @@ class SchemaEditor (AdhocView):
         schemaArea.pack_start(scrolled_win, True, True, 0)
         schemaArea.pack_start(gtk.HSeparator(), expand=False)
         schemaArea.pack_start(hboxConExplorer, expand=False)
-        
+
         return schemaArea
 
     def font_up_clicked(self, w, canvas):
@@ -297,7 +297,7 @@ class SchemaEditor (AdhocView):
         for i in self.findSchemaTitles(canvas):
             i.props.font = "Sans Bold %s" % str(self.dfont)
         return
-    
+
     def sw_resize(self, w, size, adj):
         #print adj.get_value()
         self.swX = size.width
@@ -308,7 +308,7 @@ class SchemaEditor (AdhocView):
         self.setup_canvas()
         #print self.canvas.get_bounds()
         #print "%s %s" % (size.width, size.height)
-        
+
 ###
 #
 # Functions to update the gui when an event occurs
@@ -320,7 +320,7 @@ class SchemaEditor (AdhocView):
         self.openedschemas=[]
         self.setup_canvas()
         return True
-    
+
     def update_schema(self, schema=None, event=None):
         self.update_list_schemas()
         if schema in self.openedschemas:
@@ -335,7 +335,7 @@ class SchemaEditor (AdhocView):
                 rtg = self.findRelationTypeGroup(rt.getId(),self.canvas)
                 rtg.update()
         return True
-    
+
     def update_annotation (self, annotation=None, event=None):
         if event == 'AnnotationCreate' or event == 'AnnotationDelete':
             at = annotation.getType()
@@ -344,7 +344,7 @@ class SchemaEditor (AdhocView):
                 atg = self.findAnnotationTypeGroup(at.getId(),self.canvas)
                 atg.update()
         return True
-    
+
     def update_annotationtype(self, annotationtype=None, event=None):
         schema = annotationtype.getSchema()
         if schema in self.openedschemas:
@@ -452,7 +452,7 @@ class SchemaEditor (AdhocView):
         temp=self.openedschemas.pop()
         self.openedschemas.insert(0,temp)
         self.setup_canvas()
-        
+
     def exchangeSchemaAreas(self, w):
         t1 =self.openedschemas[0]
         self.openedschemas[0]=self.openedschemas[1]
@@ -588,7 +588,7 @@ class SchemaEditor (AdhocView):
                 self.addRelationTypeGroup(canvas, sc, j.getTitle(), j)
                 r=r+1
         #print "%s RelationTypes drawn" % r
-        
+
     def draw_schema_annots(self, canvas, schema, xoffset, yoffset, xmax, ymax):
         self.addSchemaTitle(canvas, schema, xoffset+(xmax-xoffset)/2, yoffset+(ymax-yoffset)/2)
         annotTypes = schema.getAnnotationTypes()
@@ -618,7 +618,7 @@ class SchemaEditor (AdhocView):
                                         width = -1,
                                         anchor = gtk.ANCHOR_CENTER,
                                         font = "Sans Bold %s" % str(self.dfont))
-    
+
     def findSchemaTitles(self, canvas, schema=None):
         res = []
         root = canvas.get_root_item ()
@@ -778,10 +778,10 @@ class SchemaEditor (AdhocView):
                 return True
             def menuView(w, item):
                 self.create_view_based_on(item.type)
-                
+
             m=advene.gui.popup.Menu(element=item.type, controller=self.controller)
             menu=m.menu
-            
+
             itemM = gtk.MenuItem(_("Remove relation type"))
             itemM.connect('activate', menuRem, item )
             menu.insert(itemM, 1)
@@ -933,7 +933,7 @@ class SchemaEditor (AdhocView):
         # Relations redraw
         for rtg in item.rels:
             self.rel_redraw(rtg)
-            
+
 ###
 #
 #  events on background
@@ -1172,7 +1172,7 @@ class TypeExplorer (gtk.ScrolledWindow):
     def colorChange(self, but):
         col=self.bcol.get_color()
         self.entryCol.set_text("#%04x%04x%04x" % (col.red, col.green, col.blue))
-        
+
     def refresh(self, *p):
         return True
 
@@ -1197,7 +1197,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         col=self.bcol.get_color()
         self.entryCol.set_text("#%04x%04x%04x" % (col.red, col.green, col.blue))
         return True
-    
+
     def getTypeColor(self):
         return self.bcol.get_color()
 
@@ -1209,7 +1209,7 @@ class TypeExplorer (gtk.ScrolledWindow):
             return False
         self.TId.set_text(name)
         return True
-    
+
     def getTypeName(self):
         return self.TName.get_text()
 
@@ -1218,11 +1218,11 @@ class TypeExplorer (gtk.ScrolledWindow):
             return False
         self.TName.set_text(name)
         return True
-    
+
     def getMimeType(self):
         m = self.TMimeType.get_current_element()
         return m
-    
+
     def setMimeType(self, mimetype):
         store, i = dialog.generate_list_model( elements = [ ('text/plain', _("Plain text content")),
                               ('application/x-advene-structured', _("Simple-structured content")),
@@ -1347,7 +1347,7 @@ class AnnotationTypeGroup (Group):
 
         self.rect = self.newRect (rx,ry,self.color)
         self.text = self.newText (self.formattedName(),rx+5,ry+30)
-        
+
     def formattedName(self):
         nbann = str(len(self.type.getAnnotations()))
         if len(self.name)+len(nbann)>17:
@@ -1386,7 +1386,7 @@ class AnnotationTypeGroup (Group):
         parent = self.get_parent()
         child_num = parent.find_child (self)
         parent.remove_child (child_num)
-        
+
     def update(self):
         self.name=self.type.title
         self.color = "black"
@@ -1396,7 +1396,7 @@ class AnnotationTypeGroup (Group):
                 self.rect.props.stroke_color = self.color
         if self.text is not None:
             self.text.props.text = self.formattedName()
-            
+
 class RelationTypeGroup (Group):
     def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, members=[], fontsize=22):
         Group.__init__(self, parent = canvas.get_root_item ())
@@ -1507,7 +1507,7 @@ class RelationTypeGroup (Group):
                                         arrow_length = 4.0,
                                         arrow_width = 3.0
                                         )
-        
+
     #FIXME : hack to find id from type's uri
     def getIdFromURI(self, uri):
         return uri[1:]
@@ -1580,7 +1580,7 @@ class RelationTypeGroup (Group):
     def remove(self):
         self.controller.delete_element(self.type)
         self.remove_drawing_only()
-        
+
     def remove_drawing_only(self):
         for i in self.members:
             gr = self.findAnnotationTypeGroup(i.id, self.get_canvas())

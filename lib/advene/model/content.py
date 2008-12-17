@@ -34,14 +34,14 @@ from advene.model.util.mimetype import MimeType
 
 class StructuredContent(dict,object):
     """Dict-like object representing structured data.
-    
+
     It provides methods for parsing from/unparsing to Advene
     simple-structured content.
-    
+
     Note that it cannot do synchronous updates when writing since:
        - it should do a content update after each attribute
          modification, which would not be efficient.
-       - it should have a reference to the controller ECAEngine, 
+       - it should have a reference to the controller ECAEngine,
          which is not available here.
     So prefer a more verbose but explicit behaviour.
     """
@@ -79,10 +79,10 @@ class StructuredContent(dict,object):
             """
             return v.replace('\n', '%0A').replace('=', '%3D').replace('%', '%25')
 
-        return "\n".join( ("%s=%s" % (k, quote(v))) 
-                          for (k, v) in self.iteritems() 
+        return "\n".join( ("%s=%s" % (k, quote(v)))
+                          for (k, v) in self.iteritems()
                           if not k.startswith('_') )
-        
+
 class Content(modeled.Modeled,
               viewable.Viewable.withClass('content', 'getMimetype')):
     """

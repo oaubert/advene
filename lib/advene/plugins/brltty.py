@@ -46,7 +46,7 @@ def register(controller=None):
         method=engine.action_brldisplay
         engine.init_brlapi()
         if engine.brlconnection is not None:
-            gobject.io_add_watch(engine.brlconnection.fileDescriptor, 
+            gobject.io_add_watch(engine.brlconnection.fileDescriptor,
                                  gobject.IO_IN,
                                  engine.input_handler)
 
@@ -57,9 +57,9 @@ def register(controller=None):
             description=_("Display a message in Braille"),
             parameters={'message': _("Message to display.")},
             defaults={'message': 'annotation/content/data'},
-            predefined={'message': (  
+            predefined={'message': (
                     ( 'annotation/content/data', _("The annotation content") ),
-                    )},            
+                    )},
             category='generic',
             ))
 
@@ -166,7 +166,7 @@ class BrlEngine:
             elif self.currenttype is not None:
                 self.brldisplay('Nav. ' + (self.currenttype.title or self.currenttype.id))
             else:
-                self.brldisplay('Nav. video')            
+                self.brldisplay('Nav. video')
         elif k == brlapi.KEY_SYM_DELETE:
             # Play/pause
             self.controller.update_status("pause")
@@ -198,7 +198,7 @@ class BrlEngine:
                     rulename=context.evaluateValue('rule')
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
-                self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename, 
+                self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
                                                                                                                           'parametername': name})
                 self.controller.log(unicode(e)[:160])
                 result=default_value
@@ -220,7 +220,7 @@ class BrlEngine:
         if self.brlconnection is not None:
             self.controller.log("Disconnecting brltty")
             self.brlconnection.leaveTtyMode()
-        
+
     def brldisplay(self, message):
         if self.brlconnection is None:
             self.init_brlapi()

@@ -107,7 +107,7 @@ class AnnotationDisplay(AdhocView):
                     'schema': self.controller.get_title(self.annotation.schema),
                     'description': self.annotation.getMetaData(config.data.namespace_prefix['dc'], "description") or "",
                     'total': helper.format_element_name('annotation', len(self.annotation.annotations)),
-                    'id': self.annotation.id 
+                    'id': self.annotation.id
                     },
                 'imagecontents': None,
                 }
@@ -148,7 +148,7 @@ class AnnotationDisplay(AdhocView):
                 else:
                     self.sw['imagecontents'].show_all()
                     self.sw['contents'].hide()
-                    
+
                     pixbuf=d['imagecontents']
                     w=self.widget.get_allocation().width - 6
                     width=pixbuf.get_width()

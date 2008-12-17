@@ -200,7 +200,7 @@ class ViewBook(AdhocView):
                               config.data.drag_type['adhoc-view-instance'],
                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
             hb.pack_start(b, expand=False, fill=False)
-            
+
         hb.pack_start(e, expand=False, fill=False)
 
         if not permanent:
@@ -382,7 +382,7 @@ class ViewBook(AdhocView):
             sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
             # Propose a menu to open various views for the annotation:
             menu=gtk.Menu()
-            
+
             if len(sources) == 1:
                 a=sources[0]
                 title=self.controller.get_title(a)

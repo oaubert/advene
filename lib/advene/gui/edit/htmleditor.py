@@ -159,7 +159,7 @@ class HTMLEditor(textview_class, HTMLParser):
         # attribute. They can do their own processing of the tag, and
         # return a widget as well as a method which will be used to
         # process enclosed elements.
-        # If the method is None, enclosed elements will be processed by 
+        # If the method is None, enclosed elements will be processed by
         # the standard parser.
         # Signature: widget, enclosed_processor = parser(tag, attr)
         self._class_parsers=[]
@@ -284,7 +284,7 @@ class HTMLEditor(textview_class, HTMLParser):
         if cursor is None:
             cursor = self._get_iter_for_creating_mark()
 
-        anchor=self.__tb.create_child_anchor(cursor)        
+        anchor=self.__tb.create_child_anchor(cursor)
         self.add_child_at_anchor(widget, anchor)
         anchor._tag=widget._tag
         anchor._attr=widget._attr
@@ -377,7 +377,7 @@ class HTMLEditor(textview_class, HTMLParser):
                 widget, self.enclosed_processor = p(tag, dattr)
                 if widget is not None:
                     cursor = self._get_iter_for_creating_mark()
-                    anchor=self.__tb.create_child_anchor(cursor)        
+                    anchor=self.__tb.create_child_anchor(cursor)
                     self.add_child_at_anchor(widget, anchor)
                     anchor._tag=tag
                     anchor._attr=attr
@@ -430,7 +430,7 @@ class HTMLEditor(textview_class, HTMLParser):
         if self.enclosed_processor is not None:
             if not self.enclosed_processor('data', data):
                 self.enclosed_processor=None
-                return 
+                return
         data = ' '.join(data.split()) + ' '
         cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
         self.__tb.insert(cursor, data)
@@ -450,7 +450,7 @@ class HTMLEditor(textview_class, HTMLParser):
         if self.enclosed_processor is not None:
             if not self.enclosed_processor('end', tag):
                 self.enclosed_processor=None
-                return 
+                return
 
         if tag in self.__standalone:
             return
@@ -700,7 +700,7 @@ class ContextDisplay(gtk.TreeView):
                     l.append( model.get(it, 1, 2) )
                     it=model.iter_next(it)
                 mark._attr=l
-                
+
             print "Edited", mark._tag, mark._attr
             return False
 
@@ -713,7 +713,7 @@ class ContextDisplay(gtk.TreeView):
         cell.set_property('editable', True)
         cell.connect('edited', edited_cell, 2)
         self.append_column(gtk.TreeViewColumn("Value", cell, text=2))
-        
+
     def set_context(self, context):
         model=self.get_model()
         model.clear()

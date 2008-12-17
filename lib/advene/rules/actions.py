@@ -607,7 +607,7 @@ class DefaultActionsRepository:
             url=context.evaluateValue('package/view/%s/absolute_url' % viewid)
         except ValueError:
             url=None
-        
+
         if url is not None:
             self.controller.open_url(url)
         else:

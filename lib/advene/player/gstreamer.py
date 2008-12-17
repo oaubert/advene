@@ -55,9 +55,9 @@ Videomixer:
 
 videotestsrc pattern=1 ! video/x-raw-yuv,width=100,height=100 ! videobox border-alpha=0 alpha=0.5 top=-70 bottom=-70 right=-220 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink videotestsrc ! video/x-raw-yuv,width=320, height=240 ! alpha alpha=0.7 ! mix.
 
-This should show a 320x240 pixels video test source with some transparency showing the background checker pattern. Another video test source with just the snow pattern of 100x100 pixels is overlayed on top of the first one on the left vertically centered with a small transparency showing the first video test source behind and the checker pattern under it. 
+This should show a 320x240 pixels video test source with some transparency showing the background checker pattern. Another video test source with just the snow pattern of 100x100 pixels is overlayed on top of the first one on the left vertically centered with a small transparency showing the first video test source behind and the checker pattern under it.
 
-videotestsrc ! video/x-raw-yuv,width=320, height=240 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink filesrc location=/tmp/a.svg  ! gdkpixbufdec ! videoscale ! video/x-raw-rgb,width=320,height=240 ! ffmpegcolorspace ! alpha alpha=0.5 ! mix. 
+videotestsrc ! video/x-raw-yuv,width=320, height=240 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink filesrc location=/tmp/a.svg  ! gdkpixbufdec ! videoscale ! video/x-raw-rgb,width=320,height=240 ! ffmpegcolorspace ! alpha alpha=0.5 ! mix.
 
 Working pipeline (but it does not correctly handle transparency):
 filesrc location=/tmp/a.svg ! gdkpixbufdec ! ffmpegcolorspace ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink videotestsrc ! mix.
@@ -278,7 +278,7 @@ class Player:
             # resizing the ximagesink works later.
             filter.set_property("caps", gst.Caps("video/x-raw-yuv,width=%d,height=%s" % config.data.player['snapshot-dimensions']))
             csp=gst.element_factory_make('ffmpegcolorspace')
-            # The scaling did not work before 2008-10-11, cf 
+            # The scaling did not work before 2008-10-11, cf
             # http://bugzilla.gnome.org/show_bug.cgi?id=339201
             scale=gst.element_factory_make('videoscale')
             elements.extend( (filter, csp, scale, self.imagesink) )
@@ -472,7 +472,7 @@ class Player:
             f.close()
             self.imageoverlay.props.image_name=self.overlay.filename
             return True
-        
+
         if not self.captioner:
             print "Cannot caption ", message.encode('utf8')
             return

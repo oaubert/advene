@@ -48,7 +48,7 @@ class AnnotationPlaceholder:
 
     def process_enclosed_tags(self, typ, tag, attr=None):
         """Process enclosed data.
-        
+
         typ is in ('start', 'end', 'data').
         if typ == 'data': tag is in fact the data itself.
         if typ == 'start': attr is a dictionary with the attributes
@@ -67,7 +67,7 @@ class AnnotationPlaceholder:
             self.refresh()
             return self.widget, self.process_enclosed_tags
         return None, None
-        
+
     def as_html(self):
         ctx=self.controller.build_context(self.annotation)
         try:
@@ -82,7 +82,7 @@ class AnnotationPlaceholder:
             'content': self.controller.get_title(self.annotation),
             'urlbase': urlbase,
             }
-        data=[ """<table class="advene:annotation" advene:annotation="%s" advene:presentation="%s">""" % (self.annotation.id, ':'.join(self.presentation)) ]        
+        data=[ """<table class="advene:annotation" advene:annotation="%s" advene:presentation="%s">""" % (self.annotation.id, ':'.join(self.presentation)) ]
         data.append( """<tr><td>""")
 
         if 'link' in self.presentation:
@@ -135,7 +135,7 @@ class AnnotationPlaceholder:
             i=image_from_position(self.controller, position=self.annotation.fragment.begin, width=160)
         elif 'overlay' in self.presentation:
             p=overlay_svg_as_pixbuf(self.controller.package.imagecache[self.annotation.fragment.begin],
-                                    self.annotation.content.data, 
+                                    self.annotation.content.data,
                                     width=160)
             i=gtk.image_new_from_pixbuf(p)
         else:

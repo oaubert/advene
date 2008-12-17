@@ -414,7 +414,7 @@ class Config(object):
 
         # Content-handlers
         self.content_handlers = []
-        
+
         # Players, indexed by plugin name
         self.players = {}
 

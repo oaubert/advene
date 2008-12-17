@@ -239,8 +239,8 @@ class ActiveBookmarks(AdhocView):
         default=self.chosen_type_selector.get_current_element()
         atlist=self.controller.package.annotationTypes
         # Regenerate the annotation type list.
-        types=[ (at, 
-                 self.controller.get_title(at), 
+        types=[ (at,
+                 self.controller.get_title(at),
                  self.controller.get_element_color(at)) for at in atlist ]
         types.sort(key=lambda a: a[1])
 
@@ -338,7 +338,7 @@ class ActiveBookmarks(AdhocView):
             res.append(b.as_html())
         res.append("</table>")
         return "\n".join(res)
-        
+
     def set_image_size(self, size):
         self.options['snapshot-size']=size
         for b in self.bookmarks:
@@ -482,7 +482,7 @@ class ActiveBookmarks(AdhocView):
             m.show_all()
             m.popup(None, widget, None, 0, gtk.get_current_event_time())
             return True
-        
+
         def remove_current(widget):
             """Remove the current bookmark.
             """
@@ -550,7 +550,7 @@ class ActiveBookmarks(AdhocView):
             m.show_all()
             m.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
-        
+
         for (icon, tip, method) in (
             (gtk.STOCK_REDO, _("Reorder active bookmarks"), reorder),
             (gtk.STOCK_CONVERT, _("Complete bookmarks into annotations"), complete),
@@ -562,7 +562,7 @@ class ActiveBookmarks(AdhocView):
             b.connect('clicked', method)
             i=gtk.ToolItem()
             i.add(b)
-            tb.insert(i, -1)        
+            tb.insert(i, -1)
 
         hb.add(tb)
         v.pack_start(hb, expand=False)
@@ -596,7 +596,7 @@ class ActiveBookmarks(AdhocView):
                          ,
                          gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
         sb.connect('drag-motion', scroll_on_drag)
-        
+
         def hide_arrow_mark(*p):
             if self.arrow_mark is not None:
                 self.arrow_mark.hide()
@@ -742,7 +742,7 @@ class ActiveBookmark(object):
     time, with an optional content) or a completed annotation.
 
     If the from_serialisation parameter is present, it is used as the source of information.
-    
+
     Else, if the annotation parameter is present, it is used as the source of information.
 
     Else the begin time is mandatory. It can be associated with an optional content.
@@ -845,7 +845,7 @@ class ActiveBookmark(object):
             self.end_widget.image.connect('drag-motion', self.bound_drag_motion)
             self.end_widget.image.connect('scroll-event', self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
             self.end_widget.image.connect('key-press-event', self.timestamp_key_press, 'end')
-            
+
             def end_image_button_press_handler(widget, event):
                 if not self.is_current:
                     self.container.set_current_bookmark(self)
@@ -854,7 +854,7 @@ class ActiveBookmark(object):
 
             def extend_end_image_menu(menu, element):
                 for (label, action) in (
-                    (_("Remove end timestamp"), lambda i: self.set_end(None)), 
+                    (_("Remove end timestamp"), lambda i: self.set_end(None)),
                     ):
                     i=gtk.MenuItem(label)
                     i.connect('activate', action)
@@ -934,7 +934,7 @@ class ActiveBookmark(object):
         elif gtk.gdk.ACTION_MOVE & actions and is_in_view:
             # DND from the same view. Force default to move.
             drag_context.drag_status(gtk.gdk.ACTION_MOVE, timestamp)
-        
+
     def begin_drag_received(self, widget, context, x, y, selection, targetType, time):
         if self.last_drag_time == time:
             return True
@@ -1276,7 +1276,7 @@ class ActiveBookmark(object):
                 sm=gtk.Menu()
                 i.set_submenu(sm)
                 menu.append(i)
-                l=[ (t, self.controller.get_title(t)) 
+                l=[ (t, self.controller.get_title(t))
                     for t in self.controller.package.annotationTypes
                     if t != self.annotation.type ]
                 l.sort(key=lambda a: a[1])

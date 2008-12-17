@@ -96,7 +96,7 @@ class EditionHistory(AdhocView):
                                   (_("Edited"), 'edited' ) ):
             c=gtk.VBox()
             c.pack_start(gtk.Label(label), expand=False)
-            
+
             sw = gtk.ScrolledWindow()
             sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
             c.add(sw)
@@ -104,7 +104,7 @@ class EditionHistory(AdhocView):
             v=gtk.VBox()
             sw.add_with_viewport(v)
             setattr(self, attname, v)
-            
+
             hb.add(c)
 
         v.show_all()

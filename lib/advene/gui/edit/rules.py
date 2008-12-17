@@ -88,7 +88,7 @@ class EditRuleSet(EditGeneric):
                       action=action)
             self.add_rule(rule)
             return True
-        
+
         def add_subview_cb(button=None):
             if not self.editable:
                 return True
@@ -158,7 +158,7 @@ class EditRuleSet(EditGeneric):
 
         eb.connect('drag-data-get', self.drag_sent)
         eb.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                           config.data.drag_type['rule'], 
+                           config.data.drag_type['rule'],
                            gtk.gdk.ACTION_COPY )
         eb.show_all()
 

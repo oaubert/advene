@@ -211,7 +211,7 @@ def register(controller=None):
             description=_("Create a bookmark"),
             parameters={'position': _("Bookmark position (in ms)"),
                         'message': _("Bookmark content."), },
-            defaults={'message': 'string:'+_("Bookmark"), 
+            defaults={'message': 'string:'+_("Bookmark"),
                       'position': 'options/controller/player/current_position_value'},
             category='gui',
             ))
@@ -278,7 +278,7 @@ class DefaultGUIActions:
 
     def action_open_interface_predefined(self, controller):
         d={
-            'guiview': [ 
+            'guiview': [
                 ( 'string:' + ident, view.view_name)
                 for (ident, view) in controller.gui.registered_adhoc_views.iteritems()
                 ],
@@ -291,7 +291,7 @@ class DefaultGUIActions:
                 )
             }
         return d
-        
+
     def action_open_view (self, context, parameters):
         """Event Handler for the OpenView action.
 
@@ -320,18 +320,18 @@ class DefaultGUIActions:
             self.controller.gui.open_adhoc_view(v, 'south')
         else:
             self.log(_("Element %s does not look like a view") % view)
-         
+
         return True
 
     def action_open_view_predefined(self, controller):
         get_title=self.controller.get_title
         return {
-            'id': [ 
+            'id': [
                 ( 'string:' + v.id, get_title(v) )
                 for v in controller.package.views
                 ],
             }
-        
+
     def action_popup (self, context, parameters):
         """Popup action.
 
@@ -589,7 +589,7 @@ class DefaultGUIActions:
         """
         position=self.parse_parameter(context, parameters, 'position', self.controller.player.current_position_value)
         message=self.parse_parameter(context, parameters, 'message', _("New bookmark"))
-        
+
         self.controller.gui.create_bookmark(position, comment=message)
         return True
 

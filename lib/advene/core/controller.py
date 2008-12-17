@@ -321,7 +321,7 @@ class AdveneController(object):
         """Register a trace builder
         """
         self.tracers.append(tracer)
-        
+
     def register_event(self, name, description, modifying=False):
         """Register a new event.
         """
@@ -330,7 +330,7 @@ class AdveneController(object):
         catalog.event_names[name]=description
         if modifying:
             catalog.modifying_events.add(name)
-        
+
     def register_view(self, view):
         """Register a view.
         """
@@ -644,7 +644,7 @@ class AdveneController(object):
         else:
             raise Exception("Unsupported query type for %s" % query.id)
         return result, qexpr
-    
+
     @property
     def typed_active(self):
         """Return a DefaultDict of active annotations grouped by type id.
@@ -1153,7 +1153,7 @@ class AdveneController(object):
             p.views.remove(el)
             self.notify('ViewDelete', view=el, immediate=immediate_notify, batch=batch_id)
         elif isinstance(el, Query):
-            self.notify('EditSessionStart', element=el, immediate=True)            
+            self.notify('EditSessionStart', element=el, immediate=True)
             p.queries.remove(el)
             self.notify('QueryDelete', query=el, immediate=immediate_notify, batch=batch_id)
         elif isinstance(el, Resources) or isinstance(el, ResourceData):
@@ -1360,7 +1360,7 @@ class AdveneController(object):
         mediafile = self.get_default_media()
         if mediafile != "":
             self.set_media(mediafile)
-        
+
     def restart_player (self):
         """Restart the media player."""
         self.player.restart_player ()
@@ -1551,7 +1551,7 @@ class AdveneController(object):
                 print "Fixing view ", v.id
                 v.content.data = v.content.data.replace('<ruleset>',
                                                         '<ruleset xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">')
-                
+
         # Notification must be immediate, since at application startup, package attributes
         # (_indexer, imagecache) are initialized by events, and may be needed by
         # default views
@@ -1744,7 +1744,7 @@ class AdveneController(object):
                 at._fieldnames=helper.common_fieldnames(at.annotations)
             else:
                 at._fieldnames=[]
-            
+
         p.imagecache.clear ()
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
@@ -2365,7 +2365,7 @@ class AdveneController(object):
             for element in elements:
                 ctx=self.build_context(element)
                 data.append(_("""<h1>Comment on %(title)s</h1>
-    <a tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s"></img></a><br>%(title)s<br>""") % { 
+    <a tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s"></img></a><br>%(title)s<br>""") % {
                     'title': self.get_title(element),
                     'id': element.id,
                     'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
@@ -2386,7 +2386,7 @@ class AdveneController(object):
 	<strong tal:content="a/representation">Content</strong>
 </a><br>
 <span style="font-size: 0.8em">(<span tal:content="a/fragment/formatted/begin">Begin timestamp</span> - <span tal:content="a/fragment/formatted/end">End timestamp</span>)</span>
-<br> 
+<br>
 </p>
 </div></div>"""]
             v.content.data="\n".join(data)
@@ -2398,7 +2398,7 @@ class AdveneController(object):
         return sorted( ( v
                          for v in importer_package.views
                          if v.id != 'index' ), key=lambda v: v.title )
-    
+
     def apply_export_filter(self, filter, filename):
         """Apply the given export filename and output the result to filename.
         """
@@ -2412,7 +2412,7 @@ class AdveneController(object):
         kw = {}
         if filter.content.mimetype is None or filter.content.mimetype.startswith('text/'):
             compiler = simpleTAL.HTMLTemplateCompiler ()
-            compiler.parseTemplate (filter.content.stream, 'utf-8') 
+            compiler.parseTemplate (filter.content.stream, 'utf-8')
             try:
                 compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8')
             except simpleTALES.ContextContentException, e:
@@ -2438,7 +2438,7 @@ class AdveneController(object):
         @type destination: path
         @param views: the list of views to export
         @param max_depth: maximum recursion depth
-        @param progress_callback: if defined, the method will be called with a float in 0..1 and a message indicating progress 
+        @param progress_callback: if defined, the method will be called with a float in 0..1 and a message indicating progress
         """
         if views is None:
             views=[ v
@@ -2481,7 +2481,7 @@ class AdveneController(object):
             """
             if depth > max_depth:
                 return unconverted(url, 'max depth exceeded')
-                
+
             #self.log("exporting %s (%d)" % (url, depth) )
             m=re.search('(.+)#(.+)', url)
             if m:
@@ -2521,7 +2521,7 @@ class AdveneController(object):
                 print "Exception when evaluating", address
                 print unicode(e).encode('utf-8')
                 return unconverted(url, 'error for ' + output)
-            
+
             if not isinstance(content, basestring):
                 return unconverted(url, 'not a string ' + output)
 
@@ -2581,7 +2581,7 @@ class AdveneController(object):
             f=open(os.path.join(destination, output), 'w')
             f.write(content)
             f.close()
-            
+
             return output
 
         view_url={}
@@ -2613,11 +2613,11 @@ class AdveneController(object):
 
             r=self.package.resources
             for element in path.split('/'):
-                r=r[element]                
+                r=r[element]
             output=open(dest, 'wb')
             output.write(r.data)
             output.close()
-            
+
         f=open(os.path.join(destination, "index.html"), 'w')
         defaultview=self.package.getMetaData(config.data.namespace, 'default_utbv')
         v=self.package.views.get_by_id(defaultview)

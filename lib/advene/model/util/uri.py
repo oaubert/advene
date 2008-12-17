@@ -40,5 +40,5 @@ def no_fragment(uri):
     else: return uri
 
 def open(uri):
-    
+
     return urlopen(uri)

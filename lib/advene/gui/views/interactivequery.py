@@ -524,7 +524,7 @@ class InteractiveResult(AdhocView):
                 self.table=gtable
 
 
-            ti=get_pixmap_toolbutton('editaccumulator.png', 
+            ti=get_pixmap_toolbutton('editaccumulator.png',
                                      lambda b: self.open_in_edit_accumulator(self.table.get_elements()))
             ti.set_tooltip(self.controller.gui.tooltips, _("Edit elements"))
             tb.insert(ti, -1)
