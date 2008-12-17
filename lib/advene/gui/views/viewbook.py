@@ -421,6 +421,7 @@ class ViewBook(AdhocView):
                 menu.append(i)
                 for label, action in (
                     (_("to edit them"), lambda i: edit_selection(sources)),
+                    (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=sources)),
                     (_("to create a new static view"), lambda i: create_and_open_view(sources)),
                     (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin for a in sources ], destination=self.location)),
                     ):
