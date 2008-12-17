@@ -10,8 +10,8 @@ http://development.syllable.org/documentation/interface-guide.html
 
 * Nosferatu: website export: convert play links to link to
    YouTube/GoogleVideo:
-http://video.google.com/videoplay?docid=-6185283610506001721&ei=zh1GSc-gHqbU2gKF6IG7Cw&q=nosferatu+murnau
-(through a frame)
+http://video.google.com/videoplay?docid=-6185283610506001721#0h10m54s
+http://code.google.com/apis/youtube/getting_started.html
 
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)
 
