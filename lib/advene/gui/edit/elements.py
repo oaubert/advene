@@ -469,6 +469,11 @@ class EditAnnotationPopup (EditElementPopup):
         nb=gtk.Notebook()
         vbox.pack_start(nb, expand=False)
 
+        def small_label(t):
+            l=gtk.Label()
+            l.set_markup('<span size="x-small">%s</span>' % t)
+            return l
+
         def begin_callback(t):
             for c in self.forms:
                 if hasattr(c, 'contentform') and hasattr(c.contentform, 'set_begin'):
@@ -478,7 +483,7 @@ class EditAnnotationPopup (EditElementPopup):
         f = EditFragmentForm(element=self.element.fragment, controller=self.controller,
                              begin_callback=begin_callback)
         self.register_form (f)
-        nb.append_page(f.get_view(compact=compact), gtk.Label(_("Fragment")))
+        nb.append_page(f.get_view(compact=compact), small_label(_("Fragment")))
 
         # Annotation data
         f = self.make_registered_form (element=self.element,
@@ -493,15 +498,15 @@ class EditAnnotationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        nb.append_page(f.get_view(), gtk.Label(_("Attributes")))
+        nb.append_page(f.get_view(), small_label(_("Attributes")))
 
         f = EditRelationsForm(element=self.element, controller=self.controller)
         self.register_form(f)
-        nb.append_page(f.get_view(compact=compact), gtk.Label(_("Relations")))
+        nb.append_page(f.get_view(compact=compact), small_label(_("Relations")))
 
         f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
         self.register_form(f)
-        nb.append_page(f.get_view(compact=compact), gtk.Label(_("Tags")))
+        nb.append_page(f.get_view(compact=compact), small_label(_("Tags")))
 
         f = EditContentForm(self.element.content, controller=self.controller,
                             mimetypeeditable=False, parent=self.element)
