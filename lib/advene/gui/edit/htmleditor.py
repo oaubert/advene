@@ -286,6 +286,7 @@ class HTMLEditor(textview_class, HTMLParser):
 
         anchor=self.__tb.create_child_anchor(cursor)
         self.add_child_at_anchor(widget, anchor)
+        widget._anchor=anchor
         anchor._tag=widget._tag
         anchor._attr=widget._attr
         anchor.has_tal = [ (k, v) for (k, v) in widget._attr if k.startswith('tal:') ]
