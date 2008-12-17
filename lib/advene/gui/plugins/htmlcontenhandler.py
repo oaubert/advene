@@ -53,7 +53,7 @@ class AnnotationPlaceholder:
         if typ == 'data': tag is in fact the data itself.
         if typ == 'start': attr is a dictionary with the attributes
         """
-        if typ == 'end' and tag == 'span':
+        if typ == 'end' and tag == 'table':
             return False
         return True
 
@@ -82,7 +82,8 @@ class AnnotationPlaceholder:
             'content': self.controller.get_title(self.annotation),
             'urlbase': urlbase,
             }
-        data=[ """<span class="advene:annotation" advene:annotation="%s" advene:presentation="%s">""" % (self.annotation.id, ':'.join(self.presentation)) ]
+        data=[ """<table class="advene:annotation" advene:annotation="%s" advene:presentation="%s">""" % (self.annotation.id, ':'.join(self.presentation)) ]        
+        data.append( """<tr><td>""")
 
         if 'link' in self.presentation:
             data.append("""<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s>""" % d)
@@ -99,12 +100,12 @@ class AnnotationPlaceholder:
         if 'content' in self.presentation:
             if data[-1].startswith('<img') or data[-1].startswith('<em'):
                 data.append('<br>')
-            data.append("""<span tal:content="package/annotations/%(id)s/representation">%(content)s</span>""" % d)
+            data.append("""<em tal:content="package/annotations/%(id)s/representation">%(content)s</em>""" % d)
 
         if 'link' in self.presentation:
             data.append('</a>')
 
-        data.append('</span>')
+        data.append('</td></tr></table>')
 
         return "".join(data)
 
@@ -156,7 +157,7 @@ class AnnotationPlaceholder:
     def build_widget(self):
         vbox=gtk.VBox()
         vbox.as_html=self.as_html
-        vbox._tag='span'
+        vbox._tag='table'
         vbox._attr=[]
         return vbox
 
