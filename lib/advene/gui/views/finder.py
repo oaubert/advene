@@ -464,7 +464,10 @@ class QueryColumn(FinderColumn):
         vbox.pack_start(self.label['title'], expand=False)
 
         b=self.label['edit']=gtk.Button(_("Edit query"))
-        self.enable_drag_source(b)
+        # Enable DND
+        def get_element():
+            return self.element
+        enable_drag_source(b, get_element, self.controller)
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
         vbox.pack_start(b, expand=False)
 
@@ -504,8 +507,8 @@ CLASS2COLUMN[Query]=QueryColumn
 
 class ResourceColumn(FinderColumn):
     def __init__(self, controller=None, node=None, callback=None, parent=None):
+        self.element=node[DetailedTreeModel.COLUMN_ELEMENT]
         FinderColumn.__init__(self, controller, node, callback, parent)
-        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
         self.update(node)
 
     def update(self, node=None):
@@ -535,7 +538,10 @@ class ResourceColumn(FinderColumn):
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
         b=self.label['edit']=gtk.Button(_("Edit resource"))
-        self.enable_drag_source(b)
+        # Enable DND
+        def get_element():
+            return self.element
+        enable_drag_source(b, get_element, self.controller)
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
         vbox.pack_start(b, expand=False)
         self.preview=gtk.VBox()
