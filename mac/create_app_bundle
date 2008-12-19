@@ -48,6 +48,7 @@ rm pangorc
 # Generate a pangorc pointing to the relocated directory
 cat > $Resources/pangorc.in <<EOF 
 [Pango]
+ModuleFiles=@userconf/pango.modules
 ModulesPath=@executable_path/../Frameworks/modules
 EOF
 
