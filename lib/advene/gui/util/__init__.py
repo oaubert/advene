@@ -385,6 +385,8 @@ def contextual_drag_begin(widget, context, element, controller):
                 l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (col, controller.get_title(element)))
             else:
                 l.set_text(controller.get_title(element))
+
+        w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
     elif isinstance(element, AnnotationType):
         l=gtk.Label()
         col=controller.get_element_color(element)
@@ -406,8 +408,6 @@ def contextual_drag_begin(widget, context, element, controller):
         l=gtk.Label("%s %s" % (helper.get_type(element),
                                controller.get_title(element)))
         v.pack_start(l, expand=False)
-
-    w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
 
     w.add(v)
     w.show_all()
