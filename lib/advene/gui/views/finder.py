@@ -38,7 +38,7 @@ import advene.rules.elements
 import advene.gui.popup
 import advene.util.helper as helper
 import advene.model.tal.context
-from advene.gui.util import drag_data_get_cb, get_target_types
+from advene.gui.util import drag_data_get_cb, get_target_types, enable_drag_source
 
 name="Package finder view plugin"
 
@@ -123,23 +123,6 @@ class FinderColumn(object):
         self.next=None
         return True
 
-    def drag_begin(self, widget, context):
-        context._element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
-        # FIXME: should define appropriate cursor here
-        return True
-
-    def enable_drag_source(self, l):
-        """Enable drag and drop for the l widget.
-
-        Note: we cannot use the generic gui.util.enable_drag_source
-        since the element can dynamically change without updating the callback.
-        """
-        l.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          get_target_types(self.node[DetailedTreeModel.COLUMN_ELEMENT]),
-                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
-        l.connect('drag-begin', self.drag_begin)
-        l.connect('drag-data-get', drag_data_get_cb, self.controller)
-
     def get_label_button(self, name=None):
         """Return a label button for the widget.
         """
@@ -155,7 +138,7 @@ class FinderColumn(object):
                 pass
 
         l.connect('clicked', self.on_column_activation)
-        self.enable_drag_source(l)
+        enable_drag_source(l, lambda: self.node[DetailedTreeModel.COLUMN_ELEMENT], self.controller)
         return l
 
     def build_widget(self):
@@ -363,8 +346,8 @@ CLASS2COLUMN[Relation]=RelationColumn
 
 class ViewColumn(FinderColumn):
     def __init__(self, controller=None, node=None, callback=None, parent=None):
+        self.element=node[DetailedTreeModel.COLUMN_ELEMENT]
         FinderColumn.__init__(self, controller, node, callback, parent)
-        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
         self.update(node)
 
     def update(self, node=None):
@@ -418,7 +401,9 @@ class ViewColumn(FinderColumn):
         b=self.label['edit']=gtk.Button(_("Edit view"))
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
         # Enable DND
-        self.enable_drag_source(b)
+        def get_element():
+            return self.element
+        enable_drag_source(b, get_element, self.controller)
 
         vbox.pack_start(b, expand=False)
 
