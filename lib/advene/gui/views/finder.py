@@ -38,7 +38,7 @@ import advene.rules.elements
 import advene.gui.popup
 import advene.util.helper as helper
 import advene.model.tal.context
-from advene.gui.util import drag_data_get_cb, get_target_types, enable_drag_source
+from advene.gui.util import drag_data_get_cb, get_target_types, enable_drag_source, contextual_drag_begin
 
 name="Package finder view plugin"
 
@@ -271,6 +271,7 @@ class ModelColumn(FinderColumn):
                 actions = gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY
                 button = 1
                 self.drag_context = treeview.drag_begin(targets, actions, button, self.drag_data[2])
+                contextual_drag_begin(treeview, self.drag_context, element, self.controller)
                 self.drag_context._element=element
 
     def build_widget(self):
