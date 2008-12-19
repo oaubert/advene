@@ -329,6 +329,8 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
     return True
 
 def contextual_drag_begin(widget, context, element, controller):
+    if callable(element):
+        element=element()
     context._element=element
 
     w=gtk.Window(gtk.WINDOW_POPUP)
@@ -399,10 +401,19 @@ def contextual_drag_end(widget, context):
 
 def enable_drag_source(widget, element, controller):
     """Initialize support for DND from widget.
+    
+    element can be either an Advene object instance, or a method which
+    returns such an instance. This allows to use this generic method
+    with dynamic widgets (which can hold reference to multiple
+    elements), such as treeviews or reusable components.
     """
+    if callable(element):
+        el=element()
+    else:
+        el=element
     # Generic support
     widget.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                           get_target_types(element),
+                           get_target_types(el),
                            gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
     widget.connect('drag-begin', contextual_drag_begin, element, controller)
     widget.connect('drag-end', contextual_drag_end)
