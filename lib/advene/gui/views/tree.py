@@ -30,7 +30,7 @@ from advene.model.resources import Resources, ResourceData
 from advene.model.query import Query
 from advene.model.view import View
 from advene.gui.views import AdhocView
-from advene.gui.util import drag_data_get_cb, get_target_types
+from advene.gui.util import drag_data_get_cb, get_target_types, contextual_drag_begin
 
 import advene.gui.edit.elements
 import advene.gui.popup
@@ -514,6 +514,8 @@ class TreeWidget(AdhocView):
                 self.drag_context = treeview.drag_begin(targets, actions, button, self.drag_data[2])
                 # This call does not affect the icon:
                 self.drag_context._element=element
+                contextual_drag_begin(treeview, self.drag_context, element, self.controller)
+
 
     def get_selected_node (self, tree_view):
         """Return the currently selected node.
