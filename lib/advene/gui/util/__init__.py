@@ -340,19 +340,19 @@ def contextual_drag_begin(widget, context, element, controller):
     black=gtk.gdk.color_parse('black')
     white=gtk.gdk.color_parse('white')
 
-    for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                  gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                  gtk.STATE_PRELIGHT):
-        style.bg[state]=black
-        style.fg[state]=white
-        style.text[state]=white
-        #style.base[state]=white
-    w.set_style(style)
-
     v=gtk.VBox()
     v.set_style(style)
 
     if isinstance(element, (int, long, Annotation)):
+        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                      gtk.STATE_PRELIGHT):
+            style.bg[state]=black
+            style.fg[state]=white
+            style.text[state]=white
+            #style.base[state]=white
+        w.set_style(style)
+
         h=gtk.HBox()
         h.set_style(style)
         begin=gtk.Image()
@@ -385,6 +385,27 @@ def contextual_drag_begin(widget, context, element, controller):
                 l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (col, controller.get_title(element)))
             else:
                 l.set_text(controller.get_title(element))
+    elif isinstance(element, AnnotationType):
+        l=gtk.Label()
+        col=controller.get_element_color(element)
+        if col is None:
+            col='white'
+        l.set_markup(_('<span background="%(color)s">Annotation Type %(title)s</span>:\n%(count)s') % {
+                'color': col,
+                'title': controller.get_title(element),
+                'count': helper.format_element_name('annotation', len(element.annotations)),
+                })
+        v.pack_start(l, expand=False)
+    elif isinstance(element, RelationType):
+        l=gtk.Label(_("Relation Type %(title)s:\n%(count)s") % {
+                'title': controller.get_title(element),
+                'count': helper.format_element_name('relation', len(element.relations)),
+                })
+        v.pack_start(l, expand=False)
+    else:
+        l=gtk.Label("%s %s" % (helper.get_type(element),
+                               controller.get_title(element)))
+        v.pack_start(l, expand=False)
 
     w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
 
@@ -401,7 +422,7 @@ def contextual_drag_end(widget, context):
 
 def enable_drag_source(widget, element, controller):
     """Initialize support for DND from widget.
-    
+
     element can be either an Advene object instance, or a method which
     returns such an instance. This allows to use this generic method
     with dynamic widgets (which can hold reference to multiple
