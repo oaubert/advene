@@ -336,77 +336,78 @@ def contextual_drag_begin(widget, context, element, controller):
     w=gtk.Window(gtk.WINDOW_POPUP)
     w.set_decorated(False)
 
-    style=w.get_style().copy()
+    bw_style=w.get_style().copy()
     black=gtk.gdk.color_parse('black')
     white=gtk.gdk.color_parse('white')
+    for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                  gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                  gtk.STATE_PRELIGHT):
+        bw_style.bg[state]=black
+        bw_style.fg[state]=white
+        bw_style.text[state]=white
+        #bw_style.base[state]=white
 
     v=gtk.VBox()
-    v.set_style(style)
+    v.set_style(bw_style)
 
-    if isinstance(element, (int, long, Annotation)):
-        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
-            style.bg[state]=black
-            style.fg[state]=white
-            style.text[state]=white
-            #style.base[state]=white
-        w.set_style(style)
+    def get_coloured_label(t, color=None):
+        l=gtk.Label()
+        #l.set_ellipsize(pango.ELLIPSIZE_END)
+        if color is None:
+            color='white'
+        l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (color, t))
+        return l
+    
+    cache=controller.package.imagecache
 
+    if isinstance(element, (long, int)):
+        begin=gtk.image_new_from_pixbuf(png_to_pixbuf (cache.get(element, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
+        begin.set_style(bw_style)
+
+        l=gtk.Label()
+        l.set_style(bw_style)
+        l.set_text(helper.format_time(element))
+        l.set_style(bw_style)
+
+        v.pack_start(begin, expand=False)
+        v.pack_start(l, expand=False)
+        w.set_style(bw_style)
+        w.set_size_request(long(1.5 * config.data.preferences['drag-snapshot-width']), -1)
+    elif isinstance(element, Annotation):
+        # Pictures HBox
         h=gtk.HBox()
-        h.set_style(style)
-        begin=gtk.Image()
+        h.set_style(bw_style)
+        begin=gtk.image_new_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
+        begin.set_style(bw_style)
         h.pack_start(begin, expand=False)
-        padding=gtk.HBox()
         # Padding
-        h.pack_start(padding, expand=True)
-        end=gtk.Image()
+        h.pack_start(gtk.HBox(), expand=True)
+        end=gtk.image_new_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.end), width=config.data.preferences['drag-snapshot-width']))
+        end.set_style(bw_style)
         h.pack_start(end, expand=False)
         v.pack_start(h, expand=False)
-        l=gtk.Label()
-        l.set_ellipsize(pango.ELLIPSIZE_END)
-        l.set_style(style)
+
+        l=get_coloured_label(controller.get_title(element), controller.get_element_color(element))
+        l.set_style(bw_style)
         v.pack_start(l, expand=False)
-
-        cache=controller.package.imagecache
-        if isinstance(element, (long, int)):
-            begin.set_from_pixbuf(png_to_pixbuf (cache.get(element, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
-            end.hide()
-            padding.hide()
-            l.set_text(helper.format_time(element))
-        elif isinstance(element, Annotation):
-            # It can be an annotation
-            begin.set_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
-            end.set_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.end), width=config.data.preferences['drag-snapshot-width']))
-            end.show()
-            padding.show()
-            col=controller.get_element_color(element)
-            if col is not None:
-                l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (col, controller.get_title(element)))
-            else:
-                l.set_text(controller.get_title(element))
-
+        w.set_style(bw_style)
         w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
     elif isinstance(element, AnnotationType):
-        l=gtk.Label()
-        col=controller.get_element_color(element)
-        if col is None:
-            col='white'
-        l.set_markup(_('<span background="%(color)s">Annotation Type %(title)s</span>:\n%(count)s') % {
-                'color': col,
+        l=get_coloured_label(_("Annotation Type %(title)s:\n%(count)s") % {
                 'title': controller.get_title(element),
                 'count': helper.format_element_name('annotation', len(element.annotations)),
-                })
+                }, controller.get_element_color(element))
         v.pack_start(l, expand=False)
     elif isinstance(element, RelationType):
-        l=gtk.Label(_("Relation Type %(title)s:\n%(count)s") % {
+        l=get_coloured_label(_("Relation Type %(title)s:\n%(count)s") % {
                 'title': controller.get_title(element),
                 'count': helper.format_element_name('relation', len(element.relations)),
-                })
+                }, controller.get_element_color(element))
         v.pack_start(l, expand=False)
     else:
-        l=gtk.Label("%s %s" % (helper.get_type(element),
-                               controller.get_title(element)))
+        l=get_coloured_label("%s %s" % (helper.get_type(element),
+                                        controller.get_title(element)),
+                             controller.get_element_color(element))
         v.pack_start(l, expand=False)
 
     w.add(v)
