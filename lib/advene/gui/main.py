@@ -4113,8 +4113,6 @@ class AdveneGUI(object):
 
             This method is meant to be run in its own thread.
             """
-            pb._datapoints=[]
-
             shot_re=re.compile('Shot log.*?(\d+)')
 
             argv=[ config.data.path['shotdetect'],
@@ -4204,6 +4202,7 @@ class AdveneGUI(object):
         v.pack_start(progressbar, expand=False)
 
         progressbar._window=w
+        progressbar._datapoints=[]
 
         hb=gtk.HBox()
 
