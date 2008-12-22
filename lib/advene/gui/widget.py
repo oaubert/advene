@@ -277,7 +277,8 @@ class AnnotationWidget(GenericColorButtonWidget):
         w=gtk.Window(gtk.WINDOW_POPUP)
         w.set_decorated(False)
         # Set white on black background
-        w.set_style(get_color_style(w, 'black', 'white'))
+        style=get_color_style(w, 'black', 'white')
+        w.set_style(style)
 
         v=gtk.VBox()
         v.set_style(style)
