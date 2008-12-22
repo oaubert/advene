@@ -363,10 +363,13 @@ class AdveneGUI(object):
                 return True
             return False
 
-        def adhoc_view_drag_begin(widget, context, pixmap):
+        def adhoc_view_drag_begin(widget, context, pixmap, view_name):
             w=gtk.Window(gtk.WINDOW_POPUP)
             w.set_decorated(False)
-            w.add(gtk.image_new_from_file(config.data.advenefile( ( 'pixmaps', pixmap) )))
+            hb=gtk.HBox()
+            hb.pack_start(gtk.image_new_from_file(config.data.advenefile( ( 'pixmaps', pixmap) )), expand=False)
+            hb.pack_start(gtk.Label(view_name), expand=False)
+            w.add(hb)
             w.show_all()
             context.set_icon_widget(w, 16, 16)
             return True
@@ -452,7 +455,7 @@ class AdveneGUI(object):
             i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
             b.add(i)
             self.tooltips.set_tip(b, tip)
-            b.connect('drag-begin', adhoc_view_drag_begin, pixmap)
+            b.connect('drag-begin', adhoc_view_drag_begin, pixmap, tip)
             b.connect('drag-data-get', adhoc_view_drag_sent, name)
             b.connect('clicked', open_view_menu, name)
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
