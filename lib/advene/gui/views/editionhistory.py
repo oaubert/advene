@@ -71,6 +71,7 @@ class EditionHistory(AdhocView):
             w.foreach(w.remove)
             for e in reversed(elements):
                 b=gtk.Button("\n".join((helper.get_type(e), self.controller.get_title(e))), use_underline=False)
+                b.set_alignment(0, 0)
                 col=self.controller.get_element_color(e)
                 if col:
                     try:
