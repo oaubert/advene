@@ -355,6 +355,11 @@ class ViewBook(AdhocView):
             if v is not None:
                 self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
             return True
+        elif targetType == config.data.target_type['relation']:
+            v=self.controller.package.relations.get(unicode(selection.data, 'utf8'))
+            if v is not None:
+                self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
+            return True
         elif targetType == config.data.target_type['annotation-type']:
             at=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
             # Propose a menu to open various views for the annotation-type:
@@ -458,6 +463,7 @@ class ViewBook(AdhocView):
                                config.data.drag_type['schema'] +
                                config.data.drag_type['annotation-type'] +
                                config.data.drag_type['annotation'] +
+                               config.data.drag_type['relation'] +
                                config.data.drag_type['timestamp'],
                                gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK)
 
