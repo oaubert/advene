@@ -455,8 +455,16 @@ class Media(Common):
 
     def overlay(self, *args, **params):
         """Return the overlayed snapshot for the given annotation.
+
+        Snapshot syntax: /media/overlay/package_alias/id
+        
+        The expression can be followed by a TALES expression, which is
+        then used to specify the element to display.
+        For instance, 
+        /media/overlay/advene/a25/fragment/begin/formatted
+        or 
+        /media/overlay/advene/a25/content/parsed/name
         """
-        # snapshot syntax: /media/overlayed/package_alias/id
         res=[]
         if not args:
             res.append(self.start_html (_("Access to packages snapshots"), duplicate_title=True, mode='navigation'))
@@ -479,19 +487,23 @@ class Media(Common):
         if not p.imagecache.is_initialized(position):
             self.no_cache()
         snapshot=p.imagecache[position]
-        if 'svg' in a.content.mimetype:
+
+        if args[2:]:
+            # There is a format specifier. It should be a TALES
+            # expression that will be applied to the annotation (no
+            # need to specify here).
+            path=[ 'here' ]
+            path.extend(args[2:])
+            path='/'.join(path)
+            ctx=self.controller.build_context(here=a)
+            svg_data=unicode( ctx.evaluateValue(path) )
+        elif 'svg' in a.content.mimetype:
             # Overlay svg
             svg_data=a.content.data
         else:
             # Overlay annotation title
             svg_data=self.controller.get_title(a)
-            # Generate pseudo-svg with annotation content
-            svg_data="""<svg version='1' preserveAspectRatio="xMinYMin meet" viewBox='0 0 320 200'>
-  <text x='10' y='190' fill="white" font-size="24" stroke="black" font-family="sans-serif">
-%s
-  </text>
-</svg>
-""" % a.content.data
+
         if self.controller.gui:
             img=self.controller.gui.overlay(snapshot, svg_data)
         else:
