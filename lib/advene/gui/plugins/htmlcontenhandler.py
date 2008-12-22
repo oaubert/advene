@@ -53,7 +53,7 @@ class AnnotationPlaceholder:
         if typ == 'data': tag is in fact the data itself.
         if typ == 'start': attr is a dictionary with the attributes
         """
-        if typ == 'end' and tag == 'table':
+        if typ == 'end' and tag == 'span':
             return False
         return True
 
@@ -82,8 +82,7 @@ class AnnotationPlaceholder:
             'content': self.controller.get_title(self.annotation),
             'urlbase': urlbase,
             }
-        data=[ """<table class="advene:annotation" advene:annotation="%s" advene:presentation="%s">""" % (self.annotation.id, ':'.join(self.presentation)) ]
-        data.append( """<tr><td>""")
+        data=[ """<span class="advene:annotation" advene:annotation="%s" advene:presentation="%s">""" % (self.annotation.id, ':'.join(self.presentation)) ]
 
         if 'link' in self.presentation:
             data.append("""<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s>""" % d)
@@ -105,7 +104,7 @@ class AnnotationPlaceholder:
         if 'link' in self.presentation:
             data.append('</a>')
 
-        data.append('</td></tr></table>')
+        data.append('</span>')
 
         return "".join(data)
 
@@ -157,7 +156,7 @@ class AnnotationPlaceholder:
     def build_widget(self):
         vbox=gtk.VBox()
         vbox.as_html=self.as_html
-        vbox._tag='table'
+        vbox._tag='span'
         vbox._attr=[]
         return vbox
 
