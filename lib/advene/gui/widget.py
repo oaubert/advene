@@ -789,9 +789,24 @@ class RelationRepresentation(gtk.Button):
         self.relation=relation
         self.controller=controller
         self.direction=direction
-        super(RelationRepresentation, self).__init__(u'%s %s %s' % (self.arrow[direction], controller.get_title(relation), self.arrow[direction]))
+        super(RelationRepresentation, self).__init__()
+        l=gtk.Label()
+        self.add(l)
+        l.show()
+        self.refresh()
         self.connect('button-press-event', self.button_press_handler, relation)
         enable_drag_source(self, self.relation, self.controller)
+
+    def refresh(self):
+        l=self.get_children()[0]
+        t=u'%s %s %s' % (self.arrow[self.direction], 
+                         self.controller.get_title(self.relation), 
+                         self.arrow[self.direction])
+        color=self.controller.get_element_color(self.relation)
+        if color:
+            l.set_markup('<span background="%s">%s</span>' % (color, t))
+        else:
+            l.set_text(t)
 
     def button_press_handler(self, widget, event, relation):
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
