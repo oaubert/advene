@@ -45,7 +45,7 @@ import gobject
 import advene.core.config as config
 from advene.core.imagecache import ImageCache
 
-from advene.gui.util import png_to_pixbuf
+from advene.gui.util import png_to_pixbuf, enable_drag_source
 from advene.gui.util import encode_drop_parameters
 import advene.util.helper as helper
 from advene.model.annotation import Annotation
@@ -764,40 +764,7 @@ class AnnotationRepresentation(gtk.Button):
                                                           vertical=False,
                                                           height=20))
         self.connect('button-press-event', self.button_press_handler, annotation)
-        self.connect('drag-data-get', self.drag_sent)
-        # The widget can generate drags
-        self.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                             config.data.drag_type['annotation']
-                             + config.data.drag_type['uri-list']
-                             + config.data.drag_type['text-plain']
-                             + config.data.drag_type['TEXT']
-                             + config.data.drag_type['STRING']
-                             + config.data.drag_type['timestamp']
-                             + config.data.drag_type['tag']
-                             ,
-                             gtk.gdk.ACTION_LINK)
-
-    def drag_sent(self, widget, context, selection, targetType, eventTime):
-        """Handle the drag-sent event.
-        """
-        if targetType == config.data.target_type['annotation']:
-
-            selection.set(selection.target, 8, widget.annotation.uri.encode('utf8'))
-        elif targetType == config.data.target_type['uri-list']:
-            c=self.controller.build_context(here=widget.annotation)
-            uri=c.evaluateValue('here/absolute_url')
-            selection.set(selection.target, 8, uri.encode('utf8'))
-        elif (targetType == config.data.target_type['text-plain']
-              or targetType == config.data.target_type['TEXT']
-              or targetType == config.data.target_type['STRING']):
-            selection.set(selection.target, 8, widget.annotation.content.data.encode('utf8'))
-        elif targetType == config.data.target_type['timestamp']:
-            selection.set(selection.target, 8, encode_drop_parameters(timestamp=widget.annotation.fragment.begin,
-                                                                      comment=self.controller.get_title(widget.annotation)))
-        else:
-            return False
-        return True
-
+        enable_drag_source(self, self.annotation, self.controller)
 
     def button_press_handler(self, widget, event, annotation):
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
@@ -824,6 +791,7 @@ class RelationRepresentation(gtk.Button):
         self.direction=direction
         super(RelationRepresentation, self).__init__(u'%s %s %s' % (self.arrow[direction], controller.get_title(relation), self.arrow[direction]))
         self.connect('button-press-event', self.button_press_handler, relation)
+        enable_drag_source(self, self.relation, self.controller)
 
     def button_press_handler(self, widget, event, relation):
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
@@ -909,53 +877,8 @@ class TimestampRepresentation(gtk.Button):
         self.refresh()
 
         self.connect('button-press-event', self._button_press_handler)
-        self.connect('drag-data-get', self._drag_sent)
-        # The widget can generate drags
-        self.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                             config.data.drag_type['timestamp']
-                             + config.data.drag_type['text-plain']
-                             + config.data.drag_type['TEXT']
-                             + config.data.drag_type['STRING']
-                             ,
-                             gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
 
-        # Define drag cursor
-        def _drag_begin(widget, context):
-            w=gtk.Window(gtk.WINDOW_POPUP)
-            w.set_decorated(False)
-            w.set_style(style)
-
-            v=gtk.VBox()
-            v.set_style(style)
-            i=gtk.Image()
-            v.pack_start(i, expand=False)
-            l=gtk.Label()
-            l.set_style(style)
-            l.set_ellipsize(pango.ELLIPSIZE_END)
-            v.pack_start(l, expand=False)
-
-            if self.value is None:
-                val=-1
-            else:
-                val=self.value
-            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(val, epsilon=self.epsilon), width=config.data.preferences['drag-snapshot-width']))
-            l.set_markup('<small>%s</small>' % helper.format_time(self.value))
-
-            w.add(v)
-            w.show_all()
-            w.set_default_size(3 * config.data.preferences['drag-snapshot-width'], -1)
-            widget._icon=w
-            context.set_icon_widget(w, 0, 0)
-            return True
-
-        def _drag_end(widget, context):
-            widget._icon.destroy()
-            widget._icon=None
-            return True
-        # drag_set_icon_cursor does not work on native Gtk on MacOS X
-        if not (config.data.os == 'darwin' and not os.environ.get('DISPLAY')):
-            self.connect('drag-begin', _drag_begin)
-            self.connect('drag-end', _drag_end)
+        enable_drag_source(self, self.get_value, self.controller)
 
         def enter_bookmark(widget, event):
             self.controller.notify('BookmarkHighlight', timestamp=self.value, immediate=True)
@@ -992,23 +915,6 @@ class TimestampRepresentation(gtk.Button):
         self._value=v
         self.refresh()
     value=property(get_value, set_value, doc="Timestamp value")
-
-    def _drag_sent(self, widget, context, selection, targetType, eventTime):
-        """Handle the drag-sent event.
-        """
-        if (targetType == config.data.target_type['text-plain']
-              or targetType == config.data.target_type['TEXT']
-              or targetType == config.data.target_type['STRING']):
-            selection.set(selection.target, 8, helper.format_time(self._value).encode('utf-8'))
-        elif targetType == config.data.target_type['timestamp']:
-            if self.comment_getter is not None:
-                    selection.set(selection.target, 8, encode_drop_parameters(timestamp=self._value,
-                                                                              comment=self.comment_getter()))
-            else:
-                    selection.set(selection.target, 8, encode_drop_parameters(timestamp=self._value))
-        else:
-            return False
-        return True
 
     def goto_and_refresh(self, *p):
         """Goto the timestamp, and refresh the image if necessary and possible.
