@@ -262,7 +262,7 @@ def get_target_types(el):
     elif isinstance(el, AnnotationType):
         targets=config.data.drag_type['annotation-type']
     elif isinstance(el, RelationType):
-        targets=config.data.drag_type['annotation-type']
+        targets=config.data.drag_type['relation-type']
     elif isinstance(el, Query):
         targets=config.data.drag_type['query']
     elif isinstance(el, Schema):
