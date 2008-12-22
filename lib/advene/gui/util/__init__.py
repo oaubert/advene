@@ -316,9 +316,10 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         selection.set(selection.target, 8, uri.encode('utf8'))
     elif targetType == typ['timestamp']:
         if isinstance(el, (int, long)):
-            selection.set(selection.target, 8, str(el))
+            selection.set(selection.target, 8, encode_drop_parameters(timestamp=el))
         elif isinstance(el, Annotation):
-            selection.set(selection.target, 8, str(el.fragment.begin))
+            selection.set(selection.target, 8, encode_drop_parameters(timestamp=el.fragment.begin,
+                                                                      comment=controller.get_title(el)))
         else:
             print "Inconsistent DND target"
         return True
