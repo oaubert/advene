@@ -564,7 +564,8 @@ class EditRelationPopup (EditElementPopup):
         hb = gtk.HBox()
         for a in self.element.members:
             b = AnnotationRepresentation(a, controller=self.controller)
-            hb.add(b)
+            b.set_alignment(0, 0)
+            hb.pack_start(b, expand=False)
         hb.show_all()
         vbox.pack_start(self.framed(hb, _("Members")), expand=True)
 
@@ -2262,6 +2263,7 @@ class EditRelationsForm(EditForm):
             b=RelationRepresentation(r, controller=self.controller, direction=direction)
             self.view.attach(b, 0, 1, i, i + 1)
             a=AnnotationRepresentation(other, controller=self.controller)
+            a.set_alignment(0, 0)
             self.view.attach(a, 1, 2, i, i + 1)
         self.view.show_all()
         return
@@ -2276,5 +2278,6 @@ class EditRelationsForm(EditForm):
 
     def get_view(self, compact=False):
         self.view=gtk.Table()
+        self.view.set_homogeneous(False)
         self.refresh()
         return self.view
