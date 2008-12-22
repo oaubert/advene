@@ -2192,17 +2192,22 @@ class AdveneGUI(object):
             print unicode(msg).encode('utf-8')
         return
 
-    def get_illustrated_text(self, text, position=None, vertical=False, height=40):
+    def get_illustrated_text(self, text, position=None, vertical=False, height=40, color=None):
         """Return a HBox with the given text and a snapshot corresponding to position.
         """
         if vertical:
             box=gtk.VBox()
         else:
             box=gtk.HBox()
-        box.add(image_from_position(self.controller,
-                                    position=position,
-                                    height=height))
-        box.add(gtk.Label(text))
+        box.pack_start(image_from_position(self.controller,
+                                           position=position,
+                                           height=height), expand=False)
+        l=gtk.Label()
+        if color:
+            l.set_markup('<span background="%s">%s</span>' % (color, text))
+        else:
+            l.set_text(text)
+        box.pack_start(l, expand=False)
         return box
 
     def register_viewclass(self, viewclass, name=None):
