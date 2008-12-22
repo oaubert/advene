@@ -22,6 +22,7 @@
 from advene.gui.views import AdhocView
 
 from gettext import gettext as _
+from advene.gui.util import get_color_style
 
 import gtk
 
@@ -60,20 +61,7 @@ class CaptionView(AdhocView):
     def build_widget(self):
         v=gtk.HBox()
 
-        style=v.get_style().copy()
-        self.style = style
-
-        black=gtk.gdk.color_parse('black')
-        white=gtk.gdk.color_parse('white')
-
-        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
-            style.bg[state]=black
-            style.fg[state]=white
-            style.text[state]=white
-            #style.base[state]=white
-
+        style=get_color_style(v, 'black', 'white')
         v.set_style(style)
 
         def create_label(text, widget):

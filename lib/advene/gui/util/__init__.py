@@ -171,6 +171,26 @@ def name2color(color):
         gtk_color=None
     return gtk_color
 
+def get_color_style(w, background=None, foreground=None):
+    """Return a style for a widget with given colors.
+    """
+    if background is None:
+        background='white'
+    if foreground is None:
+        foreground='black'
+    b=name2color(background)
+    f=name2color(foreground)
+
+    style=w.get_style().copy()
+    for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                  gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                  gtk.STATE_PRELIGHT):
+        style.bg[state]=b
+        style.fg[state]=f
+        style.text[state]=f
+        #style.base[state]=white
+    return style
+    
 arrow_up_xpm="""13 16 2 1
        c None
 .      c #FF0000
@@ -339,16 +359,8 @@ def contextual_drag_begin(widget, context, element, controller):
     w=gtk.Window(gtk.WINDOW_POPUP)
     w.set_decorated(False)
 
-    bw_style=w.get_style().copy()
-    black=name2color('black')
-    white=name2color('white')
-    for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                  gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                  gtk.STATE_PRELIGHT):
-        bw_style.bg[state]=black
-        bw_style.fg[state]=white
-        bw_style.text[state]=white
-        #bw_style.base[state]=white
+    bw_style=get_color_style(w, 'black', 'white')
+    w.set_style(bw_style)
 
     v=gtk.VBox()
     v.set_style(bw_style)

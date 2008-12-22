@@ -46,7 +46,7 @@ import advene.core.config as config
 from advene.core.imagecache import ImageCache
 
 from advene.gui.util import png_to_pixbuf, enable_drag_source
-from advene.gui.util import encode_drop_parameters
+from advene.gui.util import encode_drop_parameters, get_color_style
 import advene.util.helper as helper
 from advene.model.annotation import Annotation
 
@@ -276,19 +276,8 @@ class AnnotationWidget(GenericColorButtonWidget):
 
         w=gtk.Window(gtk.WINDOW_POPUP)
         w.set_decorated(False)
-
-        style=w.get_style().copy()
-        black=gtk.gdk.color_parse('black')
-        white=gtk.gdk.color_parse('white')
-
-        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
-            style.bg[state]=black
-            style.fg[state]=white
-            style.text[state]=white
-            #style.base[state]=white
-        w.set_style(style)
+        # Set white on black background
+        w.set_style(get_color_style(w, 'black', 'white'))
 
         v=gtk.VBox()
         v.set_style(style)
@@ -862,18 +851,7 @@ class TimestampRepresentation(gtk.Button):
         self.extend_popup_menu=None
         self.highlight=False
 
-        style=self.get_style().copy()
-        black=gtk.gdk.color_parse('black')
-        white=gtk.gdk.color_parse('white')
-
-        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
-            style.bg[state]=black
-            style.base[state]=black
-            style.fg[state]=white
-            style.text[state]=white
-            #style.base[state]=white
+        style=get_color_style(self, 'black', 'white')
         self.set_style(style)
 
         box=gtk.VBox()

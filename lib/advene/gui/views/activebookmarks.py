@@ -27,7 +27,7 @@ import urllib
 
 # Advene part
 import advene.core.config as config
-from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf, get_pixmap_toolbutton
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf, get_pixmap_toolbutton, get_color_style
 from advene.gui.util import encode_drop_parameters, decode_drop_parameters, shaped_window_from_xpm, arrow_right_xpm
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
@@ -1353,17 +1353,7 @@ class ActiveBookmark(object):
             w=gtk.Window(gtk.WINDOW_POPUP)
             w.set_decorated(False)
 
-            style=w.get_style().copy()
-            black=gtk.gdk.color_parse('black')
-            white=gtk.gdk.color_parse('white')
-
-            for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                          gtk.STATE_PRELIGHT):
-                style.bg[state]=black
-                style.fg[state]=white
-                style.text[state]=white
-                #style.base[state]=white
+            style=get_color_style(w, 'black', 'white')
             w.set_style(style)
 
             v=gtk.VBox()
