@@ -2252,6 +2252,8 @@ class EditRelationsForm(EditForm):
 
     def refresh(self):
         self.view.foreach(self.view.remove)
+        col1=gtk.SizeGroup(gtk.SIZE_GROUP_HORIZONTAL)
+        col2=gtk.SizeGroup(gtk.SIZE_GROUP_HORIZONTAL)
         for i, r in enumerate(self.element.relations):
             # Determine the direction
             if r.members[0] == self.element:
@@ -2260,11 +2262,19 @@ class EditRelationsForm(EditForm):
             else:
                 direction="from"
                 other=r.members[0]
-            b=RelationRepresentation(r, controller=self.controller, direction=direction)
-            self.view.attach(b, 0, 1, i, i + 1)
+            hb=gtk.HBox()
+
+            b=RelationRepresentation(r, controller=self.controller, direction=direction)            
+            b.set_alignment(0, 0)
+            col1.add_widget(b)
+            hb.pack_start(b, expand=False)
+
             a=AnnotationRepresentation(other, controller=self.controller)
             a.set_alignment(0, 0)
-            self.view.attach(a, 1, 2, i, i + 1)
+            col2.add_widget(a)
+            hb.pack_start(a, expand=False)
+            
+            self.view.pack_start(hb, expand=False)
         self.view.show_all()
         return
 
@@ -2277,7 +2287,6 @@ class EditRelationsForm(EditForm):
         return True
 
     def get_view(self, compact=False):
-        self.view=gtk.Table()
-        self.view.set_homogeneous(False)
+        self.view=gtk.VBox()
         self.refresh()
         return self.view
