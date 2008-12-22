@@ -480,6 +480,7 @@ class TranscriptionView(AdhocView):
     def populate_popup_cb(self, textview, menu):
         if self.currentannotation is None:
             return False
+        menu.foreach(menu.remove)
 
         item=gtk.SeparatorMenuItem()
         item.show()
