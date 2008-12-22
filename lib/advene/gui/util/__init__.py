@@ -252,6 +252,8 @@ def get_target_types(el):
         targets= (config.data.drag_type['annotation']
                   + config.data.drag_type['timestamp']
                   + config.data.drag_type['tag'])
+    elif isinstance(el, Relation):
+        targets= config.data.drag_type['relation']
     elif isinstance(el, View):
         if helper.get_view_type(el) == 'adhoc':
             targets=config.data.drag_type['adhoc-view']
