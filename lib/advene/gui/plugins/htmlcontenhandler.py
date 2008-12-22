@@ -234,6 +234,7 @@ class HTMLContentHandler (ContentHandler):
         ctx=textview.get_current_context()
 
         if ctx:
+            menu.foreach(menu.remove)
             if ctx[-1]._tag == 'img':
                 # There is an image
                 item=gtk.MenuItem("Image")
