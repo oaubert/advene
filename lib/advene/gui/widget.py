@@ -762,7 +762,8 @@ class AnnotationRepresentation(gtk.Button):
         self.add(self.controller.gui.get_illustrated_text(text=self.controller.get_title(annotation),
                                                           position=annotation.fragment.begin,
                                                           vertical=False,
-                                                          height=20))
+                                                          height=20,
+                                                          color=controller.get_element_color(annotation)))
         self.connect('button-press-event', self.button_press_handler, annotation)
         enable_drag_source(self, self.annotation, self.controller)
 
