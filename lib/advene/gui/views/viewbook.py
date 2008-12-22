@@ -372,7 +372,7 @@ class ViewBook(AdhocView):
                 (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location, label=_("Query %s") % title)),
                 (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location, label=_("Browsing %s") % title)),
                 ):
-                i=gtk.MenuItem(label, use_underline=False)
+                i=gtk.MenuItem(u"    " + label, use_underline=False)
                 i.connect('activate', action)
                 menu.append(i)
             menu.show_all()
@@ -396,7 +396,7 @@ class ViewBook(AdhocView):
                     (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
                     (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin ], destination=self.location)),
                     ):
-                    i=gtk.MenuItem(label, use_underline=False)
+                    i=gtk.MenuItem(u"    " + label, use_underline=False)
                     i.connect('activate', action)
                     menu.append(i)
 
@@ -412,7 +412,7 @@ class ViewBook(AdhocView):
                         i=gtk.MenuItem(self.controller.get_title(q), use_underline=False)
                         i.connect('activate', apply_query, q)
                         sm.append(i)
-                    i=gtk.MenuItem(_("as the context for the query..."), use_underline=False)
+                    i=gtk.MenuItem(u"    " + _("as the context for the query..."), use_underline=False)
                     i.set_submenu(sm)
                     menu.append(i)
             else:
@@ -425,7 +425,7 @@ class ViewBook(AdhocView):
                     (_("to create a new static view"), lambda i: create_and_open_view(sources)),
                     (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin for a in sources ], destination=self.location)),
                     ):
-                    i=gtk.MenuItem(label, use_underline=False)
+                    i=gtk.MenuItem(u"    " + label, use_underline=False)
                     i.connect('activate', action)
                     menu.append(i)
             menu.show_all()
