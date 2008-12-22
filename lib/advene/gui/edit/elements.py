@@ -498,7 +498,7 @@ class EditAnnotationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        nb.append_page(f.get_view(), small_label(_("Attributes")))
+        nb.append_page(f.get_view(), small_label(_("Metadata")))
 
         f = EditRelationsForm(element=self.element, controller=self.controller)
         self.register_form(f)
@@ -547,7 +547,7 @@ class EditRelationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        ex=self.expandable(f.get_view(), _("Attributes"), expanded=False)
+        ex=self.expandable(f.get_view(), _("Metadata"), expanded=False)
         vbox.pack_start(ex, expand=False)
 
         def button_press_handler(widget, event, annotation):
@@ -632,7 +632,7 @@ class EditViewPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (self.expandable(f.get_view (), _("Attributes"),
+        vbox.pack_start (self.expandable(f.get_view (), _("Metadata"),
                                          expanded=False), expand=False)
 
         if config.data.preferences['expert-mode']:
@@ -694,7 +694,7 @@ class EditQueryPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (self.expandable(f.get_view (),  _("Attributes"), expanded=False),
+        vbox.pack_start (self.expandable(f.get_view (),  _("Metadata"), expanded=False),
                          expand=False)
 
         f = EditContentForm (self.element.content, controller=self.controller,
@@ -752,7 +752,7 @@ class EditPackagePopup (EditElementPopup):
                                                'date':   _('Date')}
                                        )
 
-        vbox.pack_start (self.expandable(f.get_view (),  _("Attributes"), expanded=False),
+        vbox.pack_start (self.expandable(f.get_view (),  _("Metadata"), expanded=False),
                          expand=False)
 
         f = EditMetaForm(title=_("Description"),
@@ -843,7 +843,7 @@ class EditSchemaPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (self.expandable(f.get_view (),  _("Attributes"), expanded=False),
+        vbox.pack_start (self.expandable(f.get_view (),  _("Metadata"), expanded=False),
                          expand=False)
 
         f = EditMetaForm(title=_("Description"),
@@ -913,7 +913,7 @@ class EditAnnotationTypePopup (EditElementPopup):
                                                'date':   _('Date'),
                                                }
                                        )
-        vbox.pack_start(self.expandable(f.get_view(),  _("Attributes"), expanded=False), expand=False)
+        vbox.pack_start(self.expandable(f.get_view(),  _("Metadata"), expanded=False), expand=False)
 
         f = EditAttributeForm(title=_("MIME Type"),
                               element=self.element, name='mimetype',
@@ -1013,7 +1013,7 @@ class EditRelationTypePopup (EditElementPopup):
                                                'date':   _('Date'),
                                                }
                                        )
-        vbox.add(self.expandable(f.get_view(),  _("Attributes"), expanded=False))
+        vbox.add(self.expandable(f.get_view(),  _("Metadata"), expanded=False))
 
         members=[ ('#'+at.id, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
         members.append( ('', _("Any annotation type")) )
