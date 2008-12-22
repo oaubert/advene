@@ -38,7 +38,7 @@ import advene.rules.elements
 import advene.gui.popup
 import advene.util.helper as helper
 import advene.model.tal.context
-from advene.gui.util import drag_data_get_cb, get_target_types, enable_drag_source, contextual_drag_begin
+from advene.gui.util import drag_data_get_cb, get_target_types, enable_drag_source, contextual_drag_begin, name2color
 
 name="Package finder view plugin"
 
@@ -129,14 +129,9 @@ class FinderColumn(object):
         if not name:
             name=self.name
         l=gtk.Button(name, use_underline=False)
-        col=self.node[DetailedTreeModel.COLUMN_COLOR]
-        if col:
-            try:
-                color=gtk.gdk.color_parse(col)
-                style = l.modify_bg(gtk.STATE_NORMAL, color)
-            except ValueError:
-                pass
-
+        color=name2color(self.node[DetailedTreeModel.COLUMN_COLOR])
+        if color:
+            style = l.modify_bg(gtk.STATE_NORMAL, color)
         l.connect('clicked', self.on_column_activation)
         enable_drag_source(l, lambda: self.node[DetailedTreeModel.COLUMN_ELEMENT], self.controller)
         return l
@@ -183,14 +178,9 @@ class ModelColumn(FinderColumn):
         if self.node is None:
             return True
         self.label.set_label(self.name)
-        col=self.node[DetailedTreeModel.COLUMN_COLOR]
-        if col:
-            try:
-                color=gtk.gdk.color_parse(col)
-                style = self.label.modify_bg(gtk.STATE_NORMAL, color)
-            except ValueError:
-                pass
-
+        color=name2color(self.node[DetailedTreeModel.COLUMN_COLOR])
+        if color:
+            style = self.label.modify_bg(gtk.STATE_NORMAL, color)
         for row in self.get_valid_members(node):
             self.liststore.append(row)
 

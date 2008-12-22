@@ -36,7 +36,7 @@ except ImportError:
 import cairo
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.gui.views import AdhocView
-from advene.gui.util import dialog
+from advene.gui.util import dialog, name2color
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.elements import get_edit_popup
 import advene.util.helper as helper
@@ -1164,10 +1164,9 @@ class TypeExplorer (gtk.ScrolledWindow):
 
     def colorTextChange(self, w):
         col = self.entryCol.get_text()
-        if len(col)!=13:
-            return
-        gtk_color=gtk.gdk.color_parse(col)
-        self.bcol.set_color(gtk_color)
+        color=name2color(col)
+        if color is not None:
+            self.bcol.set_color(color)
 
     def colorChange(self, but):
         col=self.bcol.get_color()
@@ -1189,7 +1188,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         if v is None :
             v="#000000000000"
         try:
-            gtk_color=gtk.gdk.color_parse(v)
+            gtk_color=name2color(v)
             self.bcol.set_color(gtk_color)
         except:
             print "exception in color change"

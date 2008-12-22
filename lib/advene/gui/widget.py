@@ -45,14 +45,14 @@ import gobject
 import advene.core.config as config
 from advene.core.imagecache import ImageCache
 
-from advene.gui.util import png_to_pixbuf, enable_drag_source
+from advene.gui.util import png_to_pixbuf, enable_drag_source, name2color
 from advene.gui.util import encode_drop_parameters, get_color_style
 import advene.util.helper as helper
 from advene.model.annotation import Annotation
 
 import advene.gui.popup
 
-active_color=gtk.gdk.color_parse ('#fdfd4b')
+active_color=name2color('#fdfd4b')
 
 class GenericColorButtonWidget(gtk.DrawingArea):
     """ Widget emulating a color button widget

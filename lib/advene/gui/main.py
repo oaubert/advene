@@ -86,7 +86,7 @@ import advene.util.importer
 from advene.gui.util.completer import Indexer
 
 # GUI elements
-from advene.gui.util import get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png
+from advene.gui.util import get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
@@ -1060,7 +1060,7 @@ class AdveneGUI(object):
         try:
             c=self.controller.build_context(here=element)
             colname=c.evaluateValue(element.getMetaData(config.data.namespace, 'color'))
-            gtk_color=gtk.gdk.color_parse(colname)
+            gtk_color=name2color(colname)
         except:
             gtk_color=None
         d=gtk.ColorSelectionDialog(_("Choose a color"))

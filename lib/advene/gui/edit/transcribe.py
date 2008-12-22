@@ -103,9 +103,9 @@ class TranscriptionEdit(AdhocView):
             }
 
         self.colors = {
-            'default': gtk.gdk.color_parse ('lightblue'),
-            'ignore':  gtk.gdk.color_parse ('tomato'),
-            'current': gtk.gdk.color_parse ('green'),
+            'default': name2color('lightblue'),
+            'ignore':  name2color('tomato'),
+            'current': name2color('green'),
             }
 
         self.marks = []

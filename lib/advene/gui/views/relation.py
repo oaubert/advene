@@ -22,6 +22,7 @@ import advene.core.config as config
 from gettext import gettext as _
 
 import advene.gui.popup
+from advene.gui.util import name2color
 
 import gtk
 
@@ -71,7 +72,7 @@ class RelationsBox:
         self.package=package
         self.controller=controller
         self.relationviews=[]
-        self.active_color = gtk.gdk.color_parse ('red')
+        self.active_color = name2color('red')
         self.inactive_color = gtk.Button().get_style().bg[0]
         self.widget = self.build_widget()
 

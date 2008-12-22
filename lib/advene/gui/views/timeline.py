@@ -229,11 +229,10 @@ class TimeLine(AdhocView):
             default_position=self.minimum
 
         self.colors = {
-            'active': gtk.gdk.color_parse ('#fdfd4b'),
+            'active': name2color('#fdfd4b'),
             'inactive': gtk.Button().get_style().bg[0],
-            'background': gtk.gdk.color_parse('red'),
-            'relations': gtk.gdk.color_parse('orange'),
-            'white': gtk.gdk.color_parse('white'),
+            'background': name2color('red'),
+            'white': name2color('white'),
             }
 
         def handle_autoscroll_combo(combo):

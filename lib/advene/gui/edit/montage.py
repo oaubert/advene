@@ -90,7 +90,7 @@ class Montage(AdhocView):
 
         # Needed by AnnotationWidget
         self.button_height = 20
-        self.active_color=gtk.gdk.color_parse ('#fdfd4b')
+        self.active_color=name2color('#fdfd4b')
 
         self.master_view=None
 

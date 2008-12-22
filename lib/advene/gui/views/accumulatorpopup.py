@@ -27,7 +27,7 @@ import gtk
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-from advene.gui.util import get_pixmap_button
+from advene.gui.util import get_pixmap_button, name2color
 
 class DummyLock:
     def __init__(self):
@@ -63,7 +63,7 @@ class AccumulatorPopup(AdhocView):
         self.vertical=vertical
         self.scrollable=scrollable
 
-        self.new_color = gtk.gdk.color_parse ('tomato')
+        self.new_color = name2color('tomato')
         self.old_color = gtk.Button().get_style().bg[0]
 
         # List of tuples (widget, hidetime, frame)
