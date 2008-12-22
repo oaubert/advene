@@ -340,8 +340,8 @@ def contextual_drag_begin(widget, context, element, controller):
     w.set_decorated(False)
 
     bw_style=w.get_style().copy()
-    black=gtk.gdk.color_parse('black')
-    white=gtk.gdk.color_parse('white')
+    black=name2color('black')
+    white=name2color('white')
     for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
                   gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
                   gtk.STATE_PRELIGHT):
