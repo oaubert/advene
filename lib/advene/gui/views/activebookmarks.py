@@ -1331,7 +1331,8 @@ class ActiveBookmark(object):
                 selection.set(selection.target, 8, ("%s : %s" % (helper.format_time(self.begin),
                                                                  self.content)).encode('utf8'))
             elif targetType == config.data.target_type['timestamp']:
-                selection.set(selection.target, 8, encode_drop_parameters(timestamp=self.begin))
+                selection.set(selection.target, 8, encode_drop_parameters(timestamp=self.begin,
+                                                                          comment=self.content))
             else:
                 return False
             return True
