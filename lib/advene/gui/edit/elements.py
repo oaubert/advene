@@ -567,7 +567,7 @@ class EditRelationPopup (EditElementPopup):
             b.set_alignment(0, 0)
             hb.pack_start(b, expand=False)
         hb.show_all()
-        vbox.pack_start(self.framed(hb, _("Members")), expand=True)
+        vbox.pack_start(self.framed(hb, _("Members")), expand=False)
 
         # Tags
         f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
