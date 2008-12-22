@@ -268,10 +268,35 @@ class HTMLContentHandler (ContentHandler):
 
     def insert_annotation_content(self, choice, annotation, focus=False):
         """
-        choice: list of one or more strings: 'link', 'snapshot', 'timestamp', 'content', 'overlay'
+        choice: list of one or more strings: 'snapshot', 'timestamp', 'content', 'overlay'
         """
-        w=AnnotationPlaceholder(annotation, self.controller, choice)
-        self.editor.insert_widget(w.widget)
+        ctx=self.controller.build_context(annotation)
+        try:
+            urlbase=self.controller.server.urlbase.rstrip('/')
+        except AttributeError:
+            urlbase='http://localhost:1234'
+        d={ 
+            'id': annotation.id,
+            'href': urlbase + ctx.evaluateValue('here/player_url'),
+            'imgurl': urlbase + ctx.evaluateValue('here/snapshot_url'),
+            'timestamp': helper.format_time(annotation.fragment.begin),
+            'content': self.controller.get_title(annotation),
+            'urlbase': urlbase,
+            }
+        data=[ """<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s>""" % d ]
+        if 'overlay' in choice:
+            data.append("""<img title="Click here to play"  width="160" height="100" src="%(urlbase)s/media/overlay/advene/%(id)s"></img><br>""" % d)
+        elif 'snapshot' in choice:
+            data.append("""<img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img><br>""" % d)
+        if 'timestamp' in choice:
+            data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
+        if 'content' in choice:
+            data.append("""<span tal:content="package/annotations/%(id)s/representation">%(content)s</span>""" % d)
+        
+        data.append('</a>')
+
+        self.editor.feed("".join(data))
+        
         if focus:
             self.grab_focus()
         return True
@@ -344,9 +369,7 @@ class HTMLContentHandler (ContentHandler):
         vbox=gtk.VBox()
 
         self.editor=HTMLEditor()
-        # For debug:
-        self.controller.gui.ht=self.editor
-        self.editor.register_class_parser(self.class_parser)
+        #self.editor.register_class_parser(self.class_parser)
         try:
             self.editor.set_text(self.element.data)
         except Exception, e:
