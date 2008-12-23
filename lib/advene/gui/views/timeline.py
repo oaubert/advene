@@ -506,8 +506,9 @@ class TimeLine(AdhocView):
         if package is None:
             package = self.controller.package
 
-        self.adjustment.value=0
-        if not partial_update:
+        if partial_update:
+            pos=self.get_middle_position()
+        else:
             # It is not just an update, do a full redraw
             oldmax=self.maximum
             self.minimum=0
@@ -553,6 +554,9 @@ class TimeLine(AdhocView):
         self.update_legend_widget(self.legend)
         self.legend.show_all()
         self.fraction_event(widget=None)
+
+        if partial_update:
+            self.set_middle_position(pos)
         #self.layout.show_all()
         return
 
