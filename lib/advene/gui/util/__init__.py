@@ -431,8 +431,9 @@ def contextual_drag_begin(widget, context, element, controller):
     return True
 
 def contextual_drag_end(widget, context):
-    widget._icon.destroy()
-    widget._icon=None
+    if hasattr(widget, '_icon'):
+        widget._icon.destroy()
+        widget._icon=None
     return True
 
 def enable_drag_source(widget, element, controller):
