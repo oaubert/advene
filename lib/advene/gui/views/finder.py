@@ -430,8 +430,8 @@ CLASS2COLUMN[View]=ViewColumn
 
 class QueryColumn(FinderColumn):
     def __init__(self, controller=None, node=None, callback=None, parent=None):
+        self.element=node[DetailedTreeModel.COLUMN_ELEMENT]
         FinderColumn.__init__(self, controller, node, callback, parent)
-        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
         self.update(node)
 
     def update(self, node=None):
