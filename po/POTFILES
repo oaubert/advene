@@ -34,6 +34,7 @@
 ../lib/advene/gui/views/transcription.py
 ../lib/advene/gui/plugins/contenthandlers.py
 ../lib/advene/gui/plugins/actions.py
+../lib/advene/gui/plugins/htmlcontenhandler.py
 ../lib/advene/gui/plugins/eventaccumulator.py
 ../lib/advene/gui/edit/transcribe.py
 ../lib/advene/gui/edit/imports.py
@@ -52,9 +53,9 @@
 ../lib/advene/gui/widget.py
 ../lib/advene/gui/main.py
 ../lib/advene/gui/util/initialconfig.py
+../lib/advene/gui/util/__init__.py
 ../lib/advene/gui/util/dialog.py
 ../lib/advene/gui/util/dummy_translations.py
-../lib/advene/gui/assistants/annotationtype.py
 ../lib/advene/gui/popup.py
 ../lib/advene/model/bundle.py
 ../lib/advene/model/zippackage.py
