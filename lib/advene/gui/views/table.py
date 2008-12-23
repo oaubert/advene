@@ -30,7 +30,7 @@ import advene.gui.edit.elements
 import advene.gui.popup
 
 import advene.util.helper as helper
-from advene.gui.util import dialog, png_to_pixbuf
+from advene.gui.util import dialog, png_to_pixbuf, contextual_drag_begin, contextual_drag_end
 
 COLUMN_ELEMENT=0
 COLUMN_CONTENT=1
@@ -156,6 +156,21 @@ class AnnotationTable(AdhocView):
                                   + config.data.drag_type['STRING']
                                   ,
                                   gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+
+        def get_element():
+            selection = tree_view.get_selection ()
+            if not selection:
+                return None
+            store, paths=selection.get_selected_rows()
+            l=[ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
+            if not l:
+                return None
+            elif len(l) == 1:
+                return l[0]
+            else:
+                return l
+        tree_view.connect('drag-begin', contextual_drag_begin, get_element, self.controller)
+        tree_view.connect('drag-end', contextual_drag_end)
 
         tree_view.connect('drag-data-get', self.drag_data_get_cb)
 
