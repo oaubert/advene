@@ -2801,6 +2801,12 @@ class AdveneGUI(object):
             elif event.keyval == gtk.keysyms.q:
                 self.on_exit()
                 return True
+            elif event.keyval == gtk.keysyms.s:
+                if event.state & gtk.gdk.SHIFT_MASK:
+                    self.on_save_as1_activate()
+                else:
+                    self.on_save1_activate()
+                return True
             elif event.keyval == gtk.keysyms.z:
                 try:
                     self.controller.undomanager.undo()
