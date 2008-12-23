@@ -71,19 +71,16 @@ class Completer:
         self.is_visible=False
 
     def show_completion_window(self, *p):
-        width, height = self.widget.size_request()
-        if width <= 200:
-            width=200
-        else:
-            width += 28
-        if height <= 200:
-            height=200
-        else:
-            height += 28
+        width, height = self.treeview.size_request()
+        width += 24
+        height += 24
         self.widget.resize(width, height)
         self.widget.set_property("width-request", width)
         self.widget.set_property("height-request", height)
         self.position_window(width, height)
+
+        self.widget.set_size_request(width, height)
+
         self.widget.show_all()
         self.position_window(width, height)
         self.is_visible=True
@@ -130,12 +127,11 @@ class Completer:
         position_x = window_x + cursor_x
         position_y = window_y + cursor_y + cursor_height
 
-        # If the completion window extends past the text editor's buffer,
-        # reposition the completion window inside the text editor's buffer area.
-        if position_x + width > window_x + window_width:
-            position_x = (window_x + window_width) - width
-        if position_y + height > window_y + window_height:
-            position_y = (window_y + cursor_y) - height
+        if position_x + width > gtk.gdk.screen_width():
+            position_x = window_x + cursor_x - width
+        if position_y + height > gtk.gdk.screen_height():
+            position_y = window_y + cursor_y - height
+
         #if not_(self.__signals_are_blocked):
         x, y = self.widget.get_position()
 
@@ -263,7 +259,7 @@ class Completer:
         w=gtk.Window(gtk.WINDOW_POPUP)
 
         w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_MENU)
-        w.set_size_request(200, 200)
+        #w.set_size_request(200, 200)
 
         self.treeview=gtk.TreeView()
 
