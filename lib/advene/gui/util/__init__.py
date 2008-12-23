@@ -23,7 +23,6 @@ from gettext import gettext as _
 
 import gtk
 import gobject
-import pango
 import cgi
 import StringIO
 

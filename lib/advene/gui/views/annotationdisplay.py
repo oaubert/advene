@@ -20,7 +20,6 @@
 """
 
 import gtk
-import gobject
 from gettext import gettext as _
 
 import advene.core.config as config

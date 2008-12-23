@@ -50,7 +50,7 @@ from advene.model.query import Query
 from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.browser import Browser
 from advene.gui.views.tagbag import TagBag
-from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, get_pixmap_toolbutton, name2color
+from advene.gui.util import dialog, get_pixmap_toolbutton, name2color
 from advene.gui.util.completer import Completer
 import advene.gui.popup
 from advene.gui.widget import AnnotationRepresentation, RelationRepresentation

@@ -38,7 +38,6 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.gui.views import AdhocView
 from advene.gui.util import dialog, name2color
 from advene.gui.edit.create import CreateElementPopup
-from advene.gui.edit.elements import get_edit_popup
 import advene.util.helper as helper
 from math import sqrt
 import advene.gui.popup
@@ -1418,8 +1417,6 @@ class RelationTypeGroup (Group):
             self.type=rt
             if not self.members:
                 self.controller.gui.edit_element(self.type)
-                #pop = get_edit_popup (self.type, self.controller)
-                #pop.edit(modal=True)
             else:
                 # FIXME if more than 2 members
                 self.type.hackedMemberTypes=( '#' + self.members[0].id, '#' + self.members[1].id )

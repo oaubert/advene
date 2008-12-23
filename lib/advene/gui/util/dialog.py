@@ -22,7 +22,6 @@
 from gettext import gettext as _
 
 import gtk
-import gobject
 import re
 import os
 import sys

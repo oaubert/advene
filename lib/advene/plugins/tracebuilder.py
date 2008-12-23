@@ -35,7 +35,7 @@ import os
 import advene.util.helper as helper
 import advene.util.handyxml as handyxml
 import xml.dom
-
+from gettext import gettext as _
 
 def register(controller):
     controller.register_tracer(TraceBuilder(controller))
