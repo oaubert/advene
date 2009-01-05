@@ -9,7 +9,7 @@ Source: dist\doc\*; DestDir: {app}\doc; Flags: recursesubdirs
 Source: dist\locale\*; DestDir: {app}\locale; Flags: recursesubdirs
 Source: share\pixmaps\advene.ico; DestDir: {app}; DestName: advene.ico
 Source: c:\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs
-Source: examples\*v8.azp; DestDir: {app}\examples
+Source: examples\*v9.azp; DestDir: {app}\examples
 Source: c:\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs
 Source: c:\gtk\share\locale\fr\*; DestDir: {app}\lib\locale\fr; Flags: recursesubdirs
 Source: c:\gtk\lib\pango\*; DestDir: {app}\lib\pango; Flags: recursesubdirs
@@ -36,7 +36,7 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.34
+AppVerName=Advene 0.35
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
 VersionInfoVersion=0.34
@@ -47,8 +47,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.34_all_in_one_vlc140108svn
-VersionInfoTextVersion=0.34
+OutputBaseFilename=setup_advene_0.35_all_in_one_vlc140108svn
+VersionInfoTextVersion=0.35
 
 ;[Registry]
 ;Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
