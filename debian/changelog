@@ -1,6 +1,7 @@
 advene (0.35) unstable; urgency=low
 
-  * Video player plugins can be dynamically selected
+  * The shotdetect ( http://shotdetect.nonutc.fr/ ) application has been
+    integrated and is available through Player/Detect shots menu.
   
   * Very large medias (like 24h captures) can be edited in the timeline,
     and precise zoom can be achieved by limiting the timeline range to a
@@ -9,17 +10,30 @@ advene (0.35) unstable; urgency=low
   * New event BrailleInput allows to handle cursor key events from a
     dynamic view.
   
+  * New action: CreateBookmark
+  
   * Static views output can be exported as a set of HTML files and
     accompanying resources, that can be put online (File/Website export
     menu).
   
-  * Export filters can be activated from the command line.
+  * New webserver path ( /media/overlay/package_id/annotation_id ) returns
+    the snapshot for the given annotation overlayed with its content
+    (mostly used to render SVG annotations).
   
-  * Activity trace can be recorded and displayed.
+  * Export filters can be activated from the command line.
   
   * Arrows can be drawn in the SVG editor
   
+  * Video player plugins can be dynamically selected. Moreover, gstreamer
+    works also for MacOS X.
+
+  * Activity trace can be recorded and displayed.
+  
+  * Adhoc views can be opened embedded by default (cf Edit/Preferences/GUI)
+  
   * The optional autosave feature can regularly save backup files.
+
+  * An Edition History view display latest edited/created elements
   
  --
 
