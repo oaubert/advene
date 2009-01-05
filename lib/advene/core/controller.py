@@ -2480,9 +2480,9 @@ class AdveneController(object):
             @return: the output name of the converted url
             """
             if depth > max_depth:
-                return unconverted(url, 'max depth exceeded')
+                return unconverted(url, 'max depth exceeded %d > %d' % (depth, max_depth))
 
-            #self.log("exporting %s (%d)" % (url, depth) )
+            self.log("exporting %s (%d)" % (url, depth) )
             m=re.search('(.+)#(.+)', url)
             if m:
                 url=m.group(1)
@@ -2547,8 +2547,11 @@ class AdveneController(object):
 
             # Convert all links
             for link in re.findall(r'''href=['"](.+?)['"> ]''', content):
-                if link in url_translation:
-                    # The destination has already been processed
+                if link in url_translation and not 'max depth exceeded' in url_translation[link]:
+                    # The destination has already been processed 
+                    # We make an exception if the link was unconverted
+                    # because of max depth exceeded, since another
+                    # path can make it have a correct depth.
                     continue
                 l=link.replace(self.server.urlbase, '')
                 if l.startswith('http:'):
