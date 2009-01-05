@@ -1560,7 +1560,8 @@ class ShapeEditor:
             """Update the toolbutton with the appropriate shape information.
             """
             if pixmap_dir is not None and self.pixmap_name.get(shape, None):
-                i=gtk.image_new_from_file( os.path.join( pixmap_dir, self.pixmap_name.get(shape, None)) )
+                i=gtk.Image()
+                i.set_from_file( os.path.join( pixmap_dir, self.pixmap_name.get(shape, None)) )
                 i.show()
                 tb.set_icon_widget(i)
             else:
