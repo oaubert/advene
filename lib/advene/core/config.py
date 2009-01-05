@@ -122,7 +122,7 @@ class Config(object):
                 # current package path
                 'moviepath': '_',
                 'locale': 'c:\\Program Files\\Advene\\locale',
-                'shotdetect': 'shotdetect',
+                'shotdetect': 'c:\\Program Files\\Advene\\share\\shotdetect.exe',
                 }
         elif self.os == 'darwin':
             self.path = {
