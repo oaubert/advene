@@ -176,6 +176,8 @@ class HTMLContentHandler (ContentHandler):
         self.editable = True
         self.fname=None
         self.last_dndtime=None
+        self.last_x = None
+        self.last_y = None
         # HTMLEditor component (gtk.Textview subclass)
         self.editor = None
 
@@ -296,7 +298,7 @@ class HTMLContentHandler (ContentHandler):
         data.append('</a>')
 
         self.editor.feed("".join(data))
-        
+
         if focus:
             self.grab_focus()
         return True
@@ -317,10 +319,16 @@ class HTMLContentHandler (ContentHandler):
         # but none of them seems to work here. Just use a basic approach,
         # imagining that nobody is fast enough to really do two DNDs
         # at the same time.
-        if time == self.last_dndtime:
+        #print "%s, %s, %s, %s, %s, %s, %s" % (widget, context, x, y, selection, targetType, time)
+        #FIXME : on win32, timestamp is always 0. So i changed to x and y
+        #if time == self.last_dndtime:
+        #    return True
+        #self.last_dndtime=time
+        if x==self.last_x and y == self.last_y:
             return True
-        self.last_dndtime=time
-
+        self.last_x=x
+        self.last_y=y
+        
         if targetType == config.data.target_type['annotation']:
             for uri in unicode(selection.data, 'utf8').split('\n'):
                 source=self.controller.package.annotations.get(uri)
