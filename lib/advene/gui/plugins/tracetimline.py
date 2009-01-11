@@ -163,20 +163,57 @@ class TraceTimeline(AdhocView):
                 self.drag_coordinates=(event.x_root, event.y_root)
                 return False            
             x, y = self.drag_coordinates
-            
+            wa=widget.get_allocation()
             a=scrolled_win.get_hadjustment()
+            
             v=a.value + x - event.x_root
-            if v > a.lower and v < a.upper:
+            if v > a.lower and v+wa.width < a.upper:
                 a.value=v
+            
+            #print wa, wa.x, wa.width, wa.y, wa.height
             a=scrolled_win.get_vadjustment()
             v=a.value + y - event.y_root
-            if v > a.lower and v < a.upper:
+            if v > a.lower and v+wa.height < a.upper:
                 a.value=v
             
             self.drag_coordinates= (event.x_root, event.y_root)
             return False
         self.canvas.connect('motion-notify-event', on_background_motion)
+        
+        def on_background_button_release(widget, event):
+            if event.button == 1:
+                self.drag_coordinates=None
+            return False
+        self.canvas.connect('button-release-event', on_background_button_release)
 
+        def zoom_out(w):
+            self.canvasY = (self.canvasY * 1.25)
+            self.timefactor *= 1.25
+            #print "%s" % (self.timefactor)
+            self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
+            self.refresh()
+        btnm.connect('clicked', zoom_out)
+        
+        def zoom_in(w):
+            self.canvasY = (self.canvasY*0.8)
+            self.timefactor *= 0.8
+            #print "%s" % (self.timefactor)
+            self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
+            self.refresh()
+        btnp.connect('clicked', zoom_in)
+
+        def zoom_100(w):
+            wa = self.canvas.get_parent().get_allocation()
+            self.canvasY = wa.height-40
+            if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
+                a = self.tracer.trace.levels['actions'][-1].activity_time[1]
+                self.timefactor = a/(self.canvasY-1.0)
+            else:
+                self.timefactor = 1000
+            print self.timefactor
+            self.canvas.set_bounds(0,0,self.canvasX, self.canvasY)
+            self.refresh()
+        btnc.connect('clicked', zoom_100)
         return bx
 
     def populate_head_canvas(self):
@@ -195,16 +232,28 @@ class TraceTimeline(AdhocView):
         self.controller.tracers[0].unregister_view(self)
         return False
 
-    def refresh(self):
+    def refresh(self, action=None):
         root = self.canvas.get_root_item()
         while root.get_n_children()>0:
             root.remove_child (0)
         if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
-            a = self.tracer.trace.levels['actions'][-1].activity_time[1]
-            while a>self.canvasY*self.timefactor:
-                self.timefactor = (self.canvasY+self.incr)*self.timefactor//self.canvasY
-                self.canvasY = self.canvasY + self.incr
-                print "Y : %s tf : %s" % (self.canvasY, self.timefactor)
+            a = None
+            if action is None:
+                a = self.tracer.trace.levels['actions'][-1].activity_time[1]
+            else:
+                a = action.activity_time[1]
+            #print "t1 %s Ytf %s" % (a, self.canvasY*self.timefactor)
+            if a<(self.canvasY-self.incr)*self.timefactor or a>self.canvasY*self.timefactor:
+                self.canvasY = int(a/self.timefactor + 1)
+            #print "t1 %s Ytf %s" % (a, self.canvasY*self.timefactor)
+            #while a<(self.canvasY-self.incr)*self.timefactor:
+                #self.timefactor = (self.canvasY+self.incr)*self.timefactor//self.canvasY
+                #self.canvasY = self.canvasY - self.incr
+                #print "- Y : %s tf : %s" % (self.canvasY, self.timefactor)
+            #while a>self.canvasY*self.timefactor:
+                #self.timefactor = (self.canvasY+self.incr)*self.timefactor//self.canvasY
+                #self.canvasY = self.canvasY + self.incr
+                #print "+ Y : %s tf : %s" % (self.canvasY, self.timefactor)
             self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
             self.canvas.show()
             for i in self.tracer.trace.levels['actions']:
@@ -232,7 +281,7 @@ class TraceTimeline(AdhocView):
             l.remove_child (child_num)
             length = (action.activity_time[1]-action.activity_time[0])//self.timefactor
             if y1+length > self.canvasY:
-                self.refresh()
+                self.refresh(action)
                 #self.widget.show_all()
             
             l.rect = l.newRect(x1, y1, length, l.color, l.color_c)
@@ -246,8 +295,9 @@ class TraceTimeline(AdhocView):
             x = h.rect.get_bounds().x1+1
             y = action.activity_time[0]//self.timefactor
             length = (action.activity_time[1]-action.activity_time[0])//self.timefactor
-            if y+length > self.canvasY:
-                self.refresh()
+            if action.activity_time[1] > self.canvasY*self.timefactor:
+                #print "%s %s %s" % (action.name , action.activity_time[1], self.canvasY*self.timefactor)
+                self.refresh(action)
             ev = EventGroup(self.controller, self.canvas, None, action, x, y, length, 14, color)
             self.cols[action.name]=(h,ev)
             #self.lasty = ev.rect.get_bounds().y2
