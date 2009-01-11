@@ -230,14 +230,14 @@ class SchemaEditor (AdhocView):
                 self.drag_coordinates=(event.x_root, event.y_root)
                 return False
             x, y = self.drag_coordinates
-
+            wa = widget.get_allocation()
             a=scrolled_win.get_hadjustment()
             v=a.value + x - event.x_root
-            if v > a.lower and v < a.upper:
+            if v > a.lower and v+wa.width < a.upper:
                 a.value=v
             a=scrolled_win.get_vadjustment()
             v=a.value + y - event.y_root
-            if v > a.lower and v < a.upper:
+            if v > a.lower and v+wa.height < a.upper:
                 a.value=v
 
             self.drag_coordinates= (event.x_root, event.y_root)
