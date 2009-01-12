@@ -318,11 +318,22 @@ class InteractiveResult(AdhocView):
             self.controller.notify('QueryEditEnd', query=q)
         return q
 
+    def create_comment(self, *p):
+        if hasattr(self, 'table'):
+            # There are annotations
+            l=self.table.get_elements()
+            v=self.controller.create_static_view(elements=l)
+            if isinstance(self.query, Quicksearch):
+                v.title=_("Comment annotations containing %s") % self.query.searched
+                self.controller.notify('ViewEditEnd', view=v)
+            self.controller.gui.open_adhoc_view('edit', element=v, destination=self._destination)
+        return True
+
     def create_montage(self, *p):
         if hasattr(self, 'table'):
             # There are annotations
             l=self.table.get_elements()
-        self.controller.gui.open_adhoc_view('montage', elements=l, destination=self._destination)
+            self.controller.gui.open_adhoc_view('montage', elements=l, destination=self._destination)
         return True
 
     def create_annotations(self, *p):
@@ -501,6 +512,7 @@ class InteractiveResult(AdhocView):
                     (gtk.STOCK_CONVERT, _("Export table"), lambda b: table.csv_export()),
                     (gtk.STOCK_NEW, _("Create annotations from the result"), self.create_annotations),
                     ('montage.png', _("Define a montage with the result"), self.create_montage),
+                    ('comment.png', _("Create a comment view with the result"), self.create_comment),
                     (gtk.STOCK_FIND_AND_REPLACE, _("Search and replace strings in the annotations content"), self.search_replace),
                     ):
                     if icon.endswith('.png'):
