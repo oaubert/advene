@@ -70,6 +70,9 @@ puis
 pads=list(mix.pads())
 pads[0].props.xpos=-320
 pads[1].props.xpos=320
+
+Use appsink to get data out of a pipeline:
+https://thomas.apestaart.org/thomas/trac/browser/tests/gst/crc/crc.py
 """
 
 import advene.core.config as config
