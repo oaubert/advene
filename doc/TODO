@@ -1,3 +1,9 @@
+* table view: add color to type column
+
+* finder: add frame around each column
+
+* finder: remove label button
+
 * Make initial setup window an assistant (multiple steps)
 
 * Read HIG docs: 
