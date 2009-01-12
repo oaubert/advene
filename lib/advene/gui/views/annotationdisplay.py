@@ -48,6 +48,7 @@ class AnnotationDisplay(AdhocView):
         self.annotation=annotation
         self.no_image_pixbuf=png_to_pixbuf(ImageCache.not_yet_available_image, width=50)
         self.widget=self.build_widget()
+        self.refresh()
 
     def set_annotation(self, a=None):
         """This method takes either an annotation, a time value or None as parameter.
@@ -227,6 +228,5 @@ class AnnotationDisplay(AdhocView):
 
         v.show_all()
         image.hide()
-        self.refresh()
         v.set_no_show_all(True)
         return v
