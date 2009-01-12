@@ -150,9 +150,9 @@ class ModelColumn(FinderColumn):
         def title(c):
             el=c[DetailedTreeModel.COLUMN_ELEMENT]
             if isinstance(el, AnnotationType):
-                return "(%d) %s" % (len(el.annotations), c[DetailedTreeModel.COLUMN_TITLE])
+                return "%s (%d)" % (c[DetailedTreeModel.COLUMN_TITLE], len(el.annotations))
             elif isinstance(el, RelationType):
-                return "(%d) %s" % (len(el.relations), c[DetailedTreeModel.COLUMN_TITLE])
+                return "%s (%d)" % (c[DetailedTreeModel.COLUMN_TITLE], len(el.relations))
             else:
                 return c[DetailedTreeModel.COLUMN_TITLE]
 
