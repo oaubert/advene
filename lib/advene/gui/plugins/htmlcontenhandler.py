@@ -319,13 +319,10 @@ class HTMLContentHandler (ContentHandler):
         # but none of them seems to work here. Just use a basic approach,
         # imagining that nobody is fast enough to really do two DNDs
         # at the same time.
-        #print "%s, %s, %s, %s, %s, %s, %s" % (widget, context, x, y, selection, targetType, time)
-        #FIXME : on win32, timestamp is always 0. So i changed to x and y
-        #if time == self.last_dndtime:
-        #    return True
-        #self.last_dndtime=time
-        if x==self.last_x and y == self.last_y:
+        # But on win32, timestamp is always 0. So we must use x and y information as well.
+        if time == self.last_dndtime and x == self.last_x and y == self.last_y:
             return True
+        self.last_dndtime=time
         self.last_x=x
         self.last_y=y
         
