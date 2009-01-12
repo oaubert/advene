@@ -37,10 +37,10 @@
     </Company_Info>
     <Program_Info>
       <Program_Name>Advene</Program_Name>
-      <Program_Version>0.34</Program_Version>
-      <Program_Release_Month>08</Program_Release_Month>
-      <Program_Release_Day>22</Program_Release_Day>
-      <Program_Release_Year>2008</Program_Release_Year>
+      <Program_Version>0.36</Program_Version>
+      <Program_Release_Month>01</Program_Release_Month>
+      <Program_Release_Day>05</Program_Release_Day>
+      <Program_Release_Year>2009</Program_Release_Year>
       <Program_Cost_Dollars>0</Program_Cost_Dollars>
       <Program_Cost_Other_Code></Program_Cost_Other_Code>
       <Program_Cost_Other></Program_Cost_Other>
@@ -50,9 +50,9 @@
       <Program_OS_Support>Linux,Mac OS X,Windows2000,Windows2003,WinXP</Program_OS_Support>
       <Program_Language>English,Esperanto,French</Program_Language>
       <File_Info>
-        <File_Size_Bytes>23085161</File_Size_Bytes>
-	<File_Size_K>22529</File_Size_K>
-	<File_Size_MB>22</File_Size_MB>
+        <File_Size_Bytes>38511957</File_Size_Bytes>
+	<File_Size_K>37609</File_Size_K>
+	<File_Size_MB>36</File_Size_MB>
       </File_Info>
       <Expire_Info>
         <Has_Expire_Info>N</Has_Expire_Info><Expire_Count></Expire_Count><Expire_Based_On></Expire_Based_On><Expire_Other_Info></Expire_Other_Info><Expire_Month></Expire_Month><Expire_Day></Expire_Day><Expire_Year></Expire_Year>
@@ -94,7 +94,7 @@
 	<Application_XML_File_URL>http://liris.cnrs.fr/advene/advene_pad.xml</Application_XML_File_URL>
       </Application_URLs>
       <Download_URLs>
-        <Primary_Download_URL>http://download.gna.org/advene/win32/setup_advene_0.34_all_in_one_vlcsvn.exe</Primary_Download_URL>
+        <Primary_Download_URL>http://download.gna.org/advene/win32/setup_advene_0.36_all_in_one_vlcsvn.exe</Primary_Download_URL>
 	<Secondary_Download_URL></Secondary_Download_URL>
 	<Additional_Download_URL_1></Additional_Download_URL_1>
 	<Additional_Download_URL_2></Additional_Download_URL_2>
