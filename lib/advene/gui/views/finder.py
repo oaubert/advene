@@ -123,19 +123,6 @@ class FinderColumn(object):
         self.next=None
         return True
 
-    def get_label_button(self, name=None):
-        """Return a label button for the widget.
-        """
-        if not name:
-            name=self.name
-        l=gtk.Button(name, use_underline=False)
-        color=name2color(self.node[DetailedTreeModel.COLUMN_COLOR])
-        if color:
-            style = l.modify_bg(gtk.STATE_NORMAL, color)
-        l.connect('clicked', self.on_column_activation)
-        enable_drag_source(l, lambda: self.node[DetailedTreeModel.COLUMN_ELEMENT], self.controller)
-        return l
-
     def build_widget(self):
         return gtk.Label("Generic finder column")
 
@@ -177,10 +164,6 @@ class ModelColumn(FinderColumn):
         self.liststore.clear()
         if self.node is None:
             return True
-        self.label.set_label(self.name)
-        color=name2color(self.node[DetailedTreeModel.COLUMN_COLOR])
-        if color:
-            style = self.label.modify_bg(gtk.STATE_NORMAL, color)
         for row in self.get_valid_members(node):
             self.liststore.append(row)
 
@@ -267,9 +250,6 @@ class ModelColumn(FinderColumn):
     def build_widget(self):
         vbox=gtk.VBox()
 
-        self.label=self.get_label_button()
-        vbox.pack_start(self.label, expand=False)
-
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
         vbox.add (sw)
@@ -311,8 +291,6 @@ class AnnotationColumn(FinderColumn):
     def build_widget(self):
         vbox=gtk.VBox()
 
-        vbox.pack_start(self.get_label_button(_("Annotation")), expand=False)
-
         self.view=AnnotationDisplay(controller=self.controller, annotation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
         vbox.add(self.view.widget)
         vbox.show_all()
@@ -328,7 +306,6 @@ class RelationColumn(FinderColumn):
     def build_widget(self):
         vbox=gtk.VBox()
 
-        vbox.pack_start(self.get_label_button(_("Relation")), expand=False)
         self.view=RelationDisplay(controller=self.controller, relation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
         vbox.add(self.view.widget)
         vbox.show_all()
@@ -383,7 +360,6 @@ class ViewColumn(FinderColumn):
 
     def build_widget(self):
         vbox=gtk.VBox()
-        vbox.pack_start(self.get_label_button(_("View")), expand=False)
         self.label={}
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
@@ -449,7 +425,6 @@ class QueryColumn(FinderColumn):
 
     def build_widget(self):
         vbox=gtk.VBox()
-        vbox.pack_start(self.get_label_button(_("Query")), expand=False)
         self.label={}
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
@@ -524,7 +499,6 @@ class ResourceColumn(FinderColumn):
 
     def build_widget(self):
         vbox=gtk.VBox()
-        vbox.pack_start(self.get_label_button(_("Resource")), expand=False)
         self.label={}
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
