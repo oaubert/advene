@@ -42,6 +42,7 @@ COLUMN_DURATION=6
 COLUMN_BEGIN_FORMATTED=7
 COLUMN_END_FORMATTED=8
 COLUMN_PIXBUF=9
+COLUMN_COLOR=10
 
 name="Element tabular view plugin"
 
@@ -82,7 +83,7 @@ class AnnotationTable(AdhocView):
         """Build the ListStore containing the data.
 
         """
-        l=gtk.ListStore(object, str, str, str, long, long, long, str, str, gtk.gdk.Pixbuf)
+        l=gtk.ListStore(object, str, str, str, long, long, long, str, str, gtk.gdk.Pixbuf, str)
         if not self.elements:
             return l
         for a in self.elements:
@@ -97,7 +98,8 @@ class AnnotationTable(AdhocView):
                            helper.format_time(a.fragment.begin),
                            helper.format_time(a.fragment.end),
                            png_to_pixbuf(self.controller.package.imagecache[a.fragment.begin],
-                                         height=32)
+                                         height=32),
+                           self.controller.get_element_color(a),
                            ) )
         return l
 
@@ -140,6 +142,9 @@ class AnnotationTable(AdhocView):
         columns['begin'].set_sort_column_id(COLUMN_BEGIN)
         columns['end'].set_sort_column_id(COLUMN_END)
         self.model.set_sort_column_id(COLUMN_BEGIN, gtk.SORT_ASCENDING)
+        columns['type'].add_attribute(columns['type'].get_cell_renderers()[0],
+                                      'cell-background',
+                                      COLUMN_COLOR)
 
         # Resizable columns: content, type
         for name in ('content', 'type', 'snapshot'):
