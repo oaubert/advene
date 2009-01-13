@@ -57,7 +57,8 @@ class FinderColumn(object):
         self.callback=callback
         self.previous=parent
         self.next=None
-        self.widget=self.build_widget()
+        self.widget=gtk.Frame()
+        self.widget.add(self.build_widget())
         self.widget.connect('key-press-event', self.key_pressed_cb)
 
     def key_pressed_cb(self, col, event):
@@ -80,13 +81,15 @@ class FinderColumn(object):
         ViewColumn, we want to use the second button.
         """
         b=self.get_child_buttons(self.widget)
-        if len(b) >= 2:
-            b[1].grab_focus()
+        if len(b) >= 1:
+            b[0].grab_focus()
         return True
 
     def get_child_buttons(self, w):
         """Return the buttons contained in the widget.
         """
+        if isinstance(w, gtk.Frame):
+            w=w.get_children()[0]
         b=[]
         try:
             b=[ c for c in w.get_children() if isinstance(c, gtk.Button) ]
@@ -642,6 +645,7 @@ class Finder(AdhocView):
                       parent=columnbrowser)
             col.widget.set_property("width-request", self.column_width)
             self.hbox.pack_start(col.widget, expand=False)
+            col.widget.show_all()
             columnbrowser.next=col
         else:
             # Delete all next+1 columns (we reuse the next one)
