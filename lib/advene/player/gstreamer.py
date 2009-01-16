@@ -284,6 +284,7 @@ class Player:
             # The scaling did not work before 2008-10-11, cf
             # http://bugzilla.gnome.org/show_bug.cgi?id=339201
             scale=gst.element_factory_make('videoscale')
+            self.videoscale=scale
             elements.extend( (filter, csp, scale, self.imagesink) )
 
         self.video_sink.add(*elements)

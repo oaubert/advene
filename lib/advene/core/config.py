@@ -295,7 +295,7 @@ class Config(object):
             'snapshot-chroma': 'RV32',
             'dvd-device': '/dev/dvd',
             }
-        if self.os == 'linux':
+        if self.os in ('linux', 'darwin'):
             # Use gstreamer by default on linux
             self.player['plugin']='gstreamer'
 
@@ -725,23 +725,22 @@ class Config(object):
         args=[]
         filters=[]
 
-        args.extend( [ '--intf', 'dummy' ] )
+        args.append( '--intf=dummy' )
 
         if os.path.isdir(self.path['plugins']):
-            args.extend([ '--plugin-path', self.path['plugins'] ])
+            args.append( '--plugin-path=%s' % self.path['plugins'] )
         if self.player['verbose'] is not None:
             args.append ('--verbose')
             args.append (self.player['verbose'])
         if self.player['vout'] != 'default':
-            args.extend( [ '--vout', self.player['vout'] ] )
+            args.append( '--vout=%s' % self.player['vout'] )
         if self.player['svg']:
-            args.extend( [ '--text-renderer', 'svg' ] )
+            args.append( '--text-renderer=svg' )
         if self.player['bundled']:
             args.append( '--no-plugins-cache' )
         if filters != []:
             # Some filters have been defined
-            args.extend (['--vout-filter', ":".join(filters)])
-        args.extend( '--snapshot-width 160 --snapshot-height 100'.split() )
+            args.append ('--vout-filter=%s' %":".join(filters))
         #print "player args", args
         return [ str(i) for i in args ]
 
