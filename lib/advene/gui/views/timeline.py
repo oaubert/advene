@@ -1414,13 +1414,7 @@ class TimeLine(AdhocView):
         """
         if self.options['goto-on-click'] and event.button == 1 and widget._single_click_guard:
             self.controller.gui.set_current_annotation(annotation)
-            # Goto annotation if not already playing it
-            p=self.controller.player.current_position_value
-            # We do not use 'p in annotation.fragment' since if we are
-            # at the end of the annotation, we may want to go back to its beginning
-            if p >= annotation.fragment.begin and p < annotation.fragment.end:
-                return True
-
+            # Goto annotation
             c=self.controller
             pos = c.create_position (value=annotation.fragment.begin,
                                      key=c.player.MediaTime,
