@@ -872,8 +872,8 @@ class AdveneController(object):
                 print "Exception in snapshot: %s" % e
                 return True
             if i is not None and i.height != 0:
-                self.package.imagecache[position] = helper.snapshot2png (i)
-                self.notify('SnapshotUpdate', position=position)
+                self.package.imagecache[i.date] = helper.snapshot2png (i)
+                self.notify('SnapshotUpdate', position=i.date)
         else:
             # FIXME: do something useful (warning) ?
             pass
