@@ -2306,7 +2306,7 @@ class AdveneGUI(object):
         for v in self.adhoc_views:
             ev.locals_[v.view_id]=v
         w=ev.popup()
-
+        w.set_icon_list(*self.get_icon_list())
         return True
 
     def update_display (self):
