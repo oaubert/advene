@@ -24,7 +24,7 @@ This widget allows to present event history in a timeline view.
 
 import gtk
 import time
-
+from gtk.gdk import Cursor
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
@@ -73,10 +73,12 @@ class TraceTimeline(AdhocView):
         self.toolbox = None
         self.lasty=0
         self.canvasX = None
-        self.canvasY = 1000
-        self.obj_l = 10
+        self.canvasY = 1
+        self.obj_l = 5
         self.incr = 500
-        self.timefactor = 1000
+        self.timefactor = 100
+        self.autoscroll = True
+        self.sw = None
         self.cols={}
         self.tracer.register_view(self)
         for act in self.tracer.action_types:
@@ -84,9 +86,9 @@ class TraceTimeline(AdhocView):
         self.widget = self.build_widget()
         self.widget.connect("destroy", self.destroy)
         self.populate_head_canvas()
-        self.draw_marks()
-        self.receive(self.tracer.trace)
-
+        self.widget.show_all()
+        self.refresh()
+        
     def build_widget(self):
         bx = gtk.HPaned()
         mainbox = gtk.VPaned()
@@ -98,6 +100,7 @@ class TraceTimeline(AdhocView):
         self.canvas = goocanvas.Canvas()
         self.canvas.set_bounds (0, 0,self.canvasX, self.canvasY)
         scrolled_win = gtk.ScrolledWindow ()
+        self.sw = scrolled_win
         scrolled_win.add(self.canvas)
         mainbox.pack2(scrolled_win, resize=True, shrink=True)
         mainbox.set_position(35)
@@ -122,8 +125,10 @@ class TraceTimeline(AdhocView):
         def on_background_scroll(widget, event):
             zoom=event.state & gtk.gdk.CONTROL_MASK
             if zoom:
-                # Control+scroll: zoom in/out
-                print 'zoom'
+                if event.direction == gtk.gdk.SCROLL_DOWN:
+                    zoom_out(widget)
+                elif  event.direction == gtk.gdk.SCROLL_UP:
+                    zoom_in(widget)
             elif event.state & gtk.gdk.SHIFT_MASK:
                 # Horizontal scroll
                 a = scrolled_win.get_hadjustment()
@@ -159,16 +164,15 @@ class TraceTimeline(AdhocView):
             #    return False
             if not self.drag_coordinates:
                 self.drag_coordinates=(event.x_root, event.y_root)
+                self.widget.get_parent_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.DIAMOND_CROSS))
+                #curseur grab
                 return False            
             x, y = self.drag_coordinates
             wa=widget.get_allocation()
             a=scrolled_win.get_hadjustment()
-            
             v=a.value + x - event.x_root
             if v > a.lower and v+wa.width < a.upper:
                 a.value=v
-            
-            #print wa, wa.x, wa.width, wa.y, wa.height
             a=scrolled_win.get_vadjustment()
             v=a.value + y - event.y_root
             if v > a.lower and v+wa.height < a.upper:
@@ -181,20 +185,26 @@ class TraceTimeline(AdhocView):
         def on_background_button_release(widget, event):
             if event.button == 1:
                 self.drag_coordinates=None
+                self.widget.get_parent_window().set_cursor(None)
+                #curseur normal
             return False
         self.canvas.connect('button-release-event', on_background_button_release)
 
         def zoom_out(w):
-            self.canvasY = (self.canvasY * 1.25)
-            self.timefactor *= 1.25
-            self.obj_l *= 0.8
+            h = self.canvas.get_allocation().height
+            if h/float(self.canvasY)>=0.8:
+                zoom_100(w)
+            else:
+                self.canvasY = self.canvasY * 0.8
+                self.timefactor *= 1.25
+                self.obj_l *= 0.8
             #print "%s" % (self.timefactor)
             self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
             self.refresh()
         btnm.connect('clicked', zoom_out)
         
         def zoom_in(w):
-            self.canvasY = (self.canvasY*0.8)
+            self.canvasY = self.canvasY * 1.25
             self.timefactor *= 0.8
             self.obj_l *= 1.25
             #print "%s" % (self.timefactor)
@@ -203,8 +213,8 @@ class TraceTimeline(AdhocView):
         btnp.connect('clicked', zoom_in)
 
         def zoom_100(w):
-            wa = self.canvas.get_parent().get_allocation()
-            self.canvasY = wa.height-40
+            wa = self.canvas.get_allocation()
+            self.canvasY = wa.height
             if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
                 a = self.tracer.trace.levels['actions'][-1].activity_time[1]
                 self.timefactor = a/(self.canvasY-1.0)
@@ -220,21 +230,58 @@ class TraceTimeline(AdhocView):
 
     def draw_marks(self):
         # adding time lines
-        tinc = 60000 / self.timefactor
+        wa = self.canvas.get_parent().get_allocation().height
+        tinc = 60
+        if wa > 100:
+            tinc = wa/4.0 # 4 marks in the widget
+        else:
+            tinc = 60000 / self.timefactor
         t=tinc
-        #print t, self.canvasY
-        ld = goocanvas.LineDash([5.0, 10.0])
+        #print t, wa
+        ld = goocanvas.LineDash([5.0, 20.0])
         while t < self.canvasY:
-            goocanvas.polyline_new_line(self.canvas.get_root_item(), 0, t, self.canvasX, t, line_dash=ld)
+            #print t
+            goocanvas.polyline_new_line(self.canvas.get_root_item(),
+                                        0,
+                                        t,
+                                        self.canvasX,
+                                        t,
+                                        line_dash=ld,
+                                        line_width = 0.2)
+            goocanvas.Text(parent = self.canvas.get_root_item(),
+                        text = time.strftime("%H:%M:%S",time.gmtime(t*self.timefactor/1000)),
+                        x = 0,
+                        y = t-5,
+                        width = -1,
+                        anchor = gtk.ANCHOR_W,
+                        fill_color_rgba=0x121212FF, #0x23456788
+                        font = "Sans 7")
+            goocanvas.Text(parent = self.canvas.get_root_item(),
+                        text = time.strftime("%H:%M:%S",time.gmtime(t*self.timefactor/1000)),
+                        x = self.canvasX-4,
+                        y = t-5,
+                        width = -1,
+                        fill_color_rgba=0x121212FF,
+                        anchor = gtk.ANCHOR_E,
+                        font = "Sans 7")
+            #goocanvas.Text(parent = self.canvas.get_root_item(),
+            #           text = time.strftime("%H:%M:%S",time.gmtime(t*self.timefactor)/1000),
+            #           x = self.canvasX/2,
+            #           y = t-5,
+            #           width = -1,
+            #           fill_color_rgba=0x23456788,
+            #           anchor = gtk.ANCHOR_CENTER,
+            #           font = "Sans 8")
             t += tinc
         return
 
     def populate_head_canvas(self):
         offset = 0
         offset_x = 100
-        offset_c = 0x00008800
+        offset_c = [0x000088AA, 0x0000FFAA, 0x008800AA, 0x00FF00AA, 0x880000AA, 0xFF0000FF, 0x008888FF, 0x880088FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
+        # 18 col max
         for c in self.cols.keys():
-            gpc = 0x00000050 + offset_c*(16**offset)
+            gpc = offset_c[offset]
             #print '%02x %02x' % (offset_c*(16**offset), gpc)
             etgroup = HeadGroup(self.controller, self.head_canvas, c, 5+offset_x*offset, 0, 8, gpc)
             self.cols[c]=(etgroup, None)
@@ -260,22 +307,13 @@ class TraceTimeline(AdhocView):
                 a = action.activity_time[1]
             #print "t1 %s Ytf %s" % (a, self.canvasY*self.timefactor)
             if a<(self.canvasY-self.incr)*self.timefactor or a>self.canvasY*self.timefactor:
-                self.canvasY = int(a/self.timefactor + 1)
+                self.canvasY = int(1.0*a/self.timefactor + 1)
                 self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
                 #print "%s %s" % (self.timefactor, self.canvasY)
                 self.canvas.show()
-            #print "t1 %s Y %s" % (a, self.canvasY)
-            #while a<(self.canvasY-self.incr)*self.timefactor:
-                #self.timefactor = (self.canvasY+self.incr)*self.timefactor//self.canvasY
-                #self.canvasY = self.canvasY - self.incr
-                #print "- Y : %s tf : %s" % (self.canvasY, self.timefactor)
-            #while a>self.canvasY*self.timefactor:
-                #self.timefactor = (self.canvasY+self.incr)*self.timefactor//self.canvasY
-                #self.canvasY = self.canvasY + self.incr
-                #print "+ Y : %s tf : %s" % (self.canvasY, self.timefactor)
-            for i in self.tracer.trace.levels['actions']:
-                self.receive(self.tracer.trace, action=i)
         self.draw_marks()
+        for i in self.tracer.trace.levels['actions']:
+                self.receive(self.tracer.trace, action=i)
 
     def receive(self, trace, event=None, operation=None, action=None):
         # trace : the full trace to be managed
@@ -289,6 +327,9 @@ class TraceTimeline(AdhocView):
         if action is None:
             #redraw screen
             self.refresh()
+            if self.autoscroll:
+                a = self.sw.get_vadjustment()
+                a.value=a.upper-a.page_size
             return
         h,l = self.cols[action.name]
         color = h.color_c
@@ -300,13 +341,9 @@ class TraceTimeline(AdhocView):
             length = (action.activity_time[1]-action.activity_time[0])//self.timefactor
             if y1+length > self.canvasY:
                 self.refresh(action)
-                #self.widget.show_all()
-            l.rect = l.newRect(x1, y1, length, l.color, l.color_c)
-            l.redrawObjs(self.obj_l)
-            
-
+            #l.rect = l.newRect(x1, y1, length, l.color, l.color_c)
+            #l.redrawObjs(self.obj_l)
         else:
-            #y=self.lasty
             x = h.rect.get_bounds().x1+1
             y = action.activity_time[0]//self.timefactor
             length = (action.activity_time[1]-action.activity_time[0])//self.timefactor
@@ -318,6 +355,9 @@ class TraceTimeline(AdhocView):
             self.cols[action.name]=(h,ev)
             #self.lasty = ev.rect.get_bounds().y2
             #print "%s %s %s" % (y, length, self.lasty)
+        if self.autoscroll:
+            a = self.sw.get_vadjustment()
+            a.value=a.upper-a.page_size
 
 class HeadGroup (Group):
     def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, fontsize=14, color_c=0x00ffff50):
@@ -334,9 +374,9 @@ class HeadGroup (Group):
                                     y = y,
                                     width = 90,
                                     height = 30,
-                                    fill_color_rgba = self.color_c,
-                                    stroke_color = self.color_s,
-                                    line_width = 2.0)
+                                    fill_color_rgba = 0xFFFFFF00,
+                                    stroke_color = 0xFFFFFF00,
+                                    line_width = 0)
         self.text = goocanvas.Text (parent = self,
                                         text = self.name,
                                         x = x+45,
@@ -352,7 +392,7 @@ class HeadGroup (Group):
             return
         
 class EventGroup (Group):
-    def __init__(self, controller=None, canvas=None, type=None, event=None, x =0, y=0, l=1, ol=5, fontsize=22, color_c=0x00ffff50):
+    def __init__(self, controller=None, canvas=None, type=None, event=None, x =0, y=0, l=1, ol=5, fontsize=8, color_c=0x00ffffff):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.event=event
@@ -360,11 +400,13 @@ class EventGroup (Group):
         self.rect = None
         self.text = None
         self.color_c = color_c
+        self.color_o = 0xADEAEAFF
         self.color = "black"
         self.fontsize=fontsize
         self.rect = self.newRect (x,y,l,self.color, self.color_c)
         self.objs={}
         self.redrawObjs(ol)
+        self.lines = []
 
     def newRect(self, xx, yy, l, color, color_c):
         return goocanvas.Rect (parent = self,
@@ -377,23 +419,75 @@ class EventGroup (Group):
                                     line_width = 2.0)
 
     def addObj(self, obj_id, factor, xx, yy, ol, color, color_c):
-        return goocanvas.Rect (parent = self,
-                                    x = xx,
-                                    y = yy,
-                                    width = ol,
-                                    height = ol,
-                                    fill_color_rgba = color_c,
-                                    stroke_color = color,
-                                    line_width = 1.0)
+        #o = goocanvas.Rect (parent = self,
+        #                            x = xx,
+        #                            y = yy,
+        #                            width = ol,
+        #                            height = ol,
+        #                            fill_color_rgba = color_c,
+        #                            stroke_color = color,
+        #                            line_width = 1.0)
+        o = goocanvas.Ellipse(parent=self,
+                            center_x=xx+ol/2,
+                            center_y=yy+ol/2,
+                            radius_x=ol/2,
+                            radius_y=ol/2,
+                            stroke_color=color,
+                            fill_color_rgba=color_c,
+                            line_width=1.0)
+        
+        def toggle_rels(w, target, ev, obj_id):
+            #print "%s %s %s %s" % (w, target, ev.button, obj_id)
+            if ev.button != 1:
+                return
+            r = w.get_canvas().get_root_item()
+            chd = []
+            i=0
+            while i <r.get_n_children():
+                f = r.get_child(i)
+                if isinstance(f, EventGroup) and f.objs is not None:
+                    chd.append(f)
+                    if f.lines:
+                        for l in f.lines:
+                            n=f.find_child(l)
+                            f.remove_child(n)
+                        f.lines=[]
+                i+=1
+            for c in chd:
+                if obj_id in c.objs.keys():
+                    (r_obj, f) = c.objs[obj_id] #rect, factor
+                    if r_obj != w:
+                        #faire un lien
+                        x2=y2=0
+                        #x1 = w.get_bounds().x1 + w.props.width/2
+                        #y1 = w.get_bounds().y1 + w.props.height/2
+                        x1 = w.props.center_x
+                        y1 = w.props.center_y
+                        if r_obj is None:
+                            x2 = c.rect.get_bounds().x1 + c.rect.props.width/2
+                            y2 = c.rect.get_bounds().y1 + c.rect.props.height/2
+                        else:
+                            x2 = r_obj.props.center_x
+                            y2 = r_obj.props.center_y
+                            
+                        p = goocanvas.Points ([(x1, y1), (x2,y2)])
+                        self.lines.append(goocanvas.Polyline (parent = self,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = 0xFFFFFFFF,
+                                        line_width = 1.0,
+                                        start_arrow = False,
+                                        end_arrow = False,
+                                        ))
+            return
+        o.connect('button-press-event', toggle_rels, obj_id)
+        return o
 
     def redrawObjs(self, ol=5):
         l = self.rect.props.height
         w = self.rect.props.width
-        if l <ol+2 or ol<5:
-            #too small
-            return
-        if ol > w/3.0:
-            ol = w/3.0
+        if ol > (w-6)/3.0:
+            ol = (w-6)/3.0
         y=self.rect.get_bounds().y1+1
         x=self.rect.get_bounds().x1+1
         #FIXME : brutal way to do that. Need only to find what operation was added to update only this square
@@ -405,27 +499,39 @@ class EventGroup (Group):
         self.objs= {}
         for op in self.event.operations:
             obj = op.concerned_object['id']
+            if obj is None:
+                pass
             if obj in self.objs.keys():
                 (r_obj, pds) = self.objs[obj]
                 self.objs[obj] = (None, pds+1)
             else:
                 self.objs[obj] = (None, 1)
+        if l <ol+2 or ol<5:
+            #too small, we do not draw rects
+            return
         #self.objs : item : #time modified during action
-        ox = x+1
-        oy = y+1
+        ox = x+2
+        oy = y+2
         #trier le dictionnaire par poids?
         for obj in self.objs.keys():
-            if ox+(ol+1)*2 >= x+90:
-                if oy+(ol+1)*2>= y+l:
+            if ox+(ol+2)*2>= x+90:
+                if oy+(ol+2)*2>= y+l:
                     # ...
+                    #goocanvas.Text(parent = self,
+                    #                    text = "...",
+                    #                    x = ox,
+                    #                    y = oy,
+                    #                    width = -1,
+                    #                    anchor = gtk.ANCHOR_CENTER,
+                    #                    font = "Sans Bold %s" % str(self.fontsize))
                     break
                 else:
                     (r_obj, pds) = self.objs[obj]
-                    self.objs[obj]= (self.addObj(obj, pds, ox, oy, ol, self.color, self.color_c), pds)
-                    ox = x+1
-                    oy += (ol+1)
+                    self.objs[obj]= (self.addObj(obj, pds, ox, oy, ol, self.color, self.color_o), pds)
+                    ox = x+2
+                    oy += (ol+2)
             else:
                 (r_obj, pds) = self.objs[obj]
-                self.objs[obj]= (self.addObj(obj, pds, ox, oy, ol, self.color, self.color_c), pds)
-                ox += (ol+1)
+                self.objs[obj]= (self.addObj(obj, pds, ox, oy, ol, self.color, self.color_o), pds)
+                ox += (ol+2)
 
