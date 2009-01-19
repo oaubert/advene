@@ -1541,7 +1541,9 @@ class AdveneGUI(object):
         c=self.controller
         p=self.controller.player
 
-        if event.state & gtk.gdk.MOD1_MASK and event.keyval == gtk.keysyms.space:
+        if (event.keyval == gtk.keysyms.nobreakspace
+            or (event.state & gtk.gdk.MOD1_MASK and event.keyval == gtk.keysyms.space)):
+            # Alt-Space on MacOS X generates nobreakspace
             self.player_create_bookmark(event)
             return True
         elif event.keyval in self.key_shortcuts:
