@@ -124,11 +124,13 @@ class TraceTimeline(AdhocView):
 
         def on_background_scroll(widget, event):
             zoom=event.state & gtk.gdk.CONTROL_MASK
+            a = None
             if zoom:
                 if event.direction == gtk.gdk.SCROLL_DOWN:
                     zoom_out(widget)
                 elif  event.direction == gtk.gdk.SCROLL_UP:
                     zoom_in(widget)
+                return
             elif event.state & gtk.gdk.SHIFT_MASK:
                 # Horizontal scroll
                 a = scrolled_win.get_hadjustment()
@@ -137,7 +139,7 @@ class TraceTimeline(AdhocView):
                 # Vertical scroll
                 a = scrolled_win.get_vadjustment()
                 incr = a.step_increment
-                
+
             if event.direction == gtk.gdk.SCROLL_DOWN:
                 val = a.value + incr
                 if val > a.upper - a.page_size:
@@ -514,8 +516,9 @@ class EventGroup (Group):
         oy = y+2
         #trier le dictionnaire par poids?
         for obj in self.objs.keys():
+            # modif 90 par largeur colonne
             if ox+(ol+2)*2>= x+90:
-                if oy+(ol+2)*2>= y+l:
+                if oy+ol+2>= y+l:
                     # ...
                     #goocanvas.Text(parent = self,
                     #                    text = "...",
