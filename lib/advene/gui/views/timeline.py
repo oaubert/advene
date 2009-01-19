@@ -93,7 +93,7 @@ class QuickviewBar(gtk.HBox):
         self.annotation=a
         self.begin.set_text(b)
         self.end.set_text(e)
-        self.content.set_markup(u"<b>%s</b>" % c)
+        self.content.set_markup(u"<b>%s</b>" % c.replace('<', '&lt;'))
 
 class TimeLine(AdhocView):
     """Representation of a set of annotations placed on a timeline.

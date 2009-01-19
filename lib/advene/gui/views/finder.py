@@ -326,7 +326,7 @@ class ViewColumn(FinderColumn):
         self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
 
         self.label['title'].set_markup(_("View <b>%(title)s</b>\nId: %(id)s") % {
-                'title': self.controller.get_title(self.element),
+                'title': self.controller.get_title(self.element).replace('<', '&lt;'),
                 'id': self.element.id })
 
         t=helper.get_view_type(self.element)
@@ -419,7 +419,7 @@ class QueryColumn(FinderColumn):
 
         self.label['title'].set_markup(_("%(type)s <b>%(title)s</b>\nId: %(id)s") % {
                 'type': helper.get_type(self.element),
-                'title': self.controller.get_title(self.element),
+                'title': self.controller.get_title(self.element).replace('<', '&lt;'),
                 'id': self.element.id })
         # Reset the sensitive state on apply buttons
         for b in self.apply_buttons:
@@ -485,7 +485,7 @@ class ResourceColumn(FinderColumn):
         self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
         self.label['title'].set_markup(_("%(type)s <b>%(title)s</b>\nId: %(id)s") % {
                 'type': helper.get_type(self.element),
-                'title': self.controller.get_title(self.element),
+                'title': self.controller.get_title(self.element).replace('<', '&lt;'),
                 'id': self.element.id })
         self.update_preview()
         return True

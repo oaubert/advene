@@ -78,7 +78,7 @@ class EditAccumulator(AccumulatorPopup):
 
         t=self.get_short_title(element)
         l=gtk.Label()
-        l.set_markup('<b>%s</b>' % t)
+        l.set_markup('<b>%s</b>' % t.replace('<', '&lt;'))
         hbox.pack_start(l, expand=True)
 
         self.edited_elements[element]=w
@@ -127,7 +127,7 @@ class EditAccumulator(AccumulatorPopup):
             return False
         w=self.edited_elements[element]
         l=w._title_label
-        l.set_markup('<b>%s</b>' % self.get_short_title(element))
+        l.set_markup('<b>%s</b>' % self.get_short_title(element).replace('<', '&lt;'))
         return True
 
     def update_annotation(self, annotation, event):

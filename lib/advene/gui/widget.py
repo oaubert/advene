@@ -795,7 +795,7 @@ class RelationRepresentation(gtk.Button):
                          self.arrow[self.direction])
         color=self.controller.get_element_color(self.relation)
         if color:
-            l.set_markup('<span background="%s">%s</span>' % (color, t))
+            l.set_markup('<span background="%s">%s</span>' % (color, t.replace('<', '&lt;')))
         else:
             l.set_text(t)
 
