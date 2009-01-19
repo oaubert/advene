@@ -153,7 +153,7 @@ class AnnotationDisplay(AdhocView):
                     w=self.widget.get_allocation().width - 6
                     width=pixbuf.get_width()
                     height=pixbuf.get_height()
-                    if width > w:
+                    if width > w and w > 0:
                         height = 1.0 * w * height / width
                         pixbuf=pixbuf.scale_simple(int(w), int(height), gtk.gdk.INTERP_BILINEAR)
                     self.label['imagecontents'].set_from_pixbuf(pixbuf)
