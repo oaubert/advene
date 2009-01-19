@@ -32,6 +32,7 @@ FIXME: find a way to pass the background path
 """
 
 import os
+import sys
 import gtk
 import cairo
 import urllib
@@ -1594,11 +1595,14 @@ class ShapeEditor:
             w.set_transient_for(tb.get_toplevel())
             w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_TOOLBAR)
             w.set_modal(True)
-            alloc = tb.get_allocation()
-            w.move(alloc.x, alloc.y)
             w.resize(20, 150)
+            alloc = tb.get_allocation()
+            if sys.platform == 'darwin':
+                p=tb.get_toplevel().get_position()
+                w.move(alloc.x+p[0], alloc.y+p[1])
+            else:
+                w.move(alloc.x, alloc.y)
             w.show_all()
-
             def button_press_event(wid, event):
                 wid.destroy()
                 return False
@@ -1646,11 +1650,14 @@ class ShapeEditor:
             w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_TOOLBAR)
             w.set_modal(True)
             bar.show_all()
-            alloc = tb.get_allocation()
-            w.move(alloc.x, alloc.y)
             w.resize(20, 200)
+            alloc = tb.get_allocation()
+            if sys.platform == 'darwin':
+                p=tb.get_toplevel().get_position()
+                w.move(alloc.x+p[0], alloc.y+p[1])
+            else:
+                w.move(alloc.x, alloc.y)
             w.show_all()
-
             def button_press_event(wid, event):
                 wid.destroy()
                 return False
