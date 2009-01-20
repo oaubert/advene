@@ -324,7 +324,7 @@ class HTMLEditor(textview_class, HTMLParser):
 
             def set_size(pixbuf, width, height):
                 if attrwidth and attrheight:
-                    # Both are specified. Simple use them.
+                    # Both are specified. Simply use them.
                     width, height = attrwidth, attrheight
                 elif attrwidth and not attrheight:
                     # Only width is specified.
