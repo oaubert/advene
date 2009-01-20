@@ -505,7 +505,7 @@ class Media(Common):
             svg_data=self.controller.get_title(a)
 
         if self.controller.gui:
-            img=self.controller.gui.overlay(snapshot, svg_data)
+            img=self.controller.gui.overlay(snapshot, svg_data, other_thread=True)
         else:
             img=snapshot
         cherrypy.response.headers['Content-type']='image/png'
