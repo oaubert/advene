@@ -1648,10 +1648,10 @@ class AdveneGUI(object):
             def process_overlay(queue=None):
                 queue.put(overlay_svg_as_png(png_data, svg_data))
                 return False
-            self.controller.queue_action(process_overlay, queue=q)
+            gobjet.timeout_add(0, process_overlay, q)
             try:
                 data=q.get(True, 2)
-            except Empty:
+            except Queue.Empty:
                 data=None
             return data
         else:
