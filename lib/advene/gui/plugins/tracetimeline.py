@@ -35,7 +35,7 @@ except ImportError:
     # fail the module loading, and use them as a guard in register()
     goocanvas=None
     Group=object
-    
+
 def register(controller):
     if goocanvas is None:
         controller.log("Cannot register TraceTimeline: the goocanvas python module does not seem to be available.")
@@ -81,7 +81,7 @@ class TraceTimeline(AdhocView):
         self.populate_head_canvas()
         self.widget.show_all()
         self.refresh()
-        
+
     def build_widget(self):
         bx = gtk.HPaned()
         mainbox = gtk.VPaned()
@@ -97,7 +97,7 @@ class TraceTimeline(AdhocView):
         scrolled_win.add(self.canvas)
         mainbox.pack2(scrolled_win, resize=True, shrink=True)
         mainbox.set_position(35)
-        
+
         bx.pack1(mainbox, resize=True, shrink=True)
         self.toolbox = gtk.VBox()
         lbz = gtk.Label(_('Zoom'))
@@ -161,7 +161,7 @@ class TraceTimeline(AdhocView):
                 self.drag_coordinates=(event.x_root, event.y_root)
                 self.widget.get_parent_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.DIAMOND_CROSS))
                 #curseur grab
-                return False            
+                return False
             x, y = self.drag_coordinates
             wa=widget.get_allocation()
             a=scrolled_win.get_hadjustment()
@@ -172,11 +172,11 @@ class TraceTimeline(AdhocView):
             v=a.value + y - event.y_root
             if v > a.lower and v+wa.height < a.upper:
                 a.value=v
-            
+
             self.drag_coordinates= (event.x_root, event.y_root)
             return False
         self.canvas.connect('motion-notify-event', on_background_motion)
-        
+
         def on_background_button_release(widget, event):
             if event.button == 1:
                 self.drag_coordinates=None
@@ -197,7 +197,7 @@ class TraceTimeline(AdhocView):
             self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
             self.refresh()
         btnm.connect('clicked', zoom_out)
-        
+
         def zoom_in(w):
             self.canvasY = self.canvasY * 1.25
             self.timefactor *= 0.8
@@ -385,7 +385,7 @@ class HeadGroup (Group):
 
         def change_font(self, font):
             return
-        
+
 class EventGroup (Group):
     def __init__(self, controller=None, canvas=None, type=None, event=None, x =0, y=0, l=1, ol=5, fontsize=8, color_c=0x00ffffff):
         Group.__init__(self, parent = canvas.get_root_item ())
@@ -430,7 +430,7 @@ class EventGroup (Group):
                             stroke_color=color,
                             fill_color_rgba=color_c,
                             line_width=1.0)
-        
+
         def toggle_rels(w, target, ev, obj_id):
             #print "%s %s %s %s" % (w, target, ev.button, obj_id)
             if ev.button != 1:
@@ -464,7 +464,7 @@ class EventGroup (Group):
                         else:
                             x2 = r_obj.props.center_x
                             y2 = r_obj.props.center_y
-                            
+
                         p = goocanvas.Points ([(x1, y1), (x2,y2)])
                         self.lines.append(goocanvas.Polyline (parent = self,
                                         close_path = False,
