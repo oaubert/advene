@@ -306,6 +306,7 @@ class HTMLEditor(textview_class, HTMLParser):
                 src='file:'+src
             f = urllib2.urlopen(src)
             data = f.read()
+            f.close()
             alt=dattr.get('alt', '')
         except Exception, ex:
             print "Error loading %s: %s" % (dattr.get('src', "[No src attribute]"), ex)
