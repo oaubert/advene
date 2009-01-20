@@ -369,11 +369,62 @@ class HTMLContentHandler (ContentHandler):
             return w.parse_html(tag, attr)
         return None, None
 
+    def custom_url_loader(self, url):
+        """Custom URL loader.
+
+        This method processes URLs internally when possible, instead
+        of going through the webserver. This is at the cost of some
+        code, and possible discrepancies with the original webcherry
+        code. It is absolutely unnecessary on linux/macosx. However,
+        win32 (svg?) pixbuf loader is broken wrt. threads, and this is
+        the solution to have the overlay() code (and thus the pixbuf
+        loader) execute in the main thread.
+        """
+        m=re.search('/media/overlay/(.+?)/(.+)', url)
+        if m:
+            (alias, element)=m.groups()
+            if '/' in element:
+                # There is a TALES expression specifying the overlayed
+                # content
+                aid, path = element.split('/', 1)
+            else:
+                aid, path = element, None
+            p=self.controller.packages.get(alias)
+            if not p:
+                return None
+            a=p.get_element_by_id(aid)
+            if a is None:
+                return None
+            if path:
+                # There is a TALES expression
+                path='here/'+path
+                ctx=self.controller.build_context(here=a)
+                svg_data=unicode( ctx.evaluateValue(path) )
+            elif 'svg' in a.content.mimetype:
+                # Overlay svg
+                svg_data=a.content.data
+            else:
+                # Overlay annotation title
+                svg_data=self.controller.get_title(a)
+
+            png_data=p.imagecache[a.fragment.begin]            
+            return self.controller.gui.overlay(png_data, svg_data)
+
+        m=re.search('/packages/(.+?)/imagecache/(\d+)', url)
+        if m:
+            alias, timestamp = m.groups()
+            p=self.controller.packages.get(alias)
+            if p is None:
+                return None
+            return p.imagecache[long(timestamp)]
+        return None
+
     def get_view (self, compact=False):
         """Generate a view widget for editing HTML."""
         vbox=gtk.VBox()
 
         self.editor=HTMLEditor()
+        self.editor.custom_url_loader=self.custom_url_loader
         #self.editor.register_class_parser(self.class_parser)
         try:
             self.editor.set_text(self.element.data)
