@@ -1597,7 +1597,7 @@ class ShapeEditor:
             w.set_modal(True)
             w.resize(20, 150)
             alloc = tb.get_allocation()
-            if sys.platform == 'darwin':
+            if sys.platform in ('darwin', 'win32'):
                 p=tb.get_toplevel().get_position()
                 w.move(alloc.x+p[0], alloc.y+p[1])
             else:
@@ -1652,7 +1652,7 @@ class ShapeEditor:
             bar.show_all()
             w.resize(20, 200)
             alloc = tb.get_allocation()
-            if sys.platform == 'darwin':
+            if sys.platform in ('darwin', 'win32'):
                 p=tb.get_toplevel().get_position()
                 w.move(alloc.x+p[0], alloc.y+p[1])
             else:
