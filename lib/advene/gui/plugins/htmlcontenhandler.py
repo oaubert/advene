@@ -277,7 +277,7 @@ class HTMLContentHandler (ContentHandler):
             urlbase=self.controller.server.urlbase.rstrip('/')
         except AttributeError:
             urlbase='http://localhost:1234'
-        d={ 
+        d={
             'id': annotation.id,
             'href': urlbase + ctx.evaluateValue('here/player_url'),
             'imgurl': urlbase + ctx.evaluateValue('here/snapshot_url'),
@@ -294,7 +294,7 @@ class HTMLContentHandler (ContentHandler):
             data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
         if 'content' in choice:
             data.append("""<span tal:content="package/annotations/%(id)s/representation">%(content)s</span>""" % d)
-        
+
         data.append('</a>')
 
         self.editor.feed("".join(data))
@@ -325,7 +325,7 @@ class HTMLContentHandler (ContentHandler):
         self.last_dndtime=time
         self.last_x=x
         self.last_y=y
-        
+
         if targetType == config.data.target_type['annotation']:
             for uri in unicode(selection.data, 'utf8').split('\n'):
                 source=self.controller.package.annotations.get(uri)
@@ -407,7 +407,7 @@ class HTMLContentHandler (ContentHandler):
                 # Overlay annotation title
                 svg_data=self.controller.get_title(a)
 
-            png_data=p.imagecache[a.fragment.begin]            
+            png_data=p.imagecache[a.fragment.begin]
             return self.controller.gui.overlay(png_data, svg_data)
 
         m=re.search('/packages/(.+?)/imagecache/(\d+)', url)
