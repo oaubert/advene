@@ -155,6 +155,12 @@ class HTMLEditor(textview_class, HTMLParser):
         self.set_editable(True)
         self.set_wrap_mode(gtk.WRAP_WORD)
 
+        # Callers can override this with a custom method to load URLs.
+        # The method takes a URL as parameter, and returns the
+        # corresponding data.
+        # If it returns None, then normal processing is done.
+        self.custom_url_loader=None
+
         # Class parsers are invoked when meeting a tag with a 'class'
         # attribute. They can do their own processing of the tag, and
         # return a widget as well as a method which will be used to
@@ -296,22 +302,50 @@ class HTMLEditor(textview_class, HTMLParser):
         anchor.has_tal = [ (k, v) for (k, v) in widget._attr if k.startswith('tal:') ]
         self.__tags.setdefault(widget._tag, []).append(anchor)
 
-    def handle_img(self, tag, attr):
-        dattr=dict(attr)
-        # Wait maximum 1s for connection
-        socket.setdefaulttimeout(1)
+    def url_load(self, url):
+        if self.custom_url_loader is not None:
+            try:
+                data=self.custom_url_loader(url)
+                msg=''
+            except Exception, ex:
+                data=None
+                msg=ex
+            if data is not None:
+                return data, msg
+            elif isinstance(msg, Exception):
+                # There was an error.
+                return data, unicode(msg)
+            # Useless else: use default code.
+            # else:
+            #    pass
+
+        # Wait maximum 3s for connection
+        dto = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(3)
+        if not url.startswith('http:') and not url.startswith('file:'):
+            url='file:'+url
         try:
-            src=dattr['src']
-            if not src.startswith('http:') and not src.startswith('file:'):
-                src='file:'+src
-            f = urllib2.urlopen(src)
+            f = urllib2.urlopen(url)
             data = f.read()
             f.close()
-            alt=dattr.get('alt', '')
+            msg=''
         except Exception, ex:
-            print "Error loading %s: %s" % (dattr.get('src', "[No src attribute]"), ex)
-            data = None
-            alt=dattr.get('alt', 'Broken image')
+            data=None
+            msg=str(ex)
+        socket.setdefaulttimeout(dto)
+        return data, msg
+
+    def handle_img(self, tag, attr):
+        dattr=dict(attr)
+        src=dattr.get('src')
+        if src:
+            data, msg=self.url_load(src)
+            if data is None:
+                print "Error loading %s: %s" % (src, msg)
+                alt=dattr.get('alt', 'Broken image')
+            else:
+                alt=dattr.get('alt', '')
+
         # Process width and height attributes
         attrwidth = dattr.get('width')
         attrheight = dattr.get('height')
