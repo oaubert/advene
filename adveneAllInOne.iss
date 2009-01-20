@@ -9,7 +9,7 @@ Source: dist\doc\*; DestDir: {app}\doc; Flags: recursesubdirs
 Source: dist\locale\*; DestDir: {app}\locale; Flags: recursesubdirs
 Source: share\pixmaps\advene.ico; DestDir: {app}; DestName: advene.ico
 Source: c:\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs
-Source: examples\*v9.azp; DestDir: {app}\examples
+Source: examples\*v10.azp; DestDir: {app}\examples
 Source: c:\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs
 Source: c:\gtk\share\locale\fr\*; DestDir: {app}\lib\locale\fr; Flags: recursesubdirs
 Source: c:\gtk\lib\pango\*; DestDir: {app}\lib\pango; Flags: recursesubdirs
@@ -49,9 +49,14 @@ VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
 OutputBaseFilename=setup_advene_0.36_all_in_one_vlc140108svn
 VersionInfoTextVersion=0.36
+ChangesAssociations=yes
 
-;[Registry]
+[Registry]
 ;Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
+Root: HKCR; Subkey: ".azp"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletevalue; Check: CanChange;
+Root: HKCR; Subkey: "Advene"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletekey; Check: CanChange;
+Root: HKCR; Subkey: "Advene\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\advene.exe,0"; Check: CanChange;
+Root: HKCR; Subkey: "Advene\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\advene.exe"" ""%1"""; Check: CanChange;
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -67,7 +72,7 @@ var
   Uninstall: String;
 begin
   if (CurStep = ssInstall) then begin
-    if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall) or RegQueryStringValue(HKLM, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall)then begin
+    if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall) then begin
       if MsgBox('Warning: Old Version will be removed!', mbConfirmation, MB_OKCANCEL)=IDOK then begin
           Exec(RemoveQuotes(Uninstall), ' /SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ResultCode);
       end
@@ -77,3 +82,9 @@ begin
     end;
   end;
 end;
+
+function CanChange(): Boolean;
+begin
+  Result := (IsAdminLoggedOn or IsPowerUserLoggedOn);
+end;
+
