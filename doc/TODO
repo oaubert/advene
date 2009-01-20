@@ -1,3 +1,5 @@
+* make vlc bindings work again (linux/mac)
+
 * bug in htmleditor when inserting overlayed snapshot (crash in
    f.read() in htmleditor.handle_img) on win32
 
