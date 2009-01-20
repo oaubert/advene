@@ -1648,7 +1648,7 @@ class AdveneGUI(object):
             def process_overlay(queue=None):
                 queue.put(overlay_svg_as_png(png_data, svg_data))
                 return False
-            gobjet.timeout_add(0, process_overlay, q)
+            gobject.timeout_add(0, process_overlay, q)
             try:
                 data=q.get(True, 2)
             except Queue.Empty:
