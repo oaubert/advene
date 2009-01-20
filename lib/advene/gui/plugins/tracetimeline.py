@@ -24,16 +24,9 @@ This widget allows to present event history in a timeline view.
 
 import gtk
 import time
-from gtk.gdk import Cursor
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-import advene.util.helper as helper
-import urllib
-import advene.model.view
-from advene.gui.widget import TimestampRepresentation
-from advene.rules.elements import ECACatalog
-import advene.core.config as config
 try:
     import goocanvas
     from goocanvas import Group
