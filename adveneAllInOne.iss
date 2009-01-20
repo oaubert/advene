@@ -53,10 +53,10 @@ ChangesAssociations=yes
 
 [Registry]
 ;Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
-Root: HKCR; Subkey: ".azp"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletevalue; Check: CanChange;
-Root: HKCR; Subkey: "Advene"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletekey; Check: CanChange;
-Root: HKCR; Subkey: "Advene\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\advene.exe,0"; Check: CanChange;
-Root: HKCR; Subkey: "Advene\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\advene.exe"" ""%1"""; Check: CanChange;
+Root: HKCU; Subkey: ".azp"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletevalue; Check: CanChange;
+Root: HKCU; Subkey: "Advene"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletekey; Check: CanChange;
+Root: HKCU; Subkey: "Advene\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\advene.exe,0"; Check: CanChange;
+Root: HKCU; Subkey: "Advene\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\advene.exe"" ""%1"""; Check: CanChange;
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
