@@ -25,6 +25,7 @@ from gettext import gettext as _
 
 import gtk
 
+import advene.core.config as config
 from advene.gui.views import AdhocView
 import advene.gui.popup
 import advene.util.helper as helper
@@ -72,9 +73,17 @@ class EditionHistory(AdhocView):
             for e in reversed(elements):
                 b=gtk.Button("\n".join((helper.get_type(e), self.controller.get_title(e))), use_underline=False)
                 b.set_alignment(0, 0)
-                color=name2color(self.controller.get_element_color(e))
-                if color:
-                    style = b.modify_bg(gtk.STATE_NORMAL, color)
+                colorname=self.controller.get_element_color(e)
+                if colorname:
+                    if config.data.os == 'win32':
+                        text=b.get_label()
+                        b.foreach(b.remove)
+                        l=gtk.Label()
+                        l.set_markup('<span background="%s">%s</span>' % (colorname, text))
+                        l.show()
+                        b.add(l)
+                    else:
+                        style = b.modify_bg(gtk.STATE_NORMAL, name2color(colorname))
                 b.connect('clicked', (lambda i, el: self.controller.gui.edit_element(el)),
                           e)
                 content=getattr(e, 'content', None)
