@@ -1720,8 +1720,6 @@ class ShapeEditor:
         return vbox
 
 def main():
-    import sys
-
     if len(sys.argv) > 1:
         bg = sys.argv[1]
     else:
