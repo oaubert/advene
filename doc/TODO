@@ -1,8 +1,5 @@
 * make vlc bindings work again (linux/mac)
 
-* bug in htmleditor when inserting overlayed snapshot (crash in
-   f.read() in htmleditor.handle_img) on win32
-
 * Make initial setup window an assistant (multiple steps)
 
 * Read HIG docs: 
@@ -2635,3 +2632,5 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Mac: put modified files (pangorc, modules) into
    ~/Library/Preferences/advene/files
 
+* bug in htmleditor when inserting overlayed snapshot (crash in
+   f.read() in htmleditor.handle_img) on win32
