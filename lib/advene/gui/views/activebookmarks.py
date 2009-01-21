@@ -136,7 +136,7 @@ class ActiveBookmarks(AdhocView):
 
     def clear(self, *p):
         del self.bookmarks[:]
-        self.mainbox.foreach(self.mainbox.remove)
+        self.mainbox.foreach(lambda w: w.destroy())
         self.mainbox.set_focus_chain([])
         return True
 
