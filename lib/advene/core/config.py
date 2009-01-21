@@ -89,8 +89,10 @@ class Config(object):
 
     def __init__ (self):
 
-        self.startup_time=time.time()
+        self.debug=False
 
+        self.startup_time=time.time()
+        
         self.config_file=''
         self.parse_options()
 
