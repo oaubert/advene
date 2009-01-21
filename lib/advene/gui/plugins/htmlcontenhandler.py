@@ -407,7 +407,7 @@ class HTMLContentHandler (ContentHandler):
                 # Overlay annotation title
                 svg_data=self.controller.get_title(a)
 
-            png_data=p.imagecache[a.fragment.begin]
+            png_data=str(p.imagecache[a.fragment.begin])
             return self.controller.gui.overlay(png_data, svg_data)
 
         m=re.search('/packages/(.+?)/imagecache/(\d+)', url)
@@ -416,7 +416,7 @@ class HTMLContentHandler (ContentHandler):
             p=self.controller.packages.get(alias)
             if p is None:
                 return None
-            return p.imagecache[long(timestamp)]
+            return str(p.imagecache[long(timestamp)])
         return None
 
     def get_view (self, compact=False):
