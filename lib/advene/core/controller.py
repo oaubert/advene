@@ -1904,6 +1904,15 @@ class AdveneController(object):
         """General exit callback."""
         if not self.cleanup_done:
             # Stop the event handler
+            if config.data.debug:
+                start=self._state
+                end=self.event_handler.dump()
+                import difflib
+                diff=difflib.Differ()
+                print "-----------"
+                for l in diff.compare(start, end):
+                    print l
+                print "-----------"
             self.event_handler.reset_queue()
             self.event_handler.clear_state()
             self.event_handler.update_rulesets()

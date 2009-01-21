@@ -1016,6 +1016,8 @@ class AdveneGUI(object):
             self.check_for_update()
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
+        if config.data.debug:
+            self.controller._state=self.controller.event_handler.dump()
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
