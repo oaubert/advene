@@ -161,7 +161,6 @@ class ImageCache(dict):
         """
         if key is None:
             return value
-        key = self.approximate(key)
         if value != self.not_yet_available_image:
             self._modified=True
             if self.autosync and self.name is not None:
@@ -185,22 +184,23 @@ class ImageCache(dict):
         if key is None:
             return None
         key=long(key)
-        if dict.has_key(self, key):
+        if dict.has_key(self, key) and dict.__getitem__(self, key) != self.not_yet_available_image:
             return key
 
         if epsilon is None:
             epsilon=self.epsilon
         valids = [ (pos, abs(pos-key))
                    for pos in self.keys()
-                   if abs(pos - key) <= epsilon ]
+                   if abs(pos - key) <= epsilon
+                   and dict.__getitem__(self, pos) != self.not_yet_available_image ]
         valids.sort(key=operator.itemgetter(1))
 
         if valids:
             key = valids[0][0]
 #            print "Approximate key: %d (%d)" % valids[0]
-##             if len(valids) > 1:
-##                 print "Imagecache: more than 1 valid snapshot for %d: %s" % (key,
-##                                                                              valids)
+#            if len(valids) > 1:
+#                print "Imagecache: more than 1 valid snapshot for %d: %s" % (key,
+#                                                                              valids)
         else:
             self.init_value (key)
 
@@ -219,7 +219,7 @@ class ImageCache(dict):
         key = self.approximate(key, epsilon)
         if dict.__getitem__(self, key) != self.not_yet_available_image:
             dict.__setitem__(self, key, self.not_yet_available_image)
-        return
+        return key
 
     def missing_snapshots (self):
         """Return a list of positions of missing snapshots.
