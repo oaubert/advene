@@ -889,7 +889,7 @@ class TimestampRepresentation(gtk.Button):
         self._rules=[]
         # React to UpdateSnapshot events
         def snapshot_update_cb(context, target):
-            if context.globals['position'] == self._value:
+            if abs(context.globals['position'] - self._value) <= self.epsilon:
                 # Update the representation
                 self.refresh()
             return True
@@ -952,7 +952,7 @@ class TimestampRepresentation(gtk.Button):
             self.image.hide()
             self.set_size_request(6, 12)
         else:
-            self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=self.epsilon), width=self.width))
+            self.image.set_from_pixbuf(png_to_pixbuf(self.controller.package.imagecache.get(v, epsilon=self.epsilon), width=self.width))
             self.set_size_request(-1, -1)
             self.image.show()
         ts=helper.format_time(self._value)
