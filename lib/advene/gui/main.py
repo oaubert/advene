@@ -1374,19 +1374,34 @@ class AdveneGUI(object):
         return self.pane['fareast']
 
     def find_bookmark_view(self):
+        def make_panel_visible():
+            # Make the fareast view visible if needed
+            pane=self.pane['fareast']
+            w=pane.get_allocation().width
+            if abs(w - pane.get_position()) < 200:
+                # Less than 30 visible pixels. Enlarge.
+                step=(pane.get_position() - (w - 256)) / 8
+                target=w - 256
+                def enlarge_view():
+                    pos=pane.get_position() - step
+                    if pos < target:
+                        pane.set_position(target)
+                        return False
+                    pane.set_position(pos)
+                    return True
+                gobject.timeout_add(100, enlarge_view)
+            return True
+
         l=[ w for w in self.adhoc_views if w.view_id == 'activebookmarks' ]
         if l:
             # There is at least one open view. Use the latest.
             a=l[-1]
+            if a._destination == 'fareast':
+                make_panel_visible()
         else:
             # No existing view. Create one.
             a=self.open_adhoc_view('activebookmarks', destination='fareast')
-            # Make the fareast view visible if needed
-            p=self.pane['fareast']
-            w=p.get_allocation().width
-            if abs(w - p.get_position()) < 30:
-                # Less than 50 visible pixels. Enlarge.
-                p.set_position(w - 256)
+            make_panel_visible()
         return a
 
     def create_bookmark(self, position, insert_after_current=False, comment=None):
