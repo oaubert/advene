@@ -1091,6 +1091,9 @@ class EditForm(object):
     This class defines the method that an EditForm is expected to
     implement.
     """
+    def close(self):
+        return True
+
     def check_validity(self):
         """Checks the validity of the data."""
         return True
