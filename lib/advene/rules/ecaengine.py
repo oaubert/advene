@@ -317,6 +317,12 @@ class ECAEngine:
             print "Trying to remove non-existant rule %s from %s ruleset" % (str(rule.name), type_)
             pass
 
+    def dump(self):
+        res=[]
+        for k in sorted(self.ruledict.keys()):
+            res.append("%s: %s" % (k, len(self.ruledict[k])))
+        return res
+            
     def notify (self, event_name, *param, **kw):
         """Invoked by the application on the occurence of an event.
 
