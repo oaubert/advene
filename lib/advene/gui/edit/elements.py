@@ -1196,6 +1196,10 @@ class EditContentForm(EditForm):
                                           ('application/x-advene-ruleset',
                                            'application/x-advene-simplequery')))
 
+    def close(self):
+        self.contentform.close()
+        return True
+
     def set_editable (self, bool):
         self.editable = bool
 
