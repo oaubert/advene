@@ -197,8 +197,7 @@ class HTMLContentHandler (ContentHandler):
 
 
     def populate_popup_cb(self, textview, menu):
-        def open_link(i, m):
-            link=dict(m._attr).get('href', None)
+        def open_link(i, link=None):
             if link:
                 pos=re.findall('/media/play/(\d+)', link)
                 if pos:
@@ -207,11 +206,9 @@ class HTMLContentHandler (ContentHandler):
                 else:
                     self.controller.open_url(link)
             return True
-        def goto_position(i, m):
-            src=dict(m._attr).get('src', None)
-            pos=re.findall('imagecache/(\d+)', src)
-            if pos:
-                self.controller.update_status('set', long(pos[0]))
+
+        def goto_position(i, pos):
+            self.controller.update_status('set', pos)
             return True
 
         def select_presentation(i, ap, mode):
@@ -224,37 +221,36 @@ class HTMLContentHandler (ContentHandler):
             ap.presentation.append(mode)
             ap.refresh()
             return True
-                
+
+        def new_menuitem(label, action, *params):
+            item=gtk.MenuItem(label)
+            item.connect('activate', action, *params)
+            item.show()
+            menu.append(item)
+            return item
+
         ctx=textview.get_current_context()
 
         if ctx:
             menu.foreach(menu.remove)
             if hasattr(ctx[-1], '_placeholder'):
                 ap=ctx[-1]._placeholder
-
-                if 'snapshot' in ap.presentation:
-                    item=gtk.MenuItem("Display overlay")
-                    item.connect('activate', select_presentation, ap, 'overlay')
-                    item.show()
-                    menu.append(item)
-                elif 'overlay' in ap.presentation:
-                    item=gtk.MenuItem("Display snapshot")
-                    item.connect('activate', select_presentation, ap, 'snapshot')
-                    item.show()
-                    menu.append(item)
                 
-            if ctx[-1]._tag == 'img':
-                # There is an image
-                item=gtk.MenuItem("Image")
-                item.connect('activate', goto_position, ctx[-1])
-                item.show()
-                menu.append(item)
+                new_menuitem(_("Play video"), goto_position, ap.annotation.fragment.begin)
+                
+                if 'snapshot' in ap.presentation:
+                    new_menuitem(_("Display overlay"), select_presentation, ap, 'overlay')
+                elif 'overlay' in ap.presentation:
+                    new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
+                
             l=[ m for m in ctx if m._tag == 'a' ]
             if l:
-                item=gtk.MenuItem("Open link")
-                item.connect('activate', open_link, l[0])
-                item.show()
-                menu.append(item)
+                link=dict(l[0]._attr).get('href', None)
+                if link:
+                    if '/media/play' in link:
+                        new_menuitem(_("Play video"), open_link, link)
+                    else:
+                        new_menuitem(_("Open link"), open_link, link)
         return False
 
     def editor_drag_motion(self, widget, drag_context, x, y, timestamp):
