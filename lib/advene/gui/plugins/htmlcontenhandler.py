@@ -42,10 +42,16 @@ class AnnotationPlaceholder:
             presentation=('snapshot', 'link')
         self.presentation=presentation
         self.width=160
-        # FIXME: width, height, alt, link ?
+        # FIXME: how to pass/parse width, height, alt, link ?
+        self.rules=[]
         self.pixbuf=self.build_pixbuf()
         self.pixbuf._placeholder=self
         self.refresh()
+
+    def cleanup(self):
+        for r in self.rules:
+            self.controller.event_handler.remove_rule(r, 'internal')
+        self.rules=[]
 
     def process_enclosed_tags(self, typ, tag, attr=None):
         """Process enclosed data.
@@ -106,9 +112,36 @@ class AnnotationPlaceholder:
 
         return "".join(data)
 
+    def snapshot_updated(self, context, target):
+        if self.annotation is not None and abs(context.globals['position'] - self.annotation.fragment.begin) <= 20:
+            # Update the representation
+            self.refresh()
+        return True
+
+    def annotation_updated(self, context, target):
+        if context.globals['annotation'] == self.annotation:
+            self.refresh()
+        return True
+
+    def annotation_deleted(self, context, target):
+        if context.globals['annotation'] == self.annotation:
+            self.annotation=None
+            self.cleanup()
+            self.refresh()
+        return True
+
     def refresh(self):
+        if not self.rules and self.annotation:
+            # Now that an annotation is defined, we can connect the notifications
+            self.rules.append(self.controller.event_handler.internal_rule (event='AnnotationEditEnd',
+                                                                           method=self.annotation_updated))
+            self.rules.append(self.controller.event_handler.internal_rule (event='AnnotationDelete',
+                                                                           method=self.annotation_deleted))
+            self.rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
+                                                                           method=self.snapshot_updated))
+
         p=self.build_pixbuf()
-        p.composite(self.pixbuf, 0, 0, self.pixbuf.get_width(), self.pixbuf.get_height(), 
+        p.composite(self.pixbuf, 0, 0, self.pixbuf.get_width(), self.pixbuf.get_height(),
                     0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
         return True
 
@@ -168,8 +201,14 @@ class HTMLContentHandler (ContentHandler):
         self.view = None
         self.sourceview=None
 
+        self.placeholders=[]
+
         self.editing_source=False
         self.tooltips=gtk.Tooltips()
+
+    def close(self):
+        for p in self.placeholders:
+            p.cleanup()
 
     def set_editable (self, boolean):
         self.editable = boolean
@@ -241,14 +280,14 @@ class HTMLContentHandler (ContentHandler):
             menu.foreach(menu.remove)
             if hasattr(ctx[-1], '_placeholder'):
                 ap=ctx[-1]._placeholder
-                
+
                 new_menuitem(_("Play video"), goto_position, ap.annotation.fragment.begin)
-                
+
                 if 'snapshot' in ap.presentation:
                     new_menuitem(_("Display overlay"), select_presentation, ap, 'overlay')
                 elif 'overlay' in ap.presentation:
                     new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
-                
+
             l=[ m for m in ctx if m._tag == 'a' ]
             if l:
                 link=dict(l[0]._attr).get('href', None)
@@ -281,6 +320,7 @@ class HTMLContentHandler (ContentHandler):
         choice: list of one or more strings: 'snapshot', 'timestamp', 'content', 'overlay'
         """
         a=AnnotationPlaceholder(annotation, self.controller, choice)
+        self.placeholders.append(a)
         self.editor.insert_pixbuf(a.pixbuf)
         if focus:
             self.grab_focus()
@@ -344,8 +384,9 @@ class HTMLContentHandler (ContentHandler):
 
     def class_parser(self, tag, attr):
         if attr['class'] == 'advene:annotation':
-            w=AnnotationPlaceholder(annotation=None, controller=self.controller)
-            return w.parse_html(tag, attr)
+            a=AnnotationPlaceholder(annotation=None, controller=self.controller)
+            self.placeholders.append(a)
+            return a.parse_html(tag, attr)
         return None, None
 
     def custom_url_loader(self, url):
