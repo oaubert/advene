@@ -62,11 +62,11 @@ class AnnotationPlaceholder:
         if attr['class'] == 'advene:annotation':
             self.presentation=':'.split(attr['advene:presentation'])
             aid=attr['advene:annotation']
-            self.annotation=self.controller.get_element_by_id(aid)
+            self.annotation=self.controller.package.get_element_by_id(aid)
             if self.annotation is None:
                 print "Problem: non-existent annotation"
             self.refresh()
-            return self.widget, self.process_enclosed_tags
+            return self.pixbuf, self.process_enclosed_tags
         return None, None
 
     def as_html(self):
@@ -135,6 +135,9 @@ class AnnotationPlaceholder:
             pixbuf=overlay_svg_as_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
                                          helper.format_time(self.annotation.fragment.begin),
                                          width=self.width)
+        else:
+            pixbuf=png_to_pixbuf(self.controller.package.imagecache.not_yet_available_image,
+                                 width=self.width)
         pixbuf.as_html=self.as_html
         pixbuf._tag='span'
         pixbuf._attr=[]
@@ -436,7 +439,7 @@ class HTMLContentHandler (ContentHandler):
         try:
             self.editor.set_text(self.element.data)
         except Exception, e:
-            self.controller.log(_("HTML editor: cannot parse content"))
+            self.controller.log(_("HTML editor: cannot parse content (%s)") % unicode(e))
 
         self.editor.connect('drag-data-received', self.editor_drag_received)
         self.editor.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
