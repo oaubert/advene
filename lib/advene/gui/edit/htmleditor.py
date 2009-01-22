@@ -302,6 +302,11 @@ class HTMLEditor(textview_class, HTMLParser):
         anchor.has_tal = [ (k, v) for (k, v) in widget._attr if k.startswith('tal:') ]
         self.__tags.setdefault(widget._tag, []).append(anchor)
 
+    def insert_pixbuf(self, pixbuf, cursor=None):
+        if cursor is None:
+            cursor = self._get_iter_for_creating_mark()
+        self.__tb.insert_pixbuf(cursor, pixbuf)
+
     def url_load(self, url):
         if self.custom_url_loader is not None:
             try:
@@ -380,20 +385,10 @@ class HTMLEditor(textview_class, HTMLParser):
             pixbuf=None
 
         if pixbuf is None:
-            pixbuf=gtk.gdk.pixbuf_new_from_xpm_data(broken_xpm)
-
-        cursor = self._get_iter_for_creating_mark()
-        if pixbuf is not None:
-            self.__tb.insert_pixbuf(cursor, pixbuf)
-            pixbuf._tag=tag
-            pixbuf._attr=attr
-        else:
-            mark = self.__tb.create_mark(None, cursor, True)
-            mark._tag=tag
-            mark._attr=attr
-            mark._startmark=mark
-            mark._endmark=mark
-            self.__tb.insert(cursor, alt)
+            pixbuf=gtk.gdk.pixbuf_new_from_xpm_data(broken_xpm)        
+        pixbuf._tag=tag
+        pixbuf._attr=attr
+        self.insert_pixbuf(pixbuf)
 
     def register_class_parser(self, p):
         self._class_parsers.append(p)
@@ -552,7 +547,10 @@ class HTMLEditor(textview_class, HTMLParser):
         while True:
             p=i.get_pixbuf()
             if p is not None:
-                fd.write("<img %s></img>" % " ".join( '%s="%s"' % (k, v) for (k, v) in p._attr ))
+                if hasattr(p, 'as_html'):
+                    fd.write(p.as_html())
+                else:
+                    fd.write("<img %s></img>" % " ".join( '%s="%s"' % (k, v) for (k, v) in p._attr ))
 
             p=i.get_child_anchor()
             if p is not None:
