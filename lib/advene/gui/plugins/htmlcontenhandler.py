@@ -76,6 +76,9 @@ class AnnotationPlaceholder:
         return None, None
 
     def as_html(self):
+        if self.annotation is None:
+            return """<span advene:error="Non-existent annotation"></span>"""
+
         ctx=self.controller.build_context(self.annotation)
         try:
             urlbase=self.controller.server.urlbase.rstrip('/')
@@ -281,12 +284,12 @@ class HTMLContentHandler (ContentHandler):
             if hasattr(ctx[-1], '_placeholder'):
                 ap=ctx[-1]._placeholder
 
-                new_menuitem(_("Play video"), goto_position, ap.annotation.fragment.begin)
-
-                if 'snapshot' in ap.presentation:
-                    new_menuitem(_("Display overlay"), select_presentation, ap, 'overlay')
-                elif 'overlay' in ap.presentation:
-                    new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
+                if ap.annotation is not None:
+                    new_menuitem(_("Play video"), goto_position, ap.annotation.fragment.begin)
+                    if 'snapshot' in ap.presentation:
+                        new_menuitem(_("Display overlay"), select_presentation, ap, 'overlay')
+                    elif 'overlay' in ap.presentation:
+                        new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
 
             l=[ m for m in ctx if m._tag == 'a' ]
             if l:
@@ -460,7 +463,8 @@ class HTMLContentHandler (ContentHandler):
         if hasattr(ctx[-1], '_placeholder'):
             # There is an annotation placeholder
             a=ctx[-1]._placeholder.annotation
-            self.controller.update_status('set', a.fragment.begin)
+            if a is not None:
+                self.controller.update_status('set', a.fragment.begin)
             return False
 
         l=[ m for m in ctx if m._tag == 'a' ]
