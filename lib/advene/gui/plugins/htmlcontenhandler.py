@@ -195,16 +195,19 @@ class HTMLContentHandler (ContentHandler):
             self.sourceview.content_set(self.element.data)
         return True
 
+    def open_link(self, link=None):
+        if link:
+            pos=re.findall('/media/play/(\d+)', link)
+            if pos:
+                # A position was specified. Directly use it.
+                self.controller.update_status('set', long(pos[0]))
+            else:
+                self.controller.open_url(link)
+        return True
 
     def populate_popup_cb(self, textview, menu):
-        def open_link(i, link=None):
-            if link:
-                pos=re.findall('/media/play/(\d+)', link)
-                if pos:
-                    # A position was specified. Directly use it.
-                    self.controller.update_status('set', long(pos[0]))
-                else:
-                    self.controller.open_url(link)
+        def open_link(i, l):
+            self.open_link(l)
             return True
 
         def goto_position(i, pos):
@@ -392,6 +395,37 @@ class HTMLContentHandler (ContentHandler):
             return str(p.imagecache[long(timestamp)])
         return None
 
+    def button_press_cb(self, textview, event):
+        if event.button != 1 or event.type != gtk.gdk._2BUTTON_PRESS:
+            return False
+
+        textwin=textview.get_window(gtk.TEXT_WINDOW_TEXT)
+        if event.window != textwin:
+            return False
+        (x, y) = textview.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
+                                                  int(event.x),
+                                                  int(event.y))
+        it=textview.get_iter_at_location(x, y)
+        if it is None:
+            print "Error in get_iter_at_location"
+            return False
+        ctx=self.editor.get_current_context(it)
+        if not ctx:
+            return False
+
+        if hasattr(ctx[-1], '_placeholder'):
+            # There is an annotation placeholder
+            a=ctx[-1]._placeholder.annotation
+            self.controller.update_status('set', a.fragment.begin)
+            return False
+
+        l=[ m for m in ctx if m._tag == 'a' ]
+        if l:
+            link=dict(l[0]._attr).get('href', None)
+            self.open_link(link)
+            return False
+        return False
+
     def get_view (self, compact=False):
         """Generate a view widget for editing HTML."""
         vbox=gtk.VBox()
@@ -414,6 +448,7 @@ class HTMLContentHandler (ContentHandler):
                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_ASK )
         self.editor.connect('drag-motion', self.editor_drag_motion)
         self.editor.connect('populate-popup', self.populate_popup_cb)
+        self.editor.connect('button-press-event', self.button_press_cb)
 
         self.view = gtk.VBox()
 
