@@ -120,14 +120,21 @@ class AnnotationPlaceholder:
             pixbuf=overlay_svg_as_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
                                          self.annotation.content.data,
                                          width=self.width)
+        elif 'snapshot' in self.presentation:
+            if 'timestamp' in self.presentation:
+                pixbuf=overlay_svg_as_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
+                                             helper.format_time(self.annotation.fragment.begin),
+                                             width=self.width)
+            else:
+                pixbuf=png_to_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
+                                     width=self.width)
         elif 'timestamp' in self.presentation:
+            # Generate only a timestamp FIXME: ideally, we should not
+            # generate a pixbuf, but text. Difficult to fit in this
+            # current architecture...
             pixbuf=overlay_svg_as_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
                                          helper.format_time(self.annotation.fragment.begin),
                                          width=self.width)
-        else:
-            pixbuf=png_to_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
-                                 width=self.width)
-
         pixbuf.as_html=self.as_html
         pixbuf._tag='span'
         pixbuf._attr=[]
@@ -283,12 +290,8 @@ class HTMLContentHandler (ContentHandler):
                 for (title, choice) in (
                     (_("Snapshot only"), ('link', 'snapshot', )),
                     (_("Overlayed snapshot only"), ('link', 'overlay', )),
-                    (_("Content only"), ('link', 'content', )),
                     (_("Timestamp only"), ('link', 'timestamp', )),
                     (_("Snapshot+timestamp"), ('link', 'snapshot', 'timestamp')),
-                    (_("Overlayed snapshot+timestamp"), ('link', 'overlay', 'timestamp')),
-                    (_("Snapshot+content"), ('link', 'snapshot', 'content')),
-                    (_("Snapshot+timestamp+content"), ('link', 'snapshot', 'timestamp', 'content')),
                     ):
                     i=gtk.MenuItem(title)
                     i.connect('activate', (lambda it, ann, data: self.insert_annotation_content(data, ann, focus=True)), source, choice)
