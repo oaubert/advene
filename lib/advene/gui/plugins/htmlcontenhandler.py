@@ -91,12 +91,13 @@ class AnnotationPlaceholder:
         if 'overlay' in self.presentation:
             data.append("""<img title="Click here to play"  width="160" height="100" src="%(urlbase)s/media/overlay/advene/%(id)s"></img>""" % d)
         elif 'snapshot' in self.presentation:
-            data.append("""<img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img>""" % d)
-
-        if 'timestamp' in self.presentation:
-            if data[-1].startswith('<img'):
-                data.append('<br>')
-            data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
+            if 'timestamp' in self.presentation:
+                data.append("""<img title="Click here to play"  width="160" height="100" src="%(urlbase)s/media/overlay/advene/%(id)s/fragment/formatted/begin"></img>""" % d)
+            else:
+                data.append("""<img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img>""" % d)
+        elif 'timestamp' in self.presentation:
+            # timestamp without snapshot or overlay
+            """<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d
 
         if 'link' in self.presentation:
             data.append('</a>')
