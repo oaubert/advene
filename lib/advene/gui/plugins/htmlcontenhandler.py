@@ -213,10 +213,36 @@ class HTMLContentHandler (ContentHandler):
             if pos:
                 self.controller.update_status('set', long(pos[0]))
             return True
+
+        def select_presentation(i, ap, mode):
+            modes=['overlay', 'snapshot']
+            modes.remove(mode)
+            try:
+                ap.presentation.remove(modes[0])
+            except ValueError:
+                pass
+            ap.presentation.append(mode)
+            ap.refresh()
+            return True
+                
         ctx=textview.get_current_context()
 
         if ctx:
             menu.foreach(menu.remove)
+            if hasattr(ctx[-1], '_placeholder'):
+                ap=ctx[-1]._placeholder
+
+                if 'snapshot' in ap.presentation:
+                    item=gtk.MenuItem("Display overlay")
+                    item.connect('activate', select_presentation, ap, 'overlay')
+                    item.show()
+                    menu.append(item)
+                elif 'overlay' in ap.presentation:
+                    item=gtk.MenuItem("Display snapshot")
+                    item.connect('activate', select_presentation, ap, 'snapshot')
+                    item.show()
+                    menu.append(item)
+                
             if ctx[-1]._tag == 'img':
                 # There is an image
                 item=gtk.MenuItem("Image")
@@ -288,10 +314,10 @@ class HTMLContentHandler (ContentHandler):
                     return True
                 m=gtk.Menu()
                 for (title, choice) in (
-                    (_("Snapshot only"), ('link', 'snapshot', )),
-                    (_("Overlayed snapshot only"), ('link', 'overlay', )),
-                    (_("Timestamp only"), ('link', 'timestamp', )),
-                    (_("Snapshot+timestamp"), ('link', 'snapshot', 'timestamp')),
+                    (_("Snapshot only"), ['link', 'snapshot', ]),
+                    (_("Overlayed snapshot only"), ['link', 'overlay', ]),
+                    (_("Timestamp only"), ['link', 'timestamp', ]),
+                    (_("Snapshot+timestamp"), ['link', 'snapshot', 'timestamp']),
                     ):
                     i=gtk.MenuItem(title)
                     i.connect('activate', (lambda it, ann, data: self.insert_annotation_content(data, ann, focus=True)), source, choice)
