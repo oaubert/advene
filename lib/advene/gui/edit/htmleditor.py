@@ -303,6 +303,11 @@ class HTMLEditor(textview_class, HTMLParser):
         self.__tags.setdefault(widget._tag, []).append(anchor)
 
     def insert_pixbuf(self, pixbuf, cursor=None):
+        """Insert a pixbuf.
+
+        It must have _tag and _attr attributes (that are used to
+        display contextual information).
+        """
         if cursor is None:
             cursor = self._get_iter_for_creating_mark()
         self.__tb.insert_pixbuf(cursor, pixbuf)
@@ -728,7 +733,8 @@ class ContextDisplay(gtk.TreeView):
             if parent is None:
                 # Changed the tag name
                 mark._tag=newtext
-                mark._endmark._endtag=newtext
+                if hasattr(mark, '_endmark'):
+                    mark._endmark._endtag=newtext
             else:
                 # Changed an attribute. Regenerate the whole _attr
                 # list
