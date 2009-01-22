@@ -60,7 +60,7 @@ class AnnotationPlaceholder:
 
     def parse_html(self, tag, attr):
         if attr['class'] == 'advene:annotation':
-            self.presentation=':'.split(attr['advene:presentation'])
+            self.presentation=attr['advene:presentation'].split(':')
             aid=attr['advene:annotation']
             self.annotation=self.controller.package.get_element_by_id(aid)
             if self.annotation is None:
