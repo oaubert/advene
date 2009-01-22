@@ -24,7 +24,7 @@ import re
 
 import advene.core.config as config
 from advene.gui.edit.elements import ContentHandler, TextContentHandler
-from advene.gui.util import image_from_position, decode_drop_parameters, get_pixmap_toolbutton, overlay_svg_as_pixbuf
+from advene.gui.util import png_to_pixbuf, decode_drop_parameters, get_pixmap_toolbutton, overlay_svg_as_pixbuf
 
 from advene.gui.edit.htmleditor import HTMLEditor, ContextDisplay
 import advene.util.helper as helper
@@ -39,12 +39,13 @@ class AnnotationPlaceholder:
         self.annotation=annotation
         self.controller=controller
         if presentation is None:
-            presentation=('snapshot', 'timestamp', 'link')
+            presentation=('snapshot', 'link')
         self.presentation=presentation
+        self.width=160
         # FIXME: width, height, alt, link ?
-        self.widget=self.build_widget()
+        self.pixbuf=self.build_pixbuf()
+        self.pixbuf._placeholder=self
         self.refresh()
-        self.widget.show_all()
 
     def process_enclosed_tags(self, typ, tag, attr=None):
         """Process enclosed data.
@@ -96,10 +97,6 @@ class AnnotationPlaceholder:
             if data[-1].startswith('<img'):
                 data.append('<br>')
             data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
-        if 'content' in self.presentation:
-            if data[-1].startswith('<img') or data[-1].startswith('<em'):
-                data.append('<br>')
-            data.append("""<em tal:content="package/annotations/%(id)s/representation">%(content)s</em>""" % d)
 
         if 'link' in self.presentation:
             data.append('</a>')
@@ -109,56 +106,31 @@ class AnnotationPlaceholder:
         return "".join(data)
 
     def refresh(self):
-        self.widget.foreach(self.widget.remove)
-
-        if self.annotation is None:
-            self.widget.add(gtk.Label(_("No annotation")))
-            self.widget.show_all()
-            return
-
-        ctx=self.controller.build_context(self.annotation)
-        try:
-            urlbase=self.controller.server.urlbase.rstrip('/')
-        except AttributeError:
-            urlbase='http://localhost:1234'
-        d={
-            'id': self.annotation.id,
-            'href': urlbase + ctx.evaluateValue('here/player_url'),
-            'imgurl': urlbase + ctx.evaluateValue('here/snapshot_url'),
-            'timestamp': helper.format_time(self.annotation.fragment.begin),
-            'content': self.controller.get_title(self.annotation),
-            'urlbase': urlbase,
-            }
-
-        if 'snapshot' in self.presentation:
-            i=image_from_position(self.controller, position=self.annotation.fragment.begin, width=160)
-        elif 'overlay' in self.presentation:
-            p=overlay_svg_as_pixbuf(self.controller.package.imagecache[self.annotation.fragment.begin],
-                                    self.annotation.content.data,
-                                    width=160)
-            i=gtk.image_new_from_pixbuf(p)
-        else:
-            i=None
-        if i is not None:
-            self.widget.pack_start(i, expand=False)
-
-        if 'timestamp' in self.presentation:
-            l=gtk.Label(d['timestamp'])
-            self.widget.pack_start(l, expand=False)
-
-        if 'content' in self.presentation:
-            l=gtk.Label(d['content'])
-            self.widget.pack_start(l, expand=False)
-
-        self.widget.show_all()
+        p=self.build_pixbuf()
+        p.composite(self.pixbuf, 0, 0, self.pixbuf.get_width(), self.pixbuf.get_height(), 
+                    0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
         return True
 
-    def build_widget(self):
-        vbox=gtk.VBox()
-        vbox.as_html=self.as_html
-        vbox._tag='span'
-        vbox._attr=[]
-        return vbox
+    def build_pixbuf(self):
+        if self.annotation is None:
+            pixbuf=png_to_pixbuf(self.controller.package.imagecache.not_yet_available_image,
+                                 width=self.width)
+        elif 'overlay' in self.presentation:
+            pixbuf=overlay_svg_as_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
+                                         self.annotation.content.data,
+                                         width=self.width)
+        elif 'timestamp' in self.presentation:
+            pixbuf=overlay_svg_as_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
+                                         helper.format_time(self.annotation.fragment.begin),
+                                         width=self.width)
+        else:
+            pixbuf=png_to_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
+                                 width=self.width)
+
+        pixbuf.as_html=self.as_html
+        pixbuf._tag='span'
+        pixbuf._attr=[]
+        return pixbuf
 
 class HTMLContentHandler (ContentHandler):
     """Create a HTML edit form for the given element."""
@@ -272,33 +244,8 @@ class HTMLContentHandler (ContentHandler):
         """
         choice: list of one or more strings: 'snapshot', 'timestamp', 'content', 'overlay'
         """
-        ctx=self.controller.build_context(annotation)
-        try:
-            urlbase=self.controller.server.urlbase.rstrip('/')
-        except AttributeError:
-            urlbase='http://localhost:1234'
-        d={
-            'id': annotation.id,
-            'href': urlbase + ctx.evaluateValue('here/player_url'),
-            'imgurl': urlbase + ctx.evaluateValue('here/snapshot_url'),
-            'timestamp': helper.format_time(annotation.fragment.begin),
-            'content': self.controller.get_title(annotation),
-            'urlbase': urlbase,
-            }
-        data=[ """<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href=%(href)s>""" % d ]
-        if 'overlay' in choice:
-            data.append("""<img title="Click here to play"  width="160" height="100" src="%(urlbase)s/media/overlay/advene/%(id)s"></img><br>""" % d)
-        elif 'snapshot' in choice:
-            data.append("""<img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img><br>""" % d)
-        if 'timestamp' in choice:
-            data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
-        if 'content' in choice:
-            data.append("""<span tal:content="package/annotations/%(id)s/representation">%(content)s</span>""" % d)
-
-        data.append('</a>')
-
-        self.editor.feed("".join(data))
-
+        a=AnnotationPlaceholder(annotation, self.controller, choice)
+        self.editor.insert_pixbuf(a.pixbuf)
         if focus:
             self.grab_focus()
         return True
@@ -425,7 +372,7 @@ class HTMLContentHandler (ContentHandler):
 
         self.editor=HTMLEditor()
         self.editor.custom_url_loader=self.custom_url_loader
-        #self.editor.register_class_parser(self.class_parser)
+        self.editor.register_class_parser(self.class_parser)
         try:
             self.editor.set_text(self.element.data)
         except Exception, e:
