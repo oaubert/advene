@@ -198,7 +198,7 @@ class HTMLEditor(textview_class, HTMLParser):
                                                  b.get_iter_at_mark(m),
                                                  b.get_iter_at_mark(m._endmark))
                             b.delete_mark(m)
-                            if not m._endmark.get_deleted():
+                            if hasattr(m, '_endmark') and not m._endmark.get_deleted():
                                 # Could already be deleted (for
                                 # instance, br tag have startmark ==
                                 # endmark)
@@ -416,14 +416,13 @@ class HTMLEditor(textview_class, HTMLParser):
             for p in self._class_parsers:
                 widget, self.enclosed_processor = p(tag, dattr)
                 if widget is not None:
-                    cursor = self._get_iter_for_creating_mark()
-                    anchor=self.__tb.create_child_anchor(cursor)
-                    self.add_child_at_anchor(widget, anchor)
-                    anchor._tag=tag
-                    anchor._attr=attr
-                    anchor.has_tal = [ (k, v) for (k, v) in attr if k.startswith('tal:') ]
-                    self.__tags.setdefault(tag, []).append(anchor)
-                    break
+                    if isinstance(widget, gtk.gdk.Pixbuf):
+                        self.insert_pixbuf(widget)
+                    elif isinstance(widget, gtk.Widget):
+                        self.insert_widget(widget)
+                    else:
+                        self.log("Unknown element type")
+                    return
 
         if tag == 'img':
             self.handle_img(tag, attr)
