@@ -409,7 +409,7 @@ class HTMLEditor(textview_class, HTMLParser):
         if self.enclosed_processor is not None:
             if not self.enclosed_processor('start', tag, dattr):
                 self.enclosed_processor=None
-                return
+            return
 
         if 'class' in dattr:
             # See if there is a dedicated parser for this class
@@ -469,7 +469,7 @@ class HTMLEditor(textview_class, HTMLParser):
         if self.enclosed_processor is not None:
             if not self.enclosed_processor('data', data):
                 self.enclosed_processor=None
-                return
+            return
         data = ' '.join(data.split()) + ' '
         cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
         self.__tb.insert(cursor, data)
@@ -489,7 +489,7 @@ class HTMLEditor(textview_class, HTMLParser):
         if self.enclosed_processor is not None:
             if not self.enclosed_processor('end', tag):
                 self.enclosed_processor=None
-                return
+            return
 
         if tag in self.__standalone:
             return
