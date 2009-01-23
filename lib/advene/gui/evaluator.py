@@ -652,6 +652,7 @@ class Evaluator:
         
         b=gtk.SeparatorToolItem()
         b.set_expand(True)
+        b.set_draw(False)
         self.toolbar.insert(b, -1)
 
         if embedded:
