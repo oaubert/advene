@@ -25,6 +25,9 @@ This widget allows to present event history in a timeline view.
 import gtk
 import time
 from gettext import gettext as _
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.annotation import Annotation, Relation
+from advene.model.view import View
 
 from advene.gui.views import AdhocView
 try:
@@ -64,6 +67,7 @@ class TraceTimeline(AdhocView):
         self.canvas = None
         self.head_canvas = None
         self.toolbox = None
+        self.tooltips = gtk.Tooltips()
         self.lasty=0
         self.canvasX = None
         self.canvasY = 1
@@ -76,6 +80,7 @@ class TraceTimeline(AdhocView):
         self.tracer.register_view(self)
         for act in self.tracer.action_types:
             self.cols[act] = (None, None)
+        self.col_width = 100
         self.widget = self.build_widget()
         self.widget.connect("destroy", self.destroy)
         self.populate_head_canvas()
@@ -87,7 +92,7 @@ class TraceTimeline(AdhocView):
         mainbox = gtk.VPaned()
         self.head_canvas = goocanvas.Canvas()
         c = len(self.cols)
-        self.canvasX = c*100
+        self.canvasX = c*self.col_width+5
         self.head_canvas.set_bounds (0,0,self.canvasX,35)
         mainbox.pack1(self.head_canvas, resize=False, shrink=True)
         self.canvas = goocanvas.Canvas()
@@ -99,22 +104,34 @@ class TraceTimeline(AdhocView):
         mainbox.set_position(35)
 
         bx.pack1(mainbox, resize=True, shrink=True)
-        self.toolbox = gtk.VBox()
-        lbz = gtk.Label(_('Zoom'))
-        btnp = gtk.Button('+')
-        btnm = gtk.Button('-')
-        btnc = gtk.Button('100%')
-        lbf = gtk.Label(_('Filtres'))
-        self.toolbox.pack_start(lbz, expand=False)
-        self.toolbox.pack_start(gtk.HSeparator(), expand=False)
-        self.toolbox.pack_start(btnp, expand=False)
-        self.toolbox.pack_start(btnm, expand=False)
-        self.toolbox.pack_start(btnc, expand=False)
-        self.toolbox.pack_start(gtk.HSeparator(), expand=False)
-        self.toolbox.pack_start(lbf, expand=False)
-        self.toolbox.pack_start(gtk.HSeparator(), expand=False)
+        self.toolbox = gtk.Toolbar()
+        self.toolbox.set_orientation(gtk.ORIENTATION_VERTICAL)
+        btnm = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
+        btnm.set_tooltip(self.tooltips, _('Zoom out'))
+        self.toolbox.insert(btnm, -1)
+        btnp = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
+        btnp.set_tooltip(self.tooltips, _('Zoom in'))
+        self.toolbox.insert(btnp, -1)
         bx.pack2(self.toolbox, resize=False, shrink=True)
-
+        btnc = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_100)
+        btnc.set_tooltip(self.tooltips, _('Zoom 100%'))
+        self.toolbox.insert(btnc, -1)
+        #self.zoom_combobox=dialog.list_selector_widget(members=[
+        #        ( f, '%d%%' % long(100*f) )
+        #        for f in [
+        #            (1.0 / pow(1.5, n)) for n in range(0, 10)
+        #            ]
+        #        ],
+        #                                                        entry=True,
+        #                                                        callback=zoom_change)
+        #self.zoom_combobox.child.connect('activate', zoom_entry)
+        #self.zoom_combobox.child.set_width_chars(4)
+        #i=gtk.ToolItem()
+        #i.add(self.zoom_combobox)
+        #self.toolbox.insert(i, -1)
+        self.toolbox.insert(gtk.SeparatorToolItem(), -1)
+        self.toolbox.show_all()
+        
         def on_background_scroll(widget, event):
             zoom=event.state & gtk.gdk.CONTROL_MASK
             a = None
@@ -190,21 +207,26 @@ class TraceTimeline(AdhocView):
             if h/float(self.canvasY)>=0.8:
                 zoom_100(w)
             else:
+                va=scrolled_win.get_vadjustment()
+                vc = (va.value + h/2.0) * self.timefactor
                 self.canvasY = self.canvasY * 0.8
                 self.timefactor *= 1.25
                 self.obj_l *= 0.8
-            #print "%s" % (self.timefactor)
-            self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
-            self.refresh()
+                #print "%s" % (self.timefactor)
+                self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
+                self.refresh(center = vc)
         btnm.connect('clicked', zoom_out)
 
         def zoom_in(w):
+            h = self.canvas.get_allocation().height
+            va=scrolled_win.get_vadjustment()
+            vc = (va.value + h/2.0) * self.timefactor
             self.canvasY = self.canvasY * 1.25
             self.timefactor *= 0.8
             self.obj_l *= 1.25
             #print "%s" % (self.timefactor)
             self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
-            self.refresh()
+            self.refresh(center = vc)
         btnp.connect('clicked', zoom_in)
 
         def zoom_100(w):
@@ -272,24 +294,22 @@ class TraceTimeline(AdhocView):
 
     def populate_head_canvas(self):
         offset = 0
-        offset_x = 100
-        offset_c = [0x000088AA, 0x0000FFAA, 0x008800AA, 0x00FF00AA, 0x880000AA, 0xFF0000FF, 0x008888FF, 0x880088FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
+        colors = [0x000088AA, 0x0000FFAA, 0x008800AA, 0x00FF00AA, 0x880000AA, 0xFF0000FF, 0x008888FF, 0x880088FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
         # 18 col max
         for c in self.cols.keys():
-            gpc = offset_c[offset]
-            #print '%02x %02x' % (offset_c*(16**offset), gpc)
-            etgroup = HeadGroup(self.controller, self.head_canvas, c, 5+offset_x*offset, 0, 8, gpc)
+            etgroup = HeadGroup(self.controller, self.head_canvas, c, 5+self.col_width*offset, 0, 8, colors[offset])
             self.cols[c]=(etgroup, None)
-            offset = offset + 1
+            offset += 1
         return
 
     def destroy(self, source=None, event=None):
         self.controller.tracers[0].unregister_view(self)
         return False
 
-    def refresh(self, action=None):
+    def refresh(self, action=None, center = None):
         root = self.canvas.get_root_item()
         while root.get_n_children()>0:
+            #print "refresh removing %s" % root.get_child (0)
             root.remove_child (0)
         for act in self.cols.keys():
             (h,l) = self.cols[act]
@@ -309,6 +329,10 @@ class TraceTimeline(AdhocView):
         self.draw_marks()
         for i in self.tracer.trace.levels['actions']:
                 self.receive(self.tracer.trace, action=i)
+        # .
+        if center:
+            va=self.sw.get_vadjustment()
+            va.value = center/self.timefactor-va.page_size/2.0
 
     def receive(self, trace, event=None, operation=None, action=None):
         # trace : the full trace to be managed
@@ -331,13 +355,19 @@ class TraceTimeline(AdhocView):
         if l and l.event == action:
             y1=l.rect.get_bounds().y1+1
             x1=l.rect.get_bounds().x1+1
+            #print "receive removing %s" % l.rect
             child_num = l.find_child (l.rect)
-            l.remove_child (child_num)
+            if child_num>=0:
+                l.remove_child (child_num)
             length = (action.activity_time[1]-action.activity_time[0])//self.timefactor
             if y1+length > self.canvasY:
                 self.refresh(action)
-            #l.rect = l.newRect(x1, y1, length, l.color, l.color_c)
-            #l.redrawObjs(self.obj_l)
+            else:
+                l.x = x1
+                l.y = y1
+                l.l = length
+                l.rect = l.newRect(l.color, l.color_c)
+                l.redrawObjs(self.obj_l)
         else:
             x = h.rect.get_bounds().x1+1
             y = action.activity_time[0]//self.timefactor
@@ -387,147 +417,227 @@ class HeadGroup (Group):
             return
 
 class EventGroup (Group):
-    def __init__(self, controller=None, canvas=None, type=None, event=None, x =0, y=0, l=1, ol=5, fontsize=8, color_c=0x00ffffff):
+    def __init__(self, controller=None, canvas=None, type=None, event=None, x =0, y=0, l=1, ol=5, fontsize=6, color_c=0x00ffffff):
         Group.__init__(self, parent = canvas.get_root_item ())
+        self.canvas = canvas
         self.controller=controller
         self.event=event
         self.type=type
         self.rect = None
-        self.text = None
+        self.color_sel = 0xD9D919FF
         self.color_c = color_c
         self.color_o = 0xADEAEAFF
         self.color = "black"
         self.fontsize=fontsize
-        self.rect = self.newRect (x,y,l,self.color, self.color_c)
+        self.x = x
+        self.y= y
+        self.l = l
+        self.ol = ol
+        self.rect = self.newRect (self.color, self.color_c)
         self.objs={}
+        #self.lines = []
         self.redrawObjs(ol)
-        self.lines = []
 
-    def newRect(self, xx, yy, l, color, color_c):
+    def newRect(self, color, color_c):
         return goocanvas.Rect (parent = self,
-                                    x = xx,
-                                    y = yy,
+                                    x = self.x,
+                                    y = self.y,
                                     width = 90,
-                                    height = l,
+                                    height = self.l,
                                     fill_color_rgba = color_c,
                                     stroke_color = color,
                                     line_width = 2.0)
 
-    def addObj(self, obj_id, factor, xx, yy, ol, color, color_c):
-        #o = goocanvas.Rect (parent = self,
-        #                            x = xx,
-        #                            y = yy,
-        #                            width = ol,
-        #                            height = ol,
-        #                            fill_color_rgba = color_c,
-        #                            stroke_color = color,
-        #                            line_width = 1.0)
-        o = goocanvas.Ellipse(parent=self,
-                            center_x=xx+ol/2,
-                            center_y=yy+ol/2,
-                            radius_x=ol/2,
-                            radius_y=ol/2,
-                            stroke_color=color,
-                            fill_color_rgba=color_c,
-                            line_width=1.0)
-
-        def toggle_rels(w, target, ev, obj_id):
-            #print "%s %s %s %s" % (w, target, ev.button, obj_id)
-            if ev.button != 1:
-                return
-            r = w.get_canvas().get_root_item()
-            chd = []
-            i=0
-            while i <r.get_n_children():
-                f = r.get_child(i)
-                if isinstance(f, EventGroup) and f.objs is not None:
-                    chd.append(f)
-                    if f.lines:
-                        for l in f.lines:
-                            n=f.find_child(l)
-                            f.remove_child(n)
-                        f.lines=[]
-                i+=1
-            for c in chd:
-                if obj_id in c.objs.keys():
-                    (r_obj, f) = c.objs[obj_id] #rect, factor
-                    if r_obj != w:
-                        #faire un lien
-                        x2=y2=0
-                        #x1 = w.get_bounds().x1 + w.props.width/2
-                        #y1 = w.get_bounds().y1 + w.props.height/2
-                        x1 = w.props.center_x
-                        y1 = w.props.center_y
-                        if r_obj is None:
-                            x2 = c.rect.get_bounds().x1 + c.rect.props.width/2
-                            y2 = c.rect.get_bounds().y1 + c.rect.props.height/2
-                        else:
-                            x2 = r_obj.props.center_x
-                            y2 = r_obj.props.center_y
-
-                        p = goocanvas.Points ([(x1, y1), (x2,y2)])
-                        self.lines.append(goocanvas.Polyline (parent = self,
-                                        close_path = False,
-                                        points = p,
-                                        stroke_color = 0xFFFFFFFF,
-                                        line_width = 1.0,
-                                        start_arrow = False,
-                                        end_arrow = False,
-                                        ))
-            return
-        o.connect('button-press-event', toggle_rels, obj_id)
+    def addObj(self, obj_id, xx, yy, ol, color, color_o):
+        (pds, obj_name, obj_type, obj_opes) = self.objs[obj_id][1:5]
+        o = ObjGroup(self.controller, self.canvas, xx, yy, ol, self.fontsize, pds, obj_id, obj_name, obj_type, obj_opes)
         return o
 
     def redrawObjs(self, ol=5):
-        l = self.rect.props.height
-        w = self.rect.props.width
-        if ol > (w-6)/3.0:
-            ol = (w-6)/3.0
-        y=self.rect.get_bounds().y1+1
-        x=self.rect.get_bounds().x1+1
         #FIXME : brutal way to do that. Need only to find what operation was added to update only this square
         for obj in self.objs.keys():
-            (r_obj, f) = self.objs[obj]
-            if r_obj is not None:
-                child_num = self.find_child (r_obj)
-                self.remove_child (child_num)
-        self.objs= {}
+            obg = self.objs[obj][0]
+            if obg is not None:
+                #print "redrawObjs removing %s" % r_obj 
+                child_num = self.find_child (obg)
+                if child_num>=0:
+                    self.remove_child (child_num)
+        self.objs = {}
+        obj_opes = []
         for op in self.event.operations:
             obj = op.concerned_object['id']
             if obj is None:
-                pass
+                continue
             if obj in self.objs.keys():
-                (r_obj, pds) = self.objs[obj]
-                self.objs[obj] = (None, pds+1)
+                (pds, obj_name, obj_type, obj_opes) = self.objs[obj][1:5]
+                obj_opes.append(op)
+                self.objs[obj] = (None, pds+1, obj_name, obj_type, obj_opes)
             else:
-                self.objs[obj] = (None, 1)
-        if l <ol+2 or ol<5:
-            #too small, we do not draw rects
-            return
+                obj_name = op.concerned_object['name']
+                obj_type = op.concerned_object['type']
+                obj_opes.append(op)
+                self.objs[obj] = (None, 1, obj_name, obj_type, obj_opes)
         #self.objs : item : #time modified during action
+        y=self.rect.get_bounds().y1+1
+        x=self.rect.get_bounds().x1+1
         ox = x+2
         oy = y+2
-        #trier le dictionnaire par poids?
+        l = self.rect.props.height
+        w = self.rect.props.width
+        nb = len(self.objs.keys())
+        ol = w/3 - 4
+        while ((w/(ol+2))*(l/(ol+2))< nb and ol>3):
+            ol-=1
+        #ol = min(w-4, l-4)
+        if ol > l-4:
+            if l>7:
+                ol=l-4
+            else:
+                return
+        self.fontsize = ol-1
         for obj in self.objs.keys():
-            # modif 90 par largeur colonne
-            if ox+(ol+2)*2>= x+90:
-                if oy+ol+2>= y+l:
-                    # ...
-                    #goocanvas.Text(parent = self,
-                    #                    text = "...",
-                    #                    x = ox,
-                    #                    y = oy,
-                    #                    width = -1,
-                    #                    anchor = gtk.ANCHOR_CENTER,
-                    #                    font = "Sans Bold %s" % str(self.fontsize))
+            #print "ox %s oy %s ol %s w %s l %s" % (ox, oy, ol, w+x, l+y)
+            if ox+(ol+2)>= x+w:
+                if oy+(ol+2)*2>= y+l:
+                    ox = x+2
+                    oy += (ol+1)
+                    goocanvas.Text(parent = self,
+                                        text = "...",
+                                        x = ox,
+                                        y = oy,
+                                        width = -1,
+                                        anchor = gtk.ANCHOR_W,
+                                        font = "Sans Bold %s" % str(self.fontsize))
                     break
                 else:
-                    (r_obj, pds) = self.objs[obj]
-                    self.objs[obj]= (self.addObj(obj, pds, ox, oy, ol, self.color, self.color_o), pds)
                     ox = x+2
                     oy += (ol+2)
+                    (pds, obj_name, obj_type, obj_opes) = self.objs[obj][1:5]
+                    self.objs[obj]= (self.addObj(obj, ox+ol/2.0, oy+ol/2.0, ol/2.0, self.color, self.color_o), pds, obj_name, obj_type, obj_opes)
+                    ox += (ol+2)
             else:
-                (r_obj, pds) = self.objs[obj]
-                self.objs[obj]= (self.addObj(obj, pds, ox, oy, ol, self.color, self.color_o), pds)
+                (pds, obj_name, obj_type, obj_opes) = self.objs[obj][1:5]
+                self.objs[obj]= (self.addObj(obj, ox+ol/2.0, oy+ol/2.0, ol/2.0, self.color, self.color_o), pds, obj_name, obj_type, obj_opes)
                 ox += (ol+2)
+            #print "ox %s oy %s ol %s w %s l %s" % (ox, oy, ol, w+x, l+y)
 
+
+
+class ObjGroup (Group):
+    def __init__(self, controller=None, canvas=None, x=0, y=0, r=4, fontsize=6, pds=1, obj_id=None, obj_name=None, obj_type=None, obj_opes=[]):
+        Group.__init__(self, parent = canvas.get_root_item ())
+        self.controller=controller
+        self.rep = None
+        self.text = None
+        self.color_sel = 0xD9D919FF
+        self.color_f = 0xADEAEAFF
+        self.color_s = "black"
+        self.fontsize = fontsize
+        self.poids = pds
+        self.id = obj_id
+        self.name = obj_name
+        self.type = obj_type
+        self.opes = obj_opes
+        self.x = x
+        self.y = y
+        self.r = r
+        self.rep = self.newRep()
+        self.text = self.newText()
+        self.lines = []
+        self.sel = False
+        self.connect('button-press-event', self.toggle_rels)
+        
+    def toggle_rels(self, w, target, ev):
+        #print "%s %s %s" % (w, target, ev.button)
+        if ev.button != 1:
+            return
+        r = self.get_canvas().get_root_item()
+        chd = []
+        i=0
+        desel = False
+        while i <r.get_n_children():
+            f = r.get_child(i)
+            if isinstance(f, EventGroup) and f.objs is not None:
+                chd.append(f)
+                for obj_id in f.objs.keys():
+                    obg = f.objs[obj_id][0]
+                    if obg is None:
+                        continue
+                    for l in obg.lines:
+                        #print "toggle removing line %s" % l
+                        n=obg.find_child(l)
+                        if n>=0:
+                            obg.remove_child(n)
+                    obg.lines=[]
+                    if obg.sel:
+                        obg.deselect()
+                        if obg == self:
+                            desel = True
+            i+=1
+        if desel:
+            return
+        self.select()
+        for c in chd:
+            if self.id in c.objs.keys():
+                obj_gr = c.objs[self.id][0]
+                if obj_gr != self:
+                    x2=y2=0
+                    x1 = self.x
+                    y1 = self.y
+                    if obj_gr is None:
+                        x2 = c.rect.get_bounds().x1 + c.rect.props.width/2
+                        y2 = c.rect.get_bounds().y1 + c.rect.props.height/2
+                    else:
+                        x2 = obj_gr.x
+                        y2 = obj_gr.y
+                        obj_gr.select()
+                    p = goocanvas.Points ([(x1, y1), (x2,y2)])
+                    self.lines.append(goocanvas.Polyline (parent = self,
+                                    close_path = False,
+                                    points = p,
+                                    stroke_color = 0xFFFFFFFF,
+                                    line_width = 1.0,
+                                    start_arrow = False,
+                                    end_arrow = False,
+                                    ))
+        return
+
+    def select(self):
+        self.rep.props.fill_color_rgba=self.color_sel
+        self.sel = True
+
+    def deselect(self):
+        self.rep.props.fill_color_rgba=self.color_f
+        self.sel = False
+        
+    def newRep(self):
+        return goocanvas.Ellipse(parent=self,
+                        center_x=self.x,
+                        center_y=self.y,
+                        radius_x=self.r,
+                        radius_y=self.r,
+                        stroke_color=self.color_s,
+                        fill_color_rgba=self.color_f,
+                        line_width=1.0)
+
+    def newText(self):
+        txt = 'U'
+        if self.type == Schema:
+            txt = 'S'
+        elif self.type == AnnotationType:
+            txt = 'AT'
+        elif self.type == RelationType:
+            txt = 'RT'
+        elif self.type == Annotation:
+            txt = 'A'
+        elif self.type == Relation:
+            txt = 'R'
+        elif self.type == View:
+            txt = 'V'
+        return goocanvas.Text (parent = self,
+                        text = txt,
+                        x = self.x,
+                        y = self.y,
+                        width = -1,
+                        anchor = gtk.ANCHOR_CENTER,
+                        font = "Sans %s" % str(self.fontsize))    
