@@ -56,6 +56,7 @@ class Evaluator:
 
         self.control_shortcuts = {
             gtk.keysyms.w: self.close,
+            gtk.keysyms.b: self.add_bookmark,
             gtk.keysyms.l: self.clear_expression,
             gtk.keysyms.f: lambda: self.fill_method_parameters(),
             gtk.keysyms.d: lambda: self.display_completion(completeprefix=False),
