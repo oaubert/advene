@@ -35,17 +35,17 @@ def register(controller=None):
     controller.register_content_handler(HTMLContentHandler)
 
 class AnnotationPlaceholder:
-    def __init__(self, annotation=None, controller=None, presentation=None):
+    def __init__(self, annotation=None, controller=None, presentation=None, update_pixbuf=None):
         self.annotation=annotation
         self.controller=controller
         if presentation is None:
             presentation=('snapshot', 'link')
         self.presentation=presentation
+        self.update_pixbuf=update_pixbuf
         self.width=160
         # FIXME: how to pass/parse width, height, alt, link ?
         self.rules=[]
         self.pixbuf=self.build_pixbuf()
-        self.pixbuf._placeholder=self
         self.refresh()
 
     def cleanup(self):
@@ -143,9 +143,14 @@ class AnnotationPlaceholder:
             self.rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
                                                                            method=self.snapshot_updated))
 
-        p=self.build_pixbuf()
-        p.composite(self.pixbuf, 0, 0, self.pixbuf.get_width(), self.pixbuf.get_height(),
-                    0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
+        old=self.pixbuf
+        new=self.build_pixbuf()
+        if not self.update_pixbuf:
+            new.composite(old, 0, 0, old.get_width(), old.get_height(),
+                          0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
+        else:
+            self.update_pixbuf(old, new)
+        self.pixbuf=new
         return True
 
     def build_pixbuf(self):
@@ -165,16 +170,22 @@ class AnnotationPlaceholder:
                 pixbuf=png_to_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
                                      width=self.width)
         elif 'timestamp' in self.presentation:
-            # Generate only a timestamp FIXME: ideally, we should not
-            # generate a pixbuf, but text. Difficult to fit in this
-            # current architecture...
-            pixbuf=overlay_svg_as_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
-                                         helper.format_time(self.annotation.fragment.begin),
-                                         width=self.width)
+            # Generate only a timestamp 
+            # FIXME: hardcoded value in viewBox is bad... We should find out the appropriate size.
+            loader = gtk.gdk.PixbufLoader('svg')
+            loader.write("""<svg version='1'> preserveAspectRatio="xMinYMin meet" viewBox="0 0 220 20">
+<text x='0' y='10' fill="black" font-size="12" stroke="black" font-family="sans-serif">
+%s
+  </text>
+</svg>
+""" % helper.format_time(self.annotation.fragment.begin))
+            loader.close ()
+            pixbuf = loader.get_pixbuf ()
         else:
             pixbuf=png_to_pixbuf(self.controller.package.imagecache.not_yet_available_image,
                                  width=self.width)
         pixbuf.as_html=self.as_html
+        pixbuf._placeholder=self
         pixbuf._tag='span'
         pixbuf._attr=[]
         return pixbuf
@@ -260,12 +271,16 @@ class HTMLContentHandler (ContentHandler):
             return True
 
         def select_presentation(i, ap, mode):
-            modes=['overlay', 'snapshot']
-            modes.remove(mode)
-            try:
-                ap.presentation.remove(modes[0])
-            except ValueError:
-                pass
+            if mode == 'timestamp':
+                # Timestamp only
+                ap.presentation=[]
+            else:
+                modes=['overlay', 'snapshot']
+                modes.remove(mode)
+                try:
+                    ap.presentation.remove(modes[0])
+                except ValueError:
+                    pass
             ap.presentation.append(mode)
             ap.refresh()
             return True
@@ -286,9 +301,13 @@ class HTMLContentHandler (ContentHandler):
 
                 if ap.annotation is not None:
                     new_menuitem(_("Play video"), goto_position, ap.annotation.fragment.begin)
+                    new_menuitem(_("Timestamp only"), select_presentation, ap, 'timestamp')
                     if 'snapshot' in ap.presentation:
                         new_menuitem(_("Display overlay"), select_presentation, ap, 'overlay')
                     elif 'overlay' in ap.presentation:
+                        new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
+                    else:
+                        # Timestamp only
                         new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
 
             l=[ m for m in ctx if m._tag == 'a' ]
@@ -322,7 +341,7 @@ class HTMLContentHandler (ContentHandler):
         """
         choice: list of one or more strings: 'snapshot', 'timestamp', 'content', 'overlay'
         """
-        a=AnnotationPlaceholder(annotation, self.controller, choice)
+        a=AnnotationPlaceholder(annotation, self.controller, choice, self.editor.update_pixbuf)
         self.placeholders.append(a)
         self.editor.insert_pixbuf(a.pixbuf)
         if focus:
@@ -387,7 +406,9 @@ class HTMLContentHandler (ContentHandler):
 
     def class_parser(self, tag, attr):
         if attr['class'] == 'advene:annotation':
-            a=AnnotationPlaceholder(annotation=None, controller=self.controller)
+            a=AnnotationPlaceholder(annotation=None, 
+                                    controller=self.controller, 
+                                    update_pixbuf=self.editor.update_pixbuf)
             self.placeholders.append(a)
             return a.parse_html(tag, attr)
         return None, None
