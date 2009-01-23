@@ -705,13 +705,26 @@ class Evaluator:
         return False
 
     def add_bookmark(self, *p):
+        """Add the current expression as a bookmark.
+        """
         ex=self.get_expression()
         if not re.match('^\s*$', ex) and not ex in self.bookmarks:
             self.bookmarks.append(ex)
             self.save_data(self.bookmarks, self.bookmarkfile)
         return True
 
+    def remove_bookmark(self, *p):
+        """Remove the current expression from bookmarks.
+        """
+        ex=self.get_expression()
+        if ex in self.bookmarks:
+            self.bookmarks.remove(ex)
+            self.save_data(self.bookmarks, self.bookmarkfile)
+        return True
+
     def display_bookmarks(self, widget=None, *p):
+        """Display bookmarks as a popup menu.
+        """
         def set_expression(i, b):
             self.set_expression(b)
             return True
@@ -742,6 +755,7 @@ class Evaluator:
             (gtk.STOCK_DELETE, self.clear_expression),
             (gtk.STOCK_EXECUTE, self.evaluate_expression),
             (gtk.STOCK_ADD, self.add_bookmark),
+            (gtk.STOCK_REMOVE, self.remove_bookmark),
             (gtk.STOCK_INDEX, self.display_bookmarks),
             ):
             b=gtk.ToolButton(icon)
