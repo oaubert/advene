@@ -715,6 +715,7 @@ class Evaluator:
         if not re.match('^\s*$', ex) and not ex in self.bookmarks:
             self.bookmarks.append(ex)
             self.save_data(self.bookmarks, self.bookmarkfile)
+            self.status_message("Bookmark saved")
         return True
 
     def remove_bookmark(self, *p):
@@ -724,6 +725,7 @@ class Evaluator:
         if ex in self.bookmarks:
             self.bookmarks.remove(ex)
             self.save_data(self.bookmarks, self.bookmarkfile)
+            self.status_message("Bookmark removed")
         return True
 
     def display_bookmarks(self, widget=None, *p):
