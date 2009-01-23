@@ -163,7 +163,7 @@ class HTMLEditor(textview_class, HTMLParser):
 
         # Class parsers are invoked when meeting a tag with a 'class'
         # attribute. They can do their own processing of the tag, and
-        # return a widget as well as a method which will be used to
+        # return a widget or pixbuf as well as a method which will be used to
         # process enclosed elements.
         # If the method is None, enclosed elements will be processed by
         # the standard parser.
