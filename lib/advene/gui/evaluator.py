@@ -705,7 +705,7 @@ class Evaluator:
 
     def add_bookmark(self, *p):
         ex=self.get_expression()
-        if not ex in self.bookmarks:
+        if not re.match('^\s*$', ex) and not ex in self.bookmarks:
             self.bookmarks.append(ex)
             self.save_data(self.bookmarks, self.bookmarkfile)
         return True
