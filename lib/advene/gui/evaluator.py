@@ -39,12 +39,21 @@ class Evaluator:
             locals_ = {}
         self.globals_ = globals_
         self.locals_ = locals_
-        self.historyfile=historyfile
+
+        # History and bookmark handling
         self.history = []
+        self.bookmarks = []
+
+        self.historyfile=historyfile
+        if historyfile:
+            self.bookmarkfile=historyfile + '-bookmarks'
+        else:
+            self.bookmarkfile=None
+        self.load_history()
+
         self.current_entry=None
         self.history_index = None
-        if self.historyfile:
-            self.load_history ()
+
         self.control_shortcuts = {
             gtk.keysyms.w: self.close,
             gtk.keysyms.l: self.clear_expression,
@@ -71,33 +80,46 @@ class Evaluator:
         return False
 
     def load_history(self, name=None):
-        """Load the command history.
+        """Load a command history and return the data.
         """
         if name is None:
             name=self.historyfile
-        if name is None:
-            return
-        try:
-            f=open(name, 'r')
-        except IOError:
-            return
-        for l in f:
-            self.history.append(l.rstrip())
-        f.close()
+            bname=self.bookmarkfile
+        else:
+            bname=name + '-bookmarks'
+        self.history=self.load_data(name)
+        self.bookmarks=self.load_data(bname)
         return
 
     def save_history(self, name=None):
-        """Save the command history.
-        """
         if name is None:
             name=self.historyfile
-        if name is None:
-            return
+            bname=self.bookmarkfile
+        else:
+            bname=name + '-bookmarks'
+        self.save_data(self.history, self.historyfile)
+        self.save_data(self.bookmarks, self.bookmarkfile)
+        return
+
+    def load_data(self, name):
+        res=[]
+        try:
+            f=open(name, 'r')
+        except IOError:
+            return []
+        for l in f:
+            res.append(l.rstrip())
+        f.close()
+        return res
+
+    def save_data(self, data, name):
+        """Save a command history.
+        """
         try:
             f=open(name, 'w')
         except IOError:
-            return
-        for l in self.history:
+            return []
+        for l in data:
             f.write(l + "\n")
         f.close()
         return
@@ -109,6 +131,7 @@ class Evaluator:
         was specified.
         """
         self.save_history()
+
         if isinstance(self.widget.parent, gtk.Window):
             # Embedded in a toplevel window
             self.widget.parent.destroy()
@@ -625,6 +648,10 @@ class Evaluator:
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.connect('key-press-event', self.key_pressed_cb)
         window.set_title ("Python evaluation")
+        
+        b=gtk.SeparatorToolItem()
+        b.set_expand(True)
+        self.toolbar.insert(b, -1)
 
         if embedded:
             # Add the Close button to the toolbar
@@ -674,6 +701,28 @@ class Evaluator:
 
         return False
 
+    def add_bookmark(self, *p):
+        ex=self.get_expression()
+        if not ex in self.bookmarks:
+            self.bookmarks.append(ex)
+            self.save_data(self.bookmarks, self.bookmarkfile)
+        return True
+
+    def display_bookmarks(self, i, *p):
+        def set_expression(i, b):
+            self.set_expression(b)
+            return True
+        if not self.bookmarks:
+            return True
+        m=gtk.Menu()
+        for b in self.bookmarks:
+            i=gtk.MenuItem(b)
+            i.connect('activate', set_expression, b)
+            m.append(i)
+        m.show_all()
+        m.popup(None, i, None, 0, gtk.get_current_event_time())
+        return True
+
     def build_widget(self):
         """Build the evaluator widget.
         """
@@ -689,6 +738,8 @@ class Evaluator:
             (gtk.STOCK_CLEAR, self.clear_output),
             (gtk.STOCK_DELETE, self.clear_expression),
             (gtk.STOCK_EXECUTE, self.evaluate_expression),
+            (gtk.STOCK_ADD, self.add_bookmark),
+            (gtk.STOCK_INDEX, self.display_bookmarks),
             ):
             b=gtk.ToolButton(icon)
             b.connect('clicked', action)
@@ -745,4 +796,6 @@ if __name__ == "__main__":
     window.connect('destroy', lambda e: gtk.main_quit())
 
     gtk.main ()
-    ev.save_history(ev.historyfile)
+    # Will not do anything here since ev.historyfile was not
+    # initialized
+    ev.save_history()
