@@ -57,6 +57,7 @@ class Evaluator:
         self.control_shortcuts = {
             gtk.keysyms.w: self.close,
             gtk.keysyms.b: self.add_bookmark,
+            gtk.keysyms.space: self.display_bookmarks,
             gtk.keysyms.l: self.clear_expression,
             gtk.keysyms.f: lambda: self.fill_method_parameters(),
             gtk.keysyms.d: lambda: self.display_completion(completeprefix=False),
@@ -710,7 +711,7 @@ class Evaluator:
             self.save_data(self.bookmarks, self.bookmarkfile)
         return True
 
-    def display_bookmarks(self, i, *p):
+    def display_bookmarks(self, widget=None, *p):
         def set_expression(i, b):
             self.set_expression(b)
             return True
@@ -722,7 +723,7 @@ class Evaluator:
             i.connect('activate', set_expression, b)
             m.append(i)
         m.show_all()
-        m.popup(None, i, None, 0, gtk.get_current_event_time())
+        m.popup(None, widget, None, 0, gtk.get_current_event_time())
         return True
 
     def build_widget(self):
