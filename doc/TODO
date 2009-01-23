@@ -1,3 +1,11 @@
+* Nosferatu: website export: convert play links to link to
+   YouTube/GoogleVideo:
+http://video.google.com/videoplay?docid=-6185283610506001721#0h10m54s
+http://code.google.com/apis/youtube/getting_started.html
+
+* website export: inject javascript code to deactivate /media links
+   when Advene is not running
+
 * make vlc bindings work again (linux/mac)
 
 * Make initial setup window an assistant (multiple steps)
@@ -6,26 +14,14 @@
 http://library.gnome.org/devel/hig-book/stable/
 http://development.syllable.org/documentation/interface-guide.html
 
-* htmleditor: make inserted TAL elements gui.Widgets (annotations,
-   selections, annotation types), so that DND works
-   correctly. -> gdk.Pixbuf instead, so that copy/paste/move works correctly.
-
 * gui.main: simple click on Adhocview icon -> share code with viewbook
    (menu New/open existing).
-
-* Nosferatu: website export: convert play links to link to
-   YouTube/GoogleVideo:
-http://video.google.com/videoplay?docid=-6185283610506001721#0h10m54s
-http://code.google.com/apis/youtube/getting_started.html
 
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)
 
 * MXF samples: http://gstreamer.freedesktop.org/media/incoming/mxf/
 
 * gui.util: define get_drag_icon(element)
-
-* website export: inject javascript code to deactivate /media links
-   when Advene is not running
 
 * EditElementPopup: if destination != popup, add scrolledwidget around
    widget
@@ -2634,3 +2630,7 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * bug in htmleditor when inserting overlayed snapshot (crash in
    f.read() in htmleditor.handle_img) on win32
+
+* htmleditor: make inserted TAL elements gui.Widgets (annotations,
+   selections, annotation types), so that DND works
+   correctly. -> gdk.Pixbuf instead, so that copy/paste/move works correctly.
