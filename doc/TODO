@@ -1,3 +1,5 @@
+* Customizable shortcuts
+
 * Nosferatu: website export: convert play links to link to
    YouTube/GoogleVideo:
 http://video.google.com/videoplay?docid=-6185283610506001721#0h10m54s
@@ -2634,3 +2636,5 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * htmleditor: make inserted TAL elements gui.Widgets (annotations,
    selections, annotation types), so that DND works
    correctly. -> gdk.Pixbuf instead, so that copy/paste/move works correctly.
+
+* evaluator: implement bookmarks
