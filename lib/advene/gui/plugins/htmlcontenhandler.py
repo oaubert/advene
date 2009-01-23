@@ -95,7 +95,7 @@ class AnnotationPlaceholder:
         data=[ """<span class="advene:annotation" advene:annotation="%s" advene:presentation="%s">""" % (self.annotation.id, ':'.join(self.presentation)) ]
 
         if 'link' in self.presentation:
-            data.append("""<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href="%(href)s>" """ % d)
+            data.append("""<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href="%(href)s">""" % d)
 
         if 'overlay' in self.presentation:
             data.append("""<img title="Click here to play"  width="160" height="100" src="%(urlbase)s/media/overlay/advene/%(id)s"></img>""" % d)
@@ -106,7 +106,7 @@ class AnnotationPlaceholder:
                 data.append("""<img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img>""" % d)
         elif 'timestamp' in self.presentation:
             # timestamp without snapshot or overlay
-            """<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d
+            data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
 
         if 'link' in self.presentation:
             data.append('</a>')
@@ -273,7 +273,7 @@ class HTMLContentHandler (ContentHandler):
         def select_presentation(i, ap, mode):
             if mode == 'timestamp':
                 # Timestamp only
-                ap.presentation=[]
+                ap.presentation=[ 'link' ]
             else:
                 modes=['overlay', 'snapshot']
                 modes.remove(mode)
