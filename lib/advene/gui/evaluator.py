@@ -237,6 +237,8 @@ class Evaluator:
         Control-S: save the expression buffer
         Control-n: next item in history
         Control-p: previous item in history
+        Control-b: store the expression as a bookmark
+        Control-space: display bookmarks
 
         Control-PageUp/PageDown: scroll the output window
         Control-s: save the output
