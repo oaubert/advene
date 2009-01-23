@@ -74,11 +74,11 @@ class Evaluator:
         self.widget=self.build_widget()
 
     def true_cb(self, *p):
-        print "true_cb", str(p)
+        self.status_message("true_cb", str(p))
         return True
 
     def false_cb(self, *p):
-        print "false_cb", str(p)
+        self.status_message("false_cb", str(p))
         return False
 
     def load_history(self, name=None):
@@ -184,7 +184,7 @@ class Evaluator:
         f=open(filename, "w")
         f.write(out)
         f.close()
-        print "output saved to %s" % filename
+        self.status_message("Output saved to %s" % filename)
         return True
 
     def get_expression(self):
@@ -508,6 +508,7 @@ class Evaluator:
                                      if a.startswith(attr) ]
                     except Exception, e:
                         print "Exception when trying to complete attribute for %s starting with %s:\n%s" % (expr, attr, e)
+                        self.status_message("Completion exception for %s starting with %s" % (expr, attr))
                     if completion and attr == '':
                         # Do not display private elements by default.
                         # Display them when completion is invoked
@@ -526,6 +527,7 @@ class Evaluator:
                                          if k.startswith(key) ]
                         except Exception, e:
                             print "Exception when trying to complete dict key for %s starting with %s:\n%s" % (expr, attr, e)
+                            self.status_message("Completion exception for %s starting with %s" % (expr, attr))
 
         self.clear_output()
         if completion is None:
