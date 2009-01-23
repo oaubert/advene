@@ -312,6 +312,25 @@ class HTMLEditor(textview_class, HTMLParser):
             cursor = self._get_iter_for_creating_mark()
         self.__tb.insert_pixbuf(cursor, pixbuf)
 
+    def update_pixbuf(self, old_pixbuf, new_pixbuf):
+        """Update a pixbuf.
+
+        It must have _tag and _attr attributes (that are used to
+        display contextual information).
+        """
+        i=self.__tb.get_start_iter()
+        while True:
+            p=i.get_pixbuf()
+            if p is not None and p == old_pixbuf:
+                start=i.copy()
+                i.forward_char()
+                self.__tb.delete(start, i)
+                self.__tb.insert_pixbuf(start, new_pixbuf)
+                break
+            if not i.forward_char():
+                break
+        return
+
     def url_load(self, url):
         if self.custom_url_loader is not None:
             try:
@@ -456,7 +475,6 @@ class HTMLEditor(textview_class, HTMLParser):
             # FIXME: should insert a bullet here, and maybe render
             # nested lists
             self.__tb.insert(cursor, '\n')
-
 
     def handle_data(self, data):
         """
