@@ -544,7 +544,7 @@ class HTMLEditor(textview_class, HTMLParser):
                 txt=txt.lstrip()
             if tag in self.__block:
                 txt=txt.rstrip()
-            txt=txt.replace('\n', '<br>')
+            txt=txt.replace('\n', '<br>\n')
             self._last_endtag=None
             fd.write(txt)
 
