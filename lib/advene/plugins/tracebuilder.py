@@ -176,7 +176,7 @@ class TraceBuilder:
                 ev.o_name=None
             if ev.o_id=="None":
                 ev.o_id=None
-            if not ev.o_type or ev.o_type=="None":
+            if not hasattr(ev, 'o_type') or ev.o_type=="None": #for compatibility with previous traces
                 ev.o_type=None
             evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ev.o_type)
             evt.change_comment(ev.comment)
