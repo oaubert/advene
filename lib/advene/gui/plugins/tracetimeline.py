@@ -28,7 +28,7 @@ from gettext import gettext as _
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
-
+from math import floor
 from advene.gui.views import AdhocView
 try:
     import goocanvas
@@ -97,6 +97,7 @@ class TraceTimeline(AdhocView):
         mainbox.pack1(self.head_canvas, resize=False, shrink=True)
         self.canvas = goocanvas.Canvas()
         self.canvas.set_bounds (0, 0,self.canvasX, self.canvasY)
+        self.canvas.get_root_item().connect('button-press-event', self.canvas_clicked)
         scrolled_win = gtk.ScrolledWindow ()
         self.sw = scrolled_win
         scrolled_win.add(self.canvas)
@@ -209,7 +210,7 @@ class TraceTimeline(AdhocView):
             else:
                 va=scrolled_win.get_vadjustment()
                 vc = (va.value + h/2.0) * self.timefactor
-                self.canvasY = self.canvasY * 0.8
+                self.canvasY *= 0.8
                 self.timefactor *= 1.25
                 self.obj_l *= 0.8
                 #print "%s" % (self.timefactor)
@@ -221,7 +222,7 @@ class TraceTimeline(AdhocView):
             h = self.canvas.get_allocation().height
             va=scrolled_win.get_vadjustment()
             vc = (va.value + h/2.0) * self.timefactor
-            self.canvasY = self.canvasY * 1.25
+            self.canvasY *= 1.25
             self.timefactor *= 0.8
             self.obj_l *= 1.25
             #print "%s" % (self.timefactor)
@@ -244,6 +245,20 @@ class TraceTimeline(AdhocView):
             self.refresh()
         btnc.connect('clicked', zoom_100)
         return bx
+
+    def canvas_clicked(self, w, t, ev):
+        if ev.button == 3:
+            obj_id = None
+            l = self.canvas.get_items_at(ev.x, ev.y, False)
+            if l is not None:
+                for o in l:
+                    go = o.get_parent()
+                    if isinstance(go, ObjGroup):
+                        obj_id = go.id
+                        break
+            if obj_id is None:
+                return
+            
 
     def draw_marks(self):
         # adding time lines
@@ -307,9 +322,25 @@ class TraceTimeline(AdhocView):
         return False
 
     def refresh(self, action=None, center = None):
+        # method to refresh the canvas display
+        # 1/ clean the canvas, memorizing selected item
+        # 2/ recalculate the canvas area according to timefactor and last action
+        # 3/ redraw time separators
+        # 4/ redraw each action
+        # 5/ recenter the canvas according to previous centering
+        # 6/ reselect selected item
+        # action : the new action forcing a refresh (if action couldnt be displayed in the current canvas area)
+        # center : the timestamp on which the display need to be centered
         root = self.canvas.get_root_item()
+        selected_item = None
         while root.get_n_children()>0:
             #print "refresh removing %s" % root.get_child (0)
+            c = root.get_child(0)
+            if isinstance(c, EventGroup):
+                for k in c.objs.keys():
+                    if c.objs[k][0] is not None:
+                        if c.objs[k][0].center_sel:
+                            selected_item = (c.event, k)
             root.remove_child (0)
         for act in self.cols.keys():
             (h,l) = self.cols[act]
@@ -327,18 +358,44 @@ class TraceTimeline(AdhocView):
                 #print "%s %s" % (self.timefactor, self.canvasY)
                 self.canvas.show()
         self.draw_marks()
+        sel_eg = None
         for i in self.tracer.trace.levels['actions']:
-                self.receive(self.tracer.trace, action=i)
-        # .
+                ev = self.receive(self.tracer.trace, action=i)
+                if selected_item is not None and i == selected_item[0]:
+                    sel_eg = ev
         if center:
             va=self.sw.get_vadjustment()
             va.value = center/self.timefactor-va.page_size/2.0
+            if va.value<va.lower:
+                va.value=va.lower
+            elif va.value>va.upper-va.page_size:
+                va.value=va.upper-va.page_size
+        if selected_item is not None:
+            #print "sel item : %s %s" % selected_item
+            if sel_eg is not None:
+                if sel_eg.get_canvas() is None:
+                    #print "group deprecated"
+                    # group deprecated, need to find the new one (happens when refreshing during a receive
+                    n=0
+                    while n<root.get_n_children():
+                        #print "refresh removing %s" % root.get_child (0)
+                        c = root.get_child(n)
+                        if isinstance(c, EventGroup):
+                            if c.event == selected_item[0]:
+                                # that's the good action
+                                sel_eg = c
+                        n += 1
+                if sel_eg.objs is not None:
+                    if sel_eg.objs[selected_item[1]] is not None:
+                        if sel_eg.objs[selected_item[1]][0] is not None:
+                            sel_eg.objs[selected_item[1]][0].toggle_rels()
 
     def receive(self, trace, event=None, operation=None, action=None):
         # trace : the full trace to be managed
         # event : the new or latest modified event
         # operation : the new or latest modified operation
         # action : the new or latest modified action
+        # return the created group
 
         if (operation or event) and action is None:
             return
@@ -352,7 +409,9 @@ class TraceTimeline(AdhocView):
             return
         h,l = self.cols[action.name]
         color = h.color_c
+        ev = None
         if l and l.event == action:
+            ev = l
             y1=l.rect.get_bounds().y1+1
             x1=l.rect.get_bounds().x1+1
             #print "receive removing %s" % l.rect
@@ -383,6 +442,7 @@ class TraceTimeline(AdhocView):
         if self.autoscroll:
             a = self.sw.get_vadjustment()
             a.value=a.upper-a.page_size
+        return ev
 
 class HeadGroup (Group):
     def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, fontsize=14, color_c=0x00ffff50):
@@ -463,8 +523,8 @@ class EventGroup (Group):
                 if child_num>=0:
                     self.remove_child (child_num)
         self.objs = {}
-        obj_opes = []
         for op in self.event.operations:
+            obj_opes = []
             obj = op.concerned_object['id']
             if obj is None:
                 continue
@@ -477,6 +537,7 @@ class EventGroup (Group):
                 obj_type = op.concerned_object['type']
                 obj_opes.append(op)
                 self.objs[obj] = (None, 1, obj_name, obj_type, obj_opes)
+            #print "obj %s opes %s" % (obj, obj_opes)
         #self.objs : item : #time modified during action
         y=self.rect.get_bounds().y1+1
         x=self.rect.get_bounds().x1+1
@@ -486,14 +547,15 @@ class EventGroup (Group):
         w = self.rect.props.width
         nb = len(self.objs.keys())
         ol = w/3 - 4
-        while ((w/(ol+2))*(l/(ol+2))< nb and ol>3):
+        while (floor(((w-3)/(ol+2)))*floor(((l-3)/(ol+2)))< nb and ol>3):
             ol-=1
-        #ol = min(w-4, l-4)
+        #print "w:%s l:%s nb:%s nbw:%s nbl:%s ol:%s" % (w-2, l-2, nb, floor(((w-2)/(ol+2))), floor(((l-2)/(ol+2))), ol)
         if ol > l-4:
             if l>7:
                 ol=l-4
             else:
                 return
+        # need to fix fontsize according to object length with a min of 6 and a max of ??, 
         self.fontsize = ol-1
         for obj in self.objs.keys():
             #print "ox %s oy %s ol %s w %s l %s" % (ox, oy, ol, w+x, l+y)
@@ -506,8 +568,8 @@ class EventGroup (Group):
                                         x = ox,
                                         y = oy,
                                         width = -1,
-                                        anchor = gtk.ANCHOR_W,
-                                        font = "Sans Bold %s" % str(self.fontsize))
+                                        anchor = gtk.ANCHOR_NORTH_WEST,
+                                        font = "Sans Bold %s" % self.fontsize)
                     break
                 else:
                     ox = x+2
@@ -529,10 +591,12 @@ class ObjGroup (Group):
         self.controller=controller
         self.rep = None
         self.text = None
+        self.canvas = canvas
         self.color_sel = 0xD9D919FF
         self.color_f = 0xADEAEAFF
         self.color_s = "black"
-        self.fontsize = fontsize
+        #self.fontsize = fontsize
+        self.fontsize = 5
         self.poids = pds
         self.id = obj_id
         self.name = obj_name
@@ -545,13 +609,26 @@ class ObjGroup (Group):
         self.text = self.newText()
         self.lines = []
         self.sel = False
-        self.connect('button-press-event', self.toggle_rels)
-        
-    def toggle_rels(self, w, target, ev):
+        self.center_sel = False
+        self.connect('button-press-event', self.on_click)
+    
+    def on_click(self, w, target, ev):
         #print "%s %s %s" % (w, target, ev.button)
-        if ev.button != 1:
-            return
-        r = self.get_canvas().get_root_item()
+        if ev.button == 1:
+            self.toggle_rels()
+        elif ev.button == 3:
+            # for now, recenter on links
+            if not self.center_sel:
+                self.toggle_rels()
+            # recentering is done at the canvas level
+        return
+    
+    def toggle_rels(self):
+        #temp_str = "%s (%s) : %s\n" % (self.name, self.id, self.type)
+        #for o in self.opes:
+        #    temp_str += "%s: %s (%s)\n" % (o.time, o.name, o.content)
+        #print temp_str
+        r = self.canvas.get_root_item()
         chd = []
         i=0
         desel = False
@@ -570,13 +647,14 @@ class ObjGroup (Group):
                             obg.remove_child(n)
                     obg.lines=[]
                     if obg.sel:
-                        obg.deselect()
-                        if obg == self:
+                        if obg.center_sel and obg == self:
                             desel = True
+                        obg.deselect()
             i+=1
         if desel:
             return
         self.select()
+        self.center_sel = True
         for c in chd:
             if self.id in c.objs.keys():
                 obj_gr = c.objs[self.id][0]
@@ -609,6 +687,7 @@ class ObjGroup (Group):
     def deselect(self):
         self.rep.props.fill_color_rgba=self.color_f
         self.sel = False
+        self.center_sel = False
         
     def newRep(self):
         return goocanvas.Ellipse(parent=self,
@@ -634,10 +713,13 @@ class ObjGroup (Group):
             txt = 'R'
         elif self.type == View:
             txt = 'V'
+        if txt == 'U':
+            # need to test if we can find the type in an other way
+            pass
         return goocanvas.Text (parent = self,
                         text = txt,
                         x = self.x,
                         y = self.y,
                         width = -1,
                         anchor = gtk.ANCHOR_CENTER,
-                        font = "Sans %s" % str(self.fontsize))    
+                        font = "Sans %s" % str(self.fontsize))
