@@ -611,16 +611,29 @@ class ObjGroup (Group):
         self.sel = False
         self.center_sel = False
         self.connect('button-press-event', self.on_click)
-    
+        self.connect('enter-notify-event', self.on_mouse_over)
+        self.connect('leave-notify-event', self.on_mouse_leave)
+
+    def on_mouse_over(self, w, target, event):
+        self.toggle_rels()
+        return
+
+    def on_mouse_leave(self, w, target, event):
+        self.toggle_rels()
+        return
+        
     def on_click(self, w, target, ev):
         #print "%s %s %s" % (w, target, ev.button)
-        if ev.button == 1:
-            self.toggle_rels()
-        elif ev.button == 3:
+        #if ev.button == 1:
+        #    self.toggle_rels()
+        #elif ev.button == 3:
             # for now, recenter on links
-            if not self.center_sel:
-                self.toggle_rels()
+        #    if not self.center_sel:
+        #        self.toggle_rels()
             # recentering is done at the canvas level
+        if ev.button == 3:
+            #recenter on links
+            pass
         return
     
     def toggle_rels(self):
