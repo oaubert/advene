@@ -1,6 +1,4 @@
-* DND in htmleditor: follow mouse pointer
-
-* htmleditor: popup menu on elements, use get_iter_at_position
+* htmleditor/transcribe/edit element: use textbuffer.get_modified/set_modified
 
 * Customizable shortcuts
 
@@ -2642,3 +2640,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
    correctly. -> gdk.Pixbuf instead, so that copy/paste/move works correctly.
 
 * evaluator: implement bookmarks
+
+* DND in htmleditor: follow mouse pointer
+
