@@ -1,3 +1,7 @@
+* DND in htmleditor: follow mouse pointer
+
+* htmleditor: popup menu on elements, use get_iter_at_position
+
 * Customizable shortcuts
 
 * Nosferatu: website export: convert play links to link to
