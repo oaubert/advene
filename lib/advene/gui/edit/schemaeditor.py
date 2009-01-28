@@ -36,7 +36,7 @@ except ImportError:
 import cairo
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.gui.views import AdhocView
-from advene.gui.util import dialog, name2color
+from advene.gui.util import dialog, name2color, get_pixmap_button
 from advene.gui.edit.create import CreateElementPopup
 import advene.util.helper as helper
 from math import sqrt
@@ -260,7 +260,15 @@ class SchemaEditor (AdhocView):
         w = gtk.Button('A-')
         w.connect('clicked', self.font_down_clicked, canvas)
         hbox.pack_start (w, False, False, 0)
+
+        rotButton=get_pixmap_button('rotate.png', self.rotateSchemaAreas)
+        rotButton.set_no_show_all(True)
+        exchButton=get_pixmap_button('exchange.png', self.exchangeSchemaAreas)
+        exchButton.set_no_show_all(True)
+        hbox.pack_start(rotButton, False, False, 4)
+        hbox.pack_start(exchButton, False, False, 4)
         self.hboxButton = hbox
+
         canvas.connect('size-allocate', self.sw_resize, self.zoom_adj)
 
         #schemaArea
@@ -459,41 +467,12 @@ class SchemaEditor (AdhocView):
         self.setup_canvas()
         #print "Exchanged %s and %s" % (self.openedschemas[0].title, self.openedschemas[1].title)
 
-    def addTransformButtons(self, nbBut):
-        imrot=''
-        imexch=''
-        if self.exchButton is not None:
-            self.hboxButton.remove(self.exchButton)
-            self.exchButton=None
-        if self.rotButton is not None:
-            self.hboxButton.remove(self.rotButton)
-            self.rotButton=None
-        #self.hboxButton
-        if nbBut<3:
+    def addTransformButtons(self, nb_schemas):
+        if nb_schemas < 3:
+            self.hboxButton.foreach(lambda w: w.hide())
             self.hboxButton.show_all()
-            return
-        elif nbBut==3:
-            imrot='rot3.png'
-            imexch='exch3.png'
-        elif nbBut==4:
-            imrot='rot4.png'
-            imexch='exch4.png'
-        elif nbBut>4:
-            print "More than 4 schemas... impossible !"
-            return
-        self.rotButton=gtk.Button()
-        ir=gtk.Image()
-        ir.set_from_file(config.data.advenefile( ( 'pixmaps', imrot) ))
-        self.rotButton.add(ir)
-        self.rotButton.connect('clicked', self.rotateSchemaAreas)
-        self.exchButton=gtk.Button()
-        ie=gtk.Image()
-        ie.set_from_file(config.data.advenefile( ( 'pixmaps', imexch) ))
-        self.exchButton.add(ie)
-        self.exchButton.connect('clicked', self.exchangeSchemaAreas)
-        self.hboxButton.pack_start(self.rotButton, False, False, 4)
-        self.hboxButton.pack_start(self.exchButton, False, False, 4)
-        self.hboxButton.show_all()
+        else:
+            self.hboxButton.foreach(lambda w: w.show())
 
     def setup_canvas (self):
         root = self.canvas.get_root_item ()
