@@ -281,7 +281,7 @@ class HTMLEditor(textview_class, HTMLParser):
             # There is already a mark/tag at the current cursor
             # position. So if we add a new mark here, we cannot
             # guarantee their order.
-            # Insert an invisile chara to alleviate this problem.
+            # Insert an invisible char to alleviate this problem.
             self.__tb.insert_at_cursor(u'\u2063')
             cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
             # Safety test. Normally useles...
