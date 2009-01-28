@@ -69,8 +69,6 @@ class SchemaEditor (AdhocView):
         self.schemaArea = None
         self.canvas = None
         self.hboxButton = None
-        self.rotButton = None
-        self.exchButton = None
         self.canvasX = 1200
         self.canvasY = 1000
         self.swX = 0
