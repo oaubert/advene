@@ -369,7 +369,7 @@ def contextual_drag_begin(widget, context, element, controller):
         #l.set_ellipsize(pango.ELLIPSIZE_END)
         if color is None:
             color='white'
-        l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (color, t))
+        l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (color, t.replace('<', '&lt;')))
         return l
     
     cache=controller.package.imagecache
