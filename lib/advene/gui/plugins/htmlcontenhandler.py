@@ -261,65 +261,6 @@ class HTMLContentHandler (ContentHandler):
                 self.controller.open_url(link)
         return True
 
-    def populate_popup_cb(self, textview, menu):
-        def open_link(i, l):
-            self.open_link(l)
-            return True
-
-        def goto_position(i, pos):
-            self.controller.update_status('set', pos)
-            return True
-
-        def select_presentation(i, ap, mode):
-            if mode == 'timestamp':
-                # Timestamp only
-                ap.presentation=[ 'link' ]
-            else:
-                modes=['overlay', 'snapshot']
-                modes.remove(mode)
-                try:
-                    ap.presentation.remove(modes[0])
-                except ValueError:
-                    pass
-            ap.presentation.append(mode)
-            ap.refresh()
-            return True
-
-        def new_menuitem(label, action, *params):
-            item=gtk.MenuItem(label)
-            item.connect('activate', action, *params)
-            item.show()
-            menu.append(item)
-            return item
-
-        ctx=textview.get_current_context()
-
-        if ctx:
-            menu.foreach(menu.remove)
-            if hasattr(ctx[-1], '_placeholder'):
-                ap=ctx[-1]._placeholder
-
-                if ap.annotation is not None:
-                    new_menuitem(_("Play video"), goto_position, ap.annotation.fragment.begin)
-                    new_menuitem(_("Timestamp only"), select_presentation, ap, 'timestamp')
-                    if 'snapshot' in ap.presentation:
-                        new_menuitem(_("Display overlay"), select_presentation, ap, 'overlay')
-                    elif 'overlay' in ap.presentation:
-                        new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
-                    else:
-                        # Timestamp only
-                        new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
-
-            l=[ m for m in ctx if m._tag == 'a' ]
-            if l:
-                link=dict(l[0]._attr).get('href', None)
-                if link:
-                    if '/media/play' in link:
-                        new_menuitem(_("Play video"), open_link, link)
-                    else:
-                        new_menuitem(_("Open link"), open_link, link)
-        return False
-
     def insert_annotation_content(self, choice, annotation, focus=False):
         """
         choice: list of one or more strings: 'snapshot', 'timestamp', 'content', 'overlay'
@@ -451,8 +392,72 @@ class HTMLContentHandler (ContentHandler):
             return str(p.imagecache[long(timestamp)])
         return None
 
+    def contextual_popup(self, ctx=None, menu=None):
+        """Popup a contextual menu for the given context.        
+        """
+        if menu is None:
+            menu=gtk.Menu()
+
+        def open_link(i, l):
+            self.open_link(l)
+            return True
+
+        def goto_position(i, pos):
+            self.controller.update_status('set', pos)
+            return True
+
+        def select_presentation(i, ap, mode):
+            if mode == 'timestamp':
+                # Timestamp only
+                ap.presentation=[ 'link' ]
+            else:
+                modes=['overlay', 'snapshot']
+                modes.remove(mode)
+                try:
+                    ap.presentation.remove(modes[0])
+                except ValueError:
+                    pass
+            ap.presentation.append(mode)
+            ap.refresh()
+            return True
+
+        def new_menuitem(label, action, *params):
+            item=gtk.MenuItem(label)
+            item.connect('activate', action, *params)
+            item.show()
+            menu.append(item)
+            return item
+
+        if ctx is None:
+            ctx=textview.get_current_context()
+
+        if ctx:
+            if hasattr(ctx[-1], '_placeholder'):
+                ap=ctx[-1]._placeholder
+
+                if ap.annotation is not None:
+                    new_menuitem(_("Play video"), goto_position, ap.annotation.fragment.begin)
+                    new_menuitem(_("Timestamp only"), select_presentation, ap, 'timestamp')
+                    if 'snapshot' in ap.presentation:
+                        new_menuitem(_("Display overlay"), select_presentation, ap, 'overlay')
+                    elif 'overlay' in ap.presentation:
+                        new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
+                    else:
+                        # Timestamp only
+                        new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
+
+            l=[ m for m in ctx if m._tag == 'a' ]
+            if l:
+                link=dict(l[0]._attr).get('href', None)
+                if link:
+                    if '/media/play' in link:
+                        new_menuitem(_("Play video"), open_link, link)
+                    else:
+                        new_menuitem(_("Open link"), open_link, link)
+        return menu
+
     def button_press_cb(self, textview, event):
-        if event.button != 1 or event.type != gtk.gdk._2BUTTON_PRESS:
+        if not (event.button == 3 or (event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS)):
             return False
 
         textwin=textview.get_window(gtk.TEXT_WINDOW_TEXT)
@@ -469,18 +474,27 @@ class HTMLContentHandler (ContentHandler):
         if not ctx:
             return False
 
-        if hasattr(ctx[-1], '_placeholder'):
-            # There is an annotation placeholder
-            a=ctx[-1]._placeholder.annotation
-            if a is not None:
-                self.controller.update_status('set', a.fragment.begin)
-            return False
+        if event.button == 3:
+            # Right button
+            if hasattr(ctx[-1], '_placeholder'):
+                # An annotation placeholder is here. Display popup menu.
+                menu=self.contextual_popup(ctx)
+                menu.popup(None, None, None, 0, event.time)
+            return True
+        else:
+            # Double click with left button
+            if hasattr(ctx[-1], '_placeholder'):
+                # There is an annotation placeholder
+                a=ctx[-1]._placeholder.annotation
+                if a is not None:
+                    self.controller.update_status('set', a.fragment.begin)
+                return False
 
-        l=[ m for m in ctx if m._tag == 'a' ]
-        if l:
-            link=dict(l[0]._attr).get('href', None)
-            self.open_link(link)
-            return False
+            l=[ m for m in ctx if m._tag == 'a' ]
+            if l:
+                link=dict(l[0]._attr).get('href', None)
+                self.open_link(link)
+                return False
         return False
 
     def get_view (self, compact=False):
@@ -503,7 +517,6 @@ class HTMLContentHandler (ContentHandler):
                                   + config.data.drag_type['annotation-type']
                                   + config.data.drag_type['timestamp'],
                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_ASK )
-        self.editor.connect('populate-popup', self.populate_popup_cb)
         self.editor.connect('button-press-event', self.button_press_cb)
 
         self.view = gtk.VBox()
