@@ -537,13 +537,23 @@ class HTMLContentHandler (ContentHandler):
             self.editor.refresh()
             return True
 
+        def display_header_menu(i):
+            m=gtk.Menu()
+            for h in (1, 2, 3):
+                i=gtk.MenuItem(_("Heading %d") % h)
+                i.connect('activate', lambda w, level: self.editor.apply_html_tag('h%d' % level), h)
+                m.append(i)
+            m.show_all()
+            m.popup(None, i, None, 1, gtk.get_current_event_time())
+            return True
+
         tb=gtk.Toolbar()
         vbox.toolbar=tb
         tb.set_style(gtk.TOOLBAR_ICONS)
         for (icon, tooltip, action) in (
             (gtk.STOCK_BOLD, _("Bold"), lambda i: self.editor.apply_html_tag('b')),
             (gtk.STOCK_ITALIC, _("Italic"), lambda i: self.editor.apply_html_tag('i')),
-            (gtk.STOCK_UNDERLINE, _("Header"), lambda i: self.editor.apply_html_tag('h2')),
+            ("title_icon.png", _("Header"), display_header_menu),
             (None, None, None),
             (gtk.STOCK_COPY, _("Copy"), sel_copy),
             (gtk.STOCK_CUT, _("Cut"), sel_cut),
@@ -556,8 +566,7 @@ class HTMLContentHandler (ContentHandler):
             if not icon:
                 b=gtk.SeparatorToolItem()
             else:
-                b=gtk.ToolButton(icon)
-                b.connect('clicked', action)
+                b=get_pixmap_toolbutton(icon, action)
                 b.set_tooltip(self.tooltips, tooltip)
             tb.insert(b, -1)
             b.show()
