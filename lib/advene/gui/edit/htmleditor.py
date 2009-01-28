@@ -555,7 +555,7 @@ class HTMLEditor(textview_class, HTMLParser):
             Appropriately strip starting newline if it was inserted
             after a block endtag.
             """
-            txt=b.get_text(fr, to).replace(u'\u2063', '')
+            txt=fr.get_visible_text(to)
             if self._last_endtag in self.__block:
                 txt=txt.lstrip()
             if tag in self.__block:
@@ -634,7 +634,7 @@ class HTMLEditor(textview_class, HTMLParser):
             Appropriately strip starting newline if it was inserted
             after a block endtag.
             """
-            txt=b.get_text(fr, to).replace(u'\u2063', '')
+            txt=fr.get_visible_text(to)
             if self._last_endtag in self.__block:
                 txt=txt.lstrip()
             if tag in self.__block:
