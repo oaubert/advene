@@ -320,23 +320,6 @@ class HTMLContentHandler (ContentHandler):
                         new_menuitem(_("Open link"), open_link, link)
         return False
 
-    def editor_drag_motion(self, widget, drag_context, x, y, timestamp):
-        #w=drag_context.get_source_widget()
-        (x, y) = widget.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
-                                                  int(x),
-                                                  int(y))
-        it=widget.get_iter_at_location(x, y)
-        if it is None:
-            print "Error in get_iter_at_location"
-            return False
-        # Set the cursor position
-        widget.get_buffer().place_cursor(it)
-
-        # Dragging an annotation. Enforce only annotation target.
-        #if config.data.drag_type['annotation'][0][0] in drag_context.targets:
-        #    pass
-        return True
-
     def insert_annotation_content(self, choice, annotation, focus=False):
         """
         choice: list of one or more strings: 'snapshot', 'timestamp', 'content', 'overlay'
@@ -370,6 +353,11 @@ class HTMLContentHandler (ContentHandler):
         self.last_dndtime=time
         self.last_x=x
         self.last_y=y
+
+        x, y = self.editor.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
+                                                   *widget.get_pointer())
+        it = self.editor.get_iter_at_location(x, y)
+        self.editor.get_buffer().place_cursor(it)
 
         if targetType == config.data.target_type['annotation']:
             for uri in unicode(selection.data, 'utf8').split('\n'):
@@ -515,7 +503,6 @@ class HTMLContentHandler (ContentHandler):
                                   + config.data.drag_type['annotation-type']
                                   + config.data.drag_type['timestamp'],
                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_ASK )
-        self.editor.connect('drag-motion', self.editor_drag_motion)
         self.editor.connect('populate-popup', self.populate_popup_cb)
         self.editor.connect('button-press-event', self.button_press_cb)
 
