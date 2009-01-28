@@ -536,6 +536,83 @@ class HTMLEditor(textview_class, HTMLParser):
             mark._startmark=mark
             mark._endmark=mark
 
+    def dump(self):
+        res=[]
+
+        b=self.__tb
+        i=b.get_start_iter()
+        textstart=i.copy()
+
+        # We add an index for every startmark, so that we can close
+        # the corresponding endmarks with the right order
+        index=0
+
+        self._last_endtag=None
+
+        def output_text(fr, to, tag):
+            """Output text data.
+
+            Appropriately strip starting newline if it was inserted
+            after a block endtag.
+            """
+            txt=b.get_text(fr, to).replace(u'\u2063', '')
+            if self._last_endtag in self.__block:
+                txt=txt.lstrip()
+            if tag in self.__block:
+                txt=txt.rstrip()
+            txt=txt.replace('\n', '<n>')
+            self._last_endtag=None
+            res.append((fr.get_offset(), "%s : %d" % (txt, to.get_offset())))
+
+        while True:
+            p=i.get_pixbuf()
+            if p is not None:
+                output_text(textstart, i, None)
+                textstart=i.copy()
+                if hasattr(p, 'as_html'):
+                    res.append((i.get_offset(), "<pixbuf.as_html>"))
+                else:
+                    res.append((i.get_offset(), "<plain pixbuf>"))
+                if not i.forward_char():
+                    break
+                else:
+                    continue
+
+            p=i.get_child_anchor()
+            if p is not None:
+                res.append( (i.get_offset(), "<widget.as_html>"))
+
+            for m in i.get_marks():
+                if hasattr(m, '_endtag'):
+                    if m._endtag in self.__standalone:
+                        continue
+                    output_text(textstart, i, m._endtag)
+                    res.append( (i.get_offset(), "</%s>" % m._endtag) )
+                    textstart=i.copy()
+                    self._last_endtag=m._endtag
+                elif hasattr(m, '_tag'):
+                    output_text(textstart, i, m._tag)
+                    if m._tag in self.__standalone:
+                        closing='></%s>' % m._tag
+                    else:
+                        closing='>'
+                    if m._attr:
+                        res.append( (i.get_offset(), "<%s %s%s" % (m._tag,
+                                                                   " ".join( '%s="%s"' % (k, v) for (k, v) in m._attr ),
+                                                                   closing)))
+                    else:
+                        res.append( (i.get_offset(), "<%s%s" % (m._tag, closing) ) )
+
+                    if m._tag in self.__block or m._tag == 'br':
+                        res.append( (i.get_offset(), '\n'))
+                    textstart=i.copy()
+
+            if not i.forward_char():
+                break
+        # Write the remaining text
+        output_text(textstart, b.get_end_iter(), 'end')
+        return "\n".join( "%d: %s" % t for t in res )
+
     def dump_html(self, fd=None):
         """Dump html.
         """
@@ -569,10 +646,16 @@ class HTMLEditor(textview_class, HTMLParser):
         while True:
             p=i.get_pixbuf()
             if p is not None:
+                output_text(textstart, i, None)
+                textstart=i.copy()
                 if hasattr(p, 'as_html'):
                     fd.write(p.as_html())
                 else:
                     fd.write("<img %s></img>" % " ".join( '%s="%s"' % (k, v) for (k, v) in p._attr ))
+                if not i.forward_char():
+                    break
+                else:
+                    continue
 
             p=i.get_child_anchor()
             if p is not None:
