@@ -54,8 +54,6 @@ class TraceTimeline(AdhocView):
     def __init__ (self, controller=None, parameters=None, package=None):
         super(TraceTimeline, self).__init__(controller=controller)
         self.close_on_package_load = False
-        #self.toolTips = gtk.Tooltips()
-        #self.toolTips.enable()
         self.tracer = self.controller.tracers[0]
         self.__package=package
         #self.contextual_actions = (
@@ -66,8 +64,11 @@ class TraceTimeline(AdhocView):
         self.drag_coordinates=None
         self.canvas = None
         self.head_canvas = None
+        self.doc_canvas = None
         self.toolbox = None
         self.tooltips = gtk.Tooltips()
+        self.tooltips.enable()
+        self.explorer = None
         self.lasty=0
         self.canvasX = None
         self.canvasY = 1
@@ -76,6 +77,7 @@ class TraceTimeline(AdhocView):
         self.timefactor = 100
         self.autoscroll = True
         self.sw = None
+        self.swout = None
         self.cols={}
         self.tracer.register_view(self)
         for act in self.tracer.action_types:
@@ -93,29 +95,44 @@ class TraceTimeline(AdhocView):
         self.head_canvas = goocanvas.Canvas()
         c = len(self.cols)
         self.canvasX = c*self.col_width+5
-        self.head_canvas.set_bounds (0,0,self.canvasX,35)
+        self.head_canvas.set_bounds (0,0,self.canvasX,25)
+        self.head_canvas.set_size_request(self.canvasX, 25)
         mainbox.pack1(self.head_canvas, resize=False, shrink=True)
         self.canvas = goocanvas.Canvas()
         self.canvas.set_bounds (0, 0,self.canvasX, self.canvasY)
+        #self.canvas.set_size_request(self.canvasX, 25)
         self.canvas.get_root_item().connect('button-press-event', self.canvas_clicked)
         scrolled_win = gtk.ScrolledWindow ()
         self.sw = scrolled_win
+        self.sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
         scrolled_win.add(self.canvas)
         mainbox.pack2(scrolled_win, resize=True, shrink=True)
-        mainbox.set_position(35)
-
-        bx.pack1(mainbox, resize=True, shrink=True)
+        mainbox.set_position(25)
+        self.swout = gtk.ScrolledWindow ()
+        self.swout.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
+        self.swout.add_with_viewport(mainbox)
+        vbm = gtk.VPaned()
+        vbm.pack1(self.swout, resize=False, shrink=True)
+        self.doc_canvas = goocanvas.Canvas()
+        self.doc_canvas.set_bounds(0,0, self.canvasX, 30)
+        self.doc_canvas.set_size_request(self.canvasX, 30)
+        vbm.pack2(self.doc_canvas, resize=False, shrink=True)
+        vbm.set_position(200) # max - 30
+        bx.pack1(vbm, resize=False, shrink=True)
         self.toolbox = gtk.Toolbar()
         self.toolbox.set_orientation(gtk.ORIENTATION_VERTICAL)
         btnm = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
         btnm.set_tooltip(self.tooltips, _('Zoom out'))
+        btnm.set_label('')
         self.toolbox.insert(btnm, -1)
         btnp = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
         btnp.set_tooltip(self.tooltips, _('Zoom in'))
+        btnp.set_label('')
         self.toolbox.insert(btnp, -1)
-        bx.pack2(self.toolbox, resize=False, shrink=True)
+        bx.pack2(self.toolbox, resize=True, shrink=True)
         btnc = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_100)
         btnc.set_tooltip(self.tooltips, _('Zoom 100%'))
+        btnc.set_label('')
         self.toolbox.insert(btnc, -1)
         #self.zoom_combobox=dialog.list_selector_widget(members=[
         #        ( f, '%d%%' % long(100*f) )
@@ -131,6 +148,10 @@ class TraceTimeline(AdhocView):
         #i.add(self.zoom_combobox)
         #self.toolbox.insert(i, -1)
         self.toolbox.insert(gtk.SeparatorToolItem(), -1)
+        #self.explorer = TtlExplorer(self.controller)
+        #i=gtk.ToolItem()
+        #i.add(self.explorer)
+        #self.toolbox.insert(i, -1)
         self.toolbox.show_all()
         
         def on_background_scroll(widget, event):
@@ -244,6 +265,8 @@ class TraceTimeline(AdhocView):
             self.canvas.set_bounds(0,0,self.canvasX, self.canvasY)
             self.refresh()
         btnc.connect('clicked', zoom_100)
+        
+        bx.set_position(self.canvasX+10)
         return bx
 
     def canvas_clicked(self, w, t, ev):
@@ -458,7 +481,7 @@ class HeadGroup (Group):
                                     x = x,
                                     y = y,
                                     width = 90,
-                                    height = 30,
+                                    height = 20,
                                     fill_color_rgba = 0xFFFFFF00,
                                     stroke_color = 0xFFFFFF00,
                                     line_width = 0)
