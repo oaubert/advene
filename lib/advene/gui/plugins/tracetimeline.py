@@ -78,6 +78,7 @@ class TraceTimeline(AdhocView):
         self.incr = 500
         self.timefactor = 100
         self.autoscroll = True
+        self.links_locked = False
         self.sw = None
         self.swout = None
         self.cols={}
@@ -292,19 +293,37 @@ class TraceTimeline(AdhocView):
         return bx
 
     def canvas_clicked(self, w, t, ev):
+        obj_id = None
+        l = self.canvas.get_items_at(ev.x, ev.y, False)
+        if l is not None:
+            for o in l:
+                go = o.get_parent()
+                if isinstance(go, ObjGroup):
+                    obj_id = go.id
+                    break
+        if obj_id is None:
+            return
         if ev.button == 3:
-            obj_id = None
-            l = self.canvas.get_items_at(ev.x, ev.y, False)
-            if l is not None:
-                for o in l:
-                    go = o.get_parent()
-                    if isinstance(go, ObjGroup):
-                        obj_id = go.id
-                        break
-            if obj_id is None:
-                return
-            
-
+            #clic droit sur un item
+            pass
+        elif ev.button == 1:
+            #clic gauche sur un item : lock
+            self.links_locked = not self.links_locked
+            i=0
+            root = self.canvas.get_root_item()
+            while i < root.get_n_children():
+                go = root.get_child(i)
+                if isinstance(go, ObjGroup):
+                    if self.links_locked:
+                        #print "lock %s" % go
+                        go.handler_block(go.handler_ids['enter-notify-event'])
+                        go.handler_block(go.handler_ids['leave-notify-event'])
+                    else:
+                        #print "unlock %s" % go
+                        go.handler_unblock(go.handler_ids['enter-notify-event'])
+                        go.handler_unblock(go.handler_ids['leave-notify-event'])
+                i+=1
+                    
     def draw_marks(self):
         # adding time lines
         wa = self.canvas.get_parent().get_allocation().height
@@ -441,6 +460,16 @@ class TraceTimeline(AdhocView):
                     if sel_eg.objs[selected_item[1]] is not None:
                         if sel_eg.objs[selected_item[1]][0] is not None:
                             sel_eg.objs[selected_item[1]][0].toggle_rels()
+        if self.links_locked:
+            i=0
+            root = self.canvas.get_root_item()
+            while i < root.get_n_children():
+                go = root.get_child(i)
+                if isinstance(go, ObjGroup):
+                    go.handler_block(go.handler_ids['enter-notify-event'])
+                    go.handler_block(go.handler_ids['leave-notify-event'])
+                i+=1
+            
 
     def receive(self, trace, event=None, operation=None, action=None):
         # trace : the full trace to be managed
@@ -500,7 +529,7 @@ class HeadGroup (Group):
     def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00ffff50):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
-        self.name=name
+        self.name=name[0:2]
         self.rect = None
         self.text = None
         self.w = 90
@@ -664,9 +693,13 @@ class ObjGroup (Group):
         self.lines = []
         self.sel = False
         self.center_sel = False
-        self.connect('button-press-event', self.on_click)
-        self.connect('enter-notify-event', self.on_mouse_over)
-        self.connect('leave-notify-event', self.on_mouse_leave)
+        self.handler_ids = {
+        'enter-notify-event':None,
+        'leave-notify-event':None,
+        }
+        #self.connect('button-press-event', self.on_click)
+        self.handler_ids['enter-notify-event'] = self.connect('enter-notify-event', self.on_mouse_over)
+        self.handler_ids['leave-notify-event'] = self.connect('leave-notify-event', self.on_mouse_leave)
 
     def on_mouse_over(self, w, target, event):
         self.toggle_rels()
@@ -676,19 +709,14 @@ class ObjGroup (Group):
         self.toggle_rels()
         return
         
-    def on_click(self, w, target, ev):
+    #def on_click(self, w, target, ev):
         #print "%s %s %s" % (w, target, ev.button)
-        #if ev.button == 1:
-        #    self.toggle_rels()
-        #elif ev.button == 3:
-            # for now, recenter on links
-        #    if not self.center_sel:
-        #        self.toggle_rels()
-            # recentering is done at the canvas level
-        if ev.button == 3:
+    #    if ev.button == 1:
+    #        return
+    #    if ev.button == 3:
             #recenter on links
-            pass
-        return
+    #        pass
+    #    return
     
     def toggle_rels(self):
         #temp_str = "%s (%s) : %s\n" % (self.name, self.id, self.type)
