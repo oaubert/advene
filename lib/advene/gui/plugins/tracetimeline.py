@@ -72,6 +72,8 @@ class TraceTimeline(AdhocView):
         self.lasty=0
         self.canvasX = None
         self.canvasY = 1
+        self.head_canvasY = 25
+        self.doc_canvas_Y = 30
         self.obj_l = 5
         self.incr = 500
         self.timefactor = 100
@@ -82,43 +84,63 @@ class TraceTimeline(AdhocView):
         self.tracer.register_view(self)
         for act in self.tracer.action_types:
             self.cols[act] = (None, None)
-        self.col_width = 100
+        self.col_width = 80
+        self.colspacing = 5
         self.widget = self.build_widget()
         self.widget.connect("destroy", self.destroy)
         self.populate_head_canvas()
         self.widget.show_all()
-        self.refresh()
+        self.receive(self.tracer.trace)
 
     def build_widget(self):
         bx = gtk.HPaned()
-        mainbox = gtk.VPaned()
-        self.head_canvas = goocanvas.Canvas()
-        c = len(self.cols)
-        self.canvasX = c*self.col_width+5
-        self.head_canvas.set_bounds (0,0,self.canvasX,25)
-        self.head_canvas.set_size_request(self.canvasX, 25)
-        mainbox.pack1(self.head_canvas, resize=False, shrink=True)
-        self.canvas = goocanvas.Canvas()
-        self.canvas.set_bounds (0, 0,self.canvasX, self.canvasY)
-        #self.canvas.set_size_request(self.canvasX, 25)
-        self.canvas.get_root_item().connect('button-press-event', self.canvas_clicked)
+        #mainbox = gtk.VPaned()
+        mainbox = gtk.VBox()
         scrolled_win = gtk.ScrolledWindow ()
         self.sw = scrolled_win
         self.sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
+        self.head_canvas = goocanvas.Canvas()
+        c = len(self.cols)
+        self.canvasX = c*(self.col_width+self.colspacing)
+        self.head_canvas.set_bounds (0,0,self.canvasX,self.head_canvasY)
+        self.head_canvas.set_size_request(-1, self.head_canvasY)
+        #mainbox.pack1(self.head_canvas, resize=False, shrink=True)
+        mainbox.pack_start(self.head_canvas, expand=False, fill=True)
+        self.canvas = goocanvas.Canvas()
+        self.canvas.set_bounds (0, 0,self.canvasX, self.canvasY)
+        self.canvas.set_size_request(100, 25) # important to force a minimum size (else we could have problem with radius of objects < 0)
+        self.doc_canvas = goocanvas.Canvas()
+        self.doc_canvas.set_bounds(0,0, self.canvasX, self.doc_canvas_Y)
+        self.doc_canvas.set_size_request(-1, self.doc_canvas_Y)
+        self.canvas.get_root_item().connect('button-press-event', self.canvas_clicked)
+        def canvas_resize(w, alloc):
+            self.canvasX = alloc.width-20.0
+            self.col_width = (self.canvasX)//len(self.cols)-self.colspacing
+            #redraw head_canvas
+            self.head_canvas.set_bounds (0, 0, self.canvasX, self.head_canvasY)
+            self.redraw_head_canvas()
+            #redraw canvas
+            self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
+            h = self.canvas.get_allocation().height
+            va=scrolled_win.get_vadjustment()
+            vc = (va.value + h/2.0) * self.timefactor
+            self.refresh(action=None, center=vc)
+            #redraw doc_canvas
+            self.doc_canvas.set_bounds(0,0, self.canvasX, self.doc_canvas_Y)
+            #print alloc.width
+        self.head_canvas.connect('size-allocate', canvas_resize)
         scrolled_win.add(self.canvas)
-        mainbox.pack2(scrolled_win, resize=True, shrink=True)
-        mainbox.set_position(25)
+        mainbox.pack_start(scrolled_win, expand=True, fill=True)
+        #mainbox.pack2(scrolled_win, resize=True, shrink=True)
+        #mainbox.set_position(25)
         self.swout = gtk.ScrolledWindow ()
         self.swout.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
         self.swout.add_with_viewport(mainbox)
         vbm = gtk.VPaned()
-        vbm.pack1(self.swout, resize=False, shrink=True)
-        self.doc_canvas = goocanvas.Canvas()
-        self.doc_canvas.set_bounds(0,0, self.canvasX, 30)
-        self.doc_canvas.set_size_request(self.canvasX, 30)
+        vbm.pack1(self.swout, resize=True, shrink=True)
         vbm.pack2(self.doc_canvas, resize=False, shrink=True)
-        vbm.set_position(200) # max - 30
-        bx.pack1(vbm, resize=False, shrink=True)
+        vbm.set_position(200) # max - self.doc_canvas_Y
+        bx.pack1(vbm, resize=True, shrink=True)
         self.toolbox = gtk.Toolbar()
         self.toolbox.set_orientation(gtk.ORIENTATION_VERTICAL)
         btnm = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
@@ -129,7 +151,7 @@ class TraceTimeline(AdhocView):
         btnp.set_tooltip(self.tooltips, _('Zoom in'))
         btnp.set_label('')
         self.toolbox.insert(btnp, -1)
-        bx.pack2(self.toolbox, resize=True, shrink=True)
+        bx.pack2(self.toolbox, resize=False, shrink=True)
         btnc = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_100)
         btnc.set_tooltip(self.tooltips, _('Zoom 100%'))
         btnc.set_label('')
@@ -266,7 +288,7 @@ class TraceTimeline(AdhocView):
             self.refresh()
         btnc.connect('clicked', zoom_100)
         
-        bx.set_position(self.canvasX+10)
+        bx.set_position(self.canvasX+15)
         return bx
 
     def canvas_clicked(self, w, t, ev):
@@ -330,12 +352,19 @@ class TraceTimeline(AdhocView):
             t += tinc
         return
 
+    def redraw_head_canvas(self):
+        root = self.head_canvas.get_root_item()
+        while root.get_n_children()>0:
+            root.remove_child (0)
+        self.populate_head_canvas()
+        return
+
     def populate_head_canvas(self):
         offset = 0
         colors = [0x000088AA, 0x0000FFAA, 0x008800AA, 0x00FF00AA, 0x880000AA, 0xFF0000FF, 0x008888FF, 0x880088FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
         # 18 col max
         for c in self.cols.keys():
-            etgroup = HeadGroup(self.controller, self.head_canvas, c, 5+self.col_width*offset, 0, 8, colors[offset])
+            etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, colors[offset])
             self.cols[c]=(etgroup, None)
             offset += 1
         return
@@ -458,7 +487,7 @@ class TraceTimeline(AdhocView):
             if action.activity_time[1] > self.canvasY*self.timefactor:
                 #print "%s %s %s" % (action.name , action.activity_time[1], self.canvasY*self.timefactor)
                 self.refresh(action)
-            ev = EventGroup(self.controller, self.canvas, None, action, x, y, length, self.obj_l, 14, color)
+            ev = EventGroup(self.controller, self.canvas, None, action, x, y, length, self.col_width, self.obj_l, 14, color)
             self.cols[action.name]=(h,ev)
             #self.lasty = ev.rect.get_bounds().y2
             #print "%s %s %s" % (y, length, self.lasty)
@@ -468,26 +497,27 @@ class TraceTimeline(AdhocView):
         return ev
 
 class HeadGroup (Group):
-    def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, fontsize=14, color_c=0x00ffff50):
+    def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00ffff50):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.name=name
         self.rect = None
         self.text = None
+        self.w = 90
         self.color_s = "black"
         self.color_c = color_c
         self.fontsize=fontsize
         self.rect = goocanvas.Rect (parent = self,
                                     x = x,
                                     y = y,
-                                    width = 90,
+                                    width = self.w,
                                     height = 20,
                                     fill_color_rgba = 0xFFFFFF00,
                                     stroke_color = 0xFFFFFF00,
                                     line_width = 0)
         self.text = goocanvas.Text (parent = self,
                                         text = self.name,
-                                        x = x+45,
+                                        x = x+w/2,
                                         y = y+15,
                                         width = -1,
                                         anchor = gtk.ANCHOR_CENTER,
@@ -500,7 +530,7 @@ class HeadGroup (Group):
             return
 
 class EventGroup (Group):
-    def __init__(self, controller=None, canvas=None, type=None, event=None, x =0, y=0, l=1, ol=5, fontsize=6, color_c=0x00ffffff):
+    def __init__(self, controller=None, canvas=None, type=None, event=None, x =0, y=0, l=1, w=90, ol=5, fontsize=6, color_c=0x00ffffff):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.canvas = canvas
         self.controller=controller
@@ -516,6 +546,7 @@ class EventGroup (Group):
         self.y= y
         self.l = l
         self.ol = ol
+        self.w = w
         self.rect = self.newRect (self.color, self.color_c)
         self.objs={}
         #self.lines = []
@@ -525,7 +556,7 @@ class EventGroup (Group):
         return goocanvas.Rect (parent = self,
                                     x = self.x,
                                     y = self.y,
-                                    width = 90,
+                                    width = self.w,
                                     height = self.l,
                                     fill_color_rgba = color_c,
                                     stroke_color = color,
@@ -737,6 +768,11 @@ class ObjGroup (Group):
 
     def newText(self):
         txt = 'U'
+        if self.type is None:
+            # need to test if we can find the type in an other way, use of type() is not a good thing
+            o = self.controller.package.get_element_by_id(self.id)
+            self.type=type(o)
+            #print self.type
         if self.type == Schema:
             txt = 'S'
         elif self.type == AnnotationType:
@@ -749,9 +785,7 @@ class ObjGroup (Group):
             txt = 'R'
         elif self.type == View:
             txt = 'V'
-        if txt == 'U':
-            # need to test if we can find the type in an other way
-            pass
+
         return goocanvas.Text (parent = self,
                         text = txt,
                         x = self.x,
