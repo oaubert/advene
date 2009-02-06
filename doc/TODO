@@ -1,3 +1,7 @@
+* http://bbantispam.com/howto/
+
+* use python-webkit
+
 * htmleditor/transcribe/edit element: use textbuffer.get_modified/set_modified
 
 * Customizable shortcuts
