@@ -264,10 +264,10 @@ class Player:
 
     def playlist_get_list(self):
         l=self.get_multiline_command('playlist show')
-        re=re.compile('\s+\d+\s+(.+)$')
+        reg=re.compile('\s+\d+\s+(.+)$')
         pl=[]
         for i in l:
-            m=re.search(i)
+            m=reg.search(i)
             if m is not None:
                 pl.append(m.group(1))
         return pl
