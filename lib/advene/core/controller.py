@@ -2477,6 +2477,13 @@ class AdveneController(object):
         if progress_callback:
             progress_callback(progress, _("Starting export"))
 
+        def player_url(t):
+            """Return the URL to play video at the given time.
+            """
+            if 'video.google' in video_url:
+                # Format: HH:MM:SS.mmm
+                return '%s#%s' % (video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(long(t) / 1000)))
+            return ''
         def unconverted(url, reason):
             return 'unconverted.html?' + reason.replace(' ', '_')
             #return url
@@ -2578,9 +2585,7 @@ class AdveneController(object):
                     elif video_url and link.startswith('/media/play'):
                         l=re.findall(r'/media/play/(\d+)', link)
                         if l:
-                            # Format: HH:MM:SS.mmm
-                            t=time.strftime("%Hh%Mm%Ss", time.gmtime(long(l[0]) / 1000))
-                            url_translation[link]='%s#%s' % (video_url, t)
+                            url_translation[link]=player_url(long(l[0]))
                         else:
                             url_translation[link]=unconverted(link, 'unhandled link')
                     else:
@@ -2592,7 +2597,7 @@ class AdveneController(object):
                 tr=url_translation[link]
                 if link != tr:
                     extra=[]
-                    if video_url in tr:
+                    if video_url in tr and 'video.google' in video_url:
                         extra.append("target='_blank'")
                     if 'unconverted' in tr:
                         extra.append('onClick="return false;"')
