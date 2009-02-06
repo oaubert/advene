@@ -429,7 +429,7 @@ class HTMLContentHandler (ContentHandler):
             return item
 
         if ctx is None:
-            ctx=textview.get_current_context()
+            ctx=self.editor.get_current_context()
 
         if ctx:
             if hasattr(ctx[-1], '_placeholder'):
