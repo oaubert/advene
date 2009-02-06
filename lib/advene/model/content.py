@@ -332,7 +332,7 @@ class ContentPlugin (object):
     def find_plugin (content):
         mimetype = MimeType(content.getMimetype())
         found = None
-        foundtype = None
+        found_type = None
 
         for p in _content_plugin_registry.itervalues ():
             plugin_type = MimeType(p.getMimetype())
