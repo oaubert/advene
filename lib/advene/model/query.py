@@ -16,6 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import time
+
 import advene.model._impl as _impl
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
