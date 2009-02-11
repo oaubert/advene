@@ -706,7 +706,7 @@ class DefaultActionsRepository:
         if name is None:
             return True
         value=self.parse_parameter(context, parameters, 'value', 0)
-        if name is None:
+        if value is None:
             return True
         try:
             value=int(float(value))
