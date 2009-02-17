@@ -30,6 +30,9 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from math import floor
 from advene.gui.views import AdhocView
+#import advene.util.helper as helper
+from advene.rules.elements import ECACatalog
+
 try:
     import goocanvas
     from goocanvas import Group
@@ -68,7 +71,8 @@ class TraceTimeline(AdhocView):
         self.toolbox = None
         self.tooltips = gtk.Tooltips()
         self.tooltips.enable()
-        self.explorer = None
+        self.inspector = None
+        self.btnl = None
         self.lasty=0
         self.canvasX = None
         self.canvasY = 1
@@ -157,6 +161,11 @@ class TraceTimeline(AdhocView):
         btnc.set_tooltip(self.tooltips, _('Zoom 100%'))
         btnc.set_label('')
         self.toolbox.insert(btnc, -1)
+        self.btnl = gtk.ToolButton()
+        self.btnl.set_tooltip(self.tooltips, _('Toggle links lock'))
+        self.btnl.set_label(_('Unlocked'))
+        self.toolbox.insert(self.btnl, -1)
+        self.btnl.connect('clicked', self.toggle_lock)
         #self.zoom_combobox=dialog.list_selector_widget(members=[
         #        ( f, '%d%%' % long(100*f) )
         #        for f in [
@@ -171,20 +180,21 @@ class TraceTimeline(AdhocView):
         #i.add(self.zoom_combobox)
         #self.toolbox.insert(i, -1)
         self.toolbox.insert(gtk.SeparatorToolItem(), -1)
-        #self.explorer = TtlExplorer(self.controller)
-        #i=gtk.ToolItem()
-        #i.add(self.explorer)
-        #self.toolbox.insert(i, -1)
+        self.inspector = Inspector(self.controller)
+        i=gtk.ToolItem()
+        i.add(self.inspector)
+        self.toolbox.insert(i, -1)
         self.toolbox.show_all()
         
         def on_background_scroll(widget, event):
             zoom=event.state & gtk.gdk.CONTROL_MASK
             a = None
             if zoom:
+                center = event.y * self.timefactor
                 if event.direction == gtk.gdk.SCROLL_DOWN:
-                    zoom_out(widget)
+                    zoom_out(widget, center)
                 elif  event.direction == gtk.gdk.SCROLL_UP:
-                    zoom_in(widget)
+                    zoom_in(widget, center)
                 return
             elif event.state & gtk.gdk.SHIFT_MASK:
                 # Horizontal scroll
@@ -247,13 +257,17 @@ class TraceTimeline(AdhocView):
             return False
         self.canvas.connect('button-release-event', on_background_button_release)
 
-        def zoom_out(w):
+        def zoom_out(w, center_v=None):
             h = self.canvas.get_allocation().height
             if h/float(self.canvasY)>=0.8:
                 zoom_100(w)
             else:
                 va=scrolled_win.get_vadjustment()
-                vc = (va.value + h/2.0) * self.timefactor
+                vc=0
+                if center_v is None: 
+                    vc = (va.value + h/2.0) * self.timefactor
+                else:
+                    vc = center_v
                 self.canvasY *= 0.8
                 self.timefactor *= 1.25
                 self.obj_l *= 0.8
@@ -262,10 +276,13 @@ class TraceTimeline(AdhocView):
                 self.refresh(center = vc)
         btnm.connect('clicked', zoom_out)
 
-        def zoom_in(w):
+        def zoom_in(w, center_v=None):
             h = self.canvas.get_allocation().height
             va=scrolled_win.get_vadjustment()
-            vc = (va.value + h/2.0) * self.timefactor
+            if center_v is None: 
+                vc = (va.value + h/2.0) * self.timefactor
+            else:
+                vc = center_v
             self.canvasY *= 1.25
             self.timefactor *= 0.8
             self.obj_l *= 1.25
@@ -276,11 +293,11 @@ class TraceTimeline(AdhocView):
 
         def zoom_100(w):
             wa = self.canvas.get_allocation()
-            self.canvasY = wa.height
+            self.canvasY = wa.height-10.0 # -10 pour des raisons obscures ...
             if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
                 a = self.tracer.trace.levels['actions'][-1].activity_time[1]
-                self.timefactor = a/(self.canvasY-1.0)
-                self.obj_l = 5000/self.timefactor
+                self.timefactor = a/(self.canvasY)
+                self.obj_l = 5000.0/self.timefactor
             else:
                 self.timefactor = 1000
                 self.obj_l = 5
@@ -292,37 +309,111 @@ class TraceTimeline(AdhocView):
         bx.set_position(self.canvasX+15)
         return bx
 
+
+    def zoom_on(self, w=None, canvas_item=None):
+        min_y = -1
+        max_y = -1
+        if hasattr(canvas_item, 'rect'):
+            # action
+            min_y = canvas_item.rect.get_bounds().y1
+            max_y = canvas_item.rect.get_bounds().y2
+        elif hasattr(canvas_item, 'rep'):
+            obj_id = canvas_item.id
+            i=0
+            root = self.canvas.get_root_item()
+            while i < root.get_n_children():
+                go = root.get_child(i)
+                if isinstance(go, ObjGroup) and obj_id == go.id:
+                    # obj
+                    obj_min_y = go.rep.props.center_y - go.rep.props.radius_y
+                    obj_max_y = go.rep.props.center_y + go.rep.props.radius_y
+                    if min_y == -1:
+                        min_y = obj_min_y
+                    min_y = min(min_y, obj_min_y)
+                    max_y = max(max_y, obj_max_y)
+                i+=1
+        #print 'y1 %s y2 %s' % (min_y, max_y)
+        h = self.canvas.get_allocation().height
+        # 20.0 to keep a little space between border and object
+        va=self.sw.get_vadjustment()
+        rapp = (20.0 + max_y - min_y) / h
+        vc = self.timefactor * ((min_y + max_y) / 2.0) * (va.upper / self.canvasY)
+        self.timefactor = rapp * self.timefactor
+        self.canvasY = rapp * self.canvasY
+        self.obj_l = rapp * self.obj_l
+        self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
+        self.refresh(center = vc)        
+        
     def canvas_clicked(self, w, t, ev):
-        obj_id = None
+        obj_gp = None
+        evt_gp = None
         l = self.canvas.get_items_at(ev.x, ev.y, False)
         if l is not None:
             for o in l:
                 go = o.get_parent()
                 if isinstance(go, ObjGroup):
-                    obj_id = go.id
-                    break
-        if obj_id is None:
+                    obj_gp = go
+                if isinstance(go, EventGroup):
+                    evt_gp = go
+        if obj_gp is None and evt_gp is None:
             return
         if ev.button == 3:
             #clic droit sur un item
-            pass
+            menu=gtk.Menu()
+            if obj_gp is not None:
+                i=gtk.MenuItem(_("Zoom and center on linked items"))
+                i.connect("activate", self.zoom_on, obj_gp)
+                menu.append(i)
+            if evt_gp is not None:
+                i=gtk.MenuItem(_("Zoom on action"))
+                i.connect("activate", self.zoom_on, evt_gp)
+                menu.append(i)
+            menu.show_all()
+            menu.popup(None, None, None, ev.button, ev.time)
         elif ev.button == 1:
             #clic gauche sur un item : lock
-            self.links_locked = not self.links_locked
-            i=0
-            root = self.canvas.get_root_item()
-            while i < root.get_n_children():
-                go = root.get_child(i)
-                if isinstance(go, ObjGroup):
-                    if self.links_locked:
-                        #print "lock %s" % go
-                        go.handler_block(go.handler_ids['enter-notify-event'])
-                        go.handler_block(go.handler_ids['leave-notify-event'])
-                    else:
-                        #print "unlock %s" % go
-                        go.handler_unblock(go.handler_ids['enter-notify-event'])
-                        go.handler_unblock(go.handler_ids['leave-notify-event'])
-                i+=1
+            if obj_gp is None:
+                return
+            self.toggle_lock()
+        #if obj_gp is not None:
+            #self.inspector_id.set_text(obj_gp.id)
+            #self.inspector_name.set_text(obj_gp.name)
+            #if obj_gp.type is not None:
+            #    self.inspector_type.set_text(obj_gp.type.getLocalName())
+            #else:
+            #    self.inspector_type.set_text('None')
+            #vider les fils de self.inspector_opes
+            #for c in self.inspector_opes.get_children():
+            #    self.inspector_opes.remove(c)
+            #for o in obj_gp.opes:
+            #    self.inspector_opes.pack_start(gtk.Label("%s:\n   %s\n   (%s)" % (o.time, o.name, o.content)))
+            #self.inspector.show_all()
+        #temp_str = "%s (%s) : %s\n" % (self.name, self.id, self.type)
+        #for o in self.opes:
+        #    temp_str += "%s: %s (%s)\n" % (o.time, o.name, o.content)
+        #print temp_str
+
+
+    def toggle_lock(self, w=None):
+        self.links_locked = not self.links_locked
+        if self.links_locked:
+            self.btnl.set_label(_('Locked'))
+        else:
+            self.btnl.set_label(_('Unlocked'))
+        i=0
+        root = self.canvas.get_root_item()
+        while i < root.get_n_children():
+            go = root.get_child(i)
+            if isinstance(go, ObjGroup):
+                if self.links_locked:
+                    #print "lock %s" % go
+                    go.handler_block(go.handler_ids['enter-notify-event'])
+                    go.handler_block(go.handler_ids['leave-notify-event'])
+                else:
+                    #print "unlock %s" % go
+                    go.handler_unblock(go.handler_ids['enter-notify-event'])
+                    go.handler_unblock(go.handler_ids['leave-notify-event'])
+            i+=1
                     
     def draw_marks(self):
         # adding time lines
@@ -400,8 +491,9 @@ class TraceTimeline(AdhocView):
         # 4/ redraw each action
         # 5/ recenter the canvas according to previous centering
         # 6/ reselect selected item
+        # 7/ re-deactive locked_links
         # action : the new action forcing a refresh (if action couldnt be displayed in the current canvas area)
-        # center : the timestamp on which the display need to be centered
+        # center : the timestamp on which the display needs to be centered
         root = self.canvas.get_root_item()
         selected_item = None
         while root.get_n_children()>0:
@@ -516,7 +608,7 @@ class TraceTimeline(AdhocView):
             if action.activity_time[1] > self.canvasY*self.timefactor:
                 #print "%s %s %s" % (action.name , action.activity_time[1], self.canvasY*self.timefactor)
                 self.refresh(action)
-            ev = EventGroup(self.controller, self.canvas, None, action, x, y, length, self.col_width, self.obj_l, 14, color)
+            ev = EventGroup(self.controller, self.inspector, self.canvas, None, action, x, y, length, self.col_width, self.obj_l, 14, color)
             self.cols[action.name]=(h,ev)
             #self.lasty = ev.rect.get_bounds().y2
             #print "%s %s %s" % (y, length, self.lasty)
@@ -559,10 +651,11 @@ class HeadGroup (Group):
             return
 
 class EventGroup (Group):
-    def __init__(self, controller=None, canvas=None, type=None, event=None, x =0, y=0, l=1, w=90, ol=5, fontsize=6, color_c=0x00ffffff):
+    def __init__(self, controller=None, inspector=None, canvas=None, type=None, event=None, x =0, y=0, l=1, w=90, ol=5, fontsize=6, color_c=0x00ffffff):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.canvas = canvas
         self.controller=controller
+        self.inspector = inspector
         self.event=event
         self.type=type
         self.rect = None
@@ -593,7 +686,7 @@ class EventGroup (Group):
 
     def addObj(self, obj_id, xx, yy, ol, color, color_o):
         (pds, obj_name, obj_type, obj_opes) = self.objs[obj_id][1:5]
-        o = ObjGroup(self.controller, self.canvas, xx, yy, ol, self.fontsize, pds, obj_id, obj_name, obj_type, obj_opes)
+        o = ObjGroup(self.controller, self.inspector, self.canvas, xx, yy, ol, self.fontsize, pds, obj_id, obj_name, obj_type, obj_opes)
         return o
 
     def redrawObjs(self, ol=5):
@@ -638,6 +731,8 @@ class EventGroup (Group):
                 ol=l-4
             else:
                 return
+        if ol > 15:
+            ol=24
         # need to fix fontsize according to object length with a min of 6 and a max of ??, 
         self.fontsize = ol-1
         for obj in self.objs.keys():
@@ -669,12 +764,13 @@ class EventGroup (Group):
 
 
 class ObjGroup (Group):
-    def __init__(self, controller=None, canvas=None, x=0, y=0, r=4, fontsize=6, pds=1, obj_id=None, obj_name=None, obj_type=None, obj_opes=[]):
+    def __init__(self, controller=None, inspector=None, canvas=None, x=0, y=0, r=4, fontsize=6, pds=1, obj_id=None, obj_name=None, obj_type=None, obj_opes=[]):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.rep = None
         self.text = None
         self.canvas = canvas
+        self.inspector = inspector
         self.color_sel = 0xD9D919FF
         self.color_f = 0xADEAEAFF
         self.color_s = "black"
@@ -682,8 +778,8 @@ class ObjGroup (Group):
         self.fontsize = 5
         self.poids = pds
         self.id = obj_id
-        self.name = obj_name
-        self.type = obj_type
+        self.name = obj_name # name is the name of the type ...
+        self.type = obj_type #the type object
         self.opes = obj_opes
         self.x = x
         self.y = y
@@ -702,11 +798,15 @@ class ObjGroup (Group):
         self.handler_ids['leave-notify-event'] = self.connect('leave-notify-event', self.on_mouse_leave)
 
     def on_mouse_over(self, w, target, event):
+        #print '1 %s %s %s %s' % self.canvas.get_bounds()
         self.toggle_rels()
+        self.fill_inspector()
+        #print '2 %s %s %s %s' % self.canvas.get_bounds()
         return
 
     def on_mouse_leave(self, w, target, event):
         self.toggle_rels()
+        self.clean_inspector()
         return
         
     #def on_click(self, w, target, ev):
@@ -717,6 +817,12 @@ class ObjGroup (Group):
             #recenter on links
     #        pass
     #    return
+    
+    def clean_inspector(self):
+        self.inspector.clean()
+    
+    def fill_inspector(self):
+        self.inspector.fillWithItem(self)
     
     def toggle_rels(self):
         #temp_str = "%s (%s) : %s\n" % (self.name, self.id, self.type)
@@ -821,3 +927,74 @@ class ObjGroup (Group):
                         width = -1,
                         anchor = gtk.ANCHOR_CENTER,
                         font = "Sans %s" % str(self.fontsize))
+
+
+class Inspector (gtk.VBox):
+    def __init__ (self, controller=None):
+        gtk.VBox.__init__(self)
+        self.controller=controller
+        self.tooltips = gtk.Tooltips()
+        self.tooltips.enable()
+        self.incomplete_operations_names = {
+            'EditSessionStart': _('Beginning edition'),
+            'ElementEditBegin': _('Beginning edition'),
+            'ElementEditDestroy': _('Canceling edition'),
+            'ElementEditCancel': _('Canceling edition'),
+            'EditSessionEnd': _('Canceling edition'),
+            'ElementEditEnd': _('Ending edition'),
+        }
+        #FIXME : create a class inspector with id, name type opes
+        self.pack_start(gtk.Label('Inspector'), expand=False)
+        self.pack_start(gtk.HSeparator(), expand=False)
+        self.inspector_id = gtk.Label('Id')
+        self.pack_start(self.inspector_id, expand=False)
+        self.inspector_id.set_alignment(0, 0.5)
+        self.tooltips.set_tip(self.inspector_id, _('Id'))
+        #name is the same as type ...
+        #self.inspector_name = gtk.Label('Name') 
+        #self.pack_start(self.inspector_name, expand=False)
+        #self.tooltips.set_tip(self.inspector_name, _('Name'))
+        #self.inspector_name.set_alignment(0, 0.5)
+        self.inspector_type = gtk.Label('Type')
+        self.pack_start(self.inspector_type, expand=False)
+        self.tooltips.set_tip(self.inspector_type, _('Type'))
+        self.inspector_type.set_alignment(0, 0.5)
+        self.pack_start(gtk.HSeparator(), expand=False)
+        self.pack_start(gtk.Label('Operations'), expand=False)
+        self.inspector_opes=gtk.VBox()
+        self.pack_start(self.inspector_opes, expand=False)
+        self.clean()
+        
+    def fillWithItem(self, item):
+        self.inspector_id.set_text(item.id)
+        #self.inspector_name.set_text(item.name)
+        self.inspector_type.set_text(item.name)
+        #if item.type is not None:
+        #    self.inspector_type.set_text(item.type.getLocalName())
+        #else:
+        #    self.inspector_type.set_text('None')
+        
+        for c in self.inspector_opes.get_children():
+            self.inspector_opes.remove(c)
+        for o in item.opes:
+            n=''
+            if o.name in self.incomplete_operations_names:
+                n = self.incomplete_operations_names[o.name]
+            else:
+                n = ECACatalog.event_names[o.name]
+            l = gtk.Label("%s:\n%s" % (time.strftime("%H:%M:%S", time.localtime(o.time)), n))
+            self.inspector_opes.pack_start(l)
+            l.set_alignment(0, 0.5)
+            self.tooltips.set_tip(l, o.content)
+        self.show_all()
+        
+    def fillWithAction(self, action):
+        print 'TODO'
+    
+    def clean(self):
+        self.inspector_id.set_text('Id')
+        #self.inspector_name.set_text('Name')
+        self.inspector_type.set_text('Type')
+        for c in self.inspector_opes.get_children():
+            self.inspector_opes.remove(c)
+        self.show_all()
