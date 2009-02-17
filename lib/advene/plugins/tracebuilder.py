@@ -56,6 +56,7 @@ class TraceBuilder:
         'AnnotationEditEnd':1,
         'AnnotationDelete':1,
         'RelationCreate':1,
+        'RelationEditEnd':1,
         'AnnotationMerge':1,
         'AnnotationMove':1,
         'PlayerStart':2,
@@ -64,19 +65,25 @@ class TraceBuilder:
         'PlayerResume':2,
         'PlayerSet':2,
         'ViewActivation':2,
+        'ViewDeactivation':2,
         'AnnotationTypeCreate':3,
         'RelationTypeCreate':3,
         'RelationTypeDelete':3,
         'AnnotationTypeDelete':3,
         'AnnotationTypeEditEnd':3,
         'RelationTypeEditEnd':3,
+        'SchemaCreate':3,
+        'SchemaEditEnd':3,
+        'SchemaDelete':3,
         'ViewCreate':4,
         'ViewEditEnd':4,
+        'ViewDelete':4,
         'EditSessionStart':5,
         #'ElementEditEnd':5,
         'ElementEditDestroy':5,
         'EditSessionEnd':5,
         }
+        self.editEndNames = ['ElementEditDestroy', 'ElementEditEnd', 'AnnotationEditEnd', 'RelationEditEnd', 'AnnotationTypeEditEnd', 'RelationTypeEditEnd', 'EditSessionEnd', 'ViewEditEnd', 'SchemaEditEnd']
 
         if package is None and controller is not None:
             package=controller.package
@@ -464,7 +471,7 @@ class TraceBuilder:
                 elem.type=advene.model.package.Package
         if self.trace.levels['operations']:
             prev = self.trace.levels['operations'][-1]
-            if op_name == 'ElementEditDestroy' and (prev.name == 'ElementEditDestroy' or prev.name == 'ElementEditEnd' or prev.name == 'AnnotationEditEnd' or prev.name == 'AnnotationTypeEditEnd' or prev.name == 'RelationTypeEditEnd') and prev.concerned_object['id'] == elem_id:
+            if op_name in self.editEndNames and prev.name in self.editEndNames and prev.concerned_object['id'] == elem_id:
                 return
         op = Operation(op_name, op_time, op_activity_time, op_content, op_movie, op_movie_time, elem_name, elem_id, elem_type)
         self.trace.add_to_trace('operations', op)
@@ -527,7 +534,7 @@ class TraceBuilder:
         if 'annotationtype' in obj_evt or 'relationtype' in obj_evt or 'schema' in obj_evt:
             return "Classification"
         if 'view' in obj_evt:
-            return "View_building"
+            return "View building"
         return "Undefined"
 
     #def get_trace_level(self, level):
