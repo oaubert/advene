@@ -32,6 +32,7 @@ from math import floor
 from advene.gui.views import AdhocView
 #import advene.util.helper as helper
 from advene.rules.elements import ECACatalog
+import advene.core.config as config
 
 try:
     import goocanvas
@@ -163,7 +164,10 @@ class TraceTimeline(AdhocView):
         self.toolbox.insert(btnc, -1)
         self.btnl = gtk.ToolButton()
         self.btnl.set_tooltip(self.tooltips, _('Toggle links lock'))
-        self.btnl.set_label(_('Unlocked'))
+        #self.btnl.set_label(_('Unlocked'))
+        img = gtk.Image()
+        img.set_from_file(config.data.advenefile( ( 'pixmaps', 'unlocked.png') ))
+        self.btnl.set_icon_widget(img)
         self.toolbox.insert(self.btnl, -1)
         self.btnl.connect('clicked', self.toggle_lock)
         #self.zoom_combobox=dialog.list_selector_widget(members=[
@@ -397,9 +401,17 @@ class TraceTimeline(AdhocView):
     def toggle_lock(self, w=None):
         self.links_locked = not self.links_locked
         if self.links_locked:
-            self.btnl.set_label(_('Locked'))
+            #self.btnl.set_label(_('Locked'))
+            img = self.btnl.get_icon_widget()
+            img.set_from_file(config.data.advenefile( ( 'pixmaps', 'locked.png') ))
+            img.show()
+            self.btnl.set_icon_widget(img)
         else:
-            self.btnl.set_label(_('Unlocked'))
+            #self.btnl.set_label(_('Unlocked'))
+            img = self.btnl.get_icon_widget()
+            img.set_from_file(config.data.advenefile( ( 'pixmaps', 'unlocked.png') ))
+            img.show()
+            self.btnl.set_icon_widget(img)
         i=0
         root = self.canvas.get_root_item()
         while i < root.get_n_children():
