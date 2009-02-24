@@ -3290,6 +3290,10 @@ class AdveneGUI(object):
         return True
 
     def on_b_play_clicked (self, button=None, data=None):
+        if not self.controller.player.playlist_get_list():
+            # No movie file is defined yet. Propose to choose one.
+            self.on_b_addfile_clicked()
+            return True
         if self.controller.player.status == self.controller.player.PauseStatus:
             self.controller.update_status ("resume")
         elif self.controller.player.status != self.controller.player.PlayingStatus:
