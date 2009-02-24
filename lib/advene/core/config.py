@@ -137,14 +137,14 @@ class Config(object):
                 # Advene resources (.glade, template, ...) path FIXME
                 'resources': '/Applications/Advene.app/share',
                 # Advene data files default path
-                'data': self.get_homedir(),
+                'data': os.path.join( self.get_homedir(), "Documents" ),
                 # Imagecache save directory
                 'imagecache': '/tmp',
                 # Web data files FIXME
                 'web': '/Applications/Advene.app/share/advene/web',
                 # Movie files search path. _ is the
                 # current package path
-                'moviepath': '_',
+                'moviepath': '_:%s' % os.path.join( self.get_homedir(), 'Movies' ),
                 # Locale dir FIXME
                 'locale': '/Applications/Advene.app/locale',
                 'shotdetect': 'shotdetect',
