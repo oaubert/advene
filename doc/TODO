@@ -1,10 +1,25 @@
-* http://bbantispam.com/howto/
+* Check http://freemix.forja.rediris.es/#
+http://www.ndeschildre.net/2008/04/29/python-and-webcam-part-2/
 
-* use python-webkit
+* Display annotations over the video in flash:
+   http://www.ioncannon.net/php/110/using-flash-video-metadata-to-display-annotations/
+
+* Videotools Flash:
+http://dewey.at.northwestern.edu/ppad2/documents/help/video.html
+http://www.masternewmedia.org/video_internet_television/video-annotation/online-video-annotation-takes-a-giant-leap-20070405.htm
+http://www.opencastproject.org/wiki/Project_Pad_Audio_and_Video_Annotation_Tools
+
+* http://www.appscio.org/
+The Appscio Media Processing Framework (MPF) is built on top of
+   gstreamer and is designed to handle metadata.
+
+* phpBB antispam: http://bbantispam.com/howto/
+
+* use python-webkit for gui.views.html
 
 * htmleditor/transcribe/edit element: use textbuffer.get_modified/set_modified
 
-* Customizable shortcuts
+* Customizable shortcuts for annotation
 
 * Nosferatu: website export: convert play links to link to
    YouTube/GoogleVideo:
