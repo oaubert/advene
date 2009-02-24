@@ -93,7 +93,7 @@ class AnnotationDisplay(AdhocView):
             if col:
                 title='<span background="%s">Annotation Type <b>%s</b></span>' % (col, self.controller.get_title(self.annotation))
             else:
-                title='Annotation <b>%s</b>' % self.controller.get_title(self.annotation)
+                title='Annotation Type <b>%s</b>' % self.controller.get_title(self.annotation)
             if len(self.annotation.annotations):
                 b=min(a.fragment.begin for a in self.annotation.annotations)
                 e=max(a.fragment.end for a in self.annotation.annotations)
