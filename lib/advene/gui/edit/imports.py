@@ -114,14 +114,14 @@ class TreeViewImporter:
         l=[ e.uri for e in source if e.isImported() ]
         return (el.uri in l)
 
-    def add_package(self, store, package=None, as=None):
+    def add_package(self, store, package=None, alias=None):
         """Add a package to the liststore.
         """
         p=package
         packagerow=store.append(parent=None,
                                 row=[p,
                                      p.title,
-                                     as,
+                                     alias,
                                      True,
                                      p.uri])
         viewsrow=store.append(parent=packagerow,
@@ -232,7 +232,7 @@ class TreeViewImporter:
             )
 
         for i in self.controller.package.imports:
-            self.add_package(store, package=i.package, as=i.getAs())
+            self.add_package(store, package=i.package, alias=i.getAs())
         return store
 
     def toggled_cb(self, renderer, path, model, column):
@@ -372,7 +372,7 @@ class Importer:
         self.controller.package.imports.append(i)
 
         # Update the ListStore
-        self.ti.add_package(self.ti.store, package=i.package, as=alias)
+        self.ti.add_package(self.ti.store, package=i.package, alias=alias)
 
         return True
 
