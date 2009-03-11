@@ -1,3 +1,9 @@
+* gstreamer win32/mac:
+http://www.gstreamer-winbuild.ylatuya.es/doku.php
+http://bugzilla.songbirdnest.com/show_bug.cgi?id=8345
+http://bugzilla.songbirdnest.com/show_bug.cgi?id=8011
+http://blog.songbirdnest.com/2008/03/26/gstreamer-progress/
+
 * Check http://freemix.forja.rediris.es/#
 http://www.ndeschildre.net/2008/04/29/python-and-webcam-part-2/
 
@@ -101,11 +107,6 @@ http://development.syllable.org/documentation/interface-guide.html
 * Imagemap/SVG
 
 * LdT: handle #RRGGBB color specification
-
-* gstreamer win32/mac:
-http://bugzilla.songbirdnest.com/show_bug.cgi?id=8345
-http://bugzilla.songbirdnest.com/show_bug.cgi?id=8011
-http://blog.songbirdnest.com/2008/03/26/gstreamer-progress/
 
 * improve search results navigation (cf PA post on May 2)
 
