@@ -441,7 +441,8 @@ class AdveneGUI(object):
 
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
             ('editionhistory', _("Display edition history"), 'editionhistory.png'),
-            ('trace', _("Visualise the activity trace"), 'trace.png'),
+            ('trace', _("Visualise the activity trace as events"), 'trace.png'),
+            ('trace2', _("Visualise the activity trace as a timeline"), 'tracetimeline.png'),
             ):
             if not name:
                 # Separator
