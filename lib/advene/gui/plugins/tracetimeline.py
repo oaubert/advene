@@ -79,6 +79,7 @@ class TraceTimeline(AdhocView):
         self.canvasY = 1
         self.head_canvasY = 25
         self.doc_canvas_Y = 30
+        self.docgroup = None
         self.obj_l = 5
         self.incr = 500
         self.timefactor = 100
@@ -118,6 +119,7 @@ class TraceTimeline(AdhocView):
         self.doc_canvas = goocanvas.Canvas()
         self.doc_canvas.set_bounds(0,0, self.canvasX, self.doc_canvas_Y)
         self.doc_canvas.set_size_request(-1, self.doc_canvas_Y)
+        self.docgroup = DocGroup(controller=self.controller, canvas=self.doc_canvas, name="Nom du film", x = 5, y=5, w=self.canvasX-10, fontsize=8, color_c=0x00ffff50)
         self.canvas.get_root_item().connect('button-press-event', self.canvas_clicked)
         def canvas_resize(w, alloc):
             self.canvasX = alloc.width-20.0
@@ -133,6 +135,7 @@ class TraceTimeline(AdhocView):
             self.refresh(action=None, center=vc)
             #redraw doc_canvas
             self.doc_canvas.set_bounds(0,0, self.canvasX, self.doc_canvas_Y)
+            self.redraw_doc_canvas()
             #print alloc.width
         self.head_canvas.connect('size-allocate', canvas_resize)
         scrolled_win.add(self.canvas)
@@ -348,6 +351,9 @@ class TraceTimeline(AdhocView):
         self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
         self.refresh(center = vc)        
         
+    def redraw_doc_canvas(self):
+        return
+        
     def canvas_clicked(self, w, t, ev):
         obj_gp = None
         evt_gp = None
@@ -376,8 +382,8 @@ class TraceTimeline(AdhocView):
             menu.popup(None, None, None, ev.button, ev.time)
         elif ev.button == 1:
             #clic gauche sur un item : lock
-            if obj_gp is None:
-                return
+            #if obj_gp is None:
+            #    return
             self.toggle_lock()
         #if obj_gp is not None:
             #self.inspector_id.set_text(obj_gp.id)
@@ -416,7 +422,7 @@ class TraceTimeline(AdhocView):
         root = self.canvas.get_root_item()
         while i < root.get_n_children():
             go = root.get_child(i)
-            if isinstance(go, ObjGroup):
+            if isinstance(go, ObjGroup) or isinstance(go, EventGroup):
                 if self.links_locked:
                     #print "lock %s" % go
                     go.handler_block(go.handler_ids['enter-notify-event'])
@@ -581,10 +587,11 @@ class TraceTimeline(AdhocView):
         # operation : the new or latest modified operation
         # action : the new or latest modified action
         # return the created group
-
+        #print "received : action %s, operation %s, event %s" % (action, operation, event)
+        if operation:
+            self.docgroup.addLine(operation.movietime)
         if (operation or event) and action is None:
             return
-        #print "received : action %s, operation %s, event %s" % (action, operation, event)
         if action is None:
             #redraw screen
             self.refresh()
@@ -620,13 +627,15 @@ class TraceTimeline(AdhocView):
             if action.activity_time[1] > self.canvasY*self.timefactor:
                 #print "%s %s %s" % (action.name , action.activity_time[1], self.canvasY*self.timefactor)
                 self.refresh(action)
-            ev = EventGroup(self.controller, self.inspector, self.canvas, None, action, x, y, length, self.col_width, self.obj_l, 14, color)
+            ev = EventGroup(self.controller, self.inspector, self.canvas, self.docgroup, None, action, x, y, length, self.col_width, self.obj_l, 14, color)
             self.cols[action.name]=(h,ev)
             #self.lasty = ev.rect.get_bounds().y2
             #print "%s %s %s" % (y, length, self.lasty)
         if self.autoscroll:
             a = self.sw.get_vadjustment()
             a.value=a.upper-a.page_size
+        #redraw canvasdoc
+        #if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
         return ev
 
 class HeadGroup (Group):
@@ -663,13 +672,14 @@ class HeadGroup (Group):
             return
 
 class EventGroup (Group):
-    def __init__(self, controller=None, inspector=None, canvas=None, type=None, event=None, x =0, y=0, l=1, w=90, ol=5, fontsize=6, color_c=0x00ffffff):
+    def __init__(self, controller=None, inspector=None, canvas=None, dg=None, type=None, event=None, x =0, y=0, l=1, w=90, ol=5, fontsize=6, color_c=0x00ffffff):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.canvas = canvas
         self.controller=controller
         self.inspector = inspector
         self.event=event
         self.type=type
+        self.dg = dg
         self.rect = None
         self.color_sel = 0xD9D919FF
         self.color_c = color_c
@@ -685,7 +695,14 @@ class EventGroup (Group):
         self.objs={}
         #self.lines = []
         self.redrawObjs(ol)
-
+        self.handler_ids = {
+        'enter-notify-event':None,
+        'leave-notify-event':None,
+        }
+        #self.connect('button-press-event', self.on_click)
+        self.handler_ids['enter-notify-event'] = self.connect('enter-notify-event', self.on_mouse_over)
+        self.handler_ids['leave-notify-event'] = self.connect('leave-notify-event', self.on_mouse_leave)
+        
     def newRect(self, color, color_c):
         return goocanvas.Rect (parent = self,
                                     x = self.x,
@@ -698,7 +715,7 @@ class EventGroup (Group):
 
     def addObj(self, obj_id, xx, yy, ol, color, color_o):
         (pds, obj_name, obj_type, obj_opes) = self.objs[obj_id][1:5]
-        o = ObjGroup(self.controller, self.inspector, self.canvas, xx, yy, ol, self.fontsize, pds, obj_id, obj_name, obj_type, obj_opes)
+        o = ObjGroup(self.controller, self.inspector, self.canvas, self.dg, xx, yy, ol, self.fontsize, pds, obj_id, obj_name, obj_type, obj_opes)
         return o
 
     def redrawObjs(self, ol=5):
@@ -743,8 +760,8 @@ class EventGroup (Group):
                 ol=l-4
             else:
                 return
-        if ol > 15:
-            ol=24
+        if ol > 20:
+            ol=20
         # need to fix fontsize according to object length with a min of 6 and a max of ??, 
         self.fontsize = ol-1
         for obj in self.objs.keys():
@@ -753,6 +770,7 @@ class EventGroup (Group):
                 if oy+(ol+2)*2>= y+l:
                     ox = x+2
                     oy += (ol+1)
+                    #FIXME
                     goocanvas.Text(parent = self,
                                         text = "...",
                                         x = ox,
@@ -773,15 +791,42 @@ class EventGroup (Group):
                 ox += (ol+2)
             #print "ox %s oy %s ol %s w %s l %s" % (ox, oy, ol, w+x, l+y)
 
+    def on_mouse_over(self, w, target, event):
+        #print '1 %s %s %s %s' % self.canvas.get_bounds()
+        self.fill_inspector()
+        self.dg.redraw(trace=self.controller.tracers[0].trace, action=self.event)
+        #print '2 %s %s %s %s' % self.canvas.get_bounds()
+        return
+
+    def on_mouse_leave(self, w, target, event):
+        self.clean_inspector()
+        self.dg.redraw(trace=self.controller.tracers[0].trace, action=None)
+        return
+        
+    #def on_click(self, w, target, ev):
+        #print "%s %s %s" % (w, target, ev.button)
+    #    if ev.button == 1:
+    #        return
+    #    if ev.button == 3:
+            #recenter on links
+    #        pass
+    #    return
+    
+    def clean_inspector(self):
+        self.inspector.clean()
+    
+    def fill_inspector(self):
+        self.inspector.fillWithAction(self)
 
 
 class ObjGroup (Group):
-    def __init__(self, controller=None, inspector=None, canvas=None, x=0, y=0, r=4, fontsize=6, pds=1, obj_id=None, obj_name=None, obj_type=None, obj_opes=[]):
+    def __init__(self, controller=None, inspector=None, canvas=None, dg=None, x=0, y=0, r=4, fontsize=6, pds=1, obj_id=None, obj_name=None, obj_type=None, obj_opes=[]):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.rep = None
         self.text = None
         self.canvas = canvas
+        self.dg=dg
         self.inspector = inspector
         self.color_sel = 0xD9D919FF
         self.color_f = 0xADEAEAFF
@@ -813,12 +858,14 @@ class ObjGroup (Group):
         #print '1 %s %s %s %s' % self.canvas.get_bounds()
         self.toggle_rels()
         self.fill_inspector()
+        self.dg.redraw(trace=self.controller.tracers[0].trace, obj=self)
         #print '2 %s %s %s %s' % self.canvas.get_bounds()
         return
 
     def on_mouse_leave(self, w, target, event):
         self.toggle_rels()
         self.clean_inspector()
+        self.dg.redraw(trace=self.controller.tracers[0].trace, obj=None)
         return
         
     #def on_click(self, w, target, ev):
@@ -1001,7 +1048,21 @@ class Inspector (gtk.VBox):
         self.show_all()
         
     def fillWithAction(self, action):
-        print 'TODO'
+        self.inspector_id.set_text(_('Action'))
+        self.inspector_type.set_text(action.event.name)
+        for c in self.inspector_opes.get_children():
+            self.inspector_opes.remove(c)
+        for o in action.event.operations:
+            n=''
+            if o.name in self.incomplete_operations_names:
+                n = self.incomplete_operations_names[o.name]
+            else:
+                n = ECACatalog.event_names[o.name]
+            l = gtk.Label("%s:\n%s" % (time.strftime("%H:%M:%S", time.localtime(o.time)), n))
+            self.inspector_opes.pack_start(l)
+            l.set_alignment(0, 0.5)
+            self.tooltips.set_tip(l, o.content)
+        self.show_all()
     
     def clean(self):
         self.inspector_id.set_text('Id')
@@ -1010,3 +1071,87 @@ class Inspector (gtk.VBox):
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
         self.show_all()
+
+class DocGroup (Group):
+    def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00ffff30):
+        Group.__init__(self, parent = canvas.get_root_item ())
+        self.controller=controller
+        self.canvas=canvas
+        self.name=name
+        self.rect = None
+        self.w = w
+        self.h = 20
+        self.movielength = 1
+        if self.controller.package.cached_duration>0:
+            self.movielength = self.controller.package.cached_duration
+        self.color_c = color_c
+        self.fontsize=fontsize
+        self.lines=[]
+        self.marks=[]
+        self.rect = goocanvas.Rect (parent = self,
+                                    x = x,
+                                    y = y,
+                                    width = self.w,
+                                    height = self.h,
+                                    fill_color_rgba = 0xFFFFFF00,
+                                    stroke_color = self.color_c,
+                                    line_width = 1)
+    
+    def redraw(self, trace=None, action=None, obj=None):
+        for l in self.lines:
+            l.remove()
+        self.lines=[]
+        for m in self.marks:
+            m.remove()
+        self.marks=[]
+        if 'actions' not in trace.levels.keys():
+            return
+        for a in trace.levels['actions']:
+            for o in a.operations:
+                self.addLine(o.movietime)
+        self.changeMarks(action, obj)
+    
+    def changeMarks(self, action=None, obj=None):
+        for m in self.marks:
+            m.remove()
+        self.marks=[]
+        if action is not None:
+            for op in action.operations:
+                self.addMark(op.movietime, 'green')
+        elif obj is not None:
+            for op in obj.opes:
+                self.addMark(op.movietime, 'blue')
+        
+    def addMark(self, time=0, color='gray'):
+        x=self.rect.get_bounds().x1 + self.w * time / self.movielength
+        x1 = x-2
+        x2 = x+2
+        y2=self.rect.get_bounds().y1
+        y1=y2-2
+        p = goocanvas.Points ([(x1, y1), (x, y2), (x2, y1)])
+        l = goocanvas.Polyline (parent = self,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = color,
+                                        line_width = 1.0,
+                                        start_arrow = False,
+                                        end_arrow = False
+                                        )
+        self.marks.append(l)
+        
+    def addLine(self, time=0, color='black', offset=0):
+        if self.controller.package.cached_duration > self.movielength:
+            self.movielength=self.controller.package.cached_duration
+        x=self.rect.get_bounds().x1 + self.w * time / self.movielength
+        y1=self.rect.get_bounds().y1 - offset
+        y2=self.rect.get_bounds().y2 + offset
+        p = goocanvas.Points ([(x, y1), (x, y2)])
+        l = goocanvas.Polyline (parent = self,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = color,
+                                        line_width = 1.0,
+                                        start_arrow = False,
+                                        end_arrow = False
+                                        )
+        self.lines.append(l)
