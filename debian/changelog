@@ -1,3 +1,18 @@
+advene (0.37) unstable; urgency=low
+
+  * New trace visualisation component (vertical display).
+  
+  * HTML editor: fix drag-and-drop on windows and improve HTML code generation.
+  
+  * Finder view: modify presentation.
+  
+  * Timeline: change behaviour when clicking on an annotation: go to its
+    beginning even if the current player position is already inside.
+
+  * Fix Alt-space shortcut on MacOS X (bookmark insertion).
+  
+ --
+
 advene (0.36) unstable; urgency=low
 
   * Stable release. See the following 0.35 notes for more details.
