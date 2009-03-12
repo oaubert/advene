@@ -113,7 +113,7 @@ class TimeAdjustment:
         hbox=gtk.HBox()
         hbox.set_homogeneous(False)
 
-        if self.editable and not self.compact:
+        if self.editable:
             vb=gtk.VBox()
             b=make_button(-self.large_increment, "2leftarrow.png")
             vb.pack_start(b, expand=False)
@@ -131,7 +131,7 @@ class TimeAdjustment:
         self.tooltips.set_tip(self.image, _("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value\nright-click to invalidate screenshot"))
         hbox.pack_start(self.image, expand=False)
 
-        if self.editable and not self.compact:
+        if self.editable:
             vb=gtk.VBox()
             b=make_button(self.large_increment, "2rightarrow.png")
             vb.pack_start(b, expand=False)
