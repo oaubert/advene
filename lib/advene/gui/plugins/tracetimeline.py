@@ -50,6 +50,8 @@ def register(controller):
         controller.register_viewclass(TraceTimeline)
 
 name="Trace Timeline view"
+ACTION_COLORS=[0x000088AA, 0x008800AA, 0x880000AA, 0x008888FF, 0x880088FF, 0x0000FFAA, 0x00FF00AA, 0xFF0000FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
+ACTIONS=[]
 
 class TraceTimeline(AdhocView):
     view_name = _("Traces")
@@ -91,6 +93,7 @@ class TraceTimeline(AdhocView):
         self.tracer.register_view(self)
         for act in self.tracer.action_types:
             self.cols[act] = (None, None)
+            ACTIONS.append(act)
         self.col_width = 80
         self.colspacing = 5
         self.widget = self.build_widget()
@@ -119,7 +122,7 @@ class TraceTimeline(AdhocView):
         self.doc_canvas = goocanvas.Canvas()
         self.doc_canvas.set_bounds(0,0, self.canvasX, self.doc_canvas_Y)
         self.doc_canvas.set_size_request(-1, self.doc_canvas_Y)
-        self.docgroup = DocGroup(controller=self.controller, canvas=self.doc_canvas, name="Nom du film", x = 5, y=5, w=self.canvasX-10, fontsize=8, color_c=0x00ffff50)
+        self.docgroup = DocGroup(controller=self.controller, canvas=self.doc_canvas, name="Nom du film", x = 5, y=5, w=self.canvasX-10, fontsize=8, color_c=0x00000050)
         self.canvas.get_root_item().connect('button-press-event', self.canvas_clicked)
         def canvas_resize(w, alloc):
             self.canvasX = alloc.width-20.0
@@ -489,10 +492,10 @@ class TraceTimeline(AdhocView):
 
     def populate_head_canvas(self):
         offset = 0
-        colors = [0x000088AA, 0x0000FFAA, 0x008800AA, 0x00FF00AA, 0x880000AA, 0xFF0000FF, 0x008888FF, 0x880088FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
+        #colors = [0x000088AA, 0x0000FFAA, 0x008800AA, 0x00FF00AA, 0x880000AA, 0xFF0000FF, 0x008888FF, 0x880088FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
         # 18 col max
-        for c in self.cols.keys():
-            etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, colors[offset])
+        for c in ACTIONS:
+            etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, ACTION_COLORS[offset])
             self.cols[c]=(etgroup, None)
             offset += 1
         return
@@ -526,24 +529,25 @@ class TraceTimeline(AdhocView):
         for act in self.cols.keys():
             (h,l) = self.cols[act]
             self.cols[act] = (h, None)
-        if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
-            a = None
-            if action is None:
-                a = self.tracer.trace.levels['actions'][-1].activity_time[1]
-            else:
-                a = action.activity_time[1]
+        if not ('actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']):
+            return
+        a = None
+        if action is None:
+            a = self.tracer.trace.levels['actions'][-1].activity_time[1]
+        else:
+            a = action.activity_time[1]
             #print "t1 %s Ytf %s" % (a, self.canvasY*self.timefactor)
-            if a<(self.canvasY-self.incr)*self.timefactor or a>self.canvasY*self.timefactor:
-                self.canvasY = int(1.0*a/self.timefactor + 1)
-                self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
-                #print "%s %s" % (self.timefactor, self.canvasY)
-                self.canvas.show()
+        if a<(self.canvasY-self.incr)*self.timefactor or a>self.canvasY*self.timefactor:
+            self.canvasY = int(1.0*a/self.timefactor + 1)
+        self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
+        #print "%s %s" % (self.timefactor, self.canvasY)
+        self.canvas.show()
         self.draw_marks()
         sel_eg = None
         for i in self.tracer.trace.levels['actions']:
-                ev = self.receive(self.tracer.trace, action=i)
-                if selected_item is not None and i == selected_item[0]:
-                    sel_eg = ev
+            ev = self.receive(self.tracer.trace, action=i)
+            if selected_item is not None and i == selected_item[0]:
+                sel_eg = ev
         if center:
             va=self.sw.get_vadjustment()
             va.value = center/self.timefactor-va.page_size/2.0
@@ -588,6 +592,8 @@ class TraceTimeline(AdhocView):
         # action : the new or latest modified action
         # return the created group
         #print "received : action %s, operation %s, event %s" % (action, operation, event)
+        if event and (event.name=='DurationUpdate' or event.name=='MediaChange'):
+            self.docgroup.changeMovielength(trace)
         if operation:
             self.docgroup.addLine(operation.movietime)
         if (operation or event) and action is None:
@@ -595,6 +601,7 @@ class TraceTimeline(AdhocView):
         if action is None:
             #redraw screen
             self.refresh()
+            self.docgroup.redraw(trace)
             if self.autoscroll:
                 a = self.sw.get_vadjustment()
                 a.value=a.upper-a.page_size
@@ -635,6 +642,7 @@ class TraceTimeline(AdhocView):
             a = self.sw.get_vadjustment()
             a.value=a.upper-a.page_size
         #redraw canvasdoc
+        #self.docgroup.redraw(trace)
         #if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
         return ev
 
@@ -794,13 +802,13 @@ class EventGroup (Group):
     def on_mouse_over(self, w, target, event):
         #print '1 %s %s %s %s' % self.canvas.get_bounds()
         self.fill_inspector()
-        self.dg.redraw(trace=self.controller.tracers[0].trace, action=self.event)
+        self.dg.changeMarks(action=self.event)
         #print '2 %s %s %s %s' % self.canvas.get_bounds()
         return
 
     def on_mouse_leave(self, w, target, event):
         self.clean_inspector()
-        self.dg.redraw(trace=self.controller.tracers[0].trace, action=None)
+        self.dg.changeMarks()
         return
         
     #def on_click(self, w, target, ev):
@@ -858,14 +866,14 @@ class ObjGroup (Group):
         #print '1 %s %s %s %s' % self.canvas.get_bounds()
         self.toggle_rels()
         self.fill_inspector()
-        self.dg.redraw(trace=self.controller.tracers[0].trace, obj=self)
+        self.dg.changeMarks(obj=self)
         #print '2 %s %s %s %s' % self.canvas.get_bounds()
         return
 
     def on_mouse_leave(self, w, target, event):
         self.toggle_rels()
         self.clean_inspector()
-        self.dg.redraw(trace=self.controller.tracers[0].trace, obj=None)
+        self.dg.changeMarks()
         return
         
     #def on_click(self, w, target, ev):
@@ -1035,7 +1043,9 @@ class Inspector (gtk.VBox):
         
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
+        nb=0
         for o in item.opes:
+            nb+=1
             n=''
             if o.name in self.incomplete_operations_names:
                 n = self.incomplete_operations_names[o.name]
@@ -1045,6 +1055,10 @@ class Inspector (gtk.VBox):
             self.inspector_opes.pack_start(l)
             l.set_alignment(0, 0.5)
             self.tooltips.set_tip(l, o.content)
+            #FIXME : need to check available space
+            if nb == 8:
+                print "display limited to 8 operations. Please Fixme."
+                break
         self.show_all()
         
     def fillWithAction(self, action):
@@ -1052,7 +1066,9 @@ class Inspector (gtk.VBox):
         self.inspector_type.set_text(action.event.name)
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
+        nb=0
         for o in action.event.operations:
+            nb+=1
             n=''
             if o.name in self.incomplete_operations_names:
                 n = self.incomplete_operations_names[o.name]
@@ -1062,6 +1078,10 @@ class Inspector (gtk.VBox):
             self.inspector_opes.pack_start(l)
             l.set_alignment(0, 0.5)
             self.tooltips.set_tip(l, o.content)
+            #FIXME : need to check available space
+            if nb == 8:
+                print "display limited to 8 operations. Please Fixme."
+                break
         self.show_all()
     
     def clean(self):
@@ -1073,7 +1093,7 @@ class Inspector (gtk.VBox):
         self.show_all()
 
 class DocGroup (Group):
-    def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00ffff30):
+    def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00000050):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.canvas=canvas
@@ -1094,7 +1114,7 @@ class DocGroup (Group):
                                     width = self.w,
                                     height = self.h,
                                     fill_color_rgba = 0xFFFFFF00,
-                                    stroke_color = self.color_c,
+                                    stroke_color_rgba = self.color_c,
                                     line_width = 1)
     
     def redraw(self, trace=None, action=None, obj=None):
@@ -1116,32 +1136,44 @@ class DocGroup (Group):
             m.remove()
         self.marks=[]
         if action is not None:
+            color = ACTION_COLORS[ACTIONS.index(action.name)]
+            #print "%s %s %s" % (action.name, ACTIONS.index(action.name), color)
             for op in action.operations:
-                self.addMark(op.movietime, 'green')
+                self.addMark(op.movietime, color)
         elif obj is not None:
             for op in obj.opes:
-                self.addMark(op.movietime, 'blue')
+                self.addMark(op.movietime, 0xD9D919FF)
         
     def addMark(self, time=0, color='gray'):
+        offset = 3
         x=self.rect.get_bounds().x1 + self.w * time / self.movielength
-        x1 = x-2
-        x2 = x+2
+        x1 = x-offset
+        x2 = x+offset
         y2=self.rect.get_bounds().y1
-        y1=y2-2
+        y1=y2-offset
         p = goocanvas.Points ([(x1, y1), (x, y2), (x2, y1)])
         l = goocanvas.Polyline (parent = self,
                                         close_path = False,
                                         points = p,
-                                        stroke_color = color,
-                                        line_width = 1.0,
+                                        stroke_color_rgba = color,
+                                        line_width = 2.0,
                                         start_arrow = False,
                                         end_arrow = False
                                         )
         self.marks.append(l)
         
-    def addLine(self, time=0, color='black', offset=0):
-        if self.controller.package.cached_duration > self.movielength:
+    def changeMovielength(self, trace=None, time=None):
+        if time is not None:
+            self.movielength=time
+        elif self.controller.package.cached_duration>0:
             self.movielength=self.controller.package.cached_duration
+        self.redraw(trace)
+        
+    def addLine(self, time=0, color=0x00000050, offset=0):
+        # to be removed
+        #~ if self.controller.package.cached_duration > self.movielength:
+            #~ self.movielength=self.controller.package.cached_duration
+        # assuming there is no more movielength problem
         x=self.rect.get_bounds().x1 + self.w * time / self.movielength
         y1=self.rect.get_bounds().y1 - offset
         y2=self.rect.get_bounds().y2 + offset
@@ -1149,7 +1181,7 @@ class DocGroup (Group):
         l = goocanvas.Polyline (parent = self,
                                         close_path = False,
                                         points = p,
-                                        stroke_color = color,
+                                        stroke_color_rgba = color,
                                         line_width = 1.0,
                                         start_arrow = False,
                                         end_arrow = False
