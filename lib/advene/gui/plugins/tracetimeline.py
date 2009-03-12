@@ -110,6 +110,7 @@ class TraceTimeline(AdhocView):
 
         toolbox = gtk.Toolbar()
         toolbox.set_orientation(gtk.ORIENTATION_HORIZONTAL)
+        toolbox.set_style(gtk.TOOLBAR_ICONS)
         mainbox.pack_start(toolbox, expand=False)
 
         bx = gtk.HPaned()
