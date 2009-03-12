@@ -119,7 +119,7 @@ class TraceTimeline(AdhocView):
 
         timeline_box=gtk.VBox()
         bx.pack1(timeline_box)
-        
+
         scrolled_win = gtk.ScrolledWindow ()
         self.sw = scrolled_win
         self.sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
@@ -196,7 +196,7 @@ class TraceTimeline(AdhocView):
 
         self.inspector = Inspector(self.controller)
         bx.pack2(self.inspector)
-        
+
         def on_background_scroll(widget, event):
             zoom=event.state & gtk.gdk.CONTROL_MASK
             a = None
@@ -275,7 +275,7 @@ class TraceTimeline(AdhocView):
             else:
                 va=scrolled_win.get_vadjustment()
                 vc=0
-                if center_v is None: 
+                if center_v is None:
                     vc = (va.value + h/2.0) * self.timefactor
                 else:
                     vc = center_v
@@ -290,7 +290,7 @@ class TraceTimeline(AdhocView):
         def zoom_in(w, center_v=None):
             h = self.canvas.get_allocation().height
             va=scrolled_win.get_vadjustment()
-            if center_v is None: 
+            if center_v is None:
                 vc = (va.value + h/2.0) * self.timefactor
             else:
                 vc = center_v
@@ -316,7 +316,7 @@ class TraceTimeline(AdhocView):
             self.canvas.set_bounds(0,0,self.canvasX, self.canvasY)
             self.refresh()
         btnc.connect('clicked', zoom_100)
-        
+
         bx.set_position(self.canvasX+15)
         return mainbox
 
@@ -352,11 +352,11 @@ class TraceTimeline(AdhocView):
         self.canvasY = rapp * self.canvasY
         self.obj_l = rapp * self.obj_l
         self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
-        self.refresh(center = vc)        
-        
+        self.refresh(center = vc)
+
     def redraw_doc_canvas(self):
         return
-        
+
     def canvas_clicked(self, w, t, ev):
         obj_gp = None
         evt_gp = None
@@ -435,7 +435,7 @@ class TraceTimeline(AdhocView):
                     go.handler_unblock(go.handler_ids['enter-notify-event'])
                     go.handler_unblock(go.handler_ids['leave-notify-event'])
             i+=1
-                    
+
     def draw_marks(self):
         # adding time lines
         wa = self.canvas.get_parent().get_allocation().height
@@ -583,7 +583,7 @@ class TraceTimeline(AdhocView):
                     go.handler_block(go.handler_ids['enter-notify-event'])
                     go.handler_block(go.handler_ids['leave-notify-event'])
                 i+=1
-            
+
 
     def receive(self, trace, event=None, operation=None, action=None):
         # trace : the full trace to be managed
@@ -710,7 +710,7 @@ class EventGroup (Group):
         #self.connect('button-press-event', self.on_click)
         self.handler_ids['enter-notify-event'] = self.connect('enter-notify-event', self.on_mouse_over)
         self.handler_ids['leave-notify-event'] = self.connect('leave-notify-event', self.on_mouse_leave)
-        
+
     def newRect(self, color, color_c):
         return goocanvas.Rect (parent = self,
                                     x = self.x,
@@ -731,7 +731,7 @@ class EventGroup (Group):
         for obj in self.objs.keys():
             obg = self.objs[obj][0]
             if obg is not None:
-                #print "redrawObjs removing %s" % r_obj 
+                #print "redrawObjs removing %s" % r_obj
                 child_num = self.find_child (obg)
                 if child_num>=0:
                     self.remove_child (child_num)
@@ -770,7 +770,7 @@ class EventGroup (Group):
                 return
         if ol > 20:
             ol=20
-        # need to fix fontsize according to object length with a min of 6 and a max of ??, 
+        # need to fix fontsize according to object length with a min of 6 and a max of ??,
         self.fontsize = ol-1
         for obj in self.objs.keys():
             #print "ox %s oy %s ol %s w %s l %s" % (ox, oy, ol, w+x, l+y)
@@ -810,7 +810,7 @@ class EventGroup (Group):
         self.clean_inspector()
         self.dg.changeMarks()
         return
-        
+
     #def on_click(self, w, target, ev):
         #print "%s %s %s" % (w, target, ev.button)
     #    if ev.button == 1:
@@ -819,10 +819,10 @@ class EventGroup (Group):
             #recenter on links
     #        pass
     #    return
-    
+
     def clean_inspector(self):
         self.inspector.clean()
-    
+
     def fill_inspector(self):
         self.inspector.fillWithAction(self)
 
@@ -875,7 +875,7 @@ class ObjGroup (Group):
         self.clean_inspector()
         self.dg.changeMarks()
         return
-        
+
     #def on_click(self, w, target, ev):
         #print "%s %s %s" % (w, target, ev.button)
     #    if ev.button == 1:
@@ -884,13 +884,13 @@ class ObjGroup (Group):
             #recenter on links
     #        pass
     #    return
-    
+
     def clean_inspector(self):
         self.inspector.clean()
-    
+
     def fill_inspector(self):
         self.inspector.fillWithItem(self)
-    
+
     def toggle_rels(self):
         #temp_str = "%s (%s) : %s\n" % (self.name, self.id, self.type)
         #for o in self.opes:
@@ -956,7 +956,7 @@ class ObjGroup (Group):
         self.rep.props.fill_color_rgba=self.color_f
         self.sel = False
         self.center_sel = False
-        
+
     def newRep(self):
         return goocanvas.Ellipse(parent=self,
                         center_x=self.x,
@@ -1018,7 +1018,7 @@ class Inspector (gtk.VBox):
         self.inspector_id.set_alignment(0, 0.5)
         self.tooltips.set_tip(self.inspector_id, _('Id'))
         #name is the same as type ...
-        #self.inspector_name = gtk.Label('Name') 
+        #self.inspector_name = gtk.Label('Name')
         #self.pack_start(self.inspector_name, expand=False)
         #self.tooltips.set_tip(self.inspector_name, _('Name'))
         #self.inspector_name.set_alignment(0, 0.5)
@@ -1031,7 +1031,7 @@ class Inspector (gtk.VBox):
         self.inspector_opes=gtk.VBox()
         self.pack_start(self.inspector_opes, expand=False)
         self.clean()
-        
+
     def fillWithItem(self, item):
         self.inspector_id.set_text(item.id)
         #self.inspector_name.set_text(item.name)
@@ -1040,7 +1040,7 @@ class Inspector (gtk.VBox):
         #    self.inspector_type.set_text(item.type.getLocalName())
         #else:
         #    self.inspector_type.set_text('None')
-        
+
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
         nb=0
@@ -1060,7 +1060,7 @@ class Inspector (gtk.VBox):
                 print "display limited to 8 operations. Please Fixme."
                 break
         self.show_all()
-        
+
     def fillWithAction(self, action):
         self.inspector_id.set_text(_('Action'))
         self.inspector_type.set_text(action.event.name)
@@ -1083,7 +1083,7 @@ class Inspector (gtk.VBox):
                 print "display limited to 8 operations. Please Fixme."
                 break
         self.show_all()
-    
+
     def clean(self):
         self.inspector_id.set_text('Id')
         #self.inspector_name.set_text('Name')
@@ -1113,7 +1113,7 @@ class DocGroup (Group):
         self.lines=[]
         self.marks=[]
         self.rect = self.newRect()
-        
+
     def newRect(self):
         return goocanvas.Rect (parent = self,
                                     x = self.x,
@@ -1123,7 +1123,7 @@ class DocGroup (Group):
                                     fill_color_rgba = self.color_f,
                                     stroke_color_rgba = self.color_c,
                                     line_width = self.lw)
-    
+
     def redraw(self, trace=None, action=None, obj=None):
         for l in self.lines:
             l.remove()
@@ -1137,7 +1137,7 @@ class DocGroup (Group):
             for o in a.operations:
                 self.addLine(o.movietime)
         self.changeMarks(action, obj)
-    
+
     def changeMarks(self, action=None, obj=None):
         for m in self.marks:
             m.remove()
@@ -1150,7 +1150,7 @@ class DocGroup (Group):
         elif obj is not None:
             for op in obj.opes:
                 self.addMark(op.movietime, 0xD9D919FF)
-        
+
     def addMark(self, time=0, color='gray'):
         offset = 3
         x=self.rect.get_bounds().x1 + self.w * time / self.movielength
@@ -1168,14 +1168,14 @@ class DocGroup (Group):
                                         end_arrow = False
                                         )
         self.marks.append(l)
-        
+
     def changeMovielength(self, trace=None, time=None):
         if time is not None:
             self.movielength=time
         elif self.controller.package.cached_duration>0:
             self.movielength=self.controller.package.cached_duration
         self.redraw(trace)
-        
+
     def addLine(self, time=0, color=0x00000050, offset=0):
         # to be removed
         #~ if self.controller.package.cached_duration > self.movielength:
