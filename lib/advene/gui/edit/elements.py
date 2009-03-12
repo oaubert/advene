@@ -428,7 +428,7 @@ class EditAnnotationPopup (EditElementPopup):
         l.sort(key=lambda a: a.fragment.begin, reverse=(direction == -1))
         if l:
             a=l[0]
-            new=self.controller.gui.edit_element(a, destination=self._destination)
+            new=self.controller.gui.edit_element(a, destination=getattr(self, '_destination', 'default'))
             # Validate the current one
             self.validate_cb()
         return True
