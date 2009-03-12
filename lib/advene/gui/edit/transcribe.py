@@ -25,6 +25,7 @@ import os
 import operator
 
 import gtk
+import pango
 
 import urllib
 
@@ -100,6 +101,7 @@ class TranscriptionEdit(AdhocView):
             'autoscroll': True,
             'autoinsert': True,
             'snapshot-size': 32,
+            'font-size': 0,
             }
 
         self.colors = {
@@ -122,6 +124,7 @@ class TranscriptionEdit(AdhocView):
         self.timestamp_play = None
 
         self.widget=self.build_widget()
+        self.update_font_size()
         if filename is not None:
             self.load_transcription(filename=filename)
         for n, v in arg:
@@ -145,11 +148,27 @@ class TranscriptionEdit(AdhocView):
         ew.add_spin(_("Reaction time"), "delay", _("Reaction time (substracted from current player time)"), -5000, 5000)
         ew.add_checkbox(_("Auto-insert"), "autoinsert", _("Automatic timestamp mark insertion"))
         ew.add_spin(_("Automatic insertion delay"), 'automatic-mark-insertion-delay', _("If autoinsert is active, timestamp marks will be automatically inserted when text is entered after no interaction since this delay (in ms).\n1000 is typically a good value."), 0, 100000)
+        ew.add_spin(_("Font size"), "font-size", _("Font size for text (0 for standard size)"), 0, 48)
 
         res=ew.popup()
         if res:
+            if cache['font-size'] != self.options['font-size']:
+                # Font-size was changed. Update the textview.
+                self.update_font_size(cache['font-size'])
             self.options.update(cache)
         return True
+
+    def update_font_size(self, size=None):
+        if size is None:
+            size=self.options['font-size']
+        if size == 0:
+            # Get the default value from a temporary textview
+            t=gtk.TextView()
+            size=t.get_pango_context().get_font_description().get_size() / pango.SCALE
+            del t
+        f=self.textview.get_pango_context().get_font_description()
+        f.set_size(size * pango.SCALE)
+        self.textview.modify_font(f)
 
     def show_searchbox(self, *p):
         self.searchbox.show()
