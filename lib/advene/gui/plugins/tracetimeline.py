@@ -68,10 +68,14 @@ class TraceTimeline(AdhocView):
         if package is None and controller is not None:
             self.__package=controller.package
         self.drag_coordinates=None
-        self.canvas = None
+
+        # Header canvas
         self.head_canvas = None
+        # Main timeline canvas
+        self.canvas = None
+        # Contextualizing document canvas
         self.doc_canvas = None
-        self.toolbox = None
+
         self.tooltips = gtk.Tooltips()
         self.tooltips.enable()
         self.inspector = None
@@ -88,7 +92,6 @@ class TraceTimeline(AdhocView):
         self.autoscroll = True
         self.links_locked = False
         self.sw = None
-        self.swout = None
         self.cols={}
         self.tracer.register_view(self)
         for act in self.tracer.action_types:
@@ -103,22 +106,33 @@ class TraceTimeline(AdhocView):
         self.receive(self.tracer.trace)
 
     def build_widget(self):
-        bx = gtk.HPaned()
-        #mainbox = gtk.VPaned()
         mainbox = gtk.VBox()
+
+        toolbox = gtk.Toolbar()
+        toolbox.set_orientation(gtk.ORIENTATION_HORIZONTAL)
+        mainbox.pack_start(toolbox, expand=False)
+
+        bx = gtk.HPaned()
+        mainbox.pack_start(bx, expand=True)
+
+        timeline_box=gtk.VBox()
+        bx.pack1(timeline_box)
+        
         scrolled_win = gtk.ScrolledWindow ()
         self.sw = scrolled_win
         self.sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
+
         self.head_canvas = goocanvas.Canvas()
         c = len(self.cols)
         self.canvasX = c*(self.col_width+self.colspacing)
         self.head_canvas.set_bounds (0,0,self.canvasX,self.head_canvasY)
         self.head_canvas.set_size_request(-1, self.head_canvasY)
-        #mainbox.pack1(self.head_canvas, resize=False, shrink=True)
-        mainbox.pack_start(self.head_canvas, expand=False, fill=True)
+        timeline_box.pack_start(self.head_canvas, expand=False, fill=False)
+
         self.canvas = goocanvas.Canvas()
         self.canvas.set_bounds (0, 0,self.canvasX, self.canvasY)
         self.canvas.set_size_request(100, 25) # important to force a minimum size (else we could have problem with radius of objects < 0)
+
         self.doc_canvas = goocanvas.Canvas()
         self.doc_canvas.set_bounds(0,0, self.canvasX, self.doc_canvas_Y)
         self.doc_canvas.set_size_request(-1, self.doc_canvas_Y)
@@ -142,59 +156,36 @@ class TraceTimeline(AdhocView):
             #print alloc.width
         self.head_canvas.connect('size-allocate', canvas_resize)
         scrolled_win.add(self.canvas)
-        mainbox.pack_start(scrolled_win, expand=True, fill=True)
-        #mainbox.pack2(scrolled_win, resize=True, shrink=True)
-        #mainbox.set_position(25)
-        self.swout = gtk.ScrolledWindow ()
-        self.swout.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
-        self.swout.add_with_viewport(mainbox)
-        vbm = gtk.VPaned()
-        vbm.pack1(self.swout, resize=True, shrink=True)
-        vbm.pack2(self.doc_canvas, resize=False, shrink=True)
-        vbm.set_position(200) # max - self.doc_canvas_Y
-        bx.pack1(vbm, resize=True, shrink=True)
-        self.toolbox = gtk.Toolbar()
-        self.toolbox.set_orientation(gtk.ORIENTATION_VERTICAL)
+
+        timeline_box.add(scrolled_win)
+
+        mainbox.pack_start(self.doc_canvas, expand=False, fill=True)
+
         btnm = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
         btnm.set_tooltip(self.tooltips, _('Zoom out'))
         btnm.set_label('')
-        self.toolbox.insert(btnm, -1)
+        toolbox.insert(btnm, -1)
+
         btnp = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
         btnp.set_tooltip(self.tooltips, _('Zoom in'))
         btnp.set_label('')
-        self.toolbox.insert(btnp, -1)
-        bx.pack2(self.toolbox, resize=False, shrink=True)
+        toolbox.insert(btnp, -1)
+
         btnc = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_100)
         btnc.set_tooltip(self.tooltips, _('Zoom 100%'))
         btnc.set_label('')
-        self.toolbox.insert(btnc, -1)
+        toolbox.insert(btnc, -1)
         self.btnl = gtk.ToolButton()
         self.btnl.set_tooltip(self.tooltips, _('Toggle links lock'))
         #self.btnl.set_label(_('Unlocked'))
         img = gtk.Image()
         img.set_from_file(config.data.advenefile( ( 'pixmaps', 'unlocked.png') ))
         self.btnl.set_icon_widget(img)
-        self.toolbox.insert(self.btnl, -1)
+        toolbox.insert(self.btnl, -1)
         self.btnl.connect('clicked', self.toggle_lock)
-        #self.zoom_combobox=dialog.list_selector_widget(members=[
-        #        ( f, '%d%%' % long(100*f) )
-        #        for f in [
-        #            (1.0 / pow(1.5, n)) for n in range(0, 10)
-        #            ]
-        #        ],
-        #                                                        entry=True,
-        #                                                        callback=zoom_change)
-        #self.zoom_combobox.child.connect('activate', zoom_entry)
-        #self.zoom_combobox.child.set_width_chars(4)
-        #i=gtk.ToolItem()
-        #i.add(self.zoom_combobox)
-        #self.toolbox.insert(i, -1)
-        self.toolbox.insert(gtk.SeparatorToolItem(), -1)
+
         self.inspector = Inspector(self.controller)
-        i=gtk.ToolItem()
-        i.add(self.inspector)
-        self.toolbox.insert(i, -1)
-        self.toolbox.show_all()
+        bx.pack2(self.inspector)
         
         def on_background_scroll(widget, event):
             zoom=event.state & gtk.gdk.CONTROL_MASK
@@ -317,8 +308,7 @@ class TraceTimeline(AdhocView):
         btnc.connect('clicked', zoom_100)
         
         bx.set_position(self.canvasX+15)
-        return bx
-
+        return mainbox
 
     def zoom_on(self, w=None, canvas_item=None):
         min_y = -1
