@@ -11,6 +11,8 @@ advene (0.37) unstable; urgency=low
 
   * Fix Alt-space shortcut on MacOS X (bookmark insertion).
   
+  * Note taking view: font size can be specified from the preferences
+  
  --
 
 advene (0.36) unstable; urgency=low
