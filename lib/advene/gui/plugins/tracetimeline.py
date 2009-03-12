@@ -82,6 +82,7 @@ class TraceTimeline(AdhocView):
         self.btnl = None
         self.lasty=0
         self.canvasX = None
+        self.doc_canvas_X = 100
         self.canvasY = 1
         self.head_canvasY = 25
         self.doc_canvas_Y = 30
@@ -135,9 +136,9 @@ class TraceTimeline(AdhocView):
         self.canvas.set_size_request(100, 25) # important to force a minimum size (else we could have problem with radius of objects < 0)
 
         self.doc_canvas = goocanvas.Canvas()
-        self.doc_canvas.set_bounds(0,0, self.canvasX, self.doc_canvas_Y)
+        self.doc_canvas.set_bounds(0,0, self.doc_canvas_X, self.doc_canvas_Y)
         self.doc_canvas.set_size_request(-1, self.doc_canvas_Y)
-        self.docgroup = DocGroup(controller=self.controller, canvas=self.doc_canvas, name="Nom du film", x = 5, y=5, w=self.canvasX-10, fontsize=8, color_c=0x00000050)
+        self.docgroup = DocGroup(controller=self.controller, canvas=self.doc_canvas, name="Nom du film", x = 10, y=5, w=self.doc_canvas_X-20, h=self.doc_canvas_Y-10, fontsize=8, color_c=0x00000050)
         self.canvas.get_root_item().connect('button-press-event', self.canvas_clicked)
         def canvas_resize(w, alloc):
             self.canvasX = alloc.width-20.0
@@ -151,11 +152,19 @@ class TraceTimeline(AdhocView):
             va=scrolled_win.get_vadjustment()
             vc = (va.value + h/2.0) * self.timefactor
             self.refresh(action=None, center=vc)
-            #redraw doc_canvas
-            self.doc_canvas.set_bounds(0,0, self.canvasX, self.doc_canvas_Y)
-            self.redraw_doc_canvas()
             #print alloc.width
         self.head_canvas.connect('size-allocate', canvas_resize)
+        def doc_canvas_resize(w, alloc):
+            #redraw doc_canvas
+            self.doc_canvas_X = alloc.width
+            self.doc_canvas_Y = alloc.height
+            self.doc_canvas.set_bounds(0,0, self.doc_canvas_X, self.doc_canvas_Y)
+            self.docgroup.rect.remove()
+            self.docgroup.w = self.doc_canvas_X-20
+            self.docgroup.h = self.doc_canvas_Y-10
+            self.docgroup.rect = self.docgroup.newRect()
+            self.docgroup.redraw(self.tracer.trace)
+        self.doc_canvas.connect('size-allocate', doc_canvas_resize)
         scrolled_win.add(self.canvas)
 
         timeline_box.add(scrolled_win)
@@ -1084,29 +1093,36 @@ class Inspector (gtk.VBox):
         self.show_all()
 
 class DocGroup (Group):
-    def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00000050):
+    def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, h=20, fontsize=14, color_c=0x00000050):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.canvas=canvas
         self.name=name
         self.rect = None
         self.w = w
-        self.h = 20
+        self.h = h
+        self.x= x
+        self.y = y
         self.movielength = 1
         if self.controller.package.cached_duration>0:
             self.movielength = self.controller.package.cached_duration
         self.color_c = color_c
+        self.color_f = 0xFFFFFF00
+        self.lw = 1.0
         self.fontsize=fontsize
         self.lines=[]
         self.marks=[]
-        self.rect = goocanvas.Rect (parent = self,
-                                    x = x,
-                                    y = y,
+        self.rect = self.newRect()
+        
+    def newRect(self):
+        return goocanvas.Rect (parent = self,
+                                    x = self.x,
+                                    y = self.y,
                                     width = self.w,
                                     height = self.h,
-                                    fill_color_rgba = 0xFFFFFF00,
+                                    fill_color_rgba = self.color_f,
                                     stroke_color_rgba = self.color_c,
-                                    line_width = 1)
+                                    line_width = self.lw)
     
     def redraw(self, trace=None, action=None, obj=None):
         for l in self.lines:
