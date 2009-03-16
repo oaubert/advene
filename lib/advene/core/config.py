@@ -168,7 +168,7 @@ class Config(object):
                 # Movie files search path. _ is the
                 # current package path
                 'moviepath': '_',
-                'locale': '/usr/share/advene/locale',
+                'locale': '/usr/share/locale',
                 'shotdetect': 'shotdetect',
                 }
 
