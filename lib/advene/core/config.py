@@ -512,6 +512,19 @@ class Config(object):
         if len(h) > self.preferences['history-size-limit']:
             self.preferences['history']=h[-self.preferences['history-size-limit']:]
 
+        if not os.path.exists(self.path['shotdetect']):
+            if self.os == 'win32':
+                sdname='shotdetect.exe'
+            else:
+                sdname='shotdetect'
+            sd=find_in_path(sdname)
+            if sd is not None:
+                self.path['shotdetect']=sd
+            else:
+                sd=self.advenefile(sdname, 'resources')
+                if os.path.exists(sd):
+                    self.path['shotdetect']=sd
+
         return True
 
     def win32_specific_config(self):
@@ -825,18 +838,6 @@ class Config(object):
         data.path['locale']=os.path.sep.join( (maindir, 'locale') )
         data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
         data.path['advene']=maindir
-        if not os.path.exists(self.path['shotdetect']):
-            if self.os == 'win32':
-                sdname='shotdetect.exe'
-            else:
-                sdname='shotdetect'
-            sd=find_in_path(sdname)
-            if sd is not None:
-                self.path['shotdetect']=sd
-            else:
-                sd=self.advenefile(sdname, 'resources')
-                if os.path.exists(sd):
-                    self.path['shotdetect']=sd
         #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
 
 data = Config ()
