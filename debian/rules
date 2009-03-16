@@ -16,7 +16,10 @@ binary-indep: build install
 	dh_installmenu
 	dh_installexamples
 	dh_install --sourcedir $(install_dir)
+	# FIXME: Does not work:
 	dh_desktop
+	echo "update-desktop-database" >> debian/advene.postinst.debhelper
+	echo "update-desktop-database" >> debian/advene.postrm.debhelper
 	dh_fixperms
 	dh_pycentral
 	dh_compress -X.py
@@ -46,6 +49,7 @@ clean:
 	find . -name "*.pyc" | xargs rm -f
 	find . -name "*.pyo" | xargs rm -f
 	rm -rf $(build_dir) $(install_dir)
+	rm -rf build-python*
 	dh_clean
 
 .PHONY: binary binary-indep install build clean
