@@ -162,7 +162,7 @@ def generate_data_files():
         r.extend(generate_data_dir("locale", prefix=prefix))
     else:
         raise Exception("""**WARNING** You should generate the locales with "cd po; make mo".""")
-    if sys.platform == 'linux2':
+    if sys.platform.startswith('linux'):
         # Install specific data files
         r.append( ( 'share/applications', [ 'debian/advene.desktop' ] ) )
     return r
