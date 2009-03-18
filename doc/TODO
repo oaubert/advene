@@ -1,3 +1,6 @@
+* transcribe: when importing annotations, memorize the type so that it
+   is selected by default when exporting again.
+
 * gstreamer win32/mac:
 http://www.gstreamer-winbuild.ylatuya.es/doku.php
 http://bugzilla.songbirdnest.com/show_bug.cgi?id=8345
