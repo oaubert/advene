@@ -154,6 +154,7 @@ class DummyGlade:
         sw.set_policy (gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
         sw.set_size_request(-1, 40)
         self.logmessages=gtk.TextView()
+        self.logmessages.set_wrap_mode(gtk.WRAP_CHAR)
         sw.add(self.logmessages)
         self.vpaned.pack2(sw, resize=True, shrink=True)
 
