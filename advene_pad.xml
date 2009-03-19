@@ -37,9 +37,9 @@
     </Company_Info>
     <Program_Info>
       <Program_Name>Advene</Program_Name>
-      <Program_Version>0.36</Program_Version>
-      <Program_Release_Month>01</Program_Release_Month>
-      <Program_Release_Day>05</Program_Release_Day>
+      <Program_Version>0.38</Program_Version>
+      <Program_Release_Month>03</Program_Release_Month>
+      <Program_Release_Day>16</Program_Release_Day>
       <Program_Release_Year>2009</Program_Release_Year>
       <Program_Cost_Dollars>0</Program_Cost_Dollars>
       <Program_Cost_Other_Code></Program_Cost_Other_Code>
@@ -50,8 +50,8 @@
       <Program_OS_Support>Linux,Mac OS X,Windows2000,Windows2003,WinXP</Program_OS_Support>
       <Program_Language>English,Esperanto,French</Program_Language>
       <File_Info>
-        <File_Size_Bytes>38511957</File_Size_Bytes>
-	<File_Size_K>37609</File_Size_K>
+        <File_Size_Bytes>38527246</File_Size_Bytes>
+	<File_Size_K>37624</File_Size_K>
 	<File_Size_MB>36</File_Size_MB>
       </File_Info>
       <Expire_Info>
@@ -67,8 +67,19 @@
             <Keywords>Advene, Video, Annotation, View generation, templates</Keywords>
             <Char_Desc_45>Annotate Digital Videos, Exchange on the NEt</Char_Desc_45>
             <Char_Desc_80></Char_Desc_80>
-	    <Char_Desc_250></Char_Desc_250>
-	    <Char_Desc_450>Advene aims at providing a model and a format to share annotations about digital video documents as well as tools to edit and visualize the hypervideos generated from both the annotations and the audiovisual documents. Teachers, moviegoers, etc. can use them to exchange multimedia comments and analyses about video documents.</Char_Desc_450>
+	    <Char_Desc_250>The cross-platform Advene application allows users to easily
+		create comments and analyses of video comments, through the
+		definition of time-aligned annotations and their mobilisation
+		into automatically-generated or user-written comment views.</Char_Desc_250>
+	    <Char_Desc_450>
+	      The Advene application allows users to define
+	      time-aligned annotations which can be used to create
+	      comments and also modify the rendition of the
+	      audiovisual document, thus providing virtual montage,
+	      captioning, navigation... capabilities. Users can
+	      exchange their comments/analyses in the form of Advene
+	      packages, independently from the video itself.
+	    </Char_Desc_450>
             <Char_Desc_2000>Advene (Annotate Digital
                 Video, Exchange on the NEt) is an ongoing project in the LIRIS
                 laboratory (UMR 5205 CNRS) at University Claude Bernard Lyon 1. It
@@ -82,6 +93,16 @@
                 these self-publishing tools to share their audiovisual readings, and
                 to envision new editing and viewing interfaces for interactive comment
                 and analysis of audiovisual content.
+
+		The cross-platform Advene application allows users to easily
+		create comments and analyses of video comments, through the
+		definition of time-aligned annotations and their mobilisation
+		into automatically-generated or user-written comment views (HTML
+		documents). Annotations can also be used to modify the rendition
+		of the audiovisual document, thus providing virtual montage,
+		captioning, navigation... capabilities. Users can exchange their
+		comments/analyses in the form of Advene packages, independently from
+		the video itself.
             </Char_Desc_2000>
         </English>
     </Program_Descriptions>
@@ -89,12 +110,12 @@
       <Application_URLs>
         <Application_Info_URL>http://liris.cnrs.fr/advene/</Application_Info_URL>
 	<Application_Order_URL>http://liris.cnrs.fr/advene/download.html</Application_Order_URL>
-	<Application_Screenshot_URL>http://liris.cnrs.fr/advene/screenshots/advene-0.34.png</Application_Screenshot_URL>
-	<Application_Icon_URL>http://liris.cnrs.fr/advene/img/icon_advene34.png</Application_Icon_URL>
+	<Application_Screenshot_URL>http://liris.cnrs.fr/advene/screenshots/advene-0.38.png</Application_Screenshot_URL>
+	<Application_Icon_URL>http://liris.cnrs.fr/advene/img/icon_advene32.png</Application_Icon_URL>
 	<Application_XML_File_URL>http://liris.cnrs.fr/advene/advene_pad.xml</Application_XML_File_URL>
       </Application_URLs>
       <Download_URLs>
-        <Primary_Download_URL>http://download.gna.org/advene/win32/setup_advene_0.36_all_in_one_vlcsvn.exe</Primary_Download_URL>
+        <Primary_Download_URL>http://download.gna.org/advene/win32/setup_advene_0.38_all_in_one_vlc140108svn.exe</Primary_Download_URL>
 	<Secondary_Download_URL></Secondary_Download_URL>
 	<Additional_Download_URL_1></Additional_Download_URL_1>
 	<Additional_Download_URL_2></Additional_Download_URL_2>
