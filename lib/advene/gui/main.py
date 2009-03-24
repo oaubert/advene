@@ -2049,7 +2049,7 @@ class AdveneGUI(object):
                         'element': unicode(element),
                         'error': unicode(e)}).encode('latin1')
                 view=None
-            if view.widget.get_parent() is not None:
+            if view is not None and view.widget.get_parent() is not None:
                 # Widget is already displayed.
                 view=None
             label=_("Editing %s") % self.controller.get_title(element)
