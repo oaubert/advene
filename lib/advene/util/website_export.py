@@ -405,6 +405,46 @@ class YoutubeVideoPlayer(VideoPlayer):
     def __init__(self, destination, video_url):
         self.destination=destination
         self.video_url=video_url
+
+    @staticmethod
+    def can_handle(video_url):
+        """Static method indicating wether the class can handle the given video url.
+        """
+        return 'youtube.com/watch' in video_url
+
+    def player_url(self, t):
+        """Return the URL to play video at the given time.
+        """
+        # Format: HHhMMmSSs
+        return '%s#t=%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(long(t) / 1000)))
+
+    def fix_link(self, link):
+        """
+        """
+        if self.video_url in link:
+            return "target='video_player'", link
+        else:
+            return None, link
+
+    def transform_document(self, content):
+        """Transform the document if necessary.
+
+        This method is called at the end of the content generation. It
+        can be used to inject javascript code for instance.
+        """
+        return content
+
+    def finalize(self):
+        """Finalise the environment.
+        """
+        return
+
+class EmbeddedYoutubeVideoPlayer(VideoPlayer):
+    """Embedded Youtube video player support.
+    """
+    def __init__(self, destination, video_url):
+        self.destination=destination
+        self.video_url=video_url
         l=re.findall('youtube.com/.+v=([\w\d]+)', self.video_url)
         if l:
             self.video_id=l[0]
@@ -416,7 +456,8 @@ class YoutubeVideoPlayer(VideoPlayer):
     def can_handle(video_url):
         """Static method indicating wether the class can handle the given video url.
         """
-        return 'youtube' in video_url
+        # FIXME: deactivated class for now
+        return 'youtubeDEACTIVATED' in video_url
 
     def player_url(self, t):
         """Return the URL to play video at the given time.
