@@ -83,7 +83,7 @@ class WebsiteExporter(object):
         p=None
         # FIXME: module introspection here to get classes
         # Note that generic VideoPlayer is last, so that it will be the default if no other is found.
-        for cl in (GoogleVideoPlayer, VideoPlayer):
+        for cl in (GoogleVideoPlayer, YoutubeVideoPlayer, VideoPlayer):
             if cl.can_handle(video_url):
                 p=cl(self.destination, self.video_url)
                 break
