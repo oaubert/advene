@@ -111,9 +111,15 @@ class WebsiteExporter(object):
             return self.unconverted(url, 'max depth exceeded %d > %d' % (depth, self.max_depth))
 
         self.log("exporting %s (%d)" % (url, depth) )
-        m=re.search('(.+)#(.+)', url)
+        fragment=None
+        m=re.search('(.*)#(.+)', url)
         if m:
             url=m.group(1)
+            fragment=m.group(2)
+            if not url:
+                # Empty URL: we are addressing ourselves.
+                return '#'+fragment
+
         m=re.search('packages/(advene|%s)/(.*)' % self.controller.current_alias, url)
         if m:
             # Absolute url
@@ -206,6 +212,8 @@ class WebsiteExporter(object):
 
         # Replace all URL references.
         for link in re.findall(r'''href=['"](.+?)['"> ]''', content):
+            if link.startswith('#'):
+                continue
             tr=self.url_translation[link]
             if link != tr:
                 extra=[]
