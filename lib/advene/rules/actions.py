@@ -24,10 +24,6 @@ from gettext import gettext as _
 from advene.rules.elements import RegisteredAction, Condition
 from advene.model.tal.context import AdveneTalesException
 import advene.util.helper as helper
-import subprocess
-import signal
-import os
-from threading import Thread
 
 name="Default core actions"
 
@@ -322,9 +318,9 @@ class DefaultActionsRepository:
         self.controller=controller
         self.soundplayer=None
 
-    def init_soundplayer(self):
-        if self.soundplayer is None:
-            self.soundplayer=SoundPlayer()
+    @property
+    def soundplayer(self):
+        return self.controller.soundplayer
 
     def parse_parameter(self, context, parameters, name, default_value):
         if parameters.has_key(name):
@@ -664,8 +660,6 @@ class DefaultActionsRepository:
             # Get the resource
             d=self.controller.package.resources['soundclips']
             if clip in d:
-                if self.soundplayer is None:
-                    self.init_soundplayer()
                 self.soundplayer.play(d[clip].file_)
         return True
 
@@ -689,8 +683,6 @@ class DefaultActionsRepository:
         if filename is None:
             return True
         else:
-            if self.soundplayer is None:
-                self.init_soundplayer()
             self.soundplayer.play(filename)
         return True
 
@@ -728,82 +720,3 @@ class DefaultActionsRepository:
             s[n]=0
         return True
 
-class SoundPlayer:
-    def linux_play(self, fname):
-        """Play the given file. Requires aplay.
-        """
-        pid=subprocess.Popen( [ '/usr/bin/aplay', '-q', fname ] )
-        signal.signal(signal.SIGCHLD, self.handle_sigchld)
-        return True
-
-    def win32_play(self, fname):
-        #from winsound import PlaySound, SND_FILENAME, SND_ASYNC
-        #PlaySound(fname, SND_FILENAME|SND_ASYNC)
-        #spt = SpThread(fname)
-        #spt.setDaemon(True)
-        #spt.start()
-        pathsp = os.path.sep.join((config.data.path['advene'],'pySoundPlayer.exe'))
-        if not os.path.exists(pathsp):
-            pathsp = os.path.sep.join((config.data.path['advene'],'Win32SoundPlayer','pySoundPlayer.exe'))
-        if os.path.exists(pathsp):
-            pid=subprocess.Popen( [ pathsp, fname ] )
-            #no SIGCHLD handler for win32
-        return True
-
-    def macosx_play(self, fname):
-        """Play the given file.
-
-        Cf
-        http://developer.apple.com/documentation/Cocoa/Reference/ApplicationKit/Classes/NSSound_Class/Reference/Reference.html
-        """
-        import objc
-        import AppKit
-        sound = AppKit.NSSound.alloc().initWithContentsOfFile_byReference_(fname, True)
-        sound.play()
-        return True
-
-    def handle_sigchld(self, sig, frame):
-        os.waitpid(-1, os.WNOHANG)
-        return True
-
-    if config.data.os == 'win32':
-        play=win32_play
-    elif config.data.os == 'darwin':
-        play=macosx_play
-    else:
-        if not os.path.exists('/usr/bin/aplay'):
-            print "Error: aplay is not installed. Advene will be unable to play sounds."
-        play=linux_play
-
-class SpThread(Thread):
-    def __init__(self,name):
-        Thread.__init__(self)
-        self.fname = name
-    def run(self):
-        import pymedia.muxer as muxer, pymedia.audio.acodec as acodec, pymedia.audio.sound as sound
-        import time
-        dm= muxer.Demuxer( str.split( self.fname, '.' )[ -1 ].lower() )
-        snds= sound.getODevices()
-        f= open( self.fname, 'rb' )
-        snd= dec= None
-        s= f.read( 32000 )
-        card=0
-        rate=1
-        t= 0
-        while len( s ):
-            frames= dm.parse( s )
-            if frames:
-                for fr in frames:
-                    if dec== None:
-                        print dm.getHeaderInfo(), dm.streams
-                        dec= acodec.Decoder( dm.streams[ fr[ 0 ] ] )
-                    r= dec.decode( fr[ 1 ] )
-                    if r and r.data:
-                        if snd== None:
-                            print 'Opening sound %s with %d channels -> %s' % ( self.fname, r.channels, snds[ card ][ 'name' ] )
-                            snd= sound.Output( int( r.sample_rate* rate ), r.channels, sound.AFMT_S16_LE, card )
-                        data= r.data
-                        snd.play( data )
-            s= f.read( 512 )
-        while snd.isPlaying():
-            time.sleep( .05 )

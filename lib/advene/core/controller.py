@@ -73,6 +73,7 @@ import advene.model.tal.context
 import advene.util.helper as helper
 import advene.util.importer
 import advene.util.ElementTree as ET
+from advene.util.audio import SoundPlayer
 
 from simpletal import simpleTAL, simpleTALES
 
@@ -176,6 +177,8 @@ class AdveneController(object):
         self.current_stbv = None
 
         self.package = None
+
+        self._soundplayer=None
 
         self.playerfactory=PlayerFactory()
         self.player = self.playerfactory.get_player()
@@ -692,6 +695,12 @@ class AdveneController(object):
         f.close()
         self.log(_("Cannot start the webserver\nThe following processes seem to use the %(port)s port: %(processes)s") % { 'port': pat,
                                                                                                                            'processes':  processes})
+
+    @property
+    def soundplayer(self):
+        if self._soundplayer is None:
+            self._soundplayer=SoundPlayer()
+        return self._soundplayer
 
     def init(self, args=None):
         """Initialize the controller.
