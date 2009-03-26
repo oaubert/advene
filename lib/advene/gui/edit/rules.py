@@ -761,6 +761,7 @@ class EditCondition(EditGeneric):
                 ('annotation/fragment', _('The annotation fragment') ),
                 ('annotation/fragment/begin', _('The annotation begin time') ),
                 ('annotation/fragment/end', _('The annotation end time') ),
+                ('annotation/content/data', _('The annotation content') ),
                 ('annotation/fragment/duration', _('The annotation duration') ),
                 ('annotation/type/id', _('The id of the annotation type') ),
                 ('annotation/content/mimetype', _('The annotation MIME-type') ),
