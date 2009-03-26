@@ -595,6 +595,12 @@ class Menu:
     def make_resourcedata_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        def play_sound(w, filename):
+            self.controller.soundplayer.play(filename)
+            return True
+        if element.id.split('.')[-1] in ('wav', 'ogg', 'mp3'):
+            # Audio resource (presumably). Propose to play it.
+            add_item(_('Play sound'), play_sound, element.file_)
         if self.readonly:
             return
         return
