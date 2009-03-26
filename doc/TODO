@@ -1,3 +1,5 @@
+* investigate pitivi thumbnailing code
+
 * transcribe: when importing annotations, memorize the type so that it
    is selected by default when exporting again.
 
