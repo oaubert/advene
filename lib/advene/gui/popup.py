@@ -155,6 +155,25 @@ class Menu:
         self.do_insert_resource_file(parent=parent, filename=filename, id_=id_)
         return True
 
+    def insert_soundclip(self, widget, parent=None):
+        filename=dialog.get_filename(title=_("Choose the soundclip to insert"), filter='audio')
+        if filename is None:
+            return True
+        basename = os.path.basename(filename)
+        id_=re.sub('[^a-zA-Z0-9_.]', '_', basename)
+        if id_ != basename:
+            while True:
+                id_ = dialog.entry_dialog(title=_("Select a valid identifier"),
+                                                   text=_("The filename %s contains invalid characters\nthat have been replaced.\nYou can modify this identifier if necessary:") % filename,
+                                                   default=id_)
+                if id_ is None:
+                    # Edition cancelled
+                    return True
+                elif re.match('^[a-zA-Z0-9_.]+$', id_):
+                    break
+        self.do_insert_resource_file(parent=parent, filename=filename, id_=id_)
+        return True
+
     def insert_resource_directory(self, widget, parent=None):
         dirname=dialog.get_dirname(title=_("Choose the directory to insert"))
         if dirname is None:
@@ -561,6 +580,16 @@ class Menu:
         add_item(_('Create a new resource file...'), self.create_element, ResourceData, element)
         add_item(_('Insert a new resource file...'), self.insert_resource_data, element)
         add_item(_('Insert a new resource directory...'), self.insert_resource_directory, element)
+        print "Menu for", id(element), id(self.controller.package.resources), element.id
+
+        if element.resourcepath == '':
+            # Resources root
+            if not element.has_key('soundclips'):
+                # Create the soundclips folder
+                element['soundclips'] = element.DIRECTORY_TYPE
+            add_item(_('Insert a soundclip...'), self.insert_soundclip, element['soundclips'])
+        elif element.resourcepath == 'soundclips':
+            add_item(_('Insert a soundclip...'), self.insert_soundclip, element)
         return
 
     def make_resourcedata_menu(self, element, menu):
