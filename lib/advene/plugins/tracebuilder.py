@@ -224,6 +224,7 @@ class TraceBuilder:
         return True
 
     def receive(self, obj):
+        print obj
         # obj : received event
         ev = op = ac = None
         ev = self.packEvent(obj)
@@ -242,7 +243,8 @@ class TraceBuilder:
         # wich could then be used in a more general way by the receiver
 
     def packEvent(self, obj):
-        self.controller.update_snapshot(self.controller.player.current_position_value)
+        if obj['event_name'] != 'SnapshotUpdate':
+            self.controller.update_snapshot(self.controller.player.current_position_value)
         #ev_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
         ev_time = time.time()
         ev_activity_time = (time.time() - config.data.startup_time) * 1000
@@ -281,6 +283,8 @@ class TraceBuilder:
                     ( 'annotation=' + elem.id,
                       'type=' + elem.type.id,
                       'mimetype=' + elem.type.mimetype,
+                      'begin=' + str(elem.fragment.begin),
+                      'end=' + str(elem.fragment.end),
                       'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
                             )
                 elem_name='annotation'
@@ -400,6 +404,8 @@ class TraceBuilder:
                     ( 'annotation=' + elem.id,
                       'type=' + elem.type.id,
                       'mimetype=' + elem.type.mimetype,
+                      'begin=' + str(elem.fragment.begin),
+                      'end=' + str(elem.fragment.end),
                       'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
                             )
                 elem_name='annotation'
