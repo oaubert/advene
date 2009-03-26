@@ -25,6 +25,7 @@ This widget allows to present event history in a timeline view.
 import gtk
 import time
 from gettext import gettext as _
+from advene.model.fragment import MillisecondFragment
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
@@ -85,7 +86,7 @@ class TraceTimeline(AdhocView):
         self.doc_canvas_X = 100
         self.canvasY = 1
         self.head_canvasY = 25
-        self.doc_canvas_Y = 30
+        self.doc_canvas_Y = 45
         self.docgroup = None
         self.obj_l = 5
         self.incr = 500
@@ -138,7 +139,7 @@ class TraceTimeline(AdhocView):
         self.doc_canvas = goocanvas.Canvas()
         self.doc_canvas.set_bounds(0,0, self.doc_canvas_X, self.doc_canvas_Y)
         self.doc_canvas.set_size_request(-1, self.doc_canvas_Y)
-        self.docgroup = DocGroup(controller=self.controller, canvas=self.doc_canvas, name="Nom du film", x = 10, y=5, w=self.doc_canvas_X-20, h=self.doc_canvas_Y-10, fontsize=8, color_c=0x00000050)
+        self.docgroup = DocGroup(controller=self.controller, canvas=self.doc_canvas, name="Nom du film", x = 15, y=10, w=self.doc_canvas_X-30, h=self.doc_canvas_Y-25, fontsize=8, color_c=0x00000050)
         self.canvas.get_root_item().connect('button-press-event', self.canvas_clicked)
         def canvas_resize(w, alloc):
             self.canvasX = alloc.width-20.0
@@ -160,14 +161,16 @@ class TraceTimeline(AdhocView):
             self.doc_canvas_Y = alloc.height
             self.doc_canvas.set_bounds(0,0, self.doc_canvas_X, self.doc_canvas_Y)
             self.docgroup.rect.remove()
-            self.docgroup.w = self.doc_canvas_X-20
-            self.docgroup.h = self.doc_canvas_Y-10
+            self.docgroup.w = self.doc_canvas_X-30
+            self.docgroup.h = self.doc_canvas_Y-25
             self.docgroup.rect = self.docgroup.newRect()
             self.docgroup.redraw(self.tracer.trace)
         self.doc_canvas.connect('size-allocate', doc_canvas_resize)
         scrolled_win.add(self.canvas)
 
         timeline_box.add(scrolled_win)
+
+        mainbox.pack_start(gtk.HSeparator(), expand=False, fill=False)
 
         mainbox.pack_start(self.doc_canvas, expand=False, fill=True)
 
@@ -354,9 +357,53 @@ class TraceTimeline(AdhocView):
         self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
         self.refresh(center = vc)
 
-    def redraw_doc_canvas(self):
+    def recreate_item(self, w=None, obj_group=None):
+        c = obj_group.opes[-1].content
+        if obj_group.type == Annotation:
+            # t : obj_group.name
+            # b : content a parse
+            # d pareil
+            t=None
+            b=d=0
+            t = self.controller.package.get_element_by_id(obj_group.name)
+            if t is None or not isinstance(t, AnnotationType):
+                print "No corresponding type, creation aborted"
+                return
+            a = int(c.find("begin=")+6)
+            aa = int(c.find("\n", a))
+            b = long(c[a:aa])
+            a = int(c.find("end=")+4)
+            aa = int(c.find("\n", a))
+            e = long(c[a:aa])
+            d = e-b
+            a = int(c.find("content=")+9)
+            aa = len(c)-1
+            cont = c[a:aa]
+            an = self.controller.package.createAnnotation(
+                ident=obj_group.id,
+                type=t,
+                author=config.data.userid,
+                date=self.controller.get_timestamp(),
+                fragment=MillisecondFragment(begin=b,
+                                             duration=d))
+            an.content.data = cont
+            self.controller.package.annotations.append(an)
+            self.controller.notify("AnnotationCreate", annotation=an, comment="Recreated from Trace")
+        
         return
-
+    
+    def edit_item(self, w=None, obj=None):
+        if obj is not None:
+            self.controller.gui.edit_element(obj)
+        
+    def goto(self, w=None, time=None):
+        c=self.controller
+        pos = c.create_position (value=time,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+        c.update_status (status="set", position=pos)
+        return
+        
     def canvas_clicked(self, w, t, ev):
         obj_gp = None
         evt_gp = None
@@ -377,6 +424,27 @@ class TraceTimeline(AdhocView):
                 i=gtk.MenuItem(_("Zoom and center on linked items"))
                 i.connect("activate", self.zoom_on, obj_gp)
                 menu.append(i)
+                obj = self.controller.package.get_element_by_id(obj_gp.id)
+                if obj is not None:
+                    i=gtk.MenuItem(_("Edit item"))
+                    i.connect("activate", self.edit_item, obj)
+                    menu.append(i)
+                else:
+                    i=gtk.MenuItem(_("Recreate item"))
+                    i.connect("activate", self.recreate_item, obj_gp)
+                    menu.append(i)
+                m = gtk.Menu()
+                mt= []
+                for op in obj_gp.opes:
+                    if op.movietime not in mt:
+                        mt.append(op.movietime)
+                for t in mt:
+                    i = gtk.MenuItem("%s (%s)" % (time.strftime("%H:%M:%S", time.gmtime(t/1000)), op.name))
+                    i.connect("activate", self.goto, t)
+                    m.append(i)
+                i=gtk.MenuItem(_("Go to..."))
+                i.set_submenu(m)
+                menu.append(i)
             if evt_gp is not None:
                 i=gtk.MenuItem(_("Zoom on action"))
                 i.connect("activate", self.zoom_on, evt_gp)
@@ -384,27 +452,7 @@ class TraceTimeline(AdhocView):
             menu.show_all()
             menu.popup(None, None, None, ev.button, ev.time)
         elif ev.button == 1:
-            #clic gauche sur un item : lock
-            #if obj_gp is None:
-            #    return
             self.toggle_lock()
-        #if obj_gp is not None:
-            #self.inspector_id.set_text(obj_gp.id)
-            #self.inspector_name.set_text(obj_gp.name)
-            #if obj_gp.type is not None:
-            #    self.inspector_type.set_text(obj_gp.type.getLocalName())
-            #else:
-            #    self.inspector_type.set_text('None')
-            #vider les fils de self.inspector_opes
-            #for c in self.inspector_opes.get_children():
-            #    self.inspector_opes.remove(c)
-            #for o in obj_gp.opes:
-            #    self.inspector_opes.pack_start(gtk.Label("%s:\n   %s\n   (%s)" % (o.time, o.name, o.content)))
-            #self.inspector.show_all()
-        #temp_str = "%s (%s) : %s\n" % (self.name, self.id, self.type)
-        #for o in self.opes:
-        #    temp_str += "%s: %s (%s)\n" % (o.time, o.name, o.content)
-        #print temp_str
 
 
     def toggle_lock(self, w=None):
@@ -472,14 +520,6 @@ class TraceTimeline(AdhocView):
                         fill_color_rgba=0x121212FF,
                         anchor = gtk.ANCHOR_E,
                         font = "Sans 7")
-            #goocanvas.Text(parent = self.canvas.get_root_item(),
-            #           text = time.strftime("%H:%M:%S",time.gmtime(t*self.timefactor)/1000),
-            #           x = self.canvasX/2,
-            #           y = t-5,
-            #           width = -1,
-            #           fill_color_rgba=0x23456788,
-            #           anchor = gtk.ANCHOR_CENTER,
-            #           font = "Sans 8")
             t += tinc
         return
 
@@ -811,15 +851,6 @@ class EventGroup (Group):
         self.dg.changeMarks()
         return
 
-    #def on_click(self, w, target, ev):
-        #print "%s %s %s" % (w, target, ev.button)
-    #    if ev.button == 1:
-    #        return
-    #    if ev.button == 3:
-            #recenter on links
-    #        pass
-    #    return
-
     def clean_inspector(self):
         self.inspector.clean()
 
@@ -839,12 +870,11 @@ class ObjGroup (Group):
         self.color_sel = 0xD9D919FF
         self.color_f = 0xADEAEAFF
         self.color_s = "black"
-        #self.fontsize = fontsize
         self.fontsize = 5
         self.poids = pds
         self.id = obj_id
         self.name = obj_name # name is the name of the type ...
-        self.type = obj_type #the type object
+        self.type = obj_type #the type of the object
         self.opes = obj_opes
         self.x = x
         self.y = y
@@ -858,16 +888,13 @@ class ObjGroup (Group):
         'enter-notify-event':None,
         'leave-notify-event':None,
         }
-        #self.connect('button-press-event', self.on_click)
         self.handler_ids['enter-notify-event'] = self.connect('enter-notify-event', self.on_mouse_over)
         self.handler_ids['leave-notify-event'] = self.connect('leave-notify-event', self.on_mouse_leave)
 
     def on_mouse_over(self, w, target, event):
-        #print '1 %s %s %s %s' % self.canvas.get_bounds()
         self.toggle_rels()
         self.fill_inspector()
         self.dg.changeMarks(obj=self)
-        #print '2 %s %s %s %s' % self.canvas.get_bounds()
         return
 
     def on_mouse_leave(self, w, target, event):
@@ -968,6 +995,7 @@ class ObjGroup (Group):
                         line_width=1.0)
 
     def newText(self):
+        print "type %s" % self.type
         txt = 'U'
         if self.type is None:
             # need to test if we can find the type in an other way, use of type() is not a good thing
@@ -1093,7 +1121,7 @@ class Inspector (gtk.VBox):
         self.show_all()
 
 class DocGroup (Group):
-    def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, h=20, fontsize=14, color_c=0x00000050):
+    def __init__(self, controller=None, canvas=None, name="N/A", x =10, y=10, w=80, h=20, fontsize=14, color_c=0x00000050):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.canvas=canvas
@@ -1113,6 +1141,8 @@ class DocGroup (Group):
         self.lines=[]
         self.marks=[]
         self.rect = self.newRect()
+        self.timemarks=[]
+        self.connect('button-press-event', self.docgroup_clicked)
 
     def newRect(self):
         return goocanvas.Rect (parent = self,
@@ -1124,6 +1154,73 @@ class DocGroup (Group):
                                     stroke_color_rgba = self.color_c,
                                     line_width = self.lw)
 
+    def drawtimemarks(self):
+        nbmax = self.w / 10
+        if nbmax > 3:
+            nbmax = 3
+        #timestamp 0
+        self.timemarks.append(goocanvas.Text (parent = self,
+                                text = time.strftime("%H:%M:%S", time.gmtime(0)),
+                                x = self.x,
+                                y = self.y+self.h+7,
+                                fill_color = self.color_c,
+                                width = -1,
+                                anchor = gtk.ANCHOR_CENTER,
+                                font = "Sans 6"))
+        p = goocanvas.Points ([(self.x, self.y+self.h), (self.x, self.y+self.h+2)])
+        self.timemarks.append(goocanvas.Polyline (parent = self,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color_rgba = self.color_c,
+                                        line_width = 1.0,
+                                        start_arrow = False,
+                                        end_arrow = False
+                                        ))
+        #timestamp fin
+        self.timemarks.append(goocanvas.Text (parent = self,
+                                text = time.strftime("%H:%M:%S", time.gmtime(self.movielength/1000)),
+                                x = self.x+self.w,
+                                y = self.y+self.h+7,
+                                fill_color = self.color_c,
+                                width = -1,
+                                anchor = gtk.ANCHOR_CENTER,
+                                font = "Sans 6"))
+        p = goocanvas.Points ([(self.x+self.w, self.y+self.h), (self.x+self.w, self.y+self.h+2)])
+        self.timemarks.append(goocanvas.Polyline (parent = self,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color_rgba = self.color_c,
+                                        line_width = 1.0,
+                                        start_arrow = False,
+                                        end_arrow = False
+                                        ))
+        if nbmax <=0:
+            return
+        sec = self.movielength / 1000
+        if sec < nbmax:
+            return
+        #1-3 timestamps intermediaires
+        for i in range(0, nbmax+1):
+            rap = 1.0 * i / (nbmax+1)
+            self.timemarks.append(goocanvas.Text (parent = self,
+                                text = time.strftime("%H:%M:%S", time.gmtime(sec * rap)),
+                                x = self.x + self.w * rap,
+                                y = self.y+self.h+7,
+                                fill_color = self.color_c,
+                                width = -1,
+                                anchor = gtk.ANCHOR_CENTER,
+                                font = "Sans 6"))
+            p = goocanvas.Points ([(self.x + self.w * rap, self.y+self.h), (self.x + self.w * rap, self.y+self.h+2)])
+            self.timemarks.append(goocanvas.Polyline (parent = self,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color_rgba = self.color_c,
+                                        line_width = 1.0,
+                                        start_arrow = False,
+                                        end_arrow = False
+                                        ))
+        
+
     def redraw(self, trace=None, action=None, obj=None):
         for l in self.lines:
             l.remove()
@@ -1131,6 +1228,10 @@ class DocGroup (Group):
         for m in self.marks:
             m.remove()
         self.marks=[]
+        for t in self.timemarks:
+            t.remove()
+        self.timemarks=[]
+        self.drawtimemarks()
         if 'actions' not in trace.levels.keys():
             return
         for a in trace.levels['actions']:
@@ -1175,6 +1276,7 @@ class DocGroup (Group):
         elif self.controller.package.cached_duration>0:
             self.movielength=self.controller.package.cached_duration
         self.redraw(trace)
+        
 
     def addLine(self, time=0, color=0x00000050, offset=0):
         # to be removed
@@ -1194,3 +1296,11 @@ class DocGroup (Group):
                                         end_arrow = False
                                         )
         self.lines.append(l)
+
+    def docgroup_clicked(self, w, t, ev):
+        if ev.button == 1:
+            c=self.controller
+            pos = c.create_position (value=self.movielength * (ev.x-self.x)/self.w,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)
