@@ -3863,6 +3863,7 @@ class AdveneGUI(object):
             return True
 
         def do_conversion(b):
+            b.set_sensitive(False)
             d=dirname_entry.get_text()
             if not d:
                 return False
