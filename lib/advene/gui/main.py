@@ -3819,6 +3819,9 @@ class AdveneGUI(object):
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Output directory")), expand=False)
         dirname_entry=gtk.Entry()
+        d=self.controller.package.getMetaData(config.data.namespace, 'website-export-directory')
+        if d is not None:
+            dirname.set_text(d)
         hb.add(dirname_entry)
 
         d=gtk.Button(stock=gtk.STOCK_OPEN)
@@ -3842,6 +3845,9 @@ class AdveneGUI(object):
         hb.pack_start(gtk.Label(_("Video URL")), expand=False)
         video_entry=gtk.Entry()
         self.tooltips.set_tip(video_entry, _("URL for the video, if it is available on a sharing website.\nGoogleVideo only for the moment"))
+        u=self.controller.package.getMetaData(config.data.namespace, 'website-export-video-url')
+        if u is not None:
+            video_entry.set_text(u)
         hb.add(video_entry)
         v.pack_start(hb, expand=False)
 
@@ -3860,7 +3866,10 @@ class AdveneGUI(object):
             d=dirname_entry.get_text()
             if not d:
                 return False
+            self.controller.package.setMetaData(config.data.namespace, 'website-export-directory', d)
             video=video_entry.get_text()
+            if video:
+                self.controller.package.setMetaData(config.data.namespace, 'website-export-video-url', video)
             b.set_sensitive(False)
             self.controller.website_export(destination=d,
                                            max_depth=max_depth.get_value_as_int(),
