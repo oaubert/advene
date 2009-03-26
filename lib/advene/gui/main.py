@@ -3821,7 +3821,7 @@ class AdveneGUI(object):
         dirname_entry=gtk.Entry()
         d=self.controller.package.getMetaData(config.data.namespace, 'website-export-directory')
         if d is not None:
-            dirname.set_text(d)
+            dirname_entry.set_text(d)
         hb.add(dirname_entry)
 
         d=gtk.Button(stock=gtk.STOCK_OPEN)
