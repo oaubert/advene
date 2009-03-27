@@ -1,8 +1,5 @@
 * investigate pitivi thumbnailing code
 
-* transcribe: when importing annotations, memorize the type so that it
-   is selected by default when exporting again.
-
 * gstreamer win32/mac:
 http://www.gstreamer-winbuild.ylatuya.es/doku.php
 http://bugzilla.songbirdnest.com/show_bug.cgi?id=8345
@@ -23,8 +20,6 @@ http://www.opencastproject.org/wiki/Project_Pad_Audio_and_Video_Annotation_Tools
 * http://www.appscio.org/
 The Appscio Media Processing Framework (MPF) is built on top of
    gstreamer and is designed to handle metadata.
-
-* phpBB antispam: http://bbantispam.com/howto/
 
 * use python-webkit for gui.views.html
 
