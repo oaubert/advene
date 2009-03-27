@@ -224,7 +224,6 @@ class TraceBuilder:
         return True
 
     def receive(self, obj):
-        print obj
         # obj : received event
         ev = op = ac = None
         ev = self.packEvent(obj)
