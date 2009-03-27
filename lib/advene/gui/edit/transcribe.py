@@ -90,6 +90,10 @@ class TranscriptionEdit(AdhocView):
         self.sourcefile=None
         self.empty_re = re.compile('^\s*$')
 
+        # When importing existing annotations, memorize their type so
+        # that we can propose it by default when exporting again.
+        self.imported_type=None
+
         self.options = {
             'timestamp': True, # _("If checked, click inserts timestamp marks"))
             'play-on-scroll': False,
@@ -943,6 +947,8 @@ class TranscriptionEdit(AdhocView):
         if at is None:
             return True
 
+        self.imported_type=at
+
         if not self.buffer_is_empty():
             if not dialog.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
                                                   icon=gtk.MESSAGE_QUESTION):
@@ -1005,6 +1011,7 @@ class TranscriptionEdit(AdhocView):
             return True
 
         type_selection=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a), self.controller.get_element_color(a)) for a in ats],
+                                                   preselect=self.imported_type,
                                                    callback=handle_new_type_selection)
 
         hb=gtk.HBox()
