@@ -318,10 +318,6 @@ class DefaultActionsRepository:
         self.controller=controller
         self.soundplayer=None
 
-    @property
-    def soundplayer(self):
-        return self.controller.soundplayer
-
     def parse_parameter(self, context, parameters, name, default_value):
         if parameters.has_key(name):
             try:
@@ -660,7 +656,7 @@ class DefaultActionsRepository:
             # Get the resource
             d=self.controller.package.resources['soundclips']
             if clip in d:
-                self.soundplayer.play(d[clip].file_)
+                self.controller.soundplayer.play(d[clip].file_)
         return True
 
     def PlaySoundClip_predefined(self, controller):
@@ -683,7 +679,7 @@ class DefaultActionsRepository:
         if filename is None:
             return True
         else:
-            self.soundplayer.play(filename)
+            self.controller.soundplayer.play(filename)
         return True
 
     def SetState(self, context, parameters):
