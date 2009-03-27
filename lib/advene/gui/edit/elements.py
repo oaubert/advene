@@ -115,6 +115,13 @@ class EditElementPopup (AdhocView):
         """Create an edit window for the given element."""
         super(EditElementPopup, self).__init__(controller=controller)
         self.element = el
+        # Override the class property with the element type, so that
+        # init_window_size can discriminate against different types
+        if isinstance(el, View):
+            t=helper.get_view_type(el)
+        else:
+            t=el.__class__.__name__
+        self.view_id="-".join( (EditElementPopup.view_id, t) )
         self.vbox = gtk.VBox ()
         self.vbox.connect('key-press-event', self.key_pressed_cb)
         self.editable=editable
