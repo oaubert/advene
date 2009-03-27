@@ -3498,7 +3498,7 @@ class AdveneGUI(object):
                 _("is done automatically"): 'always',
                 _("is done after confirmation"): 'ask',
                 })
-        ew.add_spin(_("Auto-save interval"), 'package-auto-save-interval', _("Interval (in seconds) between package auto-saves"), 5, 60 * 60)
+        ew.add_spin(_("Auto-save interval (in s)"), 'package-auto-save-interval', _("Interval (in seconds) between package auto-saves"), 5, 60 * 60)
 
         ew.add_title(_("GUI"))
         ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"),
