@@ -354,7 +354,7 @@ class TraceTimeline(AdhocView):
             min_y = canvas_item.rect.get_bounds().y1
             max_y = canvas_item.rect.get_bounds().y2
         elif hasattr(canvas_item, 'rep'):
-            obj_id = canvas_item.id
+            obj_id = canvas_item.cobj['id']
             i=0
             root = self.canvas.get_root_item()
             while i < root.get_n_children():
@@ -451,8 +451,11 @@ class TraceTimeline(AdhocView):
                 i=gtk.MenuItem(_("Zoom and center on linked items"))
                 i.connect("activate", self.zoom_on, obj_gp)
                 menu.append(i)
-                obj = self.controller.package.get_element_by_id(obj_gp.cobj['id'])
-                objt = self.controller.package.get_element_by_id(obj_gp.cobj['cid'])
+                obj = objt = None
+                if obj_gp.cobj['id'] is not None:   
+                    obj = self.controller.package.get_element_by_id(obj_gp.cobj['id'])
+                if obj_gp.cobj['cid'] is not None:      
+                    objt = self.controller.package.get_element_by_id(obj_gp.cobj['cid'])
                 if obj is not None:
                     i=gtk.MenuItem(_("Edit item"))
                     i.connect("activate", self.edit_item, obj)
@@ -1114,9 +1117,12 @@ class Inspector (gtk.VBox):
         self.clean()
 
     def fillWithItem(self, item):
-        self.inspector_id.set_text(item.cobj['id'])
-        self.inspector_name.set_text(item.cobj['cid'])
-        self.inspector_type.set_text(item.cobj['name'])
+        if item.cobj['id'] is not None:
+            self.inspector_id.set_text(item.cobj['id'])
+        if item.cobj['cid'] is not None:
+            self.inspector_name.set_text(item.cobj['cid'])
+        if item.cobj['name'] is not None:
+            self.inspector_type.set_text(item.cobj['name'])
 
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
