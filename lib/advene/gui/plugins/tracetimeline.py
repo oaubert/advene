@@ -129,7 +129,7 @@ class TraceTimeline(AdhocView):
         mainbox.pack_start(bx, expand=True)
 
         timeline_box=gtk.VBox()
-        bx.pack1(timeline_box)
+        bx.pack1(timeline_box, resize=False, shrink=False)
 
         scrolled_win = gtk.ScrolledWindow ()
         self.sw = scrolled_win
@@ -144,7 +144,7 @@ class TraceTimeline(AdhocView):
 
         self.canvas = goocanvas.Canvas()
         self.canvas.set_bounds (0, 0,self.canvasX, self.canvasY)
-        self.canvas.set_size_request(100, 25) # important to force a minimum size (else we could have problem with radius of objects < 0)
+        self.canvas.set_size_request(200, 25) # important to force a minimum size (else we could have problem with radius of objects < 0)
 
         self.doc_canvas = goocanvas.Canvas()
         self.doc_canvas.set_bounds(0,0, self.doc_canvas_X, self.doc_canvas_Y)
@@ -211,6 +211,11 @@ class TraceTimeline(AdhocView):
         self.btnlm.set_tooltip(self.tooltips, _('Toggle link mode'))
         toolbox.insert(self.btnlm, -1)
         self.btnlm.connect('clicked', self.toggle_link_mode)
+        #btn to export trace
+        btne = gtk.ToolButton(label='Export')
+        btne.set_tooltip(self.tooltips, _('Export trace'))
+        toolbox.insert(btne, -1)
+        btne.connect('clicked', self.export)
         
         self.inspector = Inspector(self.controller)
         bx.pack2(self.inspector)
@@ -337,6 +342,24 @@ class TraceTimeline(AdhocView):
 
         bx.set_position(self.canvasX+15)
         return mainbox
+
+    def export(self, w):
+        fname = self.tracer.export()
+        d = gtk.Dialog(title=_("Exporting traces"),
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK
+                                 ))
+        l=gtk.Label(_("Export done to\n%s") % fname)
+        l.set_selectable(True)
+        l.set_line_wrap(True)
+        l.show()
+        d.vbox.pack_start(l, expand=False)
+        d.vbox.show_all()
+        d.show()
+        res=d.run()
+        d.destroy()
+        return
 
     def toggle_link_mode(self, w):
         if self.link_mode == 0:
@@ -1158,6 +1181,7 @@ class Inspector (gtk.VBox):
             l = gtk.Label("%s:\n%s" % (time.strftime("%H:%M:%S", time.localtime(o.time)), n))
             self.inspector_opes.pack_start(l)
             l.set_alignment(0, 0.5)
+            l.set_line_wrap(True)
             self.tooltips.set_tip(l, o.content)
             #FIXME : need to check available space
             if nb == 12:
@@ -1182,6 +1206,7 @@ class Inspector (gtk.VBox):
             l = gtk.Label("%s:\n%s" % (time.strftime("%H:%M:%S", time.localtime(o.time)), n))
             self.inspector_opes.pack_start(l)
             l.set_alignment(0, 0.5)
+            l.set_line_wrap(True)
             self.tooltips.set_tip(l, o.content)
             #FIXME : need to check available space
             if nb == 12:
@@ -1381,3 +1406,16 @@ class DocGroup (Group):
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
+
+# import socket
+# export to Damien's collector through ipv6
+# create a socket :
+# socket.socket(AF_INET6, SOCK_STREAM, 0)
+# build address:
+# socket.getaddrinfo(host, port[, family[, socktype[, proto[, flags]]]])
+# return (family, socktype, proto, canonname, sockaddr)
+# connect to address
+# socket.connect(address)
+# send data
+# socket.send(string[, flags]) or socket.sendall(string[, flags])
+# first return qt of data sent
