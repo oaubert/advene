@@ -81,6 +81,8 @@ class TraceTimeline(AdhocView):
         self.tooltips.enable()
         self.inspector = None
         self.btnl = None
+        self.btnlm = None
+        self.link_mode = 0
         self.lasty=0
         self.canvasX = None
         self.doc_canvas_X = 100
@@ -196,7 +198,12 @@ class TraceTimeline(AdhocView):
         self.btnl.set_icon_widget(img)
         toolbox.insert(self.btnl, -1)
         self.btnl.connect('clicked', self.toggle_lock)
-
+        #btn to change link mode
+        self.btnlm = gtk.ToolButton(label='L')
+        self.btnlm.set_tooltip(self.tooltips, _('Toggle link mode'))
+        toolbox.insert(self.btnlm, -1)
+        self.btnlm.connect('clicked', self.toggle_link_mode)
+        
         self.inspector = Inspector(self.controller)
         bx.pack2(self.inspector)
 
@@ -323,6 +330,22 @@ class TraceTimeline(AdhocView):
         bx.set_position(self.canvasX+15)
         return mainbox
 
+    def toggle_link_mode(self, w):
+        if self.link_mode == 0:
+            self.link_mode = 1
+            self.btnlm.set_label('H')
+        else:
+            self.link_mode = 0
+            self.btnlm.set_label('L')
+        i=0
+        root = self.canvas.get_root_item()
+        while i < root.get_n_children():
+            go = root.get_child(i)
+            if isinstance(go, ObjGroup) or isinstance(go, EventGroup):
+                go.link_mode=self.link_mode
+            i+=1
+        return
+
     def zoom_on(self, w=None, canvas_item=None):
         min_y = -1
         max_y = -1
@@ -336,7 +359,7 @@ class TraceTimeline(AdhocView):
             root = self.canvas.get_root_item()
             while i < root.get_n_children():
                 go = root.get_child(i)
-                if isinstance(go, ObjGroup) and obj_id == go.id:
+                if isinstance(go, ObjGroup) and obj_id == go.cobj['id']:
                     # obj
                     obj_min_y = go.rep.props.center_y - go.rep.props.radius_y
                     obj_max_y = go.rep.props.center_y + go.rep.props.radius_y
@@ -358,14 +381,14 @@ class TraceTimeline(AdhocView):
         self.refresh(center = vc)
 
     def recreate_item(self, w=None, obj_group=None):
-        c = obj_group.opes[-1].content
-        if obj_group.type == Annotation:
-            # t : obj_group.name
+        c = obj_group.cobj['opes'][-1].content
+        if obj_group.cobj['type'] == Annotation:
+            # t : content a parse
             # b : content a parse
-            # d pareil
+            # d : content a parse
             t=None
             b=d=0
-            t = self.controller.package.get_element_by_id(obj_group.name)
+            t = self.controller.package.get_element_by_id(obj_group.cobj['cid'])
             if t is None or not isinstance(t, AnnotationType):
                 print "No corresponding type, creation aborted"
                 return
@@ -380,7 +403,7 @@ class TraceTimeline(AdhocView):
             aa = len(c)-1
             cont = c[a:aa]
             an = self.controller.package.createAnnotation(
-                ident=obj_group.id,
+                ident=obj_group.cobj['id'],
                 type=t,
                 author=config.data.userid,
                 date=self.controller.get_timestamp(),
@@ -389,6 +412,10 @@ class TraceTimeline(AdhocView):
             an.content.data = cont
             self.controller.package.annotations.append(an)
             self.controller.notify("AnnotationCreate", annotation=an, comment="Recreated from Trace")
+        elif obj_group.cobj['type'] == Relation:
+            print 'todo'
+        else:
+            print 'TODO'
         
         return
     
@@ -424,18 +451,19 @@ class TraceTimeline(AdhocView):
                 i=gtk.MenuItem(_("Zoom and center on linked items"))
                 i.connect("activate", self.zoom_on, obj_gp)
                 menu.append(i)
-                obj = self.controller.package.get_element_by_id(obj_gp.id)
+                obj = self.controller.package.get_element_by_id(obj_gp.cobj['id'])
+                objt = self.controller.package.get_element_by_id(obj_gp.cobj['cid'])
                 if obj is not None:
                     i=gtk.MenuItem(_("Edit item"))
                     i.connect("activate", self.edit_item, obj)
                     menu.append(i)
-                else:
+                elif objt is not None:
                     i=gtk.MenuItem(_("Recreate item"))
                     i.connect("activate", self.recreate_item, obj_gp)
                     menu.append(i)
                 m = gtk.Menu()
                 mt= []
-                for op in obj_gp.opes:
+                for op in obj_gp.cobj['opes']:
                     if op.movietime not in mt:
                         mt.append(op.movietime)
                 for t in mt:
@@ -452,7 +480,7 @@ class TraceTimeline(AdhocView):
             menu.show_all()
             menu.popup(None, None, None, ev.button, ev.time)
         elif ev.button == 1:
-            self.toggle_lock()
+            self.toggle_lock(w=obj_gp)
 
 
     def toggle_lock(self, w=None):
@@ -482,6 +510,11 @@ class TraceTimeline(AdhocView):
                     #print "unlock %s" % go
                     go.handler_unblock(go.handler_ids['enter-notify-event'])
                     go.handler_unblock(go.handler_ids['leave-notify-event'])
+                    # if selected group, force leave
+                    if hasattr(go, 'center_sel') and go.center_sel:
+                        go.on_mouse_leave(None, None, None)
+                    if go == w:
+                        go.on_mouse_over(None, None, None)
             i+=1
 
     def draw_marks(self):
@@ -619,7 +652,7 @@ class TraceTimeline(AdhocView):
             root = self.canvas.get_root_item()
             while i < root.get_n_children():
                 go = root.get_child(i)
-                if isinstance(go, ObjGroup):
+                if isinstance(go, ObjGroup) or isinstance(go, EventGroup):
                     go.handler_block(go.handler_ids['enter-notify-event'])
                     go.handler_block(go.handler_ids['leave-notify-event'])
                 i+=1
@@ -674,7 +707,7 @@ class TraceTimeline(AdhocView):
             if action.activity_time[1] > self.canvasY*self.timefactor:
                 #print "%s %s %s" % (action.name , action.activity_time[1], self.canvasY*self.timefactor)
                 self.refresh(action)
-            ev = EventGroup(self.controller, self.inspector, self.canvas, self.docgroup, None, action, x, y, length, self.col_width, self.obj_l, 14, color)
+            ev = EventGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.docgroup, None, action, x, y, length, self.col_width, self.obj_l, 14, color, self.links_locked)
             self.cols[action.name]=(h,ev)
             #self.lasty = ev.rect.get_bounds().y2
             #print "%s %s %s" % (y, length, self.lasty)
@@ -720,13 +753,14 @@ class HeadGroup (Group):
             return
 
 class EventGroup (Group):
-    def __init__(self, controller=None, inspector=None, canvas=None, dg=None, type=None, event=None, x =0, y=0, l=1, w=90, ol=5, fontsize=6, color_c=0x00ffffff):
+    def __init__(self, link_mode=0, controller=None, inspector=None, canvas=None, dg=None, type=None, event=None, x =0, y=0, l=1, w=90, ol=5, fontsize=6, color_c=0x00ffffff, blocked=False):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.canvas = canvas
         self.controller=controller
         self.inspector = inspector
         self.event=event
         self.type=type
+        self.link_mode=link_mode
         self.dg = dg
         self.rect = None
         self.color_sel = 0xD9D919FF
@@ -742,7 +776,7 @@ class EventGroup (Group):
         self.rect = self.newRect (self.color, self.color_c)
         self.objs={}
         #self.lines = []
-        self.redrawObjs(ol)
+        self.redrawObjs(ol, blocked)
         self.handler_ids = {
         'enter-notify-event':None,
         'leave-notify-event':None,
@@ -750,7 +784,10 @@ class EventGroup (Group):
         #self.connect('button-press-event', self.on_click)
         self.handler_ids['enter-notify-event'] = self.connect('enter-notify-event', self.on_mouse_over)
         self.handler_ids['leave-notify-event'] = self.connect('leave-notify-event', self.on_mouse_leave)
-
+        if blocked:
+            self.handler_block(self.handler_ids['enter-notify-event'])
+            self.handler_block(self.handler_ids['leave-notify-event'])
+            
     def newRect(self, color, color_c):
         return goocanvas.Rect (parent = self,
                                     x = self.x,
@@ -761,12 +798,11 @@ class EventGroup (Group):
                                     stroke_color = color,
                                     line_width = 2.0)
 
-    def addObj(self, obj_id, xx, yy, ol, color, color_o):
-        (pds, obj_name, obj_type, obj_opes) = self.objs[obj_id][1:5]
-        o = ObjGroup(self.controller, self.inspector, self.canvas, self.dg, xx, yy, ol, self.fontsize, pds, obj_id, obj_name, obj_type, obj_opes)
-        return o
+    def addObj(self, obj_id, xx, yy, ol, color, color_o, blocked):
+        (pds, cobj) = self.objs[obj_id][1:5]
+        return ObjGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.dg, xx, yy, ol, self.fontsize, pds, cobj, blocked)
 
-    def redrawObjs(self, ol=5):
+    def redrawObjs(self, ol=5, blocked=False):
         #FIXME : brutal way to do that. Need only to find what operation was added to update only this square
         for obj in self.objs.keys():
             obg = self.objs[obj][0]
@@ -777,19 +813,17 @@ class EventGroup (Group):
                     self.remove_child (child_num)
         self.objs = {}
         for op in self.event.operations:
-            obj_opes = []
             obj = op.concerned_object['id']
             if obj is None:
                 continue
             if obj in self.objs.keys():
-                (pds, obj_name, obj_type, obj_opes) = self.objs[obj][1:5]
-                obj_opes.append(op)
-                self.objs[obj] = (None, pds+1, obj_name, obj_type, obj_opes)
+                (pds, cobj) = self.objs[obj][1:5]
+                cobj['opes'].append(op)
+                self.objs[obj] = (None, pds+1, cobj)
             else:
-                obj_name = op.concerned_object['name']
-                obj_type = op.concerned_object['type']
-                obj_opes.append(op)
-                self.objs[obj] = (None, 1, obj_name, obj_type, obj_opes)
+                cobj = op.concerned_object
+                cobj['opes'] = [op]
+                self.objs[obj] = (None, 1, cobj)
             #print "obj %s opes %s" % (obj, obj_opes)
         #self.objs : item : #time modified during action
         y=self.rect.get_bounds().y1+1
@@ -830,12 +864,12 @@ class EventGroup (Group):
                 else:
                     ox = x+2
                     oy += (ol+2)
-                    (pds, obj_name, obj_type, obj_opes) = self.objs[obj][1:5]
-                    self.objs[obj]= (self.addObj(obj, ox+ol/2.0, oy+ol/2.0, ol/2.0, self.color, self.color_o), pds, obj_name, obj_type, obj_opes)
+                    (pds, cobj) = self.objs[obj][1:5]
+                    self.objs[obj]= (self.addObj(obj, ox+ol/2.0, oy+ol/2.0, ol/2.0, self.color, self.color_o, blocked), pds, cobj)
                     ox += (ol+2)
             else:
-                (pds, obj_name, obj_type, obj_opes) = self.objs[obj][1:5]
-                self.objs[obj]= (self.addObj(obj, ox+ol/2.0, oy+ol/2.0, ol/2.0, self.color, self.color_o), pds, obj_name, obj_type, obj_opes)
+                (pds, cobj) = self.objs[obj][1:5]
+                self.objs[obj]= (self.addObj(obj, ox+ol/2.0, oy+ol/2.0, ol/2.0, self.color, self.color_o, blocked), pds, cobj)
                 ox += (ol+2)
             #print "ox %s oy %s ol %s w %s l %s" % (ox, oy, ol, w+x, l+y)
 
@@ -859,23 +893,21 @@ class EventGroup (Group):
 
 
 class ObjGroup (Group):
-    def __init__(self, controller=None, inspector=None, canvas=None, dg=None, x=0, y=0, r=4, fontsize=6, pds=1, obj_id=None, obj_name=None, obj_type=None, obj_opes=[]):
+    def __init__(self, link_mode=0, controller=None, inspector=None, canvas=None, dg=None, x=0, y=0, r=4, fontsize=6, pds=1, obj=None, blocked=False):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.rep = None
         self.text = None
         self.canvas = canvas
         self.dg=dg
+        self.link_mode=link_mode
         self.inspector = inspector
         self.color_sel = 0xD9D919FF
         self.color_f = 0xADEAEAFF
         self.color_s = "black"
         self.fontsize = 5
         self.poids = pds
-        self.id = obj_id
-        self.name = obj_name # name is the name of the type ...
-        self.type = obj_type #the type of the object
-        self.opes = obj_opes
+        self.cobj = obj
         self.x = x
         self.y = y
         self.r = r
@@ -890,6 +922,9 @@ class ObjGroup (Group):
         }
         self.handler_ids['enter-notify-event'] = self.connect('enter-notify-event', self.on_mouse_over)
         self.handler_ids['leave-notify-event'] = self.connect('leave-notify-event', self.on_mouse_leave)
+        if blocked:
+            self.handler_block(self.handler_ids['enter-notify-event'])
+            self.handler_block(self.handler_ids['leave-notify-event'])
 
     def on_mouse_over(self, w, target, event):
         self.toggle_rels()
@@ -903,29 +938,20 @@ class ObjGroup (Group):
         self.dg.changeMarks()
         return
 
-    #def on_click(self, w, target, ev):
-        #print "%s %s %s" % (w, target, ev.button)
-    #    if ev.button == 1:
-    #        return
-    #    if ev.button == 3:
-            #recenter on links
-    #        pass
-    #    return
-
     def clean_inspector(self):
         self.inspector.clean()
 
     def fill_inspector(self):
         self.inspector.fillWithItem(self)
 
+    #~ def get_link_mode(self):
+        
+        #~ return 0
+
     def toggle_rels(self):
-        #temp_str = "%s (%s) : %s\n" % (self.name, self.id, self.type)
-        #for o in self.opes:
-        #    temp_str += "%s: %s (%s)\n" % (o.time, o.name, o.content)
-        #print temp_str
         r = self.canvas.get_root_item()
         chd = []
-        i=0
+        i = 0
         desel = False
         while i <r.get_n_children():
             f = r.get_child(i)
@@ -936,7 +962,6 @@ class ObjGroup (Group):
                     if obg is None:
                         continue
                     for l in obg.lines:
-                        #print "toggle removing line %s" % l
                         n=obg.find_child(l)
                         if n>=0:
                             obg.remove_child(n)
@@ -950,29 +975,59 @@ class ObjGroup (Group):
             return
         self.select()
         self.center_sel = True
-        for c in chd:
-            if self.id in c.objs.keys():
-                obj_gr = c.objs[self.id][0]
-                if obj_gr != self:
-                    x2=y2=0
-                    x1 = self.x
-                    y1 = self.y
+        if self.link_mode == 0:
+            for c in chd:
+                if self.cobj['id'] in c.objs.keys():
+                    obj_gr = c.objs[self.cobj['id']][0]
+                    if obj_gr != self:
+                        x2=y2=0
+                        x1 = self.x
+                        y1 = self.y
+                        if obj_gr is None:
+                            x2 = c.rect.get_bounds().x1 + c.rect.props.width/2
+                            y2 = c.rect.get_bounds().y1 + c.rect.props.height/2
+                        else:
+                            x2 = obj_gr.x
+                            y2 = obj_gr.y
+                            obj_gr.select()
+                        p = goocanvas.Points ([(x1, y1), (x2,y2)])
+                        self.lines.append(goocanvas.Polyline (parent = self,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = 0xFFFFFFFF,
+                                        line_width = 1.0,
+                                        start_arrow = False,
+                                        end_arrow = False,
+                                        ))
+        else:
+            dic={}
+            for c in chd:
+                if self.cobj['id'] in c.objs.keys():
+                    obj_gr = c.objs[self.cobj['id']][0]
+                    obj_time = c.objs[self.cobj['id']][2]['opes'][0].time
                     if obj_gr is None:
-                        x2 = c.rect.get_bounds().x1 + c.rect.props.width/2
-                        y2 = c.rect.get_bounds().y1 + c.rect.props.height/2
+                        x = c.rect.get_bounds().x1 + c.rect.props.width/2
+                        y = c.rect.get_bounds().y1 + c.rect.props.height/2
                     else:
-                        x2 = obj_gr.x
-                        y2 = obj_gr.y
-                        obj_gr.select()
-                    p = goocanvas.Points ([(x1, y1), (x2,y2)])
-                    self.lines.append(goocanvas.Polyline (parent = self,
-                                    close_path = False,
-                                    points = p,
-                                    stroke_color = 0xFFFFFFFF,
-                                    line_width = 1.0,
-                                    start_arrow = False,
-                                    end_arrow = False,
-                                    ))
+                        x = obj_gr.x
+                        y = obj_gr.y
+                        obj_gr.select()                    
+                    dic[obj_time]= (x, y)
+            ks = dic.keys()
+            ks.sort()
+            lp = []
+            for key in ks:
+                lp.append(dic[key])
+            p=goocanvas.Points(lp)
+            self.lines.append(goocanvas.Polyline (parent = self,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = 0xFFFFFFFF,
+                                        line_width = 1.0,
+                                        start_arrow = False,
+                                        end_arrow = False,
+                                        ))
+                
         return
 
     def select(self):
@@ -995,24 +1050,24 @@ class ObjGroup (Group):
                         line_width=1.0)
 
     def newText(self):
-        print "type %s" % self.type
+        #print "type %s" % self.cobj['type']
         txt = 'U'
-        if self.type is None:
+        if self.cobj['type'] is None:
             # need to test if we can find the type in an other way, use of type() is not a good thing
-            o = self.controller.package.get_element_by_id(self.id)
-            self.type=type(o)
+            o = self.controller.package.get_element_by_id(self.cobj['id'])
+            self.cobj['type']=type(o)
             #print self.type
-        if self.type == Schema:
+        if self.cobj['type'] == Schema:
             txt = 'S'
-        elif self.type == AnnotationType:
+        elif self.cobj['type'] == AnnotationType:
             txt = 'AT'
-        elif self.type == RelationType:
+        elif self.cobj['type'] == RelationType:
             txt = 'RT'
-        elif self.type == Annotation:
+        elif self.cobj['type'] == Annotation:
             txt = 'A'
-        elif self.type == Relation:
+        elif self.cobj['type'] == Relation:
             txt = 'R'
-        elif self.type == View:
+        elif self.cobj['type'] == View:
             txt = 'V'
 
         return goocanvas.Text (parent = self,
@@ -1038,22 +1093,20 @@ class Inspector (gtk.VBox):
             'EditSessionEnd': _('Canceling edition'),
             'ElementEditEnd': _('Ending edition'),
         }
-        #FIXME : create a class inspector with id, name type opes
         self.pack_start(gtk.Label('Inspector'), expand=False)
         self.pack_start(gtk.HSeparator(), expand=False)
-        self.inspector_id = gtk.Label('Id')
+        self.inspector_id = gtk.Label('')
         self.pack_start(self.inspector_id, expand=False)
         self.inspector_id.set_alignment(0, 0.5)
         self.tooltips.set_tip(self.inspector_id, _('Id'))
-        #name is the same as type ...
-        #self.inspector_name = gtk.Label('Name')
-        #self.pack_start(self.inspector_name, expand=False)
-        #self.tooltips.set_tip(self.inspector_name, _('Name'))
-        #self.inspector_name.set_alignment(0, 0.5)
-        self.inspector_type = gtk.Label('Type')
+        self.inspector_type = gtk.Label('')
         self.pack_start(self.inspector_type, expand=False)
-        self.tooltips.set_tip(self.inspector_type, _('Type'))
+        self.tooltips.set_tip(self.inspector_type, _('Classe'))
         self.inspector_type.set_alignment(0, 0.5)
+        self.inspector_name = gtk.Label('')
+        self.pack_start(self.inspector_name, expand=False)
+        self.tooltips.set_tip(self.inspector_name, _('Type or schema'))
+        self.inspector_name.set_alignment(0, 0.5)
         self.pack_start(gtk.HSeparator(), expand=False)
         self.pack_start(gtk.Label('Operations'), expand=False)
         self.inspector_opes=gtk.VBox()
@@ -1061,18 +1114,14 @@ class Inspector (gtk.VBox):
         self.clean()
 
     def fillWithItem(self, item):
-        self.inspector_id.set_text(item.id)
-        #self.inspector_name.set_text(item.name)
-        self.inspector_type.set_text(item.name)
-        #if item.type is not None:
-        #    self.inspector_type.set_text(item.type.getLocalName())
-        #else:
-        #    self.inspector_type.set_text('None')
+        self.inspector_id.set_text(item.cobj['id'])
+        self.inspector_name.set_text(item.cobj['cid'])
+        self.inspector_type.set_text(item.cobj['name'])
 
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
         nb=0
-        for o in item.opes:
+        for o in item.cobj['opes']:
             nb+=1
             n=''
             if o.name in self.incomplete_operations_names:
@@ -1084,13 +1133,14 @@ class Inspector (gtk.VBox):
             l.set_alignment(0, 0.5)
             self.tooltips.set_tip(l, o.content)
             #FIXME : need to check available space
-            if nb == 8:
-                print "display limited to 8 operations. Please Fixme."
+            if nb == 12:
+                print "display limited to 12 operations. Please Fixme."
                 break
         self.show_all()
 
     def fillWithAction(self, action):
         self.inspector_id.set_text(_('Action'))
+        self.inspector_name.set_text('')
         self.inspector_type.set_text(action.event.name)
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
@@ -1107,15 +1157,15 @@ class Inspector (gtk.VBox):
             l.set_alignment(0, 0.5)
             self.tooltips.set_tip(l, o.content)
             #FIXME : need to check available space
-            if nb == 8:
-                print "display limited to 8 operations. Please Fixme."
+            if nb == 12:
+                print "display limited to 12 operations. Please Fixme."
                 break
         self.show_all()
 
     def clean(self):
-        self.inspector_id.set_text('Id')
-        #self.inspector_name.set_text('Name')
-        self.inspector_type.set_text('Type')
+        self.inspector_id.set_text('')
+        self.inspector_name.set_text('')
+        self.inspector_type.set_text('')
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
         self.show_all()
@@ -1249,7 +1299,7 @@ class DocGroup (Group):
             for op in action.operations:
                 self.addMark(op.movietime, color)
         elif obj is not None:
-            for op in obj.opes:
+            for op in obj.cobj['opes']:
                 self.addMark(op.movietime, 0xD9D919FF)
 
     def addMark(self, time=0, color='gray'):
