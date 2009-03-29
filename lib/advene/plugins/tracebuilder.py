@@ -150,8 +150,6 @@ class TraceBuilder:
                 #evt.change_comment(ev.comment)
                 #self.trace.add_to_trace('events', evt)
                 print '%s %s %s' % (an_name, an_ac_time, an_content)
-
-
         return
 
     def import_trace(self, fname, reset):
@@ -185,11 +183,13 @@ class TraceBuilder:
                 ev.o_id=None
             if not hasattr(ev, 'o_type') or ev.o_type=="None": #for compatibility with previous traces
                 ev.o_type=None
-            evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ev.o_type)
+            if not hasattr(ev, 'o_cid') or ev.o_cid=="None": #for compatibility with previous traces
+                ev.o_cid=None
+            evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ev.o_type, ev.o_cid)
             evt.change_comment(ev.comment)
             self.trace.add_to_trace('events', evt)
             if evt.name in self.operation_mapping.keys():
-                op = Operation(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ev.o_type)
+                op = Operation(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ev.o_type, ev.o_cid)
                 self.trace.add_to_trace('operations', op)
                 if op is not None:
                     if ev.name in self.operation_mapping.keys():
@@ -231,15 +231,7 @@ class TraceBuilder:
             op = self.packOperation(obj)
             if op is not None:
                 ac = self.packAction(obj, op)
-        #else:
-        #    print "Not an operation : %s" % ev.name
         self.alert_registered(ev, op, ac)
-        # this need to be replaced by a loop on packfunction depending on levels, with an array of modified objects depending on their level :
-        # modif = []
-        # for i in packfunctions:
-        #     modif.append(i(obj))
-        # self.alert_registered(modif)
-        # wich could then be used in a more general way by the receiver
 
     def packEvent(self, obj):
         if obj['event_name'] != 'SnapshotUpdate':
@@ -251,10 +243,11 @@ class TraceBuilder:
         ev_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
         ev_movie_time = self.controller.player.current_position_value
         ev_content = ''
-        elem=None
+        elem = None
         elem_name = None
         elem_id = None
-        elem_type=None
+        elem_type = None
+        elem_class_id = None
         # Logging content depending on keys
         if 'element' in obj:
             if isinstance(obj['element'],advene.model.annotation.Annotation):
@@ -288,7 +281,8 @@ class TraceBuilder:
                             )
                 elem_name='annotation'
                 elem_id=elem.id
-                elem_type = advene.model.annotation.Relation
+                elem_type = advene.model.annotation.Annotation
+                elem_class_id = elem.type.id
         elif 'relation' in obj:
             elem=obj['relation']
             if elem is not None:
@@ -302,6 +296,7 @@ class TraceBuilder:
                 elem_name='relation'
                 elem_id=elem.id
                 elem_type = advene.model.annotation.Relation
+                elem_class_id = elem.type.id
         elif 'annotationtype' in obj:
             elem=obj['annotationtype']
             if elem is not None:
@@ -313,6 +308,7 @@ class TraceBuilder:
                 elem_name='annotationtype'
                 elem_id=elem.id
                 elem_type = advene.model.schema.AnnotationType
+                elem_class_id = elem.schema.id
         elif 'relationtype' in obj:
             elem=obj['relationtype']
             if elem is not None:
@@ -324,6 +320,7 @@ class TraceBuilder:
                 elem_name='relationtype'
                 elem_id=elem.id
                 elem_type = advene.model.schema.RelationType
+                elem_class_id = elem.schema.id
         elif 'schema' in obj:
             elem=obj['schema']
             if elem is not None:
@@ -357,7 +354,7 @@ class TraceBuilder:
         ev_undo=False
         if 'undone' in obj.keys():
             ev_undo = True
-        ev = Event(ev_name, ev_time, ev_activity_time, ev_content, ev_movie, ev_movie_time, elem_name, elem_id, elem_type)
+        ev = Event(ev_name, ev_time, ev_activity_time, ev_content, ev_movie, ev_movie_time, elem_name, elem_id, elem_type, elem_class_id)
         #ev = Event(ev_name, ev_time, ev_activity_time, ev_snapshot, ev_content, ev_movie, ev_movie_time, elem_name, elem_id)
         self.trace.add_to_trace('events', ev)
         return ev
@@ -371,10 +368,11 @@ class TraceBuilder:
         op_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
         op_movie_time = self.controller.player.current_position_value
         op_content = None
-        elem=None
+        elem = None
         elem_name = None
         elem_id = None
-        elem_type=None
+        elem_type = None
+        elem_class_id = None
         # package uri annotation relation annotationtype relationtype schema
         # Logging content depending on keys
         if 'element' in obj:
@@ -410,6 +408,7 @@ class TraceBuilder:
                 elem_name='annotation'
                 elem_id=elem.id
                 elem_type = advene.model.annotation.Annotation
+                elem_class_id = elem.type.id
         elif 'relation' in obj:
             elem=obj['relation']
             if elem is not None:
@@ -423,6 +422,7 @@ class TraceBuilder:
                 elem_name='relation'
                 elem_id=elem.id
                 elem_type = advene.model.annotation.Relation
+                elem_class_id = elem.type.id
         elif 'annotationtype' in obj:
             elem=obj['annotationtype']
             if elem is not None:
@@ -434,6 +434,7 @@ class TraceBuilder:
                 elem_name='annotationtype'
                 elem_id=elem.id
                 elem_type = advene.model.schema.AnnotationType
+                elem_class_id = elem.schema.id
         elif 'relationtype' in obj:
             elem=obj['relationtype']
             if elem is not None:
@@ -445,6 +446,7 @@ class TraceBuilder:
                 elem_name='relationtype'
                 elem_id=elem.id
                 elem_type = advene.model.schema.RelationType
+                elem_class_id = elem.schema.id
         elif 'schema' in obj:
             elem=obj['schema']
             if elem is not None:
@@ -478,7 +480,7 @@ class TraceBuilder:
             prev = self.trace.levels['operations'][-1]
             if op_name in self.editEndNames and prev.name in self.editEndNames and prev.concerned_object['id'] == elem_id:
                 return
-        op = Operation(op_name, op_time, op_activity_time, op_content, op_movie, op_movie_time, elem_name, elem_id, elem_type)
+        op = Operation(op_name, op_time, op_activity_time, op_content, op_movie, op_movie_time, elem_name, elem_id, elem_type, elem_class_id)
         self.trace.add_to_trace('operations', op)
         return op
 
@@ -611,7 +613,7 @@ class Trace:
         return
 
 class Event:
-    def __init__(self, name, time, actime, content, movie, movietime, obj, obj_id, obj_type):
+    def __init__(self, name, time, actime, content, movie, movietime, obj, obj_id, obj_type, o_class_id):
         self.name = name
         self.time = time
         self.activity_time = actime
@@ -623,13 +625,14 @@ class Event:
             'name':obj,
             'id':obj_id,
             'type':obj_type,
+            'cid':o_class_id,
         }
 
     def export(self, n_id):
         #print "%s %s %s %s %s %s %s %s %s %s" % ('e'+str(n_id), self.name, str(self.time), str(self.activity_time), self.movie, str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), self.content)
         e = ET.Element('event', id='e'+str(n_id),
                 name=self.name, time=str(self.time),
-                ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']), o_type=str(self.concerned_object['type']))
+                ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']), o_type=str(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
         e.text = self.content
         return e
 
@@ -639,7 +642,7 @@ class Event:
 
 
 class Operation:
-    def __init__(self, name, time, actime, content, movie, movietime, obj, obj_id, obj_type):
+    def __init__(self, name, time, actime, content, movie, movietime, obj, obj_id, obj_type, o_class_id):
         self.name = name
         self.time = time
         self.activity_time = actime
@@ -653,11 +656,12 @@ class Operation:
             'name':obj,
             'id':obj_id,
             'type':obj_type,
+            'cid':o_class_id,
         }
 
     def export(self, n_id):
         e = ET.Element('operation', id='o'+str(n_id), name=self.name, time=str(self.time),
-                ac_time=str(self.activity_time), movie=self.movie, m_time=str(self.movietime), comment=self.comment, o_name=self.concerned_object['name'], o_id=self.concerned_object['id'])
+                ac_time=str(self.activity_time), movie=self.movie, m_time=str(self.movietime), comment=self.comment, o_name=self.concerned_object['name'], o_id=str(self.concerned_object['id']), o_type=str(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
         e.text = self.content
         return e
 
