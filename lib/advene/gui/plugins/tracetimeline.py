@@ -53,6 +53,14 @@ def register(controller):
 name="Trace Timeline view"
 ACTION_COLORS=[0x000088AA, 0x008800AA, 0x880000AA, 0x008888FF, 0x880088FF, 0x0000FFAA, 0x00FF00AA, 0xFF0000FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
 ACTIONS=[]
+INCOMPLETE_OPERATIONS_NAMES = {
+            'EditSessionStart': _('Beginning edition'),
+            'ElementEditBegin': _('Beginning edition'),
+            'ElementEditDestroy': _('Canceling edition'),
+            'ElementEditCancel': _('Canceling edition'),
+            'EditSessionEnd': _('Canceling edition'),
+            'ElementEditEnd': _('Ending edition'),
+        }
 
 class TraceTimeline(AdhocView):
     view_name = _("Traces")
@@ -468,11 +476,15 @@ class TraceTimeline(AdhocView):
                 mt= []
                 for op in obj_gp.cobj['opes']:
                     if op.movietime not in mt:
+                        n=''
+                        if op.name in INCOMPLETE_OPERATIONS_NAMES:
+                            n = INCOMPLETE_OPERATIONS_NAMES[op.name]
+                        else:
+                            n = ECACatalog.event_names[op.name]
                         mt.append(op.movietime)
-                for t in mt:
-                    i = gtk.MenuItem("%s (%s)" % (time.strftime("%H:%M:%S", time.gmtime(t/1000)), op.name))
-                    i.connect("activate", self.goto, t)
-                    m.append(i)
+                        i = gtk.MenuItem("%s (%s)" % (time.strftime("%H:%M:%S", time.gmtime(op.movietime/1000)), n))
+                        i.connect("activate", self.goto, op.movietime)
+                        m.append(i)
                 i=gtk.MenuItem(_("Go to..."))
                 i.set_submenu(m)
                 menu.append(i)
@@ -480,6 +492,23 @@ class TraceTimeline(AdhocView):
                 i=gtk.MenuItem(_("Zoom on action"))
                 i.connect("activate", self.zoom_on, evt_gp)
                 menu.append(i)
+                if obj_gp is None:
+                    m = gtk.Menu()
+                    mt= []
+                    for op in evt_gp.event.operations:
+                        if op.movietime not in mt:
+                            n=''
+                            if op.name in INCOMPLETE_OPERATIONS_NAMES:
+                                n = INCOMPLETE_OPERATIONS_NAMES[op.name]
+                            else:
+                                n = ECACatalog.event_names[op.name]
+                            mt.append(op.movietime)
+                            i = gtk.MenuItem("%s (%s)" % (time.strftime("%H:%M:%S", time.gmtime(op.movietime/1000)), n))
+                            i.connect("activate", self.goto, op.movietime)
+                            m.append(i)
+                    i=gtk.MenuItem(_("Go to..."))
+                    i.set_submenu(m)
+                    menu.append(i)
             menu.show_all()
             menu.popup(None, None, None, ev.button, ev.time)
         elif ev.button == 1:
@@ -1088,14 +1117,6 @@ class Inspector (gtk.VBox):
         self.controller=controller
         self.tooltips = gtk.Tooltips()
         self.tooltips.enable()
-        self.incomplete_operations_names = {
-            'EditSessionStart': _('Beginning edition'),
-            'ElementEditBegin': _('Beginning edition'),
-            'ElementEditDestroy': _('Canceling edition'),
-            'ElementEditCancel': _('Canceling edition'),
-            'EditSessionEnd': _('Canceling edition'),
-            'ElementEditEnd': _('Ending edition'),
-        }
         self.pack_start(gtk.Label('Inspector'), expand=False)
         self.pack_start(gtk.HSeparator(), expand=False)
         self.inspector_id = gtk.Label('')
@@ -1130,8 +1151,8 @@ class Inspector (gtk.VBox):
         for o in item.cobj['opes']:
             nb+=1
             n=''
-            if o.name in self.incomplete_operations_names:
-                n = self.incomplete_operations_names[o.name]
+            if o.name in INCOMPLETE_OPERATIONS_NAMES:
+                n = INCOMPLETE_OPERATIONS_NAMES[o.name]
             else:
                 n = ECACatalog.event_names[o.name]
             l = gtk.Label("%s:\n%s" % (time.strftime("%H:%M:%S", time.localtime(o.time)), n))
@@ -1154,8 +1175,8 @@ class Inspector (gtk.VBox):
         for o in action.event.operations:
             nb+=1
             n=''
-            if o.name in self.incomplete_operations_names:
-                n = self.incomplete_operations_names[o.name]
+            if o.name in INCOMPLETE_OPERATIONS_NAMES:
+                n = INCOMPLETE_OPERATIONS_NAMES[o.name]
             else:
                 n = ECACatalog.event_names[o.name]
             l = gtk.Label("%s:\n%s" % (time.strftime("%H:%M:%S", time.localtime(o.time)), n))
