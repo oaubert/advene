@@ -347,13 +347,19 @@ class EventAccumulator(AdhocView):
         if self.options['detail'] == 'events':
             if (event is not None and event.name in self.filters['events']):
                 return
+            if event is None and not (operation is None and action is None):
+                return
             self.showEvents(trace.levels[self.options['detail']], event)
-        if self.options['detail'] == 'operations':
+        elif self.options['detail'] == 'operations':
             if (operation is not None and operation.name in self.filters['operations']):
+                return
+            if operation is None and not (event is None and action is None):
                 return
             self.showOperations(trace.levels[self.options['detail']], operation)
         elif self.options['detail'] == 'actions':
             if (action is not None and action.name in self.filters['actions']):
+                return
+            if action is None and not (event is None and operation is None):
                 return
             self.showActions(trace.levels[self.options['detail']], action)
         else:
