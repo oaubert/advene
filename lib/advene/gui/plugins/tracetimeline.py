@@ -22,6 +22,7 @@
 This widget allows to present event history in a timeline view.
 """
 
+import urllib
 import gtk
 import time
 from gettext import gettext as _
@@ -440,7 +441,7 @@ class TraceTimeline(AdhocView):
                 date=self.controller.get_timestamp(),
                 fragment=MillisecondFragment(begin=b,
                                              duration=d))
-            an.content.data = cont
+            an.content.data = urllib.unquote(cont.encode('utf-8'))
             self.controller.package.annotations.append(an)
             self.controller.notify("AnnotationCreate", annotation=an, comment="Recreated from Trace")
         elif obj_group.cobj['type'] == Relation:
@@ -1182,7 +1183,7 @@ class Inspector (gtk.VBox):
             self.inspector_opes.pack_start(l)
             l.set_alignment(0, 0.5)
             l.set_line_wrap(True)
-            self.tooltips.set_tip(l, o.content)
+            self.tooltips.set_tip(l, urllib.unquote(o.content.encode('utf-8')))
             #FIXME : need to check available space
             if nb == 12:
                 print "display limited to 12 operations. Please Fixme."
@@ -1207,7 +1208,7 @@ class Inspector (gtk.VBox):
             self.inspector_opes.pack_start(l)
             l.set_alignment(0, 0.5)
             l.set_line_wrap(True)
-            self.tooltips.set_tip(l, o.content)
+            self.tooltips.set_tip(l, urllib.unquote(o.content.encode('utf-8')))
             #FIXME : need to check available space
             if nb == 12:
                 print "display limited to 12 operations. Please Fixme."
