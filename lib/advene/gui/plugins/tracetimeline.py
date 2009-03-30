@@ -333,6 +333,9 @@ class TraceTimeline(AdhocView):
             self.canvasY = wa.height-10.0 # -10 pour des raisons obscures ...
             if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
                 a = self.tracer.trace.levels['actions'][-1].activity_time[1]
+                for act in self.tracer.trace.levels['actions']:
+                    if act.activity_time[1]>a:
+                        a=act.activity_time[1]
                 self.timefactor = a/(self.canvasY)
                 self.obj_l = 5000.0/self.timefactor
             else:
@@ -662,11 +665,12 @@ class TraceTimeline(AdhocView):
             self.cols[act] = (h, None)
         if not ('actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']):
             return
-        a = None
-        if action is None:
-            a = self.tracer.trace.levels['actions'][-1].activity_time[1]
-        else:
-            a = action.activity_time[1]
+        a = self.tracer.trace.levels['actions'][-1].activity_time[1]
+        #if action and a< action.activity_time[1]:
+        #    a = action.activity_time[1]
+        for act in self.tracer.trace.levels['actions']:
+            if act.activity_time[1]>a:
+                a=act.activity_time[1]
             #print "t1 %s Ytf %s" % (a, self.canvasY*self.timefactor)
         if a<(self.canvasY-self.incr)*self.timefactor or a>self.canvasY*self.timefactor:
             self.canvasY = int(1.0*a/self.timefactor + 1)
@@ -679,6 +683,8 @@ class TraceTimeline(AdhocView):
             ev = self.receive(self.tracer.trace, action=i)
             if selected_item is not None and i == selected_item[0]:
                 sel_eg = ev
+            if action is not None and action ==i:
+                break
         if center:
             va=self.sw.get_vadjustment()
             va.value = center/self.timefactor-va.page_size/2.0
@@ -765,8 +771,9 @@ class TraceTimeline(AdhocView):
             if action.activity_time[1] > self.canvasY*self.timefactor:
                 #print "%s %s %s" % (action.name , action.activity_time[1], self.canvasY*self.timefactor)
                 self.refresh(action)
-            ev = EventGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.docgroup, None, action, x, y, length, self.col_width, self.obj_l, 14, color, self.links_locked)
-            self.cols[action.name]=(h,ev)
+            else:
+                ev = EventGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.docgroup, None, action, x, y, length, self.col_width, self.obj_l, 14, color, self.links_locked)
+                self.cols[action.name]=(h,ev)
             #self.lasty = ev.rect.get_bounds().y2
             #print "%s %s %s" % (y, length, self.lasty)
         if self.autoscroll:
