@@ -107,6 +107,8 @@ class TraceTimeline(AdhocView):
         self.sw = None
         self.cols={}
         self.tracer.register_view(self)
+        while ACTIONS:
+            ACTIONS.pop(-1)
         for act in self.tracer.action_types:
             self.cols[act] = (None, None)
             ACTIONS.append(act)
@@ -1408,15 +1410,3 @@ class DocGroup (Group):
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
 
-# import socket
-# export to Damien's collector through ipv6
-# create a socket :
-# socket.socket(AF_INET6, SOCK_STREAM, 0)
-# build address:
-# socket.getaddrinfo(host, port[, family[, socktype[, proto[, flags]]]])
-# return (family, socktype, proto, canonname, sockaddr)
-# connect to address
-# socket.connect(address)
-# send data
-# socket.send(string[, flags]) or socket.sendall(string[, flags])
-# first return qt of data sent
