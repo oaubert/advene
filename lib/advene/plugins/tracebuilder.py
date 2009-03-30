@@ -49,7 +49,7 @@ class TraceBuilder:
         self.operations = []
         self.registered_views = []
         self.opened_actions = {}
-        self.filtered_events = ['AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight']
+        self.filtered_events = ['SnapshotUpdate', 'AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight']
         self.action_types = ['Annotation', 'Restructuration', 'Navigation', 'Classification', 'View building']
         self.operation_mapping = {
         'AnnotationCreate':0,
@@ -225,6 +225,8 @@ class TraceBuilder:
 
     def receive(self, obj):
         # obj : received event
+        if obj['event_name'] in self.filtered_events:
+            return
         ev = op = ac = None
         ev = self.packEvent(obj)
         if ev.name in self.operation_mapping.keys():
