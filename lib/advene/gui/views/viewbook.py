@@ -79,7 +79,8 @@ class ViewBook(AdhocView):
 
         Each view is an Advene view, and must have a .widget attribute
         """
-        if v.view_id == 'htmlview':
+        # Dirty hack. Can be removed once the transition to webkit is complete.
+        if v.view_id == 'htmlview' and v.engine == 'mozembed':
             permanent=True
         if name is None:
             try:
