@@ -1166,6 +1166,7 @@ class Inspector (gtk.VBox):
         self.inspector_name.set_alignment(0, 0.5)
         self.pack_start(gtk.HSeparator(), expand=False)
         self.pack_start(gtk.Label('Operations'), expand=False)
+        self.pack_start(gtk.HSeparator(), expand=False)
         self.inspector_opes=gtk.VBox()
         self.pack_start(self.inspector_opes, expand=False)
         self.clean()
@@ -1215,6 +1216,7 @@ class Inspector (gtk.VBox):
                 n = ECACatalog.event_names[o.name]
             l = gtk.Label("%s:\n%s" % (time.strftime("%H:%M:%S", time.localtime(o.time)), n))
             self.inspector_opes.pack_start(l)
+            self.inspector_opes.pack_start(gtk.HSeparator(), expand=False)
             l.set_alignment(0, 0.5)
             l.set_line_wrap(True)
             self.tooltips.set_tip(l, urllib.unquote(o.content.encode('utf-8')))
