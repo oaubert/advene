@@ -683,8 +683,8 @@ class TraceTimeline(AdhocView):
             ev = self.receive(self.tracer.trace, action=i)
             if selected_item is not None and i == selected_item[0]:
                 sel_eg = ev
-            if action is not None and action ==i:
-                break
+            #if action is not None and action ==i:
+            #    break
         if center:
             va=self.sw.get_vadjustment()
             va.value = center/self.timefactor-va.page_size/2.0
