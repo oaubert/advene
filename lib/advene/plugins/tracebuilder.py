@@ -24,9 +24,9 @@ It needs to register to the ECAEngine to capture events.
 It transforms these events into Operation objects and Action objects.
 Widgets can register with this trace builder to receive the trace.
 """
-
+from threading import Thread
 import time
-
+import socket
 import advene.core.config as config
 import urllib
 import advene.model.view
@@ -41,11 +41,15 @@ def register(controller):
     controller.register_tracer(TraceBuilder(controller))
     return
 name="Trace Builder plugin"
-
+#HOST="2a01:e35:2efc:5cd0:216:cbff:fea0:3fb9"
+#PORT=9990
 class TraceBuilder:
     def __init__ (self, controller=None, parameters=None, package=None):
         #self.close_on_package_load = False
         self.controller=controller
+        self.host = "2a01:e35:2efc:5cd0:216:cbff:fea0:3fb9"
+        self.port = 9990
+        self.texp = None # thread to export trace to a network
         self.operations = []
         self.registered_views = []
         self.opened_actions = {}
@@ -91,13 +95,20 @@ class TraceBuilder:
         self.controller.event_handler.register_view(self)
         self.trace = Trace()
 
+    def __del__(self):
+        if self.texp is not None:
+            if self.texp.isAlive():
+                print('Export thread still running, waiting for its death...')
+            self.texp.join()
+
     def export(self):
         fname=config.data.advenefile(time.strftime("trace_advene-%Y%m%d-%H%M%S"),
                                      category='settings')
         try:
             stream=open(fname, 'wb')
         except (OSError, IOError), e:
-            self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
+            #self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
+            print(_("Cannot export to %(fname)s: %(e)s") % locals())
             return None
         tr=ET.Element('trace')
         #everything can be rebuild from events.
@@ -107,8 +118,27 @@ class TraceBuilder:
         ET.ElementTree(tr).write(stream, encoding='utf-8')
         stream.close()
         #print "Data exported to %s" % fname
+        #self.network_export()
         return fname
 
+    def network_export(self):
+        if self.texp is not None:
+            if self.texp.isAlive():
+                print "Export thread still running"
+                return
+            #else:
+            #    self.texp.join() # nettoie le zombie ou pas ...
+        self.texp = TExport(self.host, self.port, self.trace)
+        self.texp.start()
+        
+    def change_host(self, ip):
+        self.host = ip
+        return
+        
+    def change_port(self, port):
+        self.port = port
+        return
+    
     def convert_old_trace(self, fname):
         #FIXME : complete the import and do not use handyxml.
         print 'importing trace from %s' % fname
@@ -637,6 +667,11 @@ class Event:
                 ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']), o_type=str(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
         e.text = self.content
         return e
+        
+    def to_xml_string(self, n_id):
+        return ET.tostring(self.export(n_id), encoding="utf-8")
+        #return "<event id='e%s' name='%s' time='%s' ac_time='%s' movie='%s' m_time='%s' comment='%s' o_name='%s' o_id='%s' o_type='%s' o_cid='%s'/>" % (str(n_id), self.name, str(self.time), str(self.activity_time), str(self.movie), str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), str(self.concerned_object['type']), str(self.concerned_object['cid']))
+
 
     def change_comment(self, comment=''):
         self.comment = comment
@@ -712,4 +747,32 @@ class Action:
     def set_content(self, newcontent):
         self.content = newcontent
 
-
+class TExport(Thread):
+   def __init__ (self, host, port, trace):
+      Thread.__init__(self)
+      self.host = host
+      self.port = port
+      self.trace = trace
+   def run(self):
+        try:
+            sck = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+            addr = socket.getaddrinfo(self.host, self.port)
+            sck.connect(addr[0][4])
+        except (socket.error,socket.gaierror), e:
+            print(_("Cannot export to %s:%s %s") % (self.host, self.port,e))
+            #self.log(_("Cannot export to %(HOST)s:%(PORT)s: %(e)s") % locals())
+            return
+        nbe=0
+        try:
+            data="INCOMIIIIIIIIIIIIIIING !"
+            sck.send(data.encode('utf-8'))
+            for (id_e, e) in enumerate(self.trace.levels['events']):
+                tmp=e.to_xml_string(id_e)
+                sck.sendall(tmp)
+                nbe+=1
+        except (socket.error,socket.gaierror), e:
+            print(_("Cannot send data to %s:%s %s") % (Hself.host, self.port,e))
+            #self.log(_("Cannot export to %(HOST)s:%(PORT)s: %(e)s") % locals())
+            return
+        print '%s events exported to %s:%s' % (nbe, self.host, self.port)
+        sck.close()      
