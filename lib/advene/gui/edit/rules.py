@@ -437,6 +437,8 @@ class EditRule(EditGeneric):
 
         self.namelabel=None
 
+        self.composition=self.model.condition.composition
+
         self.editactionlist=[]
         self.editconditionlist=[]
         self.widget=self.build_widget()
@@ -478,6 +480,7 @@ class EditRule(EditGeneric):
             self.model.condition=ConditionList([ e.model for e in self.editconditionlist ])
         else:
             self.model.condition=self.model.default_condition
+        self.model.condition.composition=self.composition
 
         # Rebuild actionlist from editactionlist
         self.model.action=ActionList([ e.model for e in self.editactionlist ])
@@ -608,12 +611,13 @@ class EditRule(EditGeneric):
         hb.add(gtk.HBox())
 
         def change_composition(combo):
-            self.model.condition.composition=combo.get_current_element()
+            self.composition=combo.get_current_element()
             return True
 
         c=dialog.list_selector_widget( [ ('and', _("All conditions must be met") ),
                                          ('or', _("Any condition can be met") ) ],
-                                       preselect=self.model.condition.composition)
+                                       preselect=self.composition,
+                                       callback=change_composition)
         hb.pack_start(c, expand=False)
 
         conditionsbox.pack_start(hb, expand=False, fill=False)
