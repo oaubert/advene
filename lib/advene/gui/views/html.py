@@ -220,7 +220,7 @@ class webkit_wrapper:
             
             if not (view and url):
                 url=''
-            self.notify(url=url)
+            self.notify(label=url)
 
         def _statusbar_text_changed_cb(view, text):
             #if text:
