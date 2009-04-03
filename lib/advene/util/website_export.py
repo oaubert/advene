@@ -74,7 +74,9 @@ class WebsiteExporter(object):
         self.video_player=self.find_video_player(video_url)
 
         self.url_translation={}
-        self.used_resources=[]
+        self.used_resources=set()
+        self.used_snapshots=set()
+        self.used_overlays=set()
 
     def log(self, *p):
         self.controller.log(*p)
@@ -136,40 +138,17 @@ class WebsiteExporter(object):
                 print unicode(e).encode('utf-8')
                 content=None
 
+            if not isinstance(content, basestring):
+                # Not a string. Could be an Advene element
+                try:
+                    c=content.view(context=self.controller.build_context(here=content))
+                    content=c
+                except AttributeError:
+                    # Apparently not. Fallback on explicit string conversion.
+                    content=unicode(content)
+
             d[url]=content
         return d
-
-    def extract_resources(self, d):
-        """Extract and copy snapshots + resources.
-        """
-
-        # FIXME: add a memo here to avoid exporting the same resource multiple times
-
-        for content in d.itervalues():
-            # Copy snapshots
-            for t in re.findall('imagecache/(\d+)', content):
-                # FIXME: not robust wrt. multiple packages/videos
-                f=open(os.path.join(self.imgdir, '%s.png' % t), 'wb')
-                f.write(str(self.controller.package.imagecache[t]))
-                f.close()
-
-            # Extract and copy overlays
-            for (ident, tales) in re.findall(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?', content):
-                # FIXME: not robust wrt. multiple packages/videos
-                a=self.controller.package.get_element_by_id(ident)
-                if not a:
-                    print "Cannot find annotation %s for overlaying"
-                    continue
-                name=ident+tales.replace('/', '_')
-                f=open(os.path.join(self.imgdir, 'overlay_%s.png' % name), 'wb')
-                if tales:
-                    # There is a TALES expression
-                    ctx=self.controller.build_context(here=a)
-                    data=ctx.evaluateValue('here' + tales)
-                else:
-                    data=a.content.data
-                f.write(str(self.controller.gui.overlay(self.controller.package.imagecache[a.fragment.begin], data)))
-                f.close()
 
     def translate_links(self, d):
         """Translate links from the given contents dict.
@@ -181,12 +160,36 @@ class WebsiteExporter(object):
         res=set()
         for baseurl, content in d.iteritems():
             # Convert all links
-            for url in re.findall(r'''href=['"](.+?)['"> ]''', content):
+            for (attname, url) in re.findall(r'''(href|src)=['"](.+?)['"> ]''', content):
+                if url in self.url_translation:
+                    # Translation already done.
+                    continue
+
                 original_url=url
 
-                if url in self.url_translation:
-                    # The destination has already been processed
+                # FIXME: pre-compile all regexps
+                m=re.search(r'/packages/[^/]+/imagecache/(\d+)', url)
+                # Image translation. Add a .png extension.
+                if m:
+                    self.url_translation[original_url]="imagecache/%s.png" % m.group(1)
+                    self.used_snapshots.add(m.group(1))
                     continue
+
+                m=re.search(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?', url)
+                if m:
+                    ident=m.group(1)
+                    tales=m.group(2) or ''
+                    # FIXME: not robust wrt. multiple packages/videos
+                    a=self.controller.package.get_element_by_id(ident)
+                    if not a:
+                        self.url_translation[original_url]=self.unconverted(url, 'non-existent annotation')
+                        self.log("Cannot find annotation %s for overlaying" % ident)
+                        continue
+                    name=ident+tales.replace('/', '_')
+                    self.url_translation[original_url]='imagecache/overlay_%s.png' % name
+                    self.used_overlays.add( (ident, tales) )
+                    continue
+
                 l=url.replace(self.controller.server.urlbase, '')
                 if l.startswith('http:'):
                     # It is an external url
@@ -218,8 +221,9 @@ class WebsiteExporter(object):
                         if m.group(1) == 'resources':
                             print "Got resource", m.group(2)
                             # We have a resource.
+                            print "Resource ", url, "->", tales
                             self.url_translation[url]=tales
-                            self.used_resources.append(m.group(2))
+                            self.used_resources.add(m.group(2))
                             continue
                         elif m.group(1) in ('view', 'annotations', 'relations', 
                                             'views', 'schemas', 'annotationTypes', 'relationTypes',
@@ -255,9 +259,6 @@ class WebsiteExporter(object):
         """
         res={}
         for url, content in d.iteritems():
-            # Add .png suffix to all snapshots
-            content=re.sub(r'/packages/[^/]+/(imagecache/\d+)', r'\1.png', content)
-
             # Handle overlays
             def overlay_replacement(m):
                 package_id=m.group(1)
@@ -353,7 +354,6 @@ class WebsiteExporter(object):
             contents=self.get_contents( links_to_be_processed )
             self.progress_callback(progress, _("Depth %d: extracting resources") % depth)
             progress += main_step / 4
-            self.extract_resources(contents)
             self.progress_callback(progress, _("Depth %d: translating links") % depth)
             progress += main_step / 4
             links_to_be_processed=self.translate_links(contents)
@@ -362,7 +362,50 @@ class WebsiteExporter(object):
             self.write_contents( self.fix_links(contents) )
             depth += 1
 
+        self.progress_callback(.90, _("Copying images"))
+
+        for t in self.used_snapshots:
+            # FIXME: not robust wrt. multiple packages/videos
+            f=open(os.path.join(self.imgdir, '%s.png' % t), 'wb')
+            f.write(str(self.controller.package.imagecache[t]))
+            f.close()
+
+        # Copy overlays
+        for (ident, tales) in self.used_overlays:
+            # FIXME: not robust wrt. multiple packages/videos
+            a=self.controller.package.get_element_by_id(ident)
+            if not a:
+                print "Cannot find annotation %s for overlaying"
+                continue
+            name=ident+tales.replace('/', '_')
+            f=open(os.path.join(self.imgdir, 'overlay_%s.png' % name), 'wb')
+            if tales:
+                # There is a TALES expression
+                ctx=self.controller.build_context(here=a)
+                data=ctx.evaluateValue('here' + tales)
+            else:
+                data=a.content.data
+            f.write(str(self.controller.gui.overlay(self.controller.package.imagecache[a.fragment.begin], data)))
+            f.close()
+            
         self.progress_callback(.95, _("Copying resources"))
+
+        # Copy used resources
+        for path in self.used_resources:
+            dest=os.path.join(self.destination, 'resources', path)
+
+            d=os.path.dirname(dest)
+            if not os.path.isdir(d):
+                helper.recursive_mkdir(d)
+
+            r=self.controller.package.resources
+            for element in path.split('/'):
+                r=r[element]
+            output=open(dest, 'wb')
+            output.write(r.data)
+            output.close()
+
+        self.progress_callback(.90, _("Copying resources"))
 
         # Copy used resources
         for path in self.used_resources:
