@@ -110,6 +110,7 @@ class WebsiteExporter(object):
         d={}
 
         for url in views:
+            print "Getting content for", url
             # Handle fragments
             m=re.search('(.*)#(.+)', url)
             if m:
@@ -159,6 +160,7 @@ class WebsiteExporter(object):
         """
         res=set()
         for baseurl, content in d.iteritems():
+            print "Translating links from", baseurl
             # Convert all links
             for (attname, url) in re.findall(r'''(href|src)=['"](.+?)['"> ]''', content):
                 if url in self.url_translation:
@@ -219,9 +221,7 @@ class WebsiteExporter(object):
                     m=re.match('(\w+)/(.+)', tales)
                     if m:
                         if m.group(1) == 'resources':
-                            print "Got resource", m.group(2)
                             # We have a resource.
-                            print "Resource ", url, "->", tales
                             self.url_translation[url]=tales
                             self.used_resources.add(m.group(2))
                             continue
