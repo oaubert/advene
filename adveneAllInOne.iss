@@ -24,9 +24,9 @@ Source: c:\gtk\bin\libgsf-1-114.dll; DestDir: {app}
 Source: c:\gtk\bin\bzip2.dll; DestDir: {app}
 Source: c:\gtk\bin\libgio-2.0-0.dll; DestDir: {app}
 Source: c:\cygwin\usr\local\bin\libgoocanvas.dll; DestDir: {app}
-Source: c:\Program Files\VideoLAN\VLC\libvlc-control.dll; DestDir: {app}
+Source: c:\Program Files\VideoLAN\VLC\libvlccore.dll; DestDir: {app}
 Source: c:\Program Files\VideoLAN\VLC\libvlc.dll; DestDir: {app}
-Source: c:\Program Files\VideoLAN\VLC\plugins\*; DestDir: {app}\plugins
+Source: c:\Program Files\VideoLAN\VLC\plugins\*; DestDir: {app}\vlcplugins
 Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}
 
 [Languages]
@@ -36,10 +36,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.36
+AppVerName=Advene 0.38
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.36
+VersionInfoVersion=0.38
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -47,12 +47,12 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.36_all_in_one_vlc140108svn
-VersionInfoTextVersion=0.36
+OutputBaseFilename=setup_advene_0.38a_all_in_one_vlc140108svn
+VersionInfoTextVersion=0.38
 ChangesAssociations=yes
 
 [Registry]
-;Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
+Root: HKCU; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
 Root: HKCU; Subkey: ".azp"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletevalue; Check: CanChange;
 Root: HKCU; Subkey: "Advene"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletekey; Check: CanChange;
 Root: HKCU; Subkey: "Advene\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\advene.exe,0"; Check: CanChange;
@@ -72,7 +72,7 @@ var
   Uninstall: String;
 begin
   if (CurStep = ssInstall) then begin
-    if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall) then begin
+    if RegQueryStringValue(HKLM, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall) then begin
       if MsgBox('Warning: Old Version will be removed!', mbConfirmation, MB_OKCANCEL)=IDOK then begin
           Exec(RemoveQuotes(Uninstall), ' /SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ResultCode);
       end
