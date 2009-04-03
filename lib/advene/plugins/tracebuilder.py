@@ -24,6 +24,7 @@ It needs to register to the ECAEngine to capture events.
 It transforms these events into Operation objects and Action objects.
 Widgets can register with this trace builder to receive the trace.
 """
+import Queue
 from threading import Thread
 import time
 import socket
@@ -36,20 +37,26 @@ import advene.util.helper as helper
 import advene.util.handyxml as handyxml
 import xml.dom
 from gettext import gettext as _
+import atexit
+
 
 def register(controller):
     controller.register_tracer(TraceBuilder(controller))
     return
 name="Trace Builder plugin"
-#HOST="2a01:e35:2efc:5cd0:216:cbff:fea0:3fb9"
-#PORT=9990
+
 class TraceBuilder:
-    def __init__ (self, controller=None, parameters=None, package=None):
+    def __init__ (self, controller=None, parameters=None, package=None, ntbd=False, nte=False):
         #self.close_on_package_load = False
+        atexit.register(self.on_exit)
         self.controller=controller
-        self.host = "2a01:e35:2efc:5cd0:216:cbff:fea0:3fb9"
+        self.host = "::1" #"2a01:e35:2efc:5cd0:216:cbff:fea0:3fb9"
         self.port = 9990
         self.texp = None # thread to export trace to a network
+        self.tbroad = None # thread to broadcast trace
+        self.bdq = None # broadcasting queue
+        self.network_broadcasting = ntbd
+        self.network_exp = nte
         self.operations = []
         self.registered_views = []
         self.opened_actions = {}
@@ -92,14 +99,25 @@ class TraceBuilder:
         if package is None and controller is not None:
             package=controller.package
         self.__package=package
+        if self.network_broadcasting:
+            self.init_broadcasting()
         self.controller.event_handler.register_view(self)
         self.trace = Trace()
 
-    def __del__(self):
-        if self.texp is not None:
-            if self.texp.isAlive():
-                print('Export thread still running, waiting for its death...')
-            self.texp.join()
+    def on_exit(self):
+        if self.network_exp:
+            # wait for export thread death
+            if self.texp is not None:
+                if self.texp.isAlive():
+                    print('Export thread still running, waiting for its death...')
+                self.texp.join()
+        if self.network_broadcasting:
+            self.end_broadcasting()
+
+    def init_broadcasting(self):
+        self.bdq = Queue.Queue(-1)
+        self.tbroad = TBroadcast(self.host, self.port, self.bdq)
+        self.tbroad.start()
 
     def export(self):
         fname=config.data.advenefile(time.strftime("trace_advene-%Y%m%d-%H%M%S"),
@@ -118,25 +136,51 @@ class TraceBuilder:
         ET.ElementTree(tr).write(stream, encoding='utf-8')
         stream.close()
         #print "Data exported to %s" % fname
-        #self.network_export()
+        if self.network_exp:
+            self.network_export()
         return fname
 
+    def toggle_network_export(self):
+        self.network_exp = not self.network_exp
+        print "network export %s" % self.network_exp
+        return
+
     def network_export(self):
+        if not self.network_exp:
+            return
         if self.texp is not None:
             if self.texp.isAlive():
                 print "Export thread still running"
                 return
-            #else:
-            #    self.texp.join() # nettoie le zombie ou pas ...
+            else:
+                self.texp.join() # nettoie le zombie ou pas ...
         self.texp = TExport(self.host, self.port, self.trace)
         self.texp.start()
         
-    def change_host(self, ip):
-        self.host = ip
+    def toggle_network_broadcasting(self):
+        self.network_broadcasting = not self.network_broadcasting
+        if self.network_broadcasting:
+            self.init_broadcasting()
+        else:
+            self.end_broadcasting()
+        print "broadcast %s" % self.network_broadcasting
         return
-        
-    def change_port(self, port):
+
+    def end_broadcasting(self):
+        if self.tbroad.isAlive(): # should always be
+            print('Broadcasting thread still running, sending its death order !')
+            self.bdq.put("###\n")
+            self.tbroad.join()
+        return
+
+    def change_nework_infos(self, ip, port):
+        bc=self.network_broadcasting
+        if bc:
+            self.toggle_network_broadcasting()
+        self.host = ip
         self.port = port
+        if bc:
+            self.toggle_network_broadcasting()
         return
     
     def convert_old_trace(self, fname):
@@ -259,6 +303,18 @@ class TraceBuilder:
             return
         ev = op = ac = None
         ev = self.packEvent(obj)
+        # broadcast reseau
+        if self.network_broadcasting:
+            #verifying thread is still alive
+            if self.tbroad.isAlive():
+                self.bdq.put_nowait(ev)
+            #should be handled in TBroadcast thread
+            else:
+                #cleaning
+                self.toggle_network_broadcasting()
+                #relaunching
+                self.toggle_network_broadcasting()
+                self.bdq.put_nowait(ev)
         if ev.name in self.operation_mapping.keys():
             op = self.packOperation(obj)
             if op is not None:
@@ -771,8 +827,50 @@ class TExport(Thread):
                 sck.sendall(tmp)
                 nbe+=1
         except (socket.error,socket.gaierror), e:
-            print(_("Cannot send data to %s:%s %s") % (Hself.host, self.port,e))
+            print(_("Cannot send data to %s:%s %s") % (self.host, self.port,e))
             #self.log(_("Cannot export to %(HOST)s:%(PORT)s: %(e)s") % locals())
+            sck.close()
             return
         print '%s events exported to %s:%s' % (nbe, self.host, self.port)
         sck.close()      
+
+class TBroadcast(Thread):
+   def __init__ (self, host, port, bdq):
+      Thread.__init__(self)
+      self.host = host
+      self.port = port
+      self.bdq = bdq
+      self.obsel = None
+   def run(self):
+        # Creating socket and queue
+        try:
+            sck = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+            addr = socket.getaddrinfo(self.host, self.port)
+            sck.connect(addr[0][4])
+        except (socket.error,socket.gaierror), e:
+            print(_("Cannot export to %s:%s %s") % (self.host, self.port,e))
+            #self.log(_("Cannot export to %(HOST)s:%(PORT)s: %(e)s") % locals())
+            return
+        nbe=0
+        # Infinite loop waiting for event to send
+        # Receiving from Queue and sending to host
+        # Need to test some special code to stop thread
+        while (1):
+            #we shouldnt receive exception from the queue
+            self.obsel = self.bdq.get()
+            if not isinstance(self.obsel, Event):
+                if self.obsel == "###\n":
+                    print "Broadcasting: death received"
+                    break
+                else:
+                    continue
+            tmp = self.obsel.to_xml_string(nbe)
+            try:
+                sck.sendall(tmp)
+                nbe+=1
+            except (socket.error,socket.gaierror), e:
+                print(_("Cannot send event %s to %s:%s %s") % (nbe, self.host, self.port,e))
+                #self.log(_("Cannot export to %(HOST)s:%(PORT)s: %(e)s") % locals())
+                return
+        print _('%s events sent to %s:%s during session.') % (nbe, self.host, self.port)
+        sck.close()  
