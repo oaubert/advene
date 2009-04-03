@@ -259,6 +259,7 @@ class WebsiteExporter(object):
         """
         res={}
         for url, content in d.iteritems():
+            print "Fixing links in ", url
             # Handle overlays
             def overlay_replacement(m):
                 package_id=m.group(1)
@@ -268,7 +269,7 @@ class WebsiteExporter(object):
                     name=ident+tales.replace('/', '_')
                 else:
                     name=ident
-                return 'imagecache/'+name+'.png'
+                return 'imagecache/overlay_%s.png' % name
             content=re.sub(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?', overlay_replacement, content)
 
             # Convert all links
