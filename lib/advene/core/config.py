@@ -109,7 +109,7 @@ class Config(object):
                 # VLC binary path
                 'vlc': 'c:\\Program Files\\VideoLAN\\VLC',
                 # VLC additional plugins path
-                'plugins': 'c:\\Program Files\\Advene\\lib',
+                'plugins': 'c:\\Program Files\\Advene\\vlcplugins',
                 # Advene modules path
                 'advene': 'c:\\Program Files\\Advene',
                 # Advene resources (.glade, template, ...) path
@@ -545,7 +545,7 @@ class Config(object):
         print "Setting Advene paths from %s" % advenehome
         self.path['advene'] = advenehome
         self.path['locale'] = os.path.sep.join( (advenehome, 'locale') )
-        self.path['plugins'] = os.path.sep.join( (advenehome, 'lib') )
+        self.path['plugins'] = os.path.sep.join( (advenehome, 'vlcplugins') )
         self.path['resources'] = os.path.sep.join( (advenehome, 'share') )
         self.path['web'] = os.path.sep.join( (advenehome, 'share', 'web') )
 
@@ -838,7 +838,7 @@ class Config(object):
         data.path['locale']=os.path.sep.join( (maindir, 'locale') )
         data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
         data.path['advene']=maindir
-        #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
+        #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlcplugins') )
 
 data = Config ()
 data.check_settings_directory()
