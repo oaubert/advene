@@ -103,236 +103,228 @@ class WebsiteExporter(object):
         return 'unconverted.html?url=%s&reason=%s' % (
             urllib.quote(url),
             urllib.quote_plus(reason))
-        #return url
 
-    def get_contents(self, views):
-        """Return the contents of the given views as a dict.
-        
-        views is a list of URLs.
+    def get_contents(self, url):
+        """Return the contents of the given view.
         """
-        d={}
+        # Handle fragments
+        m=re.search('(.*)#(.+)', url)
+        if m:
+            url=m.group(1)
+            if not url:
+                # Empty URL: we are addressing ourselves.
+                return None
 
-        for url in views:
-            print "Getting content for", url
-            # Handle fragments
-            m=re.search('(.*)#(.+)', url)
-            if m:
-                url=m.group(1)
-                if not url:
-                    # Empty URL: we are addressing ourselves.
-                    continue
+        m=re.search('packages/(advene|%s)/(.*)' % self.controller.current_alias, url)
+        if m:
+            # Absolute url
+            address=m.group(2)
+        elif url in (v.id for v in self.controller.package.views):
+            # Relative url for a view
+            address='view/'+url
+        else:
+            # No match. Do not try to retrieve
+            return None
 
-            m=re.search('packages/(advene|%s)/(.*)' % self.controller.current_alias, url)
-            if m:
-                # Absolute url
-                address=m.group(2)
-            elif url in (v.id for v in self.controller.package.views):
-                # Relative url for a view
-                address='view/'+url
-            else:
-                # No match. Do not try to retrieve
-                continue
+        # Generate the view
+        ctx=self.controller.build_context()
+        try:
+            content=ctx.evaluateValue('here/%s' % address)
+        except Exception, e:
+            print "Exception when evaluating", address
+            print unicode(e).encode('utf-8')
+            content=None
 
-            # Generate the view
-            ctx=self.controller.build_context()
+        if not isinstance(content, basestring):
+            # Not a string. Could be an Advene element
             try:
-                content=ctx.evaluateValue('here/%s' % address)
-            except Exception, e:
-                print "Exception when evaluating", address
-                print unicode(e).encode('utf-8')
-                content=None
+                c=content.view(context=self.controller.build_context(here=content))
+                content=c
+            except AttributeError:
+                # Apparently not. Fallback on explicit string conversion.
+                content=unicode(content)
+        return content
 
-            if not isinstance(content, basestring):
-                # Not a string. Could be an Advene element
-                try:
-                    c=content.view(context=self.controller.build_context(here=content))
-                    content=c
-                except AttributeError:
-                    # Apparently not. Fallback on explicit string conversion.
-                    content=unicode(content)
-
-            d[url]=content
-        return d
-
-    def translate_links(self, d):
-        """Translate links from the given contents dict.
+    def translate_links(self, content, baseurl=None, max_depth_exceeded=False):
+        """Translate links from the given content.
         
         This method updates self.url_translation.
 
         It returns a list of URLs that should be processed in the next stage (depth+1).
         """
         res=set()
-        for baseurl, content in d.iteritems():
-            print "Translating links from", baseurl
-            # Convert all links
-            for (attname, url) in re.findall(r'''(href|src)=['"](.+?)['"> ]''', content):
+        # Convert all links
+        for (attname, url) in re.findall(r'''(href|src)=['"](.+?)['"> ]''', content):
+            if url in self.url_translation:
+                # Translation already done.
+                continue
+
+            original_url=url
+
+            # FIXME: pre-compile all regexps
+            m=re.search(r'/packages/[^/]+/imagecache/(\d+)', url)
+            # Image translation. Add a .png extension.
+            if m:
+                self.url_translation[original_url]="imagecache/%s.png" % m.group(1)
+                self.used_snapshots.add(m.group(1))
+                continue
+
+            m=re.search(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?', url)
+            if m:
+                ident=m.group(1)
+                tales=m.group(2) or ''
+                # FIXME: not robust wrt. multiple packages/videos
+                a=self.controller.package.get_element_by_id(ident)
+                if not a:
+                    self.url_translation[original_url]=self.unconverted(url, 'non-existent annotation')
+                    self.log("Cannot find annotation %s for overlaying" % ident)
+                    continue
+                name=ident+tales.replace('/', '_')
+                self.url_translation[original_url]='imagecache/overlay_%s.png' % name
+                self.used_overlays.add( (ident, tales) )
+                continue
+
+            l=url.replace(self.controller.server.urlbase, '')
+            if l.startswith('http:'):
+                # It is an external url
+                self.url_translation[url]=url
+                continue
+
+            fragment=None
+            m=re.search('(.*)#(.+)', url)
+            if m:
+                url=m.group(1)
+                fragment=m.group(2)
+                if not url:
+                    # Empty URL: we are addressing ourselves.
+                    continue
                 if url in self.url_translation:
-                    # Translation already done.
+                    self.url_translation[original_url]="%s#%s" % (self.url_translation[url],
+                                                                  fragment)
+                    # URL already processed
                     continue
 
-                original_url=url
+            m=re.search('packages/(advene|%s)/(.*)' % self.controller.current_alias, url)
+            if m:
+                # Absolute url
+                tales=m.group(2)
+            elif url in (v.id for v in self.controller.package.views):
+                # Relative url.
+                tales='view/'+url
+            else:
+                tales=None
 
-                # FIXME: pre-compile all regexps
-                m=re.search(r'/packages/[^/]+/imagecache/(\d+)', url)
-                # Image translation. Add a .png extension.
+            if tales:
+                m=re.match('(\w+)/(.+)', tales)
                 if m:
-                    self.url_translation[original_url]="imagecache/%s.png" % m.group(1)
-                    self.used_snapshots.add(m.group(1))
-                    continue
-
-                m=re.search(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?', url)
-                if m:
-                    ident=m.group(1)
-                    tales=m.group(2) or ''
-                    # FIXME: not robust wrt. multiple packages/videos
-                    a=self.controller.package.get_element_by_id(ident)
-                    if not a:
-                        self.url_translation[original_url]=self.unconverted(url, 'non-existent annotation')
-                        self.log("Cannot find annotation %s for overlaying" % ident)
+                    if m.group(1) == 'resources':
+                        # We have a resource.
+                        self.url_translation[url]=tales
+                        self.used_resources.add(m.group(2))
                         continue
-                    name=ident+tales.replace('/', '_')
-                    self.url_translation[original_url]='imagecache/overlay_%s.png' % name
-                    self.used_overlays.add( (ident, tales) )
-                    continue
+                    elif m.group(1) in ('view', 'annotations', 'relations', 
+                                        'views', 'schemas', 'annotationTypes', 'relationTypes',
+                                        'queries'):
+                        # We skip the first element, which is either view/
+                        # (for toplevel views), or a bundle (annotations, views...)
+                        output=m.group(2).replace('/', '_')
 
-                l=url.replace(self.controller.server.urlbase, '')
-                if l.startswith('http:'):
-                    # It is an external url
-                    self.url_translation[url]=url
-                    continue
-
-                fragment=None
-                m=re.search('(.*)#(.+)', url)
-                if m:
-                    url=m.group(1)
-                    fragment=m.group(2)
-                    if not url:
-                        # Empty URL: we are addressing ourselves.
-                        continue
-
-                m=re.search('packages/(advene|%s)/(.*)' % self.controller.current_alias, url)
-                if m:
-                    # Absolute url
-                    tales=m.group(2)
-                elif url in (v.id for v in self.controller.package.views):
-                    # Relative url.
-                    tales='view/'+url
-                else:
-                    tales=None
-                
-                if tales:
-                    m=re.match('(\w+)/(.+)', tales)
-                    if m:
-                        if m.group(1) == 'resources':
-                            # We have a resource.
-                            self.url_translation[url]=tales
-                            self.used_resources.add(m.group(2))
-                            continue
-                        elif m.group(1) in ('view', 'annotations', 'relations', 
-                                            'views', 'schemas', 'annotationTypes', 'relationTypes',
-                                            'queries'):
-                            # We skip the first element, which is either view/
-                            # (for toplevel views), or a bundle (annotations, views...)
-                            output=m.group(2).replace('/', '_')
-                            
-                            # Check if we can add a .html suffix. This
-                            # will facilitate handling by webservers.
-                            path=m.group(2).split('/')
-                            if path and path[-2] == 'view':
-                                # Got a view. Check its mimetype
-                                v=self.controller.package.get_element_by_id(path[-1])
-                                if v and 'html' in v.content.mimetype:
-                                    output = output+".html"
-
-                            res.add(original_url)
-                        else:
-                            # Can be a query over a package, or a relative pathname
-                            output=tales.replace('/', '_')
-                            
-                            res.add(original_url)
+                        # Check if we can add a .html suffix. This
+                        # will facilitate handling by webservers.
+                        path=m.group(2).split('/')
+                        print "path", path
+                        if path and (len(path) == 1 or path[-2] == 'view'):
+                            # Got a view. Check its mimetype
+                            v=self.controller.package.get_element_by_id(path[-1])
+                            if v and hasattr(v, 'content') and 'html' in v.content.mimetype:
+                                output = output+".html"
+                        res.add(original_url)
                     else:
+                        # Can be a query over a package, or a relative pathname
                         output=tales.replace('/', '_')
-                    self.url_translation[url]=output
+                        res.add(original_url)
                 else:
-                    # No TALES expression. Could be a number of things
-                    if self.video_url and url.startswith('/media/play'):
-                        l=re.findall(r'/media/play/(\d+)', url)
-                        if l:
-                            self.url_translation[url]=self.video_player.player_url(long(l[0]))
-                        else:
-                            self.url_translation[url]=self.unconverted(url, 'unhandled player url %s' % url)
+                    output=tales.replace('/', '_')
+                self.url_translation[url]=output
+            else:
+                # No TALES expression. Could be a number of things
+                if self.video_url and url.startswith('/media/play'):
+                    l=re.findall(r'/media/play/(\d+)', url)
+                    if l:
+                        self.url_translation[url]=self.video_player.player_url(long(l[0]))
                     else:
-                        # It is another element.
-                        self.url_translation[url]=self.unconverted(url, 'unhandled url %s' % url)
+                        self.url_translation[url]=self.unconverted(url, 'unhandled player url %s' % url)
+                else:
+                    # It is another element.
+                    self.url_translation[url]=self.unconverted(url, 'unhandled url %s' % url)
+        if max_depth_exceeded:
+            # Max depth exceeded: all new links should be marked as unconverted
+            for url in res:
+                self.url_translation[url]=self.unconverted(url, 'max depth exceeded')
+            res=set()
         return res
 
-    def fix_links(self, d):
+    def fix_links(self, content):
         """Transform contents in order to fix links.
         """
-        res={}
-        for url, content in d.iteritems():
-            print "Fixing links in ", url
-            # Handle overlays
-            def overlay_replacement(m):
-                package_id=m.group(1)
-                ident=m.group(2)
-                tales=m.group(3)
-                if tales:
-                    name=ident+tales.replace('/', '_')
+        # Handle overlays
+        def overlay_replacement(m):
+            package_id=m.group(1)
+            ident=m.group(2)
+            tales=m.group(3)
+            if tales:
+                name=ident+tales.replace('/', '_')
+            else:
+                name=ident
+            return 'imagecache/overlay_%s.png' % name
+        content=re.sub(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?', overlay_replacement, content)
+
+        # Convert all links
+        for (attname, link) in re.findall(r'''(href|src)=['"](.+?)['"> ]''', content):
+            if link.startswith('imagecache/'):
+                # Already processed by the global regexp at the beginning
+                continue
+            if link.startswith('#'):
+                continue
+            m=re.search('(.*)#(.+)', link)
+            if m:
+                fragment=m.group(2)
+                tr=self.url_translation.get(m.group(1))
+            else:
+                fragment=None
+                tr=self.url_translation.get(link)
+            if tr is None:
+                print "website export bug: %s was not translated" % link
+                continue
+            if link != tr:
+                extra=[]
+                attr, l = self.video_player.fix_link(tr)
+                if attr is not None:
+                    extra.append(attr)
+                if l is not None:
+                    tr=l
+                if 'unconverted' in tr:
+                    extra.append('onClick="return false;"')
+                if fragment is not None:
+                    tr=tr+'#'+fragment
+                if extra:
+                    content=re.sub('''(%s=['"])%s(['"> ])''' % (attname, link),
+                                   " ".join(extra) + r''' \1''' + tr + r'''\2''',
+                                   content)
                 else:
-                    name=ident
-                return 'imagecache/overlay_%s.png' % name
-            content=re.sub(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?', overlay_replacement, content)
+                    content=re.sub('''(%s=['"])%s(['"> ])''' % (attname, link),
+                                   r'''\1''' + tr + r'''\2''',
+                                   content)
 
-            # Convert all links
-            for (attname, link) in re.findall(r'''(href|src)=['"](.+?)['"> ]''', content):
-                if link.startswith('imagecache/'):
-                    # Already processed by the global regexp at the beginning
-                    continue
-                if link.startswith('#'):
-                    continue
-                m=re.search('(.*)#(.+)', link)
-                if m:
-                    fragment=m.group(2)
-                    tr=self.url_translation.get(m.group(1))
-                else:
-                    fragment=None
-                    tr=self.url_translation.get(link)
-                if tr is None:
-                    print "website export bug: %s was not translated" % link
-                    continue
-                if link != tr:
-                    extra=[]
-                    attr, l = self.video_player.fix_link(tr)
-                    if attr is not None:
-                        extra.append(attr)
-                    if l is not None:
-                        tr=l
-                    if 'unconverted' in tr:
-                        extra.append('onClick="return false;"')
-                    if fragment is not None:
-                        tr=tr+'#'+fragment
-                    if extra:
-                        content=re.sub('''(%s=['"])%s(['"> ])''' % (attname, link),
-                                       " ".join(extra) + r''' \1''' + tr + r'''\2''',
-                                       content)
-                    else:
-                        content=re.sub('''(%s=['"])%s(['"> ])''' % (attname, link),
-                                       r'''\1''' + tr + r'''\2''',
-                                       content)
+        content=self.video_player.transform_document(content)
+        return content
 
-            content=self.video_player.transform_document(content)
-
-            res[url]=content
-        return res
-
-    def write_contents(self, d):
-        for url, content in d.iteritems():
-            # Write the result.
-            output=self.url_translation[url]
-            f=open(os.path.join(self.destination, output), 'w')
-            f.write(content)
-            f.close()
+    def write_contents(self, content, url):
+        # Write the result.
+        output=self.url_translation[url]
+        f=open(os.path.join(self.destination, output), 'w')
+        f.write(content)
+        f.close()
 
     def website_export(self):
         main_step=1.0/self.max_depth
@@ -345,35 +337,31 @@ class WebsiteExporter(object):
         # Pre-seed url translations for base views
         for v in self.views:
             link="/".join( (ctx.globals['options']['package_url'], 'view', v.id) )
-            if 'html'  in v.content.mimetype:
+            if hasattr(v, 'content') and 'html'  in v.content.mimetype:
                 self.url_translation[link]="%s.html" % v.id
             else:
                 self.url_translation[link]=v.id
             view_url[v]=link
 
-        progress=.1
-        
+        progress=.01
         depth=0
 
         links_to_be_processed=view_url.values()
 
         while depth <= self.max_depth:
-            self.progress_callback(progress, _("Depth %d: getting contents") % depth)
-            progress += main_step / 4
-            contents=self.get_contents( links_to_be_processed )
-            self.progress_callback(progress, _("Depth %d: extracting resources") % depth)
-            progress += main_step / 4
-            self.progress_callback(progress, _("Depth %d: translating links") % depth)
-            progress += main_step / 4
-            links_to_be_processed=self.translate_links(contents)
-            if depth == self.max_depth:
-                # Last step. All links to be processed should be marked as unconverted
-                for url in links_to_be_processed:
-                    self.url_translation[url]=self.unconverted(url, 'max depth exceeded')
-                links_to_be_processed=[]
-            self.progress_callback(progress, _("Depth %d: converting contents") % depth)
-            progress += main_step / 4
-            self.write_contents( self.fix_links(contents) )
+            step=main_step / (len(links_to_be_processed) or 1)
+            self.progress_callback(progress, _("Depth %d") % depth)
+            links=set()
+            for url in links_to_be_processed:
+                self.progress_callback(progress, _("Depth %d: processing %s") % (depth, url))
+                print "Processing", url
+                progress += step
+                content=self.get_contents(url)
+                links.update(self.translate_links(content, 
+                                                  baseurl=url,
+                                                  max_depth_exceeded=(depth == self.max_depth)))
+                self.write_contents(self.fix_links(content), url)
+            links_to_be_processed=links
             depth += 1
 
         self.progress_callback(.90, _("Copying images"))
