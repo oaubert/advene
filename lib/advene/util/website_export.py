@@ -27,6 +27,15 @@ import urllib
 import advene.core.config as config
 import advene.util.helper as helper
 
+fragment_re=re.compile('(.*)#(.+)')
+package_expression_re=re.compile('packages/(\w+)/(.*)')
+href_re=re.compile(r'''(href|src)=['"](.+?)['"> ]''')
+snapshot_re=re.compile(r'/packages/[^/]+/imagecache/(\d+)')
+overlay_re=re.compile(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?')
+tales_re=re.compile('(\w+)/(.+)')
+player_re=re.compile(r'/media/play/(\d+)')
+overlay_replace_re=re.compile(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?')
+
 class WebsiteExporter(object):
     """Export a set of static views to a directory.
 
@@ -105,14 +114,14 @@ class WebsiteExporter(object):
         """Return the contents of the given view.
         """
         # Handle fragments
-        m=re.search('(.*)#(.+)', url)
+        m=fragment_re.search(url)
         if m:
             url=m.group(1)
             if not url:
                 # Empty URL: we are addressing ourselves.
                 return None
 
-        m=re.search('packages/(advene|%s)/(.*)' % self.controller.current_alias, url)
+        m=package_expression_re.search(url)
         if m:
             # Absolute url
             address=m.group(2)
@@ -155,22 +164,21 @@ class WebsiteExporter(object):
         used_resources=set()
 
         # Convert all links
-        for (attname, url) in re.findall(r'''(href|src)=['"](.+?)['"> ]''', content):
+        for (attname, url) in href_re.findall(content):
             if url in self.url_translation:
                 # Translation already done.
                 continue
 
             original_url=url
 
-            # FIXME: pre-compile all regexps
-            m=re.search(r'/packages/[^/]+/imagecache/(\d+)', url)
+            m=snapshot_re.search(url)
             # Image translation. Add a .png extension.
             if m:
                 self.url_translation[original_url]="imagecache/%s.png" % m.group(1)
                 used_snapshots.add(m.group(1))
                 continue
 
-            m=re.search(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?', url)
+            m=overlay_re.search(url)
             if m:
                 ident=m.group(1)
                 tales=m.group(2) or ''
@@ -192,7 +200,7 @@ class WebsiteExporter(object):
                 continue
 
             fragment=None
-            m=re.search('(.*)#(.+)', url)
+            m=fragment_re.search(url)
             if m:
                 url=m.group(1)
                 fragment=m.group(2)
@@ -205,7 +213,7 @@ class WebsiteExporter(object):
                     # URL already processed
                     continue
 
-            m=re.search('packages/(advene|%s)/(.*)' % self.controller.current_alias, url)
+            m=package_expression_re.search(url)
             if m:
                 # Absolute url
                 tales=m.group(2)
@@ -216,7 +224,7 @@ class WebsiteExporter(object):
                 tales=None
 
             if tales:
-                m=re.match('(\w+)/(.+)', tales)
+                m=tales_re.match(tales)
                 if m:
                     if m.group(1) == 'resources':
                         # We have a resource.
@@ -233,7 +241,6 @@ class WebsiteExporter(object):
                         # Check if we can add a .html suffix. This
                         # will facilitate handling by webservers.
                         path=m.group(2).split('/')
-                        print "path", path
                         if path and (len(path) == 1 or path[-2] == 'view'):
                             # Got a view. Check its mimetype
                             v=self.controller.package.get_element_by_id(path[-1])
@@ -250,9 +257,10 @@ class WebsiteExporter(object):
             else:
                 # No TALES expression. Could be a number of things
                 if self.video_url and url.startswith('/media/play'):
-                    l=re.findall(r'/media/play/(\d+)', url)
-                    if l:
-                        self.url_translation[url]=self.video_player.player_url(long(l[0]))
+                    # FIXME: handle STBV activation
+                    m=player_re.search(url)
+                    if m:
+                        self.url_translation[url]=self.video_player.player_url(long(m.group(1)))
                     else:
                         self.url_translation[url]=self.unconverted(url, 'unhandled player url %s' % url)
                 else:
@@ -278,16 +286,16 @@ class WebsiteExporter(object):
             else:
                 name=ident
             return 'imagecache/overlay_%s.png' % name
-        content=re.sub(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?', overlay_replacement, content)
+        content=overlay_replace_re.sub(overlay_replacement, content)
 
         # Convert all links
-        for (attname, link) in re.findall(r'''(href|src)=['"](.+?)['"> ]''', content):
+        for (attname, link) in href_re.findall(content):
             if link.startswith('imagecache/'):
                 # Already processed by the global regexp at the beginning
                 continue
             if link.startswith('#'):
                 continue
-            m=re.search('(.*)#(.+)', link)
+            m=fragment_re.search(link)
             if m:
                 fragment=m.group(2)
                 tr=self.url_translation.get(m.group(1))
@@ -593,10 +601,11 @@ class YoutubeVideoPlayer(VideoPlayer):
 class EmbeddedYoutubeVideoPlayer(VideoPlayer):
     """Embedded Youtube video player support.
     """
+    url_re=re.compile('youtube.com/.+v=([\w\d]+)')
     def __init__(self, destination, video_url):
         self.destination=destination
         self.video_url=video_url
-        l=re.findall('youtube.com/.+v=([\w\d]+)', self.video_url)
+        l=self.url_re.findall(self.video_url)
         if l:
             self.video_id=l[0]
         else:
