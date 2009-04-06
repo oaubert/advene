@@ -338,13 +338,6 @@ class WebsiteExporter(object):
 
         progress=.1
         
-        # FIXME: rewrite breadth-first:
-        # d ({url: content}) = self.get_contents( views )
-        # links=self.extract_links( c for c in d.itervalues() )
-        # self.url_translation.update(self.translate_links(links))
-        # {url: content} = fix_links(d)
-        # self.write_contents( d )
-        # export_views( links_not_written, depth+1)
         depth=0
 
         links_to_be_processed=view_url.values()
@@ -358,6 +351,11 @@ class WebsiteExporter(object):
             self.progress_callback(progress, _("Depth %d: translating links") % depth)
             progress += main_step / 4
             links_to_be_processed=self.translate_links(contents)
+            if depth == max_depth:
+                # Last step. All links to be processed should be marked as unconverted
+                for url in links_to_be_processed:
+                    self.url_translation[url]=self.unconverted(url, 'max depth exceeded')
+                links_to_be_processed=[]
             self.progress_callback(progress, _("Depth %d: converting contents") % depth)
             progress += main_step / 4
             self.write_contents( self.fix_links(contents) )
