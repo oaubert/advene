@@ -235,6 +235,15 @@ class WebsiteExporter(object):
                             # (for toplevel views), or a bundle (annotations, views...)
                             output=m.group(2).replace('/', '_')
                             
+                            # Check if we can add a .html suffix. This
+                            # will facilitate handling by webservers.
+                            path=m.group(2).split('/')
+                            if path and path[-2] == 'view':
+                                # Got a view. Check its mimetype
+                                v=self.controller.package.get_element_by_id(path[-1])
+                                if v and 'html' in v.content.mimetype:
+                                    output = output+".html"
+
                             res.add(original_url)
                         else:
                             # Can be a query over a package, or a relative pathname
@@ -336,7 +345,10 @@ class WebsiteExporter(object):
         # Pre-seed url translations for base views
         for v in self.views:
             link="/".join( (ctx.globals['options']['package_url'], 'view', v.id) )
-            self.url_translation[link]=v.id
+            if 'html'  in v.content.mimetype:
+                self.url_translation[link]="%s.html" % v.id
+            else:
+                self.url_translation[link]=v.id
             view_url[v]=link
 
         progress=.1
@@ -428,12 +440,14 @@ class WebsiteExporter(object):
         self.video_player.finalize()
 
         # Generate a default index.html
-        f=open(os.path.join(self.destination, "index.html"), 'w')
+        name="index.html"
+        if name in self.url_translation.values():
+            name="_index.html"
+        f=open(os.path.join(self.destination, name), 'w')
         defaultview=self.controller.package.getMetaData(config.data.namespace, 'default_utbv')
         v=self.controller.package.views.get_by_id(defaultview)
         if defaultview and v:
-            default=_("""<p><strong>You should probably begin at <a href="%(href)s">%(title)s</a>.</strong></p>""") % { 'href': v.id,
-                                                                                                                        'title': self.controller.get_title(v) }
+            default=_("""<p><strong>You should probably begin at <a href="%(href)s">%(title)s</a>.</strong></p>""") % { 'href': self.url_translation[view_url[v]], 'title': self.controller.get_title(v) }
         else:
             default=''
         f.write("""<html><head>%(title)s</head>
