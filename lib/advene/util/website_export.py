@@ -100,7 +100,7 @@ class WebsiteExporter(object):
 
     def progress_callback(self, value, msg):
         """Do-nothing progress callback.
-        
+
         This method can be overriden by the caller from the constructor.
         """
         return
@@ -153,7 +153,7 @@ class WebsiteExporter(object):
 
     def translate_links(self, content, baseurl=None, max_depth_exceeded=False):
         """Translate links from the given content.
-        
+
         This method updates self.url_translation.
 
         It returns a list of URLs that should be processed in the next stage (depth+1).
@@ -231,7 +231,7 @@ class WebsiteExporter(object):
                         self.url_translation[url]=tales
                         used_resources.add(m.group(2))
                         continue
-                    elif m.group(1) in ('view', 'annotations', 'relations', 
+                    elif m.group(1) in ('view', 'annotations', 'relations',
                                         'views', 'schemas', 'annotationTypes', 'relationTypes',
                                         'queries'):
                         # We skip the first element, which is either view/
@@ -410,18 +410,18 @@ class WebsiteExporter(object):
                 progress += step
                 content=self.get_contents(url)
 
-                (new_links, 
-                 used_snapshots, 
+                (new_links,
+                 used_snapshots,
                  used_overlays,
-                 used_resources)=self.translate_links(content, 
+                 used_resources)=self.translate_links(content,
                                                       url,
                                                       max_depth_exceeded)
                 links.update(new_links)
-                
+
                 # Write contents
-                self.write_data(url, self.fix_links(content), 
-                                used_snapshots, 
-                                used_overlays, 
+                self.write_data(url, self.fix_links(content),
+                                used_snapshots,
+                                used_overlays,
                                 used_resources)
 
             links_to_be_processed=links
@@ -464,7 +464,7 @@ class WebsiteExporter(object):
         f.close()
 
         self.progress_callback(1.0, _("Export complete"))
-        
+
 class VideoPlayer(object):
     """Generic video player support.
 
@@ -517,7 +517,7 @@ class VideoPlayer(object):
         """Finalise the environment.
         """
         return
-        
+
 class GoogleVideoPlayer(VideoPlayer):
     """Google video player support.
     """
@@ -650,7 +650,7 @@ class EmbeddedYoutubeVideoPlayer(VideoPlayer):
 
     def finalize(self):
         """Finalise the environment.
-        """            
+        """
         f=open(os.path.join(self.destination, "player.html"), 'w')
         f.write('''<html><head>
 <title>Video Player</title>
