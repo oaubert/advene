@@ -22,6 +22,7 @@ from gettext import gettext as _
 import os
 import time
 import re
+import urllib
 
 import advene.core.config as config
 import advene.util.helper as helper
@@ -99,7 +100,9 @@ class WebsiteExporter(object):
         return
 
     def unconverted(self, url, reason):
-        return 'unconverted.html?' + reason.replace(' ', '_')
+        return 'unconverted.html?url=%s&reason=%s' % (
+            urllib.quote(url),
+            urllib.quote_plus(reason))
         #return url
 
     def get_contents(self, views):
