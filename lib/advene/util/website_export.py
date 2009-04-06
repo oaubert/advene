@@ -254,6 +254,9 @@ class WebsiteExporter(object):
                 else:
                     output=tales.replace('/', '_')
                 self.url_translation[url]=output
+                if fragment:
+                    self.url_translation[original_url]="%s#%s" % (output, fragment)
+
             else:
                 # No TALES expression. Could be a number of things
                 if self.video_url and url.startswith('/media/play'):
