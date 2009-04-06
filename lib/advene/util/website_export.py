@@ -75,9 +75,6 @@ class WebsiteExporter(object):
         self.video_player=self.find_video_player(video_url)
 
         self.url_translation={}
-        self.used_resources=set()
-        self.used_snapshots=set()
-        self.used_overlays=set()
 
     def log(self, *p):
         self.controller.log(*p)
@@ -153,6 +150,10 @@ class WebsiteExporter(object):
         It returns a list of URLs that should be processed in the next stage (depth+1).
         """
         res=set()
+        used_snapshots=set()
+        used_overlays=set()
+        used_resources=set()
+
         # Convert all links
         for (attname, url) in re.findall(r'''(href|src)=['"](.+?)['"> ]''', content):
             if url in self.url_translation:
@@ -166,7 +167,7 @@ class WebsiteExporter(object):
             # Image translation. Add a .png extension.
             if m:
                 self.url_translation[original_url]="imagecache/%s.png" % m.group(1)
-                self.used_snapshots.add(m.group(1))
+                used_snapshots.add(m.group(1))
                 continue
 
             m=re.search(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?', url)
@@ -181,7 +182,7 @@ class WebsiteExporter(object):
                     continue
                 name=ident+tales.replace('/', '_')
                 self.url_translation[original_url]='imagecache/overlay_%s.png' % name
-                self.used_overlays.add( (ident, tales) )
+                used_overlays.add( (ident, tales) )
                 continue
 
             l=url.replace(self.controller.server.urlbase, '')
@@ -220,7 +221,7 @@ class WebsiteExporter(object):
                     if m.group(1) == 'resources':
                         # We have a resource.
                         self.url_translation[url]=tales
-                        self.used_resources.add(m.group(2))
+                        used_resources.add(m.group(2))
                         continue
                     elif m.group(1) in ('view', 'annotations', 'relations', 
                                         'views', 'schemas', 'annotationTypes', 'relationTypes',
@@ -262,7 +263,7 @@ class WebsiteExporter(object):
             for url in res:
                 self.url_translation[url]=self.unconverted(url, 'max depth exceeded')
             res=set()
-        return res
+        return res, used_snapshots, used_overlays, used_resources
 
     def fix_links(self, content):
         """Transform contents in order to fix links.
@@ -319,12 +320,54 @@ class WebsiteExporter(object):
         content=self.video_player.transform_document(content)
         return content
 
-    def write_contents(self, content, url):
-        # Write the result.
+    def write_data(self, url, content, used_snapshots, used_overlays, used_resources):
+        """Write the converted content as well as associated data.
+        """
+        # Write the content.
         output=self.url_translation[url]
         f=open(os.path.join(self.destination, output), 'w')
         f.write(content)
         f.close()
+
+        # Copy snapshots
+        for t in used_snapshots:
+            # FIXME: not robust wrt. multiple packages/videos
+            f=open(os.path.join(self.imgdir, '%s.png' % t), 'wb')
+            f.write(str(self.controller.package.imagecache[t]))
+            f.close()
+
+        # Copy overlays
+        for (ident, tales) in used_overlays:
+            # FIXME: not robust wrt. multiple packages/videos
+            a=self.controller.package.get_element_by_id(ident)
+            if not a:
+                print "Cannot find annotation %s for overlaying"
+                continue
+            name=ident+tales.replace('/', '_')
+            f=open(os.path.join(self.imgdir, 'overlay_%s.png' % name), 'wb')
+            if tales:
+                # There is a TALES expression
+                ctx=self.controller.build_context(here=a)
+                data=ctx.evaluateValue('here' + tales)
+            else:
+                data=a.content.data
+            f.write(str(self.controller.gui.overlay(self.controller.package.imagecache[a.fragment.begin], data)))
+            f.close()
+
+        # Copy resources
+        for path in used_resources:
+            dest=os.path.join(self.destination, 'resources', path)
+
+            d=os.path.dirname(dest)
+            if not os.path.isdir(d):
+                helper.recursive_mkdir(d)
+
+            r=self.controller.package.resources
+            for element in path.split('/'):
+                r=r[element]
+            output=open(dest, 'wb')
+            output.write(r.data)
+            output.close()
 
     def website_export(self):
         main_step=1.0/self.max_depth
@@ -344,11 +387,12 @@ class WebsiteExporter(object):
             view_url[v]=link
 
         progress=.01
-        depth=0
+        depth=1
 
         links_to_be_processed=view_url.values()
 
         while depth <= self.max_depth:
+            max_depth_exceeded = (depth == self.max_depth)
             step=main_step / (len(links_to_be_processed) or 1)
             self.progress_callback(progress, _("Depth %d") % depth)
             links=set()
@@ -357,73 +401,25 @@ class WebsiteExporter(object):
                 print "Processing", url
                 progress += step
                 content=self.get_contents(url)
-                links.update(self.translate_links(content, 
-                                                  baseurl=url,
-                                                  max_depth_exceeded=(depth == self.max_depth)))
-                self.write_contents(self.fix_links(content), url)
+
+                (new_links, 
+                 used_snapshots, 
+                 used_overlays,
+                 used_resources)=self.translate_links(content, 
+                                                      url,
+                                                      max_depth_exceeded)
+                links.update(new_links)
+                
+                # Write contents
+                self.write_data(url, self.fix_links(content), 
+                                used_snapshots, 
+                                used_overlays, 
+                                used_resources)
+
             links_to_be_processed=links
             depth += 1
 
-        self.progress_callback(.90, _("Copying images"))
-
-        for t in self.used_snapshots:
-            # FIXME: not robust wrt. multiple packages/videos
-            f=open(os.path.join(self.imgdir, '%s.png' % t), 'wb')
-            f.write(str(self.controller.package.imagecache[t]))
-            f.close()
-
-        # Copy overlays
-        for (ident, tales) in self.used_overlays:
-            # FIXME: not robust wrt. multiple packages/videos
-            a=self.controller.package.get_element_by_id(ident)
-            if not a:
-                print "Cannot find annotation %s for overlaying"
-                continue
-            name=ident+tales.replace('/', '_')
-            f=open(os.path.join(self.imgdir, 'overlay_%s.png' % name), 'wb')
-            if tales:
-                # There is a TALES expression
-                ctx=self.controller.build_context(here=a)
-                data=ctx.evaluateValue('here' + tales)
-            else:
-                data=a.content.data
-            f.write(str(self.controller.gui.overlay(self.controller.package.imagecache[a.fragment.begin], data)))
-            f.close()
-            
-        self.progress_callback(.95, _("Copying resources"))
-
-        # Copy used resources
-        for path in self.used_resources:
-            dest=os.path.join(self.destination, 'resources', path)
-
-            d=os.path.dirname(dest)
-            if not os.path.isdir(d):
-                helper.recursive_mkdir(d)
-
-            r=self.controller.package.resources
-            for element in path.split('/'):
-                r=r[element]
-            output=open(dest, 'wb')
-            output.write(r.data)
-            output.close()
-
-        self.progress_callback(.90, _("Copying resources"))
-
-        # Copy used resources
-        for path in self.used_resources:
-            dest=os.path.join(self.destination, 'resources', path)
-
-            d=os.path.dirname(dest)
-            if not os.path.isdir(d):
-                helper.recursive_mkdir(d)
-
-            r=self.controller.package.resources
-            for element in path.split('/'):
-                r=r[element]
-            output=open(dest, 'wb')
-            output.write(r.data)
-            output.close()
-
+        self.progress_callback(0.95, _("Finalizing"))
         # Generate video helper files if necessary
         self.video_player.finalize()
 
