@@ -354,7 +354,7 @@ class WebsiteExporter(object):
             self.progress_callback(progress, _("Depth %d: translating links") % depth)
             progress += main_step / 4
             links_to_be_processed=self.translate_links(contents)
-            if depth == max_depth:
+            if depth == self.max_depth:
                 # Last step. All links to be processed should be marked as unconverted
                 for url in links_to_be_processed:
                     self.url_translation[url]=self.unconverted(url, 'max depth exceeded')
