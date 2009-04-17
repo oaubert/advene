@@ -229,13 +229,13 @@ class ViewBook(AdhocView):
         def create_and_open_view(sources):
             v=self.controller.create_static_view(elements=sources)
             p=get_edit_popup(v, controller=self.controller)
-            self.add_view(p, name=_("Edit %s") % self.controller.get_title(v))
+            self.add_view(p, name=_("Edit %s") % self.controller.get_title(v, max_size=40))
             # FIXME: put focus on edit window
             return True
 
         def edit_annotation(a):
             p=get_edit_popup(a, controller=self.controller)
-            self.add_view(p, name=_("Edit %s") % self.controller.get_title(a))
+            self.add_view(p, name=_("Edit %s") % self.controller.get_title(a, max_size=40))
             return True
 
         def edit_selection(sources):
@@ -285,7 +285,7 @@ class ViewBook(AdhocView):
                     sm=gtk.Menu()
                     i.set_submenu(sm)
                     for at in self.controller.package.annotationTypes:
-                        title=self.controller.get_title(at)
+                        title=self.controller.get_title(at, max_size=40)
                         i=gtk.MenuItem(title, use_underline=False)
                         i.connect('activate', lambda i, s, t: self.controller.gui.open_adhoc_view(name, source=s, label=t, destination=self.location), "here/annotationTypes/%s/annotations/sorted" % at.id, title)
                         sm.append(i)
@@ -365,7 +365,7 @@ class ViewBook(AdhocView):
             at=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
             # Propose a menu to open various views for the annotation-type:
             menu=gtk.Menu()
-            title=self.controller.get_title(at)
+            title=self.controller.get_title(at, max_size=40)
             i=gtk.MenuItem(_("Use annotation-type %s :") % title, use_underline=False)
             menu.append(i)
             for label, action in (
@@ -391,7 +391,7 @@ class ViewBook(AdhocView):
 
             if len(sources) == 1:
                 a=sources[0]
-                title=self.controller.get_title(a)
+                title=self.controller.get_title(a, max_size=40)
                 i=gtk.MenuItem(_("Use annotation %s :") % title, use_underline=False)
                 menu.append(i)
                 for label, action in (
@@ -415,7 +415,7 @@ class ViewBook(AdhocView):
                 if self.controller.package.queries:
                     sm=gtk.Menu()
                     for q in self.controller.package.queries:
-                        i=gtk.MenuItem(self.controller.get_title(q), use_underline=False)
+                        i=gtk.MenuItem(self.controller.get_title(q, max_size=40), use_underline=False)
                         i.connect('activate', apply_query, q)
                         sm.append(i)
                     i=gtk.MenuItem(u"    " + _("as the context for the query..."), use_underline=False)
