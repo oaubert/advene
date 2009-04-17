@@ -97,6 +97,8 @@ class Metaed(object):
 
         if value is None:
             if e is not None:
+                if n in self.meta_cache:
+                    del self.meta_cache[n]
                 self._getMeta ().removeChild (e)
             return
 
