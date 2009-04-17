@@ -257,18 +257,15 @@ class WebsiteExporter(object):
                 if fragment:
                     self.url_translation[original_url]="%s#%s" % (output, fragment)
 
-            else:
-                # No TALES expression. Could be a number of things
-                if self.video_url and url.startswith('/media/play'):
-                    # FIXME: handle STBV activation
-                    m=player_re.search(url)
-                    if m:
-                        self.url_translation[url]=self.video_player.player_url(long(m.group(1)))
-                    else:
-                        self.url_translation[url]=self.unconverted(url, 'unhandled player url %s' % url)
+            elif self.video_url and url.startswith('/media/play'):
+                m=player_re.search(url)
+                if m and not 'stbv' in url:
+                    self.url_translation[original_url]=self.video_player.player_url(long(m.group(1)))
                 else:
-                    # It is another element.
-                    self.url_translation[url]=self.unconverted(url, 'unhandled url %s' % url)
+                    self.url_translation[original_url]=self.unconverted(url, 'need advene')
+            else:
+                # It is another element.
+                self.url_translation[url]=self.unconverted(url, 'unhandled url')
         if max_depth_exceeded:
             # Max depth exceeded: all new links should be marked as unconverted
             for url in res:
