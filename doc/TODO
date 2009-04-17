@@ -1,3 +1,5 @@
+* check http://code.activestate.com/recipes/457411/ (interval mapping data structure)
+
 * investigate pitivi thumbnailing code
 
 * gstreamer win32/mac:
