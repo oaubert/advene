@@ -975,20 +975,26 @@ class AdveneController(object):
             url=u"%s/view/%s" % (url, defaultview)
         return url
 
-    def get_title(self, element, representation=None):
+    def get_title(self, element, representation=None, max_size=None):
         """Return the title for the given element.
         """
+        def trim_size(s):
+            if max_size is not None and len(s) > max_size:
+                return s[:max_size]+'...'
+            else:
+                return s
+
         def cleanup(s):
             i=s.find('\n')
             if i > 0:
-                return s[:i]
+                return trim_size(s[:i])
             else:
-                return s
+                return trim_size(s)
 
         if element is None:
             return _("None")
         if isinstance(element, unicode) or isinstance(element, str):
-            return element
+            return trim_size(element)
         if isinstance(element, Annotation) or isinstance(element, Relation):
             if representation is not None and representation != "":
                 c=self.build_context(here=element)
