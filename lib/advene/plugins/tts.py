@@ -227,3 +227,28 @@ class EspeakTTSEngine(TTSEngine):
             self.controller.log("TTS Error: ", unicode(e).encode('utf8'))
         return True
 
+
+class SAPITTSEngine(TTSEngine):
+    """SAPI (win32) TTSEngine.
+    """
+    def __init__(self, controller=None):
+        TTSEngine.__init__(self, controller=controller)
+        self.sapi=None
+
+    def can_run():
+        """Can this engine run ?
+        """
+        try:
+            import win32com.client
+            voice = win32com.client.Dispatch("sapi.SPVoice")
+        except:
+            voice = None
+        return voice
+    can_run=staticmethod(can_run)
+
+    def pronounce (self, sentence):
+        if self.sapi is None:
+            self.sapi=win32com.client.Dispatch("sapi.SPVoice")
+        self.sapi.Speak( sentence )
+        return True
+
