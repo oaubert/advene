@@ -10,13 +10,7 @@ Upstream Authors:
    Bertrand Richard <bertrand.richard@liris.cnrs.fr>
 
 Files: *
-Copyright: 2003-2008 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
-License: GPL-2+
-  The full text of the GPL is distributed as in
-  /usr/share/common-licenses/GPL-2 on Debian systems.
-
-Files: share/web/fckeditor/*
-Copyright: Copyright (C) 2003-2007 Frederico Caldeira Knabben
+Copyright: 2003-2009 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
 License: GPL-2+
   The full text of the GPL is distributed as in
   /usr/share/common-licenses/GPL-2 on Debian systems.
