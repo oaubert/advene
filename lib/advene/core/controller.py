@@ -518,7 +518,7 @@ class AdveneController(object):
             # Special search.
             res=[]
             for i in searched.split():
-                e=p.get(i)
+                e=p.get_element_by_id(i)
                 if e is not None:
                     res.append(e)
             return res
