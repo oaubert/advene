@@ -980,7 +980,7 @@ class AdveneController(object):
         """
         def trim_size(s):
             if max_size is not None and len(s) > max_size:
-                return s[:max_size]+'...'
+                return s[:max_size]+'\u2026'
             else:
                 return s
 
