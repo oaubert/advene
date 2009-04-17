@@ -55,10 +55,7 @@ class Menu:
 
     def get_title (self, element):
         """Return the element title."""
-        t=self.controller.get_title(element)
-        if len(t) > 80:
-            t=t[:80]
-        return t
+        return self.controller.get_title(element, max_size=40)
 
     def goto_annotation (self, widget, ann):
         c=self.controller
@@ -322,7 +319,7 @@ class Menu:
     def renumber_annotations(self, m, at):
         """Renumber all annotations of a given type.
         """
-        d = gtk.Dialog(title=_("Renumbering annotations of type %s") % self.controller.get_title(at),
+        d = gtk.Dialog(title=_("Renumbering annotations of type %s") % self.get_title(at),
                        parent=None,
                        flags=gtk.DIALOG_DESTROY_WITH_PARENT,
                        buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
@@ -485,7 +482,7 @@ class Menu:
                 submenu.append(i)
                 for t, l in el.typedRelatedIn.iteritems():
                     at=self.controller.package.get_element_by_id(t)
-                    m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
+                    m=gtk.MenuItem(self.get_title(at), use_underline=False)
                     amenu=gtk.Menu()
                     m.set_submenu(amenu)
                     amenu.connect('map', build_submenu, at, l)
@@ -501,7 +498,7 @@ class Menu:
                 submenu.append(i)
                 for t, l in el.typedRelatedOut.iteritems():
                     at=self.controller.package.get_element_by_id(t)
-                    m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
+                    m=gtk.MenuItem(self.get_title(at), use_underline=False)
                     amenu=gtk.Menu()
                     m.set_submenu(amenu)
                     amenu.connect('map', build_submenu, at, l)
@@ -623,7 +620,7 @@ class Menu:
         p=self.controller.package
         ident='v_caption_%s' % at.id
         if p.get_element_by_id(ident) is not None:
-            dialog.message_dialog(_("A caption dynamic view for %s already seems to exist.") % self.controller.get_title(at))
+            dialog.message_dialog(_("A caption dynamic view for %s already seems to exist.") % self.get_title(at))
             return True
         v=p.createView(
             ident=ident,
@@ -632,7 +629,7 @@ class Menu:
             clazz='package',
             content_mimetype='application/x-advene-ruleset'
             )
-        v.title=_("Caption %s annotations") % self.controller.get_title(at)
+        v.title=_("Caption %s annotations") % self.get_title(at)
 
         # Build the ruleset
         r=RuleSet()
