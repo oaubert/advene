@@ -193,9 +193,9 @@ class Condition:
             left=context.evaluateValue(self.lhs)
             right=context.evaluateValue(self.rhs)
             if self.operator == 'equals':
-                return left == right
-            if self.operator == 'different':
-                return left != right
+                return self.convert_value(left) == self.convert_value(right)
+            elif self.operator == 'different':
+                return self.convert_value(left) != self.convert_value(right)
             elif self.operator == 'contains':
                 return right in left
             elif self.operator == 'greater':
