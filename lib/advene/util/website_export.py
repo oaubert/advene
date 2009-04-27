@@ -471,6 +471,25 @@ class WebsiteExporter(object):
                                               for v in self.views ) })
         f.close()
 
+        frame="frame.html"
+        if frame in self.url_translation.values():
+            frame="_frame.html"
+        f=open(os.path.join(self.destination, frame), 'w')
+        f.write("""<html>
+<head><title>%(title)s</title></head>
+<body>
+<frameset rows="70%,30%">
+  <frame name="main" src="%(index)s" />
+  <frame name="video_player" src="" />
+</frameset>
+</body>
+</html>
+""" % { 
+                'title': self.controller.get_title(self.controller.package),
+                'index': name,
+                })
+        f.close()
+
         f=open(os.path.join(self.destination, "unconverted.html"), 'w')
         f.write("""<html><head>%(title)s - not converted</head>
 <body>
