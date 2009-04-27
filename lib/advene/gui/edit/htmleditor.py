@@ -367,6 +367,7 @@ class HTMLEditor(textview_class, HTMLParser):
     def handle_img(self, tag, attr):
         dattr=dict(attr)
         src=dattr.get('src')
+        data=None
         if src:
             data, msg=self.url_load(src)
             if data is None:
