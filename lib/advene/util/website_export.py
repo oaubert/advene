@@ -246,6 +246,22 @@ class WebsiteExporter(object):
                             v=self.controller.package.get_element_by_id(path[-1])
                             if v and hasattr(v, 'content') and 'html' in v.content.mimetype:
                                 output = output+".html"
+                        elif len(path) > 1 and path[-2] in ('annotations', 'relations',
+                                                            'views', 
+                                                            'schemas', 'annotationTypes', 'relationTypes',
+                                                            'queries'):
+                            # Reference to an Advene element, without
+                            # a specified view. Assume a default view
+                            # is applied and that it will output html.
+                            output = output+".html"
+
+                        if m.group(1) == 'views':
+                            # Addressing a view content. Prepend a
+                            # prefix, so that it will not overwrite
+                            # the result of the view applied to the
+                            # package.
+                            output = 'view_' + output
+
                         res.add(original_url)
                     else:
                         # Can be a query over a package, or a relative pathname
