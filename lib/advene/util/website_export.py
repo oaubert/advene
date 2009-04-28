@@ -23,6 +23,7 @@ import os
 import time
 import re
 import urllib
+import mimetypes
 
 import advene.core.config as config
 import advene.util.helper as helper
@@ -238,14 +239,16 @@ class WebsiteExporter(object):
                         # (for toplevel views), or a bundle (annotations, views...)
                         output=m.group(2).replace('/', '_')
 
-                        # Check if we can add a .html suffix. This
+                        # Check if we can add a suffix. This
                         # will facilitate handling by webservers.
                         path=m.group(2).split('/')
                         if path and (len(path) == 1 or path[-2] == 'view'):
                             # Got a view. Check its mimetype
                             v=self.controller.package.get_element_by_id(path[-1])
-                            if v and hasattr(v, 'content') and 'html' in v.content.mimetype:
-                                output = output+".html"
+                            if v and hasattr(v, 'content'):
+                                ext=mimetypes.guess_extension(v.content.mimetype)
+                                if ext is not None:
+                                    output = output + ext
                         elif len(path) > 1 and path[-2] in ('annotations', 'relations',
                                                             'views', 
                                                             'schemas', 'annotationTypes', 'relationTypes',
@@ -404,8 +407,12 @@ class WebsiteExporter(object):
         # Pre-seed url translations for base views
         for v in self.views:
             link="/".join( (ctx.globals['options']['package_url'], 'view', v.id) )
-            if hasattr(v, 'content') and 'html'  in v.content.mimetype:
-                self.url_translation[link]="%s.html" % v.id
+            if hasattr(v, 'content'):
+                ext=mimetypes.guess_extension(v.content.mimetype)
+                if ext is not None:
+                    self.url_translation[link]="%s%s" % (v.id, ext)
+                else:
+                    self.url_translation[link]=v.id
             else:
                 self.url_translation[link]=v.id
             view_url[v]=link
