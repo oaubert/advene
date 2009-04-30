@@ -246,7 +246,15 @@ class WebsiteExporter(object):
                             # Got a view. Check its mimetype
                             v=self.controller.package.get_element_by_id(path[-1])
                             if v and hasattr(v, 'content'):
-                                ext=mimetypes.guess_extension(v.content.mimetype)
+                                if v.content.mimetype == 'text/plain':
+                                    # Workaround: the mimetypes
+                                    # modules returns a default .ksh
+                                    # extension for text/plain. Ensure
+                                    # that the more appropriate .txt
+                                    # is used.
+                                    ext='.txt'
+                                else:
+                                    ext=mimetypes.guess_extension(v.content.mimetype)
                                 if ext is not None:
                                     output = output + ext
                         elif len(path) > 1 and path[-2] in ('annotations', 'relations',
@@ -408,7 +416,10 @@ class WebsiteExporter(object):
         for v in self.views:
             link="/".join( (ctx.globals['options']['package_url'], 'view', v.id) )
             if hasattr(v, 'content'):
-                ext=mimetypes.guess_extension(v.content.mimetype)
+                if v.content.mimetype == 'text/plain':
+                    ext='.txt'
+                else:
+                    ext=mimetypes.guess_extension(v.content.mimetype)
                 if ext is not None:
                     self.url_translation[link]="%s%s" % (v.id, ext)
                 else:
