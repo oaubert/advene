@@ -186,15 +186,12 @@ class webkit_wrapper:
         self.component.open(url)
         return True
 
-    def get_url(self):
-        return self.component.get_location()
-
     def build_widget(self):
         w=webkit.WebView()
 
-        def update_location(c):
+        def update_location(url):
             if self.notify:
-                self.notify(url=self.get_url())
+                self.notify(url=url)
             return False
 
         def update_label(c):
@@ -207,7 +204,7 @@ class webkit_wrapper:
                                                         frame.get_uri()))
 
         def _loading_stop_cb(view, frame):
-            # Stop hourglass cursor
+            update_location(frame.get_uri())
             pass
 
         def _loading_progress_cb(view, progress):
