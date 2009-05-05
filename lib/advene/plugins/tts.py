@@ -34,12 +34,12 @@ def register(controller=None):
     if config.data.os == 'darwin':
         controller.log("TTS: Using /usr/bin/say")
         engine=MacOSXTTSEngine(controller)
-    elif EspeakTTSEngine.can_run():
-        controller.log("TTS: Using espeak")
-        engine=EspeakTTSEngine(controller)
     elif FestivalTTSEngine.can_run():
         controller.log("TTS: Using festival")
         engine=FestivalTTSEngine(controller)
+    elif EspeakTTSEngine.can_run():
+        controller.log("TTS: Using espeak")
+        engine=EspeakTTSEngine(controller)
     else:
         engine=TTSEngine(controller)
     controller.register_action(RegisteredAction(
