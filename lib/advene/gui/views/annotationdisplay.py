@@ -202,14 +202,17 @@ class AnnotationDisplay(AdhocView):
         v.pack_start(fr, expand=False)
 
         f=gtk.Frame(label=_("Contents"))
-        c=self.label['contents']=gtk.Label()
-        c.set_line_wrap(True)
-        c.set_selectable(True)
-        c.set_single_line_mode(False)
-        c.set_alignment(0.0, 0.0)
+        c=self.label['contents']=gtk.TextView()
+        c.set_wrap_mode(gtk.WRAP_WORD_CHAR)
         sw=gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-        sw.add_with_viewport(c)
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw.add(c)
+        def set_text(widget, t):
+            b=widget.get_buffer()
+            b.delete(*b.get_bounds())
+            b.set_text(t)
+            return True
+        c.set_text=set_text.__get__(c)
         self.sw['contents']=sw
 
         image=self.label['imagecontents']=gtk.Image()
