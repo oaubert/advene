@@ -473,9 +473,12 @@ class WebsiteExporter(object):
         defaultview=self.controller.package.getMetaData(config.data.namespace, 'default_utbv')
         v=self.controller.package.views.get_by_id(defaultview)
         if defaultview and v:
-            default=_("""<p><strong>You should probably begin at <a href="%(href)s">%(title)s</a>.</strong></p>""") % { 'href': self.url_translation[view_url[v]], 'title': self.controller.get_title(v) }
+            default_href=self.url_translation[view_url[v]]
+            default=_("""<p><strong>You should probably begin at <a href="%(href)s">%(title)s</a>.</strong></p>""") % { 'href': default_href, 'title': self.controller.get_title(v) }
         else:
+            default_href=''
             default=''
+            
         f.write("""<html><head>%(title)s</head>
 <body>
 <h1>%(title)s views</h1>
@@ -495,16 +498,14 @@ class WebsiteExporter(object):
         f=open(os.path.join(self.destination, frame), 'w')
         f.write("""<html>
 <head><title>%(title)s</title></head>
-<body>
 <frameset rows="70%%,30%%">
   <frame name="main" src="%(index)s" />
   <frame name="video_player" src="" />
 </frameset>
-</body>
 </html>
 """ % { 
                 'title': self.controller.get_title(self.controller.package),
-                'index': name,
+                'index': default_href or name,
                 })
         f.close()
 
