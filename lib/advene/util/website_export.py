@@ -498,7 +498,7 @@ class WebsiteExporter(object):
         f=open(os.path.join(self.destination, frame), 'w')
         f.write("""<html>
 <head><title>%(title)s</title></head>
-<frameset rows="70%%,30%%">
+<frameset cols="70%%,30%%">
   <frame name="main" src="%(index)s" />
   <frame name="video_player" src="" />
 </frameset>
