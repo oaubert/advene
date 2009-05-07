@@ -34,6 +34,9 @@ def register(controller=None):
     if config.data.os == 'darwin':
         controller.log("TTS: Using /usr/bin/say")
         engine=MacOSXTTSEngine(controller)
+    elif CustomTTSEngine.can_run():
+        controller.log("TTS: Using custom script")
+        engine=CustomTTSEngine(controller)
     elif FestivalTTSEngine.can_run():
         controller.log("TTS: Using festival")
         engine=FestivalTTSEngine(controller)
@@ -252,3 +255,46 @@ class SAPITTSEngine(TTSEngine):
         self.sapi.Speak( sentence )
         return True
 
+class CustomTTSEngine(TTSEngine):
+    """Custom TTSEngine.
+
+    It tries to run a 'prononce' script, which takes strings on its
+    stdin and pronounces them.
+    """
+    def __init__(self, controller=None):
+        TTSEngine.__init__(self, controller=controller)
+        self.language=None
+        self.prg_path=helper.find_in_path('prononce')
+        self.prg_process=None
+
+    def can_run():
+        """Can this engine run ?
+        """
+        return helper.find_in_path('prononce') is not None
+    can_run=staticmethod(can_run)
+
+    def close(self):
+        """Close the espeak process.
+        """
+        if self.prg_process is not None:
+            if config.data.os == 'win32':
+                import win32api
+                win32api.TerminateProcess(int(self.prg_process._handle), -1)
+            else:
+                os.kill(self.prg_process.pid, signal.SIGTERM)
+                self.prg_process.wait()
+            self.prg_process=None
+
+    def pronounce (self, sentence):
+        lang=config.data.preferences.get('tts-language', 'en')
+        if self.language != lang:
+            # Need to restart espeak to use the new language
+            self.close()
+            self.language=lang
+        try:
+            if self.prg_process is None:
+                self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], shell=False, stdin=subprocess.PIPE)
+            self.prg_process.stdin.write(sentence + "\n")
+        except OSError, e:
+            self.controller.log("TTS Error: ", unicode(e).encode('utf8'))
+        return True
