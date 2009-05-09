@@ -24,6 +24,7 @@ It needs to register to the ECAEngine to capture events.
 It transforms these events into Operation objects and Action objects.
 Widgets can register with this trace builder to receive the trace.
 """
+import gobject
 import Queue
 from threading import Thread
 import time
@@ -41,22 +42,28 @@ import atexit
 
 
 def register(controller):
-    controller.register_tracer(TraceBuilder(controller))
+    tb = TraceBuilder(controller)
+    tb.start()
+    controller.register_tracer(tb)
     return
 name="Trace Builder plugin"
 
-class TraceBuilder:
+class TraceBuilder(Thread):
     def __init__ (self, controller=None, parameters=None, package=None, ntbd=False, nte=False):
+        Thread.__init__(self)
+        self.equeue = Queue.Queue(-1)
+        self.exit_code = "###\n"
         #self.close_on_package_load = False
-        atexit.register(self.on_exit)
+        #atexit.register(self.on_exit)
         self.controller=controller
         self.host = "::1" #"2a01:e35:2efc:5cd0:216:cbff:fea0:3fb9"
-        self.port = 9990
+        self.port = 9992
         self.texp = None # thread to export trace to a network
         self.tbroad = None # thread to broadcast trace
         self.bdq = None # broadcasting queue
         self.network_broadcasting = ntbd
         self.network_exp = nte
+        self.activity_start = config.data.startup_time
         self.operations = []
         self.registered_views = []
         self.opened_actions = {}
@@ -103,6 +110,20 @@ class TraceBuilder:
             self.init_broadcasting()
         self.controller.event_handler.register_view(self)
         self.trace = Trace()
+
+    def run(self):
+        while (1):
+            #we shouldnt receive exception from the queue
+            obj = self.equeue.get()
+            if not isinstance(obj, dict):
+                if obj == self.exit_code:
+                    self.on_exit()
+                    break
+                else:
+                    continue
+            if obj['event_name'] in self.filtered_events:
+                continue
+            self.receive(obj)
 
     def on_exit(self):
         if self.network_exp:
@@ -228,6 +249,11 @@ class TraceBuilder:
 
     def import_trace(self, fname, reset):
         print 'importing trace from %s' % fname
+        if reset:
+            self.trace = Trace()
+            self.opened_actions = {}
+            self.activity_start = config.data.startup_time
+            print "Trace cleaned."
         if not os.path.exists(fname):
             oldfname=fname
             fname = os.path.join(config.data.path['settings'],oldfname)
@@ -240,9 +266,6 @@ class TraceBuilder:
         if tr.node.nodeName != 'trace':
             print "This does not look like a trace file."
             return False
-        if reset:
-            self.trace = Trace()
-            self.opened_actions = {}
         for ev in tr.event:
             lid = lid+1
             ev_content = ''
@@ -259,6 +282,8 @@ class TraceBuilder:
                 ev.o_type=None
             if not hasattr(ev, 'o_cid') or ev.o_cid=="None": #for compatibility with previous traces
                 ev.o_cid=None
+            if float(ev.time) < self.activity_start:
+                self.activity_start=float(ev.time)
             evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ev.o_type, ev.o_cid)
             evt.change_comment(ev.comment)
             self.trace.add_to_trace('events', evt)
@@ -299,8 +324,6 @@ class TraceBuilder:
 
     def receive(self, obj):
         # obj : received event
-        if obj['event_name'] in self.filtered_events:
-            return
         ev = op = ac = None
         ev = self.packEvent(obj)
         # broadcast reseau
@@ -322,11 +345,12 @@ class TraceBuilder:
         self.alert_registered(ev, op, ac)
 
     def packEvent(self, obj):
+        #print obj['event_name']
         if obj['event_name'] != 'SnapshotUpdate':
             self.controller.update_snapshot(self.controller.player.current_position_value)
         #ev_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
         ev_time = time.time()
-        ev_activity_time = (time.time() - config.data.startup_time) * 1000
+        ev_activity_time = (time.time() - self.activity_start) * 1000
         ev_name = obj['event_name']
         ev_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
         ev_movie_time = self.controller.player.current_position_value
@@ -450,7 +474,7 @@ class TraceBuilder:
     def packOperation(self, obj):
         #op_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
         op_time = time.time()
-        op_activity_time = (time.time() - config.data.startup_time) * 1000
+        op_activity_time = (time.time() - self.activity_start) * 1000
         op_name = obj['event_name']
         #op_params = obj['parameters']
         op_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
@@ -610,7 +634,7 @@ class TraceBuilder:
 
     def alert_registered(self, event, operation, action):
         for i in self.registered_views:
-            i.receive(self.trace, event, operation, action)
+            gobject.idle_add(i.receive, self.trace, event, operation, action)
         return
 
     def register_view(self, view):
