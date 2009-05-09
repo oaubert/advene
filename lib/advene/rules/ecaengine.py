@@ -351,7 +351,8 @@ class ECAEngine:
             self.event_history.append(d)
             for v in self.views_to_notify:
                 # should only be TraceBuilder plugin or other trace building system
-                v.receive(d)
+                #v.receive(d)
+                v.equeue.put(d)
         immediate=False
         if 'immediate' in kw:
             immediate=True
