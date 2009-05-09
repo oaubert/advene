@@ -1944,7 +1944,10 @@ class AdveneController(object):
                 self.server.stop()
             except Exception:
                 pass
-
+            # closing tracers Threads puting exit_coding in queue
+            for tr in self.tracers:
+                tr.equeue.put(tr.exit_code)
+                tr.join()
             # Terminate the VLC server
             try:
                 #print "Exiting vlc player"
