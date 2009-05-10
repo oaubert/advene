@@ -720,7 +720,7 @@ class TraceTimeline(AdhocView):
         self.draw_marks()
         sel_eg = None
         for i in self.tracer.trace.levels['actions']:
-            ev = self.receive(self.tracer.trace, action=i)
+            ev = self.receive_int(self.tracer.trace, action=i)
             if selected_item is not None and i == selected_item[0]:
                 sel_eg = ev
             #if action is not None and action ==i:
@@ -760,20 +760,35 @@ class TraceTimeline(AdhocView):
                     go.handler_block(go.handler_ids['enter-notify-event'])
                     go.handler_block(go.handler_ids['leave-notify-event'])
                 i+=1
+        return
+
 
     def receive(self, trace, event=None, operation=None, action=None):
         # trace : the full trace to be managed
         # event : the new or latest modified event
         # operation : the new or latest modified operation
         # action : the new or latest modified action
+        # return False.
+        # This function is called by the tracer to update the gui
+        # it should always return False to avoid 100% cpu consumption.
+        self.receive_int(trace, event=None, operation=None, action=None)
+        return False
+
+
+    def receive_int(self, trace, event=None, operation=None, action=None):
+        # trace : the full trace to be managed
+        # event : the new or latest modified event
+        # operation : the new or latest modified operation
+        # action : the new or latest modified action
         # return the created group
         #print "received : action %s, operation %s, event %s" % (action, operation, event)
+        ev = None
         if event and (event.name=='DurationUpdate' or event.name=='MediaChange'):
             self.docgroup.changeMovielength(trace)
         if operation:
             self.docgroup.addLine(operation.movietime)
         if (operation or event) and action is None:
-            return None
+            return ev
         if action is None:
             #redraw screen
             self.refresh()
@@ -781,10 +796,9 @@ class TraceTimeline(AdhocView):
             #if self.autoscroll:
             #    a = self.sw.get_vadjustment()
             #    a.value=a.upper-a.page_size
-            return None
+            return ev
         h,l = self.cols[action.name]
         color = h.color_c
-        ev = None
 
         if l and l.event == action:
             ev = l
