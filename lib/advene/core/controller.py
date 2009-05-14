@@ -1079,6 +1079,11 @@ class AdveneController(object):
                     mediafile=n
                     self.log(_("Found matching video file in moviepath: %s") % n)
                     break
+        else:
+            # Path exists. It may be a relative path, so convert it to
+            # absolute path.
+            mediafile=os.path.abspath(mediafile)
+
         return mediafile
 
     def get_defined_tags(self, p=None):
