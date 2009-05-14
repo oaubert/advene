@@ -30,7 +30,7 @@ import advene.util.helper as helper
 
 fragment_re=re.compile('(.*)#(.+)')
 package_expression_re=re.compile('packages/(\w+)/(.*)')
-href_re=re.compile(r'''(href|src)=['"](.+?)['"> ]''')
+href_re=re.compile(r'''(href|src|about|resource)=['"](.+?)['"> ]''')
 snapshot_re=re.compile(r'/packages/[^/]+/imagecache/(\d+)')
 overlay_re=re.compile(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?')
 tales_re=re.compile('(\w+)/(.+)')
