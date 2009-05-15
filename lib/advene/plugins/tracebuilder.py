@@ -249,7 +249,7 @@ class TraceBuilder(Thread):
                 print '%s %s %s' % (an_name, an_ac_time, an_content)
         return
 
-    def import_trace(self, fname, reset):
+    def import_trace(self, fname, reset=False):
         # fname : String, trace file path
         # reset : boolean, reset current trace FIXME: to be removed or modified
         # import append a trace to self.traces
