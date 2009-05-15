@@ -1295,6 +1295,94 @@ class TimeLine(AdhocView):
                                                                                         delete=delete)
             return self.transmuted_annotation
 
+        def DTWalign_annotations(i, at, typ, mode, delete=True):
+            sa = at.annotations
+            sa.sort(key=lambda a: a.fragment.begin)
+            da = typ.annotations
+            da.sort(key=lambda a: a.fragment.begin)
+            bestpath = []
+            bestdist = []
+
+            mindist = (abs(sa[0].fragment.begin - da[0].fragment.begin)
+                       + abs(sa[0].fragment.end - da[0].fragment.end) 
+                       + abs((sa[0].fragment.end - sa[0].fragment.begin) 
+                             - (da[0].fragment.end - da[0].fragment.begin)))
+            bestdist.append(mindist)
+            bestpath.append([])
+            bestpath[0].append(0)
+            
+            for j in range(1,len(sa)):
+                bestpath.append([])
+                bestpath[j].append(j)
+
+                dist = (abs(sa[j].fragment.begin - da[0].fragment.begin)
+                        + abs(sa[j].fragment.end - da[0].fragment.end) 
+                        + abs((sa[j].fragment.end - sa[j].fragment.begin)
+                              - (da[0].fragment.end - da[0].fragment.begin)))
+                if dist < mindist:
+                    mindist = dist
+                    bestpath[j] = [j]
+                    bestdist.append(dist)
+                else:
+                    bestpath[j] = list(bestpath[j-1])
+                    bestdist.append(bestdist[j-1] + dist)
+            
+            for i in range(1,len(da)):
+                currentdist = 0
+                prevsubdist = 0
+                currentpath = []
+                prevsubpath = []
+                for j in range(0,len(sa)):
+                    dist = (abs(sa[j].fragment.begin - da[i].fragment.begin)
+                            + abs(sa[j].fragment.end - da[i].fragment.end) 
+                            + abs((sa[j].fragment.end - sa[j].fragment.begin) 
+                                  - (da[i].fragment.end - da[i].fragment.begin)))
+                    
+                    if j == 0:
+                        currentpath = list(bestpath[0])
+                        currentdist = bestdist[0]
+                        
+                        bestpath[0].append(0)
+                        bestdist[0] = bestdist[0] + dist
+
+                    else:
+                        insdist = bestdist[j] + dist
+                        deldist = bestdist[j-1] + dist
+                        subdist = prevsubdist + dist*1.5
+                        
+                        currentdist =  bestdist[j]
+                        currentpath = list(bestpath[j])
+                        
+                        if insdist < deldist :
+                            if insdist < subdist:
+                                bestpath[j].append(j)
+                                bestdist[j] = insdist
+                            else :
+                                prevsubpath.append(j)
+                                bestpath[j] = prevsubpath
+                                bestdist[j] = subdist
+                        elif subdist < deldist :
+                            prevsubpath.append(j)
+                            bestpath[j] = prevsubpath
+                            bestdist[j] = subdist
+                        else:
+                           bestpath[j] = list(bestpath[j-1])
+                           bestdist[j] = deldist
+                    
+                    prevsubdist = currentdist
+                    prevsubpath = list(currentpath)
+                        
+            for (i,j) in enumerate(bestpath[len(sa)-1]):
+                if mode == 'time':
+                    da[i].fragment.begin = sa[j].fragment.begin
+                    da[i].fragment.end = sa[j].fragment.end
+                elif mode == 'content':
+                    da[i].content.data = sa[j].content.data
+                self.transmuted_annotation = da[i]
+                
+            self.controller.notify('PackageActivate', package=self.controller.package)    
+            return self.transmuted_annotation
+
         # Popup a menu to propose the drop options
         menu=gtk.Menu()
 
@@ -1312,6 +1400,17 @@ class TimeLine(AdhocView):
             item=gtk.MenuItem(_("Move all annotations matching a string to type %s") % self.controller.get_title(dest), use_underline=False)
             item.connect('activate', copy_annotations_filtered, source, dest, True)
             menu.append(item)
+            item=gtk.MenuItem(_("Align all annotation time codes using %(source)s as reference.") % {
+                    'source': self.controller.get_title(source) }, use_underline=False)
+            item.connect('activate', DTWalign_annotations, source, dest, 'time', True)
+            menu.append(item)
+
+            item=gtk.MenuItem(_("Align all annotation contents using %(source)s as reference") % {
+                'dest': self.controller.get_title(dest),
+                'source': self.controller.get_title(source)}, use_underline=False)
+            item.connect('activate', DTWalign_annotations, source, dest, 'content', True)
+            menu.append(item)
+            
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
