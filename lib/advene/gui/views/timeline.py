@@ -1386,28 +1386,28 @@ class TimeLine(AdhocView):
         # Popup a menu to propose the drop options
         menu=gtk.Menu()
 
+        source_title=self.controller.get_title(source)
+        dest_title=self.controller.get_title(dest)
+
         if source != dest:
-            item=gtk.MenuItem(_("Duplicate all annotations to type %s") % self.controller.get_title(dest), use_underline=False)
+            item=gtk.MenuItem(_("Duplicate all annotations to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_annotations, source, dest, False)
             menu.append(item)
-            item=gtk.MenuItem(_("Move all annotations to type %s") % self.controller.get_title(dest), use_underline=False)
+            item=gtk.MenuItem(_("Move all annotations to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_annotations, source, dest, True)
             menu.append(item)
 
-            item=gtk.MenuItem(_("Duplicate all annotations matching a string to type %s") % self.controller.get_title(dest), use_underline=False)
+            item=gtk.MenuItem(_("Duplicate all annotations matching a string to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_annotations_filtered, source, dest, False)
             menu.append(item)
-            item=gtk.MenuItem(_("Move all annotations matching a string to type %s") % self.controller.get_title(dest), use_underline=False)
+            item=gtk.MenuItem(_("Move all annotations matching a string to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_annotations_filtered, source, dest, True)
             menu.append(item)
-            item=gtk.MenuItem(_("Align all annotation time codes using %(source)s as reference.") % {
-                    'source': self.controller.get_title(source) }, use_underline=False)
+            item=gtk.MenuItem(_("Align all annotation time codes using %s as reference.") % source_title, use_underline=False)
             item.connect('activate', DTWalign_annotations, source, dest, 'time', True)
             menu.append(item)
 
-            item=gtk.MenuItem(_("Align all annotation contents using %(source)s as reference") % {
-                'dest': self.controller.get_title(dest),
-                'source': self.controller.get_title(source)}, use_underline=False)
+            item=gtk.MenuItem(_("Align all annotation contents using %s as reference") % source_title, use_underline=False)
             item.connect('activate', DTWalign_annotations, source, dest, 'content', True)
             menu.append(item)
             
