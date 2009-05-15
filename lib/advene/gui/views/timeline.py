@@ -1371,17 +1371,21 @@ class TimeLine(AdhocView):
                     
                     prevsubdist = currentdist
                     prevsubpath = list(currentpath)
-                        
+
+            # Update annotation timestamp/contents
+            batch_id=object()
             for (i,j) in enumerate(bestpath[len(sa)-1]):
+                annotation=da[i]
+                self.controller.notify('EditSessionStart', element=annotation, immediate=True)
                 if mode == 'time':
-                    da[i].fragment.begin = sa[j].fragment.begin
-                    da[i].fragment.end = sa[j].fragment.end
+                    annotation.fragment.begin = sa[j].fragment.begin
+                    annotation.fragment.end = sa[j].fragment.end
                 elif mode == 'content':
-                    da[i].content.data = sa[j].content.data
-                self.transmuted_annotation = da[i]
-                
-            self.controller.notify('PackageActivate', package=self.controller.package)    
-            return self.transmuted_annotation
+                    annotation.content.data = sa[j].content.data
+                self.controller.notify('AnnotationEditEnd', annotation=annotation, batch=batch_id)
+                self.controller.notify('EditSessionEnd', element=annotation)
+                self.transmuted_annotation = annotation
+            return True
 
         # Popup a menu to propose the drop options
         menu=gtk.Menu()
