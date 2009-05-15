@@ -232,7 +232,7 @@ class TreeViewImporter:
             )
 
         for i in self.controller.package.imports:
-            self.add_package(store, package=i.package, alias=i.getAs())
+            self.add_package(store, package=i.package, alias=i.getAlias())
         return store
 
     def toggled_cb(self, renderer, path, model, column):
@@ -368,7 +368,7 @@ class Importer:
         # p = advene.model.package.Package(uri=file_, importer=self.controller.package)
         i = advene.model.package.Import(parent=self.controller.package,
                                         uri=filename)
-        i.setAs(alias)
+        i.setAlias(alias)
         self.controller.package.imports.append(i)
 
         # Update the ListStore

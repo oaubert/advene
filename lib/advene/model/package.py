@@ -219,7 +219,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         """Return a collection of this package's imports"""
         if self.__imports is None:
             e = self._getChild ( (adveneNS, "imports") )
-            self.__imports = InverseDictBundle (self, e, Import, Import.getAs)
+            self.__imports = InverseDictBundle (self, e, Import, Import.getAlias)
         return self.__imports
 
     def getAnnotations(self):
@@ -363,7 +363,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if isinstance (item, Package):
             try:
                 i=self.getImports()[item.uri]
-                return i.getAs()
+                return i.getAlias()
             except KeyError:
                 raise AdveneException ("item %s has no QName prefix in %s" %
                                        (item, self))
@@ -371,7 +371,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             return self.getQnamePrefix(item._getParent())
 
 
-class Import(modeled.Modeled, _impl.Ased):
+class Import(modeled.Modeled, _impl.Aliased):
     """Import represents the different imported elements"""
     __metaclass__ = auto_properties
 
@@ -468,10 +468,10 @@ class Import(modeled.Modeled, _impl.Ased):
 
     def getId(self):
         """
-        The 'as' attribute is used as the import's ID, including when
+        The 'alias' attribute is used as the import's ID, including when
         populating bundle.
         """
-        return self.getAs()
+        return self.getAlias()
 
 class StatisticsHandler(xml.sax.handler.ContentHandler):
     """Parse a statistics.xml file.

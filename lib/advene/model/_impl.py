@@ -455,34 +455,40 @@ class Uried(Ided):
 
     uri = property(getUri)
 
-class Ased(object):
-    """An implementation for the 'as' property.
+class Aliased(object):
+    """An implementation for the 'alias' property.
        Inheriting classes must have a _getModel method returning a DOM element
        (inheriting the modeled.Modeled class looks like a good idea).
-       Note that this implementation consider 'as' to be optional.
+       Note that this implementation consider 'alias' to be optional.
+       
+       Note: for historical reasons, this property is stored with the
+       name "as" in the DOM tree. This original name introduced a
+       clash in python2.6 with a reserved keyword. It has thus been
+       renamed in the python code, but preserved in the DOM tree for
+       compatibility issues.
     """
-    def getAs(self):
-        """Return the 'as' attribute.
-           You would probably rather use the 'as' property.
+    def getAlias(self):
+        """Return the 'alias' attribute.
+           You would probably rather use the 'alias' property.
         """
         return self._getModel().getAttributeNS(None, "as")
 
-    def setAs(self, value):
-        """Set the 'as' attribute.
-           You would probably rather use the 'as' property.
+    def setAlias(self, value):
+        """Set the 'alias' attribute.
+           You would probably rather use the 'alias' property.
         """
         if value:
             self._getModel().setAttributeNS(None, "as", unicode(value))
         else:
             self._getModel().removeAttributeNS(None, "as")
 
-    def delAs(self):
-        """Unbind the 'as' attribute.
+    def delAlias(self):
+        """Unbind the 'alias' attribute.
            You would probably rather use the 'as' property.
         """
-        self.setAs(None)
+        self.setAlias(None)
 
-    as = property(getAs, setAs, delAs)
+    alias = property(getAlias, setAlias, delAlias)
 
 class Hrefed(object):
     """An implementation for the 'href' property.
