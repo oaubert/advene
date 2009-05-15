@@ -1390,27 +1390,23 @@ class TimeLine(AdhocView):
         dest_title=self.controller.get_title(dest)
 
         if source != dest:
-            item=gtk.MenuItem(_("Duplicate all annotations to type %s") % dest_title, use_underline=False)
-            item.connect('activate', copy_annotations, source, dest, False)
-            menu.append(item)
-            item=gtk.MenuItem(_("Move all annotations to type %s") % dest_title, use_underline=False)
-            item.connect('activate', copy_annotations, source, dest, True)
-            menu.append(item)
-
-            item=gtk.MenuItem(_("Duplicate all annotations matching a string to type %s") % dest_title, use_underline=False)
-            item.connect('activate', copy_annotations_filtered, source, dest, False)
-            menu.append(item)
-            item=gtk.MenuItem(_("Move all annotations matching a string to type %s") % dest_title, use_underline=False)
-            item.connect('activate', copy_annotations_filtered, source, dest, True)
-            menu.append(item)
-            item=gtk.MenuItem(_("Align all annotation time codes using %s as reference.") % source_title, use_underline=False)
-            item.connect('activate', DTWalign_annotations, source, dest, 'time', True)
-            menu.append(item)
-
-            item=gtk.MenuItem(_("Align all annotation contents using %s as reference") % source_title, use_underline=False)
-            item.connect('activate', DTWalign_annotations, source, dest, 'content', True)
-            menu.append(item)
-            
+            for (label, action) in (
+                (_("Duplicate all annotations to type %s") % dest_title,
+                 (copy_annotations, source, dest, False) ),
+                (_("Move all annotations to type %s") % dest_title, 
+                 (copy_annotations, source, dest, True) ),
+                (_("Duplicate all annotations matching a string to type %s") % dest_title, 
+                 (copy_annotations_filtered, source, dest, False) ),
+                (_("Move all annotations matching a string to type %s") % dest_title, 
+                 (copy_annotations_filtered, source, dest, True) ),
+                (_("Align all annotation time codes using %s as reference.") % source_title, 
+                 (DTWalign_annotations, source, dest, 'time', True) ),
+                (_("Align all annotation contents using %s as reference") % source_title,
+                 (DTWalign_annotations, source, dest, 'content', True) ),
+                ):
+                item=gtk.MenuItem(label, use_underline=False)
+                item.connect('activate', *action)
+                menu.append(item)
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
