@@ -151,7 +151,7 @@ class TraceBuilder(Thread):
             #self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             print(_("Cannot export to %(fname)s: %(e)s") % locals())
             return None
-        tr=ET.Element('trace')
+        tr=ET.Element('trace', name=self.trace.name)
         #everything can be rebuild from events.
         for (id_e, e) in enumerate(self.trace.levels['events']):
             tr.append(e.export(id_e))
@@ -276,6 +276,10 @@ class TraceBuilder(Thread):
             return False
         # creating an empty new trace
         self.traces.append(Trace())
+        if hasattr(tr, 'name'):
+            self.traces[-1].rename('%s (imported)' % tr.name)
+        else:
+            self.traces[-1].rename('No Name (imported)')
         for ev in tr.event:
             lid = lid+1
             ev_content = ''
@@ -328,7 +332,7 @@ class TraceBuilder(Thread):
                     ac = Action(name=type, begintime=op.time, endtime=None, acbegintime=op.activity_time, acendtime=None, content=None, movie=op.movie, movietime=op.movietime, operations=[op])
                     self.traces[-1].add_to_trace('actions', ac)
                     self.opened_actions[type]=ac
-        #self.alert_registered(None, None, None)
+        self.alert_registered(None, None, None)
         print "%s events imported" % lid
         return True
 
@@ -675,11 +679,17 @@ class TraceBuilder(Thread):
 class Trace:
     def __init__ (self):
         self.start=0
+        self.name=time.strftime("trace_advene-%Y%m%d-%H%M%S")
         self.levels={
         'events':[],
         'operations':[],
         'actions':[],
         }
+
+    def rename(self, name):
+        # rename the trace
+        self.name = name
+        return
 
     def sort_trace_by(self, level, type):
         # allow to sort trace level 1 or 2 by time or name
