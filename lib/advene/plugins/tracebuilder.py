@@ -63,7 +63,6 @@ class TraceBuilder(Thread):
         self.bdq = None # broadcasting queue
         self.network_broadcasting = ntbd
         self.network_exp = nte
-        self.activity_start = config.data.startup_time
         self.operations = []
         self.registered_views = []
         self.opened_actions = {}
@@ -109,7 +108,10 @@ class TraceBuilder(Thread):
         if self.network_broadcasting:
             self.init_broadcasting()
         self.controller.event_handler.register_view(self)
-        self.trace = Trace()
+        self.traces = []
+        self.trace = Trace() # current trace
+        self.trace.start = config.data.startup_time
+        self.traces.append(self.trace)
 
     def run(self):
         while (1):
@@ -219,7 +221,7 @@ class TraceBuilder(Thread):
         if pk.node.nodeName != 'package':
             print "This does not look like a trace file."
             return False
-        self.trace = Trace()
+        self.traces.append(Trace())
         self.opened_actions = {}
         if pk.annotations:
             for an in pk.annotations[0].annotation:
@@ -248,12 +250,18 @@ class TraceBuilder(Thread):
         return
 
     def import_trace(self, fname, reset):
+        # fname : String, trace file path
+        # reset : boolean, reset current trace FIXME: to be removed or modified
+        # import append a trace to self.traces
         print 'importing trace from %s' % fname
+        # reseting current trace
         if reset:
             self.trace = Trace()
             self.opened_actions = {}
-            self.activity_start = config.data.startup_time
+            self.trace.start = config.data.startup_time
+            # should be now
             print "Trace cleaned."
+        # checking trace path
         if not os.path.exists(fname):
             oldfname=fname
             fname = os.path.join(config.data.path['settings'],oldfname)
@@ -266,6 +274,8 @@ class TraceBuilder(Thread):
         if tr.node.nodeName != 'trace':
             print "This does not look like a trace file."
             return False
+        # creating an empty new trace
+        self.traces.append(Trace())
         for ev in tr.event:
             lid = lid+1
             ev_content = ''
@@ -282,14 +292,14 @@ class TraceBuilder(Thread):
                 ev.o_type=None
             if not hasattr(ev, 'o_cid') or ev.o_cid=="None": #for compatibility with previous traces
                 ev.o_cid=None
-            if float(ev.time) < self.activity_start:
-                self.activity_start=float(ev.time)
+            if self.traces[-1].start == 0 or float(ev.time) < self.traces[-1].start:
+                self.traces[-1].start=float(ev.time)
             evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ev.o_type, ev.o_cid)
             evt.change_comment(ev.comment)
-            self.trace.add_to_trace('events', evt)
+            self.traces[-1].add_to_trace('events', evt)
             if evt.name in self.operation_mapping.keys():
                 op = Operation(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ev.o_type, ev.o_cid)
-                self.trace.add_to_trace('operations', op)
+                self.traces[-1].add_to_trace('operations', op)
                 if op is not None:
                     if ev.name in self.operation_mapping.keys():
                         ac_t = self.operation_mapping[ev.name]
@@ -316,9 +326,9 @@ class TraceBuilder(Thread):
                         if t != "Navigation":
                             del self.opened_actions[t]
                     ac = Action(name=type, begintime=op.time, endtime=None, acbegintime=op.activity_time, acendtime=None, content=None, movie=op.movie, movietime=op.movietime, operations=[op])
-                    self.trace.add_to_trace('actions', ac)
+                    self.traces[-1].add_to_trace('actions', ac)
                     self.opened_actions[type]=ac
-        self.alert_registered(None, None, None)
+        #self.alert_registered(None, None, None)
         print "%s events imported" % lid
         return True
 
@@ -350,7 +360,7 @@ class TraceBuilder(Thread):
             self.controller.update_snapshot(self.controller.player.current_position_value)
         #ev_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
         ev_time = time.time()
-        ev_activity_time = (time.time() - self.activity_start) * 1000
+        ev_activity_time = (time.time() - self.trace.start) * 1000
         ev_name = obj['event_name']
         ev_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
         ev_movie_time = self.controller.player.current_position_value
@@ -474,7 +484,7 @@ class TraceBuilder(Thread):
     def packOperation(self, obj):
         #op_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
         op_time = time.time()
-        op_activity_time = (time.time() - self.activity_start) * 1000
+        op_activity_time = (time.time() - self.trace.start) * 1000
         op_name = obj['event_name']
         #op_params = obj['parameters']
         op_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
@@ -664,6 +674,7 @@ class TraceBuilder(Thread):
 
 class Trace:
     def __init__ (self):
+        self.start=0
         self.levels={
         'events':[],
         'operations':[],
