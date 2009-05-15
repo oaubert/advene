@@ -36,6 +36,7 @@ from advene.gui.views import AdhocView
 from advene.rules.elements import ECACatalog
 import advene.core.config as config
 from advene.gui.widget import TimestampRepresentation
+from advene.gui.util import dialog
 
 try:
     import goocanvas
@@ -84,13 +85,15 @@ class TraceTimeline(AdhocView):
             self.__package=controller.package
         self.drag_coordinates=None
 
+        self.active_trace = None
+        
         # Header canvas
         self.head_canvas = None
         # Main timeline canvas
         self.canvas = None
         # Contextualizing document canvas
         self.doc_canvas = None
-
+        self.display_values = {} # name : (canvasY, timefactor, obj_l, center value)
         self.tooltips = gtk.Tooltips()
         self.tooltips.enable()
         self.selection=[ 0, 0, 0, 0 ]
@@ -110,7 +113,6 @@ class TraceTimeline(AdhocView):
         self.timefactor = 100
         self.autoscroll = True
         self.links_locked = False
-
         self.sw = None
         self.cols={}
         self.tracer.register_view(self)
@@ -125,7 +127,8 @@ class TraceTimeline(AdhocView):
         self.widget.connect("destroy", self.destroy)
         self.populate_head_canvas()
         self.widget.show_all()
-        self.receive(self.tracer.trace)
+        self.active_trace = self.tracer.trace
+        self.receive(self.active_trace)
 
     def build_widget(self):
         mainbox = gtk.VBox()
@@ -185,7 +188,7 @@ class TraceTimeline(AdhocView):
             self.docgroup.w = self.doc_canvas_X-30
             self.docgroup.h = self.doc_canvas_Y-25
             self.docgroup.rect = self.docgroup.newRect()
-            self.docgroup.redraw(self.tracer.trace)
+            self.docgroup.redraw(self.active_trace)
         self.doc_canvas.connect('size-allocate', doc_canvas_resize)
         scrolled_win.add(self.canvas)
 
@@ -227,7 +230,36 @@ class TraceTimeline(AdhocView):
         btne.set_tooltip(self.tooltips, _('Export trace'))
         toolbox.insert(btne, -1)
         btne.connect('clicked', self.export)
-        
+        # trace selector
+        def trace_changed(w):
+            # save zoom values
+            h = self.canvas.get_allocation().height
+            va=scrolled_win.get_vadjustment()
+            vc = (va.value + h/2.0) * self.timefactor
+            self.display_values[self.active_trace.name] = (self.canvasY, self.timefactor, self.obj_l, vc)
+            self.active_trace = self.tracer.traces[w.get_active()]
+            # redraw docgroup
+            self.docgroup.redraw(self.active_trace)
+            # restore zoom values if any
+            if self.active_trace.name in self.display_values.keys():
+                (self.canvasY, self.timefactor, self.obj_l, vc) = self.display_values[self.active_trace.name]
+                self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
+                self.refresh(center = vc)
+            else:
+                self.refresh()
+            return
+        self.trace_selector = dialog.list_selector_widget(
+            members= [( n, _("%s (%s)") % (self.tracer.traces[n].name, n) ) for n in range(0, len(self.tracer.traces))],
+            preselect=0,
+            callback=trace_changed
+)
+        #self.trace_selector.set_size_request(70,-1)
+        i=gtk.ToolItem()
+        i.add(self.trace_selector)
+        i.set_expand=False
+        toolbox.insert(i, -1)
+        #preselect= 0,
+        #callback=refresh        
         self.inspector = Inspector(self.controller)
         bx.pack2(self.inspector)
 
@@ -341,9 +373,9 @@ class TraceTimeline(AdhocView):
         def zoom_100(w):
             wa = self.canvas.get_allocation()
             self.canvasY = wa.height-10.0 # -10 pour des raisons obscures ...
-            if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
-                a = self.tracer.trace.levels['actions'][-1].activity_time[1]
-                for act in self.tracer.trace.levels['actions']:
+            if 'actions' in self.active_trace.levels.keys() and self.active_trace.levels['actions']:
+                a = self.active_trace.levels['actions'][-1].activity_time[1]
+                for act in self.active_trace.levels['actions']:
                     if act.activity_time[1]>a:
                         a=act.activity_time[1]
                 self.timefactor = a/(self.canvasY)
@@ -615,7 +647,7 @@ class TraceTimeline(AdhocView):
 
     def draw_marks(self):
         # verifying start time (changed if an import occured)
-        self.start_time = self.tracer.trace.levels['events'][0].time
+        self.start_time = self.active_trace.levels['events'][0].time
         # adding time lines
         wa = self.canvas.get_parent().get_allocation().height
         tinc = 60
@@ -702,12 +734,12 @@ class TraceTimeline(AdhocView):
         for act in self.cols.keys():
             (h,l) = self.cols[act]
             self.cols[act] = (h, None)
-        if not ('actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']):
+        if not ('actions' in self.active_trace.levels.keys() and self.active_trace.levels['actions']):
             return
-        a = self.tracer.trace.levels['actions'][-1].activity_time[1]
+        a = self.active_trace.levels['actions'][-1].activity_time[1]
         #if action and a< action.activity_time[1]:
         #    a = action.activity_time[1]
-        for act in self.tracer.trace.levels['actions']:
+        for act in self.active_trace.levels['actions']:
             if act.activity_time[1]>a:
                 a=act.activity_time[1]
             #print "t1 %s Ytf %s" % (a, self.canvasY*self.timefactor)
@@ -719,8 +751,8 @@ class TraceTimeline(AdhocView):
         self.canvas.show()
         self.draw_marks()
         sel_eg = None
-        for i in self.tracer.trace.levels['actions']:
-            ev = self.receive_int(self.tracer.trace, action=i)
+        for i in self.active_trace.levels['actions']:
+            ev = self.receive_int(self.active_trace, action=i)
             if selected_item is not None and i == selected_item[0]:
                 sel_eg = ev
             #if action is not None and action ==i:
@@ -771,7 +803,13 @@ class TraceTimeline(AdhocView):
         # return False.
         # This function is called by the tracer to update the gui
         # it should always return False to avoid 100% cpu consumption.
-        self.receive_int(trace, event=None, operation=None, action=None)
+        if self.active_trace == trace:
+            self.receive_int(trace, event, operation, action)
+        if not (event or operation or action):
+            tm = self.trace_selector.get_model()
+            n=len(tm)
+            if n<len(self.tracer.traces):
+                tm.append((_("%s (%s)") % (self.tracer.traces[n].name, n), n, None ))
         return False
 
 
@@ -799,7 +837,6 @@ class TraceTimeline(AdhocView):
             return ev
         h,l = self.cols[action.name]
         color = h.color_c
-
         if l and l.event == action:
             ev = l
             y1=l.rect.get_bounds().y1+1
