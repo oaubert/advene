@@ -1384,7 +1384,6 @@ class TimeLine(AdhocView):
                     annotation.content.data = sa[j].content.data
                 self.controller.notify('AnnotationEditEnd', annotation=annotation, batch=batch_id)
                 self.controller.notify('EditSessionEnd', element=annotation)
-                self.transmuted_annotation = annotation
             return True
 
         # Popup a menu to propose the drop options
