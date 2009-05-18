@@ -41,7 +41,6 @@ import gobject
 import shlex
 import itertools
 import operator
-from sets import Set
 
 import advene.core.config as config
 
@@ -1091,7 +1090,7 @@ class AdveneController(object):
         """
         if p is None:
             p=self.package
-        tags=Set()
+        tags=set()
         # Populate with annotations, relations tags
         for e in itertools.chain(p.annotations, p.relations):
             tags.update(e.tags)
