@@ -1639,10 +1639,7 @@ class AdveneController(object):
 
         # Reset the cached duration
         duration = self.package.getMetaData (config.data.namespace, "duration")
-        if duration is not None:
-            self.cached_duration = long(float(duration))
-        else:
-            self.cached_duration = 0
+        self.cached_duration = long(float(duration or 0))
 
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
