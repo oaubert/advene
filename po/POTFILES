@@ -4,6 +4,7 @@
 ../lib/advene/plugins/tts.py
 ../lib/advene/plugins/tracebuilder.py
 ../lib/advene/plugins/annotationgraph.py
+../lib/advene/plugins/ssa.py
 ../lib/advene/plugins/brltty.py
 ../lib/advene/plugins/shotdetect.py
 ../lib/advene/core/webcherry.py
