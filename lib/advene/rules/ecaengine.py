@@ -33,6 +33,20 @@ import urllib
 
 import advene.rules.elements
 
+class MyThread(threading.Thread):
+    """Override the standard run() method.
+    
+    Its behaviour changed in 2.6, and removed the __target, _args and
+    _kwargs variable. Since we keep reusing them, this broke our code.
+    """
+    def __init__(self, **kwargs):
+        super(MyThread, self).__init__(**kwargs)
+        self._target=kwargs.get('target', None)
+
+    def run(self):
+        if self._target:
+            self._target()
+            
 class ECAEngine:
     """ECAEngine class.
 
@@ -74,8 +88,9 @@ class ECAEngine:
         self.controller=controller
         self.catalog=advene.rules.elements.ECACatalog()
         self.scheduler=sched.scheduler(time.time, time.sleep)
-        self.schedulerthread=threading.Thread(target=self.scheduler.run)
+        self.schedulerthread=MyThread(target=self.scheduler.run)
         self.views_to_notify=[]
+
     def get_state(self):
         """Return a state of the current rulesets.
 
