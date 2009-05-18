@@ -133,6 +133,36 @@ class TraceTimeline(AdhocView):
     def build_widget(self):
         mainbox = gtk.VBox()
 
+        # trace selector
+        def trace_changed(w):
+            # unlock inspector
+            if self.links_locked:
+                self.toggle_lock()
+                self.inspector.clean()
+            # save zoom values
+            h = self.canvas.get_allocation().height
+            va=scrolled_win.get_vadjustment()
+            vc = (va.value + h/2.0) * self.timefactor
+            self.display_values[self.active_trace.name] = (self.canvasY, self.timefactor, self.obj_l, vc)
+            self.active_trace = self.tracer.traces[w.get_active()]
+            # redraw docgroup
+            self.docgroup.redraw(self.active_trace)
+            # restore zoom values if any
+            if self.active_trace.name in self.display_values.keys():
+                (self.canvasY, self.timefactor, self.obj_l, vc) = self.display_values[self.active_trace.name]
+                self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
+                self.refresh(center = vc)
+            else:
+                self.refresh()
+            return
+        self.trace_selector = dialog.list_selector_widget(
+            members= [( n, _("%s (%s)") % (self.tracer.traces[n].name, n) ) for n in range(0, len(self.tracer.traces))],
+            preselect=0,
+            callback=trace_changed
+)
+        #self.trace_selector.set_size_request(70,-1)
+        mainbox.pack_start(self.trace_selector, expand=False)
+
         toolbox = gtk.Toolbar()
         toolbox.set_orientation(gtk.ORIENTATION_HORIZONTAL)
         toolbox.set_style(gtk.TOOLBAR_ICONS)
@@ -230,34 +260,6 @@ class TraceTimeline(AdhocView):
         btne.set_tooltip(self.tooltips, _('Export trace'))
         toolbox.insert(btne, -1)
         btne.connect('clicked', self.export)
-        # trace selector
-        def trace_changed(w):
-            # save zoom values
-            h = self.canvas.get_allocation().height
-            va=scrolled_win.get_vadjustment()
-            vc = (va.value + h/2.0) * self.timefactor
-            self.display_values[self.active_trace.name] = (self.canvasY, self.timefactor, self.obj_l, vc)
-            self.active_trace = self.tracer.traces[w.get_active()]
-            # redraw docgroup
-            self.docgroup.redraw(self.active_trace)
-            # restore zoom values if any
-            if self.active_trace.name in self.display_values.keys():
-                (self.canvasY, self.timefactor, self.obj_l, vc) = self.display_values[self.active_trace.name]
-                self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
-                self.refresh(center = vc)
-            else:
-                self.refresh()
-            return
-        self.trace_selector = dialog.list_selector_widget(
-            members= [( n, _("%s (%s)") % (self.tracer.traces[n].name, n) ) for n in range(0, len(self.tracer.traces))],
-            preselect=0,
-            callback=trace_changed
-)
-        #self.trace_selector.set_size_request(70,-1)
-        i=gtk.ToolItem()
-        i.add(self.trace_selector)
-        i.set_expand=False
-        toolbox.insert(i, -1)
         #preselect= 0,
         #callback=refresh        
         self.inspector = Inspector(self.controller)
