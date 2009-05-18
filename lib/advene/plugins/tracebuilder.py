@@ -860,8 +860,10 @@ class TExport(Thread):
             addr = socket.getaddrinfo(self.host, self.port)
             sck.connect(addr[0][4])
         except (socket.error,socket.gaierror), e:
-            print(_("Cannot export to %s:%s %s") % (self.host, self.port,e))
-            #self.log(_("Cannot export to %(HOST)s:%(PORT)s: %(e)s") % locals())
+            print(_("Cannot export to %(host)s:%(port)s %(error)s") % {
+                    'host': self.host, 
+                    'port': self.port, 
+                    'error': e})
             return
         nbe=0
         try:
@@ -872,8 +874,10 @@ class TExport(Thread):
                 sck.sendall(tmp)
                 nbe+=1
         except (socket.error,socket.gaierror), e:
-            print(_("Cannot send data to %s:%s %s") % (self.host, self.port,e))
-            #self.log(_("Cannot export to %(HOST)s:%(PORT)s: %(e)s") % locals())
+            print(_("Cannot send data to %(host)s:%(port)s %(error)s") % {
+                    'host': self.host, 
+                    'port': self.port,
+                    'error': e } )
             sck.close()
             return
         print '%s events exported to %s:%s' % (nbe, self.host, self.port)
@@ -893,8 +897,10 @@ class TBroadcast(Thread):
             addr = socket.getaddrinfo(self.host, self.port)
             sck.connect(addr[0][4])
         except (socket.error,socket.gaierror), e:
-            print(_("Cannot export to %s:%s %s") % (self.host, self.port,e))
-            #self.log(_("Cannot export to %(HOST)s:%(PORT)s: %(e)s") % locals())
+            print(_("Cannot export to %(host)s:%(port)s %(error)s") % {
+                    'host': self.host, 
+                    'port': self.port, 
+                    'error': e})
             return
         nbe=0
         # Infinite loop waiting for event to send
@@ -914,8 +920,14 @@ class TBroadcast(Thread):
                 sck.sendall(tmp)
                 nbe+=1
             except (socket.error,socket.gaierror), e:
-                print(_("Cannot send event %s to %s:%s %s") % (nbe, self.host, self.port,e))
-                #self.log(_("Cannot export to %(HOST)s:%(PORT)s: %(e)s") % locals())
+                print(_("Cannot send event %(nb)s to %(host)s:%(port)s %(error)s") % {
+                        'nb': nbe, 
+                        'host': self.host, 
+                        'port': self.port,
+                        'error': e})
                 return
-        print _('%s events sent to %s:%s during session.') % (nbe, self.host, self.port)
+        print _('%(nb)s events sent to %(host)s:%(port)s during session.') % {
+            'nb': nbe, 
+            'host': self.host, 
+            'port': self.port }
         sck.close()  

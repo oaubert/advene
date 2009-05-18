@@ -208,7 +208,7 @@ class webkit_wrapper:
             pass
 
         def _loading_progress_cb(view, progress):
-            self.notify(label=_("%s%s loaded") % (progress, '%'))
+            self.notify(label=_("%s%% loaded") % progress)
 
         def _title_changed_cb(widget, frame, title):
             self.notify(label=_("Title %s") % title)

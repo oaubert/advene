@@ -156,7 +156,9 @@ class TraceTimeline(AdhocView):
                 self.refresh()
             return
         self.trace_selector = dialog.list_selector_widget(
-            members= [( n, _("%s (%s)") % (self.tracer.traces[n].name, n) ) for n in range(0, len(self.tracer.traces))],
+            members= [( n, _("%(name)s (%(index)s)") % {
+                        'name': self.tracer.traces[n].name, 
+                        'index': n} for n in range(0, len(self.tracer.traces))],
             preselect=0,
             callback=trace_changed
 )
@@ -810,8 +812,11 @@ class TraceTimeline(AdhocView):
         if not (event or operation or action):
             tm = self.trace_selector.get_model()
             n=len(tm)
-            if n<len(self.tracer.traces):
-                tm.append((_("%s (%s)") % (self.tracer.traces[n].name, n), n, None ))
+            if n < len(self.tracer.traces):
+                tm.append((_("%(name)s (%(index)s)") % {
+                        'name': self.tracer.traces[n].name, 
+                        'index': n}, 
+                           n, None ))
         return False
 
 
@@ -1285,7 +1290,7 @@ class Inspector (gtk.VBox):
         self.tooltips.set_tip(self.inspector_id, _('Id'))
         self.inspector_type = gtk.Label('')
         self.pack_start(self.inspector_type, expand=False)
-        self.tooltips.set_tip(self.inspector_type, _('Classe'))
+        self.tooltips.set_tip(self.inspector_type, _('Class'))
         self.inspector_type.set_alignment(0, 0.5)
         self.inspector_name = gtk.Label('')
         self.pack_start(self.inspector_name, expand=False)
@@ -1366,7 +1371,9 @@ class Inspector (gtk.VBox):
         nb=0
         for o in op_list:
             if nb >= nb_max:
-                l = gtk.Label(_('%s/%s operations not displayed.') % (max(len(op_list) - nb_max,0), len(op_list)))
+                l = gtk.Label(_('%(count)s/%(total)s operations not displayed.') % {
+                        'count': max(len(op_list) - nb_max,0), 
+                        'total': len(op_list)})
                 #FIXME : need to add a tooltip to describe operations not displayed
                 self.inspector_opes.pack_start(l, expand=False)
                 break

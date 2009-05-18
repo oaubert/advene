@@ -439,7 +439,7 @@ class WebsiteExporter(object):
             self.progress_callback(progress, _("Depth %d") % depth)
             links=set()
             for url in links_to_be_processed:
-                self.progress_callback(progress, _("Depth %d: processing %s") % (depth, url))
+                self.progress_callback(progress, _("Depth %(depth)d: processing %(url)s") % locals())
                 print "Processing", url
                 progress += step
                 content=self.get_contents(url)
