@@ -134,6 +134,13 @@ class TraceBuilder(Thread):
                 if self.texp.isAlive():
                     print('Export thread still running, waiting for its death...')
                 self.texp.join()
+        # Also save trace on filesystem.
+        try:
+            fn = self.controller.tracers[0].export()
+            print "trace exported to %s" % fn
+        except Exception, e:
+            print "error exporting trace : %s" % unicode(e).encode('utf-8')
+
         if self.network_broadcasting:
             self.end_broadcasting()
 
