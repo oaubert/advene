@@ -156,9 +156,10 @@ class TraceTimeline(AdhocView):
                 self.refresh()
             return
         self.trace_selector = dialog.list_selector_widget(
-            members= [( n, _("%(name)s (%(index)s)")) % {
-                        'name': self.tracer.traces[n].name, 
-                        'index': n} for n in range(0, len(self.tracer.traces))],
+            members= [( n, _("%(name)s (%(index)d)") % {
+                        'name': t.name, 
+                        'index': n
+                        }) for (n, t) in enumerate(self.tracer.traces)],
             preselect=0,
             callback=trace_changed
 )
