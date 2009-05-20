@@ -294,7 +294,7 @@ class CustomTTSEngine(TTSEngine):
         try:
             if self.prg_process is None:
                 self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], shell=False, stdin=subprocess.PIPE)
-            self.prg_process.stdin.write(sentence + "\n")
+            self.prg_process.stdin.write(unicode(sentence + "\n").encode('latin1', 'ignore'))
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e).encode('utf8'))
         return True
