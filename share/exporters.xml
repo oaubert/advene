@@ -10,7 +10,7 @@
   <queries/>
   <schemas/>
   <views>
-    <view dc:creator="oaubert" dc:date="2004-06-14" id="srt" viewable-class="package">
+    <view dc:creator="oaubert" dc:date="2004-06-14" id="srt" viewable-class="*">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">SRT subtitles</title>
 	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">srt</extension>
@@ -21,7 +21,7 @@
 &lt;span tal:replace=&quot;a/content/data&quot;&gt;Content&lt;/span&gt;
 &lt;/span&gt;</content>
     </view>
-    <view dc:creator="oaubert" dc:date="2004-06-14" id="smil" viewable-class="package">
+    <view dc:creator="oaubert" dc:date="2004-06-14" id="smil" viewable-class="*">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">SMIL</title>
 	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">smil</extension>
@@ -423,7 +423,7 @@ div.${a/id} {
 
 &lt;/package&gt;</content>
     </view>
-    <view dc:creator="oaubert" dc:date="2008-02-14" id="CMML" viewable-class="package">
+    <view dc:creator="oaubert" dc:date="2008-02-14" id="CMML" viewable-class="*">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">CMML</title>
 	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">cmml</extension>
@@ -458,7 +458,7 @@ div.${a/id} {
 
 &lt;/cmml&gt;
 </content>
-    </view><view dc:creator="oaubert" dc:date="2009-05-22" id="rdf" viewable-class="package"><meta><title xmlns="http://purl.org/dc/elements/1.1/">RDF</title></meta><content mime-type="application/xml">&lt;rdf:RDF
+    </view><view dc:creator="oaubert" dc:date="2009-05-22" id="rdf" viewable-class="*"><meta><title xmlns="http://purl.org/dc/elements/1.1/">RDF</title></meta><content mime-type="application/xml">&lt;rdf:RDF
 xmlns:rdf=&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#&quot;
 xmlns:rdfs=&quot;http://www.w3.org/2000/01/rdf-schema#&quot;
 xmlns:owl=&quot;http://www.w3.org/2002/07/owl#&quot;
@@ -467,6 +467,7 @@ xmlns:foaf=&quot;http://xmlns.com/foaf/0.1/&quot;
 xmlns:dc=&quot;http://purl.org/dc/terms/&quot;
 xmlns=&quot;http://advene.org/ns/linked-data/&quot;
 &gt;
+&lt;!-- Note: this view can be applied to a package or to an annotation-type --&gt;
   &lt;Annotation
     tal:repeat=&quot;a here/annotations&quot;
     tal:attributes=&quot;rdf:about a/uri&quot;&gt;
