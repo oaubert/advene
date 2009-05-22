@@ -458,6 +458,27 @@ div.${a/id} {
 
 &lt;/cmml&gt;
 </content>
-    </view>
+    </view><view dc:creator="oaubert" dc:date="2009-05-22" id="rdf" viewable-class="package"><meta><title xmlns="http://purl.org/dc/elements/1.1/">RDF</title></meta><content mime-type="application/xml">&lt;rdf:RDF
+xmlns:rdf=&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#&quot;
+xmlns:rdfs=&quot;http://www.w3.org/2000/01/rdf-schema#&quot;
+xmlns:owl=&quot;http://www.w3.org/2002/07/owl#&quot;
+xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema#&quot;
+xmlns:foaf=&quot;http://xmlns.com/foaf/0.1/&quot;
+xmlns:dc=&quot;http://purl.org/dc/terms/&quot;
+xmlns=&quot;http://advene.org/ns/linked-data/&quot;
+&gt;
+  &lt;Annotation
+    tal:repeat=&quot;a here/annotations&quot;
+    tal:attributes=&quot;rdf:about a/uri&quot;&gt;
+    &lt;media tal:attributes=&quot;rdf:resource package/meta/advenetool/mediafile&quot; /&gt;
+    &lt;begin tal:content=&quot;a/fragment/begin&quot;&gt;1&lt;/begin&gt;
+    &lt;end tal:content=&quot;a/fragment/begin&quot;&gt;2&lt;/end&gt;
+    &lt;transcription tal:content=&quot;a/content/data&quot;&gt;text&lt;/transcription&gt;
+ &lt;!--    &lt;rdfs:seeAlso
+       tal repeat=&quot;l a/query/Overlapping_links&quot;
+       tal attributes=&quot;rdf:resource l/content/parsed/url&quot; /&gt;
+       --&gt;
+  &lt;/Annotation&gt;
+&lt;/rdf:RDF&gt;</content></view>
   </views>
 </package>
