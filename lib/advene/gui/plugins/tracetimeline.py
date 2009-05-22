@@ -274,10 +274,11 @@ class TraceTimeline(AdhocView):
                                    filter='any')
             if not fname:
                 return True
-            self.tracer.import_trace(fname)
             # FIXME: import_trace should return the trace reference,
-            # and we should use it for selection
-            self.select_trace(self.tracer.traces[-1])
+            self.tracer.import_trace(fname)
+            # Refresh combo box
+            self.receive(self.tracer.traces[-1])
+            self.trace_selector.set_active(len(self.tracer.traces) - 1)
             return True
 
         b=gtk.ToolButton(stock_id=gtk.STOCK_OPEN)
