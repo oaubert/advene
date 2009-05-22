@@ -161,8 +161,7 @@ class TraceTimeline(AdhocView):
                         'index': n
                         }) for (n, t) in enumerate(self.tracer.traces)],
             preselect=0,
-            callback=trace_changed
-)
+            callback=trace_changed)
         #self.trace_selector.set_size_request(70,-1)
         mainbox.pack_start(self.trace_selector, expand=False)
 
@@ -254,13 +253,31 @@ class TraceTimeline(AdhocView):
         toolbox.insert(self.btnl, -1)
         self.btnl.connect('clicked', self.toggle_lock)
         #btn to change link mode
-        self.btnlm = gtk.ToolButton(label='L')
-        self.btnlm.set_tooltip(self.tooltips, _('Toggle link mode'))
-        toolbox.insert(self.btnlm, -1)
-        self.btnlm.connect('clicked', self.toggle_link_mode)
-        #btn to export trace
-        btne = gtk.ToolButton(label='Export')
-        btne.set_tooltip(self.tooltips, _('Export trace'))
+        b = gtk.ToolButton(label='L')
+        b.set_tooltip(self.tooltips, _('Toggle link mode'))
+        toolbox.insert(b, -1)
+        b.connect('clicked', self.toggle_link_mode)
+
+        def open_trace(b):
+            fname=dialog.get_filename(title=_("Open a trace file"),
+                                   action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                   button=gtk.STOCK_OPEN,
+                                   default_dir=config.data.path['settings'],
+                                   filter='any')
+            if not fname:
+                return True
+            self.controller.tracers[0].import_trace(fname)
+            
+            return True
+
+        b=gtk.ToolButton(stock_id=gtk.STOCK_OPEN)
+        b.set_tooltip(self.tooltips, _('Open an existing trace'))
+        toolbox.insert(b, -1)
+        b.connect('clicked', open_trace)
+
+        # Export trace
+        btne = gtk.ToolButton(stock_id=gtk.STOCK_SAVE)
+        btne.set_tooltip(self.tooltips, _('Save trace'))
         toolbox.insert(btne, -1)
         btne.connect('clicked', self.export)
         #preselect= 0,
@@ -417,10 +434,10 @@ class TraceTimeline(AdhocView):
     def toggle_link_mode(self, w):
         if self.link_mode == 0:
             self.link_mode = 1
-            self.btnlm.set_label('H')
+            w.set_label('H')
         else:
             self.link_mode = 0
-            self.btnlm.set_label('L')
+            w.set_label('L')
         i=0
         root = self.canvas.get_root_item()
         while i < root.get_n_children():
