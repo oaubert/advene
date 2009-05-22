@@ -130,31 +130,39 @@ class TraceTimeline(AdhocView):
         self.active_trace = self.tracer.trace
         self.receive(self.active_trace)
 
+    def select_trace(self, trace):
+        if isinstance(trace, (int, long)):
+            # Interpret it as an index into the self.tracers.traces
+            # list
+            trace=self.tracer.traces[trace]
+        # unlock inspector
+        if self.links_locked:
+            self.toggle_lock()
+            self.inspector.clean()
+        # save zoom values
+        h = self.canvas.get_allocation().height
+        va=self.sw.get_vadjustment()
+        vc = (va.value + h/2.0) * self.timefactor
+        self.display_values[self.active_trace.name] = (self.canvasY, self.timefactor, self.obj_l, vc)
+        self.active_trace = trace
+        # redraw docgroup
+        self.docgroup.redraw(self.active_trace)
+        # restore zoom values if any
+        if self.active_trace.name in self.display_values.keys():
+            (self.canvasY, self.timefactor, self.obj_l, vc) = self.display_values[self.active_trace.name]
+            self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
+            self.refresh(center = vc)
+        else:
+            self.refresh()
+
     def build_widget(self):
         mainbox = gtk.VBox()
 
         # trace selector
         def trace_changed(w):
-            # unlock inspector
-            if self.links_locked:
-                self.toggle_lock()
-                self.inspector.clean()
-            # save zoom values
-            h = self.canvas.get_allocation().height
-            va=scrolled_win.get_vadjustment()
-            vc = (va.value + h/2.0) * self.timefactor
-            self.display_values[self.active_trace.name] = (self.canvasY, self.timefactor, self.obj_l, vc)
-            self.active_trace = self.tracer.traces[w.get_active()]
-            # redraw docgroup
-            self.docgroup.redraw(self.active_trace)
-            # restore zoom values if any
-            if self.active_trace.name in self.display_values.keys():
-                (self.canvasY, self.timefactor, self.obj_l, vc) = self.display_values[self.active_trace.name]
-                self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
-                self.refresh(center = vc)
-            else:
-                self.refresh()
-            return
+            self.select_trace(w.get_active())
+            return True
+
         self.trace_selector = dialog.list_selector_widget(
             members= [( n, _("%(name)s (%(index)d)") % {
                         'name': t.name, 
@@ -266,8 +274,10 @@ class TraceTimeline(AdhocView):
                                    filter='any')
             if not fname:
                 return True
-            self.controller.tracers[0].import_trace(fname)
-            
+            self.tracer.import_trace(fname)
+            # FIXME: import_trace should return the trace reference,
+            # and we should use it for selection
+            self.select_trace(self.tracer.traces[-1])
             return True
 
         b=gtk.ToolButton(stock_id=gtk.STOCK_OPEN)
@@ -728,7 +738,7 @@ class TraceTimeline(AdhocView):
         return
 
     def destroy(self, source=None, event=None):
-        self.controller.tracers[0].unregister_view(self)
+        self.tracer.unregister_view(self)
         return False
 
     def refresh(self, action=None, center = None):
