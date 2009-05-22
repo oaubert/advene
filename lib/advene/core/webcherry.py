@@ -318,7 +318,7 @@ class Media(Common):
      Tree organization
      =================
 
-     The C{/media} folder gives the ability to acces the mediaplayer.
+     The C{/media} folder gives the ability to access the mediaplayer.
 
      The elements available in this folder are :
 
