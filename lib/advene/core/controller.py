@@ -2428,10 +2428,10 @@ class AdveneController(object):
                          for v in importer_package.views
                          if v.id != 'index' ), key=lambda v: v.title )
 
-    def apply_export_filter(self, filter, filename):
-        """Apply the given export filename and output the result to filename.
+    def apply_export_filter(self, element, filter, filename):
+        """Apply the given export filename to the element and output the result to filename.
         """
-        ctx=self.build_context()
+        ctx=self.build_context(here=element)
         try:
             stream=open(filename, 'wb')
         except Exception, e:

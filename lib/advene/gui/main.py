@@ -1687,6 +1687,78 @@ class AdveneGUI(object):
         pop=self.open_adhoc_view('edit', element=element, destination=destination)
         return pop
 
+    def export_element(self, element):
+        def generate_default_filename(filter, filename=None):
+            """Generate a filename for the given filter.
+            """
+            if filename is None:
+                # Get the current package title.
+                if isinstance(element, Package):
+                    filename=self.controller.package.title
+                    if filename == 'Template package':
+                        # Use a better name
+                        filename=os.path.splitext(os.path.basename(self.controller.package.uri))[0]
+                    filename=helper.title2id(filename)
+                else:
+                    filename=helper.title2id(element.title or element.id)
+            else:
+                # A filename was provided. Strip the extension.
+                filename=os.path.splitext(filename)[0]
+            # Add a pertinent extension
+            if filter is None:
+                return filename
+            ext=filter.getMetaData(config.data.namespace, 'extension')
+            if not ext:
+                ext = helper.title2id(filter.id)
+            return '.'.join( (filename, ext) )
+
+        if isinstance(element, Package):
+            title=_("Export package data")
+        elif isinstance(element, AnnotationType):
+            title=_("Export annotation type %s") % self.controller.get_title(element)
+        else:
+            title=_("Export element %s") % self.controller.get_title(element)
+        fs = gtk.FileChooserDialog(title=title,
+                                   parent=self.gui.win,
+                                   action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                   buttons=( gtk.STOCK_CONVERT, gtk.RESPONSE_OK,
+                                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+        def update_extension(sel):
+            filter=sel.get_current_element()
+            f=generate_default_filename(filter, os.path.basename(fs.get_filename()))
+            fs.set_current_name(f)
+            return True
+        def valid_always(v):
+            return True
+        def valid_for_package(v):
+            return v.matchFilter['class'] in ('package', '*')
+        def valid_for_annotation_type(v):
+            return v.matchFilter['class'] in ('annotation-type', '*')
+        valid_filter=valid_always
+        if isinstance(element, Package):
+            valid_filter=valid_for_package
+        elif isinstance(element, AnnotationType):
+            valid_filter=valid_for_annotation_type
+        exporters=dialog.list_selector_widget( [ (v, v.title) for v in self.controller.get_export_filters()
+                                                 if valid_filter(v) ],
+                                               callback=update_extension )
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Export format")), expand=False)
+        hb.pack_start(exporters)
+        fs.set_extra_widget(hb)
+
+        fs.show_all()
+        fs.set_current_name(generate_default_filename(exporters.get_current_element()))
+        self.fs=fs
+        res=fs.run()
+
+        if res == gtk.RESPONSE_OK:
+            self.controller.apply_export_filter(element,
+                                                exporters.get_current_element(),
+                                                fs.get_filename())
+        fs.destroy()
+        return True
+
     def update_package_list (self):
         """Update the list of loaded packages.
         """
@@ -3899,54 +3971,9 @@ class AdveneGUI(object):
         return True
 
     def on_export_activate (self, button=None, data=None):
-
-        def generate_default_filename(filter, filename=None):
-            """Generate a filename for the given filter.
-            """
-            if filename is None:
-                # Get the current package title.
-                filename=self.controller.package.title
-                if filename == 'Template package':
-                    # Use a better name
-                    filename=os.path.splitext(os.path.basename(self.controller.package.uri))[0]
-                filename=helper.title2id(filename)
-            else:
-                # A filename was provided. Strip the extension.
-                filename=os.path.splitext(filename)[0]
-            # Add a pertinent extension
-            if filter is None:
-                return filename
-            ext=filter.getMetaData(config.data.namespace, 'extension')
-            if not ext:
-                ext = helper.title2id(filter.id)
-            return '.'.join( (filename, ext) )
-
-        fs = gtk.FileChooserDialog(title=_("Export package data"),
-                                   parent=self.gui.win,
-                                   action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                   buttons=( gtk.STOCK_CONVERT, gtk.RESPONSE_OK,
-                                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
-        def update_extension(sel):
-            filter=sel.get_current_element()
-            f=generate_default_filename(filter, os.path.basename(fs.get_filename()))
-            fs.set_current_name(f)
-            return True
-        exporters=dialog.list_selector_widget( [ (v, v.title) for v in self.controller.get_export_filters() ],
-                                               callback=update_extension )
-        hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Export format")), expand=False)
-        hb.pack_start(exporters)
-        fs.set_extra_widget(hb)
-
-        fs.show_all()
-        fs.set_current_name(generate_default_filename(exporters.get_current_element()))
-        self.fs=fs
-        res=fs.run()
-
-        if res == gtk.RESPONSE_OK:
-            self.controller.apply_export_filter(exporters.get_current_element(),
-                                                fs.get_filename())
-        fs.destroy()
+        """Export a whole package.
+        """
+        self.export_element(self.controller.package)
         return True
 
     def generate_screenshots(self, *p):
