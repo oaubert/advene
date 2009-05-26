@@ -435,6 +435,8 @@ class Player:
         return b
 
     def snapshot(self, position):
+        if gst.get_gst_version() >= (0, 10, 22, 0):
+            return None
         if not self.check_uri():
             return None
 
@@ -452,7 +454,7 @@ class Player:
                            'type': 'PNG',
                            'date': t,
                            # Hardcoded size values. They are not used
-                           # by the application, since their are
+                           # by the application, since they are
                            # encoded in the PNG file anyway.
                            'width': 160,
                            'height': 100 } )
