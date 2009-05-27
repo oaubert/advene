@@ -32,6 +32,30 @@ import advene.util.helper as helper
 
 name="BrlTTY actions"
 
+# The Alva Satellite that we are using for experiments sends strange
+# keycodes. It may be a misconfiguration of brltty that should be
+# fixed, but in the meantime, hardcode appropriate values.
+ALVA_LPAD_UP=536870976 
+ALVA_LPAD_DOWN=536870977 
+ALVA_LPAD_LEFT=536870973
+ALVA_LPAD_RIGHT=536870975
+ALVA_LPAD_LEFTLEFT=536870974
+ALVA_LPAD_RIGHTRIGHT=536870960
+
+ALVA_RPAD_UP=536870927
+ALVA_RPAD_DOWN=536870928
+ALVA_RPAD_LEFT=536870964
+ALVA_RPAD_RIGHT=536870962
+ALVA_RPAD_LEFTLEFT=536870961
+ALVA_RPAD_RIGHTRIGHT=536870963
+
+ALVA_MPAD_BUTTON0=536870942
+ALVA_MPAD_BUTTON1=536870935
+ALVA_MPAD_BUTTON2=536870913
+ALVA_MPAD_BUTTON3=536870914
+ALVA_MPAD_BUTTON4=536870936
+ALVA_MPAD_BUTTON5=536870941
+
 def register(controller=None):
     # The BrailleInput event has a 'cursor' parameter, which is the
     # cursor position, available through the request/cursor TALES
@@ -114,7 +138,7 @@ class BrlEngine:
         if k is None:
             return True
         #command=self.brlconnection.expandKey(k)['command']
-        if k == brlapi.KEY_SYM_RIGHT:
+        if k == brlapi.KEY_SYM_RIGHT or k == ALVA_LPAD_RIGHT:
             # Next annotation
             if self.currenttype is None:
                 self.controller.move_position(config.data.preferences['time-increment'], relative=True)
@@ -127,7 +151,7 @@ class BrlEngine:
                    if an[0].type == self.currenttype ]
                 if l:
                     self.controller.queue_action(self.controller.update_status, 'set', l[0][1])
-        elif k == brlapi.KEY_SYM_LEFT:
+        elif k == brlapi.KEY_SYM_LEFT or k == ALVA_LPAD_LEFT:
             # Next annotation
             if self.currenttype is None:
                 self.controller.move_position(-config.data.preferences['time-increment'], relative=True)
@@ -140,22 +164,22 @@ class BrlEngine:
                 l.sort(key=lambda a: a.fragment.begin, reverse=True)
                 if l:
                     self.controller.queue_action(self.controller.update_status, 'set', l[0].fragment.begin)
-        elif k == brlapi.KEY_SYM_UP or k == brlapi.KEY_SYM_DOWN:
+        elif k == brlapi.KEY_SYM_UP or k == brlapi.KEY_SYM_DOWN or k == ALVA_LPAD_UP or k == ALVA_LPAD_DOWN:
             types=list( self.controller.package.annotationTypes )
             types.sort(key=lambda at: at.title or at.id)
             types.append( 'bookmarks' )
             try:
                 i=types.index(self.currenttype)
             except ValueError:
-                if k == brlapi.KEY_SYM_UP:
+                if k == brlapi.KEY_SYM_UP or k == ALVA_LPAD_UP:
                     # So that i-1 => last item
                     i=0
-                elif k == brlapi.KEY_SYM_DOWN:
+                elif k == brlapi.KEY_SYM_DOWN or k == ALVA_LPAD_DOWN:
                     # So that i+1 => first item
                     i=-1
-            if k == brlapi.KEY_SYM_UP:
+            if k == brlapi.KEY_SYM_UP or k == ALVA_LPAD_UP:
                 i = i - 1
-            elif k == brlapi.KEY_SYM_DOWN:
+            elif k == brlapi.KEY_SYM_DOWN or k == ALVA_LPAD_DOWN:
                 i = i + 1
             try:
                 self.currenttype=types[i]
@@ -167,10 +191,10 @@ class BrlEngine:
                 self.brldisplay('Nav. ' + (self.currenttype.title or self.currenttype.id))
             else:
                 self.brldisplay('Nav. video')
-        elif k == brlapi.KEY_SYM_DELETE:
+        elif k == brlapi.KEY_SYM_DELETE or k == ALVA_LPAD_RIGHTRIGHT:
             # Play/pause
             self.controller.update_status("pause")
-        elif k == brlapi.KEY_SYM_INSERT:
+        elif k == brlapi.KEY_SYM_INSERT or k == ALVA_LPAD_LEFTLEFT:
             # Insert a bookmark
             self.controller.gui.create_bookmark(self.controller.player.current_position_value)
         else:
