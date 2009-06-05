@@ -159,9 +159,15 @@ class TraceBuilder(Thread):
             print(_("Cannot export to %(fname)s: %(e)s") % locals())
             return None
         tr=ET.Element('trace', name=self.trace.name)
-        #everything can be rebuild from events.
-        for (id_e, e) in enumerate(self.trace.levels['events']):
-            tr.append(e.export(id_e))
+        for lvl in self.trace.levels.keys():
+            grp = ET.Element(lvl)
+            #everything can be rebuild from events.
+            for (id_e, e) in enumerate(self.trace.levels[lvl]):
+                #e.to_xml_string(id_e)
+                grp.append(e.export(id_e))
+            tr.append(grp)
+            # everything except comments could be rebuild from events...
+
         helper.indent(tr)
         ET.ElementTree(tr).write(stream, encoding='utf-8')
         stream.close()
@@ -287,7 +293,10 @@ class TraceBuilder(Thread):
             self.traces[-1].rename('%s (imported)' % tr.name)
         else:
             self.traces[-1].rename('No Name (imported)')
-        for ev in tr.event:
+        events = tr
+        if hasattr(tr, 'events'):
+            events = tr.events[0]
+        for ev in events.event:
             lid = lid+1
             ev_content = ''
             evn=None
@@ -339,6 +348,11 @@ class TraceBuilder(Thread):
                     ac = Action(name=type, begintime=op.time, endtime=None, acbegintime=op.activity_time, acendtime=None, content=None, movie=op.movie, movietime=op.movietime, operations=[op])
                     self.traces[-1].add_to_trace('actions', ac)
                     self.opened_actions[type]=ac
+        if hasattr(tr, 'actions'):
+            for ac in tr.actions[0].action:
+                #print ac.id
+                self.traces[-1].levels['actions'][int(ac.id[1:])].change_comment(ac.comment)
+
         self.alert_registered(None, None, None)
         print "%s events imported" % lid
         return True
@@ -805,10 +819,15 @@ class Operation:
         }
 
     def export(self, n_id):
-        e = ET.Element('operation', id='o'+str(n_id), name=self.name, time=str(self.time),
-                ac_time=str(self.activity_time), movie=self.movie, m_time=str(self.movietime), comment=self.comment, o_name=self.concerned_object['name'], o_id=str(self.concerned_object['id']), o_type=str(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
+        #print "%s %s %s %s %s %s %s %s %s %s" % ('e'+str(n_id), self.name, str(self.time), str(self.activity_time), self.movie, str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), self.content)
+        e = ET.Element('operation', id='o'+str(n_id),
+                name=self.name, time=str(self.time),
+                ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']), o_type=str(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
         e.text = self.content
         return e
+        
+    def to_xml_string(self, n_id):
+        return ET.tostring(self.export(n_id), encoding="utf-8")
 
     def change_comment(self, comment=''):
         self.comment = comment
@@ -854,6 +873,22 @@ class Action:
 
     def set_content(self, newcontent):
         self.content = newcontent
+
+    def export(self, a_id):
+        #print "%s %s %s %s %s %s %s %s %s %s" % ('e'+str(n_id), self.name, str(self.time), str(self.activity_time), self.movie, str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), self.content)
+        e = ET.Element('action', id='a'+str(a_id),
+                name=self.name, b_time=str(self.time[0]),
+                e_time=str(self.time[1]),
+                ac_b_time=str(self.activity_time[0]), 
+                ac_e_time=str(self.activity_time[1]),
+                movie=self.movie,
+                m_time=str(self.movietime),
+                comment = self.comment)
+        e.text = self.content 
+        return e
+
+    def to_xml_string(self, n_id):
+        return ET.tostring(self.export(n_id), encoding="utf-8")
 
 class TExport(Thread):
    def __init__ (self, host, port, trace):
