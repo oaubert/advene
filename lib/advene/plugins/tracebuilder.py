@@ -39,7 +39,9 @@ import advene.util.handyxml as handyxml
 import xml.dom
 from gettext import gettext as _
 import atexit
-
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.annotation import Annotation, Relation
+from advene.model.view import View
 
 def register(controller):
     tb = TraceBuilder(controller)
@@ -262,6 +264,22 @@ class TraceBuilder(Thread):
                 print '%s %s %s' % (an_name, an_ac_time, an_content)
         return
 
+    def imp_type(self, type):
+        if type == 'advene.model.schema.Schema':
+            return advene.model.schema.Schema
+        elif type == 'advene.model.schema.AnnotationType':
+            return advene.model.schema.AnnotationType
+        elif type == 'advene.model.schema.RelationType':
+            return advene.model.schema.RelationType
+        elif type == 'advene.model.annotation.Annotation':
+            return advene.model.annotation.Annotation
+        elif type == 'advene.model.annotation.Relation':
+            return advene.model.annotation.Relation
+        elif type == 'advene.model.view.View':
+            return advene.model.view.View
+        else:
+            return None
+
     def import_trace(self, fname, reset=False):
         # fname : String, trace file path
         # reset : boolean, reset current trace FIXME: to be removed or modified
@@ -314,11 +332,11 @@ class TraceBuilder(Thread):
                 ev.o_cid=None
             if self.traces[-1].start == 0 or float(ev.time) < self.traces[-1].start:
                 self.traces[-1].start=float(ev.time)
-            evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ev.o_type, ev.o_cid)
+            evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, self.imp_type(ev.o_type), ev.o_cid)
             evt.change_comment(ev.comment)
             self.traces[-1].add_to_trace('events', evt)
             if evt.name in self.operation_mapping.keys():
-                op = Operation(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ev.o_type, ev.o_cid)
+                op = Operation(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, self.imp_type(ev.o_type), ev.o_cid)
                 self.traces[-1].add_to_trace('operations', op)
                 if op is not None:
                     if ev.name in self.operation_mapping.keys():
@@ -782,11 +800,27 @@ class Event:
             'cid':o_class_id,
         }
 
+    def exp_type(self, type):
+        if type == Schema:
+            return 'advene.model.schema.Schema'
+        elif type == AnnotationType:
+            return 'advene.model.schema.AnnotationType'
+        elif type == RelationType:
+            return 'advene.model.schema.RelationType'
+        elif type == Annotation:
+            return 'advene.model.annotation.Annotation'
+        elif type == Relation:
+            return 'advene.model.annotation.Relation'
+        elif type == View:
+            return 'advene.model.view.View'
+        else:
+            return 'None'
+            
     def export(self, n_id):
         #print "%s %s %s %s %s %s %s %s %s %s" % ('e'+str(n_id), self.name, str(self.time), str(self.activity_time), self.movie, str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), self.content)
         e = ET.Element('event', id='e'+str(n_id),
                 name=self.name, time=str(self.time),
-                ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']), o_type=str(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
+                ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']), o_type=self.exp_type(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
         e.text = self.content
         return e
         
