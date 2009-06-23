@@ -435,8 +435,6 @@ class Player:
         return b
 
     def snapshot(self, position):
-        if gst.get_gst_version() >= (0, 10, 22, 0):
-            return None
         if not self.check_uri():
             return None
 
@@ -447,17 +445,27 @@ class Player:
             # copy() is not available.
             return None
 
-        f=self.convert_snapshot(b)
-        t=f.timestamp / gst.MSECOND
-
-        return Snapshot( { 'data': f.data,
-                           'type': 'PNG',
-                           'date': t,
-                           # Hardcoded size values. They are not used
-                           # by the application, since they are
-                           # encoded in the PNG file anyway.
-                           'width': 160,
-                           'height': 100 } )
+        t=b.timestamp / gst.MSECOND
+        #print "Snapshot taken at", t
+        if gst.get_gst_version() >= (0, 10, 22, 0):
+            return Snapshot( { 'data': b.data,
+                               'type': b.caps[0]['format'].fourcc,
+                               'date': t,
+                               # Hardcoded size values. They are not used
+                               # by the application, since they are
+                               # encoded in the PNG file anyway.
+                               'width': b.caps[0]['width'],
+                               'height': b.caps[0]['height'] } )
+        else:
+            f=self.convert_snapshot(b)            
+            return Snapshot( { 'data': f.data,
+                               'type': 'PNG',
+                               'date': t,
+                               # Hardcoded size values. They are not used
+                               # by the application, since they are
+                               # encoded in the PNG file anyway.
+                               'width': 160,
+                               'height': 100 } )
 
     def all_snapshots(self):
         self.log("all_snapshots %s")
