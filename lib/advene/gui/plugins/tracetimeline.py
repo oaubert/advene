@@ -467,19 +467,30 @@ class TraceTimeline(AdhocView):
             max_y = canvas_item.rect.get_bounds().y2
         elif hasattr(canvas_item, 'rep'):
             obj_id = canvas_item.cobj['id']
+            if obj_id is None:
+                return
             i=0
             root = self.canvas.get_root_item()
+            egl=[]
             while i < root.get_n_children():
-                go = root.get_child(i)
-                if isinstance(go, ObjGroup) and obj_id == go.cobj['id']:
-                    # obj
-                    obj_min_y = go.rep.props.center_y - go.rep.props.radius_y
-                    obj_max_y = go.rep.props.center_y + go.rep.props.radius_y
-                    if min_y == -1:
-                        min_y = obj_min_y
-                    min_y = min(min_y, obj_min_y)
-                    max_y = max(max_y, obj_max_y)
+                eg = root.get_child(i)
+                if isinstance(eg, EventGroup) and eg.objs is not None:
+                    egl.append(eg)
                 i+=1
+            for c in egl:
+                if obj_id in c.objs.keys():
+                    obj_gr = c.objs[obj_id][0]
+                    if obj_gr is None:
+                        y_mi = c.rect.get_bounds().y1
+                        y_ma = c.rect.get_bounds().y1 + c.rect.props.height
+                    else:
+                        y_mi = obj_gr.y-obj_gr.r
+                        y_ma = obj_gr.y+obj_gr.r
+                    if min_y == -1:
+                        min_y = y_mi
+                    min_y = min(min_y, y_mi)
+                    max_y = max(max_y, y_ma)
+                    
         #print 'y1 %s y2 %s' % (min_y, max_y)
         h = self.canvas.get_allocation().height
         # 20.0 to keep a little space between border and object
@@ -1290,7 +1301,8 @@ class ObjGroup (Group):
             txt = 'R'
         elif self.cobj['type'] == View:
             txt = 'V'
-
+        else:
+            print "type inconnu: %s" % self.cobj['type']
         return goocanvas.Text (parent = self,
                         text = txt,
                         x = self.x,
