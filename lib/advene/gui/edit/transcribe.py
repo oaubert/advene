@@ -27,6 +27,11 @@ import operator
 import gtk
 import pango
 
+try:
+    import gtksourceview
+except ImportError:
+    gtksourceview=None
+
 import urllib
 
 import advene.core.config as config
@@ -228,8 +233,30 @@ class TranscriptionEdit(AdhocView):
             return True
         return False
 
+    def can_undo(self):
+        try:
+            return hasattr(self.textview.get_buffer(), 'can_undo')
+        except AttributeError, e:
+            return False
+
+    def undo(self, *p):
+        b=self.textview.get_buffer()
+        if b.can_undo():
+            b.undo()
+        return True
+
     def build_widget(self):
         vbox = gtk.VBox()
+
+        if gtksourceview is not None:
+            self.textview=gtksourceview.SourceView()
+            self.textview.set_buffer(gtksourceview.SourceBuffer())
+        else:
+            self.textview = gtk.TextView()
+
+        # We could make it editable and modify the annotation
+        self.textview.set_editable(True)
+        self.textview.set_wrap_mode (gtk.WRAP_WORD)
 
         hb=gtk.HBox()
         vbox.pack_start(hb, expand=False)
@@ -242,10 +269,6 @@ class TranscriptionEdit(AdhocView):
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         vbox.add (sw)
 
-        self.textview = gtk.TextView()
-        # We could make it editable and modify the annotation
-        self.textview.set_editable(True)
-        self.textview.set_wrap_mode (gtk.WRAP_WORD)
 
         # 0-mark at the beginning
         zero=self.create_timestamp_mark(0, self.textview.get_buffer().get_start_iter())
@@ -543,6 +566,7 @@ class TranscriptionEdit(AdhocView):
             return True
 
         b=self.textview.get_buffer()
+        b.begin_user_action()
         anchor=b.create_child_anchor(it)
         # Create the mark representation
         child=TimestampRepresentation(timestamp, self.controller, width=self.options['snapshot-size'], visible_label=False)
@@ -550,6 +574,7 @@ class TranscriptionEdit(AdhocView):
         child.connect('clicked', popup_goto)
         child.popup_menu=None
         child.connect('button-press-event', self.mark_button_press_cb, anchor, child)
+        b.end_user_action()
 
         def handle_scroll_event(button, event):
             if not (event.state & gtk.gdk.CONTROL_MASK):
@@ -1176,6 +1201,13 @@ class TranscriptionEdit(AdhocView):
             b.set_tooltip(self.tooltips, tooltip)
             b.connect('clicked', callback)
             tb.insert(b, -1)
+
+        if self.can_undo():
+            b=gtk.ToolButton(gtk.STOCK_UNDO)
+            b.connect('clicked', lambda i: self.undo())
+            b.set_tooltip(self.tooltips, _("Undo"))
+            tb.insert(b, -1)
+            b.show()
 
         def handle_toggle(t, option_name):
             self.options[option_name]=t.get_active()
