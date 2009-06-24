@@ -1405,8 +1405,9 @@ class Inspector (gtk.VBox):
     # op_list : list of operations to display
     
         h = self.inspector_opes.get_allocation().height
-        nb_max = h/25 - 4 # -3 for a nice display
-        # FIXME : -3 when snapshot height pb fixed
+        w = self.inspector_opes.get_allocation().width
+        nb_max = h/25 - 2 # -1 for a nice display
+        # FIXME : -1 when snapshot height pb fixed and height pb fixed
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
         nb=0
@@ -1415,11 +1416,12 @@ class Inspector (gtk.VBox):
                 l = gtk.Label(_('%(count)s/%(total)s operations not displayed.') % {
                         'count': max(len(op_list) - nb_max,0), 
                         'total': len(op_list)})
-                #FIXME : need to add a tooltip to describe operations not displayed
+                #FIXME : need to add a scrolled window widget to display all operations
                 self.inspector_opes.pack_start(l, expand=False)
                 break
             nb+=1
             l = self.addOperation(o)
+            l.set_size_request(w, 25)
             self.inspector_opes.pack_start(l, expand=False)
 
 
