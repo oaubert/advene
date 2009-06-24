@@ -142,7 +142,7 @@ class AdhocView(object):
                 elif isinstance(l, gtk.HBox):
                     # It may be a HBox with multiple elements. Find the label.
                     # Normally (cf gui.viewbook), the label is in an EventBox
-                    l=l.get_children()[0].get_children()[0]
+                    l=l.get_children()[1].get_children()[0]
                     l.set_text(label)
         elif isinstance(p, gtk.VBox):
             # It is a popup window. Set its title.
