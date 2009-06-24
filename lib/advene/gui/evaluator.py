@@ -737,7 +737,7 @@ class Evaluator:
         if not self.bookmarks:
             return True
         m=gtk.Menu()
-        for b in self.bookmarks:
+        for b in reversed(self.bookmarks):
             i=gtk.MenuItem(b, use_underline=False)
             i.connect('activate', set_expression, b)
             m.append(i)
