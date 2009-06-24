@@ -152,7 +152,7 @@ class Evaluator:
     def scroll_output(self, d):
         a=self.resultscroll.get_vadjustment()
         new=a.value + d * a.page_increment
-        if  new >= 0 and new < a.upper - a.page_size:
+        if  new >= 0 and new < a.upper:
             a.value=new
         a.value_changed ()
         return True
