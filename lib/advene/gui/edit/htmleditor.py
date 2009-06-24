@@ -217,7 +217,10 @@ class HTMLEditor(textview_class, HTMLParser):
         self.__tb.connect('delete-range', delete_range)
 
     def can_undo(self):
-        return (gtksourceview is not None and self.get_buffer().can_undo())
+        try:
+            return hasattr(self.get_buffer(), 'can_undo')
+        except AttributeError, e:
+            return False
 
     def undo(self, *p):
         b=self.get_buffer()
