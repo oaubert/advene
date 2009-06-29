@@ -33,6 +33,20 @@ from advene.model.view import View
 from advene.model.query import Query
 import advene.util.helper as helper
 
+if hasattr(gtk, 'image_new_from_pixbuf'):
+    image_new_from_pixbuf=gtk.image_new_from_pixbuf
+else:
+    def my_image_new_from_pixbuf(pb, width=None):
+        i=gtk.Image()
+        if width:
+            height = width * pb.get_height() / pb.get_width()
+            p=pb.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+        else:
+            p=pb
+        i.set_from_pixbuf(p)
+        return i
+    image_new_from_pixbuf=my_image_new_from_pixbuf
+
 def png_to_pixbuf (png_data, width=None, height=None):
     """Load PNG data into a pixbuf
     """
@@ -375,7 +389,7 @@ def contextual_drag_begin(widget, context, element, controller):
     cache=controller.package.imagecache
 
     if isinstance(element, (long, int)):
-        begin=gtk.image_new_from_pixbuf(png_to_pixbuf (cache.get(element, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
+        begin=image_new_from_pixbuf(png_to_pixbuf (cache.get(element, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
         begin.set_style(bw_style)
 
         l=gtk.Label()
@@ -391,12 +405,12 @@ def contextual_drag_begin(widget, context, element, controller):
         # Pictures HBox
         h=gtk.HBox()
         h.set_style(bw_style)
-        begin=gtk.image_new_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
+        begin=image_new_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
         begin.set_style(bw_style)
         h.pack_start(begin, expand=False)
         # Padding
         h.pack_start(gtk.HBox(), expand=True)
-        end=gtk.image_new_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.end), width=config.data.preferences['drag-snapshot-width']))
+        end=image_new_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.end), width=config.data.preferences['drag-snapshot-width']))
         end.set_style(bw_style)
         h.pack_start(end, expand=False)
         v.pack_start(h, expand=False)
