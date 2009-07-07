@@ -382,6 +382,7 @@ class HTMLEditor(textview_class, HTMLParser):
         # Process width and height attributes
         attrwidth = dattr.get('width')
         attrheight = dattr.get('height')
+        # Note: attrwidth and attrheight are strings (possibly empty)
 
         if data is not None:
             # Caveat: GdkPixbuf is known not to be safe to load images
@@ -393,13 +394,13 @@ class HTMLEditor(textview_class, HTMLParser):
                 if attrwidth and attrheight:
                     # Both are specified. Simply use them.
                     width, height = attrwidth, attrheight
-                elif attrwidth and not attrheight:
+                elif attrwidth:
                     # Only width is specified.
-                    height = 1.0 * attrheight / attrwidth * width
-                    width = attrwidth
-                elif attrheight and not attrwidth:
-                    width = 1.0 * attrwidth / attrheight * height
-                    height = attrheight
+                    height = int(attrwidth) * height / width
+                    width = int(attrwidth)
+                elif attrheight:
+                    width = int(attrheight) * width / height
+                    height = int(attrheight)
                 loader.set_size(int(width), int(height))
             if attrwidth or attrheight:
                 loader.connect('size-prepared', set_size)
