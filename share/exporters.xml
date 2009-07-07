@@ -110,6 +110,11 @@
 &lt;/ul&gt;
 
 &lt;p&gt;You can either import the export_views package (through the &lt;em&gt;Edit/Package imports&lt;/em&gt; menu), or copy/paste the contents of a view into one of your own views, to adapt if better to your needs.&lt;/p&gt;
+
+&lt;h1&gt;Note about exporter definition&lt;/h1&gt;
+
+&lt;p&gt;Export views can be applied either to a whole package, or to an annotation-type. The MatchFilter class attribute is used to discriminate this: it is either 'package' for exporters which only handle full packages, or '*' for exporters which handle both packages and annotation-types.&lt;/p&gt;
+    
 </content>
     </view>
     <view dc:creator="oaubert" dc:date="2006-02-07" id="timeline" viewable-class="package">
