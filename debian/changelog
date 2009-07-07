@@ -1,3 +1,32 @@
+advene (0.39) unstable; urgency=low
+
+  * Website export improvements.
+  
+  * The FCKeditor browser-based WYSIWYG editor has been removed, in favor
+    of the new HTML editor.
+  
+  * For text-to-speech, the Festival is used if present (linux). Else,
+    espeak is used (linux, windows). On MacOS X, the standard /usr/bin/say
+    command is used.
+  
+  * Trace timeline: interface improvements, previous traces can be reopened.
+  
+  * Timeline: 
+      
+    * optimal alignment of annotation sets (courtesy of <mben@irisa.fr>)
+      
+  * Export:
+  
+    * a RDF export filter is available
+  
+    * annotation types can now be invidually exported (through their popup menu)
+    
+  * Import:
+  
+    * New Transcriber import filter (courtesy of <mben@irisa.fr>)
+
+ --
+
 advene (0.38) unstable; urgency=low
 
   * Stable release. See the following 0.37 notes for more details.
