@@ -272,20 +272,17 @@ class Player:
             elements.append(self.captioner)
         if self.imageoverlay is not None:
             elements.append(self.imageoverlay)
+
         if sink == 'xvimagesink':
             # Imagesink accepts both rgb/yuv and is able to do scaling itself.
             elements.append( self.imagesink )
         else:
-            filter = gst.element_factory_make("capsfilter", "filter")
-            # Strangely, we have to force different dimensions so that
-            # resizing the ximagesink works later.
-            filter.set_property("caps", gst.Caps("video/x-raw-yuv,width=%d,height=%s" % config.data.player['snapshot-dimensions']))
             csp=gst.element_factory_make('ffmpegcolorspace')
             # The scaling did not work before 2008-10-11, cf
             # http://bugzilla.gnome.org/show_bug.cgi?id=339201
             scale=gst.element_factory_make('videoscale')
             self.videoscale=scale
-            elements.extend( (filter, csp, scale, self.imagesink) )
+            elements.extend( (csp, scale, self.imagesink) )
 
         self.video_sink.add(*elements)
         gst.element_link_many(*elements)
