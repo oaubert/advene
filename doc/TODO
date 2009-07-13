@@ -1,3 +1,5 @@
+* Fix gstreamer (appsrc/appsink)
+
 * STBV export (captions): cf http://code.google.com/p/libkate/
 
 * check http://code.activestate.com/recipes/457411/ (interval mapping data structure)
@@ -25,21 +27,9 @@ http://www.opencastproject.org/wiki/Project_Pad_Audio_and_Video_Annotation_Tools
 The Appscio Media Processing Framework (MPF) is built on top of
    gstreamer and is designed to handle metadata.
 
-* use python-webkit for gui.views.html
-
 * htmleditor/transcribe/edit element: use textbuffer.get_modified/set_modified
 
-* Customizable shortcuts for annotation
-
-* Nosferatu: website export: convert play links to link to
-   YouTube/GoogleVideo:
-http://video.google.com/videoplay?docid=-6185283610506001721#0h10m54s
-http://code.google.com/apis/youtube/getting_started.html
-
-* website export: inject javascript code to deactivate /media links
-   when Advene is not running
-
-* make vlc bindings work again (linux/mac)
+* Customizable shortcuts for annotation creation
 
 * Make initial setup window an assistant (multiple steps)
 
@@ -53,8 +43,6 @@ http://development.syllable.org/documentation/interface-guide.html
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)
 
 * MXF samples: http://gstreamer.freedesktop.org/media/incoming/mxf/
-
-* gui.util: define get_drag_icon(element)
 
 * EditElementPopup: if destination != popup, add scrolledwidget around
    widget
