@@ -221,6 +221,45 @@ class TraceBuilder(Thread):
             self.toggle_network_broadcasting()
         return
     
+    def remove_trace(self, index):
+        if index >= len(self.traces):
+            return False
+        self.traces.pop(index)
+        self.alert_registered(None, None, None)
+        return True
+    
+    def search(self, trace, words='', exact=False, options=['oname','oid','ocontent']):
+        # exact will be to match exact terms or just find the terms in a string
+        temp=Trace()
+        temp.rename('Search results for \'%s\' in %s' % (words, trace.name))
+        for e in trace.levels['events']:
+            etemp = e.copy()
+            temp.add_to_trace('events', etemp)
+        for a in trace.levels['actions']:
+            atemp = a.copy()
+            atemp.operations=[]
+            temp.add_to_trace('actions', atemp)
+            
+            for o in a.operations:
+                if o.concerned_object['name'] is not None:
+                    content=''
+                    contentb = o.content.find('content="')
+                    if contentb > 0 :
+                        contentb = contentb+9
+                        contentf = o.content.find('"', contentb)
+                        content = urllib.unquote(o.content[contentb:contentf])
+                    found = False or (not exact and 'oname' in options and o.concerned_object['name'].find(words)>=0) or (exact and 'oname' in options and o.concerned_object['name']==words) or (not exact and 'oid' in options and o.concerned_object['id'].find(words)>=0) or (exact and 'oid' in options and o.concerned_object['id']==words) or (not exact and 'ocontent' in options and content.find(words)>=0) or (exact and 'ocontent' in options and content==words)
+                    if found and not o in temp.levels['operations']:
+                        otemp = o.copy()
+                        temp.add_to_trace('operations', otemp)
+                        atemp.operations.append(otemp)
+            
+            if len(atemp.operations)<=0:
+                temp.remove_from_trace('actions', atemp)
+        self.traces.append(temp)
+        self.alert_registered(None, None, None)
+        return temp
+                
     def convert_old_trace(self, fname):
         #FIXME : complete the import and do not use handyxml.
         print 'importing trace from %s' % fname
@@ -470,7 +509,7 @@ class TraceBuilder(Thread):
                      'schema=' + elem.schema.id,
                      'mimetype=' + elem.mimetype)
                     )
-                elem_name='annotationtype'
+                elem_name=elem.title
                 elem_id=elem.id
                 elem_type = advene.model.schema.AnnotationType
                 elem_class_id = elem.schema.id
@@ -482,7 +521,7 @@ class TraceBuilder(Thread):
                      'schema=' + elem.schema.id,
                      'mimetype=' + elem.mimetype)
                     )
-                elem_name='relationtype'
+                elem_name=elem.title
                 elem_id=elem.id
                 elem_type = advene.model.schema.RelationType
                 elem_class_id = elem.schema.id
@@ -490,7 +529,7 @@ class TraceBuilder(Thread):
             elem=obj['schema']
             if elem is not None:
                 ev_content= 'schema=' + elem.id
-                elem_name='schema'
+                elem_name=elem.title
                 elem_id=elem.id
                 elem_type = advene.model.schema.Schema
         elif 'view' in obj:
@@ -501,12 +540,12 @@ class TraceBuilder(Thread):
                         ('view=' + elem.id,
                          'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
                         )
-                    elem_name='view'
+                    elem_name=elem.title
                     elem_id=elem.id
                     elem_type = advene.model.view.View
                 else:
                     ev_content= 'view=' + str(elem)
-                    elem_name='view'
+                    elem_name='not a view'
                     elem_id='undefined'
         elif 'package' in obj:
             elem=obj['package']
@@ -596,7 +635,7 @@ class TraceBuilder(Thread):
                      'schema=' + elem.schema.id,
                      'mimetype=' + elem.mimetype)
                     )
-                elem_name='annotationtype'
+                elem_name=elem.title
                 elem_id=elem.id
                 elem_type = advene.model.schema.AnnotationType
                 elem_class_id = elem.schema.id
@@ -608,7 +647,7 @@ class TraceBuilder(Thread):
                      'schema=' + elem.schema.id,
                      'mimetype=' + elem.mimetype)
                     )
-                elem_name='relationtype'
+                elem_name=elem.title
                 elem_id=elem.id
                 elem_type = advene.model.schema.RelationType
                 elem_class_id = elem.schema.id
@@ -616,7 +655,7 @@ class TraceBuilder(Thread):
             elem=obj['schema']
             if elem is not None:
                 op_content= 'schema=' + elem.id
-                elem_name='schema'
+                elem_name=elem.title
                 elem_id=elem.id
                 elem_type = advene.model.schema.Schema
         elif 'view' in obj:
@@ -627,12 +666,12 @@ class TraceBuilder(Thread):
                         ('view=' + elem.id,
                          'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
                         )
-                    elem_name='view'
+                    elem_name=elem.title
                     elem_id=elem.id
                     elem_type = advene.model.view.View
                 else:
                     op_content= 'view=' + str(elem)
-                    elem_name='view'
+                    elem_name='not a view'
                     elem_id='undefined'
         elif 'package' in obj:
             elem=obj['package']
@@ -718,7 +757,7 @@ class TraceBuilder(Thread):
 class Trace:
     def __init__ (self):
         self.start=0
-        self.name=time.strftime("trace_advene-%Y%m%d-%H%M%S")
+        self.name=time.strftime("trace-%Y%m%d-%H%M%S")
         self.levels={
         'events':[],
         'operations':[],
@@ -739,12 +778,14 @@ class Trace:
         if obj is None or not self.levels.has_key(level):
             return None
         self.levels[level].append(obj)
-        return
+        return obj
 
     def remove_from_trace(self, level, obj):
         # remove an object from the trace
-        # should not be used as a trace is what it is ...
-        return
+        if obj is None or not self.levels.has_key(level) or obj not in self.levels[level]:
+            return None
+        self.levels[level].remove(obj)
+        return obj
 
     def add_level(self, level):
         # create a new level in the trace
@@ -800,6 +841,11 @@ class Event:
             'cid':o_class_id,
         }
 
+    def copy(self):
+        e = Event(self.name, self.time, self.activity_time, self.content, self.movie, self.movietime, self.concerned_object['name'],self.concerned_object['id'],self.concerned_object['type'],self.concerned_object['cid'])
+        e.change_comment(self.comment)
+        return e
+
     def exp_type(self, type):
         if type == Schema:
             return 'advene.model.schema.Schema'
@@ -852,6 +898,11 @@ class Operation:
             'cid':o_class_id,
         }
 
+    def copy(self):
+        o = Operation(self.name, self.time, self.activity_time, self.content, self.movie, self.movietime, self.concerned_object['name'],self.concerned_object['id'],self.concerned_object['type'],self.concerned_object['cid'])
+        o.change_comment(self.comment)
+        return o
+        
     def export(self, n_id):
         #print "%s %s %s %s %s %s %s %s %s %s" % ('e'+str(n_id), self.name, str(self.time), str(self.activity_time), self.movie, str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), self.content)
         e = ET.Element('operation', id='o'+str(n_id),
@@ -891,6 +942,11 @@ class Action:
         self.movietime = movietime
         if operations is not None:
             self.operations = operations
+
+    def copy(self):
+        a = Action(self.name, self.time[0], self.time[1], self.activity_time[0], self.activity_time[1], self.content, self.movie, self.movietime, self.operations)
+        a.change_comment(self.comment)
+        return a
 
     def change_comment(self, comment=''):
         self.comment = comment
