@@ -36,7 +36,7 @@ from advene.gui.views import AdhocView
 from advene.rules.elements import ECACatalog
 import advene.core.config as config
 from advene.gui.widget import TimestampRepresentation
-from advene.gui.util import dialog
+from advene.gui.util import dialog, get_small_stock_button
 
 try:
     import goocanvas
@@ -162,7 +162,7 @@ class TraceTimeline(AdhocView):
         def trace_changed(w):
             self.select_trace(w.get_active())
             return True
-
+        self.selector_box = gtk.HBox()
         self.trace_selector = dialog.list_selector_widget(
             members= [( n, _("%(name)s (%(index)d)") % {
                         'name': t.name, 
@@ -171,7 +171,43 @@ class TraceTimeline(AdhocView):
             preselect=0,
             callback=trace_changed)
         #self.trace_selector.set_size_request(70,-1)
-        mainbox.pack_start(self.trace_selector, expand=False)
+        self.selector_box.pack_start(self.trace_selector, expand=True)
+        self.remove_trace_button = get_small_stock_button(gtk.STOCK_CANCEL)
+        def remove_trace(button, event):
+            tr = self.trace_selector.get_active()
+            if tr > 0:
+                self.tracer.remove_trace(tr)
+                mod= self.trace_selector.get_model()
+                if len(self.tracer.traces)<len(mod):
+                    mod.remove(mod.get_iter(tr))
+                    self.trace_selector.set_active(tr-1)
+                #self.select_trace(tr-1)
+            
+        self.remove_trace_button.connect('button-press-event', remove_trace)
+        self.selector_box.pack_start(self.remove_trace_button, expand=False)
+        mainbox.pack_start(self.selector_box, expand=False)
+
+        quicksearch_options = [False, ['oname','oid','ocontent']] # exact search, where to search
+        self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
+        self.quicksearch_entry=gtk.Entry()
+        self.quicksearch_entry.set_text(_('String to search'))
+        #self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
+        def do_search(button, event, options):
+            tr=self.tracer.search(self.active_trace, self.quicksearch_entry.get_text(), options[0], options[1])
+            mod= self.trace_selector.get_model()
+            if len(self.tracer.traces)>len(mod):
+                n = len(self.tracer.traces)-1
+                mod.append((_("%(name)s (%(index)s)") % {
+                        'name': self.tracer.traces[n].name, 
+                        'index': n}, 
+                           n, None ))
+                self.trace_selector.set_active(n)
+            #self.select_trace(tr)
+        self.quicksearch_button.connect('button-press-event', do_search, quicksearch_options)
+        self.search_box = gtk.HBox()
+        self.search_box.pack_start(self.quicksearch_entry, expand=False)
+        self.search_box.pack_start(self.quicksearch_button, expand=False)
+        mainbox.pack_start(self.search_box, expand=False)
 
         toolbox = gtk.Toolbar()
         toolbox.set_orientation(gtk.ORIENTATION_HORIZONTAL)
@@ -1328,10 +1364,10 @@ class Inspector (gtk.VBox):
         self.inspector_id = gtk.Label('')
         self.pack_start(self.inspector_id, expand=False)
         self.inspector_id.set_alignment(0, 0.5)
-        self.tooltips.set_tip(self.inspector_id, _('Id'))
+        self.tooltips.set_tip(self.inspector_id, _('Item Id'))
         self.inspector_type = gtk.Label('')
         self.pack_start(self.inspector_type, expand=False)
-        self.tooltips.set_tip(self.inspector_type, _('Class'))
+        self.tooltips.set_tip(self.inspector_type, _('Item name or class'))
         self.inspector_type.set_alignment(0, 0.5)
         self.inspector_name = gtk.Label('')
         self.pack_start(self.inspector_name, expand=False)
