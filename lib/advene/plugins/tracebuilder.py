@@ -230,8 +230,11 @@ class TraceBuilder(Thread):
     
     def search(self, trace, words='', exact=False, options=['oname','oid','ocontent']):
         # exact will be to match exact terms or just find the terms in a string
+        # oname : objects name
+        # oid : objects id
+        # ocontent : objects content
         temp=Trace()
-        temp.rename('Search results for \'%s\' in %s' % (words, trace.name))
+        temp.rename('Results for \'%s\' in %s' % (words, trace.name))
         for e in trace.levels['events']:
             etemp = e.copy()
             temp.add_to_trace('events', etemp)
