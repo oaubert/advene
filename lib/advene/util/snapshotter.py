@@ -83,7 +83,6 @@ class NotifySink(gst.BaseSink):
             return self._notify
         else:
             print "No property %s" % key.name
-gobject.type_register(NotifySink)
 gst.element_register(NotifySink, 'notifysink')
 
 class Snapshotter(object):
@@ -111,7 +110,7 @@ class Snapshotter(object):
         # Pipeline building
         videobin=gst.Bin()
 
-        self.player=gst.element_factory_make("playbin2", "player")
+        self.player=gst.element_factory_make("playbin2")
 
         csp=gst.element_factory_make('ffmpegcolorspace')
         pngenc=gst.element_factory_make('pngenc')
@@ -247,6 +246,13 @@ if __name__ == '__main__':
         if Evaluator is None:
             print "Missing evaluator module.\nFetch it from http://svn.gna.org/viewcvs/advene/trunk/lib/advene/gui/evaluator.py."
             sys.exit(0)
+
+        # Adding the following lines breaks the code, with a warning:
+        #    sys:1: Warning: cannot register existing type `GstSelectorPad'
+        #    sys:1: Warning: g_object_new: assertion `G_TYPE_IS_OBJECT (object_type)' failed
+        #pipe=gst.parse_launch('playbin uri=file:///media/video/Bataille.avi')
+        #pipe.set_state(gst.STATE_PLAYING)
+
         ev=Evaluator(globals_=globals(), locals_=locals())
         ev.locals_['self']=ev
         window=ev.popup(embedded=False)
