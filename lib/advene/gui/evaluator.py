@@ -105,6 +105,8 @@ class Evaluator:
 
     def load_data(self, name):
         res=[]
+        if name is None:
+            return res
         try:
             f=open(name, 'r')
         except IOError:
@@ -117,6 +119,8 @@ class Evaluator:
     def save_data(self, data, name):
         """Save a command history.
         """
+        if name is None:
+            return
         try:
             f=open(name, 'w')
         except IOError:
