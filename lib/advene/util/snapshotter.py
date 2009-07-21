@@ -153,7 +153,6 @@ class Snapshotter(object):
         Used for debugging.
         """
         t=(buffer.timestamp / gst.MSECOND)
-        print "Notified", t
         fname='/tmp/%010d.png' % t
         f=open(fname, 'w')
         f.write(buffer.data)
