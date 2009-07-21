@@ -102,7 +102,7 @@ class Snapshotter(object):
     * call gtk.gdk.threads_init() at the beginning of you application
     * invoke the "start" method to start the thread.
     """
-    def __init__(self, notify=None):
+    def __init__(self, notify=None, width=None):
         self.notify=notify
         # Snapshot queue handling
         self.timestamp_queue=Queue.Queue()
@@ -114,12 +114,17 @@ class Snapshotter(object):
         self.player=gst.element_factory_make("playbin2", "player")
 
         csp=gst.element_factory_make('ffmpegcolorspace')
-        scale=gst.element_factory_make('videoscale')
-        # FIXME: insert capsfilter here with appropriate dimensions
         pngenc=gst.element_factory_make('pngenc')
         sink=gst.element_factory_make('notifysink')
 
-        l=(csp, scale, pngenc, sink)
+        if width is not None:
+            filter=gst.element_factory_make("capsfilter")
+            filter.set_property("caps", gst.Caps("video/x-raw-rgb,width=%d" % width))
+            scale=gst.element_factory_make('videoscale')            
+            l=(csp, scale, filter, pngenc, sink)
+        else:
+            l=(csp, pngenc, sink)
+
         videobin.add(*l)
         gst.element_link_many(*l)
 
@@ -221,7 +226,7 @@ if __name__ == '__main__':
     except IndexError:
         uri='file:///media/video/Bataille.avi'
 
-    s=Snapshotter()
+    s=Snapshotter(width=160)
     s.set_uri(uri)
     s.notify=s.simple_notify
     s.start()
@@ -234,6 +239,7 @@ if __name__ == '__main__':
         def wait_for_completion():
             if s.timestamp_queue.empty():
                 # Quit application
+                s.snapshot_ready.wait()
                 loop.quit()
             return True
         gobject.idle_add(wait_for_completion)
