@@ -750,22 +750,25 @@ class Evaluator:
         """
         vbox=gtk.VBox()
 
+        tips=gtk.Tooltips()
+
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
         # Use small toolbar button everywhere
         gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
 
-        for (icon, action) in (
-            (gtk.STOCK_SAVE, self.save_output_cb),
-            (gtk.STOCK_CLEAR, self.clear_output),
-            (gtk.STOCK_DELETE, self.clear_expression),
-            (gtk.STOCK_EXECUTE, self.evaluate_expression),
-            (gtk.STOCK_ADD, self.add_bookmark),
-            (gtk.STOCK_REMOVE, self.remove_bookmark),
-            (gtk.STOCK_INDEX, self.display_bookmarks),
+        for (icon, tip, action) in (
+            (gtk.STOCK_SAVE, "Save output window (C-s)", self.save_output_cb),
+            (gtk.STOCK_CLEAR, "Clear output window", self.clear_output),
+            (gtk.STOCK_DELETE, "Clear expression (C-l)", self.clear_expression),
+            (gtk.STOCK_EXECUTE, "Evaluate expression (C-Return)", self.evaluate_expression),
+            (gtk.STOCK_ADD, "Add a bookmark (C-b)", self.add_bookmark),
+            (gtk.STOCK_REMOVE, "Remove a bookmark", self.remove_bookmark),
+            (gtk.STOCK_INDEX, "Display bookmarks (C-Space)", self.display_bookmarks),
             ):
             b=gtk.ToolButton(icon)
             b.connect('clicked', action)
+            b.set_tooltip(tips, tip)
             tb.insert(b, -1)
 
         # So that applications can define their own buttons
