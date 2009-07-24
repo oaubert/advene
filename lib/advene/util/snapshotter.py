@@ -84,6 +84,7 @@ class NotifySink(gst.BaseSink):
         else:
             print "No property %s" % key.name
 gst.element_register(NotifySink, 'notifysink')
+gobject.type_register(NotifySink)
 
 class Snapshotter(object):
     """Snapshotter class.
@@ -110,7 +111,7 @@ class Snapshotter(object):
         # Pipeline building
         videobin=gst.Bin()
 
-        self.player=gst.element_factory_make("playbin2")
+        self.player=gst.element_factory_make("playbin")
 
         csp=gst.element_factory_make('ffmpegcolorspace')
         pngenc=gst.element_factory_make('pngenc')
