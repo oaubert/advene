@@ -107,6 +107,7 @@ class Snapshotter(object):
         # Snapshot queue handling
         self.timestamp_queue=Queue.Queue()
         self.snapshot_ready=Event()
+        self.thread_running=False
 
         # Pipeline building
         videobin=gst.Bin()
@@ -187,6 +188,7 @@ class Snapshotter(object):
         
         This method is meant to run continuously in its own thread.
         """
+        self.thread_running=True
         while True:
             #print "Waiting for event"
             self.snapshot_ready.wait()
