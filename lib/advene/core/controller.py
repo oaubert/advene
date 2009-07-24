@@ -863,6 +863,11 @@ class AdveneController(object):
             v=0
         return v
 
+    def snapshot_taken(self, snap):
+        if snap is not None and snap.height != 0:
+            self.package.imagecache[snap.date] = helper.snapshot2png(snap)
+            self.notify('SnapshotUpdate', position=snap.date)
+        
     def update_snapshot (self, position=None):
         """Event handler used to take a snapshot for the given position.
 
@@ -873,6 +878,15 @@ class AdveneController(object):
         """
         if (config.data.player['snapshot']
             and not self.package.imagecache.is_initialized (position)):
+
+            # Check if the player has async_snapshot capability.
+            async=getattr(self.player, 'async_snapshot', None)
+            if async is not None:
+                if self.player.snapshot_notify is None:
+                    self.player.snapshot_notify=self.snapshot_taken
+                async(position or 0)
+                return True
+
             # FIXME: only 0-relative position for the moment
             # print "Update snapshot for %d" % position
             try:
@@ -2073,9 +2087,7 @@ class AdveneController(object):
             # FIXME: we should catch more specific exceptions and
             # devise a better feedback than a simple print
             import traceback
-            s=StringIO.StringIO()
-            traceback.print_exc (file = s)
-            self.log(_("Raised exception in update_status: %s") % str(e), s.getvalue())
+            self.log(_("Raised exception in update_status: %s") % traceback.format_exc())
         en=self.status2eventname.get(status, None)
         if en and notify:
             self.notify (en,
