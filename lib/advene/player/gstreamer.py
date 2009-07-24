@@ -91,7 +91,8 @@ except ImportError:
 
 import gtk
 import os
-from threading import Condition
+
+from advene.util.snapshotter import Snapshotter
 
 name="GStreamer video player"
 
@@ -179,7 +180,11 @@ class Player:
         # fullscreen gtk.Window
         self.fullscreen_window=None
 
-        self.build_converter()
+        self.snapshotter=Snapshotter(self.snapshot_taken, width=config.data.player['snapshot-dimensions'][0])
+        #self.snapshotter.start()
+        
+        # This method should be set by caller:
+        self.snapshot_notify=None
         self.build_pipeline()
 
         self.caption=Caption()
@@ -200,27 +205,6 @@ class Player:
                                                     origin=self.RelativePosition)
 
         self.position_update()
-
-    def build_converter(self):
-        """Build the snapshot converter pipeline.
-        """
-        # Snapshot format conversion infrastructure.
-        self.converter=gst.parse_launch('fakesrc name=src ! queue name=queue ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=%d,height=%d ! pngenc ! fakesink name=sink signal-handoffs=true' % config.data.player['snapshot-dimensions'])
-        self.converter._lock = Condition()
-
-        self.converter.queue=self.converter.get_by_name('queue')
-        self.converter.sink=self.converter.get_by_name('sink')
-
-        def converter_cb(element, buf, pad):
-            c=self.converter
-            c._lock.acquire()
-            c._buffer=buf
-            c._lock.notify()
-            c._lock.release()
-            return True
-
-        self.converter.sink.connect('handoff', converter_cb)
-        self.converter.set_state(gst.STATE_PLAYING)
 
     def build_pipeline(self):
         sink='xvimagesink'
@@ -374,6 +358,7 @@ class Player:
             raise InternalException
 
     def start(self, position=0):
+        print "Starting"
         if not self.check_uri():
             return
         if position != 0:
@@ -404,6 +389,8 @@ class Player:
         if os.path.exists(item):
             item="file://" + os.path.abspath(item)
         self.player.set_property('uri', item)
+        if self.snapshotter:
+            self.snapshotter.set_uri(item)
 
     def playlist_clear(self):
         self.videofile=None
@@ -412,57 +399,30 @@ class Player:
     def playlist_get_list(self):
         return [ self.videofile ]
 
-    def convert_snapshot(self, frame):
-        """Synchronously convert a frame (gst.Buffer) to jpeg.
-        """
-        c=self.converter
-        # Lock the conversion pipeline
-        c._lock.acquire()
-        c._buffer=None
-
-        # Push the frame into the conversion pipeline
-        c.queue.get_pad('src').push(frame)
-
-        # Wait for the lock to be released
-        while c._buffer is None:
-            c._lock.wait()
-
-        b=c._buffer.copy()
-        c._lock.release()
-        return b
-
+    def snapshot_taken(self, buffer):
+        if self.snapshot_notify:
+            s=Snapshot( { 'data': buffer.data,
+                          'type': 'PNG',
+                          'date': buffer.timestamp / gst.MSECOND,
+                          # Hardcoded size values. They are not used
+                          # by the application, since they are
+                          # encoded in the PNG file anyway.
+                          'width': 160,
+                          'height': 100 } )
+            self.snapshot_notify(s)
+            
+    def async_snapshot(self, position):
+        t=long(self.position2value(position))
+        if not self.snapshotter.thread_running:
+            self.snapshotter.start()
+        if self.snapshotter:
+            self.snapshotter.enqueue(t)
+        
     def snapshot(self, position):
         if not self.check_uri():
             return None
-
-        try:
-            b=self.player.props.frame.copy()
-        except (SystemError, AttributeError):
-            # AttributeError: in some cases, props.frame is None, so
-            # copy() is not available.
-            return None
-
-        t=b.timestamp / gst.MSECOND
-        #print "Snapshot taken at", t
-        if gst.get_gst_version() >= (0, 10, 22, 0):
-            return Snapshot( { 'data': b.data,
-                               'type': b.caps[0]['format'].fourcc,
-                               'date': t,
-                               # Hardcoded size values. They are not used
-                               # by the application, since they are
-                               # encoded in the PNG file anyway.
-                               'width': b.caps[0]['width'],
-                               'height': b.caps[0]['height'] } )
-        else:
-            f=self.convert_snapshot(b)            
-            return Snapshot( { 'data': f.data,
-                               'type': 'PNG',
-                               'date': t,
-                               # Hardcoded size values. They are not used
-                               # by the application, since they are
-                               # encoded in the PNG file anyway.
-                               'width': 160,
-                               'height': 100 } )
+        # Return None in all cases.
+        return None
 
     def all_snapshots(self):
         self.log("all_snapshots %s")
