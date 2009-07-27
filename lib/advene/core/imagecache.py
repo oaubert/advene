@@ -24,6 +24,7 @@ import advene.core.config as config
 import operator
 
 import os
+import re
 
 class CachedString:
     """String cached in a file.
@@ -31,6 +32,11 @@ class CachedString:
     def __init__(self, filename):
         self._filename=filename
         self.contenttype='text/plain'
+        ts=re.findall('(\d+).png$', filename)
+        if ts:
+            self.timestamp=long(ts[0])
+        else:
+            self.timestamp=-1
 
     def __str__(self):
         try:
@@ -45,11 +51,12 @@ class CachedString:
         return "Cached content from " + self._filename
 
 class TypedString(str):
-    """String with a mimetype attribute.
+    """String with a mimetype and a timestamp attribute.
     """
     def __init__(self, *p, **kw):
         super(TypedString, self).__init__(*p, **kw)
         self.contenttype='text/plain'
+        self.timestamp=-1
 
 class ImageCache(dict):
     """ImageCache class.
@@ -74,6 +81,7 @@ class ImageCache(dict):
     not_yet_available_image = TypedString(f.read())
     f.close()
     not_yet_available_image.contenttype='image/png'
+    not_yet_available_image.timestamp=-1
 
     def __init__ (self, name=None, epsilon=20):
         """Initialize the Imagecache
@@ -172,6 +180,10 @@ class ImageCache(dict):
                 f.write (value)
                 f.close ()
                 value=CachedString(filename)
+                value.contenttype='image/png'
+            elif isinstance(value, basestring):
+                value=TypedString(value)
+                value.timestamp=key
                 value.contenttype='image/png'
         return dict.__setitem__(self, key, value)
 
