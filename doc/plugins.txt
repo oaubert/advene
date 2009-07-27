@@ -80,3 +80,4 @@ serves as reference for this API.
   * pause : able to be paused
   * record : able to record
   * frame-by-frame : able to do frame-by-frame
+  * async-snapshot : able to do asynchronous (callback-based) snapshot with precise positioning.
