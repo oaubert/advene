@@ -149,7 +149,7 @@ class Caption:
 
 class Player:
     player_id='gstreamer'
-    player_capabilities=[ 'seek', 'pause', 'caption', 'frame-by-frame' ]
+    player_capabilities=[ 'seek', 'pause', 'caption', 'frame-by-frame', 'async-snapshot' ]
 
     # Class attributes
     AbsolutePosition=0
