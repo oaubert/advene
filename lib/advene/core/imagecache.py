@@ -185,7 +185,9 @@ class ImageCache(dict):
                 value=TypedString(value)
                 value.timestamp=key
                 value.contenttype='image/png'
-        return dict.__setitem__(self, key, value)
+            return dict.__setitem__(self, key, value)
+        else:
+            return self.not_yet_available_image
 
     def approximate (self, key, epsilon=None):
         """Return an approximate key value for key.
