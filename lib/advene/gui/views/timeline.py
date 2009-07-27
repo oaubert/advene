@@ -19,6 +19,7 @@
 import sys
 import sets
 import re
+import operator
 import cgi
 import struct
 import gtk
@@ -285,6 +286,8 @@ class TimeLine(AdhocView):
         self.layout = gtk.Layout ()
         self.layout.add_events( gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.BUTTON1_MOTION_MASK )
         self.scale_layout = gtk.Layout()
+        self.scale_layout.height=0
+        self.scale_layout.step=0
         self.scale_layout.add_events( gtk.gdk.BUTTON_PRESS_MASK )
 
         # Memorize the current scale height, so that we can refresh it
@@ -651,6 +654,27 @@ class TimeLine(AdhocView):
             self.update_model()
         return True
 
+    def snapshot_update_handler(self, context, parameters):
+        pos=long(context.globals['position'])
+        epsilon=self.scale_layout.step / 2
+        # Note: we check here w.timestamp, which is the timestamp of
+        # the displayed snapshot, instead of w.mark (which is the
+        # timestamp of the widget), so that the most precise snapshot
+        # is kept.
+        l=sorted( ( t
+                    for t in ( (w, abs(w.mark - pos)) for w in self.scale_layout.get_children()
+                               if isinstance(w, gtk.Image) ) 
+                    if t[1] <= epsilon and t[1] < abs(t[0].timestamp - pos) ),
+                 key=operator.itemgetter(1))
+        for t in l:
+            w=t[0]
+            # Iterate only on the first one (if any)
+            png=self.controller.package.imagecache.get(pos)
+            w.set_from_pixbuf(png_to_pixbuf (png, height=self.scale_layout.height))
+            w.timestamp=png.timestamp
+            break
+        return True
+
     def register_callback (self, controller=None):
         """Add the activate handler for annotations.
         """
@@ -671,6 +695,9 @@ class TimeLine(AdhocView):
                 controller.event_handler.internal_rule (event="DurationUpdate",
                                                         method=self.duration_update_handler),
                 ))
+        if 'async-snapshot' in self.controller.player.player_capabilities:
+            self.registered_rules.append( controller.event_handler.internal_rule (event="SnapshotUpdate",
+                                                                                  method=self.snapshot_update_handler))
 
     def type_restricted_handler(self, context, parameters):
         """Update the display when playing is restricted to a type.
@@ -1965,9 +1992,17 @@ class TimeLine(AdhocView):
         def display_image(widget, event, h, step):
             """Lazy-loading of images
             """
-            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=step/2), height=max(20, h)))
-            widget.disconnect(widget.expose_signal)
-            widget.expose_signal=None
+            ic=self.controller.package.imagecache
+            png=ic.get(widget.mark, epsilon=step/2)
+            if (png == ic.not_yet_available_image 
+                and 'async-snapshot' in self.controller.player.player_capabilities):
+                self.controller.update_snapshot(widget.mark)
+            else:
+                widget.timestamp=png.timestamp
+            widget.set_from_pixbuf(png_to_pixbuf (png, height=max(20, h)))
+            if widget.expose_signal is not None:
+                widget.disconnect(widget.expose_signal)
+                widget.expose_signal=None
             return False
 
         if abs(height - self.current_scale_height) > 10:
@@ -1989,6 +2024,9 @@ class TimeLine(AdhocView):
                 width=int(height * 4.0 / 3) + 5
                 step = self.pixel2unit(width)
                 t = self.minimum
+                
+                self.scale_layout.height=height
+                self.scale_layout.step=step
 
                 u2p=self.unit2pixel
                 while t <= self.maximum:
@@ -1997,6 +2035,11 @@ class TimeLine(AdhocView):
                     i.mark = t
                     i.expose_signal=i.connect('expose-event', display_image, height, step)
                     i.pos = 20
+                    # Real timestamp of the snapshot. If < 0 (and a
+                    # large value, since it is after used to get best
+                    # approximation through abs(pos - i.timestamp)),
+                    # the snapshot is the uninitialized one.
+                    i.timestamp=-self.controller.cached_duration
                     i.show()
                     self.scale_layout.put(i, u2p(i.mark, absolute=True), i.pos)
 
