@@ -42,6 +42,8 @@ class PlayerFactory:
                     return self.nativevlc_win32_import()
                 else:
                     import advene.player.vlcnative as playermodule
+            elif p == 'vlcctypes':
+                import advene.player.vlcctypes as playermodule
             elif p == 'dummy':
                 import advene.player.dummy as playermodule
             elif p == 'mplayer':
