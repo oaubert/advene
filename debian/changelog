@@ -1,28 +1,30 @@
 advene (0.39) unstable; urgency=low
 
+  * The gstreamer player plugin now works correctly with gstreamer >= 0.10.22
+
   * Website export improvements.
-  
+
   * The FCKeditor browser-based WYSIWYG editor has been removed, in favor
     of the new HTML editor.
-  
-  * For text-to-speech, the Festival is used if present (linux). Else,
-    espeak is used (linux, windows). On MacOS X, the standard /usr/bin/say
+
+  * For text-to-speech, Festival is used if present (linux). Else, espeak
+    is used (linux, windows). On MacOS X, the standard /usr/bin/say
     command is used.
-  
+
   * Trace timeline: interface improvements, previous traces can be reopened.
-  
-  * Timeline: 
-      
+
+  * Timeline:
+
     * optimal alignment of annotation sets (courtesy of <mben@irisa.fr>)
-      
+
   * Export:
-  
+
     * a RDF export filter is available
-  
+
     * annotation types can now be invidually exported (through their popup menu)
-    
+
   * Import:
-  
+
     * New Transcriber import filter (courtesy of <mben@irisa.fr>)
 
  --
@@ -36,18 +38,18 @@ advene (0.38) unstable; urgency=low
 advene (0.37) unstable; urgency=low
 
   * New trace visualisation component (vertical display).
-  
+
   * HTML editor: fix drag-and-drop on windows and improve HTML code generation.
-  
+
   * Finder view: modify presentation.
-  
+
   * Timeline: change behaviour when clicking on an annotation: go to its
     beginning even if the current player position is already inside.
 
   * Fix Alt-space shortcut on MacOS X (bookmark insertion).
-  
+
   * Note taking view: font size can be specified from the preferences
-  
+
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 16 Mar 2009 11:49:40 +0100
 
 advene (0.36) unstable; urgency=low
@@ -60,39 +62,39 @@ advene (0.35) unstable; urgency=low
 
   * The shotdetect ( http://shotdetect.nonutc.fr/ ) application has been
     integrated and is available through Player/Detect shots menu.
-  
+
   * Very large medias (like 24h captures) can be edited in the timeline,
     and precise zoom can be achieved by limiting the timeline range to a
     specific fragment of the media, through the timeline contextual menu.
-  
+
   * New event BrailleInput allows to handle cursor key events from a
     dynamic view.
-  
+
   * New action: CreateBookmark
-  
+
   * Static views output can be exported as a set of HTML files and
     accompanying resources, that can be put online (File/Website export
     menu).
-  
+
   * New webserver path ( /media/overlay/package_id/annotation_id ) returns
     the snapshot for the given annotation overlayed with its content
     (mostly used to render SVG annotations).
-  
+
   * Export filters can be activated from the command line.
-  
+
   * Arrows can be drawn in the SVG editor
-  
+
   * Video player plugins can be dynamically selected. Moreover, gstreamer
     works also for MacOS X.
 
   * Activity trace can be recorded and displayed.
-  
+
   * Adhoc views can be opened embedded by default (cf Edit/Preferences/GUI)
-  
+
   * The optional autosave feature can regularly save backup files.
 
   * An Edition History view display latest edited/created elements
-  
+
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 05 Jan 2009 16:02:51 +0100
 
 advene (0.34) unstable; urgency=low
@@ -109,7 +111,7 @@ advene (0.33) unstable; urgency=low
   * A basic WYSIWYG HTML editor allows to edit HTML contents directly from
     the GUI (as opposed to the browser-based FCKEditor which is more
     complete and still available).
-  
+
   * Drag-and-drop of an annotation or a selection over a viewbook proposes
     to create a new static view based on the annotations.
 
@@ -139,7 +141,7 @@ advene (0.31) unstable; urgency=low
    * Experimental speech synthesis support is available on all
      platforms. You need to install the espeak application from
      http://espeak.sourceforge.net/
-  
+
    * Automatize generation of "Caption annotation for a given annotation
      type" dynamic views through the annotation-type popup menu.
 
