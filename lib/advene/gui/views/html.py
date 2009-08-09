@@ -175,7 +175,7 @@ class webkit_wrapper:
         self.widget=self.build_widget()
 
     def refresh(self, *p):
-        self.component.reload(0)
+        self.component.reload()
         return True
 
     def back(self, *p):
