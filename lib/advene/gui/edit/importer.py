@@ -58,7 +58,7 @@ class ExternalImporter(AdhocView):
             self.importers.set_active(0)
             self.convert_button.set_sensitive(True)
             return
-        if os.path.exists(n) and not os.path.isdir(n):
+        if (os.path.exists(n) and not os.path.isdir(n)) or n.startswith('http:'):
             # Valid filename. Guess importers
             valid=advene.util.importer.get_valid_importers(n)
             for i in valid:
