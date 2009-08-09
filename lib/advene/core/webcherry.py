@@ -1206,13 +1206,6 @@ class Packages(Common):
             res.append (unicode(e.args[0]).encode('utf-8'))
             return
 
-        # FIXME:
-        # Principe: si l'objet est un viewable, on appelle la
-        # methode view pour en obtenir une vue par defaut.
-        #if isinstance(objet, advene.model.viewable.Viewable):
-        #    # It is a viewable, so display it using the default view
-        #    objet.view(context=context)
-
         displaymode = self.controller.server.displaymode
         # Hack to automatically switch to an image view for image objects.
         # FIXME: we should find a clean solution (for instance a new object
@@ -1227,8 +1220,21 @@ class Packages(Common):
 
         if displaymode == 'image':
             # Return an image, so build the correct headers
+            try:
+                mimetype=expr.contenttype
+            except AttributeError:
+                mimetype=self.image_type(str(objet))
+            if 'imagecache' in expr and 'async-snapshot' in self.controller.player.player_capabilities:
+                # Probably an image from the imagecache. Check if it
+                # is initialized, else ask if possible for update.
+                t=getattr(objet, 'timestamp', None)
+                if t is not None and t < 0:
+                    # Non-initialized snapshot. Ask for update.
+                    ts=re.findall('imagecache/(\d+)', expr)
+                    if ts:
+                        self.controller.queue_action(self.controller.update_snapshot, long(ts[0]))
             cherrypy.response.status=200
-            cherrypy.response.headers['Content-type']=self.image_type(str(objet))
+            cherrypy.response.headers['Content-type']=mimetype
             self.no_cache ()
 
             res.append (str(objet))
