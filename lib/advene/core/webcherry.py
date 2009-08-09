@@ -447,6 +447,8 @@ class Media(Common):
 
         if not i.is_initialized (position):
             self.no_cache ()
+            if 'async-snapshot' in self.controller.player.player_capabilities:
+                self.controller.queue_action(self.controller.update_snapshot, position)
         snapshot=i[position]
         cherrypy.response.headers['Content-type']=snapshot.contenttype
         res.append (str(snapshot))
