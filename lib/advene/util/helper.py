@@ -33,6 +33,7 @@ import urllib
 import unicodedata
 
 import advene.core.config as config
+from advene.core.imagecache import ImageCache
 
 try:
     import Image
@@ -151,10 +152,7 @@ def snapshot2png (image, output=None):
         print "snapshot: unknown image type ", repr(image.type)
 
     if png is None:
-        f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
-        png=TypedString(f.read(10000))
-        png.contenttype='image/png'
-        f.close()
+        png=ImageCache.not_yet_available_image
 
     if output is not None:
         f=open(output, 'wb')
