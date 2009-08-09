@@ -307,10 +307,11 @@ class Player:
         s.streamstatus=Player.UndefinedStatus
 
         l=self.get_multiline_command('playlist show')
-        re=re.compile('\*>\s+\d+\s+(.+)$')
-        v=[ re.search(i).group(1)
-            for i in l
-            if re.search(i) ]
+        rg=re.compile('\*>\s+\d+\s+(.+)$')
+        v=[ m.group(1) 
+            for m in 
+            (rg.search(i) for i in l)
+            if m ]
         if len(v) == 1:
             s.url=v[0]
 
