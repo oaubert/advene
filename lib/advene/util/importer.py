@@ -152,7 +152,7 @@ class GenericImporter(object):
 
     def progress(self, value=None, label=None):
         if self.callback:
-            self.callback(value, label)
+            self.callback(min(value, 1.0), label)
 
     def process_options(self, option_list):
         (self.options, self.args) = self.optionparser.parse_args(args=option_list)
