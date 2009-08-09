@@ -23,8 +23,6 @@ name="AnnotationGraph importer"
 
 from gettext import gettext as _
 
-import sets
-
 import advene.core.config as config
 from advene.util.importer import GenericImporter
 import advene.util.ElementTree as ET
@@ -97,7 +95,7 @@ class AnnotationGraphImporter(GenericImporter):
                 ats[t]=self.create_annotation_type (schema, t)
             at=ats[t]
 
-            attribnames=attribs.setdefault(an.attrib['type'], sets.Set())
+            attribnames=attribs.setdefault(an.attrib['type'], set())
             content="\n".join( [ "%s=%s" % (f.attrib['name'], f.text)
                                  for f in an.findall(str(tag('Feature'))) ] )
             attribnames.update([ f.attrib['name'] for f in an.findall(tag('Feature')) ])

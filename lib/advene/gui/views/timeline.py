@@ -17,7 +17,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 import sys
-import sets
 import re
 import operator
 import cgi
@@ -197,7 +196,7 @@ class TimeLine(AdhocView):
             else:
                 # We specified a list. Display only the annotation
                 # types for annotations present in the set
-                self.annotationtypes = list(sets.Set([ a.type for a in self.list ]))
+                self.annotationtypes = list(set([ a.type for a in self.list ]))
 
         if minimum is None and maximum is None and controller is not None:
             # No dimension. Get them from the controller.
@@ -539,7 +538,7 @@ class TimeLine(AdhocView):
             else:
                 # We specified a list. Display only the annotation
                 # types for annotations present in the set
-                self.annotationtypes = list(sets.Set([ a.type for a in self.list ]))
+                self.annotationtypes = list(set([ a.type for a in self.list ]))
 
         # Clear the layouts
         self.layout.foreach(self.layout.remove)

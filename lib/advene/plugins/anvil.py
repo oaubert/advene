@@ -21,8 +21,6 @@
 
 name="Anvil importer"
 
-import sets
-
 from gettext import gettext as _
 
 import advene.core.config as config
@@ -75,7 +73,7 @@ class AnvilImporter(GenericImporter):
         for track in l:
             at=self.create_annotation_type (schema, track.attrib['name'])
             self.progress(value=progress, label="Converting " + at.id)
-            attribnames=sets.Set()
+            attribnames=set()
             elements=track.findall('.//el')
             el_incr=type_incr / len(elements)
             for el in elements:

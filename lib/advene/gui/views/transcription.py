@@ -20,7 +20,6 @@
 """
 
 import re
-import sets
 
 import gtk
 
@@ -113,7 +112,7 @@ class TranscriptionView(AdhocView):
 
         # Try to determine a default representation
         try:
-            t=sets.Set([ a.type for a in self.model ])
+            t=set([ a.type for a in self.model ])
         except:
             t=[]
         if len(t) == 1:
