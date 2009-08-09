@@ -1,10 +1,6 @@
-* Fix gstreamer (appsrc/appsink)
-
 * STBV export (captions): cf http://code.google.com/p/libkate/
 
 * check http://code.activestate.com/recipes/457411/ (interval mapping data structure)
-
-* investigate pitivi thumbnailing code
 
 * gstreamer win32/mac:
 http://www.gstreamer-winbuild.ylatuya.es/doku.php
@@ -2654,4 +2650,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * evaluator: implement bookmarks
 
 * DND in htmleditor: follow mouse pointer
+
+* Fix gstreamer (appsrc/appsink)
+
+* investigate pitivi thumbnailing code
 
