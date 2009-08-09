@@ -78,7 +78,7 @@ class ImageCache(dict):
     # The content of the not_yet_available_file file. We could use
     # CachedString but as it is frequently used, let us keep it in memory.
     f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
-    not_yet_available_image = TypedString(f.read())
+    not_yet_available_image = TypedString(f.read(10000))
     f.close()
     not_yet_available_image.contenttype='image/png'
     not_yet_available_image.timestamp=-1
