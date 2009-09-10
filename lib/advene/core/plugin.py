@@ -112,9 +112,13 @@ class Plugin(object):
         else:
             name, ext = os.path.splitext(fname)
             if ext == '.py':
-                self._plugin = imp.load_source('_'.join( (prefix, name) ), fullname, open(fullname) )
+                f=open(fullname, 'r')
+                self._plugin = imp.load_source('_'.join( (prefix, name) ), fullname, f )
+                f.close()
             elif ext == '.pyc':
-                self._plugin = imp.load_compiled('_'.join( (prefix, name) ), fullname, open(fullname) )
+                f=open(fullname, 'r')
+                self._plugin = imp.load_compiled('_'.join( (prefix, name) ), fullname, f )
+                f.close()
 
         # Is this really a plugin ?
         if not hasattr(self._plugin, 'name') or not hasattr(self._plugin, 'register'):
