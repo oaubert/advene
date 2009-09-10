@@ -151,11 +151,11 @@ class TraceBuilder(Thread):
                     self.log('Export thread still running, waiting for its death...')
                 self.texp.join()
         # Also save trace on filesystem.
-        try:
-            fn = self.export()
-            self.log("trace exported to %s" % fn)
-        except Exception, e:
-            self.log("error exporting trace : %s" % unicode(e).encode('utf-8'))
+        if config.data.preferences['record-actions']:
+            try:
+                fn = self.export()
+            except Exception, e:
+                self.log("error exporting trace : %s" % unicode(e).encode('utf-8'))
 
         if self.network_broadcasting:
             self.end_broadcasting()
@@ -166,6 +166,11 @@ class TraceBuilder(Thread):
         self.tbroad.start()
 
     def export(self):
+        # Check that there are events to record
+        if not sum( len(l) for l in self.trace.levels.itervalues() ):
+            self.log("No event to export")
+            return ''
+
         fname=config.data.advenefile(time.strftime("trace_advene-%Y%m%d-%H%M%S"),
                                      category='settings')
         try:
@@ -189,6 +194,7 @@ class TraceBuilder(Thread):
         stream.close()
         if self.network_exp:
             self.network_export()
+        self.log("trace exported to %s" % fname)
         return fname
 
     def toggle_network_export(self):
@@ -956,13 +962,13 @@ class Action:
 
         self.movie = movie
         self.movietime = movietime
-        
+
         self.comment = ''
 
     def copy(self):
-        a = Action(self.name, self.time[0], self.time[1], 
-                   self.activity_time[0], self.activity_time[1], 
-                   self.content, self.movie, self.movietime, 
+        a = Action(self.name, self.time[0], self.time[1],
+                   self.activity_time[0], self.activity_time[1],
+                   self.content, self.movie, self.movietime,
                    self.operations)
         a.change_comment(self.comment)
         return a
