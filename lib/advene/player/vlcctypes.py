@@ -37,11 +37,13 @@ def register(controller=None):
 if vlc is not None:
     # Shortcut used for get_stream_information
     MediaTime=vlc.PositionKey.MediaTime
-    PlayingStatus=vlc.PlayerStatus.PlayingStatus
-    PauseStatus=vlc.PlayerStatus.PauseStatus
-    InitStatus=vlc.PlayerStatus.InitStatus
-    EndStatus=vlc.PlayerStatus.EndStatus
-    UndefinedStatus=vlc.PlayerStatus.UndefinedStatus
+
+    # We store Status information as int, so that it is hashable
+    PlayingStatus=vlc.PlayerStatus.PlayingStatus.value
+    PauseStatus=vlc.PlayerStatus.PauseStatus.value
+    InitStatus=vlc.PlayerStatus.InitStatus.value
+    EndStatus=vlc.PlayerStatus.EndStatus.value
+    UndefinedStatus=vlc.PlayerStatus.UndefinedStatus.value
 
 class Player(object):
     """Wrapper class for a native vlc.MediaControl object.
@@ -78,19 +80,21 @@ class Player(object):
         MediaTime=vlc.PositionKey.MediaTime
 
         # Status
-        PlayingStatus=vlc.PlayerStatus.PlayingStatus
-        PauseStatus=vlc.PlayerStatus.PauseStatus
-        InitStatus=vlc.PlayerStatus.InitStatus
-        EndStatus=vlc.PlayerStatus.EndStatus
-        UndefinedStatus=vlc.PlayerStatus.UndefinedStatus
+        PlayingStatus=vlc.PlayerStatus.PlayingStatus.value
+        PauseStatus=vlc.PlayerStatus.PauseStatus.value
+        InitStatus=vlc.PlayerStatus.InitStatus.value
+        EndStatus=vlc.PlayerStatus.EndStatus.value
+        UndefinedStatus=vlc.PlayerStatus.UndefinedStatus.value
 
         # Exceptions
         PositionKeyNotSupported=vlc.MediaControlException
         PositionOriginNotSupported=vlc.MediaControlException
         InvalidPosition=vlc.MediaControlException
-        PlaylistException=vlc.MediaControlException
-        InternalException=vlc.MediaControlException
-
+        class PlaylistException(Exception):
+            pass
+        class InternalException(Exception):
+            pass
+        
     def __getattribute__ (self, name):
         """
         Use the defined method if necessary. Else, forward the request
@@ -243,10 +247,12 @@ class Player(object):
         mc=getattr(self, 'mc', None)
         if mc is not None:
             try:
-                s = mc.get_stream_information (MediaTime)
-            except:
-                raise self.InternalException()
-            self.status = s.status
+                s = mc.get_stream_information(MediaTime)
+            except Exception, e:
+                print "Exception", str(e)
+                raise self.InternalException(str(e))
+            # Make sure we store the (python) value of the status
+            self.status = s.status.value
             self.stream_duration = s.length
             self.current_position_value = s.position
             self.url=s.url
@@ -311,11 +317,11 @@ class Player(object):
             print "Snapshots <=100ms dropped"
             return None
         s=self.mc.snapshot(position)
-        # FIXME: s.date is invalid. Check why.
         return s
 
     def set_visual(self, xid):
-        self.mc.set_visual(xid)
+        if xid:
+            self.mc.set_visual(xid)
 
     def sound_mute(self):
         if self.mute_volume is None:
