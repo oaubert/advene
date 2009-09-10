@@ -24,30 +24,37 @@ It needs to register to the ECAEngine to capture events.
 It transforms these events into Operation objects and Action objects.
 Widgets can register with this trace builder to receive the trace.
 """
-import gobject
-import Queue
+
+import os
+
 from threading import Thread
+import Queue
+import gobject
 import time
 import socket
-import advene.core.config as config
 import urllib
-import advene.model.view
-import advene.util.ElementTree as ET
-import os
-import advene.util.helper as helper
-import advene.util.handyxml as handyxml
 import xml.dom
 from gettext import gettext as _
-import atexit
+
+import advene.core.config as config
+
+import advene.model.view
+import advene.util.ElementTree as ET
+
+import advene.util.helper as helper
+import advene.util.handyxml as handyxml
+
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
+from advene.model.package import Package
 
 def register(controller):
     tb = TraceBuilder(controller)
     tb.start()
     controller.register_tracer(tb)
     return
+
 name="Trace Builder plugin"
 
 class TraceBuilder(Thread):
@@ -56,7 +63,7 @@ class TraceBuilder(Thread):
         self.equeue = Queue.Queue(-1)
         self.exit_code = "###\n"
         #self.close_on_package_load = False
-        #atexit.register(self.on_exit)
+
         self.controller=controller
         self.host = "::1" #"2a01:e35:2efc:5cd0:216:cbff:fea0:3fb9"
         self.port = 9992
@@ -68,7 +75,7 @@ class TraceBuilder(Thread):
         self.operations = []
         self.registered_views = []
         self.opened_actions = {}
-        self.filtered_events = ['SnapshotUpdate', 'AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight']
+        self.filtered_events = ['SnapshotUpdate', 'AnnotationBegin', 'AnnotationEnd', 'BookmarkHighlight', 'BookmarkUnhighlight']
         self.action_types = ['Annotation', 'Restructuration', 'Navigation', 'Classification', 'View building']
         self.operation_mapping = {
         'AnnotationCreate':0,
@@ -200,7 +207,7 @@ class TraceBuilder(Thread):
                 self.texp.join() # nettoie le zombie ou pas ...
         self.texp = TExport(self.host, self.port, self.trace)
         self.texp.start()
-        
+
     def toggle_network_broadcasting(self):
         self.network_broadcasting = not self.network_broadcasting
         if self.network_broadcasting:
@@ -226,15 +233,17 @@ class TraceBuilder(Thread):
         if bc:
             self.toggle_network_broadcasting()
         return
-    
+
     def remove_trace(self, index):
         if index >= len(self.traces):
             return False
         self.traces.pop(index)
         self.alert_registered(None, None, None)
         return True
-    
-    def search(self, trace, words='', exact=False, options=['oname','oid','ocontent']):
+
+    def search(self, trace, words='', exact=False, options=None):
+        if options is None:
+            options=['oname', 'oid', 'ocontent']
         # exact will be to match exact terms or just find the terms in a string
         # oname : objects name
         # oid : objects id
@@ -248,7 +257,7 @@ class TraceBuilder(Thread):
             atemp = a.copy()
             atemp.operations=[]
             temp.add_to_trace('actions', atemp)
-            
+
             for o in a.operations:
                 if o.concerned_object['name'] is not None:
                     content=''
@@ -262,25 +271,24 @@ class TraceBuilder(Thread):
                         otemp = o.copy()
                         temp.add_to_trace('operations', otemp)
                         atemp.operations.append(otemp)
-            
+
             if len(atemp.operations)<=0:
                 temp.remove_from_trace('actions', atemp)
         self.traces.append(temp)
         self.alert_registered(None, None, None)
         return temp
-                
+
     def convert_old_trace(self, fname):
         #FIXME : complete the import and do not use handyxml.
         self.log('importing trace from %s' % fname)
         if not os.path.exists(fname):
             oldfname=fname
-            fname = os.path.join(config.data.path['settings'],oldfname)
-            self.log("%s not found, trying %s" % (oldfname,fname))
+            fname = config.data.advenefile(oldfname, category='settings')
+            self.log("%s not found, trying %s" % (oldfname, fname))
             if not os.path.exists(fname):
                 self.log("%s not found, giving up." % fname)
                 return False
         pk=handyxml.xml(fname, forced=True)
-        lid=0
         if pk.node.nodeName != 'package':
             self.log("This does not look like a trace file.")
             return False
@@ -301,10 +309,9 @@ class TraceBuilder(Thread):
                         if evn and evn.nodeType is xml.dom.Node.TEXT_NODE:
                             an_content = evn.data.encode('utf-8')
                 an_name = an.type[1:]
-                an_time=an_ac_time
                 if an_content.find('position='):
                     d= an_content.find('position=')
-                    e = an_content.find('\n',an_content.find('position='))
+                    e = an_content.find('\n', an_content.find('position='))
                     an_m_time=an_content[d:e]
                 #evt = Event(an_name, float(an_time), float(an_ac_time), an_content, an_movie, float(an_m_time), an_o_name, an_o_id)
                 #evt.change_comment(ev.comment)
@@ -312,18 +319,18 @@ class TraceBuilder(Thread):
                 self.log('%s %s %s' % (an_name, an_ac_time, an_content))
         return
 
-    def imp_type(self, type):
-        if type == 'advene.model.schema.Schema':
+    def imp_type(self, typ):
+        if typ == 'advene.model.schema.Schema':
             return advene.model.schema.Schema
-        elif type == 'advene.model.schema.AnnotationType':
+        elif typ == 'advene.model.schema.AnnotationType':
             return advene.model.schema.AnnotationType
-        elif type == 'advene.model.schema.RelationType':
+        elif typ == 'advene.model.schema.RelationType':
             return advene.model.schema.RelationType
-        elif type == 'advene.model.annotation.Annotation':
+        elif typ == 'advene.model.annotation.Annotation':
             return advene.model.annotation.Annotation
-        elif type == 'advene.model.annotation.Relation':
+        elif typ == 'advene.model.annotation.Relation':
             return advene.model.annotation.Relation
-        elif type == 'advene.model.view.View':
+        elif typ == 'advene.model.view.View':
             return advene.model.view.View
         else:
             return None
@@ -343,8 +350,8 @@ class TraceBuilder(Thread):
         # checking trace path
         if not os.path.exists(fname):
             oldfname=fname
-            fname = os.path.join(config.data.path['settings'],oldfname)
-            self.log("%s not found, trying %s" % (oldfname,fname))
+            fname = config.data.advenefile(oldfname, category='settings')
+            self.log("%s not found, trying %s" % (oldfname, fname))
             if not os.path.exists(fname):
                 self.log("%s not found, giving up." % fname)
                 return False
@@ -391,29 +398,29 @@ class TraceBuilder(Thread):
                         ac_t = self.operation_mapping[ev.name]
                     else:
                         continue
-                    type = "Undefined"
+                    typ = "Undefined"
                     if ac_t < len(self.action_types):
-                        type = self.action_types[ac_t]
-                    if type == "Undefined":
+                        typ = self.action_types[ac_t]
+                    if typ == "Undefined":
                         if ev.o_name=='annotation' or ev.o_name=='relation':
-                            type="Restructuration"
+                            typ="Restructuration"
                         elif ev.o_name=='annotationtype' or ev.o_name=='relationtype' or ev.o_name=='schema':
-                            type="Classification"
+                            typ="Classification"
                         elif ev.o_name=='view':
-                            type="View building"
-                    if type in self.opened_actions.keys():
+                            typ="View building"
+                    if typ in self.opened_actions.keys():
                         # an action is already opened for this event
-                        ac = self.opened_actions[type]
-                        if type == "Navigation" and (op.name == "PlayerStop" or op.name == "PlayerPause"):
-                            del self.opened_actions[type]
+                        ac = self.opened_actions[typ]
+                        if typ == "Navigation" and (op.name == "PlayerStop" or op.name == "PlayerPause"):
+                            del self.opened_actions[typ]
                         ac.add_operation(op)
                         continue
                     for t in self.opened_actions.keys():
                         if t != "Navigation":
                             del self.opened_actions[t]
-                    ac = Action(name=type, begintime=op.time, endtime=None, acbegintime=op.activity_time, acendtime=None, content=None, movie=op.movie, movietime=op.movietime, operations=[op])
+                    ac = Action(name=typ, begintime=op.time, endtime=None, acbegintime=op.activity_time, acendtime=None, content=None, movie=op.movie, movietime=op.movietime, operations=[op])
                     self.traces[-1].add_to_trace('actions', ac)
-                    self.opened_actions[type]=ac
+                    self.opened_actions[typ]=ac
         if hasattr(tr, 'actions'):
             for ac in tr.actions[0].action:
                 #print ac.id
@@ -463,22 +470,22 @@ class TraceBuilder(Thread):
         elem_class_id = None
         # Logging content depending on keys
         if 'element' in obj:
-            if isinstance(obj['element'],advene.model.annotation.Annotation):
+            if isinstance(obj['element'], Annotation):
                 obj['annotation']=obj['element']
-            elif isinstance(obj['element'],advene.model.annotation.Relation):
+            elif isinstance(obj['element'], Relation):
                 obj['relation']=obj['element']
-            elif isinstance(obj['element'],advene.model.schema.AnnotationType):
+            elif isinstance(obj['element'], AnnotationType):
                 obj['annotationtype']=obj['element']
-            elif isinstance(obj['element'],advene.model.schema.RelationType):
+            elif isinstance(obj['element'], RelationType):
                 obj['relationtype']=obj['element']
-            elif isinstance(obj['element'],advene.model.schema.Schema):
+            elif isinstance(obj['element'], Schema):
                 obj['schema']=obj['element']
-            elif isinstance(obj['element'],advene.model.view.View):
+            elif isinstance(obj['element'], View):
                 obj['view']=obj['element']
-            elif isinstance(obj['element'],advene.model.package.Package):
+            elif isinstance(obj['element'], Package):
                 obj['package']=obj['element']
         if 'uri' in obj:
-            obj['content']='movie="'+str(obj['uri'])+'"'
+            obj['content']='movie="%s"' % str(obj['uri'])
             elem_name='movie'
             elem_id=str(obj['uri'])
         elif 'annotation' in obj:
@@ -589,19 +596,19 @@ class TraceBuilder(Thread):
         # package uri annotation relation annotationtype relationtype schema
         # Logging content depending on keys
         if 'element' in obj:
-            if isinstance(obj['element'],advene.model.annotation.Annotation):
+            if isinstance(obj['element'], advene.model.annotation.Annotation):
                 obj['annotation']=obj['element']
-            elif isinstance(obj['element'],advene.model.annotation.Relation):
+            elif isinstance(obj['element'], advene.model.annotation.Relation):
                 obj['relation']=obj['element']
-            elif isinstance(obj['element'],advene.model.schema.AnnotationType):
+            elif isinstance(obj['element'], advene.model.schema.AnnotationType):
                 obj['annotationtype']=obj['element']
-            elif isinstance(obj['element'],advene.model.schema.RelationType):
+            elif isinstance(obj['element'], advene.model.schema.RelationType):
                 obj['relationtype']=obj['element']
-            elif isinstance(obj['element'],advene.model.schema.Schema):
+            elif isinstance(obj['element'], advene.model.schema.Schema):
                 obj['schema']=obj['element']
-            elif isinstance(obj['element'],advene.model.view.View):
+            elif isinstance(obj['element'], advene.model.view.View):
                 obj['view']=obj['element']
-            elif isinstance(obj['element'],advene.model.package.Package):
+            elif isinstance(obj['element'], advene.model.package.Package):
                 obj['package']=obj['element']
         if 'uri' in obj:
             obj['content']='movie="'+str(obj['uri'])+'"'
@@ -705,17 +712,17 @@ class TraceBuilder(Thread):
             ac_t = self.operation_mapping[obj['event_name']]
         else:
             return
-        type = "Undefined"
+        typ = "Undefined"
         if ac_t < len(self.action_types):
-            type = self.action_types[ac_t]
-        if type == "Undefined":
-            type = self.find_action_name(obj)
+            typ = self.action_types[ac_t]
+        if typ == "Undefined":
+            typ = self.find_action_name(obj)
             # traiter les edit
-        if type in self.opened_actions.keys():
+        if typ in self.opened_actions.keys():
             # an action is already opened for this event
-            ac = self.opened_actions[type]
-            if type == "Navigation" and (ope.name == "PlayerStop" or ope.name == "PlayerPause"):
-                del self.opened_actions[type]
+            ac = self.opened_actions[typ]
+            if typ == "Navigation" and (ope.name == "PlayerStop" or ope.name == "PlayerPause"):
+                del self.opened_actions[typ]
             ac.add_operation(ope)
             return ac
         for t in self.opened_actions.keys():
@@ -730,7 +737,7 @@ class TraceBuilder(Thread):
 #                return ac
         ac = Action(name=type, begintime=ope.time, endtime=None, acbegintime=ope.activity_time, acendtime=None, content=None, movie=ope.movie, movietime=ope.movietime, operations=[ope])
         self.trace.add_to_trace('actions', ac)
-        self.opened_actions[type]=ac
+        self.opened_actions[typ]=ac
         return ac
 
     def alert_registered(self, event, operation, action):
@@ -747,7 +754,6 @@ class TraceBuilder(Thread):
         return
 
     def find_action_name(self, obj_evt):
-        evid = obj_evt['event_name']
         # need to test something else in annot
         if 'annotation' in obj_evt or 'relation' in obj_evt:
             return "Restructuration"
@@ -778,7 +784,7 @@ class Trace:
         self.name = name
         return
 
-    def sort_trace_by(self, level, type):
+    def sort_trace_by(self, level, typ):
         # allow to sort trace level 1 or 2 by time or name
         return
 
@@ -831,13 +837,13 @@ class Trace:
         for i in self.levels.keys():
             print "Trace niveau \'%s\'" % i
             for t in self.levels[i]:
-                print "    %s : \'%s\'" % (t,t.name)
+                print "    %s : \'%s\'" % (t, t.name)
         return
 
 class Event:
-    def __init__(self, name, time, actime, content, movie, movietime, obj, obj_id, obj_type, o_class_id):
+    def __init__(self, name, time_, actime, content, movie, movietime, obj, obj_id, obj_type, o_class_id):
         self.name = name
-        self.time = time
+        self.time = time_
         self.activity_time = actime
         self.content = content
         self.movie = movie
@@ -851,26 +857,29 @@ class Event:
         }
 
     def copy(self):
-        e = Event(self.name, self.time, self.activity_time, self.content, self.movie, self.movietime, self.concerned_object['name'],self.concerned_object['id'],self.concerned_object['type'],self.concerned_object['cid'])
+        e = Event(self.name, self.time, self.activity_time,
+                  self.content, self.movie, self.movietime,
+                  self.concerned_object['name'], self.concerned_object['id'],
+                  self.concerned_object['type'], self.concerned_object['cid'])
         e.change_comment(self.comment)
         return e
 
-    def exp_type(self, type):
-        if type == Schema:
+    def exp_type(self, typ):
+        if typ == Schema:
             return 'advene.model.schema.Schema'
-        elif type == AnnotationType:
+        elif typ == AnnotationType:
             return 'advene.model.schema.AnnotationType'
-        elif type == RelationType:
+        elif typ == RelationType:
             return 'advene.model.schema.RelationType'
-        elif type == Annotation:
+        elif typ == Annotation:
             return 'advene.model.annotation.Annotation'
-        elif type == Relation:
+        elif typ == Relation:
             return 'advene.model.annotation.Relation'
-        elif type == View:
+        elif typ == View:
             return 'advene.model.view.View'
         else:
             return 'None'
-            
+
     def export(self, n_id):
         #print "%s %s %s %s %s %s %s %s %s %s" % ('e'+str(n_id), self.name, str(self.time), str(self.activity_time), self.movie, str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), self.content)
         e = ET.Element('event', id='e'+str(n_id),
@@ -878,7 +887,7 @@ class Event:
                 ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']), o_type=self.exp_type(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
         e.text = self.content
         return e
-        
+
     def to_xml_string(self, n_id):
         return ET.tostring(self.export(n_id), encoding="utf-8")
         #return "<event id='e%s' name='%s' time='%s' ac_time='%s' movie='%s' m_time='%s' comment='%s' o_name='%s' o_id='%s' o_type='%s' o_cid='%s'/>" % (str(n_id), self.name, str(self.time), str(self.activity_time), str(self.movie), str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), str(self.concerned_object['type']), str(self.concerned_object['cid']))
@@ -890,9 +899,9 @@ class Event:
 
 
 class Operation:
-    def __init__(self, name, time, actime, content, movie, movietime, obj, obj_id, obj_type, o_class_id):
+    def __init__(self, name, time_, actime, content, movie, movietime, obj, obj_id, obj_type, o_class_id):
         self.name = name
-        self.time = time
+        self.time = time_
         self.activity_time = actime
         self.content = ''
         if content is not None:
@@ -908,10 +917,13 @@ class Operation:
         }
 
     def copy(self):
-        o = Operation(self.name, self.time, self.activity_time, self.content, self.movie, self.movietime, self.concerned_object['name'],self.concerned_object['id'],self.concerned_object['type'],self.concerned_object['cid'])
+        o = Operation(self.name, self.time, self.activity_time,
+                      self.content, self.movie, self.movietime,
+                      self.concerned_object['name'], self.concerned_object['id'],
+                      self.concerned_object['type'],self.concerned_object['cid'])
         o.change_comment(self.comment)
         return o
-        
+
     def export(self, n_id):
         #print "%s %s %s %s %s %s %s %s %s %s" % ('e'+str(n_id), self.name, str(self.time), str(self.activity_time), self.movie, str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), self.content)
         e = ET.Element('operation', id='o'+str(n_id),
@@ -919,7 +931,7 @@ class Operation:
                 ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']), o_type=str(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
         e.text = self.content
         return e
-        
+
     def to_xml_string(self, n_id):
         return ET.tostring(self.export(n_id), encoding="utf-8")
 
@@ -929,41 +941,38 @@ class Operation:
 
 class Action:
     def __init__(self, name, begintime, endtime, acbegintime, acendtime, content, movie, movietime, operations):
-        self.operations=[]
-        self.time = [0,0]
-        self.activity_time=[0,0]
+        self.operations = operations or []
         self.name = name
-        self.time[0] = begintime
-        self.comment = ''
-        if endtime is not None:
-            self.time[1] = endtime
-        else:
-            self.time[1] = begintime + 0.5
-        self.activity_time[0] = acbegintime
-        if acendtime is not None:
-            self.activity_time[1] = acendtime
-        else:
-            self.activity_time[1] = acbegintime + 500
-        self.content = ''
-        if content is not None:
-            self.content = content
+
+        if endtime is None:
+            endtime = begintime + 0.5
+        if acendtime is None:
+            acendtime = acbegintime + 500
+
+        self.time = [ begintime, endtime ]
+        self.activity_time = [ acbegintime, acendtime ]
+
+        self.content = content or ''
+
         self.movie = movie
         self.movietime = movietime
-        if operations is not None:
-            self.operations = operations
+        
+        self.comment = ''
 
     def copy(self):
-        a = Action(self.name, self.time[0], self.time[1], self.activity_time[0], self.activity_time[1], self.content, self.movie, self.movietime, self.operations)
+        a = Action(self.name, self.time[0], self.time[1], 
+                   self.activity_time[0], self.activity_time[1], 
+                   self.content, self.movie, self.movietime, 
+                   self.operations)
         a.change_comment(self.comment)
         return a
 
     def change_comment(self, comment=''):
         self.comment = comment
-        return
 
     def add_operation(self, operation):
         self.operations.append(operation)
-        self.set_time(1,operation.time)
+        self.set_time(1, operation.time)
 
     def set_time(self, choice, newtime):
         offset = (newtime - self.time[choice])*1000
@@ -978,32 +987,33 @@ class Action:
         e = ET.Element('action', id='a'+str(a_id),
                 name=self.name, b_time=str(self.time[0]),
                 e_time=str(self.time[1]),
-                ac_b_time=str(self.activity_time[0]), 
+                ac_b_time=str(self.activity_time[0]),
                 ac_e_time=str(self.activity_time[1]),
                 movie=self.movie,
                 m_time=str(self.movietime),
                 comment = self.comment)
-        e.text = self.content 
+        e.text = self.content
         return e
 
     def to_xml_string(self, n_id):
         return ET.tostring(self.export(n_id), encoding="utf-8")
 
 class TExport(Thread):
-   def __init__ (self, host, port, trace):
-      Thread.__init__(self)
-      self.host = host
-      self.port = port
-      self.trace = trace
-   def run(self):
+    def __init__ (self, host, port, trace):
+        Thread.__init__(self)
+        self.host = host
+        self.port = port
+        self.trace = trace
+
+    def run(self):
         try:
             sck = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
             addr = socket.getaddrinfo(self.host, self.port)
             sck.connect(addr[0][4])
-        except (socket.error,socket.gaierror), e:
+        except (socket.error, socket.gaierror), e:
             print(_("Cannot export to %(host)s:%(port)s %(error)s") % {
-                    'host': self.host, 
-                    'port': self.port, 
+                    'host': self.host,
+                    'port': self.port,
                     'error': e})
             return
         nbe=0
@@ -1014,33 +1024,35 @@ class TExport(Thread):
                 tmp=e.to_xml_string(id_e)
                 sck.sendall(tmp)
                 nbe+=1
-        except (socket.error,socket.gaierror), e:
+        except (socket.error, socket.gaierror), e:
             print(_("Cannot send data to %(host)s:%(port)s %(error)s") % {
-                    'host': self.host, 
+                    'host': self.host,
                     'port': self.port,
                     'error': e } )
             sck.close()
             return
         print '%s events exported to %s:%s' % (nbe, self.host, self.port)
-        sck.close()      
+        sck.close()
 
 class TBroadcast(Thread):
-   def __init__ (self, host, port, bdq):
-      Thread.__init__(self)
-      self.host = host
-      self.port = port
-      self.bdq = bdq
-      self.obsel = None
-   def run(self):
+
+    def __init__ (self, host, port, bdq):
+        Thread.__init__(self)
+        self.host = host
+        self.port = port
+        self.bdq = bdq
+        self.obsel = None
+
+    def run(self):
         # Creating socket and queue
         try:
             sck = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
             addr = socket.getaddrinfo(self.host, self.port)
             sck.connect(addr[0][4])
-        except (socket.error,socket.gaierror), e:
+        except (socket.error, socket.gaierror), e:
             print(_("Cannot export to %(host)s:%(port)s %(error)s") % {
-                    'host': self.host, 
-                    'port': self.port, 
+                    'host': self.host,
+                    'port': self.port,
                     'error': e})
             return
         nbe=0
@@ -1060,15 +1072,15 @@ class TBroadcast(Thread):
             try:
                 sck.sendall(tmp)
                 nbe+=1
-            except (socket.error,socket.gaierror), e:
+            except (socket.error, socket.gaierror), e:
                 print(_("Cannot send event %(nb)s to %(host)s:%(port)s %(error)s") % {
-                        'nb': nbe, 
-                        'host': self.host, 
+                        'nb': nbe,
+                        'host': self.host,
                         'port': self.port,
                         'error': e})
                 return
         print _('%(nb)s events sent to %(host)s:%(port)s during session.') % {
-            'nb': nbe, 
-            'host': self.host, 
+            'nb': nbe,
+            'host': self.host,
             'port': self.port }
-        sck.close()  
+        sck.close()
