@@ -115,6 +115,13 @@ class TraceBuilder(Thread):
         self.trace.start = config.data.startup_time
         self.traces.append(self.trace)
 
+    def log(self, msg, level=None):
+        m=": ".join( ("Tracebuilder", msg) )
+        if self.controller:
+            self.controller.log(m, level)
+        else:
+            print m
+
     def run(self):
         while (1):
             #we shouldnt receive exception from the queue
@@ -134,14 +141,14 @@ class TraceBuilder(Thread):
             # wait for export thread death
             if self.texp is not None:
                 if self.texp.isAlive():
-                    print('Export thread still running, waiting for its death...')
+                    self.log('Export thread still running, waiting for its death...')
                 self.texp.join()
         # Also save trace on filesystem.
         try:
-            fn = self.controller.tracers[0].export()
-            print "trace exported to %s" % fn
+            fn = self.export()
+            self.log("trace exported to %s" % fn)
         except Exception, e:
-            print "error exporting trace : %s" % unicode(e).encode('utf-8')
+            self.log("error exporting trace : %s" % unicode(e).encode('utf-8'))
 
         if self.network_broadcasting:
             self.end_broadcasting()
@@ -158,7 +165,7 @@ class TraceBuilder(Thread):
             stream=open(fname, 'wb')
         except (OSError, IOError), e:
             #self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
-            print(_("Cannot export to %(fname)s: %(e)s") % locals())
+            self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             return None
         tr=ET.Element('trace', name=self.trace.name)
         for lvl in self.trace.levels.keys():
@@ -173,14 +180,13 @@ class TraceBuilder(Thread):
         helper.indent(tr)
         ET.ElementTree(tr).write(stream, encoding='utf-8')
         stream.close()
-        #print "Data exported to %s" % fname
         if self.network_exp:
             self.network_export()
         return fname
 
     def toggle_network_export(self):
         self.network_exp = not self.network_exp
-        print "network export %s" % self.network_exp
+        self.log("network export %s" % self.network_exp)
         return
 
     def network_export(self):
@@ -188,7 +194,7 @@ class TraceBuilder(Thread):
             return
         if self.texp is not None:
             if self.texp.isAlive():
-                print "Export thread still running"
+                self.log("Export thread still running")
                 return
             else:
                 self.texp.join() # nettoie le zombie ou pas ...
@@ -201,12 +207,12 @@ class TraceBuilder(Thread):
             self.init_broadcasting()
         else:
             self.end_broadcasting()
-        print "broadcast %s" % self.network_broadcasting
+        self.log("broadcast %s" % self.network_broadcasting)
         return
 
     def end_broadcasting(self):
         if self.tbroad.isAlive(): # should always be
-            print('Broadcasting thread still running, sending its death order !')
+            self.log('Broadcasting thread still running, sending its death order !')
             self.bdq.put("###\n")
             self.tbroad.join()
         return
@@ -265,18 +271,18 @@ class TraceBuilder(Thread):
                 
     def convert_old_trace(self, fname):
         #FIXME : complete the import and do not use handyxml.
-        print 'importing trace from %s' % fname
+        self.log('importing trace from %s' % fname)
         if not os.path.exists(fname):
             oldfname=fname
             fname = os.path.join(config.data.path['settings'],oldfname)
-            print "%s not found, trying %s" % (oldfname,fname)
+            self.log("%s not found, trying %s" % (oldfname,fname))
             if not os.path.exists(fname):
-                print "%s not found, giving up." % fname
+                self.log("%s not found, giving up." % fname)
                 return False
         pk=handyxml.xml(fname, forced=True)
         lid=0
         if pk.node.nodeName != 'package':
-            print "This does not look like a trace file."
+            self.log("This does not look like a trace file.")
             return False
         self.traces.append(Trace())
         self.opened_actions = {}
@@ -303,7 +309,7 @@ class TraceBuilder(Thread):
                 #evt = Event(an_name, float(an_time), float(an_ac_time), an_content, an_movie, float(an_m_time), an_o_name, an_o_id)
                 #evt.change_comment(ev.comment)
                 #self.trace.add_to_trace('events', evt)
-                print '%s %s %s' % (an_name, an_ac_time, an_content)
+                self.log('%s %s %s' % (an_name, an_ac_time, an_content))
         return
 
     def imp_type(self, type):
@@ -326,26 +332,26 @@ class TraceBuilder(Thread):
         # fname : String, trace file path
         # reset : boolean, reset current trace FIXME: to be removed or modified
         # import append a trace to self.traces
-        print 'importing trace from %s' % fname
+        self.log('importing trace from %s' % fname)
         # reseting current trace
         if reset:
             self.trace = Trace()
             self.opened_actions = {}
             self.trace.start = config.data.startup_time
             # should be now
-            print "Trace cleaned."
+            self.log("Trace cleaned.")
         # checking trace path
         if not os.path.exists(fname):
             oldfname=fname
             fname = os.path.join(config.data.path['settings'],oldfname)
-            print "%s not found, trying %s" % (oldfname,fname)
+            self.log("%s not found, trying %s" % (oldfname,fname))
             if not os.path.exists(fname):
-                print "%s not found, giving up." % fname
+                self.log("%s not found, giving up." % fname)
                 return False
         tr=handyxml.xml(fname, forced=True)
         lid=0
         if tr.node.nodeName != 'trace':
-            print "This does not look like a trace file."
+            self.log("This does not look like a trace file.")
             return False
         # creating an empty new trace
         self.traces.append(Trace())
@@ -414,7 +420,7 @@ class TraceBuilder(Thread):
                 self.traces[-1].levels['actions'][int(ac.id[1:])].change_comment(ac.comment)
 
         self.alert_registered(None, None, None)
-        print "%s events imported" % lid
+        self.log("%s events imported" % lid)
         return True
 
     def receive(self, obj):
