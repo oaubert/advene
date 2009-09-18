@@ -24,7 +24,7 @@ from advene.gui.views.browser import Browser
 import advene.util.helper
 from advene.gui.util import dialog
 
-re_tales=re.compile('^\$\{(.+)\}\s*$')
+re_tales=re.compile('^\$\{([^}]+)\}\s*$')
 
 class TALESEntry:
     """TALES expression entry widget.
