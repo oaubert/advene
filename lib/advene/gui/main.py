@@ -2458,7 +2458,9 @@ class AdveneGUI(object):
             # stream easier
             pass
         elif self.controller.player.status in self.active_player_status:
-            self.time_label.set_text(helper.format_time(pos))
+            t=helper.format_time(pos)
+            if t != self.time_label.get_text():
+                self.time_label.set_text(t)
             # Update the display
             d = self.controller.cached_duration
             if d > 0 and d != self.gui.slider.get_adjustment ().upper:
@@ -2486,7 +2488,9 @@ class AdveneGUI(object):
 
         else:
             self.gui.slider.set_value (0)
-            self.time_label.set_text(helper.format_time(None))
+            t=helper.format_time(None)
+            if t != self.time_label.get_text():
+                self.time_label.set_text(t)
             if self.controller.player.status != self.oldstatus:
                 self.oldstatus = self.controller.player.status
                 self.gui.player_status.set_text(self.statustext.get(self.controller.player.status, _("Unknown")))
