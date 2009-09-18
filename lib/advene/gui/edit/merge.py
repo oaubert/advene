@@ -70,11 +70,13 @@ class TreeViewMerger:
 
         for l in self.differ.diff():
             name, s, d, action=l
+            # Note: s and d are normally Advene elements, except for
+            # resources for which we have the path.
             store.append(row=[ l,
                                labels.setdefault(name, name),
                                "%s %s (%s)" % (helper.get_type(s),
                                                self.controller.get_title(s),
-                                               s.id),
+                                               getattr(s, 'id', unicode(s))),
                                True ])
         return store
 
