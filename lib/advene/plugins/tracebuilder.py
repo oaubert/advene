@@ -368,6 +368,7 @@ class TraceBuilder(Thread):
             return False
         # creating an empty new trace
         self.traces.append(Trace())
+        tmp_opened_actions = {}
         if hasattr(tr, 'name'):
             self.traces[-1].rename('%s (imported)' % tr.name)
         else:
@@ -414,22 +415,21 @@ class TraceBuilder(Thread):
                             typ="Classification"
                         elif ev.o_name=='view':
                             typ="View building"
-                    if typ in self.opened_actions.keys():
+                    if typ in tmp_opened_actions.keys():
                         # an action is already opened for this event
-                        ac = self.opened_actions[typ]
+                        ac = tmp_opened_actions[typ]
                         if typ == "Navigation" and (op.name == "PlayerStop" or op.name == "PlayerPause"):
-                            del self.opened_actions[typ]
+                            del tmp_opened_actions[typ]
                         ac.add_operation(op)
                         continue
-                    for t in self.opened_actions.keys():
+                    for t in tmp_opened_actions.keys():
                         if t != "Navigation":
-                            del self.opened_actions[t]
+                            del tmp_opened_actions[t]
                     ac = Action(name=typ, begintime=op.time, endtime=None, acbegintime=op.activity_time, acendtime=None, content=None, movie=op.movie, movietime=op.movietime, operations=[op])
                     self.traces[-1].add_to_trace('actions', ac)
-                    self.opened_actions[typ]=ac
+                    tmp_opened_actions[typ]=ac
         if hasattr(tr, 'actions'):
             for ac in tr.actions[0].action:
-                #print ac.id
                 self.traces[-1].levels['actions'][int(ac.id[1:])].change_comment(ac.comment)
 
         self.alert_registered(None, None, None)
@@ -741,7 +741,7 @@ class TraceBuilder(Thread):
 #                ac.add_operation(ope)
                 #mise a jour des temps de fin, contenu, liste operations
 #                return ac
-        ac = Action(name=type, begintime=ope.time, endtime=None, acbegintime=ope.activity_time, acendtime=None, content=None, movie=ope.movie, movietime=ope.movietime, operations=[ope])
+        ac = Action(name=typ, begintime=ope.time, endtime=None, acbegintime=ope.activity_time, acendtime=None, content=None, movie=ope.movie, movietime=ope.movietime, operations=[ope])
         self.trace.add_to_trace('actions', ac)
         self.opened_actions[typ]=ac
         return ac
