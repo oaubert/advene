@@ -1,3 +1,9 @@
+* Utilisation npt:/
+* Define content-types: montag <annotation>...</annotation> +
+   extensions (transition...)
+
+* gstreamer SVGOverlay element in python
+
 * STBV export (captions): cf http://code.google.com/p/libkate/
 
 * check http://code.activestate.com/recipes/457411/ (interval mapping data structure)
@@ -630,7 +636,7 @@ when there is a syntax error in a TALES expression (missing string orbadly writt
   corresponding annotations.
 
 * Make the absolute time specification work for display_text (rather
-  than relative positions)
+  than relative positions) -> ok for gstreamer
 
 * Model related:
 
