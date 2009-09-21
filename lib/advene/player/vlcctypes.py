@@ -108,6 +108,7 @@ class Player(object):
             raise self.InternalException(e)
 
     def fullscreen(self):
+        self.mc.set_fullscreen(True)
         return True
 
     def playlist_add_item(self, name):
