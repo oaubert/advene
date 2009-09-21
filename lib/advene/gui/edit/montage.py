@@ -364,7 +364,7 @@ class Montage(AdhocView):
         tb.set_style(gtk.TOOLBAR_ICONS)
 
         b=get_small_stock_button(gtk.STOCK_DELETE)
-        self.controller.gui.tooltips.set_tip(b, _("Drop an annotation here to remove it from the list"))
+        b.set_tooltip_text(_("Drop an annotation here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
@@ -375,7 +375,7 @@ class Montage(AdhocView):
         tb.insert(ti, -1)
 
         b=gtk.ToolButton(gtk.STOCK_MEDIA_PLAY)
-        b.set_tooltip(self.controller.gui.tooltips, _("Play the montage"))
+        b.set_tooltip_text(_("Play the montage"))
         b.connect('clicked', self.play)
         tb.insert(b, -1)
 
@@ -436,7 +436,7 @@ class Montage(AdhocView):
                 event="AnnotationDeactivate"
                 label=_("Highlight annotations")
                 b.highlight=True
-            self.controller.gui.tooltips.set_tip(b, label)
+                b.set_tooltip_text(label)
             for a in set( [ w.annotation for w in self.contents ] ):
                 self.controller.notify(event, annotation=a)
             return True

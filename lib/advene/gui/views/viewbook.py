@@ -178,7 +178,7 @@ class ViewBook(AdhocView):
             shortname=name
         l=gtk.Label(shortname)
         if self.controller.gui:
-            self.controller.gui.tooltips.set_tip(e, name)
+            e.set_tooltip_text(name)
         e.add(l)
         e.connect('button-press-event', popup_menu, v)
 
@@ -192,7 +192,7 @@ class ViewBook(AdhocView):
 
         if not permanent:
             b=get_pixmap_button('small_detach.png')
-            self.controller.gui.tooltips.set_tip(b, _("Detach view in its own window, or drag-and-drop to another zone"))
+            b.set_tooltip_text(_("Detach view in its own window, or drag-and-drop to another zone"))
             b.set_relief(gtk.RELIEF_NONE)
             b.connect('clicked', relocate_view, v, 'popup')
             b.connect('drag-data-get', label_drag_sent, v)
@@ -206,7 +206,7 @@ class ViewBook(AdhocView):
 
         if not permanent:
             b=get_pixmap_button('small_close.png')
-            self.controller.gui.tooltips.set_tip(b, _("Close view"))
+            b.set_tooltip_text(_("Close view"))
             b.set_relief(gtk.RELIEF_NONE)
             b.connect('clicked', close_view, v)
             hb.pack_start(b, expand=False, fill=False)

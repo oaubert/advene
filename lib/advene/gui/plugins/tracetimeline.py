@@ -94,8 +94,6 @@ class TraceTimeline(AdhocView):
         # Contextualizing document canvas
         self.doc_canvas = None
         self.display_values = {} # name : (canvasY, timefactor, obj_l, center value)
-        self.tooltips = gtk.Tooltips()
-        self.tooltips.enable()
         self.selection=[ 0, 0, 0, 0 ]
         self.inspector = None
         self.btnl = None
@@ -191,7 +189,6 @@ class TraceTimeline(AdhocView):
         self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
         self.quicksearch_entry=gtk.Entry()
         self.quicksearch_entry.set_text(_('String to search'))
-        #self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
         def do_search(button, event, options):
             tr=self.tracer.search(self.active_trace, self.quicksearch_entry.get_text(), options[0], options[1])
             mod= self.trace_selector.get_model()
@@ -275,21 +272,21 @@ class TraceTimeline(AdhocView):
         mainbox.pack_start(self.doc_canvas, expand=False, fill=True)
 
         btnm = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
-        btnm.set_tooltip(self.tooltips, _('Zoom out'))
+        btnm.set_tooltip_text(_('Zoom out'))
         btnm.set_label('')
         toolbox.insert(btnm, -1)
 
         btnp = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
-        btnp.set_tooltip(self.tooltips, _('Zoom in'))
+        btnp.set_tooltip_text(_('Zoom in'))
         btnp.set_label('')
         toolbox.insert(btnp, -1)
 
         btnc = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_100)
-        btnc.set_tooltip(self.tooltips, _('Zoom 100%'))
+        btnc.set_tooltip_text(_('Zoom 100%'))
         btnc.set_label('')
         toolbox.insert(btnc, -1)
         self.btnl = gtk.ToolButton()
-        self.btnl.set_tooltip(self.tooltips, _('Toggle links lock'))
+        self.btnl.set_tooltip_text(_('Toggle links lock'))
         #self.btnl.set_label(_('Unlocked'))
         img = gtk.Image()
         img.set_from_file(config.data.advenefile( ( 'pixmaps', 'unlocked.png') ))
@@ -298,7 +295,7 @@ class TraceTimeline(AdhocView):
         self.btnl.connect('clicked', self.toggle_lock)
         #btn to change link mode
         b = gtk.ToolButton(label='L')
-        b.set_tooltip(self.tooltips, _('Toggle link mode'))
+        b.set_tooltip_text(_('Toggle link mode'))
         toolbox.insert(b, -1)
         b.connect('clicked', self.toggle_link_mode)
 
@@ -318,13 +315,13 @@ class TraceTimeline(AdhocView):
             return True
 
         b=gtk.ToolButton(stock_id=gtk.STOCK_OPEN)
-        b.set_tooltip(self.tooltips, _('Open an existing trace'))
+        b.set_tooltip_text(_('Open an existing trace'))
         toolbox.insert(b, -1)
         b.connect('clicked', open_trace)
 
         # Export trace
         btne = gtk.ToolButton(stock_id=gtk.STOCK_SAVE)
-        btne.set_tooltip(self.tooltips, _('Save trace'))
+        btne.set_tooltip_text(_('Save trace'))
         toolbox.insert(btne, -1)
         btne.connect('clicked', self.export)
         #preselect= 0,
@@ -1357,21 +1354,19 @@ class Inspector (gtk.VBox):
         gtk.VBox.__init__(self)
         self.action=None
         self.controller=controller
-        self.tooltips = gtk.Tooltips()
-        self.tooltips.enable()
         self.pack_start(gtk.Label(_('Inspector')), expand=False)
         self.pack_start(gtk.HSeparator(), expand=False)
         self.inspector_id = gtk.Label('')
         self.pack_start(self.inspector_id, expand=False)
         self.inspector_id.set_alignment(0, 0.5)
-        self.tooltips.set_tip(self.inspector_id, _('Item Id'))
+        self.inspector_id.set_tooltip_text(_('Item Id'))
         self.inspector_type = gtk.Label('')
         self.pack_start(self.inspector_type, expand=False)
-        self.tooltips.set_tip(self.inspector_type, _('Item name or class'))
+        self.inspector_type.set_tooltip_text(_('Item name or class'))
         self.inspector_type.set_alignment(0, 0.5)
         self.inspector_name = gtk.Label('')
         self.pack_start(self.inspector_name, expand=False)
-        self.tooltips.set_tip(self.inspector_name, _('Type or schema'))
+        self.inspector_name.set_tooltip_text(_('Type or schema'))
         self.inspector_name.set_alignment(0, 0.5)
         self.pack_start(gtk.HSeparator(), expand=False)
         self.pack_start(gtk.Label(_('Operations')), expand=False)
@@ -1486,7 +1481,7 @@ class Inspector (gtk.VBox):
             hb.pack_start(tr, expand=False)
             hb.pack_start(gtk.VSeparator(), expand=False)
         if corpsstr != "":
-            self.tooltips.set_tip(box,corpsstr)
+            box.set_tooltip_text(corpsstr)
         def box_pressed(w, event, id):
             #print "%s %s" % (id, mtime)
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:

@@ -961,7 +961,7 @@ class TimestampRepresentation(gtk.Button):
             self.label.show()
         else:
             self.label.hide()
-        self.controller.gui.tooltips.set_tip(self, ts)
+        self.set_tooltip_text(ts)
         return True
 
     def as_html(self, with_timestamp=True):

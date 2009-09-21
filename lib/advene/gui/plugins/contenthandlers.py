@@ -57,7 +57,6 @@ class ZoneContentHandler (ContentHandler):
         self.fname=None
         self.view = None
         self.shape = None
-        self.tooltips=gtk.Tooltips()
 
     def set_editable (self, boolean):
         self.editable = boolean
@@ -163,7 +162,6 @@ class SVGContentHandler (ContentHandler):
         self.view = None
         self.sourceview=None
         self.editing_source=False
-        self.tooltips=gtk.Tooltips()
 
     def close(self):
         for r in self.rules:

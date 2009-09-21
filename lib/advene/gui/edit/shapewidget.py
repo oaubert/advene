@@ -1439,7 +1439,6 @@ class ShapeEditor:
             Image: 'shape_image.png',
             }
 
-        self.tooltips=gtk.Tooltips()
         self.widget=self.build_widget(pixmap_dir)
         self.widget.connect('key-press-event', self.key_press_event)
 
@@ -1567,7 +1566,7 @@ class ShapeEditor:
                 tb.set_icon_widget(i)
             else:
                 tb.set_text(shape.SHAPENAME)
-            tb.set_tooltip(self.tooltips, shape.SHAPENAME)
+            tb.set_tooltip_text(shape.SHAPENAME)
             tb._shape=shape
             return True
 
@@ -1621,7 +1620,7 @@ class ShapeEditor:
             """Update the toolbutton with the appropriate color information.
             """
             tb.get_icon_widget().set_markup('<span background="%s">    </span>' % color)
-            tb.set_tooltip(self.tooltips, color)
+            tb.set_tooltip_text(color)
             tb._color=color
             return True
 
@@ -1696,18 +1695,18 @@ class ShapeEditor:
         tb.insert(gtk.SeparatorToolItem(), -1)
 
         b=gtk.ToolButton(gtk.STOCK_CONVERT)
-        b.set_tooltip(self.tooltips, _("Dump SVG"))
+        b.set_tooltip_text(_("Dump SVG"))
         b.connect('clicked', dump_svg)
         tb.insert(b, -1)
 
         b=gtk.ToolButton(gtk.STOCK_OPEN)
-        b.set_tooltip(self.tooltips, _("Load SVG"))
+        b.set_tooltip_text(_("Load SVG"))
         b.connect('clicked', load_svg)
         tb.insert(b, -1)
 
         if True:
             b=gtk.ToolButton(gtk.STOCK_SAVE)
-            b.set_tooltip(self.tooltips, _("Save SVG"))
+            b.set_tooltip_text(_("Save SVG"))
             b.connect('clicked', save_svg)
             tb.insert(b, -1)
 

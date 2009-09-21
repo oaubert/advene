@@ -754,8 +754,6 @@ class Evaluator:
         """
         vbox=gtk.VBox()
 
-        tips=gtk.Tooltips()
-
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
         # Use small toolbar button everywhere
@@ -772,7 +770,7 @@ class Evaluator:
             ):
             b=gtk.ToolButton(icon)
             b.connect('clicked', action)
-            b.set_tooltip(tips, tip)
+            b.set_tooltip_text(tip)
             tb.insert(b, -1)
 
         # So that applications can define their own buttons

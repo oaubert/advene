@@ -441,7 +441,7 @@ class AdhocView(object):
             return False
 
         b=get_pixmap_button('small_attach.png', self.attach_view, window)
-        self.controller.gui.tooltips.set_tip(b, _("Click or drag-and-drop to reattach view"))
+        b.set_tooltip_text(_("Click or drag-and-drop to reattach view"))
         b.connect('drag-data-get', drag_sent)
         # The widget can generate drags
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,

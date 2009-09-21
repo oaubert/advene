@@ -120,7 +120,6 @@ class DummyGlade:
     """Transition class.
     """
     def __init__(self, menu_definition):
-        self.tooltips=gtk.Tooltips()
         self.win=gtk.Window()
         v=gtk.VBox()
         self.win.add(v)
@@ -181,7 +180,7 @@ class DummyGlade:
             elif action is not None:
                 i.connect('activate', action)
             if tooltip:
-                self.tooltips.set_tip(i, tooltip)
+                i.set_tooltip_text(tooltip)
 
             if name == _("_Select player"):
                 self.select_player_menuitem=i
@@ -220,8 +219,6 @@ class AdveneGUI(object):
         """
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
-
-        self.tooltips = gtk.Tooltips()
 
         menu_definition=(
             (_("_File"), (
@@ -318,7 +315,7 @@ class AdveneGUI(object):
                 i=gtk.Image()
                 i.set_from_file( config.data.advenefile( ('pixmaps', stock ) ) )
                 b=gtk.ToolButton(icon_widget=i)
-            b.set_tooltip(self.tooltips, tip)
+            b.set_tooltip_text(tip)
             b.connect('clicked', callback)
             self.gui.fileop_toolbar.insert(b, -1)
         self.gui.fileop_toolbar.show_all()
@@ -459,7 +456,7 @@ class AdveneGUI(object):
             i=gtk.Image()
             i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
             b.add(i)
-            self.tooltips.set_tip(b, tip)
+            b.set_tooltip_text(tip)
             b.connect('drag-begin', adhoc_view_drag_begin, pixmap, tip)
             b.connect('drag-data-get', adhoc_view_drag_sent, name)
             b.connect('clicked', open_view_menu, name)
@@ -477,11 +474,11 @@ class AdveneGUI(object):
             if config.data.preferences['record-actions']:
                 config.data.preferences['record-actions']=False
                 i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
-                self.tooltips.set_tip(w, _('Tracing : ') + _('off'))
+                w.set_tooltip_text(_('Tracing : ') + _('off'))
             else:
                 config.data.preferences['record-actions']=True
                 i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
-                self.tooltips.set_tip(w, _('Tracing : ') + _('on'))
+                w.set_tooltip_text(_('Tracing : ') + _('on'))
             w.set_image(i)
             return
         # Invert the preference, so that calling the trace_toggle
@@ -494,14 +491,14 @@ class AdveneGUI(object):
 
         self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
         self.quicksearch_entry=gtk.Entry()
-        self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
+        self.quicksearch_entry.set_tooltip_text(_('String to search'))
 
         def modify_source(i, expr, label):
             """Modify the quicksearch source, and update the tooltip accordingly.
             """
             config.data.preferences['quicksearch-source']=expr
-            self.tooltips.set_tip(self.quicksearch_button, _("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
-            self.tooltips.set_tip(self.quicksearch_entry, _('String to search in %s') % label)
+            self.quicksearch_button.set_tooltip_text(_("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
+            self.quicksearch_entry.set_tooltip_text(_('String to search in %s') % label)
             return True
 
         def quicksearch_options(button, event, method):
@@ -1108,7 +1105,7 @@ class AdveneGUI(object):
             mes=_("Select an annotation to loop on it")
         else:
             mes=_("Looping on %s") % self.controller.get_title(self.current_annotation)
-        b.set_tooltip(self.tooltips, mes)
+        b.set_tooltip_text(mes)
         return True
 
     def get_visualisation_widget(self):
@@ -1163,7 +1160,7 @@ class AdveneGUI(object):
             cr.popup()
             return True
         b=get_small_stock_button(gtk.STOCK_ADD, new_stbv)
-        self.tooltips.set_tip(b, _("Create a new dynamic view."))
+        b.set_tooltip_text(_("Create a new dynamic view."))
         hb.pack_start(b, expand=False)
 
         def on_edit_current_stbv_clicked(button):
@@ -1192,9 +1189,9 @@ class AdveneGUI(object):
                 return False
             stbv=combo.get_model().get_value(i, 1)
             if stbv is None:
-                self.tooltips.set_tip(edit_stbv_button, _("Create a new dynamic view."))
+                edit_stbv_button.set_tooltip_text(_("Create a new dynamic view."))
             else:
-                self.tooltips.set_tip(edit_stbv_button, _("Edit the current dynamic view."))
+                edit_stbv_button.set_tooltip_text(_("Edit the current dynamic view."))
             self.controller.activate_stbv(stbv)
             return True
         self.gui.stbv_combo.connect('changed', on_stbv_combo_changed)
@@ -1224,7 +1221,7 @@ class AdveneGUI(object):
         self.audio_mute.set_icon_widget(audio_on)
         self.audio_mute.connect('toggled', toggle_audio_mute)
         self.audio_mute.set_active(self.controller.player.sound_is_muted())
-        self.audio_mute.set_tooltip(self.tooltips, _("Mute/unmute"))
+        self.audio_mute.set_tooltip_text(_("Mute/unmute"))
         self.player_toolbar.insert(self.audio_mute, -1)
 
         # Append the loop checkitem to the toolbar
@@ -1602,7 +1599,7 @@ class AdveneGUI(object):
 
         for text, stock, callback in tb_list:
             b=gtk.ToolButton(stock)
-            b.set_tooltip(self.tooltips, text)
+            b.set_tooltip_text(text)
             b.connect('clicked', callback)
             tb.insert(b, -1)
 
@@ -1783,7 +1780,7 @@ class AdveneGUI(object):
                 name += _(' (modified)')
             i=gtk.MenuItem(label=unicode(name), use_underline=False)
             i.connect('activate', activate_package, a)
-            self.tooltips.set_tip(i, _("Activate %s") % self.controller.get_title(p))
+            i.set_tooltip_text(_("Activate %s") % self.controller.get_title(p))
             menu.append(i)
 
         menu.show_all()
@@ -1830,7 +1827,7 @@ class AdveneGUI(object):
         menu=self.gui.menubar.get_children()[0].get_submenu()
         i=gtk.MenuItem(label=unicode(os.path.basename(filename)), use_underline=False)
         i.connect('activate', open_history_file, filename)
-        self.tooltips.set_tip(i, _("Open %s") % filename)
+        i.set_tooltip_text(_("Open %s") % filename)
 
         i.show()
         menu.append(i)
@@ -2654,8 +2651,8 @@ class AdveneGUI(object):
             ident=self.controller.package._idgenerator.get_id(AnnotationType)
             new_type_title_dialog=dialog.title_id_widget(element_title=ident,
                                                          element_id=ident)
-            self.tooltips.set_tip(new_type_title_dialog.title_entry, _("Title of the new type"))
-            self.tooltips.set_tip(new_type_title_dialog.id_entry, _("Id of the new type. It is generated from the title, but you may change it if necessary."))
+            new_type_title_dialog.title_entry.set_tooltip_text(_("Title of the new type"))
+            new_type_title_dialog.id_entry.set_tooltip_text(_("Id of the new type. It is generated from the title, but you may change it if necessary."))
             new_type_dialog.pack_start(new_type_title_dialog, expand=False)
 
             # Mimetype
@@ -2667,7 +2664,7 @@ class AdveneGUI(object):
                 )
 
             mimetype_selector = dialog.list_selector_widget(members=type_list, entry=True)
-            self.tooltips.set_tip(mimetype_selector, _("Specify the content-type for the annotation type"))
+            mimetype_selector.set_tooltip_text(_("Specify the content-type for the annotation type"))
 
             new_type_title_dialog.attach(gtk.Label(_("Content type")), 0, 1, 2, 3)
             new_type_title_dialog.attach(mimetype_selector, 1, 2, 2, 3)
@@ -2689,15 +2686,15 @@ class AdveneGUI(object):
 
             schema_selector=dialog.list_selector_widget(members=[ (s, self.controller.get_title(s), self.controller.get_element_color(s)) for s in schemas],
                                                         callback=handle_new_schema_selection)
-            self.tooltips.set_tip(schema_selector, _("Choose an existing schema for the new type, or create a new one"))
+            schema_selector.set_tooltip_text(_("Choose an existing schema for the new type, or create a new one"))
             new_type_title_dialog.attach(schema_selector, 1, 2, 3, 4)
             new_type_title_dialog.attach(new_schema_dialog, 1, 2, 4, 5)
             new_schema_dialog.pack_start(gtk.Label(_("Specify the schema title")), expand=False)
             ident=self.controller.package._idgenerator.get_id(Schema)
             new_schema_title_dialog=dialog.title_id_widget(element_title=ident,
                                                            element_id=ident)
-            self.tooltips.set_tip(new_schema_title_dialog.title_entry, _("Title of the new schema"))
-            self.tooltips.set_tip(new_schema_title_dialog.id_entry, _("Id of the new schema. It is generated from the title, but you may change it if necessary."))
+            new_schema_title_dialog.title_entry.set_tooltip_text(_("Title of the new schema"))
+            new_schema_title_dialog.id_entry.set_tooltip_text(_("Id of the new schema. It is generated from the title, but you may change it if necessary."))
             new_schema_dialog.pack_start(new_schema_title_dialog, expand=False)
 
         d.vbox.show_all()
@@ -3807,7 +3804,7 @@ class AdveneGUI(object):
                                    element_id=name,
                                    text=_("Enter a view name to save the workspace"))
         d.default=gtk.CheckButton(_("Default workspace"))
-        self.tooltips.set_tip(d.default, _("Open this workspace when opening the package"))
+        d.default.set_tooltip_text(_("Open this workspace when opening the package"))
         d.vbox.pack_start(d.default)
         d.show_all()
         dialog.center_on_mouse(d)
@@ -3920,7 +3917,7 @@ class AdveneGUI(object):
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Video URL")), expand=False)
         video_entry=gtk.Entry()
-        self.tooltips.set_tip(video_entry, _("URL for the video, if it is available on a sharing website.\nOnly for GoogleVideo and Youtube for the moment"))
+        video_entry.set_tooltip_text(_("URL for the video, if it is available on a sharing website.\nOnly for GoogleVideo and Youtube for the moment"))
         u=self.controller.package.getMetaData(config.data.namespace, 'website-export-video-url')
         if u is not None:
             video_entry.set_text(u)

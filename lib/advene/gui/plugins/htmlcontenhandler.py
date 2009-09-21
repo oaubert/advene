@@ -218,7 +218,6 @@ class HTMLContentHandler (ContentHandler):
         self.placeholders=[]
 
         self.editing_source=False
-        self.tooltips=gtk.Tooltips()
 
     def close(self):
         for p in self.placeholders:
@@ -567,14 +566,14 @@ class HTMLContentHandler (ContentHandler):
                 b=gtk.SeparatorToolItem()
             else:
                 b=get_pixmap_toolbutton(icon, action)
-                b.set_tooltip(self.tooltips, tooltip)
+                b.set_tooltip_text(tooltip)
             tb.insert(b, -1)
             b.show()
 
         if self.editor.can_undo():
             b=gtk.ToolButton(gtk.STOCK_UNDO)
             b.connect('clicked', lambda i: self.editor.undo())
-            b.set_tooltip(self.tooltips, _("Undo"))
+            b.set_tooltip_text(_("Undo"))
             tb.insert(b, -1)
             b.show()
 
@@ -615,7 +614,7 @@ class HTMLContentHandler (ContentHandler):
                                                    parent=self.parent)
                 self.sourceview.widget=self.sourceview.get_view()
                 b=get_pixmap_toolbutton('xml.png', edit_wysiwyg)
-                b.set_tooltip(self.tooltips, _("WYSIWYG editor"))
+                b.set_tooltip_text(_("WYSIWYG editor"))
                 self.sourceview.widget.toolbar.insert(b, 0)
 
             vbox.foreach(vbox.remove)
@@ -625,7 +624,7 @@ class HTMLContentHandler (ContentHandler):
             return True
 
         b=get_pixmap_toolbutton('xml.png', edit_source)
-        b.set_tooltip(self.tooltips, _("Edit HTML source"))
+        b.set_tooltip_text(_("Edit HTML source"))
         tb.insert(b, 0)
 
         # FIXME: this test should be activated for the release

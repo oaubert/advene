@@ -317,7 +317,7 @@ class TagBag(AdhocView):
 
         b=get_small_stock_button(gtk.STOCK_DELETE)
 
-        self.controller.gui.tooltips.set_tip(b, _("Drop a tag here to remove it from the list"))
+        b.set_tooltip_text(_("Drop a tag here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,

@@ -492,7 +492,7 @@ class ActiveBookmarks(AdhocView):
             return True
 
         b=get_small_stock_button(gtk.STOCK_DELETE)
-        self.controller.gui.tooltips.set_tip(b, _("Drop a bookmark here to remove it from the list"))
+        b.set_tooltip_text(_("Drop a bookmark here to remove it from the list"))
         if config.data.os == 'win32':
             # DND on win32 is partially broken: it will not detect
             # ACTION_MOVE only. We have to add ACTION_COPY.
@@ -511,7 +511,7 @@ class ActiveBookmarks(AdhocView):
         tb.insert(i, -1)
 
         b=get_pixmap_toolbutton('set-to-now.png', bookmark_current_time)
-        b.set_tooltip(self.controller.gui.tooltips, _("Insert a bookmark for the current video time"))
+        b.set_tooltip_text(_("Insert a bookmark for the current video time"))
         tb.insert(b, -1)
 
         i=gtk.ToolItem()
@@ -519,7 +519,7 @@ class ActiveBookmarks(AdhocView):
         types.sort(key=lambda a: a[1])
 
         sel=dialog.list_selector_widget(members=types)
-        self.controller.gui.tooltips.set_tip(sel, _("Type of the annotations that will be created"))
+        sel.set_tooltip_text(_("Type of the annotations that will be created"))
         i.add(sel)
         self.chosen_type_selector=sel
         default=helper.get_id(self.controller.package.annotationTypes, 'annotation')
@@ -558,7 +558,7 @@ class ActiveBookmarks(AdhocView):
             (gtk.STOCK_FULLSCREEN, _("Set the size of snaphots"), scale_snaphots_menu),
             ):
             b=get_small_stock_button(icon)
-            self.controller.gui.tooltips.set_tip(b, tip)
+            b.set_tooltip_text(tip)
             b.connect('clicked', method)
             i=gtk.ToolItem()
             i.add(b)
@@ -1105,7 +1105,7 @@ class ActiveBookmark(object):
                 return True
             b=get_pixmap_button('small_ok.png', handle_ok)
             b.set_relief(gtk.RELIEF_NONE)
-            self.controller.gui.tooltips.set_tip(b, _("Validate the annotation"))
+            b.set_tooltip_text(_("Validate the annotation"))
             def set_current(widget, event):
                 self.container.set_current_bookmark(self)
                 return True

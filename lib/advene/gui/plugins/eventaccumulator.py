@@ -89,8 +89,6 @@ class EventAccumulator(AdhocView):
             }
         #opt, arg = self.load_parameters(parameters)
         #self.options.update(opt)
-        self.toolTips = gtk.Tooltips()
-        self.toolTips.enable()
         self.__package=package
         if package is None and controller is not None:
             self.__package=controller.package
@@ -530,7 +528,7 @@ class EventAccumulator(AdhocView):
                 corpsstr += urllib.unquote( op_time + " : " + op.name + "\n")
             else:
                 corpsstr += urllib.unquote( op_time + " : " + op.name + " ( " + op.concerned_object['name'] + " : " + op.concerned_object['id'] + " )\n")
-        self.toolTips.set_tip(tup[1], corpsstr)
+        tup[1].set_tooltip_text(corpsstr)
         self.receive(self.tracer.trace)
         # workaround to solve tooltip refresh problem
 
@@ -586,7 +584,7 @@ class EventAccumulator(AdhocView):
             hb.pack_start(gtk.VSeparator(), expand=False)
         hb.pack_start(entete, expand=False)
         if corpsstr != "":
-            self.toolTips.set_tip(hb,corpsstr)
+            hb.set_tooltip_text(corpsstr)
         return hb
 
     def build_operation_box(self, obj_evt):
@@ -640,7 +638,7 @@ class EventAccumulator(AdhocView):
             hb.pack_start(tr, expand=False)
             hb.pack_start(gtk.VSeparator(), expand=False)
         if corpsstr != "":
-            self.toolTips.set_tip(box,corpsstr)
+            box.set_tooltip_text(corpsstr)
         def box_pressed(w, event, id):
             #print "%s %s" % (id, mtime)
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
@@ -685,7 +683,7 @@ class EventAccumulator(AdhocView):
             hb.pack_start(tr, expand=False)
             hb.pack_start(gtk.VSeparator(), expand=False)
         if corpsstr != "":
-            self.toolTips.set_tip(hb,corpsstr)
+            hb.set_tooltip_text(corpsstr)
         def box_pressed(w, event, ops):
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
                 #FIXME : need to change details in another way

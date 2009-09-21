@@ -107,8 +107,6 @@ class SimpleAdveneGUI(AdveneGUI):
         window.set_icon_list(*[ gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'icon_advene%d.png' % size ) ))
                                 for size in (16, 32, 48, 64, 128) ])
 
-        self.tooltips = gtk.Tooltips()
-
         # Last auto-save time (in ms)
         self.last_auto_save=time.time()*1000
 
@@ -138,7 +136,7 @@ class SimpleAdveneGUI(AdveneGUI):
             """Modify the quicksearch source, and update the tooltip accordingly.
             """
             config.data.preferences['quicksearch-source']=expr
-            self.tooltips.set_tip(self.quicksearch_button, _("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
+            self.quicksearch_button.set_tooltip_text(_("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
             return True
 
         def quicksearch_options(button, event, method):
@@ -179,7 +177,7 @@ class SimpleAdveneGUI(AdveneGUI):
             modify_source(None, None, _("All annotations"))
         hb=self.gui.get_widget('search_hbox')
         self.quicksearch_entry=gtk.Entry()
-        self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
+        self.quicksearch_entry.set_tooltip_text(_('String to search'))
         self.quicksearch_entry.connect('activate', self.do_quicksearch)
         hb.pack_start(self.quicksearch_entry, expand=False)
         def modify_source_and_search(i, expr, label):
@@ -383,7 +381,7 @@ class SimpleAdveneGUI(AdveneGUI):
             mes=_("Select an annotation to loop on it")
         else:
             mes=_("Looping on %s") % self.controller.get_title(self.current_annotation)
-        b.set_tooltip(self.tooltips, mes)
+        b.set_tooltip_text(mes)
         return True
 
     def get_visualisation_widget(self):
@@ -446,7 +444,7 @@ class SimpleAdveneGUI(AdveneGUI):
         self.audio_mute.set_icon_widget(audio_on)
         self.audio_mute.connect('toggled', toggle_audio_mute)
         self.audio_mute.set_active(self.controller.player.sound_is_muted())
-        self.audio_mute.set_tooltip(self.tooltips, _("Mute/unmute"))
+        self.audio_mute.set_tooltip_text(_("Mute/unmute"))
         self.player_toolbar.insert(self.audio_mute, -1)
 
         # Append the loop checkitem to the toolbar

@@ -90,7 +90,6 @@ class TranscriptionEdit(AdhocView):
 
         self.controller=controller
         self.package=controller.package
-        self.tooltips=gtk.Tooltips()
 
         self.sourcefile=None
         self.empty_re = re.compile('^\s*$')
@@ -486,9 +485,10 @@ class TranscriptionEdit(AdhocView):
 
         def popup_modify(win, t):
             timestamp=child.value + t
-            self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
-            if self.tooltips.active_tips_data is None:
-                button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
+            child.set_tooltip_text("%s" % helper.format_time(timestamp))
+            # FIXME: find a way to do this in the new gtk.Tooltip API?
+            #if self.tooltips.active_tips_data is None:
+            #    button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
             child.value=timestamp
             if self.options['play-on-scroll']:
                 popup_goto(child, timestamp)
@@ -589,9 +589,10 @@ class TranscriptionEdit(AdhocView):
             elif event.direction == gtk.gdk.SCROLL_UP:
                 button.value += config.data.preferences[i]
 
-            self.tooltips.set_tip(button, "%s" % helper.format_time(button.value))
-            if self.tooltips.active_tips_data is None:
-                button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
+                button.set_tooltip_text("%s" % helper.format_time(button.value))
+            # FIXME: find a way to do this in the new gtk.Tooltip API?
+            #if self.tooltips.active_tips_data is None:
+            #    button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
             self.timestamp_play = button.value
             button.grab_focus()
             return True
@@ -610,7 +611,7 @@ class TranscriptionEdit(AdhocView):
 
         child.connect('scroll-event', handle_scroll_event)
         child.connect('key-release-event', mark_key_release_cb, anchor, child)
-        self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
+        child.set_tooltip_text("%s" % helper.format_time(timestamp))
         child.value=timestamp
         child.ignore=False
         self.update_mark(child)
@@ -1198,14 +1199,14 @@ class TranscriptionEdit(AdhocView):
         for text, tooltip, icon, callback in tb_list:
             b=gtk.ToolButton(label=text)
             b.set_stock_id(icon)
-            b.set_tooltip(self.tooltips, tooltip)
+            b.set_tooltip_text(tooltip)
             b.connect('clicked', callback)
             tb.insert(b, -1)
 
         if self.can_undo():
             b=gtk.ToolButton(gtk.STOCK_UNDO)
             b.connect('clicked', lambda i: self.undo())
-            b.set_tooltip(self.tooltips, _("Undo"))
+            b.set_tooltip_text(_("Undo"))
             tb.insert(b, -1)
             b.show()
 
@@ -1215,7 +1216,7 @@ class TranscriptionEdit(AdhocView):
 
         b=gtk.ToggleToolButton(gtk.STOCK_JUMP_TO)
         b.set_active(self.options['autoscroll'])
-        b.set_tooltip(self.tooltips, _("Automatically scroll to the mark position when playing"))
+        b.set_tooltip_text(_("Automatically scroll to the mark position when playing"))
         b.connect('toggled', handle_toggle, 'autoscroll')
         b.set_label(_("Autoscroll"))
         tb.insert(b, -1)
@@ -1226,7 +1227,7 @@ class TranscriptionEdit(AdhocView):
         b.set_icon_widget(i)
         b.set_label(_("Autoinsert"))
         b.set_active(self.options['autoinsert'])
-        b.set_tooltip(self.tooltips, _("Automatically insert marks"))
+        b.set_tooltip_text(_("Automatically insert marks"))
         b.connect('toggled', handle_toggle, 'autoinsert')
         tb.insert(b, -1)
 

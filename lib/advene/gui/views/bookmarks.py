@@ -220,7 +220,7 @@ class Bookmarks(AdhocView):
             return False
 
         b=get_small_stock_button(gtk.STOCK_DELETE)
-        self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
+        b.set_tooltip_text(_("Drop a position here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
@@ -248,7 +248,7 @@ class Bookmarks(AdhocView):
                 b=get_pixmap_toolbutton(icon)
             else:
                 b=gtk.ToolButton(stock_id=icon)
-            b.set_tooltip(self.controller.gui.tooltips, tip)
+            b.set_tooltip_text(tip)
             b.connect('clicked', action)
             tb.insert(b, -1)
         hb.add(tb)

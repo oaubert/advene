@@ -103,10 +103,8 @@ class TimeAdjustment:
                 tip=_("Decrement value by %.2f s") % (incr_value / 1000.0)
             else:
                 tip=_("Increment value by %.2f s") % (incr_value / 1000.0)
-            self.tooltips.set_tip(b, tip)
+            b.set_tooltip_text(tip)
             return b
-
-        self.tooltips = self.controller.gui.tooltips
 
         vbox=gtk.VBox()
 
@@ -128,7 +126,7 @@ class TimeAdjustment:
         self.image=TimestampRepresentation(self.value, self.controller, width, epsilon=1000/25, visible_label=False)
         self.image.connect('button-press-event', image_button_press)
         self.image.connect('clicked', image_button_clicked)
-        self.tooltips.set_tip(self.image, _("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value\nright-click to invalidate screenshot"))
+        self.image.set_tooltip_text(_("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value\nright-click to invalidate screenshot"))
         hbox.pack_start(self.image, expand=False)
 
         if self.editable:
@@ -156,7 +154,7 @@ class TimeAdjustment:
             current_pos=gtk.Button()
             i=gtk.Image()
             i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
-            self.tooltips.set_tip(current_pos, _("Set to current player position"))
+            current_pos.set_tooltip_text(_("Set to current player position"))
             current_pos.add(i)
             current_pos.connect('clicked', self.use_current_position)
             hb.pack_start(current_pos, expand=False)

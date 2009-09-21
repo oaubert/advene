@@ -315,7 +315,7 @@ class TranscriptionView(AdhocView):
             (gtk.STOCK_PREFERENCES, self.edit_options, _("Edit preferences")),
             ):
             b=gtk.ToolButton(stock_id=icon)
-            b.set_tooltip(self.controller.gui.tooltips, tip)
+            b.set_tooltip_text(tip)
             b.connect('clicked', action)
             tb.insert(b, -1)
         mainbox.pack_start(tb, expand=False)
@@ -384,7 +384,7 @@ class TranscriptionView(AdhocView):
 #
 #        b=get_small_stock_button(gtk.STOCK_GO_FORWARD, find_next)
 #        b.set_relief(gtk.RELIEF_NONE)
-#        self.controller.gui.tooltips.set_tip(b, _("Find next occurrence"))
+#        b.set_tooltip_text(_("Find next occurrence"))
 #        self.searchbox.pack_start(b, expand=False, fill=False)
 
         fill=gtk.HBox()

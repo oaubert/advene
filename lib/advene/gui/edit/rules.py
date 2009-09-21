@@ -119,20 +119,20 @@ class EditRuleSet(EditGeneric):
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect('clicked', add_rule_cb)
         b.set_sensitive(self.editable)
-        self.controller.gui.tooltips.set_tip(b, _("Add a new rule"))
+        b.set_tooltip_text(_("Add a new rule"))
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
         b.set_label(_("Subview"))
         b.connect('clicked', add_subview_cb)
         b.set_sensitive(self.editable)
-        self.controller.gui.tooltips.set_tip(b, _("Add a subview list"))
+        b.set_tooltip_text(_("Add a subview list"))
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
         b.connect('clicked', remove_rule_cb)
         b.set_sensitive(self.editable)
-        self.controller.gui.tooltips.set_tip(b, _("Remove the current rule"))
+        b.set_tooltip_text(_("Remove the current rule"))
         hb.pack_start(b, expand=False)
 
 
@@ -869,7 +869,6 @@ class EditAction(EditGeneric):
         self.paramlist={}
 
         self.catalog=catalog
-        self.tooltips=gtk.Tooltips()
         self.widget=self.build_widget()
 
     def invalid_items(self):
@@ -955,7 +954,7 @@ class EditAction(EditGeneric):
         entry.set_editable(self.editable)
         entry.entry.connect('changed', self.on_change_parameter, entry, name)
 
-        self.tooltips.set_tip(entry.entry, description)
+        entry.entry.set_tooltip_text(description)
 
         hbox.entry=entry
 

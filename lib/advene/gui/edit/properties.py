@@ -104,9 +104,6 @@ class EditWidget(gtk.VBox):
         self.__table.show()
         self.add(self.__table)
 
-        self.__tooltips = gtk.Tooltips()
-
-
     #
     # Adds a line of widgets to the configurator. The line can be indented.
     #
@@ -185,7 +182,7 @@ class EditWidget(gtk.VBox):
         check = gtk.CheckButton(label)
         check.show()
 
-        self.__tooltips.set_tip(check, help)
+        check.set_tooltip_text(help)
         self.__add_line(1, check)
 
         value = self.__get_config(property)
@@ -209,7 +206,7 @@ class EditWidget(gtk.VBox):
             entry.set_visibility(False)
             entry.set_invisible_char(unichr(0x2022))
 
-        self.__tooltips.set_tip(entry, help)
+        entry.set_tooltip_text(help)
         self.__add_line(1, align, entry)
 
         value = self.__get_config(property)
@@ -238,7 +235,7 @@ class EditWidget(gtk.VBox):
         b.connect('clicked', callback, entry)
         hbox.pack_start(b, expand=False)
 
-        self.__tooltips.set_tip(entry, help)
+        entry.set_tooltip_text(help)
         self.__add_line(1, align, hbox)
 
         value = self.__get_config(property)
@@ -264,7 +261,7 @@ class EditWidget(gtk.VBox):
 
         value = self.__get_config(property)
 
-        self.__tooltips.set_tip(spin_button, help)
+        spin_button.set_tooltip_text(help)
         self.__add_line(1, align, spin_button)
 
         spin_button.set_value(value)
@@ -302,7 +299,7 @@ class EditWidget(gtk.VBox):
 
         combo.connect('changed', self.__on_change, property, self.CHANGE_OPTION)
 
-        self.__tooltips.set_tip(combo, help)
+        combo.set_tooltip_text(help)
         self.__add_line(1, align, combo)
 
     def add_file_selector(self, label, property, help):
@@ -348,8 +345,8 @@ class EditWidget(gtk.VBox):
         entry.connect('changed', self.__on_change, property,
                       self.CHANGE_ENTRY)
 
-        self.__tooltips.set_tip(entry, help)
-        self.__tooltips.set_tip(btn, help)
+        entry.set_tooltip_text(help)
+        btn.set_tooltip_text(help)
         self.__add_line(1, align, hbox)
 
     def add_dir_selector(self, label, property, help):
@@ -395,8 +392,8 @@ class EditWidget(gtk.VBox):
         entry.connect('changed', self.__on_change, property,
                       self.CHANGE_ENTRY)
 
-        self.__tooltips.set_tip(entry, help)
-        self.__tooltips.set_tip(btn, help)
+        entry.set_tooltip_text(help)
+        btn.set_tooltip_text(help)
         self.__add_line(1, align, hbox)
 
     def popup(self):

@@ -178,7 +178,6 @@ class TimeLine(AdhocView):
 
         self.list = elements
         self.annotationtypes = annotationtypes
-        self.tooltips = gtk.Tooltips()
 
         self.current_marker = None
         self.current_marker_scale = None
@@ -2739,7 +2738,7 @@ class TimeLine(AdhocView):
 
         for t in self.annotationtypes:
             b=AnnotationTypeWidget(annotationtype=t, container=self)
-            self.tooltips.set_tip(b, _("From schema %s") % self.controller.get_title(t.schema))
+            b.set_tooltip_text(_("From schema %s") % self.controller.get_title(t.schema))
             layout.put (b, 20, self.layer_position[t])
             b.update_widget()
             b.show_all()
@@ -2803,14 +2802,14 @@ class TimeLine(AdhocView):
             p.set_playing = set_playing.__get__(p)
             p.annotationtype=t
             p.set_size_request(20, self.button_height)
-            self.tooltips.set_tip(p, _('Restrict playing to this annotation-type'))
+            p.set_tooltip_text(_('Restrict playing to this annotation-type'))
             layout.put (p, 0, self.layer_position[t])
 
             # At the right of the annotation type : prev/next buttons
             nav=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
             nav.set_size_request(16, self.button_height)
             nav.annotationtype=t
-            self.tooltips.set_tip(nav, _('Goto previous annotation'))
+            nav.set_tooltip_text(_('Goto previous annotation'))
             eb=gtk.EventBox()
             eb.connect('button-press-event', navigate, 'prev', t)
             eb.add(nav)
@@ -2821,7 +2820,7 @@ class TimeLine(AdhocView):
             nav=gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
             nav.set_size_request(16, self.button_height)
             nav.annotationtype=t
-            self.tooltips.set_tip(nav, _('Goto next annotation'))
+            nav.set_tooltip_text(_('Goto next annotation'))
             eb=gtk.EventBox()
             eb.connect('button-press-event', navigate, 'next', t)
             eb.add(nav)
@@ -2835,7 +2834,7 @@ class TimeLine(AdhocView):
         l.set_markup('<b><span style="normal">%s</span></b>' % _('+'))
         l.modify_font(self.annotation_type_font)
         b.add(l)
-        self.tooltips.set_tip(b, _('Create a new annotation type'))
+        b.set_tooltip_text(_('Create a new annotation type'))
         b.set_size_request(-1, self.button_height)
         layout.put (b, 0, height - 2 * self.button_height + config.data.preferences['timeline']['interline-height'])
         b.annotationtype=None
@@ -2890,14 +2889,14 @@ class TimeLine(AdhocView):
             return True
 
         b=get_small_stock_button(gtk.STOCK_FIND, open_annotation_display)
-        self.controller.gui.tooltips.set_tip(b, _('Open an annotation display view'))
+        b.set_tooltip_text(_('Open an annotation display view'))
         b.connect('drag-data-get', drag_sent, 'annotationdisplay')
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
         hb.pack_start(b, expand=False)
 
         b=get_pixmap_button('montage.png', open_slave_montage)
-        self.controller.gui.tooltips.set_tip(b, _('Open a slave montage view (coordinated zoom level)'))
+        b.set_tooltip_text(_('Open a slave montage view (coordinated zoom level)'))
         b.connect('drag-data-get', drag_sent, 'montage')
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
@@ -3113,7 +3112,7 @@ class TimeLine(AdhocView):
             return False
 
         b=gtk.ToolButton(stock_id=gtk.STOCK_DELETE)
-        self.controller.gui.tooltips.set_tip(b, _('Delete the selected annotations or drop an annotation here to delete it.'))
+        b.set_tooltip_text(_('Delete the selected annotations or drop an annotation here to delete it.'))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
@@ -3135,7 +3134,7 @@ class TimeLine(AdhocView):
             return True
 
         b=gtk.ToolButton(stock_id=gtk.STOCK_SELECT_COLOR)
-        b.set_tooltip(self.tooltips, _('Drag an annotation type here to remove it from display.\nClick to edit all displayed types'))
+        b.set_tooltip_text(_('Drag an annotation type here to remove it from display.\nClick to edit all displayed types'))
         b.connect('clicked', self.edit_annotation_types)
         b.connect('drag-data-received', annotationtype_selection_drag_received)
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -3147,7 +3146,7 @@ class TimeLine(AdhocView):
 
         # Selection menu
         b=get_pixmap_toolbutton('selection.png', self.selection_menu)
-        b.set_tooltip(self.tooltips, _('Selection actions'))
+        b.set_tooltip_text(_('Selection actions'))
         tb.insert(b, -1)
         b.set_sensitive(False)
         self.selection_button=b
@@ -3158,7 +3157,7 @@ class TimeLine(AdhocView):
             return True
 
         self.display_relations_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_REDO)
-        self.display_relations_toggle.set_tooltip(self.tooltips, _('Display relations'))
+        self.display_relations_toggle.set_tooltip_text(_('Display relations'))
         self.display_relations_toggle.set_active(self.options['display-relations'])
         self.display_relations_toggle.connect('toggled', handle_toggle, 'display-relations')
         tb.insert(self.display_relations_toggle, -1)
@@ -3195,12 +3194,12 @@ class TimeLine(AdhocView):
 
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
         i.connect('clicked', zoom, 1.3)
-        i.set_tooltip(self.tooltips, _('Zoom out'))
+        i.set_tooltip_text(_('Zoom out'))
         tb.insert(i, -1)
 
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
         i.connect('clicked', zoom, .7)
-        i.set_tooltip(self.tooltips, _('Zoom in'))
+        i.set_tooltip_text(_('Zoom in'))
         tb.insert(i, -1)
 
         self.zoom_combobox=dialog.list_selector_widget(members=[
@@ -3238,7 +3237,7 @@ class TimeLine(AdhocView):
             (_('Center on current player position.'), gtk.STOCK_JUSTIFY_CENTER, center_on_current_position),
             ):
             b=gtk.ToolButton(stock_id=icon)
-            b.set_tooltip(self.tooltips, tooltip)
+            b.set_tooltip_text(tooltip)
             b.connect('clicked', callback)
             tb.insert(b, -1)
 
@@ -3251,7 +3250,7 @@ class TimeLine(AdhocView):
 
         self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
         self.loop_toggle_button.connect('toggled', loop_toggle_cb)
-        self.loop_toggle_button.set_tooltip(self.tooltips, _('Automatically activate loop when clicking on an annotation'))
+        self.loop_toggle_button.set_tooltip_text(_('Automatically activate loop when clicking on an annotation'))
         tb.insert(self.loop_toggle_button, -1)
 
         def goto_toggle_cb(b):
@@ -3261,7 +3260,7 @@ class TimeLine(AdhocView):
         self.goto_on_click_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_GO_FORWARD)
         self.goto_on_click_toggle.set_active(self.options['goto-on-click'])
         self.goto_on_click_toggle.connect('toggled', goto_toggle_cb)
-        self.goto_on_click_toggle.set_tooltip(self.tooltips, _('Goto annotation when clicking'))
+        self.goto_on_click_toggle.set_tooltip_text(_('Goto annotation when clicking'))
         tb.insert(self.goto_on_click_toggle, -1)
 
         ti=gtk.SeparatorToolItem()

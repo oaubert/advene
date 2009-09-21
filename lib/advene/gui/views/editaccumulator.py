@@ -67,13 +67,13 @@ class EditAccumulator(AccumulatorPopup):
         # OK button
         b=get_pixmap_button('small_ok.png', handle_ok, w)
         b.set_relief(gtk.RELIEF_NONE)
-        self.controller.gui.tooltips.set_tip(b, _("Validate"))
+        b.set_tooltip_text(_("Validate"))
         hbox.pack_start(b, expand=False)
 
         # Close button
         b=get_pixmap_button('small_close.png', self.undisplay_cb, w)
         b.set_relief(gtk.RELIEF_NONE)
-        self.controller.gui.tooltips.set_tip(b, _("Close"))
+        b.set_tooltip_text(_("Close"))
         hbox.pack_start(b, expand=False)
 
         t=self.get_short_title(element)

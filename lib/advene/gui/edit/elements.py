@@ -147,12 +147,12 @@ class EditElementPopup (AdhocView):
 
             b=gtk.ToolButton(gtk.STOCK_OK)
             b.connect('clicked', self.validate_cb)
-            self.controller.gui.tooltips.set_tip(b, _("Apply changes and close the edit window"))
+            b.set_tooltip_text(_("Apply changes and close the edit window"))
             tb.insert(b, -1)
 
             b=gtk.ToolButton (gtk.STOCK_APPLY)
             b.connect('clicked', self.apply_cb)
-            self.controller.gui.tooltips.set_tip(b, _("Apply changes"))
+            b.set_tooltip_text(_("Apply changes"))
             tb.insert(b, -1)
 
             self.extend_toolbar(tb)
@@ -445,11 +445,11 @@ class EditAnnotationPopup (EditElementPopup):
             tb.insert(gtk.SeparatorToolItem(), -1)
 
         b=get_pixmap_toolbutton(gtk.STOCK_GO_BACK, self.goto, -1)
-        b.set_tooltip(self.controller.gui.tooltips, _("Apply changes and edit previous annotation of same type"))
+        b.set_tooltip_text(_("Apply changes and edit previous annotation of same type"))
         tb.insert(b, -1)
 
         b=get_pixmap_toolbutton(gtk.STOCK_GO_FORWARD, self.goto, +1)
-        b.set_tooltip(self.controller.gui.tooltips, _("Apply changes and edit next annotation of same type"))
+        b.set_tooltip_text(_("Apply changes and edit next annotation of same type"))
         tb.insert(b, -1)
 
         def toggle_highlight(b, ann):
@@ -461,7 +461,7 @@ class EditAnnotationPopup (EditElementPopup):
                 event="AnnotationDeactivate"
                 label=_("Highlight annotation")
                 b.highlight=True
-            self.controller.gui.tooltips.set_tip(b, label)
+                b.set_tooltip_text(label)
             self.controller.notify(event, annotation=ann)
             return True
 
@@ -609,11 +609,11 @@ class EditViewPopup (EditElementPopup):
         t = helper.get_view_type(self.element)
         if t == 'static' and self.element.matchFilter['class'] in ('package', '*'):
             b = get_pixmap_toolbutton( 'web.png', self.apply_and_open)
-            self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
+            b.set_tooltip_text(_("Apply changes and visualise in web browser"))
             tb.insert(b, -1)
         elif t == 'dynamic':
             b = get_pixmap_toolbutton( gtk.STOCK_MEDIA_PLAY, self.apply_and_activate)
-            self.controller.gui.tooltips.set_tip(b, _("Apply changes and activate the view"))
+            b.set_tooltip_text(_("Apply changes and activate the view"))
             tb.insert(b, -1)
         return True
 
@@ -1301,7 +1301,6 @@ class TextContentHandler (ContentHandler):
         self.editable = True
         self.fname=None
         self.view = None
-        self.tooltips=gtk.Tooltips()
 
     def get_focus(self):
         self.view.grab_focus()
@@ -1430,23 +1429,23 @@ class TextContentHandler (ContentHandler):
             tb.set_style(gtk.TOOLBAR_ICONS)
 
             b=gtk.ToolButton(gtk.STOCK_OPEN)
-            b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
+            b.set_tooltip_text(_("Open a file (C-o)"))
             b.connect('clicked', self.content_open)
             tb.insert(b, -1)
 
             b=gtk.ToolButton(gtk.STOCK_SAVE)
-            b.set_tooltip(self.tooltips, _("Save to a file (C-s)"))
+            b.set_tooltip_text(_("Save to a file (C-s)"))
             b.connect('clicked', self.content_save)
             tb.insert(b, -1)
 
             b=gtk.ToolButton(gtk.STOCK_REFRESH)
-            b.set_tooltip(self.tooltips, _("Reload the file (C-r)"))
+            b.set_tooltip_text(_("Reload the file (C-r)"))
             b.connect('clicked', self.content_reload)
             tb.insert(b, -1)
 
             if config.data.preferences['expert-mode']:
                 b=get_pixmap_toolbutton('browser.png', self.browser_open)
-                b.set_tooltip(self.tooltips, _("Insert a value from the browser (C-i)"))
+                b.set_tooltip_text(_("Insert a value from the browser (C-i)"))
                 tb.insert(b, -1)
 
             vbox.pack_start(tb, expand=False)
@@ -1531,7 +1530,6 @@ class GenericContentHandler (ContentHandler):
         self.view = None
         self.parent=None
         self.data=self.element.data
-        self.tooltips=gtk.Tooltips()
 
     def set_editable (self, boolean):
         self.editable = boolean
@@ -1643,17 +1641,17 @@ class GenericContentHandler (ContentHandler):
         tb.set_style(gtk.TOOLBAR_ICONS)
 
         b=gtk.ToolButton(gtk.STOCK_OPEN)
-        b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
+        b.set_tooltip_text(_("Open a file (C-o)"))
         b.connect('clicked', self.content_open)
         tb.insert(b, -1)
 
         b=gtk.ToolButton(gtk.STOCK_SAVE)
-        b.set_tooltip(self.tooltips, _('Save to a file (C-s)'))
+        b.set_tooltip_text(_('Save to a file (C-s)'))
         b.connect('clicked', self.content_save)
         tb.insert(b, -1)
 
         b=gtk.ToolButton(gtk.STOCK_REFRESH)
-        b.set_tooltip(self.tooltips, _('Reload the file (C-r)'))
+        b.set_tooltip_text(_('Reload the file (C-r)'))
         b.connect('clicked', self.content_reload)
         tb.insert(b, -1)
 
@@ -1770,8 +1768,7 @@ class EditGenericForm(EditForm):
         else:
             self.entry=gtk.Entry()
             if self.tooltip:
-                tt=gtk.Tooltips()
-                tt.set_tip(self.entry, self.tooltip)
+                self.entry.set_tooltip_text(self.tooltip)
             self.entry.set_text(v)
             self.entry.set_editable(self.editable)
         hbox.pack_start(self.entry)
