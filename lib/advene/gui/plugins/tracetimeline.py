@@ -1164,7 +1164,8 @@ class ObjGroup (Group):
         self.link_mode=link_mode
         self.inspector = inspector
         self.color_sel = 0xD9D919FF
-        self.color_f = 0xADEAEAFF
+        self.stroke_color_sel = "red"
+        self.color_f = 0xFFFFFFFF
         self.color_s = "black"
         self.fontsize = 5
         self.poids = pds
@@ -1172,6 +1173,19 @@ class ObjGroup (Group):
         self.x = x
         self.y = y
         self.r = r
+        # trying to get the item color in advene
+        temp_it = self.controller.package.get_element_by_id(self.cobj['id'])
+        temp_c = self.controller.get_element_color(temp_it)
+        if temp_c is not None:
+            if len(temp_c)==7:
+                self.color_f= int(temp_c[1:]+"FF", 16)
+            elif len(temp_c)==13:
+                b1=int(temp_c[1:5], 16)/0x101
+                b2=int(temp_c[5:9], 16)/0x101
+                b3=int(temp_c[9:], 16)/0x101
+                self.color_f= b1*0x1000000 + b2*0x10000 + b3*0x100 + 0xFF
+                #print self.color_f
+
         self.rep = self.newRep()
         self.text = self.newText()
         self.lines = []
@@ -1294,10 +1308,12 @@ class ObjGroup (Group):
 
     def select(self):
         self.rep.props.fill_color_rgba=self.color_sel
+        self.rep.props.stroke_color = self.stroke_color_sel
         self.sel = True
 
     def deselect(self):
         self.rep.props.fill_color_rgba=self.color_f
+        self.rep.props.stroke_color = self.color_s
         self.sel = False
         self.center_sel = False
 
