@@ -1,33 +1,56 @@
 [Files]
-Source: dist\library.zip; DestDir: {app}
-Source: dist\*.dll; DestDir: {app}
-Source: dist\*.pyd; DestDir: {app}
-Source: dist\advene.exe; DestDir: {app}
-Source: dist\w9xpopen.exe; DestDir: {app}
-Source: dist\share\*; DestDir: {app}\share; Flags: recursesubdirs
-Source: dist\doc\*; DestDir: {app}\doc; Flags: recursesubdirs
-Source: dist\locale\*; DestDir: {app}\locale; Flags: recursesubdirs
-Source: share\pixmaps\advene.ico; DestDir: {app}; DestName: advene.ico
-Source: c:\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs
-Source: examples\*v10.azp; DestDir: {app}\examples
-Source: c:\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs
-Source: c:\gtk\share\locale\fr\*; DestDir: {app}\lib\locale\fr; Flags: recursesubdirs
-Source: c:\gtk\lib\pango\*; DestDir: {app}\lib\pango; Flags: recursesubdirs
-Source: c:\gtk\share\themes\*; DestDir: {app}\share\themes; Flags: recursesubdirs
-Source: c:\gtk\bin\libpng12.dll; DestDir: {app}
-Source: c:\gtk\bin\libpangoft2-1.0-0.dll; DestDir: {app}
-Source: c:\gtk\bin\libtiff3.dll; DestDir: {app}
-Source: c:\gtk\bin\jpeg62.dll; DestDir: {app}
-Source: c:\gtk\bin\librsvg-2-2.dll; DestDir: {app}
-Source: c:\gtk\bin\libcroco-0.6-3.dll; DestDir: {app}
-Source: c:\gtk\bin\libgsf-1-114.dll; DestDir: {app}
-Source: c:\gtk\bin\bzip2.dll; DestDir: {app}
-Source: c:\gtk\bin\libgio-2.0-0.dll; DestDir: {app}
-Source: c:\cygwin\usr\local\bin\libgoocanvas.dll; DestDir: {app}
-Source: c:\Program Files\VideoLAN\VLC\libvlccore.dll; DestDir: {app}
-Source: c:\Program Files\VideoLAN\VLC\libvlc.dll; DestDir: {app}
-Source: c:\Program Files\VideoLAN\VLC\plugins\*; DestDir: {app}\vlcplugins
-Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}
+Source: dist\library.zip; DestDir: {app}; Components: advene
+Source: dist\*.dll; DestDir: {app}; Components: advene
+Source: dist\*.pyd; DestDir: {app}; Components: advene
+Source: dist\advene.exe; DestDir: {app}; Components: advene
+Source: dist\w9xpopen.exe; DestDir: {app}; Components: advene
+Source: dist\share\*; DestDir: {app}\share; Flags: recursesubdirs; Components: advene
+Source: dist\doc\*; DestDir: {app}\doc; Flags: recursesubdirs; Components: advene
+Source: dist\locale\*; DestDir: {app}\locale; Flags: recursesubdirs; Components: advene
+Source: share\pixmaps\advene.ico; DestDir: {app}; DestName: advene.ico; Components: advene
+Source: c:\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs; Components: advene
+Source: examples\*v10.azp; DestDir: {app}\examples; Components: advene
+Source: c:\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs; Components: advene
+Source: c:\gtk\share\locale\fr\*; DestDir: {app}\lib\locale\fr; Flags: recursesubdirs; Components: advene
+;Source: c:\gtk\lib\pango\*; DestDir: {app}\lib\pango; Flags: recursesubdirs     gtk <= 2.16.6
+Source: c:\gtk\share\themes\*; DestDir: {app}\share\themes; Flags: recursesubdirs; Components: advene
+;Source: c:\gtk\bin\libpng12.dll; DestDir: {app}  gtk <= 2.16.6
+Source: c:\gtk\bin\libpng12-0.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\libpangoft2-1.0-0.dll; DestDir: {app}; Components: advene
+;Source: c:\gtk\bin\libtiff3.dll; DestDir: {app}  gtk <= 2.16.6
+Source: c:\gtk\bin\libtiff-3.dll; DestDir: {app}; Components: advene
+;Source: c:\gtk\bin\jpeg62.dll; DestDir: {app}    gtk <= 2.16.6
+Source: c:\gtk\bin\libjpeg-7.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\librsvg-2-2.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\libcroco-0.6-3.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\libgsf-1-114.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\bzip2.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\libgio-2.0-0.dll; DestDir: {app}; Components: advene
+;Source: c:\cygwin\usr\local\bin\libgoocanvas3.dll; DestDir: {app}    goocanvas0.10
+Source: c:\cygwin\usr\local\bin\libgoocanvas-3.dll; DestDir: {app}; Components: advene
+Source: c:\Program Files\VideoLAN\VLC\libvlccore.dll; DestDir: {app}; Components: vlc
+Source: c:\Program Files\VideoLAN\VLC\libvlc.dll; DestDir: {app}; Components: vlc
+Source: c:\Program Files\VideoLAN\VLC\plugins\*; DestDir: {app}\vlcplugins; Components: vlc
+Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}; Components: advene
+
+[CustomMessages]
+En.CleanPrefs=Clean &preferences
+Fr.CleanPrefs=Effacer les &préférences
+En.ITadvenevlc=Advene with included vlc
+Fr.ITadvenevlc=Advene et vlc inclus
+En.ITadvene=Advene without included vlc
+Fr.ITadvene=Advene sans vlc
+En.ITcustom=Custom installation
+Fr.ITcustom=Installation personnalisée
+
+[Types]
+Name: "AdveneVlc"; Description: "{cm:ITadvenevlc}"
+Name: "AdveneOnly"; Description: "{cm:ITadvene}"
+Name: "Custom"; Description: "{cm:ITcustom}"; Flags: iscustom
+
+[Components]
+Name: advene; Description: Advene files; Types: AdveneOnly AdveneVlc Custom; Flags: fixed
+Name: vlc; Description: VLC files; Types: AdveneVlc Custom
 
 [Languages]
 Name: Fr; MessagesFile: "compiler:Languages\French.isl"
@@ -36,10 +59,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.38
+AppVerName=Advene 0.39
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.38
+VersionInfoVersion=0.39
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -47,8 +70,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.38a_all_in_one_vlc140108svn
-VersionInfoTextVersion=0.38
+OutputBaseFilename=setup_advene_0.39_all_in_one_vlc_1.0.2
+VersionInfoTextVersion=0.39
 ChangesAssociations=yes
 
 [Registry]
@@ -60,10 +83,19 @@ Root: HKCU; Subkey: "Advene\shell\open\command"; ValueType: string; ValueName: "
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "cleanprefs"; Description: "{cm:CleanPrefs}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Icons]
 Name: {group}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; IconIndex: 0
 Name: {userdesktop}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; Tasks: desktopicon
+Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; Tasks: quicklaunchicon
+
+[InstallDelete]
+Type: files; Name: "{userappdata}\..\advene\advene.prefs"; Tasks: cleanprefs
+Type: files; Name: "{userappdata}\..\advene\player.prefs"; Tasks: cleanprefs
+Type: files; Name: "{userappdata}\..\advene\advene.ini"; Tasks: cleanprefs
+
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);
