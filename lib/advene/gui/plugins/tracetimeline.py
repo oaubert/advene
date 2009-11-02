@@ -63,6 +63,7 @@ INCOMPLETE_OPERATIONS_NAMES = {
             'ElementEditCancel': _('Canceling edition'),
             'EditSessionEnd': _('Canceling edition'),
             'ElementEditEnd': _('Ending edition'),
+            'PlayerSet': _('Moving to'),
         }
 
 class TraceTimeline(AdhocView):
@@ -188,7 +189,7 @@ class TraceTimeline(AdhocView):
         quicksearch_options = [False, ['oname','oid','ocontent']] # exact search, where to search
         self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
         self.quicksearch_entry=gtk.Entry()
-        self.quicksearch_entry.set_text(_('String to search'))
+        self.quicksearch_entry.set_text(_('Search'))
         def do_search(button, event, options):
             tr=self.tracer.search(self.active_trace, self.quicksearch_entry.get_text(), options[0], options[1])
             mod= self.trace_selector.get_model()
@@ -201,6 +202,13 @@ class TraceTimeline(AdhocView):
                 self.trace_selector.set_active(n)
             #self.select_trace(tr)
         self.quicksearch_button.connect('button-press-event', do_search, quicksearch_options)
+        def is_focus(w, event):
+            if w.is_focus() :
+                return False
+            w.select_region(0, len(w.get_text()))
+            w.grab_focus()
+            return True
+        self.quicksearch_entry.connect('button-press-event', is_focus)
         self.search_box = gtk.HBox()
         self.search_box.pack_start(self.quicksearch_entry, expand=False)
         self.search_box.pack_start(self.quicksearch_button, expand=False)
@@ -1387,8 +1395,12 @@ class Inspector (gtk.VBox):
         self.pack_start(gtk.HSeparator(), expand=False)
         self.pack_start(gtk.Label(_('Operations')), expand=False)
         self.pack_start(gtk.HSeparator(), expand=False)
-        self.inspector_opes=gtk.VBox()
-        self.pack_start(self.inspector_opes, expand=True)
+        opscwin = gtk.ScrolledWindow ()
+        opscwin.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        opscwin.set_border_width(0)
+        self.inspector_opes= gtk.VBox()
+        opscwin.add_with_viewport(self.inspector_opes)
+        self.pack_start(opscwin, expand=True)
         self.commentBox = gtk.VBox()
         self.comment=gtk.Entry()
         save_btn=gtk.Button(_('Save'))
@@ -1450,25 +1462,11 @@ class Inspector (gtk.VBox):
     #
     # used to pack operation boxes in the inspector 
     # op_list : list of operations to display
-    
-        h = self.inspector_opes.get_allocation().height
-        w = self.inspector_opes.get_allocation().width
-        nb_max = h/25 - 2 # -1 for a nice display
-        # FIXME : -1 when snapshot height pb fixed and height pb fixed
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
-        nb=0
         for o in op_list:
-            if nb >= nb_max:
-                l = gtk.Label(_('%(count)s/%(total)s operations not displayed.') % {
-                        'count': max(len(op_list) - nb_max,0), 
-                        'total': len(op_list)})
-                #FIXME : need to add a scrolled window widget to display all operations
-                self.inspector_opes.pack_start(l, expand=False)
-                break
-            nb+=1
             l = self.addOperation(o)
-            l.set_size_request(w, 25)
+            l.set_size_request(-1, 25)
             self.inspector_opes.pack_start(l, expand=False)
 
 
@@ -1489,6 +1487,9 @@ class Inspector (gtk.VBox):
         entetestr = "%s : %s" % (ev_time, n)
         if obj_evt.concerned_object['id']:
             entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
+        elif obj_evt.name=='PlayerSet':
+            # destination time to add
+            entetestr = entetestr + ' %s' % obj_evt.content
         entete = gtk.Label(entetestr.encode("UTF-8"))
         hb = gtk.HBox()
         box = gtk.EventBox()
@@ -1499,13 +1500,10 @@ class Inspector (gtk.VBox):
         if corpsstr != "":
             box.set_tooltip_text(corpsstr)
         def box_pressed(w, event, id):
-            #print "%s %s" % (id, mtime)
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
                 if id is not None:
                     obj = self.controller.package.get_element_by_id(id)
                     if obj is not None:
-                        #Need to edit the item
-                        #print obj
                         self.controller.gui.edit_element(obj)
                     else:
                         print "item %s no longuer exists" % id
@@ -1696,11 +1694,13 @@ class DocGroup (Group):
         y1=self.rect.get_bounds().y1 - offset
         y2=self.rect.get_bounds().y2 + offset
         p = goocanvas.Points ([(x, y1), (x, y2)])
+        #ld = goocanvas.LineDash([3.0, 3.0])
         l = goocanvas.Polyline (parent = self,
                                         close_path = False,
                                         points = p,
                                         stroke_color_rgba = color,
                                         line_width = 1.0,
+                                        #line_dash=ld,
                                         start_arrow = False,
                                         end_arrow = False
                                         )
