@@ -576,6 +576,10 @@ class TraceBuilder(Thread):
                 elem_name='package'
                 elem_id=elem.title
                 elem_type = advene.model.package.Package
+        elif 'position' in obj:
+            #event related to the player
+            if obj['position'] is not None:
+                ev_content=str(time.strftime("%H:%M:%S", time.gmtime(obj['position']/1000)))
         #TODO undo ?
         ev_undo=False
         if 'undone' in obj.keys():
@@ -591,6 +595,8 @@ class TraceBuilder(Thread):
         op_activity_time = (time.time() - self.trace.start) * 1000
         op_name = obj['event_name']
         #op_params = obj['parameters']
+        #for i in obj.keys():
+        #    print "%s : %s" % (i,obj[i])
         op_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
         op_movie_time = self.controller.player.current_position_value
         op_content = None
@@ -702,6 +708,10 @@ class TraceBuilder(Thread):
                 elem_name='package'
                 elem_id=elem.title
                 elem.type=advene.model.package.Package
+        elif 'position' in obj:
+            #event related to the player
+            if obj['position'] is not None:
+                op_content=str(time.strftime("%H:%M:%S", time.gmtime(obj['position']/1000)))
         if self.trace.levels['operations']:
             prev = self.trace.levels['operations'][-1]
             if op_name in self.editEndNames and prev.name in self.editEndNames and prev.concerned_object['id'] == elem_id:
