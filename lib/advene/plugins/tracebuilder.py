@@ -247,7 +247,7 @@ class TraceBuilder(Thread):
         self.alert_registered(None, None, None)
         return True
 
-    def search(self, trace, words='', exact=False, options=None):
+    def search(self, trace, words=u'', exact=False, options=None):
         if options is None:
             options=['oname', 'oid', 'ocontent']
         # exact will be to match exact terms or just find the terms in a string
@@ -266,13 +266,16 @@ class TraceBuilder(Thread):
 
             for o in a.operations:
                 if o.concerned_object['name'] is not None:
-                    content=''
-                    contentb = o.content.find('content="')
+                    content=o.content.encode('utf-8')
+                    contentb = content.find('content="')
                     if contentb > 0 :
                         contentb = contentb+9
-                        contentf = o.content.find('"', contentb)
-                        content = urllib.unquote(o.content[contentb:contentf])
-                    found = False or (not exact and 'oname' in options and o.concerned_object['name'].find(words)>=0) or (exact and 'oname' in options and o.concerned_object['name']==words) or (not exact and 'oid' in options and o.concerned_object['id'].find(words)>=0) or (exact and 'oid' in options and o.concerned_object['id']==words) or (not exact and 'ocontent' in options and content.find(words)>=0) or (exact and 'ocontent' in options and content==words)
+                        contentf = content.find('"', contentb)
+                        content = urllib.unquote(content[contentb:contentf])
+                        content = unicode(content)
+                    name = unicode(o.concerned_object['name'])
+                    _id = o.concerned_object['id']
+                    found = False or (not exact and 'oname' in options and name.find(words.lower())>=0) or (exact and 'oname' in options and name==words) or (not exact and 'oid' in options and _id.lower().find(words.lower())>=0) or (exact and 'oid' in options and _id==words) or (not exact and 'ocontent' in options and content.lower().find(words.lower())>=0) or (exact and 'ocontent' in options and content==words)
                     if found and not o in temp.levels['operations']:
                         otemp = o.copy()
                         temp.add_to_trace('operations', otemp)
@@ -584,7 +587,7 @@ class TraceBuilder(Thread):
         ev_undo=False
         if 'undone' in obj.keys():
             ev_undo = True
-        ev = Event(ev_name, ev_time, ev_activity_time, ev_content, ev_movie, ev_movie_time, elem_name, elem_id, elem_type, elem_class_id)
+        ev = Event(ev_name, ev_time, ev_activity_time, unicode(ev_content), ev_movie, ev_movie_time, elem_name, elem_id, elem_type, elem_class_id)
         #ev = Event(ev_name, ev_time, ev_activity_time, ev_snapshot, ev_content, ev_movie, ev_movie_time, elem_name, elem_id)
         self.trace.add_to_trace('events', ev)
         return ev
@@ -716,7 +719,7 @@ class TraceBuilder(Thread):
             prev = self.trace.levels['operations'][-1]
             if op_name in self.editEndNames and prev.name in self.editEndNames and prev.concerned_object['id'] == elem_id:
                 return
-        op = Operation(op_name, op_time, op_activity_time, op_content, op_movie, op_movie_time, elem_name, elem_id, elem_type, elem_class_id)
+        op = Operation(op_name, op_time, op_activity_time, unicode(op_content), op_movie, op_movie_time, elem_name, elem_id, elem_type, elem_class_id)
         self.trace.add_to_trace('operations', op)
         return op
 
@@ -861,7 +864,7 @@ class Event:
         self.name = name
         self.time = time_
         self.activity_time = actime
-        self.content = content
+        self.content = content or u''
         self.movie = movie
         self.movietime = movietime
         self.comment = ''
@@ -919,9 +922,7 @@ class Operation:
         self.name = name
         self.time = time_
         self.activity_time = actime
-        self.content = ''
-        if content is not None:
-            self.content = content
+        self.content = content or u''
         self.movie = movie
         self.movietime = movietime
         self.comment = ''
@@ -968,7 +969,7 @@ class Action:
         self.time = [ begintime, endtime ]
         self.activity_time = [ acbegintime, acendtime ]
 
-        self.content = content or ''
+        self.content = content or u''
 
         self.movie = movie
         self.movietime = movietime
