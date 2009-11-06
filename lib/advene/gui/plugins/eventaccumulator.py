@@ -540,7 +540,7 @@ class EventAccumulator(AdhocView):
         corpsstr = ''
         entetestr = ''
         if obj_evt.content is not None:
-            corpsstr = urllib.unquote(obj_evt.content)
+            corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
         if self.options['time'] == 'activity':
             ev_time = helper.format_time(obj_evt.activity_time)
@@ -594,7 +594,7 @@ class EventAccumulator(AdhocView):
         # label with the time of the event
         corpsstr = ''
         if obj_evt.content is not None:
-            corpsstr = urllib.unquote(obj_evt.content)
+            corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
         if self.options['time'] == 'activity':
             ev_time = helper.format_time(obj_evt.activity_time)

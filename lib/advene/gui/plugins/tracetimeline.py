@@ -96,6 +96,7 @@ class TraceTimeline(AdhocView):
         self.doc_canvas = None
         self.display_values = {} # name : (canvasY, timefactor, obj_l, center value)
         self.selection=[ 0, 0, 0, 0 ]
+        self.sel_frame=None
         self.inspector = None
         self.btnl = None
         self.btnlm = None
@@ -191,7 +192,7 @@ class TraceTimeline(AdhocView):
         self.quicksearch_entry=gtk.Entry()
         self.quicksearch_entry.set_text(_('Search'))
         def do_search(button, event, options):
-            tr=self.tracer.search(self.active_trace, self.quicksearch_entry.get_text(), options[0], options[1])
+            tr=self.tracer.search(self.active_trace, unicode(self.quicksearch_entry.get_text(),'utf-8'), options[0], options[1])
             mod= self.trace_selector.get_model()
             if len(self.tracer.traces)>len(mod):
                 n = len(self.tracer.traces)-1
@@ -208,7 +209,12 @@ class TraceTimeline(AdhocView):
             w.select_region(0, len(w.get_text()))
             w.grab_focus()
             return True
+        def is_typing(w, event):
+            #if return is hit, activate quicksearch_button
+            if event.keyval == gtk.keysyms.Return:
+                self.quicksearch_button.activate()
         self.quicksearch_entry.connect('button-press-event', is_focus)
+        self.quicksearch_entry.connect('key-press-event', is_typing)
         self.search_box = gtk.HBox()
         self.search_box.pack_start(self.quicksearch_entry, expand=False)
         self.search_box.pack_start(self.quicksearch_button, expand=False)
@@ -376,10 +382,26 @@ class TraceTimeline(AdhocView):
         self.canvas.connect('scroll-event', on_background_scroll)
 
         def on_background_motion(widget, event):
-            if event.state & gtk.gdk.SHIFT_MASK:
-                return
             if not event.state & gtk.gdk.BUTTON1_MASK:
                 return False
+            if event.state & gtk.gdk.SHIFT_MASK:
+                # redraw selection frame
+                if self.selection[0]==0 and self.selection[1]==0:
+                    self.selection[0]=event.x
+                    self.selection[1]=event.y
+                p = goocanvas.Points([(self.selection[0],self.selection[1]),(self.selection[0],event.y),(event.x,event.y),(event.x,self.selection[1])])
+                if self.sel_frame is not None:
+                    self.sel_frame.props.points = p
+                else:
+                    self.sel_frame=goocanvas.Polyline (parent = self.canvas.get_root_item(),
+                                        close_path = True,
+                                        points = p,
+                                        stroke_color = 0xFFFFFFFF,
+                                        line_width = 1.0,
+                                        start_arrow = False,
+                                        end_arrow = False,
+                                        )
+                return
             #if self.dragging:
             #    return False
             if not self.drag_coordinates:
@@ -599,11 +621,17 @@ class TraceTimeline(AdhocView):
         if ev.state & gtk.gdk.SHIFT_MASK:
             self.selection[2]=ev.x
             self.selection[3]=ev.y
+            if self.sel_frame:
+                self.sel_frame.remove()
+                self.sel_frame=None
             self.widget.get_parent_window().set_cursor(None)
             min_y=min(self.selection[1], self.selection[3])
             max_y=max(self.selection[1], self.selection[3])
             h = self.canvas.get_allocation().height
             va=self.sw.get_vadjustment()
+            if max_y-min_y<=3:
+                #must be a misclick
+                return
             rapp = (max_y - min_y) / h
             vc = self.timefactor * ((min_y + max_y) / 2.0) * (va.upper / self.canvasY)
             self.timefactor = rapp * self.timefactor
@@ -617,6 +645,9 @@ class TraceTimeline(AdhocView):
     def canvas_clicked(self, w, t, ev):
         if ev.state & gtk.gdk.SHIFT_MASK:
             self.selection = [ ev.x, ev.y, 0, 0]
+            if self.sel_frame:
+                self.sel_frame.remove()
+                self.sel_frame=None
             self.widget.get_parent_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.PLUS))
             return
         obj_gp = None
