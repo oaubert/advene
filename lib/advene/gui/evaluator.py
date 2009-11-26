@@ -658,7 +658,7 @@ class Evaluator:
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.connect('key-press-event', self.key_pressed_cb)
         window.set_title ("Python evaluation")
-        
+
         b=gtk.SeparatorToolItem()
         b.set_expand(True)
         b.set_draw(False)
@@ -811,11 +811,14 @@ class Evaluator:
 
         return vbox
 
-if __name__ == "__main__":
-
-    ev=Evaluator(globals_=globals(), locals_=locals(),
-                 historyfile=os.path.join(os.getenv('HOME'),
-                                          '.pyeval.log'))
+def launch(globals_=None, locals_=None, historyfile=None):
+    if globals_ is None:
+        globals_={}
+    if locals_ is None:
+        locals_={}
+    if historyfile is None:
+        historyfile=os.path.join(os.getenv('HOME'), '.pyeval.log')
+    ev=Evaluator(globals_=globals_, locals_=locals_, historyfile=historyfile)
 
     ev.locals_['self']=ev
     window=ev.popup(embedded=False)
@@ -824,6 +827,7 @@ if __name__ == "__main__":
     window.connect('destroy', lambda e: gtk.main_quit())
 
     gtk.main ()
-    # Will not do anything here since ev.historyfile was not
-    # initialized
     ev.save_history()
+
+if __name__ == "__main__":
+    launch(globals(), locals())
