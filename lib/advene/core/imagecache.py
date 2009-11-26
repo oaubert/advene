@@ -53,8 +53,8 @@ class CachedString:
 class TypedString(str):
     """String with a mimetype and a timestamp attribute.
     """
-    def __init__(self, *p, **kw):
-        super(TypedString, self).__init__(*p, **kw)
+    def __init__(self, *p):
+        super(TypedString, self).__init__(*p)
         self.contenttype='text/plain'
         self.timestamp=-1
 
