@@ -28,9 +28,11 @@ import shutil
 # Magic stuff before the instanciation of Advene : we set the
 # sys.path and the various config.data.path
 
+
 class AutoFlush(file):
     """Auto-flushed file object.
     """
+
     def write(self, s):
         super(AutoFlush, self).write(s)
         self.flush()
@@ -39,20 +41,22 @@ class AutoFlush(file):
         super(AutoFlush, self).writelines(l)
         self.flush()
 
-def recursive_mkdir(d): 
-    parent=os.path.dirname(d)
+
+def recursive_mkdir(d):
+    parent = os.path.dirname(d)
     if not os.path.exists(parent):
         recursive_mkdir(parent)
     os.mkdir(d)
 
-logfile=None
+logfile = None
 # Try to find if we are in a development tree.
-(maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
+(maindir, subdir) = os.path.split(
+    os.path.dirname(os.path.abspath(sys.argv[0])))
 if subdir == 'bin' and  os.path.exists(os.path.join(maindir, "setup.py")):
     # Chances are that we were in a development tree...
-    libpath=os.path.join(maindir, "lib")
+    libpath = os.path.join(maindir, "lib")
     print "You seem to have a development tree at:\n%s." % libpath
-    sys.path.insert (0, libpath)
+    sys.path.insert(0, libpath)
 
     import advene.core.config as config
     config.data.fix_paths(maindir)
@@ -65,12 +69,12 @@ else:
         print str(e)
         sys.exit(1)
     # If running from a binary version, redirect stdout, stderr to a file
-    logfile=config.data.advenefile('advene.log', 'settings')
+    logfile = config.data.advenefile('advene.log', 'settings')
     try:
-        f=AutoFlush(logfile, 'w')
+        f = AutoFlush(logfile, 'w')
         print "Advene output is stored into ", logfile
-        sys.stdout=f
-        sys.stderr=f
+        sys.stdout = f
+        sys.stderr = f
     except IOError:
         # The file cannot be written. Well, let us use the console...
         pass
@@ -78,7 +82,7 @@ else:
 # Locale selection
 if config.data.preferences['language']:
     # A non-empty value overrides the system default
-    os.environ['LANG']=config.data.preferences['language']
+    os.environ['LANG'] = config.data.preferences['language']
 
 print config.data.version_string, "run at", time.strftime("%F %H:%M:%S %z"), "on", sys.platform
 
@@ -88,47 +92,47 @@ if config.data.os in ('linux') and not 'DISPLAY' in os.environ:
 
 # Maybe we are running from a pyinstaller version
 if not os.path.exists(config.data.path['resources']):
-    maindir=os.path.abspath(os.path.dirname(sys.executable))
-    if os.path.exists(os.path.join( maindir, 'share', 'web' )):
+    maindir = os.path.abspath(os.path.dirname(sys.executable))
+    if os.path.exists(os.path.join(maindir, 'share', 'web')):
         # There is a 'share' directory at the same level as the executable
         # This can mean that we are in a pyinstaller version
         print "Seemingly running from a pyinstaller version in\n%s" % maindir
         config.data.fix_paths(maindir)
     else:
         # We can possibly be in a MacOSX .app bundle
-        d=os.path.dirname(os.path.abspath(sys.argv[0]))
+        d = os.path.dirname(os.path.abspath(sys.argv[0]))
         if os.path.basename(d) == 'Resources':
             print "Seemingly running from a .app bundle"
 
             # We will put pangorc, pango.modules and gdk-pixbuf.loaders files in a directory of the user preferences.
-            userconf=os.path.join( os.environ['HOME'], 'Library', 'Preferences', 'Advene', '_config' )
+            userconf = os.path.join(os.environ['HOME'], 'Library', 'Preferences', 'Advene', '_config')
             if not os.path.isdir(userconf):
-               recursive_mkdir(userconf) 
+                recursive_mkdir(userconf)
 
             config.data.fix_paths(d)
-            executable_path_dot_dot=os.path.dirname(d)
+            executable_path_dot_dot = os.path.dirname(d)
             print "Setting GTK_PATH to", d
-            os.environ['GTK_EXE_PREFIX']=d
-            os.environ['GTK_PATH']=d
-            os.environ['GDK_PIXBUF_MODULE_FILE']=os.path.join(userconf, 'gdk-pixbuf.loaders' )
-            os.environ['PANGO_RC_FILE']=os.path.join(userconf, 'pangorc' )
-            os.environ['FONTCONFIG_FILE']=os.path.join( d, 'fonts.conf' )
+            os.environ['GTK_EXE_PREFIX'] = d
+            os.environ['GTK_PATH'] = d
+            os.environ['GDK_PIXBUF_MODULE_FILE'] = os.path.join(userconf, 'gdk-pixbuf.loaders')
+            os.environ['PANGO_RC_FILE'] = os.path.join(userconf, 'pangorc')
+            os.environ['FONTCONFIG_FILE'] = os.path.join(d, 'fonts.conf')
             # Pango hack
-            os.environ['PANGO_SYSCONF_DIR']=d
-            os.environ['PANGO_LIB_DIR']=d
+            os.environ['PANGO_SYSCONF_DIR'] = d
+            os.environ['PANGO_LIB_DIR'] = d
 
-            os.environ['GST_PLUGIN_PATH']=os.path.join( d, 'gst-plugins' )
+            os.environ['GST_PLUGIN_PATH'] = os.path.join(d, 'gst-plugins')
 
             # Let us fix the pango.modules and pixbuf.loaders files if necessary
             for n in ('pangorc', 'pango.modules', 'gdk-pixbuf.loaders'):
-                sname=os.path.join(d, n + '.in')
-                dname=os.path.join(userconf, n)
-                data=open(sname, 'r').readlines()
+                sname = os.path.join(d, n + '.in')
+                dname = os.path.join(userconf, n)
+                data = open(sname, 'r').readlines()
                 # Rewrite only if necessary
-                if [ l for l in data if '@executable_path' in l or '@userconf' in l ]:
+                if [l for l in data if '@executable_path' in l or '@userconf' in l]:
                     print "Relocating ", n
-                    relocated=[ l.replace('@executable_path/..', executable_path_dot_dot).replace( '@userconf', userconf ) for l in data ]
-                    f=open(dname, 'w')
+                    relocated = [l.replace('@executable_path/..', executable_path_dot_dot).replace('@userconf', userconf) for l in data]
+                    f = open(dname, 'w')
                     f.writelines(relocated)
                     f.close()
 
@@ -143,11 +147,11 @@ if config.data.os == 'win32':
     except ImportError:
         # Gtk DLLs are not in the PATH. Try to get their directory
         # from the registry
-        path=config.data.get_registry_value('Software\\GTK\\2.0', 'Path')
+        path = config.data.get_registry_value('Software\\GTK\\2.0', 'Path')
         if path is None:
             raise ImportError("Couldn't find GTK DLLs.")
         os.environ['PATH'] += os.path.pathsep + path.encode('utf8')
-        os.environ['PATH'] += os.path.pathsep + os.path.join( path, 'bin' ).encode('utf8')
+        os.environ['PATH'] += os.path.pathsep + os.path.join(path, 'bin').encode('utf8')
         print "Using GTK DLLs at %s" % path
         import pygtk
         import gtk
@@ -164,11 +168,11 @@ Advene seems to be either badly installed or badly configured (maybe both).
 Aborting.""" % config.data.path[d]
             sys.exit(1)
 
-    filter=config.data.options.filter
+    filter = config.data.options.filter
     if filter == 'help':
         # List available filters.
         import advene.core.controller
-        c=advene.core.controller.AdveneController()
+        c = advene.core.controller.AdveneController()
         c.init()
         print "Available export filters:\n"
         for v in c.get_export_filters():
@@ -177,16 +181,16 @@ Aborting.""" % config.data.path[d]
     elif filter is not None:
         # A filter has been specified.
         import advene.core.controller
-        c=advene.core.controller.AdveneController()
+        c = advene.core.controller.AdveneController()
         c.init()
-        l=[ v for v in c.get_export_filters() if v.id == filter ]
+        l = [v for v in c.get_export_filters() if v.id == filter]
         if not l:
             print "Export filter %s is not defined" % filter
             sys.exit(1)
-        ext=l[0].getMetaData(config.data.namespace, 'extension')
+        ext = l[0].getMetaData(config.data.namespace, 'extension')
         for f in config.data.args:
             # A filename was provided. Strip the extension.
-            output=".".join((os.path.splitext(f)[0], ext))
+            output = ".".join((os.path.splitext(f)[0], ext))
             print "Converting ", f, "into", output
             c.load_package(f)
             #FIXME: could trigger events?
@@ -196,39 +200,40 @@ Aborting.""" % config.data.path[d]
     # First time configuration
     if config.data.first_run:
         import advene.gui.util.initialconfig
-        c=advene.gui.util.initialconfig.Config()
+        c = advene.gui.util.initialconfig.Config()
         c.main()
 
     if config.data.options.simple:
         import advene.gui.simple
-        gui = advene.gui.simple.SimpleAdveneGUI ()
+        gui = advene.gui.simple.SimpleAdveneGUI()
     else:
         import advene.gui.main
-        gui = advene.gui.main.AdveneGUI ()
+        gui = advene.gui.main.AdveneGUI()
     try:
         #import hotshot
         #filename = "/tmp/pythongrind.prof"
         #prof = hotshot.Profile(filename, lineevents=1)
         #prof.runcall(gui.main, config.data.args)
         #prof.close()
-        gui.main (config.data.args)
+        gui.main(config.data.args)
     except Exception, e:
         print config.data.version_string
         print _("Got exception\n\n%s\n\n. Stopping services...") % str(e)
         import traceback
-        s=StringIO.StringIO()
-        traceback.print_exc (file = s)
-        err=s.getvalue()
+        s = StringIO.StringIO()
+        traceback.print_exc(file=s)
+        err = s.getvalue()
         print err
 
         import gtk
         if logfile is not None:
-            d=gtk.MessageDialog(None,
+            d = gtk.MessageDialog(None,
                                 gtk.DIALOG_MODAL,
                                 gtk.MESSAGE_ERROR,
                                 gtk.BUTTONS_OK,
                                 _("An error occurred."))
             d.format_secondary_text(_("You can inform the Advene developers by sending the file\n %s\n to advene@liris.cnrs.fr, along with a description of how the bug occurred.") % logfile)
+
             def q(*p):
                 gtk.main_quit()
                 return True
