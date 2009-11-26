@@ -258,19 +258,24 @@ class SAPITTSEngine(TTSEngine):
 class CustomTTSEngine(TTSEngine):
     """Custom TTSEngine.
 
-    It tries to run a 'prononce' script, which takes strings on its
-    stdin and pronounces them.
+    It tries to run a 'prononce' ('prononce.bat' on win32) script,
+    which takes strings on its stdin and pronounces them.
     """
+    if config.data.os == 'win32':
+        prgname='prononce.bat'
+    else:
+        prgname='prononce'
+
     def __init__(self, controller=None):
         TTSEngine.__init__(self, controller=controller)
         self.language=None
-        self.prg_path=helper.find_in_path('prononce')
+        self.prg_path=helper.find_in_path(CustomTTSEngine.prgname)
         self.prg_process=None
 
     def can_run():
         """Can this engine run ?
         """
-        return helper.find_in_path('prononce') is not None
+        return helper.find_in_path(CustomTTSEngine.prgname) is not None
     can_run=staticmethod(can_run)
 
     def close(self):
