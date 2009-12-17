@@ -1001,7 +1001,8 @@ class HeadGroup (Group):
     def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00ffff50):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
-        self.name=name[0:2]
+        #self.name=name[0:2]
+        self.name=name[0:5]
         self.rect = None
         self.text = None
         self.w = 90
