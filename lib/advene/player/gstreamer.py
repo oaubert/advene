@@ -388,7 +388,7 @@ class Player:
         self.videofile=item
         if os.path.exists(item):
             if config.data.os == 'win32':
-                item="file:///" + str.replace(os.path.abspath(item),'\\','/')
+                item="file:///" + os.path.abspath(item)
             else:
                 item="file://" + os.path.abspath(item)
         self.player.set_property('uri', item)
