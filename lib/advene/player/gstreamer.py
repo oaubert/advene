@@ -387,11 +387,14 @@ class Player:
     def playlist_add_item(self, item):
         self.videofile=item
         if os.path.exists(item):
-            item="file://" + os.path.abspath(item)
+            if config.data.os == 'win32':
+                item="file:///" + str.replace(os.path.abspath(item),'\\','/')
+            else:
+                item="file://" + os.path.abspath(item)
         self.player.set_property('uri', item)
         if self.snapshotter:
             self.snapshotter.set_uri(item)
-
+        
     def playlist_clear(self):
         self.videofile=None
         self.player.set_property('uri', '')
