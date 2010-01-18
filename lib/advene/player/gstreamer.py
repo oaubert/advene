@@ -655,7 +655,10 @@ class Player:
             self.fullscreen_window.set_style(style)
         self.fullscreen_window.show()
         self.fullscreen_window.window.fullscreen()
-        self.imagesink.set_xwindow_id(self.fullscreen_window.window.xid)
+        if config.data.os == 'win32':
+            self.imagesink.set_xwindow_id(self.fullscreen_window.window.handle)
+        else:
+            self.imagesink.set_xwindow_id(self.fullscreen_window.window.xid)
 
     def unfullscreen(self):
         self.imagesink.set_xwindow_id(self.xid)
