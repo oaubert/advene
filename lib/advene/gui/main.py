@@ -319,7 +319,6 @@ class AdveneGUI(object):
             b.connect('clicked', callback)
             self.gui.fileop_toolbar.insert(b, -1)
         self.gui.fileop_toolbar.show_all()
-
         # Resize the main window
         window=self.gui.win
         window.connect('key-press-event', self.on_win_key_press_event)
@@ -343,7 +342,6 @@ class AdveneGUI(object):
         # Dictionary of registered adhoc views
         self.registered_adhoc_views={}
         self.gui_plugins=[]
-
         # Register plugins.
         for n in ('plugins', 'views', 'edit'):
             try:
@@ -354,7 +352,6 @@ class AdveneGUI(object):
             except OSError:
                 print "OSerror"
                 pass
-
         # Adhoc view toolbuttons signal handling
         def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
             if targetType == config.data.target_type['adhoc-view']:
@@ -488,7 +485,6 @@ class AdveneGUI(object):
         b.connect('clicked', trace_toggle)
         tsb.pack_start(b, expand=False)
         tsb.show_all()
-
         self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
         self.quicksearch_entry=gtk.Entry()
         self.quicksearch_entry.set_tooltip_text(_('String to search'))
@@ -535,7 +531,6 @@ class AdveneGUI(object):
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
-
         if config.data.preferences['quicksearch-source'] is None:
             modify_source(None, None, _("All annotations"))
         hb=self.gui.search_hbox
@@ -551,7 +546,6 @@ class AdveneGUI(object):
         self.quicksearch_button.connect('button-press-event', quicksearch_options, modify_source_and_search)
         hb.pack_start(self.quicksearch_button, expand=False, fill=False)
         hb.show_all()
-
         # Player status
         p=self.controller.player
         self.update_player_labels()
@@ -569,7 +563,6 @@ class AdveneGUI(object):
         self.edit_popups = []
 
         self.edit_accumulator = None
-
         # Populate default STBV and type lists
         self.update_gui()
 
@@ -864,12 +857,10 @@ class AdveneGUI(object):
         """
         if args is None:
             args=[]
-        if config.data.os != 'win32':
-            try:
-                gtk.gdk.threads_init ()
-            except RuntimeError:
-                print "*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour."
-
+        try:
+            gtk.gdk.threads_init ()
+        except RuntimeError:
+            print "*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour."
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
         self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
@@ -1017,7 +1008,9 @@ class AdveneGUI(object):
         self.controller.notify ("ApplicationStart")
         if config.data.debug:
             self.controller._state=self.controller.event_handler.dump()
+        gtk.gdk.threads_enter()
         gtk.main ()
+        gtk.gdk.threads_leave()
         self.controller.notify ("ApplicationEnd")
 
     def check_for_update(self, *p):
