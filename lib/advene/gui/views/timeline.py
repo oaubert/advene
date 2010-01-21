@@ -2294,9 +2294,11 @@ class TimeLine(AdhocView):
                 for widget in self.layout.get_children():
                     if not isinstance(widget, AnnotationWidget):
                         continue
-                    x=self.layout.child_get_property(widget, 'x')
-                    y=self.layout.child_get_property(widget, 'y')
-                    w,h=widget.window.get_size()
+                    #x=self.layout.child_get_property(widget, 'x')
+                    #y=self.layout.child_get_property(widget, 'y')
+                    # memory leak in container.child_get_property
+                    x,y = widget.window.get_position()
+                    w,h = widget.window.get_size()
                     if ( x >= x1 and x + w <= x2
                          and y >= y1 and y + h <= y2):
                         self.activate_annotation(widget.annotation, buttons=[ widget ])
