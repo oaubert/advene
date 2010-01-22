@@ -27,15 +27,22 @@ Source: c:\gtk\bin\libgsf-1-114.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\bzip2.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\libgio-2.0-0.dll; DestDir: {app}; Components: advene
 ;Source: c:\cygwin\usr\local\bin\libgoocanvas3.dll; DestDir: {app}    goocanvas0.10
+Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}; Components: advene
 Source: c:\cygwin\usr\local\bin\libgoocanvas-3.dll; DestDir: {app}; Components: advene
+
 Source: c:\Program Files\VideoLAN\VLC\libvlccore.dll; DestDir: {app}; Components: vlc
 Source: c:\Program Files\VideoLAN\VLC\libvlc.dll; DestDir: {app}; Components: vlc
 Source: c:\Program Files\VideoLAN\VLC\plugins\*; DestDir: {app}\vlcplugins; Components: vlc
-Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}; Components: advene
+
+Source: c:\gstreamer\bin\*; DestDir: {app}\gst; Components: gst
+Source: c:\gstreamer\lib\gstreamer-0.10\*; DestDir: {app}\gst\lib\gstreamer-0.10; Components: gst
+
 
 [CustomMessages]
 En.CleanPrefs=Clean &preferences
 Fr.CleanPrefs=Effacer les &préférences
+En.ITadvenegst=Advene with included gstreamer
+Fr.ITadvenegst=Advene et gstreamer inclus
 En.ITadvenevlc=Advene with included vlc
 Fr.ITadvenevlc=Advene et vlc inclus
 En.ITadvene=Advene without included vlc
@@ -44,13 +51,15 @@ En.ITcustom=Custom installation
 Fr.ITcustom=Installation personnalisée
 
 [Types]
+Name: "AdveneGst"; Description: "{cm:ITadvenegst}"
 Name: "AdveneVlc"; Description: "{cm:ITadvenevlc}"
 Name: "AdveneOnly"; Description: "{cm:ITadvene}"
 Name: "Custom"; Description: "{cm:ITcustom}"; Flags: iscustom
 
 [Components]
-Name: advene; Description: Advene files; Types: AdveneOnly AdveneVlc Custom; Flags: fixed
+Name: advene; Description: Advene files; Types: AdveneOnly AdveneVlc AdveneGst Custom; Flags: fixed
 Name: vlc; Description: VLC files; Types: AdveneVlc Custom
+Name: gst; Description: Gstreamer files; Types: AdveneGst Custom
 
 [Languages]
 Name: Fr; MessagesFile: "compiler:Languages\French.isl"
@@ -70,7 +79,7 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.39_all_in_one_vlc_1.0.2
+OutputBaseFilename=setup_advene_0.39_all_in_one_vlc_1.0.3_gstreamer_0.10.15
 VersionInfoTextVersion=0.39
 ChangesAssociations=yes
 
@@ -80,6 +89,9 @@ Root: HKCU; Subkey: ".azp"; ValueType: string; ValueName: ""; ValueData: "Advene
 Root: HKCU; Subkey: "Advene"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletekey; Check: CanChange;
 Root: HKCU; Subkey: "Advene\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\advene.exe,0"; Check: CanChange;
 Root: HKCU; Subkey: "Advene\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\advene.exe"" ""%1"""; Check: CanChange;
+Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "GST_PLUGIN_PATH"; ValueData: "{app}\gst\lib\gstreamer-0.10"; Check: GstreamerPathSet;
+Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "%PATH%;{app}\gst\bin"; Check: GstreamerPathSet;
+
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -113,6 +125,37 @@ begin
       end;
     end;
   end;
+end;
+
+function GstreamerPathSet(): Boolean;
+var
+  gst_plugin_path: String;
+begin
+    if IsComponentSelected('gst') then begin
+      //MsgBox('Gst Selected', mbError, MB_OK);
+      if RegQueryStringValue(HKLM, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'GST_PLUGIN_PATH', gst_plugin_path) then begin
+        if DirExists(gst_plugin_path) then begin
+          //MsgBox('You seem to already have gstreamer installed in '+ gst_plugin_path + ', trying to use this one.', mbError, MB_OK);
+          Result := False;
+        end;
+      end
+      else begin
+        if RegQueryStringValue(HKCU, 'Environment', 'GST_PLUGIN_PATH', gst_plugin_path) then begin
+          if DirExists(gst_plugin_path) then begin
+            //MsgBox('You seem to already have gstreamer installed in '+ gst_plugin_path + ', trying to use this one.', mbError, MB_OK);
+            Result := False;
+          end
+          else begin
+            //MsgBox('Your GST_PLUGIN_PATH environment variable ' + gst_plugin_path + 'seems to be corrupted, we will override it to use our included gstreamer.', mbError, MB_OK);
+            Result := True;
+          end;
+        end
+        else begin
+          //MsgBox('Setting your PATH and GST_PLUGIN_PATH environment variables to use our included gstreamer.', mbError, MB_OK);
+          Result := True;
+        end;
+      end;
+    end;
 end;
 
 function CanChange(): Boolean;
