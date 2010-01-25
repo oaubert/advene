@@ -34,7 +34,7 @@ Source: c:\Program Files\VideoLAN\VLC\libvlccore.dll; DestDir: {app}; Components
 Source: c:\Program Files\VideoLAN\VLC\libvlc.dll; DestDir: {app}; Components: vlc
 Source: c:\Program Files\VideoLAN\VLC\plugins\*; DestDir: {app}\vlcplugins; Components: vlc
 
-Source: c:\gstreamer\bin\*; DestDir: {app}\gst; Components: gst
+Source: c:\gstreamer\bin\*; DestDir: {app}\gst\bin; Components: gst
 Source: c:\gstreamer\lib\gstreamer-0.10\*; DestDir: {app}\gst\lib\gstreamer-0.10; Components: gst
 
 
