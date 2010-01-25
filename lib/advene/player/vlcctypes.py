@@ -21,8 +21,9 @@
 
 import advene.core.config as config
 
+
 try:
-    import vlc
+    import advene.player.vlc as vlc
 except ImportError:
     vlc=None
 
