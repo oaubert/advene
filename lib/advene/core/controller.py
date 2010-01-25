@@ -1375,7 +1375,7 @@ class AdveneController(object):
         """Activate the given player.
         """
         # Stop the current player.
-        self.player.stop(0)
+        self.player.stop()
         self.player.exit()
         if 'record' in self.player.player_capabilities:
             # The old player was a recorder. Chances are that we
