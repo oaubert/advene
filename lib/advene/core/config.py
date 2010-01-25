@@ -283,7 +283,7 @@ class Config(object):
 
         # Player options
         self.player = {
-            'plugin': 'vlcnative',
+            'plugin': 'vlcctypes',
             'bundled': True,
             'embedded': True,
             'name': 'vlc',
