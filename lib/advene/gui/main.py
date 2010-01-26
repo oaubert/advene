@@ -146,8 +146,12 @@ class DummyGlade:
 
         self.vpaned=gtk.VPaned()
 
-        self.displayvbox=gtk.VBox()
-        self.vpaned.pack1(self.displayvbox, resize=True, shrink=False)
+        if config.data.preferences['embedded']:
+            self.videocontainer=gtk.VBox()
+            self.vpaned.pack1(self.videocontainer, resize=True, shrink=False)
+        else:
+            self.videocontainer=gtk.Window()
+            # FIXME: hide/show on demand (when starting the video)
 
         sw=gtk.ScrolledWindow()
         sw.set_policy (gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
@@ -492,7 +496,7 @@ class AdveneGUI(object):
         def modify_source(i, expr, label):
             """Modify the quicksearch source, and update the tooltip accordingly.
             """
-            config.data.preferences['quicksearch-source']=expr
+            config.data.preferences['quicksearch-sources']=expr
             self.quicksearch_button.set_tooltip_text(_("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
             self.quicksearch_entry.set_tooltip_text(_('String to search in %s') % label)
             return True
@@ -522,8 +526,8 @@ class AdveneGUI(object):
                  'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags'), (_("Ids"), 'ids') ]
             for (label, expression) in source_expressions:
                 i=gtk.CheckMenuItem(label, use_underline=False)
-                i.set_active(expression == config.data.preferences['quicksearch-source'])
-                i.connect('activate', method, expression, label)
+                i.set_active(expression in config.data.preferences['quicksearch-sources'])
+                #i.connect('activate', method, expression, label)
                 submenu.append(i)
             item.set_submenu(submenu)
             menu.append(item)
@@ -531,7 +535,8 @@ class AdveneGUI(object):
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
-        if config.data.preferences['quicksearch-source'] is None:
+
+        if not config.data.preferences['quicksearch-sources']:
             modify_source(None, None, _("All annotations"))
         hb=self.gui.search_hbox
 
@@ -867,7 +872,7 @@ class AdveneGUI(object):
         self.register_view(self.logwindow)
 
         self.visualisationwidget=self.get_visualisation_widget()
-        self.gui.displayvbox.add(self.visualisationwidget)
+        self.gui.videocontainer.add(self.visualisationwidget)
         self.gui.vpaned.set_position(-1)
 
         def media_changed(context, parameters):
@@ -4236,10 +4241,11 @@ class AdveneGUI(object):
                     else:
                         prg=None
                     do_gui_operation(pb.set_label_value,
-                                     _("Detected shot at %s") % helper.format_time(ts),
+                                     _("Detected shot #%d at %s ") % (len(pb._datapoints),
+                                                                      helper.format_time(ts)),
                                      prg)
 
-            # Detection is over. Import resulting
+            # Detection is over. Import result
             do_gui_operation(on_shotdetect_end, pb)
             return False
 
@@ -4286,7 +4292,7 @@ class AdveneGUI(object):
 
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Sensitivity")), expand=False)
-        progressbar._sensitivity=gtk.SpinButton(gtk.Adjustment(60, 50, 80, 1, 5))
+        progressbar._sensitivity=gtk.SpinButton(gtk.Adjustment(60, 5, 95, 1, 5))
         hb.pack_start(progressbar._sensitivity)
         v.pack_start(hb, expand=False)
         v.pack_start(progressbar, expand=False)

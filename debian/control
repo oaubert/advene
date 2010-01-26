@@ -4,7 +4,7 @@ Build-Depends: debhelper (>= 5.0.38), python-all-dev (>= 2.3.5-11), python-centr
 Standards-Version: 3.6.0
 Section: graphics
 Priority: optional
-XS-Python-Version: >= 2.4
+XS-Python-Version: >= 2.5
 
 Package: advene
 XB-Python-Version: ${python:Versions}

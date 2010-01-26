@@ -241,9 +241,9 @@ class Config(object):
             # Imagecache save on exit: 'never', 'ask' or 'always'
             'imagecache-save-on-exit': 'ask',
             'quicksearch-ignore-case': True,
-            # quicksearch source. If None, it is all package's annotations.
-            # Else it is a TALES expression applied to the current package
-            'quicksearch-source': None,
+            # quicksearch sources. If [], it is all package's annotations.
+            # Else it is a list of TALES expression applied to the current package
+            'quicksearch-sources': [],
             # Display advanced options
             'expert-mode': False,
             # Package auto-save : 'never', 'ask' or 'always'
@@ -273,6 +273,7 @@ class Config(object):
             # popup views may be forced into a specific viewbook,
             # instead of default popup
             'popup-destination': 'popup',
+            'embedded': True,
             }
 
         # Player options

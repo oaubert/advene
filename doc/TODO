@@ -1,3 +1,27 @@
+* Fix autogeneration of attribute names for new annotations
+
+* Automatically update package title/description when a movie file is associated
+
+* Export website: check OSError when read-only
+
+* Interactive result : use standard snapshot view (to have markers on
+   mouse over): cf views.table, implement CellRendererTimestamp
+
+* Allow multiple source selection in quicksearch
+
+* Shortcut for edit element validation
+
+* Ctrl-scroll to modify annotation bounds: update video position if
+   frame-by-frame is available
+
+* Ctrl+wheel -> frame by frame
+
+* Add "Split here" in the annotation popup menu
+
+* Fix renumbering
+
+* Check PyUseCase http://texttest.carmen.se/index.php?page=ui_testing
+
 * Utilisation npt:/
 * Define content-types: montag <annotation>...</annotation> +
    extensions (transition...)
