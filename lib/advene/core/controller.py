@@ -477,8 +477,18 @@ class AdveneController(object):
         self.notify('RestrictType', annotationtype=at)
         return True
 
-    def search_string(self, searched=None, source=None, case_sensitive=False):
-        """Search a string in the given source (TALES expression).
+    @property
+    def defined_quicksearch_sources(self):
+        """Return a list of TitledElements
+        """
+        return [ helper.TitledElement(expression, label) 
+                 for (label, expression) in [ (_("All annotations"), "all_annotations") ] + [
+                (_("Annotations of type %s") % self.get_title(at),
+                 'here/annotationTypes/%s/annotations' % at.id) for at in self.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags'), (_("Ids"), 'ids') ] 
+                 ]
+
+    def search_string(self, searched=None, sources=None, case_sensitive=False):
+        """Search a string in the given sources (TALES expressions).
 
         A special source value 'tags' will return the elements that
         are tagged with the searched string.
@@ -505,26 +515,9 @@ class AdveneController(object):
         else:
             data_func=lambda e: normalize_case(e.content.data)
 
-        if source is None:
-            source=p.annotations
-        elif source == 'tags':
-            source=itertools.chain( p.annotations, p.relations )
-            if case_sensitive:
-                data_func=lambda e: e.tags
-            else:
-                data_func=lambda e: [ normalize_case(t) for t in e.tags ]
-        elif source == 'ids':
-            # Special search.
-            res=[]
-            for i in searched.split():
-                e=p.get_element_by_id(i)
-                if e is not None:
-                    res.append(e)
-            return res
-        else:
-            c=self.build_context()
-            source=c.evaluateValue(source)
-
+        if sources is None:
+            sources=[ "all_annotations" ]
+        
         # Replace standard \n/\t escape, because \ are parsed by shlex
         searched=searched.replace('\\n', '%n').replace('\\t', '%t')
         try:
@@ -539,24 +532,47 @@ class AdveneController(object):
         exceptions=[ w[1:] for w in words if w.startswith('-') ]
         normal=[ w for w in words if not w.startswith('+') and not w.startswith('-') ]
 
-        for w in mandatory:
-            w=normalize_case(w)
-            source=[ e for e in source if w in data_func(e) ]
-        for w in exceptions:
-            w=normalize_case(w)
-            source=[ e for e in source if w not in data_func(e) ]
-        if not normal:
-            # No "normal" search terms. Return the result.
-            return source
-        normal=[ normalize_case(w) for w in normal ]
-        res=[]
-        for e in source:
-            data=data_func(e)
-            for w in normal:
-                if w in data:
-                    res.append(e)
-                    break
-        return res
+        result=[]
+
+        for source in sources:
+            if source == 'tags':
+                sourcedata=itertools.chain( p.annotations, p.relations )
+                if case_sensitive:
+                    data_func=lambda e: e.tags
+                else:
+                    data_func=lambda e: [ normalize_case(t) for t in e.tags ]
+            elif source == 'ids':
+                # Special search.
+                res=[]
+                for i in searched.split():
+                    e=p.get_element_by_id(i)
+                    if e is not None:
+                        result.append(e)
+                continue
+            else:
+                if source == 'all_annotations':
+                    source = 'here/annotations'
+                c=self.build_context()
+                sourcedata=c.evaluateValue(source)
+
+            for w in mandatory:
+                w=normalize_case(w)
+                sourcedata=[ e for e in sourcedata if w in data_func(e) ]
+            for w in exceptions:
+                w=normalize_case(w)
+                sourcedata=[ e for e in sourcedata if w not in data_func(e) ]
+            if not normal:
+                # No "normal" search terms. Return the result.
+                result.extend(sourcedata)
+            else:
+                normal=[ normalize_case(w) for w in normal ]
+                for e in sourcedata:
+                    data=data_func(e)
+                    for w in normal:
+                        if w in data:
+                            result.append(e)
+                            break
+        return result
 
     def evaluate_query(self, query=None, context=None, expr=None):
         """Evaluate a Query in a given context.
@@ -594,8 +610,8 @@ class AdveneController(object):
             qexpr=Quicksearch(controller=self)
             qexpr.from_xml(query.content.stream)
             if expr is not None:
-                # Override the source... Is it a good idea ?
-                qexpr.source=expr
+                # Override the sources... Is it a good idea ?
+                qexpr.sources=[ expr ]
             result=qexpr.execute(context=context)
         elif query.content.mimetype == 'application/x-advene-sparql-query':
             # FIXME: this should go into an appropriate PelletQuery class

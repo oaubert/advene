@@ -258,7 +258,7 @@ class InteractiveResult(AdhocView):
         if isinstance(self.query, basestring):
             # Quicksearch entry. Convert to Quicksearch class.
             q=Quicksearch(controller=self.controller,
-                          source=config.data.preferences['quicksearch-source'],
+                          sources=config.data.preferences['quicksearch-sources'],
                           searched=self.query,
                           case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
             self.query=q

@@ -690,16 +690,16 @@ class SimpleQuery(EtreeMixin):
     'element' global. In other words, use 'element' as the root of
     condition and return value expressions.
 
-    @ivar source: the source of the data
-    @type source: a TALES expression
+    @ivar sources: the sources for the data
+    @type sources: a list of TALES expression
     @ivar condition: the matching condition
     @type condition: a Condition
     @ivar rvalue: the return value (specified as a TALES expression)
     @type rvalue: a TALES expression
     @ivar controller: the controller
     """
-    def __init__(self, source=None, condition=None, controller=None, rvalue=None):
-        self.source=source
+    def __init__(self, sources=None, condition=None, controller=None, rvalue=None):
+        self.sources=sources
         self.condition=condition
         self.controller=controller
         self.rvalue=rvalue
@@ -724,8 +724,7 @@ class SimpleQuery(EtreeMixin):
         compatibility=(querynode.tag == 'query')
         sourcenodes=querynode.findall(tag('source', old=compatibility))
         assert len(sourcenodes) != 0, "No source associated to query"
-        assert len(sourcenodes) == 1, "Multiple sources are associated to query"
-        self.source=sourcenodes[0].attrib['value']
+        self.sources=[ n.attrib['value'] for n in sourcenodes ]
 
         # Conditions
         for condnode in querynode.findall(tag('condition', old=compatibility)):
@@ -752,8 +751,9 @@ class SimpleQuery(EtreeMixin):
         """
         qnode=ET.Element(tag('query'))
 
-        qnode.append(ET.Element(tag('source'),
-                                    { 'value': self.source }))
+        for source in self.sources:
+            qnode.append(ET.Element(tag('source'),
+                                    { 'value': source }))
 
         if self.condition is not None:
             if isinstance(self.condition, Condition):
@@ -779,40 +779,38 @@ class SimpleQuery(EtreeMixin):
 
         @return: the list of elements matching the query or a boolean
         """
-        s=context.evaluateValue(self.source)
+        result=[]
 
-        if self.condition is None:
-            if self.rvalue is None or self.rvalue == 'element':
-                return s
-            else:
-                r=[]
-                #context.addLocals( [ ('element', None) ] )
+        for source in self.sources:
+            s=context.evaluateValue(self.source)
+
+            if self.condition is None:
+                if self.rvalue is None or self.rvalue == 'element':
+                    result.extend(s)
+                else:
+                    #context.addLocals( [ ('element', None) ] )
+                    context.pushLocals()
+                    for e in s:
+                        context.setLocal('element', e)
+                        result.append(context.evaluateValue(self.rvalue))
+                    context.popLocals()
+            elif hasattr(s, '__getitem__'):
+                # It is either a real list or a Bundle
+                # (for isinstance(someBundle, list) == False !
+                # FIXME: should we use a Bundle ?
                 context.pushLocals()
                 for e in s:
                     context.setLocal('element', e)
-                    r.append(context.evaluateValue(self.rvalue))
+                    if self.condition.match(context):
+                        if self.rvalue is None or self.rvalue == 'element':
+                            result.append(e)
+                        else:
+                            result.append(context.evaluateValue(self.rvalue))
                 context.popLocals()
-                return r
-
-        if hasattr(s, '__getitem__'):
-            # It is either a real list or a Bundle
-            # (for isinstance(someBundle, list) == False !
-            # FIXME: should we use a Bundle ?
-            r=[]
-            #context.addLocals( [ ('element', None) ] )
-            context.pushLocals()
-            for e in s:
-                context.setLocal('element', e)
-                if self.condition.match(context):
-                    if self.rvalue is None or self.rvalue == 'element':
-                        r.append(e)
-                    else:
-                        r.append(context.evaluateValue(self.rvalue))
-            context.popLocals()
-            return r
-        else:
-            # Not a list. What do we do in this case ?
-            return s
+            else:
+                # Not a list. What do we do in this case ?
+                pass
+        return result
 
 class Quicksearch(EtreeMixin):
     """Quicksearch component.
@@ -820,16 +818,16 @@ class Quicksearch(EtreeMixin):
     This quicksearch component returns a set of data matching strings
     from a given source (the source is a TALES expression).
 
-    @ivar source: the source of the data
-    @type source: a TALES expression
+    @ivar source: the sources of the data
+    @type source: a list of TALES expressions
     @ivar searched: the searched string
     @type searched: a string
     @ivar controller: the controller
     """
-    def __init__(self, controller=None, source=None, searched=None, case_sensitive=False):
-        if source is None:
-            source='package/annotations'
-        self.source=source
+    def __init__(self, controller=None, sources=None, searched=None, case_sensitive=False):
+        if sources is None:
+            sources=[ 'package/annotations' ]
+        self.sources=sources
         self.searched=searched
         self.case_sensitive=case_sensitive
         self.controller=controller
@@ -841,9 +839,9 @@ class Quicksearch(EtreeMixin):
         """
         assert element.tag == tag('quicksearch') or element.tag == 'quicksearch', "Invalid tag %s for Quicksearch" % element.tag
         compatibility=(element.tag == 'quicksearch')
-        sourcenode=element.find(tag('source', old=compatibility))
-        if sourcenode is not None:
-            self.source=sourcenode.attrib['value']
+        sourcenodes=element.findall(tag('source', old=compatibility))
+        if sourcenodes is not None:
+            self.sources=[ node.attrib['value'] for node in sourcenodes ]
 
         # Searched string
         s=element.find('searched')
@@ -862,8 +860,10 @@ class Quicksearch(EtreeMixin):
         @return: an ElementTree.Element
         """
         qnode=ET.Element(tag('quicksearch'))
+        
+        for source in self.sources:
+            qnode.append(ET.Element(tag('source'), { 'value': source } ))
 
-        qnode.append(ET.Element(tag('source'), { 'value': self.source } ))
         qnode.append(ET.Element(tag('searched'),
                      { 'value':
                        urllib.quote(unicode(self.searched).encode('utf-8'))} ))
@@ -879,7 +879,7 @@ class Quicksearch(EtreeMixin):
         @return: the list of elements matching the query or a boolean
         """
         return self.controller.search_string(searched=self.searched,
-                                             source=self.source,
+                                             sources=self.sources,
                                              case_sensitive=self.case_sensitive)
 
 class RegisteredAction:

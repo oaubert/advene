@@ -380,6 +380,39 @@ class AdveneGUI(object):
             self.open_adhoc_view(name, destination=destination)
             return True
 
+        def update_quicksearch_sources(mi):
+            """Display a dialog allowing to edit quicksearch-sources setting.
+            """
+            d = gtk.Dialog(title=_("Quicksearch lists"),
+                   parent=None,
+                   flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                   buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
+                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+
+            d.vbox.pack_start(gtk.Label(_("Please specify the lists of elements to be searched.")), expand=False)
+            for el in self.controller.defined_quicksearch_sources:
+                b=gtk.CheckButton(el.title, use_underline=False)
+                b._element = el
+                b.set_active(el.value in config.data.preferences['quicksearch-sources'])
+                d.vbox.pack_start(b, expand=False)
+            d.vbox.show_all()
+            d.connect('key-press-event', dialog.dialog_keypressed_cb)
+            d.show()
+            dialog.center_on_mouse(d)
+            res=d.run()
+            if res == gtk.RESPONSE_OK:
+                # Update quicksearch-sources
+                elements=[ b._element
+                           for b in d.vbox.get_children()
+                           if hasattr(b, 'get_active') and b.get_active() ]
+                config.data.preferences['quicksearch-sources']=[ el.value for el in elements ]
+                # Update tooltip
+                label="\n".join( el.title for el in elements )
+                self.quicksearch_button.set_tooltip_text(_("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
+                self.quicksearch_entry.set_tooltip_text(_('String to search in %s') % label)
+            d.destroy()
+            return True
+
         def open_view_menu(widget, name):
             """Open the view menu.
 
@@ -493,15 +526,7 @@ class AdveneGUI(object):
         self.quicksearch_entry=gtk.Entry()
         self.quicksearch_entry.set_tooltip_text(_('String to search'))
 
-        def modify_source(i, expr, label):
-            """Modify the quicksearch source, and update the tooltip accordingly.
-            """
-            config.data.preferences['quicksearch-sources']=expr
-            self.quicksearch_button.set_tooltip_text(_("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
-            self.quicksearch_entry.set_tooltip_text(_('String to search in %s') % label)
-            return True
-
-        def quicksearch_options(button, event, method):
+        def quicksearch_options(button, event):
             """Generate the quicksearch options menu.
             """
             if event.type != gtk.gdk.BUTTON_PRESS:
@@ -518,37 +543,17 @@ class AdveneGUI(object):
             menu.append(item)
 
             item=gtk.MenuItem(_("Searched elements"))
-            submenu=gtk.Menu()
-
-            source_expressions=[ (_("All annotations"),
-                                  None) ] + [
-                (_("Annotations of type %s") % self.controller.get_title(at),
-                 'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags'), (_("Ids"), 'ids') ]
-            for (label, expression) in source_expressions:
-                i=gtk.CheckMenuItem(label, use_underline=False)
-                i.set_active(expression in config.data.preferences['quicksearch-sources'])
-                #i.connect('activate', method, expression, label)
-                submenu.append(i)
-            item.set_submenu(submenu)
+            item.connect('activate', update_quicksearch_sources)
             menu.append(item)
 
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
 
-        if not config.data.preferences['quicksearch-sources']:
-            modify_source(None, None, _("All annotations"))
         hb=self.gui.search_hbox
-
         self.quicksearch_entry.connect('activate', self.do_quicksearch)
         hb.pack_start(self.quicksearch_entry, expand=False)
-        def modify_source_and_search(i, expr, label):
-            """Modify the search source and launch the search.
-            """
-            modify_source(i, expr, label)
-            self.do_quicksearch()
-            return True
-        self.quicksearch_button.connect('button-press-event', quicksearch_options, modify_source_and_search)
+        self.quicksearch_button.connect('button-press-event', quicksearch_options)
         hb.pack_start(self.quicksearch_button, expand=False, fill=False)
         hb.show_all()
         # Player status
@@ -2224,7 +2229,7 @@ class AdveneGUI(object):
                 except AttributeError:
                     pass
         # Reset quicksearch source value
-        config.data.preferences['quicksearch-source']=None
+        config.data.preferences['quicksearch-sources']=[ "all_annotations" ]
         pass
 
     def manage_package_load (self, context, parameters):
@@ -2567,7 +2572,7 @@ class AdveneGUI(object):
             for v in tr:
                 v.highlight_search_forward(s)
         return self.controller.search_string(searched=s,
-                                             source=config.data.preferences['quicksearch-source'],
+                                             sources=config.data.preferences['quicksearch-sources'],
                                              case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
 
     def do_quicksearch(self, *p):
@@ -2576,8 +2581,7 @@ class AdveneGUI(object):
             self.log(_("Empty quicksearch string"))
             return True
         res=self.search_string(unicode(s))
-        label=_("'%s'") % s
-        self.open_adhoc_view('interactiveresult', destination='east', result=res, label=label, query=s)
+        self.open_adhoc_view('interactiveresult', destination='east', result=res, label=_("'%s'") % s, query=s)
         return True
 
     def ask_for_annotation_type(self, text=None, create=False, force_create=False):
