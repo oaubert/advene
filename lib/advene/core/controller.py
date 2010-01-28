@@ -2138,6 +2138,14 @@ class AdveneController(object):
 
         return self.player.current_position_value
 
+    def player_scrub(self, pos):
+        """Scrub to a given position.
+        """
+        p=self.player
+        if p.status == p.PauseStatus and 'frame-by-frame' in p.player_capabilities:
+            self.update_status("set", pos, notify=False)
+        return True
+
     def update (self):
         """Update the information.
 
