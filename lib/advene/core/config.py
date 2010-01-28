@@ -107,7 +107,7 @@ class Config(object):
         if self.os == 'win32':
             self.path = {
                 # VLC binary path
-                'vlc': 'c:\\Program Files\\VideoLAN\\VLC',
+                'vlc': 'c:\\Program Files\\Advene',
                 # VLC additional plugins path
                 'plugins': 'c:\\Program Files\\Advene\\vlcplugins',
                 # Advene modules path
