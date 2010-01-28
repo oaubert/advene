@@ -1158,6 +1158,9 @@ class AdveneController(object):
         if uri is not None and uri != "":
             id_ = helper.mediafile2id (uri)
             self.package.imagecache.load (id_)
+            # Update package title and description if necessary
+            if not package.title or package.title == "Template package":
+                package.title = _("Analysis of ") + unicode(os.path.basename(uri))
 
     def delete_element (self, el, immediate_notify=False, batch_id=None):
         """Delete an element from its package.
