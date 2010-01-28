@@ -1434,11 +1434,17 @@ class AdveneGUI(object):
                       for b in tb.get_children()
                       if hasattr(b, 'get_stock_id') )
 
-        if gtk.STOCK_MEDIA_PLAY in buttons and 'record' in p.player_capabilities:
-            buttons[gtk.STOCK_MEDIA_PLAY].set_stock_id(gtk.STOCK_MEDIA_RECORD)
+        if gtk.STOCK_MEDIA_PLAY in buttons:
+            b=buttons[gtk.STOCK_MEDIA_PLAY]
         elif gtk.STOCK_MEDIA_RECORD in buttons:
-            buttons[gtk.STOCK_MEDIA_RECORD].set_stock_id(gtk.STOCK_MEDIA_PLAY)
-        # else: should not happen.
+            b=buttons[gtk.STOCK_MEDIA_RECORD]
+        else:
+            b=None
+        if b:
+            if 'record' in p.player_capabilities:
+                b.set_stock_id(gtk.STOCK_MEDIA_RECORD)
+            else:
+                b.set_stock_id(gtk.STOCK_MEDIA_PLAY)
 
         if 'record' in p.player_capabilities:
             for (stock, b) in buttons.iteritems():
