@@ -23,12 +23,12 @@ import gtk
 from gettext import gettext as _
 
 import advene.core.config as config
-from advene.core.imagecache import ImageCache
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
-from advene.gui.util import png_to_pixbuf, overlay_svg_as_pixbuf
+from advene.gui.util import overlay_svg_as_pixbuf
 from advene.model.annotation import Annotation
 from advene.model.schema import AnnotationType
+from advene.gui.widget import TimestampRepresentation
 
 name="Annotation display plugin"
 
@@ -46,7 +46,6 @@ class AnnotationDisplay(AdhocView):
         self.contextual_actions = ()
         self.controller=controller
         self.annotation=annotation
-        self.no_image_pixbuf=png_to_pixbuf(ImageCache.not_yet_available_image, width=50)
         self.widget=self.build_widget()
         self.refresh()
 
@@ -166,11 +165,7 @@ class AnnotationDisplay(AdhocView):
                 b=self.annotation
             elif isinstance(self.annotation, Annotation):
                 b=self.annotation.fragment.begin
-            cache=self.controller.package.imagecache
-            if cache.is_initialized(b, epsilon=config.data.preferences['bookmark-snapshot-precision']):
-                self.label['image'].set_from_pixbuf(png_to_pixbuf (cache.get(b, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
-            elif self.label['image'].get_pixbuf() != self.no_image_pixbuf:
-                self.label['image'].set_from_pixbuf(self.no_image_pixbuf)
+            self.label['image'].value = b
             self.label['image'].show()
         return False
 
@@ -196,7 +191,7 @@ class AnnotationDisplay(AdhocView):
 
         fr = gtk.Expander ()
         fr.set_label(_("Screenshot"))
-        self.label['image'] = gtk.Image()
+        self.label['image'] = TimestampRepresentation(-1, self.controller, width=config.data.preferences['drag-snapshot-width'], epsilon=config.data.preferences['bookmark-snapshot-precision'], visible_label=False)
         fr.add(self.label['image'])
         fr.set_expanded(True)
         v.pack_start(fr, expand=False)
