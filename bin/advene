@@ -153,10 +153,13 @@ if config.data.os == 'win32':
         os.environ['PATH'] += os.path.pathsep + path.encode('utf8')
         os.environ['PATH'] += os.path.pathsep + os.path.join(path, 'bin').encode('utf8')
         print "Using GTK DLLs at %s" % path
-        import pygtk
-        import gtk
-    else:
-        import gtk
+        try:
+            import pygtk
+            import gtk
+        except ImportError:
+            print "Cannot import GTK, try installing visual studio 2008 redist."
+else:
+    import gtk
 
 if __name__ == '__main__':
 
