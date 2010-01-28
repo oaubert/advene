@@ -82,6 +82,17 @@ import time
 import gobject
 gobject.threads_init()
 
+import gtk
+import os
+
+if config.data.os == 'win32':
+    #try to determine if gstreamer is already installed
+    ppath = os.getenv('GST_PLUGIN_PATH')
+    if not ppath or not os.path.exists(ppath):
+        os.environ['GST_PLUGIN_PATH']=config.data.path['advene']+'/gst/lib/gstreamer-0.10'
+    gstpath = os.getenv('PATH')
+    os.environ['PATH']=config.data.path['advene']+'/gst/bin;'+gstpath
+
 try:
     import pygst
     pygst.require('0.10')
@@ -89,8 +100,7 @@ try:
 except ImportError:
     gst=None
 
-import gtk
-import os
+
 
 from advene.util.snapshotter import Snapshotter
 
