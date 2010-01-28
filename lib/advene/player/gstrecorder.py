@@ -22,6 +22,7 @@ Based on gst >= 0.10 API.
 """
 
 import tempfile
+import time
 
 import advene.core.config as config
 
@@ -36,7 +37,6 @@ except ImportError:
     gst=None
 
 import os
-from threading import Condition
 
 name="GStreamer video recorder"
 
@@ -113,7 +113,7 @@ class Player:
 
         self.player=None
         self.pipeline=None
-        self.videofile="/tmp/gstrecorder.mp3"
+        self.videofile=time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
         self.build_pipeline()
 
         self.status=Player.UndefinedStatus
@@ -140,7 +140,7 @@ class Player:
             if config.data.player['vout'] == 'x11':
                 sink='ffmpegcolorspace ! ximagesink'
 
-        self.pipeline=gst.parse_launch('%(videosrc)s ! video/x-raw-yuv,width=352,height=288 ! tee name=tee ! ffmpegcolorspace ! ffenc_mpeg4 bitrate=400000 ! queue ! avimux name=mux ! filesink location=%(videofile)s  %(audiosrc)s ! lame ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
+        self.pipeline=gst.parse_launch('%(videosrc)s ! video/x-raw-yuv,width=352,height=288 ! tee name=tee ! ffmpegcolorspace ! theoraenc ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s ! audioconvert ! vorbisenc ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
         #self.pipeline=gst.parse_launch('alsasrc name=source device=hw:1,0 ! lame ! filesink location=%s' % self.videofile)
         #self.player = self.pipeline.get_by_name('source')
         self.imagesink=self.pipeline.get_by_name('sink')
@@ -202,6 +202,10 @@ class Player:
         return
 
     def start(self, position):
+        self.videofile=time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
+        self.build_pipeline()
+        self.set_visual(self.xid)
+
         if self.player is None:
             return
         self.player.set_state(gst.STATE_PLAYING)
@@ -218,7 +222,7 @@ class Player:
         self.stream_duration=self.current_position
         if self.player is None:
             return
-        self.player.set_state(gst.STATE_READY)
+        self.player.set_state(gst.STATE_NULL)
 
     def exit(self):
         if self.player is None:
@@ -230,7 +234,7 @@ class Player:
             # tempfile.mktemp should not be used for security reasons.
             # But the probability of a tempfile attack against Advene
             # is rather low at the time of writing this comment.
-            self.videofile=tempfile.mktemp('.avi', 'record_')
+            self.videofile=tempfile.mktemp('.ogg', 'record_')
             print "%s already exists. We will not overwrite, so use %s instead " % (item, self.videofile)
         else:
             self.videofile=item
