@@ -890,9 +890,11 @@ class TimeLine(AdhocView):
 
         p=self.pixel2unit(widget.allocation.x + x, absolute=True)
         menu=advene.gui.popup.Menu(ann, controller=self.controller)
-        menu.add_menuitem(menu.menu,
-                          _("Split at %s") % helper.format_time(p),
-                          split_annotation, widget, ann, p)
+        v=self.controller.player.current_position_value
+        if v > ann.fragment.begin and v < ann.fragment.end:
+            menu.add_menuitem(menu.menu,
+                              _("Split at current player position"),
+                              split_annotation, widget, ann, v)
 
         menu.add_menuitem(menu.menu,
                           _("Center and zoom"),
