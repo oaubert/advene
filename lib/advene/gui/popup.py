@@ -316,6 +316,17 @@ class Menu:
         menu.show_all()
         return menu
 
+    def display_stats(self, m, at):
+        """Display statistics about the annotation type.
+        """
+        msg=_("<b>Statistics about %s</b>\n\n") % self.controller.get_title(at)
+        msg += "%d annotations\n" % len(at.annotations)
+        msg += "Min duration : %s\n" % helper.format_time(min( a.fragment.duration for a in at.annotations))
+        msg += "Max duration : %s\n" % helper.format_time(max( a.fragment.duration for a in at.annotations))
+        msg += "Mean duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in at.annotations) / len(at.annotations))
+        dialog.message_dialog(msg)
+        return True
+
     def renumber_annotations(self, m, at):
         """Renumber all annotations of a given type.
         """
@@ -673,11 +684,8 @@ class Menu:
         add_item(_('Create a new annotation...'), self.create_element, Annotation, element)
         add_item(_('Delete all annotations...'), self.delete_elements, element, element.annotations)
         add_item(_('Renumber annotations'), self.renumber_annotations, element)
-
         add_item('')
-        i=gtk.MenuItem(_('%d annotations(s)') % len(element.annotations))
-        menu.append(i)
-        i.set_sensitive(False)
+        add_item(_('%d annotations(s) - statistics') % len(element.annotations), self.display_stats, element)
 
         return
 
