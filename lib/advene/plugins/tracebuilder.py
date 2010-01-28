@@ -171,7 +171,7 @@ class TraceBuilder(Thread):
             self.log("No event to export")
             return ''
 
-        fname=config.data.advenefile(time.strftime("trace_advene-%Y%m%d-%H%M%S"),
+        fname=config.data.advenefile(['traces',time.strftime("trace_advene-%Y%m%d-%H%M%S")],
                                      category='settings')
         try:
             stream=open(fname, 'wb')
