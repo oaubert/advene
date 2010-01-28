@@ -26,16 +26,24 @@ Source: c:\gtk\bin\libcroco-0.6-3.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\libgsf-1-114.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\bzip2.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\libgio-2.0-0.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\libxml2-2.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\iconv.dll; DestDir: {app}; Components: advene
+
 ;Source: c:\cygwin\usr\local\bin\libgoocanvas3.dll; DestDir: {app}    goocanvas0.10
 Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}; Components: advene
 Source: c:\cygwin\usr\local\bin\libgoocanvas-3.dll; DestDir: {app}; Components: advene
+;msvcr90.dll,m,p & manifest needed for pygtk2.16 & co. Can be found in visual studio redist
+;http://www.microsoft.com/downloads/details.aspx?FamilyID=9B2DA534-3E03-4391-8A4D-074B9F2BC1BF&displaylang=fr
+Source: vcredist_x86.exe; DestDir: {tmp}; Components: advene
+Source: c:\gtk\bin\gdk-pixbuf-query-loaders.exe; DestDir: {app}; Components: advene
+Source: post_install.bat; DestDir: {app}; Components: advene
 
 Source: c:\Program Files\VideoLAN\VLC\libvlccore.dll; DestDir: {app}; Components: vlc
 Source: c:\Program Files\VideoLAN\VLC\libvlc.dll; DestDir: {app}; Components: vlc
 Source: c:\Program Files\VideoLAN\VLC\plugins\*; DestDir: {app}\vlcplugins; Components: vlc
 
-Source: c:\gstreamer\bin\*; DestDir: {app}\gst\bin; Components: gst
-Source: c:\gstreamer\lib\gstreamer-0.10\*; DestDir: {app}\gst\lib\gstreamer-0.10; Components: gst
+Source: gst\*; DestDir: {app}\gst; Flags: recursesubdirs; Components: gst
+
 
 
 [CustomMessages]
@@ -89,8 +97,8 @@ Root: HKCU; Subkey: ".azp"; ValueType: string; ValueName: ""; ValueData: "Advene
 Root: HKCU; Subkey: "Advene"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletekey; Check: CanChange;
 Root: HKCU; Subkey: "Advene\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\advene.exe,0"; Check: CanChange;
 Root: HKCU; Subkey: "Advene\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\advene.exe"" ""%1"""; Check: CanChange;
-Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "GST_PLUGIN_PATH"; ValueData: "{app}\gst\lib\gstreamer-0.10"; Check: GstreamerPathSet;
-Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\gst\bin;{olddata}"; Check: GstreamerPathSet;
+;Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "GST_PLUGIN_PATH"; ValueData: "{app}\gst\lib\gstreamer-0.10"; Check: GstreamerPathSet;
+;Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\gst\bin;{olddata}"; Check: GstreamerPathSet;
 
 
 [Tasks]
@@ -108,6 +116,9 @@ Type: files; Name: "{userappdata}\..\advene\advene.prefs"; Tasks: cleanprefs
 Type: files; Name: "{userappdata}\..\advene\player.prefs"; Tasks: cleanprefs
 Type: files; Name: "{userappdata}\..\advene\advene.ini"; Tasks: cleanprefs
 
+[Run]
+Filename: "{tmp}\vcredist_x86.exe"; Parameters: "/qb!";
+Filename: "{app}\post_install.bat"; Parameters: "";
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);
