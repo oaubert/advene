@@ -1,0 +1,1 @@
+gdk-pixbuf-query-loaders.exe > etc/gtk-2.0/gdk-pixbuf.loaders
