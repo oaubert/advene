@@ -3955,10 +3955,14 @@ class AdveneGUI(object):
             if video:
                 self.controller.package.setMetaData(config.data.namespace, 'website-export-video-url', video)
             b.set_sensitive(False)
-            self.controller.website_export(destination=d,
-                                           max_depth=max_depth.get_value_as_int(),
-                                           progress_callback=cb,
-                                           video_url=video)
+            try:
+                self.controller.website_export(destination=d,
+                                               max_depth=max_depth.get_value_as_int(),
+                                               progress_callback=cb,
+                                               video_url=video)
+            except OSError, e:
+                dialog.message_dialog(_("Could not export data: ") + unicode(e), icon=gtk.MESSAGE_ERROR)
+                b.set_sensitive(True)
             return True
 
         dirname_entry.connect('activate', do_conversion)
