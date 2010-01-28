@@ -7,6 +7,9 @@ import os
 import string
 import re
 import sys
+# to be able to import gst
+import pygst
+pygst.require('0.10')
 
 # We define the main script name here (file in bin), since we have to change it for MacOS X
 SCRIPTNAME='advene'
@@ -66,12 +69,12 @@ platform_options={}
 
 if sys.platform == 'win32':
     import py2exe
-    platform_options['console'] = [ "bin/advene" ]
+    platform_options['windows'] = [ "bin/advene" ]
     platform_options['options'] = {
 	"py2exe": {
-	    "includes": "pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
+	    "includes": "email.header,pango,pangocairo,cairo,atk,gtk,gio,pygst,gst,gtk.keysyms,gobject,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
 	    "excludes": [ "Tkconstants","Tkinter","tcl" ],
-	    "dll_excludes": ["libvlc.dll","libvlc-control.dll"],
+	    "dll_excludes": ["libvlc.dll","libvlc-control.dll", "libglade-2.0-0.dll"],
 	    #         		 ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
 	    #                          "libgdk_pixbuf-2.0-0.dll","libgdk-win32-2.0-0.dll",
 	    #                          "libglib-2.0-0.dll","libgmodule-2.0-0.dll",
