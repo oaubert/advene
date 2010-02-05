@@ -25,10 +25,10 @@ name="Transcriber importer"
 
 from gettext import gettext as _
 
-import xml.dom
+import xml.dom as dom
 
 from advene.util.importer import GenericImporter
-import advene.util.handyxml as handyxml
+import advene.util.ElementTree as ETree
 
 def register(controller=None):
     controller.register_importer(TrsImporter)
@@ -64,9 +64,11 @@ class TrsImporter(GenericImporter):
 
         progress=0.5
         nbsection = 0
+
+        Episode = trs.findall('Episode')
         try:
-            for e in trs.Episode:
-                nbsection += len(e.Section)
+            for e in Episode:
+                nbsection += len(e.findall('Section'))
             incr=0.5 / nbsection
         except AttributeError:
             return
@@ -77,16 +79,17 @@ class TrsImporter(GenericImporter):
             'end': None,
             'content': None
             }
-        for e in trs.Episode:
+        for e in Episode:
             try:
                 s_begin = None
                 s_end = None
-                for s in e.Section:
+                Section = e.findall('Section')
+                for s in Section:
                     self.progress(progress, _("Parsing section information"))
                     progress += incr
-
+                    
                     try:
-                        s_begin=float(s.startTime) ## 'startTime' is a "Section" required attribute
+                        s_begin=float(s.get('startTime')) ## 'startTime' is a "Section" required attribute
                     except AttributeError, e:
                         print str(e)
                         continue
@@ -94,7 +97,7 @@ class TrsImporter(GenericImporter):
                     s_begin=int(s_begin*1000)
 
                     try:
-                        s_end=float(s.endTime)    ## 'endTime' is a "Section" required attribute
+                        s_end=float(s.get('endTime'))    ## 'endTime' is a "Section" required attribute
                     except AttributeError, e:
                         print str(e)
                         continue
@@ -102,15 +105,16 @@ class TrsImporter(GenericImporter):
                     s_end=int(s_end*1000)
 
                     try:
-                        typ = s.type              ## 'type' is a "Section" required attribute
+                        typ = s.get('type')              ## 'type' is a "Section" required attribute
                     except AttributeError, e:
                         print str(e)
                         continue
-
+                    
                     topic = ""  ## 'topic' is a "Section" optional  attribute
                     try :
-                        topic = self.topics[s.topic].rstrip('[]')
-                    except AttributeError:
+                        if s.get('topic') is not None:
+                            topic = self.topics[s.get('topic')].rstrip('[]')
+                    except AttributeError, KeyError:
                         pass
 
 
@@ -123,18 +127,18 @@ class TrsImporter(GenericImporter):
                     yield d
 
                     try:
-                        for t in s.Turn:
+                        for t in s.findall('Turn'):
 
                             try:
-                                t_begin=float(t.startTime) ## 'startTime' is a "Turn" required attribute
+                                t_begin=float(t.get('startTime')) ## 'startTime' is a "Turn" required attribute
                             except AttributeError, e:
                                 print str(e)
                                 continue
 
                             t_begin=int(t_begin*1000)
-
+                            
                             try:
-                                t_end=float(t.endTime)   ## 'endTime' is a "Turn" required attribute
+                                t_end=float(t.get('endTime'))   ## 'endTime' is a "Turn" required attribute
                             except AttributeError, e:
                                 print str(e)
                                 continue
@@ -143,8 +147,9 @@ class TrsImporter(GenericImporter):
 
                             speaker = ""   ## 'speaker' is a "Turn" optional attribute
                             try:
-                                speaker = self.speakers[t.speaker]
-                            except AttributeError:
+                                if t.get('speaker') is not None:
+                                    speaker = self.speakers[t.get('speaker')]
+                            except AttributeError, KeyError:
                                 pass
 
                             d={
@@ -159,80 +164,79 @@ class TrsImporter(GenericImporter):
 
                             seg = None
 
-                            if t.hasChildNodes():
-                                for node in t.childNodes:
-                                    if node.nodeName == "Sync" :
-                                        try:
-                                            seg_time = float(node.getAttribute('time'))
-                                        except AttributeError, e:
+                            for elem in t.getchildren():
+                   
+                                if elem.tag == "Sync" :
+                                    try:
+                                        seg_time = float(elem.get('time'))
+                                    except AttributeError, e:
                                             print str(e)
                                             continue
 
-                                        seg_time = int(seg_time*1000)
-
-                                        if seg is not None:
-                                            seg['end'] = seg_time
-                                            seg['content'] = text+"\n"
-                                            yield seg
-                                            text = ""
-
-                                        seg = {
-                                            'type': self.atypes['Transcription'],
-                                            'begin': seg_time,
-                                            'end': None,
-                                            'content': "%s" % text
-                                            }
-
-                                    elif node.nodeType == xml.dom.Node.TEXT_NODE:
-                                        text += node.data.replace("\n","")
-
-                                    elif node.nodeName == 'Background':
-                                        try:
-                                            time = node.getAttribute('time')
-                                        except AttributeError, e:
-                                            print str(e)
-                                            continue
-
-                                        level = 'off'
-
-                                        try:
-                                            level =  node.getAttribute('level')
-                                        except AttributeError:
-                                            pass
-
-                                        if level == 'high':
-                                            n_begin = int(float(time)*1000)
-                                            try :
-                                                n_type = node.getAttribute('type')
-                                            except AttributeError:
-                                                continue
-                                            b ={
-                                                'type': self.atypes['Background'],
-                                                'begin': n_begin,
-                                                'end': None,
-                                                'content': "%s" % n_type
-                                                }
-                                        elif  level == 'off'and b['begin'] is not None:
-                                            n_end = int(float(time)*1000)
-                                            b['end'] = n_end
-                                            yield b
-                                            b = {
-                                                'type': None,
-                                                'begin': None,
-                                                'end': None,
-                                                'content': None
-                                                }
+                                    seg_time = int(seg_time*1000)
 
                                     if seg is not None:
-                                        seg['end'] = t_end
+                                        seg['end'] = seg_time
                                         seg['content'] = text+"\n"
                                         yield seg
+                                        text = ""
 
-                    except AttributeError,e: ## catch exception on s.Turn
+                                    seg = {
+                                        'type': self.atypes['Transcription'],
+                                        'begin': seg_time,
+                                        'end': None,
+                                        'content': "%s" % text
+                                       }
+                                    
+                                    text = elem.tail.replace("\n","")
+
+                                elif elem.tag == 'Background':
+                                    try:
+                                        time = elem.get('time')
+                                    except AttributeError, e:
+                                        print str(e)
+                                        continue
+
+                                    level = 'off'
+
+                                    try:
+                                        level =  elem.get('level')
+                                    except AttributeError:
+                                        pass
+
+                                    if level == 'high':
+                                        n_begin = int(float(time)*1000)
+                                        try :
+                                            n_type = elem.get('type')
+                                        except AttributeError:
+                                            continue
+                                        b ={
+                                            'type': self.atypes['Background'],
+                                            'begin': n_begin,
+                                            'end': None,
+                                            'content': "%s" % n_type
+                                            }
+                                    elif  level == 'off'and b['begin'] is not None:
+                                        n_end = int(float(time)*1000)
+                                        b['end'] = n_end
+                                        yield b
+                                        b = {
+                                            'type': None,
+                                            'begin': None,
+                                            'end': None,
+                                            'content': None
+                                            }
+                                        
+                            if seg is not None:
+                                seg['end'] = t_end
+                                seg['content'] = text+"\n"
+                                yield seg
+                                    
+                    except AttributeError,e: ## catch exception on Turn elements
                         print str(e)
                         continue
 
-            except AttributeError,e:  ## catch exceptions on e.Section
+            except AttributeError,e:  ## catch exceptions on Section elements
                 print str(e)
                 continue
 
@@ -241,9 +245,10 @@ class TrsImporter(GenericImporter):
                 yield b
 
     def process_file(self, filename):
-        trs=handyxml.xml(filename)
-
-        if trs.node.nodeName != 'Trans':
+        trstree=ETree.parse(filename)
+        trs = trstree.getroot()
+        
+        if trs.tag != 'Trans':
             self.log("This does not look like a Transcriber file.")
             return
 
@@ -262,29 +267,31 @@ class TrsImporter(GenericImporter):
         self.progress(0.4, _("Parsing header information"))
 
         try:
-            self.schema.author = trs.scribe
+            self.schema.author = trs.get('scribe')
         except AttributeError:
             pass
         try:
-            self.schema.date = trs.version_date
+            self.schema.date = trs.get('version_date')
         except AttributeError:
             pass
 
         self.progress(0.5, _("Parsing topic and speaker tables information"))
 
         # Handle 'Topics' table informations
+        Topics = trs.find('Topics')
         try:
-            topiclist = trs.Topics[0].Topic
+            topiclist = Topics.findall('Topic')
             for topic in topiclist:
-                self.topics[topic.id] = topic.desc
+                self.topics[topic.get('id')] = topic.get('desc')
         except AttributeError:
             pass
 
         # Handle 'Speakers' table informations
+        Speakers = trs.find('Speakers')
         try:
-            spklist = trs.Speakers[0].Speaker
+            spklist = Speakers.findall('Speaker')
             for spk in spklist:
-                self.speakers[spk.id] = spk.name
+                self.speakers[spk.get('id')] = spk.get('name')
         except AttributeError:
             pass
 
