@@ -1157,6 +1157,8 @@ class AdveneGUI(object):
         cell.props.ellipsize = pango.ELLIPSIZE_MIDDLE
         self.gui.stbv_combo.pack_start(cell, True)
         self.gui.stbv_combo.add_attribute(cell, 'text', 0)
+        self.gui.stbv_combo.props.tooltip_text=_("No active dynamic view")
+
         hb.pack_start(self.gui.stbv_combo, expand=True)
 
         def new_stbv(*p):
@@ -1196,8 +1198,10 @@ class AdveneGUI(object):
             stbv=combo.get_model().get_value(i, 1)
             if stbv is None:
                 edit_stbv_button.set_tooltip_text(_("Create a new dynamic view."))
+                combo.props.tooltip_text=_("No dynamic view")
             else:
                 edit_stbv_button.set_tooltip_text(_("Edit the current dynamic view."))
+                combo.props.tooltip_text=self.controller.get_title(stbv)
             self.controller.activate_stbv(stbv)
             return True
         self.gui.stbv_combo.connect('changed', on_stbv_combo_changed)
