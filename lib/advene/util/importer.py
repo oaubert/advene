@@ -77,32 +77,35 @@ def register(imp):
         IMPORTERS.append(imp)
 
 def get_valid_importers(fname):
-    """Return a list of valid importers for fname.
+    """Return two lists of importers (valid importers, not valid ones) for fname.
 
-    The list is sorted in priority order (best choice first)
+    The valid importers list is sorted in priority order (best choice first)
     """
-    res=[]
+    valid=[]
+    invalid=[]
     n=fname.lower()
     for i in IMPORTERS:
         v=i.can_handle(n)
         if v:
-            res.append( (i, v) )
+            valid.append( (i, v) )
+        else:
+            invalid.append(i)
     # reverse sort along matching scores
-    res.sort(lambda a, b: cmp(b[1], a[1]))
-    return [ i for (i, v) in res ]
+    valid.sort(lambda a, b: cmp(b[1], a[1]))
+    return [ i for (i, v) in valid ], invalid
 
 def get_importer(fname, **kw):
     """Return the first/best valid importer.
     """
-    l=get_valid_importers(fname)
+    valid, invalid=get_valid_importers(fname)
     i=None
-    if len(l) == 0:
+    if len(valid) == 0:
         print "No valid importer"
     else:
-        if len(l) > 1:
-            print "Multiple importers: ", str(l)
+        if len(valid) > 1:
+            print "Multiple importers: ", str(valid)
             print "Using first one."
-        i=l[0](**kw)
+        i=valid[0](**kw)
     return i
 
 class GenericImporter(object):
