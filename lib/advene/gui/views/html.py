@@ -23,6 +23,8 @@ FIXME: add navigation buttons (back, history)
 
 import gtk
 import urllib
+import urlparse
+import re
 
 engine=None
 try:
@@ -172,6 +174,7 @@ class webkit_wrapper:
     def __init__(self, controller=None, notify=None):
         self.controller=controller
         self.notify=notify
+        self.no_content_re = re.compile('^(/media/(play|pause|resume|stop)|/action/.+|/application/adhoc/.+)')
         self.widget=self.build_widget()
 
     def refresh(self, *p):
@@ -190,6 +193,12 @@ class webkit_wrapper:
         w=webkit.WebView()
 
         def update_location(url):
+            l=urlparse.urlparse(url)
+            if self.no_content_re.match(l[2]):
+                # webkit does not correctly handle 204 return code.
+                # Automatically go back.
+                # FIXME: to be removed once webkit is fixed.
+                self.back()
             if self.notify:
                 self.notify(url=url)
             return False
