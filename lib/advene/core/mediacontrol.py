@@ -34,15 +34,12 @@ class PlayerFactory:
         if p is None:
             p=config.data.player['plugin']
         print "mediacontrol: using %s" % p
+        # vlcnative is deprecated and has been removed.
+        if p == 'vlcnative':
+            p = 'vlcctypes'
 
         try:
-            if p == 'vlcnative':
-                # Should do some checks to verify it is present
-                if config.data.os == 'win32':
-                    return self.nativevlc_win32_import()
-                else:
-                    import advene.player.vlcnative as playermodule
-            elif p == 'vlcctypes':
+            if p == 'vlcctypes':
                 import advene.player.vlcctypes as playermodule
             elif p == 'dummy':
                 import advene.player.dummy as playermodule
@@ -58,7 +55,7 @@ class PlayerFactory:
                 print "Fallback to dummy module"
                 import advene.player.dummy as playermodule
         except ImportError, e:
-            if config.data.os == 'linux' and p != 'gstreamer':
+            if p != 'gstreamer':
                 print "Cannot import %(player)s mediaplayer: %(error)s.\nTrying gstreamer player." % {
                     'player': p,
                     'error': str(e) }
@@ -68,47 +65,5 @@ class PlayerFactory:
                     'player': p,
                     'error': str(e) }
                 import advene.player.dummy as playermodule
-
-        return playermodule.Player()
-
-    def nativevlc_win32_import(self):
-        """Specific importer for win32 vlc.
-        """
-        vlcpath=None
-        if (config.data.player['bundled']==True
-            and os.path.exists(os.path.join('.','libvlc.dll'))):
-
-            #we need to clean vlc cache path
-            # --no-plugins-cache
-            print "Using included version of VLC"
-            vlcpath = '.'
-
-        if (vlcpath is None):
-            vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','InstallDir')
-            if vlcpath is None:
-                # Try the Path key
-                vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','Path')
-
-
-        # FIXME: Hack: for local versions of VLC (development tree)
-        # You should define the correct path in advene.ini
-        if (vlcpath is None
-            and os.path.exists(os.path.join( config.data.path['vlc'],
-                                             'vlc.exe' ))):
-            print "Using local version of VLC from %s" % config.data.path['vlc']
-            vlcpath = config.data.path['vlc']
-
-        if vlcpath is None:
-            print "VLC does not seem to be installed. Using dummy player."
-            import advene.player.dummy as playermodule
-        else:
-            print "Using VLC player module"
-            # Hack needed to get the vlc module running correctly
-            # (find the interfaces)
-            try:
-                os.chdir(vlcpath)
-            except OSError:
-                print "Cannot cd to %s. The player certainly won't work." % vlcpath
-            import advene.player.vlcnative as playermodule
 
         return playermodule.Player()
