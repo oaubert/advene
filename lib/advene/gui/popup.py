@@ -324,6 +324,7 @@ class Menu:
         msg += "Min duration : %s\n" % helper.format_time(min( a.fragment.duration for a in at.annotations))
         msg += "Max duration : %s\n" % helper.format_time(max( a.fragment.duration for a in at.annotations))
         msg += "Mean duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in at.annotations) / len(at.annotations))
+        msg += "Total duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in at.annotations))
         dialog.message_dialog(msg)
         return True
 
