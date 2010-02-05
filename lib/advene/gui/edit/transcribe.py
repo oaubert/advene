@@ -865,10 +865,17 @@ class TranscriptionEdit(AdhocView):
         if self.sourcefile:
             fname=self.sourcefile
         else:
+            # Use current movie filename as basename
+            default_name='transcribe.txt'
+            l=self.controller.player.playlist_get_list()
+            if l:
+                default_name=os.path.splitext(os.path.basename(l[0]))[0] + ".txt"
             fname=dialog.get_filename(title= ("Save transcription to..."),
                                                action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                                button=gtk.STOCK_SAVE,
-                                               default_dir=config.data.path['data'])
+                                               default_dir=config.data.path['data'],
+                                               default_file=default_name
+                                               )
         if fname is not None:
             self.save_transcription(filename=fname)
         return True
