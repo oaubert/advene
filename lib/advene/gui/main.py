@@ -45,6 +45,7 @@ import advene.core.version
 
 import gtk
 import gobject
+import pango
 import pprint
 
 import gettext
@@ -1153,6 +1154,7 @@ class AdveneGUI(object):
         #hb.pack_start(gtk.Label(_('D.view')), expand=False)
         self.gui.stbv_combo = gtk.ComboBox()
         cell = gtk.CellRendererText()
+        cell.props.ellipsize = pango.ELLIPSIZE_MIDDLE
         self.gui.stbv_combo.pack_start(cell, True)
         self.gui.stbv_combo.add_attribute(cell, 'text', 0)
         hb.pack_start(self.gui.stbv_combo, expand=True)
