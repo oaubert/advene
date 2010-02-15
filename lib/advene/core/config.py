@@ -147,7 +147,7 @@ class Config(object):
                 'moviepath': '_:%s' % os.path.join( self.get_homedir(), 'Movies' ),
                 # Locale dir FIXME
                 'locale': '/Applications/Advene.app/locale',
-                'shotdetect': 'shotdetect',
+                'shotdetect': '/Applications/Advene.app/Contents/Resources/share/shotdetect',
                 }
         else:
             self.path = {
@@ -512,20 +512,6 @@ class Config(object):
         h=self.preferences['history']
         if len(h) > self.preferences['history-size-limit']:
             self.preferences['history']=h[-self.preferences['history-size-limit']:]
-
-        if not os.path.exists(self.path['shotdetect']):
-            if self.os == 'win32':
-                sdname='shotdetect.exe'
-            else:
-                sdname='shotdetect'
-            sd=find_in_path(sdname)
-            if sd is not None:
-                self.path['shotdetect']=sd
-            else:
-                sd=self.advenefile(sdname, 'resources')
-                if os.path.exists(sd):
-                    self.path['shotdetect']=sd
-
         return True
 
     def win32_specific_config(self):
@@ -835,10 +821,24 @@ class Config(object):
         # .advenerc. Rationale: if the .advenerc was really correct, it
         # would have set the correct paths in the first place.
         print "Overriding 'resources', 'locale', 'advene' and 'web' config paths"
-        data.path['resources']=os.path.sep.join((maindir, 'share'))
-        data.path['locale']=os.path.sep.join( (maindir, 'locale') )
-        data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
-        data.path['advene']=maindir
+        self.path['resources']=os.path.sep.join((maindir, 'share'))
+        self.path['locale']=os.path.sep.join( (maindir, 'locale') )
+        self.path['web']=os.path.sep.join((maindir, 'share', 'web'))
+        self.path['advene']=maindir
+
+        if not os.path.exists(self.path['shotdetect']):
+            if self.os == 'win32':
+                sdname='shotdetect.exe'
+            else:
+                sdname='shotdetect'
+            sd=find_in_path(sdname)
+            if sd is not None:
+                self.path['shotdetect']=sd
+            else:
+                sd=self.advenefile(sdname, 'resources')
+                if os.path.exists(sd):
+                    self.path['shotdetect']=sd
+
         #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlcplugins') )
 
 data = Config ()
