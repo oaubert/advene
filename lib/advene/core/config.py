@@ -400,7 +400,7 @@ class Config(object):
             u'string:#008C00',
             u'string:#006E2E',
             u'string:#4096EE',
-            u'string:#FF0084',
+            u'string:#F0C5ED',
             u'string:#B02B2C',
             u'string:#D15600',
             u'string:#C79810',
