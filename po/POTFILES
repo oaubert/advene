@@ -1,8 +1,9 @@
-../lib/vlcwidget.py
 ../lib/advene/plugins/anvil.py
 ../lib/advene/plugins/mpeg7.py
+../lib/advene/plugins/ted.py
 ../lib/advene/plugins/tts.py
 ../lib/advene/plugins/tracebuilder.py
+../lib/advene/plugins/transcriber.py
 ../lib/advene/plugins/annotationgraph.py
 ../lib/advene/plugins/ssa.py
 ../lib/advene/plugins/brltty.py
@@ -51,13 +52,11 @@
 ../lib/advene/gui/edit/merge.py
 ../lib/advene/gui/edit/schemaeditor.py
 ../lib/advene/gui/edit/rules.py
-../lib/advene/gui/simple.py
 ../lib/advene/gui/widget.py
 ../lib/advene/gui/main.py
 ../lib/advene/gui/util/initialconfig.py
 ../lib/advene/gui/util/__init__.py
 ../lib/advene/gui/util/dialog.py
-../lib/advene/gui/util/dummy_translations.py
 ../lib/advene/gui/popup.py
 ../lib/advene/model/bundle.py
 ../lib/advene/model/zippackage.py
