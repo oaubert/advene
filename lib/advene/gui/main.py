@@ -4139,7 +4139,8 @@ class AdveneGUI(object):
                 i=advene.util.importer.get_importer(iname, controller=self.controller)
             except Exception:
                 dialog.message_dialog(_("Cannot import shotdetect output. Did you install the shotdetect software?"),
-                                        icon=gtk.MESSAGE_ERROR)
+                                        icon=gtk.MESSAGE_ERROR,
+                                      modal=False)
                 return True
             def progress_callback(value=None, label=''):
                 progressbar.set_label_value(label or '', value)
@@ -4159,7 +4160,7 @@ class AdveneGUI(object):
             self.controller.notify('AnnotationTypeCreate', annotationtype=i.annotationtype)
             self.controller.notify('PackageLoad', package=self.controller.package)
             msg=_("Detected %s shots") % i.statistics['annotation']
-            dialog.message_dialog(msg)
+            dialog.message_dialog(msg, modal=False)
             self.log(msg)
             return True
 
@@ -4246,8 +4247,8 @@ class AdveneGUI(object):
                                             shell=False,
                                             stderr=subprocess.PIPE )
             except OSError, e:
-                dialog.message_dialog(_("Could not run shotdetect: %s") % unicode(e))
                 do_cancel(None, pb)
+                dialog.message_dialog(_("Could not run shotdetect: %s") % unicode(e), modal=False)
                 return True
 
             do_gui_operation(pb.set_label_value,
