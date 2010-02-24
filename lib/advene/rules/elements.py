@@ -782,7 +782,7 @@ class SimpleQuery(EtreeMixin):
         result=[]
 
         for source in self.sources:
-            s=context.evaluateValue(self.source)
+            s=context.evaluateValue(source)
 
             if self.condition is None:
                 if self.rvalue is None or self.rvalue == 'element':
