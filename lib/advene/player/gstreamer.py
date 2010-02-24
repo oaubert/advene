@@ -591,16 +591,28 @@ class Player:
             os.unlink(self.overlay.filename)
             self.overlay.filename=''
 
-    def set_visual(self, xid):
-        self.xid = xid
-        self.imagesink.set_xwindow_id(self.xid)
+    def reparent(self, xid):
+        # See https://bugzilla.gnome.org/show_bug.cgi?id=599885
+        #gtk.gdk.threads_enter()
+        gtk.gdk.display_get_default().sync()
+        
+        self.imagesink.set_xwindow_id(xid)
         self.imagesink.set_property('force-aspect-ratio', True)
+        
+        #gtk.gdk.threads_leave()
+        
+    def set_visual(self, xid):
+        print "set_visual", xid
+        if not xid:
+            return True
+        self.xid = xid
+        self.reparent(xid)
         return True
 
     def restart_player(self):
         # FIXME: destroy the previous player
         self.player.set_state(gst.STATE_READY)
-        # Rebuilt the pipeline
+        # Rebuild the pipeline
         self.build_pipeline()
         self.playlist_add_item(self.videofile)
         self.position_update()
@@ -610,8 +622,7 @@ class Player:
         if message.structure is None:
             return
         if message.structure.get_name() == 'prepare-xwindow-id':
-            self.imagesink.set_xwindow_id(self.xid)
-            message.src.set_property('force-aspect-ratio', True)
+            self.set_visual(self.xid)
 
     def sound_mute(self):
         if self.mute_volume is None:
@@ -666,10 +677,10 @@ class Player:
         self.fullscreen_window.show()
         self.fullscreen_window.window.fullscreen()
         if config.data.os == 'win32':
-            self.imagesink.set_xwindow_id(self.fullscreen_window.window.handle)
+            self.reparent(self.fullscreen_window.window.handle)
         else:
-            self.imagesink.set_xwindow_id(self.fullscreen_window.window.xid)
+            self.reparent(self.fullscreen_window.window.xid)
 
     def unfullscreen(self):
-        self.imagesink.set_xwindow_id(self.xid)
+        self.reparent(self.xid)
         self.fullscreen_window.hide()
