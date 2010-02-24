@@ -17,8 +17,7 @@ You will need the following python packages (the package names are from
 Debian, they may slightly vary on other distributions) :
 
 python >= 2.4
-python-gtk2 (>=2.10)
-python-glade2 (>=2.10)
+python-gtk2 (>=2.12)
 python-cherrypy3 (>=3.0.0) [for convenience, a copy of cherrypy is included in
 this Advene distribution]
 python-simpletal (>=3.12) [for convenience, a copy of simpletal is included in
@@ -39,7 +38,7 @@ distribution.
 
 You should install in this order (note the version numbers) :
 
-Gtk/win32 v. >= 2.10 : http://gladewin32.sourceforge.net/ (runtime environment)
+Gtk/win32 v. >= 2.12 : http://gladewin32.sourceforge.net/ (runtime environment)
 v2.12 recommended to avoid problems with Vista environment.
 
 Python    v. 2.4 : http://www.python.org/ftp/python/2.4.4/Python-2.4.4.exe
@@ -67,7 +66,7 @@ From macports (http://www.macports.org/), install :
       /opt/local/bin/python exists, and that your path begins with
       /opt/local/bin. Else, the installation of the other packages
       could use the /usr/bin/python version]
-    * py-gtk2
+    * py-gtk2 >= 2.12
 
 You will also need the vlc.so python module to control VLC. You can
 download a precompiled version for vlc0.8.6c/i3386 from
