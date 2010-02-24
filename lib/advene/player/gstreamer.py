@@ -410,7 +410,10 @@ class Player:
         self.player.set_property('uri', '')
 
     def playlist_get_list(self):
-        return [ self.videofile ]
+        if self.videofile:
+            return [ self.videofile ]
+        else:
+            return [ ]
 
     def snapshot_taken(self, buffer):
         if self.snapshot_notify:
