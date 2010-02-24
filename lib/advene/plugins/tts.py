@@ -37,12 +37,12 @@ def register(controller=None):
     elif CustomTTSEngine.can_run():
         controller.log("TTS: Using custom script")
         engine=CustomTTSEngine(controller)
-    elif FestivalTTSEngine.can_run():
-        controller.log("TTS: Using festival")
-        engine=FestivalTTSEngine(controller)
     elif EspeakTTSEngine.can_run():
         controller.log("TTS: Using espeak")
         engine=EspeakTTSEngine(controller)
+    elif FestivalTTSEngine.can_run():
+        controller.log("TTS: Using festival")
+        engine=FestivalTTSEngine(controller)
     else:
         engine=TTSEngine(controller)
     controller.register_action(RegisteredAction(
