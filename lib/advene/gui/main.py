@@ -85,7 +85,7 @@ import advene.util.helper as helper
 import advene.util.ElementTree as ET
 
 import advene.util.importer
-from advene.gui.util.completer import Indexer
+from advene.gui.util.completer import Indexer, Completer
 
 # GUI elements
 from advene.gui.util import get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color
@@ -2428,6 +2428,12 @@ class AdveneGUI(object):
         # Define variables referencing the opened views
         for v in self.adhoc_views:
             ev.locals_[v.view_id]=v
+            
+        # Hook completer
+        completer=Completer(textview=ev.source,
+                            controller=self.controller,
+                            indexer=self.controller.package._indexer)
+
         w=ev.popup()
         w.set_icon_list(*self.get_icon_list())
         return True
