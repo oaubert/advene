@@ -255,7 +255,7 @@ class Config(object):
             'save-default-workspace': 'never',
             'restore-default-workspace': 'ask',
             # Daily check for updates on the Advene website ?
-            'update-check': False,
+            'update-check': True,
             # Last update time
             'last-update': 0,
             # Width of the image used to display the snapshot of a bookmark
