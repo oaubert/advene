@@ -8,39 +8,31 @@ parent=`dirname "$d"`
 parent=`(cd "$parent" ; pwd)`
 
 echo "Advene.app started at "  `date` " on " `uname -a`
-X11APP=/Applications/Utilities/X11.app
-if [ ! -x $X11APP ]
-then
-   osascript -e 'tell application "Finder" to display dialog "No X11 server found. Please install it from the MacOS X install disc, package System/Installation/Packages/X11User.pkg"'
-   exit 0
-fi
-
-if [ ! -e /tmp/.X11-unix/* ]
-then
-   osascript -e 'tell application "Finder" to display dialog "Please start the X11 server before trying to run Advene"'
-   exit 0
-fi
 
 if [ -x /opt/local/lib/libgstreamer-0.10.0.dylib ]
 then
    osascript -e 'tell application "Finder" to display dialog "You have installed gstreamer from macports.org.\nThis may conflict with the executable you are trying to run. If the application crashes, you may either disable darwinports (sudo chmod 0 /opt) or try to run Advene from the sources."'
 fi
 
-if [ -x /Applications/VLC.app ]
-then
-  x11plugin=/Applications/VLC.app/Contents/MacOS/modules/libx11_plugin.dylib
-  if [ ! -e ${x11plugin} ]
-  then
-    # Try to copy it from our resources
-    cp ${parent}/Resources/libx11_plugin.dylib ${x11plugin}
-    if [ ! -e ${x11plugin}
-    then
-       osascript -e 'tell application "Finder" to display dialog "Unable to copy the x11 video output module. Maybe a permission problem.\nPlease try to copy ${parent}/Resources/libx11_plugin.dylib to ${x11plugin}"'
-       exit 0
-    fi
-  fi
-fi
+osx_version=`sw_vers -productVersion`
+case ${osx_version} in
+10.4*)
+      X11APP=/Applications/Utilities/X11.app
+      if [ ! -x $X11APP ]
+      then
+         osascript -e 'tell application "Finder" to display dialog "No X11 server found. Please install it from the MacOS X install disc, package System/Installation/Packages/X11User.pkg"'
+         exit 0
+      fi
 
-export DISPLAY=:0.0
+      if [ ! -e /tmp/.X11-unix/* ]
+      then
+         osascript -e 'tell application "Finder" to display dialog "Please start the X11 server (from /Applications/Utilities) before trying to run Advene"'
+         exit 0
+      fi
+
+      # Set DISPLAY variable for 10.4 only. In 10.5, the X server is automatically launched.
+      export DISPLAY=:0.0
+      ;;
+esac
 
 exec ${d}/Advene.bin $@
