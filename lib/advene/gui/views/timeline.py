@@ -1878,13 +1878,19 @@ class TimeLine(AdhocView):
 
             self.controller.notify('EditSessionStart', element=button.annotation, immediate=True)
 
+            newpos = None
             if event.state & gtk.gdk.SHIFT_MASK:
                 f.begin += incr
                 f.end += incr
+                newpos = f.begin
             elif fr < .5:
                 f.begin += incr
+                newpos = f.begin
             elif fr >= .5:
                 f.end += incr
+                newpos = f.end
+
+            self.controller.player_delayed_scrub(newpos)
 
             self.controller.notify('AnnotationEditEnd', annotation=button.annotation)
             self.controller.notify('EditSessionEnd', element=button.annotation)
