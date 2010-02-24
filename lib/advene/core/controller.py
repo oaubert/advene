@@ -190,6 +190,9 @@ class AdveneController(object):
         except AttributeError:
             pass
 
+        # Scrubbing timeout guard
+        self.scrub_lastvalue = None
+
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
         self.modifying_events = self.event_handler.catalog.modifying_events
@@ -2143,7 +2146,29 @@ class AdveneController(object):
         """
         p=self.player
         if p.status == p.PauseStatus and 'frame-by-frame' in p.player_capabilities:
-            self.update_status("set", pos, notify=False)
+            self.update_status("set", pos, notify=True)
+        return False
+
+    def player_delayed_scrub(self, pos):
+        """Scrub to a given position.
+
+        To avoid too fast scrubbing, we set a timeout. The actual
+        scrubbing is done with the last value given when the timeout expires.
+        """
+        def do_scrub():
+            if self.scrub_lastvalue is not None:
+                # FIXME: there is a concurrency issue here.
+                self.player_scrub(self.scrub_lastvalue)
+                self.scrub_lastvalue = None
+            return False
+
+        p=self.player
+        if p.status == p.PauseStatus and 'frame-by-frame' in p.player_capabilities:
+            if self.scrub_lastvalue is None:
+                # Not in a scrubbing state.
+                gobject.timeout_add(250, do_scrub)
+            self.scrub_lastvalue = pos
+
         return True
 
     def update (self):
