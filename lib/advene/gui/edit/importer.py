@@ -112,7 +112,7 @@ class ExternalImporter(AdhocView):
         mes=_('Completed conversion from file %(filename)s :\n%(statistics)s') % {
             'filename': fname,
             'statistics': i.statistics_formatted() }
-        dialog.message_dialog(mes)
+        dialog.message_dialog(mes, modal=False)
         self.log(mes)
         return True
 
