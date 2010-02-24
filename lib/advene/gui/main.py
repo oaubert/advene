@@ -2242,7 +2242,7 @@ class AdveneGUI(object):
                 except AttributeError:
                     pass
         # Reset quicksearch source value
-        config.data.preferences['quicksearch-source']=None
+        config.data.preferences['quicksearch-sources']=None
         pass
 
     def manage_package_load (self, context, parameters):
@@ -2585,7 +2585,7 @@ class AdveneGUI(object):
             for v in tr:
                 v.highlight_search_forward(s)
         return self.controller.search_string(searched=s,
-                                             source=config.data.preferences['quicksearch-source'],
+                                             sources=config.data.preferences['quicksearch-sources'],
                                              case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
 
     def do_quicksearch(self, *p):
