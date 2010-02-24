@@ -61,18 +61,21 @@ def register(controller=None):
     # cursor position, available through the request/cursor TALES
     # expression
     controller.register_event('BrailleInput', _("Input from the braille table."))
+    method=controller.message_log
 
     if brlapi is None:
-        controller.log(_("BrlTTY not initialised. There will be no braille support."))
-        method=controller.message_log
+        controller.log(_("BrlTTY not installed. There will be no braille support."))
     else:
         engine=BrlEngine(controller)
-        method=engine.action_brldisplay
-        engine.init_brlapi()
-        if engine.brlconnection is not None:
-            gobject.io_add_watch(engine.brlconnection.fileDescriptor,
-                                 gobject.IO_IN,
-                                 engine.input_handler)
+        try:
+            engine.init_brlapi()
+            if engine.brlconnection is not None:
+                gobject.io_add_watch(engine.brlconnection.fileDescriptor,
+                                     gobject.IO_IN,
+                                     engine.input_handler)
+                method=engine.action_brldisplay
+        except:
+            controller.log(_("Could not initialize BrlTTY. No braille support."))
 
     # Register the Braille action even if the API is not available.
     controller.register_action(RegisteredAction(
