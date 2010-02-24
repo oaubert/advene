@@ -596,6 +596,7 @@ class Menu:
             if not element.has_key('soundclips'):
                 # Create the soundclips folder
                 element['soundclips'] = element.DIRECTORY_TYPE
+                self.controller.notify('ResourceCreate', resource=element['soundclips'])
             add_item(_('Insert a soundclip...'), self.insert_soundclip, element['soundclips'])
         elif element.resourcepath == 'soundclips':
             add_item(_('Insert a soundclip...'), self.insert_soundclip, element)
