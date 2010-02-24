@@ -128,6 +128,9 @@ cp -r /opt/local/share/locale/fr/LC_MESSAGES/*.mo ${Resources}/locale/fr/LC_MESS
 # FIXME: to update
 ##cp mac/libx11_plugin.dylib ${Resources}
 
+# Fix shotdetect permissions
+chmod 755 ${Resources}/share/shotdetect
+
 # Use the shell wrapper
 mv ${MacOS}/Advene ${MacOS}/Advene.bin
 cp mac/Advene.wrapper ${MacOS}/Advene
