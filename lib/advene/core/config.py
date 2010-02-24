@@ -284,10 +284,9 @@ class Config(object):
 
         # Player options
         self.player = {
-            'plugin': 'vlcctypes',
+            'plugin': 'gstreamer',
             'bundled': True,
             'embedded': True,
-            'name': 'vlc',
             'vout': 'default',
             'svg': False,
             'osdfont': '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
@@ -298,9 +297,6 @@ class Config(object):
             'snapshot-chroma': 'RV32',
             'dvd-device': '/dev/dvd',
             }
-        if self.os in ('linux', 'darwin'):
-            # Use gstreamer by default on linux
-            self.player['plugin']='gstreamer'
 
         self.webserver = {
             'port': 1234,
