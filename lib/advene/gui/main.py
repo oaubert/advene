@@ -4267,8 +4267,10 @@ class AdveneGUI(object):
                     else:
                         prg=None
                     do_gui_operation(pb.set_label_value,
-                                     _("Detected shot #%d at %s ") % (len(pb._datapoints),
-                                                                      helper.format_time(ts)),
+                                     _("Detected shot #%(num)d at %(pos)s ") % {
+                            'num': len(pb._datapoints),
+                            'pos': helper.format_time(ts) 
+                            },
                                      prg)
 
             # Detection is over. Import result
