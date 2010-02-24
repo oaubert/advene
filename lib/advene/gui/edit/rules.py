@@ -284,7 +284,7 @@ class EditQuery(EditGeneric):
     def update_value(self):
         if not self.editable:
             return False
-        self.model.source=self.sourceentry.get_text()
+        self.model.sources=self.sourceentry.get_text().split(';')
         if self.valueentry is None:
             v='element'
         else:
@@ -359,7 +359,7 @@ class EditQuery(EditGeneric):
         self.sourceentry=TALESEntry(context=self.model,
                                     controller=self.controller,
                                     predefined=predef)
-        self.sourceentry.set_text(self.model.source)
+        self.sourceentry.set_text(";".join(self.model.sources))
         self.sourceentry.set_editable(self.editable)
         ef.add(self.sourceentry.widget)
         ef.show_all()
