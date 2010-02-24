@@ -183,7 +183,11 @@ class Resources:
         fname=os.path.join( self.dir_, key )
 
         if item == self.DIRECTORY_TYPE:
-            os.mkdir(fname)
+            if os.path.exists(fname):
+                if not os.path.isdir(fname):
+                    raise Exception("%s resource exists but is not a folder!" % key)
+            else:
+                os.mkdir(fname)
         else:
             # Some content
             f=open(fname, 'wb')
