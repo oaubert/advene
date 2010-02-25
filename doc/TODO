@@ -1,26 +1,31 @@
-* Fix autogeneration of attribute names for new annotations
+* fix controller.svg_overlay
 
-* Automatically update package title/description when a movie file is associated
+* Generic "ImportFromApplication" module/framework (with progressbar, etc)
 
-* Export website: check OSError when read-only
+* montage: video export
+
+* gstreamer: 2 video syntax: path;path -> videobox
+
+* gui.edit.rules: SimpleQuery edition will fail since TALESEntry does
+   not handle multiple sources
+
+* Note-taking: save == convert option
+
+* Fix autocompletion of attribute names for annotations (should
+   record key=value strings)
 
 * Interactive result : use standard snapshot view (to have markers on
    mouse over): cf views.table, implement CellRendererTimestamp
 
-* Allow multiple source selection in quicksearch
-
 * Shortcut for edit element validation
-
-* Ctrl-scroll to modify annotation bounds: update video position if
-   frame-by-frame is available
 
 * Ctrl+wheel -> frame by frame
 
-* Add "Split here" in the annotation popup menu
-
-* Fix renumbering
-
 * Check PyUseCase http://texttest.carmen.se/index.php?page=ui_testing
+
+* MAJ shortcuts/wiki/0.38
+
+* webcherry: use content negociation for invoking appropriate views
 
 * Utilisation npt:/
 * Define content-types: montag <annotation>...</annotation> +
@@ -65,8 +70,6 @@ http://development.syllable.org/documentation/interface-guide.html
 
 * gui.main: simple click on Adhocview icon -> share code with viewbook
    (menu New/open existing).
-
-* Generic "ImportFromApplication" module/framework (with progressbar, etc)
 
 * MXF samples: http://gstreamer.freedesktop.org/media/incoming/mxf/
 
@@ -2684,4 +2687,23 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Fix gstreamer (appsrc/appsink)
 
 * investigate pitivi thumbnailing code
+
+* Add "Split here" in the annotation popup menu
+
+* Importer GUI: display all filters (appropriate first, others last)
+
+* webkit: fix behaviour on 204 (/media/play)
+
+* Click on Play with no movie -> display message or movie choice dialog
+
+* Hook completer into evaluator
+
+* Note-taking: use current videofilename as default save filename
+
+* Fix shotdetect path determination (esp. on macosx)
+
+* Ctrl-scroll to modify annotation bounds: update video position if
+   frame-by-frame is available
+
+* exporter: have TAL export to text/plain not convert entities to HTML (cf srt)
 
