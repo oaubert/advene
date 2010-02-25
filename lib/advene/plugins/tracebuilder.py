@@ -171,6 +171,10 @@ class TraceBuilder(Thread):
             self.log("No event to export")
             return ''
 
+        d=config.data.advenefile('traces', category='settings')
+        if not os.path.isdir(d):
+            helper.recursive_mkdir(d)
+        
         fname=config.data.advenefile(['traces',time.strftime("trace_advene-%Y%m%d-%H%M%S")],
                                      category='settings')
         try:
