@@ -206,12 +206,8 @@ Aborting.""" % config.data.path[d]
         c = advene.gui.util.initialconfig.Config()
         c.main()
 
-    if config.data.options.simple:
-        import advene.gui.simple
-        gui = advene.gui.simple.SimpleAdveneGUI()
-    else:
-        import advene.gui.main
-        gui = advene.gui.main.AdveneGUI()
+    import advene.gui.main
+    gui = advene.gui.main.AdveneGUI()
     try:
         #import hotshot
         #filename = "/tmp/pythongrind.prof"
