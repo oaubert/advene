@@ -2332,10 +2332,17 @@ class AdveneController(object):
         if filter.content.mimetype is None or filter.content.mimetype.startswith('text/'):
             compiler = simpleTAL.HTMLTemplateCompiler ()
             compiler.parseTemplate (filter.content.stream, 'utf-8')
+            if filter.content.mimetype == 'text/plain':
+                # Convert HTML entities to their values
+                output = StringIO.StringIO()
+            else:
+                output = stream
             try:
-                compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8')
+                compiler.getTemplate ().expand (context=ctx, outputFile=output, outputEncoding='utf-8')
             except simpleTALES.ContextContentException, e:
                 self.log(_("Error when exporting: %s") % unicode(e))
+            if filter.content.mimetype == 'text/plain':
+                stream.write(output.getvalue().replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&'))
         else:
             compiler = simpleTAL.XMLTemplateCompiler ()
             compiler.parseTemplate (filter.content.stream)
