@@ -12,4 +12,8 @@ VERNUM=${version}.${relnum}
 
 echo "Creating image Advene-${VERNUM}.dmg"
 
-/usr/bin/hdiutil create -fs HFS+ -format UDZO -imagekey zlib-level=9 -srcfolder dist/Advene.app  -volname Advene-${VERNUM} Advene-${VERNUM}.dmg
+ln -s /Applications dist/Applications
+
+`dirname $0`/pkg-dmg --target "Advene-${VERNUM}.dmg" --source dist --volname Advene-${VERNUM} --mkdir /.background --copy mac/background.tiff:/.background  --icon share/pixmaps/advene.icns --copy mac/advene.dsstore:/.DS_Store
+
+# /usr/bin/hdiutil create -fs HFS+ -format UDZO -imagekey zlib-level=9 -srcfolder dist/Advene.app  -volname Advene-${VERNUM} Advene-${VERNUM}.dmg
