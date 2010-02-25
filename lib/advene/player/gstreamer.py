@@ -678,7 +678,10 @@ class Player:
                 style.base[state]=black
             self.fullscreen_window.set_style(style)
         self.fullscreen_window.show()
-        self.fullscreen_window.window.fullscreen()
+        if config.data.os == 'darwin':
+            self.fullscreen_window.set_size_request(gtk.gdk.screen_width(), gtk.gdk.screen_height())
+        else:
+            self.fullscreen_window.window.fullscreen()
         if config.data.os == 'win32':
             self.reparent(self.fullscreen_window.window.handle)
         else:
