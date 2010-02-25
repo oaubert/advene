@@ -3206,8 +3206,9 @@ class AdveneGUI(object):
         edit=EditRuleSet(rs,
                          catalog=self.controller.event_handler.catalog,
                          controller=self.controller)
-        vbox.add(edit.get_widget())
-        edit.get_widget().show()
+        wid = edit.get_packed_widget()
+        vbox.add(wid)
+        wid.show_all()
 
         def validate_ruleset(button, type_):
             edit.update_value()
@@ -3225,14 +3226,6 @@ class AdveneGUI(object):
             return True
 
         hb=gtk.HButtonBox()
-
-        b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect('clicked', edit.add_rule_cb)
-        hb.pack_start(b, expand=False)
-
-        b=gtk.Button(stock=gtk.STOCK_REMOVE)
-        b.connect('clicked', edit.remove_rule_cb)
-        hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_SAVE)
         b.connect('clicked', save_ruleset, 'default')
