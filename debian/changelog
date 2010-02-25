@@ -1,22 +1,31 @@
 advene (0.39) unstable; urgency=low
 
-  * The gstreamer player plugin now works correctly with gstreamer >= 0.10.22
+  * The gstreamer player plugin now works correctly with gstreamer >=
+    0.10.22. Additionnaly, the windows installer now comes with gstreamer
+    support. gstreamer is now the default player on all platforms (with
+    VLC being an alternative).
 
   * Website export improvements.
 
   * The FCKeditor browser-based WYSIWYG editor has been removed, in favor
     of the new HTML editor.
 
-  * For text-to-speech, Festival is used if present (linux). Else, espeak
-    is used (linux, windows). On MacOS X, the standard /usr/bin/say
-    command is used.
+  * For text-to-speech, espeak is used if present (linux, mac). Else,
+    festival is used (linux). On MacOS X, the standard /usr/bin/say
+    command is used. A custom "pronounce" script can be used to customize
+    the settings.
 
   * Trace timeline: interface improvements, previous traces can be reopened.
 
+  * Multiple search sources can be specified in quicksearch.
+  
   * Timeline:
 
     * optimal alignment of annotation sets (courtesy of <mben@irisa.fr>)
 
+    * basic statistics about annotation types are available from their
+      popup menu.
+  
   * Export:
 
     * a RDF export filter is available
