@@ -1,3 +1,9 @@
+advene (0.40) unstable; urgency=low
+
+  * Stable release. See the following 0.39 notes for more details.
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 25 Feb 2010 17:33:14 +0100
+
 advene (0.39) unstable; urgency=low
 
   * The gstreamer player plugin now works correctly with gstreamer >=
@@ -36,7 +42,7 @@ advene (0.39) unstable; urgency=low
 
     * New Transcriber import filter (courtesy of <mben@irisa.fr>)
 
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 25 Feb 2010 17:32:56 +0100
 
 advene (0.38) unstable; urgency=low
 
