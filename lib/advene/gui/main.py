@@ -1012,7 +1012,7 @@ class AdveneGUI(object):
         self.event_source_slow_update_display=gobject.timeout_add (1000, self.slow_update_display)
         # Do we need to make an update check
         if (config.data.preferences['update-check']
-            and time.time() - config.data.preferences['last-update'] >= 24 * 60 * 60):
+            and time.time() - config.data.preferences['last-update'] >= 7 * 24 * 60 * 60):
             config.data.preferences['last-update']=time.time()
             self.check_for_update()
         # Everything is ready. We can notify the ApplicationStart
@@ -3580,7 +3580,7 @@ class AdveneGUI(object):
         ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
 
         ew.add_title(_("General"))
-        ew.add_checkbox(_("Daily update check"), 'update-check', _("Daily check for updates on the Advene website"))
+        ew.add_checkbox(_("Weekly update check"), 'update-check', _("Weekly check for updates on the Advene website"))
         ew.add_option(_("On exit,"), 'imagecache-save-on-exit',
                       _("How to handle screenshots on exit"),
                       {

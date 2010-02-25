@@ -87,7 +87,7 @@ class Config:
                 "Francais": 'fr_FR',
                 _("System default"): '',
                 })
-        ew.add_checkbox(_("Daily check for Advene updates on the Advene website"), 'update-check', _("Daily check for updates on the Advene website"))
+        ew.add_checkbox(_("Weekly check for Advene updates on the Advene website"), 'update-check', _("Weekly check for updates on the Advene website"))
 
         ew.add_dir_selector(_("Preferred directory for data files"), "data", _("Preferred directory for storing data files (Advene packages)"))
         #ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))

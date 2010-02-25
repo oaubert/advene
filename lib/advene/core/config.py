@@ -254,7 +254,7 @@ class Config(object):
             'language': '',
             'save-default-workspace': 'never',
             'restore-default-workspace': 'ask',
-            # Daily check for updates on the Advene website ?
+            # Weekly check for updates on the Advene website ?
             'update-check': True,
             # Last update time
             'last-update': 0,
