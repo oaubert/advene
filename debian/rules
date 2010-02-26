@@ -16,8 +16,6 @@ binary-indep: build install
 	dh_installmenu
 	dh_installexamples
 	dh_install --sourcedir $(install_dir)
-	# FIXME: Does not work:
-	dh_desktop
 	echo "update-desktop-database" >> debian/advene.postinst.debhelper
 	echo "update-desktop-database" >> debian/advene.postrm.debhelper
 	dh_fixperms
