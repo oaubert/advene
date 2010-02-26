@@ -54,8 +54,8 @@ def register(controller):
         controller.register_viewclass(TraceTimeline)
 
 name="Trace Timeline view"
-ACTION_COLORS=[0x000088AA, 0x008800AA, 0x880000AA, 0x008888FF, 0x880088FF, 0x0000FFAA, 0x00FF00AA, 0xFF0000FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
-ACTIONS=[]
+#ACTION_COLORS=[0x000088AA, 0x008800AA, 0x880000AA, 0x008888FF, 0x880088FF, 0x0000FFAA, 0x00FF00AA, 0xFF0000FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
+#ACTIONS=[]
 INCOMPLETE_OPERATIONS_NAMES = {
             'EditSessionStart': _('Beginning edition'),
             'ElementEditBegin': _('Beginning edition'),
@@ -116,11 +116,8 @@ class TraceTimeline(AdhocView):
         self.sw = None
         self.cols={}
         self.tracer.register_view(self)
-        while ACTIONS:
-            ACTIONS.pop(-1)
-        for act in self.tracer.action_types:
+        for act in self.tracer.tracemodel['actions']:
             self.cols[act] = (None, None)
-            ACTIONS.append(act)
         self.col_width = 80
         self.colspacing = 5
         self.widget = self.build_widget()
@@ -815,8 +812,9 @@ class TraceTimeline(AdhocView):
         offset = 0
         #colors = [0x000088AA, 0x0000FFAA, 0x008800AA, 0x00FF00AA, 0x880000AA, 0xFF0000FF, 0x008888FF, 0x880088FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
         # 18 col max
-        for c in ACTIONS:
-            etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, ACTION_COLORS[offset])
+        for c in self.tracer.tracemodel['actions']:
+            color = self.tracer.colormodel['actions'][c]
+            etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, color)
             self.cols[c]=(etgroup, None)
             offset += 1
         return
@@ -1573,6 +1571,7 @@ class DocGroup (Group):
         self.movielength = 1
         if self.controller.package.cached_duration>0:
             self.movielength = self.controller.package.cached_duration
+        self.tracer = self.controller.tracers[0]
         self.color_c = color_c
         self.color_f = 0xFFFFFF00
         self.lw = 1.0
@@ -1683,7 +1682,7 @@ class DocGroup (Group):
             m.remove()
         self.marks=[]
         if action is not None:
-            color = ACTION_COLORS[ACTIONS.index(action.name)]
+            color = self.tracer.colormodel['actions'][action.name]
             #print "%s %s %s" % (action.name, ACTIONS.index(action.name), color)
             for op in action.operations:
                 self.addMark(op.movietime, color)

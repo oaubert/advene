@@ -48,6 +48,7 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.package import Package
+from advene.rules.elements import ECACatalog
 
 def register(controller):
     tb = TraceBuilder(controller)
@@ -76,39 +77,64 @@ class TraceBuilder(Thread):
         self.registered_views = []
         self.opened_actions = {}
         self.filtered_events = ['SnapshotUpdate', 'AnnotationBegin', 'AnnotationEnd', 'BookmarkHighlight', 'BookmarkUnhighlight']
-        self.action_types = ['Annotation', 'Restructuration', 'Navigation', 'Classification', 'View building']
-        self.operation_mapping = {
-        'AnnotationCreate':0,
-        'AnnotationEditEnd':1,
-        'AnnotationDelete':1,
-        'RelationCreate':1,
-        'RelationEditEnd':1,
-        'AnnotationMerge':1,
-        'AnnotationMove':1,
-        'PlayerStart':2,
-        'PlayerStop':2,
-        'PlayerPause':2,
-        'PlayerResume':2,
-        'PlayerSet':2,
-        'ViewActivation':2,
-        'ViewDeactivation':2,
-        'AnnotationTypeCreate':3,
-        'RelationTypeCreate':3,
-        'RelationTypeDelete':3,
-        'AnnotationTypeDelete':3,
-        'AnnotationTypeEditEnd':3,
-        'RelationTypeEditEnd':3,
-        'SchemaCreate':3,
-        'SchemaEditEnd':3,
-        'SchemaDelete':3,
-        'ViewCreate':4,
-        'ViewEditEnd':4,
-        'ViewDelete':4,
-        'EditSessionStart':5,
-        #'ElementEditEnd':5,
-        'ElementEditDestroy':5,
-        'EditSessionEnd':5,
-        }
+        self.tracemodel = {'events':[],
+                            'operations':[],
+                            'actions':[],
+                            }
+        for i in ECACatalog.event_names.keys():
+            self.tracemodel['events'].append(i)
+            if i not in self.filtered_events:
+                self.tracemodel['operations'].append(i)
+        self.tracemodel['actions']=['Annotation', 'Restructuration', 'Navigation', 'Classification', 'View building']
+        self.modelmapping = {
+                        'operations': {
+                                'actions': {
+                                        'AnnotationCreate':0,
+                                        'AnnotationEditEnd':1,
+                                        'AnnotationDelete':1,
+                                        'RelationCreate':1,
+                                        'RelationEditEnd':1,
+                                        'RelationDelete':1,
+                                        'AnnotationMerge':1,
+                                        'AnnotationMove':1,
+                                        'PlayerStart':2,
+                                        'PlayerStop':2,
+                                        'PlayerPause':2,
+                                        'PlayerResume':2,
+                                        'PlayerSet':2,
+                                        'ViewActivation':2,
+                                        'ViewDeactivation':2,
+                                        'AnnotationTypeCreate':3,
+                                        'RelationTypeCreate':3,
+                                        'RelationTypeDelete':3,
+                                        'AnnotationTypeDelete':3,
+                                        'AnnotationTypeEditEnd':3,
+                                        'RelationTypeEditEnd':3,
+                                        'SchemaCreate':3,
+                                        'SchemaEditEnd':3,
+                                        'SchemaDelete':3,
+                                        'ViewCreate':4,
+                                        'ViewEditEnd':4,
+                                        'ViewDelete':4,
+                                        'EditSessionStart':-1,
+                                        #'ElementEditEnd':5,
+                                        'ElementEditDestroy':-1,
+                                        'EditSessionEnd':-1,
+                                        },
+                                     },                             
+                            }
+        self.colormodel = {'events':{},
+                            'operations':{},
+                            'actions':{ 'Annotation':0x000088FF,
+                                        'Restructuration':0x008800FF,
+                                        'Navigation':0x880000FF,
+                                        'Classification':0x008888FF,
+                                        'View building':0x880088FF,
+                                        }
+                            }
+        #for i in self.tracemodel['operations']:
+        #    if i not in self.modelmapping['operations']['actions']:
+        #        print i
         self.editEndNames = ['ElementEditDestroy', 'ElementEditEnd', 'AnnotationEditEnd', 'RelationEditEnd', 'AnnotationTypeEditEnd', 'RelationTypeEditEnd', 'EditSessionEnd', 'ViewEditEnd', 'SchemaEditEnd']
 
         if package is None and controller is not None:
@@ -404,17 +430,17 @@ class TraceBuilder(Thread):
             evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, self.imp_type(ev.o_type), ev.o_cid)
             evt.change_comment(ev.comment)
             self.traces[-1].add_to_trace('events', evt)
-            if evt.name in self.operation_mapping.keys():
+            if evt.name in self.modelmapping['operations']['actions'].keys():
                 op = Operation(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, self.imp_type(ev.o_type), ev.o_cid)
                 self.traces[-1].add_to_trace('operations', op)
                 if op is not None:
-                    if ev.name in self.operation_mapping.keys():
-                        ac_t = self.operation_mapping[ev.name]
+                    if ev.name in self.modelmapping['operations']['actions'].keys():
+                        ac_t = self.modelmapping['operations']['actions'][ev.name]
                     else:
                         continue
                     typ = "Undefined"
-                    if ac_t < len(self.action_types):
-                        typ = self.action_types[ac_t]
+                    if ac_t >=0:
+                        typ = self.tracemodel['actions'][ac_t]
                     if typ == "Undefined":
                         if ev.o_name=='annotation' or ev.o_name=='relation':
                             typ="Restructuration"
@@ -459,7 +485,7 @@ class TraceBuilder(Thread):
                 #relaunching
                 self.toggle_network_broadcasting()
                 self.bdq.put_nowait(ev)
-        if ev.name in self.operation_mapping.keys():
+        if ev.name in self.modelmapping['operations']['actions'].keys():
             op = self.packOperation(obj)
             if op is not None:
                 ac = self.packAction(obj, op)
@@ -731,13 +757,13 @@ class TraceBuilder(Thread):
         ope = op
         ac_t = None
         # verifier l'action de l'evenement
-        if obj['event_name'] in self.operation_mapping.keys():
-            ac_t = self.operation_mapping[obj['event_name']]
+        if obj['event_name'] in self.modelmapping['operations']['actions'].keys():
+            ac_t = self.modelmapping['operations']['actions'][obj['event_name']]
         else:
             return
         typ = "Undefined"
-        if ac_t < len(self.action_types):
-            typ = self.action_types[ac_t]
+        if ac_t >=0:
+            typ = self.tracemodel['actions'][ac_t]
         if typ == "Undefined":
             typ = self.find_action_name(obj)
             # traiter les edit
