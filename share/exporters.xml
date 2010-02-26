@@ -485,6 +485,23 @@ xmlns=&quot;http://advene.org/ns/linked-data/&quot;
        tal attributes=&quot;rdf:resource l/content/parsed/url&quot; /&gt;
        --&gt;
   &lt;/Annotation&gt;
-&lt;/rdf:RDF&gt;</content></view>
+&lt;/rdf:RDF&gt;</content></view><view dc:creator="oaubert" dc:date="2010-02-26" id="TimedText" viewable-class="*"><meta><extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">tt</extension><title xmlns="http://purl.org/dc/elements/1.1/">TimedText</title></meta><content mime-type="application/xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;tt xml:lang=&quot;en&quot; xmlns=&quot;http://www.w3.org/2006/10/ttaf1&quot; xmlns:tts=&quot;http://www.w3.org/2006/04/ttaf1#styling&quot;&gt; 
+&lt;head&gt;
+  &lt;metadata xmlns:ttm=&quot;http://www.w3.org/2006/10/ttaf1#metadata&quot;&gt; 
+      &lt;ttm:title tal:content=&quot;here/title&quot;&gt;Title&lt;/ttm:title&gt;
+      &lt;ttm:desc tal:content=&quot;here/meta/dc/description&quot;&gt;Description&lt;/ttm:desc&gt;
+  &lt;/metadata&gt;  
+  &lt;styling&gt;
+    &lt;style id=&quot;1&quot; tts:textAlign=&quot;center&quot; tts:color=&quot;transparent&quot; tts:fontFamily=&quot;Verdana&quot; tts:wrapOption=&quot;wrap&quot;/&gt;
+    &lt;/styling&gt;  
+&lt;/head&gt;  
+&lt;body&gt;
+  &lt;div xml:id=&quot;captions&quot; xml:lang=&quot;en&quot;&gt;
+     &lt;p tal:repeat=&quot;a here/annotations&quot; tal:attributes=&quot;begin a/fragment/formatted/begin ; end a/fragment/formatted/end&quot; tal:content=&quot;a/content/data&quot;&gt;data&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+ &lt;/tt&gt;
+ </content></view>
   </views>
 </package>
