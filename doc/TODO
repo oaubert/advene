@@ -1,3 +1,7 @@
+* export DFXP / TT
+
+* svg editor: fix subtoolbar positioning
+
 * fix controller.svg_overlay
 
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)
