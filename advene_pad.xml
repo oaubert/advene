@@ -37,10 +37,10 @@
     </Company_Info>
     <Program_Info>
       <Program_Name>Advene</Program_Name>
-      <Program_Version>0.38</Program_Version>
-      <Program_Release_Month>03</Program_Release_Month>
-      <Program_Release_Day>16</Program_Release_Day>
-      <Program_Release_Year>2009</Program_Release_Year>
+      <Program_Version>0.40</Program_Version>
+      <Program_Release_Month>02</Program_Release_Month>
+      <Program_Release_Day>26</Program_Release_Day>
+      <Program_Release_Year>2010</Program_Release_Year>
       <Program_Cost_Dollars>0</Program_Cost_Dollars>
       <Program_Cost_Other_Code></Program_Cost_Other_Code>
       <Program_Cost_Other></Program_Cost_Other>
@@ -50,9 +50,9 @@
       <Program_OS_Support>Linux,Mac OS X,Windows2000,Windows2003,WinXP</Program_OS_Support>
       <Program_Language>English,Esperanto,French</Program_Language>
       <File_Info>
-        <File_Size_Bytes>38527246</File_Size_Bytes>
-	<File_Size_K>37624</File_Size_K>
-	<File_Size_MB>36</File_Size_MB>
+        <File_Size_Bytes>62272083</File_Size_Bytes>
+	<File_Size_K>60812</File_Size_K>
+	<File_Size_MB>59</File_Size_MB>
       </File_Info>
       <Expire_Info>
         <Has_Expire_Info>N</Has_Expire_Info><Expire_Count></Expire_Count><Expire_Based_On></Expire_Based_On><Expire_Other_Info></Expire_Other_Info><Expire_Month></Expire_Month><Expire_Day></Expire_Day><Expire_Year></Expire_Year>
@@ -110,12 +110,12 @@
       <Application_URLs>
         <Application_Info_URL>http://liris.cnrs.fr/advene/</Application_Info_URL>
 	<Application_Order_URL>http://liris.cnrs.fr/advene/download.html</Application_Order_URL>
-	<Application_Screenshot_URL>http://liris.cnrs.fr/advene/screenshots/advene-0.38.png</Application_Screenshot_URL>
+	<Application_Screenshot_URL>http://liris.cnrs.fr/advene/screenshots/advene-0.40.png</Application_Screenshot_URL>
 	<Application_Icon_URL>http://liris.cnrs.fr/advene/img/icon_advene32.png</Application_Icon_URL>
 	<Application_XML_File_URL>http://liris.cnrs.fr/advene/advene_pad.xml</Application_XML_File_URL>
       </Application_URLs>
       <Download_URLs>
-        <Primary_Download_URL>http://download.gna.org/advene/win32/setup_advene_0.38_all_in_one_vlc140108svn.exe</Primary_Download_URL>
+        <Primary_Download_URL>http://download.gna.org/advene/win32/setup_advene_0.40_all_in_one_vlc_1.0.3_gstreamer_0.10.15.exe</Primary_Download_URL>
 	<Secondary_Download_URL></Secondary_Download_URL>
 	<Additional_Download_URL_1></Additional_Download_URL_1>
 	<Additional_Download_URL_2></Additional_Download_URL_2>
