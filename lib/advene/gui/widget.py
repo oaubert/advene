@@ -888,18 +888,19 @@ class TimestampRepresentation(gtk.Button):
 
         self._rules=[]
         # React to UpdateSnapshot events
-        def snapshot_update_cb(context, target):
-            if abs(context.globals['position'] - self._value) <= self.epsilon:
-                # Update the representation
-                self.refresh()
-            return True
-        def remove_rules(*p):
-            for r in self._rules:
-                self.controller.event_handler.remove_rule(r, 'internal')
-            return False
         self._rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
-                                                                        method=snapshot_update_cb))
-        self.connect('destroy', remove_rules)
+                                                                        method=self.snapshot_update_cb))
+        self.connect('destroy', self.remove_rules)
+
+    def snapshot_update_cb(self, context, target):
+        if abs(context.globals['position'] - self._value) <= self.epsilon:
+            # Update the representation
+            self.refresh()
+        return True
+    def remove_rules(self, *p):
+        for r in self._rules:
+            self.controller.event_handler.remove_rule(r, 'internal')
+        return False
 
     def get_value(self):
         return self._value
