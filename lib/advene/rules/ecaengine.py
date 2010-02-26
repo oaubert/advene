@@ -329,7 +329,7 @@ class ECAEngine:
         except ValueError:
             # Ignore the error if the rule was already removed.
             # but display a warning anyway (it should not happen)
-            print "Trying to remove non-existant rule %s from %s ruleset" % (str(rule.name), type_)
+            print "Trying to remove non-existant rule %s from %s ruleset" % (str(rule), type_)
             pass
 
     def dump(self):
