@@ -241,7 +241,7 @@ class TimeAdjustment:
 
     def play_from_here(self, button):
         if self.controller.player.status == self.controller.player.PauseStatus:
-            self.controller.update_status("resume", self.value)
+            self.controller.update_status("set", self.value)
         elif self.controller.player.status != self.controller.player.PlayingStatus:
             self.controller.update_status("start", self.value)
         self.controller.update_status("set", self.value)
