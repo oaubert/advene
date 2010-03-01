@@ -1,5 +1,3 @@
-* svg editor: fix subtoolbar positioning
-
 * fix controller.svg_overlay
 
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)
@@ -2710,4 +2708,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * exporter: have TAL export to text/plain not convert entities to HTML (cf srt)
 
 * export DFXP / TT
+
+* svg editor: fix subtoolbar positioning
 

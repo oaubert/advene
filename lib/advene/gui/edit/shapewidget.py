@@ -1596,11 +1596,8 @@ class ShapeEditor:
             w.set_modal(True)
             w.resize(20, 150)
             alloc = tb.get_allocation()
-            if sys.platform in ('darwin', 'win32'):
-                p=tb.get_toplevel().get_position()
-                w.move(alloc.x+p[0], alloc.y+p[1])
-            else:
-                w.move(alloc.x, alloc.y)
+            p = tb.get_toplevel().get_position()
+            w.move(alloc.x + p[0], alloc.y + p[1])
             w.show_all()
             def button_press_event(wid, event):
                 wid.destroy()
@@ -1651,11 +1648,8 @@ class ShapeEditor:
             bar.show_all()
             w.resize(20, 200)
             alloc = tb.get_allocation()
-            if sys.platform in ('darwin', 'win32'):
-                p=tb.get_toplevel().get_position()
-                w.move(alloc.x+p[0], alloc.y+p[1])
-            else:
-                w.move(alloc.x, alloc.y)
+            p = tb.get_toplevel().get_position()
+            w.move(alloc.x + p[0], alloc.y + p[1])
             w.show_all()
             def button_press_event(wid, event):
                 wid.destroy()
