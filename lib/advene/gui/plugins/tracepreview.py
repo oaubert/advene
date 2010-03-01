@@ -19,7 +19,7 @@
 #
 """Trace Preview.
 
-This widget allows to stack compact event history to preview the trace.
+This widget allows to stack compact operation history to preview the trace.
 """
 
 import gtk
@@ -33,6 +33,12 @@ import urllib
 import advene.model.view
 from advene.gui.widget import TimestampRepresentation
 from advene.rules.elements import ECACatalog
+import advene.core.config as config
+import goocanvas
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.annotation import Annotation, Relation
+from advene.model.view import View
+from advene.model.package import Package
 
 def register(controller):
     controller.register_viewclass(TracePreview)
@@ -63,7 +69,7 @@ class TracePreview(AdhocView):
             'max_size': 5,
             'detail': 'operations', #depending on tracer.trace.levels (basically : events, operations or actions)
             }
-        self.DetB = None
+        #self.DetB = None
         self.sc = None
         self.accuBox = None
         self.box_h = 30
@@ -79,36 +85,13 @@ class TracePreview(AdhocView):
     def build_widget(self):
         mainbox = gtk.VBox()
         btnbar=gtk.HBox()
-
-        # choix details
-        if len(self.tracer.trace.levels.keys())<=0:
-            print "Trace Preview error : no trace level"
-        else:
-            def details_changed(w):
-                v=w.get_label()
-                i=self.tracer.trace.levels.keys().index(v)+1
-                if i>=len(self.tracer.trace.levels.keys()):
-                    i=0
-                v=self.tracer.trace.levels.keys()[i]
-                w.set_label(v)
-                #updating options
-                self.options['detail']=v
-                #refreshing display
-                self.receive(self.tracer.trace)
-                return
-            bdetLabel = self.options['detail']
-            bdet = gtk.Button(bdetLabel)
-            self.DetB = bdet
-            bdet.set_size_request(60, 20)
-            btnbar.pack_start(gtk.Label(_(' Trace : ')), expand=False)
-            btnbar.pack_start(bdet, expand=False)
-            bdet.connect('clicked', details_changed)
-        btnbar.pack_start(gtk.VSeparator())
         btngt = gtk.Button(_('Full trace'))
         btngt.set_tooltip_text(_('Open the trace timeline view fareast'))
         btngt.set_size_request(60, 20)
         def open_trace(w):
-            self.controller.gui.open_adhoc_view(name='trace2', destination='fareast')
+            l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'trace2' ]
+            if not l:
+                a=self.controller.gui.open_adhoc_view(name='trace2', destination='fareast')
         btnbar.pack_start(btngt, expand=False)
         btngt.connect('clicked', open_trace)
             
@@ -237,6 +220,17 @@ class TracePreview(AdhocView):
         if obj_evt is not None:
             vb=gtk.VBox()
             self.last_obs_box = self.buildBox(obj_evt, level)
+            def zoom_in_timeline(w, event, obj_evt):
+                if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+                    l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'trace2' ]
+                    if l:
+                        a=l[-1]
+                    else:        
+                        a=self.controller.gui.open_adhoc_view(name='trace2', destination='fareast')
+                    g = a.find_group(obj_evt)
+                    if g is not None:
+                        a.zoom_on(canvas_item=g)
+            self.last_obs_box.connect('button-press-event', zoom_in_timeline, obj_evt)
             self.last_obs = obj_evt
             vb.add(self.last_obs_box)
             vb.add(gtk.HSeparator())
@@ -248,73 +242,190 @@ class TracePreview(AdhocView):
         if level<0:
             print 'refresh trace'
         else:
-            corpsstr = ''
-            entetestr = ''
-            if obj_evt.content is not None:
-                corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
             if isinstance(obj_evt.time, float):
                 ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
             else: 
                 # intervalle
                 ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time[0]))
-            if hasattr(obj_evt, 'operations'):
-                entetestr = "%s : %s" % (ev_time, obj_evt.name)
-                for op in obj_evt.operations:
-                    op_time = time.strftime("%H:%M:%S", time.localtime(op.time))
-                    if op.concerned_object['name'] is None:
-                        corpsstr += urllib.unquote( op_time + " : " + op.name + "\n")
-                    else:
-                        corpsstr += urllib.unquote( op_time + " : " + op.name + " ( " + op.concerned_object['name'] + " : " + op.concerned_object['id'] + " )\n")
-            else:
-                if obj_evt.name in self.incomplete_operations_names.keys():
-                    comp = ''
-                    if obj_evt.concerned_object['id']:
-                        ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
-                        #print "%s %s %s" % (self.controller.package, obj_evt.concerned_object['id'], ob)
-                        if isinstance(ob, advene.model.annotation.Annotation):
-                            comp = _('of an annotation (%s)') % obj_evt.concerned_object['id']
-                        elif isinstance(ob,advene.model.annotation.Relation):
-                            comp = _('of a relation (%s)') % obj_evt.concerned_object['id']
-                        elif isinstance(ob,advene.model.schema.AnnotationType):
-                            comp = _('of an annotation type (%s)') % obj_evt.concerned_object['id']
-                        elif isinstance(ob,advene.model.schema.RelationType):
-                            comp = _('of a relation type (%s)') % obj_evt.concerned_object['id']
-                        elif isinstance(ob,advene.model.schema.Schema):
-                            comp = _('of a schema (%s)') % obj_evt.concerned_object['id']
-                        elif isinstance(ob,advene.model.view.View):
-                            comp = _('of a view (%s)') % obj_evt.concerned_object['id']
-                        elif isinstance(ob,advene.model.package.Package):
-                            comp = _('of a package (%s)') % obj_evt.concerned_object['id']
-                        else:
-                            comp = _('of an unknown item (%s)') % obj_evt.concerned_object['id']
-                            #print "%s" % ob
-                    entetestr = "%s : %s %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
-                elif obj_evt.name in ECACatalog.event_names:
-                    if ECACatalog.event_names[obj_evt.name]:
-                        entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
-                    else:
-                        entetestr = "%s : %s" % (ev_time, "Observed item not described")
-                    if obj_evt.concerned_object['id']:
-                        entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
+            corpsstr = ''
+            entetestr = ''
+            if obj_evt.name not in self.incomplete_operations_names.keys():
+                if ECACatalog.event_names[obj_evt.name]:
+                    entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
                 else:
-                    print "Trace Preview: unlabelled observed item : %s" % obj_evt.name
-                    entetestr = "%s : %s" % (ev_time, obj_evt.name)
-            entete = gtk.Label(entetestr.encode("UTF-8"))
+                    entetestr = "%s : %s" % (ev_time, "Event not described")
+                if obj_evt.concerned_object['id']:
+                    entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
+            else:
+                comp = ''
+                if obj_evt.concerned_object['type'] == Annotation:
+                    comp = _('of an annotation (%s)') % obj_evt.concerned_object['id']
+                elif obj_evt.concerned_object['type'] == Relation:
+                    comp = _('of a relation (%s)') % obj_evt.concerned_object['id']
+                elif obj_evt.concerned_object['type'] == AnnotationType:
+                    comp = _('of an annotation type (%s)') % obj_evt.concerned_object['id']
+                elif obj_evt.concerned_object['type'] == RelationType:
+                    comp = _('of a relation type (%s)') % obj_evt.concerned_object['id']
+                elif obj_evt.concerned_object['type'] == Schema:
+                    comp = _('of a schema (%s)') % obj_evt.concerned_object['id']
+                elif obj_evt.concerned_object['type'] == View:
+                    comp = _('of a view (%s)') % obj_evt.concerned_object['id']
+                elif obj_evt.concerned_object['type'] == Package:
+                    comp = _('of a package (%s)') % obj_evt.concerned_object['id']
+                else:
+                    comp = _('of an unknown item (%s)') % obj_evt.concerned_object['id']
+                    #print "%s" % ob
+                entetestr = "%s : %s %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
+            if obj_evt.content is not None:
+                corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
+            entete = gtk.Label(ev_time.encode("UTF-8"))
             hb = gtk.HBox()
-            tr = TimestampRepresentation(obj_evt.movietime, self.controller, self.box_h, 0, None , False)
-            if tr is not None:
-                hb.pack_start(tr, expand=False)
-                hb.pack_start(gtk.VSeparator(), expand=False)
-            pb = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, 20, self.box_h)
-            color = 0xdddd00FF
-            if obj_evt.name in self.tracer.colormodel[level].keys():
-                color = self.tracer.colormodel[level][obj_evt.name]
-            pb.fill(color)
-            im = gtk.image_new_from_pixbuf(pb)
-            hb.pack_start(im, expand=False)
             hb.pack_start(entete, expand=False)
+            objcanvas = goocanvas.Canvas()
+            objcanvas.set_bounds (0,0,60,20)
+            hb.pack_end(objcanvas, expand=False)
+            #BIG HACK to display icon
+            te = obj_evt.name
+            if te.find('Edit')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                        (( 'pixmaps', 'edition.png')))
+            elif te.find('Creat')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                        (( 'pixmaps', 'plus.png')))
+            elif te.find('Delet')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                        (( 'pixmaps', 'moins.png')))
+            elif te.find('Set')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                        ( ('pixmaps', 'allera.png')))
+            elif te.find('Start')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                        ( ('pixmaps', 'lecture.png')))
+            elif te.find('Pause')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                        ( ('pixmaps', 'pause.png')))
+            elif te.find('Stop')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                        ( ('pixmaps', 'stop.png')))
+            else:
+                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                        ( ('pixmaps', 'web.png')))
+                print 'No icon for %s' % te
+            goocanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
+            # object icon
+            objg = goocanvas.Group(parent = objcanvas.get_root_item ())
+            if obj_evt.concerned_object['id']:
+                ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
+                temp_c = self.controller.get_element_color(ob)
+                if temp_c is not None:
+                    if len(temp_c)==7:
+                        temp_c= int(temp_c[1:]+"FF", 16)
+                    elif len(temp_c)==13:
+                        b1=int(temp_c[1:5], 16)/0x101
+                        b2=int(temp_c[5:9], 16)/0x101
+                        b3=int(temp_c[9:], 16)/0x101
+                        temp_c= b1*0x1000000 + b2*0x10000 + b3*0x100 + 0xFF
+                        #print self.color_f
+                else:
+                    temp_c = 0xFFFFFFFF
+                goocanvas.Ellipse(parent=objg,
+                        center_x=40,
+                        center_y=10,
+                        radius_x=9,
+                        radius_y=9,
+                        stroke_color='black',
+                        fill_color_rgba=temp_c,
+                        line_width=1.0)        
+                if obj_evt.concerned_object['type'] == Annotation:
+                    #draw a A
+                    txt='A'
+                elif obj_evt.concerned_object['type'] == Relation:
+                    #draw a R
+                    txt='R'
+                elif obj_evt.concerned_object['type'] == AnnotationType:
+                    #draw a AT
+                    txt='AT'
+                elif obj_evt.concerned_object['type'] == RelationType:
+                    #draw a RT
+                    txt='RT'
+                elif obj_evt.concerned_object['type'] == Schema:
+                    #draw a S
+                    txt='S'
+                elif obj_evt.concerned_object['type'] == View:
+                    #draw a V
+                    txt='V'
+                else:
+                    #draw a U
+                    txt='U'
+                goocanvas.Text (parent = objg,
+                        text = txt,
+                        x = 40,
+                        y = 10,
+                        width = -1,
+                        anchor = gtk.ANCHOR_CENTER,
+                        font = "Sans 5")
+            cm = objcanvas.get_colormap()
+            color = cm.alloc_color('#FFFFFF')
+            if obj_evt.name in self.tracer.colormodel[level].keys():
+                cs = str.replace(str(self.tracer.colormodel[level][obj_evt.name]), '0x', '#')
+                if len(cs)<10:
+                    cs = cs[:(len(cs)-2)]
+                    while len(cs)<7:
+                        cs=str.replace(cs, '#', '#0')
+                    color = gtk.gdk.color_parse( cs)
+                else:
+                    cs = cs[:(len(cs)-3)]
+                    color = gtk.gdk.color_parse( cs)
+            elif self.tracer.modelmapping[level]:
+                for k in self.tracer.modelmapping[level].keys():
+                    if obj_evt.name in self.tracer.modelmapping[level][k].keys():
+                        x = self.tracer.modelmapping[level][k][obj_evt.name]
+                        if x >=0:
+                            kn = self.tracer.tracemodel[k][x]
+                            if kn in self.tracer.colormodel[k].keys():
+                                cs = str.replace(str(hex(self.tracer.colormodel[k][kn])), '0x', '#')
+                                if len(cs)<10:
+                                    cs = cs[:(len(cs)-2)]
+                                    while len(cs)<7:
+                                        cs=str.replace(cs, '#', '#0')
+                                    color = gtk.gdk.color_parse( cs)
+                                else:
+                                    cs = cs[:(len(cs)-3)]
+                                    color = gtk.gdk.color_parse( cs)
+                                break
+                        else:
+                            #BIG HACK, FIXME
+                            #should do nothing but for incomplete operations we need to do something...
+                            if obj_evt.name in self.incomplete_operations_names.keys():
+                                if obj_evt.concerned_object['id']:
+                                    ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
+                                    if isinstance(ob, advene.model.annotation.Annotation) or isinstance(ob,advene.model.annotation.Relation):
+                                        x=1
+                                    elif isinstance(ob,advene.model.schema.AnnotationType) or isinstance(ob,advene.model.schema.RelationType) or isinstance(ob,advene.model.schema.Schema):
+                                        x=3
+                                    elif isinstance(ob,advene.model.view.View):
+                                        x=4
+                                    else:
+                                        x=-1
+                                    if x >=0:
+                                        kn = self.tracer.tracemodel[k][x]
+                                        if kn in self.tracer.colormodel[k].keys():
+                                            cs = str.replace(str(hex(self.tracer.colormodel[k][kn])), '0x', '#')
+                                            if len(cs)<10:
+                                                cs = cs[:(len(cs)-2)]
+                                                while len(cs)<7:
+                                                    cs=str.replace(cs, '#', '#0')
+                                                color = gtk.gdk.color_parse( cs)
+                                            else:
+                                                cs = cs[:(len(cs)-3)]
+                                                color = gtk.gdk.color_parse( cs)
+                                            break
+            objcanvas.modify_base (gtk.STATE_NORMAL, color)
+            objcanvas.set_size_request(60,20)
             if corpsstr != "":
-                hb.set_tooltip_text(corpsstr)
+                entete.set_tooltip_text(corpsstr)
+            if entetestr != "":
+                objcanvas.set_tooltip_text(entetestr)
             return hb
 
     def unpackEvent(self):
