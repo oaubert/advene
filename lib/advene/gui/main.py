@@ -1123,18 +1123,11 @@ class AdveneGUI(object):
         # south, fareast)
         self.pane={}
 
-        if config.data.os == 'win32':
-            # gtk.Socket is available on win32 only from gtk >= 2.8
-            self.drawable=gtk.DrawingArea()
-            # Ignore the delete event, which is sent when the
-            # embedded vout dies (i.e. on movie stop)
-            self.drawable.connect('delete-event', lambda w, e: True)
-        else:
-            self.drawable=gtk.Socket()
-            def handle_remove(socket):
-                # Do not kill the widget if the application exits
-                return True
-            self.drawable.connect('plug-removed', handle_remove)
+        self.drawable=gtk.Socket()
+        def handle_remove(socket):
+            # Do not kill the widget if the application exits
+            return True
+        self.drawable.connect('plug-removed', handle_remove)
 
         black=gtk.gdk.Color(0, 0, 0)
         for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
