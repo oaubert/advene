@@ -54,8 +54,6 @@ def register(controller):
         controller.register_viewclass(TraceTimeline)
 
 name="Trace Timeline view"
-#ACTION_COLORS=[0x000088AA, 0x008800AA, 0x880000AA, 0x008888FF, 0x880088FF, 0x0000FFAA, 0x00FF00AA, 0xFF0000FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
-#ACTIONS=[]
 INCOMPLETE_OPERATIONS_NAMES = {
             'EditSessionStart': _('Beginning edition'),
             'ElementEditBegin': _('Beginning edition'),
@@ -994,6 +992,21 @@ class TraceTimeline(AdhocView):
         #self.docgroup.redraw(trace)
         #if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
         return ev
+
+    def find_group(self, observed):
+        g=None
+        root = self.canvas.get_root_item()
+        i=0
+        while i < root.get_n_children():
+            g = root.get_child(i)
+            i+=1
+            if isinstance(g, EventGroup):
+                if observed == g.event:
+                    return g
+                if observed in g.event.operations:
+                    return g
+        return None
+        
 
 class HeadGroup (Group):
     def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00ffff50):
