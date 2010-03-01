@@ -21,22 +21,38 @@ import signal
 import os
 from threading import Thread
 
+try:
+    import pygst
+    pygst.require('0.10')
+    import gst
+except ImportError:
+    gst=None
+
 import advene.core.config as config
 
 class SoundPlayer:
+    def gst_play(self, fname):
+        """Play the given file through gstreamer.
+        """
+        if not hasattr(self, 'pipe'):
+            self.pipe = gst.parse_launch('playbin2')
+        if fname.startswith('file:') or fname.startswith('http:'):
+            uri = fname
+        else:
+            uri = 'file://' + fname
+        self.pipe.set_state(gst.STATE_NULL)
+        self.pipe.props.uri = uri
+        self.pipe.set_state(gst.STATE_PLAYING)
+        return True
+
     def linux_play(self, fname):
         """Play the given file. Requires aplay.
         """
         pid=subprocess.Popen( [ '/usr/bin/aplay', '-q', fname ] )
         signal.signal(signal.SIGCHLD, self.handle_sigchld)
         return True
-
+            
     def win32_play(self, fname):
-        #from winsound import PlaySound, SND_FILENAME, SND_ASYNC
-        #PlaySound(fname, SND_FILENAME|SND_ASYNC)
-        #spt = SpThread(fname)
-        #spt.setDaemon(True)
-        #spt.start()
         pathsp = os.path.sep.join((config.data.path['advene'],'pySoundPlayer.exe'))
         if not os.path.exists(pathsp):
             pathsp = os.path.sep.join((config.data.path['advene'],'Win32SoundPlayer','pySoundPlayer.exe'))
@@ -61,7 +77,9 @@ class SoundPlayer:
         os.waitpid(-1, os.WNOHANG)
         return True
 
-    if config.data.os == 'win32':
+    if gst is not None:
+        play = gst_play
+    elif config.data.os == 'win32':
         play=win32_play
     elif config.data.os == 'darwin':
         play=macosx_play
@@ -69,36 +87,3 @@ class SoundPlayer:
         if not os.path.exists('/usr/bin/aplay'):
             print "Error: aplay is not installed. Advene will be unable to play sounds."
         play=linux_play
-
-class SpThread(Thread):
-    def __init__(self,name):
-        Thread.__init__(self)
-        self.fname = name
-    def run(self):
-        import pymedia.muxer as muxer, pymedia.audio.acodec as acodec, pymedia.audio.sound as sound
-        import time
-        dm= muxer.Demuxer( str.split( self.fname, '.' )[ -1 ].lower() )
-        snds= sound.getODevices()
-        f= open( self.fname, 'rb' )
-        snd= dec= None
-        s= f.read( 32000 )
-        card=0
-        rate=1
-        t= 0
-        while len( s ):
-            frames= dm.parse( s )
-            if frames:
-                for fr in frames:
-                    if dec== None:
-                        print dm.getHeaderInfo(), dm.streams
-                        dec= acodec.Decoder( dm.streams[ fr[ 0 ] ] )
-                    r= dec.decode( fr[ 1 ] )
-                    if r and r.data:
-                        if snd== None:
-                            print 'Opening sound %s with %d channels -> %s' % ( self.fname, r.channels, snds[ card ][ 'name' ] )
-                            snd= sound.Output( int( r.sample_rate* rate ), r.channels, sound.AFMT_S16_LE, card )
-                        data= r.data
-                        snd.play( data )
-            s= f.read( 512 )
-        while snd.isPlaying():
-            time.sleep( .05 )
