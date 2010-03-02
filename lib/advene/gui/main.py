@@ -1275,6 +1275,7 @@ class AdveneGUI(object):
         self.gui.slider.set_draw_value(False)
         self.gui.slider.connect('button-press-event', self.on_slider_button_press_event)
         self.gui.slider.connect('button-release-event', self.on_slider_button_release_event)
+        self.gui.slider.connect('scroll-event', self.on_slider_scroll_event)
         def update_timelabel(s):
             self.time_label.set_text(helper.format_time(s.get_value()))
             return False
@@ -3726,6 +3727,14 @@ class AdveneGUI(object):
             p = self.controller.create_position (value = long(self.gui.slider.get_value ()))
             self.controller.update_status('set', p)
         self.slider_move = False
+        return False
+
+    def on_slider_scroll_event (self, widget=None, event=None):
+        if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
+            incr=+1
+        if event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
+            incr=-1
+        self.controller.move_frame(incr)
         return False
 
     def on_help1_activate (self, button=None, data=None):
