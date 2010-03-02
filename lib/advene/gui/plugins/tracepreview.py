@@ -66,8 +66,7 @@ class TracePreview(AdhocView):
             'PlayerSet': _('Moving to'),
         }
         self.options = {
-            'max_size': 5,
-            'detail': 'operations', #depending on tracer.trace.levels (basically : events, operations or actions)
+            'max_size': 8,
             }
         #self.DetB = None
         self.sc = None
@@ -94,7 +93,6 @@ class TracePreview(AdhocView):
                 a=self.controller.gui.open_adhoc_view(name='trace2', destination='fareast')
         btnbar.pack_start(btngt, expand=False)
         btngt.connect('clicked', open_trace)
-            
         mainbox.pack_start(btnbar, expand=False)
         mainbox.pack_start(gtk.HSeparator(), expand=False)
         self.accuBox = gtk.VBox()
@@ -117,50 +115,12 @@ class TracePreview(AdhocView):
         # operation : the new or latest modified operation
         # action : the new or latest modified action
         #print "received : action %s, operation %s, event %s" % (action, operation, event)
-        if self.options['detail'] == 'events':
-            if event is None and not (operation is None and action is None):
-                return
-            self.showEvents(trace.levels[self.options['detail']], event)
-        elif self.options['detail'] == 'operations':
-            if operation is None and not (event is None and action is None):
-                return
-            self.showOperations(trace.levels[self.options['detail']], operation)
-        elif self.options['detail'] == 'actions':
-            if action is None and not (event is None and operation is None):
-                return
-            self.showActions(trace.levels[self.options['detail']], action)
-        else:
-            self.showTrace(trace.levels[self.options['detail']])
+        if operation is None and not (event is None and action is None):
+            return
+        self.showObs(trace.levels['operations'], operation)
         self.scroll_win()
 
-    def showTrace(self, level):
-        # generic trace display
-        return
-
-    def showEvents(self, tracelevel, event):
-        #adjust the current display to the modified trace
-        if event is not None:
-            if self.size>=self.options['max_size']:
-                self.unpackEvent()
-            self.packObs(event, 'events')
-        else:
-            #refreshing the whole trace
-            while self.size > 0:
-                self.unpackEvent()
-            if len(tracelevel)==0:
-                return
-            trace_max = max(0, len(tracelevel))
-            trace_min = max(0, trace_max-self.options['max_size'])
-            t_temp = trace_max-1
-            #print 'First min %s' % trace_min
-            while t_temp > trace_min and trace_min>0:
-                t_temp = t_temp-1
-            #print 'Final min %s' % trace_min
-            for i in tracelevel[trace_min:trace_max]:
-                self.packObs(i, 'events')
-        return
-
-    def showOperations(self, tracelevel, operation):
+    def showObs(self, tracelevel, operation):
         #adjust the current display to the modified trace
         if operation is not None:
             if self.size>=self.options['max_size']:
@@ -179,41 +139,6 @@ class TracePreview(AdhocView):
                 t_temp = t_temp -1
             for i in tracelevel[trace_min:trace_max]:
                 self.packObs(i, 'operations')
-        return
-
-    def showActions(self, tracelevel, action):
-        #print "action recue : %s , trace : %s" % (action, len(tracelevel))
-        if action is None:
-            #refreshing the whole trace
-            while self.size > 0:
-                self.unpackEvent()
-            if len(tracelevel)==0:
-                return
-            trace_max = max(0, len(tracelevel))
-            trace_min = max(0, trace_max-self.options['max_size'])
-            #print "min %s, max %s" % (trace_min, trace_max)
-            t_temp = trace_max-1
-            while t_temp > trace_min and trace_min > 0:
-                if tracelevel[t_temp].name == "Undefined":
-                    trace_min = trace_min-1
-                t_temp = t_temp -1
-            for i in tracelevel[trace_min:trace_max]:
-                if i.name == "Undefined":
-                    print "Trace Preview: Undefined action for object %s" % i
-                    pass
-                self.packObs(i, 'actions')
-            return
-        #adjust the current display to the modified trace
-        if action.name == "Undefined":
-            print "Trace Preview: Undefined action for object %s" % action
-            return
-        if action == self.last_obs:
-            # same action as before, we just need to refresh it
-            self.update_last_action_box(action)
-            return
-        if self.size>=self.options['max_size']:
-            self.unpackEvent()
-        self.packObs(action, 'actions')
         return
 
     def packObs(self, obj_evt, level):
@@ -287,8 +212,12 @@ class TracePreview(AdhocView):
             #BIG HACK to display icon
             te = obj_evt.name
             if te.find('Edit')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                if te.find('Start')>=0:
+                    pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
                         (( 'pixmaps', 'edition.png')))
+                elif te.find('End')>=0 or te.find('Destroy')>=0:
+                    pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                        (( 'pixmaps', 'finedition.png')))
             elif te.find('Creat')>=0:
                 pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
                         (( 'pixmaps', 'plus.png')))
@@ -298,7 +227,7 @@ class TracePreview(AdhocView):
             elif te.find('Set')>=0:
                 pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
                         ( ('pixmaps', 'allera.png')))
-            elif te.find('Start')>=0:
+            elif te.find('Start')>=0 or te.find('Resume')>=0:
                 pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
                         ( ('pixmaps', 'lecture.png')))
             elif te.find('Pause')>=0:
@@ -325,7 +254,6 @@ class TracePreview(AdhocView):
                         b2=int(temp_c[5:9], 16)/0x101
                         b3=int(temp_c[9:], 16)/0x101
                         temp_c= b1*0x1000000 + b2*0x10000 + b3*0x100 + 0xFF
-                        #print self.color_f
                 else:
                     temp_c = 0xFFFFFFFF
                 goocanvas.Ellipse(parent=objg,
@@ -435,17 +363,6 @@ class TracePreview(AdhocView):
             print "Trace Preview: no event to unpack ? %s" % self.size
         if self.size>0:
             self.size = self.size-1
-
-    def update_last_action_box(self, obj_evt):
-        corpsstr = ""
-        for op in obj_evt.operations:
-            op_time = time.strftime("%H:%M:%S", time.localtime(op.time))
-            if op.concerned_object['name'] is None:
-                corpsstr += urllib.unquote( op_time + " : " + op.name + "\n")
-            else:
-                corpsstr += urllib.unquote( op_time + " : " + op.name + " ( " + op.concerned_object['name'] + " : " + op.concerned_object['id'] + " )\n")
-        self.last_obs_box.set_tooltip_text(corpsstr)
-        self.receive(self.tracer.trace)
 
     def destroy(self, source=None, event=None):
         self.controller.tracers[0].unregister_view(self)
