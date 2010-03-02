@@ -292,6 +292,19 @@ class TracePreview(AdhocView):
                         width = -1,
                         anchor = gtk.ANCHOR_CENTER,
                         font = "Sans 5")
+            else:
+                # no concerned object, we are in an action of navigation
+                h=obj_evt.movietime/(1000*3600)
+                m=(obj_evt.movietime-(3600*1000*h))/(60*1000)
+                s= (obj_evt.movietime-(3600*1000*h)-(60*1000*m))/1000
+                txt = "{0:3}:{1:3}:{2:3}".format(h,m,s,2)
+                goocanvas.Text (parent = objg,
+                        text = txt,
+                        x = 40,
+                        y = 10,
+                        width = -1,
+                        anchor = gtk.ANCHOR_CENTER,
+                        font = "Sans 6")
             cm = objcanvas.get_colormap()
             color = cm.alloc_color('#FFFFFF')
             if obj_evt.name in self.tracer.colormodel[level].keys():
