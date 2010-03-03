@@ -466,6 +466,7 @@ class AdveneGUI(object):
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
             ('browser', _('TALES explorer'), 'browser.png'),
             ('montage', _("Dynamic montage"), 'montage.png'),
+            ('videoplayer', _("Video player"), 'videoplayer.png'),
             ('', '', ''),
 
             ('webbrowser', _('Open a comment view in the web browser'), 'web.png'),
@@ -2364,7 +2365,8 @@ class AdveneGUI(object):
             self.adhoc_views.append (view)
             try:
                 view.register_callback (controller=self.controller)
-            except AttributeError:
+            except AttributeError, e:
+                print e
                 pass
         return True
 
