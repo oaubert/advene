@@ -293,11 +293,8 @@ class TracePreview(AdhocView):
                         anchor = gtk.ANCHOR_CENTER,
                         font = "Sans 5")
             else:
-                # no concerned object, we are in an action of navigation
-                h=obj_evt.movietime/(1000*3600)
-                m=(obj_evt.movietime-(3600*1000*h))/(60*1000)
-                s= (obj_evt.movietime-(3600*1000*h)-(60*1000*m))/1000
-                txt = "{0:3}:{1:3}:{2:3}".format(h,m,s,2)
+                # no concerned object, we are in an action of navigation                
+                txt = time.strftime("%h%m%s", time.localtime(obj_evt.movietime))
                 goocanvas.Text (parent = objg,
                         text = txt,
                         x = 40,
