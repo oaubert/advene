@@ -612,6 +612,12 @@ class Player:
         self.reparent(xid)
         return True
 
+    def set_widget(self, widget):
+        if hasattr(widget.window, 'xid'):
+            self.set_visual(widget.window.xid)
+        elif hasattr(widget.window, 'hwnd'):
+            self.set_visual(widget.window.hwnd)
+            
     def restart_player(self):
         # FIXME: destroy the previous player
         self.player.set_state(gst.STATE_READY)
