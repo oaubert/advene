@@ -123,8 +123,9 @@ class VideoPlayer(AdhocView):
 
     def build_widget(self):
         vbox=gtk.VBox()
-        
+
         self.player = self.controller.playerfactory.get_player()
+        self.player.sound_mute()
 
         self.drawable=gtk.Socket()
         def handle_remove(socket):
@@ -140,7 +141,37 @@ class VideoPlayer(AdhocView):
 
         self.drawable.set_size_request(320, 200)
 
+
+        self.toolbar=gtk.Toolbar()
+
+        self.audio_mute=gtk.ToggleToolButton()
+        audio_on=gtk.Image()
+        audio_on.set_from_file(config.data.advenefile( ( 'pixmaps', 'silk-sound.png') ))
+        audio_on.show()
+        audio_off=gtk.Image()
+        audio_off.set_from_file(config.data.advenefile( ( 'pixmaps', 'silk-sound-mute.png') ))
+        audio_off.show()
+
+        def toggle_audio_mute(b):
+            """Toggle audio mute status.
+            """
+            # Set the correct image
+            if b.get_active():
+                self.player.sound_mute()
+                b.set_icon_widget(audio_off)
+            else:
+                self.player.sound_unmute()
+                b.set_icon_widget(audio_on)
+            return False
+
+        self.audio_mute.set_icon_widget(audio_on)
+        self.audio_mute.connect('toggled', toggle_audio_mute)
+        self.audio_mute.set_active(self.player.sound_is_muted())
+        self.audio_mute.set_tooltip_text(_("Mute/unmute"))
+        self.toolbar.insert(self.audio_mute, -1)
+        
         vbox.add(self.drawable)
+        vbox.pack_start(self.toolbar, expand=False)
 
         def register_drawable(drawable):
             self.player.set_widget(self.drawable)
