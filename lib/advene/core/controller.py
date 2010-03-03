@@ -183,6 +183,7 @@ class AdveneController(object):
         self.player = self.playerfactory.get_player()
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
+        self.slave_players = set()
 
         # Some player can define a cleanup() method
         try:
@@ -378,9 +379,22 @@ class AdveneController(object):
         advene.util.importer.register(imp)
 
     def register_player(self, imp):
-        """Register a video player.
+        """Register a video player plugin.
         """
         config.data.register_player(imp)
+
+    def register_slave_player(self, p):
+        """Register a slave video player.
+        """
+        self.slave_players.add(p)
+
+    def unregister_slave_player(self, p):
+        """Unregister a slave video player.
+        """
+        try:
+            self.slave_players.remove(p)
+        except KeyError:
+            pass
 
     def register_videotime_action(self, t, action):
         """Register an action to be executed when reaching the given movie time.
@@ -2099,6 +2113,8 @@ class AdveneController(object):
             #     print "update_status %s %s" % (status, position)
             if self.player.playlist_get_list():
                 self.player.update_status (status, position)
+                for p in self.slave_players:
+                    p.update_status(status, position)
                 # Update the destination screenshot
                 if hasattr(position, 'value'):
                     # It is a player.Position. Do a simple conversion
