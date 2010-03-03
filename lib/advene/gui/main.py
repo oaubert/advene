@@ -2363,11 +2363,8 @@ class AdveneGUI(object):
         """
         if view not in self.adhoc_views:
             self.adhoc_views.append (view)
-            try:
+            if hasattr(view, 'register_callback'):
                 view.register_callback (controller=self.controller)
-            except AttributeError, e:
-                print e
-                pass
         return True
 
     def unregister_view (self, view):
