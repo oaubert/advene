@@ -2714,3 +2714,5 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * svg editor: fix subtoolbar positioning
 
 * fix controller.svg_overlay
+
+* Videoplayer: locate movie file (method in controller)

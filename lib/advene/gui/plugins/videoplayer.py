@@ -117,9 +117,9 @@ class VideoPlayer(AdhocView):
         return True
 
     def set_file(self, fname):
-        self.uri = fname
+        self.uri = self.controller.locate_mediafile(fname)
         self.player.playlist_clear()
-        self.player.playlist_add_item(fname)
+        self.player.playlist_add_item(self.uri)
 
     def build_widget(self):
         vbox=gtk.VBox()
