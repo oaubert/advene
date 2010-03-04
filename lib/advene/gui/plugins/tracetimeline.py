@@ -1228,14 +1228,8 @@ class ObjGroup (Group):
         temp_it = self.controller.package.get_element_by_id(self.cobj['id'])
         temp_c = self.controller.get_element_color(temp_it)
         if temp_c is not None:
-            if len(temp_c)==7:
-                self.color_f= int(temp_c[1:]+"FF", 16)
-            elif len(temp_c)==13:
-                b1=int(temp_c[1:5], 16)/0x101
-                b2=int(temp_c[5:9], 16)/0x101
-                b3=int(temp_c[9:], 16)/0x101
-                self.color_f= b1*0x1000000 + b2*0x10000 + b3*0x100 + 0xFF
-                #print self.color_f
+            c=gtk.gdk.color_parse(temp_c)
+            self.color_f = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.red >> 8 ) << 8) + 0xFF 
 
         self.rep = self.newRep()
         self.text = self.newText()

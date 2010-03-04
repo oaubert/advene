@@ -247,13 +247,8 @@ class TracePreview(AdhocView):
                 ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
                 temp_c = self.controller.get_element_color(ob)
                 if temp_c is not None:
-                    if len(temp_c)==7:
-                        temp_c= int(temp_c[1:]+"FF", 16)
-                    elif len(temp_c)==13:
-                        b1=int(temp_c[1:5], 16)/0x101
-                        b2=int(temp_c[5:9], 16)/0x101
-                        b3=int(temp_c[9:], 16)/0x101
-                        temp_c= b1*0x1000000 + b2*0x10000 + b3*0x100 + 0xFF
+                    c=gtk.gdk.color_parse(temp_c)
+                    temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.red >> 8 ) << 8) + 0xFF 
                 else:
                     temp_c = 0xFFFFFFFF
                 goocanvas.Ellipse(parent=objg,
@@ -294,7 +289,7 @@ class TracePreview(AdhocView):
                         font = "Sans 5")
             else:
                 # no concerned object, we are in an action of navigation                
-                txt = time.strftime("%h%m%s", time.localtime(obj_evt.movietime))
+                txt = time.strftime("%H%M%S", time.localtime(obj_evt.movietime))
                 goocanvas.Text (parent = objg,
                         text = txt,
                         x = 40,
