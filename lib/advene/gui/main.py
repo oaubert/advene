@@ -950,10 +950,7 @@ class AdveneGUI(object):
                 try:
                     self.controller.player.set_widget(self.drawable)
                 except AttributeError:
-                    if config.data.os == 'win32':
-                        self.visual_id=self.drawable.window.handle
-                    else:
-                        self.visual_id=self.drawable.window.xid
+                    self.visual_id = self.drawable.get_id()
                     self.controller.player.set_visual(self.visual_id)
             except Exception, e:
                 self.log("Cannot set visual: %s" % unicode(e))
