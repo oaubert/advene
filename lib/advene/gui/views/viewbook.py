@@ -63,6 +63,8 @@ class ViewBook(AdhocView):
         if view in self.permanent_widgets:
             self.log(_("Cannot remove this widget, it is essential."))
             return False
+        if hasattr(view, 'reparent_prepare'):
+            view.reparent_prepare()
         self.views.remove(view)
         view.widget.get_parent().remove(view.widget)
         return True
@@ -335,6 +337,8 @@ class ViewBook(AdhocView):
             if v is not None:
                 wid=v.widget
                 self.add_view(v, name=v._label)
+                if hasattr(v, 'reparent_done'):
+                    v.reparent_done()
             else:
                 print "Cannot find view ", selection.data
             return True
