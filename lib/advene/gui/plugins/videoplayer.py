@@ -121,6 +121,38 @@ class VideoPlayer(AdhocView):
         self.player.playlist_clear()
         self.player.playlist_add_item(self.uri)
 
+    def reparent_prepare(self):
+        if config.data.os != 'win32':
+            # On X11, the socket id changes. Since we destroy the
+            # origin socket before having realized the destination
+            # one, we cannot maintain a valid xid for the
+            # application. Create a temporary window for this.
+            self.temp_window = self._popup()
+        return True
+
+    def reparent_done(self):
+        if config.data.os != 'win32':
+            self.drawable.connect_after('realize', self.register_drawable)
+            if hasattr(self, 'temp_window') and self.temp_window is not None:
+                self.temp_window.destroy()
+                self.temp_window = None
+        return True
+
+    def register_drawable(self, drawable):
+        if self.drawable.get_parent_window() is not None:
+            self.player.set_widget(self.drawable)
+        return False
+
+    def _popup(self, *p):
+        """Open a popup window for temporary anchoring the player video.
+        """
+        w=gtk.Window()
+        d=gtk.Socket()
+        w.add(d)
+        w.show_all()
+        self.player.set_visual(d.get_id())
+        return w
+
     def build_widget(self):
         vbox=gtk.VBox()
 
@@ -173,10 +205,7 @@ class VideoPlayer(AdhocView):
         vbox.add(self.drawable)
         vbox.pack_start(self.toolbar, expand=False)
 
-        def register_drawable(drawable):
-            self.player.set_widget(self.drawable)
-            return True
-        self.drawable.connect_after('realize', register_drawable)
+        self.drawable.connect_after('realize', self.register_drawable)
 
         vbox.show_all()
         return vbox
