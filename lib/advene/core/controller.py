@@ -1099,7 +1099,15 @@ class AdveneController(object):
         elif mediafile.startswith('http:'):
             # FIXME: check for the existence of the file
             pass
-        elif not os.path.exists(mediafile.encode(sys.getfilesystemencoding(), 'ignore')):
+        else:
+            mediafile=self.locate_mediafile(mediafile)
+
+        return mediafile
+
+    def locate_mediafile(self, mediafile):
+        """Locate the given media file.
+        """
+        if not os.path.exists(mediafile.encode(sys.getfilesystemencoding(), 'ignore')):
             # It is a file. It should exist. Else check for a similar
             # one in moviepath
             # UNIX/Windows interoperability: convert pathnames
