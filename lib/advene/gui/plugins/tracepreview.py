@@ -167,11 +167,7 @@ class TracePreview(AdhocView):
         if level<0:
             print 'refresh trace'
         else:
-            if isinstance(obj_evt.time, float):
-                ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
-            else: 
-                # intervalle
-                ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time[0]))
+            ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
             corpsstr = ''
             entetestr = ''
             if obj_evt.name not in self.incomplete_operations_names.keys():
@@ -289,26 +285,22 @@ class TracePreview(AdhocView):
                         font = "Sans 5")
             else:
                 # no concerned object, we are in an action of navigation                
-                txt = time.strftime("%H%M%S", time.localtime(obj_evt.movietime))
+                txt = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
                 goocanvas.Text (parent = objg,
                         text = txt,
                         x = 40,
                         y = 10,
                         width = -1,
                         anchor = gtk.ANCHOR_CENTER,
-                        font = "Sans 6")
+                        font = "Sans 7")
             cm = objcanvas.get_colormap()
             color = cm.alloc_color('#FFFFFF')
             if obj_evt.name in self.tracer.colormodel[level].keys():
-                cs = str.replace(str(self.tracer.colormodel[level][obj_evt.name]), '0x', '#')
-                if len(cs)<10:
-                    cs = cs[:(len(cs)-2)]
-                    while len(cs)<7:
-                        cs=str.replace(cs, '#', '#0')
-                    color = gtk.gdk.color_parse( cs)
-                else:
-                    cs = cs[:(len(cs)-3)]
-                    color = gtk.gdk.color_parse( cs)
+                color = gtk.gdk.Color((self.tracer.colormodel[level][obj_evt.name] & 0xFF000000) >> 16,
+                    (self.tracer.colormodel[level][obj_evt.name] & 0x00FF0000) >> 8,
+                    (self.tracer.colormodel[level][obj_evt.name] & 0x0000FF00)
+                    )
+
             elif self.tracer.modelmapping[level]:
                 for k in self.tracer.modelmapping[level].keys():
                     if obj_evt.name in self.tracer.modelmapping[level][k].keys():
@@ -316,15 +308,10 @@ class TracePreview(AdhocView):
                         if x >=0:
                             kn = self.tracer.tracemodel[k][x]
                             if kn in self.tracer.colormodel[k].keys():
-                                cs = str.replace(str(hex(self.tracer.colormodel[k][kn])), '0x', '#')
-                                if len(cs)<10:
-                                    cs = cs[:(len(cs)-2)]
-                                    while len(cs)<7:
-                                        cs=str.replace(cs, '#', '#0')
-                                    color = gtk.gdk.color_parse( cs)
-                                else:
-                                    cs = cs[:(len(cs)-3)]
-                                    color = gtk.gdk.color_parse( cs)
+                                color = gtk.gdk.Color((self.tracer.colormodel[k][kn] & 0xFF000000) >> 16,
+                                                (self.tracer.colormodel[k][kn] & 0x00FF0000) >> 8,
+                                                (self.tracer.colormodel[k][kn] & 0x0000FF00)
+                                                )
                                 break
                         else:
                             #BIG HACK, FIXME
@@ -343,15 +330,10 @@ class TracePreview(AdhocView):
                                     if x >=0:
                                         kn = self.tracer.tracemodel[k][x]
                                         if kn in self.tracer.colormodel[k].keys():
-                                            cs = str.replace(str(hex(self.tracer.colormodel[k][kn])), '0x', '#')
-                                            if len(cs)<10:
-                                                cs = cs[:(len(cs)-2)]
-                                                while len(cs)<7:
-                                                    cs=str.replace(cs, '#', '#0')
-                                                color = gtk.gdk.color_parse( cs)
-                                            else:
-                                                cs = cs[:(len(cs)-3)]
-                                                color = gtk.gdk.color_parse( cs)
+                                            color = gtk.gdk.Color((self.tracer.colormodel[k][kn] & 0xFF000000) >> 16,
+                                                                (self.tracer.colormodel[k][kn] & 0x00FF0000) >> 8,
+                                                                (self.tracer.colormodel[k][kn] & 0x0000FF00)
+                                                                )
                                             break
             objcanvas.modify_base (gtk.STATE_NORMAL, color)
             objcanvas.set_size_request(60,20)

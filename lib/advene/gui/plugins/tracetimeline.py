@@ -1415,6 +1415,7 @@ class Inspector (gtk.VBox):
         gtk.VBox.__init__(self)
         self.action=None
         self.controller=controller
+        self.tracer = self.controller.tracers[0]
         self.pack_start(gtk.Label(_('Inspector')), expand=False)
         self.pack_start(gtk.HSeparator(), expand=False)
         self.inspector_id = gtk.Label('')
@@ -1527,15 +1528,150 @@ class Inspector (gtk.VBox):
         elif obj_evt.name=='PlayerSet':
             # destination time to add
             entetestr = entetestr + ' %s' % obj_evt.content
-        entete = gtk.Label(entetestr.encode("UTF-8"))
+        entete = gtk.Label(ev_time.encode("UTF-8"))
         hb = gtk.HBox()
-        box = gtk.EventBox()
-        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 20, 0, None , False)
-        if tr is not None:
-            hb.pack_start(tr, expand=False)
-            hb.pack_start(gtk.VSeparator(), expand=False)
+
+        #hb.pack_start(entete, expand=False)
+        objcanvas = goocanvas.Canvas()
+        objcanvas.set_bounds (0,0,60,20)
+        hb.pack_end(objcanvas, expand=False)
+        #BIG HACK to display icon
+        te = obj_evt.name
+        if te.find('Edit')>=0:
+            if te.find('Start')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    (( 'pixmaps', 'edition.png')))
+            elif te.find('End')>=0 or te.find('Destroy')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    (( 'pixmaps', 'finedition.png')))
+        elif te.find('Creat')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    (( 'pixmaps', 'plus.png')))
+        elif te.find('Delet')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    (( 'pixmaps', 'moins.png')))
+        elif te.find('Set')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    ( ('pixmaps', 'allera.png')))
+        elif te.find('Start')>=0 or te.find('Resume')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    ( ('pixmaps', 'lecture.png')))
+        elif te.find('Pause')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    ( ('pixmaps', 'pause.png')))
+        elif te.find('Stop')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    ( ('pixmaps', 'stop.png')))
+        else:
+            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    ( ('pixmaps', 'web.png')))
+            print 'No icon for %s' % te
+        goocanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
+        # object icon
+        objg = goocanvas.Group(parent = objcanvas.get_root_item ())
+        if obj_evt.concerned_object['id']:
+            ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
+            temp_c = self.controller.get_element_color(ob)
+            if temp_c is not None:
+                c=gtk.gdk.color_parse(temp_c)
+                temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.red >> 8 ) << 8) + 0xFF 
+            else:
+                temp_c = 0xFFFFFFFF
+            goocanvas.Ellipse(parent=objg,
+                    center_x=40,
+                    center_y=10,
+                    radius_x=9,
+                    radius_y=9,
+                    stroke_color='black',
+                    fill_color_rgba=temp_c,
+                    line_width=1.0)        
+            if obj_evt.concerned_object['type'] == Annotation:
+                #draw a A
+                txt='A'
+            elif obj_evt.concerned_object['type'] == Relation:
+                #draw a R
+                txt='R'
+            elif obj_evt.concerned_object['type'] == AnnotationType:
+                #draw a AT
+                txt='AT'
+            elif obj_evt.concerned_object['type'] == RelationType:
+                #draw a RT
+                txt='RT'
+            elif obj_evt.concerned_object['type'] == Schema:
+                #draw a S
+                txt='S'
+            elif obj_evt.concerned_object['type'] == View:
+                #draw a V
+                txt='V'
+            else:
+                #draw a U
+                txt='U'
+            goocanvas.Text (parent = objg,
+                    text = txt,
+                    x = 40,
+                    y = 10,
+                    width = -1,
+                    anchor = gtk.ANCHOR_CENTER,
+                    font = "Sans 5")
+        else:
+            # no concerned object, we are in an action of navigation                
+            txt = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
+            goocanvas.Text (parent = objg,
+                    text = txt,
+                    x = 40,
+                    y = 10,
+                    width = -1,
+                    anchor = gtk.ANCHOR_CENTER,
+                    font = "Sans 7")
+        cm = objcanvas.get_colormap()
+        color = cm.alloc_color('#FFFFFF')
+        if obj_evt.name in self.tracer.colormodel['operations'].keys():
+            color = gtk.gdk.Color((self.tracer.colormodel['operations'][obj_evt.name] & 0xFF000000) >> 16,
+                                (self.tracer.colormodel['operations'][obj_evt.name] & 0x00FF0000) >> 8,
+                                (self.tracer.colormodel['operations'][obj_evt.name] & 0x0000FF00)
+                                )
+        elif self.tracer.modelmapping['operations']:
+            for k in self.tracer.modelmapping['operations'].keys():
+                if obj_evt.name in self.tracer.modelmapping['operations'][k].keys():
+                    x = self.tracer.modelmapping['operations'][k][obj_evt.name]
+                    if x >=0:
+                        kn = self.tracer.tracemodel[k][x]
+                        if kn in self.tracer.colormodel[k].keys():
+                            color = gtk.gdk.Color((self.tracer.colormodel[k][kn] & 0xFF000000) >> 16,
+                                                (self.tracer.colormodel[k][kn] & 0x00FF0000) >> 8,
+                                                (self.tracer.colormodel[k][kn] & 0x0000FF00)
+                                                )
+                            break
+                    else:
+                        #BIG HACK, FIXME
+                        #should do nothing but for incomplete operations we need to do something...
+                        if obj_evt.name in INCOMPLETE_OPERATIONS_NAMES.keys():
+                            if obj_evt.concerned_object['id']:
+                                ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
+                                if isinstance(ob, Annotation) or isinstance(ob, Relation):
+                                    x=1
+                                elif isinstance(ob, AnnotationType) or isinstance(ob, RelationType) or isinstance(ob, Schema):
+                                    x=3
+                                elif isinstance(ob, View):
+                                    x=4
+                                else:
+                                    x=-1
+                                if x >=0:
+                                    kn = self.tracer.tracemodel[k][x]
+                                    if kn in self.tracer.colormodel[k].keys():
+                                        color = gtk.gdk.Color((self.tracer.colormodel[k][kn] & 0xFF000000) >> 16,
+                                                (self.tracer.colormodel[k][kn] & 0x00FF0000) >> 8,
+                                                (self.tracer.colormodel[k][kn] & 0x0000FF00)
+                                                )
+                                        break
+        objcanvas.modify_base (gtk.STATE_NORMAL, color)
+        objcanvas.set_size_request(60,20)
         if corpsstr != "":
-            box.set_tooltip_text(corpsstr)
+            entete.set_tooltip_text(corpsstr)
+        if entetestr != "":
+            objcanvas.set_tooltip_text(entetestr)
+    
+        box = gtk.EventBox()
         def box_pressed(w, event, id):
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
                 if id is not None:
