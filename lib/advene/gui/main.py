@@ -3388,7 +3388,10 @@ class AdveneGUI(object):
         return True
 
     def on_b_pause_clicked (self, button=None, data=None):
-        self.controller.update_status ("pause")
+        if self.controller.player.status == self.controller.player.PauseStatus:
+            self.controller.update_status ("resume")
+        elif self.controller.player.status == self.controller.player.PlayingStatus:
+            self.controller.update_status ("pause")
         return True
 
     def on_b_stop_clicked (self, button=None, data=None):
