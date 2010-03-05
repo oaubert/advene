@@ -201,7 +201,12 @@ class VideoPlayer(AdhocView):
         self.audio_mute.set_active(self.player.sound_is_muted())
         self.audio_mute.set_tooltip_text(_("Mute/unmute"))
         self.toolbar.insert(self.audio_mute, -1)
-        
+
+        sync_button=gtk.ToolButton(gtk.STOCK_CONNECT)
+        sync_button.set_tooltip_text(_("Synchronize"))
+        sync_button.connect('clicked', self.synchronize)
+        self.toolbar.insert(sync_button, -1)
+
         vbox.add(self.drawable)
         vbox.pack_start(self.toolbar, expand=False)
 
