@@ -92,7 +92,7 @@ class VideoPlayer(AdhocView):
             if ps == self.player.PauseStatus:
                 self.player.update_status("pause")
             elif ps == self.player.PlayingStatus:
-                self.player.update_status("start")
+                self.player.update_status("start", self.controller.player.current_position_value)
             else:
                 self.player.update_status("stop")
             
