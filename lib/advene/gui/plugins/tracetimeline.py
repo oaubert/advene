@@ -338,6 +338,7 @@ class TraceTimeline(AdhocView):
         self.inspector = Inspector(self.controller)
         bx.pack2(self.inspector)
 
+
         def on_background_scroll(widget, event):
             zoom=event.state & gtk.gdk.CONTROL_MASK
             a = None
@@ -481,6 +482,9 @@ class TraceTimeline(AdhocView):
 
         bx.set_position(self.canvasX+15)
         return mainbox
+
+    def show_inspector(self):
+        self.widget.get_children()[3].set_position(201) # same as size request for canvas
 
     def export(self, w):
         fname = self.tracer.export()
@@ -1229,7 +1233,7 @@ class ObjGroup (Group):
         temp_c = self.controller.get_element_color(temp_it)
         if temp_c is not None:
             c=gtk.gdk.color_parse(temp_c)
-            self.color_f = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.red >> 8 ) << 8) + 0xFF 
+            self.color_f = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.blue >> 8 ) << 8) + 0xFF 
 
         self.rep = self.newRep()
         self.text = self.newText()
@@ -1333,7 +1337,7 @@ class ObjGroup (Group):
                         x = obj_gr.x
                         y = obj_gr.y
                         obj_gr.select()                    
-                    dic[obj_time]= (x, y)
+                    dic[obj_time] = (x, y)
             ks = dic.keys()
             ks.sort()
             lp = []
@@ -1482,7 +1486,7 @@ class Inspector (gtk.VBox):
         self.addOperations(item.cobj['opes'])
         self.show_all()
 
-    def fillWithAction(self, action):
+    def fillWithAction(self, action=None, op=None):
     #
     # Fill the inspector with informations concerning an action
     # action : the action to display
@@ -1493,22 +1497,25 @@ class Inspector (gtk.VBox):
         self.inspector_type.set_text(action.event.name)
         self.pack_end(self.commentBox, expand=False)
         self.comment.set_text(action.event.comment)
-        self.addOperations(action.event.operations)
+        self.addOperations(action.event.operations, op)
         self.show_all()
 
-    def addOperations(self, op_list):
+    def select_operation(self, op):
+        self.fillWithAction(self.action, op)
+            
+
+    def addOperations(self, op_list=[], op_sel=None):
     #
     # used to pack operation boxes in the inspector 
     # op_list : list of operations to display
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
         for o in op_list:
-            l = self.addOperation(o)
-            l.set_size_request(-1, 25)
+            l = self.addOperation(o, o==op_sel)
+            l.set_size_request(-1, 20)
             self.inspector_opes.pack_start(l, expand=False)
 
-
-    def addOperation(self, obj_evt):
+    def addOperation(self, obj_evt=None, sel=False):
     #
     # used to build a box to display an operation 
     # obj_evt : operation to build a box for
@@ -1534,7 +1541,6 @@ class Inspector (gtk.VBox):
         #hb.pack_start(entete, expand=False)
         objcanvas = goocanvas.Canvas()
         objcanvas.set_bounds (0,0,60,20)
-        hb.pack_end(objcanvas, expand=False)
         #BIG HACK to display icon
         te = obj_evt.name
         if te.find('Edit')>=0:
@@ -1569,6 +1575,15 @@ class Inspector (gtk.VBox):
         goocanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
         # object icon
         objg = goocanvas.Group(parent = objcanvas.get_root_item ())
+        if sel:
+            goocanvas.Rect(parent=objg,
+                            x=0,
+                            y=0,
+                            width=60,
+                            height=20,
+                            stroke_color='red',
+                            line_width=2.0
+                            )
         if obj_evt.concerned_object['id']:
             ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
             temp_c = self.controller.get_element_color(ob)
@@ -1683,7 +1698,9 @@ class Inspector (gtk.VBox):
             return
         box.add(entete)
         box.connect('button-press-event', box_pressed, obj_evt.concerned_object['id'])
+        objcanvas.connect('button-press-event', box_pressed, obj_evt.concerned_object['id'])
         hb.pack_start(box, expand=False)
+        hb.pack_end(objcanvas, expand=False)
         return hb
 
     def clean(self):

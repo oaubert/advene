@@ -155,6 +155,9 @@ class TracePreview(AdhocView):
                     g = a.find_group(obj_evt)
                     if g is not None:
                         a.zoom_on(canvas_item=g)
+                        g.on_mouse_over(None, None, None)
+                        a.show_inspector()
+                        a.inspector.select_operation(obj_evt)
             self.last_obs_box.connect('button-press-event', zoom_in_timeline, obj_evt)
             self.last_obs = obj_evt
             vb.add(self.last_obs_box)
@@ -244,7 +247,7 @@ class TracePreview(AdhocView):
                 temp_c = self.controller.get_element_color(ob)
                 if temp_c is not None:
                     c=gtk.gdk.color_parse(temp_c)
-                    temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.red >> 8 ) << 8) + 0xFF 
+                    temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.blue >> 8 ) << 8) + 0xFF 
                 else:
                     temp_c = 0xFFFFFFFF
                 goocanvas.Ellipse(parent=objg,
