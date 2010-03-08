@@ -1,3 +1,8 @@
+* When switching package, the timeline imagecache reference is not
+   correctly updated -> corruption
+
+* Workspace restore: the log pane position is not restored
+
 * Generateur waveform
 
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)
