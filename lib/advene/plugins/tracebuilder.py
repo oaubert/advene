@@ -495,7 +495,6 @@ class TraceBuilder(Thread):
         #print obj['event_name']
         if obj['event_name'] != 'SnapshotUpdate':
             self.controller.update_snapshot(self.controller.player.current_position_value)
-        #ev_snapshot = self.controller.package.imagecache.get(self.controller.player.current_position_value, epsilon=100)
         ev_time = time.time()
         ev_activity_time = (time.time() - self.trace.start) * 1000
         ev_name = obj['event_name']
@@ -550,7 +549,8 @@ class TraceBuilder(Thread):
                       'type=' + elem.type.id,
                       'mimetype=' + elem.type.mimetype,
                       'source=' + elem.members[0].id,
-                      'dest=' + elem.members[1].id )
+                      'dest=' + elem.members[1].id,
+                      'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
                     )
                 elem_name='relation'
                 elem_id=elem.id
@@ -612,6 +612,7 @@ class TraceBuilder(Thread):
         elif 'position' in obj:
             #event related to the player
             if obj['position'] is not None:
+                #print type(obj['position'])
                 ev_content=str(time.strftime("%H:%M:%S", time.gmtime(obj['position']/1000)))
         #TODO undo ?
         ev_undo=False
@@ -682,7 +683,8 @@ class TraceBuilder(Thread):
                       'type=' + elem.type.id,
                       'mimetype=' + elem.type.mimetype,
                       'source=' + elem.members[0].id,
-                      'dest=' + elem.members[1].id )
+                      'dest=' + elem.members[1].id,
+                      'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')                      
                     )
                 elem_name='relation'
                 elem_id=elem.id
