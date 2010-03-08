@@ -92,6 +92,8 @@ class TraceTimeline(AdhocView):
         self.canvas = None
         # Contextualizing document canvas
         self.doc_canvas = None
+        # time context canvas
+        self.context_canvas = None
         self.display_values = {} # name : (canvasY, timefactor, obj_l, center value)
         self.selection=[ 0, 0, 0, 0 ]
         self.sel_frame=None
@@ -100,7 +102,11 @@ class TraceTimeline(AdhocView):
         self.btnlm = None
         self.link_mode = 0
         self.lasty=0
-        self.canvasX = None
+        self.canvasX = 0
+        self.context_canvasX = 0
+        self.context_canvasY = 100
+        self.context_col_width = 1
+        self.context_colspacing = 1
         self.doc_canvas_X = 100
         self.canvasY = 1
         self.head_canvasY = 25
@@ -220,8 +226,18 @@ class TraceTimeline(AdhocView):
         toolbox.set_style(gtk.TOOLBAR_ICONS)
         mainbox.pack_start(toolbox, expand=False)
 
+        c = len(self.cols)
+        self.context_canvasX = c*(self.context_col_width+self.context_colspacing) + 4 # 4 for select square
+        
         bx = gtk.HPaned()
-        mainbox.pack_start(bx, expand=True)
+        hbt = gtk.HBox()
+        self.context_canvas = goocanvas.Canvas()
+        self.context_canvas.set_bounds (0, 0, self.context_canvasX, self.context_canvasY)
+        self.context_canvas.set_size_request(self.context_canvasX, -1)
+        hbt.pack_start(self.context_canvas, expand=False)
+        hbt.pack_start(gtk.VSeparator(), expand=False)
+        hbt.pack_start(bx, expand=True)
+        mainbox.pack_start(hbt, expand=True)
 
         timeline_box=gtk.VBox()
         bx.pack1(timeline_box, resize=False, shrink=False)
@@ -231,7 +247,7 @@ class TraceTimeline(AdhocView):
         self.sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
 
         self.head_canvas = goocanvas.Canvas()
-        c = len(self.cols)
+
         self.canvasX = c*(self.col_width+self.colspacing)
         self.head_canvas.set_bounds (0,0,self.canvasX,self.head_canvasY)
         self.head_canvas.set_size_request(-1, self.head_canvasY)
@@ -484,7 +500,7 @@ class TraceTimeline(AdhocView):
         return mainbox
 
     def show_inspector(self):
-        self.widget.get_children()[3].set_position(201) # same as size request for canvas
+        self.widget.get_children()[3].get_children()[2].set_position(201) # same as size request for canvas
 
     def export(self, w):
         fname = self.tracer.export()
@@ -598,7 +614,31 @@ class TraceTimeline(AdhocView):
             self.controller.package.annotations.append(an)
             self.controller.notify("AnnotationCreate", annotation=an, comment="Recreated from Trace")
         elif obj_group.cobj['type'] == Relation:
-            print 'todo'
+            t=None
+            t = self.controller.package.get_element_by_id(obj_group.cobj['cid'])
+            if t is None or not isinstance(t, RelationType):
+                print "No corresponding type, creation aborted"
+                return
+            a = int(c.find("source=")+7)
+            aa = int(c.find("\n", a))
+            s = c[a:aa]
+            source = self.controller.package.get_element_by_id(s)
+            a = int(c.find("dest=")+5)
+            aa = int(c.find("\n", a))
+            d = c[a:aa]
+            dest = self.controller.package.get_element_by_id(d)
+            a = int(c.find("content=")+9)
+            aa = len(c)-1
+            cont = c[a:aa]
+            if source is None or dest is None or not isinstance(source, Annotation) or not isinstance(dest, Annotation):
+                print "Source or Destination missing, creation aborted"
+                return
+            r = self.controller.package.createRelation(ident=obj_group.cobj['id'],
+                                 members=(source, dest),
+                                 type=t)
+            r.content.data = urllib.unquote(cont.encode('utf-8'))
+            self.controller.package.relations.append(r)
+            self.controller.notify("RelationCreate", relation=r)
         else:
             print 'TODO'
         
