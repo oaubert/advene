@@ -135,7 +135,7 @@ class Player:
             videosrc='dshowsrcwrapper'
         else:
             videosrc='v4l2src queue-size=4'
-            audiosrc='alsasrc device=hw:1,0'
+            audiosrc='alsasrc'
             videosink='xvimagesink'
             if config.data.player['vout'] == 'x11':
                 sink='ffmpegcolorspace ! ximagesink'
