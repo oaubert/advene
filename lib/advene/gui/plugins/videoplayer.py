@@ -100,7 +100,7 @@ class VideoPlayer(AdhocView):
         # Synchronize time
         if ( (ps == self.player.PauseStatus or ps == self.player.PlayingStatus)
              and self.controller.player.current_position_value > 0
-             and abs( long(s.position) - self.controller.player.current_position_value ) > 20 ):
+             and abs( long(s.position) - self.controller.player.current_position_value ) > 80 ):
             self.player.update_status("set", self.controller.player.current_position_value)
         return True
 
