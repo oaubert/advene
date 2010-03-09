@@ -19,6 +19,7 @@
 
 from gettext import gettext as _
 import gtk
+import pango
 import os
 
 import advene.core.config as config
@@ -120,6 +121,7 @@ class VideoPlayer(AdhocView):
         self.uri = self.controller.locate_mediafile(fname)
         self.player.playlist_clear()
         self.player.playlist_add_item(self.uri)
+        self.label.set_text(os.path.basename(self.uri))
 
     def reparent_prepare(self):
         if config.data.os != 'win32':
@@ -207,7 +209,23 @@ class VideoPlayer(AdhocView):
         sync_button.connect('clicked', self.synchronize)
         self.toolbar.insert(sync_button, -1)
 
+        self.label = gtk.Label()
+        self.label.set_alignment(0, 0)
+        self.label.modify_font(pango.FontDescription("sans 10"))
+
+        black=gtk.gdk.color_parse('black')
+        white=gtk.gdk.color_parse('white')
+        eb=gtk.EventBox()
+        eb.add(self.label)
+        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                      gtk.STATE_PRELIGHT):
+            self.label.modify_bg(state, black)
+            eb.modify_bg(state, black)
+            self.label.modify_fg(state, white)
+
         vbox.add(self.drawable)
+        vbox.pack_start(eb, expand=False)
         vbox.pack_start(self.toolbar, expand=False)
 
         self.drawable.connect_after('realize', self.register_drawable)
