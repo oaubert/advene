@@ -156,11 +156,11 @@ class DummyGlade:
 
         sw=gtk.ScrolledWindow()
         sw.set_policy (gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
-        sw.set_size_request(-1, 40)
+        sw.set_size_request(-1, 50)
         self.logmessages=gtk.TextView()
         self.logmessages.set_wrap_mode(gtk.WRAP_CHAR)
         sw.add(self.logmessages)
-        self.vpaned.pack2(sw, resize=True, shrink=True)
+        self.vpaned.pack2(sw, resize=True, shrink=False)
 
         v.add(self.vpaned)
 
