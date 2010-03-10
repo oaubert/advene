@@ -123,6 +123,10 @@ class TraceBuilder(Thread):
                                         },
                                      },                             
                             }
+
+        # FIXME: this does not belong here. It should be in a
+        # view-related module, which would allow use to directly store
+        # gtk.gdk.Color instances.
         self.colormodel = {'events':{},
                             'operations':{},
                             'actions':{ 'Annotation': "#444488",
