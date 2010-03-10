@@ -48,7 +48,7 @@ def tag(name, old=False):
     else:
         return str(ET.QName(config.data.namespace, name))
 
-class EtreeMixin:
+class EtreeMixin(object):
     """This class defines helper methods for conversion to/from ElementTree.
 
     The mixed-in class should implement to_etree() and from_etree(element, **kw) methods.
