@@ -125,11 +125,11 @@ class TraceBuilder(Thread):
                             }
         self.colormodel = {'events':{},
                             'operations':{},
-                            'actions':{ 'Annotation': "#000088",
-                                        'Restructuration': "#008800",
-                                        'Navigation': "#880000",
-                                        'Classification': "#008888",
-                                        'View building': "#880088",
+                            'actions':{ 'Annotation': "#444488",
+                                        'Restructuration': "#448844",
+                                        'Navigation': "#884444",
+                                        'Classification': "#448888",
+                                        'View building': "#884488",
                                         }
                             }
         #for i in self.tracemodel['operations']:
