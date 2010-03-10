@@ -1,8 +1,3 @@
-* When switching package, the timeline imagecache reference is not
-   correctly updated -> corruption
-
-* Workspace restore: the log pane position is not restored
-
 * Generateur waveform
 
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)
@@ -2721,3 +2716,11 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * fix controller.svg_overlay
 
 * Videoplayer: locate movie file (method in controller)
+
+* Workspace restore: the log pane position is not restored
+
+* Filename on videoplayer view
+
+* When switching package, the timeline imagecache reference is not
+   correctly updated -> corruption
+

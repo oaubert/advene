@@ -652,6 +652,12 @@ class TimeLine(AdhocView):
             self.update_model()
         return True
 
+    def media_change_handler(self, context, parameters):
+        # Note: this should trigger a DurationUpdate after a while anyway.
+        # However, this will get the screenshots to update immediately
+        self.update_scale_screenshots()
+        return True
+
     def snapshot_update_handler(self, context, parameters):
         pos=long(context.globals['position'])
         epsilon=self.scale_layout.step / 2
@@ -692,6 +698,8 @@ class TimeLine(AdhocView):
                                                         method=self.bookmark_unhighlight_handler),
                 controller.event_handler.internal_rule (event="DurationUpdate",
                                                         method=self.duration_update_handler),
+                controller.event_handler.internal_rule (event="MediaChange",
+                                                        method=self.media_change_handler),
                 ))
         if 'async-snapshot' in self.controller.player.player_capabilities:
             self.registered_rules.append( controller.event_handler.internal_rule (event="SnapshotUpdate",
@@ -1981,8 +1989,8 @@ class TimeLine(AdhocView):
         self.update_current_mark(self.minimum)
         return True
 
-    def update_scale_screenshots(self, *p):
-        """Redraw scale screenshots in case of zoom change or global pane position change.
+    def update_scale_height(self, *p):
+        """Callback for notify::height of the scale widget.
         """
         if self.global_pane is None:
             return
@@ -1995,6 +2003,15 @@ class TimeLine(AdhocView):
             n = n << 1
         height=n >> 1
 
+        if abs(height - self.current_scale_height) > 10:
+            # The position changed significantly. Update the display.
+            self.current_scale_height=height
+            self.scale_layout.set_size(self.unit2pixel(self.maximum, absolute=True), 25 + height)
+            self.update_scale_screenshots()
+
+    def update_scale_screenshots(self):
+        """Redraw scale screenshots in case of zoom change or global pane position change.
+        """
         def display_image(widget, event, h, step):
             """Lazy-loading of images
             """
@@ -2011,45 +2028,41 @@ class TimeLine(AdhocView):
                 widget.expose_signal=None
             return False
 
-        if abs(height - self.current_scale_height) > 10:
-            # The position changed significantly. Update the display.
-            self.current_scale_height=height
-            self.scale_layout.set_size(self.unit2pixel(self.maximum, absolute=True), 25 + height)
+        # Remove previous images
+        def remove_image(w):
+            if isinstance(w, gtk.Image):
+                self.scale_layout.remove(w)
+                return True
+        self.scale_layout.foreach(remove_image)
 
-            # Remove previous images
-            def remove_image(w):
-                if isinstance(w, gtk.Image):
-                    self.scale_layout.remove(w)
-                    return True
-            self.scale_layout.foreach(remove_image)
+        height = self.current_scale_height
+        if height >= 16:
+            # Big enough. Let's display screenshots.
 
-            if height >= 16:
-                # Big enough. Let's display screenshots.
+            # Evaluate screenshot width.
+            width=int(height * 4.0 / 3) + 5
+            step = self.pixel2unit(width)
+            t = self.minimum
 
-                # Evaluate screenshot width.
-                width=int(height * 4.0 / 3) + 5
-                step = self.pixel2unit(width)
-                t = self.minimum
-                
-                self.scale_layout.height=height
-                self.scale_layout.step=step
+            self.scale_layout.height=height
+            self.scale_layout.step=step
 
-                u2p=self.unit2pixel
-                while t <= self.maximum:
-                    # Draw screenshots
-                    i=gtk.Image()
-                    i.mark = t
-                    i.expose_signal=i.connect('expose-event', display_image, height, step)
-                    i.pos = 20
-                    # Real timestamp of the snapshot. If < 0 (and a
-                    # large value, since it is after used to get best
-                    # approximation through abs(pos - i.timestamp)),
-                    # the snapshot is the uninitialized one.
-                    i.timestamp=-self.controller.cached_duration
-                    i.show()
-                    self.scale_layout.put(i, u2p(i.mark, absolute=True), i.pos)
+            u2p=self.unit2pixel
+            while t <= self.maximum:
+                # Draw screenshots
+                i=gtk.Image()
+                i.mark = t
+                i.expose_signal=i.connect('expose-event', display_image, height, step)
+                i.pos = 20
+                # Real timestamp of the snapshot. If < 0 (and a
+                # large value, since it is after used to get best
+                # approximation through abs(pos - i.timestamp)),
+                # the snapshot is the uninitialized one.
+                i.timestamp=-self.controller.cached_duration
+                i.show()
+                self.scale_layout.put(i, u2p(i.mark, absolute=True), i.pos)
 
-                    t += step
+                t += step
 
     def draw_marks (self):
         """Draw marks for stream positioning"""
@@ -2070,7 +2083,7 @@ class TimeLine(AdhocView):
             t += step
         # Reset current_scale_height to force screenshots redraw
         self.current_scale_height=0
-        self.update_scale_screenshots()
+        self.update_scale_height()
 
     def bounds (self):
         """Bounds of the list.
@@ -3088,7 +3101,7 @@ class TimeLine(AdhocView):
         self.global_pane.add2(content_pane)
 
         self.global_pane.set_position(50)
-        self.global_pane.connect('notify::position', self.update_scale_screenshots)
+        self.global_pane.connect('notify::position', self.update_scale_height)
 
         vbox.add (self.global_pane)
 
