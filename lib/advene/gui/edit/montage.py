@@ -103,6 +103,9 @@ class Montage(AdhocView):
 
         self.mainbox=None
         self.widget=self.build_widget()
+        
+        # Annotation widget currently played
+        self.current_widget = None
 
         if elements is not None:
             # Fill with default values
@@ -202,6 +205,16 @@ class Montage(AdhocView):
         self.duration_label.set_text(helper.format_time(duration))
         return True
 
+    def update_position(self, pos):
+        w=self.current_widget
+        if w is None:
+            return
+        f=w.annotation.fragment
+        if not pos in f:
+            w.fraction_marker=None
+            return
+        w.fraction_marker = 1.0 * (pos - f.begin) / f.duration
+
     def clear(self, *p):
         self.contents=[]
         self.refresh()
@@ -291,6 +304,9 @@ class Montage(AdhocView):
             """
             try:
                 w=annotation_queue.next()
+                if self.current_widget is not None:
+                    self.current_widget.fraction_marker=None
+                self.current_widget=w
                 a=w.annotation
                 #print "Playing ", a.id
             except StopIteration:
@@ -298,6 +314,9 @@ class Montage(AdhocView):
                 self.controller.update_status('pause')
                 for w in self.contents:
                     self.set_widget_active(w, False)
+                if self.current_widget is not None:
+                    self.current_widget.fraction_marker=None
+                self.current_widget=None
                 return False
             # Go to the annotation
             # Change position only if we are not already at the right place

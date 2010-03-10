@@ -4,8 +4,6 @@
 
 * montage: video export
 
-* montage: cursor
-
 * gstreamer: multiple video syntax: path;path -> videobox
 
 * gui.edit.rules: SimpleQuery edition will fail since TALESEntry does
@@ -2723,4 +2721,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * When switching package, the timeline imagecache reference is not
    correctly updated -> corruption
+
+* montage: cursor
 
