@@ -36,7 +36,7 @@ from advene.gui.views import AdhocView
 from advene.rules.elements import ECACatalog
 import advene.core.config as config
 from advene.gui.widget import TimestampRepresentation
-from advene.gui.util import dialog, get_small_stock_button
+from advene.gui.util import dialog, get_small_stock_button, gdk2intrgba
 
 try:
     import goocanvas
@@ -855,8 +855,7 @@ class TraceTimeline(AdhocView):
         #colors = [0x000088AA, 0x0000FFAA, 0x008800AA, 0x00FF00AA, 0x880000AA, 0xFF0000FF, 0x008888FF, 0x880088FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
         # 18 col max
         for c in self.tracer.tracemodel['actions']:
-            color = self.tracer.colormodel['actions'][c]
-            etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, color)
+            etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][c])))
             self.cols[c]=(etgroup, None)
             offset += 1
         return
@@ -1680,22 +1679,16 @@ class Inspector (gtk.VBox):
                     font = "Sans 7")
         cm = objcanvas.get_colormap()
         color = cm.alloc_color('#FFFFFF')
-        if obj_evt.name in self.tracer.colormodel['operations'].keys():
-            color = gtk.gdk.Color((self.tracer.colormodel['operations'][obj_evt.name] & 0xFF000000) >> 16,
-                                (self.tracer.colormodel['operations'][obj_evt.name] & 0x00FF0000) >> 8,
-                                (self.tracer.colormodel['operations'][obj_evt.name] & 0x0000FF00)
-                                )
+        if obj_evt.name in self.tracer.colormodel['operations']:
+            color = gtk.gdk.color_parse(self.tracer.colormodel['operations'][obj_evt.name])
         elif self.tracer.modelmapping['operations']:
-            for k in self.tracer.modelmapping['operations'].keys():
-                if obj_evt.name in self.tracer.modelmapping['operations'][k].keys():
+            for k in self.tracer.modelmapping['operations']:
+                if obj_evt.name in self.tracer.modelmapping['operations'][k]:
                     x = self.tracer.modelmapping['operations'][k][obj_evt.name]
                     if x >=0:
                         kn = self.tracer.tracemodel[k][x]
-                        if kn in self.tracer.colormodel[k].keys():
-                            color = gtk.gdk.Color((self.tracer.colormodel[k][kn] & 0xFF000000) >> 16,
-                                                (self.tracer.colormodel[k][kn] & 0x00FF0000) >> 8,
-                                                (self.tracer.colormodel[k][kn] & 0x0000FF00)
-                                                )
+                        if kn in self.tracer.colormodel[k]:
+                            color = gtk.gdk.color_parse(self.tracer.colormodel[k][kn])
                             break
                     else:
                         #BIG HACK, FIXME
@@ -1713,11 +1706,8 @@ class Inspector (gtk.VBox):
                                     x=-1
                                 if x >=0:
                                     kn = self.tracer.tracemodel[k][x]
-                                    if kn in self.tracer.colormodel[k].keys():
-                                        color = gtk.gdk.Color((self.tracer.colormodel[k][kn] & 0xFF000000) >> 16,
-                                                (self.tracer.colormodel[k][kn] & 0x00FF0000) >> 8,
-                                                (self.tracer.colormodel[k][kn] & 0x0000FF00)
-                                                )
+                                    if kn in self.tracer.colormodel[k]:
+                                        color = gtk.gdk.color_parse(self.tracer.colormodel[k][kn])
                                         break
         objcanvas.modify_base (gtk.STATE_NORMAL, color)
         objcanvas.set_size_request(60,20)
@@ -1882,15 +1872,15 @@ class DocGroup (Group):
             m.remove()
         self.marks=[]
         if action is not None:
-            color = self.tracer.colormodel['actions'][action.name]
             #print "%s %s %s" % (action.name, ACTIONS.index(action.name), color)
             for op in action.operations:
-                self.addMark(op.movietime, color)
+                self.addMark(op.movietime, 
+                             gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][action.name])))
         elif obj is not None:
             for op in obj.cobj['opes']:
                 self.addMark(op.movietime, 0xD9D919FF)
 
-    def addMark(self, time=0, color='gray'):
+    def addMark(self, time=0, color=0x444444ff):
         offset = 3
         x=self.rect.get_bounds().x1 + self.w * time / self.movielength
         x1 = x-offset

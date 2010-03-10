@@ -170,6 +170,8 @@ class TracePreview(AdhocView):
         if level<0:
             print 'refresh trace'
         else:
+            ### FIXME : this code should be factorized with the
+            ### similar one in tracetimeline (addOperation)
             ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
             corpsstr = ''
             entetestr = ''
@@ -298,23 +300,16 @@ class TracePreview(AdhocView):
                         font = "Sans 7")
             cm = objcanvas.get_colormap()
             color = cm.alloc_color('#FFFFFF')
-            if obj_evt.name in self.tracer.colormodel[level].keys():
-                color = gtk.gdk.Color((self.tracer.colormodel[level][obj_evt.name] & 0xFF000000) >> 16,
-                    (self.tracer.colormodel[level][obj_evt.name] & 0x00FF0000) >> 8,
-                    (self.tracer.colormodel[level][obj_evt.name] & 0x0000FF00)
-                    )
-
+            if obj_evt.name in self.tracer.colormodel[level]:
+                color = gtk.gdk.color_parse(self.tracer.colormodel[level])
             elif self.tracer.modelmapping[level]:
-                for k in self.tracer.modelmapping[level].keys():
-                    if obj_evt.name in self.tracer.modelmapping[level][k].keys():
+                for k in self.tracer.modelmapping[level]:
+                    if obj_evt.name in self.tracer.modelmapping[level][k]:
                         x = self.tracer.modelmapping[level][k][obj_evt.name]
                         if x >=0:
                             kn = self.tracer.tracemodel[k][x]
-                            if kn in self.tracer.colormodel[k].keys():
-                                color = gtk.gdk.Color((self.tracer.colormodel[k][kn] & 0xFF000000) >> 16,
-                                                (self.tracer.colormodel[k][kn] & 0x00FF0000) >> 8,
-                                                (self.tracer.colormodel[k][kn] & 0x0000FF00)
-                                                )
+                            if kn in self.tracer.colormodel[k]:
+                                color = gtk.gdk.color_parse(self.tracer.colormodel[k][kn])
                                 break
                         else:
                             #BIG HACK, FIXME
@@ -332,11 +327,8 @@ class TracePreview(AdhocView):
                                         x=-1
                                     if x >=0:
                                         kn = self.tracer.tracemodel[k][x]
-                                        if kn in self.tracer.colormodel[k].keys():
-                                            color = gtk.gdk.Color((self.tracer.colormodel[k][kn] & 0xFF000000) >> 16,
-                                                                (self.tracer.colormodel[k][kn] & 0x00FF0000) >> 8,
-                                                                (self.tracer.colormodel[k][kn] & 0x0000FF00)
-                                                                )
+                                        if kn in self.tracer.colormodel[k]:
+                                            color = gtk.gdk.color_parse(self.tracer.colormodel[k][kn])
                                             break
             objcanvas.modify_base (gtk.STATE_NORMAL, color)
             objcanvas.set_size_request(60,20)
