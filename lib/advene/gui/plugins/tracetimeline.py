@@ -149,7 +149,7 @@ class TraceTimeline(AdhocView):
         # redraw docgroup
         self.docgroup.redraw(self.active_trace)
         # restore zoom values if any
-        if self.active_trace.name in self.display_values.keys():
+        if self.active_trace.name in self.display_values:
             (self.canvasY, self.timefactor, self.obj_l, vc) = self.display_values[self.active_trace.name]
             self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
             self.refresh(center = vc)
@@ -481,7 +481,7 @@ class TraceTimeline(AdhocView):
         def zoom_100(w):
             wa = self.canvas.get_allocation()
             self.canvasY = wa.height-10.0 # -10 pour des raisons obscures ...
-            if 'actions' in self.active_trace.levels.keys() and self.active_trace.levels['actions']:
+            if 'actions' in self.active_trace.levels and self.active_trace.levels['actions']:
                 a = self.active_trace.levels['actions'][-1].activity_time[1]
                 for act in self.active_trace.levels['actions']:
                     if act.activity_time[1]>a:
@@ -556,7 +556,7 @@ class TraceTimeline(AdhocView):
                     egl.append(eg)
                 i+=1
             for c in egl:
-                if obj_id in c.objs.keys():
+                if obj_id in c.objs:
                     obj_gr = c.objs[obj_id][0]
                     if obj_gr is None:
                         y_mi = c.rect.get_bounds().y1
@@ -881,15 +881,15 @@ class TraceTimeline(AdhocView):
             #print "refresh removing %s" % root.get_child (0)
             c = root.get_child(0)
             if isinstance(c, EventGroup):
-                for k in c.objs.keys():
+                for k in c.objs:
                     if c.objs[k][0] is not None:
                         if c.objs[k][0].center_sel:
                             selected_item = (c.event, k)
             c.remove()
-        for act in self.cols.keys():
+        for act in self.cols:
             (h,l) = self.cols[act]
             self.cols[act] = (h, None)
-        if not ('actions' in self.active_trace.levels.keys() and self.active_trace.levels['actions']):
+        if not ('actions' in self.active_trace.levels and self.active_trace.levels['actions']):
             return
         a = self.active_trace.levels['actions'][-1].activity_time[1]
         #if action and a< action.activity_time[1]:
@@ -1033,7 +1033,7 @@ class TraceTimeline(AdhocView):
             a.value=a.upper-a.page_size
         #redraw canvasdoc
         #self.docgroup.redraw(trace)
-        #if 'actions' in self.tracer.trace.levels.keys() and self.tracer.trace.levels['actions']:
+        #if 'actions' in self.tracer.trace.levels and self.tracer.trace.levels['actions']:
         return ev
 
     def find_group(self, observed):
@@ -1141,7 +1141,7 @@ class EventGroup (Group):
 
     def redrawObjs(self, ol=5, blocked=False):
         #FIXME : brutal way to do that. Need only to find what operation was added to update only this square
-        for obj in self.objs.keys():
+        for obj in self.objs:
             obg = self.objs[obj][0]
             if obg is not None:
                 #print "redrawObjs removing %s" % r_obj
@@ -1154,7 +1154,7 @@ class EventGroup (Group):
             obj = op.concerned_object['id']
             if obj is None:
                 continue
-            if obj in self.objs.keys():
+            if obj in self.objs:
                 (pds, cobj) = self.objs[obj][1:5]
                 cobj['opes'].append(op)
                 self.objs[obj] = (None, pds+1, cobj)
@@ -1170,7 +1170,7 @@ class EventGroup (Group):
         oy = y+2
         l = self.rect.props.height
         w = self.rect.props.width
-        nb = len(self.objs.keys())
+        nb = len(self.objs)
         ol = w/3 - 4
         while (floor(((w-3)/(ol+2)))*floor(((l-3)/(ol+2)))< nb and ol>3):
             ol-=1
@@ -1184,7 +1184,7 @@ class EventGroup (Group):
             ol=20
         # need to fix fontsize according to object length with a min of 6 and a max of ??,
         self.fontsize = ol-1
-        for obj in self.objs.keys():
+        for obj in self.objs:
             #print "ox %s oy %s ol %s w %s l %s" % (ox, oy, ol, w+x, l+y)
             if ox+(ol+2)>= x+w:
                 if oy+(ol+2)*2>= y+l:
@@ -1320,7 +1320,7 @@ class ObjGroup (Group):
             f = r.get_child(i)
             if isinstance(f, EventGroup) and f.objs is not None:
                 chd.append(f)
-                for obj_id in f.objs.keys():
+                for obj_id in f.objs:
                     obg = f.objs[obj_id][0]
                     if obg is None:
                         continue
@@ -1341,7 +1341,7 @@ class ObjGroup (Group):
         self.center_sel = True
         if self.link_mode == 0:
             for c in chd:
-                if self.cobj['id'] in c.objs.keys():
+                if self.cobj['id'] in c.objs:
                     obj_gr = c.objs[self.cobj['id']][0]
                     if obj_gr != self:
                         x2=y2=0
@@ -1366,7 +1366,7 @@ class ObjGroup (Group):
         else:
             dic={}
             for c in chd:
-                if self.cobj['id'] in c.objs.keys():
+                if self.cobj['id'] in c.objs:
                     obj_gr = c.objs[self.cobj['id']][0]
                     obj_time = c.objs[self.cobj['id']][2]['opes'][0].time
                     if obj_gr is None:
@@ -1377,12 +1377,7 @@ class ObjGroup (Group):
                         y = obj_gr.y
                         obj_gr.select()                    
                     dic[obj_time] = (x, y)
-            ks = dic.keys()
-            ks.sort()
-            lp = []
-            for key in ks:
-                lp.append(dic[key])
-            p=goocanvas.Points(lp)
+            p=goocanvas.Points(sorted(dic))
             self.lines.append(goocanvas.Polyline (parent = self,
                                         close_path = False,
                                         points = p,
@@ -1693,7 +1688,7 @@ class Inspector (gtk.VBox):
                     else:
                         #BIG HACK, FIXME
                         #should do nothing but for incomplete operations we need to do something...
-                        if obj_evt.name in INCOMPLETE_OPERATIONS_NAMES.keys():
+                        if obj_evt.name in INCOMPLETE_OPERATIONS_NAMES:
                             if obj_evt.concerned_object['id']:
                                 ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
                                 if isinstance(ob, Annotation) or isinstance(ob, Relation):
@@ -1860,7 +1855,7 @@ class DocGroup (Group):
             t.remove()
         self.timemarks=[]
         self.drawtimemarks()
-        if 'actions' not in trace.levels.keys():
+        if 'actions' not in trace.levels:
             return
         for a in trace.levels['actions']:
             for o in a.operations:

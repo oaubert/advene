@@ -175,7 +175,7 @@ class TracePreview(AdhocView):
             ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
             corpsstr = ''
             entetestr = ''
-            if obj_evt.name not in self.incomplete_operations_names.keys():
+            if obj_evt.name not in self.incomplete_operations_names:
                 if ECACatalog.event_names[obj_evt.name]:
                     entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
                 else:
@@ -314,7 +314,7 @@ class TracePreview(AdhocView):
                         else:
                             #BIG HACK, FIXME
                             #should do nothing but for incomplete operations we need to do something...
-                            if obj_evt.name in self.incomplete_operations_names.keys():
+                            if obj_evt.name in self.incomplete_operations_names:
                                 if obj_evt.concerned_object['id']:
                                     ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
                                     if isinstance(ob, advene.model.annotation.Annotation) or isinstance(ob,advene.model.annotation.Relation):

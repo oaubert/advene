@@ -81,7 +81,7 @@ class TraceBuilder(Thread):
                             'operations':[],
                             'actions':[],
                             }
-        for i in ECACatalog.event_names.keys():
+        for i in ECACatalog.event_names:
             self.tracemodel['events'].append(i)
             if i not in self.filtered_events:
                 self.tracemodel['operations'].append(i)
@@ -214,7 +214,7 @@ class TraceBuilder(Thread):
             self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             return None
         tr=ET.Element('trace', name=self.trace.name)
-        for lvl in self.trace.levels.keys():
+        for lvl in self.trace.levels:
             grp = ET.Element(lvl)
             #everything can be rebuild from events.
             for (id_e, e) in enumerate(self.trace.levels[lvl]):
@@ -434,11 +434,11 @@ class TraceBuilder(Thread):
             evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, self.imp_type(ev.o_type), ev.o_cid)
             evt.change_comment(ev.comment)
             self.traces[-1].add_to_trace('events', evt)
-            if evt.name in self.modelmapping['operations']['actions'].keys():
+            if evt.name in self.modelmapping['operations']['actions']:
                 op = Operation(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, self.imp_type(ev.o_type), ev.o_cid)
                 self.traces[-1].add_to_trace('operations', op)
                 if op is not None:
-                    if ev.name in self.modelmapping['operations']['actions'].keys():
+                    if ev.name in self.modelmapping['operations']['actions']:
                         ac_t = self.modelmapping['operations']['actions'][ev.name]
                     else:
                         continue
@@ -452,14 +452,14 @@ class TraceBuilder(Thread):
                             typ="Classification"
                         elif ev.o_name=='view':
                             typ="View building"
-                    if typ in tmp_opened_actions.keys():
+                    if typ in tmp_opened_actions:
                         # an action is already opened for this event
                         ac = tmp_opened_actions[typ]
                         if typ == "Navigation" and (op.name == "PlayerStop" or op.name == "PlayerPause"):
                             del tmp_opened_actions[typ]
                         ac.add_operation(op)
                         continue
-                    for t in tmp_opened_actions.keys():
+                    for t in tmp_opened_actions:
                         if t != "Navigation":
                             del tmp_opened_actions[t]
                     ac = Action(name=typ, begintime=op.time, endtime=None, acbegintime=op.activity_time, acendtime=None, content=None, movie=op.movie, movietime=op.movietime, operations=[op])
@@ -489,7 +489,7 @@ class TraceBuilder(Thread):
                 #relaunching
                 self.toggle_network_broadcasting()
                 self.bdq.put_nowait(ev)
-        if ev.name in self.modelmapping['operations']['actions'].keys():
+        if ev.name in self.modelmapping['operations']['actions']:
             op = self.packOperation(obj)
             if op is not None:
                 ac = self.packAction(obj, op)
@@ -620,7 +620,7 @@ class TraceBuilder(Thread):
                 ev_content=str(time.strftime("%H:%M:%S", time.gmtime(obj['position']/1000)))
         #TODO undo ?
         ev_undo=False
-        if 'undone' in obj.keys():
+        if 'undone' in obj:
             ev_undo = True
         ev = Event(ev_name, ev_time, ev_activity_time, unicode(ev_content), ev_movie, ev_movie_time, elem_name, elem_id, elem_type, elem_class_id)
         #ev = Event(ev_name, ev_time, ev_activity_time, ev_snapshot, ev_content, ev_movie, ev_movie_time, elem_name, elem_id)
@@ -633,7 +633,7 @@ class TraceBuilder(Thread):
         op_activity_time = (time.time() - self.trace.start) * 1000
         op_name = obj['event_name']
         #op_params = obj['parameters']
-        #for i in obj.keys():
+        #for i in obj:
         #    print "%s : %s" % (i,obj[i])
         op_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
         op_movie_time = self.controller.player.current_position_value
@@ -763,7 +763,7 @@ class TraceBuilder(Thread):
         ope = op
         ac_t = None
         # verifier l'action de l'evenement
-        if obj['event_name'] in self.modelmapping['operations']['actions'].keys():
+        if obj['event_name'] in self.modelmapping['operations']['actions']:
             ac_t = self.modelmapping['operations']['actions'][obj['event_name']]
         else:
             return
@@ -773,14 +773,14 @@ class TraceBuilder(Thread):
         if typ == "Undefined":
             typ = self.find_action_name(obj)
             # traiter les edit
-        if typ in self.opened_actions.keys():
+        if typ in self.opened_actions:
             # an action is already opened for this event
             ac = self.opened_actions[typ]
             if typ == "Navigation" and (ope.name == "PlayerStop" or ope.name == "PlayerPause"):
                 del self.opened_actions[typ]
             ac.add_operation(ope)
             return ac
-        for t in self.opened_actions.keys():
+        for t in self.opened_actions:
             if t != "Navigation":
                 del self.opened_actions[t]
         # verifier que ce n'est pas la meme que la derniere
@@ -889,7 +889,7 @@ class Trace:
             return None
 
     def list_all(self):
-        for i in self.levels.keys():
+        for i in self.levels:
             print "Trace niveau \'%s\'" % i
             for t in self.levels[i]:
                 print "    %s : \'%s\'" % (t, t.name)
