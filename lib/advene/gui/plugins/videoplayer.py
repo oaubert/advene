@@ -161,6 +161,8 @@ class VideoPlayer(AdhocView):
         vbox=gtk.VBox()
 
         self.player = self.controller.playerfactory.get_player()
+        self.player.view = self
+
         self.player.sound_mute()
 
         self.drawable=gtk.Socket()
