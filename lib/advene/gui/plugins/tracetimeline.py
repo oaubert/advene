@@ -1586,31 +1586,31 @@ class Inspector (gtk.VBox):
         if te.find('Edit')>=0:
             if te.find('Start')>=0:
                 pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                    (( 'pixmaps', 'edition.png')))
+                    (( 'pixmaps', 'traces', 'edition.png')))
             elif te.find('End')>=0 or te.find('Destroy')>=0:
                 pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                    (( 'pixmaps', 'finedition.png')))
+                    (( 'pixmaps', 'traces', 'finedition.png')))
         elif te.find('Creat')>=0:
             pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                    (( 'pixmaps', 'plus.png')))
+                    (( 'pixmaps', 'traces', 'plus.png')))
         elif te.find('Delet')>=0:
             pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                    (( 'pixmaps', 'moins.png')))
+                    (( 'pixmaps', 'traces', 'moins.png')))
         elif te.find('Set')>=0:
             pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                    ( ('pixmaps', 'allera.png')))
+                    ( ('pixmaps', 'traces', 'allera.png')))
         elif te.find('Start')>=0 or te.find('Resume')>=0:
             pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                    ( ('pixmaps', 'lecture.png')))
+                    ( ('pixmaps', 'traces', 'lecture.png')))
         elif te.find('Pause')>=0:
             pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                    ( ('pixmaps', 'pause.png')))
+                    ( ('pixmaps', 'traces', 'pause.png')))
         elif te.find('Stop')>=0:
             pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                    ( ('pixmaps', 'stop.png')))
+                    ( ('pixmaps', 'traces', 'stop.png')))
         else:
             pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                    ( ('pixmaps', 'web.png')))
+                    ( ('pixmaps', 'traces', 'web.png')))
             print 'No icon for %s' % te
         goocanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
         # object icon
