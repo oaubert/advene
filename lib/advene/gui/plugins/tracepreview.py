@@ -88,9 +88,9 @@ class TracePreview(AdhocView):
         btngt.set_tooltip_text(_('Open the trace timeline view fareast'))
         btngt.set_size_request(60, 20)
         def open_trace(w):
-            l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'trace2' ]
+            l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'tracetimeline' ]
             if not l:
-                a=self.controller.gui.open_adhoc_view(name='trace2', destination='fareast')
+                a=self.controller.gui.open_adhoc_view(name='tracetimeline', destination='fareast')
         btnbar.pack_start(btngt, expand=False)
         btngt.connect('clicked', open_trace)
         mainbox.pack_start(btnbar, expand=False)
@@ -147,11 +147,11 @@ class TracePreview(AdhocView):
             self.last_obs_box = self.buildBox(obj_evt, level)
             def zoom_in_timeline(w, event, obj_evt):
                 if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-                    l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'trace2' ]
+                    l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'tracetimeline' ]
                     if l:
                         a=l[-1]
                     else:        
-                        a=self.controller.gui.open_adhoc_view(name='trace2', destination='fareast')
+                        a=self.controller.gui.open_adhoc_view(name='tracetimeline', destination='fareast')
                     g = a.find_group(obj_evt)
                     if g is not None:
                         a.zoom_on(canvas_item=g)

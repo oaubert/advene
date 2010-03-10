@@ -66,7 +66,7 @@ INCOMPLETE_OPERATIONS_NAMES = {
 
 class TraceTimeline(AdhocView):
     view_name = _("Traces")
-    view_id = 'trace2'
+    view_id = 'tracetimeline'
     tooltip=("Traces of Advene Events in a Timeline")
     def __init__ (self, controller=None, parameters=None, package=None):
         super(TraceTimeline, self).__init__(controller=controller)
