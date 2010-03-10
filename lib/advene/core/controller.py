@@ -165,6 +165,8 @@ class AdveneController(object):
         self.videotime_bookmarks = []
         self.usertime_bookmarks = []
 
+        self.pending_duration_update = False
+
         self.restricted_annotation_type=None
         self.restricted_annotations=None
         self.restricted_rule=None
@@ -1162,6 +1164,8 @@ class AdveneController(object):
         p.playlist_clear()
         if uri is not None:
             p.playlist_add_item (uri)
+        # Reset cached_duration so that it will be updated on play
+        self.pending_duration_update = True
         self.notify("MediaChange", uri=uri)
 
     def set_default_media (self, uri, package=None):
@@ -1604,10 +1608,12 @@ class AdveneController(object):
             d={}
         self.package._tag_colors=d
 
+        self.pending_duration_update = True
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
             try:
                 v=long(float(duration))
+                self.pending_duration_update = False
             except ValueError:
                 v=0
             self.cached_duration = v
@@ -1697,6 +1703,8 @@ class AdveneController(object):
         # Reset the cached duration
         duration = self.package.getMetaData (config.data.namespace, "duration")
         self.cached_duration = long(float(duration or 0))
+        if not self.cached_duration:
+            self.pending_duration_update = True
 
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
@@ -2276,9 +2284,11 @@ class AdveneController(object):
                     break
 
         # Update the cached duration if necessary
-        if self.cached_duration <= 0 and self.player.stream_duration > 0:
+        if self.pending_duration_update and self.player.stream_duration > 0:
             self.cached_duration=long(self.player.stream_duration)
             self.notify('DurationUpdate', duration=self.cached_duration)
+            self.pending_duration_update = False
+
 
         return pos
 
