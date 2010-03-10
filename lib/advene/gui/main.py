@@ -1284,10 +1284,12 @@ class AdveneGUI(object):
         v.pack_start(hb, expand=False)
         eb=gtk.EventBox()
         eb.set_above_child(True)
+        eb.set_visible_window(True)
         eb.add(self.drawable)
         v.pack_start(eb, expand=True)
         eb.connect('scroll-event', self.on_slider_scroll_event)
         eb.connect('button-press-event', self.on_video_button_press_event)
+        eb.connect('key-press-event', self.on_win_key_press_event)
 
         if config.data.preferences['display-scroller']:
             self.scroller=ScrollerView(controller=self.controller)
@@ -3745,8 +3747,11 @@ class AdveneGUI(object):
         self.controller.move_frame(incr)
         return False
 
-    def on_video_button_press_event (self, button=None, data=None):
-        self.controller.update_status("pause")
+    def on_video_button_press_event (self, button=None, event=None):
+        if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            self.controller.player.fullscreen()
+        elif event.button == 3:
+            self.player_create_bookmark(event)
         return False
 
     def on_help1_activate (self, button=None, data=None):
