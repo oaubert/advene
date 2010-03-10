@@ -121,7 +121,7 @@ class TraceBuilder(Thread):
                                         'ElementEditDestroy':-1,
                                         'EditSessionEnd':-1,
                                         },
-                                     },                             
+                                     },
                             }
 
         # FIXME: this does not belong here. It should be in a
@@ -204,7 +204,7 @@ class TraceBuilder(Thread):
         d=config.data.advenefile('traces', category='settings')
         if not os.path.isdir(d):
             helper.recursive_mkdir(d)
-        
+
         fname=config.data.advenefile(['traces',time.strftime("trace_advene-%Y%m%d-%H%M%S")],
                                      category='settings')
         try:
@@ -688,7 +688,7 @@ class TraceBuilder(Thread):
                       'mimetype=' + elem.type.mimetype,
                       'source=' + elem.members[0].id,
                       'dest=' + elem.members[1].id,
-                      'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')                      
+                      'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
                     )
                 elem_name='relation'
                 elem_id=elem.id

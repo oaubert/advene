@@ -150,7 +150,7 @@ class TracePreview(AdhocView):
                     l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'tracetimeline' ]
                     if l:
                         a=l[-1]
-                    else:        
+                    else:
                         a=self.controller.gui.open_adhoc_view(name='tracetimeline', destination='fareast')
                     g = a.find_group(obj_evt)
                     if g is not None:
@@ -249,7 +249,7 @@ class TracePreview(AdhocView):
                 temp_c = self.controller.get_element_color(ob)
                 if temp_c is not None:
                     c=gtk.gdk.color_parse(temp_c)
-                    temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.blue >> 8 ) << 8) + 0xFF 
+                    temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.blue >> 8 ) << 8) + 0xFF
                 else:
                     temp_c = 0xFFFFFFFF
                 goocanvas.Ellipse(parent=objg,
@@ -259,7 +259,7 @@ class TracePreview(AdhocView):
                         radius_y=9,
                         stroke_color='black',
                         fill_color_rgba=temp_c,
-                        line_width=1.0)        
+                        line_width=1.0)
                 if obj_evt.concerned_object['type'] == Annotation:
                     #draw a A
                     txt='A'
@@ -289,7 +289,7 @@ class TracePreview(AdhocView):
                         anchor = gtk.ANCHOR_CENTER,
                         font = "Sans 5")
             else:
-                # no concerned object, we are in an action of navigation                
+                # no concerned object, we are in an action of navigation
                 txt = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
                 goocanvas.Text (parent = objg,
                         text = txt,

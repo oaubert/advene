@@ -85,7 +85,7 @@ class TraceTimeline(AdhocView):
         self.drag_coordinates=None
 
         self.active_trace = None
-        
+
         # Header canvas
         self.head_canvas = None
         # Main timeline canvas
@@ -166,7 +166,7 @@ class TraceTimeline(AdhocView):
         self.selector_box = gtk.HBox()
         self.trace_selector = dialog.list_selector_widget(
             members= [( n, _("%(name)s (%(index)d)") % {
-                        'name': t.name, 
+                        'name': t.name,
                         'index': n
                         }) for (n, t) in enumerate(self.tracer.traces)],
             preselect=0,
@@ -183,7 +183,7 @@ class TraceTimeline(AdhocView):
                     mod.remove(mod.get_iter(tr))
                     self.trace_selector.set_active(tr-1)
                 #self.select_trace(tr-1)
-            
+
         self.remove_trace_button.connect('button-press-event', remove_trace)
         self.selector_box.pack_start(self.remove_trace_button, expand=False)
         mainbox.pack_start(self.selector_box, expand=False)
@@ -198,8 +198,8 @@ class TraceTimeline(AdhocView):
             if len(self.tracer.traces)>len(mod):
                 n = len(self.tracer.traces)-1
                 mod.append((_("%(name)s (%(index)s)") % {
-                        'name': self.tracer.traces[n].name, 
-                        'index': n}, 
+                        'name': self.tracer.traces[n].name,
+                        'index': n},
                            n, None ))
                 self.trace_selector.set_active(n)
             #self.select_trace(tr)
@@ -228,7 +228,7 @@ class TraceTimeline(AdhocView):
 
         c = len(self.cols)
         self.context_canvasX = c*(self.context_col_width+self.context_colspacing) + 4 # 4 for select square
-        
+
         bx = gtk.HPaned()
         hbt = gtk.HBox()
         self.context_canvas = goocanvas.Canvas()
@@ -350,7 +350,7 @@ class TraceTimeline(AdhocView):
         toolbox.insert(btne, -1)
         btne.connect('clicked', self.export)
         #preselect= 0,
-        #callback=refresh        
+        #callback=refresh
         self.inspector = Inspector(self.controller)
         bx.pack2(self.inspector)
 
@@ -568,7 +568,7 @@ class TraceTimeline(AdhocView):
                         min_y = y_mi
                     min_y = min(min_y, y_mi)
                     max_y = max(max_y, y_ma)
-                    
+
         #print 'y1 %s y2 %s' % (min_y, max_y)
         h = self.canvas.get_allocation().height
         # 20.0 to keep a little space between border and object
@@ -641,13 +641,13 @@ class TraceTimeline(AdhocView):
             self.controller.notify("RelationCreate", relation=r)
         else:
             print 'TODO'
-        
+
         return
-    
+
     def edit_item(self, w=None, obj=None):
         if obj is not None:
             self.controller.gui.edit_element(obj)
-        
+
     def goto(self, w=None, time=None):
         c=self.controller
         pos = c.create_position (value=time,
@@ -655,7 +655,7 @@ class TraceTimeline(AdhocView):
                                      origin=c.player.AbsolutePosition)
         c.update_status (status="set", position=pos)
         return
-        
+
     def canvas_release(self, w, t, ev):
         if ev.state & gtk.gdk.SHIFT_MASK:
             self.selection[2]=ev.x
@@ -680,7 +680,7 @@ class TraceTimeline(AdhocView):
             self.refresh(center = vc)
             self.selection = [ 0, 0, 0, 0]
             return
-        
+
     def canvas_clicked(self, w, t, ev):
         if ev.state & gtk.gdk.SHIFT_MASK:
             self.selection = [ ev.x, ev.y, 0, 0]
@@ -709,9 +709,9 @@ class TraceTimeline(AdhocView):
                 i.connect("activate", self.zoom_on, obj_gp)
                 menu.append(i)
                 obj = objt = None
-                if obj_gp.cobj['id'] is not None:   
+                if obj_gp.cobj['id'] is not None:
                     obj = self.controller.package.get_element_by_id(obj_gp.cobj['id'])
-                if obj_gp.cobj['cid'] is not None:      
+                if obj_gp.cobj['cid'] is not None:
                     objt = self.controller.package.get_element_by_id(obj_gp.cobj['cid'])
                 if obj is not None:
                     i=gtk.MenuItem(_("Edit item"))
@@ -965,8 +965,8 @@ class TraceTimeline(AdhocView):
             n=len(tm)
             if n < len(self.tracer.traces):
                 tm.append((_("%(name)s (%(index)s)") % {
-                        'name': self.tracer.traces[n].name, 
-                        'index': n}, 
+                        'name': self.tracer.traces[n].name,
+                        'index': n},
                            n, None ))
         return False
 
@@ -1049,7 +1049,7 @@ class TraceTimeline(AdhocView):
                 if observed in g.event.operations:
                     return g
         return None
-        
+
 
 class HeadGroup (Group):
     def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00ffff50):
@@ -1124,7 +1124,7 @@ class EventGroup (Group):
             self.handler_block(self.handler_ids['leave-notify-event'])
         if self.event.comment!='':
             self.addCommentMark()
-            
+
     def newRect(self, color, color_c):
         return goocanvas.Rect (parent = self,
                                     x = self.x,
@@ -1228,12 +1228,12 @@ class EventGroup (Group):
 
     def fill_inspector(self):
         self.inspector.fillWithAction(self)
-        
+
     def removeCommentMark(self):
         if self.commentMark:
             self.commentMark.remove()
         self.commentMark = None
-    
+
     def addCommentMark(self):
         if self.commentMark:
             return
@@ -1272,7 +1272,7 @@ class ObjGroup (Group):
         temp_c = self.controller.get_element_color(temp_it)
         if temp_c is not None:
             c=gtk.gdk.color_parse(temp_c)
-            self.color_f = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.blue >> 8 ) << 8) + 0xFF 
+            self.color_f = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.blue >> 8 ) << 8) + 0xFF
 
         self.rep = self.newRep()
         self.text = self.newText()
@@ -1308,7 +1308,7 @@ class ObjGroup (Group):
         self.inspector.fillWithItem(self)
 
     #~ def get_link_mode(self):
-        
+
         #~ return 0
 
     def toggle_rels(self):
@@ -1375,7 +1375,7 @@ class ObjGroup (Group):
                     else:
                         x = obj_gr.x
                         y = obj_gr.y
-                        obj_gr.select()                    
+                        obj_gr.select()
                     dic[obj_time] = (x, y)
             p=goocanvas.Points(sorted(dic))
             self.lines.append(goocanvas.Polyline (parent = self,
@@ -1386,7 +1386,7 @@ class ObjGroup (Group):
                                         start_arrow = False,
                                         end_arrow = False,
                                         ))
-                
+
         return
 
     def select(self):
@@ -1414,7 +1414,7 @@ class ObjGroup (Group):
     #
     #
     #
-        
+
         txt = 'U'
         if self.cobj['type'] is None:
             # need to test if we can find the type in an other way, use of type() is not a good thing
@@ -1448,7 +1448,7 @@ class Inspector (gtk.VBox):
 #
 # Inspector component to display informations concerning items and actions in the timeline
 #
-    
+
     def __init__ (self, controller=None):
         gtk.VBox.__init__(self)
         self.action=None
@@ -1487,13 +1487,13 @@ class Inspector (gtk.VBox):
                     self.action.addCommentMark()
                 else:
                     self.action.removeCommentMark()
-            
+
         save_btn.connect('clicked', save_clicked)
         clear_btn=gtk.Button(_('Clear'))
         def clear_clicked(w):
             self.comment.set_text('')
             save_clicked(w)
-            
+
         clear_btn.connect('clicked', clear_clicked)
         btns = gtk.HBox()
         btns.pack_start(save_btn, expand=False)
@@ -1510,7 +1510,7 @@ class Inspector (gtk.VBox):
     #
     # Fill the inspector with informations concerning an object
     # item : the advene object to display
-    
+
         if item.cobj['id'] is not None:
             self.inspector_id.set_text(item.cobj['id'])
         if item.cobj['cid'] is not None:
@@ -1524,7 +1524,7 @@ class Inspector (gtk.VBox):
     #
     # Fill the inspector with informations concerning an action
     # action : the action to display
-    
+
         self.action=action
         self.inspector_id.set_text(_('Action'))
         self.inspector_name.set_text('')
@@ -1536,11 +1536,11 @@ class Inspector (gtk.VBox):
 
     def select_operation(self, op):
         self.fillWithAction(self.action, op)
-            
+
 
     def addOperations(self, op_list=[], op_sel=None):
     #
-    # used to pack operation boxes in the inspector 
+    # used to pack operation boxes in the inspector
     # op_list : list of operations to display
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
@@ -1551,7 +1551,7 @@ class Inspector (gtk.VBox):
 
     def addOperation(self, obj_evt=None, sel=False):
     #
-    # used to build a box to display an operation 
+    # used to build a box to display an operation
     # obj_evt : operation to build a box for
 
         corpsstr = ''
@@ -1623,7 +1623,7 @@ class Inspector (gtk.VBox):
             temp_c = self.controller.get_element_color(ob)
             if temp_c is not None:
                 c=gtk.gdk.color_parse(temp_c)
-                temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.red >> 8 ) << 8) + 0xFF 
+                temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.red >> 8 ) << 8) + 0xFF
             else:
                 temp_c = 0xFFFFFFFF
             goocanvas.Ellipse(parent=objg,
@@ -1633,7 +1633,7 @@ class Inspector (gtk.VBox):
                     radius_y=9,
                     stroke_color='black',
                     fill_color_rgba=temp_c,
-                    line_width=1.0)        
+                    line_width=1.0)
             if obj_evt.concerned_object['type'] == Annotation:
                 #draw a A
                 txt='A'
@@ -1663,7 +1663,7 @@ class Inspector (gtk.VBox):
                     anchor = gtk.ANCHOR_CENTER,
                     font = "Sans 5")
         else:
-            # no concerned object, we are in an action of navigation                
+            # no concerned object, we are in an action of navigation
             txt = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
             goocanvas.Text (parent = objg,
                     text = txt,
@@ -1710,7 +1710,7 @@ class Inspector (gtk.VBox):
             entete.set_tooltip_text(corpsstr)
         if entetestr != "":
             objcanvas.set_tooltip_text(entetestr)
-    
+
         box = gtk.EventBox()
         def box_pressed(w, event, id):
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
@@ -1842,7 +1842,7 @@ class DocGroup (Group):
                                         start_arrow = False,
                                         end_arrow = False
                                         ))
-        
+
 
     def redraw(self, trace=None, action=None, obj=None):
         for l in self.lines:
@@ -1869,7 +1869,7 @@ class DocGroup (Group):
         if action is not None:
             #print "%s %s %s" % (action.name, ACTIONS.index(action.name), color)
             for op in action.operations:
-                self.addMark(op.movietime, 
+                self.addMark(op.movietime,
                              gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][action.name])))
         elif obj is not None:
             for op in obj.cobj['opes']:
@@ -1899,7 +1899,7 @@ class DocGroup (Group):
         elif self.controller.package.cached_duration>0:
             self.movielength=self.controller.package.cached_duration
         self.redraw(trace)
-        
+
 
     def addLine(self, time=0, color=0x00000050, offset=0):
         # to be removed
