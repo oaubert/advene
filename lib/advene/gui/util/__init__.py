@@ -467,3 +467,18 @@ def enable_drag_source(widget, element, controller):
     widget.connect('drag-begin', contextual_drag_begin, element, controller)
     widget.connect('drag-end', contextual_drag_end)
     widget.connect('drag-data-get', drag_data_get_cb, controller)
+
+def gdk2intrgba(color, alpha=0xff):
+    """Convert a gdk.Color to int RGBA.
+    """
+    return (color.red   / 256 << 24) \
+         | (color.green / 256 << 16) \
+         | (color.blue  / 256 <<  8) \
+         | alpha
+         
+def gdk2intrgb(color):
+    """Convert a gdk.Color to int RGB.
+    """
+    return (color.red   / 256 << 16) \
+         | (color.green / 256 << 8) \
+         | (color.blue  / 256 )
