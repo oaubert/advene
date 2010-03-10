@@ -245,6 +245,7 @@ class AnnotationWidget(GenericColorButtonWidget):
     def __init__(self, annotation=None, container=None):
         self.annotation=annotation
         self.active=False
+        self._fraction_marker=None
         GenericColorButtonWidget.__init__(self, element=annotation, container=container)
         self.connect('key-press-event', self.keypress, self.annotation)
         self.connect('enter-notify-event', lambda b, e: b.grab_focus() and True)
@@ -265,6 +266,13 @@ class AnnotationWidget(GenericColorButtonWidget):
                              ,
                              gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.no_image_pixbuf=None
+
+    def set_fraction_marker(self, f):
+        self._fraction_marker = f
+        self.update_widget()
+    def get_fraction_marker(self):
+        return self._fraction_marker
+    fraction_marker = property(get_fraction_marker, set_fraction_marker)
 
     def _drag_begin(self, widget, context):
         try:
@@ -525,6 +533,15 @@ class AnnotationWidget(GenericColorButtonWidget):
             context.show_text(title.encode('utf8'))
         except MemoryError:
             print "MemoryError while rendering title for annotation ", self.annotation.id
+
+        if self._fraction_marker is not None:
+            x=int(self._fraction_marker * width)
+            context.set_source_rgba(0.9, 0, 0, 0.9)
+            context.set_line_width(2)
+            context.move_to(x, 0)
+            context.line_to(x, height)
+            context.stroke()
+
 gobject.type_register(AnnotationWidget)
 
 class AnnotationTypeWidget(GenericColorButtonWidget):
