@@ -2071,11 +2071,14 @@ class TimeLine(AdhocView):
         step = self.pixel2unit (110)
         t = self.minimum
 
+        font = pango.FontDescription("sans 10")
+
         while t <= self.maximum:
             x = u2p(t, absolute=True)
 
             # Draw label
-            l = gtk.Label ("|" + helper.format_time (t))
+            l = gtk.Label ('|' + helper.format_time (t))
+            l.modify_font(font)
             l.mark = t
             l.pos = 1
             l.show()
