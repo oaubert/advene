@@ -1282,7 +1282,12 @@ class AdveneGUI(object):
         # Stack the video components
         v=gtk.VBox()
         v.pack_start(hb, expand=False)
-        v.pack_start(self.drawable, expand=True)
+        eb=gtk.EventBox()
+        eb.set_above_child(True)
+        eb.add(self.drawable)
+        v.pack_start(eb, expand=True)
+        eb.connect('scroll-event', self.on_slider_scroll_event)
+
         if config.data.preferences['display-scroller']:
             self.scroller=ScrollerView(controller=self.controller)
             v.pack_start(self.scroller.widget, expand=False)
