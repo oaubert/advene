@@ -140,6 +140,7 @@ class Snapshotter(object):
         sink.props.notify=self.queue_notify
 
     def set_uri(self, uri):
+        self.player.set_state(gst.STATE_NULL)
         self.player.props.uri=uri
         self.player.set_state(gst.STATE_PAUSED)
 
