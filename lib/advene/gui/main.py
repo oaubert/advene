@@ -1287,6 +1287,7 @@ class AdveneGUI(object):
         eb.add(self.drawable)
         v.pack_start(eb, expand=True)
         eb.connect('scroll-event', self.on_slider_scroll_event)
+        eb.connect('button-press-event', self.on_video_button_press_event)
 
         if config.data.preferences['display-scroller']:
             self.scroller=ScrollerView(controller=self.controller)
@@ -3742,6 +3743,10 @@ class AdveneGUI(object):
         if event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
             incr=-1
         self.controller.move_frame(incr)
+        return False
+
+    def on_video_button_press_event (self, button=None, data=None):
+        self.controller.update_status("pause")
         return False
 
     def on_help1_activate (self, button=None, data=None):
