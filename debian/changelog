@@ -1,3 +1,18 @@
+advene (0.41) unstable; urgency=low
+
+  * New trace preview visualisation.
+
+  * Trace timeline: various improvements.
+
+  * New exporter: TimedText
+
+  * Mouse wheel in video window moves frame-by-frame (if
+    possible). Right-click in video window sets a bookmark.
+
+  * The current playing position is displayed in the montage view.
+
+ --
+
 advene (0.40) unstable; urgency=low
 
   * Stable release. See the following 0.39 notes for more details.
@@ -24,14 +39,14 @@ advene (0.39) unstable; urgency=low
   * Trace timeline: interface improvements, previous traces can be reopened.
 
   * Multiple search sources can be specified in quicksearch.
-  
+
   * Timeline:
 
     * optimal alignment of annotation sets (courtesy of <mben@irisa.fr>)
 
     * basic statistics about annotation types are available from their
       popup menu.
-  
+
   * Export:
 
     * a RDF export filter is available
