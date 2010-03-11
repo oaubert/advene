@@ -459,7 +459,7 @@ class TraceBuilder(Thread):
                             del tmp_opened_actions[typ]
                         ac.add_operation(op)
                         continue
-                    for t in tmp_opened_actions:
+                    for t in tmp_opened_actions.keys():
                         if t != "Navigation":
                             del tmp_opened_actions[t]
                     ac = Action(name=typ, begintime=op.time, endtime=None, acbegintime=op.activity_time, acendtime=None, content=None, movie=op.movie, movietime=op.movietime, operations=[op])
