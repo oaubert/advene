@@ -207,6 +207,7 @@ class VideoPlayer(AdhocView):
 
 
         self.toolbar=gtk.Toolbar()
+        self.toolbar.set_state(gtk.TOOLBAR_ICONS)
 
         self.audio_mute=gtk.ToggleToolButton()
         audio_on=gtk.Image()
