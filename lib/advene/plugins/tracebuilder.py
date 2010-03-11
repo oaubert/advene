@@ -780,7 +780,7 @@ class TraceBuilder(Thread):
                 del self.opened_actions[typ]
             ac.add_operation(ope)
             return ac
-        for t in self.opened_actions:
+        for t in self.opened_actions.keys():
             if t != "Navigation":
                 del self.opened_actions[t]
         # verifier que ce n'est pas la meme que la derniere
