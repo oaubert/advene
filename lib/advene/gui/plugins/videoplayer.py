@@ -167,8 +167,8 @@ class VideoPlayer(AdhocView):
         if self.player is None:
             return
         if hasattr(position, 'value'):
-            position = position.value
-        if position is not None:
+            position.value = position.value + self.offset
+        elif position is not None:
             position = position + self.offset
         self.player.update_status(status, position)
 
