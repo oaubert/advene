@@ -56,6 +56,8 @@ class VideoPlayer(AdhocView):
             uri=a['uri']
 
         self.uri = uri
+        # Offset in ms
+        self.offset = 0
 
         self.widget = self.build_widget()
         if self.uri is None:
@@ -66,7 +68,7 @@ class VideoPlayer(AdhocView):
     def register_callback (self, controller=None):
         """Add the event handlers.
         """
-        self.controller.register_slave_player(self.player)
+        self.controller.register_slave_player(self)
         self.registered_rules.extend( 
             controller.event_handler.internal_rule(event=name,
                                                    method=self.synchronize)
@@ -79,7 +81,7 @@ class VideoPlayer(AdhocView):
             )
 
     def unregister_callback (self, controller=None):
-        self.controller.register_slave_player(self.player)
+        self.controller.register_slave_player(self)
         for r in self.registered_rules:
             controller.event_handler.remove_rule(r, type_="internal")
 
@@ -100,15 +102,16 @@ class VideoPlayer(AdhocView):
         # Synchronize time
         if ( (ps == self.player.PauseStatus or ps == self.player.PlayingStatus)
              and self.controller.player.current_position_value > 0
-             and abs( long(s.position) - self.controller.player.current_position_value ) > 80 ):
-            self.player.update_status("set", self.controller.player.current_position_value)
+             and abs( long(s.position) + self.offset - self.controller.player.current_position_value ) > 80 ):
+            self.player.update_status("set", self.controller.player.current_position_value + self.offset)
         return True
 
     def get_save_arguments(self):
         if self.uri is not None:
-            arguments = [ ('uri', self.uri) ]
+            arguments = [ ('uri', self.uri),
+                          ('offset', self.offset) ]
         else:
-            arguments = []
+            arguments = [ ('offset', self.offset) ]
         return self.options, arguments
 
     def select_file(self, button=None):
@@ -147,6 +150,15 @@ class VideoPlayer(AdhocView):
             self.player.set_widget(self.drawable)
         return False
 
+    def update_status(self, status, position=None):
+        """Wrapper for update_status to handle offsets.
+        """
+        if hasattr(position, 'value'):
+            position = position.value
+        if position is not None:
+            position = position + self.offset
+        self.player.update_status(status, position)
+
     def _popup(self, *p):
         """Open a popup window for temporary anchoring the player video.
         """
@@ -161,7 +173,6 @@ class VideoPlayer(AdhocView):
         vbox=gtk.VBox()
 
         self.player = self.controller.playerfactory.get_player()
-        self.player.view = self
 
         self.player.sound_mute()
 
@@ -212,6 +223,21 @@ class VideoPlayer(AdhocView):
         sync_button.set_tooltip_text(_("Synchronize"))
         sync_button.connect('clicked', self.synchronize)
         self.toolbar.insert(sync_button, -1)
+
+        def offset_changed(spin):
+            self.offset = long(spin.get_value())
+            return True
+
+        ti = gtk.ToolItem()
+        spin = gtk.SpinButton(gtk.Adjustment(value = self.offset,
+                                                         lower = - 24 * 60 * 60 * 1000,
+                                                         upper =   24 * 60 * 60 * 1000,
+                                                         step_incr = 1000 / 25,
+                                                         page_incr = 1000))
+        spin.get_adjustment().connect('value-changed', offset_changed)
+        ti.add(spin)
+        spin.set_tooltip_text(_("Offset in ms"))
+        self.toolbar.insert(ti, -1)
 
         self.label = gtk.Label()
         self.label.set_alignment(0, 0)

@@ -2548,7 +2548,7 @@ class AdveneGUI(object):
             return True
 
         for p in self.controller.slave_players:
-            p.view.synchronize()
+            p.synchronize()
 
         if self.gui.win.get_title().endswith('(*)') ^ self.controller.package._modified:
             self.update_window_title()
