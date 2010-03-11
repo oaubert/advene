@@ -1623,7 +1623,7 @@ class Inspector (gtk.VBox):
             temp_c = self.controller.get_element_color(ob)
             if temp_c is not None:
                 c=gtk.gdk.color_parse(temp_c)
-                temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.red >> 8 ) << 8) + 0xFF
+                temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.blue >> 8 ) << 8) + 0xFF
             else:
                 temp_c = 0xFFFFFFFF
             goocanvas.Ellipse(parent=objg,
@@ -1691,11 +1691,11 @@ class Inspector (gtk.VBox):
                         if obj_evt.name in INCOMPLETE_OPERATIONS_NAMES:
                             if obj_evt.concerned_object['id']:
                                 ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
-                                if isinstance(ob, Annotation) or isinstance(ob, Relation):
+                                if obj_evt.concerned_object['type'] == Annotation or obj_evt.concerned_object['type'] == Relation or isinstance(ob, Annotation) or isinstance(ob, Relation):
                                     x=1
-                                elif isinstance(ob, AnnotationType) or isinstance(ob, RelationType) or isinstance(ob, Schema):
+                                elif obj_evt.concerned_object['type'] == RelationType or obj_evt.concerned_object['type'] == AnnotationType or obj_evt.concerned_object['type'] == Schema or isinstance(ob, AnnotationType) or isinstance(ob, RelationType) or isinstance(ob, Schema) :
                                     x=3
-                                elif isinstance(ob, View):
+                                elif obj_evt.concerned_object['type'] == View or isinstance(ob, View):
                                     x=4
                                 else:
                                     x=-1
