@@ -88,6 +88,8 @@ class VideoPlayer(AdhocView):
     def synchronize(self, *p):
         """Synchronize the player with the main player.
         """
+        if self.player is None:
+            return True
         s=self.player.get_stream_information()
         ps=self.controller.player.status
         if s.status != ps:
@@ -123,6 +125,8 @@ class VideoPlayer(AdhocView):
         return True
 
     def set_file(self, fname):
+        if self.player is None:
+            return True
         self.uri = self.controller.locate_mediafile(fname)
         self.player.playlist_clear()
         self.player.playlist_add_item(self.uri)
@@ -145,6 +149,13 @@ class VideoPlayer(AdhocView):
                 self.temp_window = None
         return True
 
+    def close(self, *p):
+        p=self.player
+        self.player=None
+        p.exit()
+        super(VideoPlayer, self).close()
+        return True
+
     def register_drawable(self, drawable):
         if self.drawable.get_parent_window() is not None:
             self.player.set_widget(self.drawable)
@@ -153,6 +164,8 @@ class VideoPlayer(AdhocView):
     def update_status(self, status, position=None):
         """Wrapper for update_status to handle offsets.
         """
+        if self.player is None:
+            return
         if hasattr(position, 'value'):
             position = position.value
         if position is not None:
@@ -162,6 +175,8 @@ class VideoPlayer(AdhocView):
     def _popup(self, *p):
         """Open a popup window for temporary anchoring the player video.
         """
+        if self.player is None:
+            return None
         w=gtk.Window()
         d=gtk.Socket()
         w.add(d)
@@ -204,6 +219,8 @@ class VideoPlayer(AdhocView):
         def toggle_audio_mute(b):
             """Toggle audio mute status.
             """
+            if self.player is None:
+                return False
             # Set the correct image
             if b.get_active():
                 self.player.sound_mute()
