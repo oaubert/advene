@@ -39,6 +39,7 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.package import Package
+from advene.gui.util import gdk2intrgba
 
 def register(controller):
     controller.register_viewclass(TracePreview)
@@ -248,8 +249,7 @@ class TracePreview(AdhocView):
                 ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
                 temp_c = self.controller.get_element_color(ob)
                 if temp_c is not None:
-                    c=gtk.gdk.color_parse(temp_c)
-                    temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.blue >> 8 ) << 8) + 0xFF
+                    temp_c = gdk2intrgba(gtk.gdk.color_parse(temp_c))
                 else:
                     temp_c = 0xFFFFFFFF
                 goocanvas.Ellipse(parent=objg,

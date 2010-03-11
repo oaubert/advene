@@ -1271,8 +1271,7 @@ class ObjGroup (Group):
         temp_it = self.controller.package.get_element_by_id(self.cobj['id'])
         temp_c = self.controller.get_element_color(temp_it)
         if temp_c is not None:
-            c=gtk.gdk.color_parse(temp_c)
-            self.color_f = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.blue >> 8 ) << 8) + 0xFF
+            self.color_f = gdk2intrgba(gtk.gdk.color_parse(temp_c))
 
         self.rep = self.newRep()
         self.text = self.newText()
@@ -1622,8 +1621,7 @@ class Inspector (gtk.VBox):
             ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
             temp_c = self.controller.get_element_color(ob)
             if temp_c is not None:
-                c=gtk.gdk.color_parse(temp_c)
-                temp_c = ( (c.red >> 8) << 24 ) + ( (c.green >> 8) << 16) + (( c.blue >> 8 ) << 8) + 0xFF
+                temp_c = gdk2intrgba(gtk.gdk.color_parse(temp_c))
             else:
                 temp_c = 0xFFFFFFFF
             goocanvas.Ellipse(parent=objg,

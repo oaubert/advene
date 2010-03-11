@@ -471,14 +471,14 @@ def enable_drag_source(widget, element, controller):
 def gdk2intrgba(color, alpha=0xff):
     """Convert a gdk.Color to int RGBA.
     """
-    return (color.red   / 256 << 24) \
-         | (color.green / 256 << 16) \
-         | (color.blue  / 256 <<  8) \
+    return ( (color.red >> 8) << 24) \
+         | ( (color.green >> 8) << 16) \
+         | ( (color.blue >> 8) <<  8) \
          | alpha
          
 def gdk2intrgb(color):
     """Convert a gdk.Color to int RGB.
     """
-    return (color.red   / 256 << 16) \
-         | (color.green / 256 << 8) \
-         | (color.blue  / 256 )
+    return ( (color.red >> 8) << 16) \
+         | ( (color.green >> 8) << 8) \
+         | (color.blue >> 8)
