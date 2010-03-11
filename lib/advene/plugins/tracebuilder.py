@@ -75,7 +75,6 @@ class TraceBuilder(Thread):
         self.network_exp = nte
         self.operations = []
         self.registered_views = []
-        self.opened_actions = {}
         self.filtered_events = ['SnapshotUpdate', 'AnnotationBegin', 'AnnotationEnd', 'BookmarkHighlight', 'BookmarkUnhighlight']
         self.tracemodel = {'events':[],
                             'operations':[],
@@ -86,6 +85,8 @@ class TraceBuilder(Thread):
             if i not in self.filtered_events:
                 self.tracemodel['operations'].append(i)
         self.tracemodel['actions']=['Annotation', 'Restructuration', 'Navigation', 'Classification', 'View building']
+        self.opened_actions = {}
+        self.reset_opened_actions()
         self.modelmapping = {
                         'operations': {
                                 'actions': {
@@ -151,6 +152,10 @@ class TraceBuilder(Thread):
         self.trace = Trace() # current trace
         self.trace.start = config.data.startup_time
         self.traces.append(self.trace)
+
+    def reset_opened_actions(self):
+        for i in self.tracemodel['actions']:
+            self.opened_actions[i]=None
 
     def log(self, msg, level=None):
         m=": ".join( ("Tracebuilder", msg) )
@@ -336,7 +341,7 @@ class TraceBuilder(Thread):
             self.log("This does not look like a trace file.")
             return False
         self.traces.append(Trace())
-        self.opened_actions = {}
+        self.reset_opened_actions()
         if pk.annotations:
             for an in pk.annotations[0].annotation:
                 an_content = ''
@@ -386,7 +391,7 @@ class TraceBuilder(Thread):
         # reseting current trace
         if reset:
             self.trace = Trace()
-            self.opened_actions = {}
+            self.reset_opened_actions()
             self.trace.start = config.data.startup_time
             # should be now
             self.log("Trace cleaned.")
@@ -405,7 +410,10 @@ class TraceBuilder(Thread):
             return False
         # creating an empty new trace
         self.traces.append(Trace())
+        # initializing opened actions for the imported trace
         tmp_opened_actions = {}
+        for i in self.tracemodel['actions']:
+            tmp_opened_actions[i]=None
         if hasattr(tr, 'name'):
             self.traces[-1].rename('%s (imported)' % tr.name)
         else:
@@ -431,11 +439,12 @@ class TraceBuilder(Thread):
                 ev.o_cid=None
             if self.traces[-1].start == 0 or float(ev.time) < self.traces[-1].start:
                 self.traces[-1].start=float(ev.time)
-            evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, self.imp_type(ev.o_type), ev.o_cid)
+            ot = self.imp_type(ev.o_type)
+            evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ot, ev.o_cid)
             evt.change_comment(ev.comment)
             self.traces[-1].add_to_trace('events', evt)
             if evt.name in self.modelmapping['operations']['actions']:
-                op = Operation(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, self.imp_type(ev.o_type), ev.o_cid)
+                op = Operation(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ot, ev.o_cid)
                 self.traces[-1].add_to_trace('operations', op)
                 if op is not None:
                     if ev.name in self.modelmapping['operations']['actions']:
@@ -446,28 +455,39 @@ class TraceBuilder(Thread):
                     if ac_t >=0:
                         typ = self.tracemodel['actions'][ac_t]
                     if typ == "Undefined":
-                        if ev.o_name=='annotation' or ev.o_name=='relation':
+                        if ot==advene.model.annotation.Annotation or ot==advene.model.annotation.Annotation:
                             typ="Restructuration"
-                        elif ev.o_name=='annotationtype' or ev.o_name=='relationtype' or ev.o_name=='schema':
+                        elif ot==advene.model.schema.AnnotationType or ot==advene.model.schema.RelationType or ot==advene.model.schema.Schema:
                             typ="Classification"
-                        elif ev.o_name=='view':
+                        elif ot==advene.model.view.View:
                             typ="View building"
-                    if typ in tmp_opened_actions:
-                        # an action is already opened for this event
+                        else:
+                            print "undefined action type ! %s" % ev.o_type
+                            continue
+                    if tmp_opened_actions[typ]:
+                        # an action is already opened for this type of event
                         ac = tmp_opened_actions[typ]
-                        if typ == "Navigation" and (op.name == "PlayerStop" or op.name == "PlayerPause"):
-                            del tmp_opened_actions[typ]
+                        #add operation to existing action
                         ac.add_operation(op)
+                        if typ == "Navigation" and (op.name == "PlayerStop" or op.name == "PlayerPause"):
+                            # Navigation action end if PlayerStop or PlayerPause
+                            tmp_opened_actions[typ]=None
                         continue
+                    #no corresponding action was already opened
                     for t in tmp_opened_actions.keys():
+                        #we close every opened actions except Navigation
                         if t != "Navigation":
-                            del tmp_opened_actions[t]
+                            tmp_opened_actions[t]=None
+                    #we create the new action
                     ac = Action(name=typ, begintime=op.time, endtime=None, acbegintime=op.activity_time, acendtime=None, content=None, movie=op.movie, movietime=op.movietime, operations=[op])
                     self.traces[-1].add_to_trace('actions', ac)
+                    #we append the new action to the trace and flag it as opened (not yet ended)
                     tmp_opened_actions[typ]=ac
+        # copy comments
         if hasattr(tr, 'actions'):
             for ac in tr.actions[0].action:
-                self.traces[-1].levels['actions'][int(ac.id[1:])].change_comment(ac.comment)
+                if ac.comment != "":
+                    self.traces[-1].levels['actions'][int(ac.id[1:])].change_comment(ac.comment)
 
         self.alert_registered(None, None, None)
         self.log("%s events imported" % lid)
@@ -771,27 +791,26 @@ class TraceBuilder(Thread):
         if ac_t >=0:
             typ = self.tracemodel['actions'][ac_t]
         if typ == "Undefined":
+            # some operations can be mapped to different actions, we check that
             typ = self.find_action_name(obj)
-            # traiter les edit
-        if typ in self.opened_actions:
+        if self.opened_actions[typ]:
             # an action is already opened for this event
             ac = self.opened_actions[typ]
             if typ == "Navigation" and (ope.name == "PlayerStop" or ope.name == "PlayerPause"):
-                del self.opened_actions[typ]
+                # navigation action is ended by a stop or pause
+                self.opened_actions[typ] = None
+            # we pack the operation to the already existing action
             ac.add_operation(ope)
             return ac
+        #no existing action found, we close every previously opened actions except navigation
         for t in self.opened_actions.keys():
             if t != "Navigation":
-                del self.opened_actions[t]
-        # verifier que ce n'est pas la meme que la derniere
-#        if len(self.trace.levels['actions'])>0:
-#            if self.trace.levels['actions'][len(self.trace.levels['actions'])-1].name == type:
-#                ac = self.trace.levels['actions'][len(self.trace.levels['actions'])-1]
-#                ac.add_operation(ope)
-                #mise a jour des temps de fin, contenu, liste operations
-#                return ac
+                self.opened_actions[t]=None
+        # we create a new action
         ac = Action(name=typ, begintime=ope.time, endtime=None, acbegintime=ope.activity_time, acendtime=None, content=None, movie=ope.movie, movietime=ope.movietime, operations=[ope])
+        # add it to the trace
         self.trace.add_to_trace('actions', ac)
+        # and flag it as opened
         self.opened_actions[typ]=ac
         return ac
 
@@ -977,11 +996,27 @@ class Operation:
         o.change_comment(self.comment)
         return o
 
+    def exp_type(self, typ):
+        if typ == Schema:
+            return 'advene.model.schema.Schema'
+        elif typ == AnnotationType:
+            return 'advene.model.schema.AnnotationType'
+        elif typ == RelationType:
+            return 'advene.model.schema.RelationType'
+        elif typ == Annotation:
+            return 'advene.model.annotation.Annotation'
+        elif typ == Relation:
+            return 'advene.model.annotation.Relation'
+        elif typ == View:
+            return 'advene.model.view.View'
+        else:
+            return 'None'
+
     def export(self, n_id):
         #print "%s %s %s %s %s %s %s %s %s %s" % ('e'+str(n_id), self.name, str(self.time), str(self.activity_time), self.movie, str(self.movietime), self.comment, str(self.concerned_object['name']), str(self.concerned_object['id']), self.content)
         e = ET.Element('operation', id='o'+str(n_id),
                 name=self.name, time=str(self.time),
-                ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']), o_type=str(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
+                ac_time=str(self.activity_time), movie=str(self.movie), m_time=str(self.movietime), comment=self.comment, o_name=str(self.concerned_object['name']), o_id=str(self.concerned_object['id']), o_type=self.exp_type(self.concerned_object['type']), o_cid=str(self.concerned_object['cid']))
         e.text = self.content
         return e
 
