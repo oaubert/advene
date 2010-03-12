@@ -1,5 +1,5 @@
 <package dc:creator="oaubert" dc:date="2004-06-15" xmlns="http://experience.univ-lyon1.fr/advene/ns" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <meta>
+  <meta><default_adhoc xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">_default_workspace</default_adhoc>
     <tag_colors xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"></tag_colors>
     <duration xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">1800000</duration>
     <title xmlns="http://purl.org/dc/elements/1.1/">Export package</title>
@@ -17,7 +17,7 @@
       </meta>
       <content mime-type="text/plain">&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;
 &lt;span tal:replace=&quot;python:repeat['a'].getIndex()+1&quot; &gt;Index&lt;/span&gt;
-&lt;span tal:replace=&quot;a/fragment/formatted/begin&quot; &gt;Begin&lt;/span&gt; --&gt; &lt;span tal:replace=&quot;a/fragment/formatted/end&quot; &gt;End&lt;/span&gt;
+&lt;span tal:define=&quot;begin a/fragment/formatted/begin&quot; tal:replace=&quot;python:begin.replace('.',',')&quot; &gt;Begin&lt;/span&gt; --&gt; &lt;span tal:define=&quot;end a/fragment/formatted/end&quot; tal:replace=&quot;python:end.replace('.',',')&quot; &gt;End&lt;/span&gt;
 &lt;span tal:replace=&quot;a/content/data&quot;&gt;Content&lt;/span&gt;
 &lt;/span&gt;</content>
     </view>
@@ -502,6 +502,30 @@ xmlns=&quot;http://advene.org/ns/linked-data/&quot;
   &lt;/div&gt;
 &lt;/body&gt;
  &lt;/tt&gt;
- </content></view>
+ </content></view><view dc:creator="pa" dc:date="2010-03-11" id="_default_workspace" viewable-class="package"><meta><title xmlns="http://purl.org/dc/elements/1.1/">Environnement sauvegardé</title></meta><content mime-type="application/x-advene-workspace-view">&lt;workspace&gt;
+  &lt;layout height=&quot;727&quot; width=&quot;1296&quot; x=&quot;325&quot; y=&quot;85&quot;&gt;
+    &lt;pane id=&quot;west&quot; position=&quot;0&quot; /&gt;
+    &lt;pane id=&quot;east&quot; position=&quot;623&quot; /&gt;
+    &lt;pane id=&quot;fareast&quot; position=&quot;1290&quot; /&gt;
+    &lt;pane id=&quot;south&quot; position=&quot;493&quot; /&gt;
+    &lt;pane id=&quot;main&quot; position=&quot;610&quot; /&gt;
+  &lt;/layout&gt;&lt;advene:adhoc destination=&quot;east&quot; id=&quot;tree&quot; title=&quot;Vue en arbre&quot; xmlns:advene=&quot;http://experience.univ-lyon1.fr/advene/ns/advenetool&quot; /&gt;
+  &lt;advene:adhoc destination=&quot;fareast&quot; id=&quot;activebookmarks&quot; title=&quot;Signets Actifs&quot; xmlns:advene=&quot;http://experience.univ-lyon1.fr/advene/ns/advenetool&quot;&gt;
+    &lt;advene:option name=&quot;snapshot-size&quot; value=&quot;80&quot; /&gt;
+    &lt;advene:option name=&quot;snapshot_width&quot; value=&quot;60&quot; /&gt;
+  &lt;/advene:adhoc&gt;&lt;advene:adhoc destination=&quot;south&quot; id=&quot;timeline&quot; title=&quot;Ligne de Temps&quot; xmlns:advene=&quot;http://experience.univ-lyon1.fr/advene/ns/advenetool&quot;&gt;
+    &lt;advene:option name=&quot;pane-position&quot; value=&quot;1282&quot; /&gt;
+    &lt;advene:option name=&quot;goto-on-click&quot; value=&quot;True&quot; /&gt;
+    &lt;advene:option name=&quot;autoscroll&quot; value=&quot;2&quot; /&gt;
+    &lt;advene:option name=&quot;highlight&quot; value=&quot;False&quot; /&gt;
+    &lt;advene:option name=&quot;display-relations&quot; value=&quot;True&quot; /&gt;
+    &lt;advene:option name=&quot;display-relation-type&quot; value=&quot;True&quot; /&gt;
+    &lt;advene:option name=&quot;display-relation-content&quot; value=&quot;True&quot; /&gt;
+    &lt;advene:argument name=&quot;minimum&quot; value=&quot;0&quot; /&gt;
+    &lt;advene:argument name=&quot;maximum&quot; value=&quot;1800000&quot; /&gt;
+    &lt;advene:argument name=&quot;position&quot; value=&quot;0&quot; /&gt;
+    &lt;advene:argument name=&quot;zoom&quot; value=&quot;4.44164043506&quot; /&gt;
+  &lt;/advene:adhoc&gt;
+&lt;/workspace&gt;</content></view>
   </views>
 </package>
