@@ -186,6 +186,8 @@ class AdveneController(object):
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
         self.slave_players = set()
+        # source-id (returned by gobject.timeout_add)
+        self.slave_player_timeout = None
 
         # Some player can define a cleanup() method
         try:
@@ -389,6 +391,19 @@ class AdveneController(object):
         """Register a slave video player.
         """
         self.slave_players.add(p)
+
+        def synchronize_players():
+            for p in self.slave_players:
+                p.synchronize()
+            if not self.slave_players:
+                # Abort the timeout
+                self.slave_player_timeout = None
+                return False
+            else:
+                return True
+
+        if self.slave_player_timeout is None:
+            self.slave_player_timeout = gobject.timeout_add(config.data.preferences['slave-player-sync-delay'], synchronize_players)
 
     def unregister_slave_player(self, p):
         """Unregister a slave video player.
