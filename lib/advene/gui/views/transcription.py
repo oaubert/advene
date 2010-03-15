@@ -47,7 +47,7 @@ def register(controller):
 class TranscriptionView(AdhocView):
     view_name = _("Transcription")
     view_id = 'transcription'
-    tooltip = _("Representation of a set of annotation as a transcription")
+    tooltip = _("Display annotations as a text transcription")
 
     def __init__ (self, controller=None, source=None, elements=None, parameters=None):
         super(TranscriptionView, self).__init__(controller=controller)

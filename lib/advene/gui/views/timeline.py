@@ -116,7 +116,7 @@ class TimeLine(AdhocView):
     """
     view_name = _("Timeline")
     view_id = 'timeline'
-    tooltip = _("Representation of a set of annotations placed on a timeline.")
+    tooltip = _("Display annotations on a timeline")
 
     def __init__ (self, elements=None,
                   minimum=None,
