@@ -340,6 +340,8 @@ class GenericTable(AdhocView):
         Columns: element, content (title), type, id
         """
         l=gtk.ListStore(object, str, str, str)
+        if not self.elements:
+            return l
         for e in self.elements:
             l.append( (e,
                        self.controller.get_title(e),
