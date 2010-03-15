@@ -187,8 +187,11 @@ class DummyGlade:
             if tooltip:
                 i.set_tooltip_text(tooltip)
 
+            # Menu-specific customizations
             if name == _("_Select player"):
                 self.select_player_menuitem=i
+            elif name == _("_View"):
+                self.adhoc_view_menuitem=i
             elif name == _("Packages"):
                 self.package_list_menu=gtk.Menu()
                 i.set_submenu(self.package_list_menu)
@@ -225,6 +228,7 @@ class AdveneGUI(object):
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
 
+        # FIXME: we should use gtk.UIManager 
         menu_definition=(
             (_("_File"), (
                     ( _("_New package"), self.on_new1_activate, _("Create a new package")),
@@ -270,15 +274,7 @@ class AdveneGUI(object):
                     ( _("P_references"), self.on_preferences1_activate, _("Interface preferences") ),
                     ), "" ),
             (_("_View"), (
-                    ( _("Take notes on the fly"), self.on_adhoc_transcribe_activate, _("Take notes on the fly as a timestamped transcription") ),
-                    ( _("_TreeView"), self.on_adhoc_treeview_activate, _("Display the package's content as a tree") ),
-                    ( _("T_imeline"), self.on_adhoc_timeline_activate, _("Display annotations on a timeline") ),
-                    ( _("_URL stack"), self.on_view_urlstack_activate, "" ),
-                    ( _("T_ranscription"), (
-                            ( _("of an annotation type"), self.on_adhoc_transcription_activate, _("Display the transcription for an annotation type") ),
-                            ( _("of the whole package"), self.on_adhoc_transcription_package_activate, _("Transcription of the whole package") ),
-                            ), ""),
-                    ( _("_Package Browser"), self.on_adhoc_browser_activate, _("Browse the package's data") ),
+                    # Note: this will be populated from registered_adhoc_views
                     ( _("_Start Web Browser"), self.on_adhoc_web_browser_activate, _("Start the web browser") ),
                     ( "", None, "" ),
                     ( _("Evaluator"), self.on_evaluator2_activate, _("Open python evaluator window") ),
@@ -448,6 +444,16 @@ class AdveneGUI(object):
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
 
             return True
+
+        # Populate the View submenu
+        m=self.gui.adhoc_view_menuitem.get_submenu()
+        for name in sorted(self.registered_adhoc_views, reverse=True):
+            cl=self.registered_adhoc_views[name]
+            it=gtk.MenuItem(cl.view_name, use_underline=False)
+            it.set_tooltip_text(cl.tooltip)
+            it.connect('activate', open_view_menu, name)
+            m.prepend(it)
+        m.show_all()
 
         # Generate the adhoc view buttons
         hb=self.gui.adhoc_hbox
