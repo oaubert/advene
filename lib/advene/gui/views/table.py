@@ -64,7 +64,7 @@ class AnnotationTable(AdhocView):
         self.elements=elements
         self.options={}
 
-        self.model=self.build_model()
+        self.model=self.build_model(elements)
         self.widget = self.build_widget()
 
     def get_elements(self):
@@ -79,14 +79,14 @@ class AnnotationTable(AdhocView):
         store, paths=selection.get_selected_rows()
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
-    def build_model(self):
+    def build_model(self, elements):
         """Build the ListStore containing the data.
 
         """
         l=gtk.ListStore(object, str, str, str, long, long, long, str, str, gtk.gdk.Pixbuf, str)
-        if not self.elements:
+        if not elements:
             return l
-        for a in self.elements:
+        for a in elements:
             if isinstance(a, Annotation):
                 l.append( (a,
                            self.controller.get_title(a),
@@ -102,6 +102,11 @@ class AnnotationTable(AdhocView):
                            self.controller.get_element_color(a),
                            ) )
         return l
+
+    def set_elements(self, elements):
+        self.elements=elements
+        model=self.build_model(elements)
+        self.widget.treeview.set_model(model)
 
     def build_widget(self):
         tree_view = gtk.TreeView(self.model)
@@ -178,6 +183,30 @@ class AnnotationTable(AdhocView):
         tree_view.connect('drag-end', contextual_drag_end)
 
         tree_view.connect('drag-data-get', self.drag_data_get_cb)
+
+        # The widget can receive drops
+        def drag_received_cb(widget, context, x, y, selection, targetType, time):
+            """Handle the drop of an annotation type.
+            """
+            if targetType == config.data.target_type['annotation']:
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                if sources:
+                    self.set_elements(sources)
+                return True
+            elif targetType == config.data.target_type['annotation-type']:
+                sources=[ self.controller.package.annotationTypes.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                if sources:
+                    self.set_elements(sources[0].annotations)
+                return True
+            return False
+
+        tree_view.connect('drag-data-received', drag_received_cb)
+        tree_view.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.drag_type['annotation'] +
+                        config.data.drag_type['annotation-type'],
+                        gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -287,24 +316,6 @@ class AnnotationTable(AdhocView):
                         retval=True
         return retval
 
-    def drag_sent(self, widget, context, selection, targetType, eventTime):
-        #print "drag_sent event from %s" % widget.annotation.content.data
-        if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, widget.annotation.uri.encode('utf8'))
-        else:
-            print "Unknown target type for drag: %d" % targetType
-        return True
-
-    def drag_received(self, widget, context, x, y, selection, targetType, time):
-        #print "drag_received event for %s" % widget.annotation.content.data
-        if targetType == config.data.target_type['annotation']:
-            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8').split('\n')[0])
-            dest=widget.annotation
-            self.create_relation_popup(source, dest)
-        else:
-            print "Unknown target type for drop: %d" % targetType
-        return True
-
 class GenericTable(AdhocView):
     view_name = _("Generic table view")
     view_id = 'generictable'
@@ -319,7 +330,7 @@ class GenericTable(AdhocView):
         self.elements=elements
         self.options={}
 
-        self.model=self.build_model()
+        self.model=self.build_model(elements)
         self.widget = self.build_widget()
 
     def get_elements(self):
@@ -334,15 +345,20 @@ class GenericTable(AdhocView):
         store, paths=selection.get_selected_rows()
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
-    def build_model(self):
+    def set_elements(self, elements):
+        self.elements=elements
+        model=self.build_model(elements)
+        self.widget.treeview.set_model(model)
+        
+    def build_model(self, elements):
         """Build the ListStore containing the data.
 
         Columns: element, content (title), type, id
         """
         l=gtk.ListStore(object, str, str, str)
-        if not self.elements:
+        if not elements:
             return l
-        for e in self.elements:
+        for e in elements:
             l.append( (e,
                        self.controller.get_title(e),
                        helper.get_type(e),
@@ -419,6 +435,30 @@ class GenericTable(AdhocView):
         sw.add(tree_view)
 
         sw.treeview = tree_view
+
+        # The widget can receive drops
+        def drag_received_cb(widget, context, x, y, selection, targetType, time):
+            """Handle the drop of an annotation type.
+            """
+            if targetType == config.data.target_type['annotation']:
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                if sources:
+                    self.set_elements(sources)
+                return True
+            elif targetType == config.data.target_type['annotation-type']:
+                sources=[ self.controller.package.annotationTypes.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                if sources:
+                    self.set_elements(sources[0].annotations)
+                return True
+            return False
+
+        tree_view.connect('drag-data-received', drag_received_cb)
+        tree_view.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.drag_type['annotation'] +
+                        config.data.drag_type['annotation-type'],
+                        gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
 
         return sw
 
