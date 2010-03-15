@@ -1,3 +1,5 @@
+* Annotation display: allow DND of annotation
+
 * Generateur waveform
 
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)

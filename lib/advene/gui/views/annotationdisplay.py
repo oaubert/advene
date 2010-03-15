@@ -227,4 +227,22 @@ class AnnotationDisplay(AdhocView):
         v.show_all()
         image.hide()
         v.set_no_show_all(True)
+
+        def annotation_drag_received_cb(widget, context, x, y, selection, targetType, time):
+            """Handle the drop of an annotation.
+            """
+            if targetType == config.data.target_type['annotation']:
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                if sources:
+                    self.set_annotation(sources[0])
+                return True
+            return False
+        # The button can receive drops (to display annotations)
+        v.connect('drag-data-received', annotation_drag_received_cb)
+        v.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.drag_type['annotation'],
+                        gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+
         return v
