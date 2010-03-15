@@ -1,3 +1,6 @@
+* controller.update_status: accept annotation as parameter, to allow
+   more precise notification
+
 * Generateur waveform
 
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)
@@ -19,11 +22,7 @@
 
 * Shortcut for edit element validation
 
-* Ctrl+wheel -> frame by frame
-
 * Check PyUseCase http://texttest.carmen.se/index.php?page=ui_testing
-
-* MAJ shortcuts/wiki/0.38
 
 * webcherry: use content negociation for invoking appropriate views
 
@@ -2727,3 +2726,5 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Table view: allow DND of annotation type
 
 * Annotation display: allow DND of annotation
+
+* Ctrl+wheel -> frame by frame (wheel on video actually)
