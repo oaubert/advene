@@ -286,6 +286,7 @@ class AdveneGUI(object):
                     ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
                     ( _("_Configure player"), self.on_configure_player1_activate, _("Configure the player") ),
                     ( _("Capture screenshots"), self.generate_screenshots, _("Generate screenshots for the current video") ),
+                    ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds") ),
                     ( _("Detect shots"), self.on_shotdetect_activate, _("Automatically detect shots")),
                     ( _("_Select player"), None, _("Select the player plugin") ),
                     ), "" ),
@@ -4022,6 +4023,23 @@ class AdveneGUI(object):
         """Export a whole package.
         """
         self.export_element(self.controller.package)
+        return True
+
+    def update_annotation_screenshots(self, *p):
+        """Update screenshot for annotations bounds.
+
+        This requires that the player has the async-snapshot capability.
+        """
+        missing = set()
+        ic=self.controller.package.imagecache
+        for a in self.controller.package.annotations:
+            if not ic.is_initialized(a.fragment.begin):
+                missing.add(a.fragment.begin)
+            if not ic.is_initialized(a.fragment.end):
+                missing.add(a.fragment.end)
+        print "Updating %d missing snapshots: " % len(missing), ", ".join(helper.format_time(t) for t in sorted(missing))
+        for t in sorted(missing):
+            self.controller.player.async_snapshot(t)
         return True
 
     def generate_screenshots(self, *p):
