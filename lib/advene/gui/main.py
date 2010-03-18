@@ -4030,6 +4030,9 @@ class AdveneGUI(object):
 
         This requires that the player has the async-snapshot capability.
         """
+        if not 'async-snapshot' in self.controller.player.player_capabilities:
+            dialog.message_dialog(_("This video player is not able to grab specific screenshots"))
+            return True
         missing = set()
         ic=self.controller.package.imagecache
         for a in self.controller.package.annotations:
@@ -4037,9 +4040,13 @@ class AdveneGUI(object):
                 missing.add(a.fragment.begin)
             if not ic.is_initialized(a.fragment.end):
                 missing.add(a.fragment.end)
-        print "Updating %d missing snapshots: " % len(missing), ", ".join(helper.format_time(t) for t in sorted(missing))
-        for t in sorted(missing):
-            self.controller.player.async_snapshot(t)
+        if missing:
+            dialog.message_dialog(_("Updating %d snapshots") % len(missing), modal=False)
+            print "Updating %d missing snapshots: " % len(missing), ", ".join(helper.format_time(t) for t in sorted(missing))
+            for t in sorted(missing):
+                self.controller.player.async_snapshot(t)
+        else:
+            dialog.message_dialog(_("No snapshot to update"), modal=False)
         return True
 
     def generate_screenshots(self, *p):
