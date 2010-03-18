@@ -180,6 +180,14 @@ class EditElementPopup (AdhocView):
 
         return self._widget
 
+    def reparent_done(self):
+        if self._widget.get_toplevel() != self.controller.gui.gui.win:
+            # In a popup window. Define appropriate shortcuts.
+            #self.key_cb[gtk.keysyms.Return] = self.validate_cb
+            self.key_cb[gtk.keysyms.Escape] = self.close_cb
+            self._widget.get_toplevel().connect('key-press-event', self.key_pressed_cb)
+        return True
+
     def extend_toolbar(self, tb):
         """Extend the widget toolbar.
 
