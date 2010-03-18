@@ -85,7 +85,7 @@ class TraceTimeline(AdhocView):
         self.drag_coordinates=None
 
         self.active_trace = None
-
+        self.timemarks = []
         # Header canvas
         self.head_canvas = None
         # Main timeline canvas
@@ -108,17 +108,17 @@ class TraceTimeline(AdhocView):
         self.context_col_width = 1
         self.context_colspacing = 1
         self.doc_canvas_X = 100
-        self.canvasY = 1
+        self.canvasY = 200
         self.head_canvasY = 25
         self.doc_canvas_Y = 45
         self.docgroup = None
         self.obj_l = 5
         self.incr = 500
-        self.timefactor = 100
+        self.timefactor = 10
         self.autoscroll = True
         self.links_locked = False
         self.sw = None
-        self.cols={}
+        self.cols={} # head_groupe / last event_group
         self.tracer.register_view(self)
         for act in self.tracer.tracemodel['actions']:
             self.cols[act] = (None, None)
@@ -803,36 +803,41 @@ class TraceTimeline(AdhocView):
     def draw_marks(self):
         # verifying start time (changed if an import occured)
         self.start_time = self.active_trace.levels['events'][0].time
-        # adding time lines
-        wa = self.canvas.get_parent().get_allocation().height
+        #Calculating where to start from and the increment between marks
         tinc = 60
-        if wa > 100:
-            tinc = wa/4.0 # 4 marks in the widget
+        if not self.timemarks:
+            wa = self.canvas.get_parent().get_allocation().height
+            
+            if wa > 100:
+                tinc = wa/4.0 # 4 marks in the widget
+            else:
+                tinc = 60000 / self.timefactor
+            t=tinc
         else:
-            tinc = 60000 / self.timefactor
-        t=tinc
-        #print t, wa
+            if len(self.timemarks)>=2:
+               tinc=self.timemarks[1].get_child(0).get_bounds().y1-self.timemarks[0].get_child(0).get_bounds().y1
+            else:
+               tinc=self.timemarks[0].get_child(0).get_bounds().y1-self.start_time
+            t=self.timemarks[-1].get_child(0).get_bounds().y1+tinc
         ld = goocanvas.LineDash([5.0, 20.0])
-        #time.localtime(t*self.timefactor/1000)
-        #time.gmtime(t*self.timefactor/1000)
         while t < self.canvasY:
-            #print t
-            goocanvas.polyline_new_line(self.canvas.get_root_item(),
+            mgroup = goocanvas.Group(parent=self.canvas.get_root_item())
+            goocanvas.polyline_new_line(mgroup,
                                         0,
                                         t,
                                         self.canvasX,
                                         t,
                                         line_dash=ld,
                                         line_width = 0.2)
-            goocanvas.Text(parent = self.canvas.get_root_item(),
+            goocanvas.Text(parent = mgroup,
                         text = time.strftime("%H:%M:%S",time.localtime(self.start_time+t*self.timefactor/1000)),
                         x = 0,
                         y = t-5,
                         width = -1,
                         anchor = gtk.ANCHOR_W,
-                        fill_color_rgba=0x121212FF, #0x23456788
+                        fill_color_rgba=0x121212FF, 
                         font = "Sans 7")
-            goocanvas.Text(parent = self.canvas.get_root_item(),
+            goocanvas.Text(parent = mgroup,
                         text = time.strftime("%H:%M:%S",time.localtime(self.start_time+t*self.timefactor/1000)),
                         x = self.canvasX-4,
                         y = t-5,
@@ -840,7 +845,8 @@ class TraceTimeline(AdhocView):
                         fill_color_rgba=0x121212FF,
                         anchor = gtk.ANCHOR_E,
                         font = "Sans 7")
-            t += tinc
+            self.timemarks.append(mgroup)
+            t+=tinc
         return
 
     def redraw_head_canvas(self):
@@ -852,8 +858,6 @@ class TraceTimeline(AdhocView):
 
     def populate_head_canvas(self):
         offset = 0
-        #colors = [0x000088AA, 0x0000FFAA, 0x008800AA, 0x00FF00AA, 0x880000AA, 0xFF0000FF, 0x008888FF, 0x880088FF, 0x888800FF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFF00FF, 0x00FF88FF, 0xFF0088FF, 0x0088FFFF, 0x8800FFFF, 0x88FF00FF, 0xFF8800FF]
-        # 18 col max
         for c in self.tracer.tracemodel['actions']:
             etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][c])))
             self.cols[c]=(etgroup, None)
@@ -904,6 +908,7 @@ class TraceTimeline(AdhocView):
         self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
         #print "%s %s" % (self.timefactor, self.canvasY)
         self.canvas.show()
+        self.timemarks=[]
         self.draw_marks()
         sel_eg = None
         for i in self.active_trace.levels['actions']:
@@ -970,7 +975,64 @@ class TraceTimeline(AdhocView):
                            n, None ))
         return False
 
-
+    def receive_int_new(self, trace, event=None, operation=None, action=None):
+        # trace : the full trace to be managed
+        # event : the new or latest modified event
+        # operation : the new or latest modified operation
+        # action : the new or latest modified action
+        # return the created group
+        #print "Debug: received : action %s, operation %s, event %s" % (action, operation, event)
+        ev = None
+        if event and (event.name=='DurationUpdate' or event.name=='MediaChange'):
+            #new film, update duration
+            self.docgroup.changeMovielength(trace)
+        if operation:
+            # new operation, add it on docgroup
+            self.docgroup.addLine(operation.movietime)
+        if (operation or event) and action is None:
+            # no action changed, return
+            return ev
+        if action is None:
+            # no event, operation or action, this is a refresh query, redraw screen
+            return ev
+        h,l = self.cols[action.name]
+        color = h.color_c
+        if l and l.event == action:
+            # action corresponding to the last action of this type, update the drawing
+            #calculating old length
+            b=l.rect.get_bounds()
+            oldlength = b.y2-b.y1
+            #calculating new length
+            newlength = (action.activity_time[1]-action.activity_time[0])//self.timefactor
+            ratio = newlength/oldlength
+            if b.y1+newlength >= self.canvasY-1:
+                #need to expand canvas
+                self.canvasY = b.y1+newlength+1
+                self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
+                self.draw_marks()
+            #transofrm item
+            l.rect.props.height=newlength
+            ev=l
+        else:
+            #totally new action
+            # getting x bound from header
+            x = h.rect.get_bounds().x1+1
+            #calculating y0 and length
+            y = action.activity_time[0]//self.timefactor
+            length = (action.activity_time[1]-action.activity_time[0])//self.timefactor
+            if y+length >= self.canvasY-1:
+                #need to expand canvas
+                self.canvasY = y+length+1
+                self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
+                self.draw_marks()
+            ev = EventGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.docgroup, None, action, x, y, length, self.col_width, self.obj_l, 14, color, self.links_locked)
+            self.cols[action.name]=(h,ev)
+        self.canvas.show()
+        if self.autoscroll:
+            a = self.sw.get_vadjustment()
+            a.value=a.upper-a.page_size
+        return ev
+        
     def receive_int(self, trace, event=None, operation=None, action=None):
         # trace : the full trace to be managed
         # event : the new or latest modified event
@@ -1900,10 +1962,8 @@ class DocGroup (Group):
 
 
     def addLine(self, time=0, color=0x00000050, offset=0):
-        # to be removed
-        #~ if self.controller.package.cached_duration > self.movielength:
-            #~ self.movielength=self.controller.package.cached_duration
-        # assuming there is no more movielength problem
+        #print "Time: %s" % time
+        #FIXME sometimes 0, need to check that
         x=self.rect.get_bounds().x1 + self.w * time / self.movielength
         y1=self.rect.get_bounds().y1 - offset
         y2=self.rect.get_bounds().y2 + offset
