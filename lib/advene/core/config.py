@@ -250,7 +250,7 @@ class Config(object):
             'package-auto-save': 'never',
             # auto-save interval in ms. Every 5 minutes by default.
             'package-auto-save-interval': 5 * 60 * 1000,
-            # slave player automatic synchronization delay
+            # slave player automatic synchronization delay. 0 to disable.
             'slave-player-sync-delay': 3000,
             # Interface language. '' means system default.
             'language': '',

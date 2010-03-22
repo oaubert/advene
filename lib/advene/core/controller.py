@@ -395,14 +395,14 @@ class AdveneController(object):
         def synchronize_players():
             for p in self.slave_players:
                 p.synchronize()
-            if not self.slave_players:
+            if not self.slave_players or config.data.preferences['slave-player-sync-delay'] == 0:
                 # Abort the timeout
                 self.slave_player_timeout = None
                 return False
             else:
                 return True
 
-        if self.slave_player_timeout is None:
+        if self.slave_player_timeout is None and config.data.preferences['slave-player-sync-delay'] != 0:
             self.slave_player_timeout = gobject.timeout_add(config.data.preferences['slave-player-sync-delay'], synchronize_players)
 
     def unregister_slave_player(self, p):

@@ -3633,7 +3633,7 @@ class AdveneGUI(object):
         ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 10000)
         ew.add_spin(_("Second scroll increment"), "second-scroll-increment", _("On most annotations, control+shift+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 10000)
         ew.add_label("")
-        ew.add_spin(_("Player sync"), 'slave-player-sync-delay', _("Interval (in ms) with which we synchronize slave players. Setting a too-low value could render the application unusable."), 1000, 60 * 1000)
+        ew.add_spin(_("Player sync"), 'slave-player-sync-delay', _("Interval (in ms) with which we synchronize slave players. Setting a too-low value could render the application unusable. Use 0 to disable continuous synchronization."), 0, 60 * 1000)
         ew.add_title(_("Timeline parameters"))
         ew.add_spin(_("Font size"), 'font-size', _("Font size for annotation widgets"), 4, 20)
         ew.add_spin(_("Button height"), 'button-height', _("Height of annotation widgets"), 10, 50)
