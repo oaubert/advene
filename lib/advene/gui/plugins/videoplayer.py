@@ -81,7 +81,7 @@ class VideoPlayer(AdhocView):
             )
 
     def unregister_callback (self, controller=None):
-        self.controller.register_slave_player(self)
+        self.controller.unregister_slave_player(self)
         for r in self.registered_rules:
             controller.event_handler.remove_rule(r, type_="internal")
 
