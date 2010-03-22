@@ -1331,6 +1331,12 @@ class AdveneController(object):
                 self.log("Cannot convert %s to %s" % (annotation.type.mimetype,
                                                       an.type.mimetype))
                 an.content.data = annotation.content.data
+        elif an.type.mimetype == 'image/svg+xml':
+            # Use a template for text->SVG conversion. 
+            # FIXME: we should be able to propose a variety of templates, passed as parameter from the GUI
+            an.content.data = """<svg:svg height="320pt" preserveAspectRatio="xMinYMin meet" version="1" viewBox="0 0 400 320" width="400pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg">
+  <text fill="green" name="Content" stroke="green" style="stroke-width:1; font-family: sans-serif; font-size: 22" x="8" y="122">%s</text>
+</svg:svg>""" % self.get_title(annotation)
         else:
             self.log("Do not know how to convert %s to %s" % (annotation.type.mimetype,
                                                               an.type.mimetype))

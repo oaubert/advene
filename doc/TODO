@@ -1,3 +1,5 @@
+* propose template when transmuting from any (esp.text/plain) to SVG
+
 * controller.update_status: accept annotation as parameter, to allow
    more precise notification
 
