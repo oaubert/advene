@@ -3545,6 +3545,7 @@ class AdveneGUI(object):
             'advene': config.data.path['advene'],
             'imagecache': config.data.path['imagecache'],
             'moviepath': config.data.path['moviepath'],
+            'shotdetect': config.data.path['shotdetect'],
             'font-size': config.data.preferences['timeline']['font-size'],
             'button-height': config.data.preferences['timeline']['button-height'],
             'interline-height': config.data.preferences['timeline']['interline-height'],
@@ -3561,6 +3562,7 @@ class AdveneGUI(object):
         ew.add_dir_selector(_("Movie path"), "moviepath", _("List of directories (separated by %s) to search for movie files (_ means package directory)") % os.path.pathsep)
         ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
         ew.add_dir_selector(_("Player"), "plugins", _("Directory of the video player"))
+        ew.add_file_selector(_("Shotdetect"), "shotdetect", _("Shotdetect application"))
 
         ew.add_title(_("Standard views"))
 
@@ -3656,7 +3658,7 @@ class AdveneGUI(object):
                 config.data.preferences[k] = cache[k]
             for k in ('font-size', 'button-height', 'interline-height'):
                 config.data.preferences['timeline'][k] = cache[k]
-            for k in ('data', 'moviepath', 'plugins', 'imagecache', 'advene'):
+            for k in ('data', 'moviepath', 'plugins', 'imagecache', 'advene', 'shotdetect'):
                 if cache[k] != config.data.path[k]:
                     config.data.path[k]=cache[k]
                     # Store in auto-saved preferences
