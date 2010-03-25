@@ -1040,6 +1040,8 @@ class AdveneGUI(object):
         socket.setdefaulttimeout(timeout)
         data=u.read()
         u.close()
+        if not data:
+            return False
         info=dict( [ l.split(':') for l in data.splitlines() ] )
         major, minor = info['version'].split('.')
         major=int(major)
