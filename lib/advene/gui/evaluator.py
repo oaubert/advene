@@ -53,13 +53,15 @@ class Evaluator:
     Control-H:   display source for element before cursor
     Control-f:   auto-fill parameters for a function
     """
-    def __init__(self, globals_=None, locals_=None, historyfile=None):
+    def __init__(self, globals_=None, locals_=None, historyfile=None, display_info=False):
         if globals_ is None:
             globals_ = {}
         if locals_ is None:
             locals_ = {}
         self.globals_ = globals_
         self.locals_ = locals_
+        # display info widget (additional messages)
+        self.display_info = display_info
 
         # History and bookmark handling
         self.history = []
@@ -748,6 +750,12 @@ class Evaluator:
         m.popup(None, widget, None, 0, gtk.get_current_event_time())
         return True
 
+    def info(self, *p):
+        if self.display_info:
+            for l in p:
+                self.logbuffer.insert_at_cursor(time.strftime("%H:%M:%S") + l + "\n")
+        return True
+
     def build_widget(self):
         """Build the evaluator widget.
         """
@@ -797,7 +805,19 @@ class Evaluator:
         self.resultscroll.add(self.output)
         self.resultscroll.set_size_request( -1, 200 )
         f.add(self.resultscroll)
-        vbox.add(f)
+
+        if self.display_info:
+            self.logwidget = gtk.TextView()
+            self.logbuffer = self.logwidget.get_buffer()
+            sw=gtk.ScrolledWindow()
+            sw.add(self.logwidget)
+
+            pane=gtk.VPaned()
+            vbox.add(pane)
+            pane.add1(f)
+            pane.pack2(sw)
+        else:
+            vbox.add(f)
 
         self.source.connect('key-press-event', self.key_pressed_cb)
         self.output.connect('key-press-event', self.key_pressed_cb)
