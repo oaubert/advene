@@ -30,7 +30,28 @@ import __builtin__
 import inspect
 
 class Evaluator:
-    """Evaluator popup window.
+    """Evaluator window. Shortcuts:
+    
+    F1: display this help
+    
+    Control-Return: evaluate the expression. If a selection is
+    active, evaluate only the selection.
+    
+    Control-l: clear the expression buffer
+    Control-S: save the expression buffer
+    Control-n: next item in history
+    Control-p: previous item in history
+    Control-b: store the expression as a bookmark
+    Control-space: display bookmarks
+    
+    Control-PageUp/PageDown: scroll the output window
+    Control-s: save the output
+    
+    Control-d: display completion possibilities
+    Tab: perform autocompletion
+    Control-h:   display docstring for element before cursor
+    Control-H:   display source for element before cursor
+    Control-f:   auto-fill parameters for a function
     """
     def __init__(self, globals_=None, locals_=None, historyfile=None):
         if globals_ is None:
@@ -230,29 +251,7 @@ class Evaluator:
         """Display the help message.
         """
         self.clear_output()
-        self.log("""Evaluator window help:
-
-        F1: display this help
-
-        Control-Return: evaluate the expression. If a selection is
-                        active, evaluate only the selection.
-
-        Control-l: clear the expression buffer
-        Control-S: save the expression buffer
-        Control-n: next item in history
-        Control-p: previous item in history
-        Control-b: store the expression as a bookmark
-        Control-space: display bookmarks
-
-        Control-PageUp/PageDown: scroll the output window
-        Control-s: save the output
-
-        Control-d: display completion possibilities
-        Tab: perform autocompletion
-        Control-h:   display docstring for element before cursor
-        Control-H:   display source for element before cursor
-        Control-f:   auto-fill parameters for a function
-        """)
+        self.log(self.__doc__)
         return True
 
     def previous_entry(self, *p, **kw):
