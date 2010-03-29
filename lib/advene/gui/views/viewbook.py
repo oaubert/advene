@@ -81,9 +81,6 @@ class ViewBook(AdhocView):
 
         Each view is an Advene view, and must have a .widget attribute
         """
-        # Dirty hack. Can be removed once the transition to webkit is complete.
-        if v.view_id == 'htmlview' and v.engine == 'mozembed':
-            permanent=True
         if name is None:
             try:
                 name=v.view_name
@@ -319,7 +316,8 @@ class ViewBook(AdhocView):
                     menu.popup(None, None, None, 0, gtk.get_current_event_time())
                 else:
                     view=self.controller.gui.open_adhoc_view(name, label=label, destination=None)
-                    self.add_view(view, name=view.view_name)
+                    if view is not None:
+                        self.add_view(view, name=view.view_name)
             else:
                 # Bug
                 self.log("Cannot happen")
