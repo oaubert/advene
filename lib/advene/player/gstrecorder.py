@@ -201,7 +201,7 @@ class Player:
         # No navigation
         return
 
-    def start(self, position):
+    def start(self, position=None):
         self.videofile=time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
         self.build_pipeline()
         self.set_visual(self.xid)
@@ -210,15 +210,15 @@ class Player:
             return
         self.player.set_state(gst.STATE_PLAYING)
 
-    def pause(self, position):
+    def pause(self, position=None):
         # Impossible to pause recording (it should be possible, but
         # gstreamer does not like it)
         return
 
-    def resume(self, position):
+    def resume(self, position=None):
         self.pause(position)
 
-    def stop(self, position):
+    def stop(self, position=None):
         self.stream_duration=self.current_position
         if self.player is None:
             return
