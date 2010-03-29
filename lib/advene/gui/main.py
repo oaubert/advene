@@ -3541,17 +3541,14 @@ class AdveneGUI(object):
                         'save-default-workspace', 'restore-default-workspace',
                         'slave-player-sync-delay',
                         'tts-language', 'record-actions', 'popup-destination' )
+        path_options=('data', 'plugins', 'advene', 'imagecache', 'moviepath', 'shotdetect')
         cache={
-            'data': config.data.path['data'],
-            'plugins': config.data.path['plugins'],
-            'advene': config.data.path['advene'],
-            'imagecache': config.data.path['imagecache'],
-            'moviepath': config.data.path['moviepath'],
-            'shotdetect': config.data.path['shotdetect'],
             'font-size': config.data.preferences['timeline']['font-size'],
             'button-height': config.data.preferences['timeline']['button-height'],
             'interline-height': config.data.preferences['timeline']['interline-height'],
             }
+        for k in path_options:
+            cache[k] = config.data.path[k]
         for k in direct_options:
             cache[k] = config.data.preferences[k]
         cache['package-auto-save-interval']=cache['package-auto-save-interval']/1000
@@ -3660,7 +3657,7 @@ class AdveneGUI(object):
                 config.data.preferences[k] = cache[k]
             for k in ('font-size', 'button-height', 'interline-height'):
                 config.data.preferences['timeline'][k] = cache[k]
-            for k in ('data', 'moviepath', 'plugins', 'imagecache', 'advene', 'shotdetect'):
+            for k in path_options:
                 if cache[k] != config.data.path[k]:
                     config.data.path[k]=cache[k]
                     # Store in auto-saved preferences
