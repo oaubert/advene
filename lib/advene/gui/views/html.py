@@ -298,10 +298,6 @@ class HTMLView(AdhocView):
         if url is not None:
             self.open_url(url)
 
-    def close(self):
-        # Prevent closing the view, since it crashes the component for now.
-        return False
-
     def notify(self, url=None, label=None):
         if url is not None:
             self.current_url(url)
@@ -316,7 +312,8 @@ class HTMLView(AdhocView):
     def build_widget(self):
         mapping={ 'webkit': webkit_wrapper,
                   'mozembed': mozembed_wrapper,
-                  'gtkhtml2': gtkhtml_wrapper }
+                  'gtkhtml2': gtkhtml_wrapper,
+                  None: None}
         wrapper=mapping.get(engine)
         if wrapper is None:
             w=gtk.Label(_("No available HTML rendering component"))

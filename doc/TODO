@@ -2737,3 +2737,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Annotation display: allow DND of annotation
 
 * Ctrl+wheel -> frame by frame (wheel on video actually)
+
+* webkit: close view
+
