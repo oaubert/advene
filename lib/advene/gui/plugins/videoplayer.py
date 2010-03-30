@@ -117,8 +117,13 @@ class VideoPlayer(AdhocView):
         return self.options, arguments
 
     def select_file(self, button=None):
+        mp=[ d for d in config.data.path['moviepath'].split(os.path.pathsep) if d != '_' ]
+        if mp:
+            default=mp[0]
+        else:
+            default=None
         fname = dialog.get_filename(title=_("Select a video file"),
-                                    default_dir=config.data.path['moviepath'].split(os.path.sep)[0],
+                                    default_dir=default,
                                     filter='video')
         if fname is not None:
             self.set_file(fname)
