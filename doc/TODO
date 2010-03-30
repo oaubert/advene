@@ -3,8 +3,6 @@
 
 * shapewidget: fix editor when unknown attributes are present (cinecast:trust)
 
-* shapewidget: implement ellipse support
-
 * propose template when transmuting from any (esp.text/plain) to SVG
 
 * controller.update_status: accept annotation as parameter, to allow
@@ -2739,4 +2737,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Ctrl+wheel -> frame by frame (wheel on video actually)
 
 * webkit: close view
+
+* shapewidget: implement ellipse support
 

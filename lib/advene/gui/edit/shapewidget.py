@@ -884,7 +884,6 @@ class Line(Rectangle):
         else:
             yield e
 
-
 class Circle(Rectangle):
     """A Circle shape.
 
@@ -893,7 +892,6 @@ class Circle(Rectangle):
     @ivar r: the circle radius in pixel
     @type r: int
     """
-    # FIXME: should indeed be Ellipse, since it may happen that rx != ry
     SHAPENAME=_("Circle")
     SVGTAG='circle'
 
@@ -920,13 +918,13 @@ class Circle(Rectangle):
         pixmap.draw_arc(gc,
                   self.filled,
                   self.x, self.y,
-                  self.width, self.height,
+                  self.width, self.width,
                   0, 360 * 64)
         return
 
     def __contains__(self, point):
         x, y = point
-        d = (point[0] - self.cx) ** 2 + (point[1] - self.cy) ** 2
+        d = (x - self.cx) ** 2 + (y - self.cy) ** 2
         return d < ( self.r ** 2 )
 
     def translate(self, vector):
@@ -943,6 +941,67 @@ class Circle(Rectangle):
         self.y=self.cy - self.r
         self.width=2 * self.r
         self.height=2 * self.r
+
+class Ellipse(Rectangle):
+    """An Ellipse shape.
+
+    @ivar cx, cy: the coordinates of the center in pixel
+    @type cx, cy: int
+    @ivar rx, ry: horizontal and vertical radius in pixel
+    @type rx, ry: int
+    """
+    SHAPENAME=_("Ellipse")
+    SVGTAG='ellipse'
+
+    coords=( ('cx', 0),
+             ('cy', 1),
+             ('rx', 0),
+             ('ry', 1) )
+
+    def set_bounds(self, bounds):
+        self.x = int(min(bounds[0][0], bounds[1][0]))
+        self.y = int(min(bounds[0][1], bounds[1][1]))
+        self.width = int(abs(bounds[0][0] - bounds[1][0]))
+        self.height = int(abs(bounds[0][1] - bounds[1][1]))
+
+        self.cx = int( (bounds[0][0] + bounds[1][0]) / 2)
+        self.cy = int( (bounds[0][1] + bounds[1][1]) / 2)
+        self.rx = self.width / 2
+        self.ry = self.height / 2
+
+    def render(self, pixmap, invert=False):
+        col=pixmap.get_colormap().alloc_color(self.color)
+        gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
+        if invert:
+            gc.set_function(gtk.gdk.INVERT)
+        pixmap.draw_arc(gc,
+                  self.filled,
+                  self.x, self.y,
+                  self.width, self.height,
+                  0, 360 * 64)
+        return
+
+    def __contains__(self, point):
+        x, y = point
+        if self.rx == 0 or self.ry == 0:
+            return False
+        d =  ( (x - self.cx) / self.rx ) ** 2 + ( (y - self.cy) / self.ry )  ** 2
+        return d < 1
+
+    def translate(self, vector):
+        self.cx += int(vector[0])
+        self.cy += int(vector[1])
+        self.x=self.cx - self.rx
+        self.y=self.cy - self.ry
+
+    def post_parse(self):
+        """Method called after parsing of a SVG representation.
+        """
+        # Compute x, y, width, height values
+        self.x=self.cx - self.rx
+        self.y=self.cy - self.ry
+        self.width=2 * self.rx
+        self.height=2 * self.ry
 
 class Link(Shape):
     """Link pseudo-shape.
@@ -1418,7 +1477,7 @@ class ShapeEditor:
         self.background=None
         self.drawer=ShapeDrawer(callback=self.callback,
                                 background=background)
-        self.shapes = [ Rectangle, Circle, Line, Text, Image ]
+        self.shapes = [ Rectangle, Ellipse, Line, Text, Image ]
 
         self.colors = COLORS
         self.defaultcolor = self.colors[0]
@@ -1427,7 +1486,7 @@ class ShapeEditor:
             gtk.keysyms.l: Line,
             gtk.keysyms.r: Rectangle,
             gtk.keysyms.t: Text,
-            gtk.keysyms.c: Circle,
+            gtk.keysyms.c: Ellipse,
             #gtk.keysyms.i: Image,
             }
 
@@ -1435,7 +1494,7 @@ class ShapeEditor:
             Rectangle: 'shape_rectangle.png',
             Line: 'shape_arrow.png',
             Text: 'shape_text.png',
-            Circle: 'shape_ellipse.png',
+            Ellipse: 'shape_ellipse.png',
             Image: 'shape_image.png',
             }
 
