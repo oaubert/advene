@@ -3420,15 +3420,15 @@ class AdveneGUI(object):
 
     def on_b_addfile_clicked (self, button=None, data=None):
         """Open a movie file"""
-        if config.data.path['data']:
-            d=config.data.path['data']
+        mp=[ d for d in config.data.path['moviepath'].split(os.path.pathsep) if d != '_' ]
+        if mp:
+            default=mp[0]
         else:
-            d=None
-
+            default=None
         filename=dialog.get_filename(title=_("Select a movie file"),
                                      action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                      button=gtk.STOCK_OPEN,
-                                     default_dir=d,
+                                     default_dir=default,
                                      filter='video')
         if filename:
             self.controller.set_default_media(filename)
