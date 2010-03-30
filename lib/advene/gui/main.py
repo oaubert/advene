@@ -156,7 +156,7 @@ class DummyGlade:
 
         sw=gtk.ScrolledWindow()
         sw.set_policy (gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
-        sw.set_size_request(-1, 50)
+        sw.set_size_request(-1, 20)
         self.logmessages=gtk.TextView()
         self.logmessages.set_wrap_mode(gtk.WRAP_CHAR)
         sw.add(self.logmessages)
@@ -2325,7 +2325,7 @@ class AdveneGUI(object):
         @type level: int
         """
         buf = self.gui.logmessages.get_buffer ()
-        mes = "".join((time.strftime("%H:%M:%S"), " - ", str(msg), "\n"))
+        mes = "".join(("\n", time.strftime("%H:%M:%S"), " - ", str(msg)))
         # FIXME: handle level (bold?)
         buf.place_cursor(buf.get_end_iter ())
         buf.insert_at_cursor (mes)
