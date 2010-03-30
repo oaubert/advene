@@ -127,25 +127,25 @@ class Player:
         if self.videofile is None:
             return
         videofile=self.videofile
-        audiosrc='autoaudiosink'
+        audiosrc='autoaudiosrc'
+        videosrc='autovideosrc'
         videosink='autovideosink'
-        if config.data.os == 'darwin':
-            videosrc='osxvideosrc'
-        elif config.data.os == 'win32':
-            videosrc='dshowsrcwrapper'
-        else:
-            videosrc='v4l2src queue-size=4'
-            audiosrc='alsasrc'
-            videosink='xvimagesink'
-            if config.data.player['vout'] == 'x11':
-                sink='ffmpegcolorspace ! ximagesink'
 
-        self.pipeline=gst.parse_launch('%(videosrc)s ! video/x-raw-yuv,width=352,height=288 ! tee name=tee ! ffmpegcolorspace ! theoraenc ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s ! audioconvert ! vorbisenc ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
-        #self.pipeline=gst.parse_launch('alsasrc name=source device=hw:1,0 ! lame ! filesink location=%s' % self.videofile)
-        #self.player = self.pipeline.get_by_name('source')
+        self.pipeline=gst.parse_launch('%(videosrc)s ! video/x-raw-yuv,width=352,height=288 ! queue ! tee name=tee ! ffmpegcolorspace ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s ! audioconvert ! vorbisenc ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
         self.imagesink=self.pipeline.get_by_name('sink')
         self.player=self.pipeline
 
+        # Asynchronous XOverlay support.
+        bus = self.pipeline.get_bus()
+        bus.enable_sync_message_emission()
+        def on_sync_message(bus, message):
+            if message.structure is None:
+                return
+            if message.structure.get_name() == 'prepare-xwindow-id' and self.xid is not None:
+                message.src.set_xwindow_id(self.xid)
+                if hasattr(message.src.props, 'force-aspect-ratio'):
+                    message.src.set_property("force-aspect-ratio", True)
+        bus.connect('sync-message::element', on_sync_message)
 
     def position2value(self, p):
         """Returns a position in ms.
@@ -368,11 +368,12 @@ class Player:
 
     def set_visual(self, xid):
         self.xid = xid
-        try:
-            self.imagesink.set_xwindow_id(self.xid)
-            self.imagesink.set_property('force-aspect-ratio', True)
-        except AttributeError:
-            pass
+        if self.imagesink.implements_interface(gst.interfaces.XOverlay):
+            realsink = autovideosink.get_by_interface(gst.interfaces.XOverlay)
+            if realsink:
+                realsink.set_xwindow_id(self.xid)
+                if hasattr(realsink.props, 'force-aspect-ratio'):
+                    realsink.set_property('force-aspect-ratio', True)
         return True
 
     def restart_player(self):

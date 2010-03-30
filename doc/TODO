@@ -1,3 +1,7 @@
+* gstrecorder: option to specify wether to record from webcam
+   (autovideosrc) or from screen (ximagesrc/dshowvideosrc...) or
+   audio-only
+
 * content.parsed: define/use a PATH syntax for accessing XML elements
    (better than handyxml)
 
