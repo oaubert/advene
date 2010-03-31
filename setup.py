@@ -74,7 +74,7 @@ if sys.platform == 'win32':
 	"py2exe": {
 	    "includes": "email.header,pango,pangocairo,cairo,atk,gtk,gio,pygst,gst,gtk.keysyms,gobject,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
 	    "excludes": [ "Tkconstants","Tkinter","tcl" ],
-	    "dll_excludes": ["libvlc.dll","libvlc-control.dll", "libglade-2.0-0.dll"],
+	    "dll_excludes": ["libgstvideo-0.10.dll","libgstpbutils-0.10.dll","libgstinterfaces-0.10.dll","libgstdataprotocol-0.10.dll","libgstbase-0.10.dll","libgstnet-0.10.dll","libgstcontroller-0.10.dll","libgstaudio-0.10.dll","libgsttag-0.10.dll","libgstreamer-0.10.dll","libvlc.dll","libvlc-control.dll", "libglade-2.0-0.dll"],
 	    #         		 ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
 	    #                          "libgdk_pixbuf-2.0-0.dll","libgdk-win32-2.0-0.dll",
 	    #                          "libglib-2.0-0.dll","libgmodule-2.0-0.dll",
