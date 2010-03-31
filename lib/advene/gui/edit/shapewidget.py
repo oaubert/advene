@@ -1349,11 +1349,14 @@ class ShapeDrawer:
         """
         if self.pixmap is None:
             return
-        self.pixmap.draw_rectangle(self.widget.get_style().white_gc, True, 0, 0, self.canvaswidth, self.canvasheight)
+        gc=self.widget.get_style().white_gc
+        if gc is None:
+            return
+        self.pixmap.draw_rectangle(gc, True, 0, 0, self.canvaswidth, self.canvasheight)
 
         if self.background:
             pixbuf=self.background.get_pixbuf()
-            self.pixmap.draw_pixbuf(self.widget.get_style().white_gc,
+            self.pixmap.draw_pixbuf(gc,
                                     pixbuf,
                                     0, 0,
                                     0, 0)
