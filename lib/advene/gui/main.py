@@ -3774,7 +3774,7 @@ class AdveneGUI(object):
         if os.access(helpfile, os.R_OK):
             self.controller.open_url ('file:///' + helpfile)
         else:
-            self.log(_("Unable to find the help file at %s") % helpfile)
+            self.controller.open_url ('http://liris.cnrs.fr/advene/wiki/index.php/AdveneShortcuts')
         return True
 
     def on_create_view_activate (self, button=None, data=None):
