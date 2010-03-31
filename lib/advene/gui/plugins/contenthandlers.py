@@ -177,8 +177,11 @@ class SVGContentHandler (ContentHandler):
         if self.element.data:
             try:
                 root=ET.parse(self.element.stream).getroot()
-            except xml.parsers.expat.ExpatError:
+            except xml.parsers.expat.ExpatError, e:
                 root=None
+                dialog.message_dialog(
+                    _("Error while parsing SVG content:\n\n%s") % unicode(e),
+                    icon=gtk.MESSAGE_ERROR)
             if root:
                 self.view.drawer.clear_objects()
                 path=''

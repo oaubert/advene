@@ -5,8 +5,6 @@
 * content.parsed: define/use a PATH syntax for accessing XML elements
    (better than handyxml)
 
-* shapewidget: fix editor when unknown attributes are present (cinecast:trust)
-
 * propose template when transmuting from any (esp.text/plain) to SVG
 
 * controller.update_status: accept annotation as parameter, to allow
@@ -2743,4 +2741,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * webkit: close view
 
 * shapewidget: implement ellipse support
+
+* shapewidget: fix editor when unknown attributes are present (cinecast:trust)
 
