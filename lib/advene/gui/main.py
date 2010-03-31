@@ -269,7 +269,7 @@ class AdveneGUI(object):
                             ( _("Relation Type"), self.on_create_relation_type_activate, "" ),
                             ), "" ),
                     ( _("Package _Imports"), self.on_package_imports1_activate, _("Edit imported element from other packages") ),
-                    ( _("_Standard Ruleset"), self.on_edit_ruleset1_activate, _("Edit the standard rules") ),
+#                    ( _("_Standard Ruleset"), self.on_edit_ruleset1_activate, _("Edit the standard rules") ),
                     ( _("P_ackage properties"), self.on_package_properties1_activate, _("Edit package properties") ),
                     ( _("P_references"), self.on_preferences1_activate, _("Interface preferences") ),
                     ), "" ),
