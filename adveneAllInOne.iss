@@ -28,6 +28,7 @@ Source: c:\gtk\bin\bzip2.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\libgio-2.0-0.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\libxml2-2.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\iconv.dll; DestDir: {app}; Components: advene
+Source: Brl\*; DestDir: {app}; Components: advene
 
 ;Source: c:\cygwin\usr\local\bin\libgoocanvas3.dll; DestDir: {app}    goocanvas0.10
 Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}; Components: advene
@@ -76,10 +77,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.40
+AppVerName=Advene 0.41
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.40
+VersionInfoVersion=0.41
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -87,8 +88,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.40_all_in_one_vlc_1.0.3_gstreamer_0.10.15
-VersionInfoTextVersion=0.40
+OutputBaseFilename=setup_advene_0.41_vlc_1.0.3_gstreamer_0.10.15
+VersionInfoTextVersion=0.41
 ChangesAssociations=yes
 
 [Registry]
