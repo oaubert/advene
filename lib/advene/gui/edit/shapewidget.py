@@ -1627,7 +1627,7 @@ class ShapeEditor:
                 i.show()
                 tb.set_icon_widget(i)
             else:
-                tb.set_text(shape.SHAPENAME)
+                tb.set_label(shape.SHAPENAME)
             tb.set_tooltip_text(shape.SHAPENAME)
             tb._shape=shape
             return True
