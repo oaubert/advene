@@ -120,7 +120,7 @@ class Snapshotter(object):
 
         if width is not None:
             filter=gst.element_factory_make("capsfilter")
-            filter.set_property("caps", gst.Caps("video/x-raw-rgb,width=%d" % width))
+            filter.set_property("caps", gst.Caps("video/x-raw-rgb,width=%d,pixel-aspect-ratio=(fraction)1/1" % width))
             scale=gst.element_factory_make('videoscale')            
             l=(csp, scale, filter, pngenc, sink)
         else:
