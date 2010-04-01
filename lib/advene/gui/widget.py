@@ -305,16 +305,18 @@ class AnnotationWidget(GenericColorButtonWidget):
         l.set_style(style)
         v.pack_start(l, expand=False)
 
-        def set_cursor(wid, t=None):
+        def set_cursor(wid, t=None, precision=None):
             if t is None:
                 t=self.annotation
+            if precision is None:
+                precision=config.data.preferences['bookmark-snapshot-precision']
             cache=self.controller.package.imagecache
             if self.no_image_pixbuf is None:
                 self.no_image_pixbuf=png_to_pixbuf(ImageCache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
             if not t == w._current:
                 if isinstance(t, long) or isinstance(t, int):
-                    if cache.is_initialized(t, epsilon=config.data.preferences['bookmark-snapshot-precision']):
-                        begin.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
+                    if cache.is_initialized(t, epsilon=precision):
+                        begin.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=precision), width=config.data.preferences['drag-snapshot-width']))
                     elif begin.get_pixbuf() != self.no_image_pixbuf:
                         begin.set_from_pixbuf(self.no_image_pixbuf)
                     end.hide()

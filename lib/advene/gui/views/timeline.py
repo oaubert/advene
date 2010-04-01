@@ -2398,8 +2398,9 @@ class TimeLine(AdhocView):
     def layout_drag_motion_cb(self, widget, drag_context, x, y, timestamp):
         t=self.pixel2unit(self.adjustment.value +  x, absolute=True)
         w=drag_context.get_source_widget()
+        precision=max(20, self.pixel2unit(1, absolute=False))
         try:
-            w._icon.set_cursor(t)
+            w._icon.set_cursor(t, precision)
         except AttributeError:
             pass
         actions=drag_context.actions
