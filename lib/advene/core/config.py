@@ -323,7 +323,7 @@ class Config(object):
         self.sound_volume=0
 
         # Update delay for position marker in views (in ms)
-        self.slow_update_delay=200
+        self.slow_update_delay=10
 
         # Reaction time offset (in ms) used when setting annotations
         self.reaction_time=200
