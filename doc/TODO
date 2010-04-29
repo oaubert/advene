@@ -1,3 +1,12 @@
+* completion: predefined vocabularies (for collaborative
+   annotation) for completion. 3 options:
+  - define a keyword annotation type with vocabulary list
+  - define a 'vocabularies' resource folder (with files "generic" +
+   at-ids) initializing keywords
+  - define a URL to request for completion
+
+* table view: keyword occurrences + stats
+
 * gstrecorder: option to specify wether to record from webcam
    (autovideosrc) or from screen (ximagesrc/dshowvideosrc...) or
    audio-only
