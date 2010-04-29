@@ -53,7 +53,7 @@ class Evaluator:
     Control-H:   display source for element before cursor
     Control-f:   auto-fill parameters for a function
     """
-    def __init__(self, globals_=None, locals_=None, historyfile=None, display_info=False):
+    def __init__(self, globals_=None, locals_=None, historyfile=None, display_info_widget=False):
         if globals_ is None:
             globals_ = {}
         if locals_ is None:
@@ -61,7 +61,7 @@ class Evaluator:
         self.globals_ = globals_
         self.locals_ = locals_
         # display info widget (additional messages)
-        self.display_info = display_info
+        self.display_info_widget = display_info_widget
 
         # History and bookmark handling
         self.history = []
@@ -751,7 +751,7 @@ class Evaluator:
         return True
 
     def info(self, *p):
-        if self.display_info:
+        if self.display_info_widget:
             for l in p:
                 self.logbuffer.insert_at_cursor(time.strftime("%H:%M:%S") + l + "\n")
         return True
@@ -806,7 +806,7 @@ class Evaluator:
         self.resultscroll.set_size_request( -1, 200 )
         f.add(self.resultscroll)
 
-        if self.display_info:
+        if self.display_info_widget:
             self.logwidget = gtk.TextView()
             self.logbuffer = self.logwidget.get_buffer()
             sw=gtk.ScrolledWindow()
