@@ -217,6 +217,8 @@ class Config(object):
             'time-increment': 2000,
             # Time increment (Control-Shift-Left/Right)
             'second-time-increment': 5000,
+            # Time increment (Control-Shift-Up/Down)
+            'third-time-increment': 1,
             'timeline': {
                 'font-size': 10,
                 'button-height': 20,

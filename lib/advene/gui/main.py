@@ -1520,10 +1520,16 @@ class AdveneGUI(object):
         self.controller.move_position (-config.data.preferences[i], notify=False)
 
     def player_forward_frame(self, event):
-        self.controller.move_frame(+1)
+        if event.state & gtk.gdk.SHIFT_MASK:
+            self.controller.move_position(+config.data.preferences['third-time-increment'], notify=False)
+        else:
+            self.controller.move_frame(+1)
 
     def player_rewind_frame(self, event):
-        self.controller.move_frame(-1)
+        if event.state & gtk.gdk.SHIFT_MASK:
+            self.controller.move_position(-config.data.preferences['third-time-increment'], notify=False)
+        else:
+            self.controller.move_frame(-1)
 
     def player_create_bookmark(self, event):
         p=self.controller.player
@@ -3533,7 +3539,8 @@ class AdveneGUI(object):
 
     def on_preferences1_activate (self, button=None, data=None):
         direct_options=('history-size-limit', 'scroll-increment', 'second-scroll-increment',
-                        'time-increment', 'second-time-increment', 'language',
+                        'time-increment', 'second-time-increment', 'third-time-increment',
+                        'language',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit',
                         'remember-window-size', 'expert-mode', 'update-check',
                         'package-auto-save', 'package-auto-save-interval',
@@ -3629,8 +3636,9 @@ class AdveneGUI(object):
         ew.add_spin(_("Bookmark snapshot precision"), 'bookmark-snapshot-precision', _("Precision (in ms) of the displayed bookmark snapshots."), 25, 500)
 
         ew.add_title(_("Time-related"))
-        ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 100, 30000)
-        ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 100, 30000)
+        ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 1, 300000)
+        ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 1, 300000)
+        ew.add_spin(_("Third time increment"), "third-time-increment", _("Skip duration, when using control-shift-up/down (in ms)."), 1, 300000)
         ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 10000)
         ew.add_spin(_("Second scroll increment"), "second-scroll-increment", _("On most annotations, control+shift+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 10000)
         ew.add_label("")
