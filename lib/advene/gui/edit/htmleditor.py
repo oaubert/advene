@@ -39,14 +39,14 @@ import StringIO
 import re
 from HTMLParser import HTMLParser
 try:
-    import gtksourceview
+    import gtksourceview2
 except ImportError:
-    gtksourceview=None
+    gtksourceview2=None
 
-if gtksourceview is None:
+if gtksourceview2 is None:
     textview_class=gtk.TextView
 else:
-    textview_class=gtksourceview.SourceView
+    textview_class=gtksourceview2.View
 
 broken_xpm="""20 22 5 1
   c black
@@ -150,8 +150,8 @@ class HTMLEditor(textview_class, HTMLParser):
         """
         gtk.TextView.__init__(self, *cnf, **kw)
         HTMLParser.__init__(self)
-        if gtksourceview is not None:
-            self.set_buffer(gtksourceview.SourceBuffer())
+        if gtksourceview2 is not None:
+            self.set_buffer(gtksourceview2.Buffer())
         self.set_editable(True)
         self.set_wrap_mode(gtk.WRAP_WORD)
 
@@ -921,7 +921,7 @@ if __name__ == "__main__":
         ev.toolbar.insert(b, -1)
         b.show()
 
-    if gtksourceview is not None:
+    if gtksourceview2 is not None:
         b=gtk.ToolButton(gtk.STOCK_UNDO)
         b.connect('clicked', lambda i: t.undo())
         ev.toolbar.insert(b, -1)

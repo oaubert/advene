@@ -394,8 +394,8 @@ if __name__ == "__main__":
     window.connect('destroy', lambda e: gtk.main_quit())
     window.set_title ('test')
 
-    import gtksourceview
-    t=gtksourceview.SourceView(gtksourceview.SourceBuffer())
+    import gtksourceview2
+    t=gtksourceview2.View(gtksourceview2.Buffer())
     #t=gtk.TextView()
     if sys.argv[1:]:
         print "loading ", sys.argv[1]

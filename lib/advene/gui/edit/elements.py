@@ -36,9 +36,9 @@ import struct
 import itertools
 
 try:
-    import gtksourceview
+    import gtksourceview2
 except ImportError:
-    gtksourceview=None
+    gtksourceview2=None
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
@@ -1458,13 +1458,13 @@ class TextContentHandler (ContentHandler):
 
             vbox.pack_start(tb, expand=False)
 
-        if gtksourceview is not None:
-            textview=gtksourceview.SourceView(gtksourceview.SourceBuffer())
+        if gtksourceview2 is not None:
+            textview=gtksourceview2.View(gtksourceview2.Buffer())
             b=textview.get_buffer()
-            m=gtksourceview.SourceLanguagesManager()
+            m=gtksourceview2.language_manager_get_default()
             if m:
-                b.set_language(m.get_language_from_mime_type(self.element.mimetype))
-                b.set_highlight(True)
+                b.set_language(m.guess_language(content_type=self.element.mimetype))
+                b.set_highlight_syntax(True)
             textview.set_editable (self.editable)
             textview.set_wrap_mode (gtk.WRAP_CHAR)
             textview.set_auto_indent(True)

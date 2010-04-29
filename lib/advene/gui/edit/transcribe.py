@@ -28,9 +28,9 @@ import gtk
 import pango
 
 try:
-    import gtksourceview
+    import gtksourceview2
 except ImportError:
-    gtksourceview=None
+    gtksourceview2=None
 
 import urllib
 
@@ -247,9 +247,9 @@ class TranscriptionEdit(AdhocView):
     def build_widget(self):
         vbox = gtk.VBox()
 
-        if gtksourceview is not None:
-            self.textview=gtksourceview.SourceView()
-            self.textview.set_buffer(gtksourceview.SourceBuffer())
+        if gtksourceview2 is not None:
+            self.textview=gtksourceview2.View()
+            self.textview.set_buffer(gtksourceview2.Buffer())
         else:
             self.textview = gtk.TextView()
 
