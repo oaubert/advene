@@ -333,6 +333,7 @@ class Config(object):
             'application/x-advene-structured',
             'application/x-advene-sparql-query',
             'application/x-javascript',
+            'application/javascript',
             'application/x-advene-adhoc-view',
             'application/x-advene-workspace-view',
             'application/x-advene-quicksearch',
