@@ -2251,6 +2251,9 @@ class AdveneGUI(object):
         self.log(_("Activating package %s") % self.controller.get_title(self.controller.package))
         self.update_gui()
 
+        self.last_created=[]
+        self.last_edited=[]
+
         self.update_window_title()
         for v in self.adhoc_views:
             if (not hasattr(v, 'close_on_package_load')
