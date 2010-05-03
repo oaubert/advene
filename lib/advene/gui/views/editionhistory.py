@@ -54,6 +54,7 @@ class EditionHistory(AdhocView):
         self.update_annotationtype=self.refresh
         self.update_relationtype=self.refresh
         self.update_schema=self.refresh
+        self.update_model=self.refresh
 
         self.controller=controller
         self.widget=self.build_widget()
