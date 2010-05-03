@@ -693,3 +693,82 @@ class Player:
     def unfullscreen(self):
         self.reparent(self.xid)
         self.fullscreen_window.hide()
+
+    # relpath, dump_bin and dump_element implementation based on Daniel Lenski <dlenski@gmail.com>
+    # posted on gst-dev mailing list on 20070913
+    def relpath(self, p1, p2):
+        sep = os.path.sep
+
+        # get common prefix (up to a slash)
+        common = os.path.commonprefix((p1, p2))
+        common = common[:common.rfind(sep)]
+
+        # remove common prefix
+        p1 = p1[len(common)+1:]
+        p2 = p2[len(common)+1:]
+
+        # number of seps in p1 is # of ..'s needed
+        return "../" * p1.count(sep) + p2
+
+    def dump_bin(self, bin, depth=0, recurse=-1, showcaps=True):
+        return [ l  for e in reversed(list(bin)) for l in self.dump_element(e, depth, recurse - 1) ]
+
+    def dump_element(self, e, depth=0, recurse=-1, showcaps=True):
+        ret=[]
+        indentstr = depth * 8 * ' '
+
+        # print element path and factory
+        path = e.get_path_string() + (isinstance(e, gst.Bin) and '/' or '')
+        factory = e.get_factory()
+        if factory is not None:
+            ret.append( '%s%s (%s)' % (indentstr, path, factory.get_name()) )
+        else:
+            ret.append( '%s%s (No factory)' % (indentstr, path) )
+
+        # print info about each pad
+        for p in e.pads():
+            name = p.get_name()
+
+            # negotiated capabilities
+            caps = p.get_negotiated_caps()
+            if caps: capsname = caps[0].get_name()
+            elif showcaps: capsname = '; '.join(s.to_string() for s in set(p.get_caps()))
+            else: capsname = None
+
+            # flags
+            flags = []
+            if not p.is_active(): flags.append('INACTIVE')
+            if p.is_blocked(): flags.append('BLOCKED')
+
+            # direction
+            direc = (p.get_direction() is gst.PAD_SRC) and "=>" or "<="
+
+            # peer
+            peer = p.get_peer()
+            if peer: peerpath = self.relpath(path, peer.get_path_string())
+            else: peerpath = None
+
+            # ghost target
+            if isinstance(p, gst.GhostPad):
+                target = p.get_target()
+                if target: ghostpath = target.get_path_string()
+                else: ghostpath = None
+            else:
+                ghostpath = None
+
+            line=[ indentstr, "    " ]
+            if flags: line.append( ','.join(flags) )
+            line.append(".%s" % name)
+            if capsname: line.append( '[%s]' % capsname )
+            if ghostpath: line.append( "ghosts %s" % self.relpath(path, ghostpath) )
+            line.append( "%s %s" % (direc, peerpath) )
+            
+            #if peerpath and peerpath.find('proxy')!=-1: print peer
+            ret.append( ''.join(line) )
+        if recurse and isinstance(e, gst.Bin):
+            ret.extend( self.dump_bin(e, depth+1, recurse) )
+        return ret
+
+    def str_element(self, element):
+        return "\n".join(self.dump_element(element))
+
