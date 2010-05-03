@@ -1373,7 +1373,7 @@ class ActiveBookmark(object):
             l.set_style(style)
             v.pack_start(l, expand=False)
 
-            def set_cursor(wid, t=None):
+            def set_cursor(wid, t=None, precision=None):
                 if t is None:
                     t=self.annotation or self.begin
                 cache=self.controller.package.imagecache
