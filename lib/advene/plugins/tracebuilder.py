@@ -218,7 +218,7 @@ class TraceBuilder(Thread):
             #self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             return None
-        tr=ET.Element('trace', name=self.trace.name)
+        tr=ET.Element('trace', name=self.trace.name, start=self.trace.start)
         for lvl in self.trace.levels:
             grp = ET.Element(lvl)
             #everything can be rebuild from events.
@@ -418,6 +418,8 @@ class TraceBuilder(Thread):
             self.traces[-1].rename('%s (imported)' % tr.name)
         else:
             self.traces[-1].rename('No Name (imported)')
+        if hasattr(tr, 'start'):
+            self.traces[-1].start=float(tr.start)
         events = tr
         if hasattr(tr, 'events'):
             events = tr.events[0]
@@ -437,7 +439,7 @@ class TraceBuilder(Thread):
                 ev.o_type=None
             if not hasattr(ev, 'o_cid') or ev.o_cid=="None": #for compatibility with previous traces
                 ev.o_cid=None
-            if self.traces[-1].start == 0 or float(ev.time) < self.traces[-1].start:
+            if self.traces[-1].start == 0 or float(ev.time) < self.traces[-1].start: #for compatibility with previous traces
                 self.traces[-1].start=float(ev.time)
             ot = self.imp_type(ev.o_type)
             evt = Event(ev.name, float(ev.time), float(ev.ac_time), ev_content, ev.movie, float(ev.m_time), ev.o_name, ev.o_id, ot, ev.o_cid)
