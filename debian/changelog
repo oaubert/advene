@@ -4,10 +4,6 @@ advene (0.41) unstable; urgency=low
     synchronized (with the possibility to specify an offset). This allows
     for instance the visualisation of multiple videos of the same event.
   
-  * New trace preview visualisation.
-
-  * Trace timeline: various improvements.
-
   * New exporter: TimedText
 
   * Mouse wheel in video window moves frame-by-frame (if
@@ -15,16 +11,28 @@ advene (0.41) unstable; urgency=low
 
   * New global shortcut: Control-Shift-Up/Down moves player by a
     user-specified time value (initially 1ms)
-  
-  * The current playing position is displayed in the montage view.
 
-  * Text completion vocabulary can be initialised per annotation-type:
-    edit the annotation-type, select "Advanced" and enter a
-    space-separated list of words in the "Completions" entry.
-  
+  * Ad-hoc views:
+
+     * Treeview: annotations are sorted according to their begin time.
+
+     * New trace preview visualisation.
+
+     * Trace timeline: various improvements.
+
+     * Montage view: The current playing position is displayed.
+
+     * Tag bag: add "Display all tags" option
+
+     * Edit view: text completion vocabulary can be initialised per
+       annotation-type: edit the annotation-type, select "Advanced" and enter
+       a space-separated list of words in the "Completions" entry. This
+       allows to have some kind of controlled vocabulary in annotations.
+       
+     * Popup accumulator: it is automatically put to front when a new
+       popup is displayed
+ 
   * Log file can be displayed through Help/Display logfile
-  
-  * Treeview displays annotations sorted according to their begin time.
   
   * The brltty plugin has been included in the win32 installer package.
   
@@ -32,6 +40,8 @@ advene (0.41) unstable; urgency=low
   
   * New menuitem "Player/Update annotation screenshots" will try to grab
     screenshots for all annotation bounds.
+
+  * State variable can hold non-numeric values.
 
  --
 
