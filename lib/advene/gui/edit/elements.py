@@ -981,6 +981,16 @@ class EditAnnotationTypePopup (EditElementPopup):
         self.register_form(f)
         abox.pack_start(f.get_view(), expand=False)
 
+        f = EditMetaForm(title=_("Completions"),
+                         element=self.element, name='completions',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable,
+                         tooltip=_("Space-separated list of words used for content completion"),
+                         sizegroup=sg)
+        self.register_form(f)
+        abox.pack_start(f.get_view(), expand=False)
+
+
         vbox.pack_start(self.expandable(abox, label=_("Advanced"), expanded=False), expand=False)
 
         return vbox
