@@ -1,9 +1,7 @@
-* completion: predefined vocabularies (for collaborative
-   annotation) for completion. 3 options:
-  - define a keyword annotation type with vocabulary list
-  - define a 'vocabularies' resource folder (with files "generic" +
-   at-ids) initializing keywords
-  - define a URL to request for completion
+* Generic subprocess registration (prononce, tts...) to make sure that
+   we terminate them at Advene exit.
+
+* Generic metadata for packages
 
 * table view: keyword occurrences + stats
 
@@ -471,10 +469,6 @@ http://simile.mit.edu/timeline/
 * get things from http://svn.berlios.de/svnroot/repos/solipsis/trunk/main/ ?
 
 * HTML action to update all displayed screenshots
-
-* automatic switch to the accumulatorpopup view when a new popup
-  appears, or display an indicator (color, blink) -> option
-  on-new-popup
 
 * Example javascript media player bindings: http://publicsvn.songbirdnest.com/browser/trunk/app/content/scripts/
 
@@ -2754,4 +2748,15 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * shapewidget: fix editor when unknown attributes are present (cinecast:trust)
 
 * Help menu: add item "Open log file"
+
+* completion: predefined vocabularies (for collaborative
+   annotation) for completion. 3 options:
+  - define a keyword annotation type with vocabulary list
+  - define a 'vocabularies' resource folder (with files "generic" +
+   at-ids) initializing keywords
+  - define a URL to request for completion
+
+* automatic switch to the accumulatorpopup view when a new popup
+  appears, or display an indicator (color, blink) -> option
+  on-new-popup
 
