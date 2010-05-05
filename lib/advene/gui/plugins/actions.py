@@ -338,7 +338,7 @@ class DefaultGUIActions:
         Displays a popup with an informational message.
         """
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
-        message=message.replace('\\n', '\n')
+        message=unicode(message).replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         duration=self.parse_parameter(context, parameters, 'duration', None)
@@ -356,7 +356,7 @@ class DefaultGUIActions:
         Displays a popup to ask for a text string.
         """
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
-        message=message.replace('\\n', '\n')
+        message=unicode(message).replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         destination=self.parse_parameter(context, parameters, 'destination', None)
@@ -421,7 +421,7 @@ class DefaultGUIActions:
         description=textwrap.fill(description, config.data.preferences['gui']['popup-textwidth'])
 
         message=self.parse_parameter(context, parameters, 'message', _("Click to open the URL"))
-        message=message.replace('\\n', '\n')
+        message=unicode(message).replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         url=self.parse_parameter(context, parameters, 'url', 'string:http://liris.cnrs.fr/advene/')
@@ -456,7 +456,7 @@ class DefaultGUIActions:
         description=textwrap.fill(description, config.data.preferences['gui']['popup-textwidth'])
 
         message=self.parse_parameter(context, parameters, 'message', _("Click to go to another position"))
-        message=message.replace('\\n', '\n')
+        message=unicode(message).replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         position=self.parse_parameter(context, parameters, 'position', 0)
