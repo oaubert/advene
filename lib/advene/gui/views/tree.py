@@ -136,7 +136,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
                 self.row_inserted(path, self.get_iter(path))
             else:
                 self.row_changed(path, self.get_iter(path))
-        return
+        return path
 
     def on_get_flags(self):
         return 0
@@ -599,7 +599,13 @@ class TreeWidget(AdhocView):
     def update_annotation(self, annotation=None, event=None):
         """Update the annotation.
         """
-        self.update_element(annotation, event)
+        if event.endswith('EditEnd'):
+            # Possibly update other annotations in the same time, in the
+            # case that only the order changed.
+            for a in annotation.type.annotations:
+                self.update_element(a, event)
+        else:
+            self.update_element(annotation, event)
         return
 
     def update_relation(self, relation=None, event=None):
