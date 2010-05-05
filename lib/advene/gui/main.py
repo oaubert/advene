@@ -628,7 +628,6 @@ class AdveneGUI(object):
                 pass
         # Update the content indexer
         if event.endswith('EditEnd') or event.endswith('Create'):
-            self.controller.package._indexer.element_update(annotation)
             # Update the type fieldnames
             if annotation.content.mimetype.endswith('/x-advene-structured'):
                 annotation.type._fieldnames.update(helper.common_fieldnames([ annotation ]))
@@ -682,9 +681,6 @@ class AdveneGUI(object):
                 # into account
                 self.controller.activate_stbv(view, force=True)
 
-        # Update the content indexer
-        if event.endswith('EditEnd'):
-            self.controller.package._indexer.element_update(view)
         return True
 
     def query_lifecycle(self, context, parameters):
@@ -702,9 +698,6 @@ class AdveneGUI(object):
                 v.update_query(query=query, event=event)
             except AttributeError:
                 pass
-        # Update the content indexer
-        if event.endswith('EditEnd'):
-            self.controller.package._indexer.element_update(query)
         return True
 
     def resource_lifecycle(self, context, parameters):
@@ -752,6 +745,7 @@ class AdveneGUI(object):
         event=context.evaluateValue('event')
         if at.ownerPackage != self.controller.package:
             return True
+
         self.updated_element(event, at)
         for v in self.adhoc_views:
             try:
@@ -774,6 +768,7 @@ class AdveneGUI(object):
         event=context.evaluateValue('event')
         if rt.ownerPackage != self.controller.package:
             return True
+
         self.updated_element(event, rt)
         for v in self.adhoc_views:
             try:
@@ -788,11 +783,16 @@ class AdveneGUI(object):
 
     def updated_element(self, event, element):
         if event.endswith('EditEnd'):
+            # Update the content indexer
+            self.controller.package._indexer.element_update(element)
+
             l=self.last_edited
             # Refresh the edit popup
             for e in [ e for e in self.edit_popups if e.element == element ]:
                 e.refresh()
         elif event.endswith('Create'):
+            # Update the content indexer
+            self.controller.package._indexer.element_update(element)
             l=self.last_created
         elif event.endswith('Delete'):
             # Close the edit popups
