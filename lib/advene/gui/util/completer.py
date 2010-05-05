@@ -25,6 +25,8 @@ This code is inspired and adapted from the Scribes project
 import gtk
 import re
 
+import advene.core.config as config
+
 from advene.model.annotation import Annotation
 from advene.model.schema import AnnotationType, RelationType
 from advene.model.query import Query
@@ -307,7 +309,7 @@ class Indexer:
             'views': set(),
             }
         self.regexp=re.compile(r'[^\w\d_]+', re.UNICODE)
-        self.size_limit=5
+        self.size_limit=4
 
     def get_words(self, s):
         """Return the list of indexable words from the given string.
@@ -327,8 +329,14 @@ class Indexer:
 
         for at in self.package.annotationTypes:
             s=self.index.get(at.id, set())
+
+            words=at.getMetaData(config.data.namespace, "completions")
+            if words is not None:
+                s.update(self.get_words(words.strip()))
+
             for a in at.annotations:
                 s.update(self.get_words(a.content.data))
+
             self.index[at.id]=s
         return True
 
@@ -344,6 +352,9 @@ class Indexer:
             s=self.index.get(atid, set())
         elif isinstance(element, (AnnotationType, RelationType, Query)):
             self.index['views'].add(element.id)
+            words=element.getMetaData(config.data.namespace, "completions")
+            if words is not None:
+                self.index.get(element.id, set()).update(self.get_words(words.strip()))
             return True
         else:
             return True
