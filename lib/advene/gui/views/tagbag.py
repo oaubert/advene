@@ -59,6 +59,7 @@ class TagBag(AdhocView):
             (_("New tag"), self.new_tag),
             (_("Clear"), self.clear),
             (_("Preferences"), self.edit_options),
+            (_("Display all tags"), self.all_tags),
             (_("Save view"), self.save_view),
             (_("Save default options"), self.save_default_options),
             )
@@ -179,6 +180,11 @@ class TagBag(AdhocView):
 
         if res:
             self.options.update(cache)
+        return True
+
+    def all_tags(self, *p):
+        self.tags=sorted(self.controller.package._tag_colors.keys())
+        self.refresh()
         return True
 
     def get_save_arguments(self):
