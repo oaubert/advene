@@ -2753,3 +2753,5 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * shapewidget: fix editor when unknown attributes are present (cinecast:trust)
 
+* Help menu: add item "Open log file"
+
