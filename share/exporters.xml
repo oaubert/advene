@@ -207,11 +207,11 @@ div.${a/id} {
               &lt;FreeTextAnnotation tal:content=&quot;a/content/data&quot;&gt;Data&lt;/FreeTextAnnotation&gt;
             &lt;/TextAnnotation&gt;
             &lt;MediaTime&gt;
-              &lt;MediaTimePoint FIXME&gt;T00:19:07:9596160F14112000&lt;/MediaTimePoint&gt;
-              &lt;MediaDuration FIXME&gt;PT00H00M35S6773760N14112000F&lt;/MediaDuration&gt;
+              &lt;MediaTimePoint tal:content=&quot;a/fragment/begin/mpeg7_time&quot;&gt;Time&lt;/MediaTimePoint&gt;
+              &lt;MediaDuration tal:content=&quot;a/fragment/begin/mpeg7_duration&quot;&gt;Duration&lt;/MediaDuration&gt;
             &lt;/MediaTime&gt;
           &lt;/AudioVisualSegment&gt;
-
+         &lt;/span&gt;
         &lt;/TemporalDecomposition&gt;
       &lt;/AudioVisual&gt;
     &lt;/MultimediaContent&gt;
