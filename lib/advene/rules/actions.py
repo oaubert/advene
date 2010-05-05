@@ -697,9 +697,10 @@ class DefaultActionsRepository:
         if value is None:
             return True
         try:
-            value=int(float(value))
-        except ValueError:
-            value=0
+            val=int(float(value))
+        except ValueError, e:
+            # Store it as a string.
+            val=value
         self.controller.package.state[name]=value
         return True
 
@@ -707,7 +708,12 @@ class DefaultActionsRepository:
         name=self.parse_parameter(context, parameters, 'name', None)
         if name is None:
             return True
-        self.controller.package.state[name]=self.controller.package.state[name]+1
+        try:
+            self.controller.package.state[name]=self.controller.package.state[name]+1
+        except ValueError:
+            # Maybe it was a string value
+            self.controller.package.state[name]=self.controller.package.state[name]+"1"
+            
         return True
 
     def ClearState(self, context, parameters):
