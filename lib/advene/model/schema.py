@@ -192,10 +192,9 @@ class AnnotationType(AbstractType,
 
     def getAnnotations (self):
         # FIXME: return an iterator instead of a full fledged list
-        return [ a for a in self.getRootPackage ().getAnnotations ()
-                   if a.getType() == self ]
-
-
+        return sorted((a for a in self.getRootPackage ().getAnnotations ()
+                       if a.getType() == self),
+                      key=lambda a: a.fragment.begin)
 
 class RelationType(AbstractType,
                    viewable.Viewable.withClass('relation-type')):
