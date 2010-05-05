@@ -1,5 +1,9 @@
 advene (0.41) unstable; urgency=low
 
+  * Multiple video players can be simulatneously opened. They are
+    synchronized (with the possibility to specify an offset). This allows
+    for instance the visualisation of multiple videos of the same event.
+  
   * New trace preview visualisation.
 
   * Trace timeline: various improvements.
@@ -9,7 +13,25 @@ advene (0.41) unstable; urgency=low
   * Mouse wheel in video window moves frame-by-frame (if
     possible). Right-click in video window sets a bookmark.
 
+  * New global shortcut: Control-Shift-Up/Down moves player by a
+    user-specified time value (initially 1ms)
+  
   * The current playing position is displayed in the montage view.
+
+  * Text completion vocabulary can be initialised per annotation-type:
+    edit the annotation-type, select "Advanced" and enter a
+    space-separated list of words in the "Completions" entry.
+  
+  * Log file can be displayed through Help/Display logfile
+  
+  * Treeview displays annotations sorted according to their begin time.
+  
+  * The brltty plugin has been included in the win32 installer package.
+  
+  * The shotdetect binary path can be specified in Edit/Preferences/Paths
+  
+  * New menuitem "Player/Update annotation screenshots" will try to grab
+    screenshots for all annotation bounds.
 
  --
 
