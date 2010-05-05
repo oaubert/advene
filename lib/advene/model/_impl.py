@@ -73,6 +73,13 @@ class Metaed(object):
         else:
             return None
 
+    def elementValue(self, dom_element):
+        """Return the text content of the DOM element.
+        """
+        r = StringIO()
+        advene.model.util.dom.printElementText(dom_element, r)
+        return r.getvalue().decode('utf-8')
+        
     def getMetaData(self, namespace_uri, name):
         """Return the text content of metadata with given NS and name
         """
@@ -83,9 +90,7 @@ class Metaed(object):
         if e is None:
             return None
 
-        r = StringIO()
-        advene.model.util.dom.printElementText(e, r)
-        self.meta_cache[n]=r.getvalue().decode('utf-8')
+        self.meta_cache[n]=self.elementValue(e)
         return self.meta_cache[n]
 
     def setMetaData(self, namespace_uri, name, value):
@@ -110,6 +115,17 @@ class Metaed(object):
             e.appendChild(new)
             self.meta_cache[n]=value
 
+    def listMetaData(self):
+        """Return a list of tuples (namespace_uri, name, value) for all defined metadata.
+        """
+        meta = self._getMeta()
+        if meta is None:
+            return []
+
+        return [ (e.namespaceURI, e.localName, self.elementValue(e))
+                 for e in meta.childNodes
+                 if e.nodeType is ELEMENT_NODE ]
+        
 class Authored(Metaed):
     """An implementation for the author property.
        Inheriting classes must have a _getModel method returning a DOM element
