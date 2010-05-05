@@ -139,6 +139,11 @@ class AccumulatorPopup(AdhocView):
 
         f.show_all()
         self.show()
+        nb=self.widget.get_parent()
+        if isinstance(nb, gtk.Notebook):
+            # Ensure that the view is visible
+            nb.set_current_page(nb.page_num(self.widget))
+
         self.controller.notify('PopupDisplay', view=self)
         return True
 
