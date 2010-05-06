@@ -396,8 +396,8 @@ class Player:
             gst.element_link_many(*elements)
 
         print "gstreamer: using", sink
-
         print "adding ghostpad for", elements[0]
+
         self.video_sink.add_pad(gst.GhostPad('sink', elements[0].get_pad('video_sink') or elements[0].get_pad('sink')))
 
         self.player.props.video_sink=self.video_sink
