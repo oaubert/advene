@@ -302,7 +302,7 @@ class Player:
             self.captioner=None
 
         try:
-            self.imageoverlay=gst.element_factory_make('svgoverlay2FIXME', 'overlay')
+            self.imageoverlay=gst.element_factory_make('svgoverlay', 'overlay')
         except:
             self.imageoverlay=None
 
@@ -315,6 +315,7 @@ class Player:
             elements.append(gst.element_factory_make('queue'))
             elements.append(gst.element_factory_make('ffmpegcolorspace'))
             elements.append(self.imageoverlay)
+            elements.append(gst.element_factory_make('ffmpegcolorspace'))
 
         if sink == 'xvimagesink':
             # Imagesink accepts both rgb/yuv and is able to do scaling itself.
