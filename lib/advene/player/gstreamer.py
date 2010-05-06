@@ -392,14 +392,13 @@ class Player:
             elements.extend( (csp, scale, self.imagesink) )
 
         self.video_sink.add(*elements)
-        gst.element_link_many(*elements)
+        if len(elements) > 2:
+            gst.element_link_many(*elements)
 
         print "gstreamer: using", sink
 
-        if self.captioner:
-            self.video_sink.add_pad(gst.GhostPad('sink', self.captioner.get_pad('video_sink')))
-        else:
-            self.video_sink.add_pad(gst.GhostPad('sink', self.imagesink.get_pad('sink')))
+        print "adding ghostpad for", elements[0]
+        self.video_sink.add_pad(gst.GhostPad('sink', elements[0].get_pad('sink')))
 
         self.player.props.video_sink=self.video_sink
 
