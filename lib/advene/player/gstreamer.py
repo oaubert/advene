@@ -38,7 +38,6 @@ For set_rate:
 > If you only want to change the rate without changing the seek
         > positions, use GST_SEEK_TYPE_NONE/GST_CLOCK_TIME_NONE for the start
         > position also.
-
         Actually, this will generally cause some strangeness in the seeking,
         because the fast-forward will begin from the position that the SOURCE of
         the pipeline has reached. Due to buffering after the decoders, this is
@@ -75,8 +74,10 @@ Use appsink to get data out of a pipeline:
 https://thomas.apestaart.org/thomas/trac/browser/tests/gst/crc/crc.py
 """
 
+debug = True
+
 import advene.core.config as config
-import tempfile
+import os
 import time
 
 import gobject
@@ -100,7 +101,9 @@ try:
 except ImportError:
     gst=None
 
-
+import gtk
+import cairo
+import rsvg
 
 from advene.util.snapshotter import Snapshotter
 
@@ -111,6 +114,114 @@ def register(controller):
         return False
     controller.register_player(Player)
     return True
+
+class SVGOverlay(gst.Element):
+    __gstdetails__ = ("SVG overlay", "Filter/Editor/Video", "Overlays SVG content over the video",
+                      "Olivier Aubert <olivier.aubert@liris.cnrs.fr>")
+
+    __gproperties__ = {
+        'data': ( gobject.TYPE_STRING, 'data', 'SVG data to overlay', None, gobject.PARAM_WRITABLE ),
+        'filename': ( gobject.TYPE_STRING, 'filename', 'SVG file to overlay', None, gobject.PARAM_WRITABLE ),
+        }
+    
+    _sinkpadtemplate = gst.PadTemplate ("sink",
+                                         gst.PAD_SINK,
+                                         gst.PAD_ALWAYS,
+                                         gst.caps_from_string ("video/x-raw-rgb,bpp=32,depth=32,blue_mask=-16777216,green_mask=16711680, red_mask=65280, alpha_mask=255,width=[ 1, 2147483647 ],height=[ 1, 2147483647 ],framerate=[ 0/1, 2147483647/1 ]"))
+    _srcpadtemplate = gst.PadTemplate ("src",
+                                         gst.PAD_SRC,
+                                         gst.PAD_ALWAYS,
+                                         gst.caps_from_string ("video/x-raw-rgb,bpp=32,depth=32,blue_mask=-16777216,green_mask=16711680, red_mask=65280, alpha_mask=255,width=[ 1, 2147483647 ],height=[ 1, 2147483647 ],framerate=[ 0/1, 2147483647/1 ]"))
+    
+    def __init__(self):
+        gst.Element.__init__(self)
+
+        self.svg = None
+
+        self.sinkpad = gst.Pad(self._sinkpadtemplate, "sink")
+        self.sinkpad.set_chain_function(self.chainfunc)
+        self.sinkpad.set_event_function(self.eventfunc)
+        self.sinkpad.set_getcaps_function(gst.Pad.proxy_getcaps)
+        self.sinkpad.set_setcaps_function(gst.Pad.proxy_setcaps)
+        self.add_pad (self.sinkpad)
+
+        self.srcpad = gst.Pad(self._srcpadtemplate, "src")
+        self.srcpad.set_event_function(self.srceventfunc)
+        self.srcpad.set_query_function(self.srcqueryfunc)
+        self.srcpad.set_getcaps_function(gst.Pad.proxy_getcaps)
+        self.srcpad.set_setcaps_function(gst.Pad.proxy_setcaps)
+        self.add_pad (self.srcpad)
+
+    def chainfunc(self, pad, buffer):
+        print "chainfunc"
+        if self.svg is None:
+            return self.srcpad.push(buffer)
+
+        try:
+            outbuf = buffer.copy_on_write ()
+            self.draw_on(outbuf)
+            return self.srcpad.push(outbuf)
+        except:
+            return gst.GST_FLOW_ERROR
+
+    def eventfunc(self, pad, event):
+        print "eventfunc"
+        return self.srcpad.push_event (event)
+        
+    def srcqueryfunc (self, pad, query):
+        print "srcqueryfunc"
+        return self.sinkpad.query (query)
+    def srceventfunc (self, pad, event):
+        print "srceventfunc"
+        return self.sinkpad.push_event (event)
+
+    def do_set_property(self, key, value):
+        print "do_set_property"
+        if key.name == 'data':
+            self.set_svg(data=value)
+        elif key.name == 'filename':
+            self.set_svg(filename=value)
+        else:
+            print "No property %s" % key.name
+
+    def set_svg(self, filename=None, data=None):
+        """Set the SVG data to render.
+
+        Use None to reset.
+        """
+        print "set_svg"
+        if data is not None:
+            self.svg=rsvg.Handle(data=data)
+        elif filename is not None:
+            self.svg=rsvg.Handle(filename)
+        else:
+            self.svg=None
+
+    def draw_on(self, buf):
+        print "draw_on"
+        if self.svg is None:
+            return
+
+        try:
+            caps = buf.get_caps()
+            width = caps[0]['width']
+            height = caps[0]['height']
+            surface = cairo.ImageSurface.create_for_data (buf, cairo.FORMAT_ARGB32, width, height, 4 * width)
+            ctx = cairo.Context(surface)
+        except:
+            print "Failed to create cairo surface for buffer"
+            import traceback
+            traceback.print_exc()
+            return
+
+        sx=1.0 * width / self.svg.props.width
+        sy=1.0 * height / self.svg.props.height
+        scale = cairo.Matrix( sx, 0, 0, sy, 0, 0 )
+        ctx.set_matrix(scale)
+        self.svg.render_cairo(ctx)
+
+gst.element_register(SVGOverlay, 'svgoverlay2')
+gobject.type_register(SVGOverlay)
 
 class StreamInformation:
     def __init__(self):
@@ -203,7 +314,7 @@ class Player:
         self.caption.end=-1
 
         self.overlay=Caption()
-        self.overlay.filename=''
+        self.overlay.data=''
         self.overlay.begin=-1
         self.overlay.end=-1
 
@@ -237,7 +348,7 @@ class Player:
             self.captioner=None
 
         try:
-            self.imageoverlay=gst.element_factory_make('gdkpixbufoverlay', 'overlay')
+            self.imageoverlay=gst.element_factory_make('svgoverlay2FIXME', 'overlay')
         except:
             self.imageoverlay=None
 
@@ -265,6 +376,8 @@ class Player:
         if self.captioner is not None:
             elements.append(self.captioner)
         if self.imageoverlay is not None:
+            elements.append(gst.element_factory_make('queue'))
+            elements.append(gst.element_factory_make('ffmpegcolorspace'))
             elements.append(self.imageoverlay)
 
         if sink == 'xvimagesink':
@@ -316,7 +429,11 @@ class Player:
         return long(v)
 
     def current_status(self):
+        #if debug:
+        #    print "Before get_state"
         st=self.player.get_state()[1]
+        #if debug:
+        #    print "After get_state"
         if st == gst.STATE_PLAYING:
             return self.PlayingStatus
         elif st == gst.STATE_PAUSED:
@@ -354,26 +471,43 @@ class Player:
         return self.current_position()
 
     def set_media_position(self, position):
+        if debug:
+            print "Before check_uri"
         if not self.check_uri():
             return
+        if debug:
+            print "Before status check"
         if self.current_status() == self.UndefinedStatus:
+            if debug:
+                print "Before set_state paused"
             self.player.set_state(gst.STATE_PAUSED)
+            if debug:
+                print "After set_state paused"
         p = long(self.position2value(position) * gst.MSECOND)
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
                                    gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
                                    gst.SEEK_TYPE_SET, p,
                                    gst.SEEK_TYPE_NONE, 0)
-        res = self.player.send_event(event)
+        if debug:
+            print "Before send_event"
+            res = self.player.send_event(event)
+        if debug:
+            print "After send_event"
         if not res:
             raise InternalException
 
     def start(self, position=0):
-        print "Starting"
+        if debug:
+            print "Starting"
         if not self.check_uri():
             return
         if position != 0:
             self.set_media_position(position)
+        if debug:
+            print "Before set_state"
         self.player.set_state(gst.STATE_PLAYING)
+        if debug:
+            print "After set_state"
 
     def pause(self, position=0):
         if not self.check_uri():
@@ -453,11 +587,8 @@ class Player:
                 return True
             self.overlay.begin=self.position2value(begin)
             self.overlay.end=self.position2value(end)
-            self.overlay.filename=tempfile.mktemp('.svg', 'adv')
-            f=open(self.overlay.filename, 'w')
-            f.write(message)
-            f.close()
-            self.imageoverlay.props.image_name=self.overlay.filename
+            self.overlay.data=message
+            self.imageoverlay.props.data=message
             return True
 
         if not self.captioner:
@@ -539,7 +670,8 @@ class Player:
         @param position: the position
         @type position: long
         """
-        #print "gst - update_status ", status, str(position)
+        print "gst - update_status ", status, str(position)
+        #print "Current status", self.player.get_state(), self.imageoverlay.get_state()
         if position is None:
             position=0
         else:
@@ -553,7 +685,9 @@ class Player:
                 elif self.status != self.PlayingStatus:
                     self.start(position)
                     time.sleep(0.005)
+#            print "Before s_m_p", position
             self.set_media_position(position)
+#            print "After s_m_p"
         else:
             if status == "pause":
                 self.position_update()
@@ -569,7 +703,11 @@ class Player:
                 pass
             else:
                 print "******* Error : unknown status %s in gstreamer player" % status
+        if debug:
+            print "Before position_update"
         self.position_update ()
+        if debug:
+            print "After position_update - New status", self.player.get_state()
 
     def is_active(self):
         return True
@@ -586,13 +724,12 @@ class Player:
         if self.caption.text and (s.position < self.caption.begin
                                   or s.position > self.caption.end):
             self.display_text('', -1, -1)
-        if self.overlay.filename and (s.position < self.overlay.begin
+        if self.overlay.data and (s.position < self.overlay.begin
                                       or s.position > self.overlay.end):
-            self.imageoverlay.props.pixbuf=None
+            self.imageoverlay.props.data=None
             self.overlay.begin=-1
             self.overlay.end=-1
-            os.unlink(self.overlay.filename)
-            self.overlay.filename=''
+            self.overlay.data=None
 
     def reparent(self, xid):
         # See https://bugzilla.gnome.org/show_bug.cgi?id=599885
