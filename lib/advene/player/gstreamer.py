@@ -153,7 +153,6 @@ class SVGOverlay(gst.Element):
         self.add_pad (self.srcpad)
 
     def chainfunc(self, pad, buffer):
-        print "chainfunc"
         if self.svg is None:
             return self.srcpad.push(buffer)
 
@@ -165,18 +164,20 @@ class SVGOverlay(gst.Element):
             return gst.GST_FLOW_ERROR
 
     def eventfunc(self, pad, event):
-        print "eventfunc"
         return self.srcpad.push_event (event)
         
     def srcqueryfunc (self, pad, query):
-        print "srcqueryfunc"
         return self.sinkpad.query (query)
+
     def srceventfunc (self, pad, event):
-        print "srceventfunc"
         return self.sinkpad.push_event (event)
 
+    def do_change_state(self, transition):
+        #if transition in [gst.STATE_CHANGE_READY_TO_PAUSED, gst.STATE_CHANGE_PAUSED_TO_READY]:
+        #    self._reset()
+        return gst.Element.do_change_state(self, transition)
+
     def do_set_property(self, key, value):
-        print "do_set_property"
         if key.name == 'data':
             self.set_svg(data=value)
         elif key.name == 'filename':
@@ -189,7 +190,6 @@ class SVGOverlay(gst.Element):
 
         Use None to reset.
         """
-        print "set_svg"
         if data is not None:
             self.svg=rsvg.Handle(data=data)
         elif filename is not None:
@@ -198,7 +198,6 @@ class SVGOverlay(gst.Element):
             self.svg=None
 
     def draw_on(self, buf):
-        print "draw_on"
         if self.svg is None:
             return
 
@@ -220,7 +219,7 @@ class SVGOverlay(gst.Element):
         ctx.set_matrix(scale)
         self.svg.render_cairo(ctx)
 
-gst.element_register(SVGOverlay, 'svgoverlay2')
+gst.element_register(SVGOverlay, 'svgoverlay')
 gobject.type_register(SVGOverlay)
 
 class StreamInformation:
