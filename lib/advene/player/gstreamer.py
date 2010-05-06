@@ -22,53 +22,8 @@ Based on gst >= 0.10 API.
 
 See http://pygstdocs.berlios.de/pygst-reference/index.html for API
 
-SVG support depends on the unofficial gdkpixbufoverlay element. It can
-be obtained (as a patch) from http://bugzilla.gnome.org/show_bug.cgi?id=550443
-
 FIXME:
-- fullscreen (reparent to its own gtk.Window and use gtk.Window.(un)fullscreen )
 - get/set_rate
-- Win32: directdrawsink implements the X Overlay interface then you
-  can use it to setup your video window or to receive a signal when
-  directdrawsink will create the default one.
-- TODO: investigate SVG support. Maybe through gdkpixbufdec:
-gst-launch videotestsrc ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink filesrc location=/tmp/a.jpg ! gdkpixbufdec ! ffmpegcolorspace ! mix.
-
-For set_rate:
-> If you only want to change the rate without changing the seek
-        > positions, use GST_SEEK_TYPE_NONE/GST_CLOCK_TIME_NONE for the start
-        > position also.
-        Actually, this will generally cause some strangeness in the seeking,
-        because the fast-forward will begin from the position that the SOURCE of
-        the pipeline has reached. Due to buffering after the decoders, this is
-        not the position that the user is seeing on the screen, so their
-        trick-mode operation will commence with a jump in the position.
-
-        What you want to do is query the current position of the playback, and
-        use that with GST_SEEK_TYPE_SET to begin the trickmode from the exact
-        position you want.
-
-Caps negotiation: http://gstreamer.freedesktop.org/data/doc/gstreamer/head/pwg/html/section-nego-upstream.html
-
-Videomixer:
-
-videotestsrc pattern=1 ! video/x-raw-yuv,width=100,height=100 ! videobox border-alpha=0 alpha=0.5 top=-70 bottom=-70 right=-220 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink videotestsrc ! video/x-raw-yuv,width=320, height=240 ! alpha alpha=0.7 ! mix.
-
-This should show a 320x240 pixels video test source with some transparency showing the background checker pattern. Another video test source with just the snow pattern of 100x100 pixels is overlayed on top of the first one on the left vertically centered with a small transparency showing the first video test source behind and the checker pattern under it.
-
-videotestsrc ! video/x-raw-yuv,width=320, height=240 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink filesrc location=/tmp/a.svg  ! gdkpixbufdec ! videoscale ! video/x-raw-rgb,width=320,height=240 ! ffmpegcolorspace ! alpha alpha=0.5 ! mix.
-
-Working pipeline (but it does not correctly handle transparency):
-filesrc location=/tmp/a.svg ! gdkpixbufdec ! ffmpegcolorspace ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink videotestsrc ! mix.
-
-Mosaic : 2 videos side-by-side:
-
-videotestsrc pattern=11 !  video/x-raw-yuv,width=320,height=200 ! videobox left=-320 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink videotestsrc pattern=0 ! video/x-raw-yuv,width=320,height=200 ! mix.
-
-puis
-pads=list(mix.pads())
-pads[0].props.xpos=-320
-pads[1].props.xpos=320
 
 Use appsink to get data out of a pipeline:
 https://thomas.apestaart.org/thomas/trac/browser/tests/gst/crc/crc.py
@@ -353,24 +308,6 @@ class Player:
 
         self.imagesink = gst.element_factory_make(sink, 'sink')
 
-#
-#        self.svg_renderer = gst.parse_launch('fakesrc name=svgsrc ! gdkpixbufdec ! ffmpegcolorspace ! videoscale')
-#        mix=gst.element_factory_make("videomixer", "mix")
-#        spad = src.get_static_pad('src')
-#        dpad = mix.get_request_pad('sink_%d')
-#        spad.link(dpad)
-#        mix.link(conv) # conv == ffmpegcolorspace ! xvimagesink
-
-        # Controller for the videomixer position properties
-        # from video-controller.py
-        #control = gst.Controller(dpad, "xpos", "ypos")
-        #control.set_interpolation_mode("xpos", gst.INTERPOLATE_LINEAR)
-        #control.set_interpolation_mode("ypos", gst.INTERPOLATE_LINEAR)
-        #control.set("xpos", 0, 0)
-        #control.set("xpos", 5 * gst.SECOND, 200)
-        #control.set("ypos", 0, 0)
-        #control.set("ypos", 5 * gst.SECOND, 200)
-
         elements=[]
         if self.captioner is not None:
             elements.append(self.captioner)
@@ -404,13 +341,6 @@ class Player:
         bus = self.player.get_bus()
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', self.on_sync_message)
-##        bus.add_signal_watch()
-##        def debug_message(bus, message):
-##            if message.structure is None:
-##                return
-##            print "gst message", message.structure.get_name()
-##            return True
-##        bus.connect('message', debug_message)
 
     def position2value(self, p):
         """Returns a position in ms.
