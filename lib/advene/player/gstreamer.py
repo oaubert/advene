@@ -391,7 +391,7 @@ class Player:
             elements.extend( (csp, scale, self.imagesink) )
 
         self.video_sink.add(*elements)
-        if len(elements) > 2:
+        if len(elements) >= 2:
             gst.element_link_many(*elements)
 
         print "gstreamer: using", sink
