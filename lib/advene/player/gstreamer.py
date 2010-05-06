@@ -486,7 +486,7 @@ class Player:
     def display_text (self, message, begin, end):
         if not self.check_uri():
             return
-        if message.startswith('<svg'):
+        if message.startswith('<svg') or (message.startswith('<?xml') and '<svg' in message):
             if self.imageoverlay is None:
                 print "Cannot overlay SVG"
                 return True
