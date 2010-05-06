@@ -29,8 +29,6 @@ Use appsink to get data out of a pipeline:
 https://thomas.apestaart.org/thomas/trac/browser/tests/gst/crc/crc.py
 """
 
-debug = True
-
 import advene.core.config as config
 import os
 import time
@@ -358,11 +356,7 @@ class Player:
         return long(v)
 
     def current_status(self):
-        #if debug:
-        #    print "Before get_state"
         st=self.player.get_state()[1]
-        #if debug:
-        #    print "After get_state"
         if st == gst.STATE_PLAYING:
             return self.PlayingStatus
         elif st == gst.STATE_PAUSED:
@@ -400,43 +394,25 @@ class Player:
         return self.current_position()
 
     def set_media_position(self, position):
-        if debug:
-            print "Before check_uri"
         if not self.check_uri():
             return
-        if debug:
-            print "Before status check"
         if self.current_status() == self.UndefinedStatus:
-            if debug:
-                print "Before set_state paused"
             self.player.set_state(gst.STATE_PAUSED)
-            if debug:
-                print "After set_state paused"
         p = long(self.position2value(position) * gst.MSECOND)
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
                                    gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
                                    gst.SEEK_TYPE_SET, p,
                                    gst.SEEK_TYPE_NONE, 0)
-        if debug:
-            print "Before send_event"
-            res = self.player.send_event(event)
-        if debug:
-            print "After send_event"
+        res = self.player.send_event(event)
         if not res:
             raise InternalException
 
     def start(self, position=0):
-        if debug:
-            print "Starting"
         if not self.check_uri():
             return
         if position != 0:
             self.set_media_position(position)
-        if debug:
-            print "Before set_state"
         self.player.set_state(gst.STATE_PLAYING)
-        if debug:
-            print "After set_state"
 
     def pause(self, position=0):
         if not self.check_uri():
@@ -632,11 +608,7 @@ class Player:
                 pass
             else:
                 print "******* Error : unknown status %s in gstreamer player" % status
-        if debug:
-            print "Before position_update"
         self.position_update ()
-        if debug:
-            print "After position_update - New status", self.player.get_state()
 
     def is_active(self):
         return True
