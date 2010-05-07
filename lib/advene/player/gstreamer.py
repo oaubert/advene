@@ -55,10 +55,9 @@ except ImportError:
     gst=None
 
 import gtk
-import cairo
-import rsvg
 
 from advene.util.snapshotter import Snapshotter
+import svgoverlay
 
 name="GStreamer video player"
 
@@ -67,113 +66,6 @@ def register(controller):
         return False
     controller.register_player(Player)
     return True
-
-class SVGOverlay(gst.Element):
-    __gstdetails__ = ("SVG overlay", "Filter/Editor/Video", "Overlays SVG content over the video",
-                      "Olivier Aubert <olivier.aubert@liris.cnrs.fr>")
-
-    __gproperties__ = {
-        'data': ( gobject.TYPE_STRING, 'data', 'SVG data to overlay', None, gobject.PARAM_WRITABLE ),
-        'filename': ( gobject.TYPE_STRING, 'filename', 'SVG file to overlay', None, gobject.PARAM_WRITABLE ),
-        }
-    
-    _sinkpadtemplate = gst.PadTemplate ("sink",
-                                         gst.PAD_SINK,
-                                         gst.PAD_ALWAYS,
-                                         gst.caps_from_string ("video/x-raw-rgb,bpp=32,depth=32,blue_mask=-16777216,green_mask=16711680, red_mask=65280, alpha_mask=255,width=[ 1, 2147483647 ],height=[ 1, 2147483647 ],framerate=[ 0/1, 2147483647/1 ]"))
-    _srcpadtemplate = gst.PadTemplate ("src",
-                                         gst.PAD_SRC,
-                                         gst.PAD_ALWAYS,
-                                         gst.caps_from_string ("video/x-raw-rgb,bpp=32,depth=32,blue_mask=-16777216,green_mask=16711680, red_mask=65280, alpha_mask=255,width=[ 1, 2147483647 ],height=[ 1, 2147483647 ],framerate=[ 0/1, 2147483647/1 ]"))
-    
-    def __init__(self):
-        gst.Element.__init__(self)
-
-        self.svg = None
-
-        self.sinkpad = gst.Pad(self._sinkpadtemplate, "sink")
-        self.sinkpad.set_chain_function(self.chainfunc)
-        self.sinkpad.set_event_function(self.eventfunc)
-        self.sinkpad.set_getcaps_function(gst.Pad.proxy_getcaps)
-        self.sinkpad.set_setcaps_function(gst.Pad.proxy_setcaps)
-        self.add_pad (self.sinkpad)
-
-        self.srcpad = gst.Pad(self._srcpadtemplate, "src")
-        self.srcpad.set_event_function(self.srceventfunc)
-        self.srcpad.set_query_function(self.srcqueryfunc)
-        self.srcpad.set_getcaps_function(gst.Pad.proxy_getcaps)
-        self.srcpad.set_setcaps_function(gst.Pad.proxy_setcaps)
-        self.add_pad (self.srcpad)
-
-    def chainfunc(self, pad, buffer):
-        if self.svg is None:
-            return self.srcpad.push(buffer)
-
-        try:
-            outbuf = buffer.copy_on_write ()
-            self.draw_on(outbuf)
-            return self.srcpad.push(outbuf)
-        except:
-            return gst.GST_FLOW_ERROR
-
-    def eventfunc(self, pad, event):
-        return self.srcpad.push_event (event)
-        
-    def srcqueryfunc (self, pad, query):
-        return self.sinkpad.query (query)
-
-    def srceventfunc (self, pad, event):
-        return self.sinkpad.push_event (event)
-
-    def do_change_state(self, transition):
-        #if transition in [gst.STATE_CHANGE_READY_TO_PAUSED, gst.STATE_CHANGE_PAUSED_TO_READY]:
-        #    self._reset()
-        return gst.Element.do_change_state(self, transition)
-
-    def do_set_property(self, key, value):
-        if key.name == 'data':
-            self.set_svg(data=value)
-        elif key.name == 'filename':
-            self.set_svg(filename=value)
-        else:
-            print "No property %s" % key.name
-
-    def set_svg(self, filename=None, data=None):
-        """Set the SVG data to render.
-
-        Use None to reset.
-        """
-        if data is not None:
-            self.svg=rsvg.Handle(data=data)
-        elif filename is not None:
-            self.svg=rsvg.Handle(filename)
-        else:
-            self.svg=None
-
-    def draw_on(self, buf):
-        if self.svg is None:
-            return
-
-        try:
-            caps = buf.get_caps()
-            width = caps[0]['width']
-            height = caps[0]['height']
-            surface = cairo.ImageSurface.create_for_data (buf, cairo.FORMAT_ARGB32, width, height, 4 * width)
-            ctx = cairo.Context(surface)
-        except:
-            print "Failed to create cairo surface for buffer"
-            import traceback
-            traceback.print_exc()
-            return
-
-        sx=1.0 * width / self.svg.props.width
-        sy=1.0 * height / self.svg.props.height
-        scale = cairo.Matrix( sx, 0, 0, sy, 0, 0 )
-        ctx.set_matrix(scale)
-        self.svg.render_cairo(ctx)
-
-gst.element_register(SVGOverlay, 'svgoverlay')
-gobject.type_register(SVGOverlay)
 
 class StreamInformation:
     def __init__(self):
