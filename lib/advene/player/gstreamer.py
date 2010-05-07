@@ -57,7 +57,10 @@ except ImportError:
 import gtk
 
 from advene.util.snapshotter import Snapshotter
-import svgoverlay
+try:
+    import advene.util.svgoverlay
+except ImportError:
+    print "SVG overlay support not present"
 
 name="GStreamer video player"
 
