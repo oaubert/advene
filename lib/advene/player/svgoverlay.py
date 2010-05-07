@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import sys
+import os
 
 import gobject
 gobject.threads_init()
@@ -42,12 +43,32 @@ except ImportError:
         l=ctypes.CDLL('librsvg-2-2.dll')
         g=ctypes.CDLL('libgobject-2.0-0.dll')
     elif sys.platform == 'darwin':
-        l=ctypes.CDLL('librsvg-2.dylib')
-        g=ctypes.CDLL('libgobject-2.0.dylib')
+        try:
+            l=ctypes.CDLL('librsvg-2.dylib')
+            g=ctypes.CDLL('libgobject-2.0.dylib')
+        except OSError:
+            # Try to determine the .dylib location
+            if os.path.exists('/opt/local/lib/librsvg-2.dylib'):
+                # macports install.
+                l=ctypes.CDLL('/opt/local/lib/librsvg-2.dylib')
+                g=ctypes.CDLL('/opt/local/lib/libgobject-2.0.dylib')
+            else:
+                # .app bundle resource.
+                d = os.path.dirname(os.path.abspath(sys.argv[0]))
+                if os.path.basename(d) == 'Resources':
+                    base=os.path.basename(os.path.basename(d))
+                    l=ctypes.CDLL('%s/Frameworks/librsvg-2.2.dylib' % base)
+                    g=ctypes.CDLL('%s/Frameworks/libgobject-2.0.0.dylib' % base)
+                else:
+                    # Cannot find librsvg
+                    print "Cannot find librsvg"
+                    l=None
+                    g=None
     else:
         l=ctypes.CDLL('librsvg-2.so')
         g=ctypes.CDLL('libgobject-2.0.so')
-    g.g_type_init()
+    if g is not None:
+        g.g_type_init()
 
     class rsvgHandle():
         class RsvgDimensionData(ctypes.Structure):
