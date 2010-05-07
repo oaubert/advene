@@ -511,6 +511,10 @@ class Config(object):
         h=self.preferences['history']
         if len(h) > self.preferences['history-size-limit']:
             self.preferences['history']=h[-self.preferences['history-size-limit']:]
+        
+        if self.os == 'darwin':
+            # Force display-caption disabling on darwin.
+            self.preferences['display-caption']=False
         return True
 
     def win32_specific_config(self):
@@ -543,8 +547,6 @@ class Config(object):
         # This one should go away sometime. But for the moment, the only way
         # to embed vlc is to use the X11 video output
         self.player['vout'] = 'x11'
-        # There is still a pb with captioning, just use the workaround
-        self.preferences['display-caption']=True
 
     def get_registry_value (self, subkey, name):
         """(win32) get a value from the registry.
