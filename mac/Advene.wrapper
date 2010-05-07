@@ -35,4 +35,7 @@ case ${osx_version} in
       ;;
 esac
 
+theme="${parent}/Resources/theme"
+[ -e "$theme" ] && export GTK2_RC_FILES="${theme}/gtk-2.0/gtkrc"
+
 exec ${d}/Advene.bin $@
