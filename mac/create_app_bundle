@@ -1,5 +1,7 @@
 #! /bin/sh
 
+THEMENAME=Cillop
+
 # Ensure that we can access /opt
 sudo chmod 755 /opt
 
