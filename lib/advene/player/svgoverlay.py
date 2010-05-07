@@ -56,7 +56,7 @@ except ImportError:
                 # .app bundle resource.
                 d = os.path.dirname(os.path.abspath(sys.argv[0]))
                 if os.path.basename(d) == 'Resources':
-                    base=os.path.basename(os.path.basename(d))
+                    base=os.path.dirname(d)
                     l=ctypes.CDLL('%s/Frameworks/librsvg-2.2.dylib' % base)
                     g=ctypes.CDLL('%s/Frameworks/libgobject-2.0.0.dylib' % base)
                 else:
@@ -110,6 +110,7 @@ except ImportError:
     rsvg = rsvgClass()
 
 class SVGOverlay(gst.Element):
+    __gtype_name__ = 'SVGOverlay'
     __gstdetails__ = ("SVG overlay", "Filter/Editor/Video", "Overlays SVG content over the video",
                       "Olivier Aubert <olivier.aubert@liris.cnrs.fr>")
 
@@ -213,7 +214,6 @@ class SVGOverlay(gst.Element):
         self.svg.render_cairo(ctx)
 
 gst.element_register(SVGOverlay, 'svgoverlay')
-gobject.type_register(SVGOverlay)
 
 if __name__ == '__main__':
     mainloop = gobject.MainLoop()
