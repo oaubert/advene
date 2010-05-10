@@ -514,6 +514,11 @@ class Player:
 
     def position_update(self):
         s = self.get_stream_information ()
+        if s.position == 0:
+            # Try again once. timestamp sometimes goes through 0 when
+            # modifying the player position.
+            s = self.get_stream_information()
+
         self.status = s.status
         self.stream_duration = s.length
         self.current_position_value = long(s.position)
@@ -521,7 +526,7 @@ class Player:
                                   or s.position > self.caption.end):
             self.display_text('', -1, -1)
         if self.overlay.data and (s.position < self.overlay.begin
-                                      or s.position > self.overlay.end):
+                                  or s.position > self.overlay.end):
             self.imageoverlay.props.data=None
             self.overlay.begin=-1
             self.overlay.end=-1
@@ -530,6 +535,8 @@ class Player:
     def reparent(self, xid):
         # See https://bugzilla.gnome.org/show_bug.cgi?id=599885
         #gtk.gdk.threads_enter()
+        print "Reparent", hex(xid)
+
         gtk.gdk.display_get_default().sync()
         
         self.imagesink.set_xwindow_id(xid)
@@ -538,7 +545,6 @@ class Player:
         #gtk.gdk.threads_leave()
         
     def set_visual(self, xid):
-        print "set_visual", xid
         if not xid:
             return True
         self.xid = xid
@@ -561,7 +567,7 @@ class Player:
         if message.structure is None:
             return
         if message.structure.get_name() == 'prepare-xwindow-id':
-            self.set_visual(self.xid)
+            self.reparent(self.xid)
 
     def sound_mute(self):
         if self.mute_volume is None:
