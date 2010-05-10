@@ -108,7 +108,7 @@ class Player(object):
             return self.mc.__getattribute__ (name)
             raise self.InternalException(e)
 
-    def fullscreen(self):
+    def fullscreen(self, connect=None):
         self.mc.set_fullscreen(True)
         return True
 

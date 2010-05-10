@@ -590,7 +590,8 @@ class Player:
             l.extend( [ self.disp(c, i) for c in e.elements() ])
         return ("\n"+indent).join(l)
 
-    def fullscreen(self):
+    def fullscreen(self, connect=None):
+
         def keypress(widget, event):
             if event.keyval == gtk.keysyms.Escape:
                 self.unfullscreen()
@@ -600,12 +601,26 @@ class Player:
                 # confusion with other widgets.
                 self.pause()
                 return True
-            elif hasattr(self, 'fullscreen_key_handler'):
-                return self.fullscreen_key_handler(widget, event)
             return False
+        
+        def buttonpress(widget, event):
+            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+                self.unfullscreen()
+                return True
+            return False
+
         if self.fullscreen_window is None:
             self.fullscreen_window=gtk.Window()
+            self.fullscreen_window.add_events(gtk.gdk.BUTTON_PRESS_MASK |
+                                              gtk.gdk.BUTTON_RELEASE_MASK |
+                                              gtk.gdk.KEY_PRESS_MASK |
+                                              gtk.gdk.KEY_RELEASE_MASK |
+                                              gtk.gdk.SCROLL_MASK)
             self.fullscreen_window.connect('key-press-event', keypress)
+            self.fullscreen_window.connect('button-press-event', buttonpress)
+            if connect is not None:
+                connect(self.fullscreen_window)
+
             style=self.fullscreen_window.get_style().copy()
             black=gtk.gdk.color_parse('black')
             for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
@@ -615,10 +630,13 @@ class Player:
                 style.base[state]=black
             self.fullscreen_window.set_style(style)
         self.fullscreen_window.show()
+        self.fullscreen_window.grab_focus()
+
         if config.data.os == 'darwin':
             self.fullscreen_window.set_size_request(gtk.gdk.screen_width(), gtk.gdk.screen_height())
         else:
             self.fullscreen_window.window.fullscreen()
+
         if config.data.os == 'win32':
             self.reparent(self.fullscreen_window.window.handle)
         else:

@@ -575,8 +575,6 @@ class AdveneGUI(object):
         # Player status
         p=self.controller.player
         self.update_player_labels()
-        # Hook the player control keypress in fullscreen mode.
-        self.controller.player.fullscreen_key_handler = self.process_player_shortcuts
 
         self.oldstatus = "NotStarted"
 
@@ -1496,6 +1494,12 @@ class AdveneGUI(object):
         else:
             buttons[gtk.STOCK_FULLSCREEN].hide()
 
+    def connect_fullscreen_handlers(self, widget):
+        """Connect handlers to the fullscreen widget.
+        """
+        widget.connect('key-press-event', self.process_player_shortcuts)
+        widget.connect('scroll-event', self.on_slider_scroll_event) 
+
     def updated_player_cb(self, context, parameter):
         self.update_player_labels()
         p=self.controller.player
@@ -1505,8 +1509,6 @@ class AdveneGUI(object):
         except AttributeError:
             p.set_visual(self.visual_id)
         self.update_control_toolbar(self.player_toolbar)
-        # Hook the player control keypress in fullscreen mode.
-        self.controller.player.fullscreen_key_handler = self.process_player_shortcuts
 
     def player_play_pause(self, event):
         p=self.controller.player
@@ -1640,7 +1642,7 @@ class AdveneGUI(object):
              self.on_b_forward_clicked),
             (_("Previous frame [Control-Down]"), gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_frame(-1)),
             (_("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_frame(+1)),
-            ( (_("Fullscreen"), gtk.STOCK_FULLSCREEN, lambda i: self.controller.player.fullscreen()) )
+            ( (_("Fullscreen"), gtk.STOCK_FULLSCREEN, lambda i: self.controller.player.fullscreen(self.connect_fullscreen_handlers)) )
             ]
 
         for text, stock, callback in tb_list:
@@ -3801,7 +3803,7 @@ class AdveneGUI(object):
 
     def on_video_button_press_event (self, button=None, event=None):
         if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-            self.controller.player.fullscreen()
+            self.controller.player.fullscreen(self.connect_fullscreen_handlers)
         elif event.button == 3:
             self.player_create_bookmark(event)
         return False
