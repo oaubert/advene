@@ -2346,7 +2346,7 @@ class AdveneGUI(object):
 
         # Display in statusbar
         cid=self.gui.statusbar.get_context_id('info')
-        message_id=self.gui.statusbar.push(cid, unicode(msg))
+        message_id=self.gui.statusbar.push(cid, unicode(msg).replace("\n", " - "))
         # Display the message only 4 seconds
         gobject.timeout_add(4000, undisplay, cid, message_id)
 
@@ -3389,21 +3389,22 @@ class AdveneGUI(object):
     def on_view_mediainformation_activate (self, button=None, data=None):
         """View mediainformation."""
         self.controller.position_update ()
-        self.log (_("**** Media information ****"))
-        self.log (_("Cached duration   : %(time)s (%(ms)d ms)") % {
-                'time': helper.format_time(self.controller.cached_duration),
-                'ms': self.controller.cached_duration })
-        if self.controller.player.is_active():
-            self.log (_("Current playlist : %s") % str(self.controller.player.playlist_get_list ()))
-            self.log (_("Current position : %(time)s (%(ms)d ms)") % {
-                    'time': helper.format_time(self.controller.player.current_position_value),
-                    'ms': self.controller.player.current_position_value})
-            self.log (_("Duration         : %(time)s (%(ms)d ms)") % {
-                    'time': helper.format_time(self.controller.player.stream_duration),
-                    'ms': self.controller.player.stream_duration })
-            self.log (_("Status           : %s") % self.statustext.get(self.controller.player.status, _("Unknown")))
+        p=self.controller.player
+        if p.is_active() and p.playlist_get_list():
+            self.controller.log("%(status)s %(filename)s %(position)s / %(duration)s (cached %(cached)s) - %(positionms)dms / %(durationms)dms (cached %(cachedms)dms)" % {
+                    'filename': unicode(p.playlist_get_list ()[0]),
+                    'status': self.statustext.get(p.status, _("Unknown")),
+                    'position': helper.format_time(p.current_position_value),
+                    'positionms': p.current_position_value,
+                    'duration': helper.format_time(p.stream_duration),
+                    'durationms': p.stream_duration,
+                    'cached': helper.format_time(self.controller.cached_duration),
+                    'cachedms': self.controller.cached_duration
+                    })
         else:
-            self.log (_("Player not active."))
+            self.controller.log(_("Player not active - cached duration   : %(duration)s (%(durationms)d ms)") % {
+                    'duration': helper.format_time(self.controller.cached_duration),
+                    'durationms': self.controller.cached_duration })
         return True
 
     def on_about1_activate (self, button=None, data=None):
