@@ -88,7 +88,7 @@ import advene.util.importer
 from advene.gui.util.completer import Indexer, Completer
 
 # GUI elements
-from advene.gui.util import get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color
+from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
@@ -121,7 +121,10 @@ class DummyGlade:
     """Transition class.
     """
     def __init__(self, menu_definition):
+        """Main window definition.
+        """
         self.win=gtk.Window()
+
         v=gtk.VBox()
         self.win.add(v)
 
@@ -145,24 +148,15 @@ class DummyGlade:
         hb.pack_start(self.search_hbox, expand=False)
         v.pack_start(hb, expand=False)
 
-        self.vpaned=gtk.VPaned()
+        self.application_space = gtk.VBox()
+        v.add(self.application_space)
 
-        if config.data.preferences['embedded']:
-            self.videocontainer=gtk.VBox()
-            self.vpaned.pack1(self.videocontainer, resize=True, shrink=False)
-        else:
-            self.videocontainer=gtk.Window()
-            # FIXME: hide/show on demand (when starting the video)
+        self.bottombar = gtk.HBox()
 
-        sw=gtk.ScrolledWindow()
-        sw.set_policy (gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
-        sw.set_size_request(-1, 20)
-        self.logmessages=gtk.TextView()
-        self.logmessages.set_wrap_mode(gtk.WRAP_CHAR)
-        sw.add(self.logmessages)
-        self.vpaned.pack2(sw, resize=True, shrink=False)
-
-        v.add(self.vpaned)
+        self.statusbar = gtk.Statusbar()
+        self.statusbar.set_has_resize_grip(False)
+        self.bottombar.pack_start(self.statusbar, expand=True)
+        v.pack_start(self.bottombar, expand=False)
 
         self.win.show_all()
 
@@ -207,10 +201,10 @@ class AdveneGUI(object):
       - L{on_win_key_press_event} : key press handling
 
     @ivar gui: the GUI model from libglade
-    @ivar gui.logmessages: the logmessages window
     @ivar gui.slider: the slider widget
     @ivar gui.player_status: the player_status widget
 
+    @ivar logbuffer: the log messages text buffer
     @ivar oldstatus: a status cache to check whether a GUI update is necessary
 
     @ivar annotation: the currently edited annotation (or I{None})
@@ -225,6 +219,8 @@ class AdveneGUI(object):
     def __init__ (self):
         """Initializes the GUI and other attributes.
         """
+        self.logbuffer = gtk.TextBuffer()
+
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
 
@@ -322,6 +318,16 @@ class AdveneGUI(object):
             b.connect('clicked', callback)
             self.gui.fileop_toolbar.insert(b, -1)
         self.gui.fileop_toolbar.show_all()
+
+        # Log messages button
+        def display_log_messages(v):
+            v=self.open_adhoc_view('logmessages', destination='south')
+            v.autoscroll()
+            return True
+        b=get_pixmap_button('logmessages.png', display_log_messages)
+        self.gui.bottombar.pack_start(b, expand=False)
+        b.show()
+
         # Resize the main window
         window=self.gui.win
         window.connect('key-press-event', self.on_win_key_press_event)
@@ -887,8 +893,7 @@ class AdveneGUI(object):
         self.register_view(self.logwindow)
 
         self.visualisationwidget=self.get_visualisation_widget()
-        self.gui.videocontainer.add(self.visualisationwidget)
-        self.gui.vpaned.set_position(-1)
+        self.gui.application_space.add(self.visualisationwidget)
 
         def media_changed(context, parameters):
             if config.data.preferences['expert-mode']:
@@ -1359,7 +1364,6 @@ class AdveneGUI(object):
         self.pane['east']=gtk.HPaned()
         self.pane['south']=gtk.VPaned()
         self.pane['fareast']=gtk.HPaned()
-        self.pane['main']=self.gui.vpaned
 
         # pack all together
         self.pane['west'].add1(self.viewbook['west'].widget)
@@ -1944,7 +1948,7 @@ class AdveneGUI(object):
         for k, v in d.iteritems():
             d[k]=unicode(v)
         layout=ET.SubElement(workspace, 'layout', d)
-        for n in ('west', 'east', 'fareast', 'south', 'main'):
+        for n in ('west', 'east', 'fareast', 'south'):
             ET.SubElement(layout, 'pane', id=n, position=unicode(self.pane[n].get_position()))
         # Now save adhoc views
         for v in self.adhoc_views:
@@ -2001,7 +2005,7 @@ class AdveneGUI(object):
             w.move(long(layout.attrib['x']), long(layout.attrib['y']))
             w.resize(long(layout.attrib['width']), long(layout.attrib['height']))
             for pane in layout:
-                if pane.tag == 'pane':
+                if pane.tag == 'pane' and pane.attrib['id'] in self.pane:
                     self.pane[pane.attrib['id']].set_position(long(pane.attrib['position']))
 
     def workspace_save(self, viewid=None):
@@ -2334,13 +2338,24 @@ class AdveneGUI(object):
         @param level: the error level
         @type level: int
         """
-        buf = self.gui.logmessages.get_buffer ()
-        mes = "".join(("\n", time.strftime("%H:%M:%S"), " - ", str(msg)))
+        def undisplay(ctxid, msgid):
+            self.gui.statusbar.remove_message(ctxid, msgid)
+            return False
+
+        # Display in statusbar
+        cid=self.gui.statusbar.get_context_id('info')
+        message_id=self.gui.statusbar.push(cid, unicode(msg))
+        # Display the message only 4 seconds
+        gobject.timeout_add(4000, undisplay, cid, message_id)
+
+        # Store into logbuffer
+        buf = self.logbuffer
+        mes = "".join(("\n", time.strftime("%H:%M:%S"), " - ", unicode(msg)))
         # FIXME: handle level (bold?)
         buf.place_cursor(buf.get_end_iter ())
         buf.insert_at_cursor (mes)
-        endmark = buf.create_mark ("end", buf.get_end_iter (), True)
-        self.gui.logmessages.scroll_mark_onscreen (endmark)
+
+        # Dump to terminal
         if config.data.preferences['log-to-terminal']:
             print unicode(msg).encode('utf-8')
         return
