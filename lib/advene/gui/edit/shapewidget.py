@@ -517,7 +517,7 @@ class Text(Rectangle):
         context.move_to(self.x, self.y)
         try:
             context.show_text(self.text)
-            self.width, self.height = context.text_extents(self.text)[2:4]
+            self.width, self.height = extents[2:4]
         except MemoryError:
             print "MemoryError while rendering text"
         return
@@ -538,7 +538,7 @@ class Text(Rectangle):
         s=cls(name=element.attrib.get('name', cls.SHAPENAME))
         s.filled=( element.attrib.get('fill', 'none') != 'none' )
         s.color=element.attrib['stroke']
-        s.text=element.text
+        s.text=element.text or ''
         style=element.attrib['style']
         m=stroke_width_re.search(style)
         if m:
