@@ -470,8 +470,7 @@ class Player:
         @param position: the position
         @type position: long
         """
-        print "gst - update_status ", status, str(position)
-        #print "Current status", self.player.get_state(), self.imageoverlay.get_state()
+        #print "gst - update_status ", status, str(position)
         if position is None:
             position=0
         else:
