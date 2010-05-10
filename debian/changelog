@@ -1,16 +1,16 @@
 advene (0.41) unstable; urgency=low
 
-  * Multiple video players can be simulatneously opened. They are
+  * SVG overlay over the video is available on all platforms.
+  
+  * Multiple video players can be simultaneously opened. They are
     synchronized (with the possibility to specify an offset). This allows
     for instance the visualisation of multiple videos of the same event.
   
-  * New exporter: TimedText
+  * New global shortcut: Control-Shift-Up/Down moves player by a
+    user-specified time value (initially 1ms)
 
   * Mouse wheel in video window moves frame-by-frame (if
     possible). Right-click in video window sets a bookmark.
-
-  * New global shortcut: Control-Shift-Up/Down moves player by a
-    user-specified time value (initially 1ms)
 
   * Ad-hoc views:
 
@@ -32,6 +32,8 @@ advene (0.41) unstable; urgency=low
      * Popup accumulator: it is automatically put to front when a new
        popup is displayed
  
+  * New exporter: TimedText
+
   * Log file can be displayed through Help/Display logfile
   
   * The brltty plugin has been included in the win32 installer package.
@@ -41,7 +43,7 @@ advene (0.41) unstable; urgency=low
   * New menuitem "Player/Update annotation screenshots" will try to grab
     screenshots for all annotation bounds.
 
-  * State variable can hold non-numeric values.
+  * State variables can hold non-numeric values.
 
  --
 

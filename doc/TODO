@@ -46,8 +46,6 @@
 * Define content-types: montag <annotation>...</annotation> +
    extensions (transition...)
 
-* gstreamer SVGOverlay element in python
-
 * STBV export (captions): cf http://code.google.com/p/libkate/
 
 * check http://code.activestate.com/recipes/457411/ (interval mapping data structure)
@@ -2760,3 +2758,4 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
   appears, or display an indicator (color, blink) -> option
   on-new-popup
 
+* gstreamer SVGOverlay element in python
