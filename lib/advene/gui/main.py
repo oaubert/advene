@@ -955,21 +955,6 @@ class AdveneGUI(object):
 
         self.visual_id = None
 
-        def register_drawable(drawable):
-            # The player is initialized. We can register the drawable id
-            try:
-                if not config.data.player['embedded']:
-                    raise Exception()
-                try:
-                    self.controller.player.set_widget(self.drawable)
-                except AttributeError:
-                    self.visual_id = self.drawable.get_id()
-                    self.controller.player.set_visual(self.visual_id)
-            except Exception, e:
-                self.log("Cannot set visual: %s" % unicode(e))
-            return True
-        self.drawable.connect_after('realize', register_drawable)
-
         # Populate the file history menu
         for filename in config.data.preferences['history']:
             self.append_file_history_menu(filename)
@@ -1136,11 +1121,28 @@ class AdveneGUI(object):
         # south, fareast)
         self.pane={}
 
+        # Video player socket
         self.drawable=gtk.Socket()
+
         def handle_remove(socket):
             # Do not kill the widget if the application exits
             return True
         self.drawable.connect('plug-removed', handle_remove)
+
+        def register_drawable(drawable):
+            # The player is initialized. We can register the drawable id
+            try:
+                if not config.data.player['embedded']:
+                    raise Exception()
+                try:
+                    self.controller.player.set_widget(self.drawable)
+                except AttributeError:
+                    self.visual_id = self.drawable.get_id()
+                    self.controller.player.set_visual(self.visual_id)
+            except Exception, e:
+                self.log("Cannot set visual: %s" % unicode(e))
+            return True
+        self.drawable.connect_after('realize', register_drawable)
 
         black=gtk.gdk.Color(0, 0, 0)
         for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
