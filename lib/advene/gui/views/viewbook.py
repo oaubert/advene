@@ -175,7 +175,8 @@ class ViewBook(AdhocView):
             shortname=unicode(name)[:12] + u'\u2026'
         else:
             shortname=name
-        l=gtk.Label(shortname)
+        l=gtk.Label()
+        l.set_markup("<small>%s</small>" % shortname)
         if self.controller.gui:
             e.set_tooltip_text(name)
         e.add(l)
