@@ -575,6 +575,9 @@ class AdveneGUI(object):
         # Player status
         p=self.controller.player
         self.update_player_labels()
+        # Hook the player control keypress in fullscreen mode.
+        self.controller.player.fullscreen_key_handler = self.process_player_shortcuts
+
         self.oldstatus = "NotStarted"
 
         self.last_slow_position = 0
@@ -1502,7 +1505,7 @@ class AdveneGUI(object):
         except AttributeError:
             p.set_visual(self.visual_id)
         self.update_control_toolbar(self.player_toolbar)
-        # Hook the player control keypress.
+        # Hook the player control keypress in fullscreen mode.
         self.controller.player.fullscreen_key_handler = self.process_player_shortcuts
 
     def player_play_pause(self, event):
