@@ -154,6 +154,13 @@ class DummyGlade:
         self.bottombar = gtk.HBox()
 
         self.statusbar = gtk.Statusbar()
+
+        # Modify font size. First find the embedded label
+        w=self.statusbar
+        while hasattr(w, 'get_children'):
+            w=w.get_children()[0]
+        w.modify_font(pango.FontDescription("sans 9"))
+
         self.statusbar.set_has_resize_grip(False)
         self.bottombar.pack_start(self.statusbar, expand=True)
         v.pack_start(self.bottombar, expand=False)
@@ -325,6 +332,7 @@ class AdveneGUI(object):
             v.autoscroll()
             return True
         b=get_pixmap_button('logmessages.png', display_log_messages)
+        b.set_relief(gtk.RELIEF_NONE)        
         self.gui.bottombar.pack_start(b, expand=False)
         b.show()
 
