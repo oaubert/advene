@@ -1,3 +1,6 @@
+* implement a "Stream record" feature in the player (tee+encode
+   before imagesink)
+
 * Generic subprocess registration (prononce, tts...) to make sure that
    we terminate them at Advene exit.
 
