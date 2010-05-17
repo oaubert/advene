@@ -183,6 +183,19 @@ class TracePreview(AdhocView):
                     entetestr = "%s : %s" % (ev_time, "Event not described")
                 if obj_evt.concerned_object['id']:
                     entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
+            elif obj_evt.name.find('Player')>=0:
+                txt = obj_evt.content
+                if txt != None:
+                    # content should be of the form pos_bef \n pos
+                    #but if it is an old trace, we only got pos
+                    poss = txt.split('\n')
+                    if len(poss)>1 and obj_evt.name.find('PlayerSet')>=0:
+                        txt=poss[1]
+                    else:
+                        txt=poss[0]
+                else:
+                    txt = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
+                entetestr = "%s : %s %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], txt)
             else:
                 comp = ''
                 if obj_evt.concerned_object['type'] == Annotation:
@@ -290,7 +303,18 @@ class TracePreview(AdhocView):
                         font = "Sans 5")
             else:
                 # no concerned object, we are in an action of navigation
-                txt = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
+    
+                txt = obj_evt.content
+                if txt != None:
+                    # content should be of the form pos_bef \n pos
+                    #but if it is an old trace, we only got pos
+                    poss = txt.split('\n')
+                    if len(poss)>1 and obj_evt.name.find('PlayerSet')>=0:
+                        txt=poss[1]
+                    else:
+                        txt=poss[0]
+                else:
+                    txt = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
                 goocanvas.Text (parent = objg,
                         text = txt,
                         x = 40,
@@ -333,9 +357,9 @@ class TracePreview(AdhocView):
             objcanvas.modify_base (gtk.STATE_NORMAL, color)
             objcanvas.set_size_request(60,20)
             if corpsstr != "":
-                entete.set_tooltip_text(corpsstr)
+                objcanvas.set_tooltip_text(corpsstr)
             if entetestr != "":
-                objcanvas.set_tooltip_text(entetestr)
+                entete.set_tooltip_text(entetestr)
             return hb
 
     def unpackEvent(self):
