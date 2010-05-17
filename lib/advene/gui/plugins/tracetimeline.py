@@ -25,6 +25,7 @@ This widget allows to present event history in a timeline view.
 import urllib
 import gtk
 import time
+import gobject
 from gettext import gettext as _
 from advene.model.fragment import MillisecondFragment
 from advene.model.schema import Schema, AnnotationType, RelationType
@@ -73,7 +74,9 @@ class TraceTimeline(AdhocView):
         self.close_on_package_load = False
         self.tracer = self.controller.tracers[0]
         self.__package=package
-        if self.tracer.trace.levels['events']:
+        if self.tracer.trace.start:
+            self.start_time=self.tracer.trace.start
+        elif self.tracer.trace.levels['events']:
             self.start_time = self.tracer.trace.levels['events'][0].time
         else:
             self.start_time = config.data.startup_time
@@ -108,15 +111,20 @@ class TraceTimeline(AdhocView):
         self.context_col_width = 1
         self.context_colspacing = 1
         self.doc_canvas_X = 100
-        self.canvasY = 200
+        self.canvasY = 824
         self.head_canvasY = 25
         self.doc_canvas_Y = 45
         self.docgroup = None
         self.obj_l = 5
         self.incr = 500
-        self.timefactor = 10
+        self.timefactor = 10.0/824
         self.autoscroll = True
+        self.auto_refresh = False # de/activate autorefresh
+        self.auto_refresh_keep_100 = False # autorefresh keep 100% ratio 
+        self.auto_refresh_delay = 1000 # time between 2 refresh in ms
+        self.ar_tag = None # autorefresh id value
         self.links_locked = False
+        self.now_line=None
         self.sw = None
         self.cols={} # head_groupe / last event_group
         self.tracer.register_view(self)
@@ -130,6 +138,7 @@ class TraceTimeline(AdhocView):
         self.widget.show_all()
         self.active_trace = self.tracer.trace
         self.receive(self.active_trace)
+        self.refresh()
 
     def select_trace(self, trace):
         if isinstance(trace, (int, long)):
@@ -146,12 +155,13 @@ class TraceTimeline(AdhocView):
         vc = (va.value + h/2.0) * self.timefactor
         self.display_values[self.active_trace.name] = (self.canvasY, self.timefactor, self.obj_l, vc)
         self.active_trace = trace
+        self.start_time=self.active_trace.start
         # redraw docgroup
         self.docgroup.redraw(self.active_trace)
         # restore zoom values if any
         if self.active_trace.name in self.display_values:
             (self.canvasY, self.timefactor, self.obj_l, vc) = self.display_values[self.active_trace.name]
-            self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
+            self.extend_canvas()
             self.refresh(center = vc)
         else:
             self.refresh()
@@ -192,7 +202,7 @@ class TraceTimeline(AdhocView):
         self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
         self.quicksearch_entry=gtk.Entry()
         self.quicksearch_entry.set_text(_('Search'))
-        def do_search(button, event, options):
+        def do_search(button, options):
             tr=self.tracer.search(self.active_trace, unicode(self.quicksearch_entry.get_text(),'utf-8'), options[0], options[1])
             mod= self.trace_selector.get_model()
             if len(self.tracer.traces)>len(mod):
@@ -203,7 +213,8 @@ class TraceTimeline(AdhocView):
                            n, None ))
                 self.trace_selector.set_active(n)
             #self.select_trace(tr)
-        self.quicksearch_button.connect('button-press-event', do_search, quicksearch_options)
+        self.quicksearch_button.connect('clicked', do_search, quicksearch_options)
+        self.quicksearch_button.connect('activate', do_search, quicksearch_options)
         def is_focus(w, event):
             if w.is_focus() :
                 return False
@@ -219,13 +230,21 @@ class TraceTimeline(AdhocView):
         self.search_box = gtk.HBox()
         self.search_box.pack_start(self.quicksearch_entry, expand=False)
         self.search_box.pack_start(self.quicksearch_button, expand=False)
-        mainbox.pack_start(self.search_box, expand=False)
+        #mainbox.pack_start(self.search_box, expand=False)
 
         toolbox = gtk.Toolbar()
         toolbox.set_orientation(gtk.ORIENTATION_HORIZONTAL)
         toolbox.set_style(gtk.TOOLBAR_ICONS)
-        mainbox.pack_start(toolbox, expand=False)
-
+        #toolbox.set_icon_size(gtk.ICON_SIZE_MENU)
+        #mainbox.pack_start(toolbox, expand=False)
+        
+       
+        htb = gtk.HBox()
+        htb.pack_start(toolbox, expand=True)      
+        htb.pack_start(self.search_box, expand=False)
+        
+        mainbox.pack_start(htb, expand=False)
+        
         c = len(self.cols)
         self.context_canvasX = c*(self.context_col_width+self.context_colspacing) + 4 # 4 for select square
 
@@ -261,22 +280,41 @@ class TraceTimeline(AdhocView):
         self.doc_canvas.set_bounds(0,0, self.doc_canvas_X, self.doc_canvas_Y)
         self.doc_canvas.set_size_request(-1, self.doc_canvas_Y)
         self.docgroup = DocGroup(controller=self.controller, canvas=self.doc_canvas, name="Nom du film", x = 15, y=10, w=self.doc_canvas_X-30, h=self.doc_canvas_Y-25, fontsize=8, color_c=0x00000050)
-        self.canvas.get_root_item().connect('button-press-event', self.canvas_clicked)
-        self.canvas.get_root_item().connect('button-release-event', self.canvas_release)
+        self.canvas.connect('button-press-event', self.canvas_clicked)
+        self.canvas.connect('button-release-event', self.canvas_release)
+        
         def canvas_resize(w, alloc):
+            if abs(self.canvasX-(alloc.width-20)) < 5:
+                # resize every 5 pixels
+                return
+            ratio = (alloc.width-20.0) / self.canvasX
             self.canvasX = alloc.width-20.0
-            self.col_width = (self.canvasX)//len(self.cols)-self.colspacing
+            self.col_width = float(self.canvasX)/len(self.cols)-self.colspacing
             #redraw head_canvas
             self.head_canvas.set_bounds (0, 0, self.canvasX, self.head_canvasY)
             self.redraw_head_canvas()
-            #redraw canvas
-            self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
-            h = self.canvas.get_allocation().height
-            va=scrolled_win.get_vadjustment()
-            vc = (va.value + h/2.0) * self.timefactor
-            self.refresh(action=None, center=vc)
-            #print alloc.width
+            self.extend_canvas()
+            root = self.canvas.get_root_item()
+            i=root.get_n_children()-1
+            while i>=0:
+                c = root.get_child(i)
+                if isinstance(c, EventGroup):
+                    c.rect.props.x *= ratio
+                    c.rect.props.width *= ratio
+                    c.ol *= ratio
+                    c.x *= ratio
+                    c.fontsize = c.ol/3
+                    c.update_objs(ratiox=ratio)
+                i -= 1
+            for tm in self.timemarks:
+                for i in range(0,tm.get_n_children()):
+                    tm.get_child(i).props.x *= ratio
+                    tm.get_child(i).props.width *= ratio
+            self.now_line.props.x *= ratio
+            self.now_line.props.width *= ratio
+
         self.head_canvas.connect('size-allocate', canvas_resize)
+        
         def doc_canvas_resize(w, alloc):
             #redraw doc_canvas
             self.doc_canvas_X = alloc.width
@@ -289,7 +327,7 @@ class TraceTimeline(AdhocView):
             self.docgroup.redraw(self.active_trace)
         self.doc_canvas.connect('size-allocate', doc_canvas_resize)
         scrolled_win.add(self.canvas)
-
+        timeline_box.pack_start(gtk.HSeparator(), expand=False, fill=False)
         timeline_box.add(scrolled_win)
 
         mainbox.pack_start(gtk.HSeparator(), expand=False, fill=False)
@@ -312,7 +350,6 @@ class TraceTimeline(AdhocView):
         toolbox.insert(btnc, -1)
         self.btnl = gtk.ToolButton()
         self.btnl.set_tooltip_text(_('Toggle links lock'))
-        #self.btnl.set_label(_('Unlocked'))
         img = gtk.Image()
         img.set_from_file(config.data.advenefile( ( 'pixmaps', 'unlocked.png') ))
         self.btnl.set_icon_widget(img)
@@ -323,7 +360,7 @@ class TraceTimeline(AdhocView):
         b.set_tooltip_text(_('Toggle link mode'))
         toolbox.insert(b, -1)
         b.connect('clicked', self.toggle_link_mode)
-
+        
         def open_trace(b):
             fname=dialog.get_filename(title=_("Open a trace file"),
                                    action=gtk.FILE_CHOOSER_ACTION_OPEN,
@@ -339,6 +376,17 @@ class TraceTimeline(AdhocView):
             self.trace_selector.set_active(len(self.tracer.traces) - 1)
             return True
 
+        btnar = gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
+        btnar.set_tooltip_text(_('Toggle auto refresh'))
+        btnar.set_label('')
+        btnar.connect('clicked', self.toggle_auto_refresh)
+        toolbox.insert(btnar, -1)
+        
+
+        s=gtk.SeparatorToolItem()
+        s.set_draw(True)
+        toolbox.insert(s, -1)
+        
         b=gtk.ToolButton(stock_id=gtk.STOCK_OPEN)
         b.set_tooltip_text(_('Open an existing trace'))
         toolbox.insert(b, -1)
@@ -349,8 +397,15 @@ class TraceTimeline(AdhocView):
         btne.set_tooltip_text(_('Save trace'))
         toolbox.insert(btne, -1)
         btne.connect('clicked', self.export)
-        #preselect= 0,
-        #callback=refresh
+
+        btnopt = gtk.ToolButton(stock_id=gtk.STOCK_PREFERENCES)
+        btnopt.set_tooltip_text(_('Configuration'))
+        btnopt.set_label('')
+        #btnopt.connect('clicked', open_options)
+        toolbox.insert(btnopt, -1)
+        
+        
+        
         self.inspector = Inspector(self.controller)
         bx.pack2(self.inspector)
 
@@ -363,7 +418,7 @@ class TraceTimeline(AdhocView):
                 if event.direction == gtk.gdk.SCROLL_DOWN:
                     zoom_out(widget, center)
                 elif  event.direction == gtk.gdk.SCROLL_UP:
-                    zoom_in(widget, center)
+                    self.zoom_at_ratio(widget, 1.25, center)
                 return
             elif event.state & gtk.gdk.SHIFT_MASK:
                 # Horizontal scroll
@@ -398,6 +453,7 @@ class TraceTimeline(AdhocView):
                 return False
             if event.state & gtk.gdk.SHIFT_MASK:
                 # redraw selection frame
+                #self.widget.get_parent_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.PLUS))
                 if self.selection[0]==0 and self.selection[1]==0:
                     self.selection[0]=event.x
                     self.selection[1]=event.y
@@ -414,8 +470,10 @@ class TraceTimeline(AdhocView):
                                         end_arrow = False,
                                         )
                 return
-            #if self.dragging:
-            #    return False
+            if self.sel_frame:
+                self.sel_frame.remove()
+                self.sel_frame=None
+            
             if not self.drag_coordinates:
                 self.drag_coordinates=(event.x_root, event.y_root)
                 self.widget.get_parent_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.DIAMOND_CROSS))
@@ -436,71 +494,59 @@ class TraceTimeline(AdhocView):
             return False
         self.canvas.connect('motion-notify-event', on_background_motion)
 
-        def on_background_button_release(widget, event):
-            if event.button == 1:
-                self.drag_coordinates=None
-                self.widget.get_parent_window().set_cursor(None)
-                #curseur normal
-            return False
-        self.canvas.connect('button-release-event', on_background_button_release)
-
         def zoom_out(w, center_v=None):
             h = self.canvas.get_allocation().height
             if h/float(self.canvasY)>=0.8:
-                zoom_100(w)
+                self.zoom_100(w)
             else:
-                va=scrolled_win.get_vadjustment()
-                vc=0
-                if center_v is None:
-                    vc = (va.value + h/2.0) * self.timefactor
-                else:
-                    vc = center_v
-                self.canvasY *= 0.8
-                self.timefactor *= 1.25
-                self.obj_l *= 0.8
-                #print "%s" % (self.timefactor)
-                self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
-                self.refresh(center = vc)
+                self.zoom_at_ratio(w, 0.8, center_v)
+                
         btnm.connect('clicked', zoom_out)
 
-        def zoom_in(w, center_v=None):
-            h = self.canvas.get_allocation().height
-            va=scrolled_win.get_vadjustment()
-            if center_v is None:
-                vc = (va.value + h/2.0) * self.timefactor
-            else:
-                vc = center_v
-            self.canvasY *= 1.25
-            self.timefactor *= 0.8
-            self.obj_l *= 1.25
-            #print "%s" % (self.timefactor)
-            self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
-            self.refresh(center = vc)
-        btnp.connect('clicked', zoom_in)
+        btnp.connect('clicked', self.zoom_at_ratio, 1.25, None)
 
-        def zoom_100(w):
-            wa = self.canvas.get_allocation()
-            self.canvasY = wa.height-10.0 # -10 pour des raisons obscures ...
-            if 'actions' in self.active_trace.levels and self.active_trace.levels['actions']:
-                a = self.active_trace.levels['actions'][-1].activity_time[1]
-                for act in self.active_trace.levels['actions']:
-                    if act.activity_time[1]>a:
-                        a=act.activity_time[1]
-                self.timefactor = a/(self.canvasY)
-                self.obj_l = 5000.0/self.timefactor
-            else:
-                self.timefactor = 1000
-                self.obj_l = 5
-            #print self.timefactor
-            self.canvas.set_bounds(0,0,self.canvasX, self.canvasY)
-            self.refresh()
-        btnc.connect('clicked', zoom_100)
-
+        btnc.connect('clicked', self.zoom_100)
+        
         bx.set_position(self.canvasX+15)
         return mainbox
 
+    def zoom_100(self, w=None):
+        h = self.canvas.get_allocation().height
+        ratio = (h-1.0)/self.canvasY
+        self.zoom_at_ratio(w, ratio, None)
+    
+
+    def refresh_time(self):
+        # function called every x seconds to continue drawing the trace.
+        # should return false to stop cycle
+        if self.active_trace != self.tracer.trace:
+            # we are not currently visualizing the true trace
+            # do not disable autorefresh but skip it
+            return True
+        self.canvasY = (time.time()-self.active_trace.start)/self.timefactor
+        self.extend_canvas()
+        self.draw_marks()
+        if self.autoscroll:
+            a = self.sw.get_vadjustment()
+            a.value=a.upper-a.page_size
+        if self.auto_refresh_keep_100:
+            self.zoom_100()
+        return self.auto_refresh
+        
+    def toggle_auto_refresh(self, w=None):
+        #function to launch / stop autorefresh
+        self.auto_refresh = not self.auto_refresh
+        if self.auto_refresh:
+            self.ar_tag = gobject.timeout_add(self.auto_refresh_delay, self.refresh_time)
+            #should change an icon button
+            print "auto_refresh started"
+        else:
+            #should change an icon button
+            gobject.source_remove(self.ar_tag)
+            print "auto_refresh stopped"
+        
     def show_inspector(self):
-        self.widget.get_children()[3].get_children()[2].set_position(201) # same as size request for canvas
+        self.widget.get_children()[2].get_children()[2].set_position(201) # same as size request for canvas
 
     def export(self, w):
         fname = self.tracer.export()
@@ -520,6 +566,7 @@ class TraceTimeline(AdhocView):
         d.destroy()
         return
 
+    #FIXME
     def toggle_link_mode(self, w):
         if self.link_mode == 0:
             self.link_mode = 1
@@ -536,51 +583,99 @@ class TraceTimeline(AdhocView):
             i+=1
         return
 
+    def zoom_at_ratio(self, w=None, ratio=1, center_v=None):
+        h = self.canvas.get_allocation().height
+        #print float(h*self.timefactor)/ratio<1, h, self.timefactor
+        if float(h*self.timefactor)/ratio<1:
+            print "TraceTimeline: minimal zoom is 1s"
+            return
+        va=self.sw.get_vadjustment()
+        
+        if center_v is None:
+            vc = (va.value + h/2.0) * self.timefactor
+        else:
+            vc = center_v
+        self.canvasY *= ratio
+        self.timefactor *= 1.0/ratio
+        self.obj_l *= ratio
+        self.extend_canvas()
+        
+        root = self.canvas.get_root_item()
+        n=root.get_n_children()-1
+        while n>=0:
+            c = root.get_child(n)
+            if isinstance(c, EventGroup):
+                c.rect.props.height *= ratio
+                c.rect.props.y *= ratio
+                c.ol *= ratio
+                c.y *= ratio
+                c.fontsize = c.ol/3
+                c.update_objs(ratioy=ratio)
+            n -= 1
+        for tm in self.timemarks:
+            for i in range(0,tm.get_n_children()):
+                tm.get_child(i).props.y *= ratio
+        
+        if len(self.timemarks)>2:
+            #on a au moins 2 lignes temporelles
+            if ratio > 1 and self.timemarks[1].get_child(0).props.y - self.timemarks[0].get_child(0).props.y > h/4.0 or self.timemarks[1].get_child(0).props.y - self.timemarks[0].get_child(0).props.y < h/6.0:
+                #elles sont trop espacées, on recalcule.
+                for t in self.timemarks:
+                    t.remove()
+                self.timemarks=[]
+                self.draw_marks()
+        va.value = vc/self.timefactor-va.page_size/2.0
+        if va.value<va.lower:
+            va.value=va.lower
+        elif va.value>va.upper-va.page_size:
+            va.value=va.upper-va.page_size
+            
     def zoom_on(self, w=None, canvas_item=None):
         min_y = -1
         max_y = -1
         if hasattr(canvas_item, 'rect'):
-            # action
+            # eventgroup
             min_y = canvas_item.rect.get_bounds().y1
             max_y = canvas_item.rect.get_bounds().y2
         elif hasattr(canvas_item, 'rep'):
+            # objgroup
             obj_id = canvas_item.cobj['id']
             if obj_id is None:
                 return
             i=0
+            # listing all eventgroup containing this item
             root = self.canvas.get_root_item()
             egl=[]
             while i < root.get_n_children():
                 eg = root.get_child(i)
-                if isinstance(eg, EventGroup) and eg.objs is not None:
-                    egl.append(eg)
+                if isinstance(eg, EventGroup):
+                    for op in eg.event.operations:
+                        #check if an operation concerns this item
+                        if op.concerned_object['id'] == obj_id:
+                            egl.append(eg)
                 i+=1
             for c in egl:
-                if obj_id in c.objs:
-                    obj_gr = c.objs[obj_id][0]
-                    if obj_gr is None:
-                        y_mi = c.rect.get_bounds().y1
-                        y_ma = c.rect.get_bounds().y1 + c.rect.props.height
-                    else:
-                        y_mi = obj_gr.y-obj_gr.r
-                        y_ma = obj_gr.y+obj_gr.r
-                    if min_y == -1:
-                        min_y = y_mi
-                    min_y = min(min_y, y_mi)
-                    max_y = max(max_y, y_ma)
-
-        #print 'y1 %s y2 %s' % (min_y, max_y)
+                #we take max / min Y from eventgroups only because when resizing objgroupsmight also disappear...
+                
+                y_mi = c.rect.get_bounds().y1
+                y_ma = c.rect.get_bounds().y2 #y1 + c.rect.props.height why that ???
+                if min_y == -1:
+                    min_y = y_mi
+                min_y = min(min_y, y_mi)
+                max_y = max(max_y, y_ma)
+        
         h = self.canvas.get_allocation().height
+        # if h < 10, the widget is not fully drawn yet, we must use an arbitrary value
+        if h < 10:
+            h=200
         # 20.0 to keep a little space between border and object
         va=self.sw.get_vadjustment()
-        rapp = (20.0 + max_y - min_y) / h
+        rapp = h / (20.0 + max_y - min_y)
         vc = self.timefactor * ((min_y + max_y) / 2.0) * (va.upper / self.canvasY)
-        self.timefactor = rapp * self.timefactor
-        self.canvasY = rapp * self.canvasY
-        self.obj_l = rapp * self.obj_l
-        self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
-        self.refresh(center = vc)
+        self.zoom_at_ratio(None, rapp, vc)
 
+        
+    #FIXME : types / schema / views
     def recreate_item(self, w=None, obj_group=None):
         c = obj_group.cobj['opes'][-1].content
         if obj_group.cobj['type'] == Annotation:
@@ -656,32 +751,35 @@ class TraceTimeline(AdhocView):
         c.update_status (status="set", position=pos)
         return
 
-    def canvas_release(self, w, t, ev):
+    def canvas_release(self, w, ev):
+        if self.sel_frame:
+            self.sel_frame.remove()
+            self.sel_frame=None
         if ev.state & gtk.gdk.SHIFT_MASK:
+            if self.selection[0]==0 and self.selection[1]==0:
+                #not a simple click + maj + release
+                return
             self.selection[2]=ev.x
             self.selection[3]=ev.y
-            if self.sel_frame:
-                self.sel_frame.remove()
-                self.sel_frame=None
             self.widget.get_parent_window().set_cursor(None)
             min_y=min(self.selection[1], self.selection[3])
             max_y=max(self.selection[1], self.selection[3])
             h = self.canvas.get_allocation().height
             va=self.sw.get_vadjustment()
-            if max_y-min_y<=3:
-                #must be a misclick
+            if (max_y-min_y)* self.timefactor<1:
+                #must be a misclick, zoom < 1s
+                self.selection = [ 0, 0, 0, 0]
                 return
-            rapp = (max_y - min_y) / h
+            rapp = h / float(max_y - min_y)
             vc = self.timefactor * ((min_y + max_y) / 2.0) * (va.upper / self.canvasY)
-            self.timefactor = rapp * self.timefactor
-            self.canvasY = rapp * self.canvasY
-            self.obj_l = rapp * self.obj_l
-            self.canvas.set_bounds (0,0,self.canvasX,self.canvasY)
-            self.refresh(center = vc)
+            self.zoom_at_ratio(None, rapp, vc)
             self.selection = [ 0, 0, 0, 0]
             return
+        if ev.button == 1:
+            self.drag_coordinates=None
+            self.widget.get_parent_window().set_cursor(None)
 
-    def canvas_clicked(self, w, t, ev):
+    def canvas_clicked(self, w, ev):
         if ev.state & gtk.gdk.SHIFT_MASK:
             self.selection = [ ev.x, ev.y, 0, 0]
             if self.sel_frame:
@@ -705,9 +803,10 @@ class TraceTimeline(AdhocView):
             #clic droit sur un item
             menu=gtk.Menu()
             if obj_gp is not None:
-                i=gtk.MenuItem(_("Zoom and center on linked items"))
-                i.connect("activate", self.zoom_on, obj_gp)
-                menu.append(i)
+                if obj_gp.rep is not None:
+                    i=gtk.MenuItem(_("Zoom and center on linked items"))
+                    i.connect("activate", self.zoom_on, obj_gp)
+                    menu.append(i)
                 obj = objt = None
                 if obj_gp.cobj['id'] is not None:
                     obj = self.controller.package.get_element_by_id(obj_gp.cobj['id'])
@@ -723,17 +822,17 @@ class TraceTimeline(AdhocView):
                     menu.append(i)
                 m = gtk.Menu()
                 mt= []
-                for op in obj_gp.cobj['opes']:
-                    if op.movietime not in mt:
-                        n=''
-                        if op.name in INCOMPLETE_OPERATIONS_NAMES:
-                            n = INCOMPLETE_OPERATIONS_NAMES[op.name]
-                        else:
-                            n = ECACatalog.event_names[op.name]
-                        mt.append(op.movietime)
-                        i = gtk.MenuItem("%s (%s)" % (time.strftime("%H:%M:%S", time.gmtime(op.movietime/1000)), n))
-                        i.connect("activate", self.goto, op.movietime)
-                        m.append(i)
+
+                if obj_gp.operation.movietime not in mt:
+                    n=''
+                    if obj_gp.operation.name in INCOMPLETE_OPERATIONS_NAMES:
+                        n = INCOMPLETE_OPERATIONS_NAMES[obj_gp.operation.name]
+                    else:
+                        n = ECACatalog.event_names[obj_gp.operation.name]
+                    mt.append(obj_gp.operation.movietime)
+                    i = gtk.MenuItem("%s (%s)" % (time.strftime("%H:%M:%S", time.gmtime(obj_gp.operation.movietime/1000)), n))
+                    i.connect("activate", self.goto, obj_gp.operation.movietime)
+                    m.append(i)
                 i=gtk.MenuItem(_("Go to..."))
                 i.set_submenu(m)
                 menu.append(i)
@@ -802,25 +901,26 @@ class TraceTimeline(AdhocView):
 
     def draw_marks(self):
         # verifying start time (changed if an import occured)
-        self.start_time = self.active_trace.levels['events'][0].time
+        self.start_time = self.active_trace.start
         #Calculating where to start from and the increment between marks
         tinc = 60
         if not self.timemarks:
             wa = self.canvas.get_parent().get_allocation().height
             
             if wa > 100:
-                tinc = wa/4.0 # 4 marks in the widget
-            else:
-                tinc = 60000 / self.timefactor
+                tinc = wa/5.0 # 5 marks in the widget
+            else: # when closing and reopening the view
+                tinc = 2 / self.timefactor
             t=tinc
         else:
             if len(self.timemarks)>=2:
                tinc=self.timemarks[1].get_child(0).get_bounds().y1-self.timemarks[0].get_child(0).get_bounds().y1
             else:
-               tinc=self.timemarks[0].get_child(0).get_bounds().y1-self.start_time
+               tinc=self.timemarks[0].get_child(0).get_bounds().y1
             t=self.timemarks[-1].get_child(0).get_bounds().y1+tinc
         ld = goocanvas.LineDash([5.0, 20.0])
         while t < self.canvasY:
+            #print self.start_time, t, t*self.timefactor
             mgroup = goocanvas.Group(parent=self.canvas.get_root_item())
             goocanvas.polyline_new_line(mgroup,
                                         0,
@@ -830,7 +930,7 @@ class TraceTimeline(AdhocView):
                                         line_dash=ld,
                                         line_width = 0.2)
             goocanvas.Text(parent = mgroup,
-                        text = time.strftime("%H:%M:%S",time.localtime(self.start_time+t*self.timefactor/1000)),
+                        text = time.strftime("%H:%M:%S",time.localtime(self.start_time+t*self.timefactor)),
                         x = 0,
                         y = t-5,
                         width = -1,
@@ -838,7 +938,7 @@ class TraceTimeline(AdhocView):
                         fill_color_rgba=0x121212FF, 
                         font = "Sans 7")
             goocanvas.Text(parent = mgroup,
-                        text = time.strftime("%H:%M:%S",time.localtime(self.start_time+t*self.timefactor/1000)),
+                        text = time.strftime("%H:%M:%S",time.localtime(self.start_time+t*self.timefactor)),
                         x = self.canvasX-4,
                         y = t-5,
                         width = -1,
@@ -860,15 +960,25 @@ class TraceTimeline(AdhocView):
         offset = 0
         for c in self.tracer.tracemodel['actions']:
             etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][c])))
-            self.cols[c]=(etgroup, None)
+            (og, oa) = self.cols[c]
+            self.cols[c]=(etgroup, oa)
             offset += 1
         return
 
     def destroy(self, source=None, event=None):
+        if self.auto_refresh:
+            self.toggle_auto_refresh()
         self.tracer.unregister_view(self)
         return False
 
-    def refresh(self, action=None, center = None):
+    def extend_canvas(self):
+        self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
+        if self.now_line:
+            self.now_line.props.y=self.canvasY-1
+
+
+    #FIXME : verify link lock problem, selection and center
+    def refresh(self, center = None):
         # method to refresh the canvas display
         # 1/ clean the canvas, memorizing selected item
         # 2/ recalculate the canvas area according to timefactor and last action
@@ -877,46 +987,37 @@ class TraceTimeline(AdhocView):
         # 5/ recenter the canvas according to previous centering
         # 6/ reselect selected item
         # 7/ re-deactive locked_links
-        # action : the new action forcing a refresh (if action couldnt be displayed in the current canvas area)
         # center : the timestamp on which the display needs to be centered
-        root = self.canvas.get_root_item()
-        selected_item = None
+        root=self.canvas.get_root_item()
         while root.get_n_children()>0:
-            #print "refresh removing %s" % root.get_child (0)
             c = root.get_child(0)
-            if isinstance(c, EventGroup):
-                for k in c.objs:
-                    if c.objs[k][0] is not None:
-                        if c.objs[k][0].center_sel:
-                            selected_item = (c.event, k)
             c.remove()
-        for act in self.cols:
-            (h,l) = self.cols[act]
-            self.cols[act] = (h, None)
-        if not ('actions' in self.active_trace.levels and self.active_trace.levels['actions']):
-            return
-        a = self.active_trace.levels['actions'][-1].activity_time[1]
-        #if action and a< action.activity_time[1]:
-        #    a = action.activity_time[1]
-        for act in self.active_trace.levels['actions']:
-            if act.activity_time[1]>a:
-                a=act.activity_time[1]
-            #print "t1 %s Ytf %s" % (a, self.canvasY*self.timefactor)
-        if a<(self.canvasY-self.incr)*self.timefactor or a>self.canvasY*self.timefactor:
-            self.canvasY = int(1.0*a/self.timefactor + 1)
-        #print self.canvasX, self.canvasY
-        self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
-        #print "%s %s" % (self.timefactor, self.canvasY)
-        self.canvas.show()
         self.timemarks=[]
+        for c in self.cols:
+            h,l = self.cols[c]
+            self.cols[c]=(h,None)
+        for lvl in self.active_trace.levels:
+            if lvl == 'event':
+                for i in self.active_trace.levels[lvl]:
+                    self.receive_int(self.active_trace, event=i, operation=None, action=None)
+            #elif lvl == 'operation':
+                #usefull only for operations not linked to actions ... is it really usefull ?
+            #    for i in self.active_trace.levels[lvl]:
+            #        self.receive_int(self.active_trace, event=None, operation=i, action=None)
+            elif lvl == 'actions':
+                for i in self.active_trace.levels[lvl]:
+                    for o in i.operations:
+                        self.receive_int(self.active_trace, event=None, operation=o, action=i)
+        
         self.draw_marks()
-        sel_eg = None
-        for i in self.active_trace.levels['actions']:
-            ev = self.receive_int(self.active_trace, action=i)
-            if selected_item is not None and i == selected_item[0]:
-                sel_eg = ev
-            #if action is not None and action ==i:
-            #    break
+        self.now_line = goocanvas.polyline_new_line(root,
+                                        0,
+                                        self.canvasY-1,
+                                        self.canvasX,
+                                        self.canvasY-1,
+                                        line_width = 3,
+                                        stroke_color_rgba=0xFF0000FF)
+        
         if center:
             va=self.sw.get_vadjustment()
             va.value = center/self.timefactor-va.page_size/2.0
@@ -924,34 +1025,6 @@ class TraceTimeline(AdhocView):
                 va.value=va.lower
             elif va.value>va.upper-va.page_size:
                 va.value=va.upper-va.page_size
-        if selected_item is not None:
-            #print "sel item : %s %s" % selected_item
-            if sel_eg is not None:
-                if sel_eg.get_canvas() is None:
-                    #print "group deprecated"
-                    # group deprecated, need to find the new one (happens when refreshing during a receive
-                    n=0
-                    while n<root.get_n_children():
-                        #print "refresh removing %s" % root.get_child (0)
-                        c = root.get_child(n)
-                        if isinstance(c, EventGroup):
-                            if c.event == selected_item[0]:
-                                # that's the good action
-                                sel_eg = c
-                        n += 1
-                if sel_eg.objs is not None:
-                    if sel_eg.objs[selected_item[1]] is not None:
-                        if sel_eg.objs[selected_item[1]][0] is not None:
-                            sel_eg.objs[selected_item[1]][0].toggle_rels()
-        if self.links_locked:
-            i=0
-            root = self.canvas.get_root_item()
-            while i < root.get_n_children():
-                go = root.get_child(i)
-                if isinstance(go, ObjGroup) or isinstance(go, EventGroup):
-                    go.handler_block(go.handler_ids['enter-notify-event'])
-                    go.handler_block(go.handler_ids['leave-notify-event'])
-                i+=1
         return
 
 
@@ -975,7 +1048,7 @@ class TraceTimeline(AdhocView):
                            n, None ))
         return False
 
-    def receive_int_new(self, trace, event=None, operation=None, action=None):
+    def receive_int(self, trace, event=None, operation=None, action=None):
         # trace : the full trace to be managed
         # event : the new or latest modified event
         # operation : the new or latest modified operation
@@ -997,33 +1070,37 @@ class TraceTimeline(AdhocView):
             return ev
         h,l = self.cols[action.name]
         color = h.color_c
+        
         if l and l.event == action:
             # action corresponding to the last action of this type, update the drawing
             #calculating old length
             b=l.rect.get_bounds()
             oldlength = b.y2-b.y1
             #calculating new length
-            newlength = (action.activity_time[1]-action.activity_time[0])//self.timefactor
+            newlength = float(action.time[1]-action.time[0])/self.timefactor
             ratio = newlength/oldlength
             if b.y1+newlength >= self.canvasY-1:
                 #need to expand canvas
                 self.canvasY = b.y1+newlength+1
-                self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
+                self.extend_canvas()
                 self.draw_marks()
             #transofrm item
             l.rect.props.height=newlength
+            #update already existing / not existing items before adding the new one
+            l.update_objs()
+            #l.addObj(operation,self.links_locked)
             ev=l
         else:
             #totally new action
             # getting x bound from header
             x = h.rect.get_bounds().x1+1
             #calculating y0 and length
-            y = action.activity_time[0]//self.timefactor
-            length = (action.activity_time[1]-action.activity_time[0])//self.timefactor
+            y = float(action.time[0]-self.start_time)/self.timefactor
+            length = float(action.time[1]-action.time[0])/self.timefactor
             if y+length >= self.canvasY-1:
                 #need to expand canvas
                 self.canvasY = y+length+1
-                self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
+                self.extend_canvas()
                 self.draw_marks()
             ev = EventGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.docgroup, None, action, x, y, length, self.col_width, self.obj_l, 14, color, self.links_locked)
             self.cols[action.name]=(h,ev)
@@ -1031,71 +1108,6 @@ class TraceTimeline(AdhocView):
         if self.autoscroll:
             a = self.sw.get_vadjustment()
             a.value=a.upper-a.page_size
-        return ev
-        
-    def receive_int(self, trace, event=None, operation=None, action=None):
-        # trace : the full trace to be managed
-        # event : the new or latest modified event
-        # operation : the new or latest modified operation
-        # action : the new or latest modified action
-        # return the created group
-        #print "received : action %s, operation %s, event %s" % (action, operation, event)
-        ev = None
-        if event and (event.name=='DurationUpdate' or event.name=='MediaChange'):
-            self.docgroup.changeMovielength(trace)
-        if operation:
-            self.docgroup.addLine(operation.movietime)
-        if (operation or event) and action is None:
-            return ev
-        if action is None:
-            #redraw screen
-            self.refresh()
-            self.docgroup.redraw(trace)
-            #if self.autoscroll:
-            #    a = self.sw.get_vadjustment()
-            #    a.value=a.upper-a.page_size
-            return ev
-        h,l = self.cols[action.name]
-        color = h.color_c
-        if l and l.event == action:
-            ev = l
-            y1=l.rect.get_bounds().y1+1
-            x1=l.rect.get_bounds().x1+1
-            #print "receive removing %s" % l.rect
-            #child_num = l.find_child (l.rect)
-            #if child_num>=0:
-            #    l.remove_child (child_num)
-            l.rect.remove()
-            length = (action.activity_time[1]-action.activity_time[0])//self.timefactor
-            if y1+length > self.canvasY:
-                self.refresh(action)
-                return ev
-            else:
-                l.x = x1
-                l.y = y1
-                l.l = length
-                l.rect = l.newRect(l.color, l.color_c)
-                l.redrawObjs(self.obj_l)
-        else:
-            x = h.rect.get_bounds().x1+1
-            y = action.activity_time[0]//self.timefactor
-            length = (action.activity_time[1]-action.activity_time[0])//self.timefactor
-            #print "%s %s %s %s" % (action, x, y, length)
-            if action.activity_time[1] > self.canvasY*self.timefactor:
-                #print "%s %s %s" % (action.name , action.activity_time[1], self.canvasY*self.timefactor)
-                self.refresh(action)
-                return ev
-            else:
-                ev = EventGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.docgroup, None, action, x, y, length, self.col_width, self.obj_l, 14, color, self.links_locked)
-                self.cols[action.name]=(h,ev)
-            #self.lasty = ev.rect.get_bounds().y2
-            #print "%s %s %s" % (y, length, self.lasty)
-        if self.autoscroll:
-            a = self.sw.get_vadjustment()
-            a.value=a.upper-a.page_size
-        #redraw canvasdoc
-        #self.docgroup.redraw(trace)
-        #if 'actions' in self.tracer.trace.levels and self.tracer.trace.levels['actions']:
         return ev
 
     def find_group(self, observed):
@@ -1166,14 +1178,14 @@ class EventGroup (Group):
         self.color = "black"
         self.fontsize=fontsize
         self.x = x
-        self.y= y
+        self.y = y
         self.l = l
-        self.ol = ol
+        self.ol = ol # object length #TODO verif pourquoi on le transmet d'avant
         self.w = w
         self.rect = self.newRect (self.color, self.color_c)
-        self.objs={}
+        self.objs=[]
         #self.lines = []
-        self.redrawObjs(ol, blocked)
+        self.update_objs()
         self.handler_ids = {
         'enter-notify-event':None,
         'leave-notify-event':None,
@@ -1197,81 +1209,79 @@ class EventGroup (Group):
                                     stroke_color = color,
                                     line_width = 2.0)
 
-    def addObj(self, obj_id, xx, yy, ol, color, color_o, blocked):
-        (pds, cobj) = self.objs[obj_id][1:5]
-        return ObjGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.dg, xx, yy, ol, self.fontsize, pds, cobj, blocked)
-
-    def redrawObjs(self, ol=5, blocked=False):
-        #FIXME : brutal way to do that. Need only to find what operation was added to update only this square
-        for obj in self.objs:
-            obg = self.objs[obj][0]
-            if obg is not None:
-                #print "redrawObjs removing %s" % r_obj
-                #child_num = self.find_child (obg)
-                #if child_num>=0:
-                #    self.remove_child (child_num)
-                obg.remove()
-        self.objs = {}
-        for op in self.event.operations:
-            obj = op.concerned_object['id']
-            if obj is None:
-                continue
-            if obj in self.objs:
-                (pds, cobj) = self.objs[obj][1:5]
-                cobj['opes'].append(op)
-                self.objs[obj] = (None, pds+1, cobj)
-            else:
-                cobj = op.concerned_object
-                cobj['opes'] = [op]
-                self.objs[obj] = (None, 1, cobj)
-            #print "obj %s opes %s" % (obj, obj_opes)
-        #self.objs : item : #time modified during action
-        y=self.rect.get_bounds().y1+1
-        x=self.rect.get_bounds().x1+1
-        ox = x+2
-        oy = y+2
+    def addObj(self, op, blocked):
+        x=self.rect.get_bounds().x1+3
+        ratio = float((self.event.time[1]-self.event.time[0]))/self.rect.props.height
+        y = (op.time-self.event.time[0]) / ratio + self.rect.get_bounds().y1
+        
         l = self.rect.props.height
         w = self.rect.props.width
-        nb = len(self.objs)
-        ol = w/3 - 4
-        while (floor(((w-3)/(ol+2)))*floor(((l-3)/(ol+2)))< nb and ol>3):
-            ol-=1
-        #print "w:%s l:%s nb:%s nbw:%s nbl:%s ol:%s" % (w-2, l-2, nb, floor(((w-2)/(ol+2))), floor(((l-2)/(ol+2))), ol)
-        if ol > l-4:
-            if l>7:
-                ol=l-4
+        ol = min(l-3, float(w)/2 - 3)
+        if ol < 6:
+            #not enough space to display 1 item, return
+            return
+        true_y=y
+        if self.event.time[1] == op.time:
+            #last operation, need to change y to display it
+            y = y - ol -5         
+        #FIXME fontsize according to object length with a min of 6 and a max of ??,
+        self.fontsize = ol/3
+        self.ol = ol
+        if y + ol > self.rect.get_bounds().y2 or y < self.rect.get_bounds().y1:
+            # not in the rectangle
+            return
+        self.objs.append( ObjGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.dg, x, y, ol/2, self.fontsize, op, blocked))
+        if true_y != y:
+            #need to store true y value
+            self.objs[-1].true_y = true_y 
+        return        
+
+    def update_objs(self, ratiox=1,ratioy=1):
+        w = self.rect.props.width
+        l = self.rect.props.height
+        if l < 10:
+            #not enough space
+            for c in self.objs:
+                c.remove()
+                self.objs.remove(c)
+        else:
+            if not self.objs:
+                self.drawObjs()
             else:
-                return
-        if ol > 20:
-            ol=20
-        # need to fix fontsize according to object length with a min of 6 and a max of ??,
-        self.fontsize = ol-1
-        for obj in self.objs:
-            #print "ox %s oy %s ol %s w %s l %s" % (ox, oy, ol, w+x, l+y)
-            if ox+(ol+2)>= x+w:
-                if oy+(ol+2)*2>= y+l:
-                    ox = x+2
-                    oy += (ol+1)
-                    #FIXME
-                    goocanvas.Text(parent = self,
-                                        text = "...",
-                                        x = ox,
-                                        y = oy,
-                                        width = -1,
-                                        anchor = gtk.ANCHOR_NORTH_WEST,
-                                        font = "Sans Bold %s" % self.fontsize)
-                    break
-                else:
-                    ox = x+2
-                    oy += (ol+2)
-                    (pds, cobj) = self.objs[obj][1:5]
-                    self.objs[obj]= (self.addObj(obj, ox+ol/2.0, oy+ol/2.0, ol/2.0, self.color, self.color_o, blocked), pds, cobj)
-                    ox += (ol+2)
-            else:
-                (pds, cobj) = self.objs[obj][1:5]
-                self.objs[obj]= (self.addObj(obj, ox+ol/2.0, oy+ol/2.0, ol/2.0, self.color, self.color_o, blocked), pds, cobj)
-                ox += (ol+2)
-            #print "ox %s oy %s ol %s w %s l %s" % (ox, oy, ol, w+x, l+y)
+                ol = min(l-3, float(w)/2 - 3)
+                self.ol=ol
+                already_existing_op=[]
+                to_be_removed = []
+                for c in self.objs:
+                    already_existing_op.append(c.operation)
+                    if c.true_y != c.y: # was the last operation, restore the true value
+                        c.y=c.true_y
+                    c.x *= ratiox
+                    c.y *= ratioy
+                    c.true_y = c.y # we need to remember this value for the next update
+                    c.r = ol/2
+                    c.fontsize = 2*c.r/3
+                    #FIXME : if we change to a 1s update cycle, this won't work as the action will be changed without new op
+                    if self.event.time[1] == c.operation.time:
+                        #last operation, need to change y to display it
+                        c.y = self.rect.get_bounds().y2 - ol -5  
+                    if c.y + ol > self.rect.get_bounds().y2 or c.y < self.rect.get_bounds().y1-1:
+                        # not in the rectangle
+                        to_be_removed.append(c)
+                        continue
+                    c.move_group()
+                for c in to_be_removed:
+                    self.objs.remove(c)
+                    c.remove()
+                for op in self.event.operations:      
+                    #obj may not already exist for this op
+                    if op not in already_existing_op:
+                        self.addObj(op, False)
+
+    def drawObjs(self, blocked=False):
+        for op in self.event.operations:
+            self.addObj(op, blocked)
+
 
     def on_mouse_over(self, w, target, event):
         #print '1 %s %s %s %s' % self.canvas.get_bounds()
@@ -1310,7 +1320,7 @@ class EventGroup (Group):
 
 
 class ObjGroup (Group):
-    def __init__(self, link_mode=0, controller=None, inspector=None, canvas=None, dg=None, x=0, y=0, r=4, fontsize=6, pds=1, obj=None, blocked=False):
+    def __init__(self, link_mode=0, controller=None, inspector=None, canvas=None, dg=None, x=0, y=0, r=4, fontsize=5, op=None, blocked=False):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.rep = None
@@ -1323,20 +1333,24 @@ class ObjGroup (Group):
         self.stroke_color_sel = "red"
         self.color_f = 0xFFFFFFFF
         self.color_s = "black"
-        self.fontsize = 5
-        self.poids = pds
-        self.cobj = obj
+        self.fontsize = fontsize
+        self.operation = op
+        self.cobj = op.concerned_object
         self.x = x
         self.y = y
         self.r = r
+        self.true_y = y # needed to display last operation correctly
+        self.rep = None
+        self.text = None
         # trying to get the item color in advene
-        temp_it = self.controller.package.get_element_by_id(self.cobj['id'])
-        temp_c = self.controller.get_element_color(temp_it)
-        if temp_c is not None:
-            self.color_f = gdk2intrgba(gtk.gdk.color_parse(temp_c))
-
-        self.rep = self.newRep()
-        self.text = self.newText()
+        if self.cobj['id']:
+            temp_it = self.controller.package.get_element_by_id(self.cobj['id'])
+            temp_c = self.controller.get_element_color(temp_it)
+            if temp_c is not None:
+                self.color_f = gdk2intrgba(gtk.gdk.color_parse(temp_c))
+            self.rep = self.newRep()
+            self.text = self.newText()
+        self.oprep = self.newOpRep()
         self.lines = []
         self.sel = False
         self.center_sel = False
@@ -1349,6 +1363,28 @@ class ObjGroup (Group):
         if blocked:
             self.handler_block(self.handler_ids['enter-notify-event'])
             self.handler_block(self.handler_ids['leave-notify-event'])
+
+    def move_group(self):
+        #move rep
+        if self.rep:
+            self.rep.props.center_y = self.y + self.r + 3
+            self.rep.props.center_x = self.x +3* self.r + 3
+            self.rep.props.radius_x = self.r
+            self.rep.props.radius_y = self.r
+        #move icon, cannot modify directly goocanvas.Image pixbuf property ... stretching ?
+        if self.oprep:
+            #~ self.oprep.props.y = self.y +3
+            #~ self.oprep.props.x = self.x
+            #~ self.oprep.props.height = 2*self.r
+            #~ self.oprep.props.width = 2*self.r
+            self.oprep.remove()
+            self.oprep=self.newOpRep()
+        #move text
+        if self.text:
+            self.text.props.y = self.y + self.r + 3
+            self.text.props.x = self.x +3* self.r + 3
+            self.text.props.font = "Sans %s" % str(self.fontsize)
+            
 
     def on_mouse_over(self, w, target, event):
         self.toggle_rels()
@@ -1368,87 +1404,88 @@ class ObjGroup (Group):
     def fill_inspector(self):
         self.inspector.fillWithItem(self)
 
-    #~ def get_link_mode(self):
-
-        #~ return 0
-
+    
+    #FIXME
     def toggle_rels(self):
-        r = self.canvas.get_root_item()
-        chd = []
-        i = 0
-        desel = False
-        while i <r.get_n_children():
-            f = r.get_child(i)
-            if isinstance(f, EventGroup) and f.objs is not None:
-                chd.append(f)
-                for obj_id in f.objs:
-                    obg = f.objs[obj_id][0]
-                    if obg is None:
-                        continue
-                    for l in obg.lines:
-                        #n=obg.find_child(l)
-                        #if n>=0:
-                        #    obg.remove_child(n)
-                        l.remove()
-                    obg.lines=[]
-                    if obg.sel:
-                        if obg.center_sel and obg == self:
-                            desel = True
-                        obg.deselect()
-            i+=1
-        if desel:
-            return
-        self.select()
-        self.center_sel = True
-        if self.link_mode == 0:
-            for c in chd:
-                if self.cobj['id'] in c.objs:
-                    obj_gr = c.objs[self.cobj['id']][0]
-                    if obj_gr != self:
-                        x2=y2=0
-                        x1 = self.x
-                        y1 = self.y
-                        if obj_gr is None:
-                            x2 = c.rect.get_bounds().x1 + c.rect.props.width/2
-                            y2 = c.rect.get_bounds().y1 + c.rect.props.height/2
-                        else:
-                            x2 = obj_gr.x
-                            y2 = obj_gr.y
-                            obj_gr.select()
-                        p = goocanvas.Points ([(x1, y1), (x2,y2)])
-                        self.lines.append(goocanvas.Polyline (parent = self,
-                                        close_path = False,
-                                        points = p,
-                                        stroke_color = 0xFFFFFFFF,
-                                        line_width = 1.0,
-                                        start_arrow = False,
-                                        end_arrow = False,
-                                        ))
-        else:
-            dic={}
-            for c in chd:
-                if self.cobj['id'] in c.objs:
-                    obj_gr = c.objs[self.cobj['id']][0]
-                    obj_time = c.objs[self.cobj['id']][2]['opes'][0].time
-                    if obj_gr is None:
-                        x = c.rect.get_bounds().x1 + c.rect.props.width/2
-                        y = c.rect.get_bounds().y1 + c.rect.props.height/2
-                    else:
-                        x = obj_gr.x
-                        y = obj_gr.y
-                        obj_gr.select()
-                    dic[obj_time] = (x, y)
-            p=goocanvas.Points(sorted(dic))
-            self.lines.append(goocanvas.Polyline (parent = self,
-                                        close_path = False,
-                                        points = p,
-                                        stroke_color = 0xFFFFFFFF,
-                                        line_width = 1.0,
-                                        start_arrow = False,
-                                        end_arrow = False,
-                                        ))
-
         return
+        
+    #~ def toggle_rels(self):
+        #~ r = self.canvas.get_root_item()
+        #~ chd = []
+        #~ i = 0
+        #~ desel = False
+        #~ while i <r.get_n_children():
+            #~ f = r.get_child(i)
+            #~ if isinstance(f, EventGroup) and f.objs is not None:
+                #~ chd.append(f)
+                #~ for obj_id in f.objs:
+                    #~ obg = f.objs[obj_id][0]
+                    #~ if obg is None:
+                        #~ continue
+                    #~ for l in obg.lines:
+                        #~ #n=obg.find_child(l)
+                        #~ #if n>=0:
+                        #~ #    obg.remove_child(n)
+                        #~ l.remove()
+                    #~ obg.lines=[]
+                    #~ if obg.sel:
+                        #~ if obg.center_sel and obg == self:
+                            #~ desel = True
+                        #~ obg.deselect()
+            #~ i+=1
+        #~ if desel:
+            #~ return
+        #~ self.select()
+        #~ self.center_sel = True
+        #~ if self.link_mode == 0:
+            #~ for c in chd:
+                #~ if self.cobj['id'] in c.objs:
+                    #~ obj_gr = c.objs[self.cobj['id']][0]
+                    #~ if obj_gr != self:
+                        #~ x2=y2=0
+                        #~ x1 = self.x
+                        #~ y1 = self.y
+                        #~ if obj_gr is None:
+                            #~ x2 = c.rect.get_bounds().x1 + c.rect.props.width/2
+                            #~ y2 = c.rect.get_bounds().y1 + c.rect.props.height/2
+                        #~ else:
+                            #~ x2 = obj_gr.x
+                            #~ y2 = obj_gr.y
+                            #~ obj_gr.select()
+                        #~ p = goocanvas.Points ([(x1, y1), (x2,y2)])
+                        #~ self.lines.append(goocanvas.Polyline (parent = self,
+                                        #~ close_path = False,
+                                        #~ points = p,
+                                        #~ stroke_color = 0xFFFFFFFF,
+                                        #~ line_width = 1.0,
+                                        #~ start_arrow = False,
+                                        #~ end_arrow = False,
+                                        #~ ))
+        #~ else:
+            #~ dic={}
+            #~ for c in chd:
+                #~ if self.cobj['id'] in c.objs:
+                    #~ obj_gr = c.objs[self.cobj['id']][0]
+                    #~ obj_time = c.objs[self.cobj['id']][2]['opes'][0].time
+                    #~ if obj_gr is None:
+                        #~ x = c.rect.get_bounds().x1 + c.rect.props.width/2
+                        #~ y = c.rect.get_bounds().y1 + c.rect.props.height/2
+                    #~ else:
+                        #~ x = obj_gr.x
+                        #~ y = obj_gr.y
+                        #~ obj_gr.select()
+                    #~ dic[obj_time] = (x, y)
+            #~ p=goocanvas.Points(sorted(dic))
+            #~ self.lines.append(goocanvas.Polyline (parent = self,
+                                        #~ close_path = False,
+                                        #~ points = p,
+                                        #~ stroke_color = 0xFFFFFFFF,
+                                        #~ line_width = 1.0,
+                                        #~ start_arrow = False,
+                                        #~ end_arrow = False,
+                                        #~ ))
+
+        #~ return
 
     def select(self):
         self.rep.props.fill_color_rgba=self.color_sel
@@ -1461,10 +1498,45 @@ class ObjGroup (Group):
         self.sel = False
         self.center_sel = False
 
+    def newOpRep(self):
+        #BIG HACK to display icon
+        te = self.operation.name
+        if te.find('Edit')>=0:
+            if te.find('Start')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    (( 'pixmaps', 'traces', 'edition.png')), int(2*self.r), int(2*self.r))
+            elif te.find('End')>=0 or te.find('Destroy')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    (( 'pixmaps', 'traces', 'finedition.png')), int(2*self.r), int(2*self.r))
+        elif te.find('Creat')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    (( 'pixmaps', 'traces', 'plus.png')), int(2*self.r), int(2*self.r))
+        elif te.find('Delet')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    (( 'pixmaps', 'traces', 'moins.png')), int(2*self.r), int(2*self.r))
+        elif te.find('Set')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    ( ('pixmaps', 'traces', 'allera.png')), int(2*self.r), int(2*self.r))
+        elif te.find('Start')>=0 or te.find('Resume')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    ( ('pixmaps', 'traces', 'lecture.png')), int(2*self.r), int(2*self.r))
+        elif te.find('Pause')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    ( ('pixmaps', 'traces', 'pause.png')), int(2*self.r), int(2*self.r))
+        elif te.find('Stop')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    ( ('pixmaps', 'traces', 'stop.png')), int(2*self.r), int(2*self.r))
+        else:
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    ( ('pixmaps', 'traces', 'web.png')), int(2*self.r), int(2*self.r))
+            print 'No icon for %s' % te
+        return goocanvas.Image(parent=self, width=int(2*self.r),height=int(2*self.r),x=self.x,y=self.y+3,pixbuf=pb)
+
+
     def newRep(self):
         return goocanvas.Ellipse(parent=self,
-                        center_x=self.x,
-                        center_y=self.y,
+                        center_x=self.x + 3*self.r + 3,
+                        center_y=self.y+self.r + 3,
                         radius_x=self.r,
                         radius_y=self.r,
                         stroke_color=self.color_s,
@@ -1498,8 +1570,8 @@ class ObjGroup (Group):
             print "type inconnu: %s" % self.cobj['type']
         return goocanvas.Text (parent = self,
                         text = txt,
-                        x = self.x,
-                        y = self.y,
+                        x = self.x + 3 * self.r + 3,
+                        y = self.y + self.r + 3,
                         width = -1,
                         anchor = gtk.ANCHOR_CENTER,
                         font = "Sans %s" % str(self.fontsize))
@@ -1578,7 +1650,7 @@ class Inspector (gtk.VBox):
             self.inspector_name.set_text(item.cobj['cid'])
         if item.cobj['name'] is not None:
             self.inspector_type.set_text(item.cobj['name'])
-        self.addOperations(item.cobj['opes'])
+        self.addOperations([item.operation]) # could be a list of ope if we decide to pack op
         self.show_all()
 
     def fillWithAction(self, action=None, op=None):
@@ -1616,10 +1688,13 @@ class Inspector (gtk.VBox):
     # obj_evt : operation to build a box for
 
         corpsstr = ''
-        if obj_evt.content is not None:
-            corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
+        if obj_evt.content is not None and obj_evt.content != 'None':
+            corpsstr = urllib.unquote(obj_evt.content.encode("UTF-8"))
+        elif obj_evt.name.startswith('Player'):
+            #we should display the movietime instead of the content.
+            corpsstr = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
-        #ev_time = helper.format_time(obj_evt.activity_time)
+
         if obj_evt.name in INCOMPLETE_OPERATIONS_NAMES:
             n = INCOMPLETE_OPERATIONS_NAMES[obj_evt.name]
         else:
@@ -1629,7 +1704,11 @@ class Inspector (gtk.VBox):
             entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
         elif obj_evt.name=='PlayerSet':
             # destination time to add
-            entetestr = entetestr + ' %s' % obj_evt.content
+            poss = obj_evt.content.split('\n')
+            if len(poss)>1:
+                entetestr = entetestr + ' %s' % poss[1]
+            else:
+                entetestr = entetestr + ' %s' % poss[0]
         entete = gtk.Label(ev_time.encode("UTF-8"))
         hb = gtk.HBox()
 
@@ -1724,7 +1803,17 @@ class Inspector (gtk.VBox):
                     font = "Sans 5")
         else:
             # no concerned object, we are in an action of navigation
-            txt = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
+            txt = obj_evt.content
+            if txt != None:
+                # content should be of the form pos_bef \n pos
+                #but if it is an old trace, we only got pos
+                poss = txt.split('\n')
+                if len(poss)>1 and te.find('PlayerSet')>=0:
+                    txt=poss[1]
+                else:
+                    txt=poss[0]
+            else:
+                txt = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
             goocanvas.Text (parent = objg,
                     text = txt,
                     x = 40,
@@ -1767,9 +1856,9 @@ class Inspector (gtk.VBox):
         objcanvas.modify_base (gtk.STATE_NORMAL, color)
         objcanvas.set_size_request(60,20)
         if corpsstr != "":
-            entete.set_tooltip_text(corpsstr)
+            objcanvas.set_tooltip_text(corpsstr)
         if entetestr != "":
-            objcanvas.set_tooltip_text(entetestr)
+            entete.set_tooltip_text(entetestr)
 
         box = gtk.EventBox()
         def box_pressed(w, event, id):
@@ -1903,7 +1992,7 @@ class DocGroup (Group):
                                         end_arrow = False
                                         ))
 
-
+    #FIXME
     def redraw(self, trace=None, action=None, obj=None):
         for l in self.lines:
             l.remove()
@@ -1932,8 +2021,7 @@ class DocGroup (Group):
                 self.addMark(op.movietime,
                              gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][action.name])))
         elif obj is not None:
-            for op in obj.cobj['opes']:
-                self.addMark(op.movietime, 0xD9D919FF)
+            self.addMark(obj.operation.movietime, 0xD9D919FF)
 
     def addMark(self, time=0, color=0x444444ff):
         offset = 3
