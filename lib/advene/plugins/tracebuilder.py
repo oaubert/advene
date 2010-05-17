@@ -326,7 +326,6 @@ class TraceBuilder(Thread):
                 temp.remove_from_trace('actions', atemp)
         self.traces.append(temp)
         self.alert_registered(None, None, None)
-        print "fin"
         return temp
 
     def convert_old_trace(self, fname):
