@@ -218,7 +218,8 @@ class TraceBuilder(Thread):
             #self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             return None
-        tr=ET.Element('trace', name=self.trace.name, start=self.trace.start)
+        tr=ET.Element('trace', name=self.trace.name, start=str(self.trace.start))
+
         for lvl in self.trace.levels:
             grp = ET.Element(lvl)
             #everything can be rebuild from events.
@@ -526,6 +527,8 @@ class TraceBuilder(Thread):
         ev_name = obj['event_name']
         ev_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
         ev_movie_time = self.controller.player.current_position_value
+        if not ev_movie_time:
+            ev_movie_time=0
         ev_content = ''
         elem = None
         elem_name = None
@@ -637,9 +640,18 @@ class TraceBuilder(Thread):
                 elem_type = advene.model.package.Package
         elif 'position' in obj:
             #event related to the player
-            if obj['position'] is not None:
-                #print type(obj['position'])
-                ev_content=str(time.strftime("%H:%M:%S", time.gmtime(obj['position']/1000)))
+            if obj['position'] is None:
+                obj['position']=0
+            if obj['position_before'] is None:
+                obj['position_before']=0
+            ev_content=str(time.strftime("%H:%M:%S", time.gmtime(obj['position_before']/1000)))
+            ev_content+= '\n'
+            ev_content+=str(time.strftime("%H:%M:%S", time.gmtime(obj['position']/1000)))
+            if not obj['event_name'].find('Set')>0:
+                #not a PlayerSet
+                ev_movie_time=obj['position_before']
+            else:
+                ev_movie_time=obj['position']
         #TODO undo ?
         ev_undo=False
         if 'undone' in obj:
@@ -659,6 +671,8 @@ class TraceBuilder(Thread):
         #    print "%s : %s" % (i,obj[i])
         op_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
         op_movie_time = self.controller.player.current_position_value
+        if not op_movie_time:
+            op_movie_time=0
         op_content = None
         elem = None
         elem_name = None
@@ -771,8 +785,18 @@ class TraceBuilder(Thread):
                 elem.type=advene.model.package.Package
         elif 'position' in obj:
             #event related to the player
-            if obj['position'] is not None:
-                op_content=str(time.strftime("%H:%M:%S", time.gmtime(obj['position']/1000)))
+            if obj['position'] is None:
+                obj['position']=0
+            if obj['position_before'] is None:
+                obj['position_before']=0
+            op_content=str(time.strftime("%H:%M:%S", time.gmtime(obj['position_before']/1000)))
+            op_content+= '\n'
+            op_content+=str(time.strftime("%H:%M:%S", time.gmtime(obj['position']/1000)))
+            if not obj['event_name'].find('Set')>0:
+                #not a PlayerSet
+                op_movie_time=obj['position_before']
+            else:
+                op_movie_time=obj['position']
         if self.trace.levels['operations']:
             prev = self.trace.levels['operations'][-1]
             if op_name in self.editEndNames and prev.name in self.editEndNames and prev.concerned_object['id'] == elem_id:
