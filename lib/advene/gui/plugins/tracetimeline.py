@@ -25,7 +25,7 @@ This widget allows to present event history in a timeline view.
 import urllib
 import gtk
 import time
-import gobject
+from gobject import timeout_add, source_remove
 from gettext import gettext as _
 from advene.model.fragment import MillisecondFragment
 from advene.model.schema import Schema, AnnotationType, RelationType
@@ -537,12 +537,12 @@ class TraceTimeline(AdhocView):
         #function to launch / stop autorefresh
         self.auto_refresh = not self.auto_refresh
         if self.auto_refresh:
-            self.ar_tag = gobject.timeout_add(self.auto_refresh_delay, self.refresh_time)
+            self.ar_tag = timeout_add(self.auto_refresh_delay, self.refresh_time)
             #should change an icon button
             print "auto_refresh started"
         else:
             #should change an icon button
-            gobject.source_remove(self.ar_tag)
+            source_remove(self.ar_tag)
             print "auto_refresh stopped"
         
     def show_inspector(self):
