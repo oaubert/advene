@@ -614,21 +614,11 @@ class TraceTimeline(AdhocView):
             n -= 1
         for tm in self.timemarks:
             for i in range(0,tm.get_n_children()):
-                #tm.get_child(i).props.y *= ratio
-                # y not present in 0.10
-                p = tm.get_child(i).props.points.coords
-                new_p=[]
-                for (x,y) in p:
-                    new_p.append(x,y*ratio)
-                tm.get_child(i).props.points = goocanvas.Points(new_p)
+                tm.get_child(i).props.y *= ratio
         
         if len(self.timemarks)>2:
-            #we got more than 2 timemarks
-            #y not present in 0.10
-            #if ratio > 1 and self.timemarks[1].get_child(0).props.y - self.timemarks[0].get_child(0).props.y > h/4.0 or self.timemarks[1].get_child(0).props.y - self.timemarks[0].get_child(0).props.y < h/6.0:
-            (x1,y1) = self.timemarks[1].get_child(0).props.points.coords[0]
-            (x2,y2) = self.timemarks[0].get_child(0).props.points.coords[0]
-            if ratio > 1 and y1 - y2 > h/4.0 or y1 - y2 < h/6.0:
+            #on a au moins 2 lignes temporelles
+            if ratio > 1 and self.timemarks[1].get_child(0).props.y - self.timemarks[0].get_child(0).props.y > h/4.0 or self.timemarks[1].get_child(0).props.y - self.timemarks[0].get_child(0).props.y < h/6.0:
                 #elles sont trop espacées, on recalcule.
                 for t in self.timemarks:
                     t.remove()
@@ -984,13 +974,7 @@ class TraceTimeline(AdhocView):
     def extend_canvas(self):
         self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
         if self.now_line:
-            #self.now_line.props.y=self.canvasY-1
-            # y is not present in 0.10, used in Debian dist...
-            p = self.now_line.props.points.coords
-            new_p = []
-            for (x,y) in p:
-                new_p.append((x,self.canvasY-1))
-            self.now_line.props.points = goocanvas.Points(new_p)
+            self.now_line.props.y=self.canvasY-1
 
 
     #FIXME : verify link lock problem, selection and center
