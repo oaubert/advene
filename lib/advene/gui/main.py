@@ -2732,7 +2732,7 @@ class AdveneGUI(object):
             type_list=(
                 ('text/plain', _("Plain text content")),
                 ('application/x-advene-structured', _("Simple-structured content")),
-                ('application/x-advene-zone', _("Rectangular zone content")),
+                ('application/x-advene-values', _("List of numeric values")),
                 ('image/svg+xml', _("SVG graphics content")),
                 )
 
