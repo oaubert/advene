@@ -951,6 +951,8 @@ class EditAnnotationTypePopup (EditElementPopup):
                          controller=self.controller,
                          editable=editable,
                          tooltip=_("TALES expression used to get a compact representation of the annotations"),
+                         elements=[ ("here/content/parsed/%s" % name, _("Display %s key") % name)
+                                    for name in getattr(self.element, '_fieldnames', []) ],
                          sizegroup=sg)
         self.register_form(f)
         abox.pack_start(f.get_view(), expand=False)
