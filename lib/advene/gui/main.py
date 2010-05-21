@@ -88,7 +88,7 @@ import advene.util.importer
 from advene.gui.util.completer import Indexer, Completer
 
 # GUI elements
-from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color
+from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color, predefined_content_mimetypes
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
@@ -2728,15 +2728,7 @@ class AdveneGUI(object):
             new_type_title_dialog.id_entry.set_tooltip_text(_("Id of the new type. It is generated from the title, but you may change it if necessary."))
             new_type_dialog.pack_start(new_type_title_dialog, expand=False)
 
-            # Mimetype
-            type_list=(
-                ('text/plain', _("Plain text content")),
-                ('application/x-advene-structured', _("Simple-structured content")),
-                ('application/x-advene-values', _("List of numeric values")),
-                ('image/svg+xml', _("SVG graphics content")),
-                )
-
-            mimetype_selector = dialog.list_selector_widget(members=type_list, entry=True)
+            mimetype_selector = dialog.list_selector_widget(members=predefined_content_mimetypes, entry=True)
             mimetype_selector.set_tooltip_text(_("Specify the content-type for the annotation type"))
 
             new_type_title_dialog.attach(gtk.Label(_("Content type")), 0, 1, 2, 3)
