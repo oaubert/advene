@@ -1641,6 +1641,8 @@ class GenericContentHandler (ContentHandler):
                 os.rename(fname, fname + '~')
             try:
                 f=open(fname, 'wb')
+                f.write(self.data)
+                f.close()
             except IOError, e:
                 dialog.message_dialog(
                     _("Cannot save the data:\n%s") % unicode(e),
