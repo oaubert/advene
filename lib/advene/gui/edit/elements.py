@@ -1745,7 +1745,8 @@ class EditFragmentForm(EditForm):
 
 class EditGenericForm(EditForm):
     def __init__(self, title=None, getter=None, setter=None,
-                 controller=None, editable=True, tooltip=None, type=None, focus=False, sizegroup=None):
+                 controller=None, editable=True, tooltip=None, type=None, elements=None, 
+                 focus=False, sizegroup=None):
         self.title=title
         self.getter=getter
         self.setter=setter
@@ -1756,6 +1757,8 @@ class EditGenericForm(EditForm):
         self.sizegroup=sizegroup
         self.tooltip=tooltip
         self.type=type
+        # List of (value, label) items
+        self.elements=elements
         self.focus=focus
 
     def get_focus(self):
@@ -1795,14 +1798,18 @@ class EditGenericForm(EditForm):
             self.entry=dialog.list_selector_widget(members=l,
                                                    preselect=v,
                                                    entry=self.editable)
-            if self.tooltip:
-                self.entry.set_tooltip_text(self.tooltip)
+        elif self.elements:
+            self.entry=dialog.list_selector_widget(members=self.elements,
+                                                   preselect=v,
+                                                   entry=self.editable)
         else:
             self.entry=gtk.Entry()
-            if self.tooltip:
-                self.entry.set_tooltip_text(self.tooltip)
             self.entry.set_text(v)
             self.entry.set_editable(self.editable)
+
+        if self.tooltip:
+            self.entry.set_tooltip_text(self.tooltip)
+
         hbox.pack_start(self.entry)
 
         if self.type == 'color':
@@ -1855,7 +1862,7 @@ class EditGenericForm(EditForm):
         v=self.getter()
         if v is None:
             v=""
-        if self.type == 'mimetype':
+        if hasattr(self.entry, 'set_current_element'):
             self.entry.set_current_element(v)
         else:
             self.entry.set_text(v)
@@ -1863,7 +1870,7 @@ class EditGenericForm(EditForm):
     def update_element(self):
         if not self.editable:
             return False
-        if self.type == 'mimetype':
+        if hasattr(self.entry, 'get_current_element'):
             v=unicode(self.entry.get_current_element())
         else:
             v=unicode(self.entry.get_text())
@@ -1873,7 +1880,9 @@ class EditGenericForm(EditForm):
 class EditMetaForm(EditGenericForm):
     def __init__(self, title=None, element=None, name=None,
                  namespaceid='advenetool', controller=None,
-                 editable=True, tooltip=None, type=None, focus=False, sizegroup=None):
+                 editable=True, tooltip=None, type=None, 
+                 elements=None,
+                 focus=False, sizegroup=None):
         getter=self.metadata_get_method(element, name, namespaceid)
         setter=self.metadata_set_method(element, name, namespaceid)
         super(EditMetaForm, self).__init__(title=title,
@@ -1883,13 +1892,15 @@ class EditMetaForm(EditGenericForm):
                                            editable=editable,
                                            tooltip=tooltip,
                                            type=type,
+                                           elements=elements,
                                            focus=focus,
                                            sizegroup=sizegroup)
 
 class EditAttributeForm(EditGenericForm):
     def __init__(self, title=None, element=None, name=None,
                  controller=None,
-                 editable=True, tooltip=None, type=None, focus=False, sizegroup=None):
+                 editable=True, tooltip=None, type=None, elements=None,
+                 focus=False, sizegroup=None):
         getter=lambda: getattr(element, name)
         setter=lambda v: setattr(element, name, v)
         super(EditAttributeForm, self).__init__(title=title,
@@ -1899,6 +1910,7 @@ class EditAttributeForm(EditGenericForm):
                                                 editable=editable,
                                                 tooltip=tooltip,
                                                 type=type,
+                                                elements=elements,
                                                 focus=focus,
                                                 sizegroup=sizegroup)
 
