@@ -495,13 +495,13 @@ class AnnotationWidget(GenericColorButtonWidget):
                 l=l[::(s/width)+1]
                 s=len(l)
             w=1.0 * width / s
-            c=w
+            c = 0
             context.set_source_rgba(0, 0, 0, .5)
             context.move_to(0, height)
-            context.line_to(0, int(height * v))
             for v in l:
                 context.line_to(int(c), int(height * v))
                 c += w
+                context.line_to(int(c), int(height * v))                
             context.line_to(int(c), height)
             context.fill()
             return
