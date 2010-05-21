@@ -83,7 +83,7 @@ class AnnotationTable(AdhocView):
         """Build the ListStore containing the data.
 
         """
-        l=gtk.ListStore(object, str, str, str, long, long, long, str, str, gtk.gdk.Pixbuf, str)
+        l=gtk.ListStore(object, str, str, str, long, long, str, str, str, gtk.gdk.Pixbuf, str)
         if not elements:
             return l
         for a in elements:
@@ -94,7 +94,7 @@ class AnnotationTable(AdhocView):
                            a.id,
                            a.fragment.begin,
                            a.fragment.end,
-                           a.fragment.duration,
+                           helper.format_time(a.fragment.duration),
                            helper.format_time(a.fragment.begin),
                            helper.format_time(a.fragment.end),
                            png_to_pixbuf(self.controller.package.imagecache[a.fragment.begin],
