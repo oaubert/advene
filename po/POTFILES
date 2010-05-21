@@ -1,13 +1,12 @@
 ../lib/advene/core/controller.py
 ../lib/advene/core/webcherry.py
-../lib/advene/player/xinerc.py
 ../lib/advene/plugins/anvil.py
 ../lib/advene/plugins/visu.py
 ../lib/advene/plugins/ted.py
-../lib/advene/plugins/ssa.py
 ../lib/advene/plugins/annotationgraph.py
 ../lib/advene/plugins/tts.py
 ../lib/advene/plugins/mpeg7.py
+../lib/advene/plugins/dcp.py
 ../lib/advene/plugins/brltty.py
 ../lib/advene/plugins/tracebuilder.py
 ../lib/advene/plugins/transcriber.py
@@ -49,7 +48,9 @@
 ../lib/advene/gui/plugins/tracepreview.py
 ../lib/advene/gui/plugins/tracetimeline.py
 ../lib/advene/gui/plugins/contenthandlers.py
+../lib/advene/gui/plugins/logmessages.py
 ../lib/advene/gui/main.py
+../lib/advene/gui/util/appimport.py
 ../lib/advene/gui/util/__init__.py
 ../lib/advene/gui/util/initialconfig.py
 ../lib/advene/gui/util/dialog.py
