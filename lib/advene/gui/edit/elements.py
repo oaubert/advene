@@ -33,7 +33,6 @@ import pango
 import re
 import os
 import struct
-import itertools
 
 try:
     import gtksourceview2
@@ -428,7 +427,7 @@ class EditAnnotationPopup (EditElementPopup):
         l.sort(key=lambda a: a.fragment.begin, reverse=(direction == -1))
         if l:
             a=l[0]
-            new=self.controller.gui.edit_element(a, destination=getattr(self, '_destination', 'default'))
+            self.controller.gui.edit_element(a, destination=getattr(self, '_destination', 'default'))
             # Validate the current one
             self.validate_cb()
         return True
@@ -1134,10 +1133,10 @@ class EditForm(object):
                 expr=""
             if re.match('^\s+$', expr):
                 # The field can contain just a newline or whitespaces, which will be then ignored
-                try:
-                    i=element.id
-                except AttributeError:
-                    i=str(element)
+                #try:
+                #    i=element.id
+                #except AttributeError:
+                #    i=str(element)
                 #print "Messed up metadata for %s (%s)" % (i, expr)
                 expr=""
             return expr
@@ -1149,11 +1148,11 @@ class EditForm(object):
             if value is None or value == "":
                 value=""
             if re.match('^\s+', value):
-                try:
-                    i=element.id
-                except AttributeError:
-                    i=str(element)
-                print "Messed up value for %s" % element.id
+                #try:
+                #    i=element.id
+                #except AttributeError:
+                #    i=str(element)
+                #print "Messed up value for %s" % element.id
                 value=""
             element.setMetaData(namespace, data, unicode(value))
             return True
