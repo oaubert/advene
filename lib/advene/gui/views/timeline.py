@@ -2458,7 +2458,11 @@ class TimeLine(AdhocView):
         item.connect('activate', popup_goto, position)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Create a new annotation"))
+        item = gtk.MenuItem(_("New annotation at current time"))
+        item.connect('activate', create_annotation, self.controller.player.current_position_value)
+        menu.append(item)
+
+        item = gtk.MenuItem(_("New annotation at cursor"))
         item.connect('activate', create_annotation, position)
         menu.append(item)
 
