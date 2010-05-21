@@ -36,6 +36,7 @@ import advene.util.helper as helper
 # Predefined MIMEtype for annotation contents
 predefined_content_mimetypes=(
     ('text/plain', _("Plain text content")),
+    ('text/html', _("HTML content")),
     ('application/x-advene-structured', _("Simple-structured content")),
     ('application/x-advene-values', _("List of numeric values")),
     ('image/svg+xml', _("SVG graphics content")),
