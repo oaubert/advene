@@ -124,6 +124,10 @@ def list_selector_widget(members=None,
             if l:
                 # The element is present.
                 combo.set_active(l[0])
+            else:
+                m=combo.get_model()
+                m.append( (unicode(el), el, None) )
+                combo.set_active(unicode(el))
 
     # Bind the method to the combobox object
     combobox.get_current_element = get_current_element.__get__(combobox)
