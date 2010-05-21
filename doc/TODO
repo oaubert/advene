@@ -1,3 +1,14 @@
+* Screen overlay interface: define a grid
+
+* widget.py: check direct rendering of SVG graphics
+
+* Have x-structured-values display start at 0 of the annotation widget
+
+* add mimetype shortcut for x-advene-values
+
+* default bookmarks view, used by default and auto-saved in the
+   package.
+
 * implement a "Stream record" feature in the player (tee+encode
    before imagesink)
 
