@@ -50,7 +50,7 @@ from advene.model.query import Query
 from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.browser import Browser
 from advene.gui.views.tagbag import TagBag
-from advene.gui.util import dialog, get_pixmap_toolbutton, name2color
+from advene.gui.util import dialog, get_pixmap_toolbutton, name2color, predefined_content_mimetypes
 from advene.gui.util.completer import Completer
 import advene.gui.popup
 from advene.gui.widget import AnnotationRepresentation, RelationRepresentation
@@ -59,21 +59,6 @@ from advene.gui.views import AdhocView
 import advene.util.helper as helper
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
-
-# Common content MIME-types
-common_content_mimetypes = [
-    'text/plain',
-    'application/x-advene-structured',
-    'application/x-advene-zone',
-    ]
-
-common_view_mimetypes = [
-    'text/html',
-    'text/plain',
-    'image/svg+xml',
-    ]
-
-
 _edit_popup_list = []
 
 def get_edit_popup (el, controller=None, editable=True):
@@ -1269,13 +1254,27 @@ class EditContentForm(EditForm):
             l=gtk.Label(_("MIME Type"))
             hbox.pack_start(l, expand=False)
 
-            self.mimetype=gtk.combo_box_entry_new_text()
-            if self.mimetypeeditable:
-                for c in common_view_mimetypes:
-                    self.mimetype.append_text(c)
+            mt=self.element.mimetype
+            # Is the current value in the predefined list?
+            data=[ tupl
+                   for tupl in predefined_content_mimetypes
+                   if tupl[0] == mt ]
+            if not data:
+                # Not yet predefined. Add its raw value.
+                current=(mt, mt)
+                predefined_content_mimetypes.append(current)
+            else:
+                current=data[0]
 
-            self.mimetype.child.set_text(self.element.mimetype)
-            self.mimetype.child.set_editable(self.mimetypeeditable)
+            if self.mimetypeeditable:
+                l=predefined_content_mimetypes
+            else:
+                l=[ current ]
+
+            self.mimetype=dialog.list_selector_widget(members=l,
+                                                      preselect=mt,
+                                                      entry=self.mimetypeeditable)
+            
             hbox.pack_start(self.mimetype)
 
             vbox.pack_start(hbox, expand=False)
@@ -1777,12 +1776,26 @@ class EditGenericForm(EditForm):
         if v is None:
             v=""
         if self.type == 'mimetype':
-            self.entry=gtk.combo_box_entry_new_text()
-            self.entry.append_text(v)
-            for t in itertools.chain(common_content_mimetypes, common_view_mimetypes):
-                self.entry.append_text(t)
-            self.entry.set_active(0)
-            self.entry.get_children()[0].set_editable(self.editable)
+            # Is the current value in the predefined list?
+            data=[ tupl
+                   for tupl in predefined_content_mimetypes
+                   if tupl[0] == v ]
+            if not data:
+                # Not yet predefined. Add its raw value.
+                current=(v, v)
+                predefined_content_mimetypes.append(current)
+            else:
+                current=data[0]
+
+            if self.editable:
+                l=predefined_content_mimetypes
+            else:
+                l=[ current ]
+            self.entry=dialog.list_selector_widget(members=l,
+                                                   preselect=v,
+                                                   entry=self.editable)
+            if self.tooltip:
+                self.entry.set_tooltip_text(self.tooltip)
         else:
             self.entry=gtk.Entry()
             if self.tooltip:
@@ -1842,8 +1855,7 @@ class EditGenericForm(EditForm):
         if v is None:
             v=""
         if self.type == 'mimetype':
-            self.entry.prepend_text(v)
-            self.entry.set_active(0)
+            self.entry.set_current_element(v)
         else:
             self.entry.set_text(v)
 
@@ -1851,7 +1863,7 @@ class EditGenericForm(EditForm):
         if not self.editable:
             return False
         if self.type == 'mimetype':
-            v=unicode(self.entry.get_active_text())
+            v=unicode(self.entry.get_current_element())
         else:
             v=unicode(self.entry.get_text())
         self.setter(v)
