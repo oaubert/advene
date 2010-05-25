@@ -1,10 +1,10 @@
+* main: incorrect svg when transmuting text to SVG
+
+* htmleditor: strange issue when editing text
+
 * Make the timeline inspector editable (thus sticky display)
 
 * Screen overlay interface: define a grid with sensitive areas
-
-* widget.py: check direct rendering of SVG graphics
-
-* add mimetype shortcut for x-advene-values
 
 * default bookmarks view, used by default and auto-saved in the
    package.
@@ -2778,4 +2778,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Have x-structured-values display start at 0 of the annotation widget
    + bargraph
+
+* add mimetype shortcut for x-advene-values
+
+* widget.py: check direct rendering of SVG graphics
 

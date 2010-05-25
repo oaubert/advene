@@ -41,6 +41,11 @@ import cairo
 import pango
 import gobject
 
+try:
+    import rsvg
+except ImportError:
+    rsvg=None
+
 # Advene part
 import advene.core.config as config
 from advene.core.imagecache import ImageCache
@@ -504,6 +509,14 @@ class AnnotationWidget(GenericColorButtonWidget):
                 context.line_to(int(c), int(height * v))                
             context.line_to(int(c), height)
             context.fill()
+            return
+        elif self.annotation.content.mimetype == 'image/svg+xml' and rsvg is not None:
+            if width < 6:
+                return
+            s=rsvg.Handle(data=self.annotation.content.data)
+            scale = 1.0 * height / s.get_dimension_data()[1]
+            context.set_matrix(cairo.Matrix( scale, 0, 0, scale, 0, 0 ))
+            s.render_cairo(context)
             return
 
         # Draw the border
