@@ -148,7 +148,7 @@ class Player:
         # fullscreen gtk.Window
         self.fullscreen_window=None
 
-        self.snapshotter=Snapshotter(self.snapshot_taken, width=config.data.player['snapshot-dimensions'][0])
+        self.snapshotter=Snapshotter(self.snapshot_taken, width=config.data.player['snapshot-width'])
         #self.snapshotter.start()
         
         # This method should be set by caller:

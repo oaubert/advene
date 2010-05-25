@@ -3718,13 +3718,9 @@ class AdveneGUI(object):
 
     def on_configure_player1_activate (self, button=None, data=None):
         cache={
-            'width': config.data.player['snapshot-dimensions'][0],
-            'height': config.data.player['snapshot-dimensions'][1],
             'level': config.data.player['verbose'] or -1,
             }
-        items=('caption', 'osdfont', 'snapshot', 'vout', 'svg', 'dvd-device')
-        for n in items:
-            cache[n] = config.data.player[n]
+        cache.update(config.data.player)
 
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Player configuration"))
@@ -3735,8 +3731,8 @@ class AdveneGUI(object):
 
         ew.add_title(_("Snapshots"))
         ew.add_checkbox(_("Enable"), "snapshot", _("Enable snapshots"))
-        ew.add_spin(_("Width"), "width", _("Snapshot width"), 0, 1280)
-        ew.add_spin(_("Height"), "height", _("Snapshot height"), 0, 1280)
+        ew.add_spin(_("Width"), "snapshot-width", _("Snapshot width"), 0, 1280)
+        ew.add_spin(_("Height"), "snapshot-height", _("Snapshot height"), 0, 1280)
 
         ew.add_title(_("Video"))
         options={_("Standard"): 'default' }
@@ -3756,15 +3752,18 @@ class AdveneGUI(object):
 
         res=ew.popup()
         if res:
-            for n in items:
-                config.data.player[n] = cache[n]
-            config.data.player['snapshot-dimensions']    = (cache['width'] ,
-                                                            cache['height'])
+            need_restart = False
+            for n in config.data.player.keys():
+                if config.data.player[n] != cache[n]:
+                    config.data.player[n] = cache[n]
+                    need_restart = True
+            # Special handling for verbose
             if cache['level'] == -1:
                 config.data.player['verbose'] = None
             else:
                 config.data.player['verbose'] = cache['level']
-            self.controller.restart_player ()
+            if need_restart:
+                self.controller.restart_player ()
         return True
 
     def on_save_imagecache1_activate (self, button=None, data=None):

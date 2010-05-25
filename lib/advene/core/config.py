@@ -292,13 +292,13 @@ class Config(object):
             'bundled': True,
             'embedded': True,
             'vout': 'default',
-            'svg': False,
+            'svg': True,
             'osdfont': '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
             'verbose': None, # None, 0, 1, 2
             'snapshot': True,
             'caption': True,
-            'snapshot-dimensions': (160,100),
-            'snapshot-chroma': 'RV32',
+            'snapshot-width': 160,
+            'snapshot-height': 100,
             'dvd-device': '/dev/dvd',
             }
 
