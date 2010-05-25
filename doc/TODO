@@ -1,3 +1,5 @@
+* Improve dcp importer
+
 * main: incorrect svg when transmuting text to SVG
 
 * svgeditor: strange issue when editing text
