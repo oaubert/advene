@@ -1234,13 +1234,13 @@ class EditContentForm(EditForm):
         if self.contentform is None:
             return True
         if self.mimetypeeditable and not hasattr(self, 'mimetype'):
-            self.element.mimetype = self.mimetype.child.get_text()
+            self.element.mimetype = self.mimetype.get_current_element()
         self.contentform.update_element()
         return True
 
     def refresh(self):
         if self.mimetype is not None:
-            self.mimetype.child.set_text(self.element.mimetype)
+            self.mimetype.set_current_element(self.element.mimetype)
         self.contentform.refresh()
 
     def get_view (self, compact=False):
