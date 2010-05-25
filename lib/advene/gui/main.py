@@ -287,7 +287,6 @@ class AdveneGUI(object):
             (_("_Player"), (
                     ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
                     ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
-                    ( _("_Configure player"), self.on_configure_player1_activate, _("Configure the player") ),
                     ( _("Capture screenshots"), self.generate_screenshots, _("Generate screenshots for the current video") ),
                     ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds") ),
                     ( _("Detect shots"), self.on_shotdetect_activate, _("Automatically detect shots")),
@@ -3593,6 +3592,11 @@ class AdveneGUI(object):
             'button-height': config.data.preferences['timeline']['button-height'],
             'interline-height': config.data.preferences['timeline']['interline-height'],
             }
+
+        cache['player-level'] = config.data.player['verbose'] or -1
+        for (k, v) in config.data.player.iteritems():
+            cache['player-' + k] = config.data.player[k]
+
         for k in path_options:
             cache[k] = config.data.path[k]
         for k in direct_options:
@@ -3608,45 +3612,6 @@ class AdveneGUI(object):
         ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
         ew.add_dir_selector(_("Player"), "plugins", _("Directory of the video player"))
         ew.add_file_selector(_("Shotdetect"), "shotdetect", _("Shotdetect application"))
-
-        ew.add_title(_("Standard views"))
-
-        ew.add_option(_("On package saving,"), 'save-default-workspace',
-                      _("Do you wish to save the default workspace with the package?"),
-                      {
-                _("never save the current workspace"): 'never',
-                _("always save the current workspace"): 'always',
-                _("ask before saving the current workspace"): 'ask',
-                })
-
-        ew.add_option(_("On package load,"), 'restore-default-workspace',
-                      _("Do you wish to load the workspace saved with the package?"),
-                      {
-                _("never load the saved workspace"): 'never',
-                _("always load the saved workspace"): 'always',
-                _("ask before loading the saved workspace"): 'ask',
-                })
-
-        ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
-        ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
-
-        ew.add_title(_("General"))
-        ew.add_checkbox(_("Weekly update check"), 'update-check', _("Weekly check for updates on the Advene website"))
-        ew.add_option(_("On exit,"), 'imagecache-save-on-exit',
-                      _("How to handle screenshots on exit"),
-                      {
-                _("never save screenshots"): 'never',
-                _("always save screenshots"): 'always',
-                _("ask before saving screenshots"): 'ask',
-                })
-        ew.add_option(_("Auto-save"), 'package-auto-save',
-                      _("Data auto-save functionality"),
-                      {
-                _("is desactivated"): 'never',
-                _("is done automatically"): 'always',
-                _("is done after confirmation"): 'ask',
-                })
-        ew.add_spin(_("Auto-save interval (in s)"), 'package-auto-save-interval', _("Interval (in seconds) between package auto-saves"), 5, 60 * 60)
 
         ew.add_title(_("GUI"))
         ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"),
@@ -3674,6 +3639,68 @@ class AdveneGUI(object):
         ew.add_spin(_("Bookmark snapshot width"), 'bookmark-snapshot-width', _("Width of the snapshots representing bookmarks"), 50, 400)
         ew.add_spin(_("Bookmark snapshot precision"), 'bookmark-snapshot-precision', _("Precision (in ms) of the displayed bookmark snapshots."), 25, 500)
 
+        ew.add_title(_("General"))
+        ew.add_checkbox(_("Weekly update check"), 'update-check', _("Weekly check for updates on the Advene website"))
+        ew.add_option(_("On exit,"), 'imagecache-save-on-exit',
+                      _("How to handle screenshots on exit"),
+                      {
+                _("never save screenshots"): 'never',
+                _("always save screenshots"): 'always',
+                _("ask before saving screenshots"): 'ask',
+                })
+        ew.add_option(_("Auto-save"), 'package-auto-save',
+                      _("Data auto-save functionality"),
+                      {
+                _("is desactivated"): 'never',
+                _("is done automatically"): 'always',
+                _("is done after confirmation"): 'ask',
+                })
+        ew.add_spin(_("Auto-save interval (in s)"), 'package-auto-save-interval', _("Interval (in seconds) between package auto-saves"), 5, 60 * 60)
+
+        ew.add_title(_("Standard views"))
+
+        ew.add_option(_("On package saving,"), 'save-default-workspace',
+                      _("Do you wish to save the default workspace with the package?"),
+                      {
+                _("never save the current workspace"): 'never',
+                _("always save the current workspace"): 'always',
+                _("ask before saving the current workspace"): 'ask',
+                })
+
+        ew.add_option(_("On package load,"), 'restore-default-workspace',
+                      _("Do you wish to load the workspace saved with the package?"),
+                      {
+                _("never load the saved workspace"): 'never',
+                _("always load the saved workspace"): 'always',
+                _("ask before loading the saved workspace"): 'ask',
+                })
+
+        ew.add_title(_("Video Player"))
+        ew.add_checkbox(_("Captions"), "player-caption", _("Enable video captions"))
+        ew.add_file_selector(_("Font"), "player-osdfont", _("TrueType font for captions"))
+        ew.add_checkbox(_("Enable SVG"), "player-svg", _("Enable SVG captions"))
+
+        ew.add_checkbox(_("Snapshots"), "player-snapshot", _("Enable snapshots"))
+        ew.add_spin(_("Snapshot width"), "player-snapshot-width", _("Snapshot width"), 0, 1280)
+        ew.add_spin(_("Snapshot height"), "player-snapshot-height", _("Snapshot height"), 0, 1280)
+
+        options={_("Standard"): 'default' }
+        if config.data.os == 'win32':
+            ew.add_entry(_("DVD drive"), 'player-dvd-device', _("Drive letter for the DVD"))
+            options[_("GDI")] = 'wingdi'
+            options[_("Direct X")] = 'directx'
+        else:
+            ew.add_entry(_("DVD device"), 'player-dvd-device', _("Device for the DVD"))
+            options[_("X11")] = 'x11'
+            options[_("XVideo")] = 'xvideo'
+        ew.add_option(_("Video output"), "player-vout", _("Video output module"), options)
+        ew.add_spin(_("Verbosity"), "player-level", _("Verbosity level. -1 for no messages."),
+                    -1, 3)
+
+        ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
+        ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
+
+
         ew.add_title(_("Time-related"))
         ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 1, 300000)
         ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 1, 300000)
@@ -3699,6 +3726,8 @@ class AdveneGUI(object):
 
         res=ew.popup()
         if res:
+            player_need_restart = False
+
             cache['package-auto-save-interval']=cache['package-auto-save-interval']*1000
             for k in direct_options:
                 config.data.preferences[k] = cache[k]
@@ -3710,60 +3739,23 @@ class AdveneGUI(object):
                     # Store in auto-saved preferences
                     config.data.preferences['path'][k]=cache[k]
                     if k == 'plugins':
-                        self.controller.restart_player()
+                        player_need_restart = True
+
+            for n in config.data.player.keys():
+                if config.data.player[n] != cache['player-' + n]:
+                    config.data.player[n] = cache['player-' + n]
+                    player_need_restart = True
+            # Special handling for verbose
+            if cache['player-level'] == -1:
+                config.data.player['verbose'] = None
+            else:
+                config.data.player['verbose'] = cache['player-level']
+            if player_need_restart:
+                self.controller.restart_player ()
+
             # Save preferences
             config.data.save_preferences()
 
-        return True
-
-    def on_configure_player1_activate (self, button=None, data=None):
-        cache={
-            'level': config.data.player['verbose'] or -1,
-            }
-        cache.update(config.data.player)
-
-        ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
-        ew.set_name(_("Player configuration"))
-        ew.add_title(_("Captions"))
-        ew.add_checkbox(_("Enable"), "caption", _("Enable video captions"))
-        ew.add_file_selector(_("Font"), "osdfont", _("TrueType font for captions"))
-        ew.add_checkbox(_("Enable SVG"), "svg", _("Enable SVG captions"))
-
-        ew.add_title(_("Snapshots"))
-        ew.add_checkbox(_("Enable"), "snapshot", _("Enable snapshots"))
-        ew.add_spin(_("Width"), "snapshot-width", _("Snapshot width"), 0, 1280)
-        ew.add_spin(_("Height"), "snapshot-height", _("Snapshot height"), 0, 1280)
-
-        ew.add_title(_("Video"))
-        options={_("Standard"): 'default' }
-        if config.data.os == 'win32':
-            ew.add_entry(_("DVD drive"), 'dvd-device', _("Drive letter for the DVD"))
-            options[_("GDI")] = 'wingdi'
-            options[_("Direct X")] = 'directx'
-        else:
-            ew.add_entry(_("DVD device"), 'dvd-device', _("Device for the DVD"))
-            options[_("X11")] = 'x11'
-            options[_("XVideo")] = 'xvideo'
-        ew.add_option(_("Output"), "vout", _("Video output module"), options)
-
-        ew.add_title(_("Verbosity"))
-        ew.add_spin(_("Level"), "level", _("Verbosity level. -1 for no messages."),
-                    -1, 3)
-
-        res=ew.popup()
-        if res:
-            need_restart = False
-            for n in config.data.player.keys():
-                if config.data.player[n] != cache[n]:
-                    config.data.player[n] = cache[n]
-                    need_restart = True
-            # Special handling for verbose
-            if cache['level'] == -1:
-                config.data.player['verbose'] = None
-            else:
-                config.data.player['verbose'] = cache['level']
-            if need_restart:
-                self.controller.restart_player ()
         return True
 
     def on_save_imagecache1_activate (self, button=None, data=None):
