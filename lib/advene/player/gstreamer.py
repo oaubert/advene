@@ -194,10 +194,12 @@ class Player:
         except:
             self.captioner=None
 
-        try:
-            self.imageoverlay=gst.element_factory_make('svgoverlay', 'overlay')
-        except:
-            self.imageoverlay=None
+        self.imageoverlay=None
+        if config.data.player['svg']:
+            try:
+                self.imageoverlay=gst.element_factory_make('svgoverlay', 'overlay')
+            except:
+                pass
 
         self.imagesink = gst.element_factory_make(sink, 'sink')
 
