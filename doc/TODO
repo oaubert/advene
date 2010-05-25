@@ -1,21 +1,18 @@
 * main: incorrect svg when transmuting text to SVG
 
-* htmleditor: strange issue when editing text
+* svgeditor: strange issue when editing text
 
 * Make the timeline inspector editable (thus sticky display)
 
 * Screen overlay interface: define a grid with sensitive areas
 
-* default bookmarks view, used by default and auto-saved in the
-   package.
+* default bookmarks view, used by default and auto-saved with the package.
 
 * LogMessages: pb of exclusive access on win32
 
-* implement a "Stream record" feature in the player (tee+encode
-   before imagesink)
+* implement a "Stream record" feature in the player (tee+encode before imagesink)
 
-* Generic subprocess registration (prononce, tts...) to make sure that
-   we terminate them at Advene exit.
+* Generic subprocess registration (prononce, tts...) to make sure that we terminate them at Advene exit.
 
 * Generic metadata for packages
 
