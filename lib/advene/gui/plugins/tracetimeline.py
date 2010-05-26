@@ -107,9 +107,10 @@ class TraceTimeline(AdhocView):
         self.lasty=0
         self.canvasX = 0
         self.context_canvasX = 0
-        self.context_canvasY = 100
+        self.context_canvasY = 850
         self.context_col_width = 1
         self.context_colspacing = 1
+        self.context_frame = None
         self.doc_canvas_X = 100
         self.canvasY = 824
         self.head_canvasY = 25
@@ -126,10 +127,14 @@ class TraceTimeline(AdhocView):
         self.links_locked = False
         self.now_line=None
         self.sw = None
-        self.cols={} # head_groupe / last event_group
+        self.cols={} # head_group / last event_group
+        self.context_cols={} # action_type, color, last_line
+        self.context_t_max = time.time()
         self.tracer.register_view(self)
-        for act in self.tracer.tracemodel['actions']:
+        for i, act in enumerate(self.tracer.tracemodel['actions']):
             self.cols[act] = (None, None)
+            c=gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][act]))
+            self.context_cols[act]=(i, c, None) 
         self.col_width = 80
         self.colspacing = 5
         self.widget = self.build_widget()
@@ -246,13 +251,21 @@ class TraceTimeline(AdhocView):
         mainbox.pack_start(htb, expand=False)
         
         c = len(self.cols)
-        self.context_canvasX = c*(self.context_col_width+self.context_colspacing) + 4 # 4 for select square
+        self.context_canvasX = c*(self.context_col_width+self.context_colspacing) + 5 # 1+4 for select square
 
         bx = gtk.HPaned()
         hbt = gtk.HBox()
         self.context_canvas = goocanvas.Canvas()
         self.context_canvas.set_bounds (0, 0, self.context_canvasX, self.context_canvasY)
         self.context_canvas.set_size_request(self.context_canvasX, -1)
+        
+        def context_resize(w, alloc):
+            h = w.get_allocation().height
+            self.context_canvasY = (h-1.0)
+            self.context_canvas.set_bounds(0,0,self.context_canvasX, self.context_canvasY)
+            self.context_update_time()
+        self.context_canvas.connect('size-allocate', context_resize)
+        
         hbt.pack_start(self.context_canvas, expand=False)
         hbt.pack_start(gtk.VSeparator(), expand=False)
         hbt.pack_start(bx, expand=True)
@@ -264,7 +277,9 @@ class TraceTimeline(AdhocView):
         scrolled_win = gtk.ScrolledWindow ()
         self.sw = scrolled_win
         self.sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
-
+        def sw_scrolled(a):
+            self.context_update_sel_frame()
+        self.sw.get_vadjustment().connect('value-changed', sw_scrolled)
         self.head_canvas = goocanvas.Canvas()
 
         self.canvasX = c*(self.col_width+self.colspacing)
@@ -531,6 +546,7 @@ class TraceTimeline(AdhocView):
             a.value=a.upper-a.page_size
         if self.auto_refresh_keep_100:
             self.zoom_100()
+        self.context_update_time()
         return self.auto_refresh
         
     def toggle_auto_refresh(self, w=None):
@@ -993,6 +1009,7 @@ class TraceTimeline(AdhocView):
             c = root.get_child(0)
             c.remove()
         self.timemarks=[]
+        self.context_clean()
         for c in self.cols:
             h,l = self.cols[c]
             self.cols[c]=(h,None)
@@ -1025,6 +1042,7 @@ class TraceTimeline(AdhocView):
                 va.value=va.lower
             elif va.value>va.upper-va.page_size:
                 va.value=va.upper-va.page_size
+        self.context_update_time()
         return
 
 
@@ -1108,6 +1126,10 @@ class TraceTimeline(AdhocView):
         if self.autoscroll:
             a = self.sw.get_vadjustment()
             a.value=a.upper-a.page_size
+        if l and l.event == action:
+            self.context_update_line(action)
+        else:
+            self.context_add_line(action)
         return ev
 
     def find_group(self, observed):
@@ -1123,6 +1145,91 @@ class TraceTimeline(AdhocView):
                 if observed in g.event.operations:
                     return g
         return None
+
+
+    """ Context related functions
+    """
+    
+    def context_clean(self):
+        """ Clean the context canvas
+        """
+        root=self.context_canvas.get_root_item()
+        while root.get_n_children()>0:
+            c = root.get_child(0)
+            c.remove()
+        self.context_frame = None
+    
+    def context_update_time(self):
+        """ Update the context canvas according to current time
+        """
+        ratio = float((self.context_t_max-self.active_trace.start))/(time.time()-self.active_trace.start)
+        self.context_t_max = time.time() 
+        root = self.context_canvas.get_root_item()
+        n = 0
+        while n < root.get_n_children():
+            l=root.get_child(n)
+            n+=1
+            if isinstance(l,goocanvas.Polyline):
+                l.props.y *= ratio
+                l.props.height *= ratio
+        self.context_update_sel_frame()
+        
+    def context_add_line(self, action):
+        """ Add a line corresponding to the action in the context canvas
+        """
+        self.context_update_time()
+        y2 = self.context_canvasY
+        r = float(y2/(action.time[1]-self.active_trace.start))
+        y1=r*(action.time[0]-self.active_trace.start)
+        (i,color,line)=self.context_cols[action.name]
+        x = 3+2*i
+        
+        l = goocanvas.polyline_new_line(self.context_canvas.get_root_item(),
+                                        x,
+                                        y1,
+                                        x,
+                                        y2,
+                                        stroke_color_rgba = color,
+                                        line_width = 1.0)
+        self.context_cols[action.name]=(i,color,l)
+        return
+    
+    def context_update_line(self, action=None):
+        """ Update a line corresponding to the action in the context canvas
+        """
+        self.context_update_time()
+        (i,color,line)=self.context_cols[action.name]
+        line.props.height = self.context_canvasY-line.props.y
+        return
+        
+    def context_draw_sel_frame(self):
+        """ Draw the selection frame on context canvas, 
+            corresponding to what is displayed in the trace timeline
+        """
+        self.context_frame = goocanvas.Rect (parent = self.context_canvas.get_root_item(),
+                                    x = 0,
+                                    y = 0,
+                                    width = self.context_canvasX,
+                                    height = self.context_canvasY,
+                                    fill_color_rgba = 0xFFFFFF00,
+                                    stroke_color = 0xFFFFFFFF,
+                                    line_width = 1.0)
+        return
+
+    def context_update_sel_frame(self):
+        if not self.context_frame:
+            self.context_draw_sel_frame()
+        h = self.canvas.get_allocation().height
+        va=self.sw.get_vadjustment()
+        tmin = va.value * self.timefactor
+        tmax = (va.value + h + 10) * self.timefactor
+        r1 = tmin / (self.context_t_max-self.active_trace.start)
+        r2=min(1,tmax / (self.context_t_max-self.active_trace.start))
+        y1 = self.context_canvasY*r1
+        y2 = self.context_canvasY*r2
+        self.context_frame.props.y=y1
+        self.context_frame.props.height = y2-y1
+        return
 
 
 class HeadGroup (Group):
