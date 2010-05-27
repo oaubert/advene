@@ -251,9 +251,12 @@ class TracePreview(AdhocView):
             elif te.find('Stop')>=0:
                 pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
                         ( ('pixmaps', 'traces', 'stop.png')))
+            elif te.find('Activation')>=0:
+                pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    ( ('pixmaps', 'traces', 'web.png')), 20,20)
             else:
-                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                        ( ('pixmaps', 'traces', 'web.png')))
+                pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    ( ('pixmaps', 'traces', 'error.png')), 20,20)
                 print 'No icon for %s' % te
             goocanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
             # object icon

@@ -1664,9 +1664,12 @@ class ObjGroup (Group):
         elif te.find('Stop')>=0:
             pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'stop.png')), int(2*self.r), int(2*self.r))
-        else:
+        elif te.find('Activation')>=0:
             pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'web.png')), int(2*self.r), int(2*self.r))
+        else:
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    ( ('pixmaps', 'traces', 'error.png')), int(2*self.r), int(2*self.r))
             print 'No icon for %s' % te
         return goocanvas.Image(parent=self, width=int(2*self.r),height=int(2*self.r),x=self.x,y=self.y+3,pixbuf=pb)
 
@@ -1886,9 +1889,12 @@ class Inspector (gtk.VBox):
         elif te.find('Stop')>=0:
             pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
                     ( ('pixmaps', 'traces', 'stop.png')))
+        elif te.find('Activation')>=0:
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    ( ('pixmaps', 'traces', 'web.png')), 20,20)
         else:
-            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
-                    ( ('pixmaps', 'traces', 'web.png')))
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                    ( ('pixmaps', 'traces', 'error.png')), 20,20)
             print 'No icon for %s' % te
         goocanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
         # object icon
