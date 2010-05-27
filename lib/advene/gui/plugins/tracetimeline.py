@@ -316,6 +316,7 @@ class TraceTimeline(AdhocView):
                 if isinstance(c, EventGroup):
                     c.rect.props.x *= ratio
                     c.rect.props.width *= ratio
+                    c.w *= ratio
                     c.ol *= ratio
                     c.x *= ratio
                     c.fontsize = c.ol/3
@@ -342,6 +343,20 @@ class TraceTimeline(AdhocView):
             self.docgroup.redraw(self.active_trace)
         self.doc_canvas.connect('size-allocate', doc_canvas_resize)
         scrolled_win.add(self.canvas)
+        
+        def show_tooltip(w, x, y, km, tooltip):
+            under_cursor = self.canvas.get_items_at(x, y+w.get_vadjustment().value, False)
+            if not under_cursor:
+                return False
+            for item in under_cursor:
+                if item.props.tooltip is not None:
+                    tooltip.set_text(item.props.tooltip)
+                    return True
+            return False
+        scrolled_win.set_has_tooltip(True)
+        scrolled_win.connect("query-tooltip", show_tooltip)
+        
+        
         timeline_box.pack_start(gtk.HSeparator(), expand=False, fill=False)
         timeline_box.add(scrolled_win)
 
@@ -625,6 +640,7 @@ class TraceTimeline(AdhocView):
                 c.rect.props.y *= ratio
                 c.ol *= ratio
                 c.y *= ratio
+                c.l *= ratio
                 c.fontsize = c.ol/3
                 c.update_objs(ratioy=ratio)
             n -= 1
@@ -937,30 +953,35 @@ class TraceTimeline(AdhocView):
         ld = goocanvas.LineDash([5.0, 20.0])
         while t < self.canvasY:
             #print self.start_time, t, t*self.timefactor
+            txt = time.strftime("%H:%M:%S",time.localtime(self.start_time+t*self.timefactor))
             mgroup = goocanvas.Group(parent=self.canvas.get_root_item())
-            goocanvas.polyline_new_line(mgroup,
+            a=goocanvas.polyline_new_line(mgroup,
                                         0,
                                         t,
                                         self.canvasX,
                                         t,
                                         line_dash=ld,
                                         line_width = 0.2)
-            goocanvas.Text(parent = mgroup,
-                        text = time.strftime("%H:%M:%S",time.localtime(self.start_time+t*self.timefactor)),
+            a.props.tooltip=txt
+            #FIXME do not work for polyline ???
+            a=goocanvas.Text(parent = mgroup,
+                        text = txt,
                         x = 0,
                         y = t-5,
                         width = -1,
                         anchor = gtk.ANCHOR_W,
                         fill_color_rgba=0x121212FF, 
                         font = "Sans 7")
-            goocanvas.Text(parent = mgroup,
-                        text = time.strftime("%H:%M:%S",time.localtime(self.start_time+t*self.timefactor)),
+            a.props.tooltip=txt
+            a=goocanvas.Text(parent = mgroup,
+                        text = txt,
                         x = self.canvasX-4,
                         y = t-5,
                         width = -1,
                         fill_color_rgba=0x121212FF,
                         anchor = gtk.ANCHOR_E,
                         font = "Sans 7")
+            a.props.tooltip=txt
             self.timemarks.append(mgroup)
             t+=tinc
         return
@@ -1228,7 +1249,7 @@ class TraceTimeline(AdhocView):
         y1 = self.context_canvasY*r1
         y2 = self.context_canvasY*r2
         self.context_frame.props.y=y1
-        self.context_frame.props.height = y2-y1
+        self.context_frame.props.height = max(0, y2-y1)
         return
 
 
@@ -1351,6 +1372,8 @@ class EventGroup (Group):
             for c in self.objs:
                 c.remove()
                 self.objs.remove(c)
+            if self.commentMark:
+                self.removeCommentMark()
         else:
             if not self.objs:
                 self.drawObjs()
@@ -1384,7 +1407,15 @@ class EventGroup (Group):
                     #obj may not already exist for this op
                     if op not in already_existing_op:
                         self.addObj(op, False)
-
+            if self.commentMark:
+                self.commentMark.props.x *= ratiox
+                self.commentMark.props.y *= ratioy
+                #~ self.removeCommentMark()
+                #~ self.addCommentMark()
+            elif self.event.comment!='':
+                self.addCommentMark()
+                
+                
     def drawObjs(self, blocked=False):
         for op in self.event.operations:
             self.addObj(op, blocked)
@@ -1411,19 +1442,19 @@ class EventGroup (Group):
     def removeCommentMark(self):
         if self.commentMark:
             self.commentMark.remove()
-        self.commentMark = None
+            self.commentMark = None
 
     def addCommentMark(self):
-        if self.commentMark:
-            return
-        self.commentMark = goocanvas.Rect (parent = self,
-                                    x = self.x+self.w-5,
-                                    y = self.y+self.l-5,
-                                    width = 5,
-                                    height = 5,
-                                    fill_color_rgba = self.color_m,
-                                    stroke_color = self.color_m,
-                                    line_width = 2.0)
+        if not self.commentMark:
+            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                        ( ('pixmaps', 'traces', 'msg.png')), 16, 16)
+            self.commentMark = goocanvas.Image(parent=self,
+                                                width=16,
+                                                height=16,
+                                                x=self.x,
+                                                y=self.y,
+                                                pixbuf=pb)
+        self.commentMark.props.tooltip=self.event.comment
 
 
 class ObjGroup (Group):
@@ -1719,7 +1750,10 @@ class Inspector (gtk.VBox):
         self.pack_start(opscwin, expand=True)
         self.commentBox = gtk.VBox()
         self.comment=gtk.Entry()
-        save_btn=gtk.Button(_('Save'))
+        save_btn=gtk.Button()
+        img = gtk.Image()
+        img.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces', 'msg_add.png') ))
+        save_btn.add(img)
         def save_clicked(w):
             if self.action:
                 self.action.event.change_comment(self.comment.get_text())
@@ -1729,7 +1763,10 @@ class Inspector (gtk.VBox):
                     self.action.removeCommentMark()
 
         save_btn.connect('clicked', save_clicked)
-        clear_btn=gtk.Button(_('Clear'))
+        clear_btn=gtk.Button()
+        img = gtk.Image()
+        img.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces', 'msg_del.png') ))
+        clear_btn.add(img)
         def clear_clicked(w):
             self.comment.set_text('')
             save_clicked(w)
