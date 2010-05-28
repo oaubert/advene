@@ -34,7 +34,6 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.fragment import MillisecondFragment
 from advene.gui.views import AdhocView
 import advene.gui.edit.elements
-from advene.gui.edit.create import CreateElementPopup
 from advene.gui.util import png_to_pixbuf
 from advene.gui.util import decode_drop_parameters
 
@@ -1036,9 +1035,9 @@ class TimeLine(AdhocView):
                     sc=self.controller.gui.ask_for_schema(text=_("Select the schema where you want to\ncreate the new relation type."), create=True)
                     if sc is None:
                         return None
-                    cr=CreateElementPopup(type_=RelationType,
-                                          parent=sc,
-                                          controller=self.controller)
+                    cr=self.controller.gui.create_element_popup(type_=RelationType,
+                                                                parent=sc,
+                                                                controller=self.controller)
                     rt=cr.popup(modal=True)
                     if not rt.hackedMemberTypes:
                         # membertypes is empty, the user did not specify any member types.

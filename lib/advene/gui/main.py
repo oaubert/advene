@@ -2455,6 +2455,13 @@ class AdveneGUI(object):
         self.unregister_view (view)
         widget.destroy ()
 
+    def create_element_popup(self, *p, **kw):
+        """Wrapper for CreateElementPopup
+        
+        This helps to solve a circular import dependency...
+        """
+        return CreateElementPopup(*p, **kw)
+
     def popup_evaluator(self, *p, **kw):
         p=self.controller.package
         try:

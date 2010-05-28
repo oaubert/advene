@@ -39,7 +39,6 @@ from advene.model.query import Query
 from advene.rules.elements import RuleSet, Rule, Event, Condition, Action
 
 from advene.gui.util import image_from_position, dialog
-from advene.gui.edit.create import CreateElementPopup
 import advene.util.helper as helper
 
 class Menu:
@@ -95,10 +94,10 @@ class Menu:
             mimetype='application/x-advene-ruleset'
         else:
             mimetype=None
-        cr = CreateElementPopup(type_=elementtype,
-                                parent=parent,
-                                controller=self.controller,
-                                mimetype=mimetype)
+        cr = self.controller.gui.create_element_popup(type_=elementtype,
+                                                      parent=parent,
+                                                      controller=self.controller,
+                                                      mimetype=mimetype)
         cr.popup()
         return True
 
@@ -358,7 +357,6 @@ class Menu:
         dialog.center_on_mouse(d)
 
         res=d.run()
-        ret=None
         if res == gtk.RESPONSE_OK:
             re_number=re.compile('(\d+)')
             re_struct=re.compile('^num=(\d+)$', re.MULTILINE)
@@ -367,7 +365,6 @@ class Menu:
             l.sort(key=lambda a: a.fragment.begin)
             l=l[offset:]
             size=float(len(l))
-            batch_id=object()
             dial=gtk.Dialog(_("Renumbering %d annotations") % size,
                            None,
                            gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -402,9 +399,6 @@ class Menu:
                     a.content.data=data
             self.controller.notify('PackageActivate', package=self.controller.package)
             dial.destroy()
-        else:
-            ret=None
-
 
         d.destroy()
         return True
