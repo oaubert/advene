@@ -86,6 +86,7 @@ import advene.util.ElementTree as ET
 
 import advene.util.importer
 from advene.gui.util.completer import Indexer, Completer
+from advene.gui.widget import TimestampRepresentation
 
 # GUI elements
 from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color, predefined_content_mimetypes
@@ -2957,6 +2958,97 @@ class AdveneGUI(object):
             return False
         else:
             return True
+
+    def bound_validation(self, timestamp, title=None):
+        """Timestamp validation interface.
+        
+        Given a timestamp, it displays a series of snapshots around
+        the timestamp and allows to select the most appropriate
+        one. Selection returns the value.
+        """
+        if title is None:
+            title = _("Select the appropriate snapshot")
+        d = gtk.Dialog(title=title,
+                       parent=None,
+                       flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                 ))
+        
+        d.selected_value = timestamp
+        count = 5
+
+        def select_time(b):
+            d.selected_value = b.value
+            d.response(gtk.RESPONSE_OK)
+            return True
+
+        hb=gtk.HBox()
+
+        for i in xrange(-count, count):
+            r=TimestampRepresentation(timestamp + i * 1000 / 25, self.controller, width=100, visible_label=True)
+            r.connect("clicked", select_time)
+            hb.pack_start(r, expand=False)
+        d.vbox.pack_start(hb, expand=False)
+
+        buttons=gtk.HBox()
+
+        # FIXME: handle scrollwheel
+        def update(b, hbox, offset):
+            """Update the timestamps to go forward/backward.
+            """
+            if offset < 0:
+                ref=hbox.get_children()[0]
+                start = max(ref.value + offset * 1000 / 25, 0)
+            else:
+                ref=hbox.get_children()[offset]
+                start = ref.value
+            for c in hbox.get_children():
+                c.value = start
+                start += 1000 / 25
+            return True
+
+        def refresh(b, hbox):
+            ic=self.controller.package.imagecache
+            for c in hbox.get_children():
+                if not ic.is_initialized(c.value):
+                    self.controller.update_snapshot(c.value)
+            return True
+
+        def handle_scroll_event(widget, event):
+            if event.direction == gtk.gdk.SCROLL_DOWN:
+                direction=+1
+            else:
+                direction=-1
+            update(widget, hb, direction)
+            return True
+        hb.connect('scroll-event', handle_scroll_event)
+
+        b=gtk.Button(stock=gtk.STOCK_GO_BACK)
+        b.connect("clicked", update, hb, -count)
+        buttons.pack_start(b, expand=True)
+
+        b=gtk.Button(stock=gtk.STOCK_REFRESH)
+        b.connect("clicked", refresh, hb)
+        buttons.pack_start(b, expand=False)
+
+        l=gtk.Label()
+        l.set_markup('<b>Current value:</b> %s' % helper.format_time(d.selected_value))
+        buttons.pack_start(l, expand=True)
+
+        b=gtk.Button(stock=gtk.STOCK_GO_FORWARD)
+        b.connect("clicked", update, hb, +count)
+        buttons.pack_start(b, expand=True)
+
+        d.vbox.pack_start(buttons, expand=False)
+        d.show_all()
+        dialog.center_on_mouse(d)
+
+        res = d.run()
+        if res == gtk.RESPONSE_OK:
+            timestamp = d.selected_value
+        d.destroy()
+        return timestamp
 
     def display_textfile(self, path, title=None, viewname=None):
         w=gtk.Window()
