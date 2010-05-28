@@ -374,7 +374,6 @@ class Menu:
             dial.show_all()
 
             for i, a in enumerate(l[offset:]):
-                print "Annotation ", a.id
                 prg.set_text(_("Annotation #%d") % i)
                 prg.set_fraction( i / size )
                 while gtk.events_pending():
