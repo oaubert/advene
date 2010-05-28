@@ -542,7 +542,7 @@ class Player:
         
         self.imagesink.set_xwindow_id(xid)
         self.imagesink.set_property('force-aspect-ratio', True)
-        
+        self.imagesink.expose()
         #gtk.gdk.threads_leave()
         
     def set_visual(self, xid):

@@ -1,6 +1,6 @@
 * Fix svg support for gstreamer/mac (need to rewrite the SVGOverlay element in C)
 
-* Shotdetect validation interface (display snapshot before+after)
+* Shotdetect validation interface (display multiple snapshots before+after)
 
 * Improve dcp importer
 
@@ -2783,4 +2783,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * svgeditor: strange issue when editing text
 
 * image quality in gstreamer/mac
+
+* Expose issue in xvimagesink
 
