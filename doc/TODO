@@ -1,3 +1,5 @@
+* Fix svg support for gstreamer/mac (need to rewrite the SVGOverlay element in C)
+
 * Shotdetect validation interface (display snapshot before+after)
 
 * Improve dcp importer
@@ -18,8 +20,8 @@
 
 * table view: keyword occurrences + stats
 
-* table view: display snapshots through a specialized
-   SnapshotCellRenderer, dynamically updated
+* Table view : use standard snapshot view (to have markers on
+   mouse over): cf views.table, implement CellRendererTimestamp
 
 * gstrecorder: option to specify wether to record from webcam
    (autovideosrc) or from screen (ximagesrc/dshowvideosrc...) or
@@ -48,9 +50,6 @@
 
 * Fix autocompletion of attribute names for annotations (should
    record key=value strings)
-
-* Interactive result : use standard snapshot view (to have markers on
-   mouse over): cf views.table, implement CellRendererTimestamp
 
 * Shortcut for edit element validation
 
@@ -106,10 +105,6 @@ http://development.syllable.org/documentation/interface-guide.html
    widget
 
 * timeline: fix continous scrolling. Set zoom 96%, 0h59 in Nosferatu
-
-* svg support for gstreamer/mac
-
-* image quality in gstreamer/mac
 
 * Use http://code.activestate.com/recipes/440554/ to execute
    shotdetect on win32
@@ -2786,4 +2781,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * main: incorrect svg when transmuting text to SVG
 
 * svgeditor: strange issue when editing text
+
+* image quality in gstreamer/mac
 

@@ -298,7 +298,6 @@ class Config(object):
             'snapshot': True,
             'caption': True,
             'snapshot-width': 160,
-            'snapshot-height': 100,
             'dvd-device': '/dev/dvd',
             }
 

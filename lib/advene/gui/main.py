@@ -3682,7 +3682,6 @@ class AdveneGUI(object):
 
         ew.add_checkbox(_("Enable snapshots"), "player-snapshot", _("Enable snapshots"))
         ew.add_spin(_("Snapshot width"), "player-snapshot-width", _("Snapshot width in pixels."), 0, 1280)
-        ew.add_spin(_("Snapshot height"), "player-snapshot-height", _("Snapshot height in pixels."), 0, 1280)
 
         options={_("Standard"): 'default' }
         if config.data.os == 'win32':
