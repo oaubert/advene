@@ -1,4 +1,4 @@
-* renumber annotations: display a progressbar
+* fix package merge with same ids (cf mattei/plans_mattei)
 
 * Fix svg support for gstreamer/mac (need to rewrite the SVGOverlay element in C)
 
@@ -2798,3 +2798,4 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * shapewidget: handle SVG width/height spec.
 
+* renumber annotations: display a progressbar

@@ -337,7 +337,8 @@ class Menu:
                        buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                                  gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  ))
-        l=gtk.Label(_("Renumber all annotations according to their order.\n\nThis will replace the first numeric value of the annotation content with the new annotation number. If no numeric value is found and the annotation is structured, it will insert the number. *If no numeric value is found and the annotation is of type text/plain, it will overwrite the annotation content.*\nThe offset parameter allows you to renumber from the annotation number offset."))
+        l=gtk.Label()
+        l.set_markup(_("<b>Renumber all annotations according to their order.</b>\n\n<i>Note that this action cannot be undone.</i>\nReplace the first numeric value of the annotation content with the new annotation number.\nIf no numeric value is found and the annotation is structured, it will insert the number.\nIf no numeric value is found and the annotation is of type text/plain, it will overwrite the annotation content.\nThe offset parameter allows you to renumber from a given annotation."))
         l.set_line_wrap(True)
         l.show()
         d.vbox.add(l)
@@ -361,11 +362,27 @@ class Menu:
         if res == gtk.RESPONSE_OK:
             re_number=re.compile('(\d+)')
             re_struct=re.compile('^num=(\d+)$', re.MULTILINE)
-            offset=s.get_value_as_int()-1
+            offset=s.get_value_as_int() - 1
             l=at.annotations
             l.sort(key=lambda a: a.fragment.begin)
+            l=l[offset:]
+            size=float(len(l))
             batch_id=object()
+            dial=gtk.Dialog(_("Renumbering %d annotations") % size,
+                           None,
+                           gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                           (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+            prg=gtk.ProgressBar()
+            dial.vbox.pack_start(prg, expand=False)
+            dial.show_all()
+
             for i, a in enumerate(l[offset:]):
+                print "Annotation ", a.id
+                prg.set_text(_("Annotation #%d") % i)
+                prg.set_fraction( i / size )
+                while gtk.events_pending():
+                    gtk.main_iteration()
+
                 if a.type.mimetype == 'application/x-advene-structured':
                     if re_struct.search(a.content.data):
                         # A 'num' field is present. Update it.
@@ -381,15 +398,13 @@ class Menu:
                     data=str(i+1)
                 else:
                     data=None
-                if data is not None:
-                    # FIXME: for this kind of batch operations, we
-                    # should record the global changes.
-                    self.controller.notify('EditSessionStart', element=a, immediate=True)
+                if data is not None and a.content.data != data:
                     a.content.data=data
-                    self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
-                    self.controller.notify('EditSessionEnd', element=a)
+            self.controller.notify('PackageActivate', package=self.controller.package)
+            dial.destroy()
         else:
             ret=None
+
 
         d.destroy()
         return True
