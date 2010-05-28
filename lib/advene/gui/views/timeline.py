@@ -130,8 +130,8 @@ class TimeLine(AdhocView):
             (_("Refresh"), self.refresh),
             (_("Save view"), self.save_view),
             (_("Save default options"), self.save_default_options),
-            (_("Limit display to current area"), self.limit_display),
-            (_("Display whole movie"), self.unlimit_display),
+            (_("Limit display to current area"), lambda i, b: self.limit_display()),
+            (_("Display whole movie"), lambda i, b: self.unlimit_display()),
             )
         self.options = {
             'highlight': False,
@@ -2334,18 +2334,35 @@ class TimeLine(AdhocView):
                         for (at, p) in self.layer_position.iteritems()
                         if (y1 >= p and y1 <= p + self.button_height) ]
                     if not a:
-                        return True
-                    at=a[0]
+                        at = None
+                    else:
+                        at=a[0]
+
                     def create(i):
                         self.create_annotation(position=self.pixel2unit(x1, absolute=True),
                                                type=at,
                                                duration=self.pixel2unit(x2-x1))
                         return True
+                    def zoom(i):
+                        self.zoom_on_region(self.pixel2unit(x1, absolute=True),
+                                            self.pixel2unit(x2, absolute=True))
+                        return True
+                    def restrict(i):
+                        self.limit_display(self.pixel2unit(x1, absolute=True),
+                                           self.pixel2unit(x2, absolute=True))
+                        return True
 
                     menu=gtk.Menu()
-                    i=gtk.MenuItem(_("Create a new annotation"))
-                    i.connect('activate', create)
-                    menu.append(i)
+                    for (label, action) in (
+                        (_("Create a new annotation"), create),
+                        (_("Zoom on region"), zoom),
+                        (_("Restrict display to region"), restrict),
+                        ):
+                        if at is None and action == 'create':
+                            pass
+                        i=gtk.MenuItem(label)
+                        i.connect('activate', action)
+                        menu.append(i)
                     menu.show_all()
                     menu.popup(None, None, None, 0, gtk.get_current_event_time())
                 return True
@@ -2524,14 +2541,26 @@ class TimeLine(AdhocView):
             self.zoom_combobox.child.set_text('%d%%' % long(100 * fraction))
         return False
 
-    def limit_display(self, *p):
-        """Limit the timeline to the currently displayed area.
+    def zoom_on_region(self, begin, end):
+        # Deactivate autoscroll...
+        self.set_autoscroll_mode(0)
+        
+        (w, h) = self.layout.window.get_size ()
+        self.scale.value=1.3 * (end - begin) / w
+        
+        # Center on annotation
+        self.center_on_position( (begin + end) / 2 )
+        return True
+
+    def limit_display(self, minimum=None, maximum=None):
+        """Limit the timeline to the specified or currently displayed area.
         """
-        mi=self.pixel2unit(self.adjustment.value, absolute=True)
-        ma=self.pixel2unit(self.adjustment.value + self.adjustment.page_size, absolute=True)
+        if minimum is None:
+            minimum=self.pixel2unit(self.adjustment.value, absolute=True)
+            maximum=self.pixel2unit(self.adjustment.value + self.adjustment.page_size, absolute=True)
         # Cannot do the assignment immediately, since unit2pixel uses self.minimum
-        self.minimum = mi
-        self.maximum = ma
+        self.minimum = minimum
+        self.maximum = maximum
         self.update_model(partial_update=True)
         self.fraction_adj.value=1.0
         return True
@@ -2951,15 +2980,7 @@ class TimeLine(AdhocView):
         def center_and_zoom(m, sel):
             begin=min( [ w.annotation.fragment.begin for w in sel ] )
             end=max( [ w.annotation.fragment.end for w in sel ] )
-
-            # Deactivate autoscroll...
-            self.set_autoscroll_mode(0)
-
-            (w, h) = self.layout.window.get_size ()
-            self.scale.value=1.3 * (end - begin) / w
-
-            # Center on annotation
-            self.center_on_position( (begin + end) / 2 )
+            self.zoom_on_region(begin, end)
             return True
 
         def create_static(m, sel):
