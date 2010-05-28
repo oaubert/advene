@@ -1,6 +1,6 @@
-* Improve dcp importer
+* Shotdetect validation interface (display snapshot before+after)
 
-* main: incorrect svg when transmuting text to SVG
+* Improve dcp importer
 
 * svgeditor: strange issue when editing text
 
@@ -19,6 +19,9 @@
 * Generic metadata for packages
 
 * table view: keyword occurrences + stats
+
+* table view: display snapshots through a specialized
+   SnapshotCellRenderer, dynamically updated
 
 * gstrecorder: option to specify wether to record from webcam
    (autovideosrc) or from screen (ximagesrc/dshowvideosrc...) or
@@ -2781,4 +2784,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * add mimetype shortcut for x-advene-values
 
 * widget.py: check direct rendering of SVG graphics
+
+* main: incorrect svg when transmuting text to SVG
 
