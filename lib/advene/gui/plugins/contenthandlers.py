@@ -265,7 +265,7 @@ class SVGContentHandler (ContentHandler):
         return False
 
     def set_begin(self, t):
-        i=image_from_position(self.controller, t, height=160)
+        i=image_from_position(self.controller, t)
         self.view.set_background(i)
         return True
 
@@ -274,20 +274,20 @@ class SVGContentHandler (ContentHandler):
         vbox=gtk.VBox()
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
-            i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
+            i=image_from_position(self.controller, self.parent.fragment.begin)
             self.view = ShapeEditor(background=i, pixmap_dir=config.data.advenefile('pixmaps'))
 
             def snapshot_update_cb(context, target):
                 if context.globals['position'] == self.parent.fragment.begin:
                     # Refresh image
-                    i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
+                    i=image_from_position(self.controller, self.parent.fragment.begin)
                     self.view.set_background(i)
                 return True
             self.rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
                                                                            method=snapshot_update_cb))
 
             def annotation_update_cb(context, target):
-                i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
+                i=image_from_position(self.controller, self.parent.fragment.begin)
                 self.view.set_background(i)
                 return True
             self.rules.append(self.controller.event_handler.internal_rule (event='AnnotationEditEnd',
