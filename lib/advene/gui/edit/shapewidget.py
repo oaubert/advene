@@ -25,7 +25,13 @@
   This component should not have dependencies on Advene, so that it
   can be reused in other projects.
 
-FIXME: when parsing SVG, allow a relative option to scale absolute values wrt. SVG-specified canvas size/current canvas size
+  Note: if given a background image at instanciation, ShapeDrawer will
+  use its size as reference, else it will use a hardcoded dimension
+  (see ShapeDrawer.__init__). When loading a SVG file, it will convert
+  its dimensions into the reference size. When saving the SVG again,
+  it will lose the original SVG dimensions and use instead the
+  background/hardcoded dimensions.
+
 FIXME: XML load/dump should try to preserve unhandled information (especially TAL instructions)
 FIXME: find a way to pass search paths for xlink:href elements resolution
 FIXME: find a way to pass the background path
@@ -174,7 +180,7 @@ class Shape(object):
         m=stroke_width_re.search(style)
         if m:
             s.linewidth=int(m.group(1))
-        c=cls.xml2coords(cls.coords, element.attrib, context.dimensions())
+        c=cls.xml2coords(cls.coords, element.attrib, context)
         for n, v in c.iteritems():
             setattr(s, n, v)
         s.svg_attrib=dict(element.attrib)
@@ -231,12 +237,16 @@ class Shape(object):
         s.copy_from(self, style)
         return s
 
-    def xml2coords(coords, attrib, dimensions):
+    def xml2coords(coords, attrib, context):
         """Converts coordinates in XML format to their appropriate value
+
+        The context object must have 2 attributes:
+        - dimensions: a (width, height) tuple giving the display canvas dimensions.
+        - svg_dimensions: a (width, height) tuple giving the original SVG dimensions.
 
         @param coords: a list of (name, dimension_index) tuple
         @param attrib: an attributes dictionary
-        @param dimensions: a (width, height) tuple
+        @param context: an object holding the context information
         @return: a dictionary with values converted
         """
         res={}
@@ -245,15 +255,22 @@ class Shape(object):
             v=attrib[n]
             if v.endswith('%'):
                 # Convert it to absolute values
-                v=float(v[:-1]) / 100 * dimensions[dimindex]
+                v=float(v[:-1]) * context.dimensions[dimindex] / 100
             else:
-                v=float(v)
+                if context.dimensions == context.svg_dimensions:
+                    v=float(v)
+                else:
+                    v=float(v) * context.dimensions[dimindex] / context.svg_dimensions[dimindex]
             res[n]=int(v)
         return res
     xml2coords=staticmethod(xml2coords)
 
     def coords2xml(self, relative, dimensions):
         """Converts coordinates to XML format
+
+        Note: we do not convert back to original SVG dimensions,
+        i.e. if a (640, 400) SVG was loaded over a (320, 200) canvas,
+        we will generate in return a (320, 200) SVG.
 
         @param relative: convert to relative dimensions
         @param dimensions: a (width, height) tuple
@@ -544,7 +561,7 @@ class Text(Rectangle):
         m=stroke_width_re.search(style)
         if m:
             s.linewidth=int(m.group(1))
-        c=cls.xml2coords(cls.coords, element.attrib, context.dimensions())
+        c=cls.xml2coords(cls.coords, element.attrib, context)
         for n, v in c.iteritems():
             setattr(s, n, v)
         s.svg_attrib=dict(element.attrib)
@@ -656,7 +673,7 @@ class Image(Rectangle):
             return None
         s=cls(name=element.attrib.get('name', cls.SHAPENAME))
         s.uri=element.attrib.get('xlink:href', element.attrib.get('{http://www.w3.org/1999/xlink}href', ''))
-        c=cls.xml2coords(cls.coords, element.attrib, context.dimensions())
+        c=cls.xml2coords(cls.coords, element.attrib, context)
         for n, v in c.iteritems():
             setattr(s, n, v)
         s.svg_attrib=dict(element.attrib)
@@ -1093,12 +1110,9 @@ class ShapeDrawer:
         """
         @param callback: the callback method
         @param background: an optional background image
-        @type background: gtk.Image
+        @type background: gtk.gdk.Pixbuf
         """
         self.callback = callback or self.default_callback
-
-        # background is a gtk.Image()
-        self.background = background
 
         # Couples object - name
         self.objects = gtk.ListStore( object, str )
@@ -1115,6 +1129,8 @@ class ShapeDrawer:
         self.feedback_shape = None
         self.shape_class = Rectangle
 
+        self._svg_dimensions = None
+
         # mode: "create", "resize" or "translate"
         self.mode = "resize"
 
@@ -1127,22 +1143,39 @@ class ShapeDrawer:
         self.widget.connect('button-release-event', self.button_release_event)
         self.widget.connect('motion-notify-event', self.motion_notify_event)
         self.widget.set_events(gtk.gdk.EXPOSURE_MASK | gtk.gdk.LEAVE_NOTIFY_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.POINTER_MOTION_MASK |gtk.gdk.POINTER_MOTION_HINT_MASK)
-
-        if self.background:
-            p=self.background.get_pixbuf()
-            w=p.get_width()
-            h=p.get_height()
-            self.canvaswidth=w
-            self.canvasheight=h
-        else:
-            self.canvaswidth=320
-            self.canvasheight=200
+        
+        self.background=None
+        # FIXME: Hardcoded dimensions are bad.
+        self.canvaswidth=320
+        self.canvasheight=200
+        if background:
+            self.set_background(background, reset_dimensions=True)
         self.widget.set_size_request(self.canvaswidth, self.canvasheight)
 
     def default_callback(self, rectangle):
         """Default callback.
         """
         print "Got selection ", str(rectangle)
+
+    def set_background(self, pixbuf, reset_dimensions=False):
+        """Set a new background pixbuf.
+        """
+        w = pixbuf.get_width()
+        h = pixbuf.get_height()
+        if w != self.canvaswidth or h != self.canvasheight:
+            # Mismatching dimensions. Do something.
+            if reset_dimensions:
+                # FIXME: if we have objects, we should scale them...
+                if self.objects:
+                    print "Resizing SVG editor with existing objects... Strange things will happen"
+                self.canvaswidth = w
+                self.canvasheight = h
+                self.widget.set_size_request(self.canvaswidth, self.canvasheight)
+            else:
+                # Resize background pixbuf
+                pixbuf=pixbuf.scale_simple(self.canvaswidth, self.canvasheight, gtk.gdk.INTERP_BILINEAR)
+        self.background = pixbuf
+        self.plot()
 
     def add_object(self, o):
         """Add an object (shape) to the object list.
@@ -1179,19 +1212,35 @@ class ShapeDrawer:
         self.plot()
         return True
 
-    def dimensions(self):
+    def get_dimensions(self):
         """Return the canvas dimensions.
 
         @return: the dimensions in pixel
         @rtype: a couple (width, height)
         """
         return (self.canvaswidth, self.canvasheight)
+    dimensions = property(get_dimensions)
+
+    def get_svg_dimensions(self):
+        """Return the SVG dimensions.
+
+        In the case where a SVG has been loaded, its dimensions (width/height attributes) may be different from the canvas dimensions.
+
+        @return: the dimensions in pixel @rtype: a couple (width,
+        height)
+        """
+        if self._svg_dimensions:
+            return self._svg_dimensions
+        else:
+            return self.dimensions
+    def set_svg_dimensions(self, t):
+        self._svg_dimensions = t
+    svg_dimensions = property(get_svg_dimensions, set_svg_dimensions)
 
     def configure_event(self, widget, event):
         if self.background:
-            p=self.background.get_pixbuf()
-            w=p.get_width()
-            h=p.get_height()
+            w=self.background.get_width()
+            h=self.background.get_height()
         else:
             x, y, w, h = widget.get_allocation()
 
@@ -1356,9 +1405,8 @@ class ShapeDrawer:
         self.pixmap.draw_rectangle(gc, True, 0, 0, self.canvaswidth, self.canvasheight)
 
         if self.background:
-            pixbuf=self.background.get_pixbuf()
             self.pixmap.draw_pixbuf(gc,
-                                    pixbuf,
+                                    self.background,
                                     0, 0,
                                     0, 0)
 
@@ -1415,6 +1463,26 @@ class ShapeDrawer:
         ET_indent(root)
         return root
 
+    def convert_unit(self, s, dimindex=0):
+        """Convert a unit.
+        
+        dimindex is the index of the unit in the .dimensions tuple: 0
+        for width, 1 for height.
+        """
+        m=re.match('(\d+)(\w*)', s)
+        if m:
+            val=long(m.group(1))
+            unit=m.group(2)
+            if unit in ('px', 'pt'):
+                return val
+            elif unit == '%':
+                return long(val * 100.0 / self.dimensions[dimindex])
+            else:
+                print 'Unhandled SVG unit for ', s
+                return val
+        print 'Unhandled SVG dimension format for ', s
+        return 0
+            
     def parse_svg(self, et, current_path=''):
         """Parse a SVG representation
 
@@ -1425,6 +1493,11 @@ class ShapeDrawer:
         """
         if et.tag != 'svg' and et.tag != ET.QName(SVGNS, 'svg'):
             print "Not a svg file"
+        w=et.attrib.get('width')
+        h=et.attrib.get('height')
+        if w is not None and h is not None:
+            self.svg_dimensions = (self.convert_unit(w, 0), 
+                                   self.convert_unit(h, 0))
         for c in et:
             for clazz in defined_shape_classes:
                 o=clazz.parse_svg(c, self)
@@ -1453,19 +1526,18 @@ class ShapeDrawer:
                                 p.fill(0xdeadbeaf)
                                 i.set_from_pixbuf(p)
                             print "Loaded background from ", uri
-                            self.background=i
+                        p=i.get_pixbuf()
                         # We insert the background at the beginning of
                         # the object stack, so that other shapes are
                         # drawn over it.
+                        self.set_background(p, reset_dimensions=True)
                         self.objects.insert(0, (o, o.name))
                         # Update the size of the shape and the widget
-                        p=self.background.get_pixbuf()
-                        o._pixbuf=p
+                        o._pixbuf=self.background
                         o.x=0
                         o.y=0
-                        o.width=self.canvaswidth=p.get_width()
-                        o.height=self.canvasheight=p.get_height()
-                        self.widget.set_size_request(self.canvaswidth, self.canvasheight)
+                        o.width=self.background.get_width()
+                        o.height=self.background.get_height()
                     else:
                         self.objects.append( (o, o.name) )
                     break
@@ -1478,7 +1550,8 @@ class ShapeEditor:
     This component provides an example of using ShapeWidget.
     """
     def __init__(self, background=None, pixmap_dir=None):
-        self.background=None
+        if isinstance(background, gtk.Image):
+            background=background.get_pixbuf()
         self.drawer=ShapeDrawer(callback=self.callback,
                                 background=background)
         self.shapes = [ Rectangle, Ellipse, Line, Text, Image ]
@@ -1591,9 +1664,14 @@ class ShapeEditor:
         return retval
 
     def set_background(self, image):
-        self.drawer.background=image
-        # FIXME: check that dimensions are compatible with old one ?
-        self.drawer.plot()
+        """Set the background image.
+        """
+        if isinstance(image, gtk.Image):
+            self.drawer.set_background(image.get_pixbuf())
+        elif isinstance(image, gtk.gdk.Pixbuf):
+            self.drawer.set_background(image)
+        else:
+            raise Exception("set_background requires a gtk.Image or a gtk.gdk.Pixbuf")
 
     def build_widget(self, pixmap_dir):
         vbox=gtk.VBox()
