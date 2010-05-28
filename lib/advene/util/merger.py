@@ -29,7 +29,10 @@ import shutil
 import advene.core.config as config
 
 from advene.model.package import Package
-from advene.model.annotation import Annotation
+from advene.model.annotation import Annotation, Relation
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.view import View
+from advene.model.query import Query
 import advene.util.helper as helper
 
 class Differ:
@@ -39,7 +42,6 @@ class Differ:
         self.source=source
         self.destination=destination
         self.controller=controller
-        self.source_ids = {}
         # translated ids for different elements with the same id.  The
         # key is the id in the source package, the value the (new) id
         # in the destination package.
@@ -80,11 +82,11 @@ class Differ:
 
 
     def diff_schemas(self):
-        ids = dict([ (s.id, s) for s in self.destination.schemas ])
-        self.source_ids['schemas']=ids
         for s in self.source.schemas:
-            if s.id in ids:
-                d=ids[s.id]
+            d=self.destination.get_element_by_id(s.id)
+            if d is None:
+                yield ('new', s, None, lambda s, d: self.copy_schema(s) )
+            elif isinstance(d, type(s)):
                 # Present. Check if it was modified
                 if s.title != d.title:
                     yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
@@ -92,14 +94,15 @@ class Differ:
                 if c:
                     yield c
             else:
-                yield ('new', s, None, lambda s, d: self.copy_schema(s) )
+                # Same id, but different type. Generate a new type
+                yield ('new', s, None, lambda s, d: self.copy_schema(s, True) )
 
     def diff_annotation_types(self):
-        ids = dict([ (s.id, s) for s in self.destination.annotationTypes ])
-        self.source_ids['annotation-types']=ids
         for s in self.source.annotationTypes:
-            if s.id in ids:
-                d=ids[s.id]
+            d=self.destination.get_element_by_id(s.id)
+            if d is None:
+                yield ('new', s, None, lambda s, d: self.copy_annotation_type(s) )
+            elif isinstance(d, type(s)):
                 # Present. Check if it was modified
                 if s.title != d.title:
                     yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
@@ -118,14 +121,14 @@ class Differ:
                 if c:
                     yield c
             else:
-                yield ('new', s, None, lambda s, d: self.copy_annotation_type(s) )
+                yield ('new', s, None, lambda s, d: self.copy_annotation_type(s, True) )
 
     def diff_relation_types(self):
-        ids = dict([ (s.id, s) for s in self.destination.relationTypes ])
-        self.source_ids['relation-types']=ids
         for s in self.source.relationTypes:
-            if s.id in ids:
-                d=ids[s.id]
+            d=self.destination.get_element_by_id(s.id)
+            if d is None:
+                yield ('new', s, None, lambda s, d: self.copy_relation_type(s) )
+            elif isinstance(d, type(s)):
                 # Present. Check if it was modified
                 if s.title != d.title:
                     yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
@@ -143,24 +146,24 @@ class Differ:
                 if s.hackedMemberTypes != d.hackedMemberTypes:
                     yield ('update_member_types', s, d, lambda s, d: d.setHackedMemberTypes( s.hackedMemberTypes ))
             else:
-                yield ('new', s, None, lambda s, d: self.copy_relation_type(s) )
+                yield ('new', s, None, lambda s, d: self.copy_relation_type(s, True) )
 
 
     def diff_annotations(self):
-        ids = dict([ (s.id, s) for s in self.destination.annotations ])
-        self.source_ids['annotations']=ids
         for s in self.source.annotations:
-            if s.id in ids:
-                d=ids[s.id]
+            d=self.destination.get_element_by_id(s.id)
+            if d is None:
+                yield ('new', s, None, lambda s, d: self.copy_annotation(s) )
+            elif isinstance(d, type(s)):
                 # check type and author/date. If different, it is very
                 # likely that it is in fact a new annotation, with
-                # duplicate ids.
+                # duplicate id.
                 if s.type.id != d.type.id:
-                    yield ('new_annotation', s, d, self.new_annotation)
+                    yield ('new_annotation', s, d, lambda s, d: self.copy_annotation(s, True))
                     continue
                 if s.author != d.author and s.date != d.date:
                     # New annotation.
-                    yield ('new_annotation', s, d, self.new_annotation)
+                    yield ('new_annotation', s, d, lambda s, d: self.copy_annotation(s, True))
                     continue
                 # Present. Check if it was modified
                 if s.fragment.begin != d.fragment.begin:
@@ -172,24 +175,24 @@ class Differ:
                 if s.tags != d.tags:
                     yield ('update_tags', s, d, lambda s, d: d.setTags( s.tags ))
             else:
-                yield ('new', s, None, lambda s, d: self.copy_annotation(s) )
+                yield ('new', s, None, lambda s, d: self.copy_annotation(s, True) )
 
 
     def diff_relations(self):
-        ids = dict([ (s.id, s) for s in self.destination.relations ])
-        self.source_ids['relations']=ids
         for s in self.source.relations:
-            if s.id in ids:
-                d=ids[s.id]
+            d=self.destination.get_element_by_id(s.id)
+            if d is None:
+                yield ('new', s, None, lambda s, d: self.copy_relation(s) )
+            elif isinstance(d, type(s)):
                 # check author/date. If different, it is very
                 # likely that it is in fact a new relation, with
                 # duplicate id.
                 if s.type.id != d.type.id:
-                    yield ('new_relation', s, d, self.new_relation)
+                    yield ('new_relation', s, d, lambda s, d: self.copy_relation(s, True))
                     continue
                 if s.author != d.author and s.date != d.date:
                     # New relation.
-                    yield ('new_relation', s, d, self.new_relation)
+                    yield ('new_relation', s, d, lambda s, d: self.copy_relation(s, True))
                     continue
                 # Present. Check if it was modified
                 if s.content.data != d.content.data:
@@ -201,15 +204,15 @@ class Differ:
                 if s.tags != d.tags:
                     yield ('update_tags', s, d, lambda s, d: d.setTags( s.tags ))
             else:
-                yield ('new', s, None, lambda s, d: self.copy_relation(s) )
+                yield ('new', s, None, lambda s, d: self.copy_relation(s, True) )
 
     def diff_views(self):
-        ids = dict([ (s.id, s) for s in self.destination.views ])
-        self.source_ids['views']=ids
         for s in self.source.views:
-            if s.id in ids:
+            d=self.destination.get_element_by_id(s.id)
+            if d is None:
+                yield ('new', s, None, lambda s, d: self.copy_view(s) )
+            if isinstance(d, type(s)):
                 # Present. Check if it was modified
-                d=ids[s.id]
                 if s.title != d.title:
                     yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
                 if (s.matchFilter['class'] != d.matchFilter['class']
@@ -220,15 +223,15 @@ class Differ:
                 if s.content.data != d.content.data:
                     yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
             else:
-                yield ('new', s, None, lambda s, d: self.copy_view(s) )
+                yield ('new', s, None, lambda s, d: self.copy_view(s, True) )
 
     def diff_queries(self):
-        ids = dict([ (s.id, s) for s in self.destination.queries ])
-        self.source_ids['queries']=ids
         for s in self.source.queries:
-            if s.id in ids:
+            d=self.destination.get_element_by_id(s.id)
+            if d is None:
+                yield ('new', s, None, lambda s, d: self.copy_query(s) )
+            elif isinstance(d, type(s)):
                 # Present. Check if it was modified
-                d=ids[s.id]
                 if s.title != d.title:
                     yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
                 if s.content.mimetype != d.content.mimetype:
@@ -236,7 +239,7 @@ class Differ:
                 if s.content.data != d.content.data:
                     yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
             else:
-                yield ('new', s, None, lambda s, d: self.copy_query(s) )
+                yield ('new', s, None, lambda s, d: self.copy_query(s, True) )
 
     def diff_resources(self):
         if self.source.resources is None or self.destination.resources is None:
@@ -271,46 +274,66 @@ class Differ:
                 yield t
         return
 
-    def copy_schema(self, s):
-        el=self.destination.createSchema(ident=s.id)
+    def copy_schema(self, s, generate_id=False):
+        if generate_id or self.destination.get_element_by_id(s.id):
+            id_=self.destination._idgenerator.get_id(Schema)
+        else:
+            id_ = s.id
+        self.destination._idgenerator.add(id_)
+        self.translated_ids[s.id]=id_
+
+        el=self.destination.createSchema(ident=id_)
         el.author=s.author or self.source.author
         el.date=s.date or self.controller.get_timestamp()
-        el.title=s.title or s.id
+        el.title=s.title or id_
         self.destination.schemas.append(el)
         return el
 
-    def copy_annotation_type(self, s):
+    def copy_annotation_type(self, s, generate_id=False):
+        if generate_id or self.destination.get_element_by_id(s.id):
+            id_=self.destination._idgenerator.get_id(AnnotationType)
+        else:
+            id_ = s.id
+        self.destination._idgenerator.add(id_)
+        self.translated_ids[s.id]=id_
+
         # Find parent, and create it if necessary
         sch=helper.get_id(self.destination.schemas, s.schema.id)
         if not sch:
             # Create it
             sch=helper.get_id(self.source.schemas, s.schema.id)
             sch=self.copy_schema(sch)
-        el=sch.createAnnotationType(ident=s.id)
+        el=sch.createAnnotationType(ident=id_)
         el.author=s.author or self.source.author
         el.date=s.date or self.controller.get_timestamp()
-        el.title=s.title or s.id
+        el.title=s.title or id_
         el.mimetype=s.mimetype
         for n in ('color', 'item_color'):
             el.setMetaData(config.data.namespace, n, (s.getMetaData(config.data.namespace, n) or ''))
         sch.annotationTypes.append(el)
         return el
 
-    def copy_relation_type(self, s):
+    def copy_relation_type(self, s, generate_id=False):
+        if generate_id or self.destination.get_element_by_id(s.id):
+            id_=self.destination._idgenerator.get_id(RelationType)
+        else:
+            id_ = s.id
+        self.destination._idgenerator.add(id_)
+        self.translated_ids[s.id]=id_
+
         # Find parent, and create it if necessary
         sch=helper.get_id(self.destination.schemas, s.schema.id)
         if not sch:
             # Create it
             sch=helper.get_id(self.source.schemas, s.schema.id)
             sch=self.copy_schema(sch)
-        el=sch.createRelationType(ident=s.id)
+        el=sch.createRelationType(ident=id_)
         el.author=s.author or self.source.author
         el.date=s.date or self.controller.get_timestamp()
-        el.title=s.title or s.id
+        el.title=s.title or id_
         el.mimetype=s.mimetype
         sch.relationTypes.append(el)
-        #for n in ('color', 'item_color'):
-        #    el.setMetaData(config.data.namespace, n, s.getMetaData(config.data.namespace, n))
+        el.setMetaData(config.data.namespace, 'color', s.getMetaData(config.data.namespace, 'color'))
         # Handle membertypes, ensure that annotation types are defined
         for m in s.hackedMemberTypes:
             if m == '':
@@ -343,13 +366,20 @@ class Differ:
             d.members.append(a)
         return d
 
-    def new_annotation(self, s, d):
+    def copy_annotation(self, s, generate_id=False):
         """Create a new annotation.
+
+        If generate_id is True, then generate a new id. Else, use the
+        source id.
 
         Try to keep track of the occurences of its id, to fix them later on.
         """
-        id_=self.destination._idgenerator.get_id(Annotation)
+        if generate_id or self.destination.get_element_by_id(s.id):
+            id_ = self.destination._idgenerator.get_id(Annotation)
+        else:
+            id_ = s.id
         self.destination._idgenerator.add(id_)
+        self.translated_ids[s.id]=id_
 
         # Find parent, and create it if necessary
         at=helper.get_id(self.destination.annotationTypes, s.type.id)
@@ -365,26 +395,16 @@ class Differ:
         el.date=s.date or self.controller.get_timestamp()
         el.content.data=s.content.data
         self.destination.annotations.append(el)
+        return el
+
+    def copy_relation(self, s, generate_id=False):
+        if generate_id or self.destination.get_element_by_id(s.id):
+            id_=self.destination._idgenerator.get_id(Relation)
+        else:
+            id_ = s.id
+        self.destination._idgenerator.add(id_)
         self.translated_ids[s.id]=id_
-        return el
 
-    def copy_annotation(self, s):
-        at=helper.get_id(self.destination.annotationTypes, s.type.id)
-        if not at:
-            # The annotation type does not exist. Create it.
-            at=self.copy_annotation_type(helper.get_id(self.source.annotationTypes,
-                                                       s.type.id))
-        el=self.destination.createAnnotation(
-            ident=s.id,
-            type=at,
-            author=s.author or self.source.author,
-            fragment=s.fragment.clone())
-        el.date=s.date or self.controller.get_timestamp()
-        el.content.data=s.content.data
-        self.destination.annotations.append(el)
-        return el
-
-    def copy_relation(self, s):
         rt=helper.get_id(self.destination.relationTypes, s.type.id)
         if not rt:
             # The annotation type does not exist. Create it.
@@ -403,7 +423,7 @@ class Differ:
                 a=self.copy_annotation(sa)
             members.append(a)
         el=self.destination.createRelation(
-            ident=s.id,
+            ident=id_,
             type=rt,
             author=s.author or self.source.author,
             members=members)
@@ -413,24 +433,38 @@ class Differ:
         #el.title=s.title or ''
         return el
 
-    def copy_query(self, s):
+    def copy_query(self, s, generate_id=False):
+        if generate_id or self.destination.get_element_by_id(s.id):
+            id_=self.destination._idgenerator.get_id(Query)
+        else:
+            id_ = s.id
+        self.destination._idgenerator.add(id_)
+        self.translated_ids[s.id]=id_
+
         el=self.destination.createQuery(
-            ident=s.id,
+            ident=id_,
             author=s.author or self.source.author)
         el.data=s.date or self.controller.get_timestamp()
-        el.title=s.title or ''
+        el.title=s.title or id_
         el.content.data=s.content.data
         el.content.mimetype=s.content.mimetype
         self.destination.queries.append(el)
         return el
 
-    def copy_view(self, s):
+    def copy_view(self, s, generate_id=False):
+        if generate_id or self.destination.get_element_by_id(s.id):
+            id_=self.destination._idgenerator.get_id(View)
+        else:
+            id_ = s.id
+        self.destination._idgenerator.add(id_)
+        self.translated_ids[s.id]=id_
+
         el=self.destination.createView(
-            ident=s.id,
+            ident=id_,
             clazz=s.viewableClass,
             author=s.author or self.source.author)
         el.date=s.date or self.controller.get_timestamp()
-        el.title=s.title or ''
+        el.title=s.title or id_
         el.matchFilter['class']=s.matchFilter['class']
         if s.matchFilter.has_key('type'):
             el.matchFilter['type']=s.matchFilter['type']
