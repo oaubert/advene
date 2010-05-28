@@ -3676,13 +3676,13 @@ class AdveneGUI(object):
                 })
 
         ew.add_title(_("Video Player"))
-        ew.add_checkbox(_("Captions"), "player-caption", _("Enable video captions"))
-        ew.add_file_selector(_("Font"), "player-osdfont", _("TrueType font for captions"))
-        ew.add_checkbox(_("Enable SVG"), "player-svg", _("Enable SVG captions"))
+        ew.add_checkbox(_("Enable captions"), "player-caption", _("Enable captions over the video"))
+        ew.add_file_selector(_("Caption font"), "player-osdfont", _("TrueType font for captions"))
+        ew.add_checkbox(_("Enable SVG"), "player-svg", _("Enable SVG captions over the video"))
 
-        ew.add_checkbox(_("Snapshots"), "player-snapshot", _("Enable snapshots"))
-        ew.add_spin(_("Snapshot width"), "player-snapshot-width", _("Snapshot width"), 0, 1280)
-        ew.add_spin(_("Snapshot height"), "player-snapshot-height", _("Snapshot height"), 0, 1280)
+        ew.add_checkbox(_("Enable snapshots"), "player-snapshot", _("Enable snapshots"))
+        ew.add_spin(_("Snapshot width"), "player-snapshot-width", _("Snapshot width in pixels."), 0, 1280)
+        ew.add_spin(_("Snapshot height"), "player-snapshot-height", _("Snapshot height in pixels."), 0, 1280)
 
         options={_("Standard"): 'default' }
         if config.data.os == 'win32':
@@ -3696,10 +3696,11 @@ class AdveneGUI(object):
         ew.add_option(_("Video output"), "player-vout", _("Video output module"), options)
         ew.add_spin(_("Verbosity"), "player-level", _("Verbosity level. -1 for no messages."),
                     -1, 3)
-
-        ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
-        ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
-
+        
+        if config.data.preferences['expert-mode']:
+            ew.add_label(_("<i>Experimental</i>"))
+            ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
+            ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
 
         ew.add_title(_("Time-related"))
         ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 1, 300000)
