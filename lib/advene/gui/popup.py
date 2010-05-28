@@ -468,7 +468,6 @@ class Menu:
         item.set_submenu(self.activate_submenu(element))
         menu.append(item)
 
-
         def build_submenu(submenu, el, items):
             """Build the submenu for the given element.
             """
@@ -559,8 +558,8 @@ class Menu:
 
         #add_item(element.content.data[:40])
         add_item(_('Begin: %s')
-                 % helper.format_time (element.fragment.begin))
-        add_item(_('End: %s') % helper.format_time (element.fragment.end))
+                 % helper.format_time (element.fragment.begin), lambda i: self.controller.gui.adjust_annotation_bound(element, 'begin'))
+        add_item(_('End: %s') % helper.format_time (element.fragment.end), lambda i: self.controller.gui.adjust_annotation_bound(element, 'end'))
         return
 
     def make_relation_menu(self, element, menu):

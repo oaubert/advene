@@ -1,7 +1,5 @@
 * Fix svg support for gstreamer/mac (need to rewrite the SVGOverlay element in C)
 
-* Shotdetect validation interface (display multiple snapshots before+after)
-
 * Improve dcp importer
 
 * Make the timeline inspector editable (thus sticky display)
@@ -2799,4 +2797,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * renumber annotations: display a progressbar
 
 * fix package merge with same ids (cf mattei/plans_mattei)
+
+* Shotdetect validation interface (display multiple snapshots before+after)
 

@@ -917,23 +917,6 @@ class TimeLine(AdhocView):
         print ("Lower: %.1f\tUpper: %.1f\tValue: %.1f\tPage size: %.1f"
                % (a.lower, a.upper, a.value, a.page_size))
 
-    def adjust_annotation_bound(self, annotation, bound='begin'):
-        """Display a dialog to adjust the annotation bound.
-        """
-        translation={
-            'begin': _('begin'),
-            'end': _('end'),
-            }
-        t=getattr(annotation.fragment, bound)
-        new=self.controller.gui.bound_validation(t, _("Update %(bound)s of %(annotation)s") % { 'bound': translation[bound],
-                                                                                                'annotation': self.controller.get_title(annotation) })
-        if new != t:
-            self.controller.notify('EditSessionStart', element=annotation, immediate=True)
-            setattr(annotation.fragment, bound, new)
-            self.controller.notify('AnnotationEditEnd', annotation=annotation)
-            self.controller.notify('EditSessionEnd', element=annotation)
-        return True
-
     def align_annotations(self, source, dest, mode):
         new={
             'begin': source.fragment.begin,
@@ -1742,9 +1725,9 @@ class TimeLine(AdhocView):
             self.controller.split_annotation(annotation, self.controller.player.current_position_value)
             return True
         elif event.keyval == gtk.keysyms.a:
-            self.adjust_annotation_bound(annotation, 'begin')
+            self.controller.gui.adjust_annotation_bound(annotation, 'begin')
         elif event.keyval == gtk.keysyms.A:
-            self.adjust_annotation_bound(annotation, 'end')
+            self.controller.gui.adjust_annotation_bound(annotation, 'end')
         elif event.keyval == gtk.keysyms.p:
             # Play
             f=self.annotation_fraction(widget)

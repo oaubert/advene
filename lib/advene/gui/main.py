@@ -3050,6 +3050,23 @@ class AdveneGUI(object):
         d.destroy()
         return timestamp
 
+    def adjust_annotation_bound(self, annotation, bound='begin'):
+        """Display a dialog to adjust the annotation bound.
+        """
+        translation={
+            'begin': _('begin'),
+            'end': _('end'),
+            }
+        t=getattr(annotation.fragment, bound)
+        new=self.bound_validation(t, _("Update %(bound)s of %(annotation)s") % { 'bound': translation[bound],
+                                                                                  'annotation': self.controller.get_title(annotation) })
+        if new != t:
+            self.controller.notify('EditSessionStart', element=annotation, immediate=True)
+            setattr(annotation.fragment, bound, new)
+            self.controller.notify('AnnotationEditEnd', annotation=annotation)
+            self.controller.notify('EditSessionEnd', element=annotation)
+        return True
+
     def display_textfile(self, path, title=None, viewname=None):
         w=gtk.Window()
         if title is not None:
