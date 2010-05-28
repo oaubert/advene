@@ -2989,6 +2989,8 @@ class AdveneGUI(object):
             r=TimestampRepresentation(timestamp + i * 1000 / 25, self.controller, width=100, visible_label=True)
             r.connect("clicked", select_time)
             hb.pack_start(r, expand=False)
+            if i == 0:
+                r.grab_focus()
         d.vbox.pack_start(hb, expand=False)
 
         buttons=gtk.HBox()
@@ -3024,6 +3026,16 @@ class AdveneGUI(object):
             return True
         hb.connect('scroll-event', handle_scroll_event)
 
+        def handle_key_press(widget, event):
+            if event.keyval == gtk.keysyms.Page_Down:
+                update(widget, hb, -count)
+                return True
+            elif event.keyval == gtk.keysyms.Page_Up:
+                update(widget, hb, +count)
+                return True
+            return False
+        d.connect('key-press-event', handle_key_press)
+        
         b=gtk.Button(stock=gtk.STOCK_GO_BACK)
         b.connect("clicked", update, hb, -count)
         buttons.pack_start(b, expand=True)
