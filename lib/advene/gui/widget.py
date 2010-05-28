@@ -985,7 +985,11 @@ class TimestampRepresentation(gtk.Button):
             self.image.hide()
             self.set_size_request(6, 12)
         else:
-            self.image.set_from_pixbuf(png_to_pixbuf(self.controller.package.imagecache.get(v, epsilon=self.epsilon), width=self.width))
+            ic=self.controller.package.imagecache
+            png = ic.get(v, epsilon=self.epsilon)
+            if png == ic.not_yet_available_image and 'async-snapshot' in self.controller.player.player_capabilities:
+                self.controller.queue_action(self.controller.update_snapshot, v)
+            self.image.set_from_pixbuf(png_to_pixbuf(png, width=self.width))
             self.set_size_request(-1, -1)
             self.image.show()
         ts=helper.format_time(self._value)
