@@ -126,7 +126,7 @@ class TimeAdjustment:
         self.image=TimestampRepresentation(self.value, self.controller, width, epsilon=1000/25, visible_label=False)
         self.image.connect('button-press-event', image_button_press)
         self.image.connect('clicked', image_button_clicked)
-        self.image.set_tooltip_text(_("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value\nright-click to invalidate screenshot"))
+        self.image.set_tooltip_text(_("Click to play\nControl+click to set to current time\Scroll to modify value (with control/shift)\nRight-click to invalidate screenshot"))
         hbox.pack_start(self.image, expand=False)
 
         if self.editable:
@@ -172,17 +172,18 @@ class TimeAdjustment:
         hb.show()
 
         def handle_scroll_event(button, event):
-            if not (event.state & gtk.gdk.CONTROL_MASK):
-                return True
-            if event.state & gtk.gdk.SHIFT_MASK:
-                i='second-scroll-increment'
+            if event.state & gtk.gdk.CONTROL_MASK:
+                i=config.data.preferences['scroll-increment']
+            elif event.state & gtk.gdk.SHIFT_MASK:
+                i=config.data.preferences['second-scroll-increment']
             else:
-                i='scroll-increment'
+                # 1 frame
+                i=1000/25
 
             if event.direction == gtk.gdk.SCROLL_DOWN:
-                incr=-config.data.preferences[i]
+                incr=-i
             elif event.direction == gtk.gdk.SCROLL_UP:
-                incr=config.data.preferences[i]
+                incr=i
 
             v=self.value
             v += incr
