@@ -2563,6 +2563,7 @@ class TimeLine(AdhocView):
         self.maximum = maximum
         self.update_model(partial_update=True)
         self.fraction_adj.value=1.0
+        self.limit_navtools.show()
         return True
 
     def unlimit_display(self, *p):
@@ -2576,6 +2577,7 @@ class TimeLine(AdhocView):
             self.maximum=42000
         self.update_model(partial_update=True)
         self.fraction_adj.value=1.0
+        self.limit_navtools.hide()
         return True
 
     def fraction_event (self, widget=None, *p):
@@ -3109,8 +3111,56 @@ class TimeLine(AdhocView):
 
         # Now build the scale_pane
         scale_pane = gtk.HPaned()
+
+        vb=gtk.VBox()
         self.scale_label = gtk.Label('Scale')
-        scale_pane.add1(self.scale_label)
+        vb.pack_start(self.scale_label, expand=False)
+
+        self.limit_navtools = gtk.HBox()
+        
+        def navigate(button, event, direction):
+            # Navigate to the previous/next page, when display is limited
+            page_duration=self.pixel2unit(self.adjustment.page_size, absolute=False)
+            if direction == -1:
+                # Previous page
+                mi = max(self.minimum - page_duration, 0)
+            elif direction == +1:
+                # Next page
+                mi = self.minimum + page_duration
+                if mi > self.controller.cached_duration:
+                    return True
+            self.limit_display(mi, mi + page_duration)
+            return True
+
+        # At the right of the annotation type : prev/next buttons
+        nav=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
+        nav.set_size_request(16, 16)
+        nav.set_tooltip_text(_('Goto previous page'))
+        eb=gtk.EventBox()
+        eb.connect('button-press-event', navigate, -1)
+        eb.add(nav)
+        self.limit_navtools.pack_start(eb, expand=False)
+
+        b=get_small_stock_button(gtk.STOCK_ZOOM_100, self.unlimit_display)
+        b.set_tooltip_text(_("Display whole movie"))
+        self.limit_navtools.pack_start(b, expand=False)
+
+        nav=gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
+        nav.set_size_request(16, 16)
+        nav.set_tooltip_text(_('Goto next page'))
+        eb=gtk.EventBox()
+        eb.connect('button-press-event', navigate, +1)
+        eb.add(nav)
+        self.limit_navtools.pack_start(eb, expand=False)
+
+        # Show contained widgets
+        self.limit_navtools.show_all()
+        # Do not honour future show_all calls, so that the navtools remain hidden
+        self.limit_navtools.set_no_show_all(True)
+        vb.add(self.limit_navtools)
+        self.limit_navtools.hide()
+
+        scale_pane.add1(vb)
 
         sw_scale=gtk.ScrolledWindow()
         sw_scale.set_policy(gtk.POLICY_NEVER, gtk.POLICY_NEVER)
