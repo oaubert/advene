@@ -52,7 +52,7 @@ class ActiveBookmarks(AdhocView):
     view_name = _("ActiveBookmarks")
     view_id = 'activebookmarks'
     tooltip= _("ActiveBookmarks")
-    def __init__(self, controller=None, elements=None, parameters=None, type=None):
+    def __init__(self, controller=None, elements=None, parameters=None, typ=None):
         super(ActiveBookmarks, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
@@ -72,6 +72,10 @@ class ActiveBookmarks(AdhocView):
                 b=ActiveBookmark(container=self, from_serialisation=v)
                 b.widget.show_all()
                 self.bookmarks.append(b)
+            elif n == 'type':
+                t=self.controller.package.get_element_by_id(v)
+                if t:
+                    typ=t
 
         if elements is not None:
             # A list of initial timestamps was provided
@@ -82,7 +86,9 @@ class ActiveBookmarks(AdhocView):
 
         self.mainbox=gtk.VBox()
         self.widget=self.build_widget()
-        self.type = type
+        if typ is None:
+            typ=self.controller.package.annotationTypes[0]
+        self.type = typ
         self.arrow_mark=None
         self.refresh()
 
@@ -113,7 +119,7 @@ class ActiveBookmarks(AdhocView):
         # Serialisation format: annotationid:begin:end:content where
         # annotationid and end may be "None" and content is
         # url-encoded
-        return self.options, ([ ('bookmark', b.serialize()) for b in self.bookmarks ])
+        return self.options, [ ('type', self.type.id) ] + [ ('bookmark', b.serialize()) for b in self.bookmarks ]
 
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
