@@ -4328,7 +4328,8 @@ class AdveneGUI(object):
 
             This method is meant to be run in its own thread.
             """
-            shot_re=re.compile('Shot log.*?(\d+)')
+            shot_re=re.compile('Shot log\s+::\s+(.+)')
+            exp_re = re.compile('(\d*\.\d*)e\+(\d+)')
 
             argv=[ config.data.path['shotdetect'],
                    '-i', gobject.filename_from_utf8(movie.encode('utf8')),
@@ -4353,7 +4354,14 @@ class AdveneGUI(object):
                     break
                 ms=shot_re.findall(l)
                 if ms:
-                    ts=long(ms[0])
+                    ts=0
+                    try:
+                        ts=long(ms[0])
+                    except ValueError:
+                        m=exp_re.match(ms[0])
+                        if m:
+                            ts=long(float(m.group(1)) * 10 ** int(m.group(2)))
+                            
                     pb._datapoints.append(ts)
                     d=self.controller.cached_duration
                     if d > 0:
