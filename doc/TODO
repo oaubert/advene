@@ -2,8 +2,6 @@
 
 * Improve dcp importer
 
-* svgeditor: strange issue when editing text
-
 * Make the timeline inspector editable (thus sticky display)
 
 * Screen overlay interface: define a grid with sensitive areas
@@ -2786,4 +2784,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * widget.py: check direct rendering of SVG graphics
 
 * main: incorrect svg when transmuting text to SVG
+
+* svgeditor: strange issue when editing text
 

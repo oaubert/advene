@@ -375,8 +375,6 @@ class Shape(object):
 
         edit.show_all()
         res=d.run()
-        d.destroy()
-
         if res == gtk.RESPONSE_OK:
             # Get new values
             for n in ('name', 'link', 'link_label', 'uri', 'text'):
@@ -389,9 +387,11 @@ class Shape(object):
             for n in ('filled', 'arrow'):
                 if n in edit.widgets:
                     setattr(self, n, edit.widgets[n].get_active())
+            d.destroy()
             return True
-
-        return False
+        else:
+            d.destroy()
+            return False
 
 class Rectangle(Shape):
     """Rectangle shape.
@@ -478,7 +478,7 @@ class Rectangle(Shape):
                  and y <= self.y + self.height )
 
 class Text(Rectangle):
-    """Experimental Text shape. Non-working for the moment.
+    """Text shape.
     """
     SHAPENAME=_("Text")
     SVGTAG='text'
@@ -491,6 +491,7 @@ class Text(Rectangle):
         self.linewidth=1
         self.filled=True
         self.text='Some text'
+        # FIXME: maybe we should consider a relative size (wrt. canvas size)
         self.textsize=20
 
     def render(self, pixmap, invert=False):
