@@ -320,12 +320,13 @@ class TraceTimeline(AdhocView):
                     c.ol *= ratio
                     c.x *= ratio
                     c.fontsize = c.ol/3
-                    c.update_objs(ratiox=ratio)
+                    c.update_objs(ratiox=ratio, blocked=self.links_locked)
                 i -= 1
             for tm in self.timemarks:
                 for i in range(0,tm.get_n_children()):
                     tm.get_child(i).props.x *= ratio
                     tm.get_child(i).props.width *= ratio
+            self.update_lines()
             self.now_line.props.x *= ratio
             self.now_line.props.width *= ratio
 
@@ -642,12 +643,11 @@ class TraceTimeline(AdhocView):
                 c.y *= ratio
                 c.l *= ratio
                 c.fontsize = c.ol/3
-                c.update_objs(ratioy=ratio)
+                c.update_objs(ratioy=ratio, blocked=self.links_locked)
             n -= 1
         for tm in self.timemarks:
             for i in range(0,tm.get_n_children()):
                 tm.get_child(i).props.y *= ratio
-        
         if len(self.timemarks)>2:
             #on a au moins 2 lignes temporelles
             if ratio > 1 and self.timemarks[1].get_child(0).props.y - self.timemarks[0].get_child(0).props.y > h/4.0 or self.timemarks[1].get_child(0).props.y - self.timemarks[0].get_child(0).props.y < h/6.0:
@@ -656,6 +656,7 @@ class TraceTimeline(AdhocView):
                     t.remove()
                 self.timemarks=[]
                 self.draw_marks()
+        self.update_lines()
         va.value = vc/self.timefactor-va.page_size/2.0
         if va.value<va.lower:
             va.value=va.lower
@@ -709,7 +710,7 @@ class TraceTimeline(AdhocView):
         
     #FIXME : types / schema / views
     def recreate_item(self, w=None, obj_group=None):
-        c = obj_group.cobj['opes'][-1].content
+        c = obj_group.operation.content
         if obj_group.cobj['type'] == Annotation:
             # t : content a parse
             # b : content a parse
@@ -983,6 +984,7 @@ class TraceTimeline(AdhocView):
                         font = "Sans 7")
             a.props.tooltip=txt
             self.timemarks.append(mgroup)
+            mgroup.lower(None)
             t+=tinc
         return
 
@@ -1126,8 +1128,7 @@ class TraceTimeline(AdhocView):
             #transofrm item
             l.rect.props.height=newlength
             #update already existing / not existing items before adding the new one
-            l.update_objs()
-            #l.addObj(operation,self.links_locked)
+            l.update_objs(blocked=self.links_locked)
             ev=l
         else:
             #totally new action
@@ -1143,6 +1144,7 @@ class TraceTimeline(AdhocView):
                 self.draw_marks()
             ev = EventGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.docgroup, None, action, x, y, length, self.col_width, self.obj_l, 14, color, self.links_locked)
             self.cols[action.name]=(h,ev)
+        self.update_lines()
         self.canvas.show()
         if self.autoscroll:
             a = self.sw.get_vadjustment()
@@ -1153,7 +1155,28 @@ class TraceTimeline(AdhocView):
             self.context_add_line(action)
         return ev
 
+    def update_lines(self):
+        root = self.canvas.get_root_item()
+        i=0
+        found=False
+        while i < root.get_n_children():
+            g = root.get_child(i)
+            i+=1
+            if isinstance(g, ObjGroup):
+                if g.center_sel:
+                    g.update_lines()
+                    found=True
+                    #we found the selected item, stop there
+                    break
+        # we did not found the item, but we are links_locked. We should free links.
+        if not found and self.links_locked:
+            self.toggle_lock()
+
     def find_group(self, observed):
+        """ Find an avent Group according to an action or operation
+            observed: an action or aperation
+            return an event group
+        """
         g=None
         root = self.canvas.get_root_item()
         i=0
@@ -1313,7 +1336,7 @@ class EventGroup (Group):
         self.rect = self.newRect (self.color, self.color_c)
         self.objs=[]
         #self.lines = []
-        self.update_objs()
+        self.update_objs(blocked=blocked)
         self.handler_ids = {
         'enter-notify-event':None,
         'leave-notify-event':None,
@@ -1364,19 +1387,23 @@ class EventGroup (Group):
             self.objs[-1].true_y = true_y 
         return        
 
-    def update_objs(self, ratiox=1,ratioy=1):
+    def update_objs(self, ratiox=1,ratioy=1, blocked=False):
         w = self.rect.props.width
         l = self.rect.props.height
+        c_sel = None
         if l < 10:
             #not enough space
             for c in self.objs:
+                if c.center_sel:
+                    locked=True
                 c.remove()
-                self.objs.remove(c)
+            self.objs=[]
             if self.commentMark:
                 self.removeCommentMark()
+            
         else:
             if not self.objs:
-                self.drawObjs()
+                self.drawObjs(blocked)
             else:
                 ol = min(l-3, float(w)/2 - 3)
                 self.ol=ol
@@ -1391,7 +1418,6 @@ class EventGroup (Group):
                     c.true_y = c.y # we need to remember this value for the next update
                     c.r = ol/2
                     c.fontsize = 2*c.r/3
-                    #FIXME : if we change to a 1s update cycle, this won't work as the action will be changed without new op
                     if self.event.time[1] == c.operation.time:
                         #last operation, need to change y to display it
                         c.y = self.rect.get_bounds().y2 - ol -5  
@@ -1406,17 +1432,14 @@ class EventGroup (Group):
                 for op in self.event.operations:      
                     #obj may not already exist for this op
                     if op not in already_existing_op:
-                        self.addObj(op, False)
+                        self.addObj(op, blocked)
             if self.commentMark:
                 self.commentMark.props.x *= ratiox
                 self.commentMark.props.y *= ratioy
-                #~ self.removeCommentMark()
-                #~ self.addCommentMark()
             elif self.event.comment!='':
                 self.addCommentMark()
                 
-                
-    def drawObjs(self, blocked=False):
+    def drawObjs(self, blocked):
         for op in self.event.operations:
             self.addObj(op, blocked)
 
@@ -1520,18 +1543,23 @@ class ObjGroup (Group):
         #move text
         if self.text:
             self.text.props.y = self.y + self.r + 3
-            self.text.props.x = self.x +3* self.r + 3
+            self.text.props.x = self.x +3 * self.r + 3
             self.text.props.font = "Sans %s" % str(self.fontsize)
-            
+
+    def update_lines(self):
+        if self.center_sel:
+            self.remove_rels()
+            self.add_rels()
+
 
     def on_mouse_over(self, w, target, event):
-        self.toggle_rels()
+        self.toggle_rels(True)
         self.fill_inspector()
         self.dg.changeMarks(obj=self)
         return
 
     def on_mouse_leave(self, w, target, event):
-        self.toggle_rels()
+        self.toggle_rels(False)
         self.clean_inspector()
         self.dg.changeMarks()
         return
@@ -1542,88 +1570,107 @@ class ObjGroup (Group):
     def fill_inspector(self):
         self.inspector.fillWithItem(self)
 
-    
-    #FIXME
-    def toggle_rels(self):
+    def remove_rels(self):
+        r = self.canvas.get_root_item()
+        i=0
+        while i<r.get_n_children():
+            og = r.get_child(i)
+            if isinstance(og, ObjGroup):
+                #we remove lines
+                for l in og.lines:
+                    l.remove()
+                og.lines=[]
+                if og.sel:
+                    og.deselect()
+            i+=1
+        return
+          
+    def add_rels(self):
+        r = self.canvas.get_root_item()
+        lg=[]        
+        i=0
+        while i<r.get_n_children():
+            eg = r.get_child(i)
+            if isinstance(eg, EventGroup):
+                lop = {}
+                # if it is an eventgroup, we list its operations which do have an objgroup
+                for objg in eg.objs:
+                    if objg.rep:
+                        #navigation actions do not have rep
+                        lop[objg.operation]=objg
+                # we then test each operation from event group
+                for op in eg.event.operations:
+                    if op.concerned_object == self.cobj:
+                        # if it concerns our advene object, and it has an associated objgroup we add it
+                        if op in lop:
+                            lg.append(lop[op])
+                        elif eg not in lg:
+                            # else we had the eventgroup
+                            lg.append(eg)
+            i+=1
+        self.center_sel = True
+        self.select()
+        if self.link_mode == 0:
+            x0=self.rep.props.center_x
+            y0=self.rep.props.center_y
+            for g in lg:
+                if g == self:
+                    continue
+                if hasattr(g, 'rep'):
+                    #this is an objgroup
+                    x1=g.rep.props.center_x
+                    y1=g.rep.props.center_y
+                else:
+                    #this is an eventgroup
+                    x1=g.rect.props.x+g.rect.props.width/2.0
+                    y1=g.rect.props.y+g.rect.props.height
+                p = goocanvas.Points ([(x0, y0), (x1,y1)])
+                self.lines.append(goocanvas.Polyline (parent = self,
+                                  close_path = False,
+                                  points = p,
+                                  stroke_color = 0xFFFFFFFF,
+                                  line_width = 1.0,
+                                  start_arrow = False,
+                                  end_arrow = False,
+                                  ))
+        else:
+            dic={}
+            for g in lg:
+                if isinstance(g, EventGroup):
+                    x=g.rect.props.x+g.rect.props.width/2.0
+                    y=g.rect.props.y+g.rect.props.height
+                    # we test each op from this group
+                    for op in g.event.operations:
+                        if op.concerned_object == self.cobj:
+                            # if it concerns our advene object, and it is not already in (obj maybe)
+                            if op.time not in dic:
+                                dic[op.time]=(x,y)
+                else:
+                    dic[g.operation.time]=(g.rep.props.center_x, g.rep.props.center_y)
+            ks = dic.keys()
+            ks.sort()
+            p=goocanvas.Points([dic[k] for k in ks])
+            self.lines.append(goocanvas.Polyline (parent = self,
+                                close_path = False,
+                                points = p,
+                                stroke_color = 0xFFFFFFFF,
+                                line_width = 1.0,
+                                start_arrow = False,
+                                end_arrow = False,
+                                ))
+        self.raise_(None)
+
+
+    def toggle_rels(self, on):
+        if not self.rep:
+            # there is no line to trace for navigation operations
+            return
+        if not on:
+            self.remove_rels()
+        else:
+            self.add_rels()
         return
         
-    #~ def toggle_rels(self):
-        #~ r = self.canvas.get_root_item()
-        #~ chd = []
-        #~ i = 0
-        #~ desel = False
-        #~ while i <r.get_n_children():
-            #~ f = r.get_child(i)
-            #~ if isinstance(f, EventGroup) and f.objs is not None:
-                #~ chd.append(f)
-                #~ for obj_id in f.objs:
-                    #~ obg = f.objs[obj_id][0]
-                    #~ if obg is None:
-                        #~ continue
-                    #~ for l in obg.lines:
-                        #~ #n=obg.find_child(l)
-                        #~ #if n>=0:
-                        #~ #    obg.remove_child(n)
-                        #~ l.remove()
-                    #~ obg.lines=[]
-                    #~ if obg.sel:
-                        #~ if obg.center_sel and obg == self:
-                            #~ desel = True
-                        #~ obg.deselect()
-            #~ i+=1
-        #~ if desel:
-            #~ return
-        #~ self.select()
-        #~ self.center_sel = True
-        #~ if self.link_mode == 0:
-            #~ for c in chd:
-                #~ if self.cobj['id'] in c.objs:
-                    #~ obj_gr = c.objs[self.cobj['id']][0]
-                    #~ if obj_gr != self:
-                        #~ x2=y2=0
-                        #~ x1 = self.x
-                        #~ y1 = self.y
-                        #~ if obj_gr is None:
-                            #~ x2 = c.rect.get_bounds().x1 + c.rect.props.width/2
-                            #~ y2 = c.rect.get_bounds().y1 + c.rect.props.height/2
-                        #~ else:
-                            #~ x2 = obj_gr.x
-                            #~ y2 = obj_gr.y
-                            #~ obj_gr.select()
-                        #~ p = goocanvas.Points ([(x1, y1), (x2,y2)])
-                        #~ self.lines.append(goocanvas.Polyline (parent = self,
-                                        #~ close_path = False,
-                                        #~ points = p,
-                                        #~ stroke_color = 0xFFFFFFFF,
-                                        #~ line_width = 1.0,
-                                        #~ start_arrow = False,
-                                        #~ end_arrow = False,
-                                        #~ ))
-        #~ else:
-            #~ dic={}
-            #~ for c in chd:
-                #~ if self.cobj['id'] in c.objs:
-                    #~ obj_gr = c.objs[self.cobj['id']][0]
-                    #~ obj_time = c.objs[self.cobj['id']][2]['opes'][0].time
-                    #~ if obj_gr is None:
-                        #~ x = c.rect.get_bounds().x1 + c.rect.props.width/2
-                        #~ y = c.rect.get_bounds().y1 + c.rect.props.height/2
-                    #~ else:
-                        #~ x = obj_gr.x
-                        #~ y = obj_gr.y
-                        #~ obj_gr.select()
-                    #~ dic[obj_time] = (x, y)
-            #~ p=goocanvas.Points(sorted(dic))
-            #~ self.lines.append(goocanvas.Polyline (parent = self,
-                                        #~ close_path = False,
-                                        #~ points = p,
-                                        #~ stroke_color = 0xFFFFFFFF,
-                                        #~ line_width = 1.0,
-                                        #~ start_arrow = False,
-                                        #~ end_arrow = False,
-                                        #~ ))
-
-        #~ return
 
     def select(self):
         self.rep.props.fill_color_rgba=self.color_sel
