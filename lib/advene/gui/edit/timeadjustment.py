@@ -351,7 +351,7 @@ class FrameSelector(object):
     def __init__(self, controller, timestamp=0, callback=None):
         self.controller = controller
         self.timestamp = timestamp
-        self.selected_value = self.timestamp
+        self.selected_value = timestamp
         self.callback = callback
         self.count = 5
         self.frame_length = 1000 / 25
@@ -375,12 +375,13 @@ class FrameSelector(object):
     def update_timestamp(self, timestamp):
         """Set the center timestamp.
         """
+        self.current_button.set_label('Current value: %s' % helper.format_time(timestamp))
         start = max(timestamp - self.count * self.frame_length, 0)
         for c in self.container.get_children():
             c.value = start
-            start += self.frame_length
             if start == timestamp:
                 c.grab_focus()
+            start += self.frame_length
         return True
 
     def update_snapshots(self):
@@ -452,7 +453,7 @@ class FrameSelector(object):
         hb=gtk.HBox()
 
         for i in xrange(-self.count, self.count):
-            r=TimestampRepresentation(0, self.controller, width=100, visible_label=True)
+            r=TimestampRepresentation(0, self.controller, width=100, visible_label=True, epsilon=30)
             r.connect("clicked", self.select_time)
             hb.pack_start(r, expand=False)
 
@@ -470,6 +471,7 @@ class FrameSelector(object):
         buttons.pack_start(b, expand=False)
 
         b=gtk.Button('Current value: %s' % helper.format_time(self.selected_value))
+        self.current_button = b
         # Go back to original timestamp
         b.connect("clicked", lambda b: self.update_timestamp(self.selected_value))
         buttons.pack_start(b, expand=True)
