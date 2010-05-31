@@ -3058,8 +3058,7 @@ class AdveneGUI(object):
 
         set_index(0)
         d.show_all()
-        d.run()
-        d.destroy()
+        d.connect("response", lambda d, r: d.destroy())
         return True
 
     def display_textfile(self, path, title=None, viewname=None):
