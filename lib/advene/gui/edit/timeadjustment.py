@@ -466,7 +466,7 @@ class FrameSelector(object):
         buttons.pack_start(b, expand=True)
 
         b=gtk.Button(stock=gtk.STOCK_REFRESH)
-        b.connect("clicked", lambda b: self.refresh())
+        b.connect("clicked", lambda b: self.update_snapshots())
         buttons.pack_start(b, expand=False)
 
         b=gtk.Button('Current value: %s' % helper.format_time(self.selected_value))
