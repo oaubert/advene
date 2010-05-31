@@ -348,13 +348,10 @@ class FrameSelector(object):
     the timestamp and allows to select the most appropriate
     one.
     """
-    def __init__(self, controller, timestamp=0, title=None, callback=None):
+    def __init__(self, controller, timestamp=0, callback=None):
         self.controller = controller
         self.timestamp = timestamp
         self.selected_value = self.timestamp
-        if title is None:
-            title = _("Select the appropriate snapshot")
-        self.title = title
         self.callback = callback
         self.count = 5
         self.frame_length = 1000 / 25
@@ -382,6 +379,8 @@ class FrameSelector(object):
         for c in self.container.get_children():
             c.value = start
             start += self.frame_length
+            if start == timestamp:
+                c.grab_focus()
         return True
 
     def update_snapshots(self):
@@ -410,8 +409,10 @@ class FrameSelector(object):
             return True
         return False
 
-    def get_value(self):
-        d = gtk.Dialog(title=self.title,
+    def get_value(self, title=None):
+        if title is None:
+            title = _("Select the appropriate snapshot")
+        d = gtk.Dialog(title=title,
                        parent=None,
                        flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                        buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
