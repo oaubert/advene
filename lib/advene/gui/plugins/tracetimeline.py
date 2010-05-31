@@ -66,6 +66,8 @@ INCOMPLETE_OPERATIONS_NAMES = {
         }
 
 class TraceTimeline(AdhocView):
+    """ Class to define a timeline view of traces.
+    """
     view_name = _("Traces")
     view_id = 'tracetimeline'
     tooltip=("Traces of Advene Events in a Timeline")
@@ -146,6 +148,9 @@ class TraceTimeline(AdhocView):
         self.refresh()
 
     def select_trace(self, trace):
+        """ Change the selected trace, reinitializing the current display.
+            Specific display values are stored in self.display_values for each opened trace
+        """
         if isinstance(trace, (int, long)):
             # Interpret it as an index into the self.tracers.traces
             # list
@@ -173,7 +178,6 @@ class TraceTimeline(AdhocView):
 
     def build_widget(self):
         mainbox = gtk.VBox()
-
         # trace selector
         def trace_changed(w):
             self.select_trace(w.get_active())
@@ -190,6 +194,8 @@ class TraceTimeline(AdhocView):
         self.selector_box.pack_start(self.trace_selector, expand=True)
         self.remove_trace_button = get_small_stock_button(gtk.STOCK_CANCEL)
         def remove_trace(button, event):
+            """ Remove a trace from the selector list
+            """
             tr = self.trace_selector.get_active()
             if tr > 0:
                 self.tracer.remove_trace(tr)
@@ -208,6 +214,10 @@ class TraceTimeline(AdhocView):
         self.quicksearch_entry=gtk.Entry()
         self.quicksearch_entry.set_text(_('Search'))
         def do_search(button, options):
+            """ Execute a search query in the active trace.
+                Result is added to the selector as a new trace
+                options : a list containing the dfferent options for the search query
+            """
             tr=self.tracer.search(self.active_trace, unicode(self.quicksearch_entry.get_text(),'utf-8'), options[0], options[1])
             mod= self.trace_selector.get_model()
             if len(self.tracer.traces)>len(mod):
@@ -221,12 +231,16 @@ class TraceTimeline(AdhocView):
         self.quicksearch_button.connect('clicked', do_search, quicksearch_options)
         self.quicksearch_button.connect('activate', do_search, quicksearch_options)
         def is_focus(w, event):
-            if w.is_focus() :
+            """ Auto select search text if focused
+            """
+            if w.is_focus():
                 return False
             w.select_region(0, len(w.get_text()))
             w.grab_focus()
             return True
         def is_typing(w, event):
+            """ Execute search query if <Enter> is pressed in search entry
+            """
             #if return is hit, activate quicksearch_button
             if event.keyval == gtk.keysyms.Return:
                 self.quicksearch_button.activate()
@@ -260,6 +274,8 @@ class TraceTimeline(AdhocView):
         self.context_canvas.set_size_request(self.context_canvasX, -1)
         
         def context_resize(w, alloc):
+            """ Adapt context canvas on resize (it should always cover the entire allocated space)
+            """
             h = w.get_allocation().height
             self.context_canvasY = (h-1.0)
             self.context_canvas.set_bounds(0,0,self.context_canvasX, self.context_canvasY)
@@ -278,6 +294,8 @@ class TraceTimeline(AdhocView):
         self.sw = scrolled_win
         self.sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
         def sw_scrolled(a):
+            """ Move context selection frame when scrolling the timeline
+            """
             self.context_update_sel_frame()
         self.sw.get_vadjustment().connect('value-changed', sw_scrolled)
         self.head_canvas = goocanvas.Canvas()
@@ -299,6 +317,9 @@ class TraceTimeline(AdhocView):
         self.canvas.connect('button-release-event', self.canvas_release)
         
         def canvas_resize(w, alloc):
+            """ Adapt the main canvas, head canvas and the drawing (Evengroups, marks, lines)
+                according to the new allocated space.                
+            """
             if abs(self.canvasX-(alloc.width-20)) < 5:
                 # resize every 5 pixels
                 return
@@ -333,6 +354,10 @@ class TraceTimeline(AdhocView):
         self.head_canvas.connect('size-allocate', canvas_resize)
         
         def doc_canvas_resize(w, alloc):
+            """ Adapt the doc canvas to the new allocated space and redraw the doc group
+            """
+            # FIXME : maybe we should not delete and recreate it 
+            # as we can just move it as everything else :D
             #redraw doc_canvas
             self.doc_canvas_X = alloc.width
             self.doc_canvas_Y = alloc.height
@@ -346,6 +371,8 @@ class TraceTimeline(AdhocView):
         scrolled_win.add(self.canvas)
         
         def show_tooltip(w, x, y, km, tooltip):
+            """ Show a tooltip according to the item under the cursor
+            """
             under_cursor = self.canvas.get_items_at(x, y+w.get_vadjustment().value, False)
             if not under_cursor:
                 return False
@@ -393,6 +420,8 @@ class TraceTimeline(AdhocView):
         b.connect('clicked', self.toggle_link_mode)
         
         def open_trace(b):
+            """ Open a trace file, add it to the trace selector and make it active
+            """
             fname=dialog.get_filename(title=_("Open a trace file"),
                                    action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                    button=gtk.STOCK_OPEN,
@@ -442,6 +471,11 @@ class TraceTimeline(AdhocView):
 
 
         def on_background_scroll(widget, event):
+            """ Manage scrolling event on timeline. 
+                Zoom if <ctrl> is pressed.
+                Horizontal scrolling if <shift> is pressed.
+                Vertical scrolling if nothing special.
+            """
             zoom=event.state & gtk.gdk.CONTROL_MASK
             a = None
             if zoom:
@@ -480,6 +514,10 @@ class TraceTimeline(AdhocView):
         self.canvas.connect('scroll-event', on_background_scroll)
 
         def on_background_motion(widget, event):
+            """ Manage background motion when left button is clicked.
+                if <shift> is pressed, draw a selection frame
+                if nothing is pressed, drag the canvas
+            """
             if not event.state & gtk.gdk.BUTTON1_MASK:
                 return False
             if event.state & gtk.gdk.SHIFT_MASK:
@@ -526,6 +564,9 @@ class TraceTimeline(AdhocView):
         self.canvas.connect('motion-notify-event', on_background_motion)
 
         def zoom_out(w, center_v=None):
+            """ Manage zoom when zooming out.
+                Verify that we wont too much dezoom.
+            """
             h = self.canvas.get_allocation().height
             if h/float(self.canvasY)>=0.8:
                 self.zoom_100(w)
@@ -542,13 +583,18 @@ class TraceTimeline(AdhocView):
         return mainbox
 
     def zoom_100(self, w=None):
+        """ Zoom the timeline to 100% of the canvas space.
+        """
         h = self.canvas.get_allocation().height
         ratio = (h-1.0)/self.canvasY
         self.zoom_at_ratio(w, ratio, None)
     
 
     def refresh_time(self):
-        # function called every x seconds to continue drawing the trace.
+        """ Do a refresh of the timeline, extending the canvas to the current time.
+            Called every x seconds to refresh continuously.
+            Keep 100% aspect ratio if self.auto_refresh_keep_100
+        """
         # should return false to stop cycle
         if self.active_trace != self.tracer.trace:
             # we are not currently visualizing the true trace
@@ -566,6 +612,8 @@ class TraceTimeline(AdhocView):
         return self.auto_refresh
         
     def toggle_auto_refresh(self, w=None):
+        """ Activate or deactivate autorefresh
+        """
         #function to launch / stop autorefresh
         self.auto_refresh = not self.auto_refresh
         if self.auto_refresh:
@@ -578,9 +626,13 @@ class TraceTimeline(AdhocView):
             print "auto_refresh stopped"
         
     def show_inspector(self):
+        """ Expand inspector zone to show it
+        """
         self.widget.get_children()[2].get_children()[2].set_position(201) # same as size request for canvas
 
     def export(self, w):
+        """ Export current trace to a predefined location
+        """
         fname = self.tracer.export()
         d = gtk.Dialog(title=_("Exporting traces"),
                        parent=None,
@@ -598,8 +650,9 @@ class TraceTimeline(AdhocView):
         d.destroy()
         return
 
-    #FIXME
     def toggle_link_mode(self, w):
+        """ Change the link mode and propagate it to eventgroups and objgroups
+        """
         if self.link_mode == 0:
             self.link_mode = 1
             w.set_label('H')
@@ -613,9 +666,13 @@ class TraceTimeline(AdhocView):
             if isinstance(go, ObjGroup) or isinstance(go, EventGroup):
                 go.link_mode=self.link_mode
             i+=1
+        self.update_lines()
         return
 
     def zoom_at_ratio(self, w=None, ratio=1, center_v=None):
+        """ Recalculate the canvas bounds and each element of the drawing according to the y zoom ratio
+            If a center value is given, keep centering the canvas on this value
+        """
         h = self.canvas.get_allocation().height
         #print float(h*self.timefactor)/ratio<1, h, self.timefactor
         if float(h*self.timefactor)/ratio<1:
@@ -664,6 +721,8 @@ class TraceTimeline(AdhocView):
             va.value=va.upper-va.page_size
             
     def zoom_on(self, w=None, canvas_item=None):
+        """ Zoom on an item (ObjGroup or EventGroup) in the canvas
+        """
         min_y = -1
         max_y = -1
         if hasattr(canvas_item, 'rect'):
@@ -710,6 +769,9 @@ class TraceTimeline(AdhocView):
         
     #FIXME : types / schema / views
     def recreate_item(self, w=None, obj_group=None):
+        """ Allows to recreate a deleted Advene object from the trace.
+            Currently only works for annotations and relations
+        """
         c = obj_group.operation.content
         if obj_group.cobj['type'] == Annotation:
             # t : content a parse
@@ -773,10 +835,14 @@ class TraceTimeline(AdhocView):
         return
 
     def edit_item(self, w=None, obj=None):
+        """ Opens advene edit window to edit the selected element
+        """
         if obj is not None:
             self.controller.gui.edit_element(obj)
 
     def goto(self, w=None, time=None):
+        """ Navigate in the movie to the time <time>
+        """
         c=self.controller
         pos = c.create_position (value=time,
                                      key=c.player.MediaTime,
@@ -785,6 +851,9 @@ class TraceTimeline(AdhocView):
         return
 
     def canvas_release(self, w, ev):
+        """ Manage the release of mouse buttons on the canvas
+            Remove the selection frame, and zoom if <shift> pressed
+        """
         if self.sel_frame:
             self.sel_frame.remove()
             self.sel_frame=None
@@ -813,6 +882,10 @@ class TraceTimeline(AdhocView):
             self.widget.get_parent_window().set_cursor(None)
 
     def canvas_clicked(self, w, ev):
+        """ Manage mouse buttons on the canvas
+            Draw a selection frame if <shift> pressed and left click
+            Display contextual menu according to under the cursor items if right click
+        """
         if ev.state & gtk.gdk.SHIFT_MASK:
             self.selection = [ ev.x, ev.y, 0, 0]
             if self.sel_frame:
@@ -899,6 +972,9 @@ class TraceTimeline(AdhocView):
                 self.toggle_lock(w=evt_gp)
 
     def toggle_lock(self, w=None):
+        """ Draw or remove links between items
+            Blocked object handlers accordingly
+        """
         self.links_locked = not self.links_locked
         if self.links_locked:
             #self.btnl.set_label(_('Locked'))
@@ -933,6 +1009,8 @@ class TraceTimeline(AdhocView):
             i+=1
 
     def draw_marks(self):
+        """ Draw the time marks on the main canvas
+        """
         # verifying start time (changed if an import occured)
         self.start_time = self.active_trace.start
         #Calculating where to start from and the increment between marks
@@ -989,6 +1067,8 @@ class TraceTimeline(AdhocView):
         return
 
     def redraw_head_canvas(self):
+        """ Clean and redraw the head canvas...
+        """
         root = self.head_canvas.get_root_item()
         while root.get_n_children()>0:
             root.remove_child (0)
@@ -996,6 +1076,8 @@ class TraceTimeline(AdhocView):
         return
 
     def populate_head_canvas(self):
+        """ Create head canvas groups according to the trace model
+        """
         offset = 0
         for c in self.tracer.tracemodel['actions']:
             etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][c])))
@@ -1005,19 +1087,26 @@ class TraceTimeline(AdhocView):
         return
 
     def destroy(self, source=None, event=None):
+        """ Intercept the destroy event to unregister the view and suspend the autorefresh
+        """
         if self.auto_refresh:
             self.toggle_auto_refresh()
         self.tracer.unregister_view(self)
         return False
 
     def extend_canvas(self):
+        """ Extend the main canvas to display time until now
+        """
         self.canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
         if self.now_line:
             self.now_line.props.y=self.canvasY-1
 
 
-    #FIXME : verify link lock problem, selection and center
     def refresh(self, center = None):
+        """ Refresh the drawing of the main canvas
+            Remove everything on the main canvas and redraw them
+            Should only be used when opening the view / changing selected trace
+        """
         # method to refresh the canvas display
         # 1/ clean the canvas, memorizing selected item
         # 2/ recalculate the canvas area according to timefactor and last action
@@ -1027,6 +1116,9 @@ class TraceTimeline(AdhocView):
         # 6/ reselect selected item
         # 7/ re-deactive locked_links
         # center : the timestamp on which the display needs to be centered
+        if self.links_locked:
+            self.toggle_lock()
+            self.inspector.clean()
         root=self.canvas.get_root_item()
         while root.get_n_children()>0:
             c = root.get_child(0)
@@ -1070,13 +1162,14 @@ class TraceTimeline(AdhocView):
 
 
     def receive(self, trace, event=None, operation=None, action=None):
-        # trace : the full trace to be managed
-        # event : the new or latest modified event
-        # operation : the new or latest modified operation
-        # action : the new or latest modified action
-        # return False.
-        # This function is called by the tracer to update the gui
-        # it should always return False to avoid 100% cpu consumption.
+        """ This function is called by the tracer to update the gui
+            trace : the full trace to be managed
+            event : the new or latest modified event
+            operation : the new or latest modified operation
+            action : the new or latest modified action
+            It should always return False to avoid 100% cpu consumption.
+        """
+
         if self.active_trace == trace:
             self.receive_int(trace, event, operation, action)
         if not (event or operation or action):
@@ -1090,11 +1183,12 @@ class TraceTimeline(AdhocView):
         return False
 
     def receive_int(self, trace, event=None, operation=None, action=None):
-        # trace : the full trace to be managed
-        # event : the new or latest modified event
-        # operation : the new or latest modified operation
-        # action : the new or latest modified action
-        # return the created group
+        """ Manage each new event in the trace.
+            trace : the full trace to be managed
+            event : the new or latest modified event
+            operation : the new or latest modified operation
+            action : the new or latest modified action
+        """
         #print "Debug: received : action %s, operation %s, event %s" % (action, operation, event)
         ev = None
         if event and (event.name=='DurationUpdate' or event.name=='MediaChange'):
@@ -1156,6 +1250,8 @@ class TraceTimeline(AdhocView):
         return ev
 
     def update_lines(self):
+        """ Search for the Objgroup containing lines and update them
+        """
         root = self.canvas.get_root_item()
         i=0
         found=False
@@ -1261,6 +1357,8 @@ class TraceTimeline(AdhocView):
         return
 
     def context_update_sel_frame(self):
+        """ Update the context canvas selection frame 
+        """
         if not self.context_frame:
             self.context_draw_sel_frame()
         h = self.canvas.get_allocation().height
@@ -1277,6 +1375,8 @@ class TraceTimeline(AdhocView):
 
 
 class HeadGroup (Group):
+    """ Group containing a rectangle and a name used to display headers
+    """
     def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00ffff50):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
@@ -1311,6 +1411,8 @@ class HeadGroup (Group):
             return
 
 class EventGroup (Group):
+    """ Group containing a rectangle, commentmarks and ObjGroups used to display an action
+    """
     def __init__(self, link_mode=0, controller=None, inspector=None, canvas=None, dg=None, type=None, event=None, x =0, y=0, l=1, w=90, ol=5, fontsize=6, color_c=0x00ffffff, blocked=False):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.canvas = canvas
@@ -1351,6 +1453,8 @@ class EventGroup (Group):
             self.addCommentMark()
 
     def newRect(self, color, color_c):
+        """ Create a new rectangle for the group
+        """
         return goocanvas.Rect (parent = self,
                                     x = self.x,
                                     y = self.y,
@@ -1361,6 +1465,8 @@ class EventGroup (Group):
                                     line_width = 2.0)
 
     def addObj(self, op, blocked):
+        """ Add objgroups to the group, if they can be displayed
+        """
         x=self.rect.get_bounds().x1+3
         ratio = float((self.event.time[1]-self.event.time[0]))/self.rect.props.height
         y = (op.time-self.event.time[0]) / ratio + self.rect.get_bounds().y1
@@ -1388,6 +1494,8 @@ class EventGroup (Group):
         return        
 
     def update_objs(self, ratiox=1,ratioy=1, blocked=False):
+        """ Update Objgroups belonging to the group
+        """
         w = self.rect.props.width
         l = self.rect.props.height
         c_sel = None
@@ -1440,34 +1548,46 @@ class EventGroup (Group):
                 self.addCommentMark()
                 
     def drawObjs(self, blocked):
+        """ Add objgroup for each operation of the action of the group
+        """
         for op in self.event.operations:
             self.addObj(op, blocked)
 
 
     def on_mouse_over(self, w, target, event):
-        #print '1 %s %s %s %s' % self.canvas.get_bounds()
+        """ Change marks and inspector informations according to the group
+        """
         self.fill_inspector()
         self.dg.changeMarks(action=self.event)
-        #print '2 %s %s %s %s' % self.canvas.get_bounds()
         return
 
     def on_mouse_leave(self, w, target, event):
+        """ Empty marks and inspector informations
+        """
         self.clean_inspector()
         self.dg.changeMarks()
         return
 
     def clean_inspector(self):
+        """ Empty inspector
+        """
         self.inspector.clean()
 
     def fill_inspector(self):
+        """ Fill inspector with informations concerning this group
+        """
         self.inspector.fillWithAction(self)
 
     def removeCommentMark(self):
+        """ Remove comment mark from this group
+        """
         if self.commentMark:
             self.commentMark.remove()
             self.commentMark = None
 
     def addCommentMark(self):
+        """ Add comment mark to this group if it has a comment
+        """
         if not self.commentMark:
             pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
                         ( ('pixmaps', 'traces', 'msg.png')), 16, 16)
@@ -1481,6 +1601,8 @@ class EventGroup (Group):
 
 
 class ObjGroup (Group):
+    """ Group used to display informations on an operation
+    """
     def __init__(self, link_mode=0, controller=None, inspector=None, canvas=None, dg=None, x=0, y=0, r=4, fontsize=5, op=None, blocked=False):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
@@ -1526,6 +1648,8 @@ class ObjGroup (Group):
             self.handler_block(self.handler_ids['leave-notify-event'])
 
     def move_group(self):
+        """ Update the display of each element of the group except lines
+        """
         #move rep
         if self.rep:
             self.rep.props.center_y = self.y + self.r + 3
@@ -1547,30 +1671,42 @@ class ObjGroup (Group):
             self.text.props.font = "Sans %s" % str(self.fontsize)
 
     def update_lines(self):
+        """ Update lines if the group is the selected item
+        """ 
         if self.center_sel:
             self.remove_rels()
             self.add_rels()
 
 
     def on_mouse_over(self, w, target, event):
+        """ Change marks and inspector informations according to the group, and display lines
+        """
         self.toggle_rels(True)
         self.fill_inspector()
         self.dg.changeMarks(obj=self)
         return
 
     def on_mouse_leave(self, w, target, event):
+        """ Change marks and inspector informations and remove lines
+        """
         self.toggle_rels(False)
         self.clean_inspector()
         self.dg.changeMarks()
         return
 
     def clean_inspector(self):
+        """ Empty inspector
+        """
         self.inspector.clean()
 
     def fill_inspector(self):
+        """ Fill inspector with informations concerning this group
+        """
         self.inspector.fillWithItem(self)
 
     def remove_rels(self):
+        """ Remove relations lines from this group
+        """
         r = self.canvas.get_root_item()
         i=0
         while i<r.get_n_children():
@@ -1586,6 +1722,8 @@ class ObjGroup (Group):
         return
           
     def add_rels(self):
+        """ Add relations lines to this group, according to the link mode
+        """
         r = self.canvas.get_root_item()
         lg=[]        
         i=0
@@ -1662,6 +1800,8 @@ class ObjGroup (Group):
 
 
     def toggle_rels(self, on):
+        """ Toggle relations display (on / off)
+        """
         if not self.rep:
             # there is no line to trace for navigation operations
             return
@@ -1673,17 +1813,23 @@ class ObjGroup (Group):
         
 
     def select(self):
+        """ Highlight selection
+        """
         self.rep.props.fill_color_rgba=self.color_sel
         self.rep.props.stroke_color = self.stroke_color_sel
         self.sel = True
 
     def deselect(self):
+        """ Draw selection back to normal
+        """
         self.rep.props.fill_color_rgba=self.color_f
         self.rep.props.stroke_color = self.color_s
         self.sel = False
         self.center_sel = False
 
     def newOpRep(self):
+        """ Change icon representing operation. 
+        """
         #BIG HACK to display icon
         te = self.operation.name
         if te.find('Edit')>=0:
@@ -1722,6 +1868,8 @@ class ObjGroup (Group):
 
 
     def newRep(self):
+        """ Create an advene object representation (ellipse)
+        """
         return goocanvas.Ellipse(parent=self,
                         center_x=self.x + 3*self.r + 3,
                         center_y=self.y+self.r + 3,
@@ -1732,10 +1880,8 @@ class ObjGroup (Group):
                         line_width=1.0)
 
     def newText(self):
-    #
-    #
-    #
-
+        """ Create a new text representation of the advene object
+        """
         txt = 'U'
         if self.cobj['type'] is None:
             # need to test if we can find the type in an other way, use of type() is not a good thing
@@ -1766,10 +1912,8 @@ class ObjGroup (Group):
 
 
 class Inspector (gtk.VBox):
-#
-# Inspector component to display informations concerning items and actions in the timeline
-#
-
+    """ Inspector component to display informations concerning items and actions in the timeline
+    """
     def __init__ (self, controller=None):
         gtk.VBox.__init__(self)
         self.action=None
@@ -1805,6 +1949,8 @@ class Inspector (gtk.VBox):
         img.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces', 'msg_add.png') ))
         save_btn.add(img)
         def save_clicked(w):
+            """ Save the comment in the trace
+            """
             if self.action:
                 self.action.event.change_comment(self.comment.get_text())
                 if self.comment.get_text()!='':
@@ -1818,6 +1964,8 @@ class Inspector (gtk.VBox):
         img.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces', 'msg_del.png') ))
         clear_btn.add(img)
         def clear_clicked(w):
+            """ Clear the comment
+            """
             self.comment.set_text('')
             save_clicked(w)
 
@@ -1834,10 +1982,9 @@ class Inspector (gtk.VBox):
         self.clean()
 
     def fillWithItem(self, item):
-    #
-    # Fill the inspector with informations concerning an object
-    # item : the advene object to display
-
+        """ Fill the inspector with informations concerning an object
+            item : the advene object to display
+        """
         if item.cobj['id'] is not None:
             self.inspector_id.set_text(item.cobj['id'])
         if item.cobj['cid'] is not None:
@@ -1848,10 +1995,9 @@ class Inspector (gtk.VBox):
         self.show_all()
 
     def fillWithAction(self, action=None, op=None):
-    #
-    # Fill the inspector with informations concerning an action
-    # action : the action to display
-
+        """ Fill the inspector with informations concerning an action
+            action : the action to display
+        """
         self.action=action
         self.inspector_id.set_text(_('Action'))
         self.inspector_name.set_text('')
@@ -1862,13 +2008,15 @@ class Inspector (gtk.VBox):
         self.show_all()
 
     def select_operation(self, op):
+        """ Fill the inspector with an operation informations
+        """
         self.fillWithAction(self.action, op)
 
 
     def addOperations(self, op_list=[], op_sel=None):
-    #
-    # used to pack operation boxes in the inspector
-    # op_list : list of operations to display
+        """ Used to pack operation boxes in the inspector
+            op_list : list of operations to display
+        """
         for c in self.inspector_opes.get_children():
             self.inspector_opes.remove(c)
         for o in op_list:
@@ -1877,10 +2025,9 @@ class Inspector (gtk.VBox):
             self.inspector_opes.pack_start(l, expand=False)
 
     def addOperation(self, obj_evt=None, sel=False):
-    #
-    # used to build a box to display an operation
-    # obj_evt : operation to build a box for
-
+        """used to build a box to display an operation
+            obj_evt : operation to build a box for
+        """
         corpsstr = ''
         if obj_evt.content is not None and obj_evt.content != 'None':
             corpsstr = urllib.unquote(obj_evt.content.encode("UTF-8"))
@@ -2059,6 +2206,8 @@ class Inspector (gtk.VBox):
 
         box = gtk.EventBox()
         def box_pressed(w, event, id):
+            """ Edit the element if double clicked
+            """
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
                 if id is not None:
                     obj = self.controller.package.get_element_by_id(id)
@@ -2075,9 +2224,8 @@ class Inspector (gtk.VBox):
         return hb
 
     def clean(self):
-    #
-    # used to clean the inspector when selecting no item
-    #
+        """ Used to clean the inspector when selecting no item
+        """
         self.action=None
         self.inspector_id.set_text('')
         self.inspector_name.set_text('')
@@ -2089,6 +2237,8 @@ class Inspector (gtk.VBox):
         self.show_all()
 
 class DocGroup (Group):
+    """ Group used to display a representation of the movie
+    """
     def __init__(self, controller=None, canvas=None, name="N/A", x =10, y=10, w=80, h=20, fontsize=14, color_c=0x00000050):
         Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
@@ -2114,6 +2264,8 @@ class DocGroup (Group):
         self.connect('button-press-event', self.docgroup_clicked)
 
     def newRect(self):
+        """ Create a new rectangle to represent the movie
+        """
         return goocanvas.Rect (parent = self,
                                     x = self.x,
                                     y = self.y,
@@ -2124,6 +2276,8 @@ class DocGroup (Group):
                                     line_width = self.lw)
 
     def drawtimemarks(self):
+        """ Add begin and end time marks and 1-3 other
+        """
         nbmax = self.w / 10
         if nbmax > 3:
             nbmax = 3
@@ -2191,6 +2345,8 @@ class DocGroup (Group):
 
     #FIXME
     def redraw(self, trace=None, action=None, obj=None):
+        """ Remove everything on the doc canvas and redraw everything
+        """
         for l in self.lines:
             l.remove()
         self.lines=[]
@@ -2209,6 +2365,8 @@ class DocGroup (Group):
         self.changeMarks(action, obj)
 
     def changeMarks(self, action=None, obj=None):
+        """ Change "v" signs to show selected items
+        """
         for m in self.marks:
             m.remove()
         self.marks=[]
@@ -2221,6 +2379,8 @@ class DocGroup (Group):
             self.addMark(obj.operation.movietime, 0xD9D919FF)
 
     def addMark(self, time=0, color=0x444444ff):
+        """ Add "v" signs to show selected items
+        """
         offset = 3
         x=self.rect.get_bounds().x1 + self.w * time / self.movielength
         x1 = x-offset
@@ -2239,6 +2399,8 @@ class DocGroup (Group):
         self.marks.append(l)
 
     def changeMovielength(self, trace=None, time=None):
+        """ Change the duration of the movie
+        """
         if time is not None:
             self.movielength=time
         elif self.controller.package.cached_duration>0:
@@ -2247,8 +2409,8 @@ class DocGroup (Group):
 
 
     def addLine(self, time=0, color=0x00000050, offset=0):
-        #print "Time: %s" % time
-        #FIXME sometimes 0, need to check that
+        """ Add a line to represent a movie access time
+        """
         x=self.rect.get_bounds().x1 + self.w * time / self.movielength
         y1=self.rect.get_bounds().y1 - offset
         y2=self.rect.get_bounds().y2 + offset
@@ -2266,6 +2428,8 @@ class DocGroup (Group):
         self.lines.append(l)
 
     def docgroup_clicked(self, w, t, ev):
+        """ Move in the movie if docgroup clicked
+        """
         if ev.button == 1:
             c=self.controller
             pos = c.create_position (value=self.movielength * (ev.x-self.x)/self.w,
