@@ -27,7 +27,7 @@ import re
 import gtk
 import advene.util.helper as helper
 from advene.gui.widget import TimestampRepresentation
-from advene.gui.util import encode_drop_parameters, decode_drop_parameters
+from advene.gui.util import encode_drop_parameters, decode_drop_parameters, dialog
 from gettext import gettext as _
 
 class TimeAdjustment:
@@ -340,3 +340,146 @@ class TimeAdjustment:
 
     def get_value(self):
         return self.value
+
+class FrameSelector(object):
+    """Frame selector interface.
+    
+    Given a timestamp, it displays a series of snapshots around
+    the timestamp and allows to select the most appropriate
+    one.
+    """
+    def __init__(self, controller, timestamp=0, title=None, callback=None):
+        self.controller = controller
+        self.timestamp = timestamp
+        self.selected_value = self.timestamp
+        if title is None:
+            title = _("Select the appropriate snapshot")
+        self.title = title
+        self.callback = callback
+        self.count = 5
+        self.frame_length = 1000 / 25
+        # Reference to the HBox holding TimestampRepresentation widgets.
+        # It is initialized in build_widget()
+        self.container = None
+        self.widget = self.build_widget()
+        
+    def update_offset(self, offset):
+        """Update the timestamps to go forward/backward.
+        """
+        if offset < 0:
+            ref=self.container.get_children()[0]
+            start = max(ref.value + offset * self.frame_length, 0)
+        else:
+            ref=self.container.get_children()[offset]
+            start = ref.value
+        self.update_timestamp(start + self.count * self.frame_length)
+        return True
+
+    def update_timestamp(self, timestamp):
+        """Set the center timestamp.
+        """
+        start = timestamp - self.count * self.frame_length
+        for c in self.container.get_children():
+            c.value = start
+            start += self.frame_length
+        return True
+
+    def update_snapshots(self):
+        """Update non-initialized snapshots.
+        """
+        ic=self.controller.package.imagecache
+        for c in self.container.get_children():
+            if not ic.is_initialized(c.value):
+                self.controller.update_snapshot(c.value)
+        return True
+
+    def handle_scroll_event(self, widget, event):
+        if event.direction == gtk.gdk.SCROLL_UP:
+            offset=-1
+        else:
+            offset=+1
+        self.update_offset(offset)
+        return True
+
+    def handle_key_press(self, widget, event):
+        if event.keyval == gtk.keysyms.Page_Down:
+            self.update_offset(-self.count)
+            return True
+        elif event.keyval == gtk.keysyms.Page_Up:
+            self.update_offset(+self.count)
+            return True
+        return False
+
+    def get_value(self):
+        d = gtk.Dialog(title=self.title,
+                       parent=None,
+                       flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                 ))
+
+        def callback(v):
+            d.response(gtk.RESPONSE_OK)
+            return True
+        self.callback = callback
+
+        d.vbox.add(self.widget)
+        d.show_all()
+        dialog.center_on_mouse(d)
+
+        res = d.run()
+        timestamp = self.timestamp
+        if res == gtk.RESPONSE_OK:
+            timestamp = self.selected_value
+        d.destroy()
+        return timestamp
+    
+    def select_time(self, button=None):
+        """General callback.
+
+        It updates self.selected_value then calls self.callback if defined.
+        """
+        if button is not None:
+            self.selected_value = button.value
+        if self.callback is not None:
+            self.callback(self.selected_value)
+        return True
+        
+    def build_widget(self):
+        vb=gtk.VBox()
+
+        hb=gtk.HBox()
+
+        for i in xrange(-self.count, self.count):
+            r=TimestampRepresentation(self.selected_value + i * self.frame_length, self.controller, width=100, visible_label=True)
+            r.connect("clicked", self.select_time)
+            hb.pack_start(r, expand=False)
+            if i == 0:
+                r.grab_focus()
+
+        hb.connect('scroll-event', self.handle_scroll_event)
+        hb.connect('key-press-event', self.handle_key_press)
+
+        buttons = gtk.HBox()
+
+        b=gtk.Button(stock=gtk.STOCK_GO_BACK)
+        b.connect("clicked", lambda b: self.update_offset(-self.count))
+        buttons.pack_start(b, expand=True)
+
+        b=gtk.Button(stock=gtk.STOCK_REFRESH)
+        b.connect("clicked", lambda b: self.refresh())
+        buttons.pack_start(b, expand=False)
+
+        b=gtk.Button('Current value: %s' % helper.format_time(self.selected_value))
+        # Go back to original timestamp
+        b.connect("clicked", lambda b: self.update_timestamp(self.selected_value))
+        buttons.pack_start(b, expand=True)
+
+        b=gtk.Button(stock=gtk.STOCK_GO_FORWARD)
+        b.connect("clicked", lambda b: self.update_offset(self.count))
+        buttons.pack_start(b, expand=True)
+
+        vb.add(hb)
+        vb.pack_start(buttons, expand=False)
+        self.container = hb
+        return vb
