@@ -375,7 +375,7 @@ class FrameSelector(object):
     def update_timestamp(self, timestamp):
         """Set the center timestamp.
         """
-        start = timestamp - self.count * self.frame_length
+        start = max(timestamp - self.count * self.frame_length, 0)
         for c in self.container.get_children():
             c.value = start
             start += self.frame_length
@@ -452,11 +452,9 @@ class FrameSelector(object):
         hb=gtk.HBox()
 
         for i in xrange(-self.count, self.count):
-            r=TimestampRepresentation(self.selected_value + i * self.frame_length, self.controller, width=100, visible_label=True)
+            r=TimestampRepresentation(0, self.controller, width=100, visible_label=True)
             r.connect("clicked", self.select_time)
             hb.pack_start(r, expand=False)
-            if i == 0:
-                r.grab_focus()
 
         hb.connect('scroll-event', self.handle_scroll_event)
         hb.connect('key-press-event', self.handle_key_press)
@@ -483,4 +481,5 @@ class FrameSelector(object):
         vb.add(hb)
         vb.pack_start(buttons, expand=False)
         self.container = hb
+        self.update_timestamp(self.timestamp)
         return vb
