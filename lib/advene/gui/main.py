@@ -86,7 +86,6 @@ import advene.util.ElementTree as ET
 
 import advene.util.importer
 from advene.gui.util.completer import Indexer, Completer
-from advene.gui.widget import TimestampRepresentation
 
 # GUI elements
 from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color, predefined_content_mimetypes
@@ -2967,14 +2966,100 @@ class AdveneGUI(object):
             'end': _('end'),
             }
         t=getattr(annotation.fragment, bound)
-        fs = FrameSelector(self.controller, t, _("Update %(bound)s of %(annotation)s") % { 'bound': translation[bound],
-                                                                                           'annotation': self.controller.get_title(annotation) })
-        new = fs.get_value()
+        fs = FrameSelector(self.controller, t)
+        new = fs.get_value(_("Update %(bound)s of %(annotation)s") % { 'bound': translation[bound],
+                                                                       'annotation': self.controller.get_title(annotation) })
         if new != t:
             self.controller.notify('EditSessionStart', element=annotation, immediate=True)
             setattr(annotation.fragment, bound, new)
             self.controller.notify('AnnotationEditEnd', annotation=annotation)
             self.controller.notify('EditSessionEnd', element=annotation)
+        return True
+
+    def adjust_annotationtype_bounds(self, at):
+        """Adjust annotation bounds for a given type.
+        """        
+        annotations = sorted(at.annotations, key=lambda a: a.fragment.begin)
+        if not annotations:
+            dialog.message_dialog(_("No annotations to adjust"))
+            return True
+
+        d = gtk.Dialog(title=_("Adjusting annotations of type %s") % self.controller.get_title(at),
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_CLOSE, gtk.RESPONSE_CLOSE) )
+        fs = FrameSelector(self.controller, annotations[0].fragment.begin)
+        d.set_title(_("Begin of ") + self.controller.get_title(annotations[0]))
+
+        prev_button = gtk.Button()
+        next_button = gtk.Button()
+
+        fs.index = 0
+        def set_index(i):
+            if i >= 0 and i < len(annotations) - 1:
+                fs.index = i
+                a=annotations[fs.index]
+                fs.update_timestamp(a.fragment.begin)
+                d.set_title(_("Begin of ") + self.controller.get_title(a))
+                if i > 0:
+                    prev_button.set_label(_("Previous: %s") % self.controller.get_title(annotations[i - 1]))
+                    prev_button.set_sensitive(True)
+                else:
+                    prev_button.set_label(_("No previous annotation"))
+                    prev_button.set_sensitive(True)
+
+                if i <= len(annotations) - 1:
+                    next_button.set_label(_("Next: %s") % self.controller.get_title(annotations[i + 1]))
+                    next_button.set_sensitive(True)
+                else:
+                    next_button.set_label(_("No next annotation"))
+                    next_button.set_sensitive(True)
+            else:
+                # End: display a message ?
+                pass
+
+        def validate_and_next(new):
+            """Validate the current annotation and display the next one.
+            """
+            annotation = annotations[fs.index]
+            batch=object()
+            if new != annotation.fragment.begin:
+                self.controller.notify('EditSessionStart', element=annotation, immediate=True)
+                annotation.fragment.begin = new
+                self.controller.notify('AnnotationEditEnd', annotation=annotation, batch_id=batch)
+                self.controller.notify('EditSessionEnd', element=annotation)
+
+            # Update previous annotation end.
+            if fs.index > 0:
+                annotation = annotations[fs.index - 1]
+                if new != annotation.fragment.end:
+                    self.controller.notify('EditSessionStart', element=annotation, immediate=True)
+                    annotation.fragment.end = new
+                    self.controller.notify('AnnotationEditEnd', annotation=annotation, batch_id=batch)
+                    self.controller.notify('EditSessionEnd', element=annotation)
+
+            set_index(fs.index + 1)
+            return True
+
+        fs.callback = validate_and_next
+        d.vbox.add(fs.widget)
+        
+        hb=gtk.HBox()
+
+        hb.pack_start(prev_button, expand=False)
+        prev_button.connect("clicked", lambda b: set_index(fs.index - 1))
+
+        hb.pack_start(gtk.HBox(), expand=True)
+
+        hb.pack_start(next_button, expand=False)
+        next_button.connect("clicked", lambda b: set_index(fs.index + 1))
+
+        d.vbox.pack_start(hb, expand=False)
+
+        set_index(0)
+        d.show_all()
+        d.run()
+        d.destroy()
         return True
 
     def display_textfile(self, path, title=None, viewname=None):
