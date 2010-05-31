@@ -2991,14 +2991,19 @@ class AdveneGUI(object):
         fs = FrameSelector(self.controller, annotations[0].fragment.begin)
         d.set_title(_("Begin of ") + self.controller.get_title(annotations[0]))
 
+        # Current index, in a user-readable way (i.e. starting at 1)
+        fs.current_index = gtk.Adjustment(1, 1, len(annotations))
+
         prev_button = gtk.Button()
         next_button = gtk.Button()
 
-        fs.index = 0
         def set_index(i):
-            if i >= 0 and i < len(annotations) - 1:
-                fs.index = i
-                a=annotations[fs.index]
+            fs.current_index.set_value(i + 1)
+
+        def handle_index_change(adj):
+            i = int(adj.get_value()) - 1
+            if i >= 0 and i <= len(annotations) - 1:
+                a=annotations[i]
                 fs.update_timestamp(a.fragment.begin)
                 d.set_title(_("Begin of ") + self.controller.get_title(a))
                 if i > 0:
@@ -3008,7 +3013,7 @@ class AdveneGUI(object):
                     prev_button.set_label(_("No previous annotation"))
                     prev_button.set_sensitive(True)
 
-                if i <= len(annotations) - 1:
+                if i < len(annotations) - 1:
                     next_button.set_label(_("Next: %s") % self.controller.get_title(annotations[i + 1]))
                     next_button.set_sensitive(True)
                 else:
@@ -3017,11 +3022,13 @@ class AdveneGUI(object):
             else:
                 # End: display a message ?
                 pass
+        fs.current_index.connect('value-changed', handle_index_change)
 
         def validate_and_next(new):
             """Validate the current annotation and display the next one.
             """
-            annotation = annotations[fs.index]
+            i = int(fs.current_index.get_value()) - 1
+            annotation = annotations[i]
             batch=object()
             if new != annotation.fragment.begin:
                 self.controller.notify('EditSessionStart', element=annotation, immediate=True)
@@ -3030,15 +3037,15 @@ class AdveneGUI(object):
                 self.controller.notify('EditSessionEnd', element=annotation)
 
             # Update previous annotation end.
-            if fs.index > 0:
-                annotation = annotations[fs.index - 1]
+            if i > 0:
+                annotation = annotations[i - 1]
                 if new != annotation.fragment.end:
                     self.controller.notify('EditSessionStart', element=annotation, immediate=True)
                     annotation.fragment.end = new
                     self.controller.notify('AnnotationEditEnd', annotation=annotation, batch_id=batch)
                     self.controller.notify('EditSessionEnd', element=annotation)
 
-            set_index(fs.index + 1)
+            set_index(i + 1)
             return True
 
         fs.callback = validate_and_next
@@ -3046,13 +3053,14 @@ class AdveneGUI(object):
         
         hb=gtk.HBox()
 
-        hb.pack_start(prev_button, expand=False)
-        prev_button.connect("clicked", lambda b: set_index(fs.index - 1))
+        hb.add(prev_button)
+        prev_button.connect("clicked", lambda b: set_index(int(fs.current_index.get_value()) - 1 - 1))
 
-        hb.pack_start(gtk.HBox(), expand=True)
+        s=gtk.SpinButton(fs.current_index)
+        hb.add(s)
 
-        hb.pack_start(next_button, expand=False)
-        next_button.connect("clicked", lambda b: set_index(fs.index + 1))
+        hb.add(next_button)
+        next_button.connect("clicked", lambda b: set_index(int(fs.current_index.get_value()) - 1 + 1))
 
         d.vbox.pack_start(hb, expand=False)
 
