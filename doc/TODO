@@ -1,3 +1,5 @@
+* Ldt ZIP importer
+
 * Fix svg support for gstreamer/mac (need to rewrite the SVGOverlay element in C)
 
 * Improve dcp importer
