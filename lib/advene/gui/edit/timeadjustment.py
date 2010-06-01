@@ -353,7 +353,8 @@ class FrameSelector(object):
         self.timestamp = timestamp
         self.selected_value = timestamp
         self.callback = callback
-        self.count = 5
+        # Number of displayed timestamps
+        self.count = 8
         self.frame_length = 1000 / 25
         # Reference to the HBox holding TimestampRepresentation widgets.
         # It is initialized in build_widget()
@@ -369,14 +370,14 @@ class FrameSelector(object):
         else:
             ref=self.container.get_children()[offset]
             start = ref.value
-        self.update_timestamp(start + self.count * self.frame_length)
+        self.update_timestamp(start + self.count / 2 * self.frame_length)
         return True
 
     def update_timestamp(self, timestamp):
         """Set the center timestamp.
         """
         self.current_button.set_label('Current value: %s' % helper.format_time(timestamp))
-        start = max(timestamp - self.count * self.frame_length, 0)
+        start = max(timestamp - self.count / 2 * self.frame_length, 0)
         for c in self.container.get_children():
             c.value = start
             if start == timestamp:
@@ -403,10 +404,10 @@ class FrameSelector(object):
 
     def handle_key_press(self, widget, event):
         if event.keyval == gtk.keysyms.Page_Down:
-            self.update_offset(-self.count)
+            self.update_offset(-self.count / 2)
             return True
         elif event.keyval == gtk.keysyms.Page_Up:
-            self.update_offset(+self.count)
+            self.update_offset(+self.count / 2)
             return True
         return False
 
@@ -452,7 +453,7 @@ class FrameSelector(object):
 
         hb=gtk.HBox()
 
-        for i in xrange(-self.count, self.count):
+        for i in xrange(-self.count / 2, self.count / 2):
             r=TimestampRepresentation(0, self.controller, width=100, visible_label=True, epsilon=30)
             r.connect("clicked", self.select_time)
             hb.pack_start(r, expand=False)
@@ -462,22 +463,14 @@ class FrameSelector(object):
 
         buttons = gtk.HBox()
 
-        b=gtk.Button(stock=gtk.STOCK_GO_BACK)
-        b.connect("clicked", lambda b: self.update_offset(-self.count))
-        buttons.pack_start(b, expand=True)
-
         b=gtk.Button(stock=gtk.STOCK_REFRESH)
         b.connect("clicked", lambda b: self.update_snapshots())
-        buttons.pack_start(b, expand=False)
-
-        b=gtk.Button('Current value: %s' % helper.format_time(self.selected_value))
-        self.current_button = b
-        # Go back to original timestamp
-        b.connect("clicked", lambda b: self.update_timestamp(self.selected_value))
         buttons.pack_start(b, expand=True)
 
-        b=gtk.Button(stock=gtk.STOCK_GO_FORWARD)
-        b.connect("clicked", lambda b: self.update_offset(self.count))
+        b=gtk.Button('Current value: %s' % helper.format_time(self.timestamp))
+        self.current_button = b
+        # Go back to original timestamp
+        b.connect("clicked", lambda b: self.update_timestamp(self.timestamp))
         buttons.pack_start(b, expand=True)
 
         vb.add(hb)
