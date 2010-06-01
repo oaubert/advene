@@ -2992,10 +2992,15 @@ class AdveneGUI(object):
         d.set_title(_("Begin of ") + self.controller.get_title(annotations[0]))
 
         # Current index, in a user-readable way (i.e. starting at 1)
-        fs.current_index = gtk.Adjustment(1, 1, len(annotations))
+        size=len(annotations)
+        # We initialize the adjustment at size, so that when we set it
+        # back to 1 at the end of the initialization, the
+        # handle_index_change correctly updates buttons.
+        fs.current_index = gtk.Adjustment(size, 1, size)
 
         prev_button = gtk.Button()
         next_button = gtk.Button()
+        merge_button = gtk.Button()
 
         def set_index(i):
             fs.current_index.set_value(i + 1)
@@ -3023,6 +3028,26 @@ class AdveneGUI(object):
                 # End: display a message ?
                 pass
         fs.current_index.connect('value-changed', handle_index_change)
+
+        def merge(button):
+            """Merge the annotation with the previous one.
+            """
+            i = int(fs.current_index.get_value()) - 1
+            if i == 0:
+                return True
+
+            annotation = annotations[i]
+            previous = annotations[i - 1]
+            batch=object()
+
+            self.controller.notify('EditSessionStart', element=previous, immediate=True)
+            previous.fragment.end = annotation.fragment.end
+            self.controller.notify('AnnotationEditEnd', annotation=previous, batch_id=batch)
+            self.controller.notify('EditSessionEnd', element=previous)
+            annotations.remove(annotation)
+            self.controller.delete_element(annotation, immediate_notify=True, batch_id=batch)
+            set_index(i - 1)
+            return True
 
         def validate_and_next(new):
             """Validate the current annotation and display the next one.
@@ -3055,6 +3080,10 @@ class AdveneGUI(object):
 
         hb.add(prev_button)
         prev_button.connect("clicked", lambda b: set_index(int(fs.current_index.get_value()) - 1 - 1))
+
+        b=gtk.Button(_("Merge with previous"))
+        b.connect("clicked", merge)
+        hb.add(b)
 
         s=gtk.SpinButton(fs.current_index)
         hb.add(s)
