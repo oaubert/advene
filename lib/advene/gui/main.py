@@ -3001,7 +3001,7 @@ class AdveneGUI(object):
         # We initialize the adjustment at size, so that when we set it
         # back to 1 at the end of the initialization, the
         # handle_index_change correctly updates buttons.
-        fs.current_index = gtk.Adjustment(size, 1, size)
+        fs.current_index = gtk.Adjustment(size, 1, size, 1, 10)
 
         prev_button = gtk.Button()
         next_button = gtk.Button()
@@ -3093,7 +3093,10 @@ class AdveneGUI(object):
         l = gtk.Label("#")
         hb.pack_start(l, expand=False)
 
-        s=gtk.SpinButton(fs.current_index)
+        s=gtk.SpinButton(fs.current_index, 1, 0)
+        s.set_increments(1, 10)
+        s.set_update_policy(gtk.UPDATE_IF_VALID)
+        s.set_numeric(True)
         hb.add(s)
 
         hb.add(next_button)
