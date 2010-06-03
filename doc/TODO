@@ -6,7 +6,8 @@
 
 * Make the timeline inspector editable (thus sticky display)
 
-* Screen overlay interface: define a grid with sensitive areas
+* Screen overlay interface: define a grid with sensitive areas + event
+   -> need to implement player.get_dimensions() method
 
 * default bookmarks view, used by default and auto-saved with the package.
 
@@ -207,27 +208,12 @@ http://code.google.com/p/facilhtml/source/browse/trunk/htmlrender.py
 
 * Data brushing p.181 -> selection in a view, highlight in others
 
-* Concatenate selection -> concatenate contents?
-
-* advene2: LGPL license
-
-* Package python-vlc-0.9.0.deb and vlc-svg-0.9.0.deb
-
 * Proeminently put GPL license info on the web site.
 
 * timeline: memorize zoom level and position when changing package
    (needs a timeline.zoom_level[package_uri] structure)
 
-* generate a 'fields' metadata for structured annotation types
-
 * allow to change mimetype when editing resource
-
-* investigate svg plugin crashing after stop/play -> win32 only
-
-* Embed VLC:  http://code.revolunet.com/VLCobject/EN
- http://code.revolunet.com/VLCcontrols/EN
-
-* shapewidget: preserve TAL attributes
 
 * shapewidget: complete support for <image> element. How to deal with
    images as resources ?
@@ -240,8 +226,6 @@ http://code.google.com/p/facilhtml/source/browse/trunk/htmlrender.py
 
 * write a ContentHandler for x-advene-quicksearch
 
-* dedicated GUI for shot segmentation correction
-
 * shotdetect: allow to specify begin/end times, to allow to redo a segmentation with a new threshold
 
 * Package: static export (to web site) of a set of views+resources/images
@@ -250,8 +234,6 @@ http://code.google.com/p/facilhtml/source/browse/trunk/htmlrender.py
    common layouts: plain TOC, illustrated TOC, etc)
 
 * view creation (static/dynamic): step by step wizard
-
-* AdhocView: make self.log display messages in a gtkStatusBar
 
 * AdveneTypes a la XSD
 
@@ -265,17 +247,7 @@ http://code.google.com/p/facilhtml/source/browse/trunk/htmlrender.py
 
 * Montage: extend with 2nd video (cf bout-a-bout) ?
 
-* make EditElementPopup an AdhocView
-
-* plugins/actions.py : TTS/win32
-
-* saved workspace: find out why log window pane position is not restored
-
-* history of selected annotations
-
 * package merge: group items by categories (views, annotations, schemas...)
-
-* main gui: add a "Edit subviews" direct button
 
 * annotation highlight: other representation (red thick border ?)
 
@@ -301,10 +273,6 @@ https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platfor
 
 * highlight: blink (wait for gtk.Transition in 2.12?)
 
-* gstrecorder: set correct duration
-
-* gstrecorder: save media file name + duration
-
 * Short version of shortcuts/tutorial for note taking
 
 * iMovie0.8-like movie exploration (skim through the paused movie through DND in the thumbnail)
@@ -322,8 +290,6 @@ https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platfor
 ** Deactivate autoscroll when moving in the timeline
 
 ** timeline: reimplement with a proper canvas (goocanvas?)
-
-** annotation interpolation interface: create some "Aligned" annotations (that keep a ref to their original) and try to determine the transformation from them.
 
 ** Make relation lines clickable (cf goocanvas)
 
@@ -373,8 +339,6 @@ position of current marks in the video (with small lines) [cf linkmap
 ** flash generation: http://www.swfmill.org/
 
 * Players
-
-** gstreamer: implement svgoverlay component
 
 ** VLC: convert svg module to use rgba blending (cf http://trac.videolan.org/vlc/changeset/19548 )
 
@@ -456,9 +420,6 @@ http://simile.mit.edu/timeline/
 
 * load/save hooks
 
-* snapshot precision: use set_rate to slow down, add "Select keyframe"
-  to the popup menu + shortcut
-
 * Convention: is_illustrated_by relation-type. In snapshot_url, if a
   relation exists, use it to get the snapshot. Else use the begin
   time.
@@ -485,8 +446,6 @@ http://simile.mit.edu/timeline/
 
 * vlc wav audio extraction: vlc --no-sout-video --sout '#transcode{acodec=s16l}:es{access-audio=file,mux-audio=wav,dst-audio=foo.raw}'  k.mpg vlc:quit
 
-module wave, audioop
-
 * bug: begin event is generated when setting position inside an annotation.
 
 * Use screen:// as input stream. Allow to parameterize (source display...)
@@ -507,24 +466,16 @@ module wave, audioop
 
 * investigate https://pyplayer.helixcommunity.org/
 
-* strange error when a view import cannot be resolved (try copying unicode.xml to ~)
-
 * embed swfplayer
 
-* embedding advene in browser: see    http://savannah.nongnu.org/projects/genres/
-
-* package http://filmlibre.org/ et http://media.april.org/
+* package http://filmlibre.org/ and http://media.april.org/
 
 * import fixer: allow to edit imports without loading the package
-   (which fails if imported package is not present).
+   (which fails if imported package is not accessible).
 
 * allow to edit the path of imported packages, to allow relative paths
 
-* Bug in webserver.py for files with accents in their fullpath (encoding pb). Should check all encodings everywhere and make sure everything is utf8 internally.
-
 * notification of new popups when embedded (flash tab)
-
-* make save button inactive when not modified
 
 * allow to specify the browser for open_url in preferences
 
@@ -537,8 +488,6 @@ module wave, audioop
   (use a wrapper similar to the one used for views. Maybe we can
   generalize this principle).
 
-* Implement a charpicker for transcribe
-
 * Implement transmission of elements between different applications (esp. transmission of annotations [bounds + content] between 2 timelines) -> new target type + element xml repr.
 
 * allow i18n of template.xml
@@ -548,19 +497,13 @@ module wave, audioop
 p.imports[0].package.views[1]._getParent().uri, p.imports[1].package.uri
 that should return the same URI. The proposed solution is to enforce the importing package to explicitly import the second level imported ones. Pb: namespace clash
 
-* Store advene conf files in Application Data on win32
-
 * transcribe: make validity check on bounds only on demand or on export.
-
-* treeview: model synchronisation pb when deleting queries
 
 * schema editor: cf tools http://www.rexx.com/~dkuhlman/
 
 * Write a advene-openoffice binding to automate video/presentation sync.
 
 * New action: translate ?
-
-* Create python binding to avidemux (for frame-by-frame functionality)
 
 * Demo movie maker : http://en.wikipedia.org/wiki/Screencast
 http://www.debugmode.com/wink/
@@ -572,8 +515,6 @@ istanbul
 
 * SMIL examples: http://webmonkey.wired.com/webmonkey/00/41/index4a_page3.html?tw=authoring
 
-* exports.xml: define a CMML export view (cf www.annodex.net)
-
 * On-the-fly annotation: display as caption the edited content (for 1s)
 
 * Sound recording in python: http://www.johnnypops.demon.co.uk/python/ See also http://divmod.org/projects/shtoom/
@@ -581,8 +522,6 @@ istanbul
 * Sound assistant: use cont_fileseg from sphinx2-bin to segment audio, or http://www.cmis.csiro.au/maaate/ or http://aubio.piem.org/news/
 
 * assistant: speech decomposition (only extracts timestamps). Use speech-tools ? http://www.cstr.ed.ac.uk/projects/speech_tools/manual-1.2.0/x737.htm
-
-* Main GUI: tooltips on STBVs (must use an EventBox)
 
 * webserver: implement a wiki-like syntax in views that dynamically generates links to Advene elements/TALES expressions (define a application/x-advene-wiki that will get converted into a TAL template)
 
@@ -594,14 +533,7 @@ istanbul
 
 * keep a viewed_segments structure to propose a view "Not yet viewed sequences"
 
-* Remove show_all() calls in EditElement popups
-
-* timeadjustment: make Play create an internal rule that pauses the player at the end of the fragment
-
 * Advene tutorial in advene, with a video capture of an interaction session
-
-* vlc: use picture+mosaic to implement video embedded inside video (to
-  quickly preview a fragment)
 
 * New action: display a fragment of a video then continue from the
 position where the link was activated. Parameters: fragment to play,
@@ -616,11 +548,7 @@ return position, or display in a new video window
   * implement get_api_version()
   * implement get/set_rate
 
-* All GUI views: convert action buttons to toolbars
-
 * navigation history: put 2 snapshots (origin, destination) to contextualize
-
-* Popups: white on black background
 
 * controller.update: implement a future_approaching and a
 future_leaving to implement a -2 seconds before / +2 seconds after
@@ -634,38 +562,16 @@ annotation event.
 
 * browser: select base element (annotation, package, ...)
 
-* Mandrake: need
-pygtk2
-pyxml
-python-imaging (warning: version 1.1.4-6 (from Mandrake 10.1) is broken, use version 1.1.4-3 (from Mandrake 10.0) instead)
-simpletal (install from source)
-vlc
-
-* Implement a action-history widget, that displays all events taking
-place with the previous and next states, so that we can know what took place
-
-* Video player: investigate pyxine and gst-python :
-http://gstreamer.freedesktop.org/releases/gst-python/0.8.2.html
-https://gna.org/projects/seamless/ (DVD player using gst-python)
-Also win32com (http://www.boddie.org.uk/python/COM.html)
-
-* Remove vlc references in advene.core.config
-
 * Item File->statistics : element count (ann, rel, etc)
-
-* subtitles.xml -> clean up
 
 * Implement "copy/paste" on elements
 
 * A creuser: http://veejay.sourceforge.net/
 
-* Use transcode to extract screenshots (cf dvd:rip). Command line:
-transcode -H 10 -z -k -o snapshot -y jpg,null -i /dev/dvd -x dvd,null -T 21,1 -c 00:00:10.0-00:00:10.5
-
 * In Context (or the GUI), catch AdveneTalesException that happens
 when there is a syntax error in a TALES expression (missing string orbadly written symbol) and display a meaningful message
 
-* Annotation chanson: paroles / refrain /couplet + UTBV/STBV (transcription)
+* Annotation song: lyrics / refrain /couplet + UTBV/STBV (transcription)
 
 * Create a 'shapes' package which will define various SVG shapes
   (moon, sun, triangle, etc) as views
@@ -673,8 +579,6 @@ when there is a syntax error in a TALES expression (missing string orbadly writt
 * Complete the bootstrap package
 
 * Edit element popup: check that the data was not modified before closing
-
-* Should snapshots be done with annotations drawn or without ??
 
 * More fine-grained snapshot specification. Idea: specify a percentage
   of the annotation time. Can be implemented with an internal
@@ -749,16 +653,9 @@ the current package's pwd first as default.
 
 * Treeview: add the elements attributes as annotation/relation children.
 
-* MediaControl.idl: get_capabilities() returning a list of
-  capabilities ("snapshot", "caption", "svg")
-
 * Interface with http://www.archive.org/movies/ (XML files)
 
-* VLC: zoom functionality (crop?)
-
 * Query MPEG7: http://www.idealliance.org/papers/extreme03/html/2001/Liu01/EML2001Liu01.html
-
-* Try to remove the dependency on PIL by using pixbuf loader to convert snapshots to PNG.
 
 * Content: how to represent structured data ? Cf MPEG7 DS ? (hackingly
   half DONE, grep source for application/x-advene-structured). Or
@@ -776,9 +673,6 @@ http://www.rexx.com/~dkuhlman/generateDS.html (XML-Schema) Or SOAPy
   - ability to specify line order and which types to display
 
 * Make the annotation interface as On-Screen Display over the video window
-
-* vlc-dev: use the new start-time and stop-time functionality in core VLC to correctly
-  handle positions in start and stop.
 
 * Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
 
