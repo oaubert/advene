@@ -323,6 +323,8 @@ class AdveneGUI(object):
             b.set_tooltip_text(tip)
             b.connect('clicked', callback)
             self.gui.fileop_toolbar.insert(b, -1)
+            if stock == gtk.STOCK_SAVE:
+                self.save_toolbutton = b
         self.gui.fileop_toolbar.show_all()
 
         # Log messages button
@@ -2341,6 +2343,9 @@ class AdveneGUI(object):
         t=" - ".join((_("Advene"), self.controller.get_title(self.controller.package)))
         if self.controller.package._modified:
             t += " (*)"
+            self.save_toolbutton.set_sensitive(True)
+        else:
+            self.save_toolbutton.set_sensitive(False)
         self.gui.win.set_title(t)
         return True
 
