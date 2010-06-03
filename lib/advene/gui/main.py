@@ -3078,6 +3078,12 @@ class AdveneGUI(object):
             set_index(i + 1)
             return True
 
+        def goto_current(i):
+            l=[ a for a in annotations if self.controller.player.current_position_value in a.fragment ]
+            if l:
+                set_index(annotations.index(l[0]))
+            return True
+
         fs.callback = validate_and_next
         d.vbox.add(fs.widget)
         
@@ -3086,7 +3092,13 @@ class AdveneGUI(object):
         hb.add(prev_button)
         prev_button.connect("clicked", lambda b: set_index(int(fs.current_index.get_value()) - 1 - 1))
 
+        b=gtk.Button(_("Current time"))
+        b.set_tooltip_text(_("Go to annotation containing current player time."))
+        b.connect("clicked", goto_current)
+        hb.add(b)
+
         b=gtk.Button(_("Merge with previous"))
+        b.set_tooltip_text(_("Merge with previous annotation, i.e. remove this bound."))
         b.connect("clicked", merge)
         hb.add(b)
 

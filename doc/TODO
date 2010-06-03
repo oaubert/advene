@@ -1,4 +1,8 @@
-* shot validation: use current movie time (or button)
+* Shot validation: fix mousewheel on spinbutton
+
+* Shot validation: handle AnntotationEditEnd/Delete events
+
+* Add gtk.SCROLL_LEFT/RIGHT where appropriate.
 
 * Ldt ZIP importer
 
@@ -2699,3 +2703,5 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Shotdetect validation interface (display multiple snapshots before+after)
 
 * shot validation: add "Play" + "refresh" to timestamp popup menu
+
+* shot validation: use current movie time (or button)
