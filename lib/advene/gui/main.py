@@ -3090,6 +3090,9 @@ class AdveneGUI(object):
         b.connect("clicked", merge)
         hb.add(b)
 
+        l = gtk.Label("#")
+        hb.pack_start(l, expand=False)
+
         s=gtk.SpinButton(fs.current_index)
         hb.add(s)
 
