@@ -384,12 +384,16 @@ class FrameSelector(object):
     def update_timestamp(self, timestamp):
         """Set the center timestamp.
         """
-        start = max(timestamp - self.count / 2 * self.frame_length, 0)
+        t = max(timestamp - self.count / 2 * self.frame_length, 0)
         for c in self.container.get_children():
-            c.value = start
-            if start == timestamp:
+            c.value = t
+            if t < self.timestamp:
+                c.bgcolor = '#666666'
+            else:
+                c.bgcolor = 'black'
+            if t == timestamp:
                 c.grab_focus()
-            start += self.frame_length
+            t += self.frame_length
         return True
 
     def update_snapshots(self):
