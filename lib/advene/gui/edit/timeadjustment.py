@@ -379,7 +379,6 @@ class FrameSelector(object):
         self.timestamp = timestamp
         self.selected_value = timestamp
         self.update_timestamp(timestamp)
-        self.current_button.set_label('Current value: %s' % helper.format_time(self.timestamp))
         
     def update_timestamp(self, timestamp):
         """Set the center timestamp.
@@ -476,12 +475,6 @@ class FrameSelector(object):
 
         b=gtk.Button(stock=gtk.STOCK_REFRESH)
         b.connect("clicked", lambda b: self.update_snapshots())
-        buttons.pack_start(b, expand=True)
-
-        b=gtk.Button('Current value: %s' % helper.format_time(self.timestamp))
-        self.current_button = b
-        # Go back to original timestamp
-        b.connect("clicked", lambda b: self.update_timestamp(self.timestamp))
         buttons.pack_start(b, expand=True)
 
         vb.add(hb)
