@@ -2705,3 +2705,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * shot validation: add "Play" + "refresh" to timestamp popup menu
 
 * shot validation: use current movie time (or button)
+
+* Shot validation: change bg color wrt. annotation bound
+
+* Shot validation: display index instead of content
+

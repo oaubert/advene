@@ -144,20 +144,10 @@ class ShotValidation(AdhocView):
             if i >= 0 and i <= len(self.annotations) - 1:
                 a=self.annotations[i]
                 self.selector.set_timestamp(a.fragment.begin)
-                self.set_title(_("Begin of ") + self.controller.get_title(a))
-                if i > 0:
-                    self.prev_button.set_label(_("Previous: %s") % self.controller.get_title(self.annotations[i - 1]))
-                    self.prev_button.set_sensitive(True)
-                else:
-                    self.prev_button.set_label(_("No previous annotation"))
-                    self.prev_button.set_sensitive(True)
-
-                if i < len(self.annotations) - 1:
-                    self.next_button.set_label(_("Next: %s") % self.controller.get_title(self.annotations[i + 1]))
-                    self.next_button.set_sensitive(True)
-                else:
-                    self.next_button.set_label(_("No next annotation"))
-                    self.next_button.set_sensitive(True)
+                self.set_title(_("Begin of #%(index)d (title: %(content)s)") % { 'index': i,
+                                                                                 'content': self.controller.get_title(a) })
+                self.prev_button.set_sensitive(i > 0)
+                self.next_button.set_sensitive(i < len(self.annotations) - 1)
             else:
                 # End: display a message ?
                 pass
@@ -168,24 +158,16 @@ class ShotValidation(AdhocView):
         # Button bar
         hb=gtk.HBox()
 
-        self.prev_button = gtk.Button()
+        self.prev_button = gtk.Button(stock=gtk.STOCK_GO_BACK)
+        self.prev_button.set_tooltip_text(_("Display previous annotation"))
         self.prev_button.connect("clicked", lambda b: self.set_index(self.index - 1))
         hb.add(self.prev_button)
-
-        b=gtk.Button(_("Current time"))
-        b.set_tooltip_text(_("Go to annotation containing current player time."))
-        b.connect("clicked", self.goto_current)
-        hb.add(b)
-
-        b=gtk.Button(_("Merge with previous"))
-        b.set_tooltip_text(_("Merge with previous annotation, i.e. remove this bound."))
-        b.connect("clicked", self.merge)
-        hb.add(b)
 
         l = gtk.Label("#")
         hb.pack_start(l, expand=False)
 
-        self.next_button = gtk.Button()
+        self.next_button = gtk.Button(stock=gtk.STOCK_GO_FORWARD)
+        self.next_button.set_tooltip_text(_("Display next annotation"))
         self.next_button.connect("clicked", lambda b: self.set_index(self.index + 1))
 
         s=gtk.SpinButton(self.current_index, 1, 0)
@@ -197,6 +179,20 @@ class ShotValidation(AdhocView):
         hb.add(self.next_button)
 
         vbox.pack_start(hb, expand=False)
+
+        hb = gtk.HBox()
+        b=gtk.Button(_("Current time"))
+        b.set_tooltip_text(_("Go to annotation containing current player time."))
+        b.connect("clicked", self.goto_current)
+        hb.add(b)
+
+        b=gtk.Button(_("Merge with previous"))
+        b.set_tooltip_text(_("Merge with previous annotation, i.e. remove this bound."))
+        b.connect("clicked", self.merge)
+        hb.add(b)
+        vbox.pack_start(hb, expand=False)
+
+
         self.set_index(0)
         vbox.show_all()
         
