@@ -133,11 +133,38 @@ class Player(object):
         """Stop the player."""
         return
 
+    def get_player_args (self):
+        """Build the VLC player argument list.
+
+        @return: the list of arguments
+        """
+        args=[]
+        filters=[]
+
+        args.append( '--intf=dummy' )
+
+        if os.path.isdir(config.data.path['plugins']):
+            args.append( '--plugin-path=%s' % config.data.path['plugins'] )
+        if config.data.player['verbose'] is not None:
+            args.append ('--verbose')
+            args.append (config.data.player['verbose'])
+        if config.data.player['vout'] != 'default':
+            args.append( '--vout=%s' % config.data.player['vout'] )
+        if config.data.player['svg']:
+            args.append( '--text-renderer=svg' )
+        if config.data.player['bundled']:
+            args.append( '--no-plugins-cache' )
+        if filters != []:
+            # Some filters have been defined
+            args.append ('--vout-filter=%s' %":".join(filters))
+        #print "player args", args
+        return [ str(i) for i in args ]
+    
     def restart_player (self):
         """Restart (cleanly) the player."""
         del self.mc
 
-        self.args=config.data.get_player_args()
+        self.args=self.get_player_args()
 
         print "Before MC instanciation"
         self.mc = vlc.MediaControl( self.args )

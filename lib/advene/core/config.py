@@ -717,36 +717,6 @@ class Config(object):
 
         self.config_file=conffile
 
-    def get_player_args (self):
-        """Build the VLC player argument list.
-
-        FIXME: this is valid for VLC only, so this should belong
-        to player.vlcnative.
-
-        @return: the list of arguments
-        """
-        args=[]
-        filters=[]
-
-        args.append( '--intf=dummy' )
-
-        if os.path.isdir(self.path['plugins']):
-            args.append( '--plugin-path=%s' % self.path['plugins'] )
-        if self.player['verbose'] is not None:
-            args.append ('--verbose')
-            args.append (self.player['verbose'])
-        if self.player['vout'] != 'default':
-            args.append( '--vout=%s' % self.player['vout'] )
-        if self.player['svg']:
-            args.append( '--text-renderer=svg' )
-        if self.player['bundled']:
-            args.append( '--no-plugins-cache' )
-        if filters != []:
-            # Some filters have been defined
-            args.append ('--vout-filter=%s' %":".join(filters))
-        #print "player args", args
-        return [ str(i) for i in args ]
-
     def get_userid (self):
         """Return the userid (login name).
 
@@ -803,8 +773,6 @@ class Config(object):
 
     userid = property (fget=get_userid,
                        doc="Login name of the user")
-    player_args = property (fget=get_player_args,
-                            doc="List of arguments for the VLC player")
 
     version_string = property(fget=get_version_string,
                               doc="Version string")
