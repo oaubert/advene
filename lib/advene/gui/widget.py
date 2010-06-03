@@ -1019,11 +1019,16 @@ class TimestampRepresentation(gtk.Button):
         self.width=w
         self.refresh()
 
-    def invalidate_snapshot(self, *p):
-        """Invalidate the snapshot image.
+    def refresh_snapshot(self, *p):
+        """Refresh the snapshot image.
         """
-        self.controller.package.imagecache.invalidate(self.value, self.epsilon)
-        self.controller.notify('SnapshotUpdate', position=self.value)
+        ic=self.controller.package.imagecache
+        if ic.is_initialized(self.value, self.epsilon):
+            # Invalidate current snapshot
+            ic.invalidate(self.value, self.epsilon)
+            self.controller.notify('SnapshotUpdate', position=self.value)
+        # Ask for refresh
+        self.controller.update_snapshot(self.value)
         self.refresh()
         return True
 
@@ -1041,11 +1046,24 @@ class TimestampRepresentation(gtk.Button):
         p=self.controller.player
 
         menu = gtk.Menu()
-        item = gtk.MenuItem(_("Invalidate snapshot"))
-        item.connect('activate', self.invalidate_snapshot)
+
+        def goto(it, t):
+            c=self.controller
+            pos = c.create_position (value=t,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)
+            return True
+
+        item = gtk.MenuItem(_("Play"))
+        item.connect('activate', goto, self.value)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Use the current player position"))
+        item = gtk.MenuItem(_("Refresh snapshot"))
+        item.connect('activate', self.refresh_snapshot)
+        menu.append(item)
+
+        item = gtk.MenuItem(_("Use current player position"))
         item.connect('activate', lambda i: self.set_value(p.current_position_value))
         if p.status != p.PauseStatus and p.status != p.PlayingStatus:
             item.set_sensitive(False)

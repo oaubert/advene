@@ -1,3 +1,5 @@
+* shot validation: use current movie time (or button)
+
 * Ldt ZIP importer
 
 * Fix svg support for gstreamer/mac (need to rewrite the SVGOverlay element in C)
@@ -2696,3 +2698,4 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Shotdetect validation interface (display multiple snapshots before+after)
 
+* shot validation: add "Play" + "refresh" to timestamp popup menu
