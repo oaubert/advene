@@ -373,10 +373,20 @@ class FrameSelector(object):
         self.update_timestamp(start + self.count / 2 * self.frame_length)
         return True
 
+    def set_timestamp(self, timestamp):
+        """Set the reference timestamp.
+
+        It is the timestamp displayed in the label, and corresponds
+        most of the time to the original timestamp (before adjustment).
+        """
+        self.timestamp = timestamp
+        self.selected_value = timestamp
+        self.update_timestamp(timestamp)
+        self.current_button.set_label('Current value: %s' % helper.format_time(self.timestamp))
+        
     def update_timestamp(self, timestamp):
         """Set the center timestamp.
         """
-        self.current_button.set_label('Current value: %s' % helper.format_time(timestamp))
         start = max(timestamp - self.count / 2 * self.frame_length, 0)
         for c in self.container.get_children():
             c.value = start

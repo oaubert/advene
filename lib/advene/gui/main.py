@@ -3009,7 +3009,7 @@ class AdveneGUI(object):
             i = int(adj.get_value()) - 1
             if i >= 0 and i <= len(annotations) - 1:
                 a=annotations[i]
-                fs.update_timestamp(a.fragment.begin)
+                fs.set_timestamp(a.fragment.begin)
                 d.set_title(_("Begin of ") + self.controller.get_title(a))
                 if i > 0:
                     prev_button.set_label(_("Previous: %s") % self.controller.get_title(annotations[i - 1]))
