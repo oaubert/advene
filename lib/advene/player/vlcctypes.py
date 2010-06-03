@@ -20,7 +20,7 @@
 """
 
 import advene.core.config as config
-
+import os
 
 try:
     import advene.player.vlc as vlc
