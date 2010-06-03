@@ -38,6 +38,7 @@ from advene.rules.elements import ECACatalog
 import advene.core.config as config
 from advene.gui.widget import TimestampRepresentation
 from advene.gui.util import dialog, get_small_stock_button, gdk2intrgba
+from advene.model.util.defaultdict import DefaultDict
 
 try:
     import goocanvas
@@ -64,6 +65,16 @@ INCOMPLETE_OPERATIONS_NAMES = {
             'ElementEditEnd': _('Ending edition'),
             'PlayerSet': _('Moving to'),
         }
+
+TYPE_ABREVIATION=DefaultDict(default='U')
+TYPE_ABREVIATION.update({
+        Annotation: 'A',
+        Relation: 'R',
+        AnnotationType: 'AT',
+        RelationType: 'RT',
+        Schema: 'S',
+        View: 'V',
+        })
 
 class TraceTimeline(AdhocView):
     """ Class to define a timeline view of traces.
@@ -1981,20 +1992,7 @@ class ObjGroup (Group):
             o = self.controller.package.get_element_by_id(self.cobj['id'])
             self.cobj['type']=type(o)
             #print self.type
-        if self.cobj['type'] == Schema:
-            txt = 'S'
-        elif self.cobj['type'] == AnnotationType:
-            txt = 'AT'
-        elif self.cobj['type'] == RelationType:
-            txt = 'RT'
-        elif self.cobj['type'] == Annotation:
-            txt = 'A'
-        elif self.cobj['type'] == Relation:
-            txt = 'R'
-        elif self.cobj['type'] == View:
-            txt = 'V'
-        else:
-            print "type inconnu: %s" % self.cobj['type']
+        txt = TYPE_ABREVIATION[self.cobj['type']]
         return goocanvas.Text (parent = self,
                         text = txt,
                         x = self.x + 3 * self.r + 3,
@@ -2225,27 +2223,7 @@ class Inspector (gtk.VBox):
                     stroke_color='black',
                     fill_color_rgba=temp_c,
                     line_width=1.0)
-            if obj_evt.concerned_object['type'] == Annotation:
-                #draw a A
-                txt='A'
-            elif obj_evt.concerned_object['type'] == Relation:
-                #draw a R
-                txt='R'
-            elif obj_evt.concerned_object['type'] == AnnotationType:
-                #draw a AT
-                txt='AT'
-            elif obj_evt.concerned_object['type'] == RelationType:
-                #draw a RT
-                txt='RT'
-            elif obj_evt.concerned_object['type'] == Schema:
-                #draw a S
-                txt='S'
-            elif obj_evt.concerned_object['type'] == View:
-                #draw a V
-                txt='V'
-            else:
-                #draw a U
-                txt='U'
+            txt = TYPE_ABREVIATION[obj_evt.concerned_object['type']]
             goocanvas.Text (parent = objg,
                     text = txt,
                     x = 40,
