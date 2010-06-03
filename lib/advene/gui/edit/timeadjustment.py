@@ -395,7 +395,7 @@ class FrameSelector(object):
             t += self.frame_length
         return True
 
-    def update_snapshots(self):
+    def refresh_snapshots(self):
         """Update non-initialized snapshots.
         """
         ic=self.controller.package.imagecache
@@ -461,6 +461,15 @@ class FrameSelector(object):
     def build_widget(self):
         vb=gtk.VBox()
 
+        buttons = gtk.HBox()
+
+        b=gtk.Button(stock=gtk.STOCK_REFRESH)
+        b.set_tooltip_text(_("Refresh missing snapshots"))
+        b.connect("clicked", lambda b: self.refresh_snapshots())
+        buttons.pack_start(b, expand=True)
+
+        vb.pack_start(buttons, expand=False)
+
         hb=gtk.HBox()
 
         for i in xrange(-self.count / 2, self.count / 2):
@@ -470,15 +479,8 @@ class FrameSelector(object):
 
         hb.connect('scroll-event', self.handle_scroll_event)
         hb.connect('key-press-event', self.handle_key_press)
-
-        buttons = gtk.HBox()
-
-        b=gtk.Button(stock=gtk.STOCK_REFRESH)
-        b.connect("clicked", lambda b: self.update_snapshots())
-        buttons.pack_start(b, expand=True)
-
         vb.add(hb)
-        vb.pack_start(buttons, expand=False)
+
         self.container = hb
         self.update_timestamp(self.timestamp)
         return vb
