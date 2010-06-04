@@ -111,7 +111,8 @@ from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
 import advene.gui.edit.properties
 import advene.gui.edit.montage
-from advene.gui.edit.timeadjustment import TimeAdjustment, FrameSelector
+from advene.gui.edit.timeadjustment import TimeAdjustment
+from advene.gui.edit.frameselector import FrameSelector
 from advene.gui.views.viewbook import ViewBook
 from advene.gui.views.html import HTMLView
 from advene.gui.views.scroller import ScrollerView

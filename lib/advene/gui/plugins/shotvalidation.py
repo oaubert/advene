@@ -21,7 +21,7 @@ import gtk
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-from advene.gui.edit.timeadjustment import FrameSelector
+from advene.gui.edit.frameselector import FrameSelector
 
 name="Shot validation view plugin"
 
