@@ -379,7 +379,15 @@ class FrameSelector(object):
         @param focus_index: the index of the child widget which should get the focus
         @type focus_index: int
         """
-        t = max(timestamp - self.count / 2 * self.frame_length, 0)
+        t = timestamp - self.count / 2 * self.frame_length
+        if t < 0:
+            # Display from 0. But we have to take this into account
+            # when handling focus_index
+            index_offset = t / self.frame_length
+            t = 0
+        else:
+            index_offset = 0
+        
         for c in self.container.get_children():
             c.value = t
             if t < self.timestamp:
@@ -391,7 +399,8 @@ class FrameSelector(object):
         # Handle focus
         if focus_index is None:
             focus_index = self.count / 2
-        self.container.get_children()[focus_index].grab_focus()
+
+        self.container.get_children()[focus_index + index_offset].grab_focus()
         return True
 
     def update_offset(self, offset, focus_index=None):
