@@ -40,18 +40,21 @@ class ShotValidation(AdhocView):
             )
         self.controller=controller
         self._annotationtype=None
-        self.annotationtype=annotationtype
+
+        self.current_index = gtk.Adjustment(10, 1, 10, 1, 10)
         self.options={}
 
         # Load options
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
 
+        self.annotationtype=annotationtype
         self.widget = self.build_widget()
 
     def set_annotationtype(self, at):
         self._annotationtype=at
         self.annotations = sorted(at.annotations, key=lambda a: a.fragment.begin)
+        self.current_index.set_upper(len(self.annotations))
 
     def get_annotationtype(self):
         return self._annotationtype
@@ -66,6 +69,17 @@ class ShotValidation(AdhocView):
         return int(self.current_index.get_value()) - 1
     index = property(get_index, set_index)
 
+    def update_annotationtype(self, annotationtype=None, event=None):
+        if annotationtype == self.annotationtype and event == 'AnnotationTypeDelete':
+            self.close()
+        return True
+
+    def update_annotation(self, annotation=None, event=None):
+        if annotation.type == self.annotationtype and event in ('AnnotationCreate', 'AnnotationDelete'):
+            # Update annotation type, which will trigger an update of self.annotations
+            self.annotationtype = annotation.type
+            self.current_index.emit('value-changed')
+        
     def goto_current(self, *p):
         """Select annotation containing current player time.
         """
@@ -145,14 +159,6 @@ class ShotValidation(AdhocView):
 
         self.selector = FrameSelector(self.controller, self.annotations[0].fragment.begin)
         self.selector.callback = self.validate_and_next
-
-        # Current index, in a user-readable way (i.e. starting at 1)
-        size=len(self.annotations)
-
-        # We initialize the adjustment at size, so that when we set it
-        # back to 1 at the end of the initialization, the
-        # handle_index_change correctly updates buttons.
-        self.current_index = gtk.Adjustment(size, 1, size, 1, 10)
 
         def handle_index_change(adj):
             i = int(adj.get_value()) - 1
