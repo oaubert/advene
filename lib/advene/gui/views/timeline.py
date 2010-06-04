@@ -1879,9 +1879,9 @@ class TimeLine(AdhocView):
             else:
                 i='scroll-increment'
 
-            if event.direction == gtk.gdk.SCROLL_DOWN:
+            if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
                 incr=-config.data.preferences[i]
-            elif event.direction == gtk.gdk.SCROLL_UP:
+            elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
                 incr=config.data.preferences[i]
 
             fr=self.annotation_fraction(button)
@@ -2630,14 +2630,14 @@ class TimeLine(AdhocView):
             a = self.adjustment
             incr = a.step_increment
 
-        if event.direction == gtk.gdk.SCROLL_DOWN:
+        if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
             val = a.value + incr
             if val > a.upper - a.page_size:
                 val = a.upper - a.page_size
             if val != a.value:
                 a.value = val
 
-        elif event.direction == gtk.gdk.SCROLL_UP:
+        elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
             val = a.value - incr
             if val < a.lower:
                 val = a.lower

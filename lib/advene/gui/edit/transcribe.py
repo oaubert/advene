@@ -584,9 +584,9 @@ class TranscriptionEdit(AdhocView):
             else:
                 i='scroll-increment'
 
-            if event.direction == gtk.gdk.SCROLL_DOWN:
+            if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
                 button.value -= config.data.preferences[i]
-            elif event.direction == gtk.gdk.SCROLL_UP:
+            elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
                 button.value += config.data.preferences[i]
 
                 button.set_tooltip_text("%s" % helper.format_time(button.value))

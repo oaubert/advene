@@ -190,7 +190,7 @@ class SchemaEditor (AdhocView):
                 # Control+scroll: zoom in/out
                 a = self.zoom_adj
                 incr = -a.step_increment
-            elif event.state & gtk.gdk.SHIFT_MASK:
+            elif (event.state & gtk.gdk.SHIFT_MASK or event.direction in (gtk.gdk.SCROLL_LEFT, gtk.gdk.SCROLL_RIGHT)):
                 # Horizontal scroll
                 a = scrolled_win.get_hadjustment()
                 incr = a.step_increment
@@ -199,7 +199,7 @@ class SchemaEditor (AdhocView):
                 a = scrolled_win.get_vadjustment()
                 incr = a.step_increment
 
-            if event.direction == gtk.gdk.SCROLL_DOWN:
+            if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
                 val = a.value + incr
                 if val > a.upper - a.page_size:
                     val = a.upper - a.page_size
@@ -207,7 +207,7 @@ class SchemaEditor (AdhocView):
                     val = a.lower
                 if val != a.value:
                     a.value = val
-            elif event.direction == gtk.gdk.SCROLL_UP:
+            elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
                 val = a.value - incr
                 if val < a.lower:
                     val = a.lower
