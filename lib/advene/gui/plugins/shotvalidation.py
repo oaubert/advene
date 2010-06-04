@@ -201,7 +201,7 @@ class ShotValidation(AdhocView):
         def handle_spin_scroll(widget, event):
             if event.direction == gtk.gdk.SCROLL_UP:
                 offset=+1
-            else:
+            elif event.direction == gtk.gdk.SCROLL_DOWN:
                 offset=-1
             self.set_index(self.index + offset)
             return True
