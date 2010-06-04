@@ -873,7 +873,7 @@ class TimestampRepresentation(gtk.Button):
         super(TimestampRepresentation, self).__init__()
         self._value=value
         self.controller=controller
-        self.width=width or config.data.preferences['bookmark-snapshot-width']
+        self._width=width or config.data.preferences['bookmark-snapshot-width']
         if epsilon is None:
             epsilon=config.data.preferences['bookmark-snapshot-precision']
         self.epsilon=epsilon
@@ -936,7 +936,14 @@ class TimestampRepresentation(gtk.Button):
             self.label.set_style(style)
             self._bgcolor = color
     bgcolor = property(get_bgcolor, set_bgcolor)
-                       
+     
+    def set_width(self, w):
+        self._width = w
+        self.refresh()
+    def get_width(self):
+        return self._width
+    width = property(get_width, set_width)
+
     def snapshot_update_cb(self, context, target):
         if abs(context.globals['position'] - self._value) <= self.epsilon:
             # Update the representation
