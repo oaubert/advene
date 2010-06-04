@@ -91,7 +91,11 @@ class ShotValidation(AdhocView):
         self.controller.notify('EditSessionEnd', element=previous)
         self.annotations.remove(annotation)
         self.controller.delete_element(annotation, immediate_notify=True, batch_id=batch)
-        self.set_index(i - 1)
+        # We want to display the next annotation, i.e. at i. But we
+        # were already at i, so the handle_index_change would not be
+        # triggered. Force value-changed emission
+        self.set_index(i)
+        self.current_index.emit('value-changed')
         return True
 
     def validate_and_next(self, new):
@@ -144,7 +148,7 @@ class ShotValidation(AdhocView):
             if i >= 0 and i <= len(self.annotations) - 1:
                 a=self.annotations[i]
                 self.selector.set_timestamp(a.fragment.begin)
-                self.set_title(_("Begin of #%(index)d (title: %(content)s)") % { 'index': i,
+                self.set_title(_("Begin of #%(index)d (title: %(content)s)") % { 'index': i + 1,
                                                                                  'content': self.controller.get_title(a) })
                 self.prev_button.set_sensitive(i > 0)
                 self.next_button.set_sensitive(i < len(self.annotations) - 1)
