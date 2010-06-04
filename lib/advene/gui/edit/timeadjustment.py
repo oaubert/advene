@@ -358,18 +358,6 @@ class FrameSelector(object):
         self.container = None
         self.widget = self.build_widget()
         
-    def update_offset(self, offset):
-        """Update the timestamps to go forward/backward.
-        """
-        if offset < 0:
-            ref=self.container.get_children()[0]
-            start = max(ref.value + offset * self.frame_length, 0)
-        else:
-            ref=self.container.get_children()[offset]
-            start = ref.value
-        self.update_timestamp(start + self.count / 2 * self.frame_length)
-        return True
-
     def set_timestamp(self, timestamp):
         """Set the reference timestamp.
 
@@ -380,8 +368,16 @@ class FrameSelector(object):
         self.selected_value = timestamp
         self.update_timestamp(timestamp)
         
-    def update_timestamp(self, timestamp):
+    def update_timestamp(self, timestamp, focus_index=None):
         """Set the center timestamp.
+        
+        If focus_index is not specified, the center timestamp will get
+        the focus.
+
+        @param timestamp: the center timestamp
+        @type timestamp: long
+        @param focus_index: the index of the child widget which should get the focus
+        @type focus_index: int
         """
         t = max(timestamp - self.count / 2 * self.frame_length, 0)
         for c in self.container.get_children():
@@ -390,9 +386,24 @@ class FrameSelector(object):
                 c.bgcolor = '#666666'
             else:
                 c.bgcolor = 'black'
-            if t == timestamp:
-                c.grab_focus()
             t += self.frame_length
+
+        # Handle focus
+        if focus_index is None:
+            focus_index = self.count / 2
+        self.container.get_children()[focus_index].grab_focus()
+        return True
+
+    def update_offset(self, offset, focus_index=None):
+        """Update the timestamps to go forward/backward.
+        """
+        if offset < 0:
+            ref=self.container.get_children()[0]
+            start = max(ref.value + offset * self.frame_length, 0)
+        else:
+            ref=self.container.get_children()[offset]
+            start = ref.value
+        self.update_timestamp(start + self.count / 2 * self.frame_length, focus_index)
         return True
 
     def refresh_snapshots(self):
@@ -412,12 +423,31 @@ class FrameSelector(object):
         self.update_offset(offset)
         return True
 
+    def focus_index(self):
+        """Return the index of the TimestampRepresentation which has the focus.
+        """
+        return self.container.get_children().index(self.container.get_focus_child())
+
     def handle_key_press(self, widget, event):
         if event.keyval == gtk.keysyms.Page_Down:
             self.update_offset(-self.count / 2)
             return True
         elif event.keyval == gtk.keysyms.Page_Up:
             self.update_offset(+self.count / 2)
+            return True
+        elif event.keyval == gtk.keysyms.Left:
+            i = self.focus_index()
+            if i == 0:
+                self.update_offset(-1, focus_index = 0)
+            else:
+                self.container.get_children()[i - 1].grab_focus()
+            return True
+        elif event.keyval == gtk.keysyms.Right:
+            i = self.focus_index()
+            if i == len(self.container.get_children()) -1:
+                self.update_offset(+1, focus_index = -1)
+            else:
+                self.container.get_children()[i + 1].grab_focus()
             return True
         return False
 
