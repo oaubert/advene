@@ -98,6 +98,17 @@ class ShotValidation(AdhocView):
         self.current_index.emit('value-changed')
         return True
 
+    def handle_keypress(self, widget, event):
+        if event.keyval == gtk.keysyms.Page_Down:
+            # Next annotation
+            self.set_index(self.index + 1)
+            return True
+        elif event.keyval == gtk.keysyms.Page_Up:
+            # Previous annotation
+            self.set_index(self.index - 1)
+            return True
+        return False
+
     def validate_and_next(self, new):
         """Validate the current annotation and display the next one.
         """
@@ -199,6 +210,6 @@ class ShotValidation(AdhocView):
 
         self.set_index(0)
         vbox.show_all()
-        
+        vbox.connect('key-press-event', self.handle_keypress)
         return vbox
 

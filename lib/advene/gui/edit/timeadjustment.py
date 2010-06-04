@@ -429,13 +429,7 @@ class FrameSelector(object):
         return self.container.get_children().index(self.container.get_focus_child())
 
     def handle_key_press(self, widget, event):
-        if event.keyval == gtk.keysyms.Page_Down:
-            self.update_offset(-self.count / 2)
-            return True
-        elif event.keyval == gtk.keysyms.Page_Up:
-            self.update_offset(+self.count / 2)
-            return True
-        elif event.keyval == gtk.keysyms.Left:
+        if event.keyval == gtk.keysyms.Left:
             i = self.focus_index()
             if i == 0:
                 self.update_offset(-1, focus_index = 0)
