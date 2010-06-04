@@ -113,9 +113,9 @@ class FrameSelector(object):
         return True
 
     def handle_scroll_event(self, widget, event):
-        if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_LEFT:
+        if event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
             offset=-1
-        elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_RIGHT:
+        elif event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
             offset=+1
         self.update_offset(offset)
         return True
