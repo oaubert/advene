@@ -176,7 +176,9 @@ color_cache={}
 def name2color(color):
     """Return the gtk color for the given color name or code.
     """
-    if color:
+    if isinstance(color, gtk.gdk.Color):
+        gtk_color = color
+    elif color:
         # Found a color. Cache it.
         try:
             gtk_color=color_cache[color]

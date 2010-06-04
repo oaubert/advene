@@ -1098,8 +1098,6 @@ class TimestampRepresentation(gtk.Button):
         return menu
 
     def set_color(self, color):
-        # FIXME: does not work ATM
-        self.modify_bg(gtk.STATE_NORMAL, color)
-        self.modify_base(gtk.STATE_NORMAL, color)
+        self.bgcolor = color
 
 gobject.type_register(TimestampRepresentation)
