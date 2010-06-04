@@ -195,6 +195,17 @@ class ShotValidation(AdhocView):
         s.set_increments(1, 10)
         s.set_update_policy(gtk.UPDATE_IF_VALID)
         s.set_numeric(True)
+
+        # For an unknown reason, the default behaviour of updating
+        # SpinButton through scroll does not work. Emulate it.
+        def handle_spin_scroll(widget, event):
+            if event.direction == gtk.gdk.SCROLL_UP:
+                offset=+1
+            else:
+                offset=-1
+            self.set_index(self.index + offset)
+            return True
+        s.connect('scroll-event', handle_spin_scroll)
         hb.add(s)
 
         hb.add(self.next_button)
