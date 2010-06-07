@@ -44,6 +44,7 @@
 ../lib/advene/gui/plugins/videoplayer.py
 ../lib/advene/gui/plugins/actions.py
 ../lib/advene/gui/plugins/htmlcontenhandler.py
+../lib/advene/gui/plugins/shotvalidation.py
 ../lib/advene/gui/plugins/eventaccumulator.py
 ../lib/advene/gui/plugins/tracepreview.py
 ../lib/advene/gui/plugins/tracetimeline.py
@@ -65,6 +66,7 @@
 ../lib/advene/gui/edit/rules.py
 ../lib/advene/gui/edit/schemaeditor.py
 ../lib/advene/gui/edit/transcribe.py
+../lib/advene/gui/edit/frameselector.py
 ../lib/advene/gui/edit/shapewidget.py
 ../lib/advene/gui/edit/timeadjustment.py
 ../lib/advene/rules/actions.py
