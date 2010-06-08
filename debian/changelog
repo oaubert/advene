@@ -1,7 +1,9 @@
 advene (0.41) unstable; urgency=low
 
-  * SVG overlay over the video is available on all platforms.
-  
+  * SVG overlay over the video is available. It has performance issues on
+    MacOS X though and is thus disable in the standard configuration. See
+    Edit/Preferences/Video player settings to enable/disable this feature.
+   
   * Multiple video players can be simultaneously opened. They are
     synchronized (with the possibility to specify an offset). This allows
     for instance the visualisation of multiple videos of the same event.
@@ -14,6 +16,28 @@ advene (0.41) unstable; urgency=low
 
   * Ad-hoc views:
 
+     * A new frame-precise time selector can be invoked through the a
+      (adjust begin time) or A (adjust end time) shortcut on an annotation.
+  
+     * A shot validation interface is accessible through the
+       annotation-type popup menu ("Ajust annotation bounds").
+  
+     * Timeline: 
+  
+        * annotations containing a series of numeric values can be
+          displayed as bargraphs.
+  
+        * SVG graphics are displayed in the timeline widgets.
+          
+        * right-clicking in the timeline background now proposes to create
+          an annotation at the current player position.
+  
+        * when selecting an empty zone, propose to zoom on region or limit
+          display to region (in addition to creating an annotation).
+  
+        * when display is limited to a time range, display navigation
+          tools in the upper left-hand corner.
+  
      * Treeview: annotations are sorted according to their begin time.
 
      * New trace preview visualisation.
