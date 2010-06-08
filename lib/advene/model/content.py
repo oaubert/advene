@@ -18,6 +18,14 @@
 #
 from cStringIO import StringIO
 import urllib
+try:
+    # In python2.6 stdlib 
+    import json
+except ImportError:
+    try:
+        import simplejson as json
+    except ImportError:
+        json = None
 
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
@@ -246,6 +254,11 @@ class Content(modeled.Modeled,
                                'text/x-advene-structured',
                                'application/x-advene-zone' ) ):
             return StructuredContent(self.data)
+        elif self.mimetype == 'application/json':
+            if json is not None:
+                return json.loads(self.data)
+            else:
+                return {'data': self.data}
         elif self.mimetype == 'application/x-advene-values':
             def convert(v):
                 try:
