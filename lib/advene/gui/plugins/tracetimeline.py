@@ -1139,6 +1139,7 @@ class TraceTimeline(AdhocView):
         
         Remove everything on the main canvas and redraw them
         Should only be used when opening the view / changing selected trace
+        
         @type center: number
         @param center: the time value on which we need to center
         """
@@ -1167,6 +1168,8 @@ class TraceTimeline(AdhocView):
             if lvl == 'event':
                 for i in self.active_trace.levels[lvl]:
                     self.receive_int(self.active_trace, event=i, operation=None, action=None)
+                    while gtk.events_pending():
+                        gtk.main_iteration()
             #elif lvl == 'operation':
                 #usefull only for operations not linked to actions ... is it really usefull ?
             #    for i in self.active_trace.levels[lvl]:
@@ -1175,6 +1178,8 @@ class TraceTimeline(AdhocView):
                 for i in self.active_trace.levels[lvl]:
                     for o in i.operations:
                         self.receive_int(self.active_trace, event=None, operation=o, action=i)
+                        while gtk.events_pending():
+                            gtk.main_iteration()
         
         self.draw_marks()
         self.now_line = goocanvas.polyline_new_line(root,
