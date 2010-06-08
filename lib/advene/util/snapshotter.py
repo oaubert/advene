@@ -116,15 +116,16 @@ class Snapshotter(object):
 
         csp=gst.element_factory_make('ffmpegcolorspace')
         pngenc=gst.element_factory_make('pngenc')
+        queue=gst.element_factory_make('queue')
         sink=gst.element_factory_make('notifysink')
 
         if width is not None:
             filter=gst.element_factory_make("capsfilter")
             filter.set_property("caps", gst.Caps("video/x-raw-rgb,width=%d,pixel-aspect-ratio=(fraction)1/1" % width))
             scale=gst.element_factory_make('videoscale')            
-            l=(csp, scale, filter, pngenc, sink)
+            l=(csp, scale, filter, pngenc, queue, sink)
         else:
-            l=(csp, pngenc, sink)
+            l=(csp, pngenc, queue, sink)
 
         videobin.add(*l)
         gst.element_link_many(*l)
