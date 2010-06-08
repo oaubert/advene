@@ -16,10 +16,23 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import advene.core.config as config
+
 import subprocess
 import signal
 import os
+import urllib
 from threading import Thread
+
+
+if config.data.os == 'win32':
+    #try to determine if gstreamer is already installed
+    ppath = os.getenv('GST_PLUGIN_PATH')
+    if not ppath or not os.path.exists(ppath):
+        os.environ['GST_PLUGIN_PATH']=config.data.path['advene']+'/gst/lib/gstreamer-0.10'
+    gstpath = os.getenv('PATH')
+    os.environ['PATH']=config.data.path['advene']+'/gst/bin;'+gstpath
+
 
 try:
     import pygst
@@ -38,8 +51,10 @@ class SoundPlayer:
             self.pipe = gst.parse_launch('playbin2')
         if fname.startswith('file:') or fname.startswith('http:'):
             uri = fname
+        elif config.data.os == 'win32':
+            uri = 'file:' + urllib.pathname2url(fname)
         else:
-            uri = 'file://' + fname
+            uri = 'file://' + os.path.abspath(fname)
         self.pipe.set_state(gst.STATE_NULL)
         self.pipe.props.uri = uri
         self.pipe.set_state(gst.STATE_PLAYING)
