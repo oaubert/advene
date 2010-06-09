@@ -1643,16 +1643,11 @@ class AdveneGUI(object):
         # of modification, ensure that both methods are still
         # consistent.
         tb_list = [
-            (_("Play [Control-Tab / Control-Space]"), gtk.STOCK_MEDIA_PLAY,
-             self.on_b_play_clicked),
-            (_("Pause [Control-Tab / Control-Space]"), gtk.STOCK_MEDIA_PAUSE,
-             self.on_b_pause_clicked),
-            (_("Stop"), gtk.STOCK_MEDIA_STOP,
-             self.on_b_stop_clicked),
-            (_("Rewind (%.02f s) [Control-Left]") % (config.data.preferences['time-increment'] / 1000.0), gtk.STOCK_MEDIA_REWIND,
-             self.on_b_rewind_clicked),
-            (_("Forward (%.02f s) [Control-Right]" % (config.data.preferences['time-increment'] / 1000.0)), gtk.STOCK_MEDIA_FORWARD,
-             self.on_b_forward_clicked),
+            (_("Play [Control-Tab / Control-Space]"), gtk.STOCK_MEDIA_PLAY, self.on_b_play_clicked),
+            (_("Pause [Control-Tab / Control-Space]"), gtk.STOCK_MEDIA_PAUSE, self.on_b_pause_clicked),
+            (_("Stop"), gtk.STOCK_MEDIA_STOP, lambda i: self.controller.update_status ("stop")),
+            (_("Rewind (%.02f s) [Control-Left]") % (config.data.preferences['time-increment'] / 1000.0), gtk.STOCK_MEDIA_REWIND, lambda i: self.controller.move_position (-config.data.preferences['time-increment'])),
+            (_("Forward (%.02f s) [Control-Right]" % (config.data.preferences['time-increment'] / 1000.0)), gtk.STOCK_MEDIA_FORWARD, lambda i: self.controller.move_position (config.data.preferences['time-increment'])),
             (_("Previous frame [Control-Down]"), gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_frame(-1)),
             (_("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_frame(+1)),
             ( (_("Fullscreen"), gtk.STOCK_FULLSCREEN, lambda i: self.controller.player.fullscreen(self.connect_fullscreen_handlers)) )
@@ -3468,12 +3463,6 @@ class AdveneGUI(object):
 
         return True
 
-    def on_b_rewind_clicked (self, button=None, data=None):
-        if self.controller.player.status == self.controller.player.PlayingStatus:
-            self.controller.move_position (-config.data.preferences['time-increment'],
-                                            notify=False)
-        return True
-
     def on_b_play_clicked (self, button=None, data=None):
         if not self.controller.player.playlist_get_list():
             # No movie file is defined yet. Propose to choose one.
@@ -3490,16 +3479,6 @@ class AdveneGUI(object):
             self.controller.update_status ("resume")
         elif self.controller.player.status == self.controller.player.PlayingStatus:
             self.controller.update_status ("pause")
-        return True
-
-    def on_b_stop_clicked (self, button=None, data=None):
-        self.controller.update_status ("stop")
-        return True
-
-    def on_b_forward_clicked (self, button=None, data=None):
-        if self.controller.player.status == self.controller.player.PlayingStatus:
-            self.controller.move_position (config.data.preferences['time-increment'],
-                                           notify=False)
         return True
 
     def on_b_addfile_clicked (self, button=None, data=None):
