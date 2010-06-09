@@ -215,9 +215,13 @@ class EspeakTTSEngine(TTSEngine):
             self.close()
             self.language=lang
         try:
-            if self.espeak_process is None:
-                self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE)
-            self.espeak_process.stdin.write(sentence + "\n")
+            if config.data.os == 'win32':
+                # stdin is botched on win32. Pass words on command line and do not reuse the process.
+                subprocess.Popen([ self.espeak_path, '-v', self.language, sentence.encode('latin1', 'ignore') ], stdin=subprocess.PIPE)
+            else:
+                if self.espeak_process is None:
+                    self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE)
+                self.espeak_process.stdin.write(sentence + "\n")
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
         return True
@@ -271,7 +275,7 @@ class CustomTTSEngine(TTSEngine):
     can_run=staticmethod(can_run)
 
     def close(self):
-        """Close the espeak process.
+        """Close the process.
         """
         if self.prg_process is not None:
             if config.data.os == 'win32':
@@ -285,7 +289,6 @@ class CustomTTSEngine(TTSEngine):
     def pronounce (self, sentence):
         lang=config.data.preferences.get('tts-language', 'en')
         if self.language != lang:
-            # Need to restart espeak to use the new language
             self.close()
             self.language=lang
         try:
@@ -326,7 +329,6 @@ class CustomArgTTSEngine(TTSEngine):
     def pronounce (self, sentence):
         lang=config.data.preferences.get('tts-language', 'en')
         if self.language != lang:
-            # Need to restart espeak to use the new language
             self.close()
             self.language=lang
         try:
