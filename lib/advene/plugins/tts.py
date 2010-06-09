@@ -84,7 +84,7 @@ class TTSEngine:
                     rulename=_("Unknown rule")
                 self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
                                                                                                                           'parametername': name})
-                self.controller.log(unicode(e)[:160])
+                self.controller.log(unicode(e.message)[:160])
                 result=default_value
         else:
             result=default_value
@@ -151,7 +151,7 @@ class FestivalTTSEngine(TTSEngine):
             if self.festival_process is not None:
                 self.festival_process.stdin.write('(SayText "%s")\n' % helper.unaccent(sentence))
         except OSError, e:
-            self.controller.log(u"TTS Error: " + unicode(e))
+            self.controller.log(u"TTS Error: " + unicode(e.message))
         return True
 
 class MacOSXTTSEngine(TTSEngine):
@@ -227,7 +227,7 @@ class EspeakTTSEngine(TTSEngine):
                 self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], shell=False, stdin=subprocess.PIPE)
             self.espeak_process.stdin.write(sentence + "\n")
         except OSError, e:
-            self.controller.log("TTS Error: ", unicode(e).encode('utf8'))
+            self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
         return True
 
 
@@ -301,5 +301,5 @@ class CustomTTSEngine(TTSEngine):
                 self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], shell=False, stdin=subprocess.PIPE)
             self.prg_process.stdin.write(unicode(sentence + "\n").encode('latin1', 'ignore'))
         except OSError, e:
-            self.controller.log("TTS Error: ", unicode(e).encode('utf8'))
+            self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
         return True
