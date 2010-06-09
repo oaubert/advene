@@ -31,20 +31,12 @@ import advene.model.tal.context
 name="Text-To-Speech actions"
 
 def register(controller=None):
-    if config.data.os == 'darwin':
-        controller.log("TTS: Using /usr/bin/say")
-        engine=MacOSXTTSEngine(controller)
-    elif CustomTTSEngine.can_run():
-        controller.log("TTS: Using custom script")
-        engine=CustomTTSEngine(controller)
-    elif EspeakTTSEngine.can_run():
-        controller.log("TTS: Using espeak")
-        engine=EspeakTTSEngine(controller)
-    elif FestivalTTSEngine.can_run():
-        controller.log("TTS: Using festival")
-        engine=FestivalTTSEngine(controller)
-    else:
-        engine=TTSEngine(controller)
+    for c in (CustomArgTTSEngine, CustomTTSEngine, EspeakTTSEngine, MacOSXTTSEngine, FestivalTTSEngine, TTSEngine):
+        if c.can_run():
+            controller.log("TTS: Using " + c.__doc__.splitlines()[0])
+            engine = c(controller)
+            break
+
     controller.register_action(RegisteredAction(
             name="Pronounce",
             method=engine.action_pronounce,
@@ -300,6 +292,45 @@ class CustomTTSEngine(TTSEngine):
             if self.prg_process is None:
                 self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], stdin=subprocess.PIPE)
             self.prg_process.stdin.write(unicode(sentence + "\n").encode('latin1', 'ignore'))
+        except OSError, e:
+            self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
+        return True
+
+class CustomArgTTSEngine(TTSEngine):
+    """CustomArg TTSEngine.
+
+    It tries to run a 'prononce' ('prononce.bat' on win32) script,
+    which takes strings as arguments and pronounces them.
+    """
+    if config.data.os == 'win32':
+        prgname='prononcearg.bat'
+    else:
+        prgname='prononcearg'
+
+    def __init__(self, controller=None):
+        TTSEngine.__init__(self, controller=controller)
+        self.language=None
+        self.prg_path=helper.find_in_path(CustomArgTTSEngine.prgname)
+
+    def can_run():
+        """Can this engine run ?
+        """
+        return helper.find_in_path(CustomArgTTSEngine.prgname) is not None
+    can_run=staticmethod(can_run)
+
+    def close(self):
+        """Close the process.
+        """
+        pass
+
+    def pronounce (self, sentence):
+        lang=config.data.preferences.get('tts-language', 'en')
+        if self.language != lang:
+            # Need to restart espeak to use the new language
+            self.close()
+            self.language=lang
+        try:
+            subprocess.Popen([ self.prg_path, '-v', self.language, unicode(sentence + "\n").encode('latin1', 'ignore') ])
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
         return True
