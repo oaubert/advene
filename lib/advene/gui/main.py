@@ -1040,7 +1040,10 @@ class AdveneGUI(object):
             socket.setdefaulttimeout(timeout)
             return
         socket.setdefaulttimeout(timeout)
-        data=u.read()
+        try:
+            data=u.read()
+        except:
+            data=""
         u.close()
         if not data:
             return False
