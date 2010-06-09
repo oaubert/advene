@@ -632,13 +632,16 @@ class Player:
                 style.bg[state]=black
                 style.base[state]=black
             self.fullscreen_window.set_style(style)
-        self.fullscreen_window.show()
-        self.fullscreen_window.grab_focus()
 
         if config.data.os == 'darwin':
             self.fullscreen_window.set_size_request(gtk.gdk.screen_width(), gtk.gdk.screen_height())
+            self.fullscreen_window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_SPLASHSCREEN)
+            self.fullscreen_window.set_position(gtk.WIN_POS_CENTER)
         else:
             self.fullscreen_window.window.fullscreen()
+
+        self.fullscreen_window.show()
+        self.fullscreen_window.grab_focus()
 
         if config.data.os == 'win32':
             self.reparent(self.fullscreen_window.window.handle)
@@ -652,6 +655,7 @@ class Player:
         else:
             # It has been destroyed
             self.fullscreen_window = None
+        return True
 
     # relpath, dump_bin and dump_element implementation based on Daniel Lenski <dlenski@gmail.com>
     # posted on gst-dev mailing list on 20070913
