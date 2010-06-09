@@ -133,7 +133,7 @@ class FestivalTTSEngine(TTSEngine):
 
     def init(self):
         if self.festival_path is not None and self.aplay_path is not None:
-            self.festival_process = subprocess.Popen([ self.festival_path, '--pipe' ], shell=False, stdin=subprocess.PIPE)
+            self.festival_process = subprocess.Popen([ self.festival_path, '--pipe' ], stdin=subprocess.PIPE)
             # Configure festival to use aplay
             self.festival_process.stdin.write("""(Parameter.set 'Audio_Command "%s -q -c 1 -t raw -f s16 -r $SR $FILE")\n""" % self.aplay_path)
             self.festival_process.stdin.write("""(Parameter.set 'Audio_Method 'Audio_Command)\n""")
@@ -224,7 +224,7 @@ class EspeakTTSEngine(TTSEngine):
             self.language=lang
         try:
             if self.espeak_process is None:
-                self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], shell=False, stdin=subprocess.PIPE)
+                self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE)
             self.espeak_process.stdin.write(sentence + "\n")
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
@@ -298,7 +298,7 @@ class CustomTTSEngine(TTSEngine):
             self.language=lang
         try:
             if self.prg_process is None:
-                self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], shell=False, stdin=subprocess.PIPE)
+                self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], stdin=subprocess.PIPE)
             self.prg_process.stdin.write(unicode(sentence + "\n").encode('latin1', 'ignore'))
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
