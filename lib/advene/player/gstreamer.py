@@ -620,6 +620,7 @@ class Player:
                                               gtk.gdk.SCROLL_MASK)
             self.fullscreen_window.connect('key-press-event', keypress)
             self.fullscreen_window.connect('button-press-event', buttonpress)
+            self.fullscreen_window.connect('destroy', self.unfullscreen)
             if connect is not None:
                 connect(self.fullscreen_window)
 
@@ -644,9 +645,13 @@ class Player:
         else:
             self.reparent(self.fullscreen_window.window.xid)
 
-    def unfullscreen(self):
+    def unfullscreen(self, *p):
         self.reparent(self.xid)
-        self.fullscreen_window.hide()
+        if self.fullscreen_window.window:
+            self.fullscreen_window.hide()
+        else:
+            # It has been destroyed
+            self.fullscreen_window = None
 
     # relpath, dump_bin and dump_element implementation based on Daniel Lenski <dlenski@gmail.com>
     # posted on gst-dev mailing list on 20070913
