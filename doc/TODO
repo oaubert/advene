@@ -1,3 +1,6 @@
+* osxvideosink / python:
+   http://sjoerdoptland.blogspot.com/2009/10/gstreamer-python-qt-mac-osx.html
+
 * Ldt ZIP importer
 
 * Fix svg support for gstreamer/mac (need to rewrite the SVGOverlay element in C)
