@@ -1,3 +1,9 @@
+advene (0.42) unstable; urgency=low
+
+  * Stable release. See the following 0.39 notes for more details.
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 10 Jun 2010 14:55:10 +0200
+
 advene (0.41) unstable; urgency=low
 
   * SVG overlay over the video is available. It has performance issues on
