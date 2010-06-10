@@ -1002,6 +1002,9 @@ class TimeLine(AdhocView):
             el.content.data=content
         elif getattr(el.type, '_fieldnames', None):
             el.content.data="\n".join( "%s=" % f for f in sorted(el.type._fieldnames) )
+        elif 'svg' in el.type.mimetype:
+            el.content.data = """<svg:svg height="320pt" preserveAspectRatio="xMinYMin meet" version="1" viewBox="0 0 400 320" width="400pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg">
+</svg:svg>"""
 
         self.controller.package.annotations.append(el)
         el.complete=False
