@@ -69,7 +69,7 @@ advene (0.41) unstable; urgency=low
 
   * State variables can hold non-numeric values.
 
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 10 Jun 2010 14:49:39 +0200
 
 advene (0.40) unstable; urgency=low
 
