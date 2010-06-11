@@ -171,6 +171,8 @@ class ViewBook(AdhocView):
             return False
 
         e=gtk.EventBox()
+        e.set_visible_window(False)
+        e.set_above_child(True)
         if len(name) > 13:
             shortname=unicode(name)[:12] + u'\u2026'
         else:
