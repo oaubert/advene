@@ -57,6 +57,7 @@ class AnnotationTable(AdhocView):
 
     def __init__(self, controller=None, parameters=None, elements=None):
         super(AnnotationTable, self).__init__(controller=controller)
+        self.registered_rules = []
         self.close_on_package_load = False
         self.contextual_actions = (
             )
@@ -66,6 +67,12 @@ class AnnotationTable(AdhocView):
 
         self.model=self.build_model(elements)
         self.widget = self.build_widget()
+
+    def update_annotation(self, annotation=None, event=None):
+        if annotation in self.elements:
+            if event.endswith('Delete'):
+                self.elements.remove(annotation)
+            self.set_elements(self.elements)
 
     def get_elements(self):
         """Return the list of elements in their displayed order.
