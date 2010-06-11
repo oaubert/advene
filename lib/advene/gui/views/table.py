@@ -319,29 +319,31 @@ class AnnotationTable(AdhocView):
         return False
 
     def tree_view_button_cb(self, widget=None, event=None):
+        if not event.window is widget.get_bin_window():
+            return False
+
         retval = False
         button = event.button
         x = int(event.x)
         y = int(event.y)
 
-        if button == 3 or button == 2:
-            if event.window is widget.get_bin_window():
-                model = self.model
-                t = widget.get_path_at_pos(x, y)
-                if t is not None:
-                    path, col, cx, cy = t
-                    it = model.get_iter(path)
-                    node = model.get_value(it,
-                                           COLUMN_ELEMENT)
-                    widget.get_selection().select_path (path)
-                    if button == 3:
-                        menu = advene.gui.popup.Menu(node, controller=self.controller)
-                        menu.popup()
-                        retval = True
-                    elif button == 2:
-                        # Expand all children
-                        widget.expand_row(path, True)
-                        retval=True
+        model = self.model
+        t = widget.get_path_at_pos(x, y)
+        if t is not None:
+            path, col, cx, cy = t
+            it = model.get_iter(path)
+            node = model.get_value(it,
+                                   COLUMN_ELEMENT)
+            widget.get_selection().select_path (path)
+            if button == 3:
+                menu = advene.gui.popup.Menu(node, controller=self.controller)
+                menu.popup()
+                retval = True
+            elif button == 1 and col.get_title() == _("Snapshot"):
+                # Click on snapshot -> play
+                self.controller.update_status("set", node.fragment.begin)
+                # Allow further processing
+                retval = False
         return retval
 
 class GenericTable(AdhocView):
