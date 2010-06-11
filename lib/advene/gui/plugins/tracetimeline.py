@@ -296,9 +296,10 @@ class TraceTimeline(AdhocView):
             """Adapt context canvas on resize (it should always cover the entire allocated space)
             """
             h = w.get_allocation().height
-            self.context_canvasY = (h-1.0)
-            self.context_canvas.set_bounds(0,0,self.context_canvasX, self.context_canvasY)
-            self.context_update_time()
+            if h != self.context_canvasY+1.0:
+                self.context_canvasY = (h-1.0)
+                self.context_canvas.set_bounds(0,0,self.context_canvasX, self.context_canvasY)
+                self.context_update_time()
         self.context_canvas.connect('size-allocate', context_resize)
         
         hbt.pack_start(self.context_canvas, expand=False)
@@ -1361,7 +1362,7 @@ class TraceTimeline(AdhocView):
         """Update the context canvas according to current time
         """
         ratio = float((self.context_t_max-self.active_trace.start))/(time.time()-self.active_trace.start)
-        self.context_t_max = time.time() 
+        self.context_t_max = time.time() # we should do that, but as we do not refresh the trace timeline every time, we base on self.now_line
         root = self.context_canvas.get_root_item()
         n = 0
         while n < root.get_n_children():
@@ -1409,6 +1410,7 @@ class TraceTimeline(AdhocView):
     def context_draw_sel_frame(self):
         """Draw the selection frame on context canvas, corresponding to what is displayed in the trace timeline
         """
+        #refresh canvas bounds
         self.context_frame = goocanvas.Rect (parent = self.context_canvas.get_root_item(),
                                     x = 0,
                                     y = 0,
@@ -1422,12 +1424,14 @@ class TraceTimeline(AdhocView):
     def context_update_sel_frame(self):
         """Update the context canvas selection frame.
         """
+        #~ while gtk.events_pending():
+            #~ gtk.main_iteration()
         if not self.context_frame:
             self.context_draw_sel_frame()
         h = self.canvas.get_allocation().height
         va=self.sw.get_vadjustment()
         tmin = va.value * self.timefactor
-        tmax = (va.value + h + 10) * self.timefactor
+        tmax = (va.value + h) * self.timefactor
         r1 = tmin / (self.context_t_max-self.active_trace.start)
         r2=min(1,tmax / (self.context_t_max-self.active_trace.start))
         y1 = self.context_canvasY*r1
