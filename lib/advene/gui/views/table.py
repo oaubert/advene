@@ -68,6 +68,14 @@ class AnnotationTable(AdhocView):
         self.model=self.build_model(elements)
         self.widget = self.build_widget()
 
+        self.registered_rules.append( controller.event_handler.internal_rule (event="SnapshotUpdate",
+                                                                              method=self.update_snapshot)
+                                      )
+        def unregister(*p):
+            for r in self.registered_rules:
+                self.controller.event_handler.remove_rule(r, type_="internal")
+        self.widget.connect('destroy', unregister)
+
     def update_annotation(self, annotation=None, event=None):
         if annotation in self.elements:
             if event.endswith('Delete'):
@@ -82,18 +90,6 @@ class AnnotationTable(AdhocView):
                 # Update pixbuf
                 r[9] = png_to_pixbuf(self.controller.package.imagecache[pos],
                                      height=32)
-                break
-
-    def register_callback (self, controller=None):
-        """Add the activate handler for annotations.
-        """
-        self.registered_rules.append( controller.event_handler.internal_rule (event="SnapshotUpdate",
-                                                                              method=self.update_snapshot)
-                                      )
-
-    def unregister_callback (self, controller=None):
-        for r in self.registered_rules:
-            controller.event_handler.remove_rule(r, type_="internal")
 
     def get_elements(self):
         """Return the list of elements in their displayed order.
