@@ -105,7 +105,7 @@ if not os.path.exists(config.data.path['resources']):
             print "Seemingly running from a .app bundle"
 
             # We will put pangorc, pango.modules and gdk-pixbuf.loaders files in a directory of the user preferences.
-            userconf = os.path.join(os.environ['HOME'], 'Library', 'Preferences', 'Advene', '_config')
+            userconf = config.data.advenefile('_config', 'settings')
             if not os.path.isdir(userconf):
                 recursive_mkdir(userconf)
 
