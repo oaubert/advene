@@ -179,16 +179,16 @@ class ShotValidation(AdhocView):
         # Button bar
         hb=gtk.HBox()
 
-        self.prev_button = gtk.Button(_("Previous annotation"))
-        self.prev_button.set_tooltip_text(_("Display previous annotation"))
+        self.prev_button = gtk.Button(_("Previous cut"))
+        self.prev_button.set_tooltip_text(_("Display previous cut"))
         self.prev_button.connect("clicked", lambda b: self.set_index(self.index - 1))
         hb.add(self.prev_button)
 
         l = gtk.Label("#")
         hb.pack_start(l, expand=False)
 
-        self.next_button = gtk.Button(_("Next annotation"))
-        self.next_button.set_tooltip_text(_("Display next annotation"))
+        self.next_button = gtk.Button(_("Next cut"))
+        self.next_button.set_tooltip_text(_("Display next cut"))
         self.next_button.connect("clicked", lambda b: self.set_index(self.index + 1))
 
         s=gtk.SpinButton(self.current_index, 1, 0)
