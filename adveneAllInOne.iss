@@ -12,14 +12,15 @@ Source: c:\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs; Components: adv
 Source: examples\*v10.azp; DestDir: {app}\examples; Components: advene
 Source: c:\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs; Components: advene
 Source: c:\gtk\share\locale\fr\*; DestDir: {app}\lib\locale\fr; Flags: recursesubdirs; Components: advene
-;Source: c:\gtk\lib\pango\*; DestDir: {app}\lib\pango; Flags: recursesubdirs     gtk <= 2.16.6
+;Source: c:\gtk\lib\pango\*; DestDir: {app}\lib\pango; Flags: recursesubdirs     gtk < 2.16.6
 Source: c:\gtk\share\themes\*; DestDir: {app}\share\themes; Flags: recursesubdirs; Components: advene
-;Source: c:\gtk\bin\libpng12.dll; DestDir: {app}  gtk <= 2.16.6
-Source: c:\gtk\bin\libpng12-0.dll; DestDir: {app}; Components: advene
+;Source: c:\gtk\bin\libpng12.dll; DestDir: {app}  gtk < 2.16.6
+;Source: c:\gtk\bin\libpng12-0.dll; DestDir: {app}; Components: advene    gtk = 2.16
+Source: c:\gtk\bin\libpng14-14.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\libpangoft2-1.0-0.dll; DestDir: {app}; Components: advene
-;Source: c:\gtk\bin\libtiff3.dll; DestDir: {app}  gtk <= 2.16.6
+;Source: c:\gtk\bin\libtiff3.dll; DestDir: {app}  gtk < 2.16.6
 Source: c:\gtk\bin\libtiff-3.dll; DestDir: {app}; Components: advene
-;Source: c:\gtk\bin\jpeg62.dll; DestDir: {app}    gtk <= 2.16.6
+;Source: c:\gtk\bin\jpeg62.dll; DestDir: {app}    gtk < 2.16.6
 Source: c:\gtk\bin\libjpeg-7.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\librsvg-2-2.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\libcroco-0.6-3.dll; DestDir: {app}; Components: advene
@@ -31,21 +32,22 @@ Source: c:\gtk\bin\iconv.dll; DestDir: {app}; Components: advene
 Source: Brl\*; DestDir: {app}; Components: advene
 
 ;Source: c:\cygwin\usr\local\bin\libgoocanvas3.dll; DestDir: {app}    goocanvas0.10
-Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}; Components: advene
-Source: c:\cygwin\usr\local\bin\libgoocanvas-3.dll; DestDir: {app}; Components: advene
+;Source: Win32SoundPlayer\*; DestDir: {app}\Win32SoundPlayer; Components: advene     not needed anymore
+Source: c:\GTK\bin\libgoocanvas-3.dll; DestDir: {app}; Components: advene
 ;msvcr90.dll,m,p & manifest needed for pygtk2.16 & co. Can be found in visual studio redist
 ;http://www.microsoft.com/downloads/details.aspx?FamilyID=9B2DA534-3E03-4391-8A4D-074B9F2BC1BF&displaylang=fr
 Source: vcredist_x86.exe; DestDir: {tmp}; Components: advene
 Source: c:\gtk\bin\gdk-pixbuf-query-loaders.exe; DestDir: {app}; Components: advene
 Source: post_install.bat; DestDir: {app}; Components: advene
 
-Source: c:\Program Files\VideoLAN\VLC\libvlccore.dll; DestDir: {app}; Components: vlc
-Source: c:\Program Files\VideoLAN\VLC\libvlc.dll; DestDir: {app}; Components: vlc
-Source: c:\Program Files\VideoLAN\VLC\plugins\*; DestDir: {app}\vlcplugins; Components: vlc
+Source: c:\Program Files (x86)\VLC\libvlccore.dll; DestDir: {app}; Components: vlc
+Source: c:\Program Files (x86)\VLC\libvlc.dll; DestDir: {app}; Components: vlc
+Source: c:\Program Files (x86)\VLC\plugins\*; DestDir: {app}\vlcplugins; Components: vlc
 
 Source: gst\*; DestDir: {app}\gst; Flags: recursesubdirs; Components: gst
 
-
+;To be able to detect if advene is already running
+Source: psvince.dll; Flags: dontcopy
 
 [CustomMessages]
 En.CleanPrefs=Clean &preferences
@@ -77,10 +79,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.41
+AppVerName=Advene 0.42
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.41
+VersionInfoVersion=0.42
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -88,8 +90,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.41_vlc_1.0.3_gstreamer_0.10.15
-VersionInfoTextVersion=0.41
+OutputBaseFilename=setup_advene_0.42_vlc_1.0.3_gstreamer_0.10.5
+VersionInfoTextVersion=0.42
 ChangesAssociations=yes
 
 [Registry]
@@ -173,5 +175,25 @@ end;
 function CanChange(): Boolean;
 begin
   Result := (IsAdminLoggedOn or IsPowerUserLoggedOn);
+end;
+
+
+function IsModuleLoaded(modulename: String ): Boolean;
+external 'IsModuleLoaded@files:psvince.dll stdcall';
+
+function InitializeSetup(): Boolean;
+begin
+
+if(Not IsModuleLoaded( 'advene.exe' )) then
+begin
+Result := true;
+end
+
+else
+begin
+MsgBox('Application is already running, exiting setup.', mbInformation, MB_OK);
+Result := false;
+end
+
 end;
 
