@@ -105,6 +105,8 @@ class ShotValidation(AdhocView):
         self.controller.notify('EditSessionEnd', element=previous)
         self.annotations.remove(annotation)
         self.controller.delete_element(annotation, immediate_notify=True, batch_id=batch)
+        self.message(_("Merged #%(first)d-#%(second)d into #%(first)d" % { 'first': i + 1,
+                                                                           'second': i + 2 }))
         # We want to display the next annotation, i.e. at i. But we
         # were already at i, so the handle_index_change would not be
         # triggered. Force value-changed emission
@@ -144,7 +146,10 @@ class ShotValidation(AdhocView):
                 annotation.fragment.end = new
                 self.controller.notify('AnnotationEditEnd', annotation=annotation, batch_id=batch)
                 self.controller.notify('EditSessionEnd', element=annotation)
-
+            self.message(_("Validated cut between #%(first)d and %(second)d") % { 'first': i + 1,
+                                                                                  'second': i + 2 })
+        else:
+            self.message(_("Validated begin time for first annotation"))
         self.set_index(i + 1)
         return True
 
@@ -224,6 +229,8 @@ class ShotValidation(AdhocView):
         hb.add(b)
         vbox.pack_start(hb, expand=False)
 
+        self.statusbar = gtk.Statusbar()
+        vbox.pack_start(self.statusbar, expand=False)
 
         self.set_index(0)
         vbox.show_all()
