@@ -246,7 +246,7 @@ class Menu:
         batch_id=object()
         if isinstance(el, AnnotationType) or isinstance(el, RelationType):
             for e in elements:
-                self.controller.delete_element(e, batch_id=batch_id)
+                self.controller.delete_element(e, batch=batch_id)
         return True
 
     def pick_color(self, widget, element):

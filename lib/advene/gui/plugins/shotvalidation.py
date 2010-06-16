@@ -101,10 +101,10 @@ class ShotValidation(AdhocView):
 
         self.controller.notify('EditSessionStart', element=previous, immediate=True)
         previous.fragment.end = annotation.fragment.end
-        self.controller.notify('AnnotationEditEnd', annotation=previous, batch_id=batch)
+        self.controller.notify('AnnotationEditEnd', annotation=previous, batch=batch)
         self.controller.notify('EditSessionEnd', element=previous)
         self.annotations.remove(annotation)
-        self.controller.delete_element(annotation, immediate_notify=True, batch_id=batch)
+        self.controller.delete_element(annotation, immediate_notify=True, batch=batch)
         self.message(_("Merged #%(first)d-#%(second)d into #%(first)d" % { 'first': i + 1,
                                                                            'second': i + 2 }))
         # We want to display the next annotation, i.e. at i. But we
@@ -135,8 +135,9 @@ class ShotValidation(AdhocView):
         if new != annotation.fragment.begin:
             self.controller.notify('EditSessionStart', element=annotation, immediate=True)
             annotation.fragment.begin = new
-            self.controller.notify('AnnotationEditEnd', annotation=annotation, batch_id=batch)
+            self.controller.notify('AnnotationEditEnd', annotation=annotation, batch=batch)
             self.controller.notify('EditSessionEnd', element=annotation)
+            self.undo_button.set_sensitive(True)
 
         # Update previous annotation end.
         if i > 0:
@@ -144,7 +145,7 @@ class ShotValidation(AdhocView):
             if new != annotation.fragment.end:
                 self.controller.notify('EditSessionStart', element=annotation, immediate=True)
                 annotation.fragment.end = new
-                self.controller.notify('AnnotationEditEnd', annotation=annotation, batch_id=batch)
+                self.controller.notify('AnnotationEditEnd', annotation=annotation, batch=batch)
                 self.controller.notify('EditSessionEnd', element=annotation)
             self.message(_("Validated cut between #%(first)d and %(second)d") % { 'first': i + 1,
                                                                                   'second': i + 2 })

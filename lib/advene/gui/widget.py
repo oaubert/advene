@@ -437,7 +437,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             else:
                 batch_id=object()
                 for w in widgets:
-                    self.controller.delete_element(w.annotation, batch_id=batch_id)
+                    self.controller.delete_element(w.annotation, batch=batch_id)
             return True
         return False
 

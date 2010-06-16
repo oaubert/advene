@@ -3217,7 +3217,7 @@ class TimeLine(AdhocView):
                 if sources:
                     batch_id=object()
                     for a in sources:
-                        self.controller.delete_element(a, batch_id=batch_id)
+                        self.controller.delete_element(a, batch=batch_id)
                 return True
             return False
 
@@ -3543,7 +3543,7 @@ class TimeLine(AdhocView):
             selection=self.get_selected_annotation_widgets()
         batch_id=object()
         for w in selection:
-            self.controller.delete_element(w.annotation, batch_id=batch_id)
+            self.controller.delete_element(w.annotation, batch=batch_id)
         return True
 
     def selection_as_table(self, widget, selection):
