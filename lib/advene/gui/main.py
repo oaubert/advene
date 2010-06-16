@@ -311,15 +311,21 @@ class AdveneGUI(object):
             ('moviefile.png', self.on_b_addfile_clicked, _("Select movie file...")),
             (gtk.STOCK_CDROM, self.on_b_selectdvd_clicked, _("Select DVD")),
             (gtk.STOCK_QUIT, self.on_exit, _("Quit")),
+            (None, None, None),
+            (gtk.STOCK_UNDO, self.undo, _("Undo")),
             ):
-            if stock.startswith('gtk-'):
+            if stock is None:
+                b=gtk.SeparatorToolItem()
+            elif stock.startswith('gtk-'):
                 b=gtk.ToolButton(stock)
             else:
                 i=gtk.Image()
                 i.set_from_file( config.data.advenefile( ('pixmaps', stock ) ) )
                 b=gtk.ToolButton(icon_widget=i)
-            b.set_tooltip_text(tip)
-            b.connect('clicked', callback)
+            if tip is not None:
+                b.set_tooltip_text(tip)
+            if callback is not None:
+                b.connect('clicked', callback)
             self.gui.fileop_toolbar.insert(b, -1)
             if stock == gtk.STOCK_SAVE:
                 self.save_toolbutton = b
@@ -1723,6 +1729,15 @@ class AdveneGUI(object):
         pop=self.open_adhoc_view('edit', element=element, destination=destination)
         return pop
 
+    def undo(self, *p):
+        """Undo the last modifying action.
+        """
+        try:
+            self.controller.undomanager.undo()
+        except AttributeError:
+            pass
+        return True
+        
     def export_element(self, element):
         def generate_default_filename(filter, filename=None):
             """Generate a filename for the given filter.
@@ -3060,10 +3075,7 @@ class AdveneGUI(object):
                     self.on_save1_activate()
                 return True
             elif event.keyval == gtk.keysyms.z:
-                try:
-                    self.controller.undomanager.undo()
-                except AttributeError:
-                    pass
+                self.undo()
                 return True
         return False
 
