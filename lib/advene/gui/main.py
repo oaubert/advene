@@ -1229,31 +1229,17 @@ class AdveneGUI(object):
         self.update_stbv_list()
 
         # Append the volume control to the toolbar
-        self.audio_mute=gtk.ToggleToolButton()
-        audio_on=gtk.Image()
-        audio_on.set_from_file(config.data.advenefile( ( 'pixmaps', 'silk-sound.png') ))
-        audio_on.show()
-        audio_off=gtk.Image()
-        audio_off.set_from_file(config.data.advenefile( ( 'pixmaps', 'silk-sound-mute.png') ))
-        audio_off.show()
+        def volume_change(scale, value):
+            if self.controller.player.sound_get_volume() != int(value * 100):
+                self.controller.player.sound_set_volume(int(value * 100))
+            return True
 
-        def toggle_audio_mute(b):
-            """Toggle audio mute status.
-            """
-            # Set the correct image
-            if b.get_active():
-                self.controller.player.sound_mute()
-                b.set_icon_widget(audio_off)
-            else:
-                self.controller.player.sound_unmute()
-                b.set_icon_widget(audio_on)
-            return False
-
-        self.audio_mute.set_icon_widget(audio_on)
-        self.audio_mute.connect('toggled', toggle_audio_mute)
-        self.audio_mute.set_active(self.controller.player.sound_is_muted())
-        self.audio_mute.set_tooltip_text(_("Mute/unmute"))
-        self.player_toolbar.insert(self.audio_mute, -1)
+        self.audio_volume = gtk.VolumeButton()
+        self.audio_volume.set_value(self.controller.player.sound_get_volume() / 100.0)
+        ti = gtk.ToolItem()
+        ti.add(self.audio_volume)
+        self.audio_volume.connect('value-changed', volume_change)
+        self.player_toolbar.insert(ti, -1)
 
         # Append the loop checkitem to the toolbar
         def loop_toggle_cb(b):
@@ -2587,9 +2573,9 @@ class AdveneGUI(object):
         This method is regularly called by the Gtk mainloop, and
         updates elements with a slower rate than update_display
         """
-        mute=self.controller.player.sound_is_muted()
-        if self.audio_mute.get_active() != mute:
-            self.audio_mute.set_active(mute)
+        vol=self.controller.player.sound_get_volume() / 100.0
+        if self.audio_volume.get_value() != vol:
+            self.audio_volume.set_value(vol)
 
         def do_save(aliases):
             for alias, p in self.controller.packages.iteritems():
