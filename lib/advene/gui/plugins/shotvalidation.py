@@ -107,6 +107,8 @@ class ShotValidation(AdhocView):
         self.controller.delete_element(annotation, immediate_notify=True, batch=batch)
         self.message(_("Merged #%(first)d-#%(second)d into #%(first)d" % { 'first': i + 1,
                                                                            'second': i + 2 }))
+        self.undo_button.set_sensitive(True)
+
         # We want to display the next annotation, i.e. at i. But we
         # were already at i, so the handle_index_change would not be
         # triggered. Force value-changed emission
@@ -125,6 +127,14 @@ class ShotValidation(AdhocView):
             return True
         return False
 
+    def undo(self, *p):
+        """Undo the last modification.
+        """
+        self.controller.gui.undo()
+        if self.index > 0:
+            self.index = self.index - 1
+        return True
+            
     def validate_and_next(self, new):
         """Validate the current annotation and display the next one.
         """
@@ -223,6 +233,13 @@ class ShotValidation(AdhocView):
         b.set_tooltip_text(_("Go to annotation containing current player time."))
         b.connect("clicked", self.goto_current)
         hb.add(b)
+
+        b=gtk.Button(_("Undo"))
+        b.set_tooltip_text(_("Undo last modification"))
+        b.connect("clicked", self.undo)
+        hb.add(b)
+        b.set_sensitive(False)
+        self.undo_button = b
 
         b=gtk.Button(_("Merge with previous"))
         b.set_tooltip_text(_("Merge with previous annotation, i.e. remove this bound."))
