@@ -18,12 +18,9 @@
 #
 """Advene GUI.
 
-This module defines the GUI classes. The main one is L{AdveneGUI},
-which is instantiated with a GLADE XML file. It defines the important
-methods and the various GUI callbacks (generally all methods with the
-C{on_} prefix).
-
-It also defines GUI-specific actions (DisplayPopup, etc).
+This module defines the main GUI class, L{AdveneGUI}. It defines the
+important methods and the various GUI callbacks (generally all methods
+with the C{on_} prefix).
 """
 
 import sys
