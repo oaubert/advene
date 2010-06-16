@@ -236,7 +236,7 @@ class SVGContentHandler (ContentHandler):
             url='%s/action/OpenView?id=%s' % (root, v.id)
         elif targetType == config.data.target_type['uri-list']:
             here=None
-            url=unicode(selection.data, 'utf8')
+            url=unicode(selection.data.splitlines()[0], 'utf8')
             title=url
         else:
             # Invalid drop target
