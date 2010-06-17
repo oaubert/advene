@@ -41,9 +41,9 @@ class FrameSelector(object):
         # Number of displayed timestamps
         self.count = 8
         self.frame_length = 1000 / 25
-        # Reference to the HBox holding TimestampRepresentation widgets.
+        # List of TimestampRepresentation widgets.
         # It is initialized in build_widget()
-        self.container = None
+        self.frames = []
         self.widget = self.build_widget()
         
     def set_timestamp(self, timestamp):
@@ -76,7 +76,7 @@ class FrameSelector(object):
         else:
             index_offset = 0
         
-        for c in self.container.get_children():
+        for c in self.frames:
             c.value = t
             if t < self.timestamp:
                 c.bgcolor = '#666666'
@@ -88,17 +88,17 @@ class FrameSelector(object):
         if focus_index is None:
             focus_index = self.count / 2
 
-        self.container.get_children()[focus_index + index_offset].grab_focus()
+        self.frames[focus_index + index_offset].grab_focus()
         return True
 
     def update_offset(self, offset, focus_index=None):
         """Update the timestamps to go forward/backward.
         """
         if offset < 0:
-            ref=self.container.get_children()[0]
+            ref=self.frames[0]
             start = max(ref.value + offset * self.frame_length, 0)
         else:
-            ref=self.container.get_children()[offset]
+            ref=self.frames[offset]
             start = ref.value
         self.update_timestamp(start + self.count / 2 * self.frame_length, focus_index)
         return True
@@ -107,7 +107,7 @@ class FrameSelector(object):
         """Update non-initialized snapshots.
         """
         ic=self.controller.package.imagecache
-        for c in self.container.get_children():
+        for c in self.frames:
             if not ic.is_initialized(c.value):
                 self.controller.update_snapshot(c.value)
         return True
@@ -123,7 +123,7 @@ class FrameSelector(object):
     def focus_index(self):
         """Return the index of the TimestampRepresentation which has the focus.
         """
-        return self.container.get_children().index(self.container.get_focus_child())
+        return self.frames.index(self.frames[0].get_parent().get_focus_child())
 
     def handle_key_press(self, widget, event):
         if event.keyval == gtk.keysyms.Left:
@@ -131,14 +131,14 @@ class FrameSelector(object):
             if i == 0:
                 self.update_offset(-1, focus_index = 0)
             else:
-                self.container.get_children()[i - 1].grab_focus()
+                self.frames[i - 1].grab_focus()
             return True
         elif event.keyval == gtk.keysyms.Right:
             i = self.focus_index()
-            if i == len(self.container.get_children()) -1:
+            if i == len(self.frames) -1:
                 self.update_offset(+1, focus_index = -1)
             else:
-                self.container.get_children()[i + 1].grab_focus()
+                self.frames[i + 1].grab_focus()
             return True
         return False
 
@@ -196,12 +196,12 @@ class FrameSelector(object):
         for i in xrange(-self.count / 2, self.count / 2):
             r=TimestampRepresentation(0, self.controller, width=100, visible_label=True, epsilon=30)
             r.connect("clicked", self.select_time)
+            self.frames.append(r)
             hb.pack_start(r, expand=False)
 
         hb.connect('scroll-event', self.handle_scroll_event)
         hb.connect('key-press-event', self.handle_key_press)
         vb.add(hb)
 
-        self.container = hb
         self.update_timestamp(self.timestamp)
         return vb
