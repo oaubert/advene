@@ -2967,8 +2967,12 @@ class AdveneGUI(object):
             'begin': _('begin'),
             'end': _('end'),
             }
+        border_mode = {
+            'begin': 'left',
+            'end': 'right',
+            }
         t=getattr(annotation.fragment, bound)
-        fs = FrameSelector(self.controller, t)
+        fs = FrameSelector(self.controller, t, border_mode=border_mode[bound])
         new = fs.get_value(_("Update %(bound)s of %(annotation)s") % { 'bound': translation[bound],
                                                                        'annotation': self.controller.get_title(annotation) })
         if new != t:
