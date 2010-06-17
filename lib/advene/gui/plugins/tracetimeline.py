@@ -143,19 +143,24 @@ class TraceTimeline(AdhocView):
         self.cols={} # head_group / last event_group
         self.context_cols={} # action_type, color, last_line
         self.context_t_max = time.time()
-        self.tracer.register_view(self)
         for i, act in enumerate(self.tracer.tracemodel['actions']):
             self.cols[act] = (None, None)
             c=gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][act]))
             self.context_cols[act]=(i, c, None) 
         self.col_width = 80
         self.colspacing = 5
+        self.active_trace = self.tracer.trace
         self.widget = self.build_widget()
         self.widget.connect("destroy", self.destroy)
         self.populate_head_canvas()
+        self.realize_id = self.widget.connect_after('realize', self.widget_realized)
         self.widget.show_all()
-        self.active_trace = self.tracer.trace
-        self.receive(self.active_trace)
+        
+
+    def widget_realized(self, w):
+        w.disconnect(self.realize_id)
+        #self.receive(self.active_trace)
+        self.tracer.register_view(self)
         self.refresh()
 
     def select_trace(self, trace):
@@ -367,8 +372,9 @@ class TraceTimeline(AdhocView):
                     tm.get_child(i).props.x *= ratio
                     tm.get_child(i).props.width *= ratio
             self.update_lines()
-            self.now_line.props.x *= ratio
-            self.now_line.props.width *= ratio
+            if self.now_line:
+                self.now_line.props.x *= ratio
+                self.now_line.props.width *= ratio
 
         self.head_canvas.connect('size-allocate', canvas_resize)
         
@@ -1075,7 +1081,6 @@ class TraceTimeline(AdhocView):
                                         line_dash=ld,
                                         line_width = 0.2)
             a.props.tooltip=txt
-            #FIXME do not work for polyline ???
             a=goocanvas.Text(parent = mgroup,
                         text = txt,
                         x = 0,
@@ -1156,6 +1161,7 @@ class TraceTimeline(AdhocView):
         if self.links_locked:
             self.toggle_lock()
             self.inspector.clean()
+        self.widget.get_parent_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
         root=self.canvas.get_root_item()
         while root.get_n_children()>0:
             c = root.get_child(0)
@@ -1165,24 +1171,6 @@ class TraceTimeline(AdhocView):
         for c in self.cols:
             h,l = self.cols[c]
             self.cols[c]=(h,None)
-        for lvl in self.active_trace.levels:
-            if lvl == 'event':
-                for i in self.active_trace.levels[lvl]:
-                    self.receive_int(self.active_trace, event=i, operation=None, action=None)
-                    while gtk.events_pending():
-                        gtk.main_iteration()
-            #elif lvl == 'operation':
-                #usefull only for operations not linked to actions ... is it really usefull ?
-            #    for i in self.active_trace.levels[lvl]:
-            #        self.receive_int(self.active_trace, event=None, operation=i, action=None)
-            elif lvl == 'actions':
-                for i in self.active_trace.levels[lvl]:
-                    for o in i.operations:
-                        self.receive_int(self.active_trace, event=None, operation=o, action=i)
-                        while gtk.events_pending():
-                            gtk.main_iteration()
-        
-        self.draw_marks()
         self.now_line = goocanvas.polyline_new_line(root,
                                         0,
                                         self.canvasY-1,
@@ -1190,7 +1178,17 @@ class TraceTimeline(AdhocView):
                                         self.canvasY-1,
                                         line_width = 3,
                                         stroke_color_rgba=0xFF0000FF)
-        
+        for lvl in self.active_trace.levels:
+            if lvl == 'event':
+                for i in self.active_trace.levels[lvl]:
+                    self.receive_int(self.active_trace, event=i, operation=None, action=None)
+            elif lvl == 'actions':
+                for i in self.active_trace.levels[lvl]:
+                    self.receive_int(self.active_trace, event=None, operation=None, action=i)
+                    # operations are processed within the action    
+       
+        self.draw_marks()
+
         if center:
             va=self.sw.get_vadjustment()
             va.value = center/self.timefactor-va.page_size/2.0
@@ -1199,6 +1197,7 @@ class TraceTimeline(AdhocView):
             elif va.value>va.upper-va.page_size:
                 va.value=va.upper-va.page_size
         self.context_update_time()
+        self.widget.get_parent_window().set_cursor(None)
         return
 
 
@@ -1307,21 +1306,15 @@ class TraceTimeline(AdhocView):
     def update_lines(self):
         """Search for the Objgroup containing lines and update them
         """
-        root = self.canvas.get_root_item()
-        i=0
-        found=False
-        while i < root.get_n_children():
-            g = root.get_child(i)
-            i+=1
-            if isinstance(g, ObjGroup):
-                if g.center_sel:
-                    g.update_lines()
-                    found=True
-                    #we found the selected item, stop there
-                    break
-        # we did not found the item, but we are links_locked. We should free links.
-        if not found and self.links_locked:
-            self.toggle_lock()
+        if not self.inspector.item:
+            #No selected item
+            if self.links_locked and not self.inspector.action:
+                #No item, no action, but links_locked
+                self.toggle_lock()
+            return
+        else:
+            self.inspector.item.update_lines()
+
 
     def find_group(self, observed):
         """Find an avent Group according to an action or operation
@@ -1357,20 +1350,27 @@ class TraceTimeline(AdhocView):
             c = root.get_child(0)
             c.remove()
         self.context_frame = None
-    
+        self.context_t_max = self.canvasY*self.timefactor + self.active_trace.start
+        for act in self.context_cols:
+            (i, c, toto) = self.context_cols[act] 
+            self.context_cols[act]=(i, c, None) 
+        
+        
     def context_update_time(self):
         """Update the context canvas according to current time
         """
-        ratio = float((self.context_t_max-self.active_trace.start))/(time.time()-self.active_trace.start)
-        self.context_t_max = time.time() # we should do that, but as we do not refresh the trace timeline every time, we base on self.now_line
-        root = self.context_canvas.get_root_item()
-        n = 0
-        while n < root.get_n_children():
-            l=root.get_child(n)
-            n+=1
-            if isinstance(l,goocanvas.Polyline):
-                l.props.y *= ratio
-                l.props.height *= ratio
+        ratio = float((self.context_t_max-self.active_trace.start))/(self.canvasY*self.timefactor)
+        self.context_t_max = self.canvasY*self.timefactor + self.active_trace.start
+        if ratio>0:
+            #else there should be nothing drawn
+            root = self.context_canvas.get_root_item()
+            n = 0
+            while n < root.get_n_children():
+                l=root.get_child(n)
+                n+=1
+                if isinstance(l,goocanvas.Polyline):
+                    l.props.y *= ratio
+                    l.props.height *= ratio
         self.context_update_sel_frame()
         
     def context_add_line(self, action):
@@ -1380,12 +1380,10 @@ class TraceTimeline(AdhocView):
         @param action: the action to add to the context
         """
         self.context_update_time()
-        y2 = self.context_canvasY
-        r = float(y2/(action.time[1]-self.active_trace.start))
-        y1=r*(action.time[0]-self.active_trace.start)
+        y1 = float(action.time[0]-self.active_trace.start)*self.context_canvasY/(self.context_t_max-self.active_trace.start)
+        y2 = float(action.time[1]-self.active_trace.start)*self.context_canvasY/(self.context_t_max-self.active_trace.start)
         (i,color,line)=self.context_cols[action.name]
         x = 3+2*i
-        
         l = goocanvas.polyline_new_line(self.context_canvas.get_root_item(),
                                         x,
                                         y1,
@@ -1404,7 +1402,9 @@ class TraceTimeline(AdhocView):
         """
         self.context_update_time()
         (i,color,line)=self.context_cols[action.name]
-        line.props.height = self.context_canvasY-line.props.y
+        y1 = float(action.time[0]-self.active_trace.start)*self.context_canvasY/(self.context_t_max-self.active_trace.start)
+        y2 = float(action.time[1]-self.active_trace.start)*self.context_canvasY/(self.context_t_max-self.active_trace.start)
+        line.props.height = y2-y1
         return
         
     def context_draw_sel_frame(self):
@@ -1424,8 +1424,6 @@ class TraceTimeline(AdhocView):
     def context_update_sel_frame(self):
         """Update the context canvas selection frame.
         """
-        #~ while gtk.events_pending():
-            #~ gtk.main_iteration()
         if not self.context_frame:
             self.context_draw_sel_frame()
         h = self.canvas.get_allocation().height
@@ -1575,13 +1573,14 @@ class EventGroup (Group):
         #FIXME fontsize according to object length with a min of 6 and a max of ??,
         self.fontsize = ol/3
         self.ol = ol
-        if y + ol > self.rect.get_bounds().y2 or y < self.rect.get_bounds().y1:
+        if y + ol >= self.rect.get_bounds().y2-2 or y < self.rect.get_bounds().y1-1:
             # not in the rectangle
             return
         self.objs.append( ObjGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.dg, x, y, ol/2, self.fontsize, op, blocked))
         if true_y != y:
             #need to store true y value
             self.objs[-1].true_y = true_y 
+
         return        
 
     def update_objs(self, ratiox=1,ratioy=1, blocked=False):
@@ -1600,8 +1599,6 @@ class EventGroup (Group):
         if l < 10:
             #not enough space
             for c in self.objs:
-                if c.center_sel:
-                    locked=True
                 c.remove()
             self.objs=[]
             if self.commentMark:
@@ -1626,12 +1623,16 @@ class EventGroup (Group):
                     c.fontsize = 2*c.r/3
                     if self.event.time[1] == c.operation.time:
                         #last operation, need to change y to display it
-                        c.y = self.rect.get_bounds().y2 - ol -5  
-                    if c.y + ol > self.rect.get_bounds().y2 or c.y < self.rect.get_bounds().y1-1:
+                        c.y = self.rect.get_bounds().y2 - ol -3  
+                    if c.y + ol >= self.rect.get_bounds().y2-2:
                         # not in the rectangle
                         to_be_removed.append(c)
                         continue
-                    c.move_group()
+                    if c.y < self.rect.get_bounds().y1-1:
+                        #FIXME it may introduce some gap between true pos and this pos, but theorically, it should never be <, so ...
+                        c.y = self.rect.get_bounds().y1-1
+                    if not c in to_be_removed:
+                        c.move_group()
                 for c in to_be_removed:
                     self.objs.remove(c)
                     c.remove()
@@ -1771,6 +1772,7 @@ class ObjGroup (Group):
             self.text.props.x = self.x +3 * self.r + 3
             self.text.props.font = "Sans %s" % str(self.fontsize)
 
+            
     def update_lines(self):
         """Update lines if the group is the selected item
         """ 
@@ -2017,6 +2019,7 @@ class Inspector (gtk.VBox):
     def __init__ (self, controller=None):
         gtk.VBox.__init__(self)
         self.action=None
+        self.item=None
         self.controller=controller
         self.tracer = self.controller.tracers[0]
         self.pack_start(gtk.Label(_('Inspector')), expand=False)
@@ -2084,9 +2087,11 @@ class Inspector (gtk.VBox):
     def fillWithItem(self, item):
         """Fill the inspector with informations concerning an object
             
-        @type item: advene model object
+        @type item: ObjGroup
         @param item: the advene object to display informations about
         """
+        self.action=None
+        self.item=item
         if item.cobj['id'] is not None:
             self.inspector_id.set_text(item.cobj['id'])
         if item.cobj['cid'] is not None:
@@ -2099,10 +2104,13 @@ class Inspector (gtk.VBox):
     def fillWithAction(self, action=None, op=None):
         """Fill the inspector with informations concerning an action
         
-        @type action: advene.plugins.tracebuilder.Action
+        @type action: EventGroup
         @param action: the action to display informations about
+        @type op: advene.plugins.tracebuilder.Operation
+        @param op: the operation to select in the list
         """
         self.action=action
+        self.item=None
         self.inspector_id.set_text(_('Action'))
         self.inspector_name.set_text('')
         self.inspector_type.set_text(action.event.name)
@@ -2325,6 +2333,7 @@ class Inspector (gtk.VBox):
         """Used to clean the inspector when selecting no item
         """
         self.action=None
+        self.item=None
         self.inspector_id.set_text('')
         self.inspector_name.set_text('')
         self.inspector_type.set_text('')
