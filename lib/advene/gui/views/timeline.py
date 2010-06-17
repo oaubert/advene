@@ -1927,8 +1927,6 @@ class TimeLine(AdhocView):
 
         for annotation in l:
             self.create_annotation_widget(annotation)
-            while gtk.events_pending():
-                gtk.main_iteration()
 
         self.layout.set_size (u2p (self.maximum - self.minimum),
                               max(self.layer_position.values() or (0,))
