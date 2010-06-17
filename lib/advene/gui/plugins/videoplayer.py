@@ -24,7 +24,6 @@ import os
 
 import advene.core.config as config
 from advene.gui.views import AdhocView
-import advene.core.mediacontrol
 import advene.gui.util.dialog as dialog
 
 name="Videoplayer view plugin"
@@ -214,33 +213,18 @@ class VideoPlayer(AdhocView):
         self.toolbar=gtk.Toolbar()
         self.toolbar.set_style(gtk.TOOLBAR_ICONS)
 
-        self.audio_mute=gtk.ToggleToolButton()
-        audio_on=gtk.Image()
-        audio_on.set_from_file(config.data.advenefile( ( 'pixmaps', 'silk-sound.png') ))
-        audio_on.show()
-        audio_off=gtk.Image()
-        audio_off.set_from_file(config.data.advenefile( ( 'pixmaps', 'silk-sound-mute.png') ))
-        audio_off.show()
+        # Append the volume control to the toolbar
+        def volume_change(scale, value):
+            if self.player.sound_get_volume() != int(value * 100):
+                self.player.sound_set_volume(int(value * 100))
+            return True
 
-        def toggle_audio_mute(b):
-            """Toggle audio mute status.
-            """
-            if self.player is None:
-                return False
-            # Set the correct image
-            if b.get_active():
-                self.player.sound_mute()
-                b.set_icon_widget(audio_off)
-            else:
-                self.player.sound_unmute()
-                b.set_icon_widget(audio_on)
-            return False
-
-        self.audio_mute.set_icon_widget(audio_on)
-        self.audio_mute.connect('toggled', toggle_audio_mute)
-        self.audio_mute.set_active(self.player.sound_is_muted())
-        self.audio_mute.set_tooltip_text(_("Mute/unmute"))
-        self.toolbar.insert(self.audio_mute, -1)
+        self.audio_volume = gtk.VolumeButton()
+        self.audio_volume.set_value(self.player.sound_get_volume() / 100.0)
+        ti = gtk.ToolItem()
+        ti.add(self.audio_volume)
+        self.audio_volume.connect('value-changed', volume_change)
+        self.toolbar.insert(ti, -1)
 
         sync_button=gtk.ToolButton(gtk.STOCK_CONNECT)
         sync_button.set_tooltip_text(_("Synchronize"))
