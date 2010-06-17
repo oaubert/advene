@@ -80,12 +80,13 @@ class FrameSelector(object):
         else:
             index_offset = 0
 
-        border_done = False
+        border_done = True
         for c in self.frames:
             c.value = t
             if t < self.timestamp:
                 c.left_border.set_color(self.black_color)
                 c.bgcolor = '#666666'
+                border_done = False
             else:
                 if border_done:
                     c.left_border.set_color(self.black_color)
@@ -204,7 +205,9 @@ class FrameSelector(object):
 
         hb=gtk.HBox()
 
-        hb.pack_start(gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN), expand=False)
+        ar = gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
+        ar.set_tooltip_text(_("Scroll to see more frames"))
+        hb.pack_start(ar, expand=False)
 
         for i in xrange(-self.count / 2, self.count / 2):
             r=TimestampRepresentation(0, self.controller, width=100, visible_label=True, epsilon=30)
@@ -217,7 +220,9 @@ class FrameSelector(object):
             hb.pack_start(r.left_border, expand=False)
             hb.pack_start(r, expand=False)
 
-        hb.pack_start(gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN), expand=False)
+        ar = gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
+        ar.set_tooltip_text(_("Scroll to see more frames"))
+        hb.pack_start(ar, expand=False)
 
         hb.set_style(get_color_style(hb, 'black', 'black'))
         hb.connect('scroll-event', self.handle_scroll_event)
