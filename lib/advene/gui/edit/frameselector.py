@@ -33,11 +33,14 @@ class FrameSelector(object):
     the timestamp and allows to select the most appropriate
     one.
     """
-    def __init__(self, controller, timestamp=0, callback=None):
+    def __init__(self, controller, timestamp=0, callback=None, border_mode='left'):
         self.controller = controller
         self.timestamp = timestamp
         self.selected_value = timestamp
         self.callback = callback
+        # border_mode is either 'left', 'right', 'both' or None
+        self.border_mode = border_mode
+
         # Number of displayed timestamps
         self.count = 8
         self.frame_length = 1000 / 25
@@ -79,22 +82,32 @@ class FrameSelector(object):
             t = 0
         else:
             index_offset = 0
+        
+        matching_index = -1
+        for (i, f) in enumerate(self.frames):
+            f.value = t
+            f.left_border.set_color(self.black_color)
+            f.right_border.set_color(self.black_color)
 
-        border_done = True
-        for c in self.frames:
-            c.value = t
             if t < self.timestamp:
-                c.left_border.set_color(self.black_color)
-                c.bgcolor = '#666666'
-                border_done = False
+                f.bgcolor = '#666666'
             else:
-                if border_done:
-                    c.left_border.set_color(self.black_color)
+                if matching_index < 0:
+                    matching_index = i
+
+                if t == self.timestamp and self.border_mode == 'right':
+                    f.bgcolor = '#666666'
                 else:
-                    c.left_border.set_color(self.red_color)
-                    border_done = True
-                c.bgcolor = 'black'
+                    f.bgcolor = 'black'
+
             t += self.frame_length
+
+        if matching_index >= 0:
+            f = self.frames[matching_index]
+            if self.border_mode == 'left' or self.border_mode ==  'both':
+                f.left_border.set_color(self.red_color)
+            if self.border_mode == 'right' or self.border_mode ==  'both':
+                f.right_border.set_color(self.red_color)
 
         # Handle focus
         if focus_index is None:
@@ -209,16 +222,31 @@ class FrameSelector(object):
         ar.set_tooltip_text(_("Scroll to see more frames"))
         hb.pack_start(ar, expand=False)
 
-        for i in xrange(-self.count / 2, self.count / 2):
-            r=TimestampRepresentation(0, self.controller, width=100, visible_label=True, epsilon=30)
-            r.connect("clicked", self.select_time)
-            
-            r.left_border = GenericColorButtonWidget('layout_current_mark')
-            r.left_border.default_size=(3, 110)
-            r.left_border.local_color=self.black_color
+        r = None
+        for i in xrange(self.count):
+
+            border = GenericColorButtonWidget('border')
+            border.default_size=(3, 110)
+            border.local_color=self.black_color
+
+            if r is not None:
+                # Previous TimestampRepresentation -> right border
+                r.right_border = border
+
+            r = TimestampRepresentation(0, self.controller, width=100, visible_label=True, epsilon=30)
             self.frames.append(r)
-            hb.pack_start(r.left_border, expand=False)
+            r.connect("clicked", self.select_time)
+            r.left_border = border
+            
+            hb.pack_start(border, expand=False)
             hb.pack_start(r, expand=False)
+
+        # Last right border
+        border = GenericColorButtonWidget('border')
+        border.default_size=(3, 110)
+        border.local_color=self.black_color
+        r.right_border = border
+        hb.pack_start(border, expand=False)
 
         ar = gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
         ar.set_tooltip_text(_("Scroll to see more frames"))
