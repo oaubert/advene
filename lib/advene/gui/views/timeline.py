@@ -2767,6 +2767,9 @@ class TimeLine(AdhocView):
         def annotationtype_keypress_handler(widget, event, at):
             if widget.keypress(widget, event, at):
                 return True
+            elif event.keyval == gtk.keysyms.a:
+                # Adjust bounds
+                self.controller.gui.adjust_annotationtype_bounds(at)
             elif event.keyval == gtk.keysyms.Return:
                 def set_end_time(action, an):
                     if action == 'validate':
