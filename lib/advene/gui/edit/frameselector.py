@@ -216,6 +216,9 @@ class FrameSelector(object):
 
         vb.pack_start(buttons, expand=False)
 
+        l = gtk.Label(_("Click on a frame to select its time."))
+        vb.pack_start(l, expand=False)
+
         hb=gtk.HBox()
 
         ar = gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
