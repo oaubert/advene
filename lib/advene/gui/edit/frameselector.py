@@ -22,8 +22,8 @@ It depends on a Controller instance to be able to interact with the video player
 """
 
 import gtk
-from advene.gui.widget import TimestampRepresentation
-from advene.gui.util import dialog
+from advene.gui.widget import TimestampRepresentation, GenericColorButtonWidget
+from advene.gui.util import dialog, get_color_style
 from gettext import gettext as _
 
 class FrameSelector(object):
@@ -41,6 +41,10 @@ class FrameSelector(object):
         # Number of displayed timestamps
         self.count = 8
         self.frame_length = 1000 / 25
+
+        self.black_color = gtk.gdk.color_parse('black')
+        self.red_color = gtk.gdk.color_parse('red')
+
         # List of TimestampRepresentation widgets.
         # It is initialized in build_widget()
         self.frames = []
@@ -75,12 +79,19 @@ class FrameSelector(object):
             t = 0
         else:
             index_offset = 0
-        
+
+        border_done = False
         for c in self.frames:
             c.value = t
             if t < self.timestamp:
+                c.left_border.set_color(self.black_color)
                 c.bgcolor = '#666666'
             else:
+                if border_done:
+                    c.left_border.set_color(self.black_color)
+                else:
+                    c.left_border.set_color(self.red_color)
+                    border_done = True
                 c.bgcolor = 'black'
             t += self.frame_length
 
@@ -196,9 +207,15 @@ class FrameSelector(object):
         for i in xrange(-self.count / 2, self.count / 2):
             r=TimestampRepresentation(0, self.controller, width=100, visible_label=True, epsilon=30)
             r.connect("clicked", self.select_time)
+            
+            r.left_border = GenericColorButtonWidget('layout_current_mark')
+            r.left_border.default_size=(3, 110)
+            r.left_border.local_color=self.black_color
             self.frames.append(r)
+            hb.pack_start(r.left_border, expand=False)
             hb.pack_start(r, expand=False)
 
+        hb.set_style(get_color_style(hb, 'black', 'black'))
         hb.connect('scroll-event', self.handle_scroll_event)
         hb.connect('key-press-event', self.handle_key_press)
         vb.add(hb)
