@@ -204,6 +204,8 @@ class FrameSelector(object):
 
         hb=gtk.HBox()
 
+        hb.pack_start(gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN), expand=False)
+
         for i in xrange(-self.count / 2, self.count / 2):
             r=TimestampRepresentation(0, self.controller, width=100, visible_label=True, epsilon=30)
             r.connect("clicked", self.select_time)
@@ -214,6 +216,8 @@ class FrameSelector(object):
             self.frames.append(r)
             hb.pack_start(r.left_border, expand=False)
             hb.pack_start(r, expand=False)
+
+        hb.pack_start(gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN), expand=False)
 
         hb.set_style(get_color_style(hb, 'black', 'black'))
         hb.connect('scroll-event', self.handle_scroll_event)
