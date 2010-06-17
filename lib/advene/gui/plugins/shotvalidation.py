@@ -130,6 +130,7 @@ class ShotValidation(AdhocView):
     def undo(self, *p):
         """Undo the last modification.
         """
+        self.message(_("Last action undone"))
         self.controller.gui.undo()
         if self.index > 0:
             self.index = self.index - 1
