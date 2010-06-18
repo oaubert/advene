@@ -36,6 +36,7 @@ overlay_re=re.compile(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?')
 tales_re=re.compile('(\w+)/(.+)')
 player_re=re.compile(r'/media/play/(\d+)')
 overlay_replace_re=re.compile(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?')
+clean_link_re = re.compile('[\[\(\)\]]')
 
 class WebsiteExporter(object):
     """Export a set of static views to a directory.
@@ -343,14 +344,13 @@ class WebsiteExporter(object):
                     extra.append('onClick="return false;"')
                 if fragment is not None:
                     tr=tr+'#'+fragment
+
                 if extra:
-                    content=re.sub('''(%s=['"])%s(['"> ])''' % (attname, urllib.quote(link)),
-                                   " ".join(extra) + r''' \1''' + tr + r'''\2''',
-                                   content)
+                    exp = '''(%s=['"])%s(['"> ])''' % (attname, clean_link_re.sub('.', link))
+                    content=re.sub(exp, " ".join(extra) + r''' \1''' + tr + r'''\2''', content)
                 else:
-                    content=re.sub('''(%s=['"])%s(['"> ])''' % (attname, urllib.quote(link)),
-                                   r'''\1''' + tr + r'''\2''',
-                                   content)
+                    exp = '''(%s=['"])%s(['"> ])''' % (attname, clean_link_re.sub('.', link))
+                    content=re.sub(exp, r'''\1''' + tr + r'''\2''', content)
 
         content=self.video_player.transform_document(content)
         return content
