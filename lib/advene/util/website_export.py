@@ -344,11 +344,11 @@ class WebsiteExporter(object):
                 if fragment is not None:
                     tr=tr+'#'+fragment
                 if extra:
-                    content=re.sub('''(%s=['"])%s(['"> ])''' % (attname, link),
+                    content=re.sub('''(%s=['"])%s(['"> ])''' % (attname, urllib.quote(link)),
                                    " ".join(extra) + r''' \1''' + tr + r'''\2''',
                                    content)
                 else:
-                    content=re.sub('''(%s=['"])%s(['"> ])''' % (attname, link),
+                    content=re.sub('''(%s=['"])%s(['"> ])''' % (attname, urllib.quote(link)),
                                    r'''\1''' + tr + r'''\2''',
                                    content)
 
