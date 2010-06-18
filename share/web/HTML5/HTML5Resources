@@ -1,0 +1,45 @@
+<html><head>
+<title></title>
+<script type="application/javascript" tal:attributes="src package/resources/HTML5/jquery.js/absolute_url"></script>
+<script type="application/javascript" tal:attributes="src package/resources/HTML5/jqueryui.js/absolute_url"></script>
+<script type="application/javascript" tal:attributes="src package/resources/HTML5/script.js/absolute_url"></script>
+
+<link rel="stylesheet" tal:attributes="href package/resources/HTML5/nosfe.css/absolute_url" type="text/css"></link>
+<link rel="stylesheet" tal:attributes="href package/resources/HTML5/theme/jqueryui.css/absolute_url" type="text/css"></link>
+<link rel="stylesheet" tal:attributes="href package/resources/HTML5/style.css/absolute_url" type="text/css"></link></head>
+
+<body>
+<h1>USED RESOURCES</h1> 
+<a  tal:attributes="href package/resources/HTML5/adv.PNG/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/bg.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/launch.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/maximized.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/nosfe.css/absolute_url">Resource</a> <br>
+
+<a  tal:attributes="href package/resources/HTML5/playerlaunch.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/view_here.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/view_player.png/absolute_url">Resource</a> <br>
+
+
+
+
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_bg_diagonals_thick18.png/absolute_url">Resource</a> <br>
+
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_bg_diagonals_thick20.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_bg_flat10.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_bg_glass65fd.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_bg_glass65ff.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_bg_glass65.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_bg_gloss_wave.png/absolute_url">Resource</a> <br>
+
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_bg_highlight_soft100.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_bg_highlight_soft75.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_icons222.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_icons228.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_iconsef8.png/absolute_url">Resource</a> <br>
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_iconsffd.png/absolute_url">Resource</a> <br>
+
+<a  tal:attributes="href package/resources/HTML5/theme/images/ui_iconsfff.png/absolute_url">Resource</a> <br>
+
+</body>
+</html>

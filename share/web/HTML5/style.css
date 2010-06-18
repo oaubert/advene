@@ -1,0 +1,162 @@
+.ui-effects-transfer { border: hidden; background-color: rgba(255, 255, 255, 0.7);padding: 10px;}
+object{float:left;}
+.player_minimized {
+  background-color:#CCC;
+  border:thin;
+  -moz-border-radius: 10px;
+  padding: 10px;
+  position: fixed;
+  bottom:15;
+  right:15;
+  width: 20;
+  color: black;
+  font-size: 0.7em;
+}
+
+.controls {
+ overflow:visible;
+  position: absolute;
+  width:90%;
+  height:15;
+  right:5%;
+  visibility: visible;
+  z-index: 1;
+  background-color:#999999;
+
+}
+
+.controls #controlesPlay {
+	position:absolute;
+	height:100;
+	opacity:0.8;
+	text-align:center;
+}
+.image_container {
+position:relative;
+overflow:hidden;
+float: left; 
+height: 190; 
+width: 220;
+padding:0;
+
+}	
+
+ .heading {
+	position:absolute;
+	text-align:center;
+	opacity:0.6;
+	border:none;
+	left:40%;
+	top:50%;
+	background-color:#666;
+	color:#FFF;
+	font-weight:160;
+	font-size:24px;
+	}
+
+ .heading strong {
+	color:#26c3e5;	
+	
+	font-weight:bold;
+	}
+
+.sampleheading {
+	position:absolute;
+	height:auto;
+	text-align:center;
+	width:auto;
+	opacity:0.6;
+	background-color:#666;
+	left:25%;
+	top:40%;
+	color:#FFF;		
+	font-weight:160;
+	font-size:24px;
+	}
+
+	
+	
+		.image_container .comment {
+			position:absolute;
+			background:#000;
+			height:30px;
+			width:100%;
+			opacity:0.8;
+			bottom:0px;
+			float:left;
+		}
+		
+		.image_container .comment strong{
+			color:#999;	
+			font-size:9px;
+			padding:5px 10px 0 10px;
+		}
+
+
+			
+.frame-content { border: 1px solid #dddddd;  50% top repeat-x; color: #333333; background-color:#999;   }
+#volumeSlider .ui-slider-range { background: #000033; }
+#volumeSlider  .ui-slider-handle {width: 0.8em; height: 0.5em; padding-top:0;}
+
+#timeLine{
+	
+  margin: 0px;
+  background: #BBBBBB;
+  position:absolute;
+  right:60; 
+  left:75; 
+  float:right; 
+  height:5; 
+  bottom:5;
+  
+  }
+#timeLine .ui-slider-range { background: #663300; }
+#timeLine .ui-slider-handle {/*background:#CCCC00; width: 0.3em; height: 0.8em; padding-top:0;*/
+width: 8px;
+  height: 13px;
+
+ 
+  top:-5;
+ 
+ overflow:hidden;
+  background: #478AFF;
+  }
+
+#samplevolumeSlider .ui-slider-range { background: #000033; }
+#samplevolumeSlider  .ui-slider-handle {width: 0.8em; height: 0.5em; padding-top:0;}
+
+#sampletimeLine .ui-slider-range { background: #663300; }
+#sampletimeLine .ui-slider-handle {background:#CCCC00; width: 0.5em; height: 0.8em; padding-top:0;}
+
+.ui-dialog .ui-dialog-title { float: right; margin-top:-5; font-size:12px; } 
+
+.optionPlay {
+		position:absolute;
+		height:auto;
+		width:130;
+		 border:thin;
+		-moz-border-radius: 10px;
+		padding: 2px;		
+		background:url(bg.png) repeat;
+	}
+#slider-bubble{ 
+background:#CCC; 
+opacity:10%;
+font-size:10px;
+height:auto; 
+width:auto; 
+margin-top:5;
+margin-left:10;
+position:relative;
+overflow:visible;
+top:-20;
+
+text-align:center;
+
+}
+
+#vid_flottante{
+border:1px solid #FFCCCC;
+height:138px !important;
+width:184px !important;	
+}

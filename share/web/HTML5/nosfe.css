@@ -1,0 +1,228 @@
+	body {
+		font-family:"ARIAL","VERDANA","HELVETICA"; 	
+		background-color: #000000;
+		color: #DD8844;
+		font-size: 14px;
+	}
+	a:link {
+		text-decoration: none; 
+		color: #CC0000;
+	}
+	a:visited {
+		text-decoration: none; 
+		color: #CC6600;
+	}
+	a:hover {
+		color: #CC9900;
+	}
+	
+	img {
+		border:1px solid #FFCCCC;
+	}
+
+	img.screenshot {
+		border:1px solid #FFCCCC;
+		height:138px;
+		width:184px;		
+	}
+
+	img.half_screenshot {
+		border:1px solid #FFCCCC;
+		height:60px;
+		width:80px;		
+	}
+
+	h1 {
+		text-align: left;
+		color: #FFFFFF;
+                font-size: 22px;
+	
+                padding-top: 15px;
+	}
+
+	h2 {
+		text-align: left;
+		color: #FF0000;
+		font-size: 19px;
+	}
+
+	h3 {
+		text-align: left;
+		color: #AA0000;
+		font-size: 16px;
+	}	
+
+	h4 {
+		text-align: left;
+		color: #FF3333;
+		font-size: 14px;
+	}	
+
+blockquote {
+                font-style:italic ;
+		
+	}	
+
+	
+    #tabsJ {
+      float:left;
+      width:100%;
+      background:#000000;
+      font-size:93%;
+      line-height:normal;
+	  border-bottom:1px solid #24618E;
+      }
+    #tabsJ ul {
+	margin:0;
+	padding:10px 10px 0 0px;
+	list-style:none;
+      }
+    #tabsJ li {
+      display:inline;
+      margin:0;
+      padding:0;
+      }
+    #tabsJ a {
+      float:left;
+      background:url("tableftJ.gif") no-repeat left top;
+      margin:0;
+      padding:0 0 0 5px;
+      text-decoration:none;
+      }
+    #tabsJ a span {
+      float:left;
+      display:block;
+      background:url("tabrightJ.gif") no-repeat right top;
+      padding:5px 15px 4px 6px;
+      color:FF3333;
+      }
+    #tabsJ span {
+      float:left;
+      display:block;
+      background:url("tabrightJ.gif") no-repeat right top;
+      padding:5px 15px 4px 6px;
+      color:FF3333;
+      }
+    /* Commented Backslash Hack hides rule from IE5-Mac \*/
+    #tabsJ a span {float:none;}
+    /* End IE5-Mac hack */
+    #tabsJ a:hover span {
+      color:#FFF;
+      }
+    #tabsJ a:hover {
+      background-position:0% -42px;
+      }
+    #tabsJ a:hover span {
+      background-position:100% -42px;
+      }
+
+.bloc {
+	border:1px solid #ccccff;
+	padding:5px;	
+	margin:5px;
+	text-align:middle;
+        float: right;
+	background-color:#000000;
+	width:70px;
+	color:#FF0000;		
+}
+
+.bloc a span {	
+	display:none;
+}
+.bloc a:link {
+		text-decoration: none; 
+		color: #CC0000;
+	}
+.bloc a:visited {
+		text-decoration: none; 
+		color: #CC6600;
+	}
+.bloc a:hover {
+		color: #CC9900;
+	}
+.bloc a:hover span {
+	text-align:left;	
+	display:block;
+	position:absolute;
+	right:12px;	
+	top:130px;
+	width:500px;	
+	border:1px solid #CCCCFF;
+	padding:5px;	
+	color:#FF0000;
+	background-color:#000000;
+}
+
+.bloc2 {
+	border:1px solid #ffcccc;
+	padding:5px;	
+	margin:5px;
+	text-align:middle;
+        float: right;
+	background-color:#000000;
+	width:70px;
+	color:#FF0000;		
+}
+
+.bloc2 a span {	
+	display:none;
+}
+.bloc2 a:link {
+		text-decoration: none; 
+		color: #CC0000;
+	}
+.bloc2 a:visited {
+		text-decoration: none; 
+		color: #CC6600;
+	}
+.bloc2 a:hover {
+		color: #CC9900;
+	}
+.bloc2 a:hover span {
+	text-align:left;	
+	display:block;
+	position:absolute;
+	right:105px;	
+	top:130px;
+	width:500px;	
+	border:1px solid #FFCCCC;
+	padding:5px;	
+	color:#FF0000;
+	background-color:#000000;
+}
+
+a.screen {
+color:#CC0000; 
+position:relative; 
+z-index:1;
+}
+a.screen:visited {
+color:#CC6600; 
+position:relative; 
+z-index:1;
+}
+
+a.screen b {
+position:absolute;
+visibility:hidden; 
+width:150px; 
+height:0; 
+border:1px solid #000;
+left:0; 
+top:-100px;
+}
+a.screen:hover {
+text-decoration:none; 
+border:0; 
+z-index:1000;
+}
+a.screen:hover b {
+visibility:visible; 
+height:100px;
+cursor:pointer; 
+z-index:500; 
+}
+a.screen:hover b img {
+border:0; 
+}

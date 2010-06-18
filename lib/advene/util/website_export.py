@@ -24,6 +24,7 @@ import time
 import re
 import urllib
 import mimetypes
+import shutil
 
 import advene.core.config as config
 import advene.util.helper as helper
@@ -34,9 +35,8 @@ href_re=re.compile(r'''(href|src|about|resource)=['"](.+?)['"> ]''')
 snapshot_re=re.compile(r'/packages/[^/]+/imagecache/(\d+)')
 overlay_re=re.compile(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?')
 tales_re=re.compile('(\w+)/(.+)')
-player_re=re.compile(r'/media/play/(\d+)')
+player_re=re.compile(r'/media/play(/|\?position=)(\d+)')
 overlay_replace_re=re.compile(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?')
-clean_link_re = re.compile('[\[\(\)\]]')
 
 class WebsiteExporter(object):
     """Export a set of static views to a directory.
@@ -94,8 +94,12 @@ class WebsiteExporter(object):
         p=None
         # FIXME: module introspection here to get classes
         # Note that generic VideoPlayer is last, so that it will be the default if no other is found.
-        for cl in (GoogleVideoPlayer, YoutubeVideoPlayer, VideoPlayer):
+        # Note: HTML5VideoPlayer is also generic
+        for cl in (GoogleVideoPlayer, YoutubeVideoPlayer, HTML5VideoPlayer, VideoPlayer):
             if cl.can_handle(video_url):
+                if p == 'HTML5VideoPlayer' and not self.video_url:
+                    # Use current player movie
+                    self.video_url = self.controller.package.get_default_media()
                 p=cl(self.destination, self.video_url)
                 break
         return p
@@ -196,6 +200,7 @@ class WebsiteExporter(object):
                 continue
 
             l=url.replace(self.controller.server.urlbase, '')
+
             if l.startswith('http:'):
                 # It is an external url
                 self.url_translation[url]=url
@@ -284,11 +289,10 @@ class WebsiteExporter(object):
                 self.url_translation[url]=output
                 if fragment:
                     self.url_translation[original_url]="%s#%s" % (output, fragment)
-
-            elif self.video_url and url.startswith('/media/play'):
+            elif self.video_url and player_re.search(url):
                 m=player_re.search(url)
-                if m and not 'stbv' in url:
-                    self.url_translation[original_url]=self.video_player.player_url(long(m.group(1)))
+                if not 'stbv' in url:
+                    self.url_translation[original_url]=self.video_player.player_url(long(m.group(2)))
                 else:
                     self.url_translation[original_url]=self.unconverted(url, 'need advene')
             else:
@@ -346,10 +350,10 @@ class WebsiteExporter(object):
                     tr=tr+'#'+fragment
 
                 if extra:
-                    exp = '''(%s=['"])%s(['"> ])''' % (attname, clean_link_re.sub('.', link))
+                    exp = '''(%s=['"])%s(['"> ])''' % (attname, re.escape(link))
                     content=re.sub(exp, " ".join(extra) + r''' \1''' + tr + r'''\2''', content)
                 else:
-                    exp = '''(%s=['"])%s(['"> ])''' % (attname, clean_link_re.sub('.', link))
+                    exp = '''(%s=['"])%s(['"> ])''' % (attname, re.escape(link))
                     content=re.sub(exp, r'''\1''' + tr + r'''\2''', content)
 
         content=self.video_player.transform_document(content)
@@ -440,7 +444,6 @@ class WebsiteExporter(object):
             links=set()
             for url in links_to_be_processed:
                 self.progress_callback(progress, _("Depth %(depth)d: processing %(url)s") % locals())
-                print "Processing", url
                 progress += step
                 content=self.get_contents(url)
 
@@ -462,6 +465,23 @@ class WebsiteExporter(object):
             depth += 1
 
         self.progress_callback(0.95, _("Finalizing"))
+
+        # Copy static video player resources
+        for (path, dest) in self.video_player.needed_resources():
+            dest=os.path.join(self.destination, dest)
+            if os.path.exists(dest):
+                # Already copied
+                continue
+            if os.path.isdir(path):
+                # Copy tree
+                shutil.copytree(path, dest)
+            else:
+                # Copy file
+                d=os.path.dirname(dest)
+                if not os.path.isdir(d):
+                    helper.recursive_mkdir(d)
+                shutil.copy(path, dest)
+
         # Generate video helper files if necessary
         self.video_player.finalize()
 
@@ -572,6 +592,15 @@ class VideoPlayer(object):
         """
         return
 
+    def needed_resources(self):
+        """Return a list of needed resources.
+
+        It is a list of ( original_file/dir, destination_file/dir )
+        items. The destination_file/dir is a directory relative to the base
+        of the exported websites.
+        """
+        return []
+
 class GoogleVideoPlayer(VideoPlayer):
     """Google video player support.
     """
@@ -652,33 +681,25 @@ class YoutubeVideoPlayer(VideoPlayer):
         """
         return
 
-class EmbeddedYoutubeVideoPlayer(VideoPlayer):
-    """Embedded Youtube video player support.
+class HTML5VideoPlayer(VideoPlayer):
+    """Youtube video player support.
     """
-    url_re=re.compile('youtube.com/.+v=([\w\d]+)')
     def __init__(self, destination, video_url):
         self.destination=destination
         self.video_url=video_url
-        l=self.url_re.findall(self.video_url)
-        if l:
-            self.video_id=l[0]
-        else:
-            # FIXME: what should we do then?
-            self.video_id=''
 
     @staticmethod
     def can_handle(video_url):
         """Static method indicating wether the class can handle the given video url.
-        """
-        # FIXME: deactivated class for now
-        return 'youtubeDEACTIVATED' in video_url
+        """        
+        # We always can handle videos.
+        return True  
 
     def player_url(self, t):
         """Return the URL to play video at the given time.
         """
-        # FIXME
-        # Format: HH:MM:SS.mmm
-        return '%s#%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(long(t) / 1000)))
+        # Format: #time_in_s
+        return '%s#%d' % (self.video_url, (t / 1000))
 
     def fix_link(self, link):
         """
@@ -686,7 +707,7 @@ class EmbeddedYoutubeVideoPlayer(VideoPlayer):
         if self.video_url in link:
             return "target='video_player'", link
         else:
-            return None, link
+            return None, None
 
     def transform_document(self, content):
         """Transform the document if necessary.
@@ -695,81 +716,29 @@ class EmbeddedYoutubeVideoPlayer(VideoPlayer):
         can be used to inject javascript code for instance.
         """
         # Inject javascript code if necessary
-        jsinject='''<script type="text/javascript" src="advene.js"></script>'''
-        if re.findall('<head>', content, re.IGNORECASE):
-            content=re.sub('''<head>''', '''<head>%s''' % jsinject, content)
+
+        # Note: Firefox does not seem to like <link href=... /> style
+        # of closing tags. Use the explicit end tag.
+        jsinject='''
+<link href="./resources/HTML5/style.css" rel="stylesheet" type="text/css"></link>
+<link type="text/css" href="./resources/HTML5/theme/jqueryui.css" rel="stylesheet"></link>
+<script type="text/javascript" src="./resources/HTML5/jquery.js"></script>
+<script type="text/javascript" src="./resources/HTML5/jqueryui.js"></script>
+<script type="text/javascript" src="./resources/HTML5/script.js"></script>
+'''
+        head_re = re.compile('<head>', re.IGNORECASE)
+        if head_re.findall(content):
+            content = head_re.sub('''<head>%s''' % jsinject, content)
         else:
-            content=('''<head>%s</head>\n''' % jsinject) + content
+            content = '''<head>%s</head>\n''' % jsinject + content
         return content
 
     def finalize(self):
         """Finalise the environment.
         """
-        f=open(os.path.join(self.destination, "player.html"), 'w')
-        f.write('''<html><head>
-<title>Video Player</title>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2/swfobject.js"></script>
-</head>
-<body>
-  <div id="player">
-    You need Flash player 8+ and JavaScript enabled to view this video.
-  </div>
-
-  <script type="text/javascript">
-    function onYouTubePlayerReady(playerId) {
-      var ytplayer = swfobject.getObjectById(playerId);
-    }
-    var params = { allowScriptAccess: "always",
-                   start: 30,
-                   rel: 0,
-                   autoplay: 1,
-                   enablejsapi: 1,
-                  };
-    var atts = { id: "myytplayer" };
-    swfobject.embedSWF("http://www.youtube.com/v/%(video_id)s&playerapiid=ytplayer",
-                       "player", "425", "356", "8", null, null, params, atts);
-  </script>
-</body></html>''' % { 'video_id': self.video_id })
-        f.close()
-
-        # Generate the appropriate advene.js
-        f=open(os.path.join(self.destination, "advene.js"), 'w')
-        f.write('''<?php
-# FIXME: cross-window scripting: http://www.quirksmode.org/js/croswin.html
-
-<script language="javascript" type="text/javascript">
-<!--
-function popitup(url) {
-	newwindow=window.open(url,'name','height=200,width=150');
-	if (window.focus) {newwindow.focus()}
-	return false;
-}
-
-// -->
-</script>
-
-Then, you link to it by:
-
-<a href="popupex.html" onclick="return popitup('popupex.html')"
-	>Link to popup</a>
-
-<div id="ytapiplayer">
-    You need Flash player 8+ and JavaScript enabled to view this video.
-  </div>
-
-  <script type="text/javascript">
-
-    var params = { allowScriptAccess: "always" };
-    var atts = { id: "myytplayer" };
-    swfobject.embedSWF("http://www.youtube.com/v/VIDEO_ID&enablejsapi=1&playerapiid=ytplayer",
-                       "ytapiplayer", "425", "356", "8", null, null, params, atts);
-
-  </script>
-
-
-        # FIXME
-?>''')
-        f.close()
-        # FIXME: generate advene.js and player.html
         return
 
+    def needed_resources(self):
+        """Return a list of needed resources.
+        """
+        return [ ( config.data.advenefile('HTML5', 'web'), 'resources/HTML5' ) ]
