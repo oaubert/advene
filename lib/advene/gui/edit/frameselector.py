@@ -33,11 +33,14 @@ class FrameSelector(object):
     the timestamp and allows to select the most appropriate
     one.
     """
-    def __init__(self, controller, timestamp=0, callback=None, border_mode='left'):
+    def __init__(self, controller, timestamp=0, callback=None, label=None, border_mode='left'):
         self.controller = controller
         self.timestamp = timestamp
         self.selected_value = timestamp
         self.callback = callback
+        if label is None:
+            label = _("Click on a frame to select its time.")
+        self.label = label
         # border_mode is either 'left', 'right', 'both' or None
         self.border_mode = border_mode
 
@@ -216,7 +219,7 @@ class FrameSelector(object):
 
         vb.pack_start(buttons, expand=False)
 
-        l = gtk.Label(_("Click on a frame to select its time."))
+        l = gtk.Label(self.label)
         vb.pack_start(l, expand=False)
 
         hb=gtk.HBox()
