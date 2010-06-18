@@ -158,10 +158,10 @@ class ShotValidation(AdhocView):
                 annotation.fragment.end = new
                 self.controller.notify('AnnotationEditEnd', annotation=annotation, batch=batch)
                 self.controller.notify('EditSessionEnd', element=annotation)
-            self.message(_("Validated cut between #%(first)d and %(second)d") % { 'first': i + 1,
+            self.message(_("Changed cut between #%(first)d and %(second)d") % { 'first': i + 1,
                                                                                   'second': i + 2 })
         else:
-            self.message(_("Validated begin time for first annotation"))
+            self.message(_("Changed begin time for first annotation"))
         self.set_index(i + 1)
         return True
 
@@ -174,7 +174,7 @@ class ShotValidation(AdhocView):
         self.title_widget = gtk.Label()
         vbox.pack_start(self.title_widget)
 
-        self.selector = FrameSelector(self.controller, self.annotations[0].fragment.begin)
+        self.selector = FrameSelector(self.controller, self.annotations[0].fragment.begin, label=_("Click on the frame just after the cut"))
         self.selector.callback = self.validate_and_next
 
         def handle_index_change(adj):
