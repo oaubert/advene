@@ -256,7 +256,7 @@ class Config(object):
             'slave-player-sync-delay': 3000,
             # Interface language. '' means system default.
             'language': '',
-            'save-default-workspace': 'never',
+            'save-default-workspace': 'always',
             'restore-default-workspace': 'ask',
             # Weekly check for updates on the Advene website ?
             'update-check': True,
