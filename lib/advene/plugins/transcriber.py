@@ -25,8 +25,6 @@ name="Transcriber importer"
 
 from gettext import gettext as _
 
-import xml.dom as dom
-
 from advene.util.importer import GenericImporter
 import advene.util.ElementTree as ETree
 
