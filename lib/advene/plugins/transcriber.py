@@ -149,7 +149,7 @@ class TrsImporter(GenericImporter):
                             try:
                                 if t.get('speaker') is not None:
                                     speaker = self.speakers[t.get('speaker')]
-                            except AttributeError, KeyError:
+                            except (AttributeError, KeyError):
                                 pass
 
                             d={
