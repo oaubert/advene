@@ -36,6 +36,8 @@ http://laszlok2.blogspot.com/2006/05/prince-of-cairo_28.html
 import struct
 import os
 
+from gettext import gettext as _
+
 import gtk
 import cairo
 import pango
@@ -1032,12 +1034,6 @@ class TimestampRepresentation(gtk.Button):
         if with_timestamp:
             ret = ''.join( (ret, """<br /><em><a href="%(player_url)s">%(timestamp)s</a></em>""" % data) )
         return ret
-
-    def set_width(self, w):
-        """Set the width of the snapshot and refresh the display.
-        """
-        self.width=w
-        self.refresh()
 
     def refresh_snapshot(self, *p):
         """Refresh the snapshot image.
