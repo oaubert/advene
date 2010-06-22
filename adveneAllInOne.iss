@@ -79,10 +79,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.42
+AppVerName=Advene 0.43
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.42
+VersionInfoVersion=0.43
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -90,8 +90,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.42_vlc_1.0.3_gstreamer_0.10.5
-VersionInfoTextVersion=0.42
+OutputBaseFilename=setup_advene_0.43_vlc_1.0.3_gstreamer_0.10.5
+VersionInfoTextVersion=0.43
 ChangesAssociations=yes
 
 [Registry]
