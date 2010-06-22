@@ -902,7 +902,7 @@ class TimestampRepresentation(gtk.Button):
         self.add(box)
         self.box=box
 
-        self.bgcolor = bgcolor
+        self._bgcolor = bgcolor
 
         self.refresh()
 
