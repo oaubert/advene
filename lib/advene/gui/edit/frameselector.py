@@ -50,6 +50,7 @@ class FrameSelector(object):
 
         self.black_color = gtk.gdk.color_parse('black')
         self.red_color = gtk.gdk.color_parse('red')
+        self.mouseover_color = gtk.gdk.color_parse('violet')
 
         # List of TimestampRepresentation widgets.
         # It is initialized in build_widget()
@@ -242,6 +243,25 @@ class FrameSelector(object):
             self.frames.append(r)
             r.connect("clicked", self.select_time)
             r.left_border = border
+
+            def enter_bookmark(widget, event):
+                if self.border_mode == 'left':
+                    b=widget.left_border
+                elif self.border_mode == 'right':
+                    b=widget.right_border
+                b.old_color = b.local_color
+                b.set_color(self.mouseover_color)
+                return False
+            def leave_bookmark(widget, event):
+                if self.border_mode == 'left':
+                    b=widget.left_border
+                elif self.border_mode == 'right':
+                    b=widget.right_border
+                b.set_color(b.old_color)
+                return False
+            if self.border_mode in ('left', 'right'):
+                r.connect('enter-notify-event', enter_bookmark)
+                r.connect('leave-notify-event', leave_bookmark)
             
             hb.pack_start(border, expand=False)
             hb.pack_start(r, expand=False)
