@@ -122,8 +122,8 @@ class Evaluator:
             bname=self.bookmarkfile
         else:
             bname=name + '-bookmarks'
-        self.save_data(self.history, self.historyfile)
-        self.save_data(self.bookmarks, self.bookmarkfile)
+        self.save_data(self.history, name)
+        self.save_data(self.bookmarks, bname)
         return
 
     def load_data(self, name):
