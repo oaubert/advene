@@ -3590,7 +3590,10 @@ class AdveneGUI(object):
             self.update_window_title()
             self.controller.set_default_media(cache['media'])
             try:
-                self.controller.package.cached_duration = long(cache['duration'])
+                d=long(cache['duration'])
+                if d != self.controller.package.cached_duration:
+                    self.controller.package.cached_duration = d
+                    self.controller.notify('DurationUpdate', duration=d)
             except ValueError, e:
                 print "Cannot convert duration", str(e)
                 pass
