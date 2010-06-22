@@ -235,6 +235,11 @@ class ShotValidation(AdhocView):
         b.connect("clicked", self.goto_current)
         hb.add(b)
 
+        b=gtk.Button(_("Refresh snapshots"))
+        b.set_tooltip_text(_("Refresh missing snapshots"))
+        b.connect("clicked", lambda b: self.selector.refresh_snapshots())
+        hb.add(b)
+
         b=gtk.Button(_("Undo"))
         b.set_tooltip_text(_("Undo last modification"))
         b.connect("clicked", self.undo)

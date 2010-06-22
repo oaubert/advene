@@ -186,6 +186,14 @@ class FrameSelector(object):
         self.callback = callback
 
         d.vbox.add(self.widget)
+
+        buttons = gtk.HBox()
+        b=gtk.Button(_("Refresh snapshots"))
+        b.set_tooltip_text(_("Refresh missing snapshots"))
+        b.connect("clicked", lambda b: self.refresh_snapshots())
+        buttons.pack_start(b, expand=False)
+        d.vbox.pack_start(buttons, expand=False)
+
         d.show_all()
         dialog.center_on_mouse(d)
 
@@ -209,15 +217,6 @@ class FrameSelector(object):
         
     def build_widget(self):
         vb=gtk.VBox()
-
-        buttons = gtk.HBox()
-
-        b=gtk.Button(stock=gtk.STOCK_REFRESH)
-        b.set_tooltip_text(_("Refresh missing snapshots"))
-        b.connect("clicked", lambda b: self.refresh_snapshots())
-        buttons.pack_start(b, expand=True)
-
-        vb.pack_start(buttons, expand=False)
 
         l = gtk.Label(self.label)
         vb.pack_start(l, expand=False)

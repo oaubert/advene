@@ -2964,15 +2964,18 @@ class AdveneGUI(object):
         """Display a dialog to adjust the annotation bound.
         """
         translation={
-            'begin': _('begin'),
-            'end': _('end'),
+            'begin': _('first frame'),
+            'end': _('last frame'),
             }
         border_mode = {
             'begin': 'left',
             'end': 'right',
             }
         t=getattr(annotation.fragment, bound)
-        fs = FrameSelector(self.controller, t, border_mode=border_mode[bound])
+        fs = FrameSelector(self.controller, t,
+                           label=_("Click on %(bound)s of %(annotation)s") % { 'bound': translation[bound],
+                                                                               'annotation': self.controller.get_title(annotation) },
+                           border_mode=border_mode[bound])
         new = fs.get_value(_("Update %(bound)s of %(annotation)s") % { 'bound': translation[bound],
                                                                        'annotation': self.controller.get_title(annotation) })
         if new != t:
