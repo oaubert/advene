@@ -888,6 +888,8 @@ class TimestampRepresentation(gtk.Button):
         self.extend_popup_menu=None
         self.highlight=False
         self._bgcolor = None
+        # Displayed text.
+        self._text = '<span size="xx-small">%(timestamp)s</span>'
 
         box=gtk.VBox()
         self.image=gtk.Image()
@@ -945,6 +947,13 @@ class TimestampRepresentation(gtk.Button):
     def get_width(self):
         return self._width
     width = property(get_width, set_width)
+
+    def set_text(self, s):
+        self._text = s
+        self.refresh()
+    def get_text(self):
+        return self._text
+    text = property(get_text, set_text)
 
     def snapshot_update_cb(self, context, target):
         if abs(context.globals['position'] - self._value) <= self.epsilon:
@@ -1015,7 +1024,7 @@ class TimestampRepresentation(gtk.Button):
             self.set_size_request(-1, -1)
             self.image.show()
         ts=helper.format_time(self._value)
-        self.label.set_markup('<small>%s</small>' % ts)
+        self.label.set_markup(self._text % { 'timestamp': ts })
         if self.visible_label and self.label.get_child_requisition()[0] <= 1.2 * self.image.get_child_requisition()[0]:
             self.label.show()
         else:
