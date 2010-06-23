@@ -49,8 +49,8 @@ class FrameSelector(object):
         self.frame_length = 1000 / 25
 
         self.black_color = gtk.gdk.color_parse('black')
-        self.red_color = gtk.gdk.color_parse('red')
-        self.mouseover_color = gtk.gdk.color_parse('violet')
+        self.red_color = gtk.gdk.color_parse('#ff6666')
+        self.mouseover_color = gtk.gdk.color_parse('#ff0000')
 
         # List of TimestampRepresentation widgets.
         # It is initialized in build_widget()
