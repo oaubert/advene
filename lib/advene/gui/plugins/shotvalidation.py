@@ -196,7 +196,7 @@ class ShotValidation(AdhocView):
         # Button bar
         hb=gtk.HBox()
 
-        self.prev_button = gtk.Button(_("Previous cut"))
+        self.prev_button = gtk.Button(_("< Previous cut"))
         self.prev_button.set_tooltip_text(_("Display previous cut"))
         self.prev_button.connect("clicked", lambda b: self.set_index(self.index - 1))
         hb.add(self.prev_button)
@@ -204,7 +204,7 @@ class ShotValidation(AdhocView):
         l = gtk.Label("#")
         hb.pack_start(l, expand=False)
 
-        self.next_button = gtk.Button(_("Next cut"))
+        self.next_button = gtk.Button(_("Next cut >"))
         self.next_button.set_tooltip_text(_("Display next cut"))
         self.next_button.connect("clicked", lambda b: self.set_index(self.index + 1))
 
@@ -229,7 +229,7 @@ class ShotValidation(AdhocView):
 
         vbox.pack_start(hb, expand=False)
 
-        hb = gtk.HBox()
+        hb = gtk.HButtonBox()
         b=gtk.Button(_("Current time"))
         b.set_tooltip_text(_("Go to annotation containing current player time."))
         b.connect("clicked", self.goto_current)
@@ -251,6 +251,12 @@ class ShotValidation(AdhocView):
         b.set_tooltip_text(_("Merge with previous annotation, i.e. remove this bound."))
         b.connect("clicked", self.merge)
         hb.add(b)
+
+        b=gtk.Button(stock=gtk.STOCK_CLOSE)
+        b.set_tooltip_text(_("Close view."))
+        b.connect("clicked", self.close)
+        hb.add(b)
+
         vbox.pack_start(hb, expand=False)
 
         self.statusbar = gtk.Statusbar()
