@@ -1,3 +1,5 @@
+* Implement subtitle import through python-aeidon
+
 * Save current workspace: display option in Save dialog
 
 * osxvideosink / python:
