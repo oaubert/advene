@@ -65,6 +65,8 @@ class AnnotationTable(AdhocView):
         self.elements=elements
         self.options={}
 
+        self.mouseover_annotation = None
+
         self.model=self.build_model(elements)
         self.widget = self.build_widget()
 
@@ -132,6 +134,35 @@ class AnnotationTable(AdhocView):
         model=self.build_model(elements)
         self.widget.treeview.set_model(model)
 
+    def motion_notify_event_cb(self, tv, event):
+        if not event.window is tv.get_bin_window():
+            return False
+        if event.is_hint:
+            x, y, state = event.window.get_pointer()
+        else:
+            x = long(event.x)
+            y = long(event.y)
+            state = event.state
+        t = tv.get_path_at_pos(x, y)
+        if t is not None:
+            path, col, cx, cy = t
+            it = self.model.get_iter(path)
+            ann = self.model.get_value(it,
+                                       COLUMN_ELEMENT)
+            if self.mouseover_annotation != ann:
+                # Update
+                if self.mouseover_annotation is not None:
+                    self.controller.notify('BookmarkUnhighlight', timestamp=self.mouseover_annotation.fragment.begin, immediate=True)
+                self.controller.notify('BookmarkHighlight', timestamp=ann.fragment.begin, immediate=True)
+                self.mouseover_annotation = ann
+        return False
+
+    def leave_notify_event_cb(self, tv, event):
+        if self.mouseover_annotation is not None:
+            self.controller.notify('BookmarkUnhighlight', timestamp=self.mouseover_annotation.fragment.begin, immediate=True)
+            self.mouseover_annotation = None
+        return False
+
     def build_widget(self):
         tree_view = gtk.TreeView(self.model)
 
@@ -140,6 +171,8 @@ class AnnotationTable(AdhocView):
 
         tree_view.connect('button-press-event', self.tree_view_button_cb)
         tree_view.connect('row-activated', self.row_activated_cb)
+        tree_view.connect('motion-notify-event', self.motion_notify_event_cb)
+        tree_view.connect('leave-notify-event', self.leave_notify_event_cb)
         #tree_view.set_search_column(COLUMN_CONTENT)
 
         def search_content(model, column, key, it):
