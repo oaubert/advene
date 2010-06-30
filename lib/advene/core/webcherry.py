@@ -2177,19 +2177,18 @@ class AdveneWebServer:
         cherrypy.tree.mount(Root(controller), config=app_config)
 
         try:
-            # server.quickstart *must* be started from the main thread.
-            cherrypy.server.quickstart()
+            # engine.start *must* be started from the main thread.
+            cherrypy.engine.start()
         except Exception, e:
             self.controller.log(_("Cannot start HTTP server: %s") % unicode(e))
 
     def start(self):
         """Start the webserver.
         """
-        self.controller.queue_action(cherrypy.engine.start, False)
+        self.controller.queue_action(cherrypy.engine.start)
         return True
 
     def stop(self):
         """Stop the webserver.
         """
-        cherrypy.engine.stop()
-        cherrypy.server.stop()
+        cherrypy.engine.exit()
