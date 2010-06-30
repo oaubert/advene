@@ -8,11 +8,20 @@ from cherrypy.lib import cptools, http
 
 class MemoryCache:
     
+    maxobjects = 1000
+    maxobj_size = 100000
+    maxsize = 10000000
+    delay = 600
+    
     def __init__(self):
         self.clear()
         t = threading.Thread(target=self.expire_cache, name='expire_cache')
         self.expiration_thread = t
-        t.setDaemon(True)
+        if hasattr(threading.Thread, "daemon"):
+            # Python 2.6+
+            t.daemon = True
+        else:
+            t.setDaemon(True)
         t.start()
     
     def clear(self):
@@ -26,10 +35,8 @@ class MemoryCache:
         self.tot_non_modified = 0
         self.cursize = 0
     
-    def _key(self):
-        request = cherrypy.request
-        return request.config.get("tools.caching.key", cherrypy.url(qs=request.query_string))
-    key = property(_key)
+    def key(self):
+        return cherrypy.url(qs=cherrypy.request.query_string)
     
     def expire_cache(self):
         # expire_cache runs in a separate thread which the servers are
@@ -54,7 +61,7 @@ class MemoryCache:
     def get(self):
         """Return the object if in the cache, else None."""
         self.tot_gets += 1
-        cache_item = self.cache.get(self.key, None)
+        cache_item = self.cache.get(self.key(), None)
         if cache_item:
             self.tot_hist += 1
             return cache_item
@@ -62,21 +69,16 @@ class MemoryCache:
             return None
     
     def put(self, obj):
-        conf = cherrypy.request.config.get
-        
-        if len(self.cache) < conf("tools.caching.maxobjects", 1000):
+        if len(self.cache) < self.maxobjects:
             # Size check no longer includes header length
             obj_size = len(obj[2])
-            maxobj_size = conf("tools.caching.maxobj_size", 100000)
-            
             total_size = self.cursize + obj_size
-            maxsize = conf("tools.caching.maxsize", 10000000)
             
             # checks if there's space for the object
-            if (obj_size < maxobj_size and total_size < maxsize):
+            if (obj_size < self.maxobj_size and total_size < self.maxsize):
                 # add to the expirations list and cache
-                expiration_time = cherrypy.response.time + conf("tools.caching.delay", 600)
-                obj_key = self.key
+                expiration_time = cherrypy.response.time + self.delay
+                obj_key = self.key()
                 bucket = self.expirations.setdefault(expiration_time, [])
                 bucket.append((obj_size, obj_key))
                 self.cache[obj_key] = obj
@@ -84,10 +86,10 @@ class MemoryCache:
                 self.cursize = total_size
     
     def delete(self):
-        self.cache.pop(self.key)
+        self.cache.pop(self.key(), None)
 
 
-def get(invalid_methods=("POST", "PUT", "DELETE"), cache_class=MemoryCache):
+def get(invalid_methods=("POST", "PUT", "DELETE"), **kwargs):
     """Try to obtain cached output. If fresh enough, raise HTTPError(304).
     
     If POST, PUT, or DELETE:
@@ -110,9 +112,6 @@ def get(invalid_methods=("POST", "PUT", "DELETE"), cache_class=MemoryCache):
         * sets request.cacheable = True
         * returns False
     """
-    if not hasattr(cherrypy, "_cache"):
-        cherrypy._cache = cache_class()
-    
     request = cherrypy.request
     
     # POST, PUT, DELETE should invalidate (delete) the cached copy.
@@ -128,7 +127,31 @@ def get(invalid_methods=("POST", "PUT", "DELETE"), cache_class=MemoryCache):
     request.cacheable = not c
     if c:
         response = cherrypy.response
-        s, response.headers, b, create_time = cache_data
+        s, h, b, create_time, original_req_headers = cache_data
+        
+        # Check 'Vary' selecting headers. If any headers mentioned in "Vary"
+        # differ between the cached and current request, bail out and
+        # let the rest of CP handle the request. This should properly
+        # mimic the behavior of isolated caches as RFC 2616 assumes:
+        # "If the selecting request header fields for the cached entry
+        # do not match the selecting request header fields of the new
+        # request, then the cache MUST NOT use a cached entry to satisfy
+        # the request unless it first relays the new request to the origin
+        # server in a conditional request and the server responds with
+        # 304 (Not Modified), including an entity tag or Content-Location
+        # that indicates the entity to be used.
+        # TODO: can we store multiple variants based on Vary'd headers?
+        for header_element in h.elements('Vary'):
+            key = header_element.value
+            if original_req_headers[key] != request.headers.get(key, 'missing'):
+                request.cached = False
+                request.cacheable = True
+                return False
+        
+        # Copy the response headers. See http://www.cherrypy.org/ticket/721.
+        response.headers = rh = http.HeaderMap()
+        for k in h:
+            dict.__setitem__(rh, k, dict.__getitem__(h, k))
         
         # Add the required Age header
         response.headers["Age"] = str(int(response.time - create_time))
@@ -138,7 +161,7 @@ def get(invalid_methods=("POST", "PUT", "DELETE"), cache_class=MemoryCache):
             # this was put into the cached copy, and should have been
             # resurrected just above (response.headers = cache_data[1]).
             cptools.validate_since()
-        except cherrypy.HTTPError, x:
+        except cherrypy.HTTPRedirect, x:
             if x.status == 304:
                 cherrypy._cache.tot_non_modified += 1
             raise
@@ -150,19 +173,29 @@ def get(invalid_methods=("POST", "PUT", "DELETE"), cache_class=MemoryCache):
 
 
 def tee_output():
-    response = cherrypy.response
-    output = []
     def tee(body):
         """Tee response.body into a list."""
+        output = []
         for chunk in body:
             output.append(chunk)
             yield chunk
+        
         # Might as well do this here; why cache if the body isn't consumed?
         if response.headers.get('Pragma', None) != 'no-cache':
             # save the cache data
-            body = ''.join([chunk for chunk in output])
+            body = ''.join(output)
+            vary = [he.value for he in
+                    cherrypy.response.headers.elements('Vary')]
+            if vary:
+                sel_headers = dict([(k, v) for k, v
+                                    in cherrypy.request.headers.iteritems()
+                                    if k in vary])
+            else:
+                sel_headers = {}
             cherrypy._cache.put((response.status, response.headers or {},
-                                 body, response.time))
+                                 body, response.time, sel_headers))
+    
+    response = cherrypy.response
     response.body = tee(response.body)
 
 
@@ -173,7 +206,8 @@ def expires(secs=0, force=False):
     number of seconds between response.time and when the response should
     expire. The 'Expires' header will be set to (response.time + secs).
     
-    If 'secs' is zero, the following "cache prevention" headers are also set:
+    If 'secs' is zero, the 'Expires' header is set one year in the past, and
+    the following "cache prevention" headers are also set:
        'Pragma': 'no-cache'
        'Cache-Control': 'no-cache, must-revalidate'
     
@@ -203,7 +237,9 @@ def expires(secs=0, force=False):
             if cherrypy.request.protocol >= (1, 1):
                 if force or "Cache-Control" not in headers:
                     headers["Cache-Control"] = "no-cache, must-revalidate"
-        
-        expiry = http.HTTPDate(response.time + secs)
+            # Set an explicit Expires date in the past.
+            expiry = http.HTTPDate(1169942400.0)
+        else:
+            expiry = http.HTTPDate(response.time + secs)
         if force or "Expires" not in headers:
             headers["Expires"] = expiry

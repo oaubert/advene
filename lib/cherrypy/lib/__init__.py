@@ -45,6 +45,12 @@ class _Builder:
                             repr(o.__class__.__name__))
         return m(o)
     
+    def build_Subscript(self, o):
+        expr, flags, subs = o.getChildren()
+        expr = self.build(expr)
+        subs = self.build(subs)
+        return expr[subs]
+    
     def build_CallFunc(self, o):
         children = map(self.build, o.getChildren())
         callee = children.pop(0)
@@ -83,17 +89,18 @@ class _Builder:
         except ImportError:
             pass
         
+        # See if the Name is in __builtin__.
+        try:
+            import __builtin__
+            return getattr(__builtin__, o.name)
+        except AttributeError:
+            pass
+        
         raise TypeError("unrepr could not resolve the name %s" % repr(o.name))
     
     def build_Add(self, o):
-        real, imag = map(self.build_Const, o.getChildren())
-        try:
-            real = float(real)
-        except TypeError:
-            raise TypeError("unrepr could not parse real %s" % repr(real))
-        if not isinstance(imag, complex) or imag.real != 0.0:
-            raise TypeError("unrepr could not parse imag %s" % repr(imag))
-        return real+imag
+        left, right = map(self.build, o.getChildren())
+        return left + right
     
     def build_Getattr(self, o):
         parent = self.build(o.expr)
@@ -103,10 +110,10 @@ class _Builder:
         return None
     
     def build_UnarySub(self, o):
-        return -self.build_Const(o.getChildren()[0])
+        return -self.build(o.getChildren()[0])
     
     def build_UnaryAdd(self, o):
-        return self.build_Const(o.getChildren()[0])
+        return self.build(o.getChildren()[0])
 
 
 def unrepr(s):
@@ -121,8 +128,31 @@ def unrepr(s):
         # e.g. IronPython 1.0.
         return eval(s)
     
-    p = compiler.parse("a=" + s)
+    p = compiler.parse("__tempvalue__ = " + s)
     obj = p.getChildren()[1].getChildren()[0].getChildren()[1]
     
     return _Builder().build(obj)
+
+
+def file_generator(input, chunkSize=65536):
+    """Yield the given input (a file object) in chunks (default 64k). (Core)"""
+    chunk = input.read(chunkSize)
+    while chunk:
+        yield chunk
+        chunk = input.read(chunkSize)
+    input.close()
+
+
+def file_generator_limited(fileobj, count, chunk_size=65536):
+    """Yield the given file object in chunks, stopping after `count`
+    bytes has been emitted.  Default chunk size is 64kB. (Core)
+    """
+    remaining = count
+    while remaining > 0:
+        chunk = fileobj.read(min(chunk_size, remaining))
+        chunklen = len(chunk)
+        if chunklen == 0:
+            return
+        remaining -= chunklen
+        yield chunk
 

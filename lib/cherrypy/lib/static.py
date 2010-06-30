@@ -1,4 +1,3 @@
-import mimetools
 import mimetypes
 mimetypes.init()
 mimetypes.types_map['.dwg']='image/x-dwg'
@@ -11,14 +10,15 @@ import time
 import urllib
 
 import cherrypy
-from cherrypy.lib import cptools, http
+from cherrypy.lib import cptools, http, file_generator_limited
 
 
 def serve_file(path, content_type=None, disposition=None, name=None):
     """Set status, headers, and body in order to serve the given file.
     
     The Content-Type header will be set to the content_type arg, if provided.
-    If not provided, the Content-Type will be guessed by its extension.
+    If not provided, the Content-Type will be guessed by the file extension
+    of the 'path' argument.
     
     If disposition is not None, the Content-Disposition header will be set
     to "<disposition>; filename=<name>". If name is None, it will be set
@@ -83,16 +83,19 @@ def serve_file(path, content_type=None, disposition=None, name=None):
             if len(r) == 1:
                 # Return a single-part response.
                 start, stop = r[0]
+                if stop > c_len:
+                    stop = c_len
                 r_len = stop - start
                 response.status = "206 Partial Content"
                 response.headers['Content-Range'] = ("bytes %s-%s/%s" %
                                                        (start, stop - 1, c_len))
                 response.headers['Content-Length'] = r_len
                 bodyfile.seek(start)
-                response.body = bodyfile.read(r_len)
+                response.body = file_generator_limited(bodyfile, r_len)
             else:
                 # Return a multipart/byteranges response.
                 response.status = "206 Partial Content"
+                import mimetools
                 boundary = mimetools.choose_boundary()
                 ct = "multipart/byteranges; boundary=%s" % boundary
                 response.headers['Content-Type'] = ct
@@ -110,7 +113,8 @@ def serve_file(path, content_type=None, disposition=None, name=None):
                         yield ("\r\nContent-range: bytes %s-%s/%s\r\n\r\n"
                                % (start, stop - 1, c_len))
                         bodyfile.seek(start)
-                        yield bodyfile.read(stop - start)
+                        for chunk in file_generator_limited(bodyfile, stop-start):
+                            yield chunk
                         yield "\r\n"
                     # Final boundary
                     yield "--" + boundary + "--"
@@ -148,10 +152,30 @@ def _attempt(filename, content_types):
         return False
 
 def staticdir(section, dir, root="", match="", content_types=None, index=""):
-    """Serve a static resource from the given (root +) dir."""
+    """Serve a static resource from the given (root +) dir.
+    
+    If 'match' is given, request.path_info will be searched for the given
+    regular expression before attempting to serve static content.
+    
+    If content_types is given, it should be a Python dictionary of
+    {file-extension: content-type} pairs, where 'file-extension' is
+    a string (e.g. "gif") and 'content-type' is the value to write
+    out in the Content-Type response header (e.g. "image/gif").
+    
+    If 'index' is provided, it should be the (relative) name of a file to
+    serve for directory requests. For example, if the dir argument is
+    '/home/me', the Request-URI is 'myapp', and the index arg is
+    'index.html', the file '/home/me/myapp/index.html' will be sought.
+    """
+    if cherrypy.request.method not in ('GET', 'HEAD'):
+        return False
+    
     if match and not re.search(match, cherrypy.request.path_info):
         return False
     
+    # Allow the use of '~' to refer to a user's home directory.
+    dir = os.path.expanduser(dir)
+
     # If dir is relative, make absolute using "root".
     if not os.path.isabs(dir):
         if not root:
@@ -179,12 +203,26 @@ def staticdir(section, dir, root="", match="", content_types=None, index=""):
     handled = _attempt(filename, content_types)
     if not handled:
         # Check for an index file if a folder was requested.
-        if index and filename[-1] in (r"\/"):
+        if index:
             handled = _attempt(os.path.join(filename, index), content_types)
+            if handled:
+                cherrypy.request.is_index = filename[-1] in (r"\/")
     return handled
 
 def staticfile(filename, root=None, match="", content_types=None):
-    """Serve a static resource from the given (root +) filename."""
+    """Serve a static resource from the given (root +) filename.
+    
+    If 'match' is given, request.path_info will be searched for the given
+    regular expression before attempting to serve static content.
+    
+    If content_types is given, it should be a Python dictionary of
+    {file-extension: content-type} pairs, where 'file-extension' is
+    a string (e.g. "gif") and 'content-type' is the value to write
+    out in the Content-Type response header (e.g. "image/gif").
+    """
+    if cherrypy.request.method not in ('GET', 'HEAD'):
+        return False
+    
     if match and not re.search(match, cherrypy.request.path_info):
         return False
     

@@ -20,18 +20,21 @@ response_codes[503] = ('Service Unavailable',
 
 
 import cgi
-from email.Header import Header, decode_header
 import re
-import rfc822
-HTTPDate = rfc822.formatdate
-import time
+from rfc822 import formatdate as HTTPDate
 
 
 def urljoin(*atoms):
-    url = "/".join(atoms)
+    """Return the given path *atoms, joined into a single URL.
+    
+    This will correctly join a SCRIPT_NAME and PATH_INFO into the
+    original URL, even if either atom is blank.
+    """
+    url = "/".join([x for x in atoms if x])
     while "//" in url:
         url = url.replace("//", "/")
-    return url
+    # Special-case the final url of "", and return "/" instead.
+    return url or "/"
 
 def protocol_from_http(protocol_str):
     """Return a protocol tuple from the given 'HTTP/x.y' string."""
@@ -45,7 +48,7 @@ def get_ranges(headervalue, content_length):
     if applied against a Python string, is requesting resource[3:7]. This
     function will return the list [(3, 7)].
     
-    If this function return an empty list, you should return HTTP 416.
+    If this function returns an empty list, you should return HTTP 416.
     """
     
     if not headervalue:
@@ -108,7 +111,7 @@ class HeaderElement(object):
         """Transform 'token;key=val' to ('token', {'key': 'val'})."""
         # Split the element into a value and parameters. The 'value' may
         # be of the form, "token=token", but we don't split that here.
-        atoms = [x.strip() for x in elementstr.split(";")]
+        atoms = [x.strip() for x in elementstr.split(";") if x.strip()]
         initial_value = atoms.pop(0).strip()
         params = {}
         for atom in atoms:
@@ -132,23 +135,30 @@ class HeaderElement(object):
 q_separator = re.compile(r'; *q *=')
 
 class AcceptElement(HeaderElement):
-    """An element (with parameters) from an Accept-* header's element list."""
+    """An element (with parameters) from an Accept* header's element list.
+    
+    AcceptElement objects are comparable; the more-preferred object will be
+    "less than" the less-preferred object. They are also therefore sortable;
+    if you sort a list of AcceptElement objects, they will be listed in
+    priority order; the most preferred value will be first. Yes, it should
+    have been the other way around, but it's too late to fix now.
+    """
     
     def from_str(cls, elementstr):
         qvalue = None
         # The first "q" parameter (if any) separates the initial
-        # parameter(s) (if any) from the accept-params.
+        # media-range parameter(s) (if any) from the accept-params.
         atoms = q_separator.split(elementstr, 1)
-        initial_value = atoms.pop(0).strip()
+        media_range = atoms.pop(0).strip()
         if atoms:
             # The qvalue for an Accept header can have extensions. The other
             # headers cannot, but it's easier to parse them as if they did.
             qvalue = HeaderElement.from_str(atoms[0].strip())
         
-        ival, params = cls.parse(initial_value)
+        media_type, params = cls.parse(media_range)
         if qvalue is not None:
             params["q"] = qvalue
-        return cls(ival, params)
+        return cls(media_type, params)
     from_str = classmethod(from_str)
     
     def qvalue(self):
@@ -159,8 +169,6 @@ class AcceptElement(HeaderElement):
     qvalue = property(qvalue, doc="The qvalue, or priority, of this value.")
     
     def __cmp__(self, other):
-        # If you sort a list of AcceptElement objects, they will be listed
-        # in priority order; the most preferred value will be first.
         diff = cmp(other.qvalue, self.qvalue)
         if diff == 0:
             diff = cmp(str(other), str(self))
@@ -187,6 +195,7 @@ def header_elements(fieldname, fieldvalue):
 
 def decode_TEXT(value):
     """Decode RFC-2047 TEXT (e.g. "=?utf-8?q?f=C3=BCr?=" -> u"f\xfcr")."""
+    from email.Header import decode_header
     atoms = decode_header(value)
     decodedvalue = ""
     for atom, charset in atoms:
@@ -242,7 +251,12 @@ def valid_status(status):
 image_map_pattern = re.compile(r"[0-9]+,[0-9]+")
 
 def parse_query_string(query_string, keep_blank_values=True):
-    """Build a params dictionary from a query_string."""
+    """Build a params dictionary from a query_string.
+    
+    Duplicate key/value pairs in the provided query_string will be
+    returned as {'key': [val1, val2, ...]}. Single key/values will
+    be returned as strings: {'key': 'value'}.
+    """
     if image_map_pattern.match(query_string):
         # Server-side image map. Map the coords to 'x' and 'y'
         # (like CGI::Request does).
@@ -356,6 +370,7 @@ class HeaderMap(CaseInsensitiveDict):
                     if protocol >= (1, 1):
                         # Encode RFC-2047 TEXT
                         # (e.g. u"\u8200" -> "=?utf-8?b?6IiA?=").
+                        from email.Header import Header
                         v = Header(v, 'utf-8').encode()
                     else:
                         raise
@@ -366,71 +381,6 @@ class HeaderMap(CaseInsensitiveDict):
             header_list.append((key, v))
         return header_list
 
-
-class MaxSizeExceeded(Exception):
-    pass
-
-class SizeCheckWrapper(object):
-    """Wraps a file-like object, raising MaxSizeExceeded if too large."""
-    
-    def __init__(self, rfile, maxlen):
-        self.rfile = rfile
-        self.maxlen = maxlen
-        self.bytes_read = 0
-    
-    def _check_length(self):
-        if self.maxlen and self.bytes_read > self.maxlen:
-            raise MaxSizeExceeded()
-    
-    def read(self, size = None):
-        data = self.rfile.read(size)
-        self.bytes_read += len(data)
-        self._check_length()
-        return data
-    
-    def readline(self, size = None):
-        if size is not None:
-            data = self.rfile.readline(size)
-            self.bytes_read += len(data)
-            self._check_length()
-            return data
-        
-        # User didn't specify a size ...
-        # We read the line in chunks to make sure it's not a 100MB line !
-        res = []
-        while True:
-            data = self.rfile.readline(256)
-            self.bytes_read += len(data)
-            self._check_length()
-            res.append(data)
-            # See http://www.cherrypy.org/ticket/421
-            if len(data) < 256 or data[-1:] == "\n":
-                return ''.join(res)
-    
-    def readlines(self, sizehint = 0):
-        # Shamelessly stolen from StringIO
-        total = 0
-        lines = []
-        line = self.readline()
-        while line:
-            lines.append(line)
-            total += len(line)
-            if 0 < sizehint <= total:
-                break
-            line = self.readline()
-        return lines
-    
-    def close(self):
-        self.rfile.close()
-    
-    def __iter__(self):
-        return self
-    
-    def next(self):
-        data = self.rfile.next()
-        self.bytes_read += len(data)
-        self._check_length()
-        return data
 
 
 class Host(object):

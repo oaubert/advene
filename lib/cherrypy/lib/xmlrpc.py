@@ -1,5 +1,4 @@
 import sys
-import xmlrpclib
 
 import cherrypy
 
@@ -7,6 +6,7 @@ import cherrypy
 def process_body():
     """Return (params, method) from request body."""
     try:
+        import xmlrpclib
         return xmlrpclib.loads(cherrypy.request.body.read())
     except Exception:
         return ('ERROR PARAMS', ), 'ERRORMETHOD'
@@ -35,11 +35,15 @@ def _set_response(body):
 
 
 def respond(body, encoding='utf-8', allow_none=0):
-    _set_response(xmlrpclib.dumps((body,), methodresponse=1,
+    import xmlrpclib
+    if not isinstance(body, xmlrpclib.Fault):
+        body = (body,)
+    _set_response(xmlrpclib.dumps(body, methodresponse=1,
                                   encoding=encoding,
                                   allow_none=allow_none))
 
-def on_error():
+def on_error(*args, **kwargs):
     body = str(sys.exc_info()[1])
+    import xmlrpclib
     _set_response(xmlrpclib.dumps(xmlrpclib.Fault(1, body)))
 

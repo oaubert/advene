@@ -25,6 +25,16 @@ are generally either modules or instances of the tools.Tool class.
 import cherrypy
 
 
+def _getargs(func):
+    """Return the names of all static arguments to the given function."""
+    # Use this instead of importing inspect for less mem overhead.
+    import types
+    if isinstance(func, types.MethodType):
+        func = func.im_func
+    co = func.func_code
+    return co.co_varnames[:co.co_argcount]
+
+
 class Tool(object):
     """A registered function for use with CherryPy request-processing hooks.
     
@@ -44,31 +54,36 @@ class Tool(object):
     def _setargs(self):
         """Copy func parameter names to obj attributes."""
         try:
-            import inspect
-            for arg in inspect.getargspec(self.callable)[0]:
+            for arg in _getargs(self.callable):
                 setattr(self, arg, None)
-        except (ImportError, AttributeError):
-            pass
-        except TypeError:
+        except (TypeError, AttributeError):
             if hasattr(self.callable, "__call__"):
-                for arg in inspect.getargspec(self.callable.__call__)[0]:
+                for arg in _getargs(self.callable.__call__):
                     setattr(self, arg, None)
         # IronPython 1.0 raises NotImplementedError because
         # inspect.getargspec tries to access Python bytecode
         # in co_code attribute.
         except NotImplementedError:
             pass
+        # IronPython 1B1 may raise IndexError in some cases,
+        # but if we trap it here it doesn't prevent CP from working.
+        except IndexError:
+            pass
     
     def _merged_args(self, d=None):
-        tm = cherrypy.request.toolmaps[self.namespace]
-        if self._name in tm:
-            conf = tm[self._name].copy()
+        """Return a dict of configuration entries for this Tool."""
+        if d:
+            conf = d.copy()
         else:
             conf = {}
-        if d:
-            conf.update(d)
+        
+        tm = cherrypy.request.toolmaps[self.namespace]
+        if self._name in tm:
+            conf.update(tm[self._name])
+        
         if "on" in conf:
             del conf["on"]
+        
         return conf
     
     def __call__(self, *args, **kwargs):
@@ -157,6 +172,37 @@ class HandlerTool(Tool):
                                       priority=p, **conf)
 
 
+class HandlerWrapperTool(Tool):
+    """Tool which wraps request.handler in a provided wrapper function.
+    
+    The 'newhandler' arg must be a handler wrapper function that takes a
+    'next_handler' argument, plus *args and **kwargs. Like all page handler
+    functions, it must return an iterable for use as cherrypy.response.body.
+    
+    For example, to allow your 'inner' page handlers to return dicts
+    which then get interpolated into a template:
+    
+        def interpolator(next_handler, *args, **kwargs):
+            filename = cherrypy.request.config.get('template')
+            cherrypy.response.template = env.get_template(filename)
+            response_dict = next_handler(*args, **kwargs)
+            return cherrypy.response.template.render(**response_dict)
+        cherrypy.tools.jinja = HandlerWrapperTool(interpolator)
+    """
+    
+    def __init__(self, newhandler, point='before_handler', name=None, priority=50):
+        self.newhandler = newhandler
+        self._point = point
+        self._name = name
+        self._priority = priority
+    
+    def callable(self):
+        innerfunc = cherrypy.request.handler
+        def wrap(*args, **kwargs):
+            return self.newhandler(innerfunc, *args, **kwargs)
+        cherrypy.request.handler = wrap
+
+
 class ErrorTool(Tool):
     """Tool which is used to replace the default request.error_response."""
     
@@ -202,7 +248,7 @@ class SessionTool(Tool):
         Tool.__init__(self, 'before_request_body', _sessions.init)
     
     def _lock_session(self):
-        cherrypy._serving.session.acquire_lock()
+        cherrypy.serving.session.acquire_lock()
     
     def _setup(self):
         """Hook this tool into cherrypy.request.
@@ -233,16 +279,59 @@ class SessionTool(Tool):
         
         hooks.attach('before_finalize', _sessions.save)
         hooks.attach('on_end_request', _sessions.close)
+        
+    def regenerate(self):
+        """Drop the current session and make a new one (with a new id)."""
+        sess = cherrypy.serving.session
+        sess.regenerate()
+        
+        # Grab cookie-relevant tool args
+        conf = dict([(k, v) for k, v in self._merged_args().iteritems()
+                     if k in ('path', 'path_header', 'name', 'timeout',
+                              'domain', 'secure')])
+        _sessions.set_response_cookie(**conf)
+
+
 
 
 class XMLRPCController(object):
+    """A Controller (page handler collection) for XML-RPC.
+    
+    To use it, have your controllers subclass this base class (it will
+    turn on the tool for you).
+    
+    You can also supply the following optional config entries:
+        
+        tools.xmlrpc.encoding: 'utf-8'
+        tools.xmlrpc.allow_none: 0
+    
+    XML-RPC is a rather discontinuous layer over HTTP; dispatching to the
+    appropriate handler must first be performed according to the URL, and
+    then a second dispatch step must take place according to the RPC method
+    specified in the request body. It also allows a superfluous "/RPC2"
+    prefix in the URL, supplies its own handler args in the body, and
+    requires a 200 OK "Fault" response instead of 404 when the desired
+    method is not found.
+    
+    Therefore, XML-RPC cannot be implemented for CherryPy via a Tool alone.
+    This Controller acts as the dispatch target for the first half (based
+    on the URL); it then reads the RPC method from the request body and
+    does its own second dispatch step based on that method. It also reads
+    body params, and returns a Fault on error.
+    
+    The XMLRPCDispatcher strips any /RPC2 prefix; if you aren't using /RPC2
+    in your URL's, you can safely skip turning on the XMLRPCDispatcher.
+    Otherwise, you need to use declare it in config:
+        
+        request.dispatch: cherrypy.dispatch.XMLRPCDispatcher()
+    """
     
     # Note we're hard-coding this into the 'tools' namespace. We could do
     # a huge amount of work to make it relocatable, but the only reason why
     # would be if someone actually disabled the default_toolbox. Meh.
     _cp_config = {'tools.xmlrpc.on': True}
     
-    def __call__(self, *vpath, **params):
+    def default(self, *vpath, **params):
         rpcparams, rpcmethod = _xmlrpc.process_body()
         
         subhandler = self
@@ -264,9 +353,7 @@ class XMLRPCController(object):
                         conf.get('encoding', 'utf-8'),
                         conf.get('allow_none', 0))
         return cherrypy.response.body
-    __call__.exposed = True
-    
-    index = __call__
+    default.exposed = True
 
 
 class WSGIAppTool(HandlerTool):
@@ -304,9 +391,18 @@ class SessionAuthTool(HandlerTool):
 class CachingTool(Tool):
     """Caching Tool for CherryPy."""
     
-    def _wrapper(self, **kwargs):
+    def _wrapper(self, invalid_methods=("POST", "PUT", "DELETE"), **kwargs):
         request = cherrypy.request
-        if _caching.get(**kwargs):
+        
+        if not hasattr(cherrypy, "_cache"):
+            # Make a process-wide Cache object.
+            cherrypy._cache = kwargs.pop("cache_class", _caching.MemoryCache)()
+            
+            # Take all remaining kwargs and set them on the Cache object.
+            for k, v in kwargs.iteritems():
+                setattr(cherrypy._cache, k, v)
+        
+        if _caching.get(invalid_methods=invalid_methods):
             request.handler = None
         else:
             if request.cacheable:
@@ -329,11 +425,11 @@ class Toolbox(object):
     """A collection of Tools.
     
     This object also functions as a config namespace handler for itself.
+    Custom toolboxes should be added to each Application's toolboxes dict.
     """
     
     def __init__(self, namespace):
         self.namespace = namespace
-        cherrypy.engine.request_class.namespaces[namespace] = self
     
     def __setattr__(self, name, value):
         # If the Tool._name is None, supply it from the attribute name.
@@ -368,8 +464,9 @@ _d.proxy = Tool('before_request_body', cptools.proxy, priority=30)
 _d.response_headers = Tool('on_start_resource', cptools.response_headers)
 _d.log_tracebacks = Tool('before_error_response', cptools.log_traceback)
 _d.log_headers = Tool('before_error_response', cptools.log_request_headers)
+_d.log_hooks = Tool('on_end_request', cptools.log_hooks, priority=100)
 _d.err_redirect = ErrorTool(cptools.redirect)
-_d.etags = Tool('before_finalize', cptools.validate_etags)
+_d.etags = Tool('before_finalize', cptools.validate_etags, priority=75)
 _d.decode = Tool('before_handler', encoding.decode)
 # the order of encoding, gzip, caching is important
 _d.encode = Tool('before_finalize', encoding.encode, priority=70)
@@ -387,8 +484,9 @@ _d.ignore_headers = Tool('before_request_body', cptools.ignore_headers)
 _d.referer = Tool('before_request_body', cptools.referer)
 _d.basic_auth = Tool('on_start_resource', auth.basic_auth)
 _d.digest_auth = Tool('on_start_resource', auth.digest_auth)
-_d.trailing_slash = Tool('before_handler', cptools.trailing_slash)
+_d.trailing_slash = Tool('before_handler', cptools.trailing_slash, priority=60)
 _d.flatten = Tool('before_finalize', cptools.flatten)
 _d.accept = Tool('on_start_resource', cptools.accept)
+_d.redirect = Tool('on_start_resource', cptools.redirect)
 
 del _d, cptools, encoding, auth, static, tidy

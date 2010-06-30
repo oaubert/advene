@@ -57,7 +57,7 @@ These API's are described in the CherryPy specification:
 http://www.cherrypy.org/wiki/CherryPySpec
 """
 
-__version__ = "3.0.1"
+__version__ = "3.1.2"
 
 from urlparse import urljoin as _urljoin
 
@@ -76,7 +76,8 @@ class _AttributeDocstrings(type):
         a docstring for that attribute; the attribute docstring will be
         popped from the class dict and folded into the class docstring.
         
-        The naming convention for attribute docstrings is: <attrname> + "__doc".
+        The naming convention for attribute docstrings is:
+            <attrname> + "__doc".
         For example:
         
             class Thing(object):
@@ -112,6 +113,13 @@ class _AttributeDocstrings(type):
             2. __metaclass__ can be specified at the module global level
                for classic classes.
         
+        For various formatting reasons, you should write multiline docs
+        with a leading newline and not a trailing one:
+            
+            response__doc = """
+            The response object for the current thread. In the main thread,
+            and any threads which are not HTTP requests, this is None."""
+        
         The type of the attribute is intentionally not included, because
         that's not How Python Works. Quack.
         '''
@@ -127,17 +135,9 @@ class _AttributeDocstrings(type):
                 if hasattr(cls, name):
                     delattr(cls, name)
                 
-                # Get an inspect-style docstring if possible (usually so).
-                val = dct[name]
-                try:
-                    import inspect
-                    val = inspect.getdoc(property(doc=val)).strip()
-                except:
-                    pass
-                
-                # Indent the docstring.
-                val = '\n'.join(['    ' + line.rstrip()
-                                 for line in val.split('\n')])
+                # Make a uniformly-indented docstring from it.
+                val = '\n'.join(['    ' + line.strip()
+                                 for line in dct[name].split('\n')])
                 
                 # Get the default value.
                 attrname = name[:-5]
@@ -157,29 +157,96 @@ from cherrypy._cperror import HTTPError, HTTPRedirect, InternalRedirect
 from cherrypy._cperror import NotFound, CherryPyException, TimeoutError
 
 from cherrypy import _cpdispatch as dispatch
-from cherrypy import _cprequest
-from cherrypy.lib import http as _http
-from cherrypy import _cpengine
-engine = _cpengine.Engine()
 
 from cherrypy import _cptools
 tools = _cptools.default_toolbox
 Tool = _cptools.Tool
 
+from cherrypy import _cprequest
+from cherrypy.lib import http as _http
+
 from cherrypy import _cptree
 tree = _cptree.Tree()
 from cherrypy._cptree import Application
 from cherrypy import _cpwsgi as wsgi
+
+from cherrypy import process
+try:
+    from cherrypy.process import win32
+    engine = win32.Win32Bus()
+    engine.console_control_handler = win32.ConsoleCtrlHandler(engine)
+    del win32
+except ImportError:
+    engine = process.bus
+
+
+# Timeout monitor
+class _TimeoutMonitor(process.plugins.Monitor):
+    
+    def __init__(self, bus):
+        self.servings = []
+        process.plugins.Monitor.__init__(self, bus, self.run)
+    
+    def acquire(self):
+        self.servings.append((serving.request, serving.response))
+    
+    def release(self):
+        try:
+            self.servings.remove((serving.request, serving.response))
+        except ValueError:
+            pass
+    
+    def run(self):
+        """Check timeout on all responses. (Internal)"""
+        for req, resp in self.servings:
+            resp.check_timeout()
+engine.timeout_monitor = _TimeoutMonitor(engine)
+engine.timeout_monitor.subscribe()
+
+engine.autoreload = process.plugins.Autoreloader(engine)
+engine.autoreload.subscribe()
+
+engine.thread_manager = process.plugins.ThreadManager(engine)
+engine.thread_manager.subscribe()
+
+engine.signal_handler = process.plugins.SignalHandler(engine)
+
+
 from cherrypy import _cpserver
 server = _cpserver.Server()
+server.subscribe()
 
-def quickstart(root, script_name="", config=None):
-    """Mount the given root, start the engine and builtin server, then block."""
+
+def quickstart(root=None, script_name="", config=None):
+    """Mount the given root, start the builtin server (and engine), then block.
+    
+    root: an instance of a "controller class" (a collection of page handler
+        methods) which represents the root of the application.
+    script_name: a string containing the "mount point" of the application.
+        This should start with a slash, and be the path portion of the URL
+        at which to mount the given root. For example, if root.index() will
+        handle requests to "http://www.example.com:8080/dept/app1/", then
+        the script_name argument would be "/dept/app1".
+        
+        It MUST NOT end in a slash. If the script_name refers to the root
+        of the URI, it MUST be an empty string (not "/").
+    config: a file or dict containing application config. If this contains
+        a [global] section, those entries will be used in the global
+        (site-wide) config.
+    """
     if config:
         _global_conf_alias.update(config)
-    tree.mount(root, script_name, config)
-    server.quickstart()
+    
+    if root is not None:
+        tree.mount(root, script_name, config)
+    
+    if hasattr(engine, "signal_handler"):
+        engine.signal_handler.subscribe()
+    if hasattr(engine, "console_control_handler"):
+        engine.console_control_handler.subscribe()
+    
     engine.start()
+    engine.block()
 
 
 try:
@@ -200,8 +267,8 @@ class _Serving(_local):
     
     __metaclass__ = _AttributeDocstrings
     
-    request = _cprequest.Request(_http.Host("localhost", 80),
-                                 _http.Host("localhost", 1111))
+    request = _cprequest.Request(_http.Host("127.0.0.1", 80),
+                                 _http.Host("127.0.0.1", 1111))
     request__doc = """
     The request object for the current thread. In the main thread,
     and any threads which are not receiving HTTP requests, this is None."""
@@ -219,8 +286,7 @@ class _Serving(_local):
         """Remove all attributes of self."""
         self.__dict__.clear()
 
-# The name "_serving" should be removed in 3.1.
-serving = _serving = _Serving()
+serving = _Serving()
 
 
 class _ThreadLocalProxy(object):
@@ -267,6 +333,14 @@ class _ThreadLocalProxy(object):
     def __contains__(self, key):
         child = getattr(serving, self.__attrname__)
         return key in child
+    
+    def __len__(self):
+        child = getattr(serving, self.__attrname__)
+        return len(child)
+    
+    def __nonzero__(self):
+        child = getattr(serving, self.__attrname__)
+        return bool(child)
 
 
 # Create request and response object (the same objects will be used
@@ -289,12 +363,12 @@ def _cherrypy_pydoc_resolve(thing, forceload=0):
     """Given an object or a path to an object, get the object and its name."""
     if isinstance(thing, _ThreadLocalProxy):
         thing = getattr(serving, thing.__attrname__)
-    return pydoc._builtin_resolve(thing, forceload)
+    return _pydoc._builtin_resolve(thing, forceload)
 
 try:
-    import pydoc
-    pydoc._builtin_resolve = pydoc.resolve
-    pydoc.resolve = _cherrypy_pydoc_resolve
+    import pydoc as _pydoc
+    _pydoc._builtin_resolve = _pydoc.resolve
+    _pydoc.resolve = _cherrypy_pydoc_resolve
 except ImportError:
     pass
 
@@ -324,13 +398,15 @@ log.error_file = ''
 # Using an access file makes CP about 10% slower. Leave off by default.
 log.access_file = ''
 
+def _buslog(msg, level):
+    log.error(msg, 'ENGINE', severity=level)
+engine.subscribe('log', _buslog)
 
 #                       Helper functions for CP apps                       #
 
 
 def expose(func=None, alias=None):
     """Expose the function, optionally providing an alias or set of aliases."""
-    
     def expose_(func):
         func.exposed = True
         if alias is not None:
@@ -343,20 +419,33 @@ def expose(func=None, alias=None):
     
     import sys, types
     if isinstance(func, (types.FunctionType, types.MethodType)):
-        # expose is being called directly, before the method has been bound
-        parents = sys._getframe(1).f_locals
-        return expose_(func)
-    else:
         if alias is None:
-            # expose is being called as a decorator "@expose"
+            # @expose
             func.exposed = True
             return func
         else:
-            # expose is returning a decorator "@expose(alias=...)"
+            # func = expose(func, alias)
+            parents = sys._getframe(1).f_locals
+            return expose_(func)
+    elif func is None:
+        if alias is None:
+            # @expose()
             parents = sys._getframe(1).f_locals
             return expose_
+        else:
+            # @expose(alias="alias") or
+            # @expose(alias=["alias1", "alias2"])
+            parents = sys._getframe(1).f_locals
+            return expose_
+    else:
+        # @expose("alias") or
+        # @expose(["alias1", "alias2"])
+        parents = sys._getframe(1).f_locals
+        alias = func
+        return expose_
 
-def url(path="", qs="", script_name=None, base=None, relative=False):
+
+def url(path="", qs="", script_name=None, base=None, relative=None):
     """Create an absolute URL for the given path.
     
     If 'path' starts with a slash ('/'), this will return
@@ -373,12 +462,15 @@ def url(path="", qs="", script_name=None, base=None, relative=False):
     Finally, note that this function can be used to obtain an absolute URL
     for the current request path (minus the querystring) by passing no args.
     If you call url(qs=cherrypy.request.query_string), you should get the
-    original browser URL (assuming no Internal redirections).
+    original browser URL (assuming no internal redirections).
     
-    If relative is False (the default), the output will be an absolute URL
-    (usually including the scheme, host, vhost, and script_name).
-    If relative is True, the output will instead be a URL that is relative
-    to the current request path, perhaps including '..' atoms.
+    If relative is None or not provided, request.app.relative_urls will
+    be used (if available, else False). If False, the output will be an
+    absolute URL (including the scheme, host, vhost, and script_name).
+    If True, the output will instead be a URL that is relative to the
+    current request path, perhaps including '..' atoms. If relative is
+    the string 'server', the output will instead be a URL that is
+    relative to the server root; i.e., it will start with a slash.
     """
     if qs:
         qs = '?' + qs
@@ -402,7 +494,7 @@ def url(path="", qs="", script_name=None, base=None, relative=False):
                 path = _urljoin(pi, path)
         
         if script_name is None:
-            script_name = request.app.script_name
+            script_name = request.script_name
         if base is None:
             base = request.base
         
@@ -430,7 +522,20 @@ def url(path="", qs="", script_name=None, base=None, relative=False):
                 atoms.append(atom)
         newurl = '/'.join(atoms)
     
-    if relative:
+    # At this point, we should have a fully-qualified absolute URL.
+    
+    if relative is None:
+        relative = getattr(request.app, "relative_urls", False)
+    
+    # See http://www.ietf.org/rfc/rfc2396.txt
+    if relative == 'server':
+        # "A relative reference beginning with a single slash character is
+        # termed an absolute-path reference, as defined by <abs_path>..."
+        # This is also sometimes called "server-relative".
+        newurl = '/' + '/'.join(newurl.split('/', 3)[3:])
+    elif relative:
+        # "A relative reference that does not begin with a scheme name
+        # or a slash character is termed a relative-path reference."
         old = url().split('/')[:-1]
         new = newurl.split('/')
         while old and new:
@@ -453,3 +558,4 @@ config = _global_conf_alias = _cpconfig.Config()
 
 from cherrypy import _cpchecker
 checker = _cpchecker.Checker()
+engine.subscribe('start', checker)

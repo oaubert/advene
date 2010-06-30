@@ -19,7 +19,7 @@ Usage:
 SUPPORTED_ALGORITHM - list of supported 'Digest' algorithms
 SUPPORTED_QOP - list of supported 'Digest' 'qop'.
 """
-__version__ = 1, 0, 0
+__version__ = 1, 0, 1
 __author__ = "Tiago Cogumbreiro <cogumbreiro@users.sf.net>"
 __credits__ = """
     Peter van Kampen for its recipe which implement most of Digest authentication:
@@ -59,7 +59,13 @@ __all__ = ("digestAuth", "basicAuth", "doAuth", "checkResponse",
            "calculateNonce", "SUPPORTED_QOP")
 
 ################################################################################
-import md5
+
+try:
+    # Python 2.5+
+    from hashlib import md5
+except ImportError:
+    from md5 import new as md5
+
 import time
 import base64
 import urllib2
@@ -76,9 +82,9 @@ SUPPORTED_QOP = (AUTH, AUTH_INT)
 # doAuth
 #
 DIGEST_AUTH_ENCODERS = {
-    MD5: lambda val: md5.new (val).hexdigest (),
-    MD5_SESS: lambda val: md5.new (val).hexdigest (),
-#    SHA: lambda val: sha.new (val).hexdigest (),
+    MD5: lambda val: md5(val).hexdigest(),
+    MD5_SESS: lambda val: md5(val).hexdigest(),
+#    SHA: lambda val: sha(val).hexdigest(),
 }
 
 def calculateNonce (realm, algorithm = MD5):
@@ -141,9 +147,14 @@ def _parseDigestAuthorization (auth_params):
         if not params.has_key(k):
             return None
 
-    # If qop is sent then cnonce and cn MUST be present
-    if params.has_key("qop") and not params.has_key("cnonce") \
-                                  and params.has_key("cn"):
+    # If qop is sent then cnonce and nc MUST be present
+    if params.has_key("qop") and not (params.has_key("cnonce") \
+                                      and params.has_key("nc")):
+        return None
+
+    # If qop is not sent, neither cnonce nor nc can be present
+    if (params.has_key("cnonce") or params.has_key("nc")) and \
+       not params.has_key("qop"):
         return None
 
     return params
@@ -270,7 +281,7 @@ def _computeDigestResponse(auth_map, password, method = "GET", A1 = None,**kwarg
     else:
         H_A1 = H(_A1(params, password))
 
-    if qop == "auth" or aop == "auth-int":
+    if qop in ("auth", "auth-int"):
         # If the "qop" value is "auth" or "auth-int":
         # request-digest  = <"> < KD ( H(A1),     unq(nonce-value)
         #                              ":" nc-value
@@ -285,7 +296,6 @@ def _computeDigestResponse(auth_map, password, method = "GET", A1 = None,**kwarg
             params["qop"],
             H_A2,
         )
-
     elif qop is None:
         # If the "qop" directive is not present (this construction is
         # for compatibility with RFC 2069):
@@ -302,14 +312,25 @@ def _checkDigestResponse(auth_map, password, method = "GET", A1 = None, **kwargs
      entity_body - when 'qop' is set to 'auth-int' you MUST provide the
                    raw data you are going to send to the client (usually the
                    HTML page.
+     request_uri - the uri from the request line compared with the 'uri'
+                   directive of the authorization map. They must represent
+                   the same resource (unused at this time).
     """
+
+    if auth_map['realm'] != kwargs.get('realm', None):
+        return False
 
     response =  _computeDigestResponse(auth_map, password, method, A1,**kwargs)
 
     return response == auth_map["response"]
 
 def _checkBasicResponse (auth_map, password, method='GET', encrypt=None, **kwargs):
-    return encrypt(auth_map["password"]) == password
+    # Note that the Basic response doesn't provide the realm value so we cannot
+    # test it
+    try:
+        return encrypt(auth_map["password"], auth_map["username"]) == password
+    except TypeError:
+        return encrypt(auth_map["password"]) == password
 
 AUTH_RESPONSES = {
     "basic": _checkBasicResponse,

@@ -5,7 +5,7 @@ import cherrypy
 
 
 def decode(encoding=None, default_encoding='utf-8'):
-    """Decode cherrypy.request.params."""
+    """Decode cherrypy.request.params from str to unicode objects."""
     if not encoding:
         ct = cherrypy.request.headers.elements("Content-Type")
         if ct:
@@ -34,17 +34,15 @@ def decode(encoding=None, default_encoding='utf-8'):
 def decode_params(encoding):
     decoded_params = {}
     for key, value in cherrypy.request.params.items():
-        if hasattr(value, 'file'):
-            # This is a file being uploaded: skip it
-            decoded_params[key] = value
-        elif isinstance(value, list):
-            # value is a list: decode each element
-            decoded_params[key] = [v.decode(encoding) for v in value]
-        elif isinstance(value, unicode):
-            pass
-        else:
-            # value is a regular string: decode it
-            decoded_params[key] = value.decode(encoding)
+        if not hasattr(value, 'file'):
+            # Skip the value if it is an uploaded file
+            if isinstance(value, list):
+                # value is a list: decode each element
+                value = [v.decode(encoding) for v in value]
+            elif isinstance(value, str):
+                # value is a regular string: decode it
+                value = value.decode(encoding)
+        decoded_params[key] = value
     
     # Decode all or nothing, so we can try again on error.
     cherrypy.request.params = decoded_params
@@ -52,7 +50,7 @@ def decode_params(encoding):
 
 # Encoding
 
-def encode(encoding=None, errors='strict'):
+def encode(encoding=None, errors='strict', text_only=True, add_charset=True):
     # Guard against running twice
     if getattr(cherrypy.request, "_encoding_attempted", False):
         return
@@ -61,10 +59,11 @@ def encode(encoding=None, errors='strict'):
     ct = cherrypy.response.headers.elements("Content-Type")
     if ct:
         ct = ct[0]
-        if ct.value.lower().startswith("text/"):
+        if (not text_only) or ct.value.lower().startswith("text/"):
             # Set "charset=..." param on response Content-Type header
             ct.params['charset'] = find_acceptable_charset(encoding, errors=errors)
-            cherrypy.response.headers["Content-Type"] = str(ct)
+            if add_charset:
+                cherrypy.response.headers["Content-Type"] = str(ct)
 
 def encode_stream(encoding, errors='strict'):
     """Encode a streaming response body.
@@ -197,10 +196,38 @@ def compress(body, compress_level):
     yield struct.pack("<l", crc)
     yield struct.pack("<L", size & 0xFFFFFFFFL)
 
+def decompress(body):
+    import gzip, StringIO
+    
+    zbuf = StringIO.StringIO()
+    zbuf.write(body)
+    zbuf.seek(0)
+    zfile = gzip.GzipFile(mode='rb', fileobj=zbuf)
+    data = zfile.read()
+    zfile.close()
+    return data
+
+
 def gzip(compress_level=9, mime_types=['text/html', 'text/plain']):
+    """Try to gzip the response body if Content-Type in mime_types.
+    
+    cherrypy.response.headers['Content-Type'] must be set to one of the
+    values in the mime_types arg before calling this function.
+    
+    No compression is performed if any of the following hold:
+        * The client sends no Accept-Encoding request header
+        * No 'gzip' or 'x-gzip' is present in the Accept-Encoding header
+        * No 'gzip' or 'x-gzip' with a qvalue > 0 is present
+        * The 'identity' value is given with a qvalue > 0.
+    """
     response = cherrypy.response
     if not response.body:
         # Response body is empty (might be a 304 for instance)
+        return
+    
+    # If returning cached content (which should already have been gzipped),
+    # don't re-zip.
+    if getattr(cherrypy.request, "cached", False):
         return
     
     acceptable = cherrypy.request.headers.elements('Accept-Encoding')
@@ -214,7 +241,7 @@ def gzip(compress_level=9, mime_types=['text/html', 'text/plain']):
         # to the client.
         return
     
-    ct = response.headers.get('Content-Type').split(';')[0]
+    ct = response.headers.get('Content-Type', '').split(';')[0]
     for coding in acceptable:
         if coding.value == 'identity' and coding.qvalue != 0:
             return

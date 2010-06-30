@@ -1,6 +1,13 @@
 """Functions for builtin CherryPy tools."""
 
-import md5
+import logging
+
+try:
+    # Python 2.5+
+    from hashlib import md5
+except ImportError:
+    from md5 import new as md5
+
 import re
 
 import cherrypy
@@ -39,7 +46,7 @@ def validate_etags(autotags=False):
     if (not etag) and autotags:
         if status == 200:
             etag = response.collapse_body()
-            etag = '"%s"' % md5.new(etag).hexdigest()
+            etag = '"%s"' % md5(etag).hexdigest()
             response.headers['ETag'] = etag
     
     response.ETag = etag
@@ -114,7 +121,13 @@ def proxy(base=None, local='X-Forwarded-Host', remote='X-Forwarded-For',
     request = cherrypy.request
     
     if scheme:
-        scheme = request.headers.get(scheme, None)
+        s = request.headers.get(scheme, None)
+        if s == 'on' and 'ssl' in scheme.lower():
+            # This handles e.g. webfaction's 'X-Forwarded-Ssl: on' header
+            scheme = 'https'
+        else:
+            # This is for lighttpd/pound/Mongrel's 'X-Forwarded-Proto: https'
+            scheme = s
     if not scheme:
         scheme = request.base[:request.base.find("://")]
     
@@ -123,9 +136,9 @@ def proxy(base=None, local='X-Forwarded-Host', remote='X-Forwarded-For',
     if not base:
         port = cherrypy.request.local.port
         if port == 80:
-            base = 'localhost'
+            base = '127.0.0.1'
         else:
-            base = 'localhost:%s' % port
+            base = '127.0.0.1:%s' % port
     
     if base.find("://") == -1:
         # add http:// or https:// if needed
@@ -164,7 +177,7 @@ response_headers.failsafe = True
 
 def referer(pattern, accept=True, accept_missing=False, error=403,
             message='Forbidden Referer header.'):
-    """Raise HTTPError if Referer header does not pass our test.
+    """Raise HTTPError if Referer header does/does not match the given pattern.
     
     pattern: a regular expression pattern to test against the Referer.
     accept: if True, the Referer must match the pattern; if False,
@@ -205,7 +218,7 @@ class SessionAuth(object):
     def on_check(self, username):
         pass
     
-    def login_screen(self, from_page='..', username='', error_msg=''):
+    def login_screen(self, from_page='..', username='', error_msg='', **kwargs):
         return """<html><body>
 Message: %(error_msg)s
 <form method="post" action="do_login">
@@ -217,7 +230,7 @@ Message: %(error_msg)s
 </body></html>""" % {'from_page': from_page, 'username': username,
                      'error_msg': error_msg}
     
-    def do_login(self, username, password, from_page='..'):
+    def do_login(self, username, password, from_page='..', **kwargs):
         """Login. May raise redirect, or return True if request handled."""
         error_msg = self.check_username_and_password(username, password)
         if error_msg:
@@ -232,7 +245,7 @@ Message: %(error_msg)s
             self.on_login(username)
             raise cherrypy.HTTPRedirect(from_page or "/")
     
-    def do_logout(self, from_page='..'):
+    def do_logout(self, from_page='..', **kwargs):
         """Logout. May raise redirect, or return True if request handled."""
         sess = cherrypy.session
         username = sess.get(self.session_key)
@@ -286,15 +299,33 @@ to this function:
                  for k in dir(SessionAuth) if not k.startswith("__")])
 
 
-def log_traceback():
+def log_traceback(severity=logging.DEBUG):
     """Write the last error's traceback to the cherrypy error log."""
-    from cherrypy import _cperror
-    cherrypy.log(_cperror.format_exc(), "HTTP")
+    cherrypy.log("", "HTTP", severity=severity, traceback=True)
 
 def log_request_headers():
     """Write request headers to the cherrypy error log."""
     h = ["  %s: %s" % (k, v) for k, v in cherrypy.request.header_list]
     cherrypy.log('\nRequest Headers:\n' + '\n'.join(h), "HTTP")
+
+def log_hooks():
+    """Write request.hooks to the cherrypy error log."""
+    msg = []
+    # Sort by the standard points if possible.
+    from cherrypy import _cprequest
+    points = _cprequest.hookpoints
+    for k in cherrypy.request.hooks.keys():
+        if k not in points:
+            points.append(k)
+    
+    for k in points:
+        msg.append("    %s:" % k)
+        v = cherrypy.request.hooks.get(k, [])
+        v.sort()
+        for h in v:
+            msg.append("        %r" % h)
+    cherrypy.log('\nRequest Hooks for ' + cherrypy.url() +
+                 ':\n' + '\n'.join(msg), "HTTP")
 
 def redirect(url='', internal=True):
     """Raise InternalRedirect or HTTPRedirect to the given url."""

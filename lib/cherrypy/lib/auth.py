@@ -2,7 +2,7 @@ import cherrypy
 from cherrypy.lib import httpauth
 
 
-def check_auth(users, encrypt=None):
+def check_auth(users, encrypt=None, realm=None):
     """If an authorization header contains credentials, return True, else False."""
     if 'authorization' in cherrypy.request.headers:
         # make sure the provided credentials are correctly set
@@ -14,18 +14,29 @@ def check_auth(users, encrypt=None):
             encrypt = httpauth.DIGEST_AUTH_ENCODERS[httpauth.MD5]
         
         if callable(users):
-            users = users() # expect it to return a dictionary
-        
-        if not isinstance(users, dict):
-            raise ValueError, "Authentication users must be a dictionary"
-        
-        # fetch the user password
-        password = users.get(ah["username"], None)
+            try:
+                # backward compatibility
+                users = users() # expect it to return a dictionary
+
+                if not isinstance(users, dict):
+                    raise ValueError, "Authentication users must be a dictionary"
+                
+                # fetch the user password
+                password = users.get(ah["username"], None)
+            except TypeError:
+                # returns a password (encrypted or clear text)
+                password = users(ah["username"])
+        else:
+            if not isinstance(users, dict):
+                raise ValueError, "Authentication users must be a dictionary"
+            
+            # fetch the user password
+            password = users.get(ah["username"], None)
         
         # validate the authorization by re-computing it here
         # and compare it with what the user-agent provided
         if httpauth.checkResponse(ah, password, method=cherrypy.request.method,
-                                  encrypt=encrypt):
+                                  encrypt=encrypt, realm=realm):
             cherrypy.request.login = ah["username"]
             return True
     
@@ -54,7 +65,7 @@ def digest_auth(realm, users):
     realm: a string containing the authentication realm.
     users: a dict of the form: {username: password} or a callable returning a dict.
     """
-    if check_auth(users):
+    if check_auth(users, realm=realm):
         return
     
     # inform the user-agent this path is protected

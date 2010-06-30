@@ -65,6 +65,8 @@ Current namespaces:
 
     engine:     Controls the 'application engine', including autoreload.
                 These can only be declared in the global config.
+    tree:       Grafts cherrypy.Application objects onto cherrypy.tree.
+                These can only be declared in the global config.
     hooks:      Declares additional request-processing functions.
     log:        Configures the logging for each application.
                 These can only be declared in the global or / config.
@@ -86,14 +88,17 @@ config, and only when you use cherrypy.config.update.
 
 You can define your own namespaces to be called at the Global, Application,
 or Request level, by adding a named handler to cherrypy.config.namespaces,
-app.namespaces, or cherrypy.engine.request_class.namespaces. The name can
+app.namespaces, or app.request_class.namespaces. The name can
 be any string, and the handler must be either a callable or a (Python 2.5
 style) context manager.
 """
 
 import ConfigParser
+try:
+    set
+except NameError:
+    from sets import Set as set
 import sys
-from warnings import warn
 
 import cherrypy
 
@@ -143,11 +148,10 @@ def merge(base, other):
     """Merge one app config (from a dict, file, or filename) into another.
     
     If the given config is a filename, it will be appended to
-    cherrypy.engine.reload_files and monitored for changes.
+    the list of files to monitor for "autoreload" changes.
     """
     if isinstance(other, basestring):
-        if other not in cherrypy.engine.reload_files:
-            cherrypy.engine.reload_files.append(other)
+        cherrypy.engine.autoreload.files.add(other)
     
     # Load other into base
     for section, value_map in as_dict(other).iteritems():
@@ -239,7 +243,6 @@ class Config(dict):
     
     namespaces = NamespaceSet(
         **{"server": lambda k, v: setattr(cherrypy.server, k, v),
-           "engine": lambda k, v: setattr(cherrypy.engine, k, v),
            "log": lambda k, v: setattr(cherrypy.log, k, v),
            "checker": lambda k, v: setattr(cherrypy.checker, k, v),
            })
@@ -256,8 +259,7 @@ class Config(dict):
         """Update self from a dict, file or filename."""
         if isinstance(config, basestring):
             # Filename
-            if config not in cherrypy.engine.reload_files:
-                cherrypy.engine.reload_files.append(config)
+            cherrypy.engine.autoreload.files.add(config)
             config = _Parser().dict_from_file(config)
         elif hasattr(config, 'read'):
             # Open file object
@@ -270,8 +272,9 @@ class Config(dict):
                 cherrypy.checker.global_config_contained_paths = True
             config = config["global"]
         
-        if 'environment' in config:
-            env = environments[config['environment']]
+        which_env = config.get('environment')
+        if which_env:
+            env = environments[which_env]
             for k in env:
                 if k not in config:
                     config[k] = env[k]
@@ -286,6 +289,48 @@ class Config(dict):
         dict.__setitem__(self, k, v)
         self.namespaces({k: v})
 
+
+def _engine_namespace_handler(k, v):
+    """Backward compatibility handler for the "engine" namespace."""
+    engine = cherrypy.engine
+    if k == 'autoreload_on':
+        if v:
+            engine.autoreload.subscribe()
+        else:
+            engine.autoreload.unsubscribe()
+    elif k == 'autoreload_frequency':
+        engine.autoreload.frequency = v
+    elif k == 'autoreload_match':
+        engine.autoreload.match = v
+    elif k == 'reload_files':
+        engine.autoreload.files = set(v)
+    elif k == 'deadlock_poll_freq':
+        engine.timeout_monitor.frequency = v
+    elif k == 'SIGHUP':
+        engine.listeners['SIGHUP'] = set([v])
+    elif k == 'SIGTERM':
+        engine.listeners['SIGTERM'] = set([v])
+    elif "." in k:
+        plugin, attrname = k.split(".", 1)
+        plugin = getattr(engine, plugin)
+        if attrname == 'on':
+            if v and callable(getattr(plugin, 'subscribe', None)):
+                plugin.subscribe()
+                return
+            elif (not v) and callable(getattr(plugin, 'unsubscribe', None)):
+                plugin.unsubscribe()
+                return
+        setattr(plugin, attrname, v)
+    else:
+        setattr(engine, k, v)
+Config.namespaces["engine"] = _engine_namespace_handler
+
+
+def _tree_namespace_handler(k, v):
+    """Namespace handler for the 'tree' config namespace."""
+    cherrypy.tree.graft(v, v.script_name)
+    cherrypy.engine.log("Mounted: %s on %s" % (v, v.script_name or "/"))
+Config.namespaces["tree"] = _tree_namespace_handler
 
 
 class _Parser(ConfigParser.ConfigParser):
@@ -323,8 +368,9 @@ class _Parser(ConfigParser.ConfigParser):
                 try:
                     value = unrepr(value)
                 except Exception, x:
-                    msg = ("Config error in section: %s, option: %s, value: %s" %
-                           (repr(section), repr(option), repr(value)))
+                    msg = ("Config error in section: %r, option: %r, "
+                           "value: %r. Config values must be valid Python." %
+                           (section, option, value))
                     raise ValueError(msg, x.__class__.__name__, x.args)
                 result[section][option] = value
         return result

@@ -10,8 +10,8 @@ http://www.nedbatchelder.com/code/modules/coverage.html
 
 To turn on coverage tracing, use the following code:
 
-    cherrypy.engine.on_start_engine_list.insert(0, covercp.start)
-    cherrypy.engine.on_start_thread_list.insert(0, covercp.start)
+    cherrypy.engine.subscribe('start', covercp.start)
+    cherrypy.engine.subscribe('start_thread', covercp.start)
 
 Run your code, then use the covercp.serve() function to browse the
 results in a web browser. If you run this module from the command line,
@@ -44,6 +44,7 @@ except ImportError:
     
     def start(threadid=None):
         pass
+start.priority = 20
 
 # Guess initial depth to hide FIXME this doesn't work for non-cherrypy stuff
 import cherrypy
@@ -194,7 +195,7 @@ def _show_branch(root, base, path, pct=0, showpct=False, exclude=""):
     for name in dirs:
         newpath = os.path.join(path, name)
         
-        if newpath.startswith(base):
+        if newpath.lower().startswith(base):
             relpath = newpath[len(base):]
             yield "| " * relpath.count(os.sep)
             yield "<a class='directory' href='menu?base=%s&exclude=%s'>%s</a>\n" % \
@@ -204,7 +205,7 @@ def _show_branch(root, base, path, pct=0, showpct=False, exclude=""):
             yield chunk
     
     # Now list the files
-    if path.startswith(base):
+    if path.lower().startswith(base):
         relpath = path[len(base):]
         files = [k for k, v in root.iteritems() if not v]
         files.sort()

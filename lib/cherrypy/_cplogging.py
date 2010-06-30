@@ -2,6 +2,8 @@
 
 import datetime
 import logging
+# Silence the no-handlers "warning" (stderr write!) in stdlib logging
+logging.Logger.manager.emittedNoHandlerWarning = 1
 logfmt = logging.Formatter("%(message)s")
 import os
 import rfc822
@@ -16,6 +18,8 @@ class LogManager(object):
     appid = None
     error_log = None
     access_log = None
+    access_log_format = \
+        '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
     
     def __init__(self, appid=None, logger_root="cherrypy"):
         self.logger_root = logger_root
@@ -28,8 +32,19 @@ class LogManager(object):
             self.access_log = logging.getLogger("%s.access.%s" % (logger_root, appid))
         self.error_log.setLevel(logging.DEBUG)
         self.access_log.setLevel(logging.INFO)
+        cherrypy.engine.subscribe('graceful', self.reopen_files)
     
-    def error(self, msg='', context='', severity=logging.DEBUG, traceback=False):
+    def reopen_files(self):
+        """Close and reopen all file handlers."""
+        for log in (self.error_log, self.access_log):
+            for h in log.handlers:
+                if isinstance(h, logging.FileHandler):
+                    h.acquire()
+                    h.stream.close()
+                    h.stream = open(h.baseFilename, h.mode)
+                    h.release()
+    
+    def error(self, msg='', context='', severity=logging.INFO, traceback=False):
         """Write to the error log.
         
         This is not just for errors! Applications may call this at any time
@@ -48,24 +63,44 @@ class LogManager(object):
         return self.error(*args, **kwargs)
     
     def access(self):
-        """Write to the access log."""
+        """Write to the access log (in Apache/NCSA Combined Log format).
+        
+        Like Apache started doing in 2.0.46, non-printable and other special
+        characters in %r (and we expand that to all parts) are escaped using
+        \\xhh sequences, where hh stands for the hexadecimal representation
+        of the raw byte. Exceptions from this rule are " and \\, which are
+        escaped by prepending a backslash, and all whitespace characters,
+        which are written in their C-style notation (\\n, \\t, etc).
+        """
         request = cherrypy.request
         remote = request.remote
         response = cherrypy.response
         outheaders = response.headers
-        tmpl = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-        s = tmpl % {'h': remote.name or remote.ip,
-                    'l': '-',
-                    'u': getattr(request, "login", None) or "-",
-                    't': self.time(),
-                    'r': request.request_line,
-                    's': response.status.split(" ", 1)[0],
-                    'b': outheaders.get('Content-Length', '') or "-",
-                    'f': outheaders.get('referer', ''),
-                    'a': outheaders.get('user-agent', ''),
-                    }
+        inheaders = request.headers
+        
+        atoms = {'h': remote.name or remote.ip,
+                 'l': '-',
+                 'u': getattr(request, "login", None) or "-",
+                 't': self.time(),
+                 'r': request.request_line,
+                 's': response.status.split(" ", 1)[0],
+                 'b': outheaders.get('Content-Length', '') or "-",
+                 'f': inheaders.get('Referer', ''),
+                 'a': inheaders.get('User-Agent', ''),
+                 }
+        for k, v in atoms.items():
+            if isinstance(v, unicode):
+                v = v.encode('utf8')
+            elif not isinstance(v, str):
+                v = str(v)
+            # Fortunately, repr(str) escapes unprintable chars, \n, \t, etc
+            # and backslash for us. All we have to do is strip the quotes.
+            v = repr(v)[1:-1]
+            # Escape double-quote.
+            atoms[k] = v.replace('"', '\\"')
+        
         try:
-            self.access_log.log(logging.INFO, s)
+            self.access_log.log(logging.INFO, self.access_log_format % atoms)
         except:
             self(traceback=True)
     
@@ -84,12 +119,13 @@ class LogManager(object):
     
     # ------------------------- Screen handlers ------------------------- #
     
-    def _set_screen_handler(self, log, enable):
+    def _set_screen_handler(self, log, enable, stream=None):
         h = self._get_builtin_handler(log, "screen")
         if enable:
             if not h:
-                h = logging.StreamHandler(sys.stdout)
-                h.setLevel(logging.DEBUG)
+                if stream is None:
+                    stream=sys.stderr
+                h = logging.StreamHandler(stream)
                 h.setFormatter(logfmt)
                 h._cpbuiltin = "screen"
                 log.addHandler(h)
@@ -102,17 +138,16 @@ class LogManager(object):
         return bool(has_h)
     
     def _set_screen(self, newvalue):
-        self._set_screen_handler(self.error_log, newvalue)
+        self._set_screen_handler(self.error_log, newvalue, stream=sys.stderr)
         self._set_screen_handler(self.access_log, newvalue)
     screen = property(_get_screen, _set_screen,
-                      doc="If True, error and access will print to stdout.")
+                      doc="If True, error and access will print to stderr.")
     
     
     # -------------------------- File handlers -------------------------- #
     
     def _add_builtin_file_handler(self, log, fname):
         h = logging.FileHandler(fname)
-        h.setLevel(logging.DEBUG)
         h.setFormatter(logfmt)
         h._cpbuiltin = "file"
         log.addHandler(h)
@@ -160,7 +195,6 @@ class LogManager(object):
         if enable:
             if not h:
                 h = WSGIErrorHandler()
-                h.setLevel(logging.DEBUG)
                 h.setFormatter(logfmt)
                 h._cpbuiltin = "wsgi"
                 log.addHandler(h)
@@ -183,7 +217,7 @@ class WSGIErrorHandler(logging.Handler):
         """Flushes the stream."""
         try:
             stream = cherrypy.request.wsgi_environ.get('wsgi.errors')
-        except AttributeError, KeyError:
+        except (AttributeError, KeyError):
             pass
         else:
             stream.flush()
@@ -192,7 +226,7 @@ class WSGIErrorHandler(logging.Handler):
         """Emit a record."""
         try:
             stream = cherrypy.request.wsgi_environ.get('wsgi.errors')
-        except AttributeError, KeyError:
+        except (AttributeError, KeyError):
             pass
         else:
             try:

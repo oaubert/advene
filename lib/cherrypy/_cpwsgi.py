@@ -4,103 +4,56 @@ import StringIO as _StringIO
 import sys as _sys
 
 import cherrypy as _cherrypy
-from cherrypy import _cperror, wsgiserver
+from cherrypy import _cperror
 from cherrypy.lib import http as _http
 
 
-#                            Internal Redirect                            #
-
-
-class InternalRedirector(object):
-    """WSGI middleware which handles cherrypy.InternalRedirect.
+class VirtualHost(object):
+    """Select a different WSGI application based on the Host header.
     
-    When cherrypy.InternalRedirect is raised, this middleware traps it,
-    rewrites the WSGI environ using the new path and query_string,
-    and calls the next application again. Because the wsgi.input stream
-    may have already been consumed by the next application, the redirected
-    call will always be of HTTP method "GET", and therefore any params must
-    be passed in the InternalRedirect object's query_string attribute.
-    If you need something more complicated, make and raise your own
-    exception and your own WSGI middleware to trap it. ;)
+    This can be useful when running multiple sites within one CP server.
+    It allows several domains to point to different applications. For example:
     
-    It would be a bad idea to raise InternalRedirect after you've already
-    yielded response content, although an enterprising soul could choose
-    to abuse this.
+        root = Root()
+        RootApp = cherrypy.Application(root)
+        Domain2App = cherrypy.Application(root)
+        SecureApp = cherrypy.Application(Secure())
+        
+        vhost = cherrypy._cpwsgi.VirtualHost(RootApp,
+            domains={'www.domain2.example': Domain2App,
+                     'www.domain2.example:443': SecureApp,
+                     })
+        
+        cherrypy.tree.graft(vhost)
     
-    nextapp: the next application callable in the WSGI chain.
+    default: required. The default WSGI application.
     
-    recursive: if False (the default), each URL (path + qs) will be
-    stored, and, if the same URL is requested again, RuntimeError will
-    be raised. If 'recursive' is True, no such error will be raised.
+    use_x_forwarded_host: if True (the default), any "X-Forwarded-Host"
+        request header will be used instead of the "Host" header. This
+        is commonly added by HTTP servers (such as Apache) when proxying.
+    
+    domains: a dict of {host header value: application} pairs.
+        The incoming "Host" request header is looked up in this dict,
+        and, if a match is found, the corresponding WSGI application
+        will be called instead of the default. Note that you often need
+        separate entries for "example.com" and "www.example.com".
+        In addition, "Host" headers may contain the port number.
     """
     
-    def __init__(self, nextapp, recursive=False):
-        self.nextapp = nextapp
-        self.recursive = recursive
+    def __init__(self, default, domains=None, use_x_forwarded_host=True):
+        self.default = default
+        self.domains = domains or {}
+        self.use_x_forwarded_host = use_x_forwarded_host
     
     def __call__(self, environ, start_response):
-        return IRResponse(self.nextapp, environ, start_response, self.recursive)
-
-
-class IRResponse(object):
-    
-    def __init__(self, nextapp, environ, start_response, recursive):
-        self.redirections = []
-        self.recursive = recursive
-        self.environ = environ.copy()
-        self.nextapp = nextapp
-        self.start_response = start_response
-        self.response = None
-        self.iter_response = None
-        self.setapp()
-    
-    def setapp(self):
-        while True:
-            try:
-                self.response = self.nextapp(self.environ, self.start_response)
-                self.iter_response = iter(self.response)
-                return
-            except _cherrypy.InternalRedirect, ir:
-                self.close()
-                self.setenv(ir)
-    
-    def setenv(self, ir):
-        env = self.environ
-        if not self.recursive:
-            if ir.path in self.redirections:
-                raise RuntimeError("InternalRedirector visited the "
-                                   "same URL twice: %r" % ir.path)
-            else:
-                # Add the *previous* path_info + qs to redirections.
-                sn = env.get('SCRIPT_NAME', '')
-                path = env.get('PATH_INFO', '')
-                qs = env.get('QUERY_STRING', '')
-                if qs:
-                    qs = "?" + qs
-                self.redirections.append(sn + path + qs)
+        domain = environ.get('HTTP_HOST', '')
+        if self.use_x_forwarded_host:
+            domain = environ.get("HTTP_X_FORWARDED_HOST", domain)
         
-        # Munge environment and try again.
-        env['REQUEST_METHOD'] = "GET"
-        env['PATH_INFO'] = ir.path
-        env['QUERY_STRING'] = ir.query_string
-        env['wsgi.input'] = _StringIO.StringIO()
-        env['CONTENT_LENGTH'] = "0"
-    
-    def close(self):
-        if hasattr(self.response, "close"):
-            self.response.close()
-    
-    def __iter__(self):
-        return self
-    
-    def next(self):
-        while True:
-            try:
-                return self.iter_response.next()
-            except _cherrypy.InternalRedirect, ir:
-                self.close()
-                self.setenv(ir)
-                self.setapp()
+        nextapp = self.domains.get(domain)
+        if nextapp is None:
+            nextapp = self.default
+        return nextapp(environ, start_response)
 
 
 
@@ -109,58 +62,98 @@ class IRResponse(object):
 
 class AppResponse(object):
     
-    throws = (KeyboardInterrupt, SystemExit, _cherrypy.InternalRedirect)
+    throws = (KeyboardInterrupt, SystemExit)
     request = None
     
-    def __init__(self, environ, start_response, cpapp):
+    def __init__(self, environ, start_response, cpapp, recursive=False):
+        self.redirections = []
+        self.recursive = recursive
+        self.environ = environ
+        self.start_response = start_response
+        self.cpapp = cpapp
+        self.setapp()
+    
+    def setapp(self):
         try:
-            self.request = self.get_engine_request(environ, cpapp)
-            
-            meth = environ['REQUEST_METHOD']
-            path = environ.get('SCRIPT_NAME', '') + environ.get('PATH_INFO', '')
-            qs = environ.get('QUERY_STRING', '')
-            rproto = environ.get('SERVER_PROTOCOL')
-            headers = self.translate_headers(environ)
-            rfile = environ['wsgi.input']
-            
-            response = self.request.run(meth, path, qs, rproto, headers, rfile)
-            s, h, b = response.status, response.header_list, response.body
-            exc = None
+            self.request = self.get_request()
+            s, h, b = self.get_response()
+            self.iter_response = iter(b)
+            self.start_response(s, h)
         except self.throws:
             self.close()
             raise
+        except _cherrypy.InternalRedirect, ir:
+            self.environ['cherrypy.previous_request'] = _cherrypy.serving.request
+            self.close()
+            self.iredirect(ir.path, ir.query_string)
+            return
         except:
             if getattr(self.request, "throw_errors", False):
                 self.close()
                 raise
             
             tb = _cperror.format_exc()
-            _cherrypy.log(tb)
+            _cherrypy.log(tb, severity=40)
             if not getattr(self.request, "show_tracebacks", True):
                 tb = ""
             s, h, b = _cperror.bare_error(tb)
-            exc = _sys.exc_info()
-        
-        self.iter_response = iter(b)
-        
-        try:
-            start_response(s, h, exc)
-        except self.throws:
-            self.close()
-            raise
-        except:
-            if getattr(self.request, "throw_errors", False):
+            self.iter_response = iter(b)
+            
+            try:
+                self.start_response(s, h, _sys.exc_info())
+            except:
+                # "The application must not trap any exceptions raised by
+                # start_response, if it called start_response with exc_info.
+                # Instead, it should allow such exceptions to propagate
+                # back to the server or gateway."
+                # But we still log and call close() to clean up ourselves.
+                _cherrypy.log(traceback=True, severity=40)
                 self.close()
                 raise
-            
-            _cherrypy.log(traceback=True)
-            self.close()
-            
-            # CherryPy test suite expects bare_error body to be output,
-            # so don't call start_response (which, according to PEP 333,
-            # may raise its own error at that point).
-            s, h, b = _cperror.bare_error()
-            self.iter_response = iter(b)
+    
+    def iredirect(self, path, query_string):
+        """Doctor self.environ and perform an internal redirect.
+        
+        When cherrypy.InternalRedirect is raised, this method is called.
+        It rewrites the WSGI environ using the new path and query_string,
+        and calls a new CherryPy Request object. Because the wsgi.input
+        stream may have already been consumed by the next application,
+        the redirected call will always be of HTTP method "GET"; therefore,
+        any params must be passed in the query_string argument, which is
+        formed from InternalRedirect.query_string when using that exception.
+        If you need something more complicated, make and raise your own
+        exception and write your own AppResponse subclass to trap it. ;)
+        
+        It would be a bad idea to redirect after you've already yielded
+        response content, although an enterprising soul could choose
+        to abuse this.
+        """
+        env = self.environ
+        if not self.recursive:
+            sn = env.get('SCRIPT_NAME', '')
+            qs = query_string
+            if qs:
+                qs = "?" + qs
+            if sn + path + qs in self.redirections:
+                raise RuntimeError("InternalRedirector visited the "
+                                   "same URL twice: %r + %r + %r" %
+                                   (sn, path, qs))
+            else:
+                # Add the *previous* path_info + qs to redirections.
+                p = env.get('PATH_INFO', '')
+                qs = env.get('QUERY_STRING', '')
+                if qs:
+                    qs = "?" + qs
+                self.redirections.append(sn + p + qs)
+        
+        # Munge environment and try again.
+        env['REQUEST_METHOD'] = "GET"
+        env['PATH_INFO'] = path
+        env['QUERY_STRING'] = query_string
+        env['wsgi.input'] = _StringIO.StringIO()
+        env['CONTENT_LENGTH'] = "0"
+        
+        self.setapp()
     
     def __iter__(self):
         return self
@@ -175,28 +168,60 @@ class AppResponse(object):
                 chunk = chunk.encode("ISO-8859-1")
             return chunk
         except self.throws:
+            self.close()
             raise
+        except _cherrypy.InternalRedirect, ir:
+            self.environ['cherrypy.previous_request'] = _cherrypy.serving.request
+            self.close()
+            self.iredirect(ir.path, ir.query_string)
         except StopIteration:
             raise
         except:
             if getattr(self.request, "throw_errors", False):
+                self.close()
                 raise
             
-            _cherrypy.log(traceback=True)
-            
-            # CherryPy test suite expects bare_error body to be output,
-            # so don't call start_response (which, according to PEP 333,
-            # may raise its own error at that point).
-            s, h, b = _cperror.bare_error()
+            tb = _cperror.format_exc()
+            _cherrypy.log(tb, severity=40)
+            if not getattr(self.request, "show_tracebacks", True):
+                tb = ""
+            s, h, b = _cperror.bare_error(tb)
+            # Empty our iterable (so future calls raise StopIteration)
             self.iter_response = iter([])
+            
+            try:
+                self.start_response(s, h, _sys.exc_info())
+            except:
+                # "The application must not trap any exceptions raised by
+                # start_response, if it called start_response with exc_info.
+                # Instead, it should allow such exceptions to propagate
+                # back to the server or gateway."
+                # But we still log and call close() to clean up ourselves.
+                _cherrypy.log(traceback=True, severity=40)
+                self.close()
+                raise
+            
             return "".join(b)
     
     def close(self):
-        _cherrypy.engine.release()
+        """Close and de-reference the current request and response. (Core)"""
+        self.cpapp.release_serving()
     
-    def get_engine_request(self, environ, cpapp):
-        """Return a Request object from the CherryPy Engine using environ."""
-        env = environ.get
+    def get_response(self):
+        """Run self.request and return its response."""
+        meth = self.environ['REQUEST_METHOD']
+        path = _http.urljoin(self.environ.get('SCRIPT_NAME', ''),
+                             self.environ.get('PATH_INFO', ''))
+        qs = self.environ.get('QUERY_STRING', '')
+        rproto = self.environ.get('SERVER_PROTOCOL')
+        headers = self.translate_headers(self.environ)
+        rfile = self.environ['wsgi.input']
+        response = self.request.run(meth, path, qs, rproto, headers, rfile)
+        return response.status, response.header_list, response.body
+    
+    def get_request(self):
+        """Create a Request object using environ."""
+        env = self.environ.get
         
         local = _http.Host('', int(env('SERVER_PORT', 80)),
                            env('SERVER_NAME', ''))
@@ -205,18 +230,16 @@ class AppResponse(object):
                             env('REMOTE_HOST', ''))
         scheme = env('wsgi.url_scheme')
         sproto = env('ACTUAL_SERVER_PROTOCOL', "HTTP/1.1")
-        request = _cherrypy.engine.request(local, remote, scheme, sproto)
+        request, resp = self.cpapp.get_serving(local, remote, scheme, sproto)
         
         # LOGON_USER is served by IIS, and is the name of the
         # user after having been mapped to a local account.
         # Both IIS and Apache set REMOTE_USER, when possible.
         request.login = env('LOGON_USER') or env('REMOTE_USER') or None
-        request.multithread = environ['wsgi.multithread']
-        request.multiprocess = environ['wsgi.multiprocess']
-        request.wsgi_environ = environ
-        request.app = cpapp
-        request.prev = env('cherrypy.request')
-        environ['cherrypy.request'] = request
+        request.multithread = self.environ['wsgi.multithread']
+        request.multiprocess = self.environ['wsgi.multiprocess']
+        request.wsgi_environ = self.environ
+        request.prev = env('cherrypy.previous_request', None)
         return request
     
     headerNames = {'HTTP_CGI_AUTHORIZATION': 'Authorization',
@@ -256,7 +279,7 @@ class CPWSGIApp(object):
         named WSGI callable (from the pipeline) as keyword arguments.
     """
     
-    pipeline = [('iredir', InternalRedirector)]
+    pipeline = []
     head = None
     config = {}
     
@@ -298,79 +321,10 @@ class CPWSGIApp(object):
             # in code (passed to self.__init__) that deployers can add to
             # (but not remove) via config.
             self.pipeline.extend(v)
+        elif k == "response_class":
+            self.response_class = v
         else:
             name, arg = k.split(".", 1)
             bucket = self.config.setdefault(name, {})
             bucket[arg] = v
-
-
-
-#                            Server components                            #
-
-
-class CPHTTPRequest(wsgiserver.HTTPRequest):
-    
-    def parse_request(self):
-        mhs = _cherrypy.server.max_request_header_size
-        if mhs > 0:
-            self.rfile = _http.SizeCheckWrapper(self.rfile, mhs)
-        
-        try:
-            wsgiserver.HTTPRequest.parse_request(self)
-        except _http.MaxSizeExceeded:
-            self.simple_response("413 Request Entity Too Large")
-            _cherrypy.log(traceback=True)
-    
-    def decode_chunked(self):
-        """Decode the 'chunked' transfer coding."""
-        if isinstance(self.rfile, _http.SizeCheckWrapper):
-            self.rfile = self.rfile.rfile
-        mbs = _cherrypy.server.max_request_body_size
-        if mbs > 0:
-            self.rfile = _http.SizeCheckWrapper(self.rfile, mbs)
-        try:
-            return wsgiserver.HTTPRequest.decode_chunked(self)
-        except _http.MaxSizeExceeded:
-            self.simple_response("413 Request Entity Too Large")
-            _cherrypy.log(traceback=True)
-            return False
-
-
-class CPHTTPConnection(wsgiserver.HTTPConnection):
-    
-    RequestHandlerClass = CPHTTPRequest
-
-
-class CPWSGIServer(wsgiserver.CherryPyWSGIServer):
-    
-    """Wrapper for wsgiserver.CherryPyWSGIServer.
-    
-    wsgiserver has been designed to not reference CherryPy in any way,
-    so that it can be used in other frameworks and applications. Therefore,
-    we wrap it here, so we can set our own mount points from cherrypy.tree.
-    
-    """
-    
-    ConnectionClass = CPHTTPConnection
-    
-    def __init__(self):
-        server = _cherrypy.server
-        sockFile = server.socket_file
-        if sockFile:
-            bind_addr = sockFile
-        else:
-            bind_addr = (server.socket_host, server.socket_port)
-        
-        s = wsgiserver.CherryPyWSGIServer
-        # We could just pass cherrypy.tree, but by passing tree.apps,
-        # we get correct SCRIPT_NAMEs as early as possible.
-        s.__init__(self, bind_addr, _cherrypy.tree.apps.items(),
-                   server.thread_pool,
-                   server.socket_host,
-                   request_queue_size = server.socket_queue_size,
-                   timeout = server.socket_timeout,
-                   )
-        self.protocol = server.protocol_version
-        self.ssl_certificate = server.ssl_certificate
-        self.ssl_private_key = server.ssl_private_key
 

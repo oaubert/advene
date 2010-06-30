@@ -15,15 +15,12 @@ class Root:
 
 
 # We will use this method from the mod_python configuration
-# as the entyr point to our application
+# as the entry point to our application
 def setup_server():
     cherrypy.tree.mount(Root())
     cherrypy.config.update({'environment': 'production',
                             'log.screen': False,
                             'show_tracebacks': False})
-    # You must start the engine in a non-blocking fashion
-    # so that mod_python can proceed
-    cherrypy.engine.start(blocking=False)
 
 ##########################################
 # mod_python settings for apache2
@@ -46,7 +43,7 @@ LoadModule python_module /usr/lib/apache2/modules/mod_python.so
 </Location> 
 # End
 
-The actual path to your mod_python.so is dependant of your
+The actual path to your mod_python.so is dependent on your
 environment. In this case we suppose a global mod_python
 installation on a Linux distribution such as Ubuntu.
 
@@ -55,9 +52,10 @@ your application can be found by from the user running
 the apache2 instance. Of course if your application
 resides in the global site-package this won't be needed.
 
-Then restart apache2 and access http://localhost:8080
+Then restart apache2 and access http://127.0.0.1:8080
 """
 
+import logging
 import StringIO
 
 import cherrypy
@@ -69,29 +67,54 @@ from cherrypy.lib import http
 # ------------------------------ Request-handling
 
 
+
 def setup(req):
+    from mod_python import apache
+    
     # Run any setup function defined by a "PythonOption cherrypy.setup" directive.
     options = req.get_options()
     if 'cherrypy.setup' in options:
-        modname, fname = options['cherrypy.setup'].split('::')
-        mod = __import__(modname, globals(), locals(), [fname])
-        func = getattr(mod, fname)
-        func()
+        atoms = options['cherrypy.setup'].split('::', 1)
+        if len(atoms) == 1:
+            mod = __import__(atoms[0], globals(), locals())
+        else:
+            modname, fname = atoms
+            mod = __import__(modname, globals(), locals(), [fname])
+            func = getattr(mod, fname)
+            func()
     
     cherrypy.config.update({'log.screen': False,
                             "tools.ignore_headers.on": True,
                             "tools.ignore_headers.headers": ['Range'],
                             })
     
-    if cherrypy.engine.state == cherrypy._cpengine.STOPPED:
-        cherrypy.engine.start(blocking=False)
-    elif cherrypy.engine.state == cherrypy._cpengine.STARTING:
-        cherrypy.engine.wait()
+    engine = cherrypy.engine
+    if hasattr(engine, "signal_handler"):
+        engine.signal_handler.unsubscribe()
+    if hasattr(engine, "console_control_handler"):
+        engine.console_control_handler.unsubscribe()
+    engine.autoreload.unsubscribe()
+    cherrypy.server.unsubscribe()
+    
+    def _log(msg, level):
+        newlevel = apache.APLOG_ERR
+        if logging.DEBUG >= level:
+            newlevel = apache.APLOG_DEBUG
+        elif logging.INFO >= level:
+            newlevel = apache.APLOG_INFO
+        elif logging.WARNING >= level:
+            newlevel = apache.APLOG_WARNING
+        # On Windows, req.server is required or the msg will vanish. See
+        # http://www.modpython.org/pipermail/mod_python/2003-October/014291.html.
+        # Also, "When server is not specified...LogLevel does not apply..."
+        apache.log_error(msg, newlevel, req.server)
+    engine.subscribe('log', _log)
+    
+    engine.start()
     
     def cherrypy_cleanup(data):
-        cherrypy.engine.stop()
+        engine.exit()
     try:
-        from mod_python import apache
         # apache.register_cleanup wasn't available until 3.1.4.
         apache.register_cleanup(cherrypy_cleanup)
     except AttributeError:
@@ -159,54 +182,59 @@ def handler(req):
             method = req.method
             path = req.uri
             qs = req.args or ""
-            sproto = req.protocol
+            reqproto = req.protocol
             headers = req.headers_in.items()
             rfile = _ReadOnlyRequest(req)
             prev = None
             
-            redirections = []
-            while True:
-                request = cherrypy.engine.request(local, remote, scheme)
-                request.login = req.user
-                request.multithread = bool(threaded)
-                request.multiprocess = bool(forked)
-                request.app = app
-                request.prev = prev
+            try:
+                redirections = []
+                while True:
+                    request, response = app.get_serving(local, remote, scheme,
+                                                        "HTTP/1.1")
+                    request.login = req.user
+                    request.multithread = bool(threaded)
+                    request.multiprocess = bool(forked)
+                    request.app = app
+                    request.prev = prev
+                    
+                    # Run the CherryPy Request object and obtain the response
+                    try:
+                        request.run(method, path, qs, reqproto, headers, rfile)
+                        break
+                    except cherrypy.InternalRedirect, ir:
+                        app.release_serving()
+                        prev = request
+                        
+                        if not recursive:
+                            if ir.path in redirections:
+                                raise RuntimeError("InternalRedirector visited the "
+                                                   "same URL twice: %r" % ir.path)
+                            else:
+                                # Add the *previous* path_info + qs to redirections.
+                                if qs:
+                                    qs = "?" + qs
+                                redirections.append(sn + path + qs)
+                        
+                        # Munge environment and try again.
+                        method = "GET"
+                        path = ir.path
+                        qs = ir.query_string
+                        rfile = StringIO.StringIO()
                 
-                # Run the CherryPy Request object and obtain the response
-                try:
-                    response = request.run(method, path, qs, sproto, headers, rfile)
-                    break
-                except cherrypy.InternalRedirect, ir:
-                    cherrypy.engine.release()
-                    prev = request
-                    
-                    if not recursive:
-                        if ir.path in redirections:
-                            raise RuntimeError("InternalRedirector visited the "
-                                               "same URL twice: %r" % ir.path)
-                        else:
-                            # Add the *previous* path_info + qs to redirections.
-                            if qs:
-                                qs = "?" + qs
-                            redirections.append(sn + path + qs)
-                    
-                    # Munge environment and try again.
-                    method = "GET"
-                    path = ir.path
-                    qs = ir.query_string
-                    rfile = StringIO.StringIO()
-            
-            send_response(req, response.status, response.header_list, response.body)
-            cherrypy.engine.release()
+                send_response(req, response.status, response.header_list,
+                              response.body, response.stream)
+            finally:
+                app.release_serving()
     except:
         tb = format_exc()
-        cherrypy.log(tb)
+        cherrypy.log(tb, 'MOD_PYTHON', severity=logging.ERROR)
         s, h, b = bare_error()
         send_response(req, s, h, b)
     return apache.OK
 
-def send_response(req, status, headers, body):
+
+def send_response(req, status, headers, body, stream=False):
     # Set response status
     req.status = int(status[:3])
     
@@ -217,6 +245,10 @@ def send_response(req, status, headers, body):
             req.content_type = value
             continue
         req.headers_out.add(header, value)
+    
+    if stream:
+        # Flush now so the status and headers are sent immediately.
+        req.flush()
     
     # Set response body
     if isinstance(body, basestring):
