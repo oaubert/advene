@@ -88,9 +88,9 @@ class AnnotationTable(AdhocView):
         pos=long(context.globals['position'])
         eps=self.controller.package.imagecache.epsilon
         for r in self.widget.treeview.get_model():
-            if abs(r[4] - pos) <= eps:
+            if abs(r[COLUMN_BEGIN] - pos) <= eps:
                 # Update pixbuf
-                r[9] = png_to_pixbuf(self.controller.package.imagecache[pos],
+                r[COLUMN_PIXBUF] = png_to_pixbuf(self.controller.package.imagecache[pos],
                                      height=32)
 
     def get_elements(self):
