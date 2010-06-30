@@ -232,7 +232,7 @@ class webkit_wrapper:
             #if text:
             self.notify(label=text)
 
-        def _icon_loaded_cb(self):
+        def _icon_loaded_cb(self, *p):
             print "icon loaded"
 
         def _selection_changed_cb(self):
