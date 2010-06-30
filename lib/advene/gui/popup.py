@@ -132,8 +132,10 @@ class Menu:
                 self.do_insert_resource_file(parent=el, filename=filename)
         return el
 
-    def insert_resource_data(self, widget, parent=None):
-        filename=dialog.get_filename(title=_("Choose the file to insert"))
+    def insert_resource_data(self, widget, parent=None, title=None, filter=None):
+        if title is None:
+            title = _("Choose the file to insert")
+        filename=dialog.get_filename(title=title, filter=filter)
         if filename is None:
             return True
         basename = os.path.basename(filename)
@@ -152,22 +154,7 @@ class Menu:
         return True
 
     def insert_soundclip(self, widget, parent=None):
-        filename=dialog.get_filename(title=_("Choose the soundclip to insert"), filter='audio')
-        if filename is None:
-            return True
-        basename = os.path.basename(filename)
-        id_=re.sub('[^a-zA-Z0-9_.]', '_', basename)
-        if id_ != basename:
-            while True:
-                id_ = dialog.entry_dialog(title=_("Select a valid identifier"),
-                                                   text=_("The filename %s contains invalid characters\nthat have been replaced.\nYou can modify this identifier if necessary:") % filename,
-                                                   default=id_)
-                if id_ is None:
-                    # Edition cancelled
-                    return True
-                elif re.match('^[a-zA-Z0-9_.]+$', id_):
-                    break
-        self.do_insert_resource_file(parent=parent, filename=filename, id_=id_)
+        self.insert_resource_data(widget, parent, title=_("Choose the soundclip to insert"), filter='audio')
         return True
 
     def insert_resource_directory(self, widget, parent=None):
