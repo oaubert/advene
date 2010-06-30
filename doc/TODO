@@ -1,3 +1,5 @@
+* Customizable shortcuts
+
 * Implement subtitle import through python-aeidon
 
 * Save current workspace: display option in Save dialog
@@ -27,9 +29,6 @@
 * Generic metadata for packages
 
 * table view: keyword occurrences + stats
-
-* Table view : use standard snapshot view (to have markers on
-   mouse over): cf views.table, implement CellRendererTimestamp
 
 * gstrecorder: option to specify wether to record from webcam
    (autovideosrc) or from screen (ximagesrc/dshowvideosrc...) or
@@ -243,8 +242,6 @@ http://code.google.com/p/facilhtml/source/browse/trunk/htmlrender.py
 * view creation (static/dynamic): step by step wizard
 
 * AdveneTypes a la XSD
-
-* Inspector: make editable (text at least)
 
 * gtk locale in win32
 
@@ -2716,3 +2713,7 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Shot validation: fix mousewheel on spinbutton
 
 * Add gtk.SCROLL_LEFT/RIGHT where appropriate.
+
+* Table view : use standard snapshot view (to have markers on
+   mouse over): cf views.table, implement CellRendererTimestamp
+
