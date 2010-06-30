@@ -111,16 +111,18 @@ class TitledElement:
 class TypedUnicode(unicode):
     """Unicode string with a mimetype attribute.
     """
-    def __init__(self, *p, **kw):
-        super(TypedUnicode, self).__init__(*p, **kw)
-        self.contenttype='text/plain'
+    def __new__(cls, value=""):
+        s=unicode.__new__(cls, value) 
+        s.contenttype='text/plain'
+        return s
 
 class TypedString(str):
     """String with a mimetype attribute.
     """
-    def __init__(self, *p, **kw):
-        super(TypedString, self).__init__(*p, **kw)
-        self.contenttype='text/plain'
+    def __new__(cls, value=""):
+        s=str.__new__(cls, value) 
+        s.contenttype='text/plain'
+        return s
 
 def snapshot2png (image, output=None):
     """Convert a VLC RGBPicture to PNG.
