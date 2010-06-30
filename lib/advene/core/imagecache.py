@@ -53,10 +53,11 @@ class CachedString:
 class TypedString(str):
     """String with a mimetype and a timestamp attribute.
     """
-    def __init__(self, *p):
-        super(TypedString, self).__init__(*p)
-        self.contenttype='text/plain'
-        self.timestamp=-1
+    def __new__(cls, value=""):
+        s=str.__new__(cls, value) 
+        s.contenttype='text/plain'
+        s.timestamp=-1
+        return s
 
 class ImageCache(dict):
     """ImageCache class.
