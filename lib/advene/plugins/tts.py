@@ -21,12 +21,15 @@ from gettext import gettext as _
 import subprocess
 import os
 import signal
+import sys
 
 import advene.core.config as config
 from advene.rules.elements import RegisteredAction
 import advene.util.helper as helper
 
 import advene.model.tal.context
+
+CREATE_NO_WINDOW = 0x8000000
 
 name="Text-To-Speech actions"
 
@@ -188,12 +191,15 @@ class EspeakTTSEngine(TTSEngine):
             # Try c:\\Program Files\\eSpeak
             if os.path.isdir('c:\\Program Files\\eSpeak'):
                 self.espeak_path='c:\\Program Files\\eSpeak\\command_line\\espeak.exe'
+            elif os.path.isdir('C:\\Program Files (x86)\\eSpeak'):
+                #winXp 64b
+                self.espeak_path='C:\\Program Files (x86)\\eSpeak\\command_line\\espeak.exe'
         self.espeak_process=None
 
     def can_run():
         """Can this engine run ?
         """
-        return (os.path.isdir('c:\\Program Files\\eSpeak') or helper.find_in_path('espeak') is not None)
+        return (os.path.isdir('c:\\Program Files\\eSpeak') or os.path.isdir('C:\\Program Files (x86)\\eSpeak') or helper.find_in_path('espeak') is not None)
     can_run=staticmethod(can_run)
 
     def close(self):
@@ -217,7 +223,8 @@ class EspeakTTSEngine(TTSEngine):
         try:
             if config.data.os == 'win32':
                 # stdin is botched on win32. Pass words on command line and do not reuse the process.
-                subprocess.Popen([ self.espeak_path, '-v', self.language, sentence.encode('utf8', 'ignore') ], stdin=subprocess.PIPE)
+                fse = sys.getfilesystemencoding()
+                subprocess.Popen([ self.espeak_path, '-v', self.language, unicode(sentence+"\n").encode(fse, 'ignore') ], creationflags = CREATE_NO_WINDOW)
             else:
                 if self.espeak_process is None:
                     self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE)
@@ -302,7 +309,7 @@ class CustomTTSEngine(TTSEngine):
 class CustomArgTTSEngine(TTSEngine):
     """CustomArg TTSEngine.
 
-    It tries to run a 'prononce' ('prononce.bat' on win32) script,
+    It tries to run a 'prononcearg' ('prononcearg.bat' on win32) script,
     which takes strings as arguments and pronounces them.
     """
     if config.data.os == 'win32':
@@ -332,7 +339,8 @@ class CustomArgTTSEngine(TTSEngine):
             self.close()
             self.language=lang
         try:
-            subprocess.Popen([ self.prg_path, '-v', self.language, unicode(sentence + "\n").encode('utf8', 'ignore') ])
+            fse = sys.getfilesystemencoding()
+            subprocess.Popen([ self.prg_path, '-v', self.language, unicode(sentence.replace('\n',' ') + "\n").encode(fse, 'ignore') ], creationflags = CREATE_NO_WINDOW)
         except OSError, e:
-            self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
+            self.controller.log("TTS Error: ", unicode(e.message).encode('utf8', 'ignore'))
         return True
