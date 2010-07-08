@@ -224,9 +224,12 @@ class FrameSelector(object):
 
         hb=gtk.HBox()
 
+        eb = gtk.EventBox()
         ar = gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
-        ar.set_tooltip_text(_("Scroll to see more frames"))
-        hb.pack_start(ar, expand=False)
+        ar.set_tooltip_text(_("Click to see more frames or scroll with the mouse wheel"))
+        eb.connect('button-press-event', lambda b,e: self.update_offset(-1))
+        eb.add(ar)
+        hb.pack_start(eb, expand=False)
 
         r = None
         for i in xrange(self.count):
@@ -273,9 +276,12 @@ class FrameSelector(object):
         r.right_border = border
         hb.pack_start(border, expand=False)
 
+        eb = gtk.EventBox()
         ar = gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
-        ar.set_tooltip_text(_("Scroll to see more frames"))
-        hb.pack_start(ar, expand=False)
+        ar.set_tooltip_text(_("Click to see more frames or scroll with the mouse wheel"))
+        eb.connect('button-press-event', lambda b,e: self.update_offset(+1))
+        eb.add(ar)
+        hb.pack_start(eb, expand=False)
 
         hb.set_style(get_color_style(hb, 'black', 'black'))
         hb.connect('scroll-event', self.handle_scroll_event)
