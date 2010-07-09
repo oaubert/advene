@@ -221,14 +221,9 @@ class EspeakTTSEngine(TTSEngine):
             self.close()
             self.language=lang
         try:
-            if config.data.os == 'win32':
-                # stdin is botched on win32. Pass words on command line and do not reuse the process.
-                fse = sys.getfilesystemencoding()
-                subprocess.Popen([ self.espeak_path, '-v', self.language, unicode(sentence+"\n").encode(fse, 'ignore') ], creationflags = CREATE_NO_WINDOW)
-            else:
-                if self.espeak_process is None:
-                    self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE)
-                self.espeak_process.stdin.write(sentence + "\n")
+            if self.espeak_process is None:
+                self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, creationflags = CREATE_NO_WINDOW)
+            self.espeak_process.stdin.write(sentence + "\n")
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
         return True
@@ -300,8 +295,8 @@ class CustomTTSEngine(TTSEngine):
             self.language=lang
         try:
             if self.prg_process is None:
-                self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], stdin=subprocess.PIPE)
-            self.prg_process.stdin.write(unicode(sentence + "\n").encode('utf8', 'ignore'))
+                self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, creationflags = CREATE_NO_WINDOW)
+            self.prg_process.stdin.write(sentence + "\n")
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
         return True
