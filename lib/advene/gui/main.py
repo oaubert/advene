@@ -36,6 +36,7 @@ import urllib2
 import socket
 import threading
 import Queue
+import win32process
 
 import advene.core.config as config
 import advene.core.version
@@ -4363,7 +4364,9 @@ class AdveneGUI(object):
                 pb._shots=subprocess.Popen( argv,
                                             bufsize=0,
                                             shell=False,
-                                            stderr=subprocess.PIPE )
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE,
+                                            creationflags = win32process.CREATE_NO_WINDOW)
             except OSError, e:
                 do_cancel(None, pb)
                 dialog.message_dialog(_("Could not run shotdetect: %s") % unicode(e), modal=False)
@@ -4407,16 +4410,16 @@ class AdveneGUI(object):
             b.set_sensitive(False)
 
             pb._tempdir=unicode(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
-            if config.data.os == 'win32' or self.controller.cached_duration <= 0:
-                # Async. reading from a pipe is a mess on win32. A
-                # proper fix should be found, but in the meantime,
-                # give a feedback to the user.  Do it also when the
-                # movie length is unknown, so that the user can know
-                # there is activity even if no shot is detected.
-                def progress():
-                    pb.pulse()
-                    return True
-                pb._source=gobject.timeout_add(500, progress)
+            #~ if config.data.os == 'win32' or self.controller.cached_duration <= 0:
+                #~ # Async. reading from a pipe is a mess on win32. A
+                #~ # proper fix should be found, but in the meantime,
+                #~ # give a feedback to the user.  Do it also when the
+                #~ # movie length is unknown, so that the user can know
+                #~ # there is activity even if no shot is detected.
+                #~ def progress():
+                    #~ pb.pulse()
+                    #~ return True
+                #~ pb._source=gobject.timeout_add(500, progress)
 
             t=threading.Thread(target=execute_shotdetect, args= [ pb ])
             t.start()
