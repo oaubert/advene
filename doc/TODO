@@ -1,3 +1,38 @@
+* in fs mode: up/down -> 1 min
+
+* fullscreen mode: 1->9 : equivalent slider
+
+* autoplay at package open
+
+* win32: check update of directshowsink (esp. when paused)
+
+* timeline: remove "goto on single click" toolbutton
+
+* option to stop player synchronisation then use current position as
+   time offset
+
+* win32: refresh issue
+
+* trace replay mode  of video navigation
+
+* fullscreen controller: arrows without Control
+
+* transcribe: add shortcut handling (like in word: ct<space> -> word)
+
+* option to specify format_time (%M:%S)
+
+* quick edit in annotation type -> move inside timeline
+
+* right click -> position curseur -> position souris / position player
+
+* Timeline: DEL on annotation (remove shift)
+
+* look for geolocalisation
+
+* win32: add icon for .azp files
+
+
+
 * Customizable shortcuts
 
 * Implement subtitle import through python-aeidon
