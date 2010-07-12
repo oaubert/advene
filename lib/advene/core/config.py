@@ -286,6 +286,9 @@ class Config(object):
             'embedded': True,
             'abbreviation-mode': True,
             'text-abbreviations': '',
+            # Automatically start the player when loading a media file
+            # (either directly or through a package)
+            'player-autostart': True,
             }
 
         # Player options

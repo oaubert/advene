@@ -949,6 +949,10 @@ class AdveneGUI(object):
         self.gui.application_space.add(self.visualisationwidget)
 
         def media_changed(context, parameters):
+            if config.data.preferences['player-autostart']:
+                self.controller.queue_action(self.controller.update_status, "start")
+                self.controller.queue_action(self.controller.update_status, "pause")
+
             if config.data.preferences['expert-mode']:
                 return True
             uri=context.globals['uri']
@@ -3654,7 +3658,7 @@ class AdveneGUI(object):
     def on_preferences1_activate (self, button=None, data=None):
         direct_options=('history-size-limit', 'scroll-increment', 'second-scroll-increment',
                         'time-increment', 'second-time-increment', 'third-time-increment',
-                        'custom-updown-keys',
+                        'custom-updown-keys', 'player-autostart',
                         'language',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit',
                         'remember-window-size', 'expert-mode', 'update-check',
@@ -3755,6 +3759,7 @@ class AdveneGUI(object):
                 })
 
         ew.add_title(_("Video Player"))
+        ew.add_checkbox(_("Autostart"), 'player-autostart', _("Automatically start the player when loading a media file (either directly or through a package)"))
         ew.add_checkbox(_("Enable captions"), "player-caption", _("Enable captions over the video"))
         ew.add_file_selector(_("Caption font"), "player-osdfont", _("TrueType font for captions"))
         ew.add_checkbox(_("Enable SVG"), "player-svg", _("Enable SVG captions over the video"))
