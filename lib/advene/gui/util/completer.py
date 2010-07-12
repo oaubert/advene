@@ -41,6 +41,7 @@ class Completer:
         # allows to do a more precise completion search
         self.element=element
 
+
         self.is_visible=False
         self.word_list=None
 
@@ -62,6 +63,15 @@ class Completer:
     def insert_text_cb(self, textbuffer, iterator, text, length):
         """Handles callback when the "insert-text" signal is emitted.
         """
+        if config.data.preferences['abbreviation-mode'] and text == ' ':
+            # Find previous word
+            w, begin, end = self.get_word_before_cursor()
+            w = w.strip()
+            repl = self.indexer.abbreviations.get(w, None)
+            if repl is not None:
+                textbuffer.delete(begin, end)
+                textbuffer.insert(begin, repl + " ")
+            return False
         if length > 1:
             self.hide_completion_window()
         else:
@@ -163,7 +173,7 @@ class Completer:
         cursor_position=b.get_iter_at_mark(b.get_insert())
         word_start=cursor_position.copy()
         word_start.backward_word_start()
-        return word_start.get_text(cursor_position)
+        return word_start.get_text(cursor_position), word_start, cursor_position
 
     def insert_word_completion(self, path):
         """Insert item selected in the completion window into the text editor's
@@ -175,8 +185,8 @@ class Completer:
         # Get the selected completion string.
         completion_string = self.model[path[0]][0].decode("utf8")
 
-        word=self.get_word_before_cursor().encode('utf8')
-        complete=completion_string.replace(word, '')
+        word, begin, end=self.get_word_before_cursor()
+        complete=completion_string.replace(word.encode('utf8'), '')
         b=self.textview.get_buffer()
         b.begin_user_action()
         b.insert_at_cursor(complete)
@@ -184,7 +194,7 @@ class Completer:
         return
 
     def check_completion(self):
-        word = self.get_word_before_cursor()
+        word, begin, end = self.get_word_before_cursor()
         if word:
             if len(word) < 2:
                 return False
@@ -299,9 +309,13 @@ class Completer:
 class Indexer:
     """Indexer for Advene elements contents.
     """
-    def __init__(self, controller=None, package=None):
+    def __init__(self, controller=None, package=None, abbreviations=None):
         self.controller=controller
         self.package=package
+
+        if abbreviations is None:
+            abbreviations = {}
+        self.abbreviations = abbreviations
 
         # Dictionary of sets. It has a 'views' key for view contents,
         # and annotation-type ids for the annotation contents
