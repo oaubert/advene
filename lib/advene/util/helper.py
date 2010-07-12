@@ -275,25 +275,31 @@ def format_time (val = 0):
 
 small_time_regexp=re.compile('(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
 time_regexp=re.compile('(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
+float_regexp = re.compile('(?P<s>\d*)\.(?P<ms>\d*)')
 def parse_time(s):
     """Convert a time string as long.
 
     If the parameter is a number, it is considered as a ms value.
     Else we try to parse a hh:mm:ss.xxx value
     """
+    f=config.data.preferences['timestamp-format']
     try:
         val=long(s)
     except ValueError:
-        # It was not a number. Try to determine its format.
+        # It was not a plain integer. Try to determine its format.
         t=None
-        m=time_regexp.match(s)
+        m = float_regexp.match(s)
         if m:
-            t=m.groupdict()
+            t = m.groupdict()
         else:
-            m=small_time_regexp.match(s)
+            m=time_regexp.match(s)
             if m:
                 t=m.groupdict()
-                t['h'] = 0
+            else:
+                m=small_time_regexp.match(s)
+                if m:
+                    t=m.groupdict()
+                    t['h'] = 0
 
         if t is not None:
             if 'ms' in t and t['ms']:
@@ -304,7 +310,7 @@ def parse_time(s):
                 if t[k] is None:
                     t[k]=0
                 t[k] = long(t[k])
-            val= t['ms'] + t['s'] * 1000 + t['m'] * 60000 + t['h'] * 3600000
+            val= t.get('ms', 0) + t.get('s', 0) * 1000 + t.get('m', 0) * 60000 + t.get('h', 0) * 3600000
         else:
             raise Exception("Unknown time format for %s" % s)
     return val
