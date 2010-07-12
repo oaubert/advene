@@ -2263,6 +2263,16 @@ class TimeLine(AdhocView):
     def layout_button_press_cb(self, widget=None, event=None):
         """Handle mouse click in timeline window.
         """
+        def set_end_time(action, an):
+            if action == 'validate':
+                an.fragment.end=self.controller.player.current_position_value
+            elif action == 'cancel':
+                # Delete the annotation
+                self.controller.notify('EditSessionStart', element=an, immediate=True)
+                self.controller.package.annotations.remove(an)
+                self.controller.notify('AnnotationDelete', annotation=an)
+            return True
+
         # Note: event.(x|y) may be relative to a child widget, so
         # we must determine the pointer position
         x, y = widget.get_pointer()
@@ -2276,6 +2286,26 @@ class TimeLine(AdhocView):
             self.context_cb (timel=self, position=self.pixel2unit(x, absolute=True), height=y)
             return True
         elif event.button == 1:
+            if event.state & gtk.gdk.CONTROL_MASK:
+                # Control-click: create annotation + edit it
+                ats=[ at
+                    for (at, p) in self.layer_position.iteritems()
+                    if (y >= p and y <= p + self.button_height) ]
+                if not ats:
+                    at = None
+                else:
+                    at=ats[0]
+                if at is not None:
+                    # Create an annotation and edit it
+                    el = self.create_annotation(position=self.controller.player.current_position_value,
+                                                type=at,
+                                                duration=3000)
+                    if el is not None:
+                        b=self.create_annotation_widget(el)
+                        b.show()
+                        self.quick_edit(el, button=b, callback=set_end_time)
+                return True
+
             if event.type == gtk.gdk._2BUTTON_PRESS:
                 # Double click in the layout: in all cases, goto the position
                 c=self.controller
