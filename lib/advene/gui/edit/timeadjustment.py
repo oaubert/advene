@@ -258,42 +258,9 @@ class TimeAdjustment:
         print "Not implemented yet."
         pass
 
-    # Static values used in numericTime
-    _hour = r'(?P<hour>\d+)'
-    _minute = r'(?P<minute>\d+)'
-    _second = r'(?P<second>\d+(\.\d+))'
-    _time = _hour + r':' + _minute + r'(:' + _second + r')?'
-    _timeRE = re.compile(_time, re.I)
-
-    def numericTime(self, s):
-        """Converts a time string into a long value.
-
-        This function is inspired from the numdate.py example script from the
-        egenix mxDateTime package.
-
-        If the input string s is a valid time expression of the
-        form hh:mm:ss.sss or hh:mm:ss or hh:mm, return
-        the corresponding value in milliseconds (float), else None
-        """
-
-        if s is None:
-            return None
-        dt = None
-        match = TimeAdjustment._timeRE.search(s)
-        if match is not None:
-            hh = int(match.group('hour'))
-            mm = int(match.group('minute'))
-            second = match.group('second')
-            if second:
-                ss = float(second)
-            else:
-                ss = 0.0
-            dt=int(1000 * (ss + (60 * mm) + (3600 * hh)))
-        return dt
-
     def convert_entered_value(self, *p):
         t=self.entry.get_text()
-        v=self.numericTime(t)
+        v=helper.parse_time(t)
         if v is not None and v != self.value:
             v=self.check_bound_value(v)
             if self.callback and not self.callback(v):

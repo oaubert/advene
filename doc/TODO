@@ -1,7 +1,5 @@
 * add PyDiscoverer interface, to get movie details ASAP
 
-* timestamp input: multiple formats
-
 * autoplay at package open
 
 * win32: check update of directshowsink (esp. when paused)
@@ -2752,4 +2750,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * quick edit in annotation type -> move inside timeline
 
 * right click -> position curseur -> position souris / position player
+
+* timestamp input: multiple formats
 
