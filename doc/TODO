@@ -6,19 +6,15 @@
 
 * win32: check update of directshowsink (esp. when paused)
 
-* option to stop player synchronisation then use current position as time offset
+* win32: add icon for .azp files
 
-* win32: refresh issue
+* option to stop player synchronisation then use current position as time offset
 
 * trace replay mode  of video navigation
 
 * transcribe: add shortcut handling (like in word: ct<space> -> word)
 
-* right click -> position curseur -> position souris / position player
-
 * look for geolocalisation
-
-* win32: add icon for .azp files
 
 
 
@@ -2754,4 +2750,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * fullscreen controller: arrows without Control
 
 * quick edit in annotation type -> move inside timeline
+
+* right click -> position curseur -> position souris / position player
 
