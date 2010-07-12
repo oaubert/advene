@@ -305,26 +305,31 @@ def player_url (target, context):
     import urllib
 
     begin=""
+    end=None
     p=None
     if isinstance(target, advene.model.annotation.Annotation):
         begin = target.fragment.begin
+        end = target.fragment.end
         p=target.rootPackage
     elif isinstance(target, advene.model.fragment.MillisecondFragment):
         begin = target.begin
+        end = target.end
         p=target.rootPackage
     elif isinstance(target, int) or isinstance(target, long):
         begin=target
     else:
         return None
 
+    base_url = "/media/play/%s" % str(begin)
+    if end is not None:
+        base_url = base_url + "/" + str(end)
+
     package=context.evaluateValue('package')
     if p is None or p == package:
-        # Play the current media
-        return "/media/play/%s" % str(begin)
+        return base_url
     else:
         c=context.evaluateValue('options/controller')
-        return "/media/play/%s?%s" % (str(begin),
-                                      urllib.urlencode( {'filename': c.get_default_media(p)} ) )
+        return base_url + "?" + urllib.urlencode( {'filename': c.get_default_media(p)} )
 
 def formatted (target, context):
     """Return a formatted timestamp as hh:mm:ss.mmmm
