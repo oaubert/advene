@@ -3612,7 +3612,8 @@ class AdveneGUI(object):
                         'bookmark-snapshot-width', 'bookmark-snapshot-precision',
                         'save-default-workspace', 'restore-default-workspace',
                         'slave-player-sync-delay',
-                        'tts-language', 'record-actions', 'popup-destination' )
+                        'tts-language', 'record-actions', 'popup-destination',
+                        'timestamp-format' )
         path_options=('data', 'plugins', 'advene', 'imagecache', 'moviepath', 'shotdetect')
         cache={
             'font-size': config.data.preferences['timeline']['font-size'],
@@ -3729,6 +3730,14 @@ class AdveneGUI(object):
             ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
 
         ew.add_title(_("Time-related"))
+        ew.add_option(_("Time format"), 'timestamp-format', _("Format used to display timecodes"), {
+                'HH:MM:SS.sss': '%H:%M:%.S',
+                'HH:MM:SS': '%H:%M:%S',
+                'MM:SS.sss': '%M:%.S',
+                'MM:SS': '%M:%S',
+                'SS.sss': '%.S',
+                'SS': '%S',
+                })
         ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 1, 300000)
         ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 1, 300000)
         ew.add_spin(_("Third time increment"), "third-time-increment", _("Skip duration, when using control-shift-up/down (in ms)."), 1, 300000)

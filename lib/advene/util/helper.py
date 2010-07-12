@@ -51,7 +51,7 @@ from advene.model.query import Query
 from advene.model.util.defaultdict import DefaultDict
 import advene.model.zippackage
 
-from advene.model.tal.context import AdveneContext, AdveneTalesException
+from advene.model.tal.context import AdveneContext
 from advene.model.exception import AdveneException
 
 # Initialize ElementTree namespace map with our own prefixes.  This
@@ -244,7 +244,7 @@ def unaccent(t):
         res.append(c)
     return "".join(res)
 
-def format_time (val=0):
+def format_time (val = 0):
     """Formats a value (in milliseconds) into a time string.
 
     @param val: the value
@@ -252,13 +252,26 @@ def format_time (val=0):
     @return: the formatted string
     @rtype: string
     """
+    dummy = False
     if val is None:
-        return '--:--:--.---'
+        dummy = True
+        val = 0
     elif val < 0:
         val = 0
     (s, ms) = divmod(long(val), 1000)
-    # Format: HH:MM:SS.mmm
-    return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
+    f = config.data.preferences['timestamp-format']
+    if f == '%S':
+        ret = str(s)
+    elif f == '%.S':
+        ret = '%d.%03d' % (s, ms)
+    else:
+        f = f.replace('%.S', '%S.' + '%03d' % ms)
+        ret = time.strftime(f, time.gmtime(s))
+
+    if dummy:
+        return ret.replace('0', '-')
+    else:
+        return ret
 
 small_time_regexp=re.compile('(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
 time_regexp=re.compile('(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')

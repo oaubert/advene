@@ -19,8 +19,6 @@
 
 * transcribe: add shortcut handling (like in word: ct<space> -> word)
 
-* option to specify format_time (%M:%S)
-
 * quick edit in annotation type -> move inside timeline
 
 * right click -> position curseur -> position souris / position player
@@ -2751,4 +2749,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Table view : use standard snapshot view (to have markers on
    mouse over): cf views.table, implement CellRendererTimestamp
+
+* option to specify format_time (%M:%S)
 

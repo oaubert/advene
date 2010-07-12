@@ -209,6 +209,9 @@ class Config(object):
             'windowposition': {},
             'remember-window-size': True,
             'gui': { 'popup-textwidth': 40 },
+            # Timestamp format. Extended notation with %.S to display
+            # seconds as floating-point data, with milliseconds.
+            'timestamp-format': '%H:%M:%.S',
             # Scroll increment in ms (for Control-Scroll)
             'scroll-increment': 100,
             # Scroll increment in ms (for Control-Shift-Scroll)
