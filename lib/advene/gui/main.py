@@ -1350,9 +1350,12 @@ class AdveneGUI(object):
                                          gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
 
                 ta=TimeAdjustment(value=self.gui.slider.get_value(), controller=self.controller, videosync=False, editable=True, compact=False)
+                ta.entry.connect("activate", lambda w: d.response(gtk.RESPONSE_OK))
                 d.vbox.pack_start(ta.widget, expand=False)
                 d.show_all()
                 dialog.center_on_mouse(d)
+                ta.entry.select_region(0, -1)
+                ta.entry.grab_focus()
                 res=d.run()
                 retval=None
                 if res == gtk.RESPONSE_OK:
