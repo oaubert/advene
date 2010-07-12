@@ -287,6 +287,7 @@ class AdveneGUI(object):
                     ( _("_MediaInformation"), self.on_view_mediainformation_activate, _("Display information about the media") ),
                     ), "" ),
             (_("_Player"), (
+                    ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code") ),
                     ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
                     ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
                     ( _("Capture screenshots"), self.generate_screenshots, _("Generate screenshots for the current video") ),
@@ -896,6 +897,37 @@ class AdveneGUI(object):
                 pass
         return True
 
+    def goto_time_dialog(self, *p):
+        """Display a dialog to go to a given time.
+        """
+        t = self.input_time_dialog()
+        if t is not None:
+            self.controller.update_status ("set", self.controller.create_position(t))
+        return True
+
+    def input_time_dialog(self, *p):
+        """Display a dialog to enter a time value.
+        """
+        d = gtk.Dialog(title=_("Enter the new time value"),
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+
+        ta=TimeAdjustment(value=self.gui.slider.get_value(), controller=self.controller, videosync=False, editable=True, compact=False)
+        ta.entry.connect("activate", lambda w: d.response(gtk.RESPONSE_OK))
+        d.vbox.pack_start(ta.widget, expand=False)
+        d.show_all()
+        dialog.center_on_mouse(d)
+        ta.entry.select_region(0, -1)
+        ta.entry.grab_focus()
+        res=d.run()
+        retval=None
+        if res == gtk.RESPONSE_OK:
+            retval = ta.get_value()
+        d.destroy()
+        return retval
+
     def main (self, args=None):
         """Mainloop : Gtk mainloop setup.
 
@@ -1343,25 +1375,7 @@ class AdveneGUI(object):
 
         def time_pressed(w, event):
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-                d = gtk.Dialog(title=_("Enter the new time value"),
-                               parent=None,
-                               flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                               buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                         gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
-
-                ta=TimeAdjustment(value=self.gui.slider.get_value(), controller=self.controller, videosync=False, editable=True, compact=False)
-                ta.entry.connect("activate", lambda w: d.response(gtk.RESPONSE_OK))
-                d.vbox.pack_start(ta.widget, expand=False)
-                d.show_all()
-                dialog.center_on_mouse(d)
-                ta.entry.select_region(0, -1)
-                ta.entry.grab_focus()
-                res=d.run()
-                retval=None
-                if res == gtk.RESPONSE_OK:
-                    t=ta.get_value()
-                    self.controller.update_status ("set", self.controller.create_position (t))
-                d.destroy()
+                self.goto_time_dialog()
                 return True
             return True
 
