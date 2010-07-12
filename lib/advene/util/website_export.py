@@ -35,7 +35,7 @@ href_re=re.compile(r'''(href|src|about|resource)=['"](.+?)['"> ]''')
 snapshot_re=re.compile(r'/packages/[^/]+/imagecache/(\d+)')
 overlay_re=re.compile(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?')
 tales_re=re.compile('(\w+)/(.+)')
-player_re=re.compile(r'/media/play(/|\?position=)(\d+)')
+player_re=re.compile(r'/media/play(/|\?position=)(\d+)(/(\d+))?')
 overlay_replace_re=re.compile(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?')
 
 class WebsiteExporter(object):
@@ -292,7 +292,7 @@ class WebsiteExporter(object):
             elif self.video_url and player_re.search(url):
                 m=player_re.search(url)
                 if not 'stbv' in url:
-                    self.url_translation[original_url]=self.video_player.player_url(long(m.group(2)))
+                    self.url_translation[original_url]=self.video_player.player_url(m.group(2), m.group(4))
                 else:
                     self.url_translation[original_url]=self.unconverted(url, 'need advene')
             else:
@@ -560,10 +560,10 @@ class VideoPlayer(object):
         """
         return
 
-    def player_url(self, t):
+    def player_url(self, begin, end=None):
         """Return the converted player URL.
         """
-        return "unconverted.html?Player_at_%d" % t
+        return "unconverted.html?Player_at_%s" % begin
 
     def fix_link(self, link):
         """Convert link code.
@@ -614,11 +614,11 @@ class GoogleVideoPlayer(VideoPlayer):
         """
         return 'video.google' in video_url
 
-    def player_url(self, t):
+    def player_url(self, begin, end=None):
         """Return the URL to play video at the given time.
         """
         # Format: HH:MM:SS.mmm
-        return '%s#%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(long(t) / 1000)))
+        return '%s#%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(long(begin) / 1000)))
 
     def fix_link(self, link):
         """
@@ -654,11 +654,11 @@ class YoutubeVideoPlayer(VideoPlayer):
         """
         return 'youtube.com/watch' in video_url
 
-    def player_url(self, t):
+    def player_url(self, begin, end=None):
         """Return the URL to play video at the given time.
         """
         # Format: HHhMMmSSs
-        return '%s#t=%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(long(t) / 1000)))
+        return '%s#t=%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(long(begin) / 1000)))
 
     def fix_link(self, link):
         """
@@ -695,11 +695,13 @@ class HTML5VideoPlayer(VideoPlayer):
         # We always can handle videos.
         return True  
 
-    def player_url(self, t):
+    def player_url(self, begin, end=None):
         """Return the URL to play video at the given time.
         """
-        # Format: #time_in_s
-        return '%s#%d' % (self.video_url, (t / 1000))
+        if end is not None:
+            return '%s#t=%d,%d' % (self.video_url, (long(begin) / 1000), (long(end) / 1000))
+        else:
+            return '%s#t=%d' % (self.video_url, (long(begin) / 1000))
 
     def fix_link(self, link):
         """
