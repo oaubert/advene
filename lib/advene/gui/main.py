@@ -36,10 +36,12 @@ import urllib2
 import socket
 import threading
 import Queue
-import win32process
 
 import advene.core.config as config
 import advene.core.version
+
+if config.data.os == 'win32':
+    import win32process
 
 import gtk
 import gobject
@@ -4360,13 +4362,16 @@ class AdveneGUI(object):
                    '-i', gobject.filename_from_utf8(movie.encode('utf8')),
                    '-o', gobject.filename_from_utf8(pb._tempdir.encode('utf8')),
                    '-s', str(pb._sensitivity.get_value_as_int()) ]
+            flags = 0
+            if config.data.os == 'win32':
+                flags = win32process.CREATE_NO_WINDOW
             try:
                 pb._shots=subprocess.Popen( argv,
                                             bufsize=0,
                                             shell=False,
                                             stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE,
-                                            creationflags = win32process.CREATE_NO_WINDOW)
+                                            creationflags = flags)
             except OSError, e:
                 do_cancel(None, pb)
                 dialog.message_dialog(_("Could not run shotdetect: %s") % unicode(e), modal=False)
