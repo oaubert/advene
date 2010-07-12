@@ -97,9 +97,9 @@ class WebsiteExporter(object):
         # Note: HTML5VideoPlayer is also generic
         for cl in (GoogleVideoPlayer, YoutubeVideoPlayer, HTML5VideoPlayer, VideoPlayer):
             if cl.can_handle(video_url):
-                if p == 'HTML5VideoPlayer' and not self.video_url:
+                if cl == HTML5VideoPlayer and not self.video_url:
                     # Use current player movie
-                    self.video_url = self.controller.package.get_default_media()
+                    self.video_url = self.controller.get_default_media()
                 p=cl(self.destination, self.video_url)
                 break
         return p
