@@ -588,12 +588,11 @@ class AdveneGUI(object):
         self.quicksearch_button.connect('button-press-event', quicksearch_options)
         hb.pack_start(self.quicksearch_button, expand=False, fill=False)
         hb.show_all()
+
         # Player status
         p=self.controller.player
         self.update_player_labels()
-
         self.oldstatus = "NotStarted"
-
         self.last_slow_position = 0
 
         self.current_annotation = None
@@ -606,6 +605,10 @@ class AdveneGUI(object):
         self.edit_popups = []
 
         self.edit_accumulator = None
+
+        # Text abbreviations
+        self.text_abbreviations =  dict( l.split(" ", 1) for l in config.data.preferences['text-abbreviations'].splitlines() )
+
         # Populate default STBV and type lists
         self.update_gui()
 
@@ -2352,7 +2355,8 @@ class AdveneGUI(object):
 
         # Create the content indexer
         p._indexer=Indexer(controller=self.controller,
-                           package=p)
+                           package=p,
+                           abbreviations=self.text_abbreviations)
         p._indexer.initialize()
 
         self.controller.queue_action(self.check_for_default_adhoc_view, p)
@@ -3651,7 +3655,8 @@ class AdveneGUI(object):
                         'save-default-workspace', 'restore-default-workspace',
                         'slave-player-sync-delay',
                         'tts-language', 'record-actions', 'popup-destination',
-                        'timestamp-format' )
+                        'timestamp-format', 
+                        'abbreviation-mode', 'text-abbreviations' )
         path_options=('data', 'plugins', 'advene', 'imagecache', 'moviepath', 'shotdetect')
         cache={
             'font-size': config.data.preferences['timeline']['font-size'],
@@ -3790,6 +3795,10 @@ class AdveneGUI(object):
         ew.add_spin(_("Button height"), 'button-height', _("Height of annotation widgets"), 10, 50)
         ew.add_spin(_("Interline height"), 'interline-height', _("Height of interlines"), 0, 40)
 
+        ew.add_title(_("Text content"))
+        ew.add_checkbox(_("Abbreviation mode"), 'abbreviation-mode', _("Enable abbreviation mode"))
+        ew.add_text(_("Abbreviations"), 'text-abbreviations', _("Text abbreviations. 1 entry per line. Each line consists of the abbreviation followed by its replacement."))
+
         ew.add_title(_("Text-To-Speech"))
         ew.add_option(_("TTS language"), 'tts-language',
                       _("What language settings should be used for text-to-speech"),
@@ -3805,8 +3814,13 @@ class AdveneGUI(object):
             player_need_restart = False
 
             cache['package-auto-save-interval']=cache['package-auto-save-interval']*1000
+            if cache['text-abbreviations'] != config.data.preferences['text-abbreviations']:
+                self.text_abbreviations.clear()
+                self.text_abbreviations.update( dict( l.split(" ", 1) for l in config.data.preferences['text-abbreviations'].splitlines() ) )
+
             for k in direct_options:
                 config.data.preferences[k] = cache[k]
+
             for k in ('font-size', 'button-height', 'interline-height'):
                 config.data.preferences['timeline'][k] = cache[k]
             for k in path_options:

@@ -284,6 +284,8 @@ class Config(object):
             # instead of default popup
             'popup-destination': 'popup',
             'embedded': True,
+            'abbreviation-mode': True,
+            'text-abbreviations': '',
             }
 
         # Player options
