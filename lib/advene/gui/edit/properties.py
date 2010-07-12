@@ -82,6 +82,7 @@ class EditWidget(gtk.VBox):
     CHANGE_OPTION = 1
     CHANGE_SPIN = 2
     CHANGE_CHECKBOX = 3
+    CHANGE_TEXT = 4
 
     def __init__(self, set_config, get_config):
 
@@ -147,6 +148,9 @@ class EditWidget(gtk.VBox):
 
         elif (mode == self.CHANGE_SPIN):
             value = src.get_value_as_int()
+
+        elif (mode == self.CHANGE_TEXT):
+            value = src.get_text(*src.get_bounds())
 
         else:
             print "Unknown type", str(mode)
@@ -244,6 +248,27 @@ class EditWidget(gtk.VBox):
                       self.CHANGE_ENTRY)
 
 
+    def add_text(self, label, property, help):
+
+        lbl = gtk.Label(label)
+        lbl.show()
+        sw = gtk.ScrolledWindow()
+        entry = gtk.TextView()
+        sw.add(entry)
+        entry.show()
+        sw.show()
+        align = gtk.Alignment()
+        align.show()
+        align.add(lbl)
+
+        entry.set_tooltip_text(help)
+        self.__add_line(1, align)
+        self.__add_line(1, sw)
+
+        value = self.__get_config(property)
+        entry.get_buffer().set_text(value)
+        entry.get_buffer().connect('changed', self.__on_change, property,
+                                   self.CHANGE_TEXT)
 
     def add_spin(self, label, property, help, low, up):
 
