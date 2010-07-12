@@ -89,6 +89,7 @@ from advene.gui.util.completer import Indexer, Completer
 
 # GUI elements
 from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color, predefined_content_mimetypes
+from advene.gui.util.playpausebutton import PlayPauseButton
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
@@ -1177,7 +1178,8 @@ class AdveneGUI(object):
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
         self.drawable.connect_object('button-press-event', self.debug_cb, self.drawable)
 
-        self.player_toolbar=self.get_player_control_toolbar()
+        self.player_toolbar = self.get_player_control_toolbar()
+        self.playpause_button = self.player_toolbar.buttons['playpause']
 
         # Dynamic view selection
         hb=gtk.HBox()
@@ -1461,47 +1463,6 @@ class AdveneGUI(object):
             b.widget.connect('size-allocate', lambda w, e: a.scroll_to_bookmark(b) and False)
         return True
 
-    def update_control_toolbar(self, tb=None):
-        if tb is None:
-            tb=self.player_toolbar
-        p=self.controller.player
-
-        buttons=dict( (b.get_stock_id(), b)
-                      for b in tb.get_children()
-                      if hasattr(b, 'get_stock_id') )
-
-        if gtk.STOCK_MEDIA_PLAY in buttons:
-            b=buttons[gtk.STOCK_MEDIA_PLAY]
-        elif gtk.STOCK_MEDIA_RECORD in buttons:
-            b=buttons[gtk.STOCK_MEDIA_RECORD]
-        else:
-            b=None
-        if b:
-            if 'record' in p.player_capabilities:
-                b.set_stock_id(gtk.STOCK_MEDIA_RECORD)
-            else:
-                b.set_stock_id(gtk.STOCK_MEDIA_PLAY)
-
-        if 'record' in p.player_capabilities:
-            for (stock, b) in buttons.iteritems():
-                if stock in (gtk.STOCK_MEDIA_RECORD, gtk.STOCK_MEDIA_STOP, gtk.STOCK_MEDIA_PLAY):
-                    continue
-                b.set_sensitive(False)
-        else:
-            for b in buttons.itervalues():
-                b.set_sensitive(True)
-
-        if 'frame-by-frame' in p.player_capabilities:
-            buttons[gtk.STOCK_MEDIA_PREVIOUS].show()
-            buttons[gtk.STOCK_MEDIA_NEXT].show()
-        else:
-            buttons[gtk.STOCK_MEDIA_PREVIOUS].hide()
-            buttons[gtk.STOCK_MEDIA_NEXT].hide()
-        if hasattr(p, 'fullscreen'):
-            buttons[gtk.STOCK_FULLSCREEN].show()
-        else:
-            buttons[gtk.STOCK_FULLSCREEN].hide()
-
     def connect_fullscreen_handlers(self, widget):
         """Connect handlers to the fullscreen widget.
         """
@@ -1665,36 +1626,69 @@ class AdveneGUI(object):
         return False
 
     def get_player_control_toolbar(self):
-        """Return a player control toolbar
+        """Return a player control toolbar.
+        
+        It has a buttons attribute, which holds references to the buttons according to an identifier.
         """
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
 
-        # Note: beware, the order of buttons is significant here since
-        # they can be updated by the updated_player_cb method. In case
-        # of modification, ensure that both methods are still
-        # consistent.
         tb_list = [
-            (_("Play [Control-Tab / Control-Space]"), gtk.STOCK_MEDIA_PLAY, self.on_b_play_clicked),
-            (_("Pause [Control-Tab / Control-Space]"), gtk.STOCK_MEDIA_PAUSE, self.on_b_pause_clicked),
-            (_("Stop"), gtk.STOCK_MEDIA_STOP, lambda i: self.controller.update_status ("stop")),
-            (_("Rewind (%.02f s) [Control-Left]") % (config.data.preferences['time-increment'] / 1000.0), gtk.STOCK_MEDIA_REWIND, lambda i: self.controller.move_position (-config.data.preferences['time-increment'])),
-            (_("Forward (%.02f s) [Control-Right]" % (config.data.preferences['time-increment'] / 1000.0)), gtk.STOCK_MEDIA_FORWARD, lambda i: self.controller.move_position (config.data.preferences['time-increment'])),
-            (_("Previous frame [Control-Down]"), gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_frame(-1)),
-            (_("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_frame(+1)),
-            ( (_("Fullscreen"), gtk.STOCK_FULLSCREEN, lambda i: self.controller.player.fullscreen(self.connect_fullscreen_handlers)) )
+            ('playpause', _("Play/Pause [Control-Tab / Control-Space]"), gtk.STOCK_MEDIA_PLAY, self.on_b_play_clicked),
+            ('rewind', _("Rewind (%.02f s) [Control-Left]") % (config.data.preferences['time-increment'] / 1000.0), gtk.STOCK_MEDIA_REWIND, lambda i: self.controller.move_position (-config.data.preferences['time-increment'])),
+            ('forward', _("Forward (%.02f s) [Control-Right]" % (config.data.preferences['time-increment'] / 1000.0)), gtk.STOCK_MEDIA_FORWARD, lambda i: self.controller.move_position (config.data.preferences['time-increment'])),
+            ('previous_frame', _("Previous frame [Control-Down]"), gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_frame(-1)),
+            ('next_frame', _("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_frame(+1)),
+            ('fullscreen', _("Fullscreen"), gtk.STOCK_FULLSCREEN, lambda i: self.controller.player.fullscreen(self.connect_fullscreen_handlers) ),
             ]
 
-        for text, stock, callback in tb_list:
-            b=gtk.ToolButton(stock)
+        tb.buttons = {}
+        for name, text, stock, callback in tb_list:
+            if name == 'playpause':
+                b = PlayPauseButton(stock)
+            else:
+                b = gtk.ToolButton(stock)
             b.set_tooltip_text(text)
             b.connect('clicked', callback)
             tb.insert(b, -1)
+            tb.buttons[name] = b
 
         tb.show_all()
         # Call update_control_toolbar()
         self.update_control_toolbar(tb)
         return tb
+
+    def update_control_toolbar(self, tb=None):
+        """Update player control toolbar.
+
+        It modifies buttons according to the player capabilities.
+        """
+        if tb is None:
+            tb=self.player_toolbar
+        p=self.controller.player
+
+        if 'record' in p.player_capabilities:
+            tb.buttons['playpause'].set_stock_ids(gtk.STOCK_MEDIA_RECORD, gtk.STOCK_MEDIA_STOP)
+            for name, b in tb.buttons.iteritems():
+                if name == 'playpause':
+                    continue
+                b.set_sensitive(False)
+        else:
+            tb.buttons['playpause'].set_stock_ids(gtk.STOCK_MEDIA_PLAY, gtk.STOCK_MEDIA_PAUSE)
+            for b in tb.buttons.itervalues():
+                b.set_sensitive(True)
+
+        if 'frame-by-frame' in p.player_capabilities:
+            tb.buttons['previous_frame'].show()
+            tb.buttons['next_frame'].show()
+        else:
+            tb.buttons['previous_frame'].hide()
+            tb.buttons['next_frame'].hide()
+
+        if hasattr(p, 'fullscreen'):
+            tb.buttons['fullscreen'].show()
+        else:
+            tb.buttons['fullscreen'].hide()
 
     def loop_on_annotation_gui(self, a, goto=False):
         """Loop over an annotation
@@ -2552,13 +2546,14 @@ class AdveneGUI(object):
         Hence, it is a critical execution path and care should be
         taken with the code used here.
         """
+        p = self.controller.player
         # Synopsis:
         # Ask the controller to update its status
         # If we are moving the slider, don't update the display
         #gtk.threads_enter()
         try:
             pos=self.controller.update()
-        except self.controller.player.InternalException:
+        except p.InternalException:
             # FIXME: something sensible to do here ?
             print "Internal error on video player"
             #gtk.threads_leave()
@@ -2580,7 +2575,7 @@ class AdveneGUI(object):
             # snapshots, and display them to make the navigation in the
             # stream easier
             pass
-        elif self.controller.player.status in self.active_player_status:
+        elif p.status in self.active_player_status:
             t=helper.format_time(pos)
             if t != self.time_label.get_text():
                 self.time_label.set_text(t)
@@ -2593,9 +2588,10 @@ class AdveneGUI(object):
             if self.gui.slider.get_value() != pos:
                 self.gui.slider.set_value(pos)
 
-            if self.controller.player.status != self.oldstatus:
-                self.oldstatus = self.controller.player.status
-                self.gui.player_status.set_text(self.statustext.get(self.controller.player.status, _("Unknown")))
+            if p.status != self.oldstatus:
+                self.oldstatus = p.status
+                self.gui.player_status.set_text(self.statustext.get(p.status, _("Unknown")))
+                self.playpause_button.set_active(self.oldstatus != p.PlayingStatus)
 
             # Update the position mark in the registered views
             # Note: beware when implementing update_position in views:
@@ -2614,9 +2610,10 @@ class AdveneGUI(object):
             t=helper.format_time(None)
             if t != self.time_label.get_text():
                 self.time_label.set_text(t)
-            if self.controller.player.status != self.oldstatus:
+            if p.status != self.oldstatus:
                 self.oldstatus = self.controller.player.status
-                self.gui.player_status.set_text(self.statustext.get(self.controller.player.status, _("Unknown")))
+                self.gui.player_status.set_text(self.statustext.get(p.status, _("Unknown")))
+                self.playpause_button.set_active(self.oldstatus != p.PlayingStatus)
             # New position_update call to handle the starting case (the first
             # returned status is None)
             self.controller.position_update ()
@@ -3510,21 +3507,15 @@ class AdveneGUI(object):
         return True
 
     def on_b_play_clicked (self, button=None, data=None):
-        if not self.controller.player.playlist_get_list():
+        p = self.controller.player
+        if not p.playlist_get_list():
             # No movie file is defined yet. Propose to choose one.
             self.on_b_addfile_clicked()
             return True
-        if self.controller.player.status == self.controller.player.PauseStatus:
-            self.controller.update_status ("resume")
-        elif self.controller.player.status != self.controller.player.PlayingStatus:
-            self.controller.update_status ("start")
-        return True
-
-    def on_b_pause_clicked (self, button=None, data=None):
-        if self.controller.player.status == self.controller.player.PauseStatus:
-            self.controller.update_status ("resume")
-        elif self.controller.player.status == self.controller.player.PlayingStatus:
-            self.controller.update_status ("pause")
+        if p.status == p.PlayingStatus:
+            self.controller.update_status("pause")
+        else:
+            self.controller.update_status("resume")
         return True
 
     def on_b_addfile_clicked (self, button=None, data=None):
