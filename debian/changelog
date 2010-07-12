@@ -1,6 +1,54 @@
 advene (0.43) unstable; urgency=low
 
-  * 
+  * Timecode display can be customized through Edit/Preferences/Time-related
+  
+  * Timecodes can be entered as milliseconds (12300), seconds (12.300 ->
+    floating point values) or complete timestamps (00:00:12.300)
+
+  * Website export can now automatically generate HTML5 <video> code,
+    thanks to Madjid Sadallah.
+  
+  * Player control
+  
+     * The player is automatically started and paused when loading a movie/package.
+  
+     * The Play/Pause button is now unique, and the Stop button has been removed.
+  
+     * The Mute/Unmute button has been replaced by a volume slider.
+     
+     * Control-Up/Down keys can be used to navigate with user-specified
+       times (without Shift modifier), see Edit/Preferences/Time-related for
+       customization.
+  
+     * Fullscreen mode now has specific shortcuts. Basically, navigation
+       keys (space, left/right, up/down...) can be used without holding
+       Control.
+  
+  * Timeline view:
+  
+     * Control+click in the timeline backgroudn creates and edits a new
+       annotation at the current player position (and in the appropriate
+       type)
+
+     * New shortcuts :
+  
+          * Del deletes annotations (previously, it was necessary to hold
+            Shift-Del)
+            
+          * a on an annotation-type invokes the "Shot adjustment" interface
+  
+          * a/A on on annotation invokes the "Frame selector" interface
+  
+  * Table view:
+  
+    * Clicking on the snapshot column plays the movie at the specified
+      position.
+  
+  * Abbreviations can be used to enter text more quickly. See
+    Edit/Preferences/Text Content for customization.
+  
+  * Workspace is now always saved in the package in the standard
+    configuration. See Edit/Preferences/Workspace for configuration.
 
  --
 
