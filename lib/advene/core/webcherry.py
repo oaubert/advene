@@ -515,7 +515,7 @@ class Media(Common):
         return res
     overlay.exposed=True
 
-    def play(self, position=None, **params):
+    def play(self, begin=None, end=None, **params):
         """Play the movie.
 
         Optional parameters:
@@ -532,12 +532,12 @@ class Media(Common):
         if not c.player.playlist_get_list():
             return self.send_no_content()
 
-        if position is None:
+        if begin is None:
             try:
-                position=params['position']
+                begin=params['position']
             except KeyError:
-                position=0
-        pos=c.create_position (value=long(position),
+                begin=0
+        pos=c.create_position (value=long(begin),
                                key=c.player.MediaTime,
                                origin=c.player.AbsolutePosition)
         c.queue_action( c.update_status, "start", pos )
