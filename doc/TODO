@@ -1,7 +1,5 @@
 * add PyDiscoverer interface, to get movie details ASAP
 
-* autoplay at package open?
-
 * win32: check update of directshowsink (esp. when paused)
 
 * win32: add icon for .azp files
@@ -2748,4 +2746,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * transcribe: add shortcut handling (like in word: ct<space> -> word)
 
 ** Make the play + pause button a unique button => not that easy
+
+* autoplay at package open?
 
