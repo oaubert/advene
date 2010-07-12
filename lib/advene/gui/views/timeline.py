@@ -1706,7 +1706,13 @@ class TimeLine(AdhocView):
 
         # Put the entry on the layout
         al=button.get_allocation()
-        button.parent.put(e, al.x, al.y)
+        if al.x == -1 and al.y == -1:
+            # We have just create the annotation widget. Its child
+            # properties wrt. layout are not yet updated. Simply
+            # compute them again.
+            button.parent.put(e, self.unit2pixel(annotation.fragment.begin, absolute=True), self.layer_position[annotation.type])
+        else:
+            button.parent.put(e, al.x, al.y)
         e.connect('size-allocate', grab_focus)
         # Keep the inspector window open on the annotation
         self.set_annotation(annotation)
@@ -2790,7 +2796,7 @@ class TimeLine(AdhocView):
                 if el is not None:
                     b=self.create_annotation_widget(el)
                     b.show()
-                    self.quick_edit(el, button=widget, callback=set_end_time)
+                    self.quick_edit(el, button=b, callback=set_end_time)
                 return True
             elif event.keyval == gtk.keysyms.space:
                 self.restrict_playing(at, widget)
