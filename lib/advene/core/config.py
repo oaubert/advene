@@ -222,6 +222,9 @@ class Config(object):
             'second-time-increment': 5000,
             # Time increment (Control-Shift-Up/Down)
             'third-time-increment': 1,
+            # Custom up/down: use third-time-increment for up/down, do
+            # not require Shift
+            'custom-updown-keys': False,
             'timeline': {
                 'font-size': 10,
                 'button-height': 20,

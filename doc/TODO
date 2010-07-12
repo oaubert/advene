@@ -2,12 +2,6 @@
 
 * timestamp input: multiple formats
 
-* in fs mode: up/down -> 1 min
-
-* fullscreen mode: 1->9 : equivalent slider
-
-* fullscreen controller: arrows without Control
-
 * autoplay at package open
 
 * win32: check update of directshowsink (esp. when paused)
@@ -2755,4 +2749,10 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * timeline: remove "goto on single click" toolbutton
 
 * Timeline: DEL on annotation (remove shift)
+
+* in fs mode: up/down -> 1 min
+
+* fullscreen mode: 1->9 : equivalent slider
+
+* fullscreen controller: arrows without Control
 

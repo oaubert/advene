@@ -1538,13 +1538,13 @@ class AdveneGUI(object):
         self.controller.move_position (-config.data.preferences[i], notify=False)
 
     def player_forward_frame(self, event):
-        if event.state & gtk.gdk.SHIFT_MASK:
+        if config.data.preferences['custom-updown-keys'] or event.state & gtk.gdk.SHIFT_MASK:
             self.controller.move_position(+config.data.preferences['third-time-increment'], notify=False)
         else:
             self.controller.move_frame(+1)
 
     def player_rewind_frame(self, event):
-        if event.state & gtk.gdk.SHIFT_MASK:
+        if config.data.preferences['custom-updown-keys'] or event.state & gtk.gdk.SHIFT_MASK:
             self.controller.move_position(-config.data.preferences['third-time-increment'], notify=False)
         else:
             self.controller.move_frame(-1)
@@ -1602,7 +1602,6 @@ class AdveneGUI(object):
         gtk.keysyms.KP_Home: player_home,
         gtk.keysyms.KP_End: player_end,
         gtk.keysyms.KP_Insert: player_create_bookmark,
-
         }
 
     fullscreen_key_shortcuts = {
@@ -3643,6 +3642,7 @@ class AdveneGUI(object):
     def on_preferences1_activate (self, button=None, data=None):
         direct_options=('history-size-limit', 'scroll-increment', 'second-scroll-increment',
                         'time-increment', 'second-time-increment', 'third-time-increment',
+                        'custom-updown-keys',
                         'language',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit',
                         'remember-window-size', 'expert-mode', 'update-check',
@@ -3779,6 +3779,8 @@ class AdveneGUI(object):
         ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 1, 300000)
         ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 1, 300000)
         ew.add_spin(_("Third time increment"), "third-time-increment", _("Skip duration, when using control-shift-up/down (in ms)."), 1, 300000)
+        ew.add_checkbox(_("Custom Up/Down"), 'custom-updown-keys', _("Use third time increment for up/down navigation without having to hold shift."))
+        ew.add_label("")
         ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 10000)
         ew.add_spin(_("Second scroll increment"), "second-scroll-increment", _("On most annotations, control+shift+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 10000)
         ew.add_label("")
