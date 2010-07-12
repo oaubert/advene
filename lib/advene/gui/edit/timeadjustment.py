@@ -138,6 +138,7 @@ class TimeAdjustment:
 
         if self.editable:
             self.entry=gtk.Entry()
+            self.entry.set_tooltip_text(_("Enter a timecode.\nAn integer value will be considered as milliseconds.\nA float value (12.2) will be considered as seconds.\nHH:MM:SS.sss values are possible."))
             # Default width of the entry field
             self.entry.set_width_chars(len(helper.format_time(0.0)))
             self.entry.connect('activate', self.convert_entered_value)
