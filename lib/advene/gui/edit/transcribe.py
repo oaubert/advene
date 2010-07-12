@@ -959,7 +959,7 @@ class TranscriptionEdit(AdhocView):
                 # transcription by mistake
                 self.sourcefile=filename
                 ignore, timestamp, text = m.group(1, 2, 3)
-                t=helper.convert_time(timestamp)
+                t=helper.parse_time(timestamp)
                 if last_time != t or ignore:
                     it=b.get_iter_at_mark(b.get_insert())
                     mark=self.create_timestamp_mark(t, it)

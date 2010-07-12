@@ -314,13 +314,13 @@ class GenericImporter(object):
             self.package, self.defaulttype=self.init_package()
         for d in source:
             try:
-                begin=helper.convert_time(d['begin'])
+                begin=helper.parse_time(d['begin'])
             except KeyError:
                 raise Exception("Begin is mandatory")
             if 'end' in d:
-                end=helper.convert_time(d['end'])
+                end=helper.parse_time(d['end'])
             elif 'duration' in d:
-                end=begin+helper.convert_time(d['duration'])
+                end=begin + helper.parse_time(d['duration'])
             else:
                 raise Exception("end or duration is missing")
             try:
@@ -463,7 +463,7 @@ class LsDVDImporter(GenericImporter):
             m=reg.search(l)
             if m is not None:
                 d=m.groupdict()
-                duration=helper.convert_time(d['duration'])
+                duration=helper.parse_time(d['duration'])
                 res={'content': "Chapter %s" % d['chapter'],
                      'begin': begin,
                      'duration': duration}
@@ -521,7 +521,7 @@ class ChaplinImporter(GenericImporter):
             m=reg.search(l)
             if m is not None:
                 d=m.groupdict()
-                end=helper.convert_time(d['begin'])
+                end=helper.parse_time(d['begin'])
                 if chapter is not None:
                     res={ 'content': "Chapter %s" % chapter,
                           'begin': begin,
@@ -998,7 +998,7 @@ class CmmlImporter(GenericImporter):
             npt=npt[4:]
 
         try:
-            msec=helper.convert_time(npt)
+            msec=helper.parse_time(npt)
         except Exception, e:
             self.log("Unhandled NPT format: " + npt)
             self.log(str(e))

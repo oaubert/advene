@@ -275,7 +275,7 @@ def format_time (val = 0):
 
 small_time_regexp=re.compile('(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
 time_regexp=re.compile('(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
-def convert_time(s):
+def parse_time(s):
     """Convert a time string as long.
 
     If the parameter is a number, it is considered as a ms value.
