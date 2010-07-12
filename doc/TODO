@@ -1,3 +1,7 @@
+* add PyDiscoverer interface, to get movie details ASAP
+
+* timestamp input: multiple formats
+
 * in fs mode: up/down -> 1 min
 
 * fullscreen mode: 1->9 : equivalent slider
@@ -5,8 +9,6 @@
 * autoplay at package open
 
 * win32: check update of directshowsink (esp. when paused)
-
-* timeline: remove "goto on single click" toolbutton
 
 * option to stop player synchronisation then use current position as
    time offset
@@ -2751,4 +2753,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
    mouse over): cf views.table, implement CellRendererTimestamp
 
 * option to specify format_time (%M:%S)
+
+* timeline: remove "goto on single click" toolbutton
 

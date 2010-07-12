@@ -139,7 +139,6 @@ class TimeLine(AdhocView):
             'display-relations': True,
             'display-relation-type': True,
             'display-relation-content': True,
-            'goto-on-click': True,
             }
         self.controller=controller
 
@@ -1547,7 +1546,7 @@ class TimeLine(AdhocView):
     def annotation_button_release_cb(self, widget, event, annotation):
         """Handle button release on annotation widgets.
         """
-        if self.options['goto-on-click'] and event.button == 1 and widget._single_click_guard:
+        if event.button == 1 and widget._single_click_guard:
             self.controller.gui.set_current_annotation(annotation)
             # Goto annotation
             c=self.controller
@@ -3363,16 +3362,6 @@ class TimeLine(AdhocView):
         self.loop_toggle_button.connect('toggled', loop_toggle_cb)
         self.loop_toggle_button.set_tooltip_text(_('Automatically activate loop when clicking on an annotation'))
         tb.insert(self.loop_toggle_button, -1)
-
-        def goto_toggle_cb(b):
-            self.options['goto-on-click']=b.get_active()
-            return True
-
-        self.goto_on_click_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_GO_FORWARD)
-        self.goto_on_click_toggle.set_active(self.options['goto-on-click'])
-        self.goto_on_click_toggle.connect('toggled', goto_toggle_cb)
-        self.goto_on_click_toggle.set_tooltip_text(_('Goto annotation when clicking'))
-        tb.insert(self.goto_on_click_toggle, -1)
 
         ti=gtk.SeparatorToolItem()
         ti.set_expand(True)
