@@ -1502,6 +1502,7 @@ class AdveneGUI(object):
     def connect_fullscreen_handlers(self, widget):
         """Connect handlers to the fullscreen widget.
         """
+        widget.connect('key-press-event', self.process_fullscreen_shortcuts)
         widget.connect('key-press-event', self.process_player_shortcuts)
         widget.connect('scroll-event', self.on_slider_scroll_event) 
 
@@ -1564,6 +1565,9 @@ class AdveneGUI(object):
                                  origin = c.player.ModuloPosition)
         c.update_status ("set", pos)
 
+    def player_set_fraction(self, f):
+        self.controller.update_status("set", self.controller.create_position(long(self.controller.cached_duration * f)))
+
     control_key_shortcuts={
         gtk.keysyms.Tab: player_play_pause,
         gtk.keysyms.space: player_play_pause,
@@ -1598,8 +1602,32 @@ class AdveneGUI(object):
         gtk.keysyms.KP_Home: player_home,
         gtk.keysyms.KP_End: player_end,
         gtk.keysyms.KP_Insert: player_create_bookmark,
+
         }
 
+    fullscreen_key_shortcuts = {
+        gtk.keysyms.Tab: player_play_pause,
+        gtk.keysyms.space: player_play_pause,
+        gtk.keysyms.Up: player_forward_frame,
+        gtk.keysyms.Down: player_rewind_frame,
+        gtk.keysyms.Right: player_forward,
+        gtk.keysyms.Left: player_rewind,
+        gtk.keysyms.Home: player_home,
+        gtk.keysyms.Insert: player_create_bookmark,
+
+        # French keyboard navigation
+        gtk.keysyms.ampersand:  lambda s, e: s.player_set_fraction(.0),
+        gtk.keysyms.eacute:     lambda s, e: s.player_set_fraction(.1),
+        gtk.keysyms.quotedbl:   lambda s, e: s.player_set_fraction(.2),
+        gtk.keysyms.apostrophe: lambda s, e: s.player_set_fraction(.3),
+        gtk.keysyms.parenleft:  lambda s, e: s.player_set_fraction(.4),
+        gtk.keysyms.minus:      lambda s, e: s.player_set_fraction(.5),
+        gtk.keysyms.egrave:     lambda s, e: s.player_set_fraction(.6),
+        gtk.keysyms.underscore: lambda s, e: s.player_set_fraction(.7),
+        gtk.keysyms.ccedilla:   lambda s, e: s.player_set_fraction(.8),
+        gtk.keysyms.agrave:     lambda s, e: s.player_set_fraction(.9),
+        }
+    
     def process_player_shortcuts(self, win, event):
         """Generic player control shortcuts.
 
@@ -1621,6 +1649,16 @@ class AdveneGUI(object):
             return True
         elif event.state & gtk.gdk.CONTROL_MASK and event.keyval in self.control_key_shortcuts:
             self.control_key_shortcuts[event.keyval](self, event)
+            return True
+        return False
+
+    def process_fullscreen_shortcuts(self, win, event):
+        """Fullscreen player control shortcuts.
+        """
+        c=self.controller
+        p=self.controller.player
+        if event.keyval in self.fullscreen_key_shortcuts:
+            self.fullscreen_key_shortcuts[event.keyval](self, event)
             return True
         return False
 
