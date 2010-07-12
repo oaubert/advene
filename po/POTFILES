@@ -13,7 +13,6 @@
 ../lib/advene/plugins/shotdetect.py
 ../lib/advene/util/importer.py
 ../lib/advene/util/helper.py
-../lib/advene/util/exporter.py
 ../lib/advene/util/website_export.py
 ../lib/advene/gui/popup.py
 ../lib/advene/gui/views/activebookmarks.py
