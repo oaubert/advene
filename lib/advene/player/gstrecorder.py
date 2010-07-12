@@ -131,8 +131,10 @@ class Player:
         videosrc='autovideosrc'
         videosink='autovideosink'
 
-        self.pipeline=gst.parse_launch('%(videosrc)s ! video/x-raw-yuv,width=352,height=288 ! queue ! tee name=tee ! ffmpegcolorspace ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s ! audioconvert ! vorbisenc ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
+        self.pipeline=gst.parse_launch('%(videosrc)s name=videosrc ! video/x-raw-yuv,width=352,height=288 ! queue ! tee name=tee ! ffmpegcolorspace ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s name=audiosrc ! audioconvert ! vorbisenc ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
         self.imagesink=self.pipeline.get_by_name('sink')
+        self.videosrc=self.pipeline.get_by_name('videosrc')
+        self.audiosrc=self.pipeline.get_by_name('audiosrc')
         self.player=self.pipeline
 
         # Asynchronous XOverlay support.
@@ -273,20 +275,11 @@ class Player:
 
         The result is a long value in [0, 100]
         """
-        if self.player is None:
-            return 0
-        v = self.player.get_property('volume') * 100 / 4
-        return long(v)
+        # FIXME: should handle this properly
+        return 50
 
     def sound_set_volume(self, v):
-        if self.player is None:
-            return 0
-        if v > 100:
-            v = 100
-        elif v < 0:
-            v = 0
-        v = v * 4.0 / 100
-        self.player.set_property('volume', v)
+        return 50
 
     # Helper methods
     def create_position (self, value=0, key=None, origin=None):
