@@ -3740,7 +3740,7 @@ class AdveneGUI(object):
                 })
         ew.add_spin(_("Auto-save interval (in s)"), 'package-auto-save-interval', _("Interval (in seconds) between package auto-saves"), 5, 60 * 60)
 
-        ew.add_title(_("Standard views"))
+        ew.add_title(_("Workspace"))
 
         ew.add_option(_("On package saving,"), 'save-default-workspace',
                       _("Do you wish to save the default workspace with the package?"),
