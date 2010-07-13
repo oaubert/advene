@@ -2234,9 +2234,11 @@ class AdveneController(object):
         """
         # Process the event queue
         self.process_queue()
+        
+        p = self.player
 
         pos=self.position_update ()
-
+        
         if pos < self.last_position:
             # We did a seek compared to the last time, so we
             # invalidate the future_begins and future_ends lists
@@ -2269,7 +2271,7 @@ class AdveneController(object):
         if self.future_begins is None or self.future_ends is None:
             self.future_begins, self.future_ends = self.generate_sorted_lists (pos)
 
-        if self.future_begins and self.player.status == self.player.PlayingStatus:
+        if self.future_begins and p.status == p.PlayingStatus:
             a, b, e = self.future_begins[0]
             while b <= pos:
                 # Ignore if we were after the annotation end
@@ -2284,7 +2286,7 @@ class AdveneController(object):
                 else:
                     break
 
-        if self.future_ends and self.player.status == self.player.PlayingStatus:
+        if self.future_ends and p.status == p.PlayingStatus:
             a, b, e = self.future_ends[0]
             while e <= pos:
                 #print "Comparing %d < %d for %s" % (e, pos, a.content.data)
@@ -2301,12 +2303,18 @@ class AdveneController(object):
                 else:
                     break
 
+        if p.stream_duration > self.cached_duration + 2000:
+            # Something wrong here. Can be a live stream, or a unknown
+            # length movie.  The "+ 2000" is here to make sure that we
+            # do not spend our time updating, since it could be a live
+            # stream played/recorded.
+            self.cached_duration=long(p.stream_duration)
+            self.notify('DurationUpdate', duration=self.cached_duration)
         # Update the cached duration if necessary
-        if self.pending_duration_update and self.player.stream_duration > 0:
-            self.cached_duration=long(self.player.stream_duration)
+        elif self.pending_duration_update and p.stream_duration > 0:
+            self.cached_duration=long(p.stream_duration)
             self.notify('DurationUpdate', duration=self.cached_duration)
             self.pending_duration_update = False
-
 
         return pos
 
