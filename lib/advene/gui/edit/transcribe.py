@@ -458,21 +458,9 @@ class TranscriptionEdit(AdhocView):
             return True
 
         def popup_edit(i, button):
-            d = gtk.Dialog(title=_("Enter the new time value"),
-                           parent=None,
-                           flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                           buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
-            ta=TimeAdjustment(value=button.value,
-                              controller=self.controller)
-            d.vbox.pack_start(ta.widget, expand=False)
-            d.show_all()
-            dialog.center_on_mouse(d)
-            res=d.run()
-            retval=None
-            if res == gtk.RESPONSE_OK:
-                button.value = ta.get_value()
-            d.destroy()
+            v = self.controller.gui.input_time_dialog()
+            if v is not None:
+                button.value = v
             return True
 
         def popup_ignore(win, button):
