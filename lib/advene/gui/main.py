@@ -1599,7 +1599,7 @@ class AdveneGUI(object):
         gtk.keysyms.Home: player_home,
         gtk.keysyms.Insert: player_create_bookmark,
 
-        # French keyboard navigation
+        # AZERTY keyboard navigation
         gtk.keysyms.ampersand:  lambda s, e: s.player_set_fraction(.0),
         gtk.keysyms.eacute:     lambda s, e: s.player_set_fraction(.1),
         gtk.keysyms.quotedbl:   lambda s, e: s.player_set_fraction(.2),
@@ -1610,6 +1610,19 @@ class AdveneGUI(object):
         gtk.keysyms.underscore: lambda s, e: s.player_set_fraction(.7),
         gtk.keysyms.ccedilla:   lambda s, e: s.player_set_fraction(.8),
         gtk.keysyms.agrave:     lambda s, e: s.player_set_fraction(.9),
+
+        # QWERTY keyboard navigation
+        gtk.keysyms._1:  lambda s, e: s.player_set_fraction(.0),
+        gtk.keysyms._2:  lambda s, e: s.player_set_fraction(.1),
+        gtk.keysyms._3:  lambda s, e: s.player_set_fraction(.2),
+        gtk.keysyms._4:  lambda s, e: s.player_set_fraction(.3),
+        gtk.keysyms._5:  lambda s, e: s.player_set_fraction(.4),
+        gtk.keysyms._6:  lambda s, e: s.player_set_fraction(.5),
+        gtk.keysyms._7:  lambda s, e: s.player_set_fraction(.6),
+        gtk.keysyms._8:  lambda s, e: s.player_set_fraction(.7),
+        gtk.keysyms._9:  lambda s, e: s.player_set_fraction(.8),
+        gtk.keysyms._0:  lambda s, e: s.player_set_fraction(.9),
+
         }
     
     def process_player_shortcuts(self, win, event):
@@ -2244,7 +2257,6 @@ class AdveneGUI(object):
                     return False
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
         elif name == 'comment':
-            print "Creating view"
             v=self.controller.create_static_view(elements=[])
             label=_("Comment view (%s)" % time.strftime('%Y%m%d - %H:%M'))
             v.title=label
