@@ -566,7 +566,7 @@ class TranscriptionEdit(AdhocView):
 
         def handle_scroll_event(button, event):
             if not (event.state & gtk.gdk.CONTROL_MASK):
-                return True
+                return False
             if event.state & gtk.gdk.SHIFT_MASK:
                 i='second-scroll-increment'
             else:
