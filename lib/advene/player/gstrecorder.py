@@ -204,6 +204,9 @@ class Player:
         return
 
     def start(self, position=None):
+        if self.current_status() == self.PlayingStatus:
+            # Already started
+            return
         self.videofile=time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
         self.build_pipeline()
         if self.player is None:
@@ -211,16 +214,12 @@ class Player:
         self.player.set_state(gst.STATE_PLAYING)
 
     def pause(self, position=None):
-        """Not a real pause, but rather a record stop.
-        
-        The removal of the Stop button forces us to emulate stop
-        through pause.
-        """
-        self.stop()
+        # Ignore
+        return
 
     def resume(self, position=None):
-        if self.current_status() != self.PlayingStatus:
-            self.start()
+        # Ignore
+        return 
 
     def stop(self, position=None):
         self.stream_duration=self.current_position
@@ -322,32 +321,14 @@ class Player:
         @type position: long
         """
         #print "gstrec - update_status ", status, str(position)
-        if position is None:
-            position=0
-        else:
-            position=self.position2value(position)
 
-        if status == "start" or status == "set":
+        # We only handle "start" and "stop".
+        if status == "start":
             self.position_update()
             if self.status not in (self.PlayingStatus, self.PauseStatus):
-                self.start(position)
-            else:
-                self.set_media_position(position)
-        else:
-            if status == "pause":
-                self.position_update()
-                if self.status == self.PauseStatus:
-                    self.resume (position)
-                else:
-                    self.pause(position)
-            elif status == "resume":
-                self.resume (position)
-            elif status == "stop":
-                self.stop (position)
-            elif status == "" or status == None:
-                pass
-            else:
-                print "******* Error : unknown status %s in gstrecorder player" % status
+                self.start()
+        elif status == "stop":
+            self.stop ()
         self.position_update ()
 
     def is_active(self):
