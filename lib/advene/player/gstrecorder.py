@@ -403,3 +403,8 @@ class Player:
             i=indent+"  "
             l.extend( [ self.disp(c, i) for c in e.elements() ])
         return ("\n"+indent).join(l)
+
+    def fullscreen(self, *p):
+        # Not implemented
+        return
+
