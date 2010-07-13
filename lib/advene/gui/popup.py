@@ -668,7 +668,7 @@ class Menu:
             v=self.controller.create_static_view([ at ])
             self.controller.gui.edit_element(v)
             return True
-        add_item(_('Create a static view'), lambda i: create_static(element))
+        add_item(_('Create a comment view'), lambda i: create_static(element))
         add_item(_('Generate a caption dynamic view'), lambda i: self.create_dynamic_view(element))
         add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % element.id))
         add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations))
