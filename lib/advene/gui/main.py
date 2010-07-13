@@ -3534,9 +3534,15 @@ class AdveneGUI(object):
             self.on_b_addfile_clicked()
             return True
         if p.status == p.PlayingStatus:
-            self.controller.update_status("pause")
+            if 'record' in p.player_capabilities:
+                self.controller.update_status("stop")
+            else:
+                self.controller.update_status("pause")
         else:
-            self.controller.update_status("resume")
+            if 'record' in p.player_capabilities:
+                self.controller.update_status("start")
+            else:
+                self.controller.update_status("resume")
         return True
 
     def on_b_addfile_clicked (self, button=None, data=None):
