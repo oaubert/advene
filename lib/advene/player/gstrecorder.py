@@ -247,7 +247,10 @@ class Player:
         self.videofile=None
 
     def playlist_get_list(self):
-        return [ self.videofile ]
+        if self.videofile is None:
+            return [ ]
+        else:
+            return [ self.videofile  ]
 
     def snapshot(self, position):
         return None
