@@ -197,8 +197,8 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
             except AttributeError:
                 pass
         # FIXME: bad hardcoded value
-        if len(title) > 50:
-            title=title[:50]
+        #if len(title) > 50:
+        #    title=title[:50]
         if isinstance(node, Annotation):
             title="%s (%s, %s)" % (title,
                                    helper.format_time(node.fragment.begin),

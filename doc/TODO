@@ -1,8 +1,6 @@
+* fullscreen: optionally display information over the video (status, position)
+
 * add PyDiscoverer interface, to get movie details ASAP
-
-* win32: check update of directshowsink (esp. when paused)
-
-* win32: add icon for .azp files
 
 * option to stop player synchronisation then use current position as time offset
 
