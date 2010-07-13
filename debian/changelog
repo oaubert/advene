@@ -22,11 +22,13 @@ advene (0.43) unstable; urgency=low
   
      * Fullscreen mode now has specific shortcuts. Basically, navigation
        keys (space, left/right, up/down...) can be used without holding
-       Control.
+       Control. See
+       http://liris.cnrs.fr/advene/wiki/index.php/AdveneShortcuts#Fullscreen_shortcuts
+       for more details.
   
   * Timeline view:
   
-     * Control+click in the timeline backgroudn creates and edits a new
+     * Control+click in the timeline background creates and edits a new
        annotation at the current player position (and in the appropriate
        type)
 
