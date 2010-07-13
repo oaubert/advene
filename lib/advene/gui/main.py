@@ -949,7 +949,7 @@ class AdveneGUI(object):
         self.gui.application_space.add(self.visualisationwidget)
 
         def media_changed(context, parameters):
-            if config.data.preferences['player-autostart']:
+            if config.data.preferences['player-autostart'] and not 'record' in self.controller.player.player_capabilities:
                 self.controller.queue_action(self.controller.update_status, "start")
                 self.controller.queue_action(self.controller.update_status, "pause")
 
