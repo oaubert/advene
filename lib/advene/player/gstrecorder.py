@@ -206,19 +206,21 @@ class Player:
     def start(self, position=None):
         self.videofile=time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
         self.build_pipeline()
-        self.set_visual(self.xid)
-
         if self.player is None:
             return
         self.player.set_state(gst.STATE_PLAYING)
 
     def pause(self, position=None):
-        # Impossible to pause recording (it should be possible, but
-        # gstreamer does not like it)
-        return
+        """Not a real pause, but rather a record stop.
+        
+        The removal of the Stop button forces us to emulate stop
+        through pause.
+        """
+        self.stop()
 
     def resume(self, position=None):
-        self.pause(position)
+        if self.current_status() != self.PlayingStatus:
+            self.start()
 
     def stop(self, position=None):
         self.stream_duration=self.current_position
@@ -265,8 +267,10 @@ class Player:
         else:
             s.url=self.videofile
 
-        s.length=0
         s.position=self.current_position()
+        # Round length to the nearest second. This way, the timeline
+        # should correctly update.
+        s.length=s.position / 1000 * 1000
         s.status=self.current_status()
         return s
 
@@ -317,7 +321,7 @@ class Player:
         @param position: the position
         @type position: long
         """
-        #print "gst - update_status ", status, str(position)
+        #print "gstrec - update_status ", status, str(position)
         if position is None:
             position=0
         else:
