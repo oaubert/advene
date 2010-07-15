@@ -51,15 +51,10 @@ class DCPImporter(GenericImporter):
         f=open(filename, 'rU')
         if self.package is None:
             self.init_package()
-        schema=self.create_schema('DCP')
+        self.schema=self.create_schema('DCP')
         rows=csv.reader(f, 'excel-tab')
         self.labels = rows.next()
         self.label2type = {}
-        # Generate types
-        for l in self.labels[2::2]:
-            if l:
-                name=unicode(l, 'mac_roman')
-                self.label2type[l] = self.create_annotation_type(schema, helper.title2id(name), title=name)
         self.convert(self.iterator(rows))
         self.progress(1.0)
         return self.package
@@ -81,16 +76,21 @@ class DCPImporter(GenericImporter):
             progress += .01
             t=self.str2time(row[1])
             for (label, tc, value) in itertools.izip(self.labels[2::2], row[2::2], row[3::2]):
+                label = unicode(label, 'mac_roman')
+
                 if tc == 'IN':
                     # Store into cache
                     cache[label]=( t, unicode(value, 'mac_roman') )
                 elif tc == 'OUT':
                     (begin, content) = cache.get(label, (0, 'FIXME'))
+                    at = self.label2type.get(label)
+                    if at is None:
+                        at = self.label2type[label] = self.create_annotation_type(self.schema, helper.title2id(label), title=label)
                     yield {
                         'begin': begin,
                         'end': t,
                         'content': content,
-                        'type': self.label2type[label]
+                        'type': at,
                         }
         self.progress(1.0)
 
