@@ -1,3 +1,17 @@
+* Whole package offset
+
+* When opening a timeline / UpdateModel? check if len(p.annotations)
+   is large (> 2000). If so, open only 1 type.
+   
+* When saving, it package.title == template -> dialog
+
+* abbreviations: pb when missing end newline
+
+* quick edit: upon validation, if duration == 0: set appropriate
+   default value
+
+* shot validation: add "new cut" feature (ctrl-click or shift-click) 
+
 * fullscreen: optionally display information over the video (status, position)
 
 * add PyDiscoverer interface, to get movie details ASAP
