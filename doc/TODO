@@ -19,8 +19,6 @@
 
 * Fix svg support for gstreamer/mac (need to rewrite the SVGOverlay element in C)
 
-* Improve dcp importer
-
 * Make the timeline inspector editable (thus sticky display)
 
 * Screen overlay interface: define a grid with sensitive areas + event
@@ -2746,4 +2744,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 ** Make the play + pause button a unique button => not that easy
 
 * autoplay at package open?
+
+* Improve dcp importer
 

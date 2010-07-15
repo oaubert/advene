@@ -24,7 +24,9 @@ from gettext import gettext as _
 import re
 import csv
 import itertools
+import urllib
 
+import advene.core.config as config
 import advene.util.helper as helper
 from advene.util.importer import GenericImporter
 
@@ -34,6 +36,31 @@ def register(controller=None):
 
 timestamp_re = re.compile('(\d\d):(\d\d):(\d\d):(\d\d)')
 
+# Column -> (type, attr) mapping.
+# 
+type_mapping = {
+    u'Inquadratura'                      : (u'Inquadratura', 'num'),
+    u'Descrizione inquadratura'          : (u'Inquadratura', 'descrizione'),
+    u'Piani/Immagini'                    : (u'Inquadratura', 'piani_immagini'),
+    u'Ampiezza temporale inquadratura'   : (u'Inquadratura', 'ampiezza_temporale'),
+
+    u'Ampiezza temporale raccordo'       : (u'Raccordo'    , 'ampiezza_temporale'),
+    u'Raccordi di contenuto'             : (u'Raccordo'    , 'contenuto'),
+    u'Raccordi spaziali'                 : (u'Raccordo'    , 'spaziali'),
+    u'Raccordi tecnici'                  : (u'Raccordo'    , 'tecnici'),
+    u'Raccordi temporali'                : (u'Raccordo'    , 'temporali'),
+
+    u'Grande unit\xe0'                   : (u'Grande_unita', 'num'),
+    u'Ampiezza temporale grande unit\xe0': (u'Grande_unita', 'ampiezza_temporale'),
+    u'Descrizione grande unit\xe0'       : (u'Grande_unita', 'descrizione'),
+    u'Transizioni fra grandi unit\xe0'   : (u'Grande_unita', 'transizioni_fra'),
+
+    u'Sequenza'                          : (u'Sequenza'    , 'num'),
+    u'Ampiezza temporale sequenza'       : (u'Sequenza'    , 'ampiezza_temporale'),
+    u'Descrizione sequenza'              : (u'Sequenza'    , 'descrizione'),
+    u'Transizioni fra sequenze'          : (u'Sequenza'    , 'transizioni_fra'),
+    }
+
 class DCPImporter(GenericImporter):
     name = _("DCP importer")
 
@@ -42,8 +69,10 @@ class DCPImporter(GenericImporter):
 
         100 is for the best match (specific extension), 0 is for no match at all.
         """
-        if fname.endswith('.tsv') or fname.endswith('.txt') or fname.endswith('.csv'):
+        if 'dcp' in fname or 'colonne' in fname:
             return 80
+        elif fname.endswith('.tsv') or fname.endswith('.txt') or fname.endswith('.csv'):
+            return 70
         return 0
     can_handle=staticmethod(can_handle)
 
@@ -81,8 +110,13 @@ class DCPImporter(GenericImporter):
     def iterator(self, rows):
         progress=0.02
         incr = 1.0 / self.row_count
-        cache={}
+        # Column cache: store (in_time, content) for each column
+        column_cache = {}
+        # Row cache: for coalesced types, store 
+        # (in_time, content) indexed by DCP type
+        row_cache = {}
         for row in rows:
+            row_cache.clear()
             self.progress(progress, _("Converting #%d / %d") % (rows.line_num, self.row_count))
             progress += incr
             t = self.str2time(row[1])
@@ -90,10 +124,14 @@ class DCPImporter(GenericImporter):
                 label = unicode(label, 'mac_roman')
 
                 if tc == 'IN':
-                    # Store into cache
-                    cache[label]=( t, unicode(value, 'mac_roman') )
+                    # Store into column_cache
+                    column_cache[label]=( t, unicode(value, 'mac_roman') )
                 elif tc == 'OUT':
-                    (begin, content) = cache.get(label, (0, 'FIXME'))
+                    (begin, content) = column_cache.get(label, (0, 'OUT without IN'))
+                    if label in type_mapping:
+                        # Coalesced type
+                        row_cache[label] = (begin, content)
+                        continue
                     at = self.label2type.get(label)
                     if at is None:
                         at = self.label2type[label] = self.create_annotation_type(self.schema, helper.title2id(label), title=label)
@@ -103,6 +141,25 @@ class DCPImporter(GenericImporter):
                         'content': content,
                         'type': at,
                         }
-                    
+            # Process row_cache
+            output = {}
+            for dcp_type, data in row_cache.iteritems():
+                label, attr = type_mapping[dcp_type]
+                begin, content = data
+                at = self.label2type.get(label)
+                if at is None:
+                    at = self.label2type[label] = self.create_annotation_type(self.schema, helper.title2id(label), title=label, mimetype='application/x-advene-structured')
+                    at.setMetaData(config.data.namespace, 'representation', 'here/content/parsed/num')
+                info = output.setdefault(at, { 'begin': begin, 'content': [] })
+                #if info[begin] != begin:
+                #    # FIXME: consistency check on begin time. What to do here???
+                info['content'].append('%s=%s' % (attr, content.replace('\n', ' -- ')))
+            for at, info in output.iteritems():
+                yield {
+                    'begin': info['begin'],
+                    'end': t,
+                    'content': "\n".join(info['content']),
+                    'type': at,
+                    }
         self.progress(1.0)
 
