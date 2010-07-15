@@ -48,10 +48,20 @@ class DCPImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
-        f=open(filename, 'rU')
         if self.package is None:
             self.init_package()
         self.schema=self.create_schema('DCP')
+
+        # Get row count
+        f=open(filename, 'rU')
+        rows=csv.reader(f, 'excel-tab')
+        self.row_count = sum(1 for row in rows)
+        f.close()
+        del rows
+
+        print "Converting ", self.row_count, " records"
+        # Conversion
+        f=open(filename, 'rU')
         rows=csv.reader(f, 'excel-tab')
         self.labels = rows.next()
         self.label2type = {}
@@ -70,11 +80,12 @@ class DCPImporter(GenericImporter):
 
     def iterator(self, rows):
         progress=0.02
+        incr = 1.0 / self.row_count
         cache={}
         for row in rows:
-            self.progress(progress)
-            progress += .01
-            t=self.str2time(row[1])
+            self.progress(progress, _("Converting #%d / %d") % (rows.line_num, self.row_count))
+            progress += incr
+            t = self.str2time(row[1])
             for (label, tc, value) in itertools.izip(self.labels[2::2], row[2::2], row[3::2]):
                 label = unicode(label, 'mac_roman')
 
@@ -92,5 +103,6 @@ class DCPImporter(GenericImporter):
                         'content': content,
                         'type': at,
                         }
+                    
         self.progress(1.0)
 
