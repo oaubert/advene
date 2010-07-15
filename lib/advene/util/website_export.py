@@ -102,6 +102,8 @@ class WebsiteExporter(object):
                     self.video_url = self.controller.get_default_media()
                 p=cl(self.destination, self.video_url)
                 break
+
+        
         return p
 
     def progress_callback(self, value, msg):
@@ -682,7 +684,7 @@ class YoutubeVideoPlayer(VideoPlayer):
         return
 
 class HTML5VideoPlayer(VideoPlayer):
-    """Youtube video player support.
+    """HTML5 video player support.
     """
     def __init__(self, destination, video_url):
         self.destination=destination
@@ -721,13 +723,32 @@ class HTML5VideoPlayer(VideoPlayer):
 
         # Note: Firefox does not seem to like <link href=... /> style
         # of closing tags. Use the explicit end tag.
-        jsinject='''
-<link href="./resources/HTML5/style.css" rel="stylesheet" type="text/css"></link>
+        jsinject=u'''
 <link type="text/css" href="./resources/HTML5/theme/jqueryui.css" rel="stylesheet"></link>
+<link href="./resources/HTML5/style.css" rel="stylesheet" type="text/css"></link>
+
 <script type="text/javascript" src="./resources/HTML5/jquery.js"></script>
 <script type="text/javascript" src="./resources/HTML5/jqueryui.js"></script>
-<script type="text/javascript" src="./resources/HTML5/script.js"></script>
-'''
+<script type="text/javascript" src="./resources/HTML5/advene.js"></script>
+<script type="text/javascript">
+$(function() {
+if (($("[target='video_player']").length == 0)) {return;}
+$("body").append("<div class='player_container' style='position:relative;overflow:visible; '>"+ 
+"<video style='overflow:visible; width:100%%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='%(video_url)s'>"+
+"</video></div>");
+$('.player_container').player({title:'ADVENE MAIN PLAYER'});
+
+$("[target='video_player']").each( function(){
+var href=$(this).attr('href');
+$(this).removeAttr('href');
+$(this).attr('value',href);
+$(this).ScreenshotOverlay();
+});
+
+});
+
+</script>
+''' % { 'video_url': unicode(self.video_url) }
         head_re = re.compile('<head>', re.IGNORECASE)
         if head_re.findall(content):
             content = head_re.sub('''<head>%s''' % jsinject, content)
@@ -744,3 +765,4 @@ class HTML5VideoPlayer(VideoPlayer):
         """Return a list of needed resources.
         """
         return [ ( config.data.advenefile('HTML5', 'web'), 'resources/HTML5' ) ]
+
