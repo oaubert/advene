@@ -368,7 +368,7 @@ class InteractiveResult(AdhocView):
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Find word") + " "), expand=False)
         search_entry=gtk.Entry()
-        if isinstance(self.query, Quicksearch):
+        if isinstance(self.query, Quicksearch) and self.query.searched.split():
             search_entry.set_text(self.query.searched.split()[0])
         hb.pack_start(search_entry, expand=False)
         d.vbox.pack_start(hb, expand=False)
