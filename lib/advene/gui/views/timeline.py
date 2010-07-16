@@ -2259,7 +2259,13 @@ class TimeLine(AdhocView):
         """
         def set_end_time(action, an):
             if action == 'validate':
-                an.fragment.end=self.controller.player.current_position_value
+                v = self.controller.player.current_position_value
+                if v == an.fragment.begin:
+                    # Same value. May be that we were paused. Use a
+                    # default value so that the annotation remains
+                    # accessible.
+                    v += 2000
+                an.fragment.end = v
             elif action == 'cancel':
                 # Delete the annotation
                 self.controller.notify('EditSessionStart', element=an, immediate=True)
@@ -2801,7 +2807,13 @@ class TimeLine(AdhocView):
             elif event.keyval == gtk.keysyms.Return:
                 def set_end_time(action, an):
                     if action == 'validate':
-                        an.fragment.end=self.controller.player.current_position_value
+                        v = self.controller.player.current_position_value
+                        if v == an.fragment.begin:
+                            # Same value. May be that we were paused. Use a
+                            # default value so that the annotation remains
+                            # accessible.
+                            v += 2000
+                        an.fragment.end = v
                     elif action == 'cancel':
                         # Delete the annotation
                         self.controller.notify('EditSessionStart', element=an, immediate=True)

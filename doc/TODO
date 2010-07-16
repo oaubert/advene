@@ -7,9 +7,6 @@
 
 * abbreviations: pb when missing end newline
 
-* quick edit: upon validation, if duration == 0: set appropriate
-   default value
-
 * shot validation: add "new cut" feature (ctrl-click or shift-click) 
 
 * fullscreen: optionally display information over the video (status, position)
@@ -2760,4 +2757,7 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * autoplay at package open?
 
 * Improve dcp importer
+
+* quick edit: upon validation, if duration == 0: set appropriate
+   default value
 
