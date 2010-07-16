@@ -1180,6 +1180,17 @@ class AdveneController(object):
         self.pending_duration_update = True
         self.notify("MediaChange", uri=uri)
 
+    def update_package_title(self):
+        """Generate a default package title if none was set.
+        """
+        if (not self.package.title 
+            or self.package.title == "Template package" 
+            or self.package.title.startswith(_("Analysis of "))):
+            self.package.title = _("Analysis of ") + unicode(os.path.basename(self.get_default_media()))
+            return True
+        else:
+            return False
+
     def set_default_media (self, uri, package=None):
         """Set the default media for the package.
         """
@@ -1200,8 +1211,7 @@ class AdveneController(object):
             id_ = helper.mediafile2id (uri)
             self.package.imagecache.load (id_)
             # Update package title and description if necessary
-            if not package.title or package.title == "Template package":
-                package.title = _("Analysis of ") + unicode(os.path.basename(uri))
+            self.update_package_title()
 
     def delete_element (self, el, immediate_notify=False, batch=None):
         """Delete an element from its package.

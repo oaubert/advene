@@ -1817,7 +1817,7 @@ class AdveneGUI(object):
                 # Get the current package title.
                 if isinstance(element, Package):
                     filename=self.controller.package.title
-                    if filename == 'Template package':
+                    if not filename or filename == 'Template package':
                         # Use a better name
                         filename=os.path.splitext(os.path.basename(self.controller.package.uri))[0]
                     filename=helper.title2id(filename)
@@ -3245,6 +3245,7 @@ class AdveneGUI(object):
         """Save the current package."""
         if package is None:
             package=self.controller.package
+        self.controller.update_package_title()
         if (package.uri == ""
             or package.uri.endswith('new_pkg')):
             self.on_save_as1_activate (package=package)
@@ -3273,6 +3274,7 @@ class AdveneGUI(object):
         """Save the package with a new name."""
         if package is None:
             package=self.controller.package
+        self.controller.update_package_title()
         if config.data.path['data']:
             d=config.data.path['data']
         else:
