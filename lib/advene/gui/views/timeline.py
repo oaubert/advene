@@ -800,11 +800,6 @@ class TimeLine(AdhocView):
         """
         b.update_widget()
         a=b.annotation
-        tip = _("%(id)s: %(begin)s - %(end)s\n%(content)s") % {
-            'content': a.content.data,
-            'id': a.id,
-            'begin': helper.format_time(a.fragment.begin),
-            'end': helper.format_time(a.fragment.end) }
         self.layout.move(b, self.unit2pixel(a.fragment.begin, absolute=True), self.layer_position[a.type])
         return True
 
@@ -894,7 +889,6 @@ class TimeLine(AdhocView):
             self.center_on_position(ann.fragment.begin)
             return True
 
-        p=self.pixel2unit(widget.allocation.x + x, absolute=True)
         menu=advene.gui.popup.Menu(ann, controller=self.controller)
         v=self.controller.player.current_position_value
         if v > ann.fragment.begin and v < ann.fragment.end:
@@ -2715,7 +2709,6 @@ class TimeLine(AdhocView):
 
     def resize_legend_widget(self, layout):
         width=0
-        height=0
         for c in layout.get_children():
             if not isinstance(c, AnnotationTypeWidget):
                 continue
