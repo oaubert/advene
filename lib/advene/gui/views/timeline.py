@@ -189,7 +189,14 @@ class TimeLine(AdhocView):
             if self.list is None:
                 # We display the whole package, so display also
                 # empty annotation types
-                self.annotationtypes = list(self.controller.package.annotationTypes)
+                if len(self.controller.package.annotations) > 800:
+                    # There are too many annotations, causing
+                    # performance issues. Display only the first two
+                    # annotation types.
+                    self.annotationtypes = self.controller.package.annotationTypes[:2]
+                    dialog.message_dialog(_("There are too many annotations.\nOnly the first two annotation types are displayed. Use the annotation type selector (second button in the timeline) to select other annotations tpes to display."), modal=False)
+                else:
+                    self.annotationtypes = list(self.controller.package.annotationTypes)
             else:
                 # We specified a list. Display only the annotation
                 # types for annotations present in the set
@@ -531,7 +538,14 @@ class TimeLine(AdhocView):
             if self.list is None:
                 # We display the whole package, so display also
                 # empty annotation types
-                self.annotationtypes = list(self.controller.package.annotationTypes)
+                if len(self.controller.package.annotations) > 800:
+                    # There are too many annotations, causing
+                    # performance issues. Display only the first two
+                    # annotation types.
+                    self.annotationtypes = self.controller.package.annotationTypes[:2]
+                    dialog.message_dialog(_("There are too many annotations.\nOnly the first two annotation types are displayed. Use the annotation type selector (second button in the timeline) to select other annotations tpes to display."), modal=False)
+                else:
+                    self.annotationtypes = list(self.controller.package.annotationTypes)
             else:
                 # We specified a list. Display only the annotation
                 # types for annotations present in the set
