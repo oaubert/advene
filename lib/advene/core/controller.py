@@ -1187,6 +1187,7 @@ class AdveneController(object):
             or self.package.title == "Template package" 
             or self.package.title.startswith(_("Analysis of "))):
             self.package.title = _("Analysis of ") + unicode(os.path.basename(self.get_default_media()))
+            self.notify("PackageEditEnd", package=self.package)
             return True
         else:
             return False
