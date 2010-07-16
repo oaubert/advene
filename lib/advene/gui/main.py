@@ -968,6 +968,7 @@ class AdveneGUI(object):
         for events, method in (
             ("PackageLoad", self.manage_package_load),
             ("PackageActivate", self.manage_package_activate),
+            ("PackageEditEnd", lambda e, c: self.update_window_title()),
             ("PackageSave", self.manage_package_save),
             ( ('AnnotationCreate', 'AnnotationEditEnd',
                'AnnotationDelete', 'AnnotationActivate',
@@ -1633,7 +1634,6 @@ class AdveneGUI(object):
         Control-home/-end: start/end of the stream
         """
 
-        c=self.controller
         p=self.controller.player
 
         if (event.keyval == gtk.keysyms.nobreakspace
