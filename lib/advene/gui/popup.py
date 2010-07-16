@@ -193,7 +193,7 @@ class Menu:
             el.fragment.end += offset
             self.controller.notify('AnnotationEditEnd', annotation=el)
             self.controller.notify('EditSessionEnd', element=el)
-        elif isinstance(el, AnnotationType) or isinstance(el, Package):
+        elif isinstance(el, AnnotationType):
             batch_id=object()
             for a in el.annotations:
                 self.controller.notify('EditSessionStart', element=a, immediate=True)
@@ -201,6 +201,11 @@ class Menu:
                 a.fragment.end += offset
                 self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
                 self.controller.notify('EditSessionEnd', element=a)
+        elif isinstance(el, Package):
+            for a in el.annotations:
+                a.fragment.begin += offset
+                a.fragment.end += offset
+            self.controller.notify('PackageActivate', package=el)
         elif isinstance(el, Schema):
             batch_id=object()
             for at in el.annotationTypes:
