@@ -45,7 +45,14 @@ advene (0.43) unstable; urgency=low
   
     * Clicking on the snapshot column plays the movie at the specified
       position.
+
+  * Cut validation interface
   
+    * Control-click on a frame creates a new cut instead of adjusting the
+      current cut.
+  
+    * Implement Undo and action notification
+
   * Abbreviations can be used to enter text more quickly. See
     Edit/Preferences/Text Content for customization.
   

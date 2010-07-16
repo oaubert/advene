@@ -143,6 +143,21 @@ class ShotValidation(AdhocView):
         annotation = self.annotations[i]
         batch=object()
 
+        event = gtk.get_current_event()
+        if event.state & gtk.gdk.CONTROL_MASK:
+            # Control-key is held. Split the annotation.
+            if new > annotation.fragment.begin and new < annotation.fragment.end:
+                self.controller.split_annotation(annotation, new)
+                self.message(_("Split annotation #%(current)d into #%(current)d and #%(next)d") % {
+                        'current': i + 1,
+                        'next': i + 2 
+                        })
+            else:
+                self.message(_("Cannot split annotation #%(current)d: out of bounds.") % {
+                        'current': i + 1,
+                        })
+            return True
+
         if new != annotation.fragment.begin:
             self.controller.notify('EditSessionStart', element=annotation, immediate=True)
             annotation.fragment.begin = new
@@ -174,7 +189,7 @@ class ShotValidation(AdhocView):
         self.title_widget = gtk.Label()
         vbox.pack_start(self.title_widget)
 
-        self.selector = FrameSelector(self.controller, self.annotations[0].fragment.begin, label=_("Click on the frame just after the cut"))
+        self.selector = FrameSelector(self.controller, self.annotations[0].fragment.begin, label=_("Click on the frame just after the cut to adjust the cut time.\nControl-click on a frame to indicate a missing cut."))
         self.selector.callback = self.validate_and_next
 
         def handle_index_change(adj):
