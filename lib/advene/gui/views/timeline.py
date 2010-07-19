@@ -2577,8 +2577,10 @@ class TimeLine(AdhocView):
         self.scale_layout.set_size (width, h)
 
         # Update the scale legend
-        dur=self.pixel2unit(110) / 1000.0
-        self.scale_label.set_text('1mark=%dm%.02fs' % (int(dur / 60), dur % 60))
+        if config.data.preferences['expert-mode']:
+            dur=self.pixel2unit(110) / 1000.0
+            self.scale_label.set_text('1mark=%dm%.02fs' % (int(dur / 60), dur % 60))
+
         self.redraw_event ()
         return True
 
@@ -3178,6 +3180,9 @@ class TimeLine(AdhocView):
         vb=gtk.VBox()
         self.scale_label = gtk.Label('Scale')
         vb.pack_start(self.scale_label, expand=False)
+        if not config.data.preferences['expert-mode']:
+            self.scale_label.hide()
+            self.scale_label.set_no_show_all(True)
 
         self.limit_navtools = gtk.HBox()
         
