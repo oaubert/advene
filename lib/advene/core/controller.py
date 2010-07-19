@@ -82,6 +82,37 @@ if config.data.webserver['mode']:
 import threading
 gobject.threads_init()
 
+class GlobalPackage(object):
+    """Wrapper to access all packages loaded data.
+    """
+    def __init__(self, controller):
+        self.controller = controller
+
+    def annotations(self):
+        for p in self.controller.packages.itervalues():
+            for a in p.annotations:
+                yield a
+
+    def relations(self):
+        for p in self.controller.packages.itervalues():
+            for r in p.relations:
+                yield r
+
+    def annotationTypes(self):
+        for p in self.controller.packages.itervalues():
+            for at in p.annotationTypes:
+                yield at
+
+    def relationTypes(self):
+        for p in self.controller.packages.itervalues():
+            for rt in p.relationTypes:
+                yield rt
+
+    def schemas(self):
+        for p in self.controller.packages.itervalues():
+            for s in p.schemas:
+                yield s
+
 class AdveneController(object):
     """AdveneController class.
 
@@ -143,6 +174,8 @@ class AdveneController(object):
 
         # Dictionaries indexed by alias
         self.packages = {}
+        self.global_package = GlobalPackage(self)
+
         # Reverse mapping indexed by package
         self.aliases = {}
         self.current_alias = None
