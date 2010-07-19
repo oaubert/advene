@@ -1,6 +1,13 @@
-* When opening a timeline / PackageActivate? check if len(p.annotations)
-   is large (> 2000). If so, open only 1 type.
-   
+* timeline: Display all relations
+
+* implement audio segmenter using cutter gst
+
+* popup menu on annotation: "Extract video fragment"
+
+* search/replace in content on AnnotationTypes popup menu
+
+* snapshotter: feedback on activity
+
 * abbreviations: pb when missing end newline
 
 * fullscreen: optionally display information over the video (status, position)
@@ -2760,4 +2767,9 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Whole package offset -> tree view, right-click on package
 
 * When saving, it package.title == template -> dialog
+
+* When opening a timeline / PackageActivate? check if len(p.annotations)
+   is large (> 2000). If so, open only 1 type.
+   
+* transcribe: reaction time: not in pause
 

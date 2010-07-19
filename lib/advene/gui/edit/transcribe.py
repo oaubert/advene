@@ -153,7 +153,7 @@ class TranscriptionEdit(AdhocView):
         ew.add_checkbox(_("Insert on single-click"), 'insert-on-single-click', _("A single click will insert the mark (else a double click is needed)"))
         ew.add_checkbox(_("Play on scroll"), "play-on-scroll", _("Play the new position upon timestamp modification"))
         ew.add_checkbox(_("Generate empty annotations"), "empty-annotations", _("If checked, generate annotations for empty text"))
-        ew.add_spin(_("Reaction time"), "delay", _("Reaction time (substracted from current player time)"), -5000, 5000)
+        ew.add_spin(_("Reaction time"), "delay", _("Reaction time (substracted from current player time, except when paused.)"), -5000, 5000)
         ew.add_checkbox(_("Auto-insert"), "autoinsert", _("Automatic timestamp mark insertion"))
         ew.add_spin(_("Automatic insertion delay"), 'automatic-mark-insertion-delay', _("If autoinsert is active, timestamp marks will be automatically inserted when text is entered after no interaction since this delay (in ms).\n1000 is typically a good value."), 0, 100000)
         ew.add_spin(_("Font size"), "font-size", _("Font size for text (0 for standard size)"), 0, 48)
@@ -367,7 +367,11 @@ class TranscriptionEdit(AdhocView):
 
         If iter is not specified, insert at the current cursor position.
         """
-        t=self.controller.player.current_position_value - self.options['delay']
+        p = self.controller.player
+        if p.status == p.PauseStatus:
+            t=p.current_position_value
+        else:
+            t=p.current_position_value - self.options['delay']
         self.controller.update_snapshot(t)
 
         if it is None:
@@ -1267,7 +1271,10 @@ class TranscriptionEdit(AdhocView):
                 it=b.get_iter_at_mark(b.get_insert())
                 if it.ends_line():
                     # Check that we are in a valid position
-                    t=p.current_position_value - self.options['delay']
+                    if p.status == p.PauseStatus:
+                        t=p.current_position_value
+                    else:
+                        t=p.current_position_value - self.options['delay']
                     m, i=self.find_preceding_mark(it)
                     if m is not None and m.value >= t:
                         pass
