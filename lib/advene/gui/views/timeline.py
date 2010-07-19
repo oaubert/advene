@@ -137,6 +137,7 @@ class TimeLine(AdhocView):
             # Autoscroll: 0: None, 1: continuous, 2: discrete, 3: annotation
             'autoscroll': 2,
             'display-relations': True,
+            'display-all-relations': False,
             'display-relation-type': True,
             'display-relation-content': True,
             }
@@ -410,11 +411,20 @@ class TimeLine(AdhocView):
     def draw_relation_lines(self, layout, event):
         if self.bookmarks_to_draw:
             self.draw_bookmarks(layout, event)
-        if not self.relations_to_draw:
+        if self.options['display-all-relations']:
+            to_draw = [ (self.get_widget_for_annotation(r.members[0]), 
+                         self.get_widget_for_annotation(r.members[1]), 
+                         r) 
+                        for r in self.controller.package.relations ] 
+        else:
+            to_draw = self.relations_to_draw
+        if not to_draw:
             return False
         context=layout.bin_window.cairo_create()
 
-        for b1, b2, r in self.relations_to_draw:
+        for b1, b2, r in to_draw:
+            if b1 is None or b2 is None:
+                continue
             r1 = b1.get_allocation()
             r2 = b2.get_allocation()
             x_start = r1.x + 3 * r1.width / 4
@@ -1812,7 +1822,7 @@ class TimeLine(AdhocView):
 
         def focus_out(widget, event):
             self.set_annotation(None)
-            if self.options['display-relations']:
+            if self.options['display-relations'] and not self.options['display-all-relations']:
                 self.relations_to_draw = []
                 self.update_relation_lines()
             return False
@@ -1820,7 +1830,7 @@ class TimeLine(AdhocView):
 
         def focus_in(button, event):
             self.set_annotation(button.annotation)
-            if self.options['display-relations']:
+            if self.options['display-relations'] and not self.options['display-all-relations']:
                 a=button.annotation
                 for r in button.annotation.relations:
                     # FIXME: handle more-than-binary relations
@@ -3324,6 +3334,10 @@ class TimeLine(AdhocView):
         # Relation display toggle
         def handle_toggle(b, option):
             self.options[option]=b.get_active()
+            if option == 'display-all-relations':
+                region = self.layout.window.get_clip_region()
+                if region:
+                    self.layout.window.invalidate_region(region, True)
             return True
 
         self.display_relations_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_REDO)
@@ -3331,6 +3345,12 @@ class TimeLine(AdhocView):
         self.display_relations_toggle.set_active(self.options['display-relations'])
         self.display_relations_toggle.connect('toggled', handle_toggle, 'display-relations')
         tb.insert(self.display_relations_toggle, -1)
+
+        self.display_all_relations_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_INFO)
+        self.display_all_relations_toggle.set_tooltip_text(_('Display all relations'))
+        self.display_all_relations_toggle.set_active(self.options['display-all-relations'])
+        self.display_all_relations_toggle.connect('toggled', handle_toggle, 'display-all-relations')
+        tb.insert(self.display_all_relations_toggle, -1)
 
         # Separator
         tb.insert(gtk.SeparatorToolItem(), -1)
