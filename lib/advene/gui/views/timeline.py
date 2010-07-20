@@ -47,6 +47,9 @@ name="Timeline view plugin"
 def register(controller):
     controller.register_viewclass(TimeLine)
 
+# Temporary workaround to timeline update performance issue
+MAX_ANNOTATIONS=1500
+
 parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 
 class QuickviewBar(gtk.HBox):
@@ -190,12 +193,13 @@ class TimeLine(AdhocView):
             if self.list is None:
                 # We display the whole package, so display also
                 # empty annotation types
-                if len(self.controller.package.annotations) > 800:
+                l = len(self.controller.package.annotations)
+                if l > MAX_ANNOTATIONS:
                     # There are too many annotations, causing
                     # performance issues. Display only the first two
                     # annotation types.
                     self.annotationtypes = self.controller.package.annotationTypes[:2]
-                    dialog.message_dialog(_("There are too many annotations.\nOnly the first two annotation types are displayed. Use the annotation type selector (second button in the timeline) to select other annotations tpes to display."), modal=False)
+                    self.dialog_too_many_annotations(l)
                 else:
                     self.annotationtypes = list(self.controller.package.annotationTypes)
             else:
@@ -511,6 +515,30 @@ class TimeLine(AdhocView):
                 context.stroke()
         return False
 
+    def dialog_too_many_annotations(self, n):
+        d = gtk.Dialog(title=_("%d annotations") % n,
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( _("Display all types"), gtk.RESPONSE_YES,
+                                 gtk.STOCK_CLOSE, gtk.RESPONSE_CLOSE ) )
+        l = gtk.Label(_("There are %d annotations.\nThe current timeline may take a long time to display them, so only the first two annotation types are displayed. Use the annotation type selector (second button in the timeline) to select other annotations types to display, or click on the 'Display all types' button below.") % n)
+        l.set_line_wrap(True)
+        d.vbox.add(l)
+        d.connect('key-press-event', dialog.dialog_keypressed_cb)
+
+        d.show_all()
+        d.resize(300, -1)
+        dialog.center_on_mouse(d)
+        def handle_response(d, res):
+            d.destroy()
+            if res == gtk.RESPONSE_YES:
+                # Display all types
+                self.annotationtypes = list(self.controller.package.annotationTypes)
+                self.update_model(partial_update=True)
+            return True
+        d.connect('response', handle_response)
+        return True
+
     def update_model(self, package=None, partial_update=False):
         """Update the whole model.
 
@@ -548,12 +576,13 @@ class TimeLine(AdhocView):
             if self.list is None:
                 # We display the whole package, so display also
                 # empty annotation types
-                if len(self.controller.package.annotations) > 800:
+                l=len(self.controller.package.annotations)
+                if l > MAX_ANNOTATIONS:
                     # There are too many annotations, causing
                     # performance issues. Display only the first two
                     # annotation types.
                     self.annotationtypes = self.controller.package.annotationTypes[:2]
-                    dialog.message_dialog(_("There are too many annotations.\nOnly the first two annotation types are displayed. Use the annotation type selector (second button in the timeline) to select other annotations tpes to display."), modal=False)
+                    self.dialog_too_many_annotations(l)
                 else:
                     self.annotationtypes = list(self.controller.package.annotationTypes)
             else:
