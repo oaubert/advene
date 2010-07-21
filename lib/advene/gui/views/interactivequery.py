@@ -354,50 +354,11 @@ class InteractiveResult(AdhocView):
         return True
 
     def search_replace(self, *p):
-        d = gtk.Dialog(title=_("Replace content in annotations"),
-                       parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                 ))
-        l=gtk.Label(_("Replace a string by another in the selected annotations.\n"))
-        l.set_line_wrap(True)
-        l.show()
-        d.vbox.pack_start(l, expand=False)
-
-        hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Find word") + " "), expand=False)
-        search_entry=gtk.Entry()
+        default_search = None
         if isinstance(self.query, Quicksearch) and self.query.searched.split():
-            search_entry.set_text(self.query.searched.split()[0])
-        hb.pack_start(search_entry, expand=False)
-        d.vbox.pack_start(hb, expand=False)
-
-        hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Replace by") + " "), expand=False)
-        replace_entry=gtk.Entry()
-        hb.pack_start(replace_entry, expand=False)
-        d.vbox.pack_start(hb, expand=False)
-
-        d.connect('key-press-event', dialog.dialog_keypressed_cb)
-        d.show_all()
-        dialog.center_on_mouse(d)
-        res=d.run()
-        if res == gtk.RESPONSE_OK:
-            search=search_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
-            replace=replace_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
-            l=self.table.get_elements()
-            count=0
-            batch_id=object()
-            for a in l:
-                if search in a.content.data:
-                    self.controller.notify('EditSessionStart', element=a, immediate=True)
-                    a.content.data = a.content.data.replace(search, replace)
-                    self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
-                    self.controller.notify('EditSessionEnd', element=a)
-                    count += 1
-            self.log(_('%(search)s has been replaced by %(replace)s in %(count)d annotation(s).') % locals())
-        d.destroy()
+            default_search = self.query.searched.split()[0]
+        self.controller.gui.search_replace_dialog(self.table.get_elements(),
+                                                  default_search)
         return True
 
     def redo_quicksearch(self, b, entry):

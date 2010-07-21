@@ -928,6 +928,61 @@ class AdveneGUI(object):
         d.destroy()
         return retval
 
+    def search_replace_dialog(self, elements, default_search=None):
+        """Display a search-replace dialog.
+        """
+        d = gtk.Dialog(title=_("Replace content in %d elements") % len(elements),
+                       parent=None,
+                       flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                 ))
+        l=gtk.Label(_("Replace a string by another in %d elements.\n") % len(elements))
+        l.set_line_wrap(True)
+        l.show()
+        d.vbox.pack_start(l, expand=False)
+
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Find word") + " "), expand=False)
+        search_entry=gtk.Entry()
+        search_entry.set_text(default_search or "")
+        hb.pack_start(search_entry, expand=False)
+        d.vbox.pack_start(hb, expand=False)
+
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Replace by") + " "), expand=False)
+        replace_entry=gtk.Entry()
+        hb.pack_start(replace_entry, expand=False)
+        d.vbox.pack_start(hb, expand=False)
+
+        d.connect('key-press-event', dialog.dialog_keypressed_cb)
+        d.show_all()
+        dialog.center_on_mouse(d)
+        res=d.run()
+        if res == gtk.RESPONSE_OK:
+            search=search_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            replace=replace_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            count=0
+            batch_id=object()
+            for a in elements:
+                if not isinstance(a, (Annotation, Relation, View)):
+                    continue
+                if search in a.content.data:
+                    self.controller.notify('EditSessionStart', element=a, immediate=True)
+                    a.content.data = a.content.data.replace(search, replace)
+                    if isinstance(a, Annotation):
+                        self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
+                    elif isinstance(a, Relation):
+                        self.controller.notify('RelationEditEnd', relation=a, batch=batch_id)
+                    elif isinstance(a, View):
+                        self.controller.notify('ViewEditEnd', view=a, batch=batch_id)
+                    self.controller.notify('EditSessionEnd', element=a)
+                    count += 1
+            self.log(_('%(search)s has been replaced by %(replace)s in %(count)d element(s).') % locals())
+        d.destroy()
+        return True
+        
+
     def main (self, args=None):
         """Mainloop : Gtk mainloop setup.
 
