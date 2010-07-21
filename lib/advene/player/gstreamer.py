@@ -569,7 +569,8 @@ class Player:
         self.player.set_state(gst.STATE_READY)
         # Rebuild the pipeline
         self.build_pipeline()
-        self.playlist_add_item(self.videofile)
+        if self.videofile is not None:
+            self.playlist_add_item(self.videofile)
         self.position_update()
         return True
 
