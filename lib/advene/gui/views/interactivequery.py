@@ -357,8 +357,10 @@ class InteractiveResult(AdhocView):
         default_search = None
         if isinstance(self.query, Quicksearch) and self.query.searched.split():
             default_search = self.query.searched.split()[0]
-        self.controller.gui.search_replace_dialog(self.table.get_elements(),
-                                                  default_search)
+        l = self.table.get_elements()
+        self.controller.gui.search_replace_dialog(l,
+                                                  title=_("Search/replace content in %d elements") % len(l),
+                                                  default_search=default_search)
         return True
 
     def redo_quicksearch(self, b, entry):

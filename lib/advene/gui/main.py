@@ -928,16 +928,18 @@ class AdveneGUI(object):
         d.destroy()
         return retval
 
-    def search_replace_dialog(self, elements, default_search=None):
+    def search_replace_dialog(self, elements, title=None, default_search=None):
         """Display a search-replace dialog.
         """
-        d = gtk.Dialog(title=_("Replace content in %d elements") % len(elements),
+        if title is None:
+            title = _("Replace content in %d elements") % len(elements)
+        d = gtk.Dialog(title=title,
                        parent=None,
                        flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                        buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                                  gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  ))
-        l=gtk.Label(_("Replace a string by another in %d elements.\n") % len(elements))
+        l=gtk.Label(title)
         l.set_line_wrap(True)
         l.show()
         d.vbox.pack_start(l, expand=False)

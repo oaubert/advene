@@ -217,6 +217,19 @@ class Menu:
                     self.controller.notify('EditSessionEnd', element=a)
         return True
 
+    def search_replace_content(self, widget, el):
+        if isinstance(el, (Annotation, View)):
+            l = [ el ]
+            title = _("Replace content in %s" % self.controller.get_title(el))
+        elif isinstance(el, AnnotationType):
+            l = el.annotations
+            title = _("Replace content in annotations of type %s" % self.controller.get_title(el))
+        elif isinstance(el, Package):
+            l = el.annotations
+            title = _("Replace content in all annotations")
+        self.controller.gui.search_replace_dialog(l, title=title)
+        return True
+
     def copy_id (self, widget, el):
         clip=gtk.clipboard_get()
         clip.set_text(el.id)
@@ -405,7 +418,7 @@ class Menu:
         add_item(_("Edit"), self.edit_element, element)
         if config.data.preferences['expert-mode']:
             add_item(_("Browse"), self.browse_element, element)
-        add_item(_("Query"), self.query_element, element)
+            add_item(_("Query"), self.query_element, element)
 
         def open_in_browser(i, v):
             c=self.controller.build_context(here=element)
@@ -423,6 +436,9 @@ class Menu:
             if type(element) == Resources and type(element.parent) == Resources:
                 # Add Delete item to Resources except for the root resources (with parent = package)
                 add_item(_("Delete"), self.delete_element, element)
+
+            if isinstance(element, (Annotation, AnnotationType, Package)):
+                add_item(_("Search/replace content"), self.search_replace_content, element)
 
             ## Common to offsetable elements
             if (config.data.preferences['expert-mode']
