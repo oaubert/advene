@@ -57,10 +57,19 @@ except ImportError:
 import gtk
 
 from advene.util.snapshotter import Snapshotter
-try:
-    import advene.util.svgoverlay
-except ImportError:
-    print "SVG overlay support not present"
+
+svgelement = None
+# First try rsvgoverlay
+if gst.element_factory_find('rsvgoverlay'):
+    svgelement = 'rsvgoverlay'
+else:
+    # Not compiled. Try to fallback on the python version.
+    try:
+        import advene.util.svgoverlay
+        svgelement = 'pysvgoverlay'
+    except ImportError:
+        print "SVG overlay support not present"
+print "SVG: Using %s element" % (svgelement or "None")
 
 name="GStreamer video player"
 
@@ -195,9 +204,9 @@ class Player:
             self.captioner=None
 
         self.imageoverlay=None
-        if config.data.player['svg']:
+        if config.data.player['svg'] and svgelement:
             try:
-                self.imageoverlay=gst.element_factory_make('svgoverlay', 'overlay')
+                self.imageoverlay=gst.element_factory_make(svgelement, 'overlay')
             except:
                 pass
 

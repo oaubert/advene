@@ -213,7 +213,7 @@ class SVGOverlay(gst.Element):
         ctx.set_matrix(scale)
         self.svg.render_cairo(ctx)
 
-gst.element_register(SVGOverlay, 'svgoverlay')
+gst.element_register(SVGOverlay, 'pysvgoverlay')
 
 if __name__ == '__main__':
     mainloop = gobject.MainLoop()
@@ -228,7 +228,7 @@ if __name__ == '__main__':
             gst.element_factory_make('queue'),
             gst.element_factory_make('ffmpegcolorspace'),
             gst.element_factory_make('videoscale'),
-            gst.element_factory_make('svgoverlay', 'overlay'),
+            gst.element_factory_make('pysvgoverlay', 'overlay'),
             gst.element_factory_make('ffmpegcolorspace'),
             gst.element_factory_make('xvimagesink'),
             ]
