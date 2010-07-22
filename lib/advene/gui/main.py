@@ -3570,14 +3570,14 @@ class AdveneGUI(object):
                     'status': self.statustext.get(p.status, _("Unknown")),
                     'position': helper.format_time(p.current_position_value),
                     'positionms': p.current_position_value,
-                    'duration': helper.format_time(p.stream_duration),
+                    'duration': helper.format_time_reference(p.stream_duration),
                     'durationms': p.stream_duration,
-                    'cached': helper.format_time(self.controller.cached_duration),
+                    'cached': helper.format_time_reference(self.controller.cached_duration),
                     'cachedms': self.controller.cached_duration
                     })
         else:
             self.controller.log(_("Player not active - cached duration   : %(duration)s (%(durationms)d ms)") % {
-                    'duration': helper.format_time(self.controller.cached_duration),
+                    'duration': helper.format_time_reference(self.controller.cached_duration),
                     'durationms': self.controller.cached_duration })
         return True
 
@@ -4267,7 +4267,7 @@ class AdveneGUI(object):
                 missing.add(a.fragment.end)
         if missing:
             dialog.message_dialog(_("Updating %d snapshots") % len(missing), modal=False)
-            print "Updating %d missing snapshots: " % len(missing), ", ".join(helper.format_time(t) for t in sorted(missing))
+            print "Updating %d missing snapshots: " % len(missing), ", ".join(helper.format_time_reference(t) for t in sorted(missing))
             for t in sorted(missing):
                 self.controller.player.async_snapshot(t)
         else:
@@ -4313,7 +4313,7 @@ class AdveneGUI(object):
                 self.controller.package.imagecache[p.current_position_value] = helper.snapshot2png (i)
                 prg=1.0 * p.current_position_value / p.stream_duration
                 pb.set_fraction(prg)
-                pb.set_text(helper.format_time(p.current_position_value))
+                pb.set_text(helper.format_time_reference(p.current_position_value))
                 if prg > .999:
                     do_cancel(None, pb)
             return True
@@ -4556,7 +4556,7 @@ class AdveneGUI(object):
                     do_gui_operation(pb.set_label_value,
                                      _("Detected shot #%(num)d at %(pos)s ") % {
                             'num': len(pb._datapoints),
-                            'pos': helper.format_time(ts) 
+                            'pos': helper.format_time_reference(ts) 
                             },
                                      prg)
 

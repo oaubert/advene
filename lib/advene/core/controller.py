@@ -901,7 +901,7 @@ class AdveneController(object):
         if False:
             print "Notify %s (%s): %s" % (
                 event_name,
-                helper.format_time(self.player.current_position_value),
+                helper.format_time_reference(self.player.current_position_value),
                 str(kw))
             import traceback
             traceback.print_stack()

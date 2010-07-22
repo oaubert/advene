@@ -351,8 +351,8 @@ class DefaultActionsRepository:
         """Goto the given position."""
         position=self.parse_parameter(context, parameters, 'position', None)
 
-        #print "Goto from %s to %s" % (helper.format_time(self.controller.player.current_position_value),
-        #                              helper.format_time(position))
+        #print "Goto from %s to %s" % (helper.format_time_reference(self.controller.player.current_position_value),
+        #                              helper.format_time_reference(position))
         if position is not None:
             position=long(position)
         c=self.controller

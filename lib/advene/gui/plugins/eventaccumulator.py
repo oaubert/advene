@@ -523,7 +523,7 @@ class EventAccumulator(AdhocView):
         for op in obj_evt.operations:
             op_time = time.strftime("%H:%M:%S", time.localtime(op.time))
             if self.options['time'] == 'activity':
-                op_time = helper.format_time(op.activity_time)
+                op_time = helper.format_time_reference(op.activity_time)
             if op.concerned_object['name'] is None:
                 corpsstr += urllib.unquote( op_time + " : " + op.name + "\n")
             else:
@@ -543,7 +543,7 @@ class EventAccumulator(AdhocView):
             corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
         if self.options['time'] == 'activity':
-            ev_time = helper.format_time(obj_evt.activity_time)
+            ev_time = helper.format_time_reference(obj_evt.activity_time)
         if obj_evt.name in self.events_names or obj_evt.name in self.operations_names:
             if ECACatalog.event_names[obj_evt.name]:
                 entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
@@ -597,7 +597,7 @@ class EventAccumulator(AdhocView):
             corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
         if self.options['time'] == 'activity':
-            ev_time = helper.format_time(obj_evt.activity_time)
+            ev_time = helper.format_time_reference(obj_evt.activity_time)
         if obj_evt.name in self.operations_names:
             if ECACatalog.event_names[obj_evt.name]:
                 entetestr = "%s : %s" % (ev_time, ECACatalog.event_names[obj_evt.name])
@@ -664,13 +664,13 @@ class EventAccumulator(AdhocView):
         act = obj_evt.name
         act_begin = time.strftime("%H:%M:%S", time.localtime(obj_evt.time[0]))
         if self.options['time'] == 'activity':
-            act_begin = helper.format_time(obj_evt.activity_time[0])
+            act_begin = helper.format_time_reference(obj_evt.activity_time[0])
         entetestr = "%s : %s" % (act_begin, act)
         corpsstr = ""
         for op in obj_evt.operations:
             op_time = time.strftime("%H:%M:%S", time.localtime(op.time))
             if self.options['time'] == 'activity':
-                op_time = helper.format_time(op.activity_time)
+                op_time = helper.format_time_reference(op.activity_time)
             if op.concerned_object['name'] is None:
                 corpsstr += urllib.unquote( op_time + " : " + op.name + "\n")
             else:

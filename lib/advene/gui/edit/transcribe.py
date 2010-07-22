@@ -763,7 +763,7 @@ class TranscriptionEdit(AdhocView):
                 timestamp=child.value
                 if timestamp < t:
                     # Invalid timestamp mark.
-                    self.log(_('Invalid timestamp mark in conversion: %s') % helper.format_time(timestamp))
+                    self.log(_('Invalid timestamp mark in conversion: %s') % helper.format_time_reference(timestamp))
                     t=timestamp
                     continue
                 text=b.get_text(begin, end, include_hidden_chars=False)
@@ -802,17 +802,17 @@ class TranscriptionEdit(AdhocView):
         for d in self.parse_transcription(show_ignored=True,
                                           strip_blank=False):
             if d['ignored']:
-                yield '[I%s]' % helper.format_time(d['begin'])
+                yield '[I%s]' % helper.format_time_reference(d['begin'])
                 yield d['content']
-                yield '[%s]' % helper.format_time(d['end'])
+                yield '[%s]' % helper.format_time_reference(d['end'])
 
             elif last != d['begin']:
-                yield '[%s]' % helper.format_time(d['begin'])
+                yield '[%s]' % helper.format_time_reference(d['begin'])
                 yield d['content']
-                yield '[%s]' % helper.format_time(d['end'])
+                yield '[%s]' % helper.format_time_reference(d['end'])
             else:
                 yield d['content']
-                yield '[%s]' % helper.format_time(d['end'])
+                yield '[%s]' % helper.format_time_reference(d['end'])
             last=d['end']
 
     def as_html(self):
