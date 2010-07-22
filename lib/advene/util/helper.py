@@ -244,8 +244,22 @@ def unaccent(t):
         res.append(c)
     return "".join(res)
 
-def format_time (val = 0):
+def format_time_reference(val = 0):
     """Formats a value (in milliseconds) into a time string.
+    
+    Use the most complete format (HH:MM:SS.sss), for reference into
+    saved files.
+    """
+    if val is None:
+        return '--:--:--.---'
+    elif val < 0:
+        return '00:00:00.000'
+    (s, ms) = divmod(long(val), 1000)
+    # Format: HH:MM:SS.mmm
+    return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
+        
+def format_time (val = 0):
+    """Formats a value (in milliseconds) into a time string, respecting user preferences.
 
     @param val: the value
     @type val: int
