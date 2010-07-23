@@ -51,7 +51,7 @@ class InteractiveQuery(AdhocView):
     view_name = _("Interactive query")
     view_id = 'interactivequery'
     tooltip=_("Interactive query dialog")
-    def __init__(self, controller=None, parameters=None, source="package/annotations", here=None):
+    def __init__(self, controller=None, parameters=None, sources=None, here=None):
         super(InteractiveQuery, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
@@ -66,13 +66,19 @@ class InteractiveQuery(AdhocView):
         if here is None:
             here=controller.package
         self.here=here
-        self.source=source
+        if sources is None:
+            sources = [ "package/annotations" ]
+        self.sources=sources
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
+        # Check for arg-defined sources
+        sources = []
         for n, v in arg:
             if n == 'source':
-                self.source=v
+                sources.append(v)
+        if sources:
+            self.sources = sources
 
         self.querycontainer, self.query = self.get_interactive_query()
 
@@ -93,8 +99,8 @@ class InteractiveQuery(AdhocView):
             el.title=_("Interactive query")
 
             # Create a basic query
-            q=SimpleQuery(source=self.source,
-                    rvalue="element")
+            q=SimpleQuery(sources=self.source,
+                          rvalue="element")
             q.add_condition(Condition(lhs="element/content/data",
                                       operator="contains",
                                       rhs="string:a"))
