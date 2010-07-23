@@ -1593,7 +1593,7 @@ class TimeLine(AdhocView):
     def annotation_button_release_cb(self, widget, event, annotation):
         """Handle button release on annotation widgets.
         """
-        if event.button == 1 and widget._single_click_guard:
+        if event.button == 1 and getattr(widget, '_single_click_guard', None):
             self.controller.gui.set_current_annotation(annotation)
             # Goto annotation
             c=self.controller
