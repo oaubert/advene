@@ -597,14 +597,13 @@ class Player:
     def set_rate(self, rate=1.0):
         if not self.check_uri():
             return
+        self.rate = rate
         event = gst.event_new_seek(self.rate, gst.FORMAT_TIME,
                                    gst.SEEK_FLAG_FLUSH,
-                                   gst.SEEK_TYPE_NONE, 0,
+                                   gst.SEEK_TYPE_SET, long(self.player.query_position(gst.FORMAT_TIME)[0]),
                                    gst.SEEK_TYPE_NONE, 0)
         res = self.player.send_event(event)
-        if res:
-            self.rate = rate
-        else:
+        if not res:
             print "Could not set rate"
 
     def get_rate(self):
