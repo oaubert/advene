@@ -22,9 +22,6 @@ Based on gst >= 0.10 API.
 
 See http://pygstdocs.berlios.de/pygst-reference/index.html for API
 
-FIXME:
-- get/set_rate
-
 Use appsink to get data out of a pipeline:
 https://thomas.apestaart.org/thomas/trac/browser/tests/gst/crc/crc.py
 """
@@ -126,7 +123,7 @@ class Caption:
 
 class Player:
     player_id='gstreamer'
-    player_capabilities=[ 'seek', 'pause', 'caption', 'frame-by-frame', 'async-snapshot' ]
+    player_capabilities=[ 'seek', 'pause', 'caption', 'frame-by-frame', 'async-snapshot', 'set-rate' ]
 
     # Class attributes
     AbsolutePosition=0
@@ -154,6 +151,7 @@ class Player:
 
         self.xid = None
         self.mute_volume=None
+        self.rate = 1.0
         # fullscreen gtk.Window
         self.fullscreen_window=None
 
@@ -305,7 +303,7 @@ class Player:
         if self.current_status() == self.UndefinedStatus:
             self.player.set_state(gst.STATE_PAUSED)
         p = long(self.position2value(position) * gst.MSECOND)
-        event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
+        event = gst.event_new_seek(self.rate, gst.FORMAT_TIME,
                                    gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
                                    gst.SEEK_TYPE_SET, p,
                                    gst.SEEK_TYPE_NONE, 0)
@@ -595,6 +593,22 @@ class Player:
 
     def sound_is_muted(self):
         return (self.mute_volume is not None)
+
+    def set_rate(self, rate=1.0):
+        if not self.check_uri():
+            return
+        event = gst.event_new_seek(self.rate, gst.FORMAT_TIME,
+                                   gst.SEEK_FLAG_FLUSH,
+                                   gst.SEEK_TYPE_NONE, 0,
+                                   gst.SEEK_TYPE_NONE, 0)
+        res = self.player.send_event(event)
+        if res:
+            self.rate = rate
+        else:
+            print "Could not set rate"
+
+    def get_rate(self):
+        return self.rate
 
     def disp(self, e, indent="  "):
         l=[str(e)]
