@@ -1346,6 +1346,21 @@ class AdveneGUI(object):
         self.audio_volume.connect('value-changed', volume_change)
         self.player_toolbar.insert(ti, -1)
 
+        # Append the volume control to the toolbar
+        def rate_change(spin):
+            v = spin.get_value()
+            if self.controller.player.get_rate() != v:
+                self.controller.player.set_rate(v)
+            return True
+
+        self.rate_control = gtk.SpinButton(gtk.Adjustment(1.0, 0.2, 4.0, 0.2, 0.5),
+                                           0.2, 1)
+        self.rate_control.set_tooltip_text(_("Playing rate"))
+        ti = gtk.ToolItem()
+        ti.add(self.rate_control)
+        self.rate_control.connect('value-changed', rate_change)
+        self.player_toolbar.insert(ti, -1)
+
         # Append the loop checkitem to the toolbar
         def loop_toggle_cb(b):
             """Handle loop button action.
@@ -1786,6 +1801,12 @@ class AdveneGUI(object):
             tb.buttons['fullscreen'].show()
         else:
             tb.buttons['fullscreen'].hide()
+
+        if hasattr(self, 'rate_control'):
+            if 'set-rate' in p.player_capabilities:
+                self.rate_control.show()
+            else:
+                self.rate_control.hide()
 
     def loop_on_annotation_gui(self, a, goto=False):
         """Loop over an annotation
