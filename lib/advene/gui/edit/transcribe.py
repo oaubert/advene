@@ -52,7 +52,6 @@ from advene.gui.util import decode_drop_parameters
 from advene.gui.edit.properties import EditWidget
 from advene.gui.util.completer import Completer
 from advene.gui.widget import TimestampRepresentation
-from advene.gui.edit.timeadjustment import TimeAdjustment
 
 name="Note-taking view plugin"
 
@@ -141,6 +140,9 @@ class TranscriptionEdit(AdhocView):
 
     def get_save_arguments(self):
         b=self.textview.get_buffer()
+        # Note: the transcription will end up doubly
+        # urllib-quoted. But for backwards compatibility sake, we
+        # cannot afford to fix it now.
         arguments = [ ('text', urllib.quote_plus("".join(self.generate_transcription()))) ]
         return self.options, arguments
 
@@ -319,7 +321,7 @@ class TranscriptionEdit(AdhocView):
         self.searchbox.pack_start(close_button, expand=False, fill=False)
 
         def search_entry_cb(e):
-            self.highlight_search_forward(e.get_text())
+            self.highlight_search_forward(unicode(e.get_text(), 'utf8'))
             return True
 
         def search_entry_key_press_cb(e, event):
@@ -334,7 +336,7 @@ class TranscriptionEdit(AdhocView):
         self.searchbox.entry.connect('key-press-event', search_entry_key_press_cb)
 
         b=get_small_stock_button(gtk.STOCK_FIND)
-        b.connect('clicked', lambda b: self.highlight_search_forward(self.searchbox.entry.get_text()))
+        b.connect('clicked', lambda b: self.highlight_search_forward(unicode(self.searchbox.entry.get_text(), 'utf8')))
         self.searchbox.pack_start(b, expand=False)
 
         fill=gtk.HBox()
@@ -766,7 +768,7 @@ class TranscriptionEdit(AdhocView):
                     self.log(_('Invalid timestamp mark in conversion: %s') % helper.format_time_reference(timestamp))
                     t=timestamp
                     continue
-                text=b.get_text(begin, end, include_hidden_chars=False)
+                text=unicode(b.get_text(begin, end, include_hidden_chars=False), 'utf8')
                 if strip_blank:
                     text=text.rstrip().lstrip()
                 if self.empty_re.match(text) and not self.options['empty-annotations']:
@@ -787,7 +789,7 @@ class TranscriptionEdit(AdhocView):
                 begin=end.copy()
         # End of buffer. Create the last annotation
         timestamp=self.controller.cached_duration
-        text=b.get_text(begin, end, include_hidden_chars=False)
+        text=unicode(b.get_text(begin, end, include_hidden_chars=False), 'utf8')
         if self.empty_re.match(text) or ignore_next:
             # Last timestsamp mark
             pass
@@ -830,7 +832,7 @@ class TranscriptionEdit(AdhocView):
                 # Found a TextAnchor
                 child=a.get_widgets()[0]
 
-                text=b.get_text(begin, end, include_hidden_chars=False).replace('\n', '<br />')
+                text=unicode(b.get_text(begin, end, include_hidden_chars=False), 'utf8').replace('\n', '<br />')
                 if ignore_next:
                     res.extend( ('<strike>', text, '</strike>') )
                 else:
@@ -841,7 +843,7 @@ class TranscriptionEdit(AdhocView):
                 begin=end.copy()
 
         # End of buffer.
-        text=b.get_text(begin, end, include_hidden_chars=False).replace('\n', '<br />')
+        text=unicode(b.get_text(begin, end, include_hidden_chars=False), 'utf8').replace('\n', '<br />')
         if ignore_next:
             res.extend( ('<strike>', text, '</strike>') )
         else:
@@ -1089,7 +1091,7 @@ class TranscriptionEdit(AdhocView):
             if res == gtk.RESPONSE_OK:
                 at=type_selection.get_current_element()
                 if at == newat:
-                    new_type_title=new_title.get_text()
+                    new_type_title=unicode(new_title.get_text(), 'utf8')
                     if new_type_title == '':
                         # Empty title. Generate one.
                         id_=self.controller.package._idgenerator.get_id(AnnotationType)
