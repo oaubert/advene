@@ -90,7 +90,7 @@ class ZoneContentHandler (ContentHandler):
             return True
 
         shape=self.shape
-        shape.name=self.nameentry.get_text()
+        shape.name=unicode(self.nameentry.get_text())
         text="""shape=rect\nname=%s\nx=%02f\ny=%02f\nwidth=%02f\nheight=%02f""" % (
             shape.name,
             shape.x * 100.0 / self.view.canvaswidth,

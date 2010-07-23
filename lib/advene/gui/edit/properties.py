@@ -138,7 +138,7 @@ class EditWidget(gtk.VBox):
         value = None
 
         if (mode == self.CHANGE_ENTRY):
-            value = src.get_text()
+            value = unicode(src.get_text())
 
         elif (mode == self.CHANGE_OPTION):
             value = src.get_model()[src.get_active()][1]
@@ -150,7 +150,7 @@ class EditWidget(gtk.VBox):
             value = src.get_value_as_int()
 
         elif (mode == self.CHANGE_TEXT):
-            value = src.get_text(*src.get_bounds())
+            value = unicode(src.get_text(*src.get_bounds()))
 
         else:
             print "Unknown type", str(mode)

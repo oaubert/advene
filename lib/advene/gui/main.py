@@ -962,8 +962,8 @@ class AdveneGUI(object):
         dialog.center_on_mouse(d)
         res=d.run()
         if res == gtk.RESPONSE_OK:
-            search=search_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
-            replace=replace_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            search=unicode(search_entry.get_text()).replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            replace=unicode(replace_entry.get_text()).replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
             count=0
             batch_id=object()
             for a in elements:
@@ -2786,7 +2786,7 @@ class AdveneGUI(object):
                                              case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
 
     def do_quicksearch(self, *p):
-        s=self.quicksearch_entry.get_text()
+        s=unicode(self.quicksearch_entry.get_text())
         if not s:
             self.log(_("Empty quicksearch string"))
             return True
@@ -2917,8 +2917,8 @@ class AdveneGUI(object):
             at=type_selector.get_current_element()
             if at == newat:
                 # Creation of a new type.
-                attitle=new_type_title_dialog.title_entry.get_text()
-                atid=new_type_title_dialog.id_entry.get_text()
+                attitle=unicode(new_type_title_dialog.title_entry.get_text())
+                atid=unicode(new_type_title_dialog.id_entry.get_text())
                 at=self.controller.package.get_element_by_id(atid)
                 if at is not None:
                     dialog.message_dialog(_("You specified a annotation-type identifier that already exists. Aborting."))
@@ -2926,8 +2926,8 @@ class AdveneGUI(object):
                     return None
                 sc=schema_selector.get_current_element()
                 if sc == newschema:
-                    sctitle=new_schema_title_dialog.title_entry.get_text()
-                    scid=new_schema_title_dialog.id_entry.get_text()
+                    sctitle=unicode(new_schema_title_dialog.title_entry.get_text())
+                    scid=unicode(new_schema_title_dialog.id_entry.get_text())
                     sc=self.controller.package.get_element_by_id(scid)
                     if sc is None:
                         # Create the schema
@@ -3016,8 +3016,8 @@ class AdveneGUI(object):
         if res == gtk.RESPONSE_OK:
             sc=schema_selector.get_current_element()
             if sc == newschema:
-                sctitle=new_schema_title_dialog.title_entry.get_text()
-                scid=new_schema_title_dialog.id_entry.get_text()
+                sctitle=unicode(new_schema_title_dialog.title_entry.get_text())
+                scid=unicode(new_schema_title_dialog.id_entry.get_text())
                 sc=self.controller.package.get_element_by_id(scid)
                 if sc is None:
                     # Create the schema
@@ -4207,11 +4207,11 @@ class AdveneGUI(object):
 
         def do_conversion(b):
             b.set_sensitive(False)
-            d=dirname_entry.get_text()
+            d=unicode(dirname_entry.get_text())
             if not d:
                 return False
             self.controller.package.setMetaData(config.data.namespace, 'website-export-directory', d)
-            video=video_entry.get_text()
+            video=unicode(video_entry.get_text())
             if video:
                 self.controller.package.setMetaData(config.data.namespace, 'website-export-video-url', video)
             b.set_sensitive(False)

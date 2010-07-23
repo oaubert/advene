@@ -1672,7 +1672,7 @@ class TimeLine(AdhocView):
             """
             rep=ann.type.getMetaData(config.data.namespace, "representation")
             if rep is None or rep == '' or re.match('^\s+', rep):
-                r=widget.get_text()
+                r=unicode(widget.get_text())
             else:
                 m=parsed_representation.match(rep)
                 if m:
@@ -1681,15 +1681,15 @@ class TimeLine(AdhocView):
                     name=m.group(1)
                     reg = re.compile('^' + name + '=(.+?)$', re.MULTILINE)
                     if reg.match(ann.content.data):
-                        r = reg.sub(name + '=' + widget.get_text().replace('\n', '\\n'), ann.content.data)
+                        r = reg.sub(name + '=' + unicode(widget.get_text()).replace('\n', '\\n'), ann.content.data)
                     else:
                         # The key is not present, add it
                         if ann.content.data:
                             r = ann.content.data + "\n%s=%s" % (name,
-                                                                widget.get_text().replace('\n', '\\n'))
+                                                                unicode(widget.get_text()).replace('\n', '\\n'))
                         else:
                             r = "%s=%s" % (name,
-                                           widget.get_text().replace('\n', '\\n'))
+                                           unicode(widget.get_text()).replace('\n', '\\n'))
                 else:
                     self.controller.log("Cannot update the annotation, its representation is too complex")
                     r=ann.content.data
@@ -3385,7 +3385,7 @@ class TimeLine(AdhocView):
         tb.insert(gtk.SeparatorToolItem(), -1)
 
         def zoom_entry(entry):
-            f=entry.get_text()
+            f=unicode(entry.get_text())
 
             i=re.findall(r'\d+', f)
             if i:

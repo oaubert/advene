@@ -260,7 +260,7 @@ class TimeAdjustment:
         pass
 
     def convert_entered_value(self, *p):
-        t=self.entry.get_text()
+        t=unicode(self.entry.get_text())
         v=helper.parse_time(t)
         if v is not None and v != self.value:
             v=self.check_bound_value(v)

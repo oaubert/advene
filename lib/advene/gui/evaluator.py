@@ -207,7 +207,7 @@ class Evaluator:
         """
         b=self.output.get_buffer()
         begin,end=b.get_bounds()
-        out=b.get_text(begin, end)
+        out=unicode(b.get_text(begin, end))
         f=open(filename, "w")
         f.write(out)
         f.close()
@@ -218,7 +218,7 @@ class Evaluator:
         """Return the content of the expression window.
         """
         b=self.source.get_buffer()
-        return b.get_text(*b.get_bounds())
+        return unicode(b.get_text(*b.get_bounds()))
 
     def set_expression(self, e, clear=True):
         """Set the content of the expression window.
@@ -360,7 +360,7 @@ class Evaluator:
             b.place_cursor(end)
         else:
             begin,end=b.get_bounds()
-        expr=b.get_text(begin, end)
+        expr=unicode(b.get_text(begin, end))
         if (not self.history) or self.history[-1] != expr:
             self.history.append(expr)
         symbol=None
@@ -462,7 +462,7 @@ class Evaluator:
         else:
             begin,end=b.get_bounds()
             cursor=b.get_iter_at_mark(b.get_insert())
-        expr=b.get_text(begin, cursor)
+        expr=unicode(b.get_text(begin, cursor))
         if expr.endswith('.'):
             expr=expr[:-1]
             trailingdot=True
@@ -575,7 +575,7 @@ class Evaluator:
         else:
             begin,end=b.get_bounds()
             cursor=b.get_iter_at_mark(b.get_insert())
-        expr=b.get_text(begin, cursor)
+        expr=unicode(b.get_text(begin, cursor))
 
         m=re.match('.+[=\(\[\s](.+?)$', expr)
         if m:
@@ -630,7 +630,7 @@ class Evaluator:
         else:
             cursor=b.get_iter_at_mark(b.get_insert())
             begin=b.get_iter_at_line(cursor.get_line())
-        expr=b.get_text(begin, cursor)
+        expr=unicode(b.get_text(begin, cursor))
         return expr
 
     def make_window(self, widget=None):

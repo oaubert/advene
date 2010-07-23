@@ -179,14 +179,14 @@ class Browser(AdhocView):
         if self.callback:
             def validate_path(*p):
                 if self.callback:
-                    p=self.pathlabel.get_text()
+                    p=unicode(self.pathlabel.get_text())
                     self.close()
                     self.callback(p)
                 return True
 
             def validate_value(*p):
                 if self.callback:
-                    v="string:%s" % self.valuelabel.get_text()
+                    v="string:%s" % unicode(self.valuelabel.get_text())
                     self.close()
                     self.callback(v)
                 return True

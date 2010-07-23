@@ -242,7 +242,7 @@ class TraceTimeline(AdhocView):
             @type options: list
             @param options: a list containing the different options for the search query (see tracebuilder for more infos)
             """
-            tr=self.tracer.search(self.active_trace, unicode(self.quicksearch_entry.get_text(),'utf-8'), options[0], options[1])
+            tr=self.tracer.search(self.active_trace, unicode(self.quicksearch_entry.get_text(), 'utf-8'), options[0], options[1])
             mod= self.trace_selector.get_model()
             if len(self.tracer.traces)>len(mod):
                 n = len(self.tracer.traces)-1
@@ -2055,8 +2055,8 @@ class Inspector (gtk.VBox):
             """Save comment in the trace
             """
             if self.action:
-                self.action.event.change_comment(self.comment.get_text())
-                if self.comment.get_text()!='':
+                self.action.event.change_comment(unicode(self.comment.get_text()))
+                if unicode(self.comment.get_text()) != '':
                     self.action.addCommentMark()
                 else:
                     self.action.removeCommentMark()

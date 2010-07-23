@@ -112,7 +112,7 @@ def list_selector_widget(members=None,
             try:
                 return combo.get_model().get_value(combo.get_active_iter(), 1)
             except (TypeError, AttributeError):
-                return combo.child.get_text()
+                return unicode(combo.child.get_text())
         def set_current_element(combo, t):
             combo.child.set_text(t)
     else:
@@ -312,7 +312,7 @@ def entry_dialog(title=None,
     ret=None
     if res == gtk.RESPONSE_OK:
         try:
-            ret=e.get_text()
+            ret=unicode(e.get_text())
         except ValueError:
             ret=None
     else:
@@ -601,7 +601,7 @@ def get_filename(title=_("Open a file"),
     if res == gtk.RESPONSE_OK:
         filename=fs.get_filename()
         if alias:
-            al=alias_entry.get_text()
+            al=unicode(alias_entry.get_text())
             if not al:
                 # It may not have been updated, if the user typed the
                 # filename in the entry box.

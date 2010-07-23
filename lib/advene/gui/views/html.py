@@ -367,4 +367,4 @@ class HTMLView(AdhocView):
     def current_url(self, url=None):
         if url is not None:
             self.url_entry.set_text(url)
-        return self.url_entry.get_text()
+        return unicode(self.url_entry.get_text())

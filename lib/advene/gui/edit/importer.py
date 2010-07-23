@@ -50,7 +50,7 @@ class ExternalImporter(AdhocView):
         self.widget=self.build_widget()
 
     def update_importers(self):
-        n=self.filename_entry.get_text()
+        n=unicode(self.filename_entry.get_text())
         model=self.importers.get_model()
         model.clear()
         if n.lower().endswith('.azp'):
@@ -85,7 +85,7 @@ class ExternalImporter(AdhocView):
     def convert_file(self, b, *p):
         b.set_sensitive(False)
         ic=self.importers.get_current_element()
-        fname=self.filename_entry.get_text()
+        fname=unicode(self.filename_entry.get_text())
         self.widget.get_toplevel().set_title(_('Importing %s') % os.path.basename(fname))
 
         if ic == dummy_advene_importer:

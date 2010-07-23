@@ -1336,7 +1336,7 @@ class TextContentHandler (ContentHandler):
             return False
         buf = self.view.get_buffer()
         start_iter, end_iter = buf.get_bounds ()
-        text = buf.get_text (start_iter, end_iter)
+        text = unicode(buf.get_text (start_iter, end_iter))
         self.element.data = text
         return True
 
@@ -1432,7 +1432,7 @@ class TextContentHandler (ContentHandler):
                     icon=gtk.MESSAGE_ERROR)
                 return True
             b=self.view.get_buffer()
-            f.write(b.get_text(*b.get_bounds()))
+            f.write(unicode(b.get_text(*b.get_bounds())))
             f.close()
             self.fname=fname
         return True
@@ -1873,7 +1873,7 @@ class EditGenericForm(EditForm):
         if not self.editable:
             return False
         if hasattr(self.entry, 'get_current_element'):
-            v=unicode(self.entry.get_current_element())
+            v=self.entry.get_current_element()
         else:
             v=unicode(self.entry.get_text())
         self.setter(v)

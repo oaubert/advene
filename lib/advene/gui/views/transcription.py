@@ -225,7 +225,7 @@ class TranscriptionView(AdhocView):
             try:
                 beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
                 enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
-                if b.get_text(beginiter, enditer) != self.representation(a):
+                if unicode(b.get_text(beginiter, enditer)) != self.representation(a):
                     modified.append(a)
             except TypeError:
                 # Some missing annotations
@@ -264,7 +264,7 @@ class TranscriptionView(AdhocView):
             beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
             enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
             self.controller.notify('EditSessionStart', element=a, immediate=True)
-            if update(a, b.get_text(beginiter, enditer)):
+            if update(a, unicode(b.get_text(beginiter, enditer))):
                 self.controller.notify("AnnotationEditEnd", annotation=a, batch=batch_id)
             else:
                 impossible.append(a)
@@ -364,7 +364,7 @@ class TranscriptionView(AdhocView):
         self.searchbox.pack_start(close_button, expand=False, fill=False)
 
         def search_entry_cb(e):
-            self.highlight_search_forward(e.get_text())
+            self.highlight_search_forward(unicode(e.get_text()))
             return True
 
         def search_entry_key_press_cb(e, event):
@@ -710,7 +710,7 @@ class TranscriptionView(AdhocView):
     def save_output(self, filename=None):
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()
-        out=b.get_text(begin, end)
+        out=unicode(b.get_text(begin, end))
         try:
             f=open(filename, "w")
         except Exception, e:

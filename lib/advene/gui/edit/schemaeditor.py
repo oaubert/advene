@@ -1139,7 +1139,7 @@ class TypeExplorer (gtk.ScrolledWindow):
 
 
     def colorTextChange(self, w):
-        col = self.entryCol.get_text()
+        col = unicode(self.entryCol.get_text())
         color=name2color(col)
         if color is not None:
             self.bcol.set_color(color)
@@ -1158,7 +1158,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         return True
 
     def getTypeDesc(self):
-        return self.TDesc.get_text()
+        return unicode(self.TDesc.get_text())
 
     def setTypeColor(self, v):
         if v is None :
@@ -1177,7 +1177,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         return self.bcol.get_color()
 
     def getTypeId(self):
-        return self.TId.get_text()
+        return unicode(self.TId.get_text())
 
     def setTypeId(self, name=""):
         if (name is None):
@@ -1186,7 +1186,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         return True
 
     def getTypeName(self):
-        return self.TName.get_text()
+        return unicode(self.TName.get_text())
 
     def setTypeName(self, name=""):
         if (name is None):

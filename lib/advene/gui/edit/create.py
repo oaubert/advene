@@ -166,8 +166,8 @@ class CreateElementPopup(object):
 
         @return: the created element, None if an error occurred
         """
-        id_ = self.dialog.id_entry.get_text()
-        title_ = self.dialog.title_entry.get_text()
+        id_ = unicode(self.dialog.id_entry.get_text())
+        title_ = unicode(self.dialog.title_entry.get_text())
         # Check validity of id.
         if not self.is_valid_id(id_):
             dialog.message_dialog(

@@ -1,3 +1,7 @@
+* gui.main: cache current value in self.time_label
+
+* Fix message log file access on win32
+
 * implement audio segmenter using cutter gst: gst-launch -m filesrc location=foo.ogg ! decodebin ! audioconvert ! cutter threshold=.3 ! progressreport ! fakesink
 
 * popup menu on annotation: "Extract video fragment"
@@ -2777,4 +2781,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * window title: display package filename
 
 * option to remove completion
+
+* Strange agrave issue in transcribe ??
 
