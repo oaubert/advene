@@ -1,4 +1,4 @@
-* quick edit + repr: append, does not update.
+* quick edit: integrate completer/abbrev
 
 * Fix message log file access on win32
 
@@ -2785,4 +2785,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Strange agrave issue in transcribe ??
 
 * gui.main: cache current value in self.time_label
+
+* quick edit + repr: append, does not update.
 
