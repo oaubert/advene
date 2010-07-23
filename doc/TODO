@@ -1,3 +1,5 @@
+* option to remove completion
+
 * implement audio segmenter using cutter gst: gst-launch -m filesrc location=foo.ogg ! decodebin ! audioconvert ! cutter threshold=.3 ! progressreport ! fakesink
 
 * popup menu on annotation: "Extract video fragment"
@@ -2773,4 +2775,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * timeline: Display all relations
 
 * search/replace in content on AnnotationTypes popup menu
+
+* window title: display package filename
 

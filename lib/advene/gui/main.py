@@ -2465,7 +2465,7 @@ class AdveneGUI(object):
 
     def update_window_title(self):
         # Update the main window title
-        t=" - ".join((_("Advene"), self.controller.get_title(self.controller.package)))
+        t=" - ".join((_("Advene"), unicode(os.path.basename(self.controller.package.uri)), self.controller.get_title(self.controller.package)))
         if self.controller.package._modified:
             t += " (*)"
             self.save_toolbutton.set_sensitive(True)
