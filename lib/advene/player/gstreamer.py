@@ -241,6 +241,19 @@ class Player:
 
         self.player.props.video_sink=self.video_sink
 
+        if gst.element_factory_find('scaletempo'):
+            # The scaletempo element is present. Use it.
+            self.audio_sink = gst.Bin()
+            elements = [
+                gst.element_factory_make('scaletempo'),
+                gst.element_factory_make('autoaudiosink'),
+                ]
+            self.audio_sink.add(*elements)
+            if len(elements) >= 2:
+                gst.element_link_many(*elements)
+            self.player.props.audio_sink = self.audio_sink
+            self.audio_sink.add_pad(gst.GhostPad('sink', elements[0].get_pad('audio_sink') or elements[0].get_pad('sink')))
+        
         bus = self.player.get_bus()
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', self.on_sync_message)
