@@ -72,6 +72,8 @@ class Completer:
                 textbuffer.delete(begin, end)
                 textbuffer.insert(begin, repl + " ")
             return False
+        if not config.data.preferences['completion-mode']:
+            return False
         if length > 1:
             self.hide_completion_window()
         else:

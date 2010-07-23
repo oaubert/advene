@@ -3745,7 +3745,7 @@ class AdveneGUI(object):
                         'slave-player-sync-delay',
                         'tts-language', 'record-actions', 'popup-destination',
                         'timestamp-format', 
-                        'abbreviation-mode', 'text-abbreviations' )
+                        'abbreviation-mode', 'text-abbreviations', 'completion-mode' )
         path_options=('data', 'plugins', 'advene', 'imagecache', 'moviepath', 'shotdetect')
         cache={
             'font-size': config.data.preferences['timeline']['font-size'],
@@ -3886,6 +3886,7 @@ class AdveneGUI(object):
         ew.add_spin(_("Interline height"), 'interline-height', _("Height of interlines"), 0, 40)
 
         ew.add_title(_("Text content"))
+        ew.add_checkbox(_("Completion mode"), 'completion-mode', _("Enable dynamic completion mode"))
         ew.add_checkbox(_("Abbreviation mode"), 'abbreviation-mode', _("Enable abbreviation mode"))
         ew.add_text(_("Abbreviations"), 'text-abbreviations', _("Text abbreviations. 1 entry per line. Each line consists of the abbreviation followed by its replacement."))
 
