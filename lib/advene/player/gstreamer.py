@@ -576,9 +576,10 @@ class Player:
 
     def on_sync_message(self, bus, message):
         if message.structure is None:
-            return
+            return True
         if message.structure.get_name() == 'prepare-xwindow-id':
             self.reparent(self.xid)
+        return True
 
     def sound_mute(self):
         if self.mute_volume is None:
