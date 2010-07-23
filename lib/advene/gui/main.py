@@ -1397,7 +1397,7 @@ class AdveneGUI(object):
         self.gui.slider.connect('button-release-event', self.on_slider_button_release_event)
         self.gui.slider.connect('scroll-event', self.on_slider_scroll_event)
         def update_timelabel(s):
-            self.time_label.set_text(helper.format_time(s.get_value()))
+            self.time_label.set_time(s.get_value())
             return False
         self.gui.slider.connect('value-changed', update_timelabel)
 
@@ -1425,14 +1425,20 @@ class AdveneGUI(object):
 
         h=gtk.HBox()
         eb=gtk.EventBox()
-        self.time_label=gtk.Label()
+        self.time_label = gtk.Label()
+        self.time_label.value = None
+        def set_time(s, t):
+            s.set_text(helper.format_time(t))
+            s.value = t
+            return t
+        self.time_label.set_time=set_time.__get__(self.time_label)
         # Make sure that we use a fixed-size font, so that the
         # time_label width is constant and does not constantly modify
         # the slider available width.
         self.time_label.modify_font(pango.FontDescription("courier 10"))
         if config.data.os == 'darwin':
             self.time_label.set_size_request(90, -1)
-        self.time_label.set_text(helper.format_time(None))
+        self.time_label.set_time(None)
         eb.add(self.time_label)
 
         def time_pressed(w, event):
@@ -2666,9 +2672,8 @@ class AdveneGUI(object):
             # stream easier
             pass
         elif p.status in self.active_player_status:
-            t=helper.format_time(pos)
-            if t != self.time_label.get_text():
-                self.time_label.set_text(t)
+            if pos != self.time_label.value:
+                self.time_label.set_time(pos)
             # Update the display
             d = self.controller.cached_duration
             if d > 0 and d != self.gui.slider.get_adjustment ().upper:
@@ -2697,9 +2702,8 @@ class AdveneGUI(object):
 
         else:
             self.gui.slider.set_value (0)
-            t=helper.format_time(None)
-            if t != self.time_label.get_text():
-                self.time_label.set_text(t)
+            if self.time_label.value is not None:
+                self.time_label.set_time(None)
             if p.status != self.oldstatus:
                 self.oldstatus = self.controller.player.status
                 self.gui.player_status.set_text(self.statustext.get(p.status, _("Unknown")))
