@@ -8,6 +8,9 @@ advene (0.43) unstable; urgency=low
   * Website export can now automatically generate HTML5 <video> code,
     thanks to Madjid Sadallah.
   
+  * Right-click on an annotation, annotation-type or package offers to do
+    a search/replace on the concerned annotations content.
+   
   * Player control
   
      * The player is automatically started and paused when loading a movie/package.
@@ -15,6 +18,8 @@ advene (0.43) unstable; urgency=low
      * The Play/Pause button is now unique, and the Stop button has been removed.
   
      * The Mute/Unmute button has been replaced by a volume slider.
+  
+     * Rate control is available for the gstreamer plugin.
      
      * Control-Up/Down keys can be used to navigate with user-specified
        times (without Shift modifier), see Edit/Preferences/Time-related for
@@ -27,6 +32,10 @@ advene (0.43) unstable; urgency=low
        for more details.
   
   * Timeline view:
+
+     * If there are more than 1500 annotations, display only 2
+       annotation types in the timeline (to speed package loading), and
+       propose display options through a dialog.
   
      * Control+click in the timeline background creates and edits a new
        annotation at the current player position (and in the appropriate
@@ -41,6 +50,8 @@ advene (0.43) unstable; urgency=low
   
           * a/A on on annotation invokes the "Frame selector" interface
   
+     * A new toolbar button toggles the display of all defined relations.
+  
   * Table view:
   
     * Clicking on the snapshot column plays the movie at the specified
@@ -53,9 +64,10 @@ advene (0.43) unstable; urgency=low
   
     * Implement Undo and action notification
 
-  * Abbreviations can be used to enter text more quickly. See
+  * When editing textual content, abbreviations can be used to enter text
+    more quickly, and automatic completion can be disabled. See
     Edit/Preferences/Text Content for customization.
-  
+
   * Workspace is now always saved in the package in the standard
     configuration. See Edit/Preferences/Workspace for configuration.
 
