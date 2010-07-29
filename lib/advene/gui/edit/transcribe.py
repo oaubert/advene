@@ -1245,11 +1245,7 @@ class TranscriptionEdit(AdhocView):
             return True
 
         if event.state & gtk.gdk.CONTROL_MASK:
-            if event.keyval == gtk.keysyms.s:
-                # Save file
-                self.save_transcription_cb()
-                return True
-            elif event.keyval == gtk.keysyms.Return:
+            if event.keyval == gtk.keysyms.Return:
                 # Insert current timestamp mark
                 if p.status == p.PlayingStatus or p.status == p.PauseStatus:
                     if event.state & gtk.gdk.SHIFT_MASK:
