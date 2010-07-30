@@ -407,6 +407,19 @@ class Menu:
         d.destroy()
         return True
 
+    def extract_fragment(self, m, ann):
+        """Extract the fragment corresponding to an annotation.
+        """
+        title = self.controller.get_title(ann)
+        begin = helper.format_time(ann.fragment.begin)
+        end = helper.format_time(ann.fragment.end)
+
+        self.controller.gui.render_montage_dialog([ ann ],
+                                                  basename = ann.id + "-" + helper.title2id(title) + ".ogv",
+                                                  title = _("Extracting %s") % title,
+                                                  label = _("Exporting annotation %(title)s\nfrom %(begin)s to %(end)s\nto %%(filename)s") % locals())
+        return True
+
     def common_submenu(self, element):
         """Build the common submenu for all elements.
         """
@@ -474,6 +487,8 @@ class Menu:
         item = gtk.MenuItem(_("Highlight"), use_underline=False)
         item.set_submenu(self.activate_submenu(element))
         menu.append(item)
+        if 'montagerenderer' in self.controller.generic_features:
+            add_item(_("Extract video fragment"), self.extract_fragment, element)
 
         def build_submenu(submenu, el, items):
             """Build the submenu for the given element.
