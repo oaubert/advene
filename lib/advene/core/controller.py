@@ -231,6 +231,12 @@ class AdveneController(object):
         # Scrubbing timeout guard
         self.scrub_lastvalue = None
 
+        # Misc. modules: some features are implemented as plugins but
+        # do not fit in the available categories (content-handler,
+        # view, tracer...). Here is a placeholder for keeping their
+        # reference, indexed by view name. The value is a class.
+        self.generic_features = {}
+        
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
         self.modifying_events = self.event_handler.catalog.modifying_events
@@ -420,6 +426,13 @@ class AdveneController(object):
         """
         config.data.register_player(imp)
 
+    def register_generic_feature(self, name, feature_class):
+        """Register a generic feature.
+        """
+        if name in self.generic_features:
+            self.log(_("Warning: redefining an existing feature %s") % name)
+        self.generic_features[name] = feature_class
+        
     def register_slave_player(self, p):
         """Register a slave video player.
         """
