@@ -112,7 +112,7 @@ class Player:
         return v
 
     def current_position(self):
-        if self.pausetime:
+        if self.pausetime is not None:
             return self.pausetime
         elif self.basetime is None:
             return 0
@@ -150,7 +150,7 @@ class Player:
             self.status=Player.PauseStatus
         else:
             self.status=Player.PlayingStatus
-            self.basetime=time() * 1000 - self.pausetime
+            self.basetime=time() * 1000 - (self.pausetime or 0)
             self.pausetime=None
 
     def resume(self, position=0):
@@ -160,7 +160,7 @@ class Player:
             self.status=Player.PauseStatus
         else:
             self.status=Player.PlayingStatus
-            self.basetime=time() * 1000 - self.pausetime
+            self.basetime=time() * 1000 - (self.pausetime or 0)
             self.pausetime=None
 
     def stop(self, position=0):
