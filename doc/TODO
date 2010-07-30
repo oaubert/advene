@@ -1,10 +1,18 @@
-* quick edit: integrate completer/abbrev
+* montage: video export
+
+* integrate pyxdg RecentFiles (use gtk.RecentFiles), pyxdg.Mime
+
+* transcribe: fix \u2019 error (')
+
+* transcribe: allow search/replace
+
+* Integrate transcription view from TBL
+
+* quick edit: integrate EntryCompletion on attributes
 
 * Fix message log file access on win32
 
 * implement audio segmenter using cutter gst: gst-launch -m filesrc location=foo.ogg ! decodebin ! audioconvert ! cutter threshold=.3 ! progressreport ! fakesink
-
-* popup menu on annotation: "Extract video fragment"
 
 * snapshotter: feedback on activity
 
@@ -64,8 +72,6 @@
 * Generateur waveform
 
 * Generic "ImportFromApplication" module/framework (with progressbar, etc)
-
-* montage: video export
 
 * gstreamer: multiple video syntax: path;path -> videobox
 
@@ -2787,4 +2793,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * gui.main: cache current value in self.time_label
 
 * quick edit + repr: append, does not update.
+
+* website: big button "Access the online hypervideo" in examples
+
+* popup menu on annotation: "Extract video fragment"
 
