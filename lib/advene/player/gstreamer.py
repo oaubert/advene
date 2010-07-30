@@ -48,25 +48,21 @@ try:
     import pygst
     pygst.require('0.10')
     import gst
+    from advene.util.snapshotter import Snapshotter
+    svgelement = None
+    # First try rsvgoverlay
+    if gst.element_factory_find('rsvgoverlay'):
+        svgelement = 'rsvgoverlay'
+    else:
+        # Not compiled. Try to fallback on the python version.
+        try:
+            import advene.util.svgoverlay
+            svgelement = 'pysvgoverlay'
+        except ImportError:
+            print "SVG overlay support not present"
+    print "SVG: Using %s element" % (svgelement or "None")
 except ImportError:
     gst=None
-
-import gtk
-
-from advene.util.snapshotter import Snapshotter
-
-svgelement = None
-# First try rsvgoverlay
-if gst.element_factory_find('rsvgoverlay'):
-    svgelement = 'rsvgoverlay'
-else:
-    # Not compiled. Try to fallback on the python version.
-    try:
-        import advene.util.svgoverlay
-        svgelement = 'pysvgoverlay'
-    except ImportError:
-        print "SVG overlay support not present"
-print "SVG: Using %s element" % (svgelement or "None")
 
 name="GStreamer video player"
 
