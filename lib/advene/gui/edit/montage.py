@@ -54,6 +54,7 @@ class Montage(AdhocView):
             (_("Save view"), self.save_view),
             (_("Clear"), self.clear),
             (_("Play"), self.play),
+            (_("Render"), self.render),
             )
         self.options={
             }
@@ -294,6 +295,15 @@ class Montage(AdhocView):
         w.update_widget()
         return w
 
+    def render(self, *p):
+        """Render the current montage.
+        """
+        self.controller.gui.render_montage_dialog([ w.annotation for w in self.contents ],
+                                                  basename = helper.title2id(self.view_name) + ".ogv",
+                                                  title = _("Extracting %s") % self.view_name,
+                                                  label = _("Exporting montage %(title)s\nto %%(filename)s") % { 'title': self.view_name })
+        return True
+        
     def play(self, *p):
         """Play the current montage.
         """
