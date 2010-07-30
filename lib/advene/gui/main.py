@@ -984,7 +984,67 @@ class AdveneGUI(object):
         d.destroy()
         return True
         
+    def render_montage_dialog(self, elements, basename=None, title=None, label=None):
+        """Extract a montage/annotation to a new video.
+        """
+        MontageRenderer = self.controller.generic_features.get('montagerenderer')
+        if MontageRenderer is None:
+            dialog.message_dialog(_("The video extracting feature is not available."))
+            return True
+        if title is None:
+            title = _("Video export")
+        if label is None:
+            label = _("Exporting video montage/fragment to %%(filename)s")
 
+        filename = dialog.get_filename(title=_("Please choose a destination filename"), 
+                                       action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                       button=gtk.STOCK_SAVE,
+                                       default_file = basename,
+                                       filter='video')
+        if filename is None:
+            return
+        m = MontageRenderer(self.controller, elements)
+        
+        w = gtk.Window()
+        w.set_title(title)
+        v = gtk.VBox()
+        l = gtk.Label(label % { 'filename': filename } )
+        v.add(l)
+
+        pg = gtk.ProgressBar()
+        v.pack_start(pg, expand=False)
+        
+        hb = gtk.HButtonBox()
+        b = gtk.Button(stock=gtk.STOCK_CLOSE)
+        def close_encoder(b):
+            m.finalize()
+            w.destroy()
+            return True
+        b.connect('clicked', close_encoder)
+        hb.pack_start(b, expand=False)
+        v.pack_start(hb, expand=False)
+        
+        w.add(v)
+        w.show_all()
+
+        def pg_callback(value, msg=''):
+            if value is None:
+                w.destroy()
+                return True
+            pg.set_fraction(value)
+            if msg:
+                pg.set_text(msg)
+            return True
+        m.render(filename, pg_callback)
+
+        # Keep a reference so that the MontageRenderer is not
+        # garbage-collected before the window is closed.
+        w.renderer = m
+
+        # FIXME: for debugging
+        self.renderer = m
+        return True
+        
     def main (self, args=None):
         """Mainloop : Gtk mainloop setup.
 
