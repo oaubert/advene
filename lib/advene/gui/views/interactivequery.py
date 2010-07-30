@@ -330,7 +330,7 @@ class InteractiveResult(AdhocView):
             l=self.table.get_elements()
             v=self.controller.create_static_view(elements=l)
             if isinstance(self.query, Quicksearch):
-                v.title=_("Comment annotations containing %s") % self.query.searched
+                v.title=_("Comment on annotations containing %s") % self.query.searched
                 self.controller.notify('ViewEditEnd', view=v)
             self.controller.gui.open_adhoc_view('edit', element=v, destination=self._destination)
         return True
