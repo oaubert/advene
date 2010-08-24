@@ -1594,15 +1594,21 @@ class TimeLine(AdhocView):
         """Handle button release on annotation widgets.
         """
         if event.button == 1 and getattr(widget, '_single_click_guard', None):
-            self.controller.gui.set_current_annotation(annotation)
             # Goto annotation
             c=self.controller
-            pos = c.create_position (value=annotation.fragment.begin,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            self.controller.update_status (status="set", position=pos)
-            if self.loop_toggle_button.get_active():
-                self.controller.gui.loop_on_annotation_gui(annotation)
+            c.gui.set_current_annotation(annotation)
+            if c.player.current_position_value == annotation.fragment.begin:
+                # Already at the right position. Start the player if
+                # it was paused
+                if c.player.status == c.player.PauseStatus:
+                    c.update_status("resume")
+            else:
+                pos = c.create_position (value=annotation.fragment.begin,
+                                         key=c.player.MediaTime,
+                                         origin=c.player.AbsolutePosition)
+                c.update_status (status="set", position=pos)
+                if self.loop_toggle_button.get_active():
+                    c.gui.loop_on_annotation_gui(annotation)
             return True
 
     def annotation_button_press_cb(self, widget, event, annotation):

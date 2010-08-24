@@ -1,3 +1,5 @@
+* timeline: deactivate vertical pane of scale layout
+
 * montage: video export
 
 * integrate pyxdg RecentFiles (use gtk.RecentFiles), pyxdg.Mime
@@ -2797,4 +2799,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * website: big button "Access the online hypervideo" in examples
 
 * popup menu on annotation: "Extract video fragment"
+
+* click 2 times on annotation -> misposition of time marker
 
