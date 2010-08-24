@@ -3281,11 +3281,14 @@ class TimeLine(AdhocView):
         sw_scale.add(self.scale_layout)
         scale_pane.add2(sw_scale)
 
-        def synchronize_position(w, param):
-            scale_pane.set_position(w.props.position)
-            return False
-
-        content_pane.connect('notify::position', synchronize_position)
+        def synchronize_position(w, param, other_pane):
+            other_pane.set_position(w.props.position)
+            return True
+        content_pane.connect('notify::position', synchronize_position, scale_pane)
+        def ignore(*p):
+            return True
+        scale_pane.connect('button-press-event', ignore)
+        scale_pane.connect('button-release-event', ignore)
 
         self.global_pane=gtk.VPaned()
 
