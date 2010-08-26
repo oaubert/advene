@@ -136,14 +136,11 @@ class TranscriptionEdit(AdhocView):
             self.load_transcription(filename=filename)
         for n, v in arg:
             if n == 'text':
-                self.load_transcription(buffer=urllib.unquote_plus(v))
+                self.load_transcription(buffer=v)
 
     def get_save_arguments(self):
         b=self.textview.get_buffer()
-        # Note: the transcription will end up doubly
-        # urllib-quoted. But for backwards compatibility sake, we
-        # cannot afford to fix it now.
-        arguments = [ ('text', urllib.quote_plus("".join(self.generate_transcription()))) ]
+        arguments = [ ('text', "".join(self.generate_transcription())) ]
         return self.options, arguments
 
     def edit_preferences(self, *p):
