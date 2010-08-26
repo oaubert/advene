@@ -221,10 +221,10 @@ class AdhocView(object):
 
         if options:
             for n, v in options.iteritems():
-                ET.SubElement(root, ET.QName(config.data.namespace, 'option'), name=n, value=urllib.quote(unicode(v)))
+                ET.SubElement(root, ET.QName(config.data.namespace, 'option'), name=n, value=urllib.quote(unicode(v).encode('utf8')))
         if arguments:
             for n, v in arguments:
-                ET.SubElement(root, ET.QName(config.data.namespace, 'argument'), name=n, value=urllib.quote(unicode(v)))
+                ET.SubElement(root, ET.QName(config.data.namespace, 'argument'), name=n, value=urllib.quote(unicode(v).encode('utf8')))
         return root
 
     def save_default_options(self, *p):
@@ -527,11 +527,11 @@ class AdhocViewParametersParser:
         for e in root:
             if e.tag == ET.QName(config.data.namespace, 'option'):
                 name=e.attrib['name']
-                value=urllib.unquote(e.attrib['value'])
+                value=unicode(urllib.unquote(e.attrib['value']), 'utf8')
                 self.options[name]=value
             elif e.tag == ET.QName(config.data.namespace, 'argument'):
                 name=e.attrib['name']
-                value=urllib.unquote(e.attrib['value'])
+                value=unicode(urllib.unquote(e.attrib['value']), 'utf8')
                 self.arguments.append( (name, value) )
             else:
                 print "Unknown tag %s in AdhocViewParametersParser" % e.tag
