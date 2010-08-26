@@ -21,6 +21,7 @@ from gettext import gettext as _
 
 import gtk
 import re
+import cairo
 
 import advene.core.config as config
 from advene.gui.edit.elements import ContentHandler, TextContentHandler
@@ -107,7 +108,8 @@ class AnnotationPlaceholder:
         elif 'timestamp' in self.presentation:
             # timestamp without snapshot or overlay
             data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
-
+        elif 'content' in self.presentation:
+            data.append("""<span tal:content="package/annotations/%(id)s/representation">%(content)s</span>""" % d)
         if 'link' in self.presentation:
             data.append('</a>')
 
@@ -153,6 +155,36 @@ class AnnotationPlaceholder:
         self.pixbuf=new
         return True
 
+    def render_text(self, text):
+        """Render the given text as a pixbuf.
+        """
+
+        # Find out the pixbuf size
+        import cairo
+        context = cairo.Context(cairo.ImageSurface(cairo.FORMAT_ARGB32, 1, 1))
+        context.select_font_face("sans-serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        context.set_font_size(12)
+        x_bearing, y_bearing, width, height = context.text_extents(text)[:4]
+
+        # Generate text
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, int(width) + 4, int(height) + 4)
+        context = cairo.Context(surface)
+        context.select_font_face("sans-serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        context.set_font_size(12)
+        context.set_source_rgba(0, 0, 0, 1)
+        context.move_to(2 - x_bearing, 2 - y_bearing)
+        context.text_path(text)
+        context.set_line_width(0.5)
+        context.stroke_preserve()
+        context.fill()
+
+        pixbuf = gtk.gdk.pixbuf_new_from_data(
+            surface.get_data(), 
+            gtk.gdk.COLORSPACE_RGB, True, 8, 
+            surface.get_width(), surface.get_height(), 
+            surface.get_stride())
+        return pixbuf
+
     def build_pixbuf(self):
         if self.annotation is None:
             pixbuf=png_to_pixbuf(self.controller.package.imagecache.not_yet_available_image,
@@ -171,16 +203,10 @@ class AnnotationPlaceholder:
                                      width=self.width)
         elif 'timestamp' in self.presentation:
             # Generate only a timestamp 
-            # FIXME: hardcoded value in viewBox is bad... We should find out the appropriate size.
-            loader = gtk.gdk.PixbufLoader('svg')
-            loader.write("""<svg version='1'> preserveAspectRatio="xMinYMin meet" viewBox="0 0 220 20">
-<text x='0' y='10' fill="black" font-size="12" stroke="black" font-family="sans-serif">
-%s
-  </text>
-</svg>
-""" % helper.format_time(self.annotation.fragment.begin))
-            loader.close ()
-            pixbuf = loader.get_pixbuf ()
+            pixbuf = self.render_text(helper.format_time(self.annotation.fragment.begin))
+        elif 'content' in self.presentation:
+            # Display text
+            pixbuf = self.render_text(self.controller.get_title(self.annotation))
         else:
             pixbuf=png_to_pixbuf(self.controller.package.imagecache.not_yet_available_image,
                                  width=self.width)
@@ -310,6 +336,7 @@ class HTMLContentHandler (ContentHandler):
                     (_("Overlayed snapshot only"), ['link', 'overlay', ]),
                     (_("Timestamp only"), ['link', 'timestamp', ]),
                     (_("Snapshot+timestamp"), ['link', 'snapshot', 'timestamp']),
+                    (_("Annotation content"), ['link', 'content']),
                     ):
                     i=gtk.MenuItem(title)
                     i.connect('activate', (lambda it, ann, data: self.insert_annotation_content(data, ann, focus=True)), source, choice)
@@ -405,24 +432,16 @@ class HTMLContentHandler (ContentHandler):
             self.controller.update_status('set', pos)
             return True
 
-        def select_presentation(i, ap, mode):
-            if mode == 'timestamp':
-                # Timestamp only
-                ap.presentation=[ 'link' ]
-            else:
-                modes=['overlay', 'snapshot']
-                modes.remove(mode)
-                try:
-                    ap.presentation.remove(modes[0])
-                except ValueError:
-                    pass
-            ap.presentation.append(mode)
+        def select_presentation(i, ap, modes):
+            ap.presentation=[ 'link' ]
+            ap.presentation.extend(modes)
             ap.refresh()
             return True
 
         def new_menuitem(label, action, *params):
             item=gtk.MenuItem(label)
-            item.connect('activate', action, *params)
+            if action is not None:
+                item.connect('activate', action, *params)
             item.show()
             menu.append(item)
             return item
@@ -435,15 +454,14 @@ class HTMLContentHandler (ContentHandler):
                 ap=ctx[-1]._placeholder
 
                 if ap.annotation is not None:
+                    new_menuitem(_("Annotation %s") % self.controller.get_title(ap.annotation), None)
                     new_menuitem(_("Play video"), goto_position, ap.annotation.fragment.begin)
-                    new_menuitem(_("Timestamp only"), select_presentation, ap, 'timestamp')
-                    if 'snapshot' in ap.presentation:
-                        new_menuitem(_("Display overlay"), select_presentation, ap, 'overlay')
-                    elif 'overlay' in ap.presentation:
-                        new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
-                    else:
-                        # Timestamp only
-                        new_menuitem(_("Display snapshot"), select_presentation, ap, 'snapshot')
+                    new_menuitem(_("Show timestamp only"), select_presentation, ap, ['timestamp'])
+                    new_menuitem(_("Show content only"), select_presentation, ap, ['content'])
+                    new_menuitem(_("Show snapshot only"), select_presentation, ap, ['snapshot'])
+                    
+                    new_menuitem(_("Show overlayed timestamp"), select_presentation, ap, ['timestamp', 'snapshot'])
+                    new_menuitem(_("Show overlayed content"), select_presentation, ap, ['overlay'])
 
             l=[ m for m in ctx if m._tag == 'a' ]
             if l:
