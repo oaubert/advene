@@ -118,7 +118,7 @@ class Bookmarks(AdhocView):
             return None
 
     def get_save_arguments(self):
-        return self.options, ([ ('bookmark', '%d:%s' % (b.value, urllib.quote(b.comment)) ) for b in self.bookmarks ])
+        return self.options, ([ ('bookmark', '%d:%s' % (b.value, b.comment) ) for b in self.bookmarks ])
 
     def close(self, *p):
         if self.closable:
