@@ -733,13 +733,11 @@ class CategorizedSelector:
 def center_on_mouse(w):
     """Center the given gtk.Window on the mouse position.
     """
-    d=gtk.gdk.device_get_core_pointer()
     root=w.get_toplevel().get_root_window()
-    (x, y) = d.get_state(root)[0]
+    (screen, x, y, mod) = root.get_display().get_pointer()
     x, y = long(x), long(y)
-
     # Let's try to center the window on the mouse as much as possible.
     width, height=w.get_size()
-    rw, rh = root.get_size()
+    rw, rh = screen.get_width(), screen.get_height()
     w.move( min( max(0, x - width/2), rw-width ),
             min( max(0, y - height/2), rh-height) )
