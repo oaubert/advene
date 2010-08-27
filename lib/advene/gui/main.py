@@ -303,7 +303,8 @@ class AdveneGUI(object):
                     ( _("Get support"), self.on_support1_activate, "" ),
                     ( _("Check for updates"), self.check_for_update, "" ),
                     ( _("Display shortcuts"), self.on_helpshortcuts_activate, "" ),
-                    ( _("Display logfile"), self.on_advene_log_display, "Display log file"),
+                    ( _("Display logfile"), self.on_advene_log_display, _("Display log file")),
+                    ( _("Open logfile folder"), self.on_advene_log_folder_display, _("Display logfile folder. It can help when sending the advene.log file by e-mail.")),
                     ( _("_About"), self.on_about1_activate, "" ),
                     ), "" ),
             )
@@ -4085,6 +4086,23 @@ class AdveneGUI(object):
         self.display_textfile(config.data.advenefile('advene.log', 'settings'),
                               title=_("Advene log"),
                               viewname='advenelogview')
+        return True
+
+    def on_advene_log_folder_display(self, button=None, data=None):
+        d = config.data.advenefile('', 'settings')
+        if config.data.os == 'win32':
+            os.startfile(d)
+        elif config.data.os == 'darwin':
+            os.system('open "%s"' % d)
+        else:
+            # Linux is more problematic...
+            for p in ('kfmclient', 'gnome-open', 'xdg-open'):
+                prg = helper.find_in_path(p)
+                if prg is not None:
+                    if p == 'kfmclient':
+                        prg = prg + " openURL"
+                    os.system('%s "%s"' % (prg, d))
+                    break
         return True
 
     def on_create_view_activate (self, button=None, data=None):
