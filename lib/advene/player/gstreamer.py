@@ -661,7 +661,7 @@ class Player:
                 style.base[state]=black
             self.fullscreen_window.set_style(style)
 
-        if True or config.data.os == 'darwin':
+        if config.data.os == 'darwin':
             # Get geometry of the first monitor
             r = gtk.gdk.screen_get_default().get_monitor_geometry(0)
             self.fullscreen_window.set_decorated(False)
