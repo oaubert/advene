@@ -735,9 +735,17 @@ def center_on_mouse(w):
     """
     root=w.get_toplevel().get_root_window()
     (screen, x, y, mod) = root.get_display().get_pointer()
-    x, y = long(x), long(y)
+    r = screen.get_monitor_geometry(screen.get_monitor_at_point(x, y))
+
     # Let's try to center the window on the mouse as much as possible.
-    width, height=w.get_size()
-    rw, rh = screen.get_width(), screen.get_height()
-    w.move( min( max(0, x - width/2), rw-width ),
-            min( max(0, y - height/2), rh-height) )
+    width, height = w.get_size()
+
+    posx = max(r.x, x - width / 2)
+    if posx + width > r.x + r.width:
+        posx = r.x + r.width - width
+
+    posy = max(r.y, y - height / 2)
+    if posy + height > r.y + r.height:
+        posy = r.y + r.height - height
+
+    w.move(posx, posy)
