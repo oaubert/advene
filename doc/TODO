@@ -2,8 +2,6 @@
 
 * integrate pyxdg RecentFiles (use gtk.RecentFiles), pyxdg.Mime
 
-* transcribe: fix \u2019 error (')
-
 * transcribe: allow search/replace
 
 * Integrate transcription view from TBL
@@ -24,8 +22,7 @@
 
 * option to stop player synchronisation then use current position as time offset
 
-* trace replay mode  of video navigation (replay video based on
-   navigation events)
+* trace replay mode  of video navigation (replay video based on navigation events)
 
 * Customizable shortcuts
 
