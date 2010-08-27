@@ -1,3 +1,5 @@
+* macosx: "use native video size" option
+
 * montage: video export
 
 * integrate pyxdg RecentFiles (use gtk.RecentFiles), pyxdg.Mime
