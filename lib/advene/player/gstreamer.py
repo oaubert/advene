@@ -661,10 +661,12 @@ class Player:
                 style.base[state]=black
             self.fullscreen_window.set_style(style)
 
-        if config.data.os == 'darwin':
-            self.fullscreen_window.set_size_request(gtk.gdk.screen_width(), gtk.gdk.screen_height())
-            self.fullscreen_window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_SPLASHSCREEN)
-            self.fullscreen_window.set_position(gtk.WIN_POS_CENTER)
+        if True or config.data.os == 'darwin':
+            # Get geometry of the first monitor
+            r = gtk.gdk.screen_get_default().get_monitor_geometry(0)
+            self.fullscreen_window.set_decorated(False)
+            self.fullscreen_window.set_size_request(r.width, r.height)
+            self.fullscreen_window.move(r.x, r.y)
             self.fullscreen_window.show()
         else:
             self.fullscreen_window.show()
