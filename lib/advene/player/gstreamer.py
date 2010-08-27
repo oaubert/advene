@@ -666,7 +666,8 @@ class Player:
             r = gtk.gdk.screen_get_default().get_monitor_geometry(0)
             self.fullscreen_window.set_decorated(False)
             self.fullscreen_window.set_size_request(r.width, r.height)
-            self.fullscreen_window.move(r.x, r.y)
+            #self.fullscreen_window.move(r.x, r.y)
+            self.fullscreen_window.move(0, 0)
             self.fullscreen_window.show()
         else:
             self.fullscreen_window.show()
