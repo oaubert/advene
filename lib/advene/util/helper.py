@@ -58,7 +58,7 @@ from advene.model.exception import AdveneException
 # helps generating readable XML through ElementTree (the appropriate
 # namespace prefixes will be used)
 import advene.util.ElementTree as ET
-ET._namespace_map.update{
+ET._namespace_map.update({
     config.data.namespace: 'advene',
     'http://www.w3.org/2000/svg': 'svg',
     'http://www.w3.org/1999/xlink': 'xlink',
@@ -66,7 +66,7 @@ ET._namespace_map.update{
     'http://experience.univ-lyon1.fr/advene/ns/advenetool': 'advenetool',
     'http://xml.zope.org/namespaces/tal': 'tal',
     'http://xml.zope.org/namespaces/metal': 'metal',
-    }
+    })
 
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
