@@ -158,13 +158,13 @@ class LogWindow(AdhocView):
             parameters={'message': _("Description of the URL"),
                         'url': _("URL")},
             defaults={'message': "string:"+_("See the Advene website"),
-                      'url': 'string:http://liris.cnrs.fr/'},
+                      'url': 'string:http://www.advene.org/'},
             predefined={'message': (
                         ('string:'+_('See the Advene website'), _('See the Advene website')),
                         ('string:'+_('See the annotation'), _('See the annotation')),
                         ),
                         'url': (
-                        ('string:http://liris.cnrs.fr', _("The Advene website")),
+                        ('string:http://www.advene.org/', _("The Advene website")),
                         ('annotation/absolute_url', _("The annotation URL")),
                         )},
             category='gui',
