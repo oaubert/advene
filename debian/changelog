@@ -7,10 +7,15 @@ advene (0.43) unstable; urgency=low
 
   * Website export can now automatically generate HTML5 <video> code,
     thanks to Madjid Sadallah.
+
+  * Popup menu:
   
-  * Right-click on an annotation, annotation-type or package offers to do
-    a search/replace on the concerned annotations content.
-   
+    * Right-click on an annotation, annotation-type or package offers to do
+      a search/replace on the concerned annotations content.
+  
+    * The video fragment corresponding to an annotation can be extracted
+      through the annotation popup menu.
+  
   * Player control
   
      * The player is automatically started and paused when loading a movie/package.
@@ -41,6 +46,9 @@ advene (0.43) unstable; urgency=low
        annotation at the current player position (and in the appropriate
        type)
 
+     * When the player is paused, click once on an annotation goes to
+       the annotation begin, a second click starts the movie.
+  
      * New shortcuts :
   
           * Del deletes annotations (previously, it was necessary to hold
@@ -68,10 +76,11 @@ advene (0.43) unstable; urgency=low
     more quickly, and automatic completion can be disabled. See
     Edit/Preferences/Text Content for customization.
 
-  * Workspace is now always saved in the package in the standard
-    configuration. See Edit/Preferences/Workspace for configuration.
+  * Workspace is now always saved in the package and restored at loading
+    in the standard configuration. See Edit/Preferences/Workspace for
+    configuration.
 
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 06 Sep 2010 14:14:42 +0200
 
 advene (0.42) unstable; urgency=low
 
