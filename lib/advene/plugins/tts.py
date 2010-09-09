@@ -16,7 +16,6 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-
 from gettext import gettext as _
 import subprocess
 import os
@@ -223,6 +222,7 @@ class EspeakTTSEngine(TTSEngine):
         try:
             if self.espeak_process is None:
                 self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, creationflags = CREATE_NO_WINDOW)
+            # FIXME: we should encode sentence to a specific encoding (utf8 ?)
             self.espeak_process.stdin.write(sentence + "\n")
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
@@ -335,7 +335,12 @@ class CustomArgTTSEngine(TTSEngine):
             self.language=lang
         try:
             fse = sys.getfilesystemencoding()
-            subprocess.Popen([ self.prg_path, '-v', self.language, unicode(sentence.replace('\n',' ') + "\n").encode(fse, 'ignore') ], creationflags = CREATE_NO_WINDOW)
+            subprocess.Popen([ self.prg_path, '-v', self.language, (sentence.replace('\n',' ') + u"\n").encode(fse, 'ignore') ], creationflags = CREATE_NO_WINDOW)
         except OSError, e:
-            self.controller.log("TTS Error: ", unicode(e.message).encode('utf8', 'ignore'))
+            try:
+                m = unicode(e.message)
+            except UnicodeDecodeError:
+                print "TTS: Error decoding error message with standard encoding"
+                m = unicode(e.message, fse, 'ignore')
+            self.controller.log("TTS Error: ", m.encode('ascii', 'ignore'))
         return True
