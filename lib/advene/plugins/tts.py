@@ -335,7 +335,7 @@ class CustomArgTTSEngine(TTSEngine):
             self.language=lang
         try:
             fse = sys.getfilesystemencoding()
-            subprocess.Popen([ self.prg_path, '-v', self.language, (sentence.replace('\n',' ') + u"\n").encode(fse, 'ignore') ], creationflags = CREATE_NO_WINDOW)
+            subprocess.Popen(unicode(" ".join([self.prg_path, '-v', self.language, '"%s"' % (sentence.replace('\n',' ').replace('"', '') + u"\n")])).encode(fse, 'ignore'), creationflags = CREATE_NO_WINDOW)
         except OSError, e:
             try:
                 m = unicode(e.message)
