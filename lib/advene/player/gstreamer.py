@@ -213,6 +213,9 @@ class Player:
             elements.append(gst.element_factory_make('queue'))
             elements.append(gst.element_factory_make('ffmpegcolorspace'))
             elements.append(self.imageoverlay)
+            # Note: do not remove the (seemingly superfluous)
+            # ffmpegcolorspace here, else it blocks the pipeline for
+            # some unknown reason.
             elements.append(gst.element_factory_make('ffmpegcolorspace'))
 
         if sink == 'xvimagesink':
@@ -220,11 +223,7 @@ class Player:
             elements.append( self.imagesink )
         else:
             csp=gst.element_factory_make('ffmpegcolorspace')
-            # The scaling did not work before 2008-10-11, cf
-            # http://bugzilla.gnome.org/show_bug.cgi?id=339201
-            scale=gst.element_factory_make('videoscale')
-            self.videoscale=scale
-            elements.extend( (csp, scale, self.imagesink) )
+            elements.extend( (csp, self.imagesink) )
 
         self.video_sink.add(*elements)
         if len(elements) >= 2:
