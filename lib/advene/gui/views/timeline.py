@@ -2034,11 +2034,12 @@ class TimeLine(AdhocView):
     def update_position (self, pos):
         if pos is None:
             pos = self.current_position
+        p = self.controller.player
         if (self.options['autoscroll'] == 1
-            and self.controller.player.status == self.controller.player.PlayingStatus):
+            and (p.status == p.PlayingStatus or p.status == p.PauseStatus)):
             self.center_on_position(pos)
         elif (self.options['autoscroll'] == 2
-              and self.controller.player.status == self.controller.player.PlayingStatus):
+            and (p.status == p.PlayingStatus or p.status == p.PauseStatus)):
             p=self.unit2pixel(pos, absolute=True)
             begin=self.adjustment.value
             end=begin + self.adjustment.page_size
