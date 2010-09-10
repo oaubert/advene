@@ -148,7 +148,8 @@ class Snapshotter(object):
     def on_bus_message(self, bus, message):
         if message.structure is None:
             return
-        print "Bus message::", message.structure.get_name()
+        if message.structure.get_name() != 'missing-plugin':
+            print "Bus message::", message.structure.get_name()
 
     def simple_notify(self, buffer):
         """Basic single-snapshot method.
