@@ -1,3 +1,6 @@
+* edit element: when pressing Escape, check content not modified, else
+   ask for confirmation
+
 * macosx: "use native video size" option
 
 * montage: video export
