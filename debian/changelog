@@ -1,3 +1,9 @@
+advene (0.44) unstable; urgency=low
+
+  * Stable release. See the following 0.43 notes for more details.
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 13 Sep 2010 17:54:23 +0200
+
 advene (0.43) unstable; urgency=low
 
   * Timecode display can be customized through Edit/Preferences/Time-related
@@ -84,7 +90,7 @@ advene (0.43) unstable; urgency=low
     Edit/Preferences). Available engines are: espeak, festival, MacOS X
     "say" command, MS SAPI5 interface, custom script.
   
- -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 13 Sep 2010 17:12:08 +0200
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 13 Sep 2010 17:54:04 +0200
 
 advene (0.42) unstable; urgency=low
 
