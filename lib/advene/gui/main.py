@@ -3819,6 +3819,7 @@ class AdveneGUI(object):
         return True
 
     def on_preferences1_activate (self, button=None, data=None):
+        # Direct options are directly retrieved/stored from/into config.data.preferences
         direct_options=('history-size-limit', 'scroll-increment', 'second-scroll-increment',
                         'time-increment', 'second-time-increment', 'third-time-increment',
                         'custom-updown-keys', 'player-autostart',
@@ -3833,6 +3834,9 @@ class AdveneGUI(object):
                         'record-actions', 'popup-destination',
                         'timestamp-format', 
                         'abbreviation-mode', 'text-abbreviations', 'completion-mode' )
+        # Direct options needing a restart to be taken into account.
+        restart_needed_options = ('tts-engine', 'language')
+
         path_options=('data', 'plugins', 'advene', 'imagecache', 'moviepath', 'shotdetect')
         cache={
             'font-size': config.data.preferences['timeline']['font-size'],
@@ -4003,6 +4007,7 @@ class AdveneGUI(object):
         res=ew.popup()
         if res:
             player_need_restart = False
+            app_need_restart = False
 
             cache['package-auto-save-interval']=cache['package-auto-save-interval']*1000
             if cache['text-abbreviations'] != config.data.preferences['text-abbreviations']:
@@ -4010,6 +4015,8 @@ class AdveneGUI(object):
                 self.text_abbreviations.update( dict( l.split(" ", 1) for l in config.data.preferences['text-abbreviations'].splitlines() ) )
 
             for k in direct_options:
+                if k in restart_needed_options and config.data.preferences[k] != cache[k]:
+                    app_need_restart = True
                 config.data.preferences[k] = cache[k]
 
             for k in ('font-size', 'button-height', 'interline-height'):
@@ -4036,6 +4043,9 @@ class AdveneGUI(object):
 
             # Save preferences
             config.data.save_preferences()
+
+            if app_need_restart:
+                dialog.message_dialog(_("You should restart Advene to take some options into account."), modal=False)
 
         return True
 
