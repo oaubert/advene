@@ -4,6 +4,7 @@
 ../lib/advene/plugins/visu.py
 ../lib/advene/plugins/ted.py
 ../lib/advene/plugins/annotationgraph.py
+../lib/advene/plugins/montagerenderer.py
 ../lib/advene/plugins/tts.py
 ../lib/advene/plugins/mpeg7.py
 ../lib/advene/plugins/dcp.py
