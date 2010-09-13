@@ -158,7 +158,7 @@ class MacOSXTTSEngine(TTSEngine):
     can_run=staticmethod(can_run)
 
     def pronounce (self, sentence):
-        subprocess.call( [ '/usr/bin/say', sentence ] )
+        subprocess.call( [ '/usr/bin/say', sentence.encode(config.data.preferences['tts-encoding'], 'ignore') ] )
         return True
 
 """
@@ -222,8 +222,7 @@ class EspeakTTSEngine(TTSEngine):
         try:
             if self.espeak_process is None:
                 self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, creationflags = CREATE_NO_WINDOW)
-            # FIXME: we should encode sentence to a specific encoding (utf8 ?)
-            self.espeak_process.stdin.write(sentence + "\n")
+            self.espeak_process.stdin.write((sentence + "\n").encode(config.data.preferences['tts-encoding'], 'ignore'))
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
         return True
@@ -296,7 +295,7 @@ class CustomTTSEngine(TTSEngine):
         try:
             if self.prg_process is None:
                 self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, creationflags = CREATE_NO_WINDOW)
-            self.prg_process.stdin.write(sentence + "\n")
+            self.prg_process.stdin.write((sentence + "\n").encode(config.data.preferences['tts-encoding'], 'ignore'))
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
         return True
@@ -335,7 +334,7 @@ class CustomArgTTSEngine(TTSEngine):
             self.language=lang
         try:
             fse = sys.getfilesystemencoding()
-            subprocess.Popen(unicode(" ".join([self.prg_path, '-v', self.language, '"%s"' % (sentence.replace('\n',' ').replace('"', '') + u"\n")])).encode(fse, 'ignore'), creationflags = CREATE_NO_WINDOW)
+            subprocess.Popen(unicode(" ".join([self.prg_path, '-v', self.language, '"%s"' % (sentence.replace('\n',' ').replace('"', '') + u"\n")])).encode(config.data.preferences['tts-encoding'], 'ignore'), creationflags = CREATE_NO_WINDOW)
         except OSError, e:
             try:
                 m = unicode(e.message)

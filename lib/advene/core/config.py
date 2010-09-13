@@ -279,6 +279,8 @@ class Config(object):
             # Language used for TTS. Standard 2 char. specification
             # (in fact, we use the espeak notation for simplicity).
             'tts-language': 'en',
+            # Encoding for data sent to the TTS engine.
+            'tts-encoding': 'utf8',
             'edition-history-size': 5,
             # popup views may be forced into a specific viewbook,
             # instead of default popup

@@ -3829,7 +3829,8 @@ class AdveneGUI(object):
                         'bookmark-snapshot-width', 'bookmark-snapshot-precision',
                         'save-default-workspace', 'restore-default-workspace',
                         'slave-player-sync-delay',
-                        'tts-language', 'record-actions', 'popup-destination',
+                        'tts-language', 'tts-encoding',
+                        'record-actions', 'popup-destination',
                         'timestamp-format', 
                         'abbreviation-mode', 'text-abbreviations', 'completion-mode' )
         path_options=('data', 'plugins', 'advene', 'imagecache', 'moviepath', 'shotdetect')
@@ -3985,6 +3986,8 @@ class AdveneGUI(object):
                 _("Esperanto"): 'eo',
                 _("Spanish"): 'es',
                 })
+        ew.add_entry(_("TTS Encoding"), 'tts-encoding',
+                      _("What encoding should be used to communicate with the TTS engine"))
 
         res=ew.popup()
         if res:
