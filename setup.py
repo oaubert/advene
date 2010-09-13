@@ -181,7 +181,7 @@ setup (name = "advene",
        author_email = "advene@liris.cnrs.fr",
        maintainer = myname,
        maintainer_email = myemail,
-       url = "http://liris.cnrs.fr/advene/",
+       url = "http://www.advene.org/",
        license = "GPL",
        long_description = """Annotate DVds, Exchange on the NEt
 
@@ -191,6 +191,16 @@ setup (name = "advene",
  audiovisual content and hypertext facilities be integrated, thanks to
  annotations providing explicit structures on  audiovisual streams, upon
  which hypervideo documents can be engineered.
+ .
+ The cross-platform Advene application allows users to easily
+ create comments and analyses of video comments, through the
+ definition of time-aligned annotations and their mobilisation
+ into automatically-generated or user-written comment views (HTML
+ documents). Annotations can also be used to modify the rendition
+ of the audiovisual document, thus providing virtual montage,
+ captioning, navigation... capabilities. Users can exchange their
+ comments/analyses in the form of Advene packages, independently from
+ the video itself.
  .
  The Advene framework provides models and tools allowing to design and reuse
  annotations schemas; annotate video streams according to these schemas;
