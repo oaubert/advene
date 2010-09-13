@@ -3829,7 +3829,7 @@ class AdveneGUI(object):
                         'bookmark-snapshot-width', 'bookmark-snapshot-precision',
                         'save-default-workspace', 'restore-default-workspace',
                         'slave-player-sync-delay',
-                        'tts-language', 'tts-encoding',
+                        'tts-language', 'tts-encoding', 'tts-engine',
                         'record-actions', 'popup-destination',
                         'timestamp-format', 
                         'abbreviation-mode', 'text-abbreviations', 'completion-mode' )
@@ -3988,6 +3988,17 @@ class AdveneGUI(object):
                 })
         ew.add_entry(_("TTS Encoding"), 'tts-encoding',
                       _("What encoding should be used to communicate with the TTS engine"))
+        ew.add_option(_("TTS Engine"), 'tts-engine',
+                      _("Which TTS engine should be used (modification requires restarting Advene to take into account)"),
+                      {
+                _("Automatic"): 'auto',
+                _("eSpeak"): 'espeak',
+                _("Custom script with standard input"): 'custom',
+                _("Custom script with arguments"): 'customarg',
+                _("SAPI"): 'sapi',
+                _("MacOS X say"): 'macosx',
+                _("Generic (text output)"): 'generic',
+                })
 
         res=ew.popup()
         if res:

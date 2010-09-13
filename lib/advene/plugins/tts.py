@@ -32,12 +32,39 @@ CREATE_NO_WINDOW = 0x8000000
 
 name="Text-To-Speech actions"
 
+ENGINES={}
+
+# Decorator. But using it would imply python >= 2.6.
+def ttsengine(name):
+    def inside_register(f):
+        ENGINES[name] = f
+        return f
+    return inside_register
+
 def register(controller=None):
-    for c in (CustomArgTTSEngine, CustomTTSEngine, EspeakTTSEngine, MacOSXTTSEngine, FestivalTTSEngine, TTSEngine):
-        if c.can_run():
-            controller.log("TTS: Using " + c.__doc__.splitlines()[0])
-            engine = c(controller)
-            break
+    engine_name = config.data.preferences.get('tts-engine', 'auto')
+    selected = None
+    if engine_name == 'auto':
+        # Automatic configuration. Order is important.
+        for name in ('customarg', 'custom', 'espeak', 'macosx', 'festival', 'sapi', 'generic'):
+            c = ENGINES[name]
+            if c.can_run():
+                controller.log("TTS: Automatically using " + c.__doc__.splitlines()[0])
+                selected = c
+                break
+    else:
+        c = ENGINES.get(engine_name)
+        if c is None:
+            controller.log("TTS: %s was specified but it does not exist. Using generic fallback. Please check your configuration." % c.__doc__.splitlines()[0])
+            selected = ENGINES['generic']
+        elif c.can_run():
+            controller.log("TTS: Using %s as specified." % c.__doc__.splitlines()[0])
+            selected = c
+        else:
+            controller.log("TTS: Using %s as specified, but it apparently cannot run. Please check your configuration."  % c.__doc__.splitlines()[0])
+            selected = c
+
+    engine = selected(controller)
 
     controller.register_action(RegisteredAction(
             name="Pronounce",
@@ -99,6 +126,7 @@ class TTSEngine:
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
         self.pronounce(message)
         return True
+ENGINES['generic'] = TTSEngine
 
 class FestivalTTSEngine(TTSEngine):
     """Festival TTSEngine.
@@ -147,6 +175,7 @@ class FestivalTTSEngine(TTSEngine):
         except OSError, e:
             self.controller.log(u"TTS Error: " + unicode(e.message))
         return True
+ENGINES['festival'] = FestivalTTSEngine
 
 class MacOSXTTSEngine(TTSEngine):
     """MacOSX TTSEngine.
@@ -160,6 +189,7 @@ class MacOSXTTSEngine(TTSEngine):
     def pronounce (self, sentence):
         subprocess.call( [ '/usr/bin/say', sentence.encode(config.data.preferences['tts-encoding'], 'ignore') ] )
         return True
+ENGINES['macosx'] = MacOSXTTSEngine
 
 """
 Win32: install pytts + pywin32 (from sf.net) + mfc71.dll + spchapi.exe (from www.microsoft.com/reader/developer/downloads/tts.mspx
@@ -226,7 +256,7 @@ class EspeakTTSEngine(TTSEngine):
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
         return True
-
+ENGINES['espeak'] = EspeakTTSEngine
 
 class SAPITTSEngine(TTSEngine):
     """SAPI (win32) TTSEngine.
@@ -251,6 +281,7 @@ class SAPITTSEngine(TTSEngine):
             self.sapi=win32com.client.Dispatch("sapi.SPVoice")
         self.sapi.Speak( sentence )
         return True
+ENGINES['sapi'] = SAPITTSEngine
 
 class CustomTTSEngine(TTSEngine):
     """Custom TTSEngine.
@@ -299,6 +330,7 @@ class CustomTTSEngine(TTSEngine):
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
         return True
+ENGINES['custom'] = CustomTTSEngine
 
 class CustomArgTTSEngine(TTSEngine):
     """CustomArg TTSEngine.
@@ -343,3 +375,4 @@ class CustomArgTTSEngine(TTSEngine):
                 m = unicode(e.message, fse, 'ignore')
             self.controller.log("TTS Error: ", m.encode('ascii', 'ignore'))
         return True
+ENGINES['customarg'] = CustomArgTTSEngine
