@@ -3987,7 +3987,7 @@ class AdveneGUI(object):
                 _("Spanish"): 'es',
                 })
         ew.add_entry(_("TTS Encoding"), 'tts-encoding',
-                      _("What encoding should be used to communicate with the TTS engine"))
+                      _("What encoding should be used to communicate with the TTS engine"), entries = [ 'utf8', 'utf16', 'latin1', 'cp1252' ] )
         ew.add_option(_("TTS Engine"), 'tts-engine',
                       _("Which TTS engine should be used (modification requires restarting Advene to take into account)"),
                       {

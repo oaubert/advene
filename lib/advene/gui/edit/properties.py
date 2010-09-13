@@ -196,22 +196,32 @@ class EditWidget(gtk.VBox):
 
 
 
-    def add_entry(self, label, property, help, passwd = 0):
+    def add_entry(self, label, property, help, passwd = 0, entries=None):
 
         lbl = gtk.Label(label)
         lbl.show()
-        entry = gtk.Entry()
-        entry.show()
         align = gtk.Alignment()
         align.show()
         align.add(lbl)
 
+        if entries:
+            combo = gtk.combo_box_entry_new_text()
+            entry = combo.child
+            combo.show()
+            for e in entries:
+                combo.append_text(e)
+            combo.set_tooltip_text(help)        
+            self.__add_line(1, align, combo)
+        else:
+            combo = None
+            entry = gtk.Entry()
+            entry.show()
+            entry.set_tooltip_text(help)        
+            self.__add_line(1, align, entry)
+
         if (passwd):
             entry.set_visibility(False)
             entry.set_invisible_char(unichr(0x2022))
-
-        entry.set_tooltip_text(help)
-        self.__add_line(1, align, entry)
 
         value = self.__get_config(property)
         entry.set_text(value)
