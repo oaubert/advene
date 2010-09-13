@@ -20,7 +20,7 @@ Description: Annotate DVDs, Exchange on the Net
  which hypervideo documents can be engineered.
  .
  The cross-platform Advene application allows users to easily
- create comments and analyses of video comments, through the
+ create comments and analyses of video documents, through the
  definition of time-aligned annotations and their mobilisation
  into automatically-generated or user-written comment views (HTML
  documents). Annotations can also be used to modify the rendition
@@ -38,3 +38,5 @@ Description: Annotate DVDs, Exchange on the Net
  documents are generated when needed, both from packages (for annotation and
  view description) and DVDs (audiovisual streams).
  .
+Homepage: http://www.advene.org/
+Tag: implemented-in::python, interface::x11, role::program, uitoolkit::gtk, use::analysing, use::organizing, use::searching, use::viewing, works-with::video, works-with::audio, x11::application
