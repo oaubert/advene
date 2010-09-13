@@ -279,7 +279,7 @@ class SAPITTSEngine(TTSEngine):
     def pronounce (self, sentence):
         if self.sapi is None:
             self.sapi=win32com.client.Dispatch("sapi.SPVoice")
-        self.sapi.Speak( sentence )
+        self.sapi.Speak( sentence.encode(config.data.preferences['tts-encoding'], 'ignore') )
         return True
 ENGINES['sapi'] = SAPITTSEngine
 
