@@ -37,9 +37,9 @@
     </Company_Info>
     <Program_Info>
       <Program_Name>Advene</Program_Name>
-      <Program_Version>0.42</Program_Version>
-      <Program_Release_Month>06</Program_Release_Month>
-      <Program_Release_Day>10</Program_Release_Day>
+      <Program_Version>0.44</Program_Version>
+      <Program_Release_Month>09</Program_Release_Month>
+      <Program_Release_Day>13</Program_Release_Day>
       <Program_Release_Year>2010</Program_Release_Year>
       <Program_Cost_Dollars>0</Program_Cost_Dollars>
       <Program_Cost_Other_Code></Program_Cost_Other_Code>
@@ -50,9 +50,9 @@
       <Program_OS_Support>Linux,Mac OS X,Windows2000,Windows2003,WinXP</Program_OS_Support>
       <Program_Language>English,Esperanto,French</Program_Language>
       <File_Info>
-        <File_Size_Bytes>46245975</File_Size_Bytes>
-	<File_Size_K>45162</File_Size_K>
-	<File_Size_MB>44</File_Size_MB>
+        <File_Size_Bytes>54831024</File_Size_Bytes>
+	<File_Size_K>53545</File_Size_K>
+	<File_Size_MB>53</File_Size_MB>
       </File_Info>
       <Expire_Info>
         <Has_Expire_Info>N</Has_Expire_Info><Expire_Count></Expire_Count><Expire_Based_On></Expire_Based_On><Expire_Other_Info></Expire_Other_Info><Expire_Month></Expire_Month><Expire_Day></Expire_Day><Expire_Year></Expire_Year>
@@ -68,7 +68,7 @@
             <Char_Desc_45>Annotate Digital Videos, Exchange on the NEt</Char_Desc_45>
             <Char_Desc_80></Char_Desc_80>
 	    <Char_Desc_250>The cross-platform Advene application allows users to easily
-		create comments and analyses of video comments, through the
+		create comments and analyses of video documents, through the
 		definition of time-aligned annotations and their mobilisation
 		into automatically-generated or user-written comment views.</Char_Desc_250>
 	    <Char_Desc_450>
@@ -115,7 +115,7 @@
 	<Application_XML_File_URL>http://liris.cnrs.fr/advene/advene_pad.xml</Application_XML_File_URL>
       </Application_URLs>
       <Download_URLs>
-        <Primary_Download_URL>http://download.gna.org/advene/win32/setup_advene_0.42_vlc_1.0.3_gstreamer_0.10.5.exe</Primary_Download_URL>
+        <Primary_Download_URL>http://download.gna.org/advene/win32/setup_advene_0.44_vlc_1.0.3_gstreamer_0.10.5_b.exe</Primary_Download_URL>
 	<Secondary_Download_URL></Secondary_Download_URL>
 	<Additional_Download_URL_1></Additional_Download_URL_1>
 	<Additional_Download_URL_2></Additional_Download_URL_2>
