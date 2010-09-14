@@ -9,14 +9,14 @@ Source: dist\doc\*; DestDir: {app}\doc; Flags: recursesubdirs; Components: adven
 Source: dist\locale\*; DestDir: {app}\locale; Flags: recursesubdirs; Components: advene
 Source: share\pixmaps\advene.ico; DestDir: {app}; DestName: advene.ico; Components: advene
 Source: c:\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs; Components: advene
-Source: examples\*v10.azp; DestDir: {app}\examples; Components: advene
+Source: examples\*v11.azp; DestDir: {app}\examples; Components: advene
 Source: c:\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs; Components: advene
 Source: c:\gtk\share\locale\fr\*; DestDir: {app}\lib\locale\fr; Flags: recursesubdirs; Components: advene
 ;Source: c:\gtk\lib\pango\*; DestDir: {app}\lib\pango; Flags: recursesubdirs     gtk < 2.16.6
 Source: c:\gtk\share\themes\*; DestDir: {app}\share\themes; Flags: recursesubdirs; Components: advene
 ;Source: c:\gtk\bin\libpng12.dll; DestDir: {app}  gtk < 2.16.6
-;Source: c:\gtk\bin\libpng12-0.dll; DestDir: {app}; Components: advene    gtk = 2.16
-Source: c:\gtk\bin\libpng14-14.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\libpng12-0.dll; DestDir: {app}; Components: advene
+;Source: c:\gtk\bin\libpng14-14.dll; DestDir: {app}; Components: advene    gtk2.20
 Source: c:\gtk\bin\libpangoft2-1.0-0.dll; DestDir: {app}; Components: advene
 ;Source: c:\gtk\bin\libtiff3.dll; DestDir: {app}  gtk < 2.16.6
 Source: c:\gtk\bin\libtiff-3.dll; DestDir: {app}; Components: advene
@@ -79,10 +79,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.43
+AppVerName=Advene 0.44
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.43
+VersionInfoVersion=0.44
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -90,16 +90,16 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.43_vlc_1.0.3_gstreamer_0.10.5
-VersionInfoTextVersion=0.43
+OutputBaseFilename=setup_advene_0.44_vlc_1.0.3_gstreamer_0.10.5
+VersionInfoTextVersion=0.44
 ChangesAssociations=yes
 
 [Registry]
 Root: HKCU; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
-Root: HKCU; Subkey: ".azp"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletevalue; Check: CanChange;
-Root: HKCU; Subkey: "Advene"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletekey; Check: CanChange;
-Root: HKCU; Subkey: "Advene\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\advene.exe,0"; Check: CanChange;
-Root: HKCU; Subkey: "Advene\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\advene.exe"" ""%1"""; Check: CanChange;
+Root: HKCR; Subkey: ".azp"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletevalue; Check: CanChange;
+Root: HKCR; Subkey: "Advene"; ValueType: string; ValueName: ""; ValueData: "Advene"; Flags: uninsdeletekey; Check: CanChange;
+Root: HKCR; Subkey: "Advene\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\advene.ico,0"; Check: CanChange;
+Root: HKCR; Subkey: "Advene\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\advene.exe"" ""%1"""; Check: CanChange;
 ;Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "GST_PLUGIN_PATH"; ValueData: "{app}\gst\lib\gstreamer-0.10"; Check: GstreamerPathSet;
 ;Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\gst\bin;{olddata}"; Check: GstreamerPathSet;
 
