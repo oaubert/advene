@@ -339,11 +339,11 @@ def formatted (target, context):
     dictionary with begin, end and duration keys.
     """
     import advene.model.fragment
+    from advene.util.helper import format_time
     import time
 
     if isinstance(target, int) or isinstance(target, long):
-        return u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(target / 1000)),
-                             target % 1000)
+        return format_time(target)
 
     if not isinstance(target, advene.model.fragment.MillisecondFragment):
         return None
@@ -355,7 +355,7 @@ def formatted (target, context):
         }
     for k in res.keys():
         t=getattr(target, k)
-        res[k] = u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)
+        res[k] = format_time(t)
     return res
 
 def first (target, context):
