@@ -975,6 +975,8 @@ class AdveneController(object):
             # Check if the player has async_snapshot capability.
             async=getattr(self.player, 'async_snapshot', None)
             if async is not None:
+                if position is None:
+                    position = self.player.current_position_value
                 if self.player.snapshot_notify is None:
                     self.player.snapshot_notify=self.snapshot_taken
                 async(position or 0)
@@ -2210,7 +2212,12 @@ class AdveneController(object):
                 if hasattr(position, 'value'):
                     # It is a player.Position. Do a simple conversion
                     # (which will fail in many cases)
-                    position=position.value
+                    if position.origin == self.player.RelativePosition:
+                        position = self.player.current_position_value + position.value
+                    elif position.origin == self.player.ModuloPosition:
+                        position = (self.player.current_position_value + position.value) % self.player.stream_duration
+                    else:
+                        position=position.value
                 self.update_snapshot(position)
         except Exception, e:
             # FIXME: we should catch more specific exceptions and
