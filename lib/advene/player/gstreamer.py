@@ -379,7 +379,7 @@ class Player:
             self.snapshot_notify(s)
             
     def async_snapshot(self, position):
-        t=long(self.position2value(position))
+        t=long(self.position2value(position)) - 40
         if not self.snapshotter.thread_running:
             self.snapshotter.start()
         if self.snapshotter:
