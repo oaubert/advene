@@ -732,21 +732,20 @@ class HTML5VideoPlayer(VideoPlayer):
 <script type="text/javascript" src="./resources/HTML5/advene.js"></script>
 <script type="text/javascript">
 $(function() {
-if (($("[target='video_player']").length == 0)) {return;}
-$("body").append("<div class='player_container' style='position:relative;overflow:visible; '>"+ 
-"<video style='overflow:visible; width:100%%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='%(video_url)s'>"+
-"</video></div>");
-$('.player_container').player({title:'ADVENE MAIN PLAYER'});
+    if (($("[target = 'video_player']").length == 0)) 
+        return;
+    $("body").append("<div class='player_container' style='position:fixed; overflow:visible; '>" + 
+                     "<video style='overflow:visible; width:100%%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='%(video_url)s'>" +
+                     "</video></div>");
+    $('.player_container').player( { title:'ADVENE MAIN PLAYER', endFragmentBehaviour: 'continue'} );
 
-$("[target='video_player']").each( function(){
-var href=$(this).attr('href');
-$(this).removeAttr('href');
-$(this).attr('value',href);
-$(this).ScreenshotOverlay();
+    $("[target='video_player']").each( function() {
+        var href = $(this).attr('href');
+        $(this).removeAttr('href');
+        $(this).attr('value',href);
+        $(this).ScreenshotOverlay();
+    });
 });
-
-});
-
 </script>
 ''' % { 'video_url': unicode(self.video_url) }
         head_re = re.compile('<head>', re.IGNORECASE)
