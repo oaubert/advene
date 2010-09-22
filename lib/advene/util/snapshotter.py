@@ -183,7 +183,7 @@ class Snapshotter(object):
         """Enqueue timestamps to capture.
         """
         for t in l:
-            self.timestamp_queue.put_nowait(t)
+            self.timestamp_queue.put_nowait(t - 40)
         self.snapshot_ready.set()
 
     def process_queue(self):
