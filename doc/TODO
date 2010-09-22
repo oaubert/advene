@@ -1,3 +1,22 @@
+* gstreamer pipeline (videomixer) to generate 1-pixel-column sum-up of
+   video:
+gst-launch -e filesrc location=/data/video/Bataille.avi ! decodebin ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=320,pixel-aspect-ratio=\(fraction\)1/1 ! videocrop left=158 right=160 ! progressreport update-freq=1 ! pngenc snapshot=false ! multifilesink location=%05d.png
+montage -tile x1 -mode Concatenate 0*g final.png
+
+* AJAX transcription:
+ - build list of DOM elements with attributes advene:begin / advene:end
+ - sort against begin
+ - keep list of active elements
+ - loop. 
+    - look for active elements pos > end, inactive and remove
+    - Look for DOM elements pos > begin, active and put in active elements 
+
+* fix encoding issue in gstreamer/mediafile
+
+* click twice when paused -> play
+
+* Edit widget: optionnaly disable video control
+
 * edit element: when pressing Escape, check content not modified, else
    ask for confirmation
 
