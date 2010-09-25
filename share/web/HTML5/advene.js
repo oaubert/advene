@@ -897,7 +897,7 @@ $.widget("ui.video", {
             $('.caption', this).stop().animate( {
                 top: (imageHeight - captionHeight) + 'px'
             }, {
-                queue: false;
+                queue: false
             });
             $('.option-play', this).fadeIn(800);
         },
@@ -905,7 +905,7 @@ $.widget("ui.video", {
                           $('.caption', this).stop().animate( {
                               top: imageHeight + 'px'
                           }, {
-                              queue: false;
+                              queue: false
                           });
                           $('.option-play', this).fadeOut(200);
 		              });
