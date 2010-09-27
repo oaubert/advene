@@ -151,7 +151,12 @@ class Player:
         # fullscreen gtk.Window
         self.fullscreen_window=None
 
-        self.snapshotter=Snapshotter(self.snapshot_taken, width=config.data.player['snapshot-width'])
+        try:
+            self.snapshotter = Snapshotter(self.snapshot_taken, width=config.data.player['snapshot-width'])
+        except Exception, e:
+            print "Could not initialize snapshotter:", unicode(e).encode('utf8')
+            self.snapshotter = None
+
         #self.snapshotter.start()
         
         # This method should be set by caller:
@@ -380,9 +385,9 @@ class Player:
             
     def async_snapshot(self, position):
         t=long(self.position2value(position)) - 40
-        if not self.snapshotter.thread_running:
-            self.snapshotter.start()
         if self.snapshotter:
+            if not self.snapshotter.thread_running:
+                self.snapshotter.start()
             self.snapshotter.enqueue(t)
         
     def snapshot(self, position):
