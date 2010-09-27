@@ -701,9 +701,9 @@ class HTML5VideoPlayer(VideoPlayer):
         """Return the URL to play video at the given time.
         """
         if end is not None:
-            return '%s#t=%d,%d' % (self.video_url, (long(begin) / 1000), (long(end) / 1000))
+            return '%s#t=%.03f,%.03f' % (self.video_url, (float(begin) / 1000.0), (float(end) / 1000.0))
         else:
-            return '%s#t=%d' % (self.video_url, (long(begin) / 1000))
+            return '%s#t=%.03f' % (self.video_url, (float(begin) / 1000.0))
 
     def fix_link(self, link):
         """

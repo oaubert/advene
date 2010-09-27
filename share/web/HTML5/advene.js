@@ -1105,7 +1105,7 @@ $.widget("ui.video", {
                 // No video player link
                 return;
             $("[target='video_player']").each( function() {
-                var data = /(.+)#t=(\d+)?,(\d+)?/.exec($(this).attr('href'));
+                var data = /(.+)#t=([.\d]+)?,([.\d]+)?/.exec($(this).attr('href'));
                 
                 if (data) { 
                     $(this).attr( { 'data-video-url': data[1], 
