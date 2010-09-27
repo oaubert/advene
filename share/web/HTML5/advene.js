@@ -1115,7 +1115,6 @@ $.widget("ui.video", {
                     if (video_url == "")
                         video_url = data[1];
                 } 
-                $(this).removeAttr('href');
                 $(this).advene('overlay');
             });
             
@@ -1152,7 +1151,6 @@ $.widget("ui.video", {
             if ($(this).children('.screenshot').size() == 0)
             {
                 // No screenshot. Simply trigger the appropriate action.
-                $(this).attr('href','#');
                 $(this).click(function() {
                     $('.player_container').player('fragmentPlay', $(this).attr('data-begin'), $(this).attr('data-end'));
                     return false;
