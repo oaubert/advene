@@ -27,6 +27,7 @@ $.widget("ui.video", {
 		startPoint: 0,
 		endPoint: 0,
 		endFragmentBehaviour: "continue",
+        transcriptHighlight: true,
         location: { 'left': 0, 'top': 0 }
 	},
     
@@ -620,7 +621,7 @@ $.widget("ui.video", {
 		if( ! self.element[0].seeking ) {
 			var duration = self.element[0].duration;
 			var currentTime = self.element[0].currentTime;
-
+            
 			if (((currentTime > self.options.endPoint) || (currentTime<self.options.startPoint)) && (self.options.fragmentPlay))
 			{
 				switch(self.options.endFragmentBehaviour)
@@ -642,6 +643,19 @@ $.widget("ui.video", {
 				return;
 			}
             
+            // Highlight/unhighlight elements by using the .activeTranscript class
+            if (self.options.transcriptHighlight)
+                $(".transcript[data-begin]", $(document)).each( function() {
+                    if ($(this).hasClass('activeTranscript'))
+                    {
+                        if (currentTime < $(this).attr('data-begin') || currentTime > $(this).attr('data-end'))
+                            $(this).removeClass('activeTranscript')
+                    } else {
+                        if ($(this).attr('data-begin') <= currentTime && currentTime <= $(this).attr('data-end'))
+                            $(this).addClass('activeTranscript')                    
+                    }
+                });
+                   
 			self._timeLinerSlider.slider(
 				'value',
 				[(currentTime / (self.element[0].duration)) * 100]
@@ -1083,7 +1097,7 @@ $.widget("ui.video", {
 
     // See http://docs.jquery.com/Plugins/Authoring#Plugin_Methods for the pattern used here.
     var methods = {
-        'init': function() {
+        'init': function(options) {
             // FIXME: pass appropriate options (player options, etc)
             var video_url = "";
             
@@ -1105,12 +1119,19 @@ $.widget("ui.video", {
                 $(this).advene('overlay');
             });
             
+            
             $("body").append("<div class='player_container' style='position:fixed; overflow:visible; '>" + 
                              "<video style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
                              "</video></div>");
-            $('.player_container').player( { title:'ADVENE MAIN PLAYER', 
-                                             endFragmentBehaviour: 'continue'} );
-            
+
+            playerOptions =  { title:'Advene main player', 
+                               endFragmentBehaviour: 'continue',
+                               transcriptHighlight: ($(".transcript").length > 0)
+                             };
+            if (options !== undefined)
+                for (key in options)
+                    playerOptions[key] = options[key];
+            $('.player_container').player( playerOptions );
         },
         
         'overlay': function() {

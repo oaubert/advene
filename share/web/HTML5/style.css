@@ -364,4 +364,8 @@ img.half_screenshot {
   font-size: 0.7em;
 }
 
+.activeTranscript {
+  background-color: #dddddd;
+}
+
 /*  ///////////////////////////////////////////////////////////////////////////////// */
