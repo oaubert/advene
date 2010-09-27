@@ -1150,14 +1150,13 @@ $.widget("ui.video", {
 	    uiPlayerTitlebarNoFixonScreen = $('<a href="#"/>')
 		    .addClass('ui-dialog-titlebar-nofixonscreen ' +'ui-corner-all')
 		    .attr('role', 'button')
-		    .hover(function() {$(this).addClass('ui-state-hover');},
-			       function() {$(this).removeClass('ui-state-hover');}
-			      )
-		    .focus(function() {$(this).addClass('ui-state-focus');})
-		    .blur(function() {$(this).removeClass('ui-state-focus');	})
-		    .mousedown(function(ev) {
-			    ev.stopPropagation();
-		    })
+		    .hover(
+                function() { $(this).addClass('ui-state-hover'); },
+			    function() { $(this).removeClass('ui-state-hover'); }
+			)
+		    .focus(function() { $(this).addClass('ui-state-focus');} )
+		    .blur(function() { $(this).removeClass('ui-state-focus'); } )
+		    .mousedown(function(ev) { ev.stopPropagation(); } )
 		.click(function(event) {
 			$(this).hide();
 			self.uiDialog.draggable();
