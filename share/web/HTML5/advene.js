@@ -1194,13 +1194,6 @@ $.widget("ui.video", {
 		    })
 		    .appendTo(uiPlayerTitlebar);
         
-	    uiPlayerTitlebarStickonWindowText = (this.uiPlayerTitlebarStickonWindowText = $('<span/>'))
-		    .addClass('ui-icon ' +'ui-icon-locked')
-		    .text("Fix On Screen")
-		    .attr('title','Fix Player position')
-		    .appendTo(uiPlayerTitlebarStickonWindow),
-        
-        
         // 	Fonction de fixation sur écran --> le player est incrusté à la page de la manère classique
 	    uiPlayerTitlebarNoStickonWindow = $('<a href="#"/>')
 		    .addClass('ui-dialog-titlebar-nostickonwindow ' +'ui-corner-all')
@@ -1221,12 +1214,6 @@ $.widget("ui.video", {
 		    })
 		    .appendTo(uiPlayerTitlebar)
 		    .hide();
-        
-	    uiPlayerTitlebarNoStickonWindowText = (this.uiPlayerTitlebarNoStickonWindowText = $('<span/>'))
-		    .addClass('ui-icon ' +'ui-icon-unlocked')
-		    .text("No Fix On Screen")
-		    .attr('title','Do not fix player position')
-		    .appendTo(uiPlayerTitlebarNoStickonWindow);
         
         //////////////////////////////////////////////
         self.fragmentPlay = function(debut, fin, title, endFragBehav) {
