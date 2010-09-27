@@ -195,7 +195,7 @@
 
 .ui-video-waiting {
 	position: absolute;
-	background-image: url("/resources/HTML5/anim.gif");
+	background-image: url("anim.gif");
 	height: 32px;
 	width: 992px;
 	margin: 50;
