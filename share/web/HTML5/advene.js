@@ -2,6 +2,21 @@
 L'API consiste en quatre widgets principales permettant de définir des vignettes, players vignettes et players autonomes faisant appel aux services de html5 video
 */
 
+/**
+ * @private
+ */
+_formatTime = function( seconds ) {
+	var h = parseInt(seconds / 3660);
+	var m = parseInt((seconds / 60)-(h*60));
+	var s = Number(seconds % 60).toPrecision(3);
+    // 0-padding
+	var hp = h >= 10 ? '' : '0';
+	var mp = m >= 10 ? '' : '0';
+	var sp = s >= 10 ? '' : '0';
+	return hp + h + ':' + mp + m + ":" + sp + s
+};
+    
+
 // L'outil video prend en charge les spécifications html5 video pour les besoins de l'API. Lors d'une instanciation d'une balise video en une instance video(), les options suivantes peuvent être incluses:
 // ** Options standard
 //	- VideoURL
@@ -339,7 +354,7 @@ $.widget("ui.video", {
 					if( self.element[0].readyState === HTMLMediaElement.HAVE_NOTHING ) {
 						return false;
 					} else {
-						self._currentProgressSpan.text(self._formatTime(self.element[0].duration * (ui.value/100)));
+						self._currentProgressSpan.text(_formatTime(self.element[0].duration * (ui.value/100)));
 						return true;
 					}
 				},
@@ -393,7 +408,7 @@ $.widget("ui.video", {
 		var duration = self.element[0].duration;
         
 		self._timeLinerSliderHover
-			.text(self._formatTime(duration * (value/100)))
+			.text(_formatTime(duration * (value/100)))
 			.position({
 				'my': 'bottom',
 				'at': 'top',
@@ -517,21 +532,7 @@ $.widget("ui.video", {
 		self._container.parent().find('.video-container:first').trigger("destroySamplePlayer");
         
 	},
-    
-	/**
-	 * @private
-	 */
-	_formatTime: function( seconds ) {
-		var h = parseInt(seconds / 3660);
-		var m = parseInt((seconds / 60)-(h*60));
-		var s = parseInt(seconds % 60);
-		var sp = s >= 10 ? '' : '0';
-		var mp = m >= 10 ? '' : '0';
-		var hp = h >= 10 ? '' : '0';
-		return hp + h + ':' + mp + m + ":" + sp + s;
-	},
-    
-    
+
 	// Events
 	/**
 	 * @private
@@ -596,7 +597,7 @@ $.widget("ui.video", {
 	 */
 	_event_loadedmetadata: function() {
 		var self = this;
-		self._durationSpan.text(self._formatTime(self.element[0].duration));
+		self._durationSpan.text(_formatTime(self.element[0].duration));
 	},
 	/**
 	 * @private
@@ -661,8 +662,8 @@ $.widget("ui.video", {
 				[(currentTime / (self.element[0].duration)) * 100]
 			);
             
-			self._durationSpan.text(self._formatTime(self.element[0].duration));
-			self._currentProgressSpan.text(self._formatTime(currentTime));
+			self._durationSpan.text(_formatTime(self.element[0].duration));
+			self._currentProgressSpan.text(_formatTime(currentTime));
             
 		}
 	},
@@ -717,7 +718,7 @@ $.widget("ui.video", {
 		self.element[0].currentTime = 0;
 		self.element[0].pause();
 		self._timeLinerSlider.slider('value', 0);
-		self._currentProgressSpan.text(self._formatTime(0));
+		self._currentProgressSpan.text(_formatTime(0));
 
 
 	},
@@ -1062,24 +1063,13 @@ $.widget("ui.video", {
             videoObject.video('fragmentPlay', debut, fin, self.options.endFragmentBehaviour);
             uiPlayer.find(".ui-dialog-fragment-title").show();
             if (!title)
-                title="Fragment PLAY";
+                title="Fragment play";
             title = title + " (" + _formatTime(debut) + " - " + _formatTime(fin) + ")";
             uiPlayer.find(".ui-dialog-fragment-title").text(title);
             self.minplayer.click();
         }
     };
 
-    // FIXME: duplicated code. To factorize.
-    self._formatTime = function( seconds ) {
-	    var h = parseInt(seconds / 3660);
-	    var m = parseInt((seconds / 60) - (h * 60));
-	    var s = parseInt(seconds % 60);
-	    var sp = s >= 10 ? '' : '0';
-	    var mp = m >= 10 ? '' : '0';
-	    var hp = h >= 10 ? '' : '0';
-	    return hp + h + ':' + mp + m + ":" + sp + s;
-    },
-    
     $.ui.player.prototype.videoObject = null;
     $.ui.player.prototype.options.sticky = true;
     $.ui.player.prototype.options.title = 'ADVENE PLAYER';
@@ -1112,6 +1102,9 @@ $.widget("ui.video", {
                                     'data-begin': data[2], 
                                     'data-end': data[3]
                                   });
+                    if (!$(this).attr("title"))
+                        $(this).attr("title", _formatTime(data[2]) + " - " + _formatTime(data[3]));
+
                     if (video_url == "")
                         video_url = data[1];
                 } 
