@@ -21,13 +21,13 @@ $.widget("ui.video", {
 		autoPlay: false,
 		loop: false,
 		autoBuffer: true,
-        sticky: true,
 		volume: .5,
 		vignet: false,
 		fragmentPlay: false,
 		startPoint: 0,
 		endPoint: 0,
-		endFragmentBehaviour: "continue"
+		endFragmentBehaviour: "continue",
+        location: { 'left': 0, 'top': 0 }
 	},
     
 	_create: function() {
@@ -792,24 +792,7 @@ $.widget("ui.video", {
         {
             $(this).attr('href','#');
             $(this).click(function() {
-                href = $(this).attr('value');
-                diesePos = href.indexOf("#t = ");
-                VideoURL = href.substring(0, diesePos);
-                offset = href.substring(diesePos+3);
-                tiretPos = offset.indexOf(",");
-                if(tiretPos > 0) {
-                    debut = offset.substring(0, tiretPos)
-		            fin = offset.substring(tiretPos+1);
-                } else {
-		            debut = offset;
-		            fin = 0;
-		        }
-                if (!(debut.toString().search(/^-?[0-9]+$/) == 0)) 
-                    debut=0;
-                if (!(fin.toString().search(/^-?[0-9]+$/) == 0)) 
-                    fin=0;
-
-                $('.player_container').player('fragmentPlay', debut, fin);
+                $('.player_container').player('fragmentPlay', $(this).attr('data-begin'), $(this).attr('data-end'));
                 return false;
             });
             return false;
@@ -828,49 +811,19 @@ $.widget("ui.video", {
 			.attr('src', './resources/HTML5/view_here.png')
 			.appendTo($optionPlay)
 			.click( function() {
-                // FIXME: duplicated code. Should be factorized.
-			    href = $('.screenshot', self).parent().attr('value');
-			    diesePos = href.indexOf("#t = ");
-			    VideoURL = href.substring(0, diesePos);
-			    offset = href.substring(diesePos + 3);
-			    tiretPos = offset.indexOf(",");
-			    if(tiretPos>0) {
-                    debut = offset.substring(0, tiretPos)
-			        fin = offset.substring(tiretPos + 1);
-                } else {
-			        debut = offset;
-			        fin = 0;
-			    }
-			    if (!(debut.toString().search(/^-?[0-9]+$/) == 0)) 
-                    debut=0;
-			    if (!(fin.toString().search(/^-?[0-9]+$/) == 0)) 
-                    fin=0;
+			    node = $('.screenshot', self).parent();
 			    $('.screenshot', self).hide();
 			    $('.caption', self).hide();
 			    $('.option-play', self).switchClass('option-play','option-play-off', 100);
-			    $(this).parent().SamplePlayer(VideoURL, debut, fin);
+			    $(this).parent().SamplePlayer(node.attr('data-video-url'), node.attr('data-begin'), node.attr('data-end'));
 			});
 
 		option = $('<img/>')
 			.attr('src', './resources/HTML5/view_player.png')
 			.css('top', 30)
 			.click( function(event){
-                // FIXME: duplicated code, should be factorized
-			    href=$('.screenshot', self).parent().attr('value');
-			    diesePos=href.indexOf("#t=");
-			    VideoURL=href.substring(0,diesePos);
-			    offset=href.substring(diesePos+3);
-			    tiretPos=offset.indexOf(",");
-			    if(tiretPos>0) {debut=offset.substring(0,tiretPos)
-			                    fin=offset.substring(tiretPos+1);}
-			    else {
-			        debut=offset;
-			        fin=0;
-			    }
-			    if(!(debut.toString().search(/^-?[0-9]+$/) == 0)) debut=0;
-			    if(!(fin.toString().search(/^-?[0-9]+$/) == 0)) fin=0;
-			    $('.player_container').player('fragmentPlay',debut,fin,fragmentTitle);
-
+			    node = $('.screenshot', self).parent();
+			    $('.player_container').player('fragmentPlay', node.attr('data-begin'), node.attr('data-end'), fragmentTitle);
 			})
 			.appendTo($optionPlay);
 
@@ -1084,14 +1037,14 @@ $.widget("ui.video", {
 	            if (self.options.sticky) {
 	                uiPlayer.css({
 	                    'position': 'fixed',
-	                    'left': self.location.left,
-	                    'top': self.location.top
+	                    'left': self.options.location.left,
+	                    'top': self.options.location.top
 	                });
 	            };
 
-		        vid = uiPlayer.find('video',this);
-		        content=uiPlayer.find('.ui-dialog-content ',this);
-		        control=uiPlayer.find('.ui-video-control ',this);
+		        vid = uiPlayer.find('video', this);
+		        content=uiPlayer.find('.ui-dialog-content ', this);
+		        control=uiPlayer.find('.ui-video-control ', this);
 		        $(vid).position({
 		            my: "top",
 		            at:"top",
@@ -1100,11 +1053,11 @@ $.widget("ui.video", {
 		            collision: "none"
 		        });
 
-		        var hauteur= $(vid).position().top+ $(vid).height();
-		        var largeur= $(vid).position().left+ $(vid).width();
+		        var hauteur= $(vid).position().top + $(vid).height();
+		        var largeur= $(vid).position().left + $(vid).width();
 		        uiPlayer.css({
-                    'width': largeur+2,
-                    'height': hauteur+20
+                    'width': largeur + 2,
+                    'height': hauteur + 20
                 });
 		        $(content).css({
                     'height': hauteur
@@ -1113,13 +1066,13 @@ $.widget("ui.video", {
 		            my: "top",
 		            at: "top",
 		            of: uiPlayer,
-		            offset: hauteur-30,
+		            offset: hauteur - 30,
 		            collision: "none"
 		        });
 	        });
 
         function storeLocation(_left, _top) {
-            self.location = { 
+            self.options.location = { 
                 left: _left,
                 top: _top 
             };
@@ -1127,9 +1080,9 @@ $.widget("ui.video", {
         
         uiPlayer = this.uiDialog;
 
-        videoObject = uiPlayer.find('video',this);
+        videoObject = uiPlayer.find('video', this);
         videoObject.video();
-        videoObject.video('endFragmentBehaviour', 'continue');
+        videoObject.video('option', 'endFragmentBehaviour', 'continue');
         
         uiPlayer.find('.ui-dialog-titlebar-close ', this).remove();
         
@@ -1145,7 +1098,7 @@ $.widget("ui.video", {
         /////////////////////////////// AJOUT DE FONCTIONS A L'INTERFACE
 	    // 	Fonction de minimisation en icone
 	    uiPlayerTitlebarToggle = $('<a href="#"/>')
-		    .addClass('ui-dialog-titlebar-toggle ' +'ui-corner-all')
+		    .addClass('ui-dialog-titlebar-toggle ' + 'ui-corner-all')
 		    .attr('role', 'button')
 		    .hover(
 			    function() { $(this).addClass('ui-state-hover'); },
@@ -1155,7 +1108,8 @@ $.widget("ui.video", {
 		    .blur(function() { $(this).removeClass('ui-state-focus'); })
 		    .mousedown(function(ev) { ev.stopPropagation();	})
 		    .click(function(event) { 
-                self.uiDialog.hide();self.minplayer.show();
+                self.uiDialog.hide();
+                self.minplayer.show();
 				return false;
 			})
 		    .appendTo(uiPlayerTitlebar);
@@ -1281,7 +1235,6 @@ $.widget("ui.video", {
             if (!title)
                 title="Fragment PLAY";
             title = title + " (" + _formatTime(debut) + " - " + _formatTime(fin) + ")";
-            title = self.options.endFragmentBehaviour + title
             uiPlayer.find(".ui-dialog-fragment-title").text(title);
             self.minplayer.click();
         }
@@ -1305,3 +1258,37 @@ $.widget("ui.video", {
     $.ui.player.prototype.options.position = "right";
     
 })(jQuery);
+
+/* Initialisation code */
+(function($) {
+    $.fn.AdvenePlayerInit = function() {
+        // FIXME: pass appropriate options (player options, etc)
+        var video_url = "";
+
+        if (($("[target = 'video_player']").length == 0)) 
+            // No video player link
+            return;
+        $("[target='video_player']").each( function() {
+            var data = /(.+)#t=(\d+)?,(\d+)?/.exec($(this).attr('href'));
+
+            if (data) { 
+                $(this).attr( { 'data-video-url': data[1], 
+                                'data-begin': data[2], 
+                                'data-end': data[3]
+                              });
+                if (video_url == "")
+                    video_url = data[1];
+            } 
+            $(this).removeAttr('href');
+            $(this).ScreenshotOverlay();
+        });
+
+        $("body").append("<div class='player_container' style='position:fixed; overflow:visible; '>" + 
+                         "<video style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
+                         "</video></div>");
+        $('.player_container').player( { title:'ADVENE MAIN PLAYER', 
+                                         endFragmentBehaviour: 'continue'} );
+
+    }
+})(jQuery)
+
