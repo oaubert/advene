@@ -771,177 +771,6 @@ $.widget("ui.video", {
 	}
 });
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////// SCREENSHOT WIDGET //////////////////////////////////////////////////////////////
-// L'outil ScreenshotOverlay définit le comportement des images vignettes dans le cadre de l'application. Il définit un certain nombre de traitements sur les objets image de la classe screenshot.
-// L'outil met les frères et soeurs, au sens DOM, de l'objet screenshot dans un conteneur CAPTION, le rendant tout le contenu disponible uniquement au survol de l'objet screenshot.
-// L'outil définit au dessous de l'objet screenshot les ancres permettant de lancer es lecteurs appropriés du fragment référencé.
-
-(function($) {
-    $.fn.ScreenshotOverlay = function() {
-	    var options = {
-	        border_color : '#666',
-	        overlay_color : '#000',
-	        overlay_text_color : '#666'};
-        
-        
-	    var self = this;
-	    var fragmentTitle = $('.screenshot', this).siblings("strong:first").text();
-        
-        if ($(this).children('.screenshot').size() == 0)
-        {
-            $(this).attr('href','#');
-            $(this).click(function() {
-                $('.player_container').player('fragmentPlay', $(this).attr('data-begin'), $(this).attr('data-end'));
-                return false;
-            });
-            return false;
-        }
-
-	    $('.screenshot', this).siblings().wrapAll("<div class='caption'/>");
-        
-	    $(this).addClass('image-overlay');
-        
-
-		$optionPlay=$('<div/>')
-			.attr("class","option-play")
-			.appendTo( $(self));
-
-		var  $option = $('<img/>')
-			.attr('src', './resources/HTML5/view_here.png')
-			.appendTo($optionPlay)
-			.click( function() {
-			    node = $('.screenshot', self).parent();
-			    $('.screenshot', self).hide();
-			    $('.caption', self).hide();
-			    $('.option-play', self).switchClass('option-play','option-play-off', 100);
-			    $(this).parent().SamplePlayer(node.attr('data-video-url'), node.attr('data-begin'), node.attr('data-end'));
-			});
-
-		option = $('<img/>')
-			.attr('src', './resources/HTML5/view_player.png')
-			.css('top', 30)
-			.click( function(event){
-			    node = $('.screenshot', self).parent();
-			    $('.player_container').player('fragmentPlay', node.attr('data-begin'), node.attr('data-end'), fragmentTitle);
-			})
-			.appendTo($optionPlay);
-
-
-		var image = new Image();
-		image.src = $('img', this).attr('src');
-		$(this).css({
-			width :$('img', this).css('width'),
-			height : $('img', this).css('height'),
-			borderColor : options.border_color});
-		$('img', this).attr({ title : '' });
-        
-
-		var imageHeight = $('img', this).height();
-		var captionHeight = $('.caption', this).height();
-        
-		$('.caption', this).css({
-			top: (options.always_show_overlay ? '0px' :  imageHeight + 'px'),
-			backgroundColor: options.overlay_color,
-			color : options.overlay_text_color
-		});
-        
-		$(this).hover(function() {
-            $('.caption', this).stop().animate( {
-                top: (imageHeight - captionHeight) + 'px'
-            }, {
-                queue: false
-            });
-            $('.option-play', this).fadeIn(800);
-        },
-			          function() { 
-                          $('.caption', this).stop().animate( {
-                              top: imageHeight + 'px'
-                          }, {
-                              queue: false
-                          });
-                          $('.option-play', this).fadeOut(200);
-		              });
-        
-		self.bind( "fragmentclose", function(event,parentC) {
-			$(parentC).find('.screenshot').show();
-			$(parentC).find('.caption').show();
-			$(parentC).find('.option-play-off').switchClass('option-play-off','option-play', 100);
-			self.die();
-		} );
-	};
-    
-})(jQuery);
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////// SAMPLE PLAYER WIDGET ////////////////////////////////////////////////////////
-// L'outil SamplePlayer définit un lecteur html5 video vignette. Il instancie un objet video() en lui définissant un conteneur vignette.
-(function($) {
-    $.fn.SamplePlayer = function(videoURL, startx, endx) {
-	    var self = this;
-	    self.options = {
-	        start_point: 0,
-	        end_point: 0
-	    };
-	    self.options.start_point = startx;
-	    self.options.end_point = endx;
-
-		var parentC = null;
-		return this.each(function() {
-			/**
-			 * @type {!jQuery}
-			 * @private
-			 */
-			self.addClass('video-container');
-			self._videoContainer = null;
-			self._videoContainer = $('<div/>',
-				                     {
-					                     'class': ' ui-corner-all ui-video-container'
-				                     }
-			                        )
-			    .css('height', $(self).css('height'))
-			    .css('width', $(self).css('width'))
-			    .css('background-color', 'black')
-			    .css('padding', '0');
-
-			self._video = $('<video/>',
-				            {
-					            'class': ' ui-corner-all sampleContainer',
-					            'src': videoURL
-				            }
-			               )
-			    .css('position','absolute')
-			    .prependTo(self._videoContainer);
-
-			$(self._video).video({
-                'vignet':'true', 
-                'startPoint':self.options.start_point,
-                'endPoint':self.options.end_point,
-                'autoPlay':true
-            });
-			parentC = $(self).parent();
-			parentC.append(self._videoContainer);
-			//destroy();
-			self._videoContainer
-			    .css('height','100%')
-			    .css('width','100%');
-
-			self.bind( "destroySamplePlayer", destroySamplePlayer );
-		});
-		function destroySamplePlayer() {
-			$(self._video).video("destroy");
-			self._video.remove();
-			self._videoContainer.empty();
-			self._videoContainer.remove();
-			self.removeClass('video-container');
-			parentC.find('.screenshot:first').trigger('fragmentclose',parentC);
-			self.unbind( "destroySamplePlayer", destroySamplePlayer );
-		};
-	};
-
-
-})(jQuery);
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// MAIN PLAYER WIDGET ////////////////////////////////////////////////////////////
 // L'outil player définit un lecteur html5 video. Il instancie un objet video() en lui définissant un conteneur indépendant. Le conteneur lui-même est dérivé de ui.dialog de jquery auquel un certain nombre de fonctions ont été greffées
@@ -1245,36 +1074,220 @@ $.widget("ui.video", {
     
 })(jQuery);
 
-/* Initialisation code */
+// Main advene plugin declaration.
+// It defines the following methods:
+// $(document).advene() or $(document).advene('init'): initialisation of the plugin
+// element.advene('overlay'): hook the player call, and possibly add an overlay player over the screenshot
+// element.advene('player', videoUrl, start, end): start the player at the given position
 (function($) {
-    $.fn.AdvenePlayerInit = function() {
-        // FIXME: pass appropriate options (player options, etc)
-        var video_url = "";
 
-        if (($("[target = 'video_player']").length == 0)) 
-            // No video player link
-            return;
-        $("[target='video_player']").each( function() {
-            var data = /(.+)#t=(\d+)?,(\d+)?/.exec($(this).attr('href'));
+    // See http://docs.jquery.com/Plugins/Authoring#Plugin_Methods for the pattern used here.
+    var methods = {
+        'init': function() {
+            // FIXME: pass appropriate options (player options, etc)
+            var video_url = "";
+            
+            if (($("[target = 'video_player']").length == 0)) 
+                // No video player link
+                return;
+            $("[target='video_player']").each( function() {
+                var data = /(.+)#t=(\d+)?,(\d+)?/.exec($(this).attr('href'));
+                
+                if (data) { 
+                    $(this).attr( { 'data-video-url': data[1], 
+                                    'data-begin': data[2], 
+                                    'data-end': data[3]
+                                  });
+                    if (video_url == "")
+                        video_url = data[1];
+                } 
+                $(this).removeAttr('href');
+                $(this).advene('overlay');
+            });
+            
+            $("body").append("<div class='player_container' style='position:fixed; overflow:visible; '>" + 
+                             "<video style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
+                             "</video></div>");
+            $('.player_container').player( { title:'ADVENE MAIN PLAYER', 
+                                             endFragmentBehaviour: 'continue'} );
+            
+        },
+        
+        'overlay': function() {
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////// SCREENSHOT WIDGET //////////////////////////////////////////////////////////////
+            // L'outil ScreenshotOverlay définit le comportement des images vignettes dans le cadre de l'application. Il définit un certain nombre de traitements sur les objets image de la classe screenshot.
+            // L'outil met les frères et soeurs, au sens DOM, de l'objet screenshot dans un conteneur CAPTION, le rendant tout le contenu disponible uniquement au survol de l'objet screenshot.
+            // L'outil définit au dessous de l'objet screenshot les ancres permettant de lancer es lecteurs appropriés du fragment référencé.
+	        var options = {
+	            border_color : '#666',
+	            overlay_color : '#000',
+	            overlay_text_color : '#666'};
+            
+            
+	        var self = this;
+	        var fragmentTitle = $('.screenshot', this).siblings("strong:first").text();
+            
+            if ($(this).children('.screenshot').size() == 0)
+            {
+                // No screenshot. Simply trigger the appropriate action.
+                $(this).attr('href','#');
+                $(this).click(function() {
+                    $('.player_container').player('fragmentPlay', $(this).attr('data-begin'), $(this).attr('data-end'));
+                    return false;
+                });
+                return false;
+            }
 
-            if (data) { 
-                $(this).attr( { 'data-video-url': data[1], 
-                                'data-begin': data[2], 
-                                'data-end': data[3]
+	        $('.screenshot', this).siblings().wrapAll("<div class='caption'/>");
+            
+	        $(this).addClass('image-overlay');
+            
+
+		    $optionPlay=$('<div/>')
+			    .attr("class","option-play")
+			    .appendTo( $(self));
+
+		    var  $option = $('<img/>')
+			    .attr('src', './resources/HTML5/view_here.png')
+			    .appendTo($optionPlay)
+			    .click( function() {
+			        node = $('.screenshot', self).parent();
+			        $('.screenshot', self).hide();
+			        $('.caption', self).hide();
+			        $('.option-play', self).switchClass('option-play','option-play-off', 100);
+			        $(this).parent().advene('player', node.attr('data-video-url'), node.attr('data-begin'), node.attr('data-end'));
+			    });
+
+		    option = $('<img/>')
+			    .attr('src', './resources/HTML5/view_player.png')
+			    .css('top', 30)
+			    .click( function(event){
+			        node = $('.screenshot', self).parent();
+			        $('.player_container').player('fragmentPlay', node.attr('data-begin'), node.attr('data-end'), fragmentTitle);
+			    })
+			    .appendTo($optionPlay);
+
+
+		    var image = new Image();
+		    image.src = $('img', this).attr('src');
+		    $(this).css({
+			    width :$('img', this).css('width'),
+			    height : $('img', this).css('height'),
+			    borderColor : options.border_color});
+		    $('img', this).attr({ title : '' });
+            
+
+		    var imageHeight = $('img', this).height();
+		    var captionHeight = $('.caption', this).height();
+            
+		    $('.caption', this).css({
+			    top: (options.always_show_overlay ? '0px' :  imageHeight + 'px'),
+			    backgroundColor: options.overlay_color,
+			    color : options.overlay_text_color
+		    });
+            
+		    $(this).hover(function() {
+                $('.caption', this).stop().animate( {
+                    top: (imageHeight - captionHeight) + 'px'
+                }, {
+                    queue: false
+                });
+                $('.option-play', this).fadeIn(800);
+            },
+			              function() { 
+                              $('.caption', this).stop().animate( {
+                                  top: imageHeight + 'px'
+                              }, {
+                                  queue: false
                               });
-                if (video_url == "")
-                    video_url = data[1];
-            } 
-            $(this).removeAttr('href');
-            $(this).ScreenshotOverlay();
-        });
+                              $('.option-play', this).fadeOut(200);
+		                  });
+            
+		    self.bind( "fragmentclose", function(event,parentC) {
+			    $(parentC).find('.screenshot').show();
+			    $(parentC).find('.caption').show();
+			    $(parentC).find('.option-play-off').switchClass('option-play-off','option-play', 100);
+			    self.die();
+		    } );
+	    },
+        
+        'player': function(videoURL, startx, endx) {
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////// SAMPLE PLAYER WIDGET ////////////////////////////////////////////////////////
+            // L'outil player définit un lecteur html5 video vignette. Il instancie un objet video() en lui définissant un conteneur vignette.
+	        var self = this;
+	        self.options = {
+	            start_point: 0,
+	            end_point: 0
+	        };
+	        self.options.start_point = startx;
+	        self.options.end_point = endx;
 
-        $("body").append("<div class='player_container' style='position:fixed; overflow:visible; '>" + 
-                         "<video style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
-                         "</video></div>");
-        $('.player_container').player( { title:'ADVENE MAIN PLAYER', 
-                                         endFragmentBehaviour: 'continue'} );
+		    var parentC = null;
+		    return this.each(function() {
+			    /**
+			     * @type {!jQuery}
+			     * @private
+			     */
+			    self.addClass('video-container');
+			    self._videoContainer = null;
+			    self._videoContainer = $('<div/>',
+				                         {
+					                         'class': ' ui-corner-all ui-video-container'
+				                         }
+			                            )
+			        .css('height', $(self).css('height'))
+			        .css('width', $(self).css('width'))
+			        .css('background-color', 'black')
+			        .css('padding', '0');
 
-    }
-})(jQuery)
+			    self._video = $('<video/>',
+				                {
+					                'class': ' ui-corner-all sampleContainer',
+					                'src': videoURL
+				                }
+			                   )
+			        .css('position','absolute')
+			        .prependTo(self._videoContainer);
+
+			    $(self._video).video({
+                    'vignet':'true', 
+                    'startPoint':self.options.start_point,
+                    'endPoint':self.options.end_point,
+                    'autoPlay':true
+                });
+			    parentC = $(self).parent();
+			    parentC.append(self._videoContainer);
+			    //destroy();
+			    self._videoContainer
+			        .css('height','100%')
+			        .css('width','100%');
+
+			    self.bind( "destroySamplePlayer", destroySamplePlayer );
+		    });
+		    function destroySamplePlayer() {
+			    $(self._video).video("destroy");
+			    self._video.remove();
+			    self._videoContainer.empty();
+			    self._videoContainer.remove();
+			    self.removeClass('video-container');
+			    parentC.find('.screenshot:first').trigger('fragmentclose',parentC);
+			    self.unbind( "destroySamplePlayer", destroySamplePlayer );
+		    }
+	    }
+    };
+
+    $.fn.advene = function( method ) {
+        // Method calling logic
+        if ( methods[method] ) {
+            return methods[ method ].apply( this, Array.prototype.slice.call( arguments, 1 ));
+        } else if ( typeof method === 'object' || ! method ) {
+            return methods.init.apply( this, arguments );
+        } else {
+            $.error( 'Method ' +  method + ' does not exist on jQuery.tooltip' );
+        } 
+  };
+})(jQuery);
+
 

@@ -732,7 +732,7 @@ class HTML5VideoPlayer(VideoPlayer):
 <script type="text/javascript" src="./resources/HTML5/advene.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
-        $(document).AdvenePlayerInit();
+        $(document).advene();
     });
 </script>
 ''' % { 'video_url': unicode(self.video_url) }
