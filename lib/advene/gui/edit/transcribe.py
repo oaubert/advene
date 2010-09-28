@@ -972,7 +972,11 @@ class TranscriptionEdit(AdhocView):
             return True
 
         self.imported_type=at
-
+        
+        if not at.annotations:
+            dialog.message_dialog(_("There are no annotations of type %s") % self.controller.get_title(at))
+            return True
+            
         if not self.buffer_is_empty():
             if not dialog.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
                                                   icon=gtk.MESSAGE_QUESTION):
