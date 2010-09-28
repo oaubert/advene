@@ -1034,7 +1034,7 @@ $.widget("ui.video", {
                                   });
                     if (!$(this).attr("title"))
                         $(this).attr("title", _formatTime(data[2]) + " - " + _formatTime(data[3]));
-
+                    $(this).attr('href', '#');
                     if (video_url == "")
                         video_url = data[1];
                 } 
