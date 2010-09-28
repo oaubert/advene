@@ -146,10 +146,10 @@
 }
 
 .ui-video-timeLiner-slider .ui-slider-range { background: #000033; }
-.ui-video-volume-slider .ui-slider-range { background: #663300; }
+.ui-video-volume-slider .ui-slider-range { background: #666666; }
 
 .ui-video-timeLiner-slider-vign .ui-slider-range { background: #000033; }
-.ui-video-volume-slider-vign .ui-slider-range { background: #663300; }
+.ui-video-volume-slider-vign .ui-slider-range { background: #666666; }
 
 
 
@@ -160,7 +160,7 @@
 	margin-left: -.3em;
 	cursor: pointer;
 	background-image:none;
-	background-color:blue;
+	background-color:#000099;
 }
 .ui-video-volume-slider .ui-slider-handle {
 	width: .6em;
@@ -169,7 +169,7 @@
 	margin-left: -.3em;
 	cursor: pointer;
 	background-image:none;
-	background-color:green;
+	background-color:black;
 }
 
 .ui-video-timeLiner-slider-vign .ui-slider-handle, .ui-video-volume-slider-vign .ui-slider-handle {
@@ -178,7 +178,6 @@
 	top: -.2em;
 	margin-left: -.3em;
 	cursor: pointer;
-	background-color:blue;
 }
 
 
