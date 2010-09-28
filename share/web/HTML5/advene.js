@@ -617,6 +617,9 @@ $.widget("ui.video", {
 	/**
 	 * @private
 	 */
+	/**
+	 * @private
+	 */
 	_event_timeupdate: function() {
 		var self = this;
 		if( ! self.element[0].seeking ) {
@@ -846,47 +849,18 @@ $.widget("ui.video", {
 			})
         
         ///////////////////////////////////////////////////////
-        if (self.options.sticky) {
-            uiPlayer.css('position', 'fixed')
-        };
-        
-        if (window.__dialogWindowScrollHandled === undefined) {
-            window.__dialogWindowScrollHandled = true;
-            $(window).scroll(function(e) {
-                $('.ui-dialog-content').each(function() {
-                    var isSticky = $(this).player('option', 'sticky') && $(this).player('isOpen');
-                    if (isSticky) {
-                        var position = $(this).player('option','position');
-                        $(this).player('option', 'position', position);
-                    };
-                });
-            });
-        }
+      
 
 
         uiPlayer
 	        .bind('dragstop', function(event, ui) {
-	            if (self.options.sticky)
-	                storeLocation(ui.position.left,
-	                              ui.position.top);
+	           
 	        })
 	        .bind('resizestart', function(event, ui) {
-	            if (self.options.sticky)
-	                storeLocation(ui.position.left - $
-	                              (window).scrollLeft(),
-	                              ui.position.top - $(window).scrollTop
-	                              ());
+	            
 	        })
 	        .bind('resizestop', function(event, ui) {
-	            if (self.options.sticky) {
-	                uiPlayer.css({
-	                    'position': 'fixed',
-	                    'left': self.options.location.left,
-	                    'top': self.options.location.top
-	                });
-	            };
-
-		        vid = uiPlayer.find('video', this);
+	            vid = uiPlayer.find('video', this);
 		        content=uiPlayer.find('.ui-dialog-content ', this);
 		        control=uiPlayer.find('.ui-video-control ', this);
 		        $(vid).position({
@@ -915,12 +889,7 @@ $.widget("ui.video", {
 		        });
 	        });
 
-        function storeLocation(_left, _top) {
-            self.options.location = { 
-                left: _left,
-                top: _top 
-            };
-        };
+       
         
         uiPlayer = this.uiDialog;
 
@@ -978,7 +947,7 @@ $.widget("ui.video", {
 		    })
 		    .click(function(event) {
 			    $(this).hide();
-			    self.uiDialog.draggable('destroy');
+			    uiPlayer.css('position','fixed');
 			    self.uiDialog.find('.ui-dialog-titlebar-nofixonscreen ',this).show();
 			    return false;
 		    })
@@ -987,7 +956,7 @@ $.widget("ui.video", {
 	    uiPlayerTitlebarFixonScreenText = (this.uiPlayerTitlebarFixonScreenText = $('<span/>'))
 		    .addClass('ui-icon ' +'ui-icon-pin-s')
 		    .text("Fix On Screen")
-		    .attr('title','Fix Player position')
+		    .attr('title','Fix Player On Screen (fixed)')
 		    .appendTo(uiPlayerTitlebarFixonScreen);
         
 	    // 	Fonction de non fixation sur la page --> le player peut être désormais déplacé à la souris
@@ -1003,7 +972,7 @@ $.widget("ui.video", {
 		    .mousedown(function(ev) { ev.stopPropagation(); } )
 		.click(function(event) {
 			$(this).hide();
-			self.uiDialog.draggable();
+			uiPlayer.css('position','absolute');
 			self.uiDialog.find('.ui-dialog-titlebar-fixonscreen ').show();
 			return false;
 		})
@@ -1013,50 +982,10 @@ $.widget("ui.video", {
 	    uiPlayerTitlebarNoFixonScreenText = (this.uiPlayerTitlebarNoFixonScreenText = $('<span/>'))
 		    .addClass('ui-icon ' +'ui-icon-pin-w')
 		    .text('options')
-		    .attr('title','Stop Fixing Player position')
+		    .attr('title','Fix Player on its Page (absolute)')
 		    .appendTo(uiPlayerTitlebarNoFixonScreen);
         
-        // 	Fonction de fixation sur écran --> le player est affiché à un endroit et ne bouge pas avec défilement de la page
-	    uiPlayerTitlebarStickonWindow = $('<a href="#"/>')
-		    .addClass('ui-dialog-titlebar-stickonwindow ' +'ui-corner-all')
-		    .attr('role', 'button')
-		    .hover(function() {$(this).addClass('ui-state-hover');},
-			       function() {$(this).removeClass('ui-state-hover');}
-			      )
-		    .focus(function() {$(this).addClass('ui-state-focus');})
-		    .blur(function() {$(this).removeClass('ui-state-focus');})
-		    .mousedown(function(ev) {
-			    ev.stopPropagation();
-		    })
-		    .click(function(event) {
-			    $(this).hide();
-			    self.options.sticky=true;
-			    self.uiDialog.find('.ui-dialog-titlebar-nostickonwindow ').show();
-			    return false;
-                
-		    })
-		    .appendTo(uiPlayerTitlebar);
-        
-        // 	Fonction de fixation sur écran --> le player est incrusté à la page de la manère classique
-	    uiPlayerTitlebarNoStickonWindow = $('<a href="#"/>')
-		    .addClass('ui-dialog-titlebar-nostickonwindow ' +'ui-corner-all')
-		    .attr('role', 'button')
-		    .hover(function() {$(this).addClass('ui-state-hover');},
-			       function() {$(this).removeClass('ui-state-hover');}
-			      )
-		    .focus(function() {$(this).addClass('ui-state-focus');})
-		    .blur(function() {$(this).removeClass('ui-state-focus');})
-		    .mousedown(function(ev) {
-			    ev.stopPropagation();
-		    })
-		    .click(function(event) {
-			    $(this).hide();
-			    self.options.sticky=false;
-			    self.uiDialog.find('.ui-dialog-titlebar-stickonwindow').show();
-			    return false;
-		    })
-		    .appendTo(uiPlayerTitlebar)
-		    .hide();
+      
         
         //////////////////////////////////////////////
         self.fragmentPlay = function(debut, fin, title, endFragBehav) {
@@ -1070,11 +999,12 @@ $.widget("ui.video", {
         }
     };
 
-    $.ui.player.prototype.videoObject = null;
-    $.ui.player.prototype.options.sticky = true;
+    $.ui.player.prototype.videoObject = null;	
     $.ui.player.prototype.options.title = 'ADVENE PLAYER';
     $.ui.player.prototype.options.endFragmentBehaviour = "continue";
     $.ui.player.prototype.options.position = "right";
+	
+
     
 })(jQuery);
 
@@ -1117,7 +1047,7 @@ $.widget("ui.video", {
                              "</video></div>");
 
             playerOptions =  { title:'Advene main player', 
-                               endFragmentBehaviour: 'continue',
+                               endFragmentBehaviour: 'continue',                               
                                transcriptHighlight: ($(".transcript").length > 0)
                              };
             if (options !== undefined)
@@ -1301,5 +1231,3 @@ $.widget("ui.video", {
         } 
   };
 })(jQuery);
-
-
