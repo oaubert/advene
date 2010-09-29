@@ -1190,7 +1190,7 @@ $.widget("ui.video", {
 					                'src': videoURL
 				                }
 			                   )
-			        .css('position','absolute')
+			        .css('position', 'fixed')
 			        .prependTo(self._videoContainer);
 
 			    $(self._video).video({
