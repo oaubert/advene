@@ -35,6 +35,7 @@ gobject.threads_init()
 
 import gtk
 import os
+from sys import getfilesystemencoding
 
 if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
@@ -352,11 +353,13 @@ class Player:
 
     def playlist_add_item(self, item):
         self.videofile=item
-        if os.path.exists(item):
-            if config.data.os == 'win32':
-                item="file:///" + os.path.abspath(item)
-            else:
-                item="file://" + os.path.abspath(item)
+        if config.data.os == 'win32':
+            #item is a str, os.path needs to work with unicode obj to accept unicode path
+            item = os.path.abspath(unicode(item))
+            if os.path.exists(item):
+                item="file:///" + item
+        elif os.path.exists(item):
+            item="file://" + os.path.abspath(item)
         self.player.set_property('uri', item)
         if self.snapshotter:
             self.snapshotter.set_uri(item)
@@ -556,11 +559,12 @@ class Player:
     def reparent(self, xid):
         # See https://bugzilla.gnome.org/show_bug.cgi?id=599885
         #gtk.gdk.threads_enter()
-        print "Reparent", hex(xid)
+        if xid:
+            print "Reparent", hex(xid)
 
-        gtk.gdk.display_get_default().sync()
+            gtk.gdk.display_get_default().sync()
         
-        self.imagesink.set_xwindow_id(xid)
+            self.imagesink.set_xwindow_id(xid)
         self.imagesink.set_property('force-aspect-ratio', True)
         self.imagesink.expose()
         #gtk.gdk.threads_leave()
@@ -574,6 +578,7 @@ class Player:
 
     def set_widget(self, widget):
         self.set_visual( widget.get_id() )
+        #self.set_visual( None )
             
     def restart_player(self):
         # FIXME: destroy the previous player
