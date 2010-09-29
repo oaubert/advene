@@ -47,29 +47,27 @@ $.widget("ui.video", {
 	},
     
 	_create: function() {
-		var self = this;
-        
 	    //  	Paramètrage avec les options nécessaires et celles spécifiées lors de l'instanciation
 		var videoOptions = {
-			autoplay: self.options.autoPlay,
+			autoplay: this.options.autoPlay,
 			controls: false,
-			loop: self.options.loop,
-			autobuffer: self.options.autoBuffer
+			loop: this.options.loop,
+			autobuffer: this.options.autoBuffer
 		};
         
 		/**
 		 * @type {!Object}
 		 * @private
 		 */
-		self._container = self.element.parent();
-		if (self.options.vignet)
-            self.options.fragmentPlay=true;
+		this._container = this.element.parent();
+		if (this.options.vignet)
+            this.options.fragmentPlay=true;
         
 		/**
 		 * @type {!Object}
 		 * @private
 		 */
-		self._oldVideooptions = {};
+		this._oldVideooptions = {};
         
 		$.each( videoOptions , function( key, value) {
 			if( value !== null ) {
@@ -77,8 +75,8 @@ $.widget("ui.video", {
 				if( key == 'autoplay' && $.browser.webkit ) {
 					value = false;
 				}
-				self._oldVideooptions[key] = self.element.attr( key );
-				self.element.attr( key, value );
+				this._oldVideooptions[key] = this.element.attr( key );
+				this.element.attr( key, value );
 			}
 		}
 			  );
@@ -112,13 +110,13 @@ $.widget("ui.video", {
 		];
         
 		$.each( videoEvents, function(){
-			if( self["_event_" + this] ) {
-				self.element.bind(
+			if( this["_event_" + this] ) {
+				this.element.bind(
 					this + ".video",
-					$.proxy(self["_event_" + this],self)
+					$.proxy(this["_event_" + this],this)
 				);
 			} else {
-				self.element.bind(
+				this.element.bind(
 					this + ".video",
 					$.proxy(function(){
 						//alert("event "+ this+"  not implemented");
@@ -131,10 +129,10 @@ $.widget("ui.video", {
 			  );
         
 	    //  	Instanciation de la barre de contrôle et définition de son comportement (apparition lors du survol de la vidéo)
-		self._createControls();
-		self._container.hover(
-			$.proxy(self._showControls,self),
-			$.proxy(self._hideControls,self)
+		this._createControls();
+		this._container.hover(
+			$.proxy(this._showControls,this),
+			$.proxy(this._hideControls,this)
 		);
         
 	    //  	Indicatif d'attente
@@ -142,31 +140,30 @@ $.widget("ui.video", {
 		 * @type {!Object}
 		 * @private
 		 */
-		self._waitingContainer = $('<div/>', {'class': 'ui-video-waiting-container'});
+		this._waitingContainer = $('<div/>', {'class': 'ui-video-waiting-container'});
 
 		/**
 		 * @type {!Object}
 		 * @private
 		 */
-		self._waiting = $('<div/>', {'class': 'ui-video-waiting'}).appendTo(self._waitingContainer);
+		this._waiting = $('<div/>', {'class': 'ui-video-waiting'}).appendTo(this._waitingContainer);
         
-		self._controls
+		this._controls
 			.fadeIn(500)
 			.delay(100)
 			.fadeOut(500);
         
-		self._volumeSlider.slider('value', self.options.volume * 100);
+		this._volumeSlider.slider('value', this.options.volume * 100);
         
 		// webkit bug
-		if( self.options.autoPlay && $.browser.webkit ) {
-			self.play();
+		if( this.options.autoPlay && $.browser.webkit ) {
+			this.play();
 		}
 	},
 	// 	Fonction privée de création de contrôles
 	_createControls: function() {
-		var self = this;
 		vigneText = '';
-		if (self.options.vignet) {
+		if (this.options.vignet) {
             vigneText='-vign';
         }
         
@@ -174,34 +171,34 @@ $.widget("ui.video", {
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._controls = $('<div/>',
+		this._controls = $('<div/>',
 				           {
 					           'class': ' ui-corner-all ui-video-control'+vigneText
 				           }
 			              )
-			.prependTo(self._container);
+			.prependTo(this._container);
         
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._progressDiv = $('<div/>',
+		this._progressDiv = $('<div/>',
 				              {
 					              'class': 'ui-video-progress'
 				              }
 			                 )
-			.appendTo(self._controls);
+			.appendTo(this._controls);
         
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._currentProgressSpan = $('<span/>',
+		this._currentProgressSpan = $('<span/>',
 				                      {
 					                      'class': 'ui-video-current-progress', 'text': '00:00'
 				                      }
 			                         )
-			.appendTo(self._progressDiv);
+			.appendTo(this._progressDiv);
         
 		$('<span/>',
 		  {
@@ -209,82 +206,82 @@ $.widget("ui.video", {
 			  'class': 'ui-video-progress-divider'
 		  }
 		 )
-			.appendTo(self._progressDiv);
+			.appendTo(this._progressDiv);
         
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._durationSpan = $('<span/>',
+		this._durationSpan = $('<span/>',
 				               {
 					               'class': 'ui-video-length', 'text': '00:00'
 				               }
 			                  )
-			.appendTo(self._progressDiv);
+			.appendTo(this._progressDiv);
         
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
         
-		self._muteButton = $('<div/>',
+		this._muteButton = $('<div/>',
 				             {
 					             'class': 'ui-icon ui-icon-volume-on ui-video-mute'+vigneText
 				             }
 			                )
-			.appendTo(self._controls)
-			.bind('click.video', $.proxy(self._mute,self));
+			.appendTo(this._controls)
+			.bind('click.video', $.proxy(this._mute,this));
         
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._playButton = $('<div/>',
+		this._playButton = $('<div/>',
 				             {
 					             'class': 'ui-icon ui-icon-play ui-video-play'+vigneText
 				             }
 			                )
-			.appendTo(self._controls)
-			.bind('click.video', $.proxy(self._togglePlayPause,self));
+			.appendTo(this._controls)
+			.bind('click.video', $.proxy(this._togglePlayPause,this));
         
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._stopButton = $('<div/>',
+		this._stopButton = $('<div/>',
 				             {
 					             'class': 'ui-icon ui-icon-stop ui-video-stop'+vigneText
 				             }
 			                )
-			.appendTo(self._controls)
-			.bind('click.video', $.proxy(self._stopfragmentplay,self))
-			.bind('click.video', $.proxy(self._stop,self));
+			.appendTo(this._controls)
+			.bind('click.video', $.proxy(this._stopfragmentplay,this))
+			.bind('click.video', $.proxy(this._stop,this));
         
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._playLoopButton = $('<div/>',
+		this._playLoopButton = $('<div/>',
 				                 {
 					                 'class': 'ui-icon ui-icon-arrowrefresh-1-s ui-video-playLoop'+vigneText
 				                 }
 			                    )
-			.appendTo(self._controls)
-			.bind('click.video', $.proxy(self._tooglePlayLoop,self));
+			.appendTo(this._controls)
+			.bind('click.video', $.proxy(this._tooglePlayLoop,this));
         
 
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._stopFragmentLoop = $('<div/>',
+		this._stopFragmentLoop = $('<div/>',
 				                   {
 					                   'class': 'ui-icon ui-icon-closethick ui-video-fragmentLoop'+vigneText
 				                   }
 			                      )
-			.appendTo(self._controls)
+			.appendTo(this._controls)
 			.hide()
-			.bind('click.video', $.proxy(self._stopfragmentplay,self));
+			.bind('click.video', $.proxy(this._stopfragmentplay,this));
         
         
         
@@ -292,12 +289,12 @@ $.widget("ui.video", {
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._volumeSlider = $('<div/>',
+		this._volumeSlider = $('<div/>',
 				               {
 					               'class': 'ui-video-volume-slider'+vigneText
 				               }
 			                  )
-			.appendTo(self._controls)
+			.appendTo(this._controls)
 			.slider({
 				range: 'min',
 				animate: true,
@@ -305,7 +302,7 @@ $.widget("ui.video", {
 					ui.handle.blur();
 				},
 				slide: function( e, ui ) {
-					self.volume.apply(self,[ui.value]);
+					this.volume.apply(this,[ui.value]);
 					return true;
 				}
 			}
@@ -315,7 +312,7 @@ $.widget("ui.video", {
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._timeLinerSliderHover =  $('<div/>',
+		this._timeLinerSliderHover =  $('<div/>',
 				                        {
 					                        'class': 'ui-widget-content ui-corner-all ui-video-timeLiner-slider-hover'
 				}
@@ -326,88 +323,87 @@ $.widget("ui.video", {
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._timeLinerSlider = $('<div/>',
+		this._timeLinerSlider = $('<div/>',
 				                  {
 					                  'class': 'ui-video-timeLiner-slider'+vigneText
 				                  }
 			                     )
-			.appendTo(self._controls)
+			.appendTo(this._controls)
 			.slider({
 				range: 'min',
 				animate: true,
 				start: function( e, ui ) {
-					if( self.element[0].readyState === HTMLMediaElement.HAVE_NOTHING ) {
+					if( this.element[0].readyState === HTMLMediaElement.HAVE_NOTHING ) {
 						return false;
 					} else {
-						self._timeLinerSliderHover.fadeIn('fast');
-						self._timeLinerHoverUpdate.apply(self,[ui.handle, ui.value]);
+						this._timeLinerSliderHover.fadeIn('fast');
+						this._timeLinerHoverUpdate.apply(this,[ui.handle, ui.value]);
 						return true;
 					}
 				},
 				stop: function( e, ui ) {
                     
 					ui.handle.blur();
-					if( self._timeLinerSliderHover.is(':visible') ) {
-						self._timeLinerSliderHover.fadeOut('fast');
+					if( this._timeLinerSliderHover.is(':visible') ) {
+						this._timeLinerSliderHover.fadeOut('fast');
 					}
                     
-					if( self.element[0].readyState === HTMLMediaElement.HAVE_NOTHING ) {
+					if( this.element[0].readyState === HTMLMediaElement.HAVE_NOTHING ) {
 						return false;
 					} else {
-						self._currentProgressSpan.text(_formatTime(self.element[0].duration * (ui.value/100)));
+						this._currentProgressSpan.text(_formatTime(this.element[0].duration * (ui.value/100)));
 						return true;
 					}
 				},
 				slide: function( e, ui ) {
-					if( self.element[0].readyState === HTMLMediaElement.HAVE_NOTHING ) {
+					if( this.element[0].readyState === HTMLMediaElement.HAVE_NOTHING ) {
 						return false;
 					} else {
-						self._timeLinerHoverUpdate.apply(self,[ui.handle, ui.value]);
-						self.timeline.apply(self,[ui.value]);
+						this._timeLinerHoverUpdate.apply(this,[ui.handle, ui.value]);
+						this.timeline.apply(this,[ui.value]);
 						return true;
 					}
 				}
 			}
 			       );
         
-		self._timeLinerSliderHover.appendTo(self._timeLinerSlider);
+		this._timeLinerSliderHover.appendTo(this._timeLinerSlider);
         
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._timeLinerSliderAbsoluteWidth = self._timeLinerSlider.width();
+		this._timeLinerSliderAbsoluteWidth = this._timeLinerSlider.width();
         
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._bufferStatus = $('<div/>',
+		this._bufferStatus = $('<div/>',
 				               {
 					               'class': 'ui-video-buffer-status ui-corner-all'
 				               }
-			                  ).appendTo( self._timeLinerSlider );
+			                  ).appendTo( this._timeLinerSlider );
         
 		/**
 		 * @type {!jQuery}
 		 * @private
 		 */
-		self._stopFragmentButton = $('<div/>',
+		this._stopFragmentButton = $('<div/>',
 				                     {
 					                     'class': 'ui-icon ui-icon-closethick ui-video-fragment-close'+vigneText
 				                     }
 			                        )
-			.appendTo(self._controls)
-			.bind('click.video', $.proxy(self._closeFragment,self));
+			.appendTo(this._controls)
+			.bind('click.video', $.proxy(this._closeFragment,this));
 	},
 	/**
 	 * @private
 	 */
 	_timeLinerHoverUpdate: function( elem, value ) {
-		var self = this;
-		var duration = self.element[0].duration;
+		var duration = this.element[0].duration;
         
-		self._timeLinerSliderHover
+		this._timeLinerSliderHover
 			.text(_formatTime(duration * (value/100)))
 			.position({
 				'my': 'bottom',
@@ -424,54 +420,48 @@ $.widget("ui.video", {
 	 * @private
 	 */
 	_togglePlayPause: function() {
-		var self = this;
-		if( self.element[0].paused ) {
-			self.play();
+		if( this.element[0].paused ) {
+			this.play();
 		} else {
-			self.pause();
+			this.pause();
 		}
 	},
 	/**
 	 * @private
 	 */
 	_stop: function() {
-		var self = this;
-		self.stop();
+		this.stop();
 	},
 	_tooglePlayLoop: function() {
-		var self = this;
-		if (self.element[0].loop) { 
-            self.element[0].loop=false;
-		    self._playLoopButton.removeClass('ui-icon-arrowthickstop-1-e').addClass('ui-icon-arrowrefresh-1-s');
+		if (this.element[0].loop) { 
+            this.element[0].loop=false;
+		    this._playLoopButton.removeClass('ui-icon-arrowthickstop-1-e').addClass('ui-icon-arrowrefresh-1-s');
         } else {
-            self.element[0].loop=true;
-			self._playLoopButton.addClass('ui-icon-arrowthickstop-1-e').removeClass('ui-icon-arrowrefresh-1-s');
+            this.element[0].loop=true;
+			this._playLoopButton.addClass('ui-icon-arrowthickstop-1-e').removeClass('ui-icon-arrowrefresh-1-s');
         }
 	},
 	/**
 	 * @private
 	 */
 	_stopfragmentplay: function() {
-		var self = this;
-		self.options.fragmentPlay=false;
-		self._stopFragmentLoop.hide();
-		self._container.parent().find(".ui-dialog-fragment-title").hide();
-		self._container.parent().find(".ui-dialog-fragment-title").text("Fragment PLAY");
+		this.options.fragmentPlay=false;
+		this._stopFragmentLoop.hide();
+		this._container.parent().find(".ui-dialog-fragment-title").hide();
+		this._container.parent().find(".ui-dialog-fragment-title").text("Fragment PLAY");
 	},
 	/**
 	 * @private
 	 */
 	_mute: function() {
-		var self = this;
-		var muted = self.element[0].muted = !self.element[0].muted;
-		self._muteButton.toggleClass('ui-icon-volume-on', !muted).toggleClass('ui-icon-volume-off', muted);
+		var muted = this.element[0].muted = !this.element[0].muted;
+		this._muteButton.toggleClass('ui-icon-volume-on', !muted).toggleClass('ui-icon-volume-off', muted);
 	},
 	/**
 	 * @private
 	 */
 	_hideControls: function() {
-		var self = this;
-		self._controls
+		this._controls
 			.stop(true,true)
 			.delay(100)
 			.fadeOut(500);
@@ -480,8 +470,7 @@ $.widget("ui.video", {
 	 * @private
 	 */
 	_showControls: function(){
-		var self = this;
-		self._controls
+		this._controls
 			.stop(true,true)
         
 			.fadeIn(500);
@@ -490,35 +479,33 @@ $.widget("ui.video", {
 	 * @private
 	 */
 	_hideWaiting: function(){
-		var self = this;
-		if( self._waitingId ) {
-			clearInterval( self._waitingId );
-			self._waitingId = null;
-			self._waitingContainer.fadeOut('fast').remove();
+		if( this._waitingId ) {
+			clearInterval( this._waitingId );
+			this._waitingId = null;
+			this._waitingContainer.fadeOut('fast').remove();
 		}
 	},
 	/**
 	 * @private
 	 */
 	_showWaiting: function(){
-		var self = this;
-		if( ! self._waitingId ) {
-			self._waiting.css('left', 0);
-			self._waitingContainer
-				.appendTo(self._container)
+		if( ! this._waitingId ) {
+			this._waiting.css('left', 0);
+			this._waitingContainer
+				.appendTo(this._container)
 				.position({
 					'my': 'center',
 					'at': 'center',
-					'of': self.element,
+					'of': this.element,
 					'collision': 'none'
 				}
 				         ).fadeIn('fast');
-			var waitingWidth = self._waiting.width();
-			var _waitingContainerWidth = self._waitingContainer.width();
-			self._waitingId = setInterval(function() {
-				var cur_left = Math.abs(self._waiting.position().left);
+			var waitingWidth = this._waiting.width();
+			var _waitingContainerWidth = this._waitingContainer.width();
+			this._waitingId = setInterval(function() {
+				var cur_left = Math.abs(this._waiting.position().left);
                 
-				self._waiting.css({'left': -((cur_left + _waitingContainerWidth) % waitingWidth) });
+				this._waiting.css({'left': -((cur_left + _waitingContainerWidth) % waitingWidth) });
                 
 			}, 50);
 		}
@@ -528,8 +515,7 @@ $.widget("ui.video", {
 	 * @private
 	 */
 	_closeFragment: function() {
-		var self = this;
-		self._container.parent().find('.video-container:first').trigger("destroySamplePlayer");
+		this._container.parent().find('.video-container:first').trigger("destroySamplePlayer");
         
 	},
 
@@ -538,7 +524,6 @@ $.widget("ui.video", {
 	 * @private
 	 */
 	_event_progress: function(e) {
-		var self = this;
 		var lengthComputable = e.originalEvent.lengthComputable,
 		loaded = e.originalEvent.loaded,
 		total = e.originalEvent.total;
@@ -546,7 +531,7 @@ $.widget("ui.video", {
 		if( lengthComputable ) {
 			var fraction = Math.max(Math.min(loaded / total,1),0);
             
-			this._bufferStatus.width(Math.max(fraction * self._timeLinerSliderAbsoluteWidth));
+			this._bufferStatus.width(Math.max(fraction * this._timeLinerSliderAbsoluteWidth));
 		}
         
 	},
@@ -554,64 +539,55 @@ $.widget("ui.video", {
 	 * @private
 	 */
 	_event_seeked: function() {
-		var self = this;
-		self._hideWaiting();
+		this._hideWaiting();
 	},
 	/**
 	 * @private
 	 */
 	_event_canplay: function() {
-		var self = this;
-		self._hideWaiting();
+		this._hideWaiting();
 	},
 	/**
 	 * @private
 	 */
 	_event_loadstart: function() {
-		var self = this;
-		self._showWaiting();
+		this._showWaiting();
 	},
 	/**
 	 * @private
 	 */
 	_event_durationchange: function() {
-		var self = this;
-		self._showWaiting();
+		this._showWaiting();
 	},
 	/**
 	 * @private
 	 */
 	_event_seeking: function() {
-		var self = this;
-		self._showWaiting();
+		this._showWaiting();
 	},
 	/**
 	 * @private
 	 */
 	_event_waiting: function() {
-		var self = this;
-		self._showWaiting();
+		this._showWaiting();
 	},
 	/**
 	 * @private
 	 */
 	_event_loadedmetadata: function() {
-		var self = this;
-		self._durationSpan.text(_formatTime(self.element[0].duration));
+		this._durationSpan.text(_formatTime(this.element[0].duration));
 	},
 	/**
 	 * @private
 	 */
 	_event_play: function() {
-		var self = this;
-		self._playButton.addClass('ui-icon-pause').removeClass('ui-icon-play');
+		this._playButton.addClass('ui-icon-pause').removeClass('ui-icon-play');
 	},
 	/**
 	 * @private
 	 */
 	_event_pause: function() {
-		var self = this;
-		self._playButton.removeClass('ui-icon-pause').addClass('ui-icon-play');
+		this._playButton.removeClass('ui-icon-pause').addClass('ui-icon-play');
 	},
 
 	/**
@@ -621,34 +597,33 @@ $.widget("ui.video", {
 	 * @private
 	 */
 	_event_timeupdate: function() {
-		var self = this;
-		if( ! self.element[0].seeking ) {
-			var duration = self.element[0].duration;
-			var currentTime = self.element[0].currentTime;
+		if( ! this.element[0].seeking ) {
+			var duration = this.element[0].duration;
+			var currentTime = this.element[0].currentTime;
             
-			if (((currentTime > self.options.endPoint) || (currentTime<self.options.startPoint)) && (self.options.fragmentPlay))
+			if (((currentTime > this.options.endPoint) || (currentTime<this.options.startPoint)) && (this.options.fragmentPlay))
 			{
-				switch(self.options.endFragmentBehaviour)
+				switch(this.options.endFragmentBehaviour)
 				{
 				case "continue":
-					self._stopfragmentplay();
+					this._stopfragmentplay();
 					break;
 				case "pause":
-					self._stopfragmentplay();
-					self.pause();
+					this._stopfragmentplay();
+					this.pause();
 					break;
 				case "stop":
-					self._stopfragmentplay();
-					self.stop();
+					this._stopfragmentplay();
+					this.stop();
 					break;
 				default: // LOOP
-					self.element[0].currentTime = self.options.startPoint;
+					this.element[0].currentTime = this.options.startPoint;
 				}
 				return;
 			}
             
             // Highlight/unhighlight elements by using the .activeTranscript class
-            if (self.options.transcriptHighlight)
+            if (this.options.transcriptHighlight)
                 $(".transcript[data-begin]", $(document)).each( function() {
                     if ($(this).hasClass('activeTranscript'))
                     {
@@ -660,13 +635,13 @@ $.widget("ui.video", {
                     }
                 });
                    
-			self._timeLinerSlider.slider(
+			this._timeLinerSlider.slider(
 				'value',
-				[(currentTime / (self.element[0].duration)) * 100]
+				[(currentTime / (this.element[0].duration)) * 100]
 			);
             
-			self._durationSpan.text(_formatTime(self.element[0].duration));
-			self._currentProgressSpan.text(_formatTime(currentTime));
+			this._durationSpan.text(_formatTime(this.element[0].duration));
+			this._currentProgressSpan.text(_formatTime(currentTime));
             
 		}
 	},
@@ -682,110 +657,103 @@ $.widget("ui.video", {
 	 * @private
 	 */
 	_event_resize: function() {
-		var self = this;
         alert('_event_resize');
-		self._controls.position({
+		this._controls.position({
 			'my': 'bottom',
 			'at': 'bottom',
-			'of': self.element,
+			'of': this.element,
 			'offset': '0 -10',
 			'collision': 'none'
 		}
 			                   );
-		self._container.width( self.element.outerWidth(true) );
-		self._container.height( self.element.outerHeight(true) );
+		this._container.width( this.element.outerWidth(true) );
+		this._container.height( this.element.outerHeight(true) );
 	},
     
 	// User functions
 	getIntrinsicWidth: function() {
-		var self = this;
-        self._wait(500);
-		return (self.element[0].videoWidth);
+        this._wait(500);
+		return (this.element[0].videoWidth);
         
 	},
 	getIntrinsicHeight: function() {
-		var self = this;
-		return (self.element[0].videoHeight);
+		return (this.element[0].videoHeight);
 	},
 	play: function() {
-		var self = this;
-		self.element[0].play();
+		this.element[0].play();
 	},
 	pause: function() {
-		var self = this;
-		self.element[0].pause();
+		this.element[0].pause();
 	},
 	stop: function() {
-		var self = this;
 		this.fragmentLoop = false;
-		self.element[0].currentTime = 0;
-		self.element[0].pause();
-		self._timeLinerSlider.slider('value', 0);
-		self._currentProgressSpan.text(_formatTime(0));
+		this.element[0].currentTime = 0;
+		this.element[0].pause();
+		this._timeLinerSlider.slider('value', 0);
+		this._currentProgressSpan.text(_formatTime(0));
 
 
 	},
 	mute: function() {
-		var self = this;
-		self.element[0].muted = true;
+		this.element[0].muted = true;
 	},
 	unmute: function() {
-		var self = this;
-		self.element[0].muted = false;
+		var this = this;
+		this.element[0].muted = false;
 	},
 	rewind: function() {
-		var self = this;
-		self.element[0].playbackRate -= 2;
+		var this = this;
+		this.element[0].playbackRate -= 2;
 	},
 	forward: function() {
-		var self = this;
-		self.element[0].playbackRate += 2;
+		var this = this;
+		this.element[0].playbackRate += 2;
 	},
 	volume: function(vol) {
-		var self = this;
-		self.element[0].volume = Math.max(Math.min(parseInt(vol) / 100, 1), 0);
+		var this = this;
+		this.element[0].volume = Math.max(Math.min(parseInt(vol) / 100, 1), 0);
 	},
 	timeline: function(pos){
-		var self = this;
-		var duration= self.element[0].duration;
+		var this = this;
+		var duration= this.element[0].duration;
 		var pos = Math.max(Math.min(parseInt(pos) / 100, 1), 0);
-		self.element[0].currentTime = duration * pos;
+		this.element[0].currentTime = duration * pos;
 	},
 	setPlayingTime: function(pos){
-		var self = this;
+		var this = this;
 		try{
-			self.element[0].currentTime = pos;
-			self.play();
+			this.element[0].currentTime = pos;
+			this.play();
 		}
 		catch(e){}
         
 	},
 	fragmentPlay: function(debut, fin, endFragBehav) {
-		var self = this;
-        self.element[0].load();
+		var this = this;
+        this.element[0].load();
 		setTimeout(function() {            
-			self.options.endPoint = fin > 0 ? fin:self.element[0].duration;
-			self.options.startPoint = debut;
-			self.options.fragmentPlay = true;
-			self.options.endFragmentBehaviour = endFragBehav;
-			self._stopFragmentLoop.show();
-			self.setPlayingTime(debut);
+			this.options.endPoint = fin > 0 ? fin:this.element[0].duration;
+			this.options.startPoint = debut;
+			this.options.fragmentPlay = true;
+			this.options.endFragmentBehaviour = endFragBehav;
+			this._stopFragmentLoop.show();
+			this.setPlayingTime(debut);
 		}, 500);
 
 	},
 
 	// The destroyer
 	destroy: function() {
-		var self = this;
-		$.each( self._oldVideooptions , function( key, value) {
-			self.element.attr( key, value );
+		var this = this;
+		$.each( this._oldVideooptions , function( key, value) {
+			this.element.attr( key, value );
 		}
 			  );
         
-		self._controls.remove();
-		self.element.unwrap();
-		self.element.unbind( ".video" );
-		$.Widget.prototype.destroy.apply(self, arguments); // default destroy
+		this._controls.remove();
+		this.element.unwrap();
+		this.element.unbind( ".video" );
+		$.Widget.prototype.destroy.apply(this, arguments); // default destroy
 	}
 });
 
@@ -799,20 +767,19 @@ $.widget("ui.video", {
     var _init = $.ui.player.prototype._init;
 
     $.ui.player.prototype._init = function() {
-        var self = this;
-        var options = self.options;
+        var options = this.options;
         var videoObject;
 
         options.closeOnEscape = false;
         _init.apply(this, arguments);
-        uiPlayer=self.uiDialog;
+        uiPlayer=this.uiDialog;
 
         ////////////// CREATE MINIMIZED ICON FOR PLAYER
-        self.minplayer=$('<img/>',
+        this.minplayer=$('<img/>',
 				         {
 					         'class': ' ui-corner-all player_minimized',
 					         'src': './resources/HTML5/maximized.png',
-					         'title': self.options.title+' Click to restore'
+					         'title': this.options.title+' Click to restore'
 				         }
 			            )
 			.appendTo(uiPlayer.parent())
@@ -840,11 +807,11 @@ $.widget("ui.video", {
                     to: ".player_container", 
                     className: 'ui-effects-transfer' 
                 };
-				self.uiDialog.show();
+				this.uiDialog.show();
 				//('.player_container').player('open');
-				//self.minplayer.css('top','0');
-				self.minplayer.hide("transfer", options, 1000, function(){} );
-				self.minplayer.hide();
+				//this.minplayer.css('top','0');
+				this.minplayer.hide("transfer", options, 1000, function(){} );
+				this.minplayer.hide();
 				return false;
 			})
         
@@ -921,8 +888,8 @@ $.widget("ui.video", {
 		    .blur(function() { $(this).removeClass('ui-state-focus'); })
 		    .mousedown(function(ev) { ev.stopPropagation();	})
 		    .click(function(event) { 
-                self.uiDialog.hide();
-                self.minplayer.show();
+                this.uiDialog.hide();
+                this.minplayer.show();
 				return false;
 			})
 		    .appendTo(uiPlayerTitlebar);
@@ -948,7 +915,7 @@ $.widget("ui.video", {
 		    .click(function(event) {
 			    $(this).hide();
 			    uiPlayer.css('position','fixed');
-			    self.uiDialog.find('.ui-dialog-titlebar-nofixonscreen ',this).show();
+			    this.uiDialog.find('.ui-dialog-titlebar-nofixonscreen ',this).show();
 			    return false;
 		    })
 		    .appendTo(uiPlayerTitlebar);
@@ -973,7 +940,7 @@ $.widget("ui.video", {
 		.click(function(event) {
 			$(this).hide();
 			uiPlayer.css('position','absolute');
-			self.uiDialog.find('.ui-dialog-titlebar-fixonscreen ').show();
+			this.uiDialog.find('.ui-dialog-titlebar-fixonscreen ').show();
 			return false;
 		})
 		    .appendTo(uiPlayerTitlebar)
@@ -988,14 +955,14 @@ $.widget("ui.video", {
       
         
         //////////////////////////////////////////////
-        self.fragmentPlay = function(debut, fin, title, endFragBehav) {
-            videoObject.video('fragmentPlay', debut, fin, self.options.endFragmentBehaviour);
+        this.fragmentPlay = function(debut, fin, title, endFragBehav) {
+            videoObject.video('fragmentPlay', debut, fin, this.options.endFragmentBehaviour);
             uiPlayer.find(".ui-dialog-fragment-title").show();
             if (!title)
                 title="Fragment play";
             title = title + " (" + _formatTime(debut) + " - " + _formatTime(fin) + ")";
             uiPlayer.find(".ui-dialog-fragment-title").text(title);
-            self.minplayer.click();
+            this.minplayer.click();
         }
     };
 
@@ -1068,8 +1035,7 @@ $.widget("ui.video", {
 	            overlay_text_color : '#666'};
             
             
-	        var self = this;
-	        var fragmentTitle = $('.screenshot', this).siblings("strong:first").text();
+		        var fragmentTitle = $('.screenshot', this).siblings("strong:first").text();
             
             if ($(this).children('.screenshot').size() == 0)
             {
@@ -1088,16 +1054,16 @@ $.widget("ui.video", {
 
 		    $optionPlay=$('<div/>')
 			    .attr("class","option-play")
-			    .appendTo( $(self));
+			    .appendTo( $(this));
 
 		    var  $option = $('<img/>')
 			    .attr('src', './resources/HTML5/view_here.png')
 			    .appendTo($optionPlay)
 			    .click( function() {
-			        node = $('.screenshot', self).parent();
-			        $('.screenshot', self).hide();
-			        $('.caption', self).hide();
-			        $('.option-play', self).switchClass('option-play','option-play-off', 100);
+			        node = $('.screenshot', this).parent();
+			        $('.screenshot', this).hide();
+			        $('.caption', this).hide();
+			        $('.option-play', this).switchClass('option-play','option-play-off', 100);
 			        $(this).parent().advene('player', node.attr('data-video-url'), node.attr('data-begin'), node.attr('data-end'));
 			    });
 
@@ -1105,7 +1071,7 @@ $.widget("ui.video", {
 			    .attr('src', './resources/HTML5/view_player.png')
 			    .css('top', 30)
 			    .click( function(event){
-			        node = $('.screenshot', self).parent();
+			        node = $('.screenshot', this).parent();
 			        $('.player_container').player('fragmentPlay', node.attr('data-begin'), node.attr('data-end'), fragmentTitle);
 			    })
 			    .appendTo($optionPlay);
@@ -1146,11 +1112,11 @@ $.widget("ui.video", {
                               $('.option-play', this).fadeOut(200);
 		                  });
             
-		    self.bind( "fragmentclose", function(event,parentC) {
+		    this.bind( "fragmentclose", function(event,parentC) {
 			    $(parentC).find('.screenshot').show();
 			    $(parentC).find('.caption').show();
 			    $(parentC).find('.option-play-off').switchClass('option-play-off','option-play', 100);
-			    self.die();
+			    this.die();
 		    } );
 	    },
         
@@ -1158,13 +1124,12 @@ $.widget("ui.video", {
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             ///////////////////////////////////////// SAMPLE PLAYER WIDGET ////////////////////////////////////////////////////////
             // L'outil player définit un lecteur html5 video vignette. Il instancie un objet video() en lui définissant un conteneur vignette.
-	        var self = this;
-	        self.options = {
+		    this.options = {
 	            start_point: 0,
 	            end_point: 0
 	        };
-	        self.options.start_point = startx;
-	        self.options.end_point = endx;
+	        this.options.start_point = startx;
+	        this.options.end_point = endx;
 
 		    var parentC = null;
 		    return this.each(function() {
@@ -1172,50 +1137,50 @@ $.widget("ui.video", {
 			     * @type {!jQuery}
 			     * @private
 			     */
-			    self.addClass('video-container');
-			    self._videoContainer = null;
-			    self._videoContainer = $('<div/>',
+			    this.addClass('video-container');
+			    this._videoContainer = null;
+			    this._videoContainer = $('<div/>',
 				                         {
 					                         'class': ' ui-corner-all ui-video-container'
 				                         }
 			                            )
-			        .css('height', $(self).css('height'))
-			        .css('width', $(self).css('width'))
+			        .css('height', $(this).css('height'))
+			        .css('width', $(this).css('width'))
 			        .css('background-color', 'black')
 			        .css('padding', '0');
 
-			    self._video = $('<video/>',
+			    this._video = $('<video/>',
 				                {
 					                'class': ' ui-corner-all sampleContainer',
 					                'src': videoURL
 				                }
 			                   )
 			        .css('position', 'fixed')
-			        .prependTo(self._videoContainer);
+			        .prependTo(this._videoContainer);
 
-			    $(self._video).video({
+			    $(this._video).video({
                     'vignet':'true', 
-                    'startPoint':self.options.start_point,
-                    'endPoint':self.options.end_point,
+                    'startPoint':this.options.start_point,
+                    'endPoint':this.options.end_point,
                     'autoPlay':true
                 });
-			    parentC = $(self).parent();
-			    parentC.append(self._videoContainer);
+			    parentC = $(this).parent();
+			    parentC.append(this._videoContainer);
 			    //destroy();
-			    self._videoContainer
+			    this._videoContainer
 			        .css('height','100%')
 			        .css('width','100%');
 
-			    self.bind( "destroySamplePlayer", destroySamplePlayer );
+			    this.bind( "destroySamplePlayer", destroySamplePlayer );
 		    });
 		    function destroySamplePlayer() {
-			    $(self._video).video("destroy");
-			    self._video.remove();
-			    self._videoContainer.empty();
-			    self._videoContainer.remove();
-			    self.removeClass('video-container');
+			    $(this._video).video("destroy");
+			    this._video.remove();
+			    this._videoContainer.empty();
+			    this._videoContainer.remove();
+			    this.removeClass('video-container');
 			    parentC.find('.screenshot:first').trigger('fragmentclose',parentC);
-			    self.unbind( "destroySamplePlayer", destroySamplePlayer );
+			    this.unbind( "destroySamplePlayer", destroySamplePlayer );
 		    }
 	    }
     };
