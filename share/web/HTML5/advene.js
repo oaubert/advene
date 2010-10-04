@@ -48,7 +48,6 @@ $.widget("ui.video", {
 
     _create: function() {
         var self = this;
-        self._fragmentID=$.AutoFragmentID++;
 
         //      Paramètrage avec les options nécessaires et celles spécifiées lors de l'instanciation
         var videoOptions = {
@@ -506,11 +505,6 @@ $.widget("ui.video", {
     _closeFragment: function() {
         var self = this;
         self._container.parent().find('.video-container:first').trigger("destroySamplePlayer");
-        // Disable the highlighted text
-        $(".activeTranscript", $(document)).each( function() {
-            if ($(this).attr('activatingFragment') == self._fragmentID)
-                $(this).removeClass('activeTranscript');
-        });
     },
 
     // Events
@@ -635,17 +629,13 @@ $.widget("ui.video", {
             // Highlight/unhighlight elements by using the .activeTranscript class
             if (self.options.transcriptHighlight)
                 $(".transcript[data-begin]", $(document)).each( function() {
-                    if ($(this).hasClass('activeTranscript'))
-                    {
-                        if ((currentTime < $(this).attr('data-begin') || currentTime > $(this).attr('data-end')) && ($(this).attr('activatingFragment')==self._fragmentID) )
+                    if ($(this).hasClass('activeTranscript')) {
+                        if ((currentTime < $(this).attr('data-begin') || currentTime > $(this).attr('data-end')))
                                 $(this).removeClass('activeTranscript');
                     } else {
-                        if ($(this).attr('data-begin') <= self.element[0].currentTime && self.element[0].currentTime <= $(this).attr('data-end'))
-                            {
+                        if ($(this).attr('data-begin') <= self.element[0].currentTime && self.element[0].currentTime <= $(this).attr('data-end')) {
                                 $(this).addClass('activeTranscript');
-                                $(this).attr('activatingFragment',self._fragmentID);
                             }
-
                     }
                 });
 
@@ -749,16 +739,7 @@ $.widget("ui.video", {
         self._timeLinerSlider.slider('value', 0);
         self._currentProgressSpan.text(_formatTime(0));
 
-        //Disable the highlighted text by this video fragment
-        $(".transcript[data-begin]", $(document)).each( function() {
-                    if ($(this).hasClass('activeTranscript'))
-                    {
-                        if ($(this).attr('activatingFragment')==self._fragmentID)
-                                $(this).removeClass('activeTranscript');
-                    }
-        });
-
-
+        $(".activeTranscript").each( $(this).removeClass("activeTranscript") );
     },
     mute: function() {
         var self = this;
