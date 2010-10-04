@@ -1036,8 +1036,19 @@ $.widget("ui.video", {
             videoObject.video('fragmentPlay', debut, fin, self.options.endFragmentBehaviour);
             uiPlayer.find(".ui-dialog-fragment-title").show();
             if (!title)
-                title="Fragment play";
-            title = title + " (" + _formatTime(debut) + " - " + _formatTime(fin) + ")";
+                switch (self.options.endFragmentBehaviour) {
+                case "continue":
+                    title = "Playing from " + _formatTime(debut);
+                    break;
+                case "pause":
+                case "stop":
+                    title = "Playing from " + _formatTime(debut) + " to " + _formatTime(fin);
+                    break;
+                default:
+                    // Loop
+                    title = "Looping from " + _formatTime(debut) + " to " + _formatTime(fin);
+                    break;
+                }
             uiPlayer.find(".ui-dialog-fragment-title").text(title);
             self.minplayer.click();
         }
