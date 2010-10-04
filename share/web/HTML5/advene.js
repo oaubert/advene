@@ -1135,7 +1135,7 @@ $.widget("ui.video", {
                     node = $('.screenshot', self).parent();
                     $('.screenshot', self).hide();
                     $('.caption', self).hide();
-                    $('.option-play', self).switchClass('option-play','option-play-off', 1000);
+                    $('.option-play', self).removeClass('option-play').addClass('option-play-off');
                     $(this).parent().advene('player', node.attr('data-video-url'), node.attr('data-begin'), node.attr('data-end'));
                 });
 
@@ -1188,10 +1188,10 @@ $.widget("ui.video", {
                               $('.option-play', this).fadeOut(200);
                           });
 
-            self.bind( "fragmentclose", function(event,parentC) {
+            self.bind( "fragmentclose", function(event, parentC) {
                 $(parentC).find('.screenshot').show();
                 $(parentC).find('.caption').show();
-                $(parentC).find('.option-play-off').switchClass('option-play-off','option-play', 100);
+                $(parentC).find('.option-play-off').removeClass('option-play-off').addClass('option-play');
                 self.die();
             } );
         },
