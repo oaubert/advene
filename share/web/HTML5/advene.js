@@ -43,6 +43,8 @@ $.widget("ui.video", {
         endPoint: 0,
         endFragmentBehaviour: "continue",
         transcriptHighlight: true,
+        // Only 1 player at a time
+        singletonPlayer: true,
         location: { 'left': 0, 'top': 0 }
     },
 
@@ -576,8 +578,13 @@ $.widget("ui.video", {
      */
     _event_play: function() {
         var self = this;
+
+        // Pause all other players
+        if (self.options.singletonPlayer)
+            $("video", $(document)).each( function() { if (this !== self.element[0] && !this.paused && !this.ended) this.pause() } );
         self._playButton.addClass(self.options.vignet ? 'ui-icon-pause' : 'ui-video-pause').removeClass(self.options.vignet ? 'ui-icon-play' : 'ui-video-play');
     },
+
     /**
      * @private
      */
