@@ -419,7 +419,7 @@ $.widget("ui.video", {
                 self.element[0].loop=false;
         self._playLoopButton.removeClass('ui-video-noplayLoop').addClass('ui-video-playLoop');
         } else {
-            elf.element[0].loop=true;
+            self.element[0].loop=true;
         self._playLoopButton.addClass('ui-video-noplayLoop').removeClass('ui-video-playLoop');
         }
     },
