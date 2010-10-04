@@ -31,7 +31,7 @@ import advene.util.helper as helper
 
 fragment_re=re.compile('(.*)#(.+)')
 package_expression_re=re.compile('packages/(\w+)/(.*)')
-href_re=re.compile(r'''(href|src|about|resource)=['"](.+?)['"> ]''')
+href_re=re.compile(r'''(xlink:href|href|src|about|resource)=['"](.+?)['"> ]''')
 snapshot_re=re.compile(r'/packages/[^/]+/imagecache/(\d+)')
 overlay_re=re.compile(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?')
 tales_re=re.compile('(\w+)/(.+)')
@@ -740,7 +740,12 @@ class HTML5VideoPlayer(VideoPlayer):
         if head_re.findall(content):
             content = head_re.sub('''<head>%s''' % jsinject, content)
         else:
-            content = '''<head>%s</head>\n''' % jsinject + content
+            # It could be SVG
+            svg_re = re.compile('(<svg.+?>)', re.IGNORECASE)
+            if svg_re.search(content):
+                svg_re.sub(r'''\1%s''' % jsinject, content)
+            else:
+                content = '''<head>%s</head>\n''' % jsinject + content
         return content
 
     def finalize(self):
