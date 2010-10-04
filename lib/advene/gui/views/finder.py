@@ -664,7 +664,7 @@ class Finder(AdhocView):
 
         # Scroll the columns
         adj=self.sw.get_hadjustment()
-        adj.value = adj.upper - .1
+        adj.value = adj.page_size
         return True
 
     def scroll_event(self, widget=None, event=None):
