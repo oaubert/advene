@@ -1013,12 +1013,12 @@ $.widget("ui.video", {
             .focus(function() { $(this).addClass('ui-state-focus');} )
             .blur(function() { $(this).removeClass('ui-state-focus'); } )
             .mousedown(function(ev) { ev.stopPropagation(); } )
-        .click(function(event) {
-            $(this).hide();
-            uiPlayer.css('position','absolute');
-            uiPlayer.find('.ui-dialog-titlebar-fixonscreen ').show();
-            return false;
-        })
+            .click(function(event) {
+                $(this).hide();
+                uiPlayer.css('position','absolute');
+                uiPlayer.find('.ui-dialog-titlebar-fixonscreen ').show();
+                return false;
+            })
             .appendTo(uiPlayerTitlebar)
             .hide();
 
