@@ -1,6 +1,6 @@
 .ui-video-control {
 	background-color:#999999;
-	height: 26px;
+	height: 40px;
 	bottom:2%;
 	left:0.5%;
 	right:0.5%;
@@ -26,36 +26,58 @@
 	font-family: monospace;
 	position: absolute;
 	right: 10px;
-	top: 1px;
-	font-size: 10px;
-	color:blue;
-	
+	top: 4px;
+	font:caption;
+	font:bolder;
+	color:white;
+	background-color:#333333
 }
+
 .ui-video-progress-vign {
 	font-family: monospace;
 	position: absolute;
-	right: 5px;
+	right: 10px;
 	top: 1px;
-	font-size: 8px;
+	font-size: 10px;
+	color:blue;
 }
+
 
 
 
 .ui-video-play {
 	position: absolute;
+	background-image:url(play.png);
+	width: 28px; height: 23px;
 	left: 10px;
-	bottom: 11px;
+	top: 2px;
 }
+
+.ui-video-pause {
+	position: absolute;
+	background-image:url(pause.png);
+	width: 28px; height: 23px;
+	left: 10px;
+	top: 2px;
+}
+
 .ui-video-play-vign {
 	position: absolute;
-	left: 0px;
+	left: 2px;
+	bottom: 0px;
+}
+.ui-video-pause-vign {
+	position: absolute;
+	left: 2px;
 	bottom: 0px;
 }
 
 .ui-video-stop {
 	position: absolute;
-	left: 30px;
-	bottom: 11px;
+	background-image:url(stop.png);
+	width: 28px; height: 23px;
+	left: 39px;
+	top: 2px;
 }
 .ui-video-stop-vign {
 	position: absolute;
@@ -65,8 +87,17 @@
 
 .ui-video-playLoop {
 	position: absolute;
-	left: 50px;
-	bottom: 11px;
+	background-image:url(loop.png);
+	width: 28px; height: 23px;
+	left: 68px;
+	top: 2px;
+}
+.ui-video-noplayLoop {
+	position: absolute;
+	background-image:url(noloop.png);
+	width: 28px; height: 23px;
+	left: 68px;
+	top: 2px;
 }
 .ui-video-playLoop-vign {
 	visibility:hidden;
@@ -74,8 +105,10 @@
 
 .ui-video-fragmentLoop {
 	position: absolute;
-	left: 70px;
-	bottom: 11px;
+	background-image:url(closefragment.png);
+	width: 28px; height: 23px;
+	left: 97px;
+	top: 2px;
 }
 .ui-video-fragmentLoop-vign {
 	position: absolute;
@@ -86,6 +119,16 @@
 
 .ui-video-mute {
 	position: absolute;
+	background-image:url(volume.png);
+	width: 23px; height: 18px;
+	left: 1px;
+	bottom: 0px;
+}
+
+.ui-video-unmute {
+	position: absolute;
+	background-image:url(muted.png);
+	width: 23px; height: 18px;
 	left: 1px;
 	bottom: 0px;
 }
@@ -98,8 +141,8 @@
 
 .ui-video-volume-slider {
 	position: absolute;
-	left: 17px;
-	bottom: 4px;
+	left: 23px;
+	bottom: 3px;
 	width: 70px;
 }
 .ui-video-volume-slider-vign {
@@ -120,9 +163,9 @@
 }
 .ui-video-timeLiner-slider {
 	position: absolute;
-	left:100px;
+	left:105px;
 	right: 10px;
-	bottom: 4px;
+	bottom: 3px;
 }
 .ui-video-timeLiner-slider-vign {
 	position: absolute;
@@ -139,7 +182,7 @@
 }
 
 .ui-video-timeLiner-slider, .ui-video-volume-slider {
-	height: .3em;
+	height: .45em;
 }
 .ui-video-timeLiner-slider-vign, .ui-video-volume-slider-vign {
 	height: .1em;
@@ -155,7 +198,7 @@
 
 .ui-video-timeLiner-slider .ui-slider-handle{
 	width: .6em;
-	height: .3em;
+	height: .48em;
 	top: -.1em;
 	margin-left: -.3em;
 	cursor: pointer;
@@ -164,7 +207,7 @@
 }
 .ui-video-volume-slider .ui-slider-handle {
 	width: .6em;
-	height: .3em;
+	height: .48em;
 	top: -.1em;
 	margin-left: -.3em;
 	cursor: pointer;
@@ -192,24 +235,18 @@
 	background: #000;
 }
 
-.ui-video-waiting {
-	position: absolute;
-	background-image: url("anim.gif");
-	height: 32px;
-	width: 992px;
-	margin: 50;
-	padding: 0;
-	border: 0;
-}
+
 .ui-video-waiting-container {
 	position: absolute;
-	height: 32px;
-	width: 32px;
-	overflow: hidden;
+	background-image: url("anim.gif");
+	background-repeat:no-repeat;
+	height: 50px;
+	width: 50px;
+	overflow:hidden;
 	margin: 0;
 	padding: 0;
 	border: 0;
-	z-index: 9999;
+
 }
 
 .ui-video-widget {
@@ -217,13 +254,13 @@
 	margin:0% !important;
 	padding:0% !important;
 
-text-align: center;
+    text-align: center;
 }
 
 .ui-dialog .ui-dialog-content { border: 0; padding: 0 !important;margin:0% !important;  overflow: auto; zoom: 1;background-color: #C1CDCD ;}
- 
+
 .ui-dialog .ui-dialog-titlebar { padding: .3em .0em .0em 0em; position: relative; height:10 !important; text-align:left;background-image: none;background-color: #B9D3EE ;border-color:#42426F}
-.ui-dialog .ui-dialog-title { float: right; margin-top:-5; font-size:12px; color:#2F4F4F; font-style: bolder;font-variant: small-caps; } 
+.ui-dialog .ui-dialog-title { float: right; margin-top:-5; font-size:12px; color:#2F4F4F; font-style: bolder;font-variant: small-caps; }
 
 
 
@@ -255,7 +292,7 @@ text-align: center;
 .image-overlay a:link, .image-overlay a:visited, .image-overlay a:hover, .image-overlay a:active { text-decoration: none; }
 .image-overlay a:link img, .image-overlay a:visited img, .image-overlay a:hover img, .image-overlay a:active img { border: none; }
 
-.image-overlay 
+.image-overlay
 {
     margin: 9px;
     float: left;
@@ -275,14 +312,14 @@ text-align: center;
 {
     float: left;
     position: absolute;
- font-size: 14px;
+    font-size: 14px;
     background-color: #000;
     width: 100%;
-height:auto;
+    height:auto;
     cursor: pointer;
-text-align: center;
+	text-align: center;
 	opacity: .85;
-  
+
 }
 .image-overlay .caption h1, .image-overlay .caption h2, .image-overlay .caption h3,
 .image-overlay .caption h4, .image-overlay .caption h5, .image-overlay .caption h6
@@ -300,25 +337,25 @@ text-align: center;
 }
 
 .option-play-off {
-		display:none;
+	display:none;
 }
 .option-play-off img{
-		display:none;
-}					
+	display:none;
+}
 .option-play {
-		display:none;
-		position:absolute;
-		border:none;
-		height:55;
-		top:25%;
-		left:17%;
-		width:130;
-		 border:thin;
-		-moz-border-radius: 10px;
-		padding: 2px;		
-		text-align:left;
-		background:url(bg.png) repeat;
-	}
+	display:none;
+	position:absolute;
+	border:none;
+	height:55;
+	top:25%;
+	left:17%;
+	width:130;
+	border:thin;
+	-moz-border-radius: 10px;
+	padding: 2px;
+	text-align:left;
+	background:url(bg.png) repeat;
+}
 .option-play img{
 	width:110;
 	height:30;
@@ -333,38 +370,38 @@ text-align: center;
 
 
 img.screenshot {
- border:1px solid #FFCCCC;
- height:138px;
- width:184px;		
+    border:1px solid #FFCCCC;
+    height:138px;
+    width:184px;
 }
 
 img.half_screenshot {
- border:1px solid #FFCCCC;
- height:60px;
- width:80px;		
+    border:1px solid #FFCCCC;
+    height:60px;
+    width:80px;
 }
 
 .sampleContainer{
- border:1px solid #FFCCCC;
- height:138px !important;
- width:184px !important;	
+    border:1px solid #FFCCCC;
+    height:138px !important;
+    width:184px !important;
 }
 
 .player_minimized {
-  background-color:#CCC;
-  border:thin;
-  -moz-border-radius: 10px;
-  padding: 10px;
-  position: fixed;
-  bottom:15;
-  right:15;
-  width: 20;
-  color: black;
-  font-size: 0.7em;
+    background-color:#CCC;
+    border:thin;
+    -moz-border-radius: 10px;
+    padding: 10px;
+    position: fixed;
+    bottom:15;
+    right:15;
+    width: 20;
+    color: black;
+    font-size: 0.7em;
 }
 
 .activeTranscript {
-  background-color: #dddddd;
+    background-color: #dddddd;
 }
 
 /*  ///////////////////////////////////////////////////////////////////////////////// */
