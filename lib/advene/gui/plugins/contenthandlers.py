@@ -27,7 +27,7 @@ import StringIO
 import advene.core.config as config
 from advene.gui.edit.elements import ContentHandler, TextContentHandler
 from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle, ShapeEditor
-from advene.gui.util import image_from_position, dialog, decode_drop_parameters
+from advene.gui.util import image_from_position, dialog, decode_drop_parameters, get_pixmap_toolbutton
 
 from advene.gui.edit.rules import EditRuleSet, EditQuery
 from advene.rules.elements import RuleSet, SimpleQuery
@@ -310,10 +310,6 @@ class SVGContentHandler (ContentHandler):
         def edit_svg(b):
             vbox.foreach(vbox.remove)
             vbox.add(self.view.widget)
-
-            b=gtk.Button(_("Edit XML"))
-            b.connect('clicked', edit_xml)
-            vbox.pack_start(b, expand=False)
             self.editing_source=False
             vbox.show_all()
             return True
@@ -324,18 +320,21 @@ class SVGContentHandler (ContentHandler):
                                                    controller=self.controller,
                                                    parent=self.parent)
                 self.sourceview.widget=self.sourceview.get_view()
+                b = get_pixmap_toolbutton('xml.png', edit_svg)
+                b.set_tooltip_text(_("Graphical editor"))
+                self.sourceview.toolbar.insert(b, 0)
 
             vbox.foreach(vbox.remove)
             vbox.add(self.sourceview.widget)
-
-            b=gtk.Button(_("Graphical editor"))
-            b.connect('clicked', edit_svg)
-            vbox.pack_start(b, expand=False)
             self.editing_source=True
             vbox.show_all()
             return True
 
-        edit_svg(None)
+        # Insert "View source" button in Shapewidget toolbar
+        b = get_pixmap_toolbutton('xml.png', edit_xml)
+        b.set_tooltip_text(_("Edit XML"))
+        self.view.toolbar.insert(b, 0)
+        edit_svg(b)
         return vbox
 
 class RuleSetContentHandler (ContentHandler):

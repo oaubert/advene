@@ -1676,7 +1676,7 @@ class ShapeEditor:
     def build_widget(self, pixmap_dir):
         vbox=gtk.VBox()
 
-        tb=gtk.Toolbar()
+        tb = self.toolbar = gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
 
         vbox.pack_start(tb, expand=False)

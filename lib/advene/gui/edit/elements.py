@@ -1442,7 +1442,7 @@ class TextContentHandler (ContentHandler):
         vbox=gtk.VBox()
 
         if not compact:
-            tb=gtk.Toolbar()
+            tb = self.toolbar = gtk.Toolbar()
             vbox.toolbar=tb
             tb.set_style(gtk.TOOLBAR_ICONS)
 
