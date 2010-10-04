@@ -1134,7 +1134,7 @@ $.widget("ui.video", {
             $(this).addClass('image-overlay');
 
             $optionPlay=$('<div/>')
-                .attr("class","option-play")
+                .attr("class", 'screenshot-overlay-menu')
                 .appendTo( $(self));
 
             var  $option = $('<img/>')
@@ -1144,7 +1144,7 @@ $.widget("ui.video", {
                     node = $('.screenshot', self).parent();
                     $('.screenshot', self).hide();
                     $('.caption', self).hide();
-                    $('.option-play', self).removeClass('option-play').addClass('option-play-off');
+                    $('.screenshot-overlay-menu', self).removeClass('screenshot-overlay-menu').addClass('screenshot-overlay-player');
                     $(this).parent().advene('player', node.attr('data-video-url'), node.attr('data-begin'), node.attr('data-end'));
                 });
 
@@ -1186,7 +1186,7 @@ $.widget("ui.video", {
                 }, {
                     queue: false
                 });
-                $('.option-play', this).fadeIn(800);
+                $('.screenshot-overlay-menu', this).fadeIn(800);
             },
                           function() {
                               $('.caption', this).stop().animate( {
@@ -1194,13 +1194,13 @@ $.widget("ui.video", {
                               }, {
                                   queue: false
                               });
-                              $('.option-play', this).fadeOut(200);
+                              $('.screenshot-overlay-menu', this).fadeOut(200);
                           });
 
             self.bind( "fragmentclose", function(event, parentC) {
                 $(parentC).find('.screenshot').show();
                 $(parentC).find('.caption').show();
-                $(parentC).find('.option-play-off').removeClass('option-play-off').addClass('option-play');
+                $(parentC).find('.screenshot-overlay-player').removeClass('screenshot-overlay-player').addClass('screenshot-overlay-menu');
                 self.die();
             } );
         },

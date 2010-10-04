@@ -336,13 +336,13 @@
 	font-size: 1em;
 }
 
-.option-play-off {
+.screenshot-overlay-player {
 	display:none;
 }
-.option-play-off img{
+.screenshot-overlay-player img{
 	display:none;
 }
-.option-play {
+.screenshot-overlay-menu {
 	display:none;
 	position:absolute;
 	border:none;
@@ -356,7 +356,7 @@
 	text-align:left;
 	background:url(bg.png) repeat;
 }
-.option-play img{
+.screenshot-overlay-menu img{
 	width:110;
 	height:30;
 	padding:0;
