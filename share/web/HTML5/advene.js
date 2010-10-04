@@ -674,13 +674,15 @@ $.widget("ui.video", {
         this._togglePlayPause();
     },
 
-
     /**
      * @private
      */
     _event_error: function(e) {
         var self = this;
-        var textError="Playback Error";
+        var textError = "Playback Error";
+
+        if (! e.target.error)
+            return;
 
         switch (e.target.error.code) {
         case e.target.error.MEDIA_ERR_ABORTED:
