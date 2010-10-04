@@ -23,12 +23,12 @@ _formatTime = function( seconds ) {
 //  - autoplay: lecture automatique
 //  - loop
 //  - autoBuffer
-//  -volume
+//  - volume
 // ** Options propres à l'API
-//  -vignet: indique si le lecteur est un lecteur vignette (true) ou bien si c'est un lecteur autonome (classe player)
-//  -fragmentPlay: cette option indique si la lecture est sur un fragment délimité ou non. On a vignet=true ---> fragmentPlay=true
-//  -startPoint et endpoint: début et fin du fragment ou de la vidéo
-//  -endFragmentBehaviour: loop, pause, continue
+//  - overlay: indicates wether the player is overlayed over a screenshot, or it is an autonomous player
+//  - fragmentPlay: cette option indique si la lecture est sur un fragment délimité ou non. On a overlay=true ---> fragmentPlay=true
+//  - startPoint et endpoint: début et fin du fragment ou de la vidéo
+//  - endFragmentBehaviour: loop, pause, continue
 $.widget("ui.video", {
     // default options
     options: {
@@ -37,7 +37,7 @@ $.widget("ui.video", {
         loop: false,
         autoBuffer: true,
         volume: .25,
-        vignet: false,
+        overlay: false,
         fragmentPlay: false,
         startPoint: 0,
         endPoint: 0,
@@ -64,7 +64,7 @@ $.widget("ui.video", {
          * @private
          */
         self._container = self.element.parent();
-        if (self.options.vignet)
+        if (self.options.overlay)
             self.options.fragmentPlay = true;
 
         /**
@@ -175,7 +175,7 @@ $.widget("ui.video", {
          * @private
          */
         self._controls = $('<div/>')
-            .addClass(self.options.vignet ? 'ui-corner-all ui-video-control-vign' : 'ui-corner-all ui-video-control')
+            .addClass(self.options.overlay ? 'ui-corner-all ui-video-control-vign' : 'ui-corner-all ui-video-control')
             .prependTo(self._container);
 
         /**
@@ -183,7 +183,7 @@ $.widget("ui.video", {
          * @private
          */
         self._progressDiv = $('<div/>')
-            .addClass(self.options.vignet ? 'ui-corner-all  ui-video-progress-vign' : 'ui-corner-all  ui-video-progress')
+            .addClass(self.options.overlay ? 'ui-corner-all  ui-video-progress-vign' : 'ui-corner-all  ui-video-progress')
             .appendTo(self._controls)
             .hover(
                 function() {
@@ -228,7 +228,7 @@ $.widget("ui.video", {
          * @private
          */
         self._muteButton = $('<div/>')
-            .addClass(self.options.vignet ? 'ui-icon ui-icon-volume-on ui-video-mute-vign' : 'ui-video-mute')
+            .addClass(self.options.overlay ? 'ui-icon ui-icon-volume-on ui-video-mute-vign' : 'ui-video-mute')
             .appendTo(self._controls)
             .bind('click.video', $.proxy(self._mute, self));
 
@@ -237,7 +237,7 @@ $.widget("ui.video", {
          * @private
          */
         self._playButton = $('<div/>')
-            .addClass(self.options.vignet ? 'ui-icon ui-icon-play ui-video-play-vign' : 'ui-video-play')
+            .addClass(self.options.overlay ? 'ui-icon ui-icon-play ui-video-play-vign' : 'ui-video-play')
             .appendTo(self._controls)
             .bind('click.video', $.proxy(self._togglePlayPause, self));
 
@@ -246,7 +246,7 @@ $.widget("ui.video", {
          * @private
          */
         self._stopButton = $('<div/>')
-            .addClass(self.options.vignet ? 'ui-icon ui-icon-stop ui-video-stop-vign' : 'ui-video-stop')
+            .addClass(self.options.overlay ? 'ui-icon ui-icon-stop ui-video-stop-vign' : 'ui-video-stop')
             .appendTo(self._controls)
             .bind('click.video', $.proxy(self._stopfragmentplay, self))
             .bind('click.video', $.proxy(self._stop, self));
@@ -257,7 +257,7 @@ $.widget("ui.video", {
          */
         self._playLoopButton = $('<div/>')
             .appendTo(self._controls)
-            .addClass(self.options.vignet ? 'ui-icon ui-icon-arrowrefresh-1-s ui-video-playLoop-vign' : 'ui-video-playLoop')
+            .addClass(self.options.overlay ? 'ui-icon ui-icon-arrowrefresh-1-s ui-video-playLoop-vign' : 'ui-video-playLoop')
             .bind('click.video', $.proxy(self._tooglePlayLoop, self));
 
 
@@ -266,7 +266,7 @@ $.widget("ui.video", {
          * @private
          */
         self._stopFragmentLoop = $('<div/>')
-            .addClass(self.options.vignet ? 'ui-icon ui-icon-closethick ui-video-fragmentLoop-vign' : 'ui-video-fragmentLoop')
+            .addClass(self.options.overlay ? 'ui-icon ui-icon-closethick ui-video-fragmentLoop-vign' : 'ui-video-fragmentLoop')
             .appendTo(self._controls)
             .hide()
             .bind('click.video', $.proxy(self._stopfragmentplay, self));
@@ -278,7 +278,7 @@ $.widget("ui.video", {
          * @private
          */
         self._volumeSlider = $('<div/>')
-            .addClass(self.options.vignet ? 'ui-video-volume-slider-vign' : 'ui-video-volume-slider')
+            .addClass(self.options.overlay ? 'ui-video-volume-slider-vign' : 'ui-video-volume-slider')
             .appendTo(self._controls)
             .slider({
                 range: 'min',
@@ -309,7 +309,7 @@ $.widget("ui.video", {
          * @private
          */
         self._timeLinerSlider = $('<div/>')
-            .addClass(self.options.vignet ? 'ui-video-timeLiner-slider-vign' : 'ui-video-timeLiner-slider')
+            .addClass(self.options.overlay ? 'ui-video-timeLiner-slider-vign' : 'ui-video-timeLiner-slider')
             .appendTo(self._controls)
             .slider({
                 range: 'min',
@@ -372,7 +372,7 @@ $.widget("ui.video", {
          * @private
          */
         self._stopFragmentButton = $('<div/>')
-            .addClass(self.options.vignet?'ui-icon ui-icon-closethick ui-video-fragment-close-vign':'ui-icon ui-icon-closethick ui-video-fragment-close')
+            .addClass(self.options.overlay ? 'ui-icon ui-icon-closethick ui-video-fragment-close-vign' : 'ui-icon ui-icon-closethick ui-video-fragment-close')
             .appendTo(self._controls)
             .bind('click.video', $.proxy(self._closeFragment,self));
     },
@@ -442,8 +442,8 @@ $.widget("ui.video", {
         var self = this;
         var muted = self.element[0].muted = !self.element[0].muted;
         self._muteButton
-            .toggleClass(self.options.vignet ? 'ui-icon-volume-on' : 'ui-video-mute', !muted)
-            .toggleClass(self.options.vignet ? 'ui-icon-volume-off' : 'ui-video-unmute', muted);
+            .toggleClass(self.options.overlay ? 'ui-icon-volume-on' : 'ui-video-mute', !muted)
+            .toggleClass(self.options.overlay ? 'ui-icon-volume-off' : 'ui-video-unmute', muted);
     },
     /**
      * @private
@@ -582,7 +582,7 @@ $.widget("ui.video", {
         // Pause all other players
         if (self.options.singletonPlayer)
             $("video", $(document)).each( function() { if (this !== self.element[0] && !this.paused && !this.ended) this.pause() } );
-        self._playButton.addClass(self.options.vignet ? 'ui-icon-pause' : 'ui-video-pause').removeClass(self.options.vignet ? 'ui-icon-play' : 'ui-video-play');
+        self._playButton.addClass(self.options.overlay ? 'ui-icon-pause' : 'ui-video-pause').removeClass(self.options.overlay ? 'ui-icon-play' : 'ui-video-play');
     },
 
     /**
@@ -590,7 +590,7 @@ $.widget("ui.video", {
      */
     _event_pause: function() {
         var self = this;
-        self._playButton.removeClass(self.options.vignet ? 'ui-icon-pause' : 'ui-video-pause').addClass(self.options.vignet ? 'ui-icon-play' : 'ui-video-play');
+        self._playButton.removeClass(self.options.overlay ? 'ui-icon-pause' : 'ui-video-pause').addClass(self.options.overlay ? 'ui-icon-play' : 'ui-video-play');
     },
 
     /**
@@ -608,7 +608,7 @@ $.widget("ui.video", {
                 } else if (currentTime > self.options.endPoint) {
                     switch(self.options.endFragmentBehaviour) {
                     case "continue":
-                        if (self.options.vignet) {
+                        if (self.options.overlay) {
                             self.element[0].currentTime = self.options.startPoint;
                             break;
                         }
@@ -1246,7 +1246,7 @@ $.widget("ui.video", {
                     .prependTo(self._videoContainer);
 
                 $(self._video).video({
-                                 'vignet': 'true',
+                                 'overlay': 'true',
                                  'startPoint': self.options.start_point,
                                  'endPoint': self.options.end_point,
                                  'poster':'resources/HTML5/advene_logo.png',
