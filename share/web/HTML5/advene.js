@@ -412,6 +412,7 @@ $.widget("ui.video", {
     _stop: function() {
         var self = this;
         self.stop();
+        $(".activeTranscript").each( $(this).removeClass("activeTranscript") );
     },
     _tooglePlayLoop: function() {
         var self = this;
