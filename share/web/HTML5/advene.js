@@ -1242,7 +1242,7 @@ $.widget("ui.video", {
                                     'poster':'resources/HTML5/advene_logo.png'
                                 }
                                )
-                    .css('position','fixed')
+                    .css('position', 'absolute')
                     .prependTo(self._videoContainer);
 
                 $(self._video).video({
