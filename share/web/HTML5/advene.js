@@ -1242,7 +1242,7 @@ $.widget("ui.video", {
                                 {
                                     'class': ' ui-corner-all sampleContainer',
                                     'src': videoURL,
-                                    'poster':'resources/html5/advene_logo.png'
+                                    'poster':'resources/HTML5/advene_logo.png'
                                 }
                                )
                     .css('position','fixed')
@@ -1252,7 +1252,7 @@ $.widget("ui.video", {
                                  'vignet': 'true',
                                  'startPoint': self.options.start_point,
                                  'endPoint': self.options.end_point,
-                                 'poster':'advene_logo.png',
+                                 'poster':'resources/HTML5/advene_logo.png',
                                  'autoPlay': true
                                  });
 
