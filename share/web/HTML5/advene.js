@@ -1044,7 +1044,7 @@ $.widget("ui.video", {
     };
 
     $.ui.player.prototype.videoObject = null;
-    $.ui.player.prototype.options.title = 'ADVENE PLAYER';
+    $.ui.player.prototype.options.title = 'Advene player';
     $.ui.player.prototype.options.endFragmentBehaviour = "continue";
     $.ui.player.prototype.options.position = "right";
 
@@ -1248,21 +1248,19 @@ $.widget("ui.video", {
                                 {
                                     'class': ' ui-corner-all sampleContainer',
                                     'src': videoURL,
-                                    'poster':'resources/html5/adv.png'
+                                    'poster':'resources/html5/advene_logo.png'
                                 }
                                )
-                    .css('position','absolute')
+                    .css('position','fixed')
                     .prependTo(self._videoContainer);
 
                 $(self._video).video({
-                                 'vignet':'true',
-                                 'startPoint':self.options.start_point,
-                                 'endPoint':self.options.end_point,
-                                 'poster':'adv.png',
-                                 'autoPlay':true
+                                 'vignet': 'true',
+                                 'startPoint': self.options.start_point,
+                                 'endPoint': self.options.end_point,
+                                 'poster':'advene_logo.png',
+                                 'autoPlay': true
                                  });
-
-
 
                 parentC = $(self).parent();
                 parentC.append(self._videoContainer);
