@@ -875,7 +875,7 @@ $.widget("ui.video", {
                     to: ".player_container",
                     className: 'ui-effects-transfer'
                 };
-                self.uiDialog.show();
+                uiPlayer.show();
                 //('.player_container').player('open');
                 //self.minplayer.css('top','0');
                 self.minplayer.hide("transfer", options, 1000, function(){} );
@@ -964,7 +964,7 @@ $.widget("ui.video", {
             .blur(function() { $(this).removeClass('ui-state-focus'); })
             .mousedown(function(ev) { ev.stopPropagation(); })
             .click(function(event) {
-                self.uiDialog.hide();
+                uiPlayer.hide();
                 self.minplayer.show();
                 return false;
             })
@@ -991,7 +991,7 @@ $.widget("ui.video", {
             .click(function(event) {
                 $(this).hide();
                 uiPlayer.css('position','fixed');
-                self.uiDialog.find('.ui-dialog-titlebar-nofixonscreen ',this).show();
+                uiPlayer.find('.ui-dialog-titlebar-nofixonscreen ',this).show();
                 return false;
             })
             .appendTo(uiPlayerTitlebar);
@@ -1016,7 +1016,7 @@ $.widget("ui.video", {
         .click(function(event) {
             $(this).hide();
             uiPlayer.css('position','absolute');
-            self.uiDialog.find('.ui-dialog-titlebar-fixonscreen ').show();
+            uiPlayer.find('.ui-dialog-titlebar-fixonscreen ').show();
             return false;
         })
             .appendTo(uiPlayerTitlebar)
