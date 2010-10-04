@@ -431,7 +431,7 @@ $.widget("ui.video", {
         self.options.fragmentPlay=false;
         self._stopFragmentLoop.hide();
         self._container.parent().find(".ui-dialog-fragment-title").hide();
-        self._container.parent().find(".ui-dialog-fragment-title").text("Fragment PLAY");
+        self._container.parent().find(".ui-dialog-fragment-title").text("Fragment play");
     },
     /**
      * @private
@@ -439,9 +439,9 @@ $.widget("ui.video", {
     _mute: function() {
         var self = this;
         var muted = self.element[0].muted = !self.element[0].muted;
-        self._muteButton.toggleClass(self.options.vignet?'ui-icon-volume-on':'ui-video-mute',!muted).toggleClass(self.options.vignet?'ui-icon-volume-off':'ui-video-unmute',muted);
-
-
+        self._muteButton
+            .toggleClass(self.options.vignet ? 'ui-icon-volume-on' : 'ui-video-mute', !muted)
+            .toggleClass(self.options.vignet ? 'ui-icon-volume-off' : 'ui-video-unmute', muted);
     },
     /**
      * @private
@@ -459,8 +459,7 @@ $.widget("ui.video", {
     _showControls: function(){
         var self = this;
         self._controls
-            .stop(true,true)
-
+            .stop(true, true)
             .fadeIn(500);
     },
     /**
@@ -494,7 +493,6 @@ $.widget("ui.video", {
             var _waitingContainerWidth = self._waitingContainer.width();
             self._waitingId = setInterval(function() {
                 var cur_left = Math.abs(self._waiting.position().left);
-
                 self._waiting.css({'left': -((cur_left + _waitingContainerWidth) % waitingWidth) });
 
             }, 50);
@@ -841,6 +839,7 @@ $.widget("ui.video", {
 
         options.closeOnEscape = false;
         _init.apply(this, arguments);
+
         uiPlayer=self.uiDialog;
 
         ////////////// CREATE MINIMIZED ICON FOR PLAYER
@@ -947,7 +946,7 @@ $.widget("ui.video", {
 
         ///////////// TITRE DU FRAGMENT
         uiPlayerFragmentTitle = $('<strong/>')
-            .text("Fragment PLAY")
+            .text("Fragment play")
             .addClass("ui-dialog-fragment-title")
             .hide()
             .appendTo(uiPlayer);
