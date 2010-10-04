@@ -1097,25 +1097,20 @@ $.widget("ui.video", {
             $('.player_container').player( playerOptions );
         },
 
-        'overlay': function(mutex) {
+        'overlay': function() {
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////// SCREENSHOT WIDGET //////////////////////////////////////////////////////////////
             // L'outil ScreenshotOverlay définit le comportement des images vignettes dans le cadre de l'application. Il définit un certain nombre de traitements sur les objets image de la classe screenshot.
             // L'outil met les frères et soeurs, au sens DOM, de l'objet screenshot dans un conteneur CAPTION, le rendant tout le contenu disponible uniquement au survol de l'objet screenshot.
             // L'outil définit au dessous de l'objet screenshot les ancres permettant de lancer es lecteurs appropriés du fragment référencé.
 
-      /////////// overlay(mutex): le paramètre facultatif mutex permet de spécifier l'exclusion mutuelle entre les lecteurs définis sur les screenshots.
             var options = {
                 border_color : '#666',
                 overlay_color : '#000',
                 overlay_text_color : '#666',
-                mutualExclusion: true
-            };  /////////// par défault, un seul player vignette est présenté.
+            };
 
             var self = this;
-
-            if (mutex !== undefined)
-                options.mutualExclusion = mutex;
 
             var fragmentTitle = $('.screenshot', this).siblings("strong:first").text();
 
@@ -1141,9 +1136,6 @@ $.widget("ui.video", {
                 .attr('src', './resources/HTML5/view_here.png')
                 .appendTo($optionPlay)
                 .click( function() {
-                    /////////// Exclusion Mutuelle
-                    if(options.mutualExclusion) $('.video-container').trigger("destroySamplePlayer");
-
                     node = $('.screenshot', self).parent();
                     $('.screenshot', self).hide();
                     $('.caption', self).hide();
