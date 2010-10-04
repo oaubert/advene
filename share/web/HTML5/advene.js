@@ -603,33 +603,33 @@ $.widget("ui.video", {
             var duration = self.element[0].duration;
             var currentTime = self.element[0].currentTime;
 
-            // FIXME: Bug here ?? Or the if can be factorized
-            if ((self.options.fragmentPlay) || (self.options.vignet))
-                if (currentTime < self.options.startPoint)
-                    self.element[0].currentTime=self.options.startPoint;
-
-            if (currentTime > self.options.endPoint)
-                switch(self.options.endFragmentBehaviour) {
-                case "continue":
-                    if (self.options.vignet) {
-                        self.element[0].currentTime = self.options.startPoint;
-                        break;
-                    }
-                    else {
+            if (self.options.fragmentPlay) {
+                if (currentTime < self.options.startPoint) {
+                    self.element[0].currentTime = self.options.startPoint
+                } else if (currentTime > self.options.endPoint) {
+                    switch(self.options.endFragmentBehaviour) {
+                    case "continue":
+                        if (self.options.vignet) {
+                            self.element[0].currentTime = self.options.startPoint;
+                            break;
+                        }
+                        else {
+                            self._stopfragmentplay();
+                            break;
+                        }
+                    case "pause":
                         self._stopfragmentplay();
+                        self.pause();
                         break;
+                    case "stop":
+                        self._stopfragmentplay();
+                        self.stop();
+                        break;
+                    default: // 'loop' is the default behaviour
+                        self.setPlayingTime(self.options.startPoint);
                     }
-                case "pause":
-                    self._stopfragmentplay();
-                    self.pause();
-                    break;
-                case "stop":
-                    self._stopfragmentplay();
-                    self.stop();
-                    break;
-                default: // 'loop' is the default behaviour
-                    self.setPlayingTime(self.options.startPoint);
                 }
+            }
 
             // Highlight/unhighlight elements by using the .activeTranscript class
             if (self.options.transcriptHighlight)
