@@ -841,6 +841,8 @@ $.widget("ui.video", {
         _init.apply(this, arguments);
 
         uiPlayer=self.uiDialog;
+        // Default behaviour: fixed position
+        uiPlayer.css('position', 'fixed');
 
         ////////////// CREATE MINIMIZED ICON FOR PLAYER
         self.minplayer=$('<img/>',
