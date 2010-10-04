@@ -4329,6 +4329,8 @@ class AdveneGUI(object):
         def cb(val, msg):
             if val > 0 and val <= 1.0:
                 pb.set_fraction(val)
+            if len(msg) > 80:
+                msg = msg[:36] + "(...)" + msg[-36:]
             pb.set_text(msg)
             while gtk.events_pending():
                 gtk.main_iteration()
