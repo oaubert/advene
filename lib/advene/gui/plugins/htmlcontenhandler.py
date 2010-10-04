@@ -630,10 +630,10 @@ class HTMLContentHandler (ContentHandler):
                 self.sourceview=TextContentHandler(element=self.element,
                                                    controller=self.controller,
                                                    parent=self.parent)
-                self.sourceview.widget=self.sourceview.get_view()
+                self.sourceview.widget = self.sourceview.get_view()
                 b=get_pixmap_toolbutton('xml.png', edit_wysiwyg)
                 b.set_tooltip_text(_("WYSIWYG editor"))
-                self.sourceview.widget.toolbar.insert(b, 0)
+                self.sourceview.toolbar.insert(b, 0)
 
             vbox.foreach(vbox.remove)
             vbox.add(self.sourceview.widget)
@@ -645,10 +645,9 @@ class HTMLContentHandler (ContentHandler):
         b.set_tooltip_text(_("Edit HTML source"))
         tb.insert(b, 0)
 
-        # FIXME: this test should be activated for the release
-        #if config.data.preferences['expert-mode']:
-        #    edit_source()
-        #else:
-        #    edit_wysiwyg()
-        edit_wysiwyg()
+        if config.data.preferences['prefer-wysiwyg']:
+            edit_wysiwyg()
+        else:
+            edit_source()
+
         return vbox

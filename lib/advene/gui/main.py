@@ -3833,7 +3833,8 @@ class AdveneGUI(object):
                         'tts-language', 'tts-encoding', 'tts-engine',
                         'record-actions', 'popup-destination',
                         'timestamp-format', 
-                        'abbreviation-mode', 'text-abbreviations', 'completion-mode' )
+                        'abbreviation-mode', 'text-abbreviations', 'completion-mode',
+                        'prefer-wysiwyg' )
         # Direct options needing a restart to be taken into account.
         restart_needed_options = ('tts-engine', 'language')
 
@@ -3873,6 +3874,7 @@ class AdveneGUI(object):
                 })
         ew.add_checkbox(_("Record activity trace"), "record-actions", _("Record activity trace"))
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
+        ew.add_checkbox(_("WYSIWYG"), "prefer-wysiwyg", _("Use WYSIWYG editors when possible (HTML, SVG)"))
 
         ew.add_option(_("Open popups"), 'popup-destination',
                       _("Where should we open adhoc views?"),

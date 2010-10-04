@@ -307,14 +307,14 @@ class SVGContentHandler (ContentHandler):
                                               + config.data.drag_type['uri-list'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
-        def edit_svg(b):
+        def edit_svg(b=None):
             vbox.foreach(vbox.remove)
             vbox.add(self.view.widget)
             self.editing_source=False
             vbox.show_all()
             return True
 
-        def edit_xml(b):
+        def edit_xml(b=None):
             if self.sourceview is None:
                 self.sourceview=TextContentHandler(element=self.element,
                                                    controller=self.controller,
@@ -334,7 +334,11 @@ class SVGContentHandler (ContentHandler):
         b = get_pixmap_toolbutton('xml.png', edit_xml)
         b.set_tooltip_text(_("Edit XML"))
         self.view.toolbar.insert(b, 0)
-        edit_svg(b)
+
+        if config.data.preferences['prefer-wysiwyg']:
+            edit_svg()
+        else:
+            edit_xml()
         return vbox
 
 class RuleSetContentHandler (ContentHandler):

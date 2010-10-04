@@ -294,6 +294,7 @@ class Config(object):
             # Automatically start the player when loading a media file
             # (either directly or through a package)
             'player-autostart': True,
+            'prefer-wysiwyg': True,
             }
 
         # Player options
