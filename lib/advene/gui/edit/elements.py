@@ -266,7 +266,7 @@ class EditElementPopup (AdhocView):
 
     def key_pressed_cb (self, widget=None, event=None):
         # Process player shortcuts
-        if self.controller.gui and self.controller.gui.process_player_shortcuts(widget, event):
+        if config.data.preferences['player-shortcuts-in-edit-windows'] and self.controller.gui and self.controller.gui.process_player_shortcuts(widget, event):
             return True
 
         if event.keyval in self.key_cb:
@@ -1586,9 +1586,6 @@ class GenericContentHandler (ContentHandler):
         return True
 
     def key_pressed_cb (self, win, event):
-        # Process player shortcuts
-        if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
-            return True
         if event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.s:
                 self.content_save()

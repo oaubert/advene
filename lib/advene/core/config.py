@@ -295,6 +295,7 @@ class Config(object):
             # (either directly or through a package)
             'player-autostart': True,
             'prefer-wysiwyg': True,
+            'player-shortcuts-in-edit-windows': True,
             }
 
         # Player options
