@@ -416,11 +416,11 @@ $.widget("ui.video", {
     _tooglePlayLoop: function() {
         var self = this;
         if (self.element[0].loop) {
-                self.element[0].loop=false;
-        self._playLoopButton.removeClass('ui-video-noplayLoop').addClass('ui-video-playLoop');
+            self.element[0].loop=false;
+            self._playLoopButton.removeClass('ui-video-noplayLoop').addClass('ui-video-playLoop');
         } else {
             self.element[0].loop=true;
-        self._playLoopButton.addClass('ui-video-noplayLoop').removeClass('ui-video-playLoop');
+            self._playLoopButton.addClass('ui-video-noplayLoop').removeClass('ui-video-playLoop');
         }
     },
     /**
@@ -586,9 +586,6 @@ $.widget("ui.video", {
         self._playButton.removeClass(self.options.vignet ? 'ui-icon-pause' : 'ui-video-pause').addClass(self.options.vignet ? 'ui-icon-play' : 'ui-video-play');
     },
 
-    /**
-     * @private
-     */
     /**
      * @private
      */
@@ -1054,7 +1051,6 @@ $.widget("ui.video", {
 (function($) {
 
     // See http://docs.jquery.com/Plugins/Authoring#Plugin_Methods for the pattern used here.
-    $.AutoFragmentID = 0;
     var methods = {
         'init': function(options) {
             // FIXME: pass appropriate options (player options, etc)
