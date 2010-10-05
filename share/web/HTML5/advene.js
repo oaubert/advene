@@ -749,13 +749,6 @@ $.widget("ui.video", {
                 $(content).css({
                     'height': hauteur
                 });
-                $(control).position({
-                    my: "top",
-                    at: "top",
-                    of: uiPlayer,
-                    offset: hauteur - 30,
-                    collision: "none"
-                });
                 if (uiPlayer.find('.ui-dialog-titlebar-fixonscreen', this).is(':hidden')) {
                     uiPlayer.css('position', 'fixed');
                 }
