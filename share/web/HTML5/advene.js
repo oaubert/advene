@@ -1,10 +1,7 @@
 /*
-L'API consiste en quatre widgets principales permettant de définir des vignettes, players vignettes et players autonomes faisant appel aux services de html5 video
-*/
-
-/**
- * @private
+  The Advene HTML API defines 2 widgets (ui.player and ui.video) and 3 methods: init(), overlay(), player()
  */
+
 _formatTime = function( seconds ) {
     var h = parseInt(seconds / 3660);
     var m = parseInt((seconds / 60)-(h*60));
@@ -18,17 +15,17 @@ _formatTime = function( seconds ) {
 
 
 // L'outil video prend en charge les spécifications html5 video pour les besoins de l'API. Lors d'une instanciation d'une balise video en une instance video(), les options suivantes peuvent être incluses:
-// ** Options standard
+// ** Standard options
 //  - VideoURL
-//  - autoplay: lecture automatique
+//  - autoplay: automatically start playing
 //  - loop
 //  - autoBuffer
 //  - volume
-// ** Options propres à l'API
-//  - overlay: indicates wether the player is overlayed over a screenshot, or it is an autonomous player
-//  - fragmentPlay: cette option indique si la lecture est sur un fragment délimité ou non. On a overlay=true ---> fragmentPlay=true
-//  - startPoint et endpoint: début et fin du fragment ou de la vidéo
-//  - endFragmentBehaviour: loop, pause, continue
+// ** Specific options
+//  - overlay: indicates whether the player is overlayed over a screenshot, or it is an autonomous player
+//  - fragmentPlay: indicate whether we are playing a fragment (with begin and end times). On a overlay=true ---> fragmentPlay=true
+//  - startPoint et endpoint: begin and end of the fragment or the video
+//  - endFragmentBehaviour: loop, pause, stop, continue.
 $.widget("ui.video", {
     // default options
     options: {
@@ -51,7 +48,6 @@ $.widget("ui.video", {
     _create: function() {
         var self = this;
 
-        //      Paramètrage avec les options nécessaires et celles spécifiées lors de l'instanciation
         var videoOptions = {
             autoplay: self.options.autoPlay,
             controls: false,
@@ -59,18 +55,10 @@ $.widget("ui.video", {
             autobuffer: self.options.autoBuffer
         };
 
-        /**
-         * @type {!Object}
-         * @private
-         */
         self._container = self.element.parent();
         if (self.options.overlay)
             self.options.fragmentPlay = true;
 
-        /**
-         * @type {!Object}
-         * @private
-         */
         self._oldVideooptions = {};
 
         $.each( videoOptions , function( key, value) {
@@ -85,7 +73,7 @@ $.widget("ui.video", {
         }
               );
 
-        //      Gestion des événements du playback vidéo
+        //  Video playback events
         var videoEvents = [
             "abort",
             "canplay",
@@ -133,26 +121,15 @@ $.widget("ui.video", {
         }
               );
 
-        //  Instanciation de la barre de contrôle et définition de son comportement (apparition lors du survol de la vidéo)
+        //  Control bar instanciation
         self._createControls();
         self._container.hover(
             $.proxy(self._showControls, self),
             $.proxy(self._hideControls, self)
         );
 
-        //      Indicatif d'attente
-        /**
-         * @type {!Object}
-         * @private
-         */
         self._waitingContainer = $('<div/>', {'class': 'ui-video-waiting-container'});
-
-        /**
-         * @type {!Object}
-         * @private
-         */
         self._waiting = $('<div/>', {'class': 'ui-video-waiting'}).appendTo(self._waitingContainer);
-
         self._controls
             .fadeIn(500)
             .delay(100)
@@ -165,23 +142,14 @@ $.widget("ui.video", {
             self.play();
         }
     },
-    //  Fonction privée de création de contrôles
+    //  Controls creation
     _createControls: function() {
         var self = this;
 
-
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._controls = $('<div/>')
             .addClass(self.options.overlay ? 'ui-corner-all ui-video-control-vign' : 'ui-corner-all ui-video-control')
             .prependTo(self._container);
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._progressDiv = $('<div/>')
             .addClass(self.options.overlay ? 'ui-corner-all  ui-video-progress-vign' : 'ui-corner-all  ui-video-progress')
             .appendTo(self._controls)
@@ -193,10 +161,6 @@ $.widget("ui.video", {
                 }
             );
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._currentProgressSpan = $('<span/>',
                                       {
                                           'class': 'ui-video-current-progress', 'text': '00:00'
@@ -212,10 +176,6 @@ $.widget("ui.video", {
          )
             .appendTo(self._progressDiv);
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._durationSpan = $('<span/>',
                                {
                                    'class': 'ui-video-length', 'text': '00:00'
@@ -223,60 +183,33 @@ $.widget("ui.video", {
                               )
             .appendTo(self._progressDiv);
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._muteButton = $('<div/>')
             .addClass(self.options.overlay ? 'ui-icon ui-icon-volume-on ui-video-mute-vign' : 'ui-video-mute')
             .appendTo(self._controls)
             .bind('click.video', $.proxy(self._mute, self));
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._playButton = $('<div/>')
             .addClass(self.options.overlay ? 'ui-icon ui-icon-play ui-video-play-vign' : 'ui-video-play')
             .appendTo(self._controls)
             .bind('click.video', $.proxy(self._togglePlayPause, self));
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._stopButton = $('<div/>')
             .addClass(self.options.overlay ? 'ui-icon ui-icon-stop ui-video-stop-vign' : 'ui-video-stop')
             .appendTo(self._controls)
             .bind('click.video', $.proxy(self._stopfragmentplay, self))
             .bind('click.video', $.proxy(self._stop, self));
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._playLoopButton = $('<div/>')
             .appendTo(self._controls)
             .addClass(self.options.overlay ? 'ui-icon ui-icon-arrowrefresh-1-s ui-video-playLoop-vign' : 'ui-video-playLoop')
             .bind('click.video', $.proxy(self._tooglePlayLoop, self));
 
-
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._stopFragmentLoop = $('<div/>')
             .addClass(self.options.overlay ? 'ui-icon ui-icon-closethick ui-video-fragmentLoop-vign' : 'ui-video-fragmentLoop')
             .appendTo(self._controls)
             .hide()
             .bind('click.video', $.proxy(self._stopfragmentplay, self));
 
-
-
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._volumeSlider = $('<div/>')
             .addClass(self.options.overlay ? 'ui-video-volume-slider-vign' : 'ui-video-volume-slider')
             .appendTo(self._controls)
@@ -293,10 +226,6 @@ $.widget("ui.video", {
             }
                    );
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._timeLinerSliderHover =  $('<div/>',
                                         {
                                             'class': 'ui-widget-content ui-corner-all ui-video-timeLiner-slider-hover'
@@ -304,10 +233,6 @@ $.widget("ui.video", {
                                        )
             .hide();
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._timeLinerSlider = $('<div/>')
             .addClass(self.options.overlay ? 'ui-video-timeLiner-slider-vign' : 'ui-video-timeLiner-slider')
             .appendTo(self._controls)
@@ -351,34 +276,19 @@ $.widget("ui.video", {
 
         self._timeLinerSliderHover.appendTo(self._timeLinerSlider);
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._timeLinerSliderAbsoluteWidth = self._timeLinerSlider.width();
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._bufferStatus = $('<div/>',
                                {
                                    'class': 'ui-video-buffer-status ui-corner-all'
                                }
                               ).appendTo( self._timeLinerSlider );
 
-        /**
-         * @type {!jQuery}
-         * @private
-         */
         self._stopFragmentButton = $('<div/>')
             .addClass(self.options.overlay ? 'ui-icon ui-icon-closethick ui-video-fragment-close-vign' : 'ui-icon ui-icon-closethick ui-video-fragment-close')
             .appendTo(self._controls)
             .bind('click.video', $.proxy(self._closeFragment,self));
     },
-    /**
-     * @private
-     */
     _timeLinerHoverUpdate: function( elem, value ) {
         var self = this;
         var duration = self.element[0].duration;
@@ -396,9 +306,6 @@ $.widget("ui.video", {
 
 
     },
-    /**
-     * @private
-     */
     _togglePlayPause: function() {
         var self = this;
         if( self.element[0].paused ) {
@@ -407,9 +314,6 @@ $.widget("ui.video", {
             self.pause();
         }
     },
-    /**
-     * @private
-     */
     _stop: function() {
         var self = this;
         self.stop();
@@ -425,9 +329,6 @@ $.widget("ui.video", {
             self._playLoopButton.addClass('ui-video-noplayLoop').removeClass('ui-video-playLoop');
         }
     },
-    /**
-     * @private
-     */
     _stopfragmentplay: function() {
         var self = this;
         self.options.fragmentPlay=false;
@@ -435,9 +336,6 @@ $.widget("ui.video", {
         self._container.parent().find(".ui-dialog-fragment-title").hide();
         self._container.parent().find(".ui-dialog-fragment-title").text("Fragment play");
     },
-    /**
-     * @private
-     */
     _mute: function() {
         var self = this;
         var muted = self.element[0].muted = !self.element[0].muted;
@@ -445,9 +343,6 @@ $.widget("ui.video", {
             .toggleClass(self.options.overlay ? 'ui-icon-volume-on' : 'ui-video-mute', !muted)
             .toggleClass(self.options.overlay ? 'ui-icon-volume-off' : 'ui-video-unmute', muted);
     },
-    /**
-     * @private
-     */
     _hideControls: function() {
         var self = this;
         self._controls
@@ -455,18 +350,12 @@ $.widget("ui.video", {
             .delay(100)
             .fadeOut(500);
     },
-    /**
-     * @private
-     */
     _showControls: function(){
         var self = this;
         self._controls
             .stop(true, true)
             .fadeIn(500);
     },
-    /**
-     * @private
-     */
     _hideWaiting: function(){
         var self = this;
         if( self._waitingId ) {
@@ -475,9 +364,6 @@ $.widget("ui.video", {
             self._waitingContainer.fadeOut('fast').remove();
         }
     },
-    /**
-     * @private
-     */
     _showWaiting: function(){
         var self = this;
         if( ! self._waitingId ) {
@@ -500,19 +386,12 @@ $.widget("ui.video", {
             }, 50);
         }
     },
-
-    /**
-     * @private
-     */
     _closeFragment: function() {
         var self = this;
         self._container.parent().find('.video-container:first').trigger("destroySamplePlayer");
     },
 
-    // Events
-    /**
-     * @private
-     */
+    // Event handling
     _event_progress: function(e) {
         var self = this;
         var lengthComputable = e.originalEvent.lengthComputable,
@@ -524,58 +403,34 @@ $.widget("ui.video", {
             this._bufferStatus.width(Math.max(fraction * self._timeLinerSliderAbsoluteWidth));
         }
     },
-    /**
-     * @private
-     */
     _event_seeked: function() {
         var self = this;
         self._hideWaiting();
     },
-    /**
-     * @private
-     */
     _event_canplay: function() {
         var self = this;
         self._hideWaiting();
     },
-    /**
-     * @private
-     */
     _event_loadstart: function() {
         var self = this;
         self._showWaiting();
     },
-    /**
-     * @private
-     */
     _event_durationchange: function() {
         var self = this;
         self._showWaiting();
     },
-    /**
-     * @private
-     */
     _event_seeking: function() {
         var self = this;
         self._showWaiting();
     },
-    /**
-     * @private
-     */
     _event_waiting: function() {
         var self = this;
         self._showWaiting();
     },
-    /**
-     * @private
-     */
     _event_loadedmetadata: function() {
         var self = this;
         self._durationSpan.text(_formatTime(self.element[0].duration));
     },
-    /**
-     * @private
-     */
     _event_play: function() {
         var self = this;
 
@@ -584,18 +439,10 @@ $.widget("ui.video", {
             $("video", $(document)).each( function() { if (this !== self.element[0] && !this.paused && !this.ended) this.pause() } );
         self._playButton.addClass(self.options.overlay ? 'ui-icon-pause' : 'ui-video-pause').removeClass(self.options.overlay ? 'ui-icon-play' : 'ui-video-play');
     },
-
-    /**
-     * @private
-     */
     _event_pause: function() {
         var self = this;
         self._playButton.removeClass(self.options.overlay ? 'ui-icon-pause' : 'ui-video-pause').addClass(self.options.overlay ? 'ui-icon-play' : 'ui-video-play');
     },
-
-    /**
-     * @private
-     */
     _event_timeupdate: function() {
         var self = this;
         if( ! self.element[0].seeking ) {
@@ -653,11 +500,6 @@ $.widget("ui.video", {
 
         }
     },
-
-
-    /**
-     * @private
-     */
     _event_resize: function() {
         var self = this;
         alert('_event_resize');
@@ -673,17 +515,10 @@ $.widget("ui.video", {
         self._container.height( self.element.outerHeight(true) );
     },
 
-
-    /**
-     * @private
-     */
     _event_click: function() {
         this._togglePlayPause();
     },
 
-    /**
-     * @private
-     */
     _event_error: function(e) {
         var self = this;
         var textError = "Playback Error";
@@ -711,6 +546,7 @@ $.widget("ui.video", {
         self._playbackErrorText.text(textError);
         self._playbackErrorText.show();
     },
+
     _wait: function(t) {
         var date = new Date();
         var curDate = null;
@@ -811,10 +647,14 @@ $.widget("ui.video", {
     }
 });
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// MAIN PLAYER WIDGET ////////////////////////////////////////////////////////////
-// L'outil player définit un lecteur html5 video. Il instancie un objet video() en lui définissant un conteneur indépendant. Le conteneur lui-même est dérivé de ui.dialog de jquery auquel un certain nombre de fonctions ont été greffées
-// pour le compte de l'application
+/**
+ * Main player widget
+ * 
+ * The "player" widget defines a HTML5 video player. It instanciates a
+ * video() object by specifying an independant container. The
+ * container itself is derived from jqueryui.dialog, with some
+ * additional features.
+ */
 (function($) {
     player=$.extend({}, $.ui.dialog.prototype);
     $.widget("ui.player", $.ui.dialog, player);
@@ -832,7 +672,7 @@ $.widget("ui.video", {
         // Default behaviour: fixed position
         uiPlayer.css('position', 'fixed');
 
-        ////////////// CREATE MINIMIZED ICON FOR PLAYER
+        /* Minimized icon */
         self.minplayer=$('<img/>',
                          {
                              'class': ' ui-corner-all player_minimized',
@@ -872,10 +712,6 @@ $.widget("ui.video", {
                 self.minplayer.hide();
                 return false;
             })
-
-        ///////////////////////////////////////////////////////
-
-
 
         uiPlayer
             .bind('dragstop', function(event, ui) {
@@ -934,15 +770,14 @@ $.widget("ui.video", {
 
         uiPlayerTitlebar=uiPlayer.find('.ui-dialog-titlebar ', this);
 
-        ///////////// TITRE DU FRAGMENT
+        // Fragment title
         uiPlayerFragmentTitle = $('<strong/>')
             .text("Fragment play")
             .addClass("ui-dialog-fragment-title")
             .hide()
             .appendTo(uiPlayer);
 
-        /////////////////////////////// AJOUT DE FONCTIONS A L'INTERFACE
-        //  Fonction de minimisation en icone
+        //  Minimisation icon
         uiPlayerTitlebarToggle = $('<a href="#"/>')
             .addClass('ui-dialog-titlebar-toggle ' + 'ui-corner-all')
             .attr('role', 'button')
@@ -966,7 +801,7 @@ $.widget("ui.video", {
             .attr('title','Minimize Player')
             .appendTo(uiPlayerTitlebarToggle);
 
-        //  Fonction de fixation sur la page --> le player ne peut être déplacé à la souris
+        // Thumbtack the player on the window (it will scroll with the content)
         uiPlayerTitlebarFixonScreen = $('<a href="#"/>')
             .addClass('ui-dialog-titlebar-fixonscreen ' +'ui-corner-all')
             .attr('role', 'button')
@@ -993,7 +828,7 @@ $.widget("ui.video", {
             .attr('title','Fix Player On Screen (fixed)')
             .appendTo(uiPlayerTitlebarFixonScreen);
 
-        //  Fonction de non fixation sur la page --> le player peut être désormais déplacé à la souris
+        // Do not thumbtack the player on the window (it will not scroll with the content)
         uiPlayerTitlebarNoFixonScreen = $('<a href="#"/>')
             .addClass('ui-dialog-titlebar-nofixonscreen ' +'ui-corner-all')
             .attr('role', 'button')
@@ -1019,9 +854,7 @@ $.widget("ui.video", {
             .attr('title','Fix Player on its Page (absolute)')
             .appendTo(uiPlayerTitlebarNoFixonScreen);
 
-
-
-        //////////////////////////////////////////////
+        // Control function
         self.fragmentPlay = function(debut, fin, title, endFragBehav) {
             videoObject.video('fragmentPlay', debut, fin, self.options.endFragmentBehaviour);
             uiPlayer.find(".ui-dialog-fragment-title").show();
@@ -1104,12 +937,9 @@ $.widget("ui.video", {
         },
 
         'overlay': function() {
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////// SCREENSHOT WIDGET //////////////////////////////////////////////////////////////
-            // L'outil ScreenshotOverlay définit le comportement des images vignettes dans le cadre de l'application. Il définit un certain nombre de traitements sur les objets image de la classe screenshot.
-            // L'outil met les frères et soeurs, au sens DOM, de l'objet screenshot dans un conteneur CAPTION, le rendant tout le contenu disponible uniquement au survol de l'objet screenshot.
-            // L'outil définit au dessous de l'objet screenshot les ancres permettant de lancer es lecteurs appropriés du fragment référencé.
-
+            // overlay plugin.
+            // The overlay function transforms MediaFragment-type links into calls to the video() object API.
+            // On elements of class "screenshot", it overlays a menu that proposes to launch the player either embedded in the document, or as main player.
             var options = {
                 border_color : '#666',
                 overlay_color : '#000',
@@ -1207,9 +1037,7 @@ $.widget("ui.video", {
         },
 
         'player': function(videoURL, startx, endx) {
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////// SAMPLE PLAYER WIDGET ////////////////////////////////////////////////////////
-            // L'outil player définit un lecteur html5 video vignette. Il instancie un objet video() en lui définissant un conteneur vignette.
+            // The player tool defines a screenshot-overlayed player
             var self = this;
             self.options = {
                 start_point: 0,
