@@ -984,7 +984,8 @@ $.widget("ui.video", {
                 uiPlayer.find('.ui-dialog-titlebar-nofixonscreen ',this).show();
                 return false;
             })
-            .appendTo(uiPlayerTitlebar);
+            .appendTo(uiPlayerTitlebar)
+            .hide();
 
         uiPlayerTitlebarFixonScreenText = (this.uiPlayerTitlebarFixonScreenText = $('<span/>'))
             .addClass('ui-icon ' +'ui-icon-pin-s')
@@ -1010,7 +1011,7 @@ $.widget("ui.video", {
                 return false;
             })
             .appendTo(uiPlayerTitlebar)
-            .hide();
+            .show();
 
         uiPlayerTitlebarNoFixonScreenText = (this.uiPlayerTitlebarNoFixonScreenText = $('<span/>'))
             .addClass('ui-icon ' +'ui-icon-pin-w')
