@@ -3,11 +3,7 @@
 gst-launch -e filesrc location=/data/video/Bataille.avi ! decodebin ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=320,pixel-aspect-ratio=\(fraction\)1/1 ! videocrop left=158 right=160 ! progressreport update-freq=1 ! pngenc snapshot=false ! multifilesink location=%05d.png
 montage -tile x1 -mode Concatenate 0*g final.png
 
-* fix encoding issue in gstreamer/mediafile
-
 * click twice when paused -> play
-
-* macosx: "use native video size" option
 
 * montage: video export
 
@@ -40,9 +36,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * Implement subtitle import through python-aeidon
 
 * Save current workspace: display option in Save dialog
-
-* osxvideosink / python:
-   http://sjoerdoptland.blogspot.com/2009/10/gstreamer-python-qt-mac-osx.html
 
 * Ldt ZIP importer
 
@@ -93,8 +86,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * Shortcut for edit element validation
 
-* Check PyUseCase http://texttest.carmen.se/index.php?page=ui_testing
-
 * webcherry: use content negociation for invoking appropriate views
 
 * Utilisation npt:/
@@ -103,53 +94,19 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * STBV export (captions): cf http://code.google.com/p/libkate/
 
-* check http://code.activestate.com/recipes/457411/ (interval mapping data structure)
-
-* gstreamer win32/mac:
-http://www.gstreamer-winbuild.ylatuya.es/doku.php
-http://bugzilla.songbirdnest.com/show_bug.cgi?id=8345
-http://bugzilla.songbirdnest.com/show_bug.cgi?id=8011
-http://blog.songbirdnest.com/2008/03/26/gstreamer-progress/
-
-* Check http://freemix.forja.rediris.es/#
-http://www.ndeschildre.net/2008/04/29/python-and-webcam-part-2/
-
-* Display annotations over the video in flash:
-   http://www.ioncannon.net/php/110/using-flash-video-metadata-to-display-annotations/
-
-* Videotools Flash:
-http://dewey.at.northwestern.edu/ppad2/documents/help/video.html
-http://www.masternewmedia.org/video_internet_television/video-annotation/online-video-annotation-takes-a-giant-leap-20070405.htm
-http://www.opencastproject.org/wiki/Project_Pad_Audio_and_Video_Annotation_Tools
-
-* http://www.appscio.org/
-The Appscio Media Processing Framework (MPF) is built on top of
-   gstreamer and is designed to handle metadata.
-
-* htmleditor/transcribe/edit element: use textbuffer.get_modified/set_modified
+* transcribe: use textbuffer.get_modified/set_modified
 
 * Customizable shortcuts for annotation creation
 
 * Make initial setup window an assistant (multiple steps)
 
-* Read HIG docs: 
-http://library.gnome.org/devel/hig-book/stable/
-http://development.syllable.org/documentation/interface-guide.html
-
 * gui.main: simple click on Adhocview icon -> share code with viewbook
    (menu New/open existing).
-
-* MXF samples: http://gstreamer.freedesktop.org/media/incoming/mxf/
 
 * EditElementPopup: if destination != popup, add scrolledwidget around
    widget
 
 * timeline: fix continous scrolling. Set zoom 96%, 0h59 in Nosferatu
-
-* Use http://code.activestate.com/recipes/440554/ to execute
-   shotdetect on win32
-
-* See  http://developer.imendio.com/node/300
 
 * tabular adhoc view, with options to export as HTML
 
@@ -182,9 +139,6 @@ http://development.syllable.org/documentation/interface-guide.html
 
 * finder: implement set_current_element method
 
-* Biblio: Pliny: A model for digital support of scholarship 
-  http://journals.tdl.org/jodi/article/view/209/198
-
 * Bug in Advene2 export -> resources
 
 * Template: in _package_view, propose to Open adhoc views
@@ -197,8 +151,6 @@ http://development.syllable.org/documentation/interface-guide.html
 
 * streamline ask_for_relationtype method (timeline relation creation)
 
-* Use animations in GUI: http://live.gnome.org/PAF
-
 * Montage: double-click -> goto annotation
 
 * Auto-pause in montage view
@@ -207,9 +159,6 @@ http://development.syllable.org/documentation/interface-guide.html
 
 * timeline popup menu on annotation: offer access to possibly
    overlapping annotations
-
-* Investigate speech recognition:
-   http://www.speech.cs.cmu.edu/cmusphinx/moinmoin/GStreamer 
 
 * transcribe: insert begin/end marks (0, duration)
 
@@ -221,21 +170,8 @@ http://development.syllable.org/documentation/interface-guide.html
  * create new type. On view rename -> set new type title
  * create/fusion/delete annotations when modifying timestamps
 
-* http://git.or.cz/course/svn.html
-* http://git.or.cz/gitwiki/GitSvnComparsion
-
-* SKOS?: http://www.w3.org/News/2008#item25
-
 * make all simple selections (annotation, timestamp, etc) able to get
    multiline data to represent element list
-
-* extend textview with possibility to insert images + bold + italic
-   and generate a subset of html. Cf
-   /usr/share/doc/python-gtk2-doc/examples/demos/textview.py
-http://www.gnome.org/~gjc/htmltextview.py (original version)
-/usr/share/gajim/src/htmltextview.py (new version)
-
-http://code.google.com/p/facilhtml/source/browse/trunk/htmlrender.py
 
 * Dynamic view editing: Categorize events (annotation, player, application)
 
@@ -288,10 +224,6 @@ http://code.google.com/p/facilhtml/source/browse/trunk/htmlrender.py
 
 * annotation highlight: other representation (red thick border ?)
 
-* Investigate
-https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platform/osx/qt_extractor.py
-https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platform/osx/frontend/QuicktimeRenderer.py
-
 * Thicker frame around widgets in editaccumulator -> not so simple
 
 * editaccumulator: distinguish incomplete annotations (missing entidtime)
@@ -340,11 +272,6 @@ https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platfor
 
 ** timeline: find a way to render overlapping buttons (cf goocanvas)
 
-** timeline: cf http://www.jonobacon.org/gallery/main.php?g2_view=core.ShowItem&g2_itemId=3382&g2_GALLERYSID=8f6c485df08f046ac9658e6fe0928260
-http://jokosher.python-hosting.com/wiki/GnonlinNotes
-http://jokosher.org/
-http://jokosher.python-hosting.com/file/JonoEdit/trunk/TimeLine.py?rev=389
-
 * transcribe: add a small timeline on the top that displays the
 position of current marks in the video (with small lines) [cf linkmap
    in /usr/lib/meld/filediff.py ]
@@ -361,8 +288,6 @@ position of current marks in the video (with small lines) [cf linkmap
 
 ** review gtk.Style for whole app (viewbook labels and comboboxes smaller, more separation...)
 
-** app.launcher (url, mail...): http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/511443
-
 * transcription
  
 ** bug when opening a new package, the dialog "Annotations were modified" blocks the GUI
@@ -371,13 +296,7 @@ position of current marks in the video (with small lines) [cf linkmap
 
 ** Tag cloud view (maybe in swf via python-ming)
 
-** flash generation: http://www.swfmill.org/
-
 * Players
-
-** VLC: convert svg module to use rgba blending (cf http://trac.videolan.org/vlc/changeset/19548 )
-
-** VLC cf r16483: subpicture_t now has a b_pausable attribute. When set to VLC_TRUE (default value is VLC_FALSE), this will keep displaying the subpicture_t when the parent input is paused. This means that subtitles should now be paused when clicking on pause. (refs #29)
 
 ** write a flashplayer plugin using ctypes + gnash/swfdec - or https://launchpad.net/pyswfdec/
 
@@ -388,12 +307,7 @@ position of current marks in the video (with small lines) [cf linkmap
 
 * TAL/TALES
 
-** Rewrite admin templates with AJAX functionalities (cf
-   http://ajaxpatterns.org/Main_Page and http://pyjamas.pyworks.org/
-   (GWT in python) http://mail.zope.org/pipermail/zpt/2006-April/006262.html
-http://pyworks.org/pipermail/py-gwt/2006-December/000283.html
-http://pyworks.org/pipermail/py-gwt/2006-December/000284.html
-http://www.zkoss.org/zkdemo/userguide/
+** Rewrite admin templates with AJAX functionalities
 
 ** write advene helpers for pyjamas to write wysiwyg code
 
@@ -419,23 +333,12 @@ Cf http://blog.hill-street.net/?p=7 for implementations comparison
 
 * Hook to define new events (spatial events: EnterZone, LeaveZone... for instance)
 
-* Look http://video.google.com/videoplay?docid=-1498959948416769897&hl=fr
-
-* REST vs WS*: http://bitworking.org/news/125/REST-and-WS
-
-* SOAP interface: cf soaplib http://trac.optio.webfactional.com/
-
 * Save dynamic view rendering: ~/src/vlc-dev/vlc --plugin-path ~/src/vlc-dev jurannessic_320x192.mpg :sout='#transcode{vcodec=mp1v,vb=4096,acodec=mpga,ab=192,scale=1,channels=2,deinterlace,audio-sync}:std{access=file,mux=ps,url="foo.mpg"}'
-
-* Investigate http://freevo.sourceforge.net/cgi-bin/freevo-2.0/SourceDoc/KaaMetadata
 
 * import MIT video lectures http://web.sls.csail.mit.edu/lectures/
 
 * reuse MIT video lecture javascript code
 http://service.real.com/help/library/guides/ScriptingGuide/HTML/htmfiles/methodin.htm
-
-* javascript timelines: http://simile.mit.edu/timeline/docs/create-timelines.html
-http://simile.mit.edu/timeline/
 
 * website: write the Advene roadmap
 
@@ -444,8 +347,6 @@ http://simile.mit.edu/timeline/
 * make most admin views return XML + XSL stylesheets (action, methods...)
 
 * /packages: convert to XML/XSL + offer the possibility to activate a package
-
-* integration/export with googlevideo: http://video.google.com/videoplay?docid=3441112139250395703#0h0m54s
 
 * note-taking: integrate Gobby component
 
@@ -461,8 +362,6 @@ http://simile.mit.edu/timeline/
 
 * define a virtual "global" package that will iterate and forward methods (annotations, relation...) over all loaded packages
 
-* UCK: http://sourceforge.net/forum/forum.php?forum_id=629763
-
 * transtyping: preserve/recreate relations
 
 * Study transana code
@@ -471,11 +370,7 @@ http://simile.mit.edu/timeline/
 
 * think about printing support
 
-* get things from http://svn.berlios.de/svnroot/repos/solipsis/trunk/main/ ?
-
 * HTML action to update all displayed screenshots
-
-* Example javascript media player bindings: http://publicsvn.songbirdnest.com/browser/trunk/app/content/scripts/
 
 * vlc audio extraction: vlc --no-sout-video --sout '#es{access-audio=file,mux-audio=ts,dst-audio=-}'  k.mpg vlc:quit
 
@@ -492,18 +387,9 @@ http://simile.mit.edu/timeline/
 
 * Audio commentaries : add a "Record" button. While pressed, it
    records. Upon release, it creates an annotation with the correct
-   bounds. Cf
-   http://www.speech.kth.se/snack/man/snack2.2/python-man.html
-   and
-   http://tedlab.mit.edu:16080/~dr/SplitIt/
-   http://trans.sourceforge.net/en/download.php
-   http://pymedia.org//tut/src/voice_recorder.py.html
-
-* investigate https://pyplayer.helixcommunity.org/
+   bounds.
 
 * embed swfplayer
-
-* package http://filmlibre.org/ and http://media.april.org/
 
 * import fixer: allow to edit imports without loading the package
    (which fails if imported package is not accessible).
@@ -513,10 +399,6 @@ http://simile.mit.edu/timeline/
 * notification of new popups when embedded (flash tab)
 
 * allow to specify the browser for open_url in preferences
-
-* check http://chardet.feedparser.org/
-
-* DnD to/from common apps: cf http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq23.018.htp and http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq23.031.htp
 
 * Define a ParameteredQuery which takes a single parameter in the path, e.g.:
   here/annotations/containedIn/foobar 
@@ -534,35 +416,15 @@ that should return the same URI. The proposed solution is to enforce the importi
 
 * transcribe: make validity check on bounds only on demand or on export.
 
-* schema editor: cf tools http://www.rexx.com/~dkuhlman/
-
 * Write a advene-openoffice binding to automate video/presentation sync.
 
 * New action: translate ?
 
-* Demo movie maker : http://en.wikipedia.org/wiki/Screencast
-http://www.debugmode.com/wink/
-vlc --screen-fps=2 screen:// --no-sout-audio --sout '#transcode{vcodec=mp4v,venc=ffmpeg,scale=0.2}:standard{access=file,mux=avi,url=/tmp/foo.avi}'
-istanbul
-
-* Read http://www.ling.uni-potsdam.de/~stede/Downloads/xbrac04.pdf
-(survey of annotation tools)
-
-* SMIL examples: http://webmonkey.wired.com/webmonkey/00/41/index4a_page3.html?tw=authoring
-
 * On-the-fly annotation: display as caption the edited content (for 1s)
-
-* Sound recording in python: http://www.johnnypops.demon.co.uk/python/ See also http://divmod.org/projects/shtoom/
-
-* Sound assistant: use cont_fileseg from sphinx2-bin to segment audio, or http://www.cmis.csiro.au/maaate/ or http://aubio.piem.org/news/
-
-* assistant: speech decomposition (only extracts timestamps). Use speech-tools ? http://www.cstr.ed.ac.uk/projects/speech_tools/manual-1.2.0/x737.htm
 
 * webserver: implement a wiki-like syntax in views that dynamically generates links to Advene elements/TALES expressions (define a application/x-advene-wiki that will get converted into a TAL template)
 
 * handle wiki syntax in transcriptionedit, so that we can do simple notetaking with some markup easily.
-
-* Implement zeroconf support: http://www.amk.ca/python/zeroconf
 
 * make navigation history accessible from TALES (/options/history ?)
 
@@ -600,8 +462,6 @@ annotation event.
 * Item File->statistics : element count (ann, rel, etc)
 
 * Implement "copy/paste" on elements
-
-* A creuser: http://veejay.sourceforge.net/
 
 * In Context (or the GUI), catch AdveneTalesException that happens
 when there is a syntax error in a TALES expression (missing string orbadly written symbol) and display a meaningful message
@@ -688,10 +548,6 @@ the current package's pwd first as default.
 
 * Treeview: add the elements attributes as annotation/relation children.
 
-* Interface with http://www.archive.org/movies/ (XML files)
-
-* Query MPEG7: http://www.idealliance.org/papers/extreme03/html/2001/Liu01/EML2001Liu01.html
-
 * Content: how to represent structured data ? Cf MPEG7 DS ? (hackingly
   half DONE, grep source for application/x-advene-structured). Or
 http://www.rexx.com/~dkuhlman/generateDS.html (XML-Schema) Or SOAPy
@@ -727,11 +583,6 @@ style "blue_text"
 widget "sendmail.*.mail" style "blue_text"
 """
 gtk.rc_parse_string(sendmail_styles)
-
-* Use popup-menu signal (cf http://cvs.gnome.org/bonsai/cvsblame.cgi?file=gtk%2B%2Fdocs%2Freference%2Fgtk/migrating-checklist.sgml&rev=HEAD&root=/cvs/gnome)
-
-* Windows: start application
-http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
 
 ------------------------------------ Archive ------------------------------------------
 * Write the correct VLC/Python module -> DONE
