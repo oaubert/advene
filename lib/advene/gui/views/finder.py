@@ -22,6 +22,7 @@
 from gettext import gettext as _
 
 import gtk
+import gobject
 import cgi
 
 import advene.core.config as config
@@ -663,8 +664,12 @@ class Finder(AdhocView):
                 columnbrowser.next.update(node)
 
         # Scroll the columns
+        gobject.timeout_add(100, lambda: self.autoscroll_end() and False)
+        return True
+
+    def autoscroll_end(self):
         adj=self.sw.get_hadjustment()
-        adj.value = adj.page_size
+        adj.value = adj.upper - adj.page_size
         return True
 
     def scroll_event(self, widget=None, event=None):
