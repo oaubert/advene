@@ -46,7 +46,7 @@ import gobject
 try:
     import rsvg
 except ImportError:
-    rsvg=None
+    import advene.util.ctypesrsvg as rsvg
 
 # Advene part
 import advene.core.config as config
