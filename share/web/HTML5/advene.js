@@ -979,9 +979,9 @@ $.widget("ui.video", {
                     $('.player_container').player('fragmentPlay', node.attr('data-begin'), node.attr('data-end'), fragmentTitle);
 
                     // Positioning player on screen when it's no longer visible (due to a scroll).
-                    if(($(document).scrollTop()>$('.player_container').parent().position().top+$('.player_container').parent().height())||
-                        ($(document).scrollTop()+$(window).height()<$('.player_container').parent().position().top))
-                        $('.player_container').parent().css({position:'absolute',top:  event.pageY -50});
+                    if ( ($(document).scrollTop() > $('.player_container').parent().position().top + $('.player_container').parent().height())
+                         || ($(document).scrollTop() + $(window).height() < $('.player_container').parent().position().top) )
+                        $('.player_container').parent().css( { position:'absolute', top: event.pageY - 50 } );
                 })
                 .appendTo($optionPlay);
 
@@ -1060,7 +1060,7 @@ $.widget("ui.video", {
                                 {
                                     'class': ' ui-corner-all sampleContainer',
                                     'src': videoURL,
-                                    'poster':'resources/HTML5/advene_logo.png'
+                                    'poster': 'resources/HTML5/advene_logo.png'
                                 }
                                )
                     .css('position', 'absolute')
@@ -1081,7 +1081,9 @@ $.widget("ui.video", {
                     .css('height','100%')
                     .css('width','100%');
 
-                self.bind( "destroySamplePlayer", destroySamplePlayer );$(self._video).hide();$(self._video).fadeIn('5000');
+                self.bind("destroySamplePlayer", destroySamplePlayer );
+                $(self._video).hide();
+                $(self._video).fadeIn('5000');
             });
             function destroySamplePlayer() {
                 $(self._video).video("destroy");
