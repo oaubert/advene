@@ -1045,6 +1045,28 @@ class TimeLine(AdhocView):
             fragment=MillisecondFragment(begin=position,
                                          duration=duration))
         if content is not None:
+            if getattr(el.type, '_fieldnames', None):
+                # Structured data
+                if "=" in content:
+                    # Let's assume that content is simple-structured data.
+                    try:
+                        data = dict( (k, v) for l in content.splitlines() for (k, v) in l.split('=') )
+                        # Add other keys
+                        data.update(dict( (f, "") for f in sorted(el.type._fieldnames) ))
+                        # Serialize
+                        content = "\n".join( "%s=%s" % (k, v) for (k, v) in data.iteritems() )
+                    except ValueError:
+                        # Badly formatted data
+                        content = "\n".join( "%s=" % f for f in sorted(el.type._fieldnames) ) + "\ncontent=%s" % content.replace("\n", " ")
+                else:
+                    content = "\n".join( "%s=" % f for f in sorted(el.type._fieldnames) ) + "\ncontent=%s" % content.replace("\n", " ")
+            elif 'svg' in el.type.mimetype:
+                if not '<svg' in content:
+                    # It must be simple text. Generate appropriate SVG.
+                    content = """<svg:svg height="320pt" preserveAspectRatio="xMinYMin meet" version="1" viewBox="0 0 400 320" width="400pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg">
+  <text fill="green" name="Content" stroke="green" style="stroke-width:1; font-family: sans-serif; font-size: 22" x="8" y="290">%s</text>
+</svg:svg>""" % content
+
             el.content.data=content
         elif getattr(el.type, '_fieldnames', None):
             el.content.data="\n".join( "%s=" % f for f in sorted(el.type._fieldnames) )
