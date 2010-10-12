@@ -3834,7 +3834,7 @@ class AdveneGUI(object):
                         'record-actions', 'popup-destination',
                         'timestamp-format', 
                         'abbreviation-mode', 'text-abbreviations', 'completion-mode',
-                        'prefer-wysiwyg' )
+                        'prefer-wysiwyg', 'player-shortcuts-in-edit-windows' )
         # Direct options needing a restart to be taken into account.
         restart_needed_options = ('tts-engine', 'language')
 
@@ -3874,7 +3874,8 @@ class AdveneGUI(object):
                 })
         ew.add_checkbox(_("Record activity trace"), "record-actions", _("Record activity trace"))
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
-        ew.add_checkbox(_("WYSIWYG"), "prefer-wysiwyg", _("Use WYSIWYG editors when possible (HTML, SVG)"))
+        ew.add_checkbox(_("Prefer WYSIWYG"), "prefer-wysiwyg", _("Use WYSIWYG editors when possible (HTML, SVG)"))
+        ew.add_checkbox(_("Player control in edit popups"), 'player-shortcuts-in-edit-windows', _("Enable generic player controls in edit windows. This may be undesirable since it overloads some standard text-edition behaviours (esp. control-left/right)."))
 
         ew.add_option(_("Open popups"), 'popup-destination',
                       _("Where should we open adhoc views?"),
