@@ -482,7 +482,7 @@ def get_filename(title=_("Open a file"),
                  default_dir=None,
                  default_file=None,
                  alias=False,
-                 filter='any'):
+                 filter=None):
     """Get a filename.
 
     @param title: the dialog title
@@ -583,7 +583,7 @@ def get_filename(title=_("Open a file"),
             filters[name].add_pattern(e)
         fs.add_filter(filters[name])
 
-    fs.set_filter(filters[filter])
+    fs.set_filter(filters[filter or 'any'])
     fs.connect('selection-changed', update_preview)
     fs.connect('key-press-event', dialog_keypressed_cb)
 
