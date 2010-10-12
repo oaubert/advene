@@ -51,38 +51,87 @@
         <title xmlns="http://purl.org/dc/elements/1.1/">SVG</title>
 	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">svg</extension>
       </meta>
-      <content mime-type="image/svg+xml">&lt;svg tal:define=&quot;scale python:4 ; offset python:150 ; duration package/meta/advenetool/duration&quot;  xmlns='http://www.w3.org/2000/svg'  xmlns:xlink='http://www.w3.org/1999/xlink'  xmlns:tal='http://xml.zope.org/namespaces/tal' version='1'   x='0' y='0' tal:attributes=&quot;width python:offset + long(duration) / scale ; height python:60+30*len(package.annotationTypes)&quot;&gt;
+      <content mime-type="image/svg+xml">&lt;?xml version=&quot;1.0&quot;  encoding=&quot;UTF-8&quot;?&gt;
+&lt;svg onload=&quot;init(evt)&quot; tal:define=&quot;scale python:100 ; hoffset python:150 ; voffset python: 30 ; line_height python: 30 ; duration package/meta/advenetool/duration&quot;  xmlns='http://www.w3.org/2000/svg'  xmlns:xlink='http://www.w3.org/1999/xlink'  xmlns:tal='http://xml.zope.org/namespaces/tal' version='1'   x='0' y='0' tal:attributes=&quot;width python:hoffset + long(duration) / scale ; height python:line_height * (2 + len(package.annotationTypes))&quot;&gt;
 
+&lt;script type=&quot;text/ecmascript&quot;&gt;
+      var scaleFactor = &lt;span tal:replace=&quot;scale&quot;&gt;100&lt;/span&gt;;
+      var hoffset = &lt;span tal:replace=&quot;hoffset&quot;&gt;150&lt;/span&gt;;
+      var voffset = &lt;span tal:replace=&quot;voffset&quot;&gt;30&lt;/span&gt;;
+      var scale = 1;
+      
+    function setYScale(s) {
+        function transform_string(vscale, hoff, voff) {
+               if (vscale === undefined) vscale = 1;
+               if (hoff === undefined)  hoff = 0;
+               if (voff === undefined)  voff = 0;
+               return &quot;translate(&quot; + hoff + &quot; &quot; + voff + &quot;) scale(&quot; + s + &quot; 1)&quot;;
+         }
+	document.getElementById(&quot;scale_layout&quot;).setAttribute(&quot;transform&quot;, transform_string(s, hoffset));
+        document.getElementById(&quot;annotations_layout&quot;).setAttribute(&quot;transform&quot;, transform_string(s, hoffset, voffset));
+        scale = s;
+    }
+    function zoomIn(evt) {
+        setYScale(scale * 1.1);
+    }
+    function zoomOut(evt) {
+        setYScale(scale / 1.1);
+    }
+&lt;/script&gt;
+
+&lt;g id=&quot;control_layout&quot;&gt;
+   &lt;a href=&quot;#&quot; onclick=&quot;zoomOut(evt)&quot;&gt;
+     &lt;rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;20&quot; height=&quot;20&quot; style=&quot;fill:grey; stroke:black&quot; /&gt;
+     &lt;text x=&quot;10&quot; y=&quot;20&quot;&gt;-&lt;/text&gt;
+   &lt;/a&gt;
+   
+   &lt;a href=&quot;#&quot; onclick=&quot;zoomIn(evt)&quot;&gt;
+       &lt;rect x=&quot;30&quot; y=&quot;5&quot; width=&quot;20&quot; height=&quot;20&quot; style=&quot;fill:grey; stroke:black&quot;/&gt;
+       &lt;text x=&quot;35&quot; y=&quot;20&quot;&gt;+&lt;/text&gt;
+   &lt;/a&gt;
+&lt;/g&gt;
+
+&lt;g id=&quot;scale_layout&quot; tal:attributes=&quot;transform string:translate(${hoffset} 0)&quot;&gt;
 &lt;!-- Header generation --&gt;
-&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;i python:range(int(duration) / 1000)&quot;&gt;
-  &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;t python:i*1000 ; pos python:offset+t/scale&quot;&gt;
-    &lt;line tal:attributes=&quot;x1 pos ; x2 pos&quot; y1=&quot;0&quot; y2=&quot;20&quot; stroke=&quot;black&quot; /&gt;
+&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;i python:range(int(duration) / 60000)&quot;&gt;
+  &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;t python:i*60000 ; pos python:t/scale&quot;&gt;
+    &lt;line tal:attributes=&quot;x1 pos ; x2 pos&quot; y1=&quot;0&quot; y2=&quot;20&quot; stroke=&quot;black&quot; &gt;&lt;/line&gt;
     &lt;text tal:attributes=&quot;x python:pos-20&quot; y=&quot;10&quot; tal:content=&quot;t/formatted&quot;  font-family=&quot;sans-serif&quot; font-size=&quot;10&quot; stroke=&quot;black&quot;&gt;Timestamp&lt;/text&gt;
   &lt;/span&gt;
 &lt;/span&gt;
+&lt;/g&gt;
 
+&lt;g id=&quot;legend_layout&quot; tal:attributes=&quot;transform string:translate(0 ${voffset})&quot;&gt;
 &lt;!-- Looping on annotation types --&gt;
 &lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;at here/annotationTypes&quot;&gt;
+   &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;vpos python:line_height*repeat['at'].getIndex() + 30&quot; &gt;
+     &lt;a tal:attributes=&quot;xlink:href at/absolute_url&quot;&gt;
+        &lt;rect x=&quot;1&quot; tal:attributes=&quot;y python:vpos-15 ; width python:hoffset-5 ; style string:fill:${at/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;
+        &lt;text x=&quot;3&quot; tal:attributes=&quot;y vpos ; id at/id&quot;  tal:content=&quot;at/title&quot; stroke=&quot;black&quot; font-size=&quot;13&quot; font-family=&quot;sans-serif&quot;&gt;Titre&lt;/text&gt;
+    &lt;/a&gt;
+   &lt;/span&gt;
+ &lt;/span&gt;
+ &lt;/g&gt;
+ 
+&lt;g id=&quot;annotations_layout&quot; tal:attributes=&quot;transform string:translate(${hoffset} ${voffset})&quot;&gt;
+&lt;!-- Looping again on annotation types --&gt;
+  &lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;at here/annotationTypes&quot;&gt;
 
- &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;vpos python:30+30*repeat['at'].getIndex()+30&quot; &gt;
+      &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;vpos python:line_height*repeat['at'].getIndex()+30&quot; &gt;
+ 
+      &lt;!-- Looping on annotations --&gt;
+         &lt;span tal:omit-tag=&quot;&quot;   tal:define=&quot;rpos python:vpos-15&quot; tal:repeat=&quot;a at/annotations&quot;&gt;
 
-  &lt;a tal:attributes=&quot;href at/absolute_url&quot;&gt;
-      &lt;rect x=&quot;1&quot; tal:attributes=&quot;y python:vpos-15 ; width python:offset-10 ; style string:fill:${at/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;
-    &lt;text x=&quot;3&quot; tal:attributes=&quot;y vpos ; id at/id&quot;  tal:content=&quot;at/title&quot; stroke=&quot;black&quot; font-size=&quot;13&quot; font-family=&quot;sans-serif&quot;&gt;Titre&lt;/text&gt;
-  &lt;/a&gt;
-
-  &lt;!-- Looping on annotations --&gt;
-    &lt;span tal:omit-tag=&quot;&quot;   tal:define=&quot;rpos python:vpos-15&quot; tal:repeat=&quot;a at/annotations&quot;&gt;
-
-	&lt;a tal:attributes=&quot;href a/absolute_url&quot;&gt;
-      &lt;rect tal:attributes=&quot;x python:offset + a.fragment.begin / scale; width python:a.fragment.duration / scale ; y rpos ; style string:fill:${a/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;
-      &lt;text tal:attributes=&quot;x python:offset + a.fragment.begin / scale; y vpos ; id a/id&quot;  tal:content=&quot;a/content/data&quot; stroke=&quot;black&quot; font-size=&quot;12&quot; font-family=&quot;sans-serif&quot;&gt;Texte&lt;/text&gt;
-      &lt;/a&gt;
+	    &lt;a class=&quot;transcript&quot; tal:attributes=&quot;xlink:href a/player_url ; title a/content/data ; data-annotation a/id&quot;&gt;
+               &lt;rect tal:attributes=&quot;x python:a.fragment.begin / scale; width python:a.fragment.duration / scale ; y rpos ; style string:fill:${a/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;
+               &lt;clipPath tal:attributes=&quot;id string:clip_${a/id}&quot;&gt;&lt;rect tal:attributes=&quot;x python:a.fragment.begin / scale; width python:a.fragment.duration / scale ; y rpos ; style string:fill:${a/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;&lt;/clipPath&gt;
+               &lt;text tal:attributes=&quot;x python:a.fragment.begin / scale; y vpos ; id a/id ; clip-path string:url(#clip_${a/id})&quot;  tal:content=&quot;a/representation&quot; stroke=&quot;black&quot; font-size=&quot;12&quot; font-family=&quot;sans-serif&quot;&gt;Texte&lt;/text&gt;
+           &lt;/a&gt;
+        &lt;/span&gt;
+      &lt;/span&gt;
     &lt;/span&gt;
+&lt;/g&gt;
 
-  &lt;/span&gt;
-
-&lt;/span&gt;
 &lt;/svg&gt;
 </content>
     </view>
