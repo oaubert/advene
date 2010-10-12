@@ -473,17 +473,22 @@ class AdveneGUI(object):
             return True
 
         # Populate the View submenu
-        m=self.gui.adhoc_view_menuitem.get_submenu()
+        menu = self.gui.adhoc_view_menuitem.get_submenu()
+        it = gtk.MenuItem(_("All available views"))
+        menu.prepend(it)
+        it.show()
+        m = gtk.Menu()
+        it.set_submenu(m)
         for name in sorted(self.registered_adhoc_views, reverse=True):
             cl=self.registered_adhoc_views[name]
             it=gtk.MenuItem(cl.view_name, use_underline=False)
             it.set_tooltip_text(cl.tooltip)
             it.connect('activate', open_view_menu, name)
             m.prepend(it)
-        m.show_all()
 
         # Generate the adhoc view buttons
         hb=self.gui.adhoc_hbox
+        item_index = 0
         for name, tip, pixmap in (
             ('timeline', _('Timeline'), 'timeline.png'),
             ('tree', _('Tree view'), 'treeview.png'),
@@ -532,7 +537,14 @@ class AdveneGUI(object):
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
             hb.pack_start(b, expand=False)
+            if name in self.registered_adhoc_views:
+                it = gtk.MenuItem(self.registered_adhoc_views[name].view_name, use_underline=False)
+                it.connect('activate', open_view_menu, name)
+                it.set_tooltip_text(tip)
+                menu.insert(it, item_index)
+                item_index = item_index + 1
         hb.show_all()
+        menu.show_all()
 
         # Trace switch button
         tsb = self.gui.traces_switch
