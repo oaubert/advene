@@ -1,7 +1,7 @@
 <package dc:creator="oaubert" dc:date="2004-06-15" xmlns="http://experience.univ-lyon1.fr/advene/ns" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink">
   <meta><default_adhoc xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">_default_workspace</default_adhoc>
     <tag_colors xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"></tag_colors>
-    <duration xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">1800000</duration>
+    <duration xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"></duration>
     <title xmlns="http://purl.org/dc/elements/1.1/">Export package</title>
     <mediafile xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"/>
   </meta>
@@ -52,13 +52,15 @@
 	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">svg</extension>
       </meta>
       <content mime-type="image/svg+xml">&lt;?xml version=&quot;1.0&quot;  encoding=&quot;UTF-8&quot;?&gt;
-&lt;svg onload=&quot;init(evt)&quot; tal:define=&quot;scale python:100 ; hoffset python:150 ; voffset python: 30 ; line_height python: 30 ; duration package/meta/advenetool/duration&quot;  xmlns='http://www.w3.org/2000/svg'  xmlns:xlink='http://www.w3.org/1999/xlink'  xmlns:tal='http://xml.zope.org/namespaces/tal' version='1'   x='0' y='0' tal:attributes=&quot;width python:hoffset + long(duration) / scale ; height python:line_height * (2 + len(package.annotationTypes))&quot;&gt;
+&lt;svg tal:define=&quot;hoffset python:150 ; voffset python: 30 ; line_height python: 30 ; duration package/meta/advenetool/duration&quot;  xmlns='http://www.w3.org/2000/svg'  xmlns:xlink='http://www.w3.org/1999/xlink'  xmlns:tal='http://xml.zope.org/namespaces/tal' version='1'   x='0' y='0' tal:attributes=&quot;width python:hoffset + long(duration) ; height python:line_height * (2 + len(package.annotationTypes))&quot;&gt;
 
 &lt;script type=&quot;text/ecmascript&quot;&gt;
-      var scaleFactor = &lt;span tal:replace=&quot;scale&quot;&gt;100&lt;/span&gt;;
       var hoffset = &lt;span tal:replace=&quot;hoffset&quot;&gt;150&lt;/span&gt;;
       var voffset = &lt;span tal:replace=&quot;voffset&quot;&gt;30&lt;/span&gt;;
-      var scale = 1;
+      var zoom = 1;
+      var scale_layout;
+      var annotations_layout;
+      var time_marker;
       
     function setYScale(s) {
         function transform_string(vscale, hoff, voff) {
@@ -67,16 +69,46 @@
                if (voff === undefined)  voff = 0;
                return &quot;translate(&quot; + hoff + &quot; &quot; + voff + &quot;) scale(&quot; + s + &quot; 1)&quot;;
          }
-	document.getElementById(&quot;scale_layout&quot;).setAttribute(&quot;transform&quot;, transform_string(s, hoffset));
-        document.getElementById(&quot;annotations_layout&quot;).setAttribute(&quot;transform&quot;, transform_string(s, hoffset, voffset));
-        scale = s;
+         if (! scale_layout)
+             scale_layout = document.getElementById(&quot;scale_layout&quot;);
+         if (scale_layout) 
+             scale_layout.setAttribute(&quot;transform&quot;, transform_string(s, hoffset));
+         if (! annotations_layout)
+              annotations_layout = document.getElementById(&quot;annotations_layout&quot;);
+         if (annotations_layout)
+             annotations_layout.setAttribute(&quot;transform&quot;, transform_string(s, hoffset, voffset));
+         if (! time_marker)
+              time_marker = document.getElementById(&quot;time_marker&quot;);
+      	if (time_marker)
+      		time_marker.setAttribute(&quot;stroke-width&quot;, (2 / s) + &quot;px&quot;)
+        zoom = s;
     }
     function zoomIn(evt) {
-        setYScale(scale * 1.1);
+        setYScale(zoom * 1.1);
     }
     function zoomOut(evt) {
-        setYScale(scale / 1.1);
+        setYScale(zoom / 1.1);
     }
+    
+    function svg_init() {
+        var svg = document.getElementsByTagName(&quot;svg&quot;)[0];
+        console.log(&quot;Setting zoom to &quot; + 1.0 * window.innerWidth / svg.width.baseVal.value);
+        setYScale(1.0 * window.innerWidth / svg.width.baseVal.value);
+    }
+    
+    function onLoadHandler(init_fxn) {
+      var old_init = window.onload;
+      var new_init = init_fxn;
+      window.onload = function() {
+          if (typeof(old_init) == &quot;function&quot;) {
+               old_init();
+          }
+          new_init();
+       }
+       return this;
+    }
+    onLoadHandler(svg_init);
+
 &lt;/script&gt;
 
 &lt;g id=&quot;control_layout&quot;&gt;
@@ -94,7 +126,7 @@
 &lt;g id=&quot;scale_layout&quot; tal:attributes=&quot;transform string:translate(${hoffset} 0)&quot;&gt;
 &lt;!-- Header generation --&gt;
 &lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;i python:range(int(duration) / 60000)&quot;&gt;
-  &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;t python:i*60000 ; pos python:t/scale&quot;&gt;
+  &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;t python:i*60000 ; pos python:t&quot;&gt;
     &lt;line tal:attributes=&quot;x1 pos ; x2 pos&quot; y1=&quot;0&quot; y2=&quot;20&quot; stroke=&quot;black&quot; &gt;&lt;/line&gt;
     &lt;text tal:attributes=&quot;x python:pos-20&quot; y=&quot;10&quot; tal:content=&quot;t/formatted&quot;  font-family=&quot;sans-serif&quot; font-size=&quot;10&quot; stroke=&quot;black&quot;&gt;Timestamp&lt;/text&gt;
   &lt;/span&gt;
@@ -123,9 +155,9 @@
          &lt;span tal:omit-tag=&quot;&quot;   tal:define=&quot;rpos python:vpos-15&quot; tal:repeat=&quot;a at/annotations&quot;&gt;
 
 	    &lt;a class=&quot;transcript&quot; tal:attributes=&quot;xlink:href a/player_url ; title a/content/data ; data-annotation a/id&quot;&gt;
-               &lt;rect tal:attributes=&quot;x python:a.fragment.begin / scale; width python:a.fragment.duration / scale ; y rpos ; style string:fill:${a/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;
-               &lt;clipPath tal:attributes=&quot;id string:clip_${a/id}&quot;&gt;&lt;rect tal:attributes=&quot;x python:a.fragment.begin / scale; width python:a.fragment.duration / scale ; y rpos ; style string:fill:${a/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;&lt;/clipPath&gt;
-               &lt;text tal:attributes=&quot;x python:a.fragment.begin / scale; y vpos ; id a/id ; clip-path string:url(#clip_${a/id})&quot;  tal:content=&quot;a/representation&quot; stroke=&quot;black&quot; font-size=&quot;12&quot; font-family=&quot;sans-serif&quot;&gt;Texte&lt;/text&gt;
+               &lt;rect tal:attributes=&quot;x python:a.fragment.begin ; width python:a.fragment.duration ; y rpos ; style string:fill:${a/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;
+               &lt;clipPath tal:attributes=&quot;id string:clip_${a/id}&quot;&gt;&lt;rect tal:attributes=&quot;x python:a.fragment.begin ; width python:a.fragment.duration ; y rpos ; style string:fill:${a/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;&lt;/clipPath&gt;
+               &lt;text tal:attributes=&quot;x python:a.fragment.begin ; y vpos ; id a/id ; clip-path string:url(#clip_${a/id})&quot;  tal:content=&quot;a/representation&quot; stroke=&quot;black&quot; font-size=&quot;12&quot; font-family=&quot;sans-serif&quot;&gt;Texte&lt;/text&gt;
            &lt;/a&gt;
         &lt;/span&gt;
       &lt;/span&gt;

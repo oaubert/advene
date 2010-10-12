@@ -741,9 +741,19 @@ class HTML5VideoPlayer(VideoPlayer):
             content = head_re.sub('''<head>%s''' % jsinject, content)
         else:
             # It could be SVG
-            svg_re = re.compile('(<svg.+?>)', re.IGNORECASE)
+            svg_re = re.compile('<svg(.+?)>', re.IGNORECASE)
             if svg_re.search(content):
-                svg_re.sub(r'''\1%s''' % jsinject, content)
+                jsinject = """<script type="text/ecmascript" xlink:href="./resources/HTML5/advene_svg.js"></script>
+<g id="video_layout" class="draggable" transform="translate(50 400)">
+  <foreignObject>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <video style="position: fixed; top: 300px; left: 50px;" controls="true" id="video_player" width="320" height="200" src=""></video>
+    </div>
+  </foreignObject>
+</g>
+"""
+                content = svg_re.sub(r'''<svg\1>
+%s''' % jsinject, content)
             else:
                 content = '''<head>%s</head>\n''' % jsinject + content
         return content
