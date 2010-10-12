@@ -836,11 +836,13 @@ class SubtitleImporter(GenericImporter):
                 # Empty line: end of subtitle
                 # Convert it and reset the data
                 if tc is None:
-                    print "Strange error: no timestamp was found for content ", "".join(content)
-                    content = []
+                    if content:
+                        print "Strange error: no timestamp was found for content ", "".join(content)
+                        content = []
+                    continue
                 d={'begin': tc[0],
                    'end': tc[1],
-                   'content': "\n".join(content)}
+                   'content': u"\n".join(content)}
                 tc=None
                 content=[]
                 yield d
@@ -856,7 +858,7 @@ class SubtitleImporter(GenericImporter):
                             # Fallback on latin1, which is very common, but may
                             # sometimes fail
                             data=unicode(line, 'latin1')
-                    content.append(data.encode('utf-8'))
+                    content.append(data)
                     # else We could check line =~ /^\d+$/
 
     def process_file(self, filename):
