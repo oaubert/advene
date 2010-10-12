@@ -258,8 +258,19 @@ class EditElementPopup (AdhocView):
             self.controller.update_status('start')
         return True
 
+    def get_modified(self):
+        return [ f for f in self.forms if f.get_modified() ]
+
+    def set_modified(self, m):
+        for f in self.forms:
+            self.set_modified(False)
+
     def close_cb (self, button=None, data=None):
         """Method called when closing a form."""
+        if self.get_modified():
+            if not dialog.message_dialog(_("Content has been modified. Close anyway and lose data?"), icon=gtk.MESSAGE_QUESTION,
+                                         modal=True):
+                return False
         self.controller.notify("EditSessionEnd", element=self.element, comment="Window closed")
         self.close()
         return True
@@ -1117,6 +1128,18 @@ class EditForm(object):
         """
         raise Exception ("This method should be implemented in subclasses.")
 
+    def get_modified(self):
+        """Checks wether the content is different from its original value.
+
+        Not all EditForms can implement this. But it is tested
+        in the close_cb callback: if an EditForm is_modified(), then
+        we should ask for confirmation before closing.
+        """
+        return False
+
+    def set_modified(self, is_modified):
+        return is_modified
+
     def refresh(self):
         """Update the representation wrt. the element value.
         """
@@ -1238,6 +1261,14 @@ class EditContentForm(EditForm):
         self.contentform.update_element()
         return True
 
+    def get_modified(self):
+        # FIXME: more complete tests should be done, but this one
+        # covers the main case.
+        return self.contentform.get_modified()
+
+    def set_modified(self, b):
+        self.contentform.set_modified(b)
+
     def refresh(self):
         if self.mimetype is not None:
             self.mimetype.set_current_element(self.element.mimetype)
@@ -1329,6 +1360,13 @@ class TextContentHandler (ContentHandler):
 
     def refresh(self):
         self.view.get_buffer().set_text(self.element.data)
+        self.set_modified(False)
+
+    def get_modified(self):
+        return self.view.get_buffer().get_modified()
+
+    def set_modified(self, b):
+        self.view.get_buffer().set_modified(b)
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
@@ -1338,6 +1376,7 @@ class TextContentHandler (ContentHandler):
         start_iter, end_iter = buf.get_bounds ()
         text = unicode(buf.get_text (start_iter, end_iter))
         self.element.data = text
+        self.set_modified(False)
         return True
 
     def key_pressed_cb (self, win, event):
@@ -1509,6 +1548,7 @@ class TextContentHandler (ContentHandler):
             textview.get_buffer().set_text(self.element.data)
             textview.connect('key-press-event', self.key_pressed_cb)
         self.view = textview
+        self.set_modified(False)
 
         col=self.controller.get_element_color(self.parent)
         if col is not None:

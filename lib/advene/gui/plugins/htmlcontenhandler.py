@@ -254,6 +254,12 @@ class HTMLContentHandler (ContentHandler):
         if self.sourceview:
             self.sourceview.set_editable(boolean)
 
+    def get_modified(self):
+        if self.editing_source:
+            return self.sourceview.get_modified()
+        else:
+            return self.view.get_modified()
+
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if not self.editable:
@@ -265,6 +271,7 @@ class HTMLContentHandler (ContentHandler):
             # parse the source again in the HTML editor
             if self.editor is not None:
                 self.editor.set_text(self.element.data)
+                self.editor.set_modified(False)
             return True
 
         if self.editor is None:
@@ -274,6 +281,7 @@ class HTMLContentHandler (ContentHandler):
         # Update the HTML source representation
         if self.sourceview is not None:
             self.sourceview.content_set(self.element.data)
+            self.sourceview.set_modified(False)
         return True
 
     def open_link(self, link=None):
@@ -647,7 +655,9 @@ class HTMLContentHandler (ContentHandler):
 
         if config.data.preferences['prefer-wysiwyg']:
             edit_wysiwyg()
+            self.view.set_modified(False)
         else:
             edit_source()
+            self.sourceview.set_modified(False)
 
         return vbox

@@ -228,6 +228,12 @@ class HTMLEditor(textview_class, HTMLParser):
             b.undo()
         return True
 
+    def get_modified(self):
+        return self.__tb.get_modified()
+
+    def set_modified(self, m):
+        return self.__tb.set_modified(m)
+
     def refresh(self):
         """Refresh the current view.
         """
