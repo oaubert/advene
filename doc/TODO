@@ -29,7 +29,7 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * option to stop player synchronisation then use current position as time offset
 
-* trace replay mode  of video navigation (replay video based on navigation events)
+* trace replay mode  of video navigation (replay video based on navigation events) -> trace player with controlled video player
 
 * Customizable shortcuts
 
@@ -147,7 +147,7 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * LdT: handle #RRGGBB color specification
 
-* improve search results navigation (cf PA post on May 2)
+* improve search results navigation (cf PA post on May 2 2008)
 
 * streamline ask_for_relationtype method (timeline relation creation)
 
