@@ -138,6 +138,7 @@ class DummyGlade:
 
         self.fileop_toolbar=gtk.Toolbar()
         self.fileop_toolbar.set_style(gtk.TOOLBAR_ICONS)
+        self.fileop_toolbar.set_show_arrow(False)
         hb.pack_start(self.fileop_toolbar, expand=True)
 
         self.adhoc_hbox=gtk.HBox()
