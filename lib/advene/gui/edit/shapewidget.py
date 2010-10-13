@@ -1267,6 +1267,17 @@ class ShapeDrawer:
                 return o[0]
         return None
 
+    def controlled_shape(self, point):
+        """Check if point is on a shape control point.
+
+        @return The shape and the control point information
+        """
+        for o in self.objects:
+            c = o[0].control_point(point)
+            if c:
+                return o[0], c
+        return None, None
+
     def add_menuitem(self, menu=None, item=None, action=None, *param, **kw):
         if item is None or item == "":
             i = gtk.SeparatorMenuItem()
@@ -1311,11 +1322,10 @@ class ShapeDrawer:
 
     # Start marking selection
     def button_press_event(self, widget, event):
-        x = int(event.x)
-        y = int(event.y)
+        point = (int(event.x), int(event.y))
         if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
             # Double-click. Open properties for the shape.
-            sel=self.clicked_shape( ( x, y ) )
+            sel = self.clicked_shape( point )
             if sel is not None and sel.edit_properties():
                 self.plot()
                 # Update liststore
@@ -1324,25 +1334,26 @@ class ShapeDrawer:
                     self.objects.set_value(i, 1, sel.name)
             return True
         elif event.button == 1:
-            self.selection[0][0], self.selection[0][1] = x, y
+            self.selection[0][0], self.selection[0][1] = point
             self.selection[1][0], self.selection[1][1] = None, None
-            sel=self.clicked_shape( ( x, y ) )
+            sel, c = self.controlled_shape( point )
             if sel is not None:
-                # Existing shape selected
+                # Existing shape controlled
                 self.feedback_shape = sel
-                c=sel.control_point( (x, y) )
-                if c is not None:
-                    self.selection = c
-                    self.mode = "resize"
-                else:
-                    self.mode = "translate"
+                self.selection = c
+                self.mode = "resize"
             else:
-                self.feedback_shape = self.shape_class()
-                self.feedback_shape.set_bounds( ( self.selection[0], self.selection[0]) )
-                self.mode = "create"
+                sel = self.clicked_shape( point )
+                if sel is not None:
+                    self.feedback_shape = sel
+                    self.mode = "translate"
+                else:
+                    self.feedback_shape = self.shape_class()
+                    self.feedback_shape.set_bounds( ( self.selection[0], self.selection[0]) )
+                    self.mode = "create"
         elif event.button == 3:
             # Popup menu
-            sel=self.clicked_shape( ( x, y ) )
+            sel=self.clicked_shape( point )
             if sel is not None:
                 self.popup_menu(sel)
         return True
