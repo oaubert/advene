@@ -80,12 +80,11 @@ def png_to_pixbuf (png_data, width=None, height=None):
     else:
         return pixbuf
 
-def image_from_position(controller, position=None, width=None, height=None):
+def image_from_position(controller, position=None, width=None, height=None, epsilon=None):
     i=gtk.Image()
     if position is None:
         position=controller.player.current_position_value
-    pb=png_to_pixbuf (controller.package.imagecache[position],
-                                         width=width, height=height)
+    pb=png_to_pixbuf (controller.package.imagecache.get(position, epsilon), width=width, height=height)
     i.set_from_pixbuf(pb)
     return i
 
