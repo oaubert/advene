@@ -387,11 +387,17 @@ class Player:
             self.snapshot_notify(s)
             
     def async_snapshot(self, position):
-        t=long(self.position2value(position)) - 40
+        t = long(self.position2value(position))
         if self.snapshotter:
             if not self.snapshotter.thread_running:
                 self.snapshotter.start()
-            self.snapshotter.enqueue(t)
+            # We enqueue 3 timestamps: the original timestamp, its
+            # value minus 20ms (the async snapshotter goes to the
+            # specified position then takes the video buffer which may then
+            # be later) and its value aligned to a frame boundary
+            # (considering a 25f/s framerate).
+            for pos in (t - 20, t / 25 * 25, t):
+                self.snapshotter.enqueue(pos)
         
     def snapshot(self, position):
         if not self.check_uri():
