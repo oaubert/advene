@@ -258,7 +258,7 @@ class HTMLContentHandler (ContentHandler):
         if self.editing_source:
             return self.sourceview.get_modified()
         else:
-            return self.view.get_modified()
+            return self.editor.get_modified()
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
@@ -655,7 +655,7 @@ class HTMLContentHandler (ContentHandler):
 
         if config.data.preferences['prefer-wysiwyg']:
             edit_wysiwyg()
-            self.view.set_modified(False)
+            self.editor.set_modified(False)
         else:
             edit_source()
             self.sourceview.set_modified(False)
