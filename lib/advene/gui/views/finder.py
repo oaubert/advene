@@ -673,7 +673,7 @@ class Finder(AdhocView):
         return True
 
     def scroll_event(self, widget=None, event=None):
-        if event.state & gtk.gdk.CONTROL_MASK:
+        if event.state & gtk.gdk.SHIFT_MASK:
             a=widget.get_hadjustment()
             if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
                 val = a.value + a.step_increment
