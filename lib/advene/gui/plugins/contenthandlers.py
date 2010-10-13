@@ -107,7 +107,7 @@ class ZoneContentHandler (ContentHandler):
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
             # We are editing the content of an annotation. Use its snapshot as background.
-            i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
+            i=image_from_position(self.controller, self.parent.fragment.begin, height=160, epsilon=1000/25)
             self.view = ShapeDrawer(callback=self.callback, background=i)
         else:
             self.view = ShapeDrawer(callback=self.callback)
@@ -265,8 +265,7 @@ class SVGContentHandler (ContentHandler):
         return False
 
     def set_begin(self, t):
-        i=image_from_position(self.controller, t)
-        self.view.set_background(i)
+        self.view.set_background(image_from_position(self.controller, t, epsilon=1000/25))
         return True
 
     def get_view (self, compact=False):
@@ -274,20 +273,20 @@ class SVGContentHandler (ContentHandler):
         vbox=gtk.VBox()
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
-            i=image_from_position(self.controller, self.parent.fragment.begin)
+            i = image_from_position(self.controller, self.parent.fragment.begin, epsilon=1000/25)
             self.view = ShapeEditor(background=i, pixmap_dir=config.data.advenefile('pixmaps'))
 
             def snapshot_update_cb(context, target):
-                if context.globals['position'] == self.parent.fragment.begin:
+                if abs(context.globals['position'] - self.parent.fragment.begin) <= 1000/25:
                     # Refresh image
-                    i=image_from_position(self.controller, self.parent.fragment.begin)
+                    i=image_from_position(self.controller, self.parent.fragment.begin, epsilon=1000/25)
                     self.view.set_background(i)
                 return True
             self.rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
                                                                            method=snapshot_update_cb))
 
             def annotation_update_cb(context, target):
-                i=image_from_position(self.controller, self.parent.fragment.begin)
+                i=image_from_position(self.controller, self.parent.fragment.begin, epsilon=1000/25)
                 self.view.set_background(i)
                 return True
             self.rules.append(self.controller.event_handler.internal_rule (event='AnnotationEditEnd',
