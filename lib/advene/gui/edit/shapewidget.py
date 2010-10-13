@@ -1128,6 +1128,9 @@ class ShapeDrawer:
         self.selection = [[None, None], [None, None]]
         self.feedback_shape = None
         self.shape_class = Rectangle
+        
+        self.resize_cursor = gtk.gdk.Cursor(gtk.gdk.BOTTOM_RIGHT_CORNER)
+        self.inside_cursor = gtk.gdk.Cursor(gtk.gdk.HAND2)
 
         self._svg_dimensions = None
 
@@ -1364,13 +1367,13 @@ class ShapeDrawer:
     # Draw rectangle during mouse movement
     def motion_notify_event(self, widget, event):
         if event.is_hint:
-            x, y, State = event.window.get_pointer()
+            x, y, state = event.window.get_pointer()
         else:
             x = event.x
             y = event.y
-            State = event.state
+            state = event.state
 
-        if State & gtk.gdk.BUTTON1_MASK and self.feedback_shape is not None:
+        if state & gtk.gdk.BUTTON1_MASK and self.feedback_shape is not None:
             if self.selection[1][0] is not None:
                 self.feedback_shape.render(self.pixmap, invert=True)
             self.selection[1][0], self.selection[1][1] = int(x), int(y)
@@ -1385,6 +1388,18 @@ class ShapeDrawer:
 
             self.feedback_shape.render(self.pixmap, invert=True)
             self.draw_drawable()
+        else:
+            # Check for control points
+            cursor = None
+            point = (x, y)
+            for o in self.objects:
+                if o[0].control_point( point ):
+                    cursor = self.resize_cursor
+                    break
+                if point in o[0]:
+                    cursor = self.inside_cursor
+                    break
+            self.widget.window.set_cursor(cursor)
 
     def draw_drawable(self):
         """Render the pixmap in the drawingarea."""
