@@ -540,6 +540,9 @@ class Text(Rectangle):
             print "MemoryError while rendering text"
         return
 
+    def control_point(self, point):
+        return None
+
     def parse_svg(cls, element, context):
         """Parse a SVG representation.
 
