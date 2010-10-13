@@ -31,7 +31,6 @@ import advene.core.config as config
 
 from advene.model.schema import AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
-from advene.model.fragment import MillisecondFragment
 from advene.gui.views import AdhocView
 import advene.gui.edit.elements
 from advene.gui.util import png_to_pixbuf
@@ -1017,68 +1016,6 @@ class TimeLine(AdhocView):
                                                            force_create=True)
         return at
 
-    def create_annotation(self, position, type, duration=None, content=None):
-        position=long(position)
-        if position > self.controller.cached_duration:
-            return None
-
-        id_=self.controller.package._idgenerator.get_id(Annotation)
-        if duration is None:
-            duration=self.controller.cached_duration / 20
-            # Make the end bound not override the screen
-            d=long(self.pixel2unit(self.adjustment.value + self.layout.window.get_size()[0], absolute=True) - position)
-            if d > 0:
-                duration=min(d, duration)
-            else:
-                # Should not happen
-                print "Strange, click outside the timeline"
-                return None
-
-        if position + duration > self.controller.cached_duration:
-            duration = self.controller.cached_duration - position
-
-        el=self.controller.package.createAnnotation(
-            ident=id_,
-            type=type,
-            author=config.data.userid,
-            date=self.controller.get_timestamp(),
-            fragment=MillisecondFragment(begin=position,
-                                         duration=duration))
-        if content is not None:
-            if getattr(el.type, '_fieldnames', None):
-                # Structured data
-                if "=" in content:
-                    # Let's assume that content is simple-structured data.
-                    try:
-                        data = dict( (k, v) for l in content.splitlines() for (k, v) in l.split('=') )
-                        # Add other keys
-                        data.update(dict( (f, "") for f in sorted(el.type._fieldnames) ))
-                        # Serialize
-                        content = "\n".join( "%s=%s" % (k, v) for (k, v) in data.iteritems() )
-                    except ValueError:
-                        # Badly formatted data
-                        content = "\n".join( "%s=" % f for f in sorted(el.type._fieldnames) ) + "\ncontent=%s" % content.replace("\n", " ")
-                else:
-                    content = "\n".join( "%s=" % f for f in sorted(el.type._fieldnames) ) + "\ncontent=%s" % content.replace("\n", " ")
-            elif 'svg' in el.type.mimetype:
-                if not '<svg' in content:
-                    # It must be simple text. Generate appropriate SVG.
-                    content = """<svg:svg height="320pt" preserveAspectRatio="xMinYMin meet" version="1" viewBox="0 0 400 320" width="400pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg">
-  <text fill="green" name="Content" stroke="green" style="stroke-width:1; font-family: sans-serif; font-size: 22" x="8" y="290">%s</text>
-</svg:svg>""" % content
-
-            el.content.data=content
-        elif getattr(el.type, '_fieldnames', None):
-            el.content.data="\n".join( "%s=" % f for f in sorted(el.type._fieldnames) )
-        elif 'svg' in el.type.mimetype:
-            el.content.data = """<svg:svg height="320pt" preserveAspectRatio="xMinYMin meet" version="1" viewBox="0 0 400 320" width="400pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg">
-</svg:svg>"""
-
-        self.controller.package.annotations.append(el)
-        el.complete=False
-        self.controller.notify('AnnotationCreate', annotation=el)
-        return el
-
     def annotation_drag_begin(self, widget, context):
         """Handle drag begin for annotations.
         """
@@ -1540,7 +1477,7 @@ class TimeLine(AdhocView):
             begin=long(data['timestamp'])
             content=data.get('comment', None)
             # Create an annotation with the timestamp as begin
-            self.create_annotation(begin, widget.annotationtype, content=content)
+            self.controller.create_annotation(begin, widget.annotationtype, content=content)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -1562,7 +1499,7 @@ class TimeLine(AdhocView):
                 begin=long(data['timestamp'])
                 content=data.get('comment', None)
                 # Create an annotation of type typ with the timestamp as begin
-                self.create_annotation(begin, typ, content=content)
+                self.controller.create_annotation(begin, typ, content=content)
         return False
 
     def legend_drag_received(self, widget, context, x, y, selection, targetType, time):
@@ -2281,10 +2218,10 @@ class TimeLine(AdhocView):
                     self.copy_annotation_type(source, a[0])
                 else:
                     # Create an annotation in the type.
-                    self.create_annotation(position=self.pixel2unit(self.adjustment.value + x, absolute=True),
-                                           type=source,
-                                           duration=self.pixel2unit(context.get_source_widget().get_allocation().width),
-                                           )
+                    self.controller.create_annotation(position=self.pixel2unit(self.adjustment.value + x, absolute=True),
+                                                      type=source,
+                                                      duration=self.pixel2unit(context.get_source_widget().get_allocation().width),
+                                                      )
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
@@ -2307,7 +2244,7 @@ class TimeLine(AdhocView):
                 begin=long(data['timestamp'])
                 content=data.get('comment', None)
                 # Create an annotation of type typ with the timestamp as begin
-                self.create_annotation(begin, typ, content=content)
+                self.controller.create_annotation(begin, typ, content=content)
         else:
             print "Unknown target type for drop: %d" % targetType
         return False
@@ -2379,9 +2316,8 @@ class TimeLine(AdhocView):
                     at=ats[0]
                 if at is not None:
                     # Create an annotation and edit it
-                    el = self.create_annotation(position=self.controller.player.current_position_value,
-                                                type=at,
-                                                duration=3000)
+                    el = self.controller.create_annotation(position=self.controller.player.current_position_value,
+                                                           type=at)
                     if el is not None:
                         b=self.create_annotation_widget(el)
                         b.show()
@@ -2462,9 +2398,9 @@ class TimeLine(AdhocView):
                         at=a[0]
 
                     def create(i):
-                        self.create_annotation(position=self.pixel2unit(x1, absolute=True),
-                                               type=at,
-                                               duration=self.pixel2unit(x2-x1))
+                        self.controller.create_annotation(position=self.pixel2unit(x1, absolute=True),
+                                                          type=at,
+                                                          duration=self.pixel2unit(x2-x1))
                         return True
                     def zoom(i):
                         self.zoom_on_region(self.pixel2unit(x1, absolute=True),
@@ -2585,7 +2521,7 @@ class TimeLine(AdhocView):
                     break
             if at is None:
                 at=self.controller.package.annotationTypes[0]
-            self.create_annotation(position, at)
+            self.controller.create_annotation(position, at)
             return True
 
         item = gtk.MenuItem(_("Position %s") % helper.format_time(position))
@@ -2909,9 +2845,8 @@ class TimeLine(AdhocView):
                     and self.controller.player.status != self.controller.player.PauseStatus):
                     return True
                 # Create a new annotation
-                el=self.create_annotation(position=long(self.controller.player.current_position_value),
-                                       type=widget.annotationtype,
-                                       duration=3000)
+                el=self.controller.create_annotation(position=long(self.controller.player.current_position_value),
+                                                     type=widget.annotationtype)
                 if el is not None:
                     b=self.create_annotation_widget(el)
                     b.show()

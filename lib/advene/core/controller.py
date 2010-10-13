@@ -893,6 +893,60 @@ class AdveneController(object):
 
         return True
 
+    def create_annotation(self, position, type, duration=None, content=None):
+        position=long(position)
+        if position > self.cached_duration:
+            return None
+        id_=self.package._idgenerator.get_id(Annotation)
+
+        if duration is None:
+            duration = self.cached_duration / 20
+        if position + duration > self.cached_duration:
+            duration = self.cached_duration - position
+
+        el=self.package.createAnnotation(
+            ident=id_,
+            type=type,
+            author=config.data.userid,
+            date=self.get_timestamp(),
+            fragment=MillisecondFragment(begin=position,
+                                         duration=duration))
+        if content is not None:
+            if getattr(el.type, '_fieldnames', None):
+                # Structured data
+                if "=" in content:
+                    # Let's assume that content is simple-structured data.
+                    try:
+                        data = dict( (k, v) for l in content.splitlines() for (k, v) in l.split('=') )
+                        # Add other keys
+                        data.update(dict( (f, "") for f in sorted(el.type._fieldnames) ))
+                        # Serialize
+                        content = "\n".join( "%s=%s" % (k, v) for (k, v) in data.iteritems() )
+                    except ValueError:
+                        # Badly formatted data
+                        content = "\n".join( "%s=" % f for f in sorted(el.type._fieldnames) ) + "\ncontent=%s" % content.replace("\n", " ")
+                else:
+                    content = "\n".join( "%s=" % f for f in sorted(el.type._fieldnames) ) + "\ncontent=%s" % content.replace("\n", " ")
+            elif 'svg' in el.type.mimetype:
+                if not '<svg' in content:
+                    # It must be simple text. Generate appropriate SVG.
+                    content = """<svg:svg width="640pt" height="480pt" preserveAspectRatio="xMinYMin meet" version="1" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg">
+  <text fill="green" name="Content" stroke="green" style="stroke-width:1; font-family: sans-serif; font-size: 22" x="8" y="390">%s</text>
+</svg:svg>""" % content
+
+            el.content.data=content
+        elif getattr(el.type, '_fieldnames', None):
+            el.content.data="\n".join( "%s=" % f for f in sorted(el.type._fieldnames) )
+        elif 'svg' in el.type.mimetype:
+            el.content.data = """<svg:svg width="640pt" height="480pt" preserveAspectRatio="xMinYMin meet" version="1" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg">
+  <rect fill="none" name="Rect" stroke="green" style="stroke-width:2;" x="100" y="100" width="100" height="100" />
+</svg:svg>"""
+
+        self.package.annotations.append(el)
+        el.complete=False
+        self.notify('AnnotationCreate', annotation=el)
+        return el
+
     def create_position (self, value=0, key=None, origin=None):
         """Create a new player-specific position.
         """
