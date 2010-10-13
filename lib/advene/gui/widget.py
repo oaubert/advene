@@ -515,10 +515,11 @@ class AnnotationWidget(GenericColorButtonWidget):
         elif self.annotation.content.mimetype == 'image/svg+xml' and rsvg is not None:
             if width < 6:
                 return
-            s=rsvg.Handle(data=self.annotation.content.data)
-            scale = 1.0 * height / s.get_dimension_data()[1]
-            context.set_matrix(cairo.Matrix( scale, 0, 0, scale, 0, 0 ))
-            s.render_cairo(context)
+            if self.annotation.content.data:
+                s=rsvg.Handle(data=self.annotation.content.data)
+                scale = 1.0 * height / s.get_dimension_data()[1]
+                context.set_matrix(cairo.Matrix( scale, 0, 0, scale, 0, 0 ))
+                s.render_cairo(context)
             return
 
         # Draw the border
