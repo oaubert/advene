@@ -505,7 +505,7 @@ $.widget("ui.video", {
                                     // looping when adjacent
                                     // annotations share the same
                                     // begin/end time
-                                    if (Math.abs(t - currentTime) > .5)
+                                    if (Math.abs(t - $(this).attr('data-begin')) > .5)
                                         setTimeout(function() {
                                             // FIXME: check data-video-url for multi-video case
                                             self.setPlayingTime(t);
