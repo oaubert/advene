@@ -40,6 +40,8 @@ $.widget("ui.video", {
         endPoint: 0,
         endFragmentBehaviour: "continue",
         transcriptHighlight: true,
+        // Follow the transcription (dynamic montage)
+        transcriptFollow: false,
         // Only 1 player at a time
         singletonPlayer: true,
         location: { 'left': 0, 'top': 0 }
@@ -48,6 +50,10 @@ $.widget("ui.video", {
     _create: function() {
         var self = this;
 
+        // Update self.options
+        self.options.transcriptHighlight = ($(".transcript", document).length > 0);
+        self.options.transcriptFollow = ($(".transcriptFollow", document).length > 0);
+        
         var videoOptions = {
             autoplay: self.options.autoPlay,
             controls: false,
@@ -481,8 +487,34 @@ $.widget("ui.video", {
             if (self.options.transcriptHighlight)
                 $(".transcript[data-begin]", $(document)).each( function() {
                     if ($(this).hasClass('activeTranscript')) {
-                        if ((currentTime < $(this).attr('data-begin') || currentTime > $(this).attr('data-end')))
-                                $(this).removeClass('activeTranscript');
+                        if ((currentTime < $(this).attr('data-begin') || currentTime > $(this).attr('data-end'))) {
+                            $(this).removeClass('activeTranscript');
+                            if (self.options.transcriptFollow) {
+                                // Get the next transcript node
+                                next = $(this).next().find(".transcript");
+                                if (! next.length)
+                                    // The element could be inside a container.
+                                    // FIXME: how many container levels should we take into account?
+                                    next = $(this).parent().next().find(".transcript");
+                                if (next.length) {
+                                    // A next node has been found. Go to it
+                                    t = next[0].getAttribute('data-begin');
+                                    // Only follow the timecode if new
+                                    // time is sufficiently
+                                    // different. This avoids infinite
+                                    // looping when adjacent
+                                    // annotations share the same
+                                    // begin/end time
+                                    if (Math.abs(t - currentTime) > .5)
+                                        setTimeout(function() {
+                                            // FIXME: check data-video-url for multi-video case
+                                            self.setPlayingTime(t);
+                                        }, 200);
+                                } else {
+                                    self.pause();
+                                }
+                            }
+                        }
                     } else {
                         if ($(this).attr('data-begin') <= self.element[0].currentTime && self.element[0].currentTime <= $(this).attr('data-end')) {
                                 $(this).addClass('activeTranscript');
@@ -920,7 +952,6 @@ $.widget("ui.video", {
 
             playerOptions =  { title:'Advene main player',
                                endFragmentBehaviour: 'continue',
-                               transcriptHighlight: ($(".transcript").length > 0)
                              };
             if (options !== undefined)
                 for (key in options)
