@@ -1006,7 +1006,7 @@ class Ellipse(Rectangle):
         x, y = point
         if self.rx == 0 or self.ry == 0:
             return False
-        d =  ( (x - self.cx) / self.rx ) ** 2 + ( (y - self.cy) / self.ry )  ** 2
+        d =  ( 1.0 * (x - self.cx) / self.rx ) ** 2 + ( 1.0 * (y - self.cy) / self.ry )  ** 2
         return d < 1
 
     def translate(self, vector):
