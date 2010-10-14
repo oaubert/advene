@@ -575,8 +575,8 @@ $.widget("ui.video", {
             textError=textError+'An unknown error occurred.';
             break;
         }
-        self._playbackErrorText.text(textError);
-        self._playbackErrorText.show();
+        if (console)
+            console.log(textError);
     },
 
     _wait: function(t) {
