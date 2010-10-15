@@ -222,9 +222,8 @@ class ECAEngine:
                     import traceback
                     s=StringIO.StringIO()
                     traceback.print_exc (file = s)
-                    self.controller.queue_action(self.controller.log, "Exception (traceback in console):" + unicode(e))
-                    print str(e)
-                    print s.getvalue()
+                    v = unicode(s.getvalue(), 'utf8', 'ignore')
+                    self.controller.queue_action(self.controller.log, "Exception (traceback in console):" + v)
 
     def reset_queue (self):
         """Reset the scheduler's queue.
