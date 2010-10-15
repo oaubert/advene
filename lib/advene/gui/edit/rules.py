@@ -762,12 +762,15 @@ class EditCondition(EditGeneric):
 
         if self.parent is None or isinstance(self.parent, EditRule):
             predefined=[
+                ('annotation/type/id', _('The id of the annotation type') ),
+                ('annotation/content/data', _('The annotation content') ),
+                ] + [
+                ('annotation/content/parsed/%s' % p, _("The value of the %s attribute") % p)
+                for p in set(a for at in self.controller.package.annotationTypes for a in at._fieldnames) ] + [
                 ('annotation/fragment', _('The annotation fragment') ),
                 ('annotation/fragment/begin', _('The annotation begin time') ),
                 ('annotation/fragment/end', _('The annotation end time') ),
-                ('annotation/content/data', _('The annotation content') ),
                 ('annotation/fragment/duration', _('The annotation duration') ),
-                ('annotation/type/id', _('The id of the annotation type') ),
                 ('annotation/content/mimetype', _('The annotation MIME-type') ),
                 ('annotation/incomingRelations', _("The annotation's incoming relations") ),
                 ('annotation/outgoingRelations', _("The annotation's outgoing relations") ),
