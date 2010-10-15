@@ -58,9 +58,7 @@ class SoundPlayer:
         bus.add_signal_watch()
 
         def eos_cb(b, m):
-            print "EOS"
             if m.src == pipe:
-                print "pipe"
                 pipe.set_state(gst.STATE_NULL)
                 
         bus.connect('message::eos', eos_cb)
