@@ -268,8 +268,12 @@ def register(controller=None):
             name="PlaySoundClip",
             method=ac.PlaySoundClip,
             description=_("Play a SoundClip"),
-            parameters={'clip': _("Clip id")},
-            defaults={'clip': 'string:Please select a sound by clicking on the arrow'},
+            parameters={'clip': _("Clip id"),
+                        'volume': _("Volume (0..100)"),
+                        'balance': _("Left-right balance: -1 -> full left, 0 -> center, 1 -> full right") },
+            defaults={'clip': 'string:Please select a sound by clicking on the arrow',
+                      'volume': 'string:100',
+                      'balance': 'string:0' },
             predefined=ac.PlaySoundClip_predefined,
             category='sound',
             )
@@ -278,8 +282,12 @@ def register(controller=None):
             name="PlaySound",
             method=ac.PlaySound,
             description=_("Play a sound"),
-            parameters={'filename': _("Sound filename")},
-            defaults={'filename': 'string:test.wav'},
+            parameters={'filename': _("Sound filename"),
+                        'volume': _("Volume (0..100)"),
+                        'balance': _("Left-right balance: -1 -> full left, 0 -> center, 1 -> full right") },
+            defaults={'filename': 'string:test.wav',
+                      'volume': 'string:100',
+                      'balance': 'string:0' },
             category='sound',
             )
                                )
@@ -648,7 +656,9 @@ class DefaultActionsRepository:
             self.controller.log(_("No 'soundclips' resource folder in the package"))
             print "No soundclips"
             return True
-        clip=self.parse_parameter(context, parameters, 'clip', None)
+        clip = self.parse_parameter(context, parameters, 'clip', None)
+        volume = self.parse_parameter(context, parameters, 'volume', 100)
+        balance = self.parse_parameter(context, parameters, 'balance', 0)
         if clip is None:
             print "No clip"
             return True
@@ -656,7 +666,7 @@ class DefaultActionsRepository:
             # Get the resource
             d=self.controller.package.resources['soundclips']
             if clip in d:
-                self.controller.soundplayer.play(d[clip].file_)
+                self.controller.soundplayer.play(d[clip].file_, volume=volume, balance=balance)
         return True
 
     def PlaySoundClip_predefined(self, controller):
@@ -668,7 +678,12 @@ class DefaultActionsRepository:
             predef = [ ('string:%s' % res.id, res.id)
                        for res in self.controller.package.resources['soundclips'].children()
                        if hasattr(res, 'data') ]
-        return { 'clip': predef }
+        return { 'clip': predef,
+                 'volume': [ ('string:100', _("Full volume")) ],
+                 'balance': [ ('string:-1', _("Left")),
+                              ('string:0', _("Center")),
+                              ('string:1', _("Right")) ]
+                 }
 
     def PlaySound(self, context, parameters):
         """Play a Sound.
@@ -676,10 +691,12 @@ class DefaultActionsRepository:
         The parameter is a filename.
         """
         filename=self.parse_parameter(context, parameters, 'filename', None)
+        volume = self.parse_parameter(context, parameters, 'volume', 100)
+        balance = self.parse_parameter(context, parameters, 'balance', 0)
         if filename is None:
             return True
         else:
-            self.controller.soundplayer.play(filename)
+            self.controller.soundplayer.play(filename, volume=volume, balance=balance)
         return True
 
     def SetState(self, context, parameters):
