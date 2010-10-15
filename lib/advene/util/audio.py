@@ -44,30 +44,44 @@ except ImportError:
 import advene.core.config as config
 
 class SoundPlayer:
-    def gst_play(self, fname):
+    def gst_play(self, fname, volume=100, balance=0):
         """Play the given file through gstreamer.
         """
-        if not hasattr(self, 'pipe'):
-            self.pipe = gst.parse_launch('playbin2')
         if fname.startswith('file:') or fname.startswith('http:'):
             uri = fname
         elif config.data.os == 'win32':
             uri = 'file:' + urllib.pathname2url(fname)
         else:
             uri = 'file://' + os.path.abspath(fname)
-        self.pipe.set_state(gst.STATE_NULL)
-        self.pipe.props.uri = uri
-        self.pipe.set_state(gst.STATE_PLAYING)
+        pipe = gst.parse_launch('uridecodebin name=decode uri=%s ! audiopanorama panorama=%f ! audioamplify name=amplify amplification=%f ! autoaudiosink' % (uri, float(balance), int(volume) / 100.0 ))
+        bus = pipe.get_bus()
+        bus.add_signal_watch()
+
+        def eos_cb(b, m):
+            print "EOS"
+            if m.src == pipe:
+                print "pipe"
+                pipe.set_state(gst.STATE_NULL)
+                
+        bus.connect('message::eos', eos_cb)
+        pipe.set_state(gst.STATE_PLAYING)
+        # FIXME: since we do not reuse the pipeline, we maybe clean it up on state_change -> READY
         return True
 
-    def linux_play(self, fname):
+    def linux_play(self, fname, volume=100, balance=0):
         """Play the given file. Requires aplay.
+
+        It ignore the volume and balance parameters.
         """
         pid=subprocess.Popen( [ '/usr/bin/aplay', '-q', fname ] )
         signal.signal(signal.SIGCHLD, self.handle_sigchld)
         return True
             
-    def win32_play(self, fname):
+    def win32_play(self, fname, volume=100, balance=0):
+        """Play the given file. Requires pySoundPlayer.exe.
+
+        It ignore the volume and balance parameters.
+        """
         pathsp = os.path.sep.join((config.data.path['advene'],'pySoundPlayer.exe'))
         if not os.path.exists(pathsp):
             pathsp = os.path.sep.join((config.data.path['advene'],'Win32SoundPlayer','pySoundPlayer.exe'))
@@ -76,15 +90,18 @@ class SoundPlayer:
             #no SIGCHLD handler for win32
         return True
 
-    def macosx_play(self, fname):
+    def macosx_play(self, fname, volume=100, balance=0):
         """Play the given file.
 
         Cf
         http://developer.apple.com/documentation/Cocoa/Reference/ApplicationKit/Classes/NSSound_Class/Reference/Reference.html
+
+        It ignores the balance parameter.
         """
         import objc
         import AppKit
         sound = AppKit.NSSound.alloc().initWithContentsOfFile_byReference_(fname, True)
+        sound.setVolume( volume / 100.0 )
         sound.play()
         return True
 
@@ -102,3 +119,4 @@ class SoundPlayer:
         if not os.path.exists('/usr/bin/aplay'):
             print "Error: aplay is not installed. Advene will be unable to play sounds."
         play=linux_play
+    
