@@ -39,8 +39,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * Ldt ZIP importer
 
-* Fix svg support for gstreamer/mac (need to rewrite the SVGOverlay element in C)
-
 * Make the timeline inspector editable (thus sticky display)
 
 * Screen overlay interface: define a grid with sensitive areas + event
@@ -1360,9 +1358,6 @@ current time,  timestamp: use spinbutton
 * edit relations through annotation context menu
 
 * EditAccumulator : only annotations et relations, not queries/views
-
-* Fix for SVG module :
- - find a way to trigger the svg module rather than the freetype module
 
 * Create a simple SVG editor (rectangle and ellipse) and integrate it in Advene
 
