@@ -799,27 +799,15 @@ class Line(Rectangle):
 
     def control_point(self, point):
         """If on a control point, return its coordinates (x, y) and those of the other bound, else None
-
-        This version is fitted for rectangular areas
         """
         x, y = point[0], point[1]
-        retval = [[None, None], [None, None]]
-        if abs(x - self.x1) <= self.tolerance:
-            retval[0][0] = self.x2
-            retval[1][0] = self.x1
-        elif abs(x - self.x2) <= self.tolerance:
-            retval[0][0] = self.x1
-            retval[1][0] = self.x2
-        else:
-            return None
-        if abs(y - self.y1) <= self.tolerance:
-            retval[0][1] = self.y2
-            retval[1][1] = self.y1
-        elif abs(y - self.y2) <= self.tolerance:
-            retval[0][1] = self.y1
-            retval[1][1] = self.y2
-        else:
-            return None
+        retval = None
+        if (abs(x - self.x1) <= self.tolerance
+            and abs(y - self.y1) <= self.tolerance):
+            retval = [ [self.x2, self.y2], [self.x1, self.y1] ]
+        elif (abs(x - self.x2) <= self.tolerance
+              and abs(y - self.y2) <= self.tolerance):
+            retval = [ [self.x1, self.y1], [self.x2, self.y2] ]
         return retval
 
     def __contains__(self, point):
