@@ -43,6 +43,7 @@ import gtk
 import cairo
 import urllib
 import re
+import types
 from math import atan2, cos, sin
 
 try:
@@ -1136,7 +1137,8 @@ class ShapeDrawer:
         self.widget.connect('button-press-event', self.button_press_event)
         self.widget.connect('button-release-event', self.button_release_event)
         self.widget.connect('motion-notify-event', self.motion_notify_event)
-        self.widget.set_events(gtk.gdk.EXPOSURE_MASK | gtk.gdk.LEAVE_NOTIFY_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.POINTER_MOTION_MASK |gtk.gdk.POINTER_MOTION_HINT_MASK)
+        self.widget.set_events(gtk.gdk.EXPOSURE_MASK | gtk.gdk.LEAVE_NOTIFY_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK 
+                               | gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.POINTER_MOTION_HINT_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK )
         
         self.background=None
         # FIXME: Hardcoded dimensions are bad.
@@ -1561,7 +1563,7 @@ class ShapeDrawer:
         self.plot()
         return True
 
-class ShapeEditor:
+class ShapeEditor(object):
     """Shape Editor component.
 
     This component provides an example of using ShapeWidget.
@@ -1591,23 +1593,19 @@ class ShapeEditor:
             Ellipse: 'shape_ellipse.png',
             Image: 'shape_image.png',
             }
-
         self.widget=self.build_widget(pixmap_dir)
         self.widget.connect('key-press-event', self.key_press_event)
 
     def key_press_event(self, widget, event):
         cl=self.key_mapping.get(event.keyval, None)
-        if cl is not None:
-            try:
-                # Select the appropriate shape
-                i=self.shapes.index(cl)
-                self.shapeselector.set_active(i)
-                return True
-            except ValueError:
-                # Maybe a method
-                if callable(cl):
-                    cl(widget, event)
-                    return True
+        if isinstance(cl, types.TypeType) and issubclass(cl, Shape):
+            # Select the appropriate shape
+            self.shape_icon.set_shape(cl)
+            self.drawer.shape_class = cl
+            return True
+        elif callable(cl):
+            cl(widget, event)
+            return True
         return False
 
     def callback(self, l):
@@ -1703,6 +1701,7 @@ class ShapeEditor:
         vbox.add(hbox)
 
         hbox.pack_start(self.drawer.widget, True, True, 0)
+        self.drawer.widget.connect('key-press-event', self.key_press_event)
 
         self.treeview = gtk.TreeView(self.drawer.objects)
         self.treeview.set_reorderable(True)
