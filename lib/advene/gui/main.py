@@ -3751,7 +3751,7 @@ class AdveneGUI(object):
 
     def on_b_play_clicked (self, button=None, data=None):
         p = self.controller.player
-        if not p.playlist_get_list():
+        if not p.playlist_get_list() and not 'record' in p.player_capabilities:
             # No movie file is defined yet. Propose to choose one.
             self.on_b_addfile_clicked()
             return True
