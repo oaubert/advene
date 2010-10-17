@@ -2259,7 +2259,7 @@ class AdveneController(object):
             #     print "update_status %s %i" % (status, position.value)
             # else:
             #     print "update_status %s %s" % (status, position)
-            if self.player.playlist_get_list():
+            if self.player.playlist_get_list() or 'record' in self.player.player_capabilities:
                 self.player.update_status (status, position)
                 for p in self.slave_players:
                     p.update_status(status, position)
