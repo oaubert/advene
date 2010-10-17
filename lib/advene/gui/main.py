@@ -1654,7 +1654,7 @@ class AdveneGUI(object):
         try:
             p.set_widget(self.drawable)
         except AttributeError:
-            p.set_visual(self.visual_id)
+            p.set_visual(self.drawable.get_id())
         self.update_control_toolbar(self.player_toolbar)
 
     def player_play_pause(self, event):
