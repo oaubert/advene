@@ -114,7 +114,7 @@ def register(controller=None):
                     ( 'string:1000', _("1 second") ),
                     ( 'annotation/fragment/duration',_("The annotation duration") )
                     )},
-            category='advanced',
+            category='image',
             )
                                )
     controller.register_action(RegisteredAction(
@@ -126,7 +126,7 @@ def register(controller=None):
             predefined={'message': (
                     ( 'annotation/content/data', _("The annotation content") ),
                     )},
-            category='advanced',
+            category='image',
             )
                                )
     controller.register_action(RegisteredAction(
@@ -176,7 +176,7 @@ def register(controller=None):
                     ( 'string:1000', _("1 second") ),
                     ( 'annotation/fragment/duration', _("The annotation duration") )
                     )},
-            category='advanced',
+            category='image',
             )
                                )
     controller.register_action(RegisteredAction(
@@ -219,7 +219,7 @@ def register(controller=None):
                         'delay': _("Delay in ms before sending the event.")},
             defaults={'identifier': 'string:name',
                       'delay': 'string:2000'},
-            category='generic',
+            category='expert',
             )
                                )
 
@@ -229,7 +229,7 @@ def register(controller=None):
             description=_("Open a URL in the web browser"),
             parameters={'url': _("URL")},
             defaults={'url': 'string:http://liris.cnrs.fr/advene/'},
-            category='gui',
+            category='external',
             )
                                )
 

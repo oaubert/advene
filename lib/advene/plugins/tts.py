@@ -75,7 +75,7 @@ def register(controller=None):
             predefined={'message': (
                     ( 'annotation/content/data', _("The annotation content") ),
                     )},
-            category='generic',
+            category='sound',
             ))
 
 class TTSEngine:

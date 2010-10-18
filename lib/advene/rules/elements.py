@@ -1064,14 +1064,15 @@ class ECACatalog:
                   'UserEvent']
 
     action_categories=odict((
-            ('generic', _("Generic actions")),
-            ('player', _("Basic player control")),
-            ('advanced', _("Advanced player control")),
+            ('player', _("Player control")),
+            ('sound', _("Audio enrichment")),
+            ('image', _("Image enrichment")),
+            ('external', _("External display control")),
+            ('popup', _("Popup")),
+
+            ('state', _("State")),
             ('gui', _("GUI actions")),
-            ('popup', _("Popup actions")),
-            ('sound', _("Sound actions")),
-            ('state', _("State actions")),
-            ('expert', _("Expert actions")),
+            ('expert', _("Expert")),
         ))
 
     def __init__(self):

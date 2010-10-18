@@ -87,7 +87,7 @@ def register(controller=None):
             predefined={'message': (
                     ( 'annotation/content/data', _("The annotation content") ),
                     )},
-            category='generic',
+            category='external',
             ))
 
 class InputRequest(object):
