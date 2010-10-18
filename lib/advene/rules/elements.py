@@ -31,6 +31,7 @@ import advene.core.config as config
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 
+from advene.util.odict import odict
 from gettext import gettext as _
 
 class Event(str):
@@ -1062,16 +1063,16 @@ class ECACatalog:
                   'PlayerResume', 'PlayerStop', 'ApplicationStart', 'ViewActivation',
                   'UserEvent']
 
-    action_categories={
-        'generic': _("Generic actions"),
-        'player': _("Basic player control"),
-        'advanced': _("Advanced player control"),
-        'gui': _("GUI actions"),
-        'popup': _("Popup actions"),
-        'sound': _("Sound actions"),
-        'state': _("State actions"),
-        'expert': _("Expert actions"),
-        }
+    action_categories=odict((
+            ('generic', _("Generic actions")),
+            ('player', _("Basic player control")),
+            ('advanced', _("Advanced player control")),
+            ('gui', _("GUI actions")),
+            ('popup', _("Popup actions")),
+            ('sound', _("Sound actions")),
+            ('state', _("State actions")),
+            ('expert', _("Expert actions")),
+        ))
 
     def __init__(self):
         # Dict of registered actions, indexed by name
