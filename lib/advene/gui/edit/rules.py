@@ -982,14 +982,15 @@ class EditAction(EditGeneric):
             if config.data.preferences['expert-mode']:
                 return l
             else:
+                expert_categories = ('expert', 'gui', 'state')
                 if attr is None:
                     # No attribute, directly test value
-                    return [ e for e in l if e != 'expert' ]
+                    return [ e for e in l if not e in expert_categories ]
                 else:
-                    return [ e for e in l if getattr(e, attr) != 'expert' ]
+                    return [ e for e in l if not getattr(e, attr) in expert_categories ]
 
         self.selector=dialog.CategorizedSelector(title=_("Select an action"),
-                                                 elements=expert_filter(c.actions.values(), 'category'),
+                                                 elements=expert_filter(sorted(c.actions.values()), 'category'),
                                                  categories=expert_filter(c.action_categories.keys()),
                                                  current=c.actions[self.current_name],
                                                  description_getter=description_getter,
