@@ -1,3 +1,5 @@
+* Play a sound file: ask wether to keep the reference or to copy the file as resource
+
 * gstreamer pipeline (videomixer) to generate 1-pixel-column sum-up of
    video:
 gst-launch -e filesrc location=/data/video/Bataille.avi ! decodebin ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=320,pixel-aspect-ratio=\(fraction\)1/1 ! videocrop left=158 right=160 ! progressreport update-freq=1 ! pngenc snapshot=false ! multifilesink location=%05d.png
