@@ -11,6 +11,7 @@
 ../lib/advene/plugins/brltty.py
 ../lib/advene/plugins/tracebuilder.py
 ../lib/advene/plugins/transcriber.py
+../lib/advene/plugins/aeidon.py
 ../lib/advene/plugins/shotdetect.py
 ../lib/advene/util/importer.py
 ../lib/advene/util/helper.py
