@@ -793,8 +793,12 @@ $.widget("ui.video", {
                     className: 'ui-effects-transfer'
                 };
                 uiPlayer.show();
-                //('.player_container').player('open');
-                //self.minplayer.css('top','0');
+                // Set player on a visible part of the screen
+    			if (uiPlayer.css('position') == 'absolute' &&
+               	    (($(document).scrollTop() > uiPlayer.position().top + uiPlayer.height())||
+               	     ($(document).scrollTop() + $(window).height() < uiPlayer.position().top)))
+                    uiPlayer.css( { position: 'absolute',
+                                    top:  event.pageY - uiPlayer.height() - 20 } );
                 self.minplayer.hide("transfer", options, 1000, function(){} );
                 self.minplayer.hide();
                 return false;
@@ -837,7 +841,9 @@ $.widget("ui.video", {
                     'height': hauteur
                 });
                 if (uiPlayer.find('.ui-dialog-titlebar-fixonscreen', this).is(':hidden')) {
-                    uiPlayer.css('position', 'fixed');
+                	var pos = uiPlayer.position();
+                	uiPlayer.css('position', 'fixed');
+                	uiPlayer.css('top', pos.top - $(window).scrollTop());
                 }
             });
 
@@ -894,7 +900,9 @@ $.widget("ui.video", {
             })
             .click(function(event) {
                 $(this).hide();
-                uiPlayer.css('position','fixed');
+                var pos = uiPlayer.position();
+                uiPlayer.css('position', 'fixed');
+                uiPlayer.css('top',pos.top - $(window).scrollTop());
                 uiPlayer.find('.ui-dialog-titlebar-nofixonscreen ',this).show();
                 return false;
             })
@@ -920,7 +928,9 @@ $.widget("ui.video", {
             .mousedown(function(ev) { ev.stopPropagation(); } )
             .click(function(event) {
                 $(this).hide();
+                var pos = uiPlayer.position();
                 uiPlayer.css('position','absolute');
+                uiPlayer.css('top', pos.top);
                 uiPlayer.find('.ui-dialog-titlebar-fixonscreen ').show();
                 return false;
             })
