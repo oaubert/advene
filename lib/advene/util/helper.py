@@ -281,7 +281,7 @@ def format_time (val = 0):
     elif f == '%.S':
         ret = '%d.%03d' % (s, ms)
     else:
-        f = f.replace('%.S', '%S.' + '%03d' % ms)
+        f = f.replace('''%.S''', '''%S.''' + '%03d' % ms).replace('''%,S''', '''%S,''' + '%02d' % (ms / 25))
         ret = time.strftime(f, time.gmtime(s))
 
     if dummy:

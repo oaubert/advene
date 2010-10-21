@@ -83,6 +83,7 @@ import advene.model.tal.context
 import advene.core.mediacontrol
 import advene.util.helper as helper
 import advene.util.ElementTree as ET
+from advene.util.odict import odict
 
 import advene.util.importer
 from advene.gui.util.completer import Indexer, Completer
@@ -4022,14 +4023,15 @@ class AdveneGUI(object):
             ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
 
         ew.add_title(_("Time-related"))
-        ew.add_option(_("Time format"), 'timestamp-format', _("Format used to display timecodes"), {
-                'HH:MM:SS.sss': '%H:%M:%.S',
-                'HH:MM:SS': '%H:%M:%S',
-                'MM:SS.sss': '%M:%.S',
-                'MM:SS': '%M:%S',
-                'SS.sss': '%.S',
-                'SS': '%S',
-                })
+        ew.add_option(_("Time format"), 'timestamp-format', _("Format used to display timecodes"), odict( (
+                    ('HH:MM:SS.sss', '%H:%M:%.S'),
+                    ('HH:MM:SS,ff', '%H:%M:%,S'),
+                    ('HH:MM:SS', '%H:%M:%S'),
+                    ('MM:SS.sss', '%M:%.S'),
+                    ('MM:SS', '%M:%S'),
+                    ('SS.sss', '%.S'),
+                    ('SS', '%S'),
+                    )) )
         ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 1, 300000)
         ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 1, 300000)
         ew.add_spin(_("Third time increment"), "third-time-increment", _("Skip duration, when using control-shift-up/down (in ms)."), 1, 300000)
