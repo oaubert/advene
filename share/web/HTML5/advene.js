@@ -141,7 +141,8 @@ $.widget("ui.video", {
             .delay(100)
             .fadeOut(500);
 
-        self._volumeSlider.slider('value', self.options.volume * 100);
+        self.element[0].volume = 0.25;
+    	self._volumeSlider.slider('value',parseInt(self.element[0].volume * 100));
 
         // webkit bug
         if( self.options.autoPlay && $.browser.webkit ) {
@@ -577,6 +578,11 @@ $.widget("ui.video", {
         }
         if (console)
             console.log(textError);
+    },
+
+    _event_volumechange: function() {
+    	var self = this;
+    	self._volumeSlider.slider('value', parseInt(self.element[0].volume * 100));
     },
 
     _wait: function(t) {
