@@ -105,7 +105,8 @@ $.widget("ui.video", {
             "volumechange",
             "waiting",
             "click",
-            "activate",
+            "keydown",
+            "mouseover",
         ];
 
         $.each( videoEvents, function(){
@@ -549,6 +550,7 @@ $.widget("ui.video", {
     },
 
     _event_click: function() {
+        var self = this;
         this._togglePlayPause();
     },
 
@@ -585,6 +587,46 @@ $.widget("ui.video", {
     	self._volumeSlider.slider('value', parseInt(self.element[0].volume * 100));
     },
 
+    _event_mouseover: function() {
+    	var self = this;
+		$(self).focus();
+
+    },
+
+    _event_keydown: function(e) {
+		var self = this;
+		if (!e)
+            var e = window.event
+		// handle event and stop propagating it!
+		e.cancelBubble = true;
+		if (e.preventDefault) e.preventDefault();
+		if (e.stopPropagation) e.stopPropagation();
+
+		switch (e.keyCode){
+			case 32:  // Space
+				self._togglePlayPause();
+				break;
+			case 38: // up-arrow
+				self.volume.apply(self, [parseInt(self.element[0].volume * 100 + 10)]);
+				break;
+			case 40: // down-arrow
+				self.volume.apply(self, [parseInt(self.element[0].volume * 100 - 10)]);
+				break;
+			case 36: // Home
+				self.setPlayingTime(0);
+				break;
+			case 37: // left-arrow (<--)
+				self.setPlayingTime(self.element[0].currentTime - 60);
+				break;
+			case 39: // right-arrow (-->)
+				self.setPlayingTime(self.element[0].currentTime + 60);
+				break;
+			case 27: // Escape
+				self.stop();
+				break;
+		}
+	 },
+
     _wait: function(t) {
         var date = new Date();
         var curDate = null;
@@ -594,6 +636,13 @@ $.widget("ui.video", {
     },
 
     // User functions
+
+    // Trigger Events manually
+    triggerKeyBoardEvent: function(e) {
+       var self = this;
+       self._event_keydown(e);
+    },
+
     getIntrinsicWidth: function() {
         var self = this;
         self._wait(500);
@@ -906,6 +955,14 @@ $.widget("ui.video", {
             self.minplayer.click();
         }
     };
+
+    // Capture CTRL + KEY events and forward them to the video widget of the main player
+    document.onkeydown = function(e) {
+    	if (event.ctrlKey == 1) {
+    		uiPlayer.find('video', this).video('triggerKeyBoardEvent', e);
+    		return false;
+    	}
+    }
 
     $.ui.player.prototype.videoObject = null;
     $.ui.player.prototype.options.title = 'Advene player';
