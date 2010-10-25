@@ -1,3 +1,7 @@
+* Import/export AIFF
+
+* DND annnotation type in comment -> display transcription/table/...
+
 * Play a sound file: ask wether to keep the reference or to copy the file as resource
 
 * gstreamer pipeline (videomixer) to generate 1-pixel-column sum-up of
@@ -2662,4 +2666,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
    ask for confirmation
 
 * Edit widget: optionnaly disable generic player control control
+
+* AnnotationType: when creating, use */* by default for member types
 
