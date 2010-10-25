@@ -1,15 +1,51 @@
+* dummy player: fix initial state (paused, not playing)
+
+* editaccumulator: when adding a widget, if not visible, make visible (steal code from activebookmarks)
+
+* Pb ordre cours d'action sur LS_LV (à valider sur win32)
+
+* Disable click twice => play
+
+* Navigation history/timestampwidget: click -> set position (not play, keep paused state)
+
+* Optional feature: automatically pause when  creating an annotation ?
+
+* Undo: implement Redo + make AnnotationCreate undo delete the annotation
+
+* Snapshotter: monitoring/control interface
+
+* Snapshotter: sort list at each insertion
+
+* Cut Adjustment: use image *before* the cut (like in FCP)
+
+* Annotation bound adjust: open as adhoc-view
+
+* Default caption dynamic view: make non-admin (remove _)
+
+* Enter/double click/e on annotation type -> edit
+
+* Montage: add "Save" icon
+
+* Relationtype popup menu: add "Create dynamic view following annotation"
+
+* Montage: implement "Import from relation type" (RT DND)
+
+* MacOSX: use Cmd modifier equiv. as control
+
+* Import youtube annotations ( http://www.google.com/reviews/y/read2?video_id=YOUR_VIDEO_ID_HERE )
+
+
 * Import/export AIFF
 
 * DND annnotation type in comment -> display transcription/table/...
 
+-
+
 * Play a sound file: ask wether to keep the reference or to copy the file as resource
 
-* gstreamer pipeline (videomixer) to generate 1-pixel-column sum-up of
-   video:
+* gstreamer pipeline (videomixer) to generate 1-pixel-column sum-up of video:
 gst-launch -e filesrc location=/data/video/Bataille.avi ! decodebin ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=320,pixel-aspect-ratio=\(fraction\)1/1 ! videocrop left=158 right=160 ! progressreport update-freq=1 ! pngenc snapshot=false ! multifilesink location=%05d.png
 montage -tile x1 -mode Concatenate 0*g final.png
-
-* click twice when paused -> play
 
 * montage: video export
 
@@ -2669,3 +2705,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * AnnotationType: when creating, use */* by default for member types
 
+# Local Variables:
+# auto-fill-inhibit-regexp: ".*"
+# End:
