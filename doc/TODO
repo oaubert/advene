@@ -4,8 +4,6 @@
 
 * Pb ordre cours d'action sur LS_LV (à valider sur win32)
 
-* Disable click twice => play
-
 * Optional feature: automatically pause when  creating an annotation ?
 
 * Undo: implement Redo + make AnnotationCreate undo delete the annotation
@@ -2705,6 +2703,7 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Navigation history/timestampwidget: click -> set position (not play, keep paused state)
 
+* Disable click twice => play
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
