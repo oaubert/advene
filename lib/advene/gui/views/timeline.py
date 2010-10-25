@@ -3645,7 +3645,7 @@ class TimeLine(AdhocView):
                 self.controller.notify('EditSessionEnd', element=l[0])
                 # Remove all others
                 for a in l[1:]:
-                    self.controller.delete_element(a, batch_id=batch_id)
+                    self.controller.delete_element(a, batch=batch_id)
         return True
 
     def selection_tag(self, widget, selection):
