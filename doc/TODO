@@ -6,8 +6,6 @@
 
 * Disable click twice => play
 
-* Navigation history/timestampwidget: click -> set position (not play, keep paused state)
-
 * Optional feature: automatically pause when  creating an annotation ?
 
 * Undo: implement Redo + make AnnotationCreate undo delete the annotation
@@ -2704,6 +2702,9 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Edit widget: optionnaly disable generic player control control
 
 * AnnotationType: when creating, use */* by default for member types
+
+* Navigation history/timestampwidget: click -> set position (not play, keep paused state)
+
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"

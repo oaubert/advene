@@ -2167,9 +2167,6 @@ class AdveneController(object):
         p=self.player
         if p.status == p.PlayingStatus:
             self.update_status('pause')
-        elif p.status != p.PauseStatus:
-            self.update_status('start')
-            self.update_status('pause')
         self.move_position (int(1000 / 25.0 * number_of_frames), notify=False)
         return True
 

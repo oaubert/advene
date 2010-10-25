@@ -985,7 +985,7 @@ class TimestampRepresentation(gtk.Button):
         # We have to check for is_initialized before doing the
         # update_status, since the snapshot may be updated by the update_status
         do_refresh=not cache.is_initialized(self._value, epsilon=self.epsilon)
-        self.controller.update_status("start", self._value)
+        self.controller.update_status("set", self._value)
         if do_refresh:
             # The image was invalidated (or not initialized). Use
             # a timer to update it after some time.
