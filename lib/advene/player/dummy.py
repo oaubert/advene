@@ -134,7 +134,8 @@ class Player:
         position = self.position2value(position)
         self.log("set_media_position %s" % str(position))
         self.basetime = time() * 1000 - position
-        self.pausetime = None
+        if self.pausetime is not None:
+            self.pausetime = time() * 1000 - self.basetime
         return
 
     def start(self, position=0):
