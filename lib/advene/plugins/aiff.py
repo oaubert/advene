@@ -1,0 +1,109 @@
+#
+# Advene: Annotate Digital Videos, Exchange on the NEt
+# Copyright (C) 2008 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+#
+# Advene is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# Advene is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Advene; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+
+# AIFF importer.
+
+name="AIFF importer"
+
+from gettext import gettext as _
+
+import advene.core.config as config
+from advene.util.importer import GenericImporter
+import advene.util.ElementTree as ET
+
+def register(controller=None):
+    controller.register_importer(AiffImporter)
+    return True
+
+class AiffImporter(GenericImporter):
+    name = _("Aiff importer")
+
+    def can_handle(fname):
+        """Return a score between 0 and 100.
+
+        100 is for the best match (specific extension), 0 is for no match at all.
+        """
+        if fname.endswith('.xml'):
+            return 80
+        return 0
+    can_handle=staticmethod(can_handle)
+
+    def process_file(self, filename, dest=None):
+        tree=ET.parse(filename)
+        root=tree.getroot()
+
+        p, at = self.init_package(filename=dest,
+                                schemaid='aiff', annotationtypeid='aiff_subtitle')
+        at.mimetype='text/plain'
+        at.title = "AIFF Subtitle"
+
+        self.at = {
+            'clipitem': self.create_annotation_type(at.schema, 'aiff_clipitem', title=_("AIFF clipitem")),
+            'subtitle': at,
+            }
+
+        self.package=p
+
+        self.convert(self.iterator(root))
+        self.progress(1.0)
+        return self.package
+
+    def iterator(self, root):
+        if root.tag != 'xmeml':
+            print "Invalid AIFF file format: ", root.tag
+            return
+
+        progress=0.01
+        self.progress(progress)
+
+        l=root.findall('.//generatoritem')
+        if l:
+            self.progress(progress, _("Importing subtitles"))
+            incr = 0.5 / len(l)
+            for e in l:
+                progress += incr
+                self.progress(progress)
+                invrate = 1000 / int(e.findtext('rate/timebase'))
+                yield {
+                    'type': self.at['subtitle'],
+                    'content': "\n".join([ p.findtext('value') for p in e.findall('.//parameter') if p.findtext('parameterid').startswith('str') and p.findtext('value') ]),
+                    'begin': long(e.find('in').text) * invrate,
+                    'end': long(e.find('out').text) * invrate,
+                    }
+        else:
+            progress = .5
+
+        self.progress(progress, _("Importing clips"))
+        l = root.findall('.//clipitem')
+        if not l:
+            self.progress(1.0, label=_("No clip"))
+            return
+        incr = 0.48 / len(l)
+        for e in l:
+            progress += incr
+            self.progress(progress)
+            invrate = 1000 / int(e.findtext('rate/timebase'))
+            yield {
+                'type': self.at['clipitem'],
+                'content': "\n".join([ p.text.strip() for p in e.find('comments') if p.text and p.text.strip() ]),
+                'begin': long(e.findtext('start')) * invrate,
+                'end': long(e.findtext('end')) * invrate,
+                }
+
+        self.progress(1.0)
