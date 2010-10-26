@@ -396,7 +396,7 @@ class Player:
             # specified position then takes the video buffer which may then
             # be later) and its value aligned to a frame boundary
             # (considering a 25f/s framerate).
-            for pos in (t - 20, t / 25 * 25, t):
+            for pos in sorted((t - 20, t / 25 * 25, t)):
                 self.snapshotter.enqueue(pos)
         
     def snapshot(self, position):
