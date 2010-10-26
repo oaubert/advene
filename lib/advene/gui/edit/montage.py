@@ -431,10 +431,12 @@ class Montage(AdhocView):
 
         b=gtk.ToolButton(gtk.STOCK_ZOOM_OUT)
         b.connect('clicked', zoom, 1.3)
+        b.set_tooltip_text(_("Zoom out"))
         tb.insert(b, -1)
 
         b=gtk.ToolButton(gtk.STOCK_ZOOM_IN)
         b.connect('clicked', zoom, .7)
+        b.set_tooltip_text(_("Zoom in"))
         tb.insert(b, -1)
 
         self.zoom_combobox=dialog.list_selector_widget(members=[
@@ -450,10 +452,12 @@ class Montage(AdhocView):
 
         ti=gtk.ToolItem()
         ti.add(self.zoom_combobox)
+        ti.set_tooltip_text(_("Set zoom level"))
         tb.insert(ti, -1)
 
         b=gtk.ToolButton(gtk.STOCK_ZOOM_100)
         b.connect('clicked', lambda i: self.zoom_adjustment.set_value(1.0))
+        b.set_tooltip_text(_("Set 100% zoom"))
         tb.insert(b, -1)
 
         def toggle_highlight(b):
@@ -465,13 +469,14 @@ class Montage(AdhocView):
                 event="AnnotationDeactivate"
                 label=_("Highlight annotations")
                 b.highlight=True
-                b.set_tooltip_text(label)
+            b.set_tooltip_text(label)
             for a in set( [ w.annotation for w in self.contents ] ):
                 self.controller.notify(event, annotation=a)
             return True
         i=gtk.Image()
         i.set_from_file(config.data.advenefile( ( 'pixmaps', 'highlight.png') ))
         b=gtk.ToggleToolButton()
+        b.set_tooltip_text(_("Highlight annotations"))
         b.set_icon_widget(i)
         b.highlight=True
         b.connect('clicked', toggle_highlight)
