@@ -105,7 +105,7 @@ class Snapshotter(object):
     def __init__(self, notify=None, width=None):
         self.notify=notify
         # Snapshot queue handling
-        self.timestamp_queue=Queue.Queue()
+        self.timestamp_queue=Queue.PriorityQueue()
         self.snapshot_ready=Event()
         self.thread_running=False
 
@@ -183,7 +183,7 @@ class Snapshotter(object):
         """Enqueue timestamps to capture.
         """
         for t in l:
-            self.timestamp_queue.put_nowait(t)
+            self.timestamp_queue.put_nowait( (t, t) )
         self.snapshot_ready.set()
 
     def process_queue(self):
@@ -196,7 +196,7 @@ class Snapshotter(object):
             #print "Waiting for event"
             self.snapshot_ready.wait()
             #print "Getting timestamp"
-            t=self.timestamp_queue.get()
+            (t, dummy) = self.timestamp_queue.get()
             #print "Clearing event"
             self.snapshot_ready.clear()
             #print "Snapshot", t
