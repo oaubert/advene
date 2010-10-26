@@ -408,6 +408,11 @@ class Montage(AdhocView):
         b.connect('clicked', self.play)
         tb.insert(b, -1)
 
+        b = gtk.ToolButton(gtk.STOCK_SAVE)
+        b.set_tooltip_text(_("Save the view in the package"))
+        b.connect('clicked', self.save_view)
+        tb.insert(b, -1)
+
         def zoom_entry(entry):
             f=unicode(entry.get_text())
 
