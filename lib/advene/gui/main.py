@@ -1594,35 +1594,56 @@ class AdveneGUI(object):
 
         return self.pane['fareast']
 
-    def find_bookmark_view(self):
-        def make_panel_visible():
-            # Make the fareast view visible if needed
-            pane=self.pane['fareast']
-            w=pane.get_allocation().width
-            if abs(w - pane.get_position()) < 200:
-                # Less than 30 visible pixels. Enlarge.
-                step=(pane.get_position() - (w - 256)) / 8
-                target=w - 256
-                def enlarge_view():
-                    pos=pane.get_position() - step
-                    if pos < target:
-                        pane.set_position(target)
-                        return False
-                    pane.set_position(pos)
-                    return True
-                gobject.timeout_add(100, enlarge_view)
-            return True
+    def make_pane_visible(self, paneid='fareast'):
+        """Ensure that the given pane is visible.
+        """
+        pane = self.pane.get(paneid)
+        if not pane:
+            return
+        width = pane.get_allocation().width
+        height = pane.get_allocation().height
+        if paneid == 'fareast':
+            need_adjust = (abs(width - pane.get_position()) < 200)
+            step = - (pane.get_position() - (width - 256)) / 8
+            condition = lambda p: (p < width - 256)
+        elif paneid == 'south':
+            need_adjust = (abs(height - pane.get_position()) < 200)
+            step = - (pane.get_position() - (height - 256)) / 8
+            condition = lambda p: (p < height - 256)
+        elif paneid == 'west':
+            # We should ideally also check for height adjustment (in
+            # south pane), but the video player is generally always
+            # visible anyway, so height should already be OK.
+            need_adjust = (pane.get_position() < 200)
+            step = 256 / 8
+            condition = lambda p: (p > 256)
+        elif paneid == 'east':
+            need_adjust = (abs(width - pane.get_position()) < 200)
+            step = - (pane.get_position() - (width - 256)) / 8
+            condition = lambda p: (p < width - 256)
+        else:
+            need_adjust = False
 
+        if need_adjust:
+            def enlarge_view():
+                pos=pane.get_position() + step
+                if condition(pos):
+                    return False
+                pane.set_position(pos)
+                return True
+            gobject.timeout_add(100, enlarge_view)
+        return True
+
+    def find_bookmark_view(self):
         l=[ w for w in self.adhoc_views if w.view_id == 'activebookmarks' ]
         if l:
             # There is at least one open view. Use the latest.
             a=l[-1]
-            if a._destination == 'fareast':
-                make_panel_visible()
+            self.make_pane_visible(a._destination)
         else:
             # No existing view. Create one.
-            a=self.open_adhoc_view('activebookmarks', destination='fareast')
-            make_panel_visible()
+            a = self.open_adhoc_view('activebookmarks', destination='fareast')
+            self.make_pane_visible('fareast')
         return a
 
     def create_bookmark(self, position, insert_after_current=False, comment=None):
@@ -3157,12 +3178,7 @@ class AdveneGUI(object):
 
     def popup_edit_accumulator(self, *p):
         self.open_adhoc_view('editaccumulator', destination='fareast')
-        # Make the fareast view visible if needed
-        p=self.pane['fareast']
-        w=p.get_allocation().width
-        if abs(w - p.get_position()) < 30:
-            # Less than 50 visible pixels. Enlarge.
-            p.set_position(w - 256)
+        self.make_pane_visible('fareast')
         return True
 
     def on_exit(self, source=None, event=None):
