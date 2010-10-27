@@ -1,6 +1,6 @@
-* editaccumulator: when adding a widget, if not visible, make visible (steal code from activebookmarks)
+* model: store binary content base64-encoded
 
-* Pb ordre cours d'action sur LS_LV (à valider sur win32)
+* editaccumulator: when adding a widget, if not visible, make visible (steal code from activebookmarks)
 
 * Optional feature: automatically pause when  creating an annotation ?
 
@@ -2704,6 +2704,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Disable click twice => play
 
 * dummy player: fix initial state (paused, not playing)
+
+* When restoring workspace, check that window size <= current screen size.
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"

@@ -2249,7 +2249,8 @@ class AdveneGUI(object):
         if layout and not preserve_layout:
             w=self.gui.win
             w.move(long(layout.attrib['x']), long(layout.attrib['y']))
-            w.resize(long(layout.attrib['width']), long(layout.attrib['height']))
+            w.resize(min(long(layout.attrib['width']), gtk.gdk.screen_width()), 
+                     min(long(layout.attrib['height']), gtk.gdk.screen_height()))
             for pane in layout:
                 if pane.tag == 'pane' and pane.attrib['id'] in self.pane:
                     self.pane[pane.attrib['id']].set_position(long(pane.attrib['position']))
