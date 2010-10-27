@@ -6,8 +6,6 @@
 
 * Snapshotter: monitoring/control interface
 
-* Snapshotter: sort list at each insertion
-
 * Cut Adjustment: use image *before* the cut (like in FCP)
 
 * Annotation bound adjust: open as adhoc-view
@@ -2707,6 +2705,11 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * model: store binary content base64-encoded
 
+* Snapshotter: sort list at each insertion
+
+* evaluator: define P, with __getattr__ is a wrapper around p.get_element_by_id
+
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
 # End:
+

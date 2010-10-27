@@ -2709,9 +2709,24 @@ class AdveneGUI(object):
         except IndexError:
             at=None
 
+        class PackageWrapper(object):
+            def __getattr__(self, name):
+                e = p.get_element_by_id(name)
+                if e is not None:
+                    return e
+                else:
+                    return getattr(p, name)
+            def _get_dict(self):
+                return dict( (el.id, el) for l in (p.annotations, p.relations,
+                                                   p.schemas,
+                                                   p.annotationTypes, p.relationTypes,
+                                                   p.views, p.queries) for el in l )
+            __dict__ = property(_get_dict)
+
         ev=Evaluator(globals_=globals(),
                      locals_={'package': p,
                               'p': p,
+                              'P': PackageWrapper(),
                               'a': a,
                               'at': at,
                               'c': self.controller,
