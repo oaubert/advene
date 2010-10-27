@@ -110,11 +110,21 @@ class Content(modeled.Modeled,
         # FIXME: is this what we need? is this what we want?
         return self._getModel ()
 
+    def isTextual(self):
+        """Check if the data is textual, according to mimetype
+        """
+        mt = self.mimetype
+        return (mt.startswith('text') or 'x-advene' in mt or 'xml' in mt or 'javascript' in mt)
+
     def getData(self):
         """Return the data associated to the Content"""
         data = StringIO()
         advene.model.util.dom.printElementText(self._getModel(), data)
-        d=data.getvalue().decode('utf-8')
+        if self._getModel().hasAttributeNS(None, 'encoding'):
+            encoding = self._getModel().getAttributeNS(None, 'encoding')
+        else:
+            encoding = 'utf-8'
+        d=data.getvalue().decode(encoding)
         return d
 
     def setData(self, data):
@@ -125,7 +135,12 @@ class Content(modeled.Modeled,
                 self._getModel().removeChild(n)
         if data:
             self.delUri()
-            new = self._getDocument().createTextNode(data)
+            if not self.isTextual():
+                encoding = 'base64'
+            else:
+                encoding = 'utf-8'                
+            self._getModel().setAttributeNS(None, 'encoding', encoding)
+            new = self._getDocument().createTextNode(data.encode(encoding))
             self._getModel().appendChild(new)
 
     def delData(self):
