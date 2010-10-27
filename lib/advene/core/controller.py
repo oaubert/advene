@@ -1173,10 +1173,11 @@ class AdveneController(object):
                 r=element.content.data
                 if element.content.mimetype == 'image/svg+xml':
                     return "SVG graphics"
+                elif not element.content.isTextual():
+                    return "Data"
                 if not r:
                     r=element.id
                 return cleanup(r)
-
             else:
                 c=self.build_context(here=element)
                 try:
