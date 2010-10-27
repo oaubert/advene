@@ -254,6 +254,34 @@ class Menu:
                 self.controller.delete_element(e, batch=batch_id)
         return True
 
+    def create_montage(self, widget, rt):
+        """Create a montage from a relationtype.
+        """
+        l = list(set( r.members[0] for r in rt.relations ))
+        res = []
+        if l:
+            l.sort(key=lambda a: a.fragment.begin)
+            ann = l[0]
+            while True:
+                res.append(ann)
+                try:
+                    l.remove(ann)
+                except ValueError:
+                    pass
+                r = ann.typedRelatedOut.get(rt.id, None)
+                if not r:
+                    ann = None
+                else:
+                    ann = r[0]
+                if ann is None or ann in res:
+                    # End of relations. Look for other roots.
+                    if l:
+                        ann = l[0]
+                    else:
+                        break
+        self.controller.gui.open_adhoc_view('montage', elements=res)
+        return True
+
     def pick_color(self, widget, element):
         self.controller.gui.update_color(element)
         return True
@@ -729,6 +757,7 @@ class Menu:
             return
         add_item(_('Select a color'), self.pick_color, element)
         add_item(_('Delete all relations...'), self.delete_elements, element, element.relations)
+        add_item(_('Create montage from related annotations'), self.create_montage, element)
         return
 
     def make_query_menu(self, element, menu):
