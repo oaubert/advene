@@ -122,7 +122,7 @@ class AnnotationDisplay(AdhocView):
                 'begin': helper.format_time(self.annotation.fragment.begin),
                 'end': helper.format_time(self.annotation.fragment.end) }
             svg_data=None
-            if self.annotation.content.mimetype.startswith('image/'):
+            if self.annotation.content.mimetype.startswith('image/svg'):
                 svg_data=self.annotation.content.data
             elif self.annotation.content.mimetype == 'application/x-advene-zone':
                 # Build svg
@@ -133,6 +133,20 @@ class AnnotationDisplay(AdhocView):
                                              self.annotation.content.data)
                 d['contents']=''
                 d['imagecontents']=pixbuf
+            elif self.annotation.content.mimetype.startswith('image/'):
+                # Image content, other than image/svg
+                # Load the element content
+                loader = gtk.gdk.PixbufLoader()
+                try:
+                    loader.write (self.annotation.content.data, len (self.annotation.content.data))
+                    loader.close ()
+                    pixbuf = loader.get_pixbuf ()
+                except gobject.GError:
+                    # The PNG data was invalid.
+                    pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+
+                d['contents']=''
+                d['imagecontents'] = pixbuf
             else:
                 d['contents']=self.annotation.content.data
                 d['imagecontents']=None
