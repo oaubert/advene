@@ -93,6 +93,8 @@ class EditAccumulator(AccumulatorPopup):
 
         w.connect('destroy', handle_destroy)
 
+        self.controller.gui.make_pane_visible(getattr(self, '_destination', None))
+
         if self.controller and self.controller.gui:
             self.controller.gui.register_edit_popup(e)
 
