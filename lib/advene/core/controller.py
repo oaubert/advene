@@ -1318,7 +1318,7 @@ class AdveneController(object):
             # Update package title and description if necessary
             self.update_package_title()
 
-    def delete_element (self, el, immediate_notify=False, batch=None):
+    def delete_element (self, el, immediate_notify=False, batch=None, undone=False):
         """Delete an element from its package.
 
         Take care of all dependencies (for instance, annotations which
@@ -1328,50 +1328,50 @@ class AdveneController(object):
         if isinstance(el, Annotation):
             # We iterate on a copy of relations, since it may be
             # modified during the loop
-            self.notify('EditSessionStart', element=el, immediate=True)
+            self.notify('EditSessionStart', element=el, immediate=True, undone=undone)
             for r in el.relations[:]:
                 [ a.relations.remove(r) for a in r.members if r in a.relations ]
-                self.delete_element(r, immediate_notify=immediate_notify, batch=batch)
+                self.delete_element(r, immediate_notify=immediate_notify, batch=batch, undone=undone)
             p.annotations.remove(el)
-            self.notify('AnnotationDelete', annotation=el, immediate=immediate_notify, batch=batch)
+            self.notify('AnnotationDelete', annotation=el, immediate=immediate_notify, batch=batch, undone=undone)
         elif isinstance(el, Relation):
             for a in el.members:
                 if el in a.relations:
                     a.relations.remove(el)
             p.relations.remove(el)
-            self.notify('RelationDelete', relation=el, immediate=immediate_notify)
+            self.notify('RelationDelete', relation=el, immediate=immediate_notify, undone=undone)
         elif isinstance(el, AnnotationType):
             for a in el.annotations:
-                self.delete_element(a, immediate_notify=True, batch=batch)
+                self.delete_element(a, immediate_notify=True, batch=batch, undone=undone)
             el.schema.annotationTypes.remove(el)
-            self.notify('AnnotationTypeDelete', annotationtype=el, immediate=immediate_notify)
+            self.notify('AnnotationTypeDelete', annotationtype=el, immediate=immediate_notify, undone=undone)
         elif isinstance(el, RelationType):
             for r in el.relations:
-                self.delete_element(r, immediate_notify=True, batch=batch)
+                self.delete_element(r, immediate_notify=True, batch=batch, undone=undone)
             el.schema.relationTypes.remove(el)
-            self.notify('RelationTypeDelete', relationtype=el, immediate=immediate_notify)
+            self.notify('RelationTypeDelete', relationtype=el, immediate=immediate_notify, undone=undone)
         elif isinstance(el, Schema):
             for at in el.annotationTypes:
-                self.delete_element(at, immediate_notify=True, batch=batch)
+                self.delete_element(at, immediate_notify=True, batch=batch, undone=undone)
             for rt in el.relationTypes:
-                self.delete_element(rt, immediate_notify=True, batch=batch)
+                self.delete_element(rt, immediate_notify=True, batch=batch, undone=undone)
             p.schemas.remove(el)
-            self.notify('SchemaDelete', schema=el, immediate=immediate_notify)
+            self.notify('SchemaDelete', schema=el, immediate=immediate_notify, undone=undone)
         elif isinstance(el, View):
-            self.notify('EditSessionStart', element=el, immediate=True)
+            self.notify('EditSessionStart', element=el, immediate=True, undone=undone)
             p.views.remove(el)
-            self.notify('ViewDelete', view=el, immediate=immediate_notify, batch=batch)
+            self.notify('ViewDelete', view=el, immediate=immediate_notify, batch=batch, undone=undone)
         elif isinstance(el, Query):
-            self.notify('EditSessionStart', element=el, immediate=True)
+            self.notify('EditSessionStart', element=el, immediate=True, undone=undone)
             p.queries.remove(el)
-            self.notify('QueryDelete', query=el, immediate=immediate_notify, batch=batch)
+            self.notify('QueryDelete', query=el, immediate=immediate_notify, batch=batch, undone=undone)
         elif isinstance(el, Resources) or isinstance(el, ResourceData):
             if isinstance(el, Resources):
                 for c in el.children():
-                    self.delete_element(c, immediate_notify=True, batch=batch)
+                    self.delete_element(c, immediate_notify=True, batch=batch, undone=undone)
             p=el.parent
             del(p[el.id])
-            self.notify('ResourceDelete', resource=el, immediate=immediate_notify)
+            self.notify('ResourceDelete', resource=el, immediate=immediate_notify, undone=undone)
         return True
 
     def transmute_annotation(self, annotation, annotationType, delete=False, position=None, notify=True):

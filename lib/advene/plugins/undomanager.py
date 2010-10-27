@@ -61,12 +61,15 @@ class UndoHistory:
             ('EditSessionEnd', self.element_edit_cancel),
             ('ElementEditDestroy', self.element_edit_cancel),
 
+            ('AnnotationCreate', self.element_create),
             ('AnnotationEditEnd', self.element_edit_end),
             ('AnnotationDelete', self.element_delete),
 
+            ('ViewCreate', self.element_create),
             ('ViewEditEnd', self.element_edit_end),
             ('ViewDelete', self.element_delete),
 
+            ('QueryCreate', self.element_create),
             ('QueryEditEnd', self.element_edit_end),
             ('QueryDelete', self.element_delete),
 
@@ -145,6 +148,31 @@ class UndoHistory:
             self._edits[element]=new
             #print "Saving diff for ", element
 
+    def element_create(self, context, parameters):
+        """Record the created element id.
+        """
+        event=context.evaluateValue('event')
+        el=event.replace('Create', '').lower()
+        element=context.evaluateValue(el)
+        batch=context.globals.get('batch', None)
+        if batch:
+            if batch == self.batch_id:
+                history=self.batch_history
+            else:
+                self.batch_id=batch
+                self.batch_history=[]
+                history=self.batch_history
+                self.history.append( ('batch', batch, history) )
+        else:
+            history=self.history
+            # Implicitly close a previous batch_history
+            if self.batch_id is not None:
+                self.batch_id=None
+                self.batch_history=[]
+
+        # Store created elements in history.
+        history.append( ('created', element, element.id) )
+
     def element_delete(self, context, parameters):
         """Record the deleted elements.
         """
@@ -183,7 +211,6 @@ class UndoHistory:
         if operation is not None:
             (action, element, data)=operation
         else:
-
             if not self.history:
                 return
             (action, element, data)=self.history.pop()
@@ -208,6 +235,8 @@ class UndoHistory:
                 self.controller.notify('ViewEditEnd', view=element, undone=True)
             elif isinstance(element, Query):
                 self.controller.notify('QueryEditEnd', query=element, undone=True)
+        elif action == 'created':
+            self.controller.delete_element(element, undone=True)
         elif action == 'deleted':
             if element == 'annotation':
                 # Re-create the annotation

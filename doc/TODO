@@ -1,6 +1,8 @@
 * Optional feature: automatically pause when  creating an annotation ?
 
-* Undo: implement Redo + make AnnotationCreate undo delete the annotation
+* Undo: implement Redo
+
+* Undo: history stack display
 
 * Snapshotter: monitoring/control interface
 
@@ -2708,7 +2710,9 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Montage: implement "Import from relation type" (RT DND)
 
+* Undo: make AnnotationCreate undo delete the annotation
+
+
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
 # End:
-
