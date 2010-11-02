@@ -28,6 +28,7 @@ import advene.gui.popup
 from advene.gui.util import dialog
 from advene.model.package import Package
 from advene.gui.edit.merge import Merger
+from advene.gui.edit.properties import OptionParserGUI
 
 from advene.gui.views import AdhocView
 
@@ -97,7 +98,7 @@ class FileImporter(AdhocView):
             return True
 
         b.set_label(gtk.STOCK_CANCEL)
-        ic=self.importers.get_current_element()
+        ic = self.importers.get_current_element()
         fname=unicode(self.filename_entry.get_text())
         self.widget.get_toplevel().set_title(_('Importing %s') % os.path.basename(fname))
 
@@ -116,6 +117,7 @@ class FileImporter(AdhocView):
         if ic is None:
             return True
         i=ic(controller=self.controller, callback=self.progress_callback)
+        i.set_options(self.optionform.options)
         i.package=self.controller.package
         i.process_file(fname)
         self.progress_callback(1.0)
@@ -139,6 +141,16 @@ class FileImporter(AdhocView):
         while gtk.events_pending():
             gtk.main_iteration()
         return self.should_continue
+
+    def update_options(self, combo):
+        # Instanciate a dummy importer, to get its options.
+        ic = combo.get_current_element()
+        if ic is not None:
+            i = ic(controller=self.controller)
+            self.options_frame.foreach(self.options_frame.remove)
+            self.optionform = OptionParserGUI(i.optionparser, i)
+            self.options_frame.add(self.optionform)
+        return True
 
     def build_widget(self):
         vbox=gtk.VBox()
@@ -170,6 +182,12 @@ class FileImporter(AdhocView):
         self.filename_entry.connect('changed', updated_filename)
         line.pack_start(self.filename_entry)
 
+        exp = gtk.Expander(_("Options"))
+        exp.set_expanded(False)
+        self.options_frame = gtk.VBox()
+        exp.add(self.options_frame)
+        vbox.pack_start(exp, expand=False)
+
         self.progressbar=gtk.ProgressBar()
         vbox.pack_start(self.progressbar, expand=False)
 
@@ -182,7 +200,7 @@ class FileImporter(AdhocView):
         vbox.pack_start(line, expand=False)
 
         line.pack_start(gtk.Label(_("Import filter")), expand=False)
-        self.importers=dialog.list_selector_widget([], None)
+        self.importers = dialog.list_selector_widget([], None, callback=self.update_options)
         line.pack_start(self.importers, expand=False)
 
         bb=gtk.HButtonBox()

@@ -1,3 +1,7 @@
+* snapshotter: bug for NY_1.mov (look for "silver beach")
+
+* Implement a "security" option to disable/enable on demand python: expressions in TAL
+
 * Optional feature: automatically pause when  creating an annotation ?
 
 * Undo: implement Redo
@@ -45,8 +49,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * Fix message log file access on win32
 
 * implement audio segmenter using cutter gst: gst-launch -m filesrc location=foo.ogg ! decodebin ! audioconvert ! cutter threshold=.3 ! progressreport ! fakesink
-
-* snapshotter: feedback on activity
 
 * abbreviations: pb when missing end newline
 
@@ -2711,6 +2713,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Undo: make AnnotationCreate undo delete the annotation
 
 * Snapshotter: monitoring/control interface
+
+* gui.edit.importer: generate option panel (through gui.edit.properties)
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
