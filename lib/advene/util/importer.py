@@ -378,6 +378,7 @@ class GenericImporter(object):
                                       author=author,
                                       title=title,
                                       timestamp=timestamp)
+            self.package._modified = True
             if 'complete' in d:
                 a.complete=d['complete']
             if 'notify' in d and d['notify'] and self.controller is not None:
