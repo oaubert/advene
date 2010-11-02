@@ -4,8 +4,6 @@
 
 * Undo: history stack display
 
-* Snapshotter: monitoring/control interface
-
 * Cut Adjustment: use image *before* the cut (like in FCP)
 
 * Annotation bound adjust: open as adhoc-view
@@ -2712,6 +2710,7 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Undo: make AnnotationCreate undo delete the annotation
 
+* Snapshotter: monitoring/control interface
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"

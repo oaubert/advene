@@ -342,6 +342,57 @@ class AdveneGUI(object):
                 self.save_toolbutton = b
         self.gui.fileop_toolbar.show_all()
 
+        # Snapshotter activity monitor
+        def display_snapshot_monitor_menu(v):
+            s = getattr(self.controller.player, 'snapshotter', None)
+
+            m = gtk.Menu()
+            if s:
+                m.append(gtk.MenuItem(_("Snapshotter activity")))
+                m.append(gtk.SeparatorMenuItem())
+                m.append(gtk.MenuItem(_("%d queued requests") % s.timestamp_queue.qsize())) 
+                i = gtk.MenuItem(_("Cancel all requests"))
+                i.connect('activate', lambda i: s.clear() or True)
+                m.append(i)
+
+            else:
+                m.append(gtk.MenuItem(_("No snapshotter")))
+            m.show_all()
+            m.popup(None, None, None, 0, gtk.get_current_event_time())
+            return True
+
+        self.snapshotter_image = {
+            'idle': gtk.image_new_from_file( config.data.advenefile( ( 'pixmaps', 'snapshotter-idle.png') )),
+            'running': gtk.image_new_from_file( config.data.advenefile( ( 'pixmaps', 'snapshotter-running.png') )),
+            }
+        
+        def set_state(b, state=None):
+            """Set the state of the snapshotter icon.
+
+            state can be either None (no snapshotter), 'idle', 'running'
+            """
+            if state == b._state:
+                return True
+            b._state = state
+            if state is None:
+                b.hide()
+            elif state == 'idle':
+                b.set_image(self.snapshotter_image[state])
+                b.set_tooltip_text(_("No snapshotting activity"))
+                b.show()
+            elif state == 'running':
+                b.set_image(self.snapshotter_image[state])
+                b.set_tooltip_text(_("Snapshotting"))
+                b.show()
+            return True
+
+        b = get_pixmap_button('snapshotter-idle.png', display_snapshot_monitor_menu)
+        b._state = None
+        b.set_relief(gtk.RELIEF_NONE)        
+        self.gui.bottombar.pack_start(b, expand=False)
+        self.snapshotter_monitor_icon = b
+        b.set_state=set_state.__get__(b)
+
         # Log messages button
         def display_log_messages(v):
             v=self.open_adhoc_view('logmessages', destination='south')
@@ -2878,6 +2929,16 @@ class AdveneGUI(object):
         if self.gui.win.get_title().endswith('(*)') ^ self.controller.package._modified:
             self.update_window_title()
 
+        # Check snapshotter activity
+        s = getattr(self.controller.player, 'snapshotter', None)
+        if s:
+            if s.timestamp_queue.empty():
+                self.snapshotter_monitor_icon.set_state('idle')
+            else:
+                self.snapshotter_monitor_icon.set_state('running')
+        else:
+            self.snapshotter_monitor_icon.set_state(None)
+            
         # Check auto-save
         if config.data.preferences['package-auto-save'] != 'never':
             t=time.time() * 1000
