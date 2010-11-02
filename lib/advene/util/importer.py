@@ -212,7 +212,7 @@ class GenericImporter(object):
     def update_statistics(self, elementtype):
         self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
 
-    def ensure_new_type(self, prefix="at_converted"):
+    def ensure_new_type(self, prefix="at_converted", title="Converted data", schemaid=None):
         """Create a new type.
         """
         l=[ at.id for at in self.package.annotationTypes ]
@@ -225,10 +225,12 @@ class GenericImporter(object):
             else:
                 i += 1
 
-        s=self.package.get_element_by_id('s_converted')
+        if schemaid is None:
+            schemaid = 's_converted'
+        s=self.package.get_element_by_id(schemaid)
         if s is None:
-            s=self.create_schema(id_='s_converted', title='Converted types')
-        self.defaulttype=self.create_annotation_type(s, atid, title="Converted data")
+            s=self.create_schema(id_=schemaid, title=schemaid)
+        self.defaulttype=self.create_annotation_type(s, atid, title=title)
         return self.defaulttype
 
     def create_annotation_type (self, schema, id_, author=None, date=None, title=None,
