@@ -19,6 +19,8 @@
 """GUI to import external file formats.
 """
 import os
+import thread
+import gobject
 import gtk
 
 from gettext import gettext as _
@@ -55,6 +57,12 @@ class FileImporter(AdhocView):
 
         # Flag used to cancel import
         self.should_continue = True
+        
+        # Assume that the view is initialized in the current
+        # thread. Store it id, so that we detect if calls
+        # (esp. progress_callback) are made from another thread and
+        # act accordingly.
+        self.main_thread_id = thread.get_ident()
 
         self.widget=self.build_widget()
 
@@ -131,7 +139,25 @@ class FileImporter(AdhocView):
         self.log(mes)
         return True
 
+    def do_gui_operation(function, *args, **kw):
+        """Execute a method in the main loop.
+
+        Ensure that we execute all Gtk operations in the mainloop.
+        """
+        def idle_func():
+            gtk.gdk.threads_enter()
+            try:
+                function(*args, **kw)
+                return False
+            finally:
+                gtk.gdk.threads_leave()
+        gobject.idle_add(idle_func)
+
     def progress_callback(self, value=None, label=None):
+        if thread.get_ident() != self.main_thread_id:
+            self.do_gui_operation(self.progress_callback, value=value, label=label)
+            return self.should_continue
+
         if value is None:
             self.progressbar.pulse()
         else:
