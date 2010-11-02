@@ -432,8 +432,11 @@ class TextImporter(GenericImporter):
                                      help=_("Specify the encoding of the input file (latin1, utf8...)"))
 
     def can_handle(fname):
-        if fname.endswith('.txt'):
+        ext = os.path.splitext(fname)[1]
+        if ext == '.txt':
             return 100
+        elif ext in config.data.video_extensions:
+            return 0
         else:
             # It may handle any type of file ?
             return 1
