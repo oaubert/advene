@@ -33,12 +33,12 @@ from advene.gui.views import AdhocView
 
 dummy_advene_importer = object()
 
-class ExternalImporter(AdhocView):
+class FileImporter(AdhocView):
     view_name = _("Importer")
     view_id = 'importerview'
 
     def __init__(self, controller=None, parameters=None):
-        super(ExternalImporter, self).__init__(controller=controller)
+        super(FileImporter, self).__init__(controller=controller)
         self.controller=controller
         self.parameters=parameters
 

@@ -107,7 +107,7 @@ from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.merge import Merger
-from advene.gui.edit.importer import ExternalImporter
+from advene.gui.edit.importer import FileImporter
 from advene.gui.evaluator import Evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
@@ -3609,7 +3609,7 @@ class AdveneGUI(object):
         return True
 
     def on_import_file1_activate (self, button=None, data=None):
-        v=ExternalImporter(controller=self.controller)
+        v=FileImporter(controller=self.controller)
         w=v.popup()
         dialog.center_on_mouse(w)
         return False
