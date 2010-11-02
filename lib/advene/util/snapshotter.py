@@ -108,6 +108,7 @@ class Snapshotter(object):
         self.timestamp_queue=Queue.PriorityQueue()
         self.snapshot_ready=Event()
         self.thread_running=False
+        self.should_clear = False
 
         # Pipeline building
         videobin=gst.Bin()
@@ -196,11 +197,29 @@ class Snapshotter(object):
             #print "Waiting for event"
             self.snapshot_ready.wait()
             #print "Getting timestamp"
+            if self.should_clear:
+                # Clear the queue
+                self.should_clear = False
+                while True:
+                    try:
+                        # FIXME: this could potentially deadlock, if
+                        # there is a producer thread that continuously
+                        # adds new elements.
+                        self.timestamp_queue.get_nowait()
+                    except Queue.Empty:
+                        break
             (t, dummy) = self.timestamp_queue.get()
             #print "Clearing event"
             self.snapshot_ready.clear()
             #print "Snapshot", t
             self.snapshot(t)
+        return True
+
+    def clear(self):
+        """Clear the queue.
+        """
+        if not self.timestamp_queue.empty():
+            self.should_clear = True
         return True
 
     def queue_notify(self, buffer):
