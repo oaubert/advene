@@ -105,7 +105,13 @@ class Snapshotter(object):
     def __init__(self, notify=None, width=None):
         self.notify=notify
         # Snapshot queue handling
-        self.timestamp_queue=Queue.PriorityQueue()
+        try:
+            self.timestamp_queue=Queue.PriorityQueue()
+        except AttributeError:
+            # python <= 2.5 does not implement PriorityQueue. Use a
+            # plain Queue.
+            self.timestamp_queue=Queue.Queue()
+
         self.snapshot_ready=Event()
         self.thread_running=False
         self.should_clear = False
