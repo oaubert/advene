@@ -180,10 +180,28 @@ class GenericImporter(object):
     def process_file(self, filename):
         """Abstract method.
 
+        This method returns when the conversion is complete. See
+        async_process_file for an asynchronous variant.
+
         When called, it will parse the file and execute the
         self.convert annotations with a dictionary as parameter.
         """
+        if hasattr(self, 'async_process_file'):
+            # FIXME: should "synchronize" the async_process_file method.
+            raise Exception(_("Import filter error. The asynchronous API should be used, please report a bug."))
+        else:
+            raise Exception(_("Import filter error. No conversion method is defined,  please report a bug."))
         pass
+
+    #def async_process_file(self, filename, end_callback):
+    #    """Abstract method.
+    #
+    #    If defined, it will be used in priority over process_file.
+    #    This method returns immediately, and call the provided
+    #    end_callback method when it is finished.
+    #    The end_callback method takes an optional message as parameter.
+    #    """
+    #    pass
 
     def log (self, *p):
         if self.controller is not None:
