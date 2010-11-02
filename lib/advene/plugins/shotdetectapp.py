@@ -103,6 +103,7 @@ class ShotdetectAppImporter(GenericImporter):
             self.cleanup()
             raise Exception(_("Could not run shotdetect: %s") % unicode(e))
 
+        self.ensure_new_type('shots', title=_("Detected shots"), schemaid='detected')
         self.progress(.01, _("Detecting shots from %s") % gobject.filename_display_name(filename))
 
         def execute_process():
@@ -167,6 +168,8 @@ class ShotdetectAppImporter(GenericImporter):
                     m = exp_re.match(ms[0])
                     if m:
                         ts = long(float(m.group(1)) * 10 ** int(m.group(2)))
+                if ts == 0:
+                    continue
                 yield {
                     'content': str(num),
                     'begin': begin,
