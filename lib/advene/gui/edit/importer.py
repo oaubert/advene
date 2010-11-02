@@ -63,6 +63,7 @@ class FileImporter(AdhocView):
         # (esp. progress_callback) are made from another thread and
         # act accordingly.
         self.main_thread_id = thread.get_ident()
+        self.importer = None
 
         self.widget=self.build_widget()
         if filename:
@@ -101,6 +102,19 @@ class FileImporter(AdhocView):
 
         return True
 
+    def processing_ended(self, msg=None):
+        if thread.get_ident() != self.main_thread_id:
+            self.do_gui_operation(self.processing_ended, msg=msg)
+            return True
+        self.progress_callback(1.0)
+        self.controller.notify("PackageActivate", package=self.controller.package)
+        self.close()
+        if msg is None:
+            msg = _('Completed conversion: %(statistics)s') % {
+                'statistics': self.importer.statistics_formatted() }
+        dialog.message_dialog(msg, modal=False)
+        self.log(msg)
+        
     def convert_file(self, b, *p):
         if b.get_label() == gtk.STOCK_CANCEL:
             # Cancel action
@@ -126,25 +140,15 @@ class FileImporter(AdhocView):
 
         if ic is None:
             return True
-        i=ic(controller=self.controller, callback=self.progress_callback)
+        i = ic(controller=self.controller, callback=self.progress_callback)
+        self.importer = i
         i.set_options(self.optionform.options)
         i.package=self.controller.package
-
-        def processing_ended(msg=None):
-            self.progress_callback(1.0)
-            self.controller.notify("PackageActivate", package=self.controller.package)
-            self.close()
-            if msg is None:
-                msg = _('Completed conversion from file %(filename)s :\n%(statistics)s') % {
-                    'filename': fname,
-                    'statistics': i.statistics_formatted() }
-            dialog.message_dialog(msg, modal=False)
-            self.log(msg)
 
         if hasattr(i, 'async_process_file'):
             # Asynchronous version.
             try:
-                i.async_process_file(fname, processing_ended)
+                i.async_process_file(fname, self.processing_ended)
             except Exception, e:
                 dialog.message_dialog(e.message, modal=False)
                 self.close()
@@ -155,7 +159,7 @@ class FileImporter(AdhocView):
             except Exception, e:
                 dialog.message_dialog(e, modal=False)
             finally:
-                processing_ended()
+                self.processing_ended()
         return True
 
     def do_gui_operation(self, func, *args, **kw):
