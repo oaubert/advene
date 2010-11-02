@@ -33,6 +33,11 @@ from advene.gui.views import AdhocView
 
 dummy_advene_importer = object()
 
+name="FileImporter view plugin"
+
+def register(controller):
+    controller.register_viewclass(FileImporter)
+
 class FileImporter(AdhocView):
     view_name = _("Importer")
     view_id = 'importerview'
