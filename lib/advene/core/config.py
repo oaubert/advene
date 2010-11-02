@@ -386,20 +386,29 @@ class Config(object):
             self.drag_type[name] = [ ( mime, 0, typ) ]
 
         self.video_extensions = (
+            '.264',
+            '.3gp',
             '.asf',
             '.avi',
+            '.dv',
             '.flv',
-            '.mov',
-            '.mpg', '.mpeg',  '.mp4',
-            '.ogm',
-            '.ogg',
-            '.ogv',
-            '.rm',
-            '.vob',
+            '.mjpg', '.mjpg',
             '.mkv',
-            '.wmv',
+            '.mov',
             '.mp3',
+            '.mpg', '.mpeg',  '.mp4', '.mp4v',
+            '.ogg', '.ogm', '.ogv', '.ogx',
+            '.ps',
+            '.qt', '.qtm',
+            '.rm', '.rmd', '.rmvb', '.rv',
+            '.ts',
+            '.vfw',
+            '.vob',
+            '.vp6', '.vp7', '.vp8',
             '.wav',
+            '.webm',
+            '.wmv',
+            '.xvid',
             )
 
         self.color_palette = (
