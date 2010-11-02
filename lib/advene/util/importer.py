@@ -139,7 +139,9 @@ class GenericImporter(object):
             'package': 0,
             }
 
-
+        # The convention for OptionParser is to have the "dest"
+        # attribute of the same name as the Importer attribute
+        # (e.g. here offset)
         self.optionparser = optparse.OptionParser(usage=_("Usage: %prog [options] source-file destination-file"))
         self.optionparser.add_option("-o", "--offset",
                                      action="store", type="int", dest="offset", default=0,
@@ -165,8 +167,15 @@ class GenericImporter(object):
         else:
             return True
 
-    def process_options(self, option_list):
-        (self.options, self.args) = self.optionparser.parse_args(args=option_list)
+    def set_options(self, options):
+        for k, v in options.iteritems():
+            if hasattr(self, k):
+                self.k = v
+
+    def process_options(self, source):
+        (options, args) = self.optionparser.parse_args(args=source)
+        self.set_options(options)
+        return args
 
     def process_file(self, filename):
         """Abstract method.
@@ -392,13 +401,16 @@ class TextImporter(GenericImporter):
         super(TextImporter, self).__init__(**kw)
         if regexp is None:
             regexp="(?P<begin>\d+)\s(?P<end>\d+)\s(?P<content>.+)"
-        self.regexp=re.compile(regexp)
+        self.regexp = regexp
         if encoding is None:
             encoding='latin1'
         self.encoding=encoding
         self.optionparser.add_option("-r", "--regexp",
-                                     action="store", type="string", dest="regexp", default=None,
+                                     action="store", type="string", dest="regexp", default=self.regexp,
                                      help=_("Specify the regexp used to parse data"))
+        self.optionparser.add_option("-e", "--encoding",
+                                     action="store", type="string", dest="encoding", default=self.encoding,
+                                     help=_("Specify the encoding of the input file (latin1, utf8...)"))
 
     def can_handle(fname):
         if fname.endswith('.txt'):
@@ -409,6 +421,7 @@ class TextImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
+        reg = re.compile(self.regexp)
         incr=0.02
         progress=0.1
         for l in f:
@@ -417,12 +430,12 @@ class TextImporter(GenericImporter):
             progress += incr
             l=l.rstrip()
             l=unicode(l, self.encoding).encode('utf-8')
-            m=self.regexp.search(l)
+            m=reg.search(l)
             if m is not None:
                 yield m.groupdict()
 
     def set_regexp(self, r):
-        self.regexp=re.compile(r)
+        self.re = re.compile(r)
 
     def process_file(self, filename):
         f=open(filename, 'r')
@@ -823,8 +836,10 @@ class SubtitleImporter(GenericImporter):
 
     def __init__(self, encoding=None, **kw):
         super(SubtitleImporter, self).__init__(**kw)
-
         self.encoding=encoding
+        self.optionparser.add_option("-e", "--encoding",
+                                     action="store", type="string", dest="encoding", default=self.encoding,
+                                     help=_("Specify the encoding of the input file (latin1, utf8...)"))
 
     def can_handle(fname):
         if fname.endswith('.srt'):
@@ -1146,7 +1161,6 @@ class CmmlImporter(GenericImporter):
             self.progress(0.1, _("Creating package"))
             self.package=Package(uri='new_pkg', source=None)
 
-        p=self.package
         self.progress(0.2, _("Creating CMML schema"))
         self.schema=self.create_schema('cmml', title="CMML converted schema")
 
