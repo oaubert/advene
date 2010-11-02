@@ -253,6 +253,7 @@ class AdveneGUI(object):
                     ( _("Associate a _Video stream"), self.on_select_a_video_stream1_activate, _("Enter a video stream address") ),
                     ( "", None, "" ),
                     ( _("_Import File"), self.on_import_file1_activate, _("Import data from an external source") ),
+                    ( _("Process video"), self.on_process_video_activate, _("Import data from video processing algorithms")),
                     ( "", None, "" ),
                     ( _("Merge package"), self.on_merge_package_activate, _("Merge elements from another package") ),
                     ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters") ),
@@ -3670,6 +3671,15 @@ class AdveneGUI(object):
 
     def on_import_file1_activate (self, button=None, data=None):
         self.open_adhoc_view('importerview')
+        return False
+
+    def on_process_video_activate(self, button=None, data=None):
+        fname = self.controller.get_default_media()
+        if fname:
+            self.open_adhoc_view('importerview', filename=fname)
+        else:
+            dialog.message_dialog(_("No associated video file"),
+                                  icon=gtk.MESSAGE_ERROR)
         return False
 
     def on_undo1_activate (self, button=None, data=None):
