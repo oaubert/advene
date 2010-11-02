@@ -52,6 +52,9 @@ class FileImporter(AdhocView):
         self.options={
             }
 
+        # Flag used to cancel import
+        self.should_continue = True
+
         self.widget=self.build_widget()
 
     def update_importers(self):
@@ -88,7 +91,12 @@ class FileImporter(AdhocView):
         return True
 
     def convert_file(self, b, *p):
-        b.set_sensitive(False)
+        if b.get_label() == gtk.STOCK_CANCEL:
+            # Cancel action
+            self.should_continue = False
+            return True
+
+        b.set_label(gtk.STOCK_CANCEL)
         ic=self.importers.get_current_element()
         fname=unicode(self.filename_entry.get_text())
         self.widget.get_toplevel().set_title(_('Importing %s') % os.path.basename(fname))
@@ -130,7 +138,7 @@ class FileImporter(AdhocView):
             self.progressbar.set_text(label)
         while gtk.events_pending():
             gtk.main_iteration()
-        return True
+        return self.should_continue
 
     def build_widget(self):
         vbox=gtk.VBox()
