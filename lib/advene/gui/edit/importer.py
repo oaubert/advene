@@ -107,7 +107,7 @@ class FileImporter(AdhocView):
 
         b.set_label(gtk.STOCK_CANCEL)
         ic = self.importers.get_current_element()
-        fname=unicode(self.filename_entry.get_text())
+        fname = unicode(self.filename_entry.get_text())
         self.widget.get_toplevel().set_title(_('Importing %s') % os.path.basename(fname))
 
         if ic == dummy_advene_importer:
@@ -127,19 +127,36 @@ class FileImporter(AdhocView):
         i=ic(controller=self.controller, callback=self.progress_callback)
         i.set_options(self.optionform.options)
         i.package=self.controller.package
-        i.process_file(fname)
-        self.progress_callback(1.0)
-        self.controller.package._modified = True
-        self.controller.notify("PackageActivate", package=self.controller.package)
-        self.close()
-        mes=_('Completed conversion from file %(filename)s :\n%(statistics)s') % {
-            'filename': fname,
-            'statistics': i.statistics_formatted() }
-        dialog.message_dialog(mes, modal=False)
-        self.log(mes)
+
+        def processing_ended(msg=None):
+            self.progress_callback(1.0)
+            self.controller.notify("PackageActivate", package=self.controller.package)
+            self.close()
+            if msg is None:
+                msg = _('Completed conversion from file %(filename)s :\n%(statistics)s') % {
+                    'filename': fname,
+                    'statistics': i.statistics_formatted() }
+            dialog.message_dialog(msg, modal=False)
+            self.log(msg)
+
+        if hasattr(i, 'async_process_file'):
+            # Asynchronous version.
+            try:
+                i.async_process_file(fname, processing_ended)
+            except Exception, e:
+                dialog.message_dialog(e.message, modal=False)
+                self.close()
+        else:
+            # Standard, synchronous version
+            try:
+                i.process_file(fname)
+            except Exception, e:
+                dialog.message_dialog(e, modal=False)
+            finally:
+                processing_ended()
         return True
 
-    def do_gui_operation(function, *args, **kw):
+    def do_gui_operation(self, func, *args, **kw):
         """Execute a method in the main loop.
 
         Ensure that we execute all Gtk operations in the mainloop.
@@ -147,7 +164,7 @@ class FileImporter(AdhocView):
         def idle_func():
             gtk.gdk.threads_enter()
             try:
-                function(*args, **kw)
+                func(*args, **kw)
                 return False
             finally:
                 gtk.gdk.threads_leave()
