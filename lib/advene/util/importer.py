@@ -154,8 +154,16 @@ class GenericImporter(object):
     can_handle=staticmethod(can_handle)
 
     def progress(self, value=None, label=None):
+        """Display progress information and notify cancel.
+
+        The callback method can indicate that the action should be
+        cancelled by returning False. In this case, the Importer
+        should take this information into account and cleanly exit.
+        """
         if self.callback:
-            self.callback(min(value, 1.0), label)
+            return self.callback(min(value, 1.0), label)
+        else:
+            return True
 
     def process_options(self, option_list):
         (self.options, self.args) = self.optionparser.parse_args(args=option_list)
@@ -404,7 +412,8 @@ class TextImporter(GenericImporter):
         incr=0.02
         progress=0.1
         for l in f:
-            self.progress(progress)
+            if not self.progress(progress):
+                break
             progress += incr
             l=l.rstrip()
             l=unicode(l, self.encoding).encode('utf-8')
@@ -457,7 +466,8 @@ class LsDVDImporter(GenericImporter):
         progress=0.1
         for l in f:
             progress += incr
-            self.progress(progress, _("Processing data"))
+            if not self.progress(progress, _("Processing data")):
+                break
             l=l.rstrip()
             l=unicode(l, self.encoding).encode('utf-8')
             m=reg.search(l)
@@ -677,7 +687,8 @@ class ElanImporter(GenericImporter):
             if not self.atypes.has_key(tid):
                 self.atypes[tid]=self.create_annotation_type(self.schema, tid)
 
-            self.progress(progress, _("Converting tier %s") % tid)
+            if not self.progress(progress, _("Converting tier %s") % tid):
+                break
             progress += incr
             for an in tier.ANNOTATION:
                 d={}
@@ -1035,7 +1046,8 @@ class CmmlImporter(GenericImporter):
         incr=0.5 / len(cm.clip)
 
         for clip in cm.clip:
-            self.progress(progress, _("Parsing clip information"))
+            if not self.progress(progress, _("Parsing clip information")):
+                break
             progress += incr
             try:
                 begin=clip.start
@@ -1222,7 +1234,8 @@ class IRIImporter(GenericImporter):
             sid=ensemble.id
             print "Ensemble", sid
             progress += incr
-            self.progress(progress, _("Parsing ensemble %s") % sid)
+            if not self.progress(progress, _("Parsing ensemble %s") % sid):
+                break
             schema=self.create_schema(sid,
                                       author=ensemble.author or self.author,
                                       date=ensemble.date,
@@ -1232,7 +1245,8 @@ class IRIImporter(GenericImporter):
             for decoupage in ensemble.decoupage:
                 tid = decoupage.id
                 progress += incr
-                self.progress(progress, _("Parsing decoupage %s") % tid)
+                if not self.progress(progress, _("Parsing decoupage %s") % tid):
+                    break
                 print "  Decoupage ", tid
                 # Update self.duration
                 self.duration=max(long(decoupage.dur), self.duration)
@@ -1267,7 +1281,8 @@ class IRIImporter(GenericImporter):
                     yield d
                 # process "views" elements to add attributes
                 progress += incr
-                self.progress(progress, _("Parsing views"))
+                if not self.progress(progress, _("Parsing views")):
+                    break
                 try:
                     views=decoupage.views[0].view
                 except AttributeError:
@@ -1288,7 +1303,8 @@ class IRIImporter(GenericImporter):
                         else:
                             at=self.atypes[tid]
                     progress += incr
-                    self.progress(progress, view.title)
+                    if not self.progress(progress, view.title):
+                        break
                     print "     ", view.title.encode('latin1')
                     for ref in view.ref:
                         an = [a for a in self.package.annotations if a.id == ref.id ]
@@ -1380,7 +1396,8 @@ class IRIDataImporter(GenericImporter):
         self.progress(progress, _("Creating annotations"))
         for c in range(0, n / size):
             progress += incr
-            self.progress(progress, '')
+            if not self.progress(progress, ''):
+                break
             yield {
                 'begin': c * size * sample,
                 'end': (c + 1) * size * sample,
