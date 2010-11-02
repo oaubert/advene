@@ -23,6 +23,7 @@ Code adapted from gDesklets.
 
 import gtk
 import os
+import sys
 
 from gettext import gettext as _
 
@@ -458,6 +459,48 @@ class EditWidget(gtk.VBox):
             return True
         else:
             return False
+
+class OptionParserGUI(EditWidget):
+    """Generic GUI view to propose a dialog matching OptionParser definitions.
+
+    @ivar parser: the OptionParser instance which holds option definitions
+    @ivar default: an optional object, that holds default values as attributes.
+    """
+    def __init__(self, parser, default=None):
+        self.parser = parser
+        self.default = default
+        self.options = {}
+        super(OptionParserGUI, self).__init__(self.options.__setitem__, self.options.get)
+        self.parse_options(parser)
+        
+    def parse_options(self, parser):
+        for o in parser.option_list:
+            name = o.get_opt_string().replace('--', '')
+            if o.dest and hasattr(self.default, o.dest):
+                val = getattr(self.default, o.dest)
+            else:
+                val = o.default
+            # FIXME: should implement store_const, append, count? and (less likely) callback
+            if o.action == 'store_true':
+                self.options[o.dest] = False
+                self.add_checkbox(name, o.dest, o.help)
+            elif o.action == 'store_false':
+                self.options[o.dest] = True
+                self.add_checkbox(name, o.dest, o.help)
+            elif o.action == 'store':
+                if o.type in ('int', 'long'):
+                    self.options[o.dest] = val
+                    self.add_spin(name, o.dest, o.help, -sys.maxint, sys.maxint)
+                elif o.type == 'string':
+                    self.options[o.dest] = val or ""
+                    self.add_entry(name, o.dest, o.help)
+                #elif o.type == 'float': FIXME
+                elif o.type == 'choice':
+                    self.options[o.dest] = val
+                    self.add_option(name, o.dest, o.help, dict( (c, c) for c in o.choices) )
+            else:
+                print "Ignoring option", name
+                continue
 
 def test():
     val = {
