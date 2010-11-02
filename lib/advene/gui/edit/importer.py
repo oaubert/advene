@@ -45,7 +45,7 @@ class FileImporter(AdhocView):
     view_name = _("Importer")
     view_id = 'importerview'
 
-    def __init__(self, controller=None, parameters=None):
+    def __init__(self, controller=None, filename=None, parameters=None):
         super(FileImporter, self).__init__(controller=controller)
         self.controller=controller
         self.parameters=parameters
@@ -65,6 +65,8 @@ class FileImporter(AdhocView):
         self.main_thread_id = thread.get_ident()
 
         self.widget=self.build_widget()
+        if filename:
+            self.filename_entry.set_text(filename)
 
     def update_importers(self):
         n=unicode(self.filename_entry.get_text())
