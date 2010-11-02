@@ -117,7 +117,10 @@ def list_selector_widget(members=None,
             combo.child.set_text(t)
     else:
         def get_current_element(combo):
-            return combo.get_model().get_value(combo.get_active_iter(), 1)
+            if combo.get_active_iter() is not None:
+                return combo.get_model().get_value(combo.get_active_iter(), 1)
+            else:
+                return None
         def set_current_element(combo, el):
             # Find the index of the element
             l=[ t[0] for t in enumerate(combo.get_model()) if t[1][1] == el ]
