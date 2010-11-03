@@ -72,14 +72,12 @@ def register(controller=None):
             method=ac.PlayerStop,
             description=_("Stop the player"),
             category='player',
-            #            parameters={'position': _("Stop position (in ms)")}
             )
                                )
     controller.register_action(RegisteredAction(
             name="PlayerPause",
             method=ac.PlayerPause,
             description=_("Pause the player"),
-            #            parameters={'position': _("Pause position (in ms)")}
             category='player',
             )
                                )
@@ -87,7 +85,6 @@ def register(controller=None):
             name="PlayerResume",
             method=ac.PlayerResume,
             description=_("Resume the player"),
-            #            parameters={'position': _("Resume position (in ms)")}
             category='player',
             )
                                )
@@ -95,7 +92,6 @@ def register(controller=None):
             name="Snapshot",
             method=ac.Snapshot,
             description=_("Take a snapshot"),
-            #            parameters={'position': _("Snapshot position (in ms)")}
             category='expert',
             )
                                )
@@ -351,7 +347,14 @@ class DefaultActionsRepository:
         """Start the player."""
         position=self.parse_parameter(context, parameters, 'position', None)
         if position is not None:
-            position=long(position)
+            if hasattr(position, 'fragment'):
+                # Probably an annotation.
+                position = position.fragment.begin
+            elif hasattr(position, 'begin'):
+                # Probably a fragment
+                position = position.begin
+            else:
+                position=long(position)
         self.controller.update_status ("start", position)
         return True
 
@@ -362,7 +365,14 @@ class DefaultActionsRepository:
         #print "Goto from %s to %s" % (helper.format_time_reference(self.controller.player.current_position_value),
         #                              helper.format_time_reference(position))
         if position is not None:
-            position=long(position)
+            if hasattr(position, 'fragment'):
+                # Probably an annotation.
+                position = position.fragment.begin
+            elif hasattr(position, 'begin'):
+                # Probably a fragment
+                position = position.begin
+            else:
+                position=long(position)
         c=self.controller
         pos = c.create_position (value=position,
                                  key=c.player.MediaTime,
@@ -383,26 +393,17 @@ class DefaultActionsRepository:
 
     def PlayerStop (self, context, parameters):
         """Stop the player."""
-        position=self.parse_parameter(context, parameters, 'position', None)
-        if position is not None:
-            position=long(position)
-        self.controller.update_status ("stop", position)
+        self.controller.update_status ("stop")
         return True
 
     def PlayerPause (self, context, parameters):
         """Pause the player."""
-        position=self.parse_parameter(context, parameters, 'position', None)
-        if position is not None:
-            position=long(position)
-        self.controller.update_status ("pause", position)
+        self.controller.update_status ("pause")
         return True
 
     def PlayerResume (self, context, parameters):
         """Resume the playing."""
-        position=self.parse_parameter(context, parameters, 'position', None)
-        if position is not None:
-            position=long(position)
-        self.controller.update_status ("resume", position)
+        self.controller.update_status ("resume")
         return True
 
     def Snapshot (self, context, parameters):
