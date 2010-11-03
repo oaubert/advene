@@ -119,6 +119,7 @@ class FileImporter(AdhocView):
         if b.get_label() == gtk.STOCK_CANCEL:
             # Cancel action
             self.should_continue = False
+            b.set_sensitive(False)
             return True
 
         b.set_label(gtk.STOCK_CANCEL)
