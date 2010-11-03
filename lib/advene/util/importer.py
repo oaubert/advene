@@ -177,7 +177,7 @@ class GenericImporter(object):
     def set_options(self, options):
         for k, v in options.iteritems():
             if hasattr(self, k):
-                self.k = v
+                setattr(self, k, v)
 
     def process_options(self, source):
         (options, args) = self.optionparser.parse_args(args=source)
