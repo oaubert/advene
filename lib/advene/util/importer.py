@@ -57,7 +57,14 @@ import optparse
 
 from gettext import gettext as _
 
+import gobject
+import shutil
+import subprocess
+import threading
+
 import advene.core.config as config
+if config.data.os == 'win32':
+    import win32process
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation
@@ -404,6 +411,139 @@ class GenericImporter(object):
             if 'notify' in d and d['notify'] and self.controller is not None:
                 print "Notifying", a
                 self.controller.notify('AnnotationCreate', annotation=a)
+
+class ExternalAppImporter(GenericImporter):
+    """External application importer.
+
+    This specialized importer implements the async_process_file
+    method, that allows to easily import data from an external
+    application.
+
+    To use it, you have to override the __init__ method and set
+    self.app_path to the appropriate value, as well as other specific
+    attributes (parameters, etc).
+
+    Then, properly override the following methods :
+    * app_setup
+    * get_process_args
+    * iterator
+    """
+    name = _("ExternalApp importer")
+
+    def __init__(self, *p, **kw):
+        super(ExternalAppImporter, self).__init__(*p, **kw)
+
+        self.process = None
+        self.temporary_resources = []
+
+        # This value should be setup by descendant classes
+        self.app_path = self.get_app_path()
+
+    def async_process_file(self, filename, end_callback):
+        appname = os.path.basename(self.app_path)
+        if not os.path.exists(self.app_path):
+            raise Exception(_("The <b>%s</b> application does not seem to be installed. Please check that it is present and that its path is correctly specified in preferences." ) % appname)
+        if not os.path.exists(filename):
+            raise Exception(_("The file %s does not seem to exist.") % filename)
+
+        self.app_setup(filename, end_callback)
+
+        argv = [ self.app_path ] + self.get_process_args(filename)
+
+        flags = 0
+        if config.data.os == 'win32':
+            flags = win32process.CREATE_NO_WINDOW
+
+        try:
+            self.process = subprocess.Popen( argv,
+                                             bufsize=0,
+                                             shell=False,
+                                             stdout=subprocess.PIPE,
+                                             stderr=subprocess.PIPE,
+                                             creationflags = flags)
+        except OSError, e:
+            self.cleanup()
+            msg = e.message
+            raise Exception(_("Could not run %(appname)s: %(msg)s") % locals())
+
+        self.progress(.01, _("Processing %s") % gobject.filename_display_name(filename))
+
+        def execute_process():
+            self.convert(self.iterator())
+            self.progress(.95, _("Cleaning up..."))
+            self.cleanup()
+            self.progress(1.0)
+            end_callback()
+            return True
+
+        # Note: the "proper" way would be to use gobject.io_add_watch,
+        # but last time I tried, this had cross-platform issues. The
+        # threading approach seems to work across platforms, so "if it
+        # ain't broke, don't fix it".
+        t=threading.Thread(target=execute_process)
+        t.start()
+        return self.package
+
+    def cleanup(self, forced=False):
+        """Cleanup, and possibly cancel import.
+        """
+        # Terminate the process if necessary
+        if self.process:
+            if config.data.os == 'win32':
+                import ctypes
+                ctypes.windll.kernel32.TerminateProcess(int(self.process._handle), -1)
+            else:
+                try:
+                    # Python 2.6 only
+                    self.process.terminate()
+                except AttributeError:
+                    try:
+                        os.kill(self.process.pid, 9)
+                        os.waitpid(self.process.pid, os.WNOHANG)
+                    except OSError, e:
+                        print "Cannot kill application", unicode(e)
+            self.process = None
+
+        for r in self.temporary_resources:
+            # Cleanup temp. dir. and files
+            if os.path.isdir(r):
+                # Remove temp dir.
+                shutil.rmtree(r, ignore_errors=True)
+            elif os.path.exists(r):
+                os.unlink(r)
+        return True
+
+    def app_setup(self, filename, end_callback):
+        """Setup various attributes/parameters.
+
+        You can for instance create temporary directories here. Add
+        them to self.temporary_resources so that they are cleaned up
+        in the end.
+        """
+        pass
+        
+    def get_process_args(self, filename):
+        """Get the process args.
+
+        Return the process arguments (the app_path, argv[0], will be
+        prepended in async_process_file and should not be included here).
+        """
+        return [ ]
+
+    def iterator(self):
+        """Process input data.
+
+        You can read the output from self.process.stdout or
+        self.process.stderr, or any other communication means provided
+        by the external application.
+
+        This method should yield dictionaries containing data (see
+        GenericImporter for details).
+
+        You can call self.progress in this method. If it returns
+        False, the process should be cancelled.
+        """
+        yield {}
 
 class TextImporter(GenericImporter):
     """Text importer.
