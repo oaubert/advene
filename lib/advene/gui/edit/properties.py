@@ -336,6 +336,7 @@ class EditWidget(gtk.VBox):
         combo.connect('changed', self.__on_change, property, self.CHANGE_OPTION)
 
         combo.set_tooltip_text(help)
+        combo.show_all()
         self.__add_line(1, align, combo)
 
     def add_file_selector(self, label, property, help):
