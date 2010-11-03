@@ -494,7 +494,13 @@ class OptionParserGUI(EditWidget):
                 elif o.type == 'string':
                     self.options[o.dest] = val or ""
                     self.add_entry(name, o.dest, o.help)
-                #elif o.type == 'float': FIXME
+                elif o.type == 'float':
+                    # FIXME: incorrect ATM, since str values will be
+                    # stored instead of float. Should define a
+                    # add_spin_float variant, or add a parameter to
+                    # add_spin
+                    self.options[o.dest] = str(val)
+                    self.add_entry(name, o.dest, o.help)
                 elif o.type == 'choice':
                     self.options[o.dest] = val
                     self.add_option(name, o.dest, o.help, dict( (c, c) for c in o.choices) )
