@@ -750,6 +750,44 @@ class Menu:
 
         return
 
+    def create_follow_dynamic_view(self, rt):
+        """Create a dynamic view for the given relation-type.
+        """
+        p = self.controller.package
+        ident = 'v_follow_%s' % rt.id
+        if p.get_element_by_id(ident) is not None:
+            dialog.message_dialog(_("A follow dynamic view for %s already seems to exist.") % self.get_title(rt))
+            return True
+        v = p.createView(
+            ident=ident,
+            author=config.data.userid,
+            date=self.controller.get_timestamp(),
+            clazz='package',
+            content_mimetype='application/x-advene-ruleset'
+            )
+        v.title = _("Follow %s relation-type") % self.get_title(rt)
+
+        # Build the ruleset
+        r = RuleSet()
+        catalog = self.controller.event_handler.catalog
+
+        ra = catalog.get_action("PlayerGoto")
+        action = Action(registeredaction=ra, catalog=catalog)
+        action.add_parameter('position', 'annotation/typedRelatedOut/%s/first/fragment/begin' % rt.id)
+        rule=Rule(name=_("Follow the relation"),
+                  event=Event("AnnotationEnd"),
+                  condition=Condition(lhs='annotation/typedRelatedOut/%s' % rt.id,
+                                      operator='value'),
+                  action=action)
+        r.add_rule(rule)
+
+        v.content.data=r.xml_repr()
+
+        p.views.append(v)
+        self.controller.notify('ViewCreate', view=v)
+        self.controller.activate_stbv(v)
+        return True
+
     def make_relationtype_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
@@ -758,6 +796,7 @@ class Menu:
         add_item(_('Select a color'), self.pick_color, element)
         add_item(_('Delete all relations...'), self.delete_elements, element, element.relations)
         add_item(_('Create montage from related annotations'), self.create_montage, element)
+        add_item(_('Create dynamic view following relations'), lambda i, e: self.create_follow_dynamic_view(e), element)
         return
 
     def make_query_menu(self, element, menu):

@@ -14,11 +14,7 @@
 
 * Default caption dynamic view: make non-admin (remove _)
 
-* Enter/double click/e on annotation type -> edit
-
 * Montage: add "Save" icon
-
-* Relationtype popup menu: add "Create dynamic view following annotation"
 
 * MacOSX: use Cmd modifier equiv. as control
 
@@ -61,8 +57,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * trace replay mode  of video navigation (replay video based on navigation events) -> trace player with controlled video player
 
 * Customizable shortcuts
-
-* Implement subtitle import through python-aeidon
 
 * Save current workspace: display option in Save dialog
 
@@ -2715,6 +2709,12 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Snapshotter: monitoring/control interface
 
 * gui.edit.importer: generate option panel (through gui.edit.properties)
+
+* Implement subtitle import through python-aeidon
+
+* Enter/double click/e on annotation type -> edit
+
+* Relationtype popup menu: add "Create dynamic view following annotation"
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
