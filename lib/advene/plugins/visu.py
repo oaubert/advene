@@ -121,7 +121,7 @@ class TTLImporter(GenericImporter):
                     end = begin + default_duration
 
                 if item['type'] == 'PresenceStart':
-                    self.defaulttype.setMetaData(config.data.namespace, 'description', "Trace for %s %s on %s" % (item['surname'], item['name'], time.strftime('%F %H:%M:%S', time.localtime(item['begin'] / 1000))))
+                    self.defaulttype.setMetaData(config.data.namespace_prefix['dc'], 'description', "Trace for %s %s on %s" % (item['surname'], item['name'], time.strftime('%F %H:%M:%S', time.localtime(item['begin'] / 1000))))
 
                 item['_begin'] = helper.format_time_reference(item['begin'])
                 item['_end'] = helper.format_time_reference(item['end'])
