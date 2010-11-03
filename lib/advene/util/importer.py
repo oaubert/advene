@@ -437,7 +437,7 @@ class ExternalAppImporter(GenericImporter):
         self.temporary_resources = []
 
         # This value should be setup by descendant classes
-        self.app_path = self.get_app_path()
+        self.app_path = None
 
     def async_process_file(self, filename, end_callback):
         appname = os.path.basename(self.app_path)
