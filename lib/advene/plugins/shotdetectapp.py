@@ -23,38 +23,29 @@ from gettext import gettext as _
 import os
 import sys
 import re
-import shutil
 import tempfile
 
 import gobject
-import subprocess
-import threading
 
 import advene.util.helper as helper
 
 import advene.core.config as config
-if config.data.os == 'win32':
-    import win32process
 
-from advene.util.importer import GenericImporter
+from advene.util.importer import ExternalAppImporter
 
 def register(controller=None):
     controller.register_importer(ShotdetectAppImporter)
     return True
 
-class ShotdetectAppImporter(GenericImporter):
+class ShotdetectAppImporter(ExternalAppImporter):
     name = _("ShotdetectApp importer")
 
     def __init__(self, *p, **kw):
         super(ShotdetectAppImporter, self).__init__(*p, **kw)
-
-        self.process = None
-        self.temporary_resources = []
-        self.sensitivity = 60
-
-        # Duration of the processed movie (used to correctly compute
-        # progress value)
+        self.app_path = config.data.path['shotdetect']
+        # Duration of the processed movie (used to correctly compute progress value)
         self.duration = 0
+        self.sensitivity = 60
 
         self.optionparser.add_option("-s", "--sensitivity",
                                      action="store", type="int", dest="sensitivity", default=self.sensitivity,
@@ -71,84 +62,42 @@ class ShotdetectAppImporter(GenericImporter):
         return 0
     can_handle=staticmethod(can_handle)
 
-    def async_process_file(self, filename, end_callback):
-        if not os.path.exists(config.data.path['shotdetect']):
-            raise Exception(_("The <b>shotdetect</b> application does not seem to be installed. Please check that it is present and that its path is correctly specified in preferences." ))
-        if not os.path.exists(filename):
-            raise Exception(_("The movie %s does not seem to exist.") % filename)
+    def app_setup(self, filename, end_callback):
+        """Setup various attributes/parameters.
 
+        You can for instance create temporary directories here. Add
+        them to self.temporary_resources so that they are cleaned up
+        in the end.
+        """
         if filename == self.controller.get_default_media():
             # We know the duration
             self.duration = self.controller.cached_duration
+        # FIXME: else we could/should get it somehow
 
-        tempdir = unicode(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
-        self.temporary_resources.append(tempdir)
-
-        argv = [ config.data.path['shotdetect'],
-                 '-i', gobject.filename_from_utf8(filename.encode('utf8')),
-                 '-o', gobject.filename_from_utf8(tempdir.encode('utf8')),
-                 '-s', str(self.sensitivity) ]
-        flags = 0
-        if config.data.os == 'win32':
-            flags = win32process.CREATE_NO_WINDOW
-
-        try:
-            self.process = subprocess.Popen( argv,
-                                             bufsize=0,
-                                             shell=False,
-                                             stdout=subprocess.PIPE,
-                                             stderr=subprocess.PIPE,
-                                             creationflags = flags)
-        except OSError, e:
-            self.cleanup()
-            raise Exception(_("Could not run shotdetect: %s") % unicode(e))
+        self.tempdir = unicode(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
+        self.temporary_resources.append(self.tempdir)
 
         self.ensure_new_type('shots', title=_("Detected shots"), schemaid='detected')
-        self.progress(.01, _("Detecting shots from %s") % gobject.filename_display_name(filename))
+        
+    def get_process_args(self, filename):
+        """Get the process args.
 
-        def execute_process():
-            self.convert(self.iterator())
-            self.progress(.95, _("Cleaning up..."))
-            self.cleanup()
-            self.progress(1.0)
-            end_callback()
-            return True
-
-        t=threading.Thread(target=execute_process)
-        t.start()
-        return self.package
-
-    def cleanup(self, forced=False):
-        """Cleanup, and possibly cancel import.
+        Return the process arguments (the app_path, argv[0], will be
+        prepended in async_process_file and should not be included here).
         """
-        # Terminate the process if necessary
-        if self.process:
-            if config.data.os == 'win32':
-                import ctypes
-                ctypes.windll.kernel32.TerminateProcess(int(self.process._handle), -1)
-            else:
-                try:
-                    # Python 2.6 only
-                    self.process.terminate()
-                except AttributeError:
-                    try:
-                        os.kill(self.process.pid, 9)
-                        os.waitpid(self.process.pid, os.WNOHANG)
-                    except OSError, e:
-                        print "Cannot kill application", unicode(e)
-            self.process = None
-
-        for r in self.temporary_resources:
-            # Cleanup temp. dir. and files
-            if os.path.isdir(r):
-                # Remove temp dir.
-                shutil.rmtree(r, ignore_errors=True)
-            elif os.path.exists(r):
-                os.unlink(r)
-        return True
+        return [ '-i', gobject.filename_from_utf8(filename.encode('utf8')),
+                 '-o', gobject.filename_from_utf8(self.tempdir.encode('utf8')),
+                 '-s', str(self.sensitivity) ]
 
     def iterator(self):
         """Process input data.
+
+        You can read the output from self.process.stdout or
+        self.process.stderr, or any other communication means provided
+        by the external application.
+
+        This method should yield dictionaries containing data (see
+        GenericImporter for details).
         """
         shot_re=re.compile('Shot log\s+::\s+(.+)')
         exp_re = re.compile('(\d*\.\d*)e\+(\d+)')
