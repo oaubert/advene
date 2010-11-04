@@ -48,6 +48,10 @@ class DelakisShotDetectImporter(GenericImporter):
 
         self.motion_threshold = .15
         self.shot_threshold = .15
+        self.cache_histogram = False
+        self.optionparser.add_option("-c", "--cache-histogram",
+                                     action="store_true", dest="cache_histogram", default=self.cache_histogram,
+                                     help=_("Cache histogram alongside video files."))
         self.optionparser.add_option("-m", "--motion-threshold",
                                      action="store", type="float", dest="motion_threshold", default=self.motion_threshold,
                                      help=_("Motion threshold."))
@@ -81,10 +85,11 @@ class DelakisShotDetectImporter(GenericImporter):
             he = HistogramExtractor()
             print "Processing ", filename
             histos, fps = he.process(unicode(filename).encode('utf-8'), self.progress)
-            try:
-                numpy.save(histofile, histos)
-            except Exception, e:
-                self.controller.log("Cannot save histogram: %s" % e.message)
+            if self.cache_histogram:
+                try:
+                    numpy.save(histofile, histos)
+                except Exception, e:
+                    self.controller.log("Cannot save histogram: %s" % e.message)
 
         sd = ShotDetector()
         for o in ('motion_threshold', 'shot_threshold'):
