@@ -158,7 +158,11 @@ class FileImporter(AdhocView):
             try:
                 i.process_file(fname)
             except Exception, e:
-                dialog.message_dialog(e, modal=False)
+                dialog.message_dialog(e.message, modal=False)
+                import sys
+                import code
+                e, v, tb = sys.exc_info()
+                code.traceback.print_exception (e, v, tb)
             finally:
                 self.processing_ended()
         return True
