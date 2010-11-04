@@ -84,6 +84,7 @@ class EditWidget(gtk.VBox):
     CHANGE_SPIN = 2
     CHANGE_CHECKBOX = 3
     CHANGE_TEXT = 4
+    CHANGE_FLOAT_SPIN = 2
 
     def __init__(self, set_config, get_config):
 
@@ -149,6 +150,9 @@ class EditWidget(gtk.VBox):
 
         elif (mode == self.CHANGE_SPIN):
             value = src.get_value_as_int()
+
+        elif (mode == self.CHANGE_FLOAT_SPIN):
+            value = src.get_value()
 
         elif (mode == self.CHANGE_TEXT):
             value = unicode(src.get_text(*src.get_bounds()))
@@ -304,7 +308,29 @@ class EditWidget(gtk.VBox):
         spin_button.connect('value-changed', self.__on_change, property,
                             self.CHANGE_SPIN)
 
+    def add_float_spin(self, label, property, help, low, up, digits=2):
 
+        lbl = gtk.Label(label)
+        lbl.show()
+
+        align = gtk.Alignment()
+        align.show()
+        align.add(lbl)
+
+        value = self.__get_config(property)
+        
+        adjustment = gtk.Adjustment(value, low, up, 10 ** -digits, 1, 0)
+        spin_button = gtk.SpinButton(adjustment, 1, digits)
+        spin_button.set_numeric(True)
+        spin_button.show()
+
+
+        spin_button.set_tooltip_text(help)
+        self.__add_line(1, align, spin_button)
+
+        spin_button.set_value(value)
+        spin_button.connect('value-changed', self.__on_change, property,
+                            self.CHANGE_FLOAT_SPIN)
 
     def add_option(self, label, property, help, options):
 
@@ -496,12 +522,8 @@ class OptionParserGUI(EditWidget):
                     self.options[o.dest] = val or ""
                     self.add_entry(name, o.dest, o.help)
                 elif o.type == 'float':
-                    # FIXME: incorrect ATM, since str values will be
-                    # stored instead of float. Should define a
-                    # add_spin_float variant, or add a parameter to
-                    # add_spin
-                    self.options[o.dest] = str(val)
-                    self.add_entry(name, o.dest, o.help)
+                    self.options[o.dest] = val
+                    self.add_float_spin(name, o.dest, o.help, -sys.maxint, sys.maxint, 2)
                 elif o.type == 'choice':
                     self.options[o.dest] = val
                     self.add_option(name, o.dest, o.help, dict( (c, c) for c in o.choices) )
