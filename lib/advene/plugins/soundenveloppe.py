@@ -50,7 +50,7 @@ class SoundEnveloppeImporter(GenericImporter):
         self.interval = 100
         # Max. number of samples in an annotation
         self.count = 1000
-        self.force_mono = True
+        self.channel = 'both'
 
         self.optionparser.add_option("-i", "--interval",
                                      action="store", type="int", dest="interval", default=self.interval,
@@ -58,9 +58,10 @@ class SoundEnveloppeImporter(GenericImporter):
         self.optionparser.add_option("-n", "--number-of-samples",
                                      action="store", type="int", dest="count", default=self.count,
                                      help=_("Maximum number of samples per annotation."))
-        self.optionparser.add_option("-m", "--mono",
-                                     action="store_true", dest="force_mono", default=self.force_mono,
-                                     help=_("Generate mono enveloppe."))
+        self.optionparser.add_option("-c", "--channel",
+                                     action="store", type="choice", dest="channel", choices=("both", "left", "right"), default=self.channel,
+                                     help=_("Channel selection."))
+
         self.buffer = []
         self.buffer_list = []
         self.min = sys.maxint
@@ -113,8 +114,13 @@ class SoundEnveloppeImporter(GenericImporter):
             elif s.get_name() == 'level':
                 if not self.buffer:
                     self.first_item_time = s['stream-time'] / gst.MSECOND
-                # FIXME: take self.force_mono into account
-                v = s['rms'][0]
+                rms = s['rms']
+                v = rms[0]
+                if len(rms) > 1:
+                    if self.channel == 'right':
+                        v = rms[1]
+                    elif self.channel == 'both':
+                        v = (rms[0] + rms[1]) / 2
                 if isinf(v) or isnan(v):
                     v = self.lastval
                 if v < self.min:
