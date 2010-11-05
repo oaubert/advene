@@ -88,19 +88,23 @@ class SoundEnveloppeImporter(GenericImporter):
                         } ])
 
     def on_bus_message(self, bus, message):
-        if message.type == gst.MESSAGE_EOS:
+        def finalize():
+            pos = self.pipeline.query_position(gst.FORMAT_TIME)[0] / gst.MSECOND
+            gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
             # Add last buffer data
-            self.buffer_list.append((self.first_item_time, self.pipeline.query_position(gst.FORMAT_TIME)[0] / gst.MSECOND, list(self.buffer)))
+            self.buffer_list.append((self.first_item_time, pos, list(self.buffer)))
             self.generate_normalized_annotations()
             self.end_callback()
-            gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
+            return True
+
+        if message.type == gst.MESSAGE_EOS:
+            finalize()
         elif message.structure:
             s=message.structure
             #print "MSG " + bus.get_name() + ": " + s.to_string()
             if s.get_name() == 'progress' and self.progress is not None:
                 if not self.progress(s['percent-double'] / 100):
-                    gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
-                    self.end_callback()
+                    finalize()
             elif s.get_name() == 'level':
                 if not self.buffer:
                     self.first_item_time = s['stream-time'] / gst.MSECOND
