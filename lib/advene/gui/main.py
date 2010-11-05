@@ -4032,26 +4032,25 @@ class AdveneGUI(object):
         ew.add_file_selector(_("Shotdetect"), "shotdetect", _("Shotdetect application"))
 
         ew.add_title(_("GUI"))
-        ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"),
-                      {
-                "English": 'C',
-                "Francais": 'fr_FR',
-                _("System default"): '',
-                })
+        ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"), odict((
+                (_("System default"), ''),
+                ("English", 'C'),
+                ("Esperanto", 'eo'),
+                ("Francais", 'fr_FR'),
+                )))
         ew.add_checkbox(_("Record activity trace"), "record-actions", _("Record activity trace"))
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
         ew.add_checkbox(_("Prefer WYSIWYG"), "prefer-wysiwyg", _("Use WYSIWYG editors when possible (HTML, SVG)"))
         ew.add_checkbox(_("Player control in edit popups"), 'player-shortcuts-in-edit-windows', _("Enable generic player controls in edit windows. This may be undesirable since it overloads some standard text-edition behaviours (esp. control-left/right)."))
 
         ew.add_option(_("Open popups"), 'popup-destination',
-                      _("Where should we open adhoc views?"),
-                      {
-                _("as a popup window"): 'popup',
-                _("embedded east of the video"): 'east',
-                _("embedded west of the video"): 'west',
-                _("embedded south of the video"): 'south',
-                _("embedded at the right of the window"): 'fareast',
-                })
+                      _("Where should we open adhoc views?"), odict((
+                (_("as a popup window"), 'popup'),
+                (_("embedded east of the video"), 'east'),
+                (_("embedded west of the video"), 'west'),
+                (_("embedded south of the video"), 'south'),
+                (_("embedded at the right of the window"), 'fareast'),
+                )))
 
         ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
                     -1, 20)
@@ -4062,38 +4061,34 @@ class AdveneGUI(object):
         ew.add_title(_("General"))
         ew.add_checkbox(_("Weekly update check"), 'update-check', _("Weekly check for updates on the Advene website"))
         ew.add_option(_("On exit,"), 'imagecache-save-on-exit',
-                      _("How to handle screenshots on exit"),
-                      {
-                _("never save screenshots"): 'never',
-                _("always save screenshots"): 'always',
-                _("ask before saving screenshots"): 'ask',
-                })
+                      _("How to handle screenshots on exit"), odict((
+                (_("never save screenshots"), 'never'),
+                (_("always save screenshots"), 'always'),
+                (_("ask before saving screenshots"), 'ask'),
+                )))
         ew.add_option(_("Auto-save"), 'package-auto-save',
-                      _("Data auto-save functionality"),
-                      {
-                _("is desactivated"): 'never',
-                _("is done automatically"): 'always',
-                _("is done after confirmation"): 'ask',
-                })
+                      _("Data auto-save functionality"), odict((
+                (_("is desactivated"), 'never'),
+                (_("is done automatically"), 'always'),
+                (_("is done after confirmation"), 'ask'),
+                )))
         ew.add_spin(_("Auto-save interval (in s)"), 'package-auto-save-interval', _("Interval (in seconds) between package auto-saves"), 5, 60 * 60)
 
         ew.add_title(_("Workspace"))
 
         ew.add_option(_("On package saving,"), 'save-default-workspace',
-                      _("Do you wish to save the default workspace with the package?"),
-                      {
-                _("never save the current workspace"): 'never',
-                _("always save the current workspace"): 'always',
-                _("ask before saving the current workspace"): 'ask',
-                })
+                      _("Do you wish to save the default workspace with the package?"), odict((
+                (_("never save the current workspace"), 'never'),
+                (_("always save the current workspace"), 'always'),
+                (_("ask before saving the current workspace"), 'ask'),
+                )))
 
         ew.add_option(_("On package load,"), 'restore-default-workspace',
-                      _("Do you wish to load the workspace saved with the package?"),
-                      {
-                _("never load the saved workspace"): 'never',
-                _("always load the saved workspace"): 'always',
-                _("ask before loading the saved workspace"): 'ask',
-                })
+                      _("Do you wish to load the workspace saved with the package?"), odict((
+                (_("never load the saved workspace"), 'never'),
+                (_("always load the saved workspace"), 'always'),
+                (_("ask before loading the saved workspace"), 'ask'),
+                )))
 
         ew.add_title(_("Video Player"))
         ew.add_checkbox(_("Autostart"), 'player-autostart', _("Automatically start the player when loading a media file (either directly or through a package)"))
@@ -4153,27 +4148,24 @@ class AdveneGUI(object):
 
         ew.add_title(_("Text-To-Speech"))
         ew.add_option(_("TTS language"), 'tts-language',
-                      _("What language settings should be used for text-to-speech"),
-                      {
-                _("French"): 'fr',
-                _("English"): 'en',
-                _("Esperanto"): 'eo',
-                _("Spanish"): 'es',
-                })
+                      _("What language settings should be used for text-to-speech"), odict((
+                (_("English"), 'en'),
+                (_("French"), 'fr'),
+                (_("Spanish"), 'es'),
+                )))
         ew.add_entry(_("TTS Encoding"), 'tts-encoding',
                       _("What encoding should be used to communicate with the TTS engine"), entries = [ 'utf8', 'utf16', 'latin1', 'cp1252' ] )
         ew.add_option(_("TTS Engine"), 'tts-engine',
-                      _("Which TTS engine should be used (modification requires restarting Advene to take into account)"),
-                      {
-                _("Automatic"): 'auto',
-                _("eSpeak"): 'espeak',
-                _("Custom script with standard input"): 'custom',
-                _("Custom script with arguments"): 'customarg',
-                _("SAPI"): 'sapi',
-                _("MacOS X say"): 'macosx',
-                _("Generic (text output)"): 'generic',
-                })
-
+                      _("Which TTS engine should be used (modification requires restarting Advene to take into account)"), odict((
+                (_("Automatic"), 'auto'),
+                (_("eSpeak"), 'espeak'),
+                (_("Custom script with standard input"), 'custom'),
+                (_("Custom script with arguments"), 'customarg'),
+                (_("SAPI"), 'sapi'),
+                (_("MacOS X say"), 'macosx'),
+                (_("Generic (text output)"), 'generic'),
+                )))
+        
         res=ew.popup()
         if res:
             player_need_restart = False
