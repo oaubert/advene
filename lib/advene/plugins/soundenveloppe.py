@@ -28,6 +28,7 @@ import gst
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
+from math import isinf, isnan
 
 def register(controller=None):
     controller.register_importer(SoundEnveloppeImporter)
@@ -42,7 +43,7 @@ class SoundEnveloppeImporter(GenericImporter):
         # Interval in ms at which to take samples
         self.interval = 100
         # Max. number of samples in an annotation
-        self.count = 100
+        self.count = 1000
         self.force_mono = True
 
         self.optionparser.add_option("-i", "--interval",
@@ -77,6 +78,7 @@ class SoundEnveloppeImporter(GenericImporter):
         self.progress(0, _("Generating annotations"))
         for i, tup in enumerate(self.buffer_list):
             self.progress(i / n)
+            #print tup[2]
             self.convert( [ {
                         'begin': tup[0],
                         'end': tup[1],
@@ -102,10 +104,13 @@ class SoundEnveloppeImporter(GenericImporter):
                     self.first_item_time = s['stream-time'] / gst.MSECOND
                 # FIXME: take self.force_mono into account
                 v = s['rms'][0]
+                if isinf(v) or isnan(v):
+                    v = self.lastval
                 if v < self.min:
                     self.min = v
                 elif v > self.max:
                     self.max = v
+                self.lastval = v
                 self.buffer.append(v)
                 if len(self.buffer) >= self.count:
                     self.buffer_list.append((self.first_item_time, s['endtime'] / gst.MSECOND, list(self.buffer)))
