@@ -1,5 +1,11 @@
 Interesting pointers:
 
+* FCP: http://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=97%26section=3%26tasks=true
+http://developer.apple.com/library/mac/#documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html
+http://developer.apple.com/library/mac/#documentation/AppleApplications/Reference/FinalCutPro_XML/Basics/Basics.html#//apple_ref/doc/uid/TP30001154-TPXREF101
+Timing: http://developer.apple.com/library/mac/#documentation/AppleApplications/Reference/FinalCutPro_XML/Topics/Topics.html#//apple_ref/doc/uid/TP30001149-CH294-SW1 
+Elements: http://developer.apple.com/library/mac/#documentation/AppleApplications/Reference/FinalCutPro_XML/Elements/Elements.html
+
 * Interface with http://www.archive.org/movies/ (XML files)
 
 * Query MPEG7: http://www.idealliance.org/papers/extreme03/html/2001/Liu01/EML2001Liu01.html
