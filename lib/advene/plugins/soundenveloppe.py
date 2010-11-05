@@ -28,7 +28,13 @@ import gst
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
-from math import isinf, isnan
+try:
+    from math import isinf, isnan
+except ImportError:
+    # python <= 2.5
+    def isnan(f):
+        return repr(f) == 'nan'
+    isinf = isnan
 
 def register(controller=None):
     controller.register_importer(SoundEnveloppeImporter)
@@ -80,7 +86,6 @@ class SoundEnveloppeImporter(GenericImporter):
         self.progress(0, _("Generating annotations"))
         for i, tup in enumerate(self.buffer_list):
             self.progress(i / n)
-            #print tup[2]
             self.convert( [ {
                         'begin': tup[0],
                         'end': tup[1],
