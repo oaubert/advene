@@ -348,15 +348,17 @@ class Menu:
         menu.show_all()
         return menu
 
-    def display_stats(self, m, at):
-        """Display statistics about the annotation type.
+    def display_stats(self, m, el):
+        """Display statistics about the element's annotations.
+
+        element can be either the package, or an annotation type.
         """
-        msg=_("<b>Statistics about %s</b>\n\n") % self.controller.get_title(at)
-        msg += "%d annotations\n" % len(at.annotations)
-        msg += "Min duration : %s\n" % helper.format_time(min( a.fragment.duration for a in at.annotations))
-        msg += "Max duration : %s\n" % helper.format_time(max( a.fragment.duration for a in at.annotations))
-        msg += "Mean duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in at.annotations) / len(at.annotations))
-        msg += "Total duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in at.annotations))
+        msg=_("<b>Statistics about %s</b>\n\n") % self.controller.get_title(el)
+        msg += "%d annotations\n" % len(el.annotations)
+        msg += "Min duration : %s\n" % helper.format_time(min( a.fragment.duration for a in el.annotations))
+        msg += "Max duration : %s\n" % helper.format_time(max( a.fragment.duration for a in el.annotations))
+        msg += "Mean duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in el.annotations) / len(el.annotations))
+        msg += "Total duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in el.annotations))
         dialog.message_dialog(msg)
         return True
 
@@ -439,9 +441,6 @@ class Menu:
         """Extract the fragment corresponding to an annotation.
         """
         title = self.controller.get_title(ann)
-        begin = helper.format_time(ann.fragment.begin)
-        end = helper.format_time(ann.fragment.end)
-
         self.controller.gui.render_montage_dialog([ ann ],
                                                   basename = ann.id + "-" + helper.title2id(title) + ".ogv",
                                                   title = _("Extracting %s") % title,
@@ -630,6 +629,8 @@ class Menu:
         if self.readonly:
             return
         add_item(_('Edit package properties...'), self.controller.gui.on_package_properties1_activate)
+        add_item(_('%d annotations(s) - statistics') % len(element.annotations), self.display_stats, element)
+        add_item('')
         add_item(_('Create a new static view...'), self.create_element, 'staticview', element)
         add_item(_('Create a new dynamic view...'), self.create_element, 'dynamicview', element)
         add_item(_('Create a new annotation...'), self.create_element, Annotation, element)
