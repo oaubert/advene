@@ -59,6 +59,8 @@ class SoundEnveloppeImporter(GenericImporter):
         self.buffer_list = []
         self.min = sys.maxint
         self.max = -sys.maxint
+        self.first_item_time = 0
+        self.lastval = 0
 
     def can_handle(fname):
         """Return a score between 0 and 100.
