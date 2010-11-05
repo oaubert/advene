@@ -1,3 +1,5 @@
+* gst spectrum videoanalyse
+
 * display clock cursor for lengthy actions (timeline update)
 
 * snapshotter: bug for NY_1.mov (look for "silver beach")
@@ -392,10 +394,6 @@ http://service.real.com/help/library/guides/ScriptingGuide/HTML/htmfiles/methodi
 * think about printing support
 
 * HTML action to update all displayed screenshots
-
-* vlc audio extraction: vlc --no-sout-video --sout '#es{access-audio=file,mux-audio=ts,dst-audio=-}'  k.mpg vlc:quit
-
-* vlc wav audio extraction: vlc --no-sout-video --sout '#transcode{acodec=s16l}:es{access-audio=file,mux-audio=wav,dst-audio=foo.raw}'  k.mpg vlc:quit
 
 * bug: begin event is generated when setting position inside an annotation.
 
@@ -2717,6 +2715,10 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Relationtype popup menu: add "Create dynamic view following annotation"
 
 * implement audio segmenter using cutter gst: gst-launch -m filesrc location=foo.ogg ! decodebin ! audioconvert ! cutter threshold=.3 ! progressreport ! fakesink
+
+* vlc audio extraction: vlc --no-sout-video --sout '#es{access-audio=file,mux-audio=ts,dst-audio=-}'  k.mpg vlc:quit
+
+* vlc wav audio extraction: vlc --no-sout-video --sout '#transcode{acodec=s16l}:es{access-audio=file,mux-audio=wav,dst-audio=foo.raw}'  k.mpg vlc:quit
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
