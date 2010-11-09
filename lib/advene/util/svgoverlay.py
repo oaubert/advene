@@ -43,7 +43,7 @@ class SVGOverlay(gst.Element):
 
     __gproperties__ = {
         'data': ( gobject.TYPE_STRING, 'data', 'SVG data to overlay', None, gobject.PARAM_WRITABLE ),
-        'filename': ( gobject.TYPE_STRING, 'filename', 'SVG file to overlay', None, gobject.PARAM_WRITABLE ),
+        'location': ( gobject.TYPE_STRING, 'location', 'SVG file to overlay', None, gobject.PARAM_WRITABLE ),
         }
     
     _sinkpadtemplate = gst.PadTemplate ("sink",
@@ -102,7 +102,7 @@ class SVGOverlay(gst.Element):
     def do_set_property(self, key, value):
         if key.name == 'data':
             self.set_svg(data=value)
-        elif key.name == 'filename':
+        elif key.name == 'location':
             self.set_svg(filename=value)
         else:
             print "No property %s" % key.name
