@@ -1,3 +1,9 @@
+* pymecavideo: see opencv example
+
+* DS: always display player control (Play/pause) under the player
+
+* DS: display explicit feedback about player status (play/pause/buffering)
+
 * finder: in Static view/dynamic view columns, add a "+" item
 
 * gst spectrum videoanalyse
