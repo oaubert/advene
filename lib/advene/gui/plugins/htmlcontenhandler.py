@@ -216,6 +216,166 @@ class AnnotationPlaceholder:
         pixbuf._attr=[]
         return pixbuf
 
+class AnnotationTypePlaceholder:
+    """AnnotationType representation.
+    
+    presentation is a list of presentation modalities. Values include:
+    * list : display as a bulleted list
+    * transcription : display as a transcription
+    * table : display as a table
+    """
+    def __init__(self, annotationtype=None, controller=None, presentation=None, update_pixbuf=None):
+        self.annotationtype=annotationtype
+        self.controller=controller
+        if presentation is None:
+            presentation=[ 'list' ]
+        self.presentation=presentation
+        self.span_count = 0
+        self.update_pixbuf=update_pixbuf
+        self.width=160
+        # FIXME: how to pass/parse width, height, alt, link ?
+        self.rules=[]
+        self.pixbuf=self.build_pixbuf()
+        self.refresh()
+
+    def cleanup(self):
+        for r in self.rules:
+            self.controller.event_handler.remove_rule(r, 'internal')
+        self.rules=[]
+
+    def process_enclosed_tags(self, typ, tag, attr=None):
+        """Process enclosed data.
+        
+        FIXME: what should we do here?
+        """
+        if typ == 'start' and tag == 'span':
+            self.span_count += 1
+        if typ == 'end' and tag == 'span':
+            self.span_count -= 1
+            if self.span_count == 0:
+                return False
+        return True
+
+    def parse_html(self, tag, attr):
+        if attr['class'] == 'advene:annotationtype':
+            self.presentation=attr['advene:presentation'].split(':')
+            aid=attr['advene:annotationtype']
+            self.annotationtype = self.controller.package.get_element_by_id(aid)
+            if self.annotationtype is None:
+                print "Problem: non-existent annotation type"
+            self.refresh()
+            return self.pixbuf, self.process_enclosed_tags
+        return None, None
+
+    def as_html(self):
+        if self.annotationtype is None:
+            return """<span advene:error="Non-existent annotation type"></span>"""
+
+        ctx=self.controller.build_context(self.annotationtype)
+        try:
+            urlbase=self.controller.server.urlbase.rstrip('/')
+        except AttributeError:
+            urlbase='http://localhost:1234'
+        d={
+            'id': self.annotationtype.id,
+            'href': urlbase + ctx.evaluateValue('here/absolute_url'),
+            'content': self.controller.get_title(self.annotationtype),
+            'urlbase': urlbase,
+            }
+        data=[ """<span class="advene:annotationtype" advene:annotationtype="%s" advene:presentation="%s">""" % (self.annotationtype.id, ':'.join(self.presentation)) ]
+
+        if 'list' in self.presentation:
+            data.append("<ul>")
+            data.append("""<li tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted"><a title="Click to play the movie" tal:attributes="href a/player_url" tal:content="a/content/data"></a>""" % d)
+            data.append("""</li></ul>""")
+        elif 'table' in self.presentation:
+            data.append("""
+<div class="screenshot_container" style="text-align: center; float: left; width: 200; height: 170; font-size: 0.8em;" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted">
+<a title="Play this annotation" tal:attributes="href a/player_url">
+        <img class="screenshot" style="border:1px solid #FFCCCC; height:100px; width:160px;" alt="" tal:attributes="src a/snapshot_url" />
+	<br />
+	<strong tal:content="a/content/data">Nom</strong>
+</a><br />
+<span>(<span tal:content="a/fragment/formatted/begin">Debut</span> - <span tal:content="a/fragment/formatted/end">Fin</span>)</span>
+<br /> 
+</div>""" % d)
+        elif 'transcription' in self.presentation:
+            data.append("""<span class="transcript" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted" tal:attributes="annotation-id a/id">
+<a title="Click to play the movie" tal:attributes="href a/player_url" tal:content="a/content/data"></a></span>""" % d)
+
+        data.append('</span>')
+        return "".join(data)
+
+    def annotationtype_updated(self, context, target):
+        if context.globals['annotationtype'] == self.annotationtype:
+            self.refresh()
+        return True
+
+    def annotationtype_deleted(self, context, target):
+        if context.globals['annotationtype'] == self.annotationtype:
+            self.annotationtype=None
+            self.cleanup()
+            self.refresh()
+        return True
+
+    def refresh(self):
+        if not self.rules and self.annotationtype:
+            # Now that an annotation is defined, we can connect the notifications
+            self.rules.append(self.controller.event_handler.internal_rule (event='AnnotationTypeEditEnd',
+                                                                           method=self.annotationtype_updated))
+            self.rules.append(self.controller.event_handler.internal_rule (event='AnnotationTypeDelete',
+                                                                           method=self.annotationtype_deleted))
+        old=self.pixbuf
+        new=self.build_pixbuf()
+        if not self.update_pixbuf:
+            new.composite(old, 0, 0, old.get_width(), old.get_height(),
+                          0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
+        else:
+            self.update_pixbuf(old, new)
+        self.pixbuf=new
+        return True
+
+    def render_text(self, text):
+        """Render the given text as a pixbuf.
+        """
+
+        # Find out the pixbuf size
+        import cairo
+        context = cairo.Context(cairo.ImageSurface(cairo.FORMAT_ARGB32, 1, 1))
+        context.select_font_face("sans-serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        context.set_font_size(12)
+        x_bearing, y_bearing, width, height = context.text_extents(text)[:4]
+
+        # Generate text
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, int(width) + 4, int(height) + 4)
+        context = cairo.Context(surface)
+        context.select_font_face("sans-serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        context.set_font_size(12)
+        context.set_source_rgba(0, 0, 0, 1)
+        context.move_to(2 - x_bearing, 2 - y_bearing)
+        context.text_path(text)
+        context.set_line_width(0.5)
+        context.stroke_preserve()
+        context.fill()
+
+        pixbuf = gtk.gdk.pixbuf_new_from_data(
+            surface.get_data(), 
+            gtk.gdk.COLORSPACE_RGB, True, 8, 
+            surface.get_width(), surface.get_height(), 
+            surface.get_stride())
+        return pixbuf
+
+    def build_pixbuf(self):
+        pixbuf = self.render_text(_("Rendering type %(type)s as %(presentation)s") % {
+                'type': self.controller.get_title(self.annotationtype),
+                'presentation': self.presentation[0],
+                })
+        pixbuf.as_html=self.as_html
+        pixbuf._placeholder=self
+        pixbuf._tag='span'
+        pixbuf._attr=[]
+        return pixbuf
+
 class HTMLContentHandler (ContentHandler):
     """Create a HTML edit form for the given element."""
     def can_handle(mimetype):
@@ -305,6 +465,17 @@ class HTMLContentHandler (ContentHandler):
             self.grab_focus()
         return True
 
+    def insert_annotationtype_content(self, choice, annotationtype, focus=False):
+        """
+        choice: list of one or more strings: 'list', 'table', 'transcription'
+        """
+        a=AnnotationTypePlaceholder(annotationtype, self.controller, choice, self.editor.update_pixbuf)
+        self.placeholders.append(a)
+        self.editor.insert_pixbuf(a.pixbuf)
+        if focus:
+            self.grab_focus()
+        return True
+
     def grab_focus(self, *p):
         self.editor.grab_focus()
         return True
@@ -353,9 +524,21 @@ class HTMLContentHandler (ContentHandler):
                 m.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
-            # FIXME: propose various choices (insert all annotations, insert title, etc)
-            self.editor.get_buffer().insert_at_cursor(source.title)
+            for uri in unicode(selection.data, 'utf8').split('\n'):
+                source = self.controller.package.annotationTypes.get(uri)
+                if source is None:
+                    return True
+                m=gtk.Menu()
+                for (title, choice) in (
+                    (_("as a list"), [ 'list' ]),
+                    (_("as a table"), [ 'table' ]),
+                    (_("as a transcription"), ['transcription' ]),
+                    ):
+                    i=gtk.MenuItem(title)
+                    i.connect('activate', (lambda it, at, data: self.insert_annotationtype_content(data, at, focus=True)), source, choice)
+                    m.append(i)
+                m.show_all()
+                m.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
         elif targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.data)
@@ -372,6 +555,12 @@ class HTMLContentHandler (ContentHandler):
             a=AnnotationPlaceholder(annotation=None, 
                                     controller=self.controller, 
                                     update_pixbuf=self.editor.update_pixbuf)
+            self.placeholders.append(a)
+            return a.parse_html(tag, attr)
+        elif attr['class'] == 'advene:annotationtype':
+            a=AnnotationTypePlaceholder(annotationtype=None, 
+                                        controller=self.controller, 
+                                        update_pixbuf=self.editor.update_pixbuf)
             self.placeholders.append(a)
             return a.parse_html(tag, attr)
         return None, None
@@ -441,8 +630,7 @@ class HTMLContentHandler (ContentHandler):
             return True
 
         def select_presentation(i, ap, modes):
-            ap.presentation=[ 'link' ]
-            ap.presentation.extend(modes)
+            ap.presentation = modes[:]
             ap.refresh()
             return True
 
@@ -461,15 +649,20 @@ class HTMLContentHandler (ContentHandler):
             if hasattr(ctx[-1], '_placeholder'):
                 ap=ctx[-1]._placeholder
 
-                if ap.annotation is not None:
+                if getattr(ap, 'annotation', None) is not None:
                     new_menuitem(_("Annotation %s") % self.controller.get_title(ap.annotation), None)
                     new_menuitem(_("Play video"), goto_position, ap.annotation.fragment.begin)
-                    new_menuitem(_("Show timestamp only"), select_presentation, ap, ['timestamp'])
-                    new_menuitem(_("Show content only"), select_presentation, ap, ['content'])
-                    new_menuitem(_("Show snapshot only"), select_presentation, ap, ['snapshot'])
+                    new_menuitem(_("Show timestamp only"), select_presentation, ap, ['timestamp', 'link'])
+                    new_menuitem(_("Show content only"), select_presentation, ap, ['content', 'link'])
+                    new_menuitem(_("Show snapshot only"), select_presentation, ap, ['snapshot', 'link'])
                     
-                    new_menuitem(_("Show overlayed timestamp"), select_presentation, ap, ['timestamp', 'snapshot'])
-                    new_menuitem(_("Show overlayed content"), select_presentation, ap, ['overlay'])
+                    new_menuitem(_("Show overlayed timestamp"), select_presentation, ap, ['timestamp', 'snapshot', 'link'])
+                    new_menuitem(_("Show overlayed content"), select_presentation, ap, ['overlay', 'link'])
+                elif getattr(ap, 'annotationtype', None) is not None:
+                    new_menuitem(_("Annotation type %s") % self.controller.get_title(ap.annotationtype), None)
+                    new_menuitem(_("display as list"), select_presentation, ap, ['list'])
+                    new_menuitem(_("display as table"), select_presentation, ap, ['table'])
+                    new_menuitem(_("display as transcription"), select_presentation, ap, ['transcription'])
 
             l=[ m for m in ctx if m._tag == 'a' ]
             if l:
@@ -509,10 +702,12 @@ class HTMLContentHandler (ContentHandler):
         else:
             # Double click with left button
             if hasattr(ctx[-1], '_placeholder'):
-                # There is an annotation placeholder
-                a=ctx[-1]._placeholder.annotation
-                if a is not None:
-                    self.controller.update_status('set', a.fragment.begin)
+                # There is an placeholder
+                p = ctx[-1]._placeholder
+                if isinstance(p, AnnotationPlaceholder):
+                    a=ctx[-1]._placeholder.annotation
+                    if a is not None:
+                        self.controller.update_status('set', a.fragment.begin)
                 return False
 
             l=[ m for m in ctx if m._tag == 'a' ]
