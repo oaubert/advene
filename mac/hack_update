@@ -1,0 +1,33 @@
+#! /bin/sh
+
+SRC=${HOME}/src/advene
+APP=${SRC}/dist/Advene.app
+LIBDIR=${SRC}/lib/advene
+PYDIR=${APP}/Contents/Resources/lib/python2.5
+SITE=${PYDIR}/site-packages.zip
+
+if [ ! -d ${APP} ]
+then
+  echo "Need an uncompressed $APP"
+  exit 1
+fi
+
+if [ ! -d /opt/local/bin ]
+then
+  echo "Need to chmod /opt/local/bin"
+  exit 1
+fi
+
+# Cleanup old .pyc
+find ${LIBDIR} -name \*.pyc | xargs rm
+/opt/local/bin/python2.5 -mcompileall ${LIBDIR}
+
+# Extract site-packages
+[ -d ${PYDIR}/t ] && /bin/rm -rf ${PYDIR}/t
+mkdir ${PYDIR}/t || exit 1
+unzip -d ${PYDIR}/t ${SITE}
+rsync -av --exclude=\*.py --exclude=.svn ${LIBDIR}/ ${PYDIR}/t/advene/
+/bin/rm ${SITE}
+(cd ${PYDIR}/t ; zip -r ${SITE} .)
+/bin/rm -rf ${PYDIR}/t
+
