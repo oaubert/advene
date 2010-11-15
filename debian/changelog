@@ -1,3 +1,50 @@
+advene (0.45) unstable; urgency=low
+
+  * Main GUI: 
+  
+    * Timecode display: add HH:MM:SS,ff (frame number) display format in
+      preferences. The same syntax can be used for timecode input too. Note
+      that it uses 25 fps by default.
+  
+    * the snapshotter activity can be monitor through an icon in
+      the lower right-hand corner of the main window.
+
+    * Undo behaviour: implement Undo for annotation/query/view creation
+
+    * Allow storage of binary data in XML
+
+    * Add items "Create a montage from the relations" and "Create a
+      dynamic view following relations" in relation-type popup menu.
+
+  * Timeline :
+  
+    * Click twice on an annotation will not start playing anymore. This
+      caused confusion with double clicks to edit.
+  
+    * Define generic relation types (from any annotation type to any type)
+      when creating new relation types.
+  
+  * Importers:
+  
+    * New AIFF (Final Cut Pro) importer
+  
+    * Audio/video extraction importers: sound enveloppe, sound detection,
+      new shot detection algorithm. The extraction importers can be invoked
+      through the File/Process video menu.
+      
+    * Options can be specified from the GUI for each import filter
+  
+    * For developers: the import framework has been simplified. If you
+      want to import data from an external application, check
+      util.importer.ExternalAppImporter (and see plugins/shotdetectapp.py
+      for an example).
+
+  * Actions:
+
+    * New parameters (balance, volume) for PlaySound / PlaySoundClip actions
+    
+ --
+
 advene (0.44) unstable; urgency=low
 
   * Stable release. See the following 0.43 notes for more details.
