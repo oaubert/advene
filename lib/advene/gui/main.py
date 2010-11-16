@@ -4108,6 +4108,7 @@ class AdveneGUI(object):
             ew.add_entry(_("DVD device"), 'player-dvd-device', _("Device for the DVD"))
             options[_("X11")] = 'x11'
             options[_("XVideo")] = 'xvideo'
+            options[_("GL")] = 'gl'
         ew.add_option(_("Video output"), "player-vout", _("Video output module"), options)
         ew.add_spin(_("Verbosity"), "player-level", _("Verbosity level. -1 for no messages."),
                     -1, 3)

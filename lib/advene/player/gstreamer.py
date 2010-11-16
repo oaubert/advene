@@ -187,6 +187,8 @@ class Player:
         sink='xvimagesink'
         if config.data.player['vout'] == 'x11':
             sink='ximagesink'
+        elif config.data.player['vout'] == 'gl':
+            sink='glimagesink'
         if config.data.os == 'win32':
             sink='directdrawsink'
 
