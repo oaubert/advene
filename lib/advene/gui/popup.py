@@ -441,6 +441,8 @@ class Menu:
         """Extract the fragment corresponding to an annotation.
         """
         title = self.controller.get_title(ann)
+        begin = ann.fragment.begin
+        end = ann.fragment.end
         self.controller.gui.render_montage_dialog([ ann ],
                                                   basename = ann.id + "-" + helper.title2id(title) + ".ogv",
                                                   title = _("Extracting %s") % title,
