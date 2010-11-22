@@ -1,3 +1,5 @@
+* feature extraction: check against filename encoding
+
 * pymecavideo: see opencv example
 
 * DS: always display player control (Play/pause) under the player
