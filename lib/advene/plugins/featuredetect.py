@@ -21,6 +21,7 @@ name="Feature detection importer"
 from gettext import gettext as _
 
 import os
+import sys
 import operator
 
 try:
@@ -77,7 +78,7 @@ class FeatureDetectImporter(GenericImporter):
         at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Detected %s") % self.classifier)
 
         self.progress(0, _("Detection started"))
-        video = cv.CreateFileCapture(filename)
+        video = cv.CreateFileCapture(unicode(filename).encode(sys.getfilesystemencoding()))
 
         if not video:
             raise "Cannot read video file:"
