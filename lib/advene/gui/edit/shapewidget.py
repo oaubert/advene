@@ -60,6 +60,7 @@ COLORS = [ 'red', 'green', 'blue', 'black', 'white', 'gray', 'yellow' ]
 SVGNS = 'http://www.w3.org/2000/svg'
 
 stroke_width_re=re.compile(r'stroke-width:\s*(\d+)')
+stroke_color_re=re.compile(r'stroke:\s*(\w+)')
 arrow_width_re=re.compile(r'#arrow(\d+)')
 
 defined_shape_classes=[]
@@ -176,11 +177,19 @@ class Shape(object):
             return None
         s=cls(name=element.attrib.get('name', cls.SHAPENAME))
         s.filled=( element.attrib.get('fill', 'none') != 'none' )
-        s.color=element.attrib['stroke']
-        style=element.attrib['style']
+        s.color=element.attrib.get('stroke', None)
+        style=element.attrib.get('style', '')
         m=stroke_width_re.search(style)
         if m:
             s.linewidth=int(m.group(1))
+        if s.color is None:
+            # Try to find it in style definition
+            m=stroke_color_re.search(style)
+            if m:
+                s.color = m.group(1)
+            else:
+                # Default fallback
+                s.color = 'green'
         c=cls.xml2coords(cls.coords, element.attrib, context)
         for n, v in c.iteritems():
             setattr(s, n, v)
@@ -559,9 +568,9 @@ class Text(Rectangle):
             return None
         s=cls(name=element.attrib.get('name', cls.SHAPENAME))
         s.filled=( element.attrib.get('fill', 'none') != 'none' )
-        s.color=element.attrib['stroke']
+        s.color=element.attrib.get('stroke', '2')
         s.text=element.text or ''
-        style=element.attrib['style']
+        style=element.attrib.get('style', '')
         m=stroke_width_re.search(style)
         if m:
             s.linewidth=int(m.group(1))
@@ -1497,7 +1506,7 @@ class ShapeDrawer:
             elif unit == '%':
                 return long(val * 100.0 / self.dimensions[dimindex])
             else:
-                print 'Unhandled SVG unit for ', s
+                print 'SVG: Unspecified unit for ', s
                 return val
         print 'Unhandled SVG dimension format for ', s
         return 0
