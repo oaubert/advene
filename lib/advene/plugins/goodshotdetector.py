@@ -258,7 +258,9 @@ class ShotDetector:
 class HistogramExtractor:
     def process(self, videofile, progress):
         progress(0, _("Extracting histogram"))
-        video = hg.cvCreateFileCapture(videofile)
+        video = hg.cvCreateFileCapture(videofile.encode(sys.getfilesystemencoding()))
+        if not video:
+            raise Exception("Could not open video file")
         histo = cv.cvCreateHist([256],cv.CV_HIST_ARRAY,[[0,256]], 1)
         frame = hg.cvQueryFrame(video)
         frame_gray  = cv.cvCreateImage(cv.cvGetSize(frame), frame.depth, 1);
