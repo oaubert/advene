@@ -57,7 +57,7 @@ class MontageRenderer(object):
         self.encoding_pipe = None
 
     def render(self, outputfile, progress_callback = None):
-        sourcefile = self.controller.get_default_media()
+        sourcefile = 'file:///' + self.controller.get_default_media()
         if not sourcefile:
             return
         pipedef = "gnlcomposition name=videocomp caps=%s ! queue ! progressreport name=progress silent=true update-freq=1 ! identity single-segment=true ! ffmpegcolorspace ! videorate ! theoraenc ! queue name=vmuxqueue ! oggmux name=mux ! filesink name=sink gnlcomposition name=audiocomp caps=%s ! queue ! identity single-segment=true ! audioconvert ! audiorate ! vorbisenc ! queue name=amuxqueue ! mux." % (CAPS_VIDEO_STRING, CAPS_AUDIO_STRING)
