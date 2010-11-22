@@ -161,16 +161,18 @@ class ShotDetector:
                 cuts = numpy.append(cuts, f)
 
         cuts.sort()
+        n = 1
         yield {
             'begin': 0,
-            'end': cuts[0],
-            'content': 'cut',
+            'end': cuts[0] * mspf,
+            'content': str(n),
             }
         for b, e in zip(cuts[:-1], cuts[1:]):
+            n += 1
             yield {
                 'begin': b * mspf,
                 'end': e * mspf,
-                'content': 'cut'
+                'content': str(n)
                 }
 
         self.progress(.3, _("Detecting dissolves"))
