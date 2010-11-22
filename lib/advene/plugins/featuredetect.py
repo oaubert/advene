@@ -42,9 +42,15 @@ class FeatureDetectImporter(GenericImporter):
         super(FeatureDetectImporter, self).__init__(*p, **kw)
 
         self.threshold = 10
+        classifiers = [ n.replace('.xml', '') for n in os.listdir(config.data.advenefile('haars')) ]
+        self.classifier = classifiers[0]
+        
         self.optionparser.add_option("-t", "--threshold",
                                      action="store", type="int", dest="threshold", default=self.threshold,
                                      help=_("Sensitivity level."))
+        self.optionparser.add_option("-c", "--classifier",
+                                     action="store", type="choice", dest="classifier", choices=classifiers, default=self.classifier,
+                                     help=_("Classifier"))
 
     def can_handle(fname):
         """Return a score between 0 and 100.
@@ -58,9 +64,9 @@ class FeatureDetectImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def process_file(self, filename):
-        at = self.ensure_new_type('face', title=_("Face"))
+        at = self.ensure_new_type('feature', title=_("Feature %s") % self.classifier)
         at.mimetype = 'image/svg+xml'
-        at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Detected faces"))
+        at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Detected %s") % self.classifier)
 
         self.progress(0, _("Detection started"))
         video = cv.CreateFileCapture(filename)
@@ -82,7 +88,7 @@ class FeatureDetectImporter(GenericImporter):
         grayscale = cv.CreateImage( (width, height), 8, 1)
         # create storage
         storage = cv.CreateMemStorage(128)
-        cascade = cv.Load('/usr/share/pyshared/mousetrap/ocvfw/haars/haarcascade_frontalface_default.xml')
+        cascade = cv.Load(config.data.advenefile( ('haars', self.classifier + '.xml') ))
         count = 0
 
         x = y = w = h = 0
@@ -107,7 +113,7 @@ class FeatureDetectImporter(GenericImporter):
                 yield {
                     'begin': start_pos,
                     'end': pos,
-                    'content': """<svg xmlns='http://www.w3.org/2000/svg' version='1' viewBox="0 0 %(width)d %(height)d" x='0' y='0' width='%(width)d' height='%(height)d'><rect style="fill:none;stroke:green;stroke-width:2;" width="%(w)d" height="%(h)s" x="%(x)s" y="%(y)s"></rect></svg>""" % locals(),
+                    'content': """<svg xmlns='http://www.w3.org/2000/svg' version='1' viewBox="0 0 %(width)d %(height)d" x='0' y='0' width='%(width)d' height='%(height)d'><rect style="fill:none;stroke:green;stroke-width:4;" width="%(w)d" height="%(h)s" x="%(x)s" y="%(y)s"></rect></svg>""" % locals(),
                     }
                 start_pos = None
                 count += 1
