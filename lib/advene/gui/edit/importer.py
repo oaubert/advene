@@ -153,14 +153,14 @@ class FileImporter(AdhocView):
             try:
                 i.async_process_file(fname, self.processing_ended)
             except Exception, e:
-                dialog.message_dialog(e.message, modal=False)
+                dialog.message_dialog(e.args[0], modal=False)
                 self.close()
         else:
             # Standard, synchronous version
             try:
                 i.process_file(fname)
             except Exception, e:
-                dialog.message_dialog(e.message, modal=False)
+                dialog.message_dialog(e.args[0], modal=False)
                 import sys
                 import code
                 e, v, tb = sys.exc_info()
