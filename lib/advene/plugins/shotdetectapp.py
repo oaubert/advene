@@ -78,7 +78,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
         self.temporary_resources.append(self.tempdir)
 
         self.ensure_new_type('shots', title=_("Detected shots"), schemaid='detected')
-        
+
     def get_process_args(self, filename):
         """Get the process args.
 
@@ -135,3 +135,9 @@ class ShotdetectAppImporter(ExternalAppImporter):
                         'pos': helper.format_time_reference(ts)
                         }):
                     break
+        # Generate last shot
+        yield {
+            'content': str(num),
+            'begin': begin,
+            'end': self.duration or (begin + 5000),
+            }
