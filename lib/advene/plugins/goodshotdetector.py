@@ -270,7 +270,8 @@ class HistogramExtractor:
 
         fps = hg.cvGetCaptureProperty(video, hg.CV_CAP_PROP_FPS)
         while frame :
-            progress(hg.cvGetCaptureProperty(video, hg.CV_CAP_PROP_POS_AVI_RATIO))
+            if not progress(hg.cvGetCaptureProperty(video, hg.CV_CAP_PROP_POS_AVI_RATIO)):
+                break
             hg.cvConvertImage(frame,frame_gray)
             cv.cvCalcHist(frame_gray,histo,0,None)
             h = [cv.cvGetReal1D(histo.bins,i) for i in range(255) ]
