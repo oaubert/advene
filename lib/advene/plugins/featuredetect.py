@@ -42,12 +42,16 @@ class FeatureDetectImporter(GenericImporter):
         super(FeatureDetectImporter, self).__init__(*p, **kw)
 
         self.threshold = 10
+        self.scale = 2
         classifiers = [ n.replace('.xml', '') for n in os.listdir(config.data.advenefile('haars')) ]
         self.classifier = classifiers[0]
         
         self.optionparser.add_option("-t", "--threshold",
                                      action="store", type="int", dest="threshold", default=self.threshold,
                                      help=_("Sensitivity level."))
+        self.optionparser.add_option("-s", "--scale",
+                                     action="store", type="int", dest="scale", default=self.scale,
+                                     help=_("Scale. Original image size will be divided by this factor, in order to speed up detection."))
         self.optionparser.add_option("-c", "--classifier",
                                      action="store", type="choice", dest="classifier", choices=classifiers, default=self.classifier,
                                      help=_("Classifier"))
@@ -83,19 +87,26 @@ class FeatureDetectImporter(GenericImporter):
         # Take the first frame to get width/height
         pos = cv.GetCaptureProperty(video, cv.CV_CAP_PROP_POS_MSEC)
         frame = cv.QueryFrame(video)
-        # create storage for grayscale version
         width, height = cv.GetSize(frame)
-        grayscale = cv.CreateImage( (width, height), 8, 1)
+        scaled_width, scaled_height = int(width / self.scale), int(height / self.scale)
+        print width, height, scaled_width, scaled_height
+
+        # create storage for grayscale version
+        largegrayscale = cv.CreateImage( (width, height), 8, 1)
+        grayscale = cv.CreateImage( (scaled_width, scaled_height), 8, 1)
         # create storage
         storage = cv.CreateMemStorage(128)
         cascade = cv.Load(config.data.advenefile( ('haars', self.classifier + '.xml') ))
         count = 0
 
         x = y = w = h = 0
+        svg_template = r"""<svg xmlns='http://www.w3.org/2000/svg' version='1' viewBox="0 0 %(scaled_width)d %(scaled_height)d" x='0' y='0' width='%(scaled_width)d' height='%(scaled_height)d'><rect style="fill:none;stroke:green;stroke-width:4;" width="%(w)d" height="%(h)s" x="%(x)s" y="%(y)s"></rect></svg>"""
         start_pos = None
 
         while frame :
-            cv.CvtColor(frame, grayscale, cv.CV_RGB2GRAY)
+            cv.CvtColor(frame, largegrayscale, cv.CV_RGB2GRAY)
+            cv.Resize(largegrayscale, grayscale, cv.CV_INTER_LINEAR)
+
             # equalize histogram
             cv.EqualizeHist(grayscale, grayscale)
 
@@ -106,20 +117,33 @@ class FeatureDetectImporter(GenericImporter):
                                          scale_factor=1.2,
                                          min_neighbors=2,
                                          flags=cv.CV_HAAR_DO_CANNY_PRUNING)
+
+            # We start a new annotation if the threshold is reached,
+            # but we do not end if if we get below the threshold.
             if faces and faces[0][1] > self.threshold and start_pos is None:
                 x, y, w, h = faces[0][0]
                 start_pos = pos
-            elif start_pos is not None:
+                count += 1
+            # FIXME: if faces and start_pos is not None:
+            # check that the rectangle is not too much different from the previous one, else create a new annotation
+            elif not faces and start_pos is not None:
                 yield {
                     'begin': start_pos,
                     'end': pos,
-                    'content': """<svg xmlns='http://www.w3.org/2000/svg' version='1' viewBox="0 0 %(width)d %(height)d" x='0' y='0' width='%(width)d' height='%(height)d'><rect style="fill:none;stroke:green;stroke-width:4;" width="%(w)d" height="%(h)s" x="%(x)s" y="%(y)s"></rect></svg>""" % locals(),
+                    'content': svg_template % locals(),
                     }
                 start_pos = None
-                count += 1
             if not self.progress(cv.GetCaptureProperty(video,
                                                        cv.CV_CAP_PROP_POS_AVI_RATIO),
                                  "Detected %d feature(s)" % count):
                 break
             pos = cv.GetCaptureProperty(video, cv.CV_CAP_PROP_POS_MSEC)
             frame = cv.QueryFrame(video)
+
+        # Last frame
+        if start_pos is not None:
+            yield {
+                'begin': start_pos,
+                'end': pos,
+                'content': svg_template % locals(),
+                }
