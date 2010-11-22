@@ -23,6 +23,7 @@ name="Shot detection importer"
 from gettext import gettext as _
 
 import os
+import sys
 
 try:
     # Needed for pimpy component
