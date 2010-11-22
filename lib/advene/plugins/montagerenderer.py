@@ -20,6 +20,7 @@
 """
 
 import os
+import sys
 
 try:
     import gst

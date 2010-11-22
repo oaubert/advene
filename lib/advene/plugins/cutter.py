@@ -22,6 +22,8 @@ name="Audio segmentation importer"
 from gettext import gettext as _
 
 import os
+import urllib
+
 import gobject
 import gst
 

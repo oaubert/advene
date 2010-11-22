@@ -23,6 +23,7 @@ from gettext import gettext as _
 
 import os
 import sys
+import urllib
 import gobject
 import gst
 
