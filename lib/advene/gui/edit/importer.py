@@ -123,6 +123,8 @@ class FileImporter(AdhocView):
             return True
 
         b.set_label(gtk.STOCK_CANCEL)
+        self.importers.set_sensitive(False)
+        self.filename_entry.set_sensitive(False)
         ic = self.importers.get_current_element()
         fname = unicode(self.filename_entry.get_text())
         self.widget.get_toplevel().set_title(_('Importing %s') % os.path.basename(fname))
