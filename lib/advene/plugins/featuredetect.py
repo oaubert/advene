@@ -21,6 +21,7 @@ name="Feature detection importer"
 from gettext import gettext as _
 
 import os
+import operator
 
 try:
     import cv
@@ -45,7 +46,10 @@ class FeatureDetectImporter(GenericImporter):
         self.scale = 2
         classifiers = [ n.replace('.xml', '') for n in os.listdir(config.data.advenefile('haars')) ]
         self.classifier = classifiers[0]
-        
+
+        # Detect that a shape has moved
+        self.motion_threshold = 5
+
         self.optionparser.add_option("-t", "--threshold",
                                      action="store", type="int", dest="threshold", default=self.threshold,
                                      help=_("Sensitivity level."))
@@ -94,13 +98,23 @@ class FeatureDetectImporter(GenericImporter):
         # create storage for grayscale version
         largegrayscale = cv.CreateImage( (width, height), 8, 1)
         grayscale = cv.CreateImage( (scaled_width, scaled_height), 8, 1)
+
         # create storage
         storage = cv.CreateMemStorage(128)
         cascade = cv.Load(config.data.advenefile( ('haars', self.classifier + '.xml') ))
         count = 0
 
-        x = y = w = h = 0
-        svg_template = r"""<svg xmlns='http://www.w3.org/2000/svg' version='1' viewBox="0 0 %(scaled_width)d %(scaled_height)d" x='0' y='0' width='%(scaled_width)d' height='%(scaled_height)d'><rect style="fill:none;stroke:green;stroke-width:4;" width="%(w)d" height="%(h)s" x="%(x)s" y="%(y)s"></rect></svg>"""
+        svg_template = """<svg xmlns='http://www.w3.org/2000/svg' version='1' viewBox="0 0 %(scaled_width)d %(scaled_height)d" x='0' y='0' width='%(scaled_width)d' height='%(scaled_height)d'>%%s</svg>""" % locals()
+        def objects2svg(objs, threshold=-1):
+            """Convert a object-list into SVG.
+
+            Only objects above threshold will be generated.
+            """
+            return svg_template % "\n".join("""<rect style="fill:none;stroke:green;stroke-width:4;" width="%(w)d" height="%(h)s" x="%(x)s" y="%(y)s"></rect>""" % locals()
+                                            for ((x, y, w, h), n) in objs
+                                            if n > threshold )
+        threshold_getter = operator.itemgetter(1)
+
         start_pos = None
 
         while frame :
@@ -111,7 +125,7 @@ class FeatureDetectImporter(GenericImporter):
             cv.EqualizeHist(grayscale, grayscale)
 
             # detect objects
-            faces = cv.HaarDetectObjects(image=grayscale,
+            objects = cv.HaarDetectObjects(image=grayscale,
                                          cascade=cascade,
                                          storage=storage,
                                          scale_factor=1.2,
@@ -120,17 +134,34 @@ class FeatureDetectImporter(GenericImporter):
 
             # We start a new annotation if the threshold is reached,
             # but we do not end if if we get below the threshold.
-            if faces and faces[0][1] > self.threshold and start_pos is None:
-                x, y, w, h = faces[0][0]
-                start_pos = pos
-                count += 1
-            # FIXME: if faces and start_pos is not None:
-            # check that the rectangle is not too much different from the previous one, else create a new annotation
-            elif not faces and start_pos is not None:
+            if objects:
+                # Detected face.
+                if start_pos is None:
+                    # Only create a new annotation if above threshold
+                    if max(threshold_getter(o) for o in objects) > self.threshold:
+                        stored_objects = objects[:]
+                        start_pos = pos
+                        count += 1
+                else:
+                    # A detection already occurred. Check if it not too different.
+                    if (len(objects) != len(stored_objects)
+                        or max( abs(a - b)
+                                for obj, sto in zip(objects, stored_objects)
+                                for a, b in zip(obj[0], sto[0]) ) > self.motion_threshold):
+                        yield {
+                            'begin': start_pos,
+                            'end': pos,
+                            'content': objects2svg(stored_objects),
+                            }
+                        stored_objects = objects[:]
+                        start_pos = pos
+                        count += 1
+            elif start_pos is not None:
+                 #End of feature(s)
                 yield {
                     'begin': start_pos,
                     'end': pos,
-                    'content': svg_template % locals(),
+                    'content': objects2svg(stored_objects),
                     }
                 start_pos = None
             if not self.progress(cv.GetCaptureProperty(video,
@@ -145,5 +176,5 @@ class FeatureDetectImporter(GenericImporter):
             yield {
                 'begin': start_pos,
                 'end': pos,
-                'content': svg_template % locals(),
+                'content': objects2svg(stored_objects),
                 }
