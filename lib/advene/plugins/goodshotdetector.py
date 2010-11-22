@@ -160,6 +160,11 @@ class ShotDetector:
                 cuts = numpy.append(cuts, f)
 
         cuts.sort()
+        yield {
+            'begin': 0,
+            'end': cuts[0],
+            'content': 'cut',
+            }
         for b, e in zip(cuts[:-1], cuts[1:]):
             yield {
                 'begin': b * mspf,
