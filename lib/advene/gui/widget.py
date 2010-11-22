@@ -516,10 +516,14 @@ class AnnotationWidget(GenericColorButtonWidget):
             if width < 6:
                 return
             if self.annotation.content.data:
-                s=rsvg.Handle(data=self.annotation.content.data)
-                scale = 1.0 * height / s.get_dimension_data()[1]
-                context.set_matrix(cairo.Matrix( scale, 0, 0, scale, 0, 0 ))
-                s.render_cairo(context)
+                try:
+                    s=rsvg.Handle(data=self.annotation.content.data)
+                    scale = 1.0 * height / s.get_dimension_data()[1]
+                    context.set_matrix(cairo.Matrix( scale, 0, 0, scale, 0, 0 ))
+                    s.render_cairo(context)
+                except:
+                    print "Error when rendering SVG timeline component"
+                    pass
             return
 
         # Draw the border
