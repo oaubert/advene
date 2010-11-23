@@ -73,6 +73,12 @@ class CutterImporter(GenericImporter):
             gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
         elif message.type == gst.MESSAGE_STATE_CHANGED:
             old, new, pending = message.parse_state_changed()
+            if old == gst.STATE_READY and new == gst.STATE_PAUSED:
+                # There has been a problem. Cancel.
+                self.progress(1.0, _("Problem when running detection"))
+                print "Undetermined problem when running silence detection."
+                self.end_callback()
+                gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
             #if new == gst.STATE_NULL:
             #    self.end_callback()
         elif message.structure:
