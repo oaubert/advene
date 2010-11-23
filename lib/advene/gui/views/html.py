@@ -213,7 +213,7 @@ class webkit_wrapper:
                                                         frame.get_uri()))
 
         def _loading_stop_cb(view, frame):
-            update_location(frame.get_uri())
+            update_location(frame.get_uri() or "")
             pass
 
         def _loading_progress_cb(view, progress):
