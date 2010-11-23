@@ -117,7 +117,8 @@ class DCPImporter(GenericImporter):
         row_cache = {}
         for row in rows:
             row_cache.clear()
-            self.progress(progress, _("Converting #%d / %d") % (rows.line_num, self.row_count))
+            self.progress(progress, _("Converting #%(num)d / %(count)d") % { 'num': rows.line_num, 
+                                                                             'count': self.row_count})
             progress += incr
             t = self.str2time(row[1])
             for (label, tc, value) in itertools.izip(self.labels[2::2], row[2::2], row[3::2]):
