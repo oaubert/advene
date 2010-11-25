@@ -4092,6 +4092,7 @@ class AdveneGUI(object):
 
         ew.add_title(_("Video Player"))
         ew.add_checkbox(_("Autostart"), 'player-autostart', _("Automatically start the player when loading a media file (either directly or through a package)"))
+        ew.add_checkbox(_("Fulscreen timestamp"), 'player-fullscreen-timestamp', _("Display the timestamp over the video when in fullscreen mode"))
         ew.add_checkbox(_("Enable captions"), "player-caption", _("Enable captions over the video"))
         ew.add_file_selector(_("Caption font"), "player-osdfont", _("TrueType font for captions"))
         ew.add_checkbox(_("Enable SVG"), "player-svg", _("Enable SVG captions over the video"))

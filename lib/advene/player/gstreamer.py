@@ -27,6 +27,7 @@ https://thomas.apestaart.org/thomas/trac/browser/tests/gst/crc/crc.py
 """
 
 import advene.core.config as config
+from advene.util.helper import format_time
 import os
 import time
 
@@ -151,6 +152,10 @@ class Player:
         self.rate = 1.0
         # fullscreen gtk.Window
         self.fullscreen_window=None
+
+        # Fullscreen timestamp display - cache data
+        self.last_timestamp = 0
+        self.last_timestamp_update = 0
 
         try:
             self.snapshotter = Snapshotter(self.snapshot_taken, width=config.data.player['snapshot-width'])
@@ -563,6 +568,15 @@ class Player:
             self.overlay.begin=-1
             self.overlay.end=-1
             self.overlay.data=None
+        elif not self.overlay.data and self.imageoverlay is not None and self.is_fullscreen() and config.data.player.get('fullscreen-timestamp', False):
+            t = time.time()
+            # Update timestamp every half second
+            if t - self.last_timestamp_update > .5 and abs(s.position - self.last_timestamp) > 10:
+                self.imageoverlay.props.data = '''<svg:svg width="640pt" height="480pt" preserveAspectRatio="xMinYMin meet" version="1" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg">
+  <text fill="white" stroke="white" style="stroke-width:1; font-family: sans-serif; font-size: 22" x="5" y="475">%s</text>
+</svg:svg>''' % format_time(s.position)
+                self.last_timestamp = s.position
+                self.last_timestamp_update = t
 
     def reparent(self, xid):
         # See https://bugzilla.gnome.org/show_bug.cgi?id=599885
@@ -642,6 +656,9 @@ class Player:
             l.extend( [ self.disp(c, i) for c in e.elements() ])
         return ("\n"+indent).join(l)
 
+    def is_fullscreen(self):
+        return self.fullscreen_window and self.fullscreen_window.is_active()
+
     def fullscreen(self, connect=None):
 
         def keypress(widget, event):
@@ -699,6 +716,9 @@ class Player:
 
     def unfullscreen(self, *p):
         self.reparent(self.xid)
+        if not self.overlay.data and self.imageoverlay:
+            # Reset imageoverlay data in any case
+            self.imageoverlay.props.data = None
         if self.fullscreen_window.window:
             self.fullscreen_window.hide()
         else:

@@ -316,6 +316,7 @@ class Config(object):
             'caption': True,
             'snapshot-width': 160,
             'dvd-device': '/dev/dvd',
+            'fullscreen-timestamp': False,
             # Name of audio device for gstrecorder
             'audio-record-device': 'default',
             }
