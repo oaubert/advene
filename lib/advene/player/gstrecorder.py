@@ -236,7 +236,9 @@ class Player:
         self.player.set_state(gst.STATE_NULL)
 
     def playlist_add_item(self, item):
-        if os.path.exists(item):
+        if item is None:
+            self.videofile=tempfile.mktemp('.ogg', 'record_')
+        elif os.path.exists(item):
             # tempfile.mktemp should not be used for security reasons.
             # But the probability of a tempfile attack against Advene
             # is rather low at the time of writing this comment.
