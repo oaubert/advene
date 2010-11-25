@@ -4098,6 +4098,10 @@ class AdveneGUI(object):
 
         ew.add_checkbox(_("Enable snapshots"), "player-snapshot", _("Enable snapshots"))
         ew.add_spin(_("Snapshot width"), "player-snapshot-width", _("Snapshot width in pixels."), 0, 1280)
+        ew.add_spin(_("Verbosity"), "player-level", _("Verbosity level. -1 for no messages."),
+                    -1, 3)
+
+        ew.add_label(_("Devices"))
 
         options={_("Standard"): 'default' }
         if config.data.os == 'win32':
@@ -4109,9 +4113,10 @@ class AdveneGUI(object):
             options[_("X11")] = 'x11'
             options[_("XVideo")] = 'xvideo'
             options[_("GL")] = 'gl'
+
         ew.add_option(_("Video output"), "player-vout", _("Video output module"), options)
-        ew.add_spin(_("Verbosity"), "player-level", _("Verbosity level. -1 for no messages."),
-                    -1, 3)
+        ew.add_entry(_("Audio input"), 'player-audio-record-device', _("Device name for audio input (with gstrecorder plugin)"))
+
         
         if config.data.preferences['expert-mode']:
             ew.add_label(_("<i>Experimental</i>"))
