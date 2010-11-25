@@ -1047,10 +1047,6 @@ class TimeLine(AdhocView):
                                                                 parent=sc,
                                                                 controller=self.controller)
                     rt=cr.popup(modal=True)
-                    if not rt.hackedMemberTypes:
-                        # membertypes is empty, the user did not specify any member types.
-                        # Create a generic binary relationType
-                        rt.hackedMemberTypes=(u'', u'')
                     self.create_relation(s, d, rt)
                 return True
 
