@@ -296,6 +296,8 @@ class CreateElementPopup(object):
                 el.mimetype=t.id
                 el.setMetaData(config.data.namespace, 'color', self.parent.rootPackage._color_palette.next())
                 el.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+                # Create a generic binary relationType
+                el.hackedMemberTypes=(u'', u'')
             self.parent.relationTypes.append(el)
             self.controller.notify('RelationTypeCreate', relationtype=el)
         elif self.type_ == Resources:
