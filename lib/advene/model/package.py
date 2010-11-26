@@ -42,7 +42,7 @@ from advene.model.zippackage import ZipPackage
 from advene.util.expat import PyExpat
 
 from advene.model.bundle import StandardXmlBundle, ImportBundle, InverseDictBundle, SumBundle
-from advene.model.constants import *
+from advene.model.constants import adveneNS, xmlNS, xmlnsNS, xlinkNS, dcNS
 from advene.model.exception import AdveneException
 
 # the following constant is used as a default value in in Package.__init__
