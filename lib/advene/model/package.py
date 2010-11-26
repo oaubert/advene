@@ -25,6 +25,7 @@ import urllib
 import re
 
 import xml.sax
+import xml.dom
 
 import util.uri
 
@@ -146,7 +147,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 
     def _make_model(self):
         """Build a new empty annotation model"""
-        di = xml.dom.DOMImplementation.DOMImplementation()
+        di = xml.dom.getDOMImplementation()
         doc = di.createDocument(adveneNS, "package", None)
 
         elt = doc.documentElement
