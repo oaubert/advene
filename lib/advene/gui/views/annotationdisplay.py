@@ -113,14 +113,16 @@ class AnnotationDisplay(AdhocView):
         else:
             # FIXME: there should be a generic content handler
             # mechanism for basic display of various contents
-            col=self.controller.get_element_color(self.annotation)
-            if col:
-                title='<span background="%s">Annotation <b>%s</b></span>' % (col, self.annotation.id)
-            else:
-                title='Annotation <b>%s</b>' % self.annotation.id
-            d={ 'title': title,
+            d={ 'id': self.annotation.id,
                 'begin': helper.format_time(self.annotation.fragment.begin),
-                'end': helper.format_time(self.annotation.fragment.end) }
+                'end': helper.format_time(self.annotation.fragment.end),
+                'duration': helper.format_time(self.annotation.fragment.duration),
+                'color': self.controller.get_element_color(self.annotation),
+                }
+            if d['color']:
+                d['title']='<span background="%(color)s">Annotation <b>%(id)s</b></span> (d: %(duration)s)' % d
+            else:
+                d['title']='Annotation <b>%(id)s</b> (d: %(duration)s)' % d
             svg_data=None
             if self.annotation.content.mimetype.startswith('image/svg'):
                 svg_data=self.annotation.content.data
@@ -171,7 +173,9 @@ class AnnotationDisplay(AdhocView):
                         pixbuf=pixbuf.scale_simple(int(w), int(height), gtk.gdk.INTERP_BILINEAR)
                     self.label['imagecontents'].set_from_pixbuf(pixbuf)
             else:
-                self.label[k].set_text(v)
+                widget = self.label.get(k)
+                if widget is not None:
+                    widget.set_text(v)
         if self.annotation is None or isinstance(self.annotation, AnnotationType):
             self.label['image'].hide()
         else:
