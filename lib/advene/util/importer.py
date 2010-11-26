@@ -474,7 +474,7 @@ class ExternalAppImporter(GenericImporter):
                                              creationflags = flags)
         except OSError, e:
             self.cleanup()
-            msg = e.message
+            msg = e.args[0]
             raise Exception(_("Could not run %(appname)s: %(msg)s") % locals())
 
         self.progress(.01, _("Processing %s") % gobject.filename_display_name(filename))
