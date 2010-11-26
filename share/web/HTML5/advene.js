@@ -1,5 +1,9 @@
 /*
   The Advene HTML API defines 2 widgets (ui.player and ui.video) and 3 methods: init(), overlay(), player()
+
+  2 behaviour options can be controlled (for the moment) by having an element (typically the document body) define a css class:
+  - highlightRelated -> highlight related .transcript elements (i.e. .transcript elements whose fragments intersect)
+  - transcriptFollow -> have the video follow .transcript elements(i.e. when the end of a .transcript element is reached, go to the begin time of the following (DOM-wise) .transcript element)
  */
 
 _formatTime = function( seconds ) {
@@ -1018,6 +1022,25 @@ $.widget("ui.video", {
                 }
                 $(this).advene('overlay');
             });
+            
+            if ($(".highlightRelated", document).length > 0) {
+                $(".transcript[data-begin]").each( function() {
+                    $(this).mouseover( function() {
+                        /* Highlight related */
+                        self = this;
+                        begin = $(self).attr('data-begin');
+                        end = $(self).attr('data-end');
+                        $(".transcript[data-begin]", $(document)).each( function() {
+                            if (Math.max(begin, $(this).attr('data-begin')) <= Math.min(end, $(this).attr('data-end'))) {
+                                $(this).addClass('relatedTranscript');
+                            }
+                        });
+                    })
+                        .mouseout( function() {
+                            $(".relatedTranscript", $(document)).each( function() { $(this).removeClass('relatedTranscript'); });
+                        });
+                });
+            }
 
             $("body").append("<div class='player_container' style='position:relative; overflow:visible; '>" + 
                              "<video  style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
