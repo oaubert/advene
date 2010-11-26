@@ -68,6 +68,7 @@ if config.data.os == 'win32':
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation
+from advene.model.schema import AnnotationType
 from advene.model.fragment import MillisecondFragment
 
 import advene.util.helper as helper
@@ -350,7 +351,7 @@ class GenericImporter(object):
 
         The following keys are optional:
           - id
-          - type (which must be a *type*, not a type-id)
+          - type (can be an annotation-type instance or a type-id)
           - notify: if True, then each annotation creation will generate a AnnotationCreate signal
           - complete: boolean. Used to mark the completeness of the annotation.
         """
@@ -377,6 +378,16 @@ class GenericImporter(object):
                 ident=None
             try:
                 type_=d['type']
+                if isinstance(type, basestring):
+                    # A type id was specified. Dereference it, and
+                    # create it if necessary.
+                    type_id = type_
+                    type_ = self.package.get_element_by_id(type_id)
+                    if type_ is None:
+                        # Not existing, create it.
+                        type_ = self.ensure_new_type(type_id)
+                    elif not isinstance(type_, AnnotationType):
+                        raise Exception("Error during import: the specified type id %s is not an annotation type" % type_id)
             except KeyError:
                 type_=self.defaulttype
                 if type_ is None:
