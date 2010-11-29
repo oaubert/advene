@@ -57,7 +57,7 @@ $.widget("ui.video", {
         // Update self.options
         self.options.transcriptHighlight = ($(".transcript", document).length > 0);
         self.options.transcriptFollow = ($(".transcriptFollow", document).length > 0);
-        
+
         var videoOptions = {
             autoplay: self.options.autoPlay,
             controls: false,
@@ -372,7 +372,7 @@ $.widget("ui.video", {
     _hideWaiting: function(){
         var self = this;
         if( self._waitingId ) {
-            
+
             self._waitingId = false;
             self._waitingContainer
                     .fadeOut('fast')
@@ -380,7 +380,7 @@ $.widget("ui.video", {
         }
     },
     _showWaiting: function(msg){
-        var self = this; 
+        var self = this;
         self._waiting.text(msg);
         self._waiting.css('width', self._container.width() - 12);
         self._waiting.css('width', self._waitingContainer.width() - 12);
@@ -388,9 +388,9 @@ $.widget("ui.video", {
             self._waiting.css('left', 0);
             self._waitingContainer
                 .appendTo(self._container)
-                .css('left', 5) 
-                .css('right', 5) 
-                .css('top',  (self._container.height()- self._waiting.height())/3) 
+                .css('left', 5)
+                .css('right', 5)
+                .css('top',  (self._container.height()- self._waiting.height())/3)
                 .fadeIn('slow');
             self._waitingId=true;
         }
@@ -740,7 +740,7 @@ $.widget("ui.video", {
 
 /**
  * Main player widget
- * 
+ *
  * The "player" widget defines a HTML5 video player. It instanciates a
  * video() object by specifying an independant container. The
  * container itself is derived from jqueryui.dialog, with some
@@ -1022,7 +1022,7 @@ $.widget("ui.video", {
                 }
                 $(this).advene('overlay');
             });
-            
+
             if ($(".highlightRelated", document).length > 0) {
                 $(".transcript[data-begin]").each( function() {
                     $(this).mouseover( function() {
@@ -1042,7 +1042,7 @@ $.widget("ui.video", {
                 });
             }
 
-            $("body").append("<div class='player_container' style='position:relative; overflow:visible; '>" + 
+            $("body").append("<div class='player_container' style='position:relative; overflow:visible; '>" +
                              "<video  style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
                              "</video></div>");
 
