@@ -139,7 +139,7 @@ $.widget("ui.video", {
             $.proxy(self._hideControls, self)
         );
 
-        self._waitingContainer = $('<div/>', {'class': 'ui-video-waiting-container'});
+        self._waitingContainer = $('<div/>', {'class': 'ui-corner-all ui-widget-content ui-video-waiting-container'});
         self._waiting = $('<div/>', {'class': 'ui-video-waiting'}).appendTo(self._waitingContainer);
         self._controls
             .fadeIn(500)

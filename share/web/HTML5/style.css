@@ -404,4 +404,10 @@ img.half_screenshot {
     background-color: #dddddd;
 }
 
-/*  ///////////////////////////////////////////////////////////////////////////////// */
+/* Resize handler style redefinition */
+
+.ui-resizable-s { cursor: s-resize; height: 5px; width: 100%; bottom: -5px; left: 0; }
+.ui-resizable-e { cursor: e-resize; width: 17px; right: -5px; top: 0; height: 100%; }
+.ui-resizable-w { cursor: w-resize; width: 17px; left: -5px; top: 0; height: 100%; }
+
+
