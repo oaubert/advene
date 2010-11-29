@@ -108,8 +108,6 @@ K=10
 T=70
 
 MEAN_WINDOW = 3
-ALPHA = 1.8
-BETA = 0.10
 
 class ShotDetector:
     """
@@ -127,6 +125,8 @@ class ShotDetector:
         if progress is None:
             progress = self.dummy_progress
         self.progress = progress
+        self.ALPHA = 1.8
+        self.BETA = 0.10
         self.MOTION_THRESHOLD = 0.15
         self.SHOT_THRESHOLD     = 0.15
         self.HIGH_CUT_THRESHOLD = 0.8
@@ -248,14 +248,14 @@ class ShotDetector:
 
     def __cut_detection(self, f, histo_dist):
         d = histo_dist[f]
-        left_diff  = histo_dist[f - 1 - MEAN_WINDOW : f - 1] + BETA
-        right_diff = histo_dist[f + 1 : f + 1 + MEAN_WINDOW] + BETA
+        left_diff  = histo_dist[f - 1 - MEAN_WINDOW : f - 1] + self.BETA
+        right_diff = histo_dist[f + 1 : f + 1 + MEAN_WINDOW] + self.BETA
 
         mean_left  = numpy.mean(left_diff)
         mean_rigth = numpy.mean(right_diff)
         mean_local = (mean_left + mean_rigth) / 2
 
-        adapt_threshold =  ALPHA * mean_local  - BETA
+        adapt_threshold =  self.ALPHA * mean_local  - self.BETA
         return d >= adapt_threshold
 
 class HistogramExtractor:
