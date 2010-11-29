@@ -85,7 +85,7 @@ class DelakisShotDetectImporter(GenericImporter):
         else :
             he = HistogramExtractor()
             print "Processing ", filename
-            histos, fps = he.process(unicode(filename).encode('utf-8'), self.progress)
+            histos, fps = he.process(filename, self.progress)
             if self.cache_histogram:
                 try:
                     numpy.save(histofile, histos)
@@ -261,7 +261,7 @@ class ShotDetector:
 class HistogramExtractor:
     def process(self, videofile, progress):
         progress(0, _("Extracting histogram"))
-        video = hg.cvCreateFileCapture(videofile.encode(sys.getfilesystemencoding()))
+        video = hg.cvCreateFileCapture(unicode(videofile).encode(sys.getfilesystemencoding()))
         if not video:
             raise Exception("Could not open video file")
         histo = cv.cvCreateHist([256],cv.CV_HIST_ARRAY,[[0,256]], 1)
