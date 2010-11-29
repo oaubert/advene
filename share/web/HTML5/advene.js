@@ -141,6 +141,7 @@ $.widget("ui.video", {
 
         self._waitingContainer = $('<div/>', {'class': 'ui-corner-all ui-widget-content ui-video-waiting-container'});
         self._waiting = $('<div/>', {'class': 'ui-video-waiting'}).appendTo(self._waitingContainer);
+        self._waiting.text("Loading...");
         self._controls
             .fadeIn(500)
             .delay(100)
@@ -371,31 +372,27 @@ $.widget("ui.video", {
     _hideWaiting: function(){
         var self = this;
         if( self._waitingId ) {
-            clearInterval( self._waitingId );
-            self._waitingId = null;
-            self._waitingContainer.fadeOut('fast').remove();
+            
+            self._waitingId = false;
+            self._waitingContainer
+                    .fadeOut('fast')
+                    .remove();
         }
     },
-    _showWaiting: function(){
-        var self = this;
+    _showWaiting: function(msg){
+        var self = this; 
+        self._waiting.text(msg);
+        self._waiting.css('width', self._container.width() - 12);
+        self._waiting.css('width', self._waitingContainer.width() - 12);
         if( ! self._waitingId ) {
             self._waiting.css('left', 0);
             self._waitingContainer
                 .appendTo(self._container)
-                .position({
-                    'my': 'center',
-                    'at': 'center',
-                    'of': self.element,
-                    'collision': 'none'
-                }
-                         ).fadeIn('fast');
-            var waitingWidth = self._waiting.width();
-            var _waitingContainerWidth = self._waitingContainer.width();
-            self._waitingId = setInterval(function() {
-                var cur_left = Math.abs(self._waiting.position().left);
-                self._waiting.css({'left': -((cur_left + _waitingContainerWidth) % waitingWidth) });
-
-            }, 50);
+                .css('left', 5) 
+                .css('right', 5) 
+                .css('top',  (self._container.height()- self._waiting.height())/3) 
+                .fadeIn('slow');
+            self._waitingId=true;
         }
     },
     _closeFragment: function() {
@@ -425,19 +422,19 @@ $.widget("ui.video", {
     },
     _event_loadstart: function() {
         var self = this;
-        self._showWaiting();
+        self._showWaiting("Loading...");
     },
     _event_durationchange: function() {
         var self = this;
-        self._showWaiting();
+        self._showWaiting("Loading...");
     },
     _event_seeking: function() {
         var self = this;
-        self._showWaiting();
+        self._showWaiting("Loading...");
     },
     _event_waiting: function() {
         var self = this;
-        self._showWaiting();
+        self._showWaiting("Loading...");
     },
     _event_loadedmetadata: function() {
         var self = this;
@@ -540,7 +537,6 @@ $.widget("ui.video", {
     },
     _event_resize: function() {
         var self = this;
-        alert('_event_resize');
         self._controls.position({
             'my': 'bottom',
             'at': 'bottom',
@@ -582,8 +578,12 @@ $.widget("ui.video", {
             textError=textError+'An unknown error occurred.';
             break;
         }
-        if (console)
-            console.log(textError);
+
+
+        self._showWaiting(textError);
+
+
+
     },
 
     _event_volumechange: function() {

@@ -238,15 +238,13 @@
 
 .ui-video-waiting-container {
 	position: absolute;
-	background-image: url("anim.gif");
-	background-repeat:no-repeat;
-	height: 50px;
-	width: 50px;
-	overflow:hidden;
+	font-size:11;
+	font-weight:bold;
+	overflow:visible;
+	text-align:center;
 	margin: 0;
-	padding: 0;
-	border: 0;
-
+	padding: 5;
+	border: 2;
 }
 
 .ui-video-widget {
