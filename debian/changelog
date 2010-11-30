@@ -16,6 +16,9 @@ advene (0.45) unstable; urgency=low
     * Add items "Create a montage from the relations" and "Create a
       dynamic view following relations" in relation-type popup menu.
 
+    * The comment editor proposes multiple presentation modalities for
+      dragged annotation-types.
+  
   * Timeline :
   
     * Click twice on an annotation will not start playing anymore. This
@@ -29,9 +32,10 @@ advene (0.45) unstable; urgency=low
     * New AIFF (Final Cut Pro) importer
   
     * Audio/video extraction importers: sound enveloppe, sound detection,
-      new shot detection algorithm. The extraction importers can be invoked
-      through the File/Process video menu.
-      
+      new shot detection algorithm, feature extraction (face, eyes...). The
+      extraction importers can be invoked through the File/Process video
+      menu.
+
     * Options can be specified from the GUI for each import filter
   
     * For developers: the import framework has been simplified. If you
