@@ -982,7 +982,7 @@ $.widget("ui.video", {
     $.ui.player.prototype.options.title = 'Advene player';
     $.ui.player.prototype.options.endFragmentBehaviour = "continue";
     $.ui.player.prototype.options.position = "right";
-
+    $.ui.player.prototype.options.resizable = "se";
 
 
 })(jQuery);
