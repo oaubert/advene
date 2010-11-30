@@ -7,6 +7,8 @@ PYVERS=$(shell pyversions -vr)
 
 binary: binary-indep
 
+binary-arch:
+
 binary-indep: build install
 	dh_testdir
 	dh_testroot
