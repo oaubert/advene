@@ -574,7 +574,7 @@ class TextImporter(GenericImporter):
     def __init__(self, regexp=None, encoding=None, **kw):
         super(TextImporter, self).__init__(**kw)
         if regexp is None:
-            regexp="(?P<begin>\d+)\s(?P<end>\d+)\s(?P<content>.+)"
+            regexp="(?P<begin>\d+)\s+(?P<end>\d+)\s+(?P<content>.+)"
         self.regexp = regexp
         if encoding is None:
             encoding='latin1'
