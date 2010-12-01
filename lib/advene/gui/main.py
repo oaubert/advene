@@ -3998,7 +3998,7 @@ class AdveneGUI(object):
                         'slave-player-sync-delay',
                         'tts-language', 'tts-encoding', 'tts-engine',
                         'record-actions', 'popup-destination',
-                        'timestamp-format', 
+                        'timestamp-format', 'default-fps',
                         'abbreviation-mode', 'text-abbreviations', 'completion-mode',
                         'prefer-wysiwyg', 'player-shortcuts-in-edit-windows' )
         # Direct options needing a restart to be taken into account.
@@ -4134,6 +4134,13 @@ class AdveneGUI(object):
                     ('SS.sss', '%.S'),
                     ('SS', '%S'),
                     )) )
+        fps = [ 10, 12, 24, 25, 40, 50, 60, 72 ]
+        d = config.data.preferences['default-fps']
+        if not d in fps:
+            fps.append(d)
+            fps.sort()
+        ew.add_option(_("Default FPS"), 'default-fps',
+                      _("Default FPS (frame-per-second) value, when entering or displaying timestamps with frame numbers."), odict( (str(f), f) for f in fps))
         ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 1, 300000)
         ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 1, 300000)
         ew.add_spin(_("Third time increment"), "third-time-increment", _("Skip duration, when using control-shift-up/down (in ms)."), 1, 300000)

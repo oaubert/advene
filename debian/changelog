@@ -4,8 +4,9 @@ advene (0.45) unstable; urgency=low
   
     * Timecode display: add HH:MM:SSfNN (frame number) display format in
       preferences. The same syntax can be used for timecode input too. Note
-      that it uses 25 fps by default (smpte-25).
-  
+      that it uses 25 fps by default (smpte-25), this can be modified in the
+      Time-related preferences.
+
     * the snapshotter activity can be monitor through an icon in
       the lower right-hand corner of the main window.
 

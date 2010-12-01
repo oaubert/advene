@@ -296,6 +296,8 @@ class Config(object):
             'player-autostart': True,
             'prefer-wysiwyg': True,
             'player-shortcuts-in-edit-windows': True,
+            # Default FPS, used for smpte-style timestamp display
+            'default-fps': 25,
             }
 
         # Player options

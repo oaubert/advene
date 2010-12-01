@@ -1,3 +1,5 @@
+* Update default-fps value when data is available from player
+
 * feature extraction: check against filename encoding
 
 * pymecavideo: see opencv example
@@ -2730,6 +2732,11 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * vlc wav audio extraction: vlc --no-sout-video --sout '#transcode{acodec=s16l}:es{access-audio=file,mux-audio=wav,dst-audio=foo.raw}'  k.mpg vlc:quit
 
+* TextImporter: use helper.parse_time for more flexible time input
+
+* hh:mm:ssfNN: make fps configurable (and updated when info is available)
+
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
 # End:
+

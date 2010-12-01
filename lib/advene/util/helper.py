@@ -281,7 +281,7 @@ def format_time (val = 0):
     elif f == '%.S':
         ret = '%d.%03d' % (s, ms)
     else:
-        f = f.replace('''%.S''', '''%S.''' + '%03d' % ms).replace('''%fS''', '''%Sf''' + '%02d' % (ms / 40))
+        f = f.replace('''%.S''', '''%S.''' + '%03d' % ms).replace('''%fS''', '''%Sf''' + '%02d' % long(ms * config.data.preferences['default-fps'] / 1000))
         ret = time.strftime(f, time.gmtime(s))
 
     if dummy:
@@ -323,7 +323,7 @@ def parse_time(s):
       ms: milliseconds
       NN: frame number
     """
-    f=config.data.preferences['timestamp-format']
+    f = config.data.preferences['timestamp-format']
     try:
         val=long(s)
     except ValueError:
@@ -346,7 +346,7 @@ def parse_time(s):
             if 'ms' in t and t['ms']:
                 if t['sep'] == 'f':
                     # Frame number
-                    t['ms'] = long(t['ms']) * 40
+                    t['ms'] = long(long(t['ms']) * (1000 / config.data.preferences['default-fps']))
                 else:
                     t['ms']=(t['ms'] + ("0" * 4))[:3]
             else:
