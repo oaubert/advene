@@ -561,11 +561,40 @@ class ExternalAppImporter(GenericImporter):
 class TextImporter(GenericImporter):
     """Text importer.
 
-    In addition to the parameters of GenericImporter, you can specify
+    The text importer handles input files with 1 annotation per
+    line. Each line consists in whitespace-separated data items
+    (whitespace can be any number of actual space or tab characters).
 
-    regexp: a regexp with named matching parentheses (coded
-    as"(?P<name>\d+)" for instance, see sre doc) returning the
-    parameters needed by GenericImporter.convert
+    The format of each line is either
+
+    begin_time end_time annotation_data
+    or
+    begin_time annotation_data
+    (in the latter case, annotation data must not begin with a word that can look like a timestamp)
+
+    begin_time and end_time can be formatted in various ways:
+
+    - plain integers are considered as milliseconds.
+      Regexp: \d+
+      Example: 2134 or 134 or 2000
+
+    - float numbers are considered as seconds
+      Regexp: \d*\.\d*
+      Example: 2.134 or .134 or 2.
+      
+    - formatted timestamps with colons in them will be interpreted as follows.
+      m:s (1 colon)
+      m:s.ms (1 colon)
+      h:m:s (2 colons)
+      h:m:s.ms (2 colons)
+      
+      Legend:
+      h: hours
+      m: minutes
+      s: seconds
+      ms: milliseconds
+    
+    In addition to the parameters of GenericImporter, you can specify
 
     encoding: the default encoding for the textfile
     """
@@ -573,15 +602,9 @@ class TextImporter(GenericImporter):
 
     def __init__(self, regexp=None, encoding=None, **kw):
         super(TextImporter, self).__init__(**kw)
-        if regexp is None:
-            regexp="(?P<begin>\d+)\s+(?P<end>\d+)\s+(?P<content>.+)"
-        self.regexp = regexp
         if encoding is None:
-            encoding='latin1'
-        self.encoding=encoding
-        self.optionparser.add_option("-r", "--regexp",
-                                     action="store", type="string", dest="regexp", default=self.regexp,
-                                     help=_("Specify the regexp used to parse data"))
+            encoding = 'latin1'
+        self.encoding = encoding
         self.optionparser.add_option("-e", "--encoding",
                                      action="store", type="string", dest="encoding", default=self.encoding,
                                      help=_("Specify the encoding of the input file (latin1, utf8...)"))
@@ -597,29 +620,83 @@ class TextImporter(GenericImporter):
             return 1
     can_handle=staticmethod(can_handle)
 
+    def log(self, *p):
+        self.controller.log(self.name + " error: " + " ".join(p))
+
     def iterator(self, f):
-        reg = re.compile(self.regexp)
-        incr=0.02
-        progress=0.1
+        # FIXME: use f.tell() / os.path.getsize(f.name) for progress report
+        incr = 0.02
+        progress = 0.1
+        # We cannot simply use string.split() since we want to be able
+        # to specify the number of splits() while keeping the
+        # flexibility of having any blank char as separator
+        whitespace_re = re.compile('\s+')
+        stored_begin = 0
+        index = 1
         for l in f:
             if not self.progress(progress):
                 break
             progress += incr
-            l=l.rstrip()
-            l=unicode(l, self.encoding).encode('utf-8')
-            m=reg.search(l)
-            if m is not None:
-                yield m.groupdict()
+            l = unicode(l.strip(), self.encoding)
+            data = whitespace_re.split(l, 2)
+
+            if not data:
+                # Error, cannot do anything with it.
+                self.log("invalid data: ", l)
+
+            try:
+                begin = helper.parse_time(data[0])
+            except helper.InvalidTimestamp:
+                self.log("cannot parse " + data[0] + " as a timestamp.")
+                continue
+
+            # We have a begin time.
+            if len(data) == 1:
+                # Only 1 time.
+                yield {
+                    'begin': stored_begin,
+                    'end': begin,
+                    'content': str(index),
+                    }
+                stored_begin = begin
+                index += 1
+                continue
+            else:
+                try:
+                    end = helper.parse_time(data[1])
+                except helper.InvalidTimestamp:
+                    # Invalid timestamp, consider that we have only a
+                    # begin time, followed by data.
+                    data = whitespace_re.split(l, 1)
+                    yield {
+                        'begin': stored_begin,
+                        'end': begin,
+                        'content': data[1],
+                        }
+                    stored_begin = begin
+                    index += 1
+                    continue
+                # We have valid begin and end times.
+                if len(data) == 3:
+                    content = data[2]
+                else:
+                    content = ""
+                yield {
+                    'begin': begin,
+                    'end': end,
+                    'content': content,
+                    }
+                stored_begin = begin
+                index += 1
 
     def set_regexp(self, r):
         self.re = re.compile(r)
 
     def process_file(self, filename):
-        f=open(filename, 'r')
+        f = open(filename, 'r')
         if self.package is None:
             self.init_package(filename=filename)
         self.ensure_new_type()
-        self.annotationtype=self.defaulttype
         self.convert(self.iterator(f))
         self.progress(1.0)
         return self.package
