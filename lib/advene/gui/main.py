@@ -4127,7 +4127,7 @@ class AdveneGUI(object):
         ew.add_title(_("Time-related"))
         ew.add_option(_("Time format"), 'timestamp-format', _("Format used to display timecodes"), odict( (
                     ('HH:MM:SS.sss', '%H:%M:%.S'),
-                    ('HH:MM:SS,ff', '%H:%M:%,S'),
+                    ('HH:MM:SSfNN (frame number)', '%H:%M:%fS'),
                     ('HH:MM:SS', '%H:%M:%S'),
                     ('MM:SS.sss', '%M:%.S'),
                     ('MM:SS', '%M:%S'),

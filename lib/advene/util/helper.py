@@ -281,7 +281,7 @@ def format_time (val = 0):
     elif f == '%.S':
         ret = '%d.%03d' % (s, ms)
     else:
-        f = f.replace('''%.S''', '''%S.''' + '%03d' % ms).replace('''%,S''', '''%S,''' + '%02d' % (ms / 40))
+        f = f.replace('''%.S''', '''%S.''' + '%03d' % ms).replace('''%fS''', '''%Sf''' + '%02d' % (ms / 40))
         ret = time.strftime(f, time.gmtime(s))
 
     if dummy:
@@ -289,14 +289,39 @@ def format_time (val = 0):
     else:
         return ret
 
-small_time_regexp=re.compile('(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
-time_regexp=re.compile('(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
+class InvalidTimestamp(Exception):
+    pass
+
+small_time_regexp=re.compile('(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,f]?)(?P<ms>\d+)?$')
+time_regexp=re.compile('(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,f]?)(?P<ms>\d+)?$')
 float_regexp = re.compile('(?P<s>\d*)\.(?P<ms>\d*)')
 def parse_time(s):
     """Convert a time string as long.
 
-    If the parameter is a number, it is considered as a ms value.
-    Else we try to parse a hh:mm:ss.xxx value
+    This function tries to handle multiple formats:
+
+    - plain integers are considered as milliseconds.
+      Regexp: \d+
+      Example: 2134 or 134 or 2000
+
+    - float numbers are considered as seconds
+      Regexp: \d*\.\d*
+      Example: 2.134 or .134 or 2.
+      
+    - formatted timestamps with colons in them will be interpreted as follows.
+      m:s (1 colon)
+      m:s.ms (1 colon)
+      m:sfNN
+      h:m:s (2 colons)
+      h:m:s.ms (2 colons)
+      h:m:sfNN
+      
+      Legend:
+      h: hours
+      m: minutes
+      s: seconds
+      ms: milliseconds
+      NN: frame number
     """
     f=config.data.preferences['timestamp-format']
     try:
@@ -319,16 +344,23 @@ def parse_time(s):
 
         if t is not None:
             if 'ms' in t and t['ms']:
-                t['ms']=(t['ms'] + ("0" * 4))[:3]
+                if t['sep'] == 'f':
+                    # Frame number
+                    t['ms'] = long(t['ms']) * 40
+                else:
+                    t['ms']=(t['ms'] + ("0" * 4))[:3]
             else:
                 t['ms']=0
             for k in t:
                 if t[k] is None:
-                    t[k]=0
-                t[k] = long(t[k] or 0)
+                    t[k] = 0
+                try:
+                    t[k] = long(t[k] or 0)
+                except ValueError:
+                    t[k] = 0
             val= t.get('ms', 0) + t.get('s', 0) * 1000 + t.get('m', 0) * 60000 + t.get('h', 0) * 3600000
         else:
-            raise Exception("Unknown time format for %s" % s)
+            raise InvalidTimestamp("Unknown time format for %s" % s)
     return val
 
 def matching_relationtypes(package, typ1, typ2):

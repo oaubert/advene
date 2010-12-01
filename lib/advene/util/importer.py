@@ -572,7 +572,9 @@ class TextImporter(GenericImporter):
     begin_time annotation_data
     (in the latter case, annotation data must not begin with a word that can look like a timestamp)
 
-    begin_time and end_time can be formatted in various ways:
+    begin_time and end_time can be formatted in various ways.
+
+    This function tries to handle multiple formats:
 
     - plain integers are considered as milliseconds.
       Regexp: \d+
@@ -585,18 +587,17 @@ class TextImporter(GenericImporter):
     - formatted timestamps with colons in them will be interpreted as follows.
       m:s (1 colon)
       m:s.ms (1 colon)
+      m:sfNN
       h:m:s (2 colons)
       h:m:s.ms (2 colons)
+      h:m:sfNN
       
       Legend:
       h: hours
       m: minutes
       s: seconds
       ms: milliseconds
-    
-    In addition to the parameters of GenericImporter, you can specify
-
-    encoding: the default encoding for the textfile
+      NN: frame number
     """
     name=_("Text importer")
 
