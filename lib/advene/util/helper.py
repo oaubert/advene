@@ -325,7 +325,7 @@ def parse_time(s):
             for k in t:
                 if t[k] is None:
                     t[k]=0
-                t[k] = long(t[k])
+                t[k] = long(t[k] or 0)
             val= t.get('ms', 0) + t.get('s', 0) * 1000 + t.get('m', 0) * 60000 + t.get('h', 0) * 3600000
         else:
             raise Exception("Unknown time format for %s" % s)
