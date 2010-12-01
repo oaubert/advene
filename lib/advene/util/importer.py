@@ -624,9 +624,7 @@ class TextImporter(GenericImporter):
         self.controller.log(self.name + " error: " + " ".join(p))
 
     def iterator(self, f):
-        # FIXME: use f.tell() / os.path.getsize(f.name) for progress report
-        incr = 0.02
-        progress = 0.1
+        filesize = float(os.path.getsize(f.name))
         # We cannot simply use string.split() since we want to be able
         # to specify the number of splits() while keeping the
         # flexibility of having any blank char as separator
@@ -634,9 +632,8 @@ class TextImporter(GenericImporter):
         stored_begin = 0
         index = 1
         for l in f:
-            if not self.progress(progress):
+            if not self.progress(f.tell() / filesize):
                 break
-            progress += incr
             l = unicode(l.strip(), self.encoding)
             data = whitespace_re.split(l, 2)
 
