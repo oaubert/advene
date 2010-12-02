@@ -1,3 +1,5 @@
+* Debian: replace jquery copy by link and dependency to the jquery package
+
 * Update default-fps value when data is available from player
 
 * feature extraction: check against filename encoding
@@ -2735,6 +2737,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * TextImporter: use helper.parse_time for more flexible time input
 
 * hh:mm:ssfNN: make fps configurable (and updated when info is available)
+
+* Move debian/changelog to /changelog
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"

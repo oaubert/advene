@@ -57,7 +57,7 @@
       <Expire_Info>
         <Has_Expire_Info>N</Has_Expire_Info><Expire_Count></Expire_Count><Expire_Based_On></Expire_Based_On><Expire_Other_Info></Expire_Other_Info><Expire_Month></Expire_Month><Expire_Day></Expire_Day><Expire_Year></Expire_Year>
       </Expire_Info>
-      <Program_Change_Info>See the changelog at http://svn.gna.org/viewcvs/advene/trunk/debian/changelog?view=auto</Program_Change_Info>
+      <Program_Change_Info>See the changelog at http://svn.gna.org/viewcvs/advene/trunk/CHANGES.txt</Program_Change_Info>
       <Program_Category_Class>Audio &amp; Multimedia::Video Tools</Program_Category_Class>
       <Program_Specific_Category></Program_Specific_Category>
       <Program_System_Requirements></Program_System_Requirements>

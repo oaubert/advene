@@ -105,4 +105,4 @@ An (incomplete) user guide is in the public Advene wiki, feel free to contribute
 http://liris.cnrs.fr/advene/wiki/index.php/Main_Page
 
 A summarized list of changes across versions is available in the
-changelog (debian/changelog file).
+CHANGES.txt file.

@@ -16,13 +16,13 @@ SCRIPTNAME='advene'
 
 def check_changelog(maindir, version):
     """Check that the changelog for maindir matches the given version."""
-    f=open(os.path.join( maindir, "debian", "changelog" ), 'r')
+    f=open(os.path.join( maindir, "CHANGES.txt" ), 'r')
     l=f.readline()
     f.close()
     if not l.startswith('advene (' + version + ')'):
-        print "The changelog does not seem to correspond to version " + version
+        print "The CHANGES.txt does not seem to match version " + version
         print l
-        print "Update either the changelog or the lib/advene/core/version.py file"
+        print "Update either the CHANGES.txt or the lib/advene/core/version.py file"
         sys.exit(1)
     return True
 
