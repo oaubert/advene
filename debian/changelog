@@ -1,0 +1,6 @@
+advene (0.45-1) unstable; urgency=low
+
+  * Separate Debian packaging from actual sources.
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 02 Dec 2010 14:47:42 +0100
+
