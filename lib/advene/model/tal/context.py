@@ -285,7 +285,7 @@ class AdveneContext(_advene_context):
             view_source = StringIO (unicode(view_source))
 
         kw = {}
-        if mimetype is None or mimetype == 'text/html':
+        if mimetype is None or mimetype.startswith('text/'):
             compiler = simpleTAL.HTMLTemplateCompiler ()
             compiler.log = self.log
             compiler.parseTemplate (view_source, 'utf-8')
