@@ -1,7 +1,7 @@
 <package dc:creator="oaubert" dc:date="2004-06-15" xmlns="http://experience.univ-lyon1.fr/advene/ns" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink">
   <meta><default_adhoc xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">_default_workspace</default_adhoc>
     <tag_colors xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"></tag_colors>
-    <duration xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"></duration>
+    <duration xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"/>
     <title xmlns="http://purl.org/dc/elements/1.1/">Export package</title>
     <mediafile xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"/>
   </meta>
@@ -583,6 +583,43 @@ xmlns=&quot;http://advene.org/ns/linked-data/&quot;
   &lt;/div&gt;
 &lt;/body&gt;
  &lt;/tt&gt;
- </content></view>
+ </content></view><view dc:creator="oaubert" dc:date="2010-12-06" id="json" viewable-class="*"><meta>
+   <title xmlns="http://purl.org/dc/elements/1.1/">json</title>
+   <extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">json</extension>
+</meta><content encoding="utf-8" mime-type="text/plain">{ &quot;annotations&quot;: [
+&lt;span tal:repeat=&quot;a here/annotations/sorted&quot; tal:omit-tag=&quot;&quot;&gt;
+                {
+                        &quot;id&quot;: &quot;&lt;span tal:replace=&quot;a/id&quot;&gt;aid&lt;/span&gt;&quot;,
+                        &quot;type&quot;: &quot;&lt;span tal:replace=&quot;a/type/id&quot;&gt;atid&lt;/span&gt;&quot;,
+                        &quot;media&quot;: &quot;&lt;span tal:replace=&quot;package/meta/advenetool/mediafile/urlquote&quot;&gt;movie&lt;/span&gt;&quot;,
+                        &quot;begin&quot;: &lt;span tal:replace=&quot;a/fragment/begin&quot;&gt;begin&lt;/span&gt;,
+                        &quot;end&quot;: &lt;span tal:replace=&quot;a/fragment/end&quot;&gt;end&lt;/span&gt;,
+                        &quot;content&quot;: &quot;&lt;span tal:replace=&quot;a/content/data/urlquote&quot;&gt;content&lt;/span&gt;&quot;
+                }&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/a/end&quot;&gt;,&lt;/span&gt;
+&lt;/span&gt;
+] }
+</content></view>
+<view dc:creator="oaubert" dc:date="2010-12-06" id="json_by_type" viewable-class="package">
+<meta>
+  <title xmlns="http://purl.org/dc/elements/1.1/">json-by-type</title>
+  <extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">json</extension>
+</meta>
+<content encoding="utf-8" mime-type="text/plain">{
+  &lt;span tal:repeat=&quot;at here/annotationTypes&quot; tal:omit-tag=&quot;&quot;&gt;
+   &quot;&lt;span tal:replace=&quot;at/id&quot;&gt;atid&lt;/span&gt;&quot;: [
+      &lt;span tal:repeat=&quot;a at/annotations/sorted&quot; tal:omit-tag=&quot;&quot;&gt;
+                {
+                        &quot;id&quot;: &quot;&lt;span tal:replace=&quot;a/id&quot;&gt;aid&lt;/span&gt;&quot;,
+                        &quot;type&quot;: &quot;&lt;span tal:replace=&quot;at/id&quot;&gt;atid&lt;/span&gt;&quot;,
+                        &quot;media&quot;: &quot;&lt;span tal:replace=&quot;package/meta/advenetool/mediafile/urlquote&quot;&gt;movie&lt;/span&gt;&quot;,
+                        &quot;begin&quot;: &lt;span tal:replace=&quot;a/fragment/begin&quot;&gt;begin&lt;/span&gt;,
+                        &quot;end&quot;: &lt;span tal:replace=&quot;a/fragment/end&quot;&gt;end&lt;/span&gt;,
+                        &quot;content&quot;: &quot;&lt;span tal:replace=&quot;a/content/data/urlquote&quot;&gt;content&lt;/span&gt;&quot;
+                }&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/a/end&quot;&gt;,&lt;/span&gt;
+&lt;/span&gt;
+]&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/at/end&quot;&gt;,&lt;/span&gt;
+&lt;/span&gt;
+}
+</content></view>
   </views>
 </package>
