@@ -1126,7 +1126,7 @@ class SubtitleImporter(GenericImporter):
                 yield d
             else:
                 if tc is not None:
-                    if self.encoding is not None:
+                    if self.encoding:
                         data=unicode(line, self.encoding)
                     else:
                         # We will try utf8 first, then fallback on latin1
