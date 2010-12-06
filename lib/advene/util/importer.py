@@ -748,18 +748,15 @@ class LsDVDImporter(GenericImporter):
     def process_file(self, filename):
         if filename != 'lsdvd':
             pass
-        p, at=self.init_package(filename=filename,
-                                schemaid='dvd',
-                                annotationtypeid='chapter')
-        if self.package is None:
+        self.init_package(filename=filename)
+        self.ensure_new_type('chapter', _("DVD Chapter"))
+        if not self.package.getMetaData(config.data.namespace, "mediafile"):
             # We created a new package. Set the mediafile
-            # FIXME: should specify title
             p.setMetaData (config.data.namespace, "mediafile", "dvd@1,1")
-            self.package=p
-        self.defaulttype=at
         self.progress(0.1, _("Launching lsdvd..."))
         f=os.popen(self.command, "r")
         self.convert(self.iterator(f))
+        f.close()
         self.progress(1.0)
         return self.package
 
@@ -811,15 +808,13 @@ class ChaplinImporter(GenericImporter):
         if filename != 'chaplin':
             return None
         f=os.popen(self.command, "r")
-        p, at=self.init_package(filename=filename,
-                                schemaid='dvd',
-                                annotationtypeid='chapter')
-        if self.package is None:
-            self.package=p
-            # FIXME: should specify title
+        self.init_package(filename=filename)
+        self.ensure_new_type('chapter', _("DVD Chapter"))
+        if not self.package.getMetaData(config.data.namespace, "mediafile"):
+            # We created a new package. Set the mediafile
             p.setMetaData (config.data.namespace, "mediafile", "dvd@1,1")
-        self.defaulttype=at
         self.convert(self.iterator(f))
+        f.close()
         self.progress(1.0)
         return self.package
 
@@ -868,8 +863,6 @@ class XiImporter(GenericImporter):
         p, at=self.init_package(filename=filename,
                                 schemaid='xi-schema',
                                 annotationtypeid='xi-verbal')
-        if self.package is None:
-            self.package=p
         self.defaulttype=at
 
         # self.signals init
@@ -1042,9 +1035,7 @@ class ElanImporter(GenericImporter):
     def process_file(self, filename):
         elan=handyxml.xml(filename)
 
-        if self.package is None:
-            self.package=Package(uri='new_pkg', source=None)
-
+        self.init_package(filename)
         self.schema=self.create_schema(id_='elan', title="ELAN converted schema")
         try:
             self.schema.date=elan.DATE
@@ -1141,15 +1132,11 @@ class SubtitleImporter(GenericImporter):
 
     def process_file(self, filename):
         f=open(filename, 'r')
-
-        p, at=self.init_package(filename=filename,
-                                schemaid='subtitle-schema',
-                                annotationtypeid='subtitle')
-        if self.package is None:
-            self.package=p
-        self.defaulttype=at
+        self.init_package(filename=filename)
+        self.ensure_new_type('subtitle', _("Subtitles from %s") % os.path.basename(filename))
         # FIXME: implement subtitle type detection
         self.convert(self.srt_iterator(f))
+        f.close()
         self.progress(1.0)
         return self.package
 
@@ -1234,12 +1221,11 @@ class PraatImporter(GenericImporter):
     def process_file(self, filename):
         f=open(filename, 'r')
 
-        if self.package is None:
-            self.package=Package(uri='new_pkg', source=None)
-
+        self.init_package(filename)
         self.schema=self.create_schema('praat',
                                        title="PRAAT converted schema")
         self.convert(self.iterator(f))
+        f.close()
         self.progress(1.0)
         return self.package
 
