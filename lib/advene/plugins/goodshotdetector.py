@@ -44,21 +44,23 @@ def register(controller=None):
 class DelakisShotDetectImporter(GenericImporter):
     name = _("Shot detection (Delakis version)")
 
+    profiles = {
+        'default': { 'ALPHA': 2.6, 'BETA': 0.05 },
+        'safe': { 'ALPHA': 2.9, 'BETA': 0.06 },
+        'aggressive': { 'ALPHA': 1.7, 'BETA': 0.05 },
+        }
+
     def __init__(self, *p, **kw):
         super(DelakisShotDetectImporter, self).__init__(*p, **kw)
 
-        self.motion_threshold = .15
-        self.shot_threshold = .15
         self.cache_histogram = False
+        self.profile = 'default'
         self.optionparser.add_option("-c", "--cache-histogram",
                                      action="store_true", dest="cache_histogram", default=self.cache_histogram,
                                      help=_("Cache histogram alongside video files."))
-        self.optionparser.add_option("-m", "--motion-threshold",
-                                     action="store", type="float", dest="motion_threshold", default=self.motion_threshold,
-                                     help=_("Motion threshold."))
-        self.optionparser.add_option("-s", "--shot-threshold",
-                                     action="store", type="float", dest="shot_threshold", default=self.shot_threshold,
-                                     help=_("Shot threshold."))
+        self.optionparser.add_option("-p", "--profile",
+                                     action="store", type="choice", dest="profile", choices=self.profiles.keys(), default=self.profile,
+                                     help=_("Parameter profile: safe will detect less cuts, aggressive will detect more cuts (but more false ones too). default is a compromise."))
 
     def can_handle(fname):
         """Return a score between 0 and 100.
@@ -72,7 +74,7 @@ class DelakisShotDetectImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def process_file(self, filename):
-        at = self.ensure_new_type('shot', title=_("Shot"))
+        at = self.ensure_new_type('shot', title=_("Shot (%s profile)") % self.profile)
         at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Detected shots"))
 
         #Compute or load histogram
@@ -93,8 +95,8 @@ class DelakisShotDetectImporter(GenericImporter):
                     self.controller.log("Cannot save histogram: %s" % e.message)
 
         sd = ShotDetector()
-        for o in ('motion_threshold', 'shot_threshold'):
-            setattr(sd, o.upper(), getattr(self, o))
+        for k, v in self.profiles[self.profile].iteritems():
+            setattr(sd, k, v)
         #Detect cut and dissolve
         self.convert(sd.process(histos, 1000 / fps))
         return self.package
