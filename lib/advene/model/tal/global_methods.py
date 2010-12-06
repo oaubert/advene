@@ -605,3 +605,9 @@ def transition_fix_date(target, context):
         return datetime.datetime(long(m.group(1)), long(m.group(2)), long(m.group(3))).isoformat()
     else:
         return target
+
+def urlquote(target, context):
+    """Percent-encode the given string.
+    """
+    import urllib
+    return urllib.quote(unicode(target).encode('utf-8'))
