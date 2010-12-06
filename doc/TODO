@@ -1,3 +1,5 @@
+* Remove embedded ElementTree now that python2.5 is required
+
 * DND issues in latest win32 versions
 
 * when deleting elements, remove their ids from idgenerator cache (else issues in package merge)
