@@ -293,8 +293,7 @@ class AdveneContext(_advene_context):
             compiler = simpleTAL.XMLTemplateCompiler ()
             compiler.log = self.log
             compiler.parseTemplate (view_source)
-            if len (self.localStack) > 2: # view is called by another view
-                kw["suppressXMLDeclaration"] = 1
+            kw["suppressXMLDeclaration"] = 1
         compiler.getTemplate ().expand (context=self, outputFile=stream, outputEncoding='utf-8', **kw)
 
         return stream
