@@ -1,3 +1,11 @@
+* DND issues in latest win32 versions
+
+* when deleting elements, remove their ids from idgenerator cache (else issues in package merge)
+
+* website_export: do not skip existing resources, they could be  updated. Copy anyway.
+
+* use dh_pysupport instead of python-central
+
 * Debian: replace jquery copy by link and dependency to the jquery package
 
 * Update default-fps value when data is available from player
