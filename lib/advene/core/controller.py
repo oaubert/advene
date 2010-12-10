@@ -1286,9 +1286,10 @@ class AdveneController(object):
     def update_package_title(self):
         """Generate a default package title if none was set.
         """
-        if (not self.package.title 
-            or self.package.title == "Template package" 
-            or self.package.title.startswith(_("Analysis of "))
+        if (len(self.package.annotations)
+            and (not self.package.title
+                 or self.package.title == "Template package"
+                 or self.package.title.startswith(_("Analysis of ")))
             and self.get_default_media()):
             self.package.title = _("Analysis of ") + unicode(os.path.basename(self.get_default_media()))
             self.notify("PackageEditEnd", package=self.package)
