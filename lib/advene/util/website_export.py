@@ -471,9 +471,6 @@ class WebsiteExporter(object):
         # Copy static video player resources
         for (path, dest) in self.video_player.needed_resources():
             dest=os.path.join(self.destination, dest)
-            if os.path.exists(dest):
-                # Already copied
-                continue
             if os.path.isdir(path):
                 # Copy tree
                 shutil.copytree(path, dest)

@@ -1,10 +1,10 @@
+* Do not generate title if there are no annotations
+
 * Remove embedded ElementTree now that python2.5 is required
 
 * DND issues in latest win32 versions
 
 * when deleting elements, remove their ids from idgenerator cache (else issues in package merge)
-
-* website_export: do not skip existing resources, they could be  updated. Copy anyway.
 
 * use dh_pysupport instead of python-central
 
@@ -2749,6 +2749,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * hh:mm:ssfNN: make fps configurable (and updated when info is available)
 
 * Move debian/changelog to /changelog
+
+* website_export: do not skip existing resources, they could be  updated. Copy anyway.
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
