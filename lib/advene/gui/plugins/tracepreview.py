@@ -34,15 +34,26 @@ import advene.model.view
 from advene.gui.widget import TimestampRepresentation
 from advene.rules.elements import ECACatalog
 import advene.core.config as config
-import goocanvas
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.package import Package
 from advene.gui.util import gdk2intrgba
 
+try:
+    import goocanvas
+    from goocanvas import Group
+except ImportError:
+    # Goocanvas is not available. Define some globals in order not to
+    # fail the module loading, and use them as a guard in register()
+    goocanvas=None
+    Group=object
+    
 def register(controller):
-    controller.register_viewclass(TracePreview)
+    if goocanvas is None:
+        controller.log("Cannot register TracePreview: the goocanvas python module does not seem to be available.")
+    else:
+        controller.register_viewclass(TracePreview)
 
 name="Trace preview"
 
@@ -260,7 +271,7 @@ class TracePreview(AdhocView):
                 print 'No icon for %s' % te
             goocanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
             # object icon
-            objg = goocanvas.Group(parent = objcanvas.get_root_item ())
+            objg = Group(parent = objcanvas.get_root_item ())
             if obj_evt.concerned_object['id']:
                 ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
                 temp_c = self.controller.get_element_color(ob)
