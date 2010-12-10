@@ -7,9 +7,6 @@ import os
 import string
 import re
 import sys
-# to be able to import gst
-import pygst
-pygst.require('0.10')
 
 # We define the main script name here (file in bin), since we have to change it for MacOS X
 SCRIPTNAME='advene'
@@ -69,6 +66,10 @@ platform_options={}
 
 if sys.platform == 'win32':
     import py2exe
+    # to be able to import gst
+    import pygst
+    pygst.require('0.10')
+
     platform_options['windows'] = [ "bin/advene" ]
     platform_options['options'] = {
 	"py2exe": {
