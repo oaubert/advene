@@ -1,12 +1,10 @@
 * Remove embedded ElementTree now that python2.5 is required
 
-* DND issues in latest win32 versions
+* DND issues in latest win32 versions (gtk issue)
 
 * when deleting elements, remove their ids from idgenerator cache (else issues in package merge)
 
 * use dh_pysupport instead of python-central
-
-* Debian: replace jquery copy by link and dependency to the jquery package
 
 * Update default-fps value when data is available from player
 
@@ -15,8 +13,6 @@
 * pymecavideo: see opencv example
 
 * DS: always display player control (Play/pause) under the player
-
-* DS: display explicit feedback about player status (play/pause/buffering)
 
 * finder: in Static view/dynamic view columns, add a "+" item
 
@@ -2751,6 +2747,10 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * website_export: do not skip existing resources, they could be  updated. Copy anyway.
 
 * Do not generate title if there are no annotations
+
+* Debian: replace jquery copy by link and dependency to the jquery package
+
+* DS: display explicit feedback about player status (play/pause/buffering)
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"

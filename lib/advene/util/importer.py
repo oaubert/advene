@@ -60,6 +60,7 @@ from gettext import gettext as _
 import gobject
 import shutil
 import subprocess
+import signal
 import threading
 
 import advene.core.config as config
@@ -77,6 +78,11 @@ import xml.dom
 import advene.util.ElementTree as ET
 
 IMPORTERS=[]
+
+def subprocess_setup():
+    # Python installs a SIGPIPE handler by default. This is usually not what
+    # non-Python subprocesses expect.
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 def register(imp):
     """Register an importer
@@ -473,10 +479,11 @@ class ExternalAppImporter(GenericImporter):
                                              shell=False,
                                              stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE,
-                                             creationflags = flags)
+                                             creationflags = flags,
+                                             preexec_fn=subprocess_setup )
         except OSError, e:
             self.cleanup()
-            msg = e.args[0]
+            msg = unicode(e.args)
             raise Exception(_("Could not run %(appname)s: %(msg)s") % locals())
 
         self.progress(.01, _("Processing %s") % gobject.filename_display_name(filename))

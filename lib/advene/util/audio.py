@@ -22,8 +22,6 @@ import subprocess
 import signal
 import os
 import urllib
-from threading import Thread
-
 
 if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
@@ -42,6 +40,11 @@ except ImportError:
     gst=None
 
 import advene.core.config as config
+
+def subprocess_setup():
+    # Python installs a SIGPIPE handler by default. This is usually not what
+    # non-Python subprocesses expect.
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 class SoundPlayer:
     def gst_play(self, fname, volume=100, balance=0):
@@ -71,7 +74,7 @@ class SoundPlayer:
 
         It ignore the volume and balance parameters.
         """
-        pid=subprocess.Popen( [ '/usr/bin/aplay', '-q', fname ] )
+        pid=subprocess.Popen( [ '/usr/bin/aplay', '-q', fname ], preexec_fn=subprocess_setup)
         signal.signal(signal.SIGCHLD, self.handle_sigchld)
         return True
             

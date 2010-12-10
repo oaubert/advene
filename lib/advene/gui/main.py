@@ -27,6 +27,7 @@ import sys
 import time
 import os
 import subprocess
+import signal
 import shutil
 import tempfile
 import StringIO
@@ -4814,6 +4815,11 @@ class AdveneGUI(object):
 
             This method is meant to be run in its own thread.
             """
+            def subprocess_setup():
+                # Python installs a SIGPIPE handler by default. This is usually not what
+                # non-Python subprocesses expect.
+                signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
             shot_re=re.compile('Shot log\s+::\s+(.+)')
             exp_re = re.compile('(\d*\.\d*)e\+(\d+)')
 
@@ -4830,7 +4836,8 @@ class AdveneGUI(object):
                                             shell=False,
                                             stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE,
-                                            creationflags = flags)
+                                            creationflags = flags,
+                                            preexec_fn=subprocess_setup)
             except OSError, e:
                 do_cancel(None, pb)
                 dialog.message_dialog(_("Could not run shotdetect: %s") % unicode(e), modal=False)

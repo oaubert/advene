@@ -34,6 +34,11 @@ name="Text-To-Speech actions"
 
 ENGINES={}
 
+def subprocess_setup():
+    # Python installs a SIGPIPE handler by default. This is usually not what
+    # non-Python subprocesses expect.
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
 # Decorator. But using it would imply python >= 2.6.
 def ttsengine(name):
     def inside_register(f):
@@ -155,7 +160,7 @@ class FestivalTTSEngine(TTSEngine):
 
     def init(self):
         if self.festival_path is not None and self.aplay_path is not None:
-            self.festival_process = subprocess.Popen([ self.festival_path, '--pipe' ], stdin=subprocess.PIPE)
+            self.festival_process = subprocess.Popen([ self.festival_path, '--pipe' ], stdin=subprocess.PIPE, preexec_fn=subprocess_setup)
             # Configure festival to use aplay
             self.festival_process.stdin.write("""(Parameter.set 'Audio_Command "%s -q -c 1 -t raw -f s16 -r $SR $FILE")\n""" % self.aplay_path)
             self.festival_process.stdin.write("""(Parameter.set 'Audio_Method 'Audio_Command)\n""")
