@@ -611,3 +611,13 @@ def urlquote(target, context):
     """
     import urllib
     return urllib.quote(unicode(target).encode('utf-8'))
+
+def json(target, context):
+    """JSON-encode the parameter.
+    """
+    try:
+        from json import dumps
+    except ImportError:
+        # json is standard in 2.6. For python <= 2.5, hope that simplejson is installed.
+        from simplejson import dumps
+    return dumps(target, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4)
