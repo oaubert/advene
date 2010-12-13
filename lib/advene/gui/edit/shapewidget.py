@@ -1842,10 +1842,17 @@ class ShapeEditor(object):
             return True
 
         def save_svg(b):
-            tree=ET.ElementTree(self.drawer.get_svg(relative=False))
-            f=open('/tmp/shapewidget.svg', 'w')
-            tree.write(f, encoding='utf-8')
-            f.close()
+            fs=gtk.FileChooserDialog(title='Select a svg file to write to',
+                                     action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                     buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+            res=fs.run()
+            if res == gtk.RESPONSE_OK:
+                name = fs.get_filename()
+                tree = ET.ElementTree(self.drawer.get_svg(relative=False))
+                f = open(name, 'w')
+                tree.write(f, encoding='utf-8')
+                f.close()
+            fs.destroy()
             return True
 
         tb.insert(gtk.SeparatorToolItem(), -1)
