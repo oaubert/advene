@@ -1830,10 +1830,6 @@ class ShapeEditor(object):
         self.color_icon.connect('clicked', display_color_menu)
         tb.insert(self.color_icon, -1)
 
-        def dump_svg(b):
-            s=self.drawer.get_svg(relative=False)
-            ET.dump(s)
-
         def load_svg(b):
             fs=gtk.FileChooserDialog(title='Select a svg file',
                                      buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
@@ -1853,11 +1849,6 @@ class ShapeEditor(object):
             return True
 
         tb.insert(gtk.SeparatorToolItem(), -1)
-
-        b=gtk.ToolButton(gtk.STOCK_CONVERT)
-        b.set_tooltip_text(_("Dump SVG"))
-        b.connect('clicked', dump_svg)
-        tb.insert(b, -1)
 
         b=gtk.ToolButton(gtk.STOCK_OPEN)
         b.set_tooltip_text(_("Load SVG"))
