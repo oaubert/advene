@@ -594,7 +594,8 @@ xmlns=&quot;http://advene.org/ns/linked-data/&quot;
                         &quot;media&quot;: &quot;&lt;span tal:replace=&quot;package/meta/advenetool/mediafile/urlquote&quot;&gt;movie&lt;/span&gt;&quot;,
                         &quot;begin&quot;: &lt;span tal:replace=&quot;a/fragment/begin&quot;&gt;begin&lt;/span&gt;,
                         &quot;end&quot;: &lt;span tal:replace=&quot;a/fragment/end&quot;&gt;end&lt;/span&gt;,
-                        &quot;content&quot;: &quot;&lt;span tal:replace=&quot;a/content/data/urlquote&quot;&gt;content&lt;/span&gt;&quot;
+                        &quot;content&quot;: &lt;span tal:replace=&quot;a/content/data/json&quot;&gt;content&lt;/span&gt;&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;python:'x-advene-structured' in a.content.mimetype&quot;&gt;, 
+                        &quot;parsed&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/content/parsed/json&quot;&gt;parsed&lt;/span&gt;&lt;/span&gt;
                 }&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/a/end&quot;&gt;,&lt;/span&gt;
 &lt;/span&gt;
 ] }
@@ -614,7 +615,8 @@ xmlns=&quot;http://advene.org/ns/linked-data/&quot;
                         &quot;media&quot;: &quot;&lt;span tal:replace=&quot;package/meta/advenetool/mediafile/urlquote&quot;&gt;movie&lt;/span&gt;&quot;,
                         &quot;begin&quot;: &lt;span tal:replace=&quot;a/fragment/begin&quot;&gt;begin&lt;/span&gt;,
                         &quot;end&quot;: &lt;span tal:replace=&quot;a/fragment/end&quot;&gt;end&lt;/span&gt;,
-                        &quot;content&quot;: &quot;&lt;span tal:replace=&quot;a/content/data/urlquote&quot;&gt;content&lt;/span&gt;&quot;
+                        &quot;content&quot;: &lt;span tal:replace=&quot;a/content/data/json&quot;&gt;content&lt;/span&gt;&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;python:'x-advene-structured' in a.content.mimetype&quot;&gt;, 
+                        &quot;parsed&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/content/parsed/json&quot;&gt;parsed&lt;/span&gt;&lt;/span&gt;
                 }&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/a/end&quot;&gt;,&lt;/span&gt;
 &lt;/span&gt;
 ]&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/at/end&quot;&gt;,&lt;/span&gt;

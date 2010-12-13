@@ -1,3 +1,5 @@
+* example SVG + lien -> json
+
 * Remove embedded ElementTree now that python2.5 is required
 
 * DND issues in latest win32 versions (gtk issue)
@@ -2751,6 +2753,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Debian: replace jquery copy by link and dependency to the jquery package
 
 * DS: display explicit feedback about player status (play/pause/buffering)
+
+* export JSON -> generated 'parsed' field
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
