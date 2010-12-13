@@ -1582,7 +1582,7 @@ class ShapeEditor(object):
             background=background.get_pixbuf()
         self.drawer=ShapeDrawer(callback=self.callback,
                                 background=background)
-        self.shapes = [ Rectangle, Ellipse, Line, Text, Image ]
+        self.shapes = [ Rectangle, Ellipse, Line, Text ]
 
         self.colors = COLORS
         self.defaultcolor = self.colors[0]
