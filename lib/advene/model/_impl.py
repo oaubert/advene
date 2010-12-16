@@ -222,7 +222,7 @@ class Authored(Metaed):
         """Set the author.
            You would probably rather use the author property.
         """
-        if value or self._getModel().parentNode.nodeType==ELEMENT_NODE:
+        if value or (self._getModel().parentNode and self._getModel().parentNode.nodeType==ELEMENT_NODE):
             self.__setAuthorNode(value, self.getAuthorUrl())
         else:
             raise AttributeError("author is a required attribute here")
