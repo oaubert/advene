@@ -111,7 +111,7 @@ class WebsiteExporter(object):
 
         This method can be overriden by the caller from the constructor.
         """
-        return
+        return True
 
     def unconverted(self, url, reason):
         return 'unconverted.html?url=%s&reason=%s' % (
@@ -414,7 +414,8 @@ class WebsiteExporter(object):
         main_step=1.0/self.max_depth
 
         progress=0
-        self.progress_callback(progress, _("Starting export"))
+        if not self.progress_callback(progress, _("Starting export")):
+            return
 
         view_url={}
         ctx=self.controller.build_context()
@@ -442,10 +443,12 @@ class WebsiteExporter(object):
         while depth <= self.max_depth:
             max_depth_exceeded = (depth == self.max_depth)
             step=main_step / (len(links_to_be_processed) or 1)
-            self.progress_callback(progress, _("Depth %d") % depth)
+            if not self.progress_callback(progress, _("Depth %d") % depth):
+                return
             links=set()
             for url in links_to_be_processed:
-                self.progress_callback(progress, _("Depth %(depth)d: processing %(url)s") % locals())
+                if not self.progress_callback(progress, _("Depth %(depth)d: processing %(url)s") % locals()):
+                    return
                 progress += step
                 content=self.get_contents(url)
 
@@ -466,7 +469,8 @@ class WebsiteExporter(object):
             links_to_be_processed=links
             depth += 1
 
-        self.progress_callback(0.95, _("Finalizing"))
+        if not self.progress_callback(0.95, _("Finalizing")):
+            return
 
         # Copy static video player resources
         for (path, dest) in self.video_player.needed_resources():

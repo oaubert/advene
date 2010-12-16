@@ -577,6 +577,10 @@ class AdveneGUI(object):
                 # Separator
                 b=gtk.VSeparator()
                 hb.pack_start(b, expand=False, padding=5)
+
+                it = gtk.SeparatorMenuItem()
+                menu.insert(it, item_index)
+                item_index = item_index + 1
                 continue
             if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
                 continue
@@ -4501,6 +4505,8 @@ class AdveneGUI(object):
         pb=gtk.ProgressBar()
         v.pack_start(pb, expand=False)
 
+        w.should_continue = True
+
         def cb(val, msg):
             if val > 0 and val <= 1.0:
                 pb.set_fraction(val)
@@ -4509,7 +4515,7 @@ class AdveneGUI(object):
             pb.set_text(msg)
             while gtk.events_pending():
                 gtk.main_iteration()
-            return True
+            return w.should_continue
 
         def do_conversion(b):
             b.set_sensitive(False)
@@ -4529,12 +4535,14 @@ class AdveneGUI(object):
             except OSError, e:
                 dialog.message_dialog(_("Could not export data: ") + unicode(e), icon=gtk.MESSAGE_ERROR)
                 b.set_sensitive(True)
+            self.log(_("Website export to %s completed") % d)
+            w.destroy()
             return True
 
         dirname_entry.connect('activate', do_conversion)
 
         def do_cancel(*p):
-            w.destroy()
+            w.should_continue = False
             return True
 
         hb=gtk.HButtonBox()
