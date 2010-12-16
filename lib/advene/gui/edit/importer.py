@@ -66,6 +66,15 @@ class FileImporter(AdhocView):
         self.importer = None
 
         self.widget=self.build_widget()
+
+        def initial_focus(w, event):
+            self.filename_entry.grab_focus()
+            # Returning False does not seem enough to remove signal handler.
+            self.widget.disconnect(self.sig)
+            del self.sig
+            return False
+        self.sig = self.widget.connect('expose-event', initial_focus)
+
         if filename:
             self.filename_entry.set_text(filename)
 
