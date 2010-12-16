@@ -3000,7 +3000,7 @@ class AdveneGUI(object):
         self.open_adhoc_view('interactiveresult', destination='east', result=res, label=_("'%s'") % s, query=s)
         return True
 
-    def ask_for_annotation_type(self, text=None, create=False, force_create=False):
+    def ask_for_annotation_type(self, text=None, create=False, force_create=False, default=None):
         """Display a popup asking to choose an annotation type.
 
         If create, then offer the possibility to create a new one.
@@ -3051,7 +3051,7 @@ class AdveneGUI(object):
             if create and force_create:
                 preselect=newat
             else:
-                preselect=None
+                preselect=default
             type_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a), self.controller.get_element_color(a)) for a in ats],
                                                       preselect=preselect,
                                                       callback=handle_new_type_selection)
