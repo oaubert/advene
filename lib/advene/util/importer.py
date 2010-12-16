@@ -386,7 +386,7 @@ class GenericImporter(object):
                 ident=None
             try:
                 type_=d['type']
-                if isinstance(type, basestring):
+                if isinstance(type_, basestring):
                     # A type id was specified. Dereference it, and
                     # create it if necessary.
                     type_id = type_
