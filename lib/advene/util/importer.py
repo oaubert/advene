@@ -230,14 +230,17 @@ class GenericImporter(object):
         """Create a new type.
         """
         l=[ at.id for at in self.package.annotationTypes ]
-        i = 1
-        atid = None
-        while atid is None:
-            t=prefix + str(i)
-            if not t in l:
-                atid = t
-            else:
-                i += 1
+        if prefix in l:
+            i = 1
+            atid = None
+            while atid is None:
+                t=prefix + str(i)
+                if not t in l:
+                    atid = t
+                else:
+                    i += 1
+        else:
+            atid = prefix
 
         if schemaid is None:
             schemaid = 's_converted'
@@ -410,7 +413,7 @@ class GenericImporter(object):
             try:
                 title=d['title']
             except KeyError:
-                title=content[:20]
+                title=(content or '')[:20]
             try:
                 timestamp=d['timestamp']
             except KeyError:
