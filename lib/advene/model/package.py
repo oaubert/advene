@@ -282,6 +282,8 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             return self.__zip.getResources(package=self)
 
     def get_element_by_id(self, i):
+        if not i:
+            return None
         uri=self.uri
         for m in (self.getSchemas, self.getViews, self.getAnnotationTypes,
                   self.getRelationTypes, self.getAnnotations, self.getQueries,
