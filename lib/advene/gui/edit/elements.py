@@ -157,8 +157,10 @@ class EditElementPopup (AdhocView):
                             break
                     except:
                         continue
+                vbox.disconnect(self.sig)
+                del self.sig
                 return False
-            vbox.connect('expose-event', initial_focus)
+            self.sig = vbox.connect('expose-event', initial_focus)
 
             self._widget=vbox
 
