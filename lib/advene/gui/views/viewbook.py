@@ -265,7 +265,8 @@ class ViewBook(AdhocView):
                 name=v
                 label=v.title
                 view=self.controller.gui.open_adhoc_view(name, label=label, destination=None)
-                self.add_view(view, name=view.view_name)
+                if view is not None:
+                    self.add_view(view, name=view.view_name)
             elif 'name' in data:
                 name=data['name']
                 if name == 'comment':
