@@ -93,10 +93,6 @@ class TranscriptionEdit(AdhocView):
         self.sourcefile=None
         self.empty_re = re.compile('^\s*$')
 
-        # When importing existing annotations, memorize their type so
-        # that we can propose it by default when exporting again.
-        self.imported_type=None
-
         self.options = {
             'timestamp': True, # _("If checked, click inserts timestamp marks"))
             'play-on-scroll': False,
@@ -109,6 +105,7 @@ class TranscriptionEdit(AdhocView):
             'autoinsert': True,
             'snapshot-size': 32,
             'font-size': 0,
+            'annotation-type-id': None,
             }
 
         self.colors = {
@@ -967,11 +964,13 @@ class TranscriptionEdit(AdhocView):
         if not self.controller.gui:
             self.message(_("Cannot import annotations: no existing interface"))
             return True
-        at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to import"), create=False)
+        at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to import"), 
+                                                       create=False, 
+                                                       default=self.controller.package.get_element_by_id(self.options['annotation-type-id']))
         if at is None:
             return True
 
-        self.imported_type=at
+        self.options['annotation-type-id'] = at.id
         
         if not at.annotations:
             dialog.message_dialog(_("There are no annotations of type %s") % self.controller.get_title(at))
@@ -1039,8 +1038,8 @@ class TranscriptionEdit(AdhocView):
             return True
 
         type_selection=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a), self.controller.get_element_color(a)) for a in ats],
-                                                   preselect=self.imported_type,
-                                                   callback=handle_new_type_selection)
+                                                   callback=handle_new_type_selection,
+                                                   preselect=self.controller.package.get_element_by_id(self.options['annotation-type-id']))
 
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Select type") + " "), expand=False)
@@ -1132,6 +1131,7 @@ class TranscriptionEdit(AdhocView):
         d.destroy()
 
         if at is not None:
+            self.options['annotation-type-id'] = at.id
             ti=TranscriptionImporter(package=self.controller.package,
                                      controller=self.controller,
                                      defaulttype=at,
