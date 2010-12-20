@@ -10,8 +10,6 @@
 
 * when deleting elements, remove their ids from idgenerator cache (else issues in package merge)
 
-* use dh_pysupport instead of python-central
-
 * Update default-fps value when data is available from player
 
 * feature extraction: check against filename encoding
