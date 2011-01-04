@@ -21,7 +21,7 @@ advene (0.45) unstable; urgency=low
     * The comment editor proposes multiple presentation modalities for
       dragged annotation-types.
   
-  * Timeline :
+  * Timeline:
   
     * Click twice on an annotation will not start playing anymore. This
       caused confusion with double clicks to edit.
