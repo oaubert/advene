@@ -1503,7 +1503,7 @@ class AdveneController(object):
         # Shorten the first one.
         self.notify('EditSessionStart', element=annotation, immediate=True)
         annotation.fragment.end = position
-        self.notify("AnnotationEditEnd", annotation=annotation, comment="Duplicate annotation")
+        self.notify("AnnotationEditEnd", annotation=annotation, comment="Split annotation")
         self.notify('EditSessionEnd', element=annotation)
 
         # Shorten the second one
@@ -1513,7 +1513,7 @@ class AdveneController(object):
         an.author=config.data.userid
         an.content.data=annotation.content.data
         an.setDate(self.get_timestamp())
-        self.notify("AnnotationCreate", annotation=an, comment="Duplicate annotation")
+        self.notify("AnnotationCreate", annotation=an, comment="Split annotation")
         return an
 
     def merge_annotations(self, s, d, extend_bounds=False):
