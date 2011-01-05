@@ -32,7 +32,7 @@ def register(controller=None):
     controller.register_importer(TTLImporter)
     return True
 
-type_re = re.compile('\[\]\s+a\s+:(\w+)')
+type_re = re.compile('\s+a\s+:(\w+)')
 prop_re = re.compile(':has(\w+)\s+(.+)')
 num_re = re.compile('^\d+$')
 
