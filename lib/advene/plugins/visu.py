@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 
-name="TTL importer"
+name="TurTLe (RDF) importer"
 
 from gettext import gettext as _
 
@@ -36,9 +36,9 @@ type_re = re.compile('\s+a\s+:(\w+)')
 prop_re = re.compile(':has(\w+)\s+(.+)')
 num_re = re.compile('^\d+$')
 
-default_duration = 10000
+default_duration = 1000
 class TTLImporter(GenericImporter):
-    name = _("TurTLe importer")
+    name = _("TurTLe (RDF) importer")
 
     def can_handle(fname):
         """Return a score between 0 and 100.
@@ -54,10 +54,10 @@ class TTLImporter(GenericImporter):
         f=open(filename, 'r')
         if self.package is None:
             self.init_package(filename=filename, schemaid='traces', annotationtypeid=None)
-        at = self.ensure_new_type('visu')
+        self.model = None
+        at = self.ensure_new_type('trace')
         at.mimetype='application/x-advene-structured'
-        at.author='Visu'
-        at.title='Visu trace'
+        at.title='Trace'
         at.setMetaData(config.data.namespace, "representation", "here/content/parsed/type")
         self.convert(self.iterator(f))
         self.progress(1.0)
@@ -71,6 +71,12 @@ class TTLImporter(GenericImporter):
         data = ''
         for l in fd:
             l=unicode(l.strip().rstrip(";").strip(), 'latin1')
+            if self.model is None:
+                if '/modelLDT/' in l:
+                    self.model = 'ldt'
+                elif '/visu/' in l:
+                    self.model = 'visu'
+
             m=type_re.search(l)
             if m:
                 item = { 'type': m.group(1) }
@@ -111,12 +117,15 @@ class TTLImporter(GenericImporter):
                 progress += .05
 
                 if start_time == -1:
-                    if item['type'] == 'RecordFilename':
-                        start_time = item['begin']
+                    if self.model == 'visu':
+                        if item['type'] == 'RecordFilename':
+                            start_time = item['begin'] / 1000
+                    else:
+                        start_time = item['begin'] / 1000
                     begin = 0
                     end = default_duration
                 else:
-                    begin = item['begin'] - start_time
+                    begin = (item['begin'] / 1000) - start_time
                     #end = item['end'] - start_time
                     end = begin + default_duration
 
