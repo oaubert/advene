@@ -42,10 +42,11 @@ def register(controller):
     else:
         controller.log(_("Cannot register montage renderer: Gnonlin plugins are not present."))
 
-CAPS_VIDEO_STRING = 'video/x-raw-yuv'
-CAPS_VIDEO = gst.caps_from_string(CAPS_VIDEO_STRING)
-CAPS_AUDIO_STRING = 'audio/x-raw-int;audio/x-raw-float'
-CAPS_AUDIO = gst.caps_from_string(CAPS_AUDIO_STRING)
+if gst is not None:
+    CAPS_VIDEO_STRING = 'video/x-raw-yuv'
+    CAPS_VIDEO = gst.caps_from_string(CAPS_VIDEO_STRING)
+    CAPS_AUDIO_STRING = 'audio/x-raw-int;audio/x-raw-float'
+    CAPS_AUDIO = gst.caps_from_string(CAPS_AUDIO_STRING)
 
 class MontageRenderer(object):
     def __init__(self, controller, elements=None):
