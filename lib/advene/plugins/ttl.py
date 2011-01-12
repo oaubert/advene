@@ -119,13 +119,13 @@ class TTLImporter(GenericImporter):
                 if start_time == -1:
                     if self.model == 'visu':
                         if item['type'] == 'RecordFilename':
-                            start_time = item['begin'] / 1000
+                            start_time = item['begin']
                     else:
-                        start_time = item['begin'] / 1000
+                        start_time = item['begin']
                     begin = 0
                     end = default_duration
                 else:
-                    begin = (item['begin'] / 1000) - start_time
+                    begin = item['begin'] - start_time
                     #end = item['end'] - start_time
                     end = begin + default_duration
 
