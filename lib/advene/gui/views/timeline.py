@@ -33,7 +33,7 @@ from advene.model.schema import AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.gui.views import AdhocView
 import advene.gui.edit.elements
-from advene.gui.util import png_to_pixbuf
+from advene.gui.util import png_to_pixbuf, enable_drag_source
 from advene.gui.util import decode_drop_parameters
 
 from advene.gui.views.annotationdisplay import AnnotationDisplay
@@ -1849,19 +1849,7 @@ class TimeLine(AdhocView):
             return False
         b.connect('focus-in-event', focus_in)
 
-        # The button can generate drags
         b.connect('drag-begin', self.annotation_drag_begin)
-
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['annotation']
-                          + config.data.drag_type['uri-list']
-                          + config.data.drag_type['text-plain']
-                          + config.data.drag_type['TEXT']
-                          + config.data.drag_type['STRING']
-                          + config.data.drag_type['timestamp']
-                          + config.data.drag_type['tag']
-                          ,
-                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_ASK )
         # The button can receive drops (to create relations)
         b.connect('drag-data-received', self.annotation_drag_received)
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
