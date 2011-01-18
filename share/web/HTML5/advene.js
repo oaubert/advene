@@ -1043,7 +1043,7 @@ $.widget("ui.video", {
             }
 
             $("body").append("<div class='player_container' style='position:relative; overflow:visible; '>" +
-                             "<video  style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
+                             "<video preload='auto' autoplay='true' style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
                              "</video></div>");
 
             playerOptions =  { title:'Advene main player',
@@ -1187,7 +1187,7 @@ $.widget("ui.video", {
                                 {
                                     'class': ' ui-corner-all sampleContainer',
                                     'src': videoURL,
-                                    'poster': 'resources/HTML5/advene_logo.png'
+                                    'poster': 'resources/HTML5/advene_logo.png',
                                 }
                                )
                     .css('position', 'absolute')
