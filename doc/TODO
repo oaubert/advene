@@ -1,3 +1,7 @@
+* advene.js:  adapt behaviour (modify video url, display warning) based on jquery.browser
+
+* advene.js: generate <video> <source...> with .x264 + .ogg references
+
 * online video URLs: use quvi
 
 * Shortcuts FCP: cf mail YP 2010/12/14
