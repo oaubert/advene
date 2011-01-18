@@ -450,13 +450,13 @@ def contextual_drag_begin(widget, context, element, controller):
     w.show_all()
     widget._icon=w
     context.set_icon_widget(w, 0, 0)
-    return True
+    return False
 
 def contextual_drag_end(widget, context):
-    if hasattr(widget, '_icon'):
+    if hasattr(widget, '_icon') and widget._icon:
         widget._icon.destroy()
         widget._icon=None
-    return True
+    return False
 
 def enable_drag_source(widget, element, controller):
     """Initialize support for DND from widget.
