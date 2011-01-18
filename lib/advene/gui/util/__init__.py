@@ -377,6 +377,14 @@ def contextual_drag_begin(widget, context, element, controller):
         element=element()
     context._element=element
 
+    if hasattr(widget, '_drag_begin'):
+        if widget._drag_begin(widget, context):
+            return False
+
+    # drag_set_icon_cursor does not work on native Gtk on MacOS X
+    if config.data.os == 'darwin' and not os.environ.get('DISPLAY'):
+        return False
+
     w=gtk.Window(gtk.WINDOW_POPUP)
     w.set_decorated(False)
 
