@@ -331,6 +331,15 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
     """
     typ=config.data.target_type
     el = context._element
+    # FIXME: think about the generalisation of the notion of container
+    # selection (for timestamp lists for instance)
+    try:
+        widgets = widget.container.get_selected_annotation_widgets()
+        if not widget in widgets:
+            widgets = None
+    except AttributeError:
+        widgets=None        
+
 
     d={ typ['annotation']: Annotation,
         typ['annotation-type']: AnnotationType,
@@ -343,7 +352,10 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         # Directly pass URIs for Annotation, types and views
         if not isinstance(el, d[targetType]):
             return False
-        selection.set(selection.target, 8, el.uri.encode('utf8'))
+        if widgets:
+            selection.set(selection.target, 8, "\n".join( w.annotation.uri for w in widgets ).encode('utf8'))
+        else:
+            selection.set(selection.target, 8, el.uri.encode('utf8'))
         return True
     elif targetType == typ['adhoc-view']:
         if helper.get_view_type(el) != 'adhoc':
@@ -351,12 +363,15 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         selection.set(selection.target, 8, encode_drop_parameters(id=el.id))
         return True
     elif targetType == typ['uri-list']:
-        try:
-            ctx=controller.build_context(here=el)
-            uri=ctx.evaluateValue('here/absolute_url')
-        except:
-            uri="No URI for " + unicode(el)
-        selection.set(selection.target, 8, uri.encode('utf8'))
+        
+        if widgets:
+            selection.set(selection.target, 8, "\n".join( controller.build_context(here=w.annotation.uri).evaluateValue('here/absolute_url') for w in widgets ).encode('utf8'))
+        else:
+            try:
+                uri=controller.build_context(here=el).evaluateValue('here/absolute_url')
+            except:
+                uri="No URI for " + unicode(el)
+            selection.set(selection.target, 8, uri.encode('utf8'))
     elif targetType == typ['timestamp']:
         if isinstance(el, (int, long)):
             selection.set(selection.target, 8, encode_drop_parameters(timestamp=el))

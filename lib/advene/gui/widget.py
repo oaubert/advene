@@ -256,14 +256,8 @@ class AnnotationWidget(GenericColorButtonWidget):
         GenericColorButtonWidget.__init__(self, element=annotation, container=container)
         self.connect('key-press-event', self.keypress, self.annotation)
         self.connect('enter-notify-event', lambda b, e: b.grab_focus() and True)
-        self.connect('drag-data-get', self.drag_sent)
-        # drag_set_icon_cursor does not work on native Gtk on MacOS X
-        if not (config.data.os == 'darwin' and not os.environ.get('DISPLAY')):
-            self.connect('drag-begin', self._drag_begin)
-            self.connect('drag-end', self._drag_end)
         # The widget can generate drags
-        self.drag_source_set(gtk.gdk.BUTTON1_MASK, get_target_types(annotation),
-                             gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
+        enable_drag_source(self, annotation, container.controller)
         self.no_image_pixbuf=None
 
     def set_fraction_marker(self, f):
@@ -344,42 +338,9 @@ class AnnotationWidget(GenericColorButtonWidget):
         context.set_icon_widget(w, 0, 0)
         return True
 
-    def _drag_end(self, widget, context):
-        widget._icon.destroy()
-        widget._icon=None
-        return True
-
     def set_active(self, b):
         self.active=b
         self.update_widget()
-
-    def drag_sent(self, widget, context, selection, targetType, eventTime):
-        """Handle the drag-sent event.
-        """
-        if targetType == config.data.target_type['annotation']:
-            try:
-                widgets=self.container.get_selected_annotation_widgets()
-                if not widget in widgets:
-                    widgets=None
-            except AttributeError:
-                widgets=None
-            if not widgets:
-                widgets=[ widget ]
-            selection.set(selection.target, 8, "\n".join( w.annotation.uri for w in widgets ).encode('utf8'))
-        elif targetType == config.data.target_type['uri-list']:
-            c=self.controller.build_context(here=widget.annotation)
-            uri=c.evaluateValue('here/absolute_url')
-            selection.set(selection.target, 8, uri.encode('utf8'))
-        elif (targetType == config.data.target_type['text-plain']
-              or targetType == config.data.target_type['TEXT']
-              or targetType == config.data.target_type['STRING']):
-            selection.set(selection.target, 8, widget.annotation.content.data.encode('utf8'))
-        elif targetType == config.data.target_type['timestamp']:
-            selection.set(selection.target, 8, encode_drop_parameters(timestamp=widget.annotation.fragment.begin,
-                                                                      comment=self.controller.get_title(widget.annotation)))
-        else:
-            return False
-        return True
 
     def keypress(self, widget, event, annotation):
         """Handle the key-press event.
