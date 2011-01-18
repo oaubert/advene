@@ -52,7 +52,7 @@ except ImportError:
 import advene.core.config as config
 from advene.core.imagecache import ImageCache
 
-from advene.gui.util import png_to_pixbuf, enable_drag_source, name2color
+from advene.gui.util import png_to_pixbuf, enable_drag_source, name2color, get_target_types
 from advene.gui.util import encode_drop_parameters, get_color_style
 import advene.util.helper as helper
 from advene.model.annotation import Annotation
@@ -262,15 +262,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             self.connect('drag-begin', self._drag_begin)
             self.connect('drag-end', self._drag_end)
         # The widget can generate drags
-        self.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                             config.data.drag_type['annotation']
-                             + config.data.drag_type['uri-list']
-                             + config.data.drag_type['text-plain']
-                             + config.data.drag_type['TEXT']
-                             + config.data.drag_type['STRING']
-                             + config.data.drag_type['timestamp']
-                             + config.data.drag_type['tag']
-                             ,
+        self.drag_source_set(gtk.gdk.BUTTON1_MASK, get_target_types(annotation),
                              gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.no_image_pixbuf=None
 
