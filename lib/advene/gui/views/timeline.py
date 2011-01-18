@@ -1126,14 +1126,6 @@ class TimeLine(AdhocView):
             print "Unknown target type for drop: %d" % targetType
         return True
 
-    def type_drag_sent(self, widget, context, selection, targetType, eventTime):
-        #print "drag_sent event from %s" % widget.annotation.content.data
-        if targetType == config.data.target_type['annotation-type']:
-            selection.set(selection.target, 8, widget.annotationtype.uri.encode('utf8'))
-        else:
-            print "Unknown target type for drag: %d" % targetType
-        return True
-
     def move_or_copy_annotations(self, sources, dest, position=None, action=gtk.gdk.ACTION_ASK):
         """Display a popup menu to move or copy the sources annotation to the dest annotation type.
 
@@ -2891,9 +2883,7 @@ class TimeLine(AdhocView):
                             config.data.drag_type['color'],
                             gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
             # The button can generate drags (to change annotation type order)
-            b.connect('drag-data-get', self.type_drag_sent)
-            b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                              config.data.drag_type['annotation-type'], gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK)
+            enable_drag_source(b, t, self.controller)
 
             height=max (height, self.layer_position[t] + 3 * self.button_height)
 
