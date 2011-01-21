@@ -53,12 +53,12 @@ elif sys.platform == 'darwin':
                 g=None
 else:
     try:
-        l=ctypes.CDLL('librsvg-2.so')
-        g=ctypes.CDLL('libgobject-2.0.so')
-    except OSError:
-        # Try numbered versions.
+        # First try numbered versions.
         l=ctypes.CDLL('librsvg-2.so.2')
         g=ctypes.CDLL('libgobject-2.0.so.0')
+    except OSError:
+        l=ctypes.CDLL('librsvg-2.so')
+        g=ctypes.CDLL('libgobject-2.0.so')
 
 if g is not None:
     g.g_type_init()
