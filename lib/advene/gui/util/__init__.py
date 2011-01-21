@@ -289,30 +289,30 @@ def decode_drop_parameters(data):
 def get_target_types(el):
     """Return DND target types for element.
     """
+    targets = []
     if isinstance(el, Annotation):
-        targets= (config.data.drag_type['annotation']
-                  + config.data.drag_type['timestamp']
-                  + config.data.drag_type['tag'])
+        targets.extend(config.data.drag_type['annotation']
+                       + config.data.drag_type['timestamp']
+                       + config.data.drag_type['tag'])
     elif isinstance(el, Relation):
-        targets= config.data.drag_type['relation']
+        targets.extend(config.data.drag_type['relation'])
     elif isinstance(el, View):
         if helper.get_view_type(el) == 'adhoc':
-            targets=config.data.drag_type['adhoc-view']
+            targets.extend(config.data.drag_type['adhoc-view'])
         else:
-            targets=config.data.drag_type['view']
+            targets.extend(config.data.drag_type['view'])
     elif isinstance(el, AnnotationType):
-        targets=config.data.drag_type['annotation-type']
+        targets.extend(config.data.drag_type['annotation-type'])
     elif isinstance(el, RelationType):
-        targets=config.data.drag_type['relation-type']
+        targets.extend(config.data.drag_type['relation-type'])
     elif isinstance(el, Query):
-        targets=config.data.drag_type['query']
+        targets.extend(config.data.drag_type['query'])
     elif isinstance(el, Schema):
-        targets=config.data.drag_type['schema']
+        targets.extend(config.data.drag_type['schema'])
     elif isinstance(el, (int, long)):
-        targets=config.data.drag_type['timestamp']
+        targets.extend(config.data.drag_type['timestamp'])
     # FIXME: Resource
-    else:
-        targets=[]
+
     targets.extend(config.data.drag_type['uri-list']
                    + config.data.drag_type['text-plain']
                    + config.data.drag_type['TEXT']
