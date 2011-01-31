@@ -236,7 +236,7 @@ def unaccent(t):
     for c in t:
         if not extended_valid_re.match(c):
             # Try to normalize
-            m=normalized_re.search(unicodedata.name(c))
+            m=normalized_re.search(unicodedata.name(c), ' ')
             if m:
                 c=m.group(2)
                 if m.group(1) == 'SMALL':
