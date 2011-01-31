@@ -84,6 +84,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         else:
             self.controller=None
         self.set_events(gtk.gdk.POINTER_MOTION_MASK |
+                        gtk.gdk.POINTER_MOTION_HINT_MASK |
                         gtk.gdk.BUTTON_PRESS_MASK |
                         gtk.gdk.BUTTON_RELEASE_MASK |
                         gtk.gdk.BUTTON1_MOTION_MASK |
