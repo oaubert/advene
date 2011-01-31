@@ -234,6 +234,9 @@ class AdveneGUI(object):
 
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
+        # The KeyboardInput event has a 'keyname' parameter ("F1" to "F12")
+        # available through the request/keyname TALES expression
+        self.controller.register_event('KeyboardInput', _("Input from the keyboard (function keys)"))
 
         # FIXME: we should use gtk.UIManager 
         menu_definition=(
@@ -1787,6 +1790,10 @@ class AdveneGUI(object):
     def player_set_fraction(self, f):
         self.controller.update_status("set", self.controller.create_position(long(self.controller.cached_duration * f)))
 
+    def function_key(self, event):
+        if gtk.keysyms.F1 <= event.keyval <= gtk.keysyms.F12:
+            self.controller.notify('KeyboardInput', request={ 'keyname': gtk.gdk.keyval_name(event.keyval) })
+
     control_key_shortcuts={
         gtk.keysyms.Tab: player_play_pause,
         gtk.keysyms.space: player_play_pause,
@@ -1821,6 +1828,20 @@ class AdveneGUI(object):
         gtk.keysyms.KP_Home: player_home,
         gtk.keysyms.KP_End: player_end,
         gtk.keysyms.KP_Insert: player_create_bookmark,
+
+        # Function keys
+        gtk.keysyms.F1:   function_key,
+        gtk.keysyms.F2:   function_key,
+        gtk.keysyms.F3:   function_key,
+        gtk.keysyms.F4:   function_key,
+        gtk.keysyms.F5:   function_key,
+        gtk.keysyms.F6:   function_key,
+        gtk.keysyms.F7:   function_key,
+        gtk.keysyms.F8:   function_key,
+        gtk.keysyms.F9:   function_key,
+        gtk.keysyms.F10:  function_key,
+        gtk.keysyms.F11:  function_key,
+        gtk.keysyms.F12:  function_key,
         }
 
     fullscreen_key_shortcuts = {
