@@ -678,6 +678,10 @@ class AdveneGUI(object):
         # Internal rule used for annotation loop
         self.annotation_loop_rule=None
 
+        # Edited data in fullscreen mode
+        self.edited_annotation_text = None
+        self.edited_annotation_begin = None
+
         # List of active annotation views (timeline, tree, ...)
         self.adhoc_views = []
         # List of active element edit popups
@@ -1908,6 +1912,68 @@ class AdveneGUI(object):
         """
         c=self.controller
         p=self.controller.player
+        if event.keyval == gtk.keysyms.Return:
+            # FIXME: reset data (validate or abort?) when leaving fullscreen
+            if self.edited_annotation_text is None:
+                # Not yet editing, entering edit mode
+                self.edited_annotation_text = ''
+                self.edited_annotation_begin = p.current_position_value
+                p.display_text(self.edited_annotation_text + '_', p.current_position_value, p.current_position_value + 5000)
+            else:
+                # Was editing. Creating annotation
+                at = c.package.get_element_by_id('annotation')
+                if at is None or not isinstance(at, AnnotationType):
+                    # Non-existent. This code path should be pretty unfrequent.
+                    if len(c.package.annotation_types):
+                        # Use the first defined type
+                        at = c.package.annotation_types[0]
+                    else:
+                        # No type. We must create one.
+                        sc = c.package.get_element_by_id('basic-schema')
+                        if sc is None or not isinstance(sc, Schema):
+                            if len(c.package.schemas):
+                                sc = c.package.schemas[0]
+                            else:
+                                # Do not bother
+                                self.log(_("Cannot create annotation. There is no schema to put it in."))
+                                return True
+                        if at is None:
+                            ident = 'annotation'
+                        else:
+                            ident = 'default_annotation_type'
+                        at = sc.createAnnotationType(ident=ident)
+                        at.author = config.data.userid
+                        at.date = self.controller.get_timestamp()
+                        at.title = _("Default annotation type")
+                        at.mimetype = 'text/plain'
+                        at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
+                        at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+                        at._fieldnames = []
+                        sc.annotationTypes.append(at)
+                        self.controller.notify('AnnotationTypeCreate', annotationtype=at)
+                c.create_annotation(self.edited_annotation_begin, at,
+                                    p.current_position_value - self.edited_annotation_begin,
+                                    self.edited_annotation_text)
+                self.edited_annotation_text = None
+                self.edited_annotation_begin = None
+                p.display_text(_('Annotation created'), p.current_position_value, p.current_position_value + 1000)
+            return True
+        elif gtk.gdk.keyval_to_unicode(event.keyval):
+            c = unicode(gtk.gdk.keyval_name(event.keyval))
+            if len(c) == 1 and (c.isalnum() or c.isspace()):
+                if self.edited_annotation_text is None:
+                    # Not yet editing, entering edit mode
+                    self.edited_annotation_text = ''
+                    self.edited_annotation_begin = p.current_position_value
+                self.edited_annotation_text += c
+                # Display feedback
+                p.display_text(self.edited_annotation_text + '_', p.current_position_value, p.current_position_value + 10000)
+                return True
+        elif event.keyval == gtk.keysyms.BackSpace and self.edited_annotation_text is not None:
+            # Delete last char
+            self.edited_annotation_text = self.edited_annotation_text[:-1]
+            p.display_text(self.edited_annotation_text + '_', p.current_position_value, p.current_position_value + 10000)
+            return True
         if event.keyval in self.fullscreen_key_shortcuts:
             self.fullscreen_key_shortcuts[event.keyval](self, event)
             return True
