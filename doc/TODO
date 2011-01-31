@@ -10,8 +10,6 @@
 
 * Remove embedded ElementTree now that python2.5 is required
 
-* DND issues in latest win32 versions (gtk issue)
-
 * when deleting elements, remove their ids from idgenerator cache (else issues in package merge)
 
 * Update default-fps value when data is available from player
@@ -2763,6 +2761,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * export JSON -> generated 'parsed' field
 
 * fullscreen annotation mode: space behaviour depends on mode (play or annotation). Enter annotation mode on alphanumeric entry or Return. Exit on Return. Overlay annotation through text. Issue: which type ?
+
+* DND issues in latest win32 versions (gtk issue)
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"

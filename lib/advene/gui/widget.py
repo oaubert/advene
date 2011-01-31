@@ -268,6 +268,10 @@ class AnnotationWidget(GenericColorButtonWidget):
     fraction_marker = property(get_fraction_marker, set_fraction_marker)
 
     def _drag_begin(self, widget, context):
+        # set_icon_widget is broken ATM in recent gtk on win32.
+        if config.data.os == 'win32':
+            return GenericColorButtonWidget._drag_begin(self, widget, context)
+
         try:
             widgets=self.container.get_selected_annotation_widgets()
             if not widget in widgets:
@@ -461,7 +465,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             for v in l:
                 context.line_to(int(c), int(height * v))
                 c += w
-                context.line_to(int(c), int(height * v))                
+                context.line_to(int(c), int(height * v))
             context.line_to(int(c), height)
             context.fill()
             return
@@ -782,8 +786,8 @@ class RelationRepresentation(gtk.Button):
 
     def refresh(self):
         l=self.get_children()[0]
-        t=u'%s %s %s' % (self.arrow[self.direction], 
-                         self.controller.get_title(self.relation), 
+        t=u'%s %s %s' % (self.arrow[self.direction],
+                         self.controller.get_title(self.relation),
                          self.arrow[self.direction])
         color=self.controller.get_element_color(self.relation)
         if color:
@@ -898,7 +902,7 @@ class TimestampRepresentation(gtk.Button):
             self.label.set_style(style)
             self._bgcolor = color
     bgcolor = property(get_bgcolor, set_bgcolor)
-     
+
     def set_width(self, w):
         self._width = w
         self.refresh()

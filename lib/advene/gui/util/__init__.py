@@ -211,7 +211,7 @@ def get_color_style(w, background=None, foreground=None):
         style.text[state]=f
         #style.base[state]=white
     return style
-    
+
 arrow_up_xpm="""13 16 2 1
        c None
 .      c #FF0000
@@ -338,7 +338,7 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         if not widget in widgets:
             widgets = None
     except AttributeError:
-        widgets=None        
+        widgets=None
 
 
     d={ typ['annotation']: Annotation,
@@ -363,7 +363,7 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         selection.set(selection.target, 8, encode_drop_parameters(id=el.id))
         return True
     elif targetType == typ['uri-list']:
-        
+
         if widgets:
             selection.set(selection.target, 8, "\n".join( controller.build_context(here=w.annotation.uri).evaluateValue('here/absolute_url') for w in widgets ).encode('utf8'))
         else:
@@ -396,8 +396,11 @@ def contextual_drag_begin(widget, context, element, controller):
         if widget._drag_begin(widget, context):
             return False
 
-    # drag_set_icon_cursor does not work on native Gtk on MacOS X
+    # set_icon_widget does not work on native Gtk on MacOS X
     if config.data.os == 'darwin' and not os.environ.get('DISPLAY'):
+        return False
+    # set_icon_widget is broken ATM in recent gtk on win32.
+    elif config.data.os == 'win32':
         return False
 
     w=gtk.Window(gtk.WINDOW_POPUP)
@@ -416,7 +419,7 @@ def contextual_drag_begin(widget, context, element, controller):
             color='white'
         l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (color, t.replace('<', '&lt;')))
         return l
-    
+
     cache=controller.package.imagecache
 
     if isinstance(element, (long, int)):
@@ -508,7 +511,7 @@ def gdk2intrgba(color, alpha=0xff):
          | ( (color.green >> 8) << 16) \
          | ( (color.blue >> 8) <<  8) \
          | alpha
-         
+
 def gdk2intrgb(color):
     """Convert a gdk.Color to int RGB.
     """
