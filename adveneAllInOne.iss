@@ -11,24 +11,29 @@ Source: share\pixmaps\advene.ico; DestDir: {app}; DestName: advene.ico; Componen
 Source: c:\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs; Components: advene
 Source: examples\*v11.azp; DestDir: {app}\examples; Components: advene
 Source: c:\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs; Components: advene
+Source: c:\gtk\lib\gdk-pixbuf-2.0\*; DestDir: {app}\lib\gdk-pixbuf-2.0; Flags: recursesubdirs; Components: advene
 Source: c:\gtk\share\locale\fr\*; DestDir: {app}\lib\locale\fr; Flags: recursesubdirs; Components: advene
 ;Source: c:\gtk\lib\pango\*; DestDir: {app}\lib\pango; Flags: recursesubdirs     gtk < 2.16.6
 Source: c:\gtk\share\themes\*; DestDir: {app}\share\themes; Flags: recursesubdirs; Components: advene
-;Source: c:\gtk\bin\libpng12.dll; DestDir: {app}  gtk < 2.16.6
-Source: c:\gtk\bin\libpng12-0.dll; DestDir: {app}; Components: advene
-;Source: c:\gtk\bin\libpng14-14.dll; DestDir: {app}; Components: advene    gtk2.20
 Source: c:\gtk\bin\libpangoft2-1.0-0.dll; DestDir: {app}; Components: advene
-;Source: c:\gtk\bin\libtiff3.dll; DestDir: {app}  gtk < 2.16.6
-Source: c:\gtk\bin\libtiff-3.dll; DestDir: {app}; Components: advene
 ;Source: c:\gtk\bin\jpeg62.dll; DestDir: {app}    gtk < 2.16.6
-Source: c:\gtk\bin\libjpeg-7.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\bzip2.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\iconv.dll; DestDir: {app}; Components: advene
+;uniquement pour le probleme du svg loader
+Source: c:\gtk\bin\libiconv-2.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\z.dll; DestDir: {app}; Components: advene
+;fin uniquement pour le probleme du svg loader
+Source: c:\gtk\bin\libgio-2.0-0.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\libxml2-2.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\librsvg-2-2.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\libcroco-0.6-3.dll; DestDir: {app}; Components: advene
 Source: c:\gtk\bin\libgsf-1-114.dll; DestDir: {app}; Components: advene
-Source: c:\gtk\bin\bzip2.dll; DestDir: {app}; Components: advene
-Source: c:\gtk\bin\libgio-2.0-0.dll; DestDir: {app}; Components: advene
-Source: c:\gtk\bin\libxml2-2.dll; DestDir: {app}; Components: advene
-Source: c:\gtk\bin\iconv.dll; DestDir: {app}; Components: advene
+;Source: c:\gtk\bin\libjpeg-7.dll; DestDir: {app}; Components: advene
+Source: c:\gtk\bin\libjpeg-8.dll; DestDir: {app}; Components: advene
+;Source: c:\gtk\bin\libpng12-0.dll; DestDir: {app}; Components: advene gtk<2.20
+Source: c:\gtk\bin\libpng14-14.dll; DestDir: {app}; Components: advene
+;Source: c:\gtk\bin\libtiff3.dll; DestDir: {app}  gtk < 2.16.6
+Source: c:\gtk\bin\libtiff-3.dll; DestDir: {app}; Components: advene
 Source: Brl\*; DestDir: {app}; Components: advene
 
 ;Source: c:\cygwin\usr\local\bin\libgoocanvas3.dll; DestDir: {app}    goocanvas0.10
@@ -45,6 +50,7 @@ Source: c:\Program Files (x86)\VLC\libvlc.dll; DestDir: {app}; Components: vlc
 Source: c:\Program Files (x86)\VLC\plugins\*; DestDir: {app}\vlcplugins; Components: vlc
 
 Source: gst\*; DestDir: {app}\gst; Flags: recursesubdirs; Components: gst
+Source: gst_bindings\libgstpython-v2.6.dll; Destdir: {app}; Components: gst
 
 ;To be able to detect if advene is already running
 Source: psvince.dll; Flags: dontcopy
@@ -79,19 +85,19 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.44
+AppVerName=Advene 0.46
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.44
+VersionInfoVersion=0.46
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
-LicenseFile=debian\copyright
+LicenseFile=doc\copyright
 DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=CHANGES.txt
-OutputBaseFilename=setup_advene_0.44_vlc_1.0.3_gstreamer_0.10.5
-VersionInfoTextVersion=0.44
+OutputBaseFilename=setup_advene_0.46r7211_vlc_1.0.3_gstreamer_0.10.7beta2
+VersionInfoTextVersion=0.46
 ChangesAssociations=yes
 
 [Registry]
