@@ -4827,12 +4827,11 @@ class AdveneGUI(object):
             i.process_file(filename)
             if filename.endswith('.txt'):
                 # Intermediary import. Fix some details.
-                at=i.annotationtype
+                at=i.defaulttype
                 at.mimetype='application/x-advene-structured'
                 at.setMetaData(config.data.namespace, "representation", 'here/content/parsed/num')
                 at.title=_("Incomplete shots")
             self.controller.package._modified = True
-            self.controller.notify('AnnotationTypeCreate', annotationtype=i.annotationtype)
             self.controller.notify('PackageLoad', package=self.controller.package)
             msg=_("Detected %s shots") % i.statistics['annotation']
             dialog.message_dialog(msg, modal=False)
@@ -4922,17 +4921,19 @@ class AdveneGUI(object):
                    '-i', gobject.filename_from_utf8(movie.encode('utf8')),
                    '-o', gobject.filename_from_utf8(pb._tempdir.encode('utf8')),
                    '-s', str(pb._sensitivity.get_value_as_int()) ]
-            flags = 0
+
             if config.data.os == 'win32':
-                flags = win32process.CREATE_NO_WINDOW
+                import win32process
+                kw = { 'creationflags': win32process.CREATE_NO_WINDOW }
+            else:
+                kw = { 'preexec_fn': subprocess_setup }
             try:
                 pb._shots=subprocess.Popen( argv,
                                             bufsize=0,
                                             shell=False,
                                             stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE,
-                                            creationflags = flags,
-                                            preexec_fn=subprocess_setup)
+                                            **kw )
             except OSError, e:
                 do_cancel(None, pb)
                 dialog.message_dialog(_("Could not run shotdetect: %s") % unicode(e), modal=False)

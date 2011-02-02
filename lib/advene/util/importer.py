@@ -64,8 +64,6 @@ import signal
 import threading
 
 import advene.core.config as config
-if config.data.os == 'win32':
-    import win32process
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation
@@ -472,9 +470,11 @@ class ExternalAppImporter(GenericImporter):
 
         argv = [ self.app_path ] + self.get_process_args(filename)
 
-        flags = 0
         if config.data.os == 'win32':
-            flags = win32process.CREATE_NO_WINDOW
+            import win32process
+            kw = { 'creationflags': win32process.CREATE_NO_WINDOW }
+        else:
+            kw = { 'preexec_fn': subprocess_setup }
 
         try:
             self.process = subprocess.Popen( argv,
@@ -482,8 +482,7 @@ class ExternalAppImporter(GenericImporter):
                                              shell=False,
                                              stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE,
-                                             creationflags = flags,
-                                             preexec_fn=subprocess_setup )
+                                             **kw )
         except OSError, e:
             self.cleanup()
             msg = unicode(e.args)
