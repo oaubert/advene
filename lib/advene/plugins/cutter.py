@@ -54,6 +54,7 @@ class CutterImporter(GenericImporter):
                                      action="store", type="choice", dest="channel", choices=("both", "left", "right"), default=self.channel,
                                      help=_("Channel selection."))
 
+        self.buffer = []
         self.last_above = None
 
     def can_handle(fname):
@@ -68,37 +69,43 @@ class CutterImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def on_bus_message(self, bus, message):
-        if message.type == gst.MESSAGE_EOS:
-            self.end_callback()
+        def finalize():
+            pos = self.pipeline.query_position(gst.FORMAT_TIME)[0] / gst.MSECOND
             gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
-        elif message.type == gst.MESSAGE_STATE_CHANGED:
-            old, new, pending = message.parse_state_changed()
-            if old == gst.STATE_READY and new == gst.STATE_PAUSED:
-                # There has been a problem. Cancel.
-                self.progress(1.0, _("Problem when running detection"))
-                print "Undetermined problem when running silence detection."
-                self.end_callback()
-                gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
-            #if new == gst.STATE_NULL:
-            #    self.end_callback()
+            self.convert( {
+                    'begin': begin,
+                    'end': end,
+                    'content': 'sound',
+                    } 
+                          for begin, end in self.buffer )
+            self.end_callback()
+            return True
+        
+        if message.type == gst.MESSAGE_EOS:
+            finalize()
+        ##elif message.type == gst.MESSAGE_STATE_CHANGED:
+        ##    old, new, pending = message.parse_state_changed()
+        ##    if old == gst.STATE_READY and new == gst.STATE_PAUSED:
+        ##        # There has been a problem. Cancel.
+        ##        self.progress(1.0, _("Problem when running detection"))
+        ##        print "Undetermined problem when running silence detection."
+        ##        self.end_callback()
+        ##        gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
+        ##    #if new == gst.STATE_NULL:
+        ##    #    self.end_callback()
         elif message.structure:
             s=message.structure
             #print "MSG " + bus.get_name() + ": " + s.to_string()
             if s.get_name() == 'progress' and self.progress is not None:
-                if not self.progress(s['percent-double'] / 100, _("Detected %d segments") % self.statistics['annotation']):
-                    gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
-                    self.end_callback()
+                if not self.progress(s['percent-double'] / 100, _("Detected %d segments") % len(self.buffer)):
+                    finalize()
             elif s.get_name() == 'cutter':
                 t = s['timestamp'] / gst.MSECOND
                 if s['above']:
                     self.last_above = t
                 else:
                     if self.last_above is not None:
-                        self.convert([ {
-                                    'content': 'sound',
-                                    'begin': self.last_above,
-                                    'end': t,
-                                    } ])
+                        self.buffer.append( (self.last_above, t) )
                     else:
                         print "Error: not above without matching above"
                     self.last_above = t
@@ -123,7 +130,7 @@ class CutterImporter(GenericImporter):
         bus.connect('message', self.on_bus_message)
 
         if config.data.os == 'win32':
-            self.decoder.props.uri = 'file:' + urllib.pathname2url(os.path.abspath(unicode(filename)))
+            self.decoder.props.uri = 'file:' + urllib.pathname2url(os.path.abspath(filename))
         else:
             self.decoder.props.uri = 'file://' + os.path.abspath(unicode(filename))
         self.progress(.1, _("Starting silence detection"))
