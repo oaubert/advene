@@ -2140,6 +2140,12 @@ class AdveneWebServer:
         settings = {
             'global': {
                 'server.socket_port' : port,
+                # Should do this for ipv6:
+                #'server.socket_host' : '::',
+                # but looks like we cannot listen to both ipv4 and ipv6
+                # despite http://stackoverflow.com/questions/1555319/cherrypy-server-unavailable-from-anything-but-localhost
+                # but http://stackoverflow.com/questions/4140550/firefox-cant-establish-connection-with-localhost-while-running-a-cherrypy-tutori
+
                 #'server.socket_queue_size': 5,
                 #'server.protocol_version': "HTTP/1.0",
                 'log.screen': False,
