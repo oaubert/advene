@@ -118,7 +118,7 @@ class CutterImporter(GenericImporter):
         at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Sound segmentation with a threshold of %(threshold)d dB - channel: %(channel)s") % self.__dict__)
         
         # Build pipeline
-        self.pipeline = gst.parse_launch('uridecodebin name=decoder ! audiopanorama method=1 panorama=%d ! audioconvert ! cutter threshold-dB=%s ! progressreport silent=true update-freq=1 name=report ! fakesink' % (self.channel_mapping[self.channel], str(self.threshold)))
+        self.pipeline = gst.parse_launch('uridecodebin name=decoder ! audioconvert ! audiopanorama method=1 panorama=%d ! audioconvert ! cutter threshold-dB=%s ! progressreport silent=true update-freq=1 name=report ! fakesink' % (self.channel_mapping[self.channel], str(self.threshold)))
         self.decoder = self.pipeline.get_by_name('decoder')
         self.report = self.pipeline.get_by_name('report')
         bus = self.pipeline.get_bus()
