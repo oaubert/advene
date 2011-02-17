@@ -36,7 +36,7 @@ gobject.threads_init()
 
 import gtk
 import os
-from sys import getfilesystemencoding
+import sys
 
 if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
