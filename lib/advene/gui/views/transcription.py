@@ -261,8 +261,14 @@ class TranscriptionView(AdhocView):
         impossible=[]
         batch_id=object()
         for a in l:
-            beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
-            enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
+            m = b.get_mark("b_%s" % a.id)
+            if not m:
+                break
+            beginiter = b.get_iter_at_mark(m)
+            m = b.get_mark("e_%s" % a.id)
+            if not m:
+                break
+            enditer  = b.get_iter_at_mark(m)
             self.controller.notify('EditSessionStart', element=a, immediate=True)
             if update(a, unicode(b.get_text(beginiter, enditer))):
                 self.controller.notify("AnnotationEditEnd", annotation=a, batch=batch_id)
