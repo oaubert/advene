@@ -154,7 +154,7 @@ class SoundEnveloppeImporter(GenericImporter):
         bus.connect('message', self.on_bus_message)
 
         if config.data.os == 'win32':
-            self.decoder.props.uri = 'file:' + urllib.pathname2url(os.path.abspath(filename))
+            self.decoder.props.uri = 'file:///' + os.path.abspath(unicode(filename))
         else:
             self.decoder.props.uri = 'file://' + os.path.abspath(filename)
         self.progress(0, _("Extracting sound enveloppe"))
