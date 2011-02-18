@@ -403,6 +403,7 @@ class AdveneGUI(object):
             v.autoscroll()
             return True
         b=get_pixmap_button('logmessages.png', display_log_messages)
+        b.set_tooltip_text(_("Display application log messages"))
         b.set_relief(gtk.RELIEF_NONE)        
         self.gui.bottombar.pack_start(b, expand=False)
         b.show()
