@@ -211,7 +211,7 @@ class Differ:
             d=self.destination.get_element_by_id(s.id)
             if d is None:
                 yield ('new', s, None, lambda s, d: self.copy_view(s) )
-            if isinstance(d, type(s)):
+            elif isinstance(d, type(s)):
                 # Present. Check if it was modified
                 if s.title != d.title:
                     yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )

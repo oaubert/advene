@@ -2764,6 +2764,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * DND issues in latest win32 versions (gtk issue)
 
+* Pb when merging package with new view (double action) - see modele_analyse
+
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
 # End:
