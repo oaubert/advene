@@ -261,7 +261,12 @@ class EspeakTTSEngine(TTSEngine):
             self.language=lang
         try:
             if self.espeak_process is None:
-                self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, creationflags = CREATE_NO_WINDOW)
+                if config.data.os == 'win32':
+                    import win32process
+                    kw = { 'creationflags': win32process.CREATE_NO_WINDOW }
+                else:
+                    kw = { 'preexec_fn': subprocess_setup }
+                self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, **kw)
             self.espeak_process.stdin.write((sentence + "\n").encode(config.data.preferences['tts-encoding'], 'ignore'))
         except OSError, e:
             self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
@@ -271,6 +276,10 @@ ENGINES['espeak'] = EspeakTTSEngine
 class SAPITTSEngine(TTSEngine):
     """SAPI (win32) TTSEngine.
     """
+    # SAPI constants (from http://msdn.microsoft.com/en-us/library/aa914305.aspx):
+    SPF_ASYNC = (1 << 0)
+    SPF_PURGEBEFORESPEAK = (1 << 1)
+
     def __init__(self, controller=None):
         TTSEngine.__init__(self, controller=controller)
         self.sapi=None
@@ -290,7 +299,7 @@ class SAPITTSEngine(TTSEngine):
         if self.sapi is None:
             import win32com.client
             self.sapi=win32com.client.Dispatch("sapi.SPVoice")
-        self.sapi.Speak( sentence.encode(config.data.preferences['tts-encoding'], 'ignore') )
+        self.sapi.Speak( sentence.encode(config.data.preferences['tts-encoding'], 'ignore'), self.SPF_ASYNC | self.SPF_PURGEBEFORESPEAK )
         return True
 ENGINES['sapi'] = SAPITTSEngine
 
