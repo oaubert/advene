@@ -46,6 +46,12 @@ if config.data.os == 'win32':
         os.environ['GST_PLUGIN_PATH'] = os.path.join(config.data.path['advene'], 'gst', 'lib', 'gstreamer-0.10').encode(fsenc)
         gstpath = unicode(os.getenv('PATH', ""), fsenc)
         os.environ['PATH'] = os.pathsep.join( ( os.path.join(config.data.path['advene'], 'gst', 'bin'), gstpath) ).encode(fsenc)
+    else:
+        #even if gstpluginpath is defined, gst still may not be in path
+        gstpath = unicode(os.getenv('PATH', ""), fsenc)
+        h,t = os.path.split(ppath)
+        binpath,t = os.path.split(h) 
+        os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) ).encode(fsenc)
 
 try:
     import pygst
