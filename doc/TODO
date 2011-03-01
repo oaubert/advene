@@ -1,3 +1,5 @@
+* Empty imagecache option
+
 * Have webcherry listen on both ipv4/ipv6
 
 * advene.js:  adapt behaviour (modify video url, display warning) based on jquery.browser
