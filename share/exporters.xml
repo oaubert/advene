@@ -361,8 +361,8 @@ div.${a/id} {
         <title xmlns="http://purl.org/dc/elements/1.1/">Advene2</title>
 	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">advene2.xml</extension>
       </meta>
-      <content mime-type="application/xml">&lt;!-- Cinelab Advene XML exporter - v0.1 --&gt;
-&lt;package xmlns=&quot;http://advene.liris.cnrs.fr/ns/cinelab/0.1#&quot;
+      <content encoding="utf-8" mime-type="application/xml">&lt;!-- Cinelab Advene XML exporter - v0.2 --&gt;
+&lt;package xmlns=&quot;http://advene.org/ns/cinelab/&quot;
                 xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;
                 xmlns:adv=&quot;http://advene.liris.cnrs.fr/ns/meta/&quot;
                 xmlns:trans=&quot;http://advene.liris.cnrs.fr/ns/transition/&quot;&gt;
