@@ -252,7 +252,14 @@ class Player:
         print "gstreamer: using", sink
         print "adding ghostpad for", elements[0]
 
-        self.video_sink.add_pad(gst.GhostPad('sink', elements[0].get_pad('video_sink') or elements[0].get_pad('sink')))
+        # Note: it is crucial to make ghostpad an attribute, so that
+        # it is not garbage-collected at the end of the build_pipeline
+        # method.
+        self._video_ghostpad = gst.GhostPad('sink', elements[0].get_pad('video_sink') or elements[0].get_pad('sink'))
+        # Idem for elements
+        self._video_elements = elements
+
+        self.video_sink.add_pad(self._video_ghostpad)
 
         self.player.props.video_sink=self.video_sink
 
@@ -267,7 +274,11 @@ class Player:
             if len(elements) >= 2:
                 gst.element_link_many(*elements)
             self.player.props.audio_sink = self.audio_sink
-            self.audio_sink.add_pad(gst.GhostPad('sink', elements[0].get_pad('audio_sink') or elements[0].get_pad('sink')))
+            # Keep a ref. on elements
+            self._audio_elements = elements
+            self._audio_ghostpad = gst.GhostPad('sink', elements[0].get_pad('audio_sink') or elements[0].get_pad('sink'))
+            self.audio_sink.add_pad(self._audio_ghostpad)
+
         
         bus = self.player.get_bus()
         bus.enable_sync_message_emission()

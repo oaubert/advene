@@ -117,7 +117,7 @@ class Snapshotter(object):
         self.should_clear = False
 
         # Pipeline building
-        videobin=gst.Bin()
+        self.videobin=gst.Bin()
 
         self.player=gst.element_factory_make("playbin")
 
@@ -134,12 +134,15 @@ class Snapshotter(object):
         else:
             l=(csp, pngenc, queue, sink)
 
-        videobin.add(*l)
+        self.videobin.add(*l)
         gst.element_link_many(*l)
+        # Keep a reference on all pipeline elements, so that they are not garbage-collected
+        self._elements = l
 
-        videobin.add_pad(gst.GhostPad('sink', csp.get_pad('sink')))
+        self._ghostpad = gst.GhostPad('sink', csp.get_pad('sink'))
+        self.videobin.add_pad(self._ghostpad)
 
-        self.player.props.video_sink=videobin
+        self.player.props.video_sink=self.videobin
 
         bus=self.player.get_bus()
         bus.enable_sync_message_emission()
@@ -181,9 +184,9 @@ class Snapshotter(object):
                                    gst.SEEK_TYPE_SET, p,
                                    gst.SEEK_TYPE_NONE, 0)
         self.player.set_state(gst.STATE_PAUSED)
-        res=self.player.send_event(event)
+        res = self.player.send_event(event)
         if not res:
-            print "Error when sending event"
+            print "snapshotter: error when sending event"
         return True
 
     def enqueue(self, *l):
