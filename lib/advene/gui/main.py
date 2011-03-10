@@ -295,6 +295,7 @@ class AdveneGUI(object):
             (_("_Player"), (
                     ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code") ),
                     ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
+                    ( _("Reset ImageCache"), self.on_reset_imagecache_activate, _("Reset the ImageCache") ),
                     ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
                     ( _("Capture screenshots"), self.generate_screenshots, _("Generate screenshots for the current video") ),
                     ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds") ),
@@ -4326,6 +4327,13 @@ class AdveneGUI(object):
             self.log(_("Imagecache saved to %s") % d)
         except OSError, e:
             self.log(_("Cannot save imagecache for %(media)s: %(e)s") % locals())
+        return True
+
+    def on_reset_imagecache_activate (self, button=None, data=None):
+        valid = self.controller.package.imagecache.valid_snapshots()
+        self.controller.package.imagecache.reset()
+        for t in valid:
+            self.controller.notify('SnapshotUpdate', position=t)
         return True
 
     def on_restart_player1_activate (self, button=None, data=None):

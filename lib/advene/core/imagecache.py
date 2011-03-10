@@ -340,6 +340,12 @@ class ImageCache(dict):
                     dict.__setitem__(self, i, s)
         self._modified=False
 
+    def reset(self):
+        """Reset imagecache.
+        """
+        for pos in self.keys():
+            dict.__setitem__(self, pos, self.not_yet_available_image)
+
     def ids (self):
         """Return the list of currents ids.
         """
