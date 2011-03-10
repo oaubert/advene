@@ -1,3 +1,5 @@
+* Mac: pb when displaying menus (no border) and progressbar
+
 * Google API for Speech-to-text ?
 
 * gst element that buffers slices of data with rolling index
