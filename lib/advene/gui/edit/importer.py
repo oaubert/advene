@@ -281,7 +281,6 @@ class FileImporter(AdhocView):
         bb.pack_start(b, expand=False)
         self.convert_button=b
 
-        vbox.buttonbox=bb
         vbox.pack_start(bb, expand=False)
 
         self.update_importers()
