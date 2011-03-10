@@ -167,7 +167,7 @@ class Player:
         try:
             self.snapshotter = Snapshotter(self.snapshot_taken, width=config.data.player['snapshot-width'])
         except Exception, e:
-            print "Could not initialize snapshotter:", unicode(e).encode('utf8')
+            self.log(u"Could not initialize snapshotter:" +  unicode(e))
             self.snapshotter = None
 
         #self.snapshotter.start()
@@ -194,6 +194,11 @@ class Player:
                                                     origin=self.RelativePosition)
 
         self.position_update()
+
+    def log (self, msg):
+        """Display a message.
+        """
+        print "gstreamer:", unicode(msg).encode('utf-8')
 
     def build_pipeline(self):
         sink='xvimagesink'
@@ -249,8 +254,7 @@ class Player:
         if len(elements) >= 2:
             gst.element_link_many(*elements)
 
-        print "gstreamer: using", sink
-        print "adding ghostpad for", elements[0]
+        self.log("gstreamer: using" + sink)
 
         # Note: it is crucial to make ghostpad an attribute, so that
         # it is not garbage-collected at the end of the build_pipeline
@@ -290,7 +294,7 @@ class Player:
         if isinstance(p, Position):
             v=p.value
             if p.key != self.MediaTime:
-                print "gstreamer: unsupported key ", p.key
+                self.log("unsupported key " + p.key)
                 return 0
             if p.origin != self.AbsolutePosition:
                 v += self.current_position()
@@ -327,11 +331,8 @@ class Player:
         if uri and gst.uri_is_valid(uri):
             return True
         else:
-            print "Invalid URI", str(uri)
+            self.log(u"Invalid URI" + unicode(uri))
             return False
-
-    def log(self, *p):
-        print "gstreamer player: %s" % p
 
     def get_media_position(self, origin, key):
         return self.current_position()
@@ -439,7 +440,7 @@ class Player:
             return
         if message.startswith('<svg') or (message.startswith('<?xml') and '<svg' in message):
             if self.imageoverlay is None:
-                print "Cannot overlay SVG"
+                self.log("Cannot overlay SVG")
                 return True
             self.overlay.begin=self.position2value(begin)
             self.overlay.end=self.position2value(end)
@@ -448,7 +449,7 @@ class Player:
             return True
 
         if not self.captioner:
-            print "Cannot caption ", message.encode('utf8')
+            self.log(u"Cannot caption " + unicode(message))
             return
         self.caption.begin=self.position2value(begin)
         self.caption.end=self.position2value(end)
@@ -557,14 +558,14 @@ class Player:
             elif status == "" or status == None:
                 pass
             else:
-                print "******* Error : unknown status %s in gstreamer player" % status
+                self.log("******* Error : unknown status %s in gstreamer player" % status)
         self.position_update ()
 
     def is_active(self):
         return True
 
     def check_player(self):
-        print "check player"
+        self.log("check player")
         return True
 
     def position_update(self):
@@ -600,7 +601,7 @@ class Player:
         # See https://bugzilla.gnome.org/show_bug.cgi?id=599885
         #gtk.gdk.threads_enter()
         if xid:
-            print "Reparent", hex(xid)
+            self.log("Reparent " + hex(xid))
 
             gtk.gdk.display_get_default().sync()
         
@@ -656,13 +657,21 @@ class Player:
         if not self.check_uri():
             return
         self.rate = rate
+        try:
+            p = self.player.query_position(gst.FORMAT_TIME)[0]
+        except gst.QueryError:
+            self.log("Error in set_rate (query position)")
+            return
         event = gst.event_new_seek(self.rate, gst.FORMAT_TIME,
                                    gst.SEEK_FLAG_FLUSH,
-                                   gst.SEEK_TYPE_SET, long(self.player.query_position(gst.FORMAT_TIME)[0]),
+                                   gst.SEEK_TYPE_SET, long(p),
                                    gst.SEEK_TYPE_NONE, 0)
-        res = self.player.send_event(event)
-        if not res:
-            print "Could not set rate"
+        if event:
+            res = self.player.send_event(event)
+            if not res:
+                self.log("Could not set rate")
+        else:
+            self.log("Cannot build set_rate event")
 
     def get_rate(self):
         return self.rate
