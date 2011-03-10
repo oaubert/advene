@@ -247,12 +247,6 @@ class FileImporter(AdhocView):
         self.filename_entry.connect('changed', updated_filename)
         line.pack_start(self.filename_entry)
 
-        exp = gtk.Expander(_("Options"))
-        exp.set_expanded(False)
-        self.options_frame = gtk.VBox()
-        exp.add(self.options_frame)
-        vbox.pack_start(exp, expand=False)
-
         self.progressbar=gtk.ProgressBar()
         vbox.pack_start(self.progressbar, expand=False)
 
@@ -267,6 +261,12 @@ class FileImporter(AdhocView):
         line.pack_start(gtk.Label(_("Import filter")), expand=False)
         self.importers = dialog.list_selector_widget([], None, callback=self.update_options)
         line.pack_start(self.importers, expand=False)
+
+        exp = gtk.Expander(_("Options"))
+        exp.set_expanded(True)
+        self.options_frame = gtk.VBox()
+        exp.add(self.options_frame)
+        vbox.pack_start(exp, expand=False)
 
         bb=gtk.HButtonBox()
 
