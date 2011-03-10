@@ -1,4 +1,6 @@
-* Empty imagecache option
+* Google API for Speech-to-text ?
+
+* gst element that buffers slices of data with rolling index
 
 * Have webcherry listen on both ipv4/ipv6
 
@@ -19,8 +21,6 @@
 * feature extraction: check against filename encoding
 
 * pymecavideo: see opencv example
-
-* DS: always display player control (Play/pause) under the player
 
 * finder: in Static view/dynamic view columns, add a "+" item
 
@@ -2767,6 +2767,9 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * DND issues in latest win32 versions (gtk issue)
 
 * Pb when merging package with new view (double action) - see modele_analyse
+
+* Empty imagecache option
+
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
