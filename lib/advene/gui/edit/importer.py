@@ -58,7 +58,7 @@ class FileImporter(AdhocView):
 
         # Flag used to cancel import
         self.should_continue = True
-        
+
         # Assume that the view is initialized in the current
         # thread. Store it id, so that we detect if calls
         # (esp. progress_callback) are made from another thread and
@@ -126,13 +126,14 @@ class FileImporter(AdhocView):
         self.log(msg)
         
     def convert_file(self, b, *p):
-        if b.get_label() == gtk.STOCK_CANCEL:
+        stop_label = _("Stop")
+        if b.get_label() == stop_label:
             # Cancel action
             self.should_continue = False
             b.set_sensitive(False)
             return True
 
-        b.set_label(gtk.STOCK_CANCEL)
+        b.set_label(stop_label)
         self.importers.set_sensitive(False)
         self.filename_entry.set_sensitive(False)
         ic = self.importers.get_current_element()
