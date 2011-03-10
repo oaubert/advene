@@ -45,10 +45,11 @@ class FileImporter(AdhocView):
     view_name = _("Importer")
     view_id = 'importerview'
 
-    def __init__(self, controller=None, filename=None, parameters=None):
+    def __init__(self, controller=None, filename=None, message=None, parameters=None):
         super(FileImporter, self).__init__(controller=controller)
         self.controller=controller
         self.parameters=parameters
+        self.message = message
 
         self.close_on_package_load = False
         self.contextual_actions = ()
@@ -242,17 +243,20 @@ class FileImporter(AdhocView):
         line=gtk.HBox()
         vbox.pack_start(line, expand=False)
 
-        line.pack_start(gtk.Label(_("Filename")), expand=False)
         self.filename_entry=gtk.Entry()
         self.filename_entry.connect('changed', updated_filename)
-        line.pack_start(self.filename_entry)
+
+        if self.message is not None:
+            line.pack_start(gtk.Label(self.message))
+        else:
+            line.pack_start(gtk.Label(_("Filename")), expand=False)
+            line.pack_start(self.filename_entry)
+            b=gtk.Button(stock=gtk.STOCK_OPEN)
+            b.connect('clicked', select_filename)
+            line.pack_start(b, expand=False)
 
         self.progressbar=gtk.ProgressBar()
         vbox.pack_start(self.progressbar, expand=False)
-
-        b=gtk.Button(stock=gtk.STOCK_OPEN)
-        b.connect('clicked', select_filename)
-        line.pack_start(b, expand=False)
 
         # Importer choice list
         line=gtk.HBox()
@@ -270,7 +274,7 @@ class FileImporter(AdhocView):
 
         bb=gtk.HButtonBox()
 
-        b=gtk.Button(stock=gtk.STOCK_CONVERT)
+        b=gtk.Button(_("Start"))
         b.connect('clicked', self.convert_file)
         b.set_sensitive(False)
         bb.pack_start(b, expand=False)

@@ -3770,7 +3770,7 @@ class AdveneGUI(object):
     def on_process_video_activate(self, button=None, data=None):
         fname = self.controller.get_default_media()
         if fname:
-            self.open_adhoc_view('importerview', filename=fname)
+            self.open_adhoc_view('importerview', filename=fname, message=_("Processing %s video") % fname)
         else:
             dialog.message_dialog(_("No associated video file"),
                                   icon=gtk.MESSAGE_ERROR)
