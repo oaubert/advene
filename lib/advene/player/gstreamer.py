@@ -254,7 +254,7 @@ class Player:
         if len(elements) >= 2:
             gst.element_link_many(*elements)
 
-        self.log("gstreamer: using" + sink)
+        self.log("gstreamer: using " + sink)
 
         # Note: it is crucial to make ghostpad an attribute, so that
         # it is not garbage-collected at the end of the build_pipeline
