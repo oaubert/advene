@@ -4210,8 +4210,10 @@ class AdveneGUI(object):
             options[_("GL")] = 'gl'
 
         ew.add_option(_("Video output"), "player-vout", _("Video output module"), options)
+        
+        ew.add_label(_("Recorder options"))
         ew.add_entry(_("Audio input"), 'player-audio-record-device', _("Device name for audio input (with gstrecorder plugin)"))
-
+        ew.add_checkbox(_("Record video"), 'player-record-video', _("Record both video and audio"))
         
         if config.data.preferences['expert-mode']:
             ew.add_label(_("<i>Experimental</i>"))

@@ -321,6 +321,7 @@ class Config(object):
             'fullscreen-timestamp': False,
             # Name of audio device for gstrecorder
             'audio-record-device': 'default',
+            'record-video': True,
             }
 
         self.webserver = {

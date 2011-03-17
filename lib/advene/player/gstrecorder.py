@@ -134,6 +134,10 @@ class Player:
         videosrc='autovideosrc'
         videosink='autovideosink'
 
+        if not config.data.player['record-video']:
+            # Generate black image
+            videosrc = 'videotestsrc pattern=2'
+
         self.pipeline=gst.parse_launch('%(videosrc)s name=videosrc ! video/x-raw-yuv,width=352,pixel-aspect-ratio=(fraction)1/1 ! queue ! tee name=tee ! ffmpegcolorspace ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s name=audiosrc ! audioconvert ! audiorate ! queue ! vorbisenc quality=0.9 ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
         self.imagesink=self.pipeline.get_by_name('sink')
         self.videosrc=self.pipeline.get_by_name('videosrc')
