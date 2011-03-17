@@ -212,9 +212,9 @@ class FileImporter(AdhocView):
     def update_options(self, combo):
         # Instanciate a dummy importer, to get its options.
         ic = combo.get_current_element()
-        if ic is not None:
+        self.options_frame.foreach(self.options_frame.remove)
+        if ic is not None and ic != dummy_advene_importer:
             i = ic(controller=self.controller)
-            self.options_frame.foreach(self.options_frame.remove)
             self.optionform = OptionParserGUI(i.optionparser, i)
             self.options_frame.add(self.optionform)
         return True
