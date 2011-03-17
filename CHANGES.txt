@@ -1,58 +1,60 @@
 advene (0.45) unstable; urgency=low
 
-  * Main GUI: 
-  
+  * Main GUI:
+
     * Timecode display: add HH:MM:SSfNN (frame number) display format in
       preferences. The same syntax can be used for timecode input too. Note
       that it uses 25 fps by default (smpte-25), this can be modified in the
       Time-related preferences (it does not yet get this information
       from each video file).
 
-    * the snapshotter activity can be monitored and controlled through
-      an icon in the lower right-hand corner of the main window.
+    * The snapshotter activity can be monitored and controlled through
+      a green icon in the lower right-hand corner of the main window.
+
+    * The imagecache can be reset from the Player menu.
 
     * Undo behaviour: implement Undo for annotation/query/view creation.
 
     * Allow storage of binary data in XML.
 
-    * Add items "Create a montage from the relations" and "Create a
+    * New menuitems "Create a montage from the relations" and "Create a
       dynamic view following relations" in relation-type popup menu.
 
     * The comment editor proposes multiple presentation modalities for
       dragged annotation-types.
-  
+
   * Timeline:
-  
+
     * Click twice on an annotation will not start playing anymore. This
       caused confusion with double clicks to edit.
-  
+
     * Define generic relation types (from any annotation type to any type)
       when creating new relation types.
-  
-  * Exporters: 
-  
+
+  * Exporters:
+
     * Two new json exporters.
 
   * Importers:
-  
+
     * Advene2 (Cinelab) importer and AIFF (Final Cut Pro) importer
-  
+
     * Audio/video extraction importers: sound enveloppe, sound detection,
       new shot detection algorithm, feature extraction (face, eyes...). The
       extraction importers can be invoked through the File/Process video
       menu.
 
     * Options can be specified from the GUI for each import filter
-  
+
     * For developers: the import framework has been simplified. If you
-      want to import data from an external application, check
+      want to import data from an external application, use
       util.importer.ExternalAppImporter (and see plugins/shotdetectapp.py
       for an example).
 
   * Actions:
 
     * New parameters (balance, volume) for PlaySound / PlaySoundClip actions
-    
+
  --
 
 advene (0.44) unstable; urgency=low
@@ -64,7 +66,7 @@ advene (0.44) unstable; urgency=low
 advene (0.43) unstable; urgency=low
 
   * Timecode display can be customized through Edit/Preferences/Time-related
-  
+
   * Timecodes can be entered as milliseconds (12300), seconds (12.300 ->
     floating point values) or complete timestamps (00:00:12.300)
 
@@ -72,67 +74,67 @@ advene (0.43) unstable; urgency=low
     thanks to Madjid Sadallah.
 
   * Popup menu:
-  
+
     * Right-click on an annotation, annotation-type or package offers to do
       a search/replace on the concerned annotations content.
-  
+
     * The video fragment corresponding to an annotation can be extracted
       through the annotation popup menu.
-  
+
   * Player control
-  
+
      * The player is automatically started and paused when loading a movie/package.
-  
+
      * The Play/Pause button is now unique, and the Stop button has been removed.
-  
+
      * The Mute/Unmute button has been replaced by a volume slider.
-  
+
      * Rate control is available for the gstreamer plugin.
-     
+
      * Control-Up/Down keys can be used to navigate with user-specified
        times (without Shift modifier), see Edit/Preferences/Time-related for
        customization.
-  
+
      * Fullscreen mode now has specific shortcuts. Basically, navigation
        keys (space, left/right, up/down...) can be used without holding
        Control. See
        http://liris.cnrs.fr/advene/wiki/index.php/AdveneShortcuts#Fullscreen_shortcuts
        for more details.
-  
+
   * Timeline view:
 
      * If there are more than 1500 annotations, display only 2
        annotation types in the timeline (to speed package loading), and
        propose display options through a dialog.
-  
+
      * Control+click in the timeline background creates and edits a new
        annotation at the current player position (and in the appropriate
        type)
 
      * When the player is paused, click once on an annotation goes to
        the annotation begin, a second click starts the movie.
-  
+
      * New shortcuts :
-  
+
           * Del deletes annotations (previously, it was necessary to hold
             Shift-Del)
-            
+
           * a on an annotation-type invokes the "Shot adjustment" interface
-  
+
           * a/A on on annotation invokes the "Frame selector" interface
-  
+
      * A new toolbar button toggles the display of all defined relations.
-  
+
   * Table view:
-  
+
     * Clicking on the snapshot column plays the movie at the specified
       position.
 
   * Cut validation interface
-  
+
     * Control-click on a frame creates a new cut instead of adjusting the
       current cut.
-  
+
     * Implement Undo and action notification
 
   * When editing textual content, abbreviations can be used to enter text
@@ -146,7 +148,7 @@ advene (0.43) unstable; urgency=low
   * Text-To-Speech engine can be more finely configured (cf
     Edit/Preferences). Available engines are: espeak, festival, MacOS X
     "say" command, MS SAPI5 interface, custom script.
-  
+
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 13 Sep 2010 17:54:04 +0200
 
 advene (0.42) unstable; urgency=low
@@ -160,11 +162,11 @@ advene (0.41) unstable; urgency=low
   * SVG overlay over the video is available. It has performance issues on
     MacOS X though and is thus disable in the standard configuration. See
     Edit/Preferences/Video player settings to enable/disable this feature.
-   
+
   * Multiple video players can be simultaneously opened. They are
     synchronized (with the possibility to specify an offset). This allows
     for instance the visualisation of multiple videos of the same event.
-  
+
   * New global shortcut: Control-Shift-Up/Down moves player by a
     user-specified time value (initially 1ms)
 
@@ -175,26 +177,26 @@ advene (0.41) unstable; urgency=low
 
      * A new frame-precise time selector can be invoked through the a
       (adjust begin time) or A (adjust end time) shortcut on an annotation.
-  
+
      * A shot validation interface is accessible through the
        annotation-type popup menu ("Ajust annotation bounds").
-  
-     * Timeline: 
-  
+
+     * Timeline:
+
         * annotations containing a series of numeric values can be
           displayed as bargraphs.
-  
+
         * SVG graphics are displayed in the timeline widgets.
-          
+
         * right-clicking in the timeline background now proposes to create
           an annotation at the current player position.
-  
+
         * when selecting an empty zone, propose to zoom on region or limit
           display to region (in addition to creating an annotation).
-  
+
         * when display is limited to a time range, display navigation
           tools in the upper left-hand corner.
-  
+
      * Treeview: annotations are sorted according to their begin time.
 
      * New trace preview visualisation.
@@ -209,18 +211,18 @@ advene (0.41) unstable; urgency=low
        annotation-type: edit the annotation-type, select "Advanced" and enter
        a space-separated list of words in the "Completions" entry. This
        allows to have some kind of controlled vocabulary in annotations.
-       
+
      * Popup accumulator: it is automatically put to front when a new
        popup is displayed
- 
+
   * New exporter: TimedText
 
   * Log file can be displayed through Help/Display logfile
-  
+
   * The brltty plugin has been included in the win32 installer package.
-  
+
   * The shotdetect binary path can be specified in Edit/Preferences/Paths
-  
+
   * New menuitem "Player/Update annotation screenshots" will try to grab
     screenshots for all annotation bounds.
 
