@@ -1,3 +1,7 @@
+* licensecheck -R --copyright advene.git | grep UNKN
+
+* Transcribe: underline zone progress according to player position between 2 marks
+
 * Mac: pb when displaying menus (no border) and progressbar
 
 * Google API for Speech-to-text ?
