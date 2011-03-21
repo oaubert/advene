@@ -36,7 +36,6 @@ class SliceBuffer(gst.Element):
 
     __gproperties__ = {
         'slicewidth':  ( gobject.TYPE_INT, 'slicewidth', 'Width of slices', 0, 65536, 0, gobject.PARAM_WRITABLE ),
-        'width': ( gobject.TYPE_INT, 'width', 'Width of output', 0, 65536, 0, gobject.PARAM_WRITABLE ),
         'offset': (gobject.TYPE_INT, 'offset', 'Offset of samples in the source video. If < 0, use the original offset.', -65536, 65536, 0, gobject.PARAM_WRITABLE),
         }
     
@@ -53,7 +52,6 @@ class SliceBuffer(gst.Element):
         gst.Element.__init__(self)
 
         self.slicewidth = 1
-        self.width = 0
         self.offset = 128
         self._index = 0
         self._buffer  = None
@@ -123,9 +121,7 @@ class SliceBuffer(gst.Element):
         return gst.Element.do_change_state(self, transition)
 
     def do_set_property(self, key, value):
-        if key.name == 'width':
-            self.width = value
-        elif key.name == 'slicewidth':
+        if key.name == 'slicewidth':
             self.slicewidth = value
         elif key.name == 'offset':
             self.offset = value
@@ -149,6 +145,7 @@ if __name__ == '__main__':
             gst.element_factory_make('ffmpegcolorspace'),
             gst.element_factory_make('videoscale'),
             gst.element_factory_make('slicebuffer', 'slicer'),
+            gst.element_factory_make('capsfilter', 'capsfilter'),
             gst.element_factory_make('ffmpegcolorspace'),
             gst.element_factory_make('xvimagesink'),
             ]
@@ -157,12 +154,17 @@ if __name__ == '__main__':
         bin.add_pad(gst.GhostPad('sink', elements[0].get_pad('video_sink') or elements[0].get_pad('sink')))
 
         slicer = bin.get_by_name('slicer')
+        capsfilter = bin.get_by_name('capsfilter')
         for p in params:
             name, value = p.split('=')
-            slicer.set_property(name, long(value))
+            if name == 'width':
+                caps = gst.caps_from_string('video/x-raw-rgb,%s' % p)
+                capsfilter.set_property('caps', caps)
+            else:
+                slicer.set_property(name, long(value))
         player.props.video_sink=bin
     else:
-        player = gst.parse_launch('videotestsrc ! ffmpegcolorspace ! videoscale ! slicebuffer %s ! ffmpegcolorspace ! xvimagesink' % " ".join(params))
+        player = gst.parse_launch('videotestsrc ! clockoverlay ! ffmpegcolorspace ! videoscale ! slicebuffer %s ! ffmpegcolorspace ! xvimagesink' % " ".join(params))
         bin = player
     
     pipe=player
