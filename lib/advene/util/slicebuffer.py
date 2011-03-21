@@ -137,25 +137,32 @@ gst.element_register(SliceBuffer, 'slicebuffer')
 if __name__ == '__main__':
     mainloop = gobject.MainLoop()
 
-    if sys.argv[1:]:
+    files = [ a for a in sys.argv[1:] if not '=' in a ]
+    params = [ a for a in sys.argv[1:] if '=' in a ]
+
+    if files:
         player=gst.element_factory_make('playbin')
-        player.props.uri = 'file://' + sys.argv[1]
+        player.props.uri = 'file://' + files[0]
     
         bin=gst.Bin()
         elements = [
             gst.element_factory_make('ffmpegcolorspace'),
             gst.element_factory_make('videoscale'),
-            gst.element_factory_make('slicebuffer'),
+            gst.element_factory_make('slicebuffer', 'slicer'),
             gst.element_factory_make('ffmpegcolorspace'),
             gst.element_factory_make('xvimagesink'),
             ]
         bin.add(*elements)
         gst.element_link_many(*elements)
         bin.add_pad(gst.GhostPad('sink', elements[0].get_pad('video_sink') or elements[0].get_pad('sink')))
-        
+
+        slicer = bin.get_by_name('slicer')
+        for p in params:
+            name, value = p.split('=')
+            slicer.set_property(name, long(value))
         player.props.video_sink=bin
     else:
-        player = gst.parse_launch('videotestsrc ! ffmpegcolorspace ! videoscale ! slicebuffer ! ffmpegcolorspace ! xvimagesink')
+        player = gst.parse_launch('videotestsrc ! ffmpegcolorspace ! videoscale ! slicebuffer %s ! ffmpegcolorspace ! xvimagesink' % " ".join(params))
         bin = player
     
     pipe=player
