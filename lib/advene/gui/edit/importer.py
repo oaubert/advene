@@ -263,7 +263,7 @@ class FileImporter(AdhocView):
         line=gtk.HBox()
         vbox.pack_start(line, expand=False)
 
-        line.pack_start(gtk.Label(_("Import filter")), expand=False)
+        line.pack_start(gtk.Label(_("Filter")), expand=False)
         self.importers = dialog.list_selector_widget([], None, callback=self.update_options)
         line.pack_start(self.importers, expand=False)
 
