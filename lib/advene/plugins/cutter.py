@@ -29,6 +29,7 @@ import gst
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
+import advene.util.helper as helper
 
 def register(controller=None):
     controller.register_importer(CutterImporter)
@@ -97,7 +98,8 @@ class CutterImporter(GenericImporter):
             s=message.structure
             #print "MSG " + bus.get_name() + ": " + s.to_string()
             if s.get_name() == 'progress' and self.progress is not None:
-                if not self.progress(s['percent-double'] / 100, _("Detected %d segments") % len(self.buffer)):
+                if not self.progress(s['percent-double'] / 100, _("Detected %(count)d segments until %(time)s") % { 'count': len(self.buffer), 
+                                                                                                                    'time': helper.format_time(s['current'] * 1000) }):
                     finalize()
             elif s.get_name() == 'cutter':
                 t = s['timestamp'] / gst.MSECOND

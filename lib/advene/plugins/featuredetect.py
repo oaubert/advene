@@ -31,6 +31,7 @@ except ImportError:
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
+import advene.util.helper as helper
 
 def register(controller=None):
     if cv:
@@ -167,7 +168,8 @@ class FeatureDetectImporter(GenericImporter):
                 start_pos = None
             if not self.progress(cv.GetCaptureProperty(video,
                                                        cv.CV_CAP_PROP_POS_AVI_RATIO),
-                                 "Detected %d feature(s)" % count):
+                                 _("Detected %(count)d feature(s) until %(time)s") % { 'count': count, 
+                                                                                       'time': helper.format_time(pos) }):
                 break
             pos = cv.GetCaptureProperty(video, cv.CV_CAP_PROP_POS_MSEC)
             frame = cv.QueryFrame(video)

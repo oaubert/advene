@@ -29,6 +29,8 @@ import gst
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
+import advene.util.helper as helper
+
 try:
     from math import isinf, isnan
 except ImportError:
@@ -110,7 +112,7 @@ class SoundEnveloppeImporter(GenericImporter):
             s=message.structure
             #print "MSG " + bus.get_name() + ": " + s.to_string()
             if s.get_name() == 'progress' and self.progress is not None:
-                if not self.progress(s['percent-double'] / 100):
+                if not self.progress(s['percent-double'] / 100, _("At %s") % helper.format_time(s['current'] * 1000)):
                     finalize()
             elif s.get_name() == 'level':
                 if not self.buffer:
