@@ -2,7 +2,6 @@
 ../lib/advene/core/webcherry.py
 ../lib/advene/plugins/featuredetect.py
 ../lib/advene/plugins/anvil.py
-../lib/advene/plugins/visu.py
 ../lib/advene/plugins/ted.py
 ../lib/advene/plugins/annotationgraph.py
 ../lib/advene/plugins/goodshotdetector.py
@@ -10,9 +9,11 @@
 ../lib/advene/plugins/shotdetectapp.py
 ../lib/advene/plugins/tts.py
 ../lib/advene/plugins/mpeg7.py
+../lib/advene/plugins/cinelab.py
 ../lib/advene/plugins/aiff.py
 ../lib/advene/plugins/dcp.py
 ../lib/advene/plugins/brltty.py
+../lib/advene/plugins/ttl.py
 ../lib/advene/plugins/tracebuilder.py
 ../lib/advene/plugins/transcriber.py
 ../lib/advene/plugins/soundenveloppe.py
@@ -53,6 +54,7 @@
 ../lib/advene/gui/plugins/htmlcontenhandler.py
 ../lib/advene/gui/plugins/shotvalidation.py
 ../lib/advene/gui/plugins/eventaccumulator.py
+../lib/advene/gui/plugins/kinect.py
 ../lib/advene/gui/plugins/tracepreview.py
 ../lib/advene/gui/plugins/tracetimeline.py
 ../lib/advene/gui/plugins/contenthandlers.py
