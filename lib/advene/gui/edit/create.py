@@ -116,8 +116,7 @@ class CreateElementPopup(object):
                               ViewType('text/plain', _("Plain text template")),
                               ]
             elif self.type_ == Query:
-                type_list = [ ViewType('application/x-advene-simplequery', _("Simple query")),
-                              ViewType('application/x-advene-sparql-query', _("SPARQL query")) ]
+                type_list = [ ViewType('application/x-advene-simplequery', _("Simple query")) ]
             elif self.type_ == Resources:
                 type_list = [ ViewType(Resources.DIRECTORY_TYPE, _("Directory")) ]
             elif self.type_ == ResourceData:

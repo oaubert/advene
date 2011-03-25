@@ -693,53 +693,6 @@ class AdveneController(object):
                 # Override the sources... Is it a good idea ?
                 qexpr.sources=[ expr ]
             result=qexpr.execute(context=context)
-        elif query.content.mimetype == 'application/x-advene-sparql-query':
-            # FIXME: this should go into an appropriate PelletQuery class
-            p = self.package
-            search = [
-                p.getAnnotations(),
-                p.getRelations(),
-                p.getSchemas(),
-                p.getAnnotationTypes(),
-                p.getRelationTypes(),
-                p.getQueries(),
-                p.getViews(),
-            ]
-            # FIXME: this is alpha code !
-            r = []
-            cmd = os.environ.get("PELLET", "/usr/local/bin/pellet")
-            queryfile = context.evaluateValue('here/queries/%s/content/data/absolute_url' % query.id)
-            f = os.popen ("%s -qf %s" % (cmd, queryfile), "r", 0)
-            from advene.util.pellet import PelletResult
-            final_result = []
-            for r in PelletResult (f).results:
-                t = []
-                for i in r:
-                    if i.startswith ('"'):
-                        i = i[1:-1]
-                    elif i == "<<null>>":
-                        i = None
-                    else:
-                        # FIXME: there should be a safer way to decide
-                        # whether this QName is an Advene URI
-                        id_ = i.split(":")[-1]
-                        if id_.startswith ("-"):
-                            # FIXME: get rid of any row with a blank
-                            # node. A bit brutal. Any better idea ?
-                            # Pellet does not seem to understand isIRI
-                            # so we have to do it ourselves.
-                            t = None
-                            break
-                        for s in search:
-                            j = s.get("%s#%s" % (p.uri, id_))
-                            if j is not None:
-                                i = j
-                                break
-                    t.append (i)
-                if t:
-                    final_result.append (t)
-            qexpr=None
-            result=final_result
         else:
             raise Exception("Unsupported query type for %s" % query.id)
         return result, qexpr
