@@ -32,6 +32,12 @@ if config.data.os == 'win32':
         os.environ['GST_PLUGIN_PATH'] = os.path.join(config.data.path['advene'], 'gst', 'lib', 'gstreamer-0.10').encode(fsenc)
         gstpath = unicode(os.getenv('PATH', ""), fsenc)
         os.environ['PATH'] = os.pathsep.join( ( os.path.join(config.data.path['advene'], 'gst', 'bin'), gstpath) ).encode(fsenc)
+    else:
+        #even if gstpluginpath is defined, gst still may not be in path
+        gstpath = unicode(os.getenv('PATH', ""), fsenc)
+        h,t = os.path.split(ppath)
+        binpath,t = os.path.split(h) 
+        os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) ).encode(fsenc)
 
 try:
     import pygst
@@ -90,6 +96,8 @@ class SoundPlayer:
         if os.path.exists(pathsp):
             pid=subprocess.Popen( [ pathsp, fname ] )
             #no SIGCHLD handler for win32
+        else:
+            print "pySoundPlayer.exe can not be found. Advene will be unable to play sounds."
         return True
 
     def macosx_play(self, fname, volume=100, balance=0):
@@ -113,8 +121,10 @@ class SoundPlayer:
 
     if gst is not None:
         play = gst_play
+        print "Using gstreamer to play sounds"
     elif config.data.os == 'win32':
         play=win32_play
+        print "Using win32_player to play sounds (may not be present)"
     elif config.data.os == 'darwin':
         play=macosx_play
     else:
