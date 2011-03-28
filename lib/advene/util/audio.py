@@ -63,17 +63,17 @@ class SoundPlayer:
             uri = 'file:' + urllib.pathname2url(fname)
         else:
             uri = 'file://' + os.path.abspath(fname)
-        pipe = gst.parse_launch('uridecodebin name=decode uri=%s ! audiopanorama panorama=%f ! audioamplify name=amplify amplification=%f ! autoaudiosink' % (uri, float(balance), int(volume) / 100.0 ))
+        pipe = gst.parse_launch('uridecodebin name=decode uri=%s ! audioconvert ! audiopanorama panorama=%f ! audioamplify name=amplify amplification=%f ! autoaudiosink' % (uri, float(balance), int(volume) / 100.0 ))
         bus = pipe.get_bus()
         bus.add_signal_watch()
 
         def eos_cb(b, m):
             if m.src == pipe:
                 pipe.set_state(gst.STATE_NULL)
-                
+
         bus.connect('message::eos', eos_cb)
         pipe.set_state(gst.STATE_PLAYING)
-        # FIXME: since we do not reuse the pipeline, we maybe clean it up on state_change -> READY
+        # FIXME: since we do not reuse the pipeline, we maybe should clean it up on state_change -> READY
         return True
 
     def linux_play(self, fname, volume=100, balance=0):
@@ -84,7 +84,7 @@ class SoundPlayer:
         pid=subprocess.Popen( [ '/usr/bin/aplay', '-q', fname ], preexec_fn=subprocess_setup)
         signal.signal(signal.SIGCHLD, self.handle_sigchld)
         return True
-            
+
     def win32_play(self, fname, volume=100, balance=0):
         """Play the given file. Requires pySoundPlayer.exe.
 
@@ -131,4 +131,4 @@ class SoundPlayer:
         if not os.path.exists('/usr/bin/aplay'):
             print "Error: aplay is not installed. Advene will be unable to play sounds."
         play=linux_play
-    
+
