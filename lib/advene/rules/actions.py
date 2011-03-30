@@ -482,7 +482,7 @@ class DefaultActionsRepository:
                                                                                      size,
                                                                                      color)
 
-        message="""<svg version='1' preserveAspectRatio='xMinYMin meet' viewBox='0 0 800 600'>%s</svg>""" % code
+        message="""<svg version='1' width="800" height="600" preserveAspectRatio='xMinYMin meet' viewBox='0 0 800 600'>%s</svg>""" % code
 
         c=self.controller
         begin = c.player.relative_position
