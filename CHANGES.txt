@@ -55,7 +55,7 @@ advene (0.45) unstable; urgency=low
 
     * New parameters (balance, volume) for PlaySound / PlaySoundClip actions
 
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 31 Mar 2011 15:43:15 +0200
 
 advene (0.44) unstable; urgency=low
 
