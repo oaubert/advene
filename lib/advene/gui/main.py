@@ -135,22 +135,22 @@ class DummyGlade:
         self.build_menubar(menu_definition, self.menubar)
         v.pack_start(self.menubar, expand=False)
 
-        hb=gtk.HBox()
+        self.toolbar_container=gtk.HBox()
 
         self.fileop_toolbar=gtk.Toolbar()
         self.fileop_toolbar.set_style(gtk.TOOLBAR_ICONS)
         self.fileop_toolbar.set_show_arrow(False)
-        hb.pack_start(self.fileop_toolbar, expand=True)
+        self.toolbar_container.pack_start(self.fileop_toolbar, expand=True)
 
         self.adhoc_hbox=gtk.HBox()
-        hb.pack_start(self.adhoc_hbox, expand=True)
+        self.toolbar_container.pack_start(self.adhoc_hbox, expand=True)
 
         self.traces_switch=gtk.HBox()
-        hb.pack_start(self.traces_switch, expand=False)
+        self.toolbar_container.pack_start(self.traces_switch, expand=False)
 
         self.search_hbox=gtk.HBox()
-        hb.pack_start(self.search_hbox, expand=False)
-        v.pack_start(hb, expand=False)
+        self.toolbar_container.pack_start(self.search_hbox, expand=False)
+        v.pack_start(self.toolbar_container, expand=False)
 
         self.application_space = gtk.VBox()
         v.add(self.application_space)
@@ -288,6 +288,7 @@ class AdveneGUI(object):
                     # Note: this will be populated from registered_adhoc_views
                     ( _("_Start Web Browser"), self.on_adhoc_web_browser_activate, _("Start the web browser") ),
                     ( "", None, "" ),
+                    ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)")),
                     ( _("Evaluator"), self.on_evaluator2_activate, _("Open python evaluator window") ),
                     ( _("Webserver log"), self.on_webserver_log1_activate, "" ),
                     ( _("_MediaInformation"), self.on_view_mediainformation_activate, _("Display information about the media") ),
@@ -1885,7 +1886,18 @@ class AdveneGUI(object):
         gtk.keysyms._0:  lambda s, e: s.player_set_fraction(.9),
 
         }
-    
+
+    def is_focus_on_editable(self):
+        """Returns True if the focus is in an editable component.
+        
+        If not, we can activate control_key_shortcuts without the Control modifier.
+        """
+        # For the moment, we only check if we are in full or simplified GUI state.
+        # FIXME: it is not as simple as this:
+        #print "FOCUS", [ isinstance(w.get_focus(), gtk.Editable) for w in  gtk.window_list_toplevels() if w.get_focus() is not None ]
+        # since we can want to use the standard gtk keyboard navigation among widgets.
+        return self.viewbook['east'].widget.get_visible()
+
     def process_player_shortcuts(self, win, event):
         """Generic player control shortcuts.
 
@@ -1904,7 +1916,9 @@ class AdveneGUI(object):
         elif event.keyval in self.key_shortcuts:
             self.key_shortcuts[event.keyval](self, event)
             return True
-        elif event.state & gtk.gdk.CONTROL_MASK and event.keyval in self.control_key_shortcuts:
+        elif event.keyval in self.control_key_shortcuts and (
+            event.state & gtk.gdk.CONTROL_MASK
+            or not self.is_focus_on_editable()):
             self.control_key_shortcuts[event.keyval](self, event)
             return True
         return False
@@ -4781,6 +4795,21 @@ class AdveneGUI(object):
         v.pack_start(hb, expand=False)
         w.show_all()
         w.set_modal(True)
+
+    def on_simplify_interface_activate(self, *p):
+        if self.viewbook['east'].widget.get_visible():
+            # Full state -> go into simplified state
+            for v in self.viewbook.values():
+                v.widget.hide()
+            self.gui.toolbar_container.hide()
+            self.gui.stbv_combo.get_parent().hide()
+        else:
+            # Simplified state -> go into full state
+            for v in self.viewbook.values():
+                v.widget.show()
+            self.gui.toolbar_container.show()
+            self.gui.stbv_combo.get_parent().show()
+        return True
 
     def on_shotdetect_activate(self, *p):
         if not os.path.exists(config.data.path['shotdetect']):
