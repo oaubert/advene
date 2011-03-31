@@ -85,9 +85,15 @@ class ShotdetectAppImporter(ExternalAppImporter):
         Return the process arguments (the app_path, argv[0], will be
         prepended in async_process_file and should not be included here).
         """
-        return [ '-i', gobject.filename_from_utf8(filename.encode('utf8')),
-                 '-o', gobject.filename_from_utf8(self.tempdir.encode('utf8')),
-                 '-s', str(self.sensitivity) ]
+        if config.data.os == 'win32':
+            args = [ '-i', filename.encode('utf8', sys.getfilesystemencoding()),
+                     '-o', self.tempdir.encode('utf8', sys.getfilesystemencoding()),
+                     '-s', str(self.sensitivity) ]
+        else:
+            args = [ '-i', gobject.filename_from_utf8(filename.encode('utf8')),
+                     '-o', gobject.filename_from_utf8(self.tempdir.encode('utf8')),
+                     '-s', str(self.sensitivity) ]
+        return args
 
     def iterator(self):
         """Process input data.
