@@ -146,7 +146,7 @@ class BrlEngine:
             return True
         #command=self.brlconnection.expandKey(k)['command']
         if k == brlapi.KEY_SYM_RIGHT or k == ALVA_LPAD_RIGHT or k == ALVA_MPAD_BUTTON4: 
-           if self.currenttype == 'scroll':
+            if self.currenttype == 'scroll':
                 i = self.char_index + self.brlconnection.displaySize[0]
                 if i <= len(self.current_message):
                     self.char_index = i
