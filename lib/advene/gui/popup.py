@@ -353,13 +353,7 @@ class Menu:
 
         element can be either the package, or an annotation type.
         """
-        msg=_("<b>Statistics about %s</b>\n\n") % self.controller.get_title(el)
-        msg += "%d annotations\n" % len(el.annotations)
-        msg += "Min duration : %s\n" % helper.format_time(min( a.fragment.duration for a in el.annotations))
-        msg += "Max duration : %s\n" % helper.format_time(max( a.fragment.duration for a in el.annotations))
-        msg += "Mean duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in el.annotations) / len(el.annotations))
-        msg += "Total duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in el.annotations))
-        dialog.message_dialog(msg)
+        self.controller.gui.display_statistics(el.annotations, label=_("<b>Statistics about %s</b>\n\n") % self.controller.get_title(el))
         return True
 
     def renumber_annotations(self, m, at):

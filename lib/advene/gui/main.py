@@ -3426,6 +3426,20 @@ class AdveneGUI(object):
         self.open_adhoc_view('shotvalidation', annotationtype=at)
         return True
 
+    def display_statistics(self, annotations, label=None):
+        """Display statistics about the given annotations.
+        """
+        if label is None:
+            label = _("<b>Annotation statistics</b>\n\n")
+        msg =  label
+        msg += "%d annotations\n" % len(annotations)
+        msg += "Min duration : %s\n" % helper.format_time(min( a.fragment.duration for a in annotations))
+        msg += "Max duration : %s\n" % helper.format_time(max( a.fragment.duration for a in annotations))
+        msg += "Mean duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in annotations) / len(annotations))
+        msg += "Total duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in annotations))
+        dialog.message_dialog(msg)
+        return True
+
     def display_textfile(self, path, title=None, viewname=None):
         w=gtk.Window()
         if title is not None:

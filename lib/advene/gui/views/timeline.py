@@ -3027,6 +3027,11 @@ class TimeLine(AdhocView):
                 self.controller.gui.edit_element(v)
             return True
 
+        def display_stats(m, sel):
+            self.controller.gui.display_statistics([ w.annotation for w in sel],
+                                                   label=_("<b>Statistics about current selection</b>\n\n"))
+            return True
+
         m=gtk.Menu()
         l=self.get_selected_annotation_widgets()
         n=len(l)
@@ -3051,6 +3056,7 @@ class TimeLine(AdhocView):
                 (_('Center and zoom on selection'), center_and_zoom),
                 (_('Edit selected annotations'), self.selection_edit),
                 (_('Merge annotations'), self.selection_merge),
+                (_('Display statistics'), display_stats),
                 ):
                 i=gtk.MenuItem(label)
                 i.connect('activate', action, l)
