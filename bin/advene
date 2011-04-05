@@ -120,7 +120,7 @@ if not os.path.exists(config.data.path['resources']):
             # Pango hack
             os.environ['PANGO_SYSCONF_DIR'] = d
             os.environ['PANGO_LIB_DIR'] = d
-
+            os.environ['XDG_DATA_DIRS'] = d
             os.environ['GST_PLUGIN_PATH'] = os.path.join(d, 'gst-plugins')
 
             # Let us fix the pango.modules and pixbuf.loaders files if necessary

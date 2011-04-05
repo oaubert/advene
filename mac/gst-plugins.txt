@@ -50,7 +50,6 @@ libgstflac.so
 libgstflv.so
 libgstflxdec.so
 libgstfreeze.so
-libgstgamma.so
 libgstgdkpixbuf.so
 libgstgdp.so
 libgstgio.so
@@ -69,7 +68,6 @@ libgstlevel.so
 libgstliveadder.so
 libgstmad.so
 libgstmatroska.so
-libgstmetadata.so
 libgstmms.so
 libgstmpeg2dec.so
 libgstmpeg4videoparse.so
@@ -112,15 +110,12 @@ libgstrtpmanager.so
 libgstrtpmux.so
 libgstrtsp.so
 libgstscaletempoplugin.so
-libgstschro.so
 libgstsdpelem.so
-libgstselector.so
 libgstshapewipe.so
 libgstshout2.so
 libgstsiren.so
 libgstsmpte.so
 libgstsndfile.so
-libgstsoundtouch.so
 libgstspectrum.so
 libgstspeed.so
 libgststereo.so
@@ -132,11 +127,8 @@ libgsttta.so
 libgsttwolame.so
 libgsttypefindfunctions.so
 libgstudp.so
-libgstvalve.so
-libgstvideobalance.so
 libgstvideobox.so
 libgstvideocrop.so
-libgstvideoflip.so
 libgstvideomeasure.so
 libgstvideomixer.so
 libgstvideorate.so
