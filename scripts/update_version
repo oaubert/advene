@@ -1,10 +1,18 @@
 #! /bin/sh
 
+LANG=C
+export LANG
+
 svnrev='Unknown'
 if [ -d .svn ]
 then
-    svn up
-    svnrev=`svn info | awk '/Revision/{print $2}'`
+    if [ -x ${HOME}/bin/svn ]
+    then
+      SVN=${HOME}/bin/svn
+    else
+      SVN=svn
+    fi
+    svnrev=`${SVN} info | awk '/Revision/{print $2}'`
 elif [ -d .git ]
 then
     svnrev=`git show HEAD | perl -lne 'print $1 if /git-svn-id.+advene.trunk@(\d+)/'`
