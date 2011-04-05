@@ -25,7 +25,6 @@ try:
 except ImportError:
     brlapi = None
 
-import advene.core.config as config
 from advene.rules.elements import RegisteredAction
 import advene.model.tal.context
 import advene.util.helper as helper
@@ -67,6 +66,7 @@ def register(controller=None):
         controller.log(_("BrlTTY not installed. There will be no braille support."))
     else:
         engine=BrlEngine(controller)
+        engine.brldisplay("Advene connected")
         try:
             engine.init_brlapi()
             if engine.brlconnection is not None:
@@ -100,8 +100,12 @@ class BrlEngine:
     def __init__(self, controller=None):
         self.controller=controller
         self.brlconnection=None
-        self.currenttype=None
+        self.currenttype='scroll'
         self.revmap=None
+
+        # Memorize current text so that it can be scrolled
+        self.current_message = ""
+        self.char_index = 0
 
     def generate_reverse_mapping(self):
         self.revmap={}
@@ -141,10 +145,12 @@ class BrlEngine:
         if k is None:
             return True
         #command=self.brlconnection.expandKey(k)['command']
-        if k == brlapi.KEY_SYM_RIGHT or k == ALVA_LPAD_RIGHT:
-            # Next annotation
-            if self.currenttype is None:
-                self.controller.move_position(config.data.preferences['time-increment'], relative=True)
+        if k == brlapi.KEY_SYM_RIGHT or k == ALVA_LPAD_RIGHT or k == ALVA_MPAD_BUTTON4: 
+           if self.currenttype == 'scroll':
+                i = self.char_index + self.brlconnection.displaySize[0]
+                if i <= len(self.current_message):
+                    self.char_index = i
+                    self.brldisplay(self.current_message, reset_index=False)
             elif self.currenttype == 'bookmarks':
                 navigate_bookmark(+1)
             else:
@@ -154,10 +160,13 @@ class BrlEngine:
                    if an[0].type == self.currenttype ]
                 if l:
                     self.controller.queue_action(self.controller.update_status, 'set', l[0][1])
-        elif k == brlapi.KEY_SYM_LEFT or k == ALVA_LPAD_LEFT:
-            # Next annotation
-            if self.currenttype is None:
-                self.controller.move_position(-config.data.preferences['time-increment'], relative=True)
+        elif k == brlapi.KEY_SYM_LEFT or k == ALVA_LPAD_LEFT or k == ALVA_MPAD_BUTTON1:
+            if self.currenttype == 'scroll':
+                if self.char_index >= 0:
+                    i = self.char_index - self.brlconnection.displaySize[0]
+                    if i >= 0:
+                        self.char_index = i
+                    self.brldisplay(self.current_message, reset_index=False)
             elif self.currenttype == 'bookmarks':
                 navigate_bookmark(-1)
             else:
@@ -170,7 +179,8 @@ class BrlEngine:
         elif k == brlapi.KEY_SYM_UP or k == brlapi.KEY_SYM_DOWN or k == ALVA_LPAD_UP or k == ALVA_LPAD_DOWN:
             types=list( self.controller.package.annotationTypes )
             types.sort(key=lambda at: at.title or at.id)
-            types.append( 'bookmarks' )
+            types.insert(0, 'scroll' )
+            types.insert(1, 'bookmarks' )
             try:
                 i=types.index(self.currenttype)
             except ValueError:
@@ -185,15 +195,18 @@ class BrlEngine:
             elif k == brlapi.KEY_SYM_DOWN or k == ALVA_LPAD_DOWN:
                 i = i + 1
             try:
-                self.currenttype=types[i]
+                self.currenttype = types[i]
             except IndexError:
-                self.currenttype=None
+                self.currenttype = 'scroll'
+
             if self.currenttype == 'bookmarks':
                 self.brldisplay('Nav. bookmarks')
-            elif self.currenttype is not None:
+            elif self.currenttype == 'scroll':
+                self.brldisplay('Scrolling text')
+            elif self.currenttype is not None and hasattr(self.currenttype, 'id'):
                 self.brldisplay('Nav. ' + (self.currenttype.title or self.currenttype.id))
             else:
-                self.brldisplay('Nav. video')
+                self.brldisplay('Error in navigation mode')
         elif k == brlapi.KEY_SYM_DELETE or k == ALVA_LPAD_RIGHTRIGHT:
             # Play/pause
             self.controller.update_status("pause")
@@ -248,19 +261,22 @@ class BrlEngine:
             self.controller.log("Disconnecting brltty")
             self.brlconnection.leaveTtyMode()
 
-    def brldisplay(self, message):
+    def brldisplay(self, message, reset_index=True):
         if self.brlconnection is None:
             self.init_brlapi()
+        if reset_index:
+            self.char_index = 0
+        msg = helper.unaccent(message)[self.char_index:]
         if self.brlconnection is not None:
-            self.brlconnection.writeText(helper.unaccent(message))
+            self.brlconnection.writeText(msg)
         else:
-            self.controller.log(_("Braille display: ") + helper.unaccent(message))
+            self.controller.log(_("Braille display: ") + msg)
         return True
 
     def action_brldisplay(self, context, parameters):
         """Pronounce action.
-        FIXME: if we switch to python2.5, this could be made a decorator.
         """
-        message=self.parse_parameter(context, parameters, 'message', _("No message"))
-        self.brldisplay(message)
+        message = self.parse_parameter(context, parameters, 'message', _("No message"))
+        self.current_message = message
+        self.brldisplay(self.current_message)
         return True

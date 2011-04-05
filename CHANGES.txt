@@ -2,7 +2,7 @@ advene (0.46) unstable; urgency=low
 
   * Stable release. See the following 0.45 notes for more details.
 
- -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 31 Mar 2011 15:46:02 +0200
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 05 Apr 2011 18:00:07 +0200
 
 advene (0.45) unstable; urgency=low
 
@@ -57,11 +57,15 @@ advene (0.45) unstable; urgency=low
       util.importer.ExternalAppImporter (and see plugins/shotdetectapp.py
       for an example).
 
+  * Braille table:
+  
+    * Long text can be scrolled with left/right buttons in scroll mode.
+  
   * Actions:
 
     * New parameters (balance, volume) for PlaySound / PlaySoundClip actions
 
- -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 31 Mar 2011 15:43:15 +0200
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 05 Apr 2011 18:00:00 +0200
 
 advene (0.44) unstable; urgency=low
 
