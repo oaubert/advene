@@ -226,6 +226,7 @@ class Player:
         if config.data.player['svg'] and svgelement:
             try:
                 self.imageoverlay=gst.element_factory_make(svgelement, 'overlay')
+                self.imageoverlay.props.fit_to_frame = True
             except:
                 pass
 
