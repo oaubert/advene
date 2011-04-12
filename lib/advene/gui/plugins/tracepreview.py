@@ -118,7 +118,8 @@ class TracePreview(AdhocView):
 
     def scroll_win(self):
         a = self.sw.get_vadjustment()
-        a.value=a.upper
+        if a:
+            a.value=a.upper
         return
 
     def receive(self, trace, event=None, operation=None, action=None):
