@@ -1156,8 +1156,9 @@ class TraceTimeline(AdhocView):
         # 4/ redraw each action
         # 5/ recenter the canvas according to previous centering
         # 6/ reselect selected item
-        # 7/ re-deactive locked_links
+        # 7/ re-deactivate locked_links
         # center : the timestamp on which the display needs to be centered
+        #print "----------------REFRESH START-----------------"
         if self.links_locked:
             self.toggle_lock()
             self.inspector.clean()
@@ -1185,10 +1186,8 @@ class TraceTimeline(AdhocView):
             elif lvl == 'actions':
                 for i in self.active_trace.levels[lvl]:
                     self.receive_int(self.active_trace, event=None, operation=None, action=i)
-                    # operations are processed within the action    
-       
+                    # operations are processed within the action
         self.draw_marks()
-
         if center:
             va=self.sw.get_vadjustment()
             va.value = center/self.timefactor-va.page_size/2.0
@@ -1198,6 +1197,7 @@ class TraceTimeline(AdhocView):
                 va.value=va.upper-va.page_size
         self.context_update_time()
         self.widget.get_parent_window().set_cursor(None)
+        #print "----------------REFRESH END-----------------"
         return
 
 
@@ -1215,7 +1215,6 @@ class TraceTimeline(AdhocView):
         @type action: advene.plugins.tracebuilder.Action
         @param action: the new or latest modified action
         """
-
         if self.active_trace == trace:
             self.receive_int(trace, event, operation, action)
         if not (event or operation or action):
@@ -1248,18 +1247,22 @@ class TraceTimeline(AdhocView):
         if event and (event.name=='DurationUpdate' or event.name=='MediaChange'):
             #new film, update duration
             self.docgroup.changeMovielength(trace)
-        if operation:
-            # new operation, add it on docgroup
-            self.docgroup.addLine(operation.movietime)
         if (operation or event) and action is None:
             # no action changed, return
             return ev
+        if operation:
+            # new operation, add it on docgroup
+            self.docgroup.addLine(operation.movietime)
         if action is None:
             # no event, operation or action, this is a refresh query, redraw screen
             return ev
         h,l = self.cols[action.name]
+        #print "INIT %s" % l
+        if (l and not l.get_canvas()):
+            print "Tracetimeline : Synchronization between tracer and view lost - droping event"
+            #to avoid crashing when tracebuilder is calling receive of a tracetimeline being closed
+            return
         color = h.color_c
-        
         if l and l.event == action:
             # action corresponding to the last action of this type, update the drawing
             #calculating old length
@@ -1278,6 +1281,7 @@ class TraceTimeline(AdhocView):
             #update already existing / not existing items before adding the new one
             l.update_objs(blocked=self.links_locked)
             ev=l
+            #print "UPD %s" % ev
         else:
             #totally new action
             # getting x bound from header
@@ -1292,6 +1296,7 @@ class TraceTimeline(AdhocView):
                 self.draw_marks()
             ev = EventGroup(self.link_mode, self.controller, self.inspector, self.canvas, self.docgroup, None, action, x, y, length, self.col_width, self.obj_l, 14, color, self.links_locked)
             self.cols[action.name]=(h,ev)
+            #print "NEW %s" % ev
         self.update_lines()
         self.canvas.show()
         if self.autoscroll:
