@@ -165,7 +165,7 @@ if __name__ == '__main__':
         
         player.props.video_sink=bin
     else:
-        player = gst.parse_launch('videotestsrc ! ffmpegcolorspace ! videoscale ! svgoverlay name=overlay ! ffmpegcolorspace ! autovideosink')
+        player = gst.parse_launch('videotestsrc ! ffmpegcolorspace ! videoscale ! pysvgoverlay name=overlay ! ffmpegcolorspace ! autovideosink')
         bin = player
     
     pipe=player
