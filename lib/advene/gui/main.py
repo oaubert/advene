@@ -4371,15 +4371,19 @@ class AdveneGUI(object):
         self.controller.restart_player ()
         return True
 
-    def on_slider_button_press_event (self, button=None, data=None):
+    def on_slider_button_press_event (self, button=None, event=None):
         self.slider_move = True
+        if event.button == 1:
+            event.button = 2
         return False
 
-    def on_slider_button_release_event (self, button=None, data=None):
+    def on_slider_button_release_event (self, button=None, event=None):
         if self.controller.player.playlist_get_list():
             p = self.controller.create_position (value = long(self.gui.slider.get_value ()))
             self.controller.update_status('set', p)
         self.slider_move = False
+        if event.button == 1:
+            event.button = 2
         return False
 
     def on_slider_scroll_event (self, widget=None, event=None):
