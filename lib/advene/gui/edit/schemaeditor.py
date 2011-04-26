@@ -1,5 +1,6 @@
 #
-# This file is part of Advene.
+# Advene: Annotate Digital Videos, Exchange on the NEt
+# Copyright (C) 2009 Bertrand Richard <bertrand.richard@liris.cnrs.fr>
 #
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
