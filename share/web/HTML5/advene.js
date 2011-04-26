@@ -1031,7 +1031,7 @@ $.widget("ui.video", {
                         begin = $(self).attr('data-begin');
                         end = $(self).attr('data-end');
                         $(".transcript[data-begin]", $(document)).each( function() {
-                            if (Math.max(begin, $(this).attr('data-begin')) <= Math.min(end, $(this).attr('data-end'))) {
+                            if (Math.max(begin, $(this).attr('data-begin')) < Math.min(end, $(this).attr('data-end'))) {
                                 $(this).addClass('relatedTranscript');
                             }
                         });
