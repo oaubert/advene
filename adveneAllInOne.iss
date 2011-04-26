@@ -94,7 +94,7 @@ PrivilegesRequired=none
 LicenseFile=doc\copyright
 DisableFinishedPage=false
 DefaultGroupName=Advene
-VersionInfoDescription=Annotate DVDs, Exchange on the NEt
+VersionInfoDescription=Annotate Digital Videos, Exchange on the NEt
 InfoAfterFile=CHANGES.txt
 OutputBaseFilename=setup_advene_0.46r7211_vlc_1.0.3_gstreamer_0.10.7beta2
 VersionInfoTextVersion=0.46
@@ -116,9 +116,9 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 Name: "cleanprefs"; Description: "{cm:CleanPrefs}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Icons]
-Name: {group}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; IconIndex: 0
-Name: {userdesktop}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; Tasks: desktopicon
-Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; Tasks: quicklaunchicon
+Name: {group}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate Digital Videos, Exchange on the NEt; IconIndex: 0
+Name: {userdesktop}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate Digital Videos, Exchange on the NEt; Tasks: desktopicon
+Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate Digital Videos, Exchange on the NEt; Tasks: quicklaunchicon
 
 [InstallDelete]
 Type: files; Name: "{userappdata}\..\advene\advene.prefs"; Tasks: cleanprefs
