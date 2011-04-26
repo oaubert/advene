@@ -67,9 +67,6 @@ class WebsiteExporter(object):
             self.log(_("%s does not exist") % self.destination)
             return
 
-        if not os.path.isdir(self.imgdir):
-            helper.recursive_mkdir(self.imgdir)
-
         if views is None:
             views=[ v
                     for v in self.controller.package.views
@@ -373,6 +370,8 @@ class WebsiteExporter(object):
         # Copy snapshots
         for t in used_snapshots:
             # FIXME: not robust wrt. multiple packages/videos
+            if not os.path.isdir(self.imgdir):
+                helper.recursive_mkdir(self.imgdir)
             f=open(os.path.join(self.imgdir, '%s.png' % t), 'wb')
             f.write(str(self.controller.package.imagecache[t]))
             f.close()
@@ -385,6 +384,8 @@ class WebsiteExporter(object):
                 print "Cannot find annotation %s for overlaying"
                 continue
             name=ident+tales.replace('/', '_')
+            if not os.path.isdir(self.imgdir):
+                helper.recursive_mkdir(self.imgdir)
             f=open(os.path.join(self.imgdir, 'overlay_%s.png' % name), 'wb')
             if tales:
                 # There is a TALES expression
