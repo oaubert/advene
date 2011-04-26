@@ -85,10 +85,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.46
+AppVerName=Advene 0.47
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.46
+VersionInfoVersion=0.47
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=doc\copyright
@@ -96,8 +96,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate Digital Videos, Exchange on the NEt
 InfoAfterFile=CHANGES.txt
-OutputBaseFilename=setup_advene_0.46r7211_vlc_1.0.3_gstreamer_0.10.7beta2
-VersionInfoTextVersion=0.46
+OutputBaseFilename=setup_advene_0.47r7291_vlc_1.0.3_gstreamer_0.10.7beta2
+VersionInfoTextVersion=0.47
 ChangesAssociations=yes
 
 [Registry]
