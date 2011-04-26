@@ -477,6 +477,12 @@ class WebsiteExporter(object):
             dest=os.path.join(self.destination, dest)
             if os.path.isdir(path):
                 # Copy tree
+                if os.path.exists(dest):
+                    # First remove old version
+                    if os.path.isdir(dest):
+                        shutil.rmtree(dest, True)
+                    else:
+                        shutil.unlink(dest)
                 shutil.copytree(path, dest)
             else:
                 # Copy file
