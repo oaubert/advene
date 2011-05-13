@@ -4627,8 +4627,13 @@ class AdveneGUI(object):
         video_entry=gtk.Entry()
         video_entry.set_tooltip_text(_("URL for the video, if it is available on a sharing website.\nOnly for GoogleVideo and Youtube for the moment"))
         u=self.controller.package.getMetaData(config.data.namespace, 'website-export-video-url')
+        if u is None:
+            u = self.controller.get_default_media()
+            if u:
+                u = os.path.basename(u)
         if u is not None:
             video_entry.set_text(u)
+            
         hb.add(video_entry)
         v.pack_start(hb, expand=False)
 
