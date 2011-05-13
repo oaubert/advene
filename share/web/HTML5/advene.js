@@ -97,6 +97,7 @@ $.widget("ui.video", {
             "error",
             "loadedfirstframe",
             "loadedmetadata",
+            "loadeddata",
             "loadstart",
             "pause",
             "play",
@@ -403,13 +404,28 @@ $.widget("ui.video", {
     // Event handling
     _event_progress: function(e) {
         var self = this;
-        var lengthComputable = e.originalEvent.lengthComputable,
-        loaded = e.originalEvent.loaded,
-        total = e.originalEvent.total;
 
-        if( lengthComputable ) {
-            var fraction = Math.max(Math.min(loaded / total,1),0);
-            this._bufferStatus.width(Math.max(fraction * self._timeLinerSliderAbsoluteWidth));
+        // Cf https://github.com/aFarkas/jMediaelement/blob/1.1.3/src/mm.base-api.js#L312 for more complete implementation
+        if (this.buffered && this.buffered.length) {
+            // current w3 spec using buffered TimeRange
+            fraction = this.buffered.end(0) / this.duration;
+            this._bufferStatus.width(fraction * self._timeLinerSliderAbsoluteWidth);
+            self._waiting.text("Loaded " + str(fraction*100) + "%...");
+        } else if (e.originalEvent && 'lengthComputable' in e.originalEvent && e.originalEvent.loaded) {
+            // Firefox/old webkits
+            var lengthComputable = e.originalEvent.lengthComputable,
+                loaded = e.originalEvent.loaded,
+                total = e.originalEvent.total;
+            if( total && lengthComputable ) {
+                var fraction = Math.max(Math.min(loaded / total, 1), 0);
+            
+                this._bufferStatus.width(fraction * self._timeLinerSliderAbsoluteWidth);
+                self._waiting.text("Loaded " + str(fraction*100) + "%...");
+            }
+            else
+            {
+                self._waiting.text("Loaded " + (loaded / 1024) + " Kbytes...");
+            }
         }
     },
     _event_seeked: function() {
@@ -417,6 +433,14 @@ $.widget("ui.video", {
         self._hideWaiting();
     },
     _event_canplay: function() {
+        var self = this;
+        self._hideWaiting();
+    },
+    _event_loadeddata: function() {
+        var self = this;
+        self._hideWaiting();
+    },
+    _event_canplaythrough: function() {
         var self = this;
         self._hideWaiting();
     },
@@ -457,6 +481,11 @@ $.widget("ui.video", {
         if( ! self.element[0].seeking ) {
             var duration = self.element[0].duration;
             var currentTime = self.element[0].currentTime;
+
+            if( self._waitingId ) {
+                // Should not be "Waiting"
+                self._hideWaiting();
+            }
 
             if (self.options.fragmentPlay) {
                 if (currentTime < self.options.startPoint) {
