@@ -4986,7 +4986,6 @@ class AdveneGUI(object):
                    '-s', str(pb._sensitivity.get_value_as_int()) ]
 
             if config.data.os == 'win32':
-                import win32process
                 kw = { 'creationflags': win32process.CREATE_NO_WINDOW }
             else:
                 kw = { 'preexec_fn': subprocess_setup }
