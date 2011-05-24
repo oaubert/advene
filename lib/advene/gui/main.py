@@ -2381,7 +2381,8 @@ class AdveneGUI(object):
             if not hasattr(v, '_destination'):
                 continue
             # Do not save permanent widgets
-            if v in self.viewbook[v._destination].permanent_widgets:
+            book = self.viewbook.get(v._destination)
+            if book and v in book.permanent_widgets:
                 continue
             options, args = v.get_save_arguments()
             if not with_arguments:
