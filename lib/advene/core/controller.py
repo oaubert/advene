@@ -2142,46 +2142,6 @@ class AdveneController(object):
                                                              origin=self.player.AbsolutePosition),
                                 notify=notify)
 
-    def generate_sorted_lists (self, position):
-        """Return two sorted lists valid for a given position.
-
-        (i.e. all annotations beginning or ending after the
-        position). The lists are sorted according to the begin and end
-        position respectively.
-
-        The elements of the list are (annotation, begin, end).
-
-        The update_display method only has to check the first element
-        of each list. If there is a match, it should trigger the
-        events and pop the element.
-
-        If there is a seek operation, we should regenerate the lists.
-
-        @param position: the current position
-        @type position: int
-        @return: a tuple of two lists containing triplets
-        @rtype: tuple
-        """
-        l = [ (a, a.fragment.begin, a.fragment.end)
-              for a in self.package.annotations
-              if a.fragment.begin >= position or a.fragment.end >= position ]
-        future_begins = list(l)
-        future_ends = l
-        future_begins.sort(key=operator.itemgetter(1))
-        future_ends.sort(key=operator.itemgetter(2))
-
-        #print "Position: %s" % helper.format_time(position)
-        #print "Begins: %s\nEnds: %s" % ([ a[0].id for a in future_begins[:4] ],
-        #                                [ a[0].id for a in future_ends[:4] ])
-        return future_begins, future_ends
-
-    def reset_annotation_lists (self):
-        """Reset the future annotations lists."""
-        #print "reset annotation lists"
-        self.future_begins = None
-        self.future_ends = None
-        self.active_annotations = []
-
     def update_status (self, status=None, position=None, notify=True):
         """Update the player status.
 
@@ -2195,8 +2155,9 @@ class AdveneController(object):
         """
         position_before=self.player.current_position_value
         #print "update status:", status, position
-        if status == 'set' or status == 'start' or status == 'stop':
-            self.reset_annotation_lists()
+        if (status == 'set' or status == 'start' or status == 'stop'):
+            if position != position_before:
+                self.reset_annotation_lists()
             if notify:
                 # Bit of a hack... In a loop context, setting the
                 # position is done with notify=False, so we do not
@@ -2292,6 +2253,58 @@ class AdveneController(object):
 
         return True
 
+    def generate_sorted_lists (self, position):
+        """Return two sorted lists and a list of active annotations valid for a given position.
+
+        (i.e. all annotations beginning or ending after the
+        position). The lists are sorted according to the begin and end
+        position respectively.
+
+        The elements of the begin/end lists are (annotation, begin,
+        end). The elements of active_annotations are annotations.
+
+        The update_display method only has to check the first element
+        of each list. If there is a match, it should trigger the
+        events and pop the element.
+
+        If there is a seek operation, we should regenerate the lists.
+
+        @param position: the current position
+        @type position: int
+        @return: a tuple of three lists containing triplets or simple annotations
+        @rtype: tuple
+        """
+        # Substract 20ms to the current position, so that in case the
+        # generate_sorted_lists is triggered due to selecting an
+        # annotation, the annotation is put in future_begins and its
+        # AnnotatioBegin gets correctly notified.
+        position -= 20
+
+        future_begins = []
+        future_ends = []
+        active = []
+
+        for a in self.package.annotations:
+            if a.fragment.begin >= position:
+                future_begins.append( (a, a.fragment.begin, a.fragment.end) )
+                future_ends.append( (a, a.fragment.begin, a.fragment.end) )
+            elif a.fragment.end >= position:
+                future_ends.append( (a, a.fragment.begin, a.fragment.end) )
+                active.append(a)
+        future_begins.sort(key=operator.itemgetter(1))
+        future_ends.sort(key=operator.itemgetter(2))
+
+        #print "Position: %s" % helper.format_time(position)
+        #print "Begins: %s\nEnds: %s" % ([ a[0].id for a in future_begins[:4] ],
+        #                                [ a[0].id for a in future_ends[:4] ])
+        return future_begins, future_ends, active
+
+    def reset_annotation_lists (self):
+        """Reset the future annotations lists."""
+        self.future_begins = None
+        self.future_ends = None
+        self.active_annotations = []
+
     def update (self):
         """Update the information.
 
@@ -2310,10 +2323,11 @@ class AdveneController(object):
 
         pos=self.position_update ()
         
-        if pos < self.last_position:
-            # We did a seek compared to the last time, so we
-            # invalidate the future_begins and future_ends lists
-            # as well as the active_annotations
+        if pos < self.last_position or pos > self.last_position + 1000:
+            # We did a seek compared to the last time (backward, or
+            # more than 1s forward), so we invalidate the
+            # future_begins and future_ends lists as well as the
+            # active_annotations
             self.reset_annotation_lists()
 
         self.last_position = pos
@@ -2340,14 +2354,17 @@ class AdveneController(object):
                     t = 0
 
         if self.future_begins is None or self.future_ends is None:
-            self.future_begins, self.future_ends = self.generate_sorted_lists (pos)
+            self.future_begins, self.future_ends, self.active_annotations = self.generate_sorted_lists(pos)
+            #print "New lists", [a.id for a in self.active_annotations], [t[0].id for t in self.future_begins ]
 
-        if self.future_begins and p.status == p.PlayingStatus:
+        if self.future_begins and (p.status == p.PlayingStatus or p.status == p.PauseStatus):
             a, b, e = self.future_begins[0]
+            #print "Future begin", a.id, b, pos
             while b <= pos:
                 # Ignore if we were after the annotation end
                 self.future_begins.pop(0)
                 if e > pos:
+                    #print "AnnotationBegin", a.id, e, pos
                     self.notify ("AnnotationBegin",
                                  annotation=a,
                                  immediate=True)
@@ -2357,7 +2374,7 @@ class AdveneController(object):
                 else:
                     break
 
-        if self.future_ends and p.status == p.PlayingStatus:
+        if self.future_ends and (p.status == p.PlayingStatus or p.status == p.PauseStatus):
             a, b, e = self.future_ends[0]
             while e <= pos:
                 #print "Comparing %d < %d for %s" % (e, pos, a.content.data)
