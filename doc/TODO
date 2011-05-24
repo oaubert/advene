@@ -1,13 +1,3 @@
-* licensecheck -R --copyright advene.git | grep UNKN
-
-* Transcribe: underline zone progress according to player position between 2 marks
-
-* Mac: pb when displaying menus (no border) and progressbar
-
-* Google API for Speech-to-text ?
-
-* gst element that buffers slices of data with rolling index
-
 * Have webcherry listen on both ipv4/ipv6
 
 * advene.js:  adapt behaviour (modify video url, display warning) based on jquery.browser
@@ -30,6 +20,10 @@
 
 * finder: in Static view/dynamic view columns, add a "+" item
 
+* finder: filter (global or by column), grouping (by column)
+
+* finder: implement set_current_element method
+
 * gst spectrum videoanalyse
 
 * display clock cursor for lengthy actions (timeline update)
@@ -50,19 +44,9 @@
 
 * Default caption dynamic view: make non-admin (remove _)
 
-* Montage: add "Save" icon
-
 * MacOSX: use Cmd modifier equiv. as control
 
 * Import youtube annotations ( http://www.google.com/reviews/y/read2?video_id=YOUR_VIDEO_ID_HERE )
-
-* Import/export AIFF
-
-* DND annnotation type in comment -> display transcription/table/...
-
--
-
-* Play a sound file: ask wether to keep the reference or to copy the file as resource
 
 * gstreamer pipeline (videomixer) to generate 1-pixel-column sum-up of video:
 gst-launch -e filesrc location=/data/video/Bataille.avi ! decodebin ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=320,pixel-aspect-ratio=\(fraction\)1/1 ! videocrop left=158 right=160 ! progressreport update-freq=1 ! pngenc snapshot=false ! multifilesink location=%05d.png
@@ -74,21 +58,17 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * transcribe: allow search/replace
 
-* Integrate transcription view from TBL
-
 * quick edit: integrate EntryCompletion on attributes
 
 * Fix message log file access on win32
-
-* abbreviations: pb when missing end newline
 
 * fullscreen: optionally display information over the video (status, position)
 
 * add PyDiscoverer interface, to get movie details ASAP
 
-* option to stop player synchronisation then use current position as time offset
+* option to stop second player synchronisation then use current position as time offset
 
-* trace replay mode  of video navigation (replay video based on navigation events) -> trace player with controlled video player
+* trace replay mode of video navigation (replay video based on navigation events) -> trace player with controlled video player
 
 * Customizable shortcuts
 
@@ -101,15 +81,9 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * Screen overlay interface: define a grid with sensitive areas + event
    -> need to implement player.get_dimensions() method
 
-* default bookmarks view, used by default and auto-saved with the package.
-
-* LogMessages: pb of exclusive access on win32
-
 * implement a "Stream record" feature in the player (tee+encode before imagesink)
 
 * Generic subprocess registration (prononce, tts...) to make sure that we terminate them at Advene exit.
-
-* Generic metadata for packages
 
 * table view: keyword occurrences + stats
 
@@ -125,16 +99,10 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * controller.update_status: accept annotation as parameter, to allow
    more precise notification
 
-* Generateur waveform
-
-* Generic "ImportFromApplication" module/framework (with progressbar, etc)
-
 * gstreamer: multiple video syntax: path;path -> videobox
 
 * gui.edit.rules: SimpleQuery edition will fail since TALESEntry does
    not handle multiple sources
-
-* Note-taking: save == convert option
 
 * Fix autocompletion of attribute names for annotations (should
    record key=value strings)
@@ -144,16 +112,8 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * webcherry: use content negociation for invoking appropriate views
 
 * Utilisation npt:/
-* Define content-types: montag <annotation>...</annotation> +
-   extensions (transition...)
-
-* STBV export (captions): cf http://code.google.com/p/libkate/
 
 * transcribe: use textbuffer.get_modified/set_modified
-
-* Customizable shortcuts for annotation creation
-
-* Make initial setup window an assistant (multiple steps)
 
 * gui.main: simple click on Adhocview icon -> share code with viewbook
    (menu New/open existing).
@@ -163,20 +123,9 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * timeline: fix continous scrolling. Set zoom 96%, 0h59 in Nosferatu
 
-* tabular adhoc view, with options to export as HTML
-
-* HTML editor: popup menu on images to refresh imagecache (and possibly code)
-
-* ssa import filter
-
-* svg editor: add a "advene_comment" field to the svg source (similar
-   to label in advene zones)
-
-* finder: filter (global or by column), grouping (by column)
+* tabular adhoc view, with customizable columns and options to export as HTML
 
 * HTMLeditor: implement basic css parsing (cf python-cssutils)
-
-* use HTMLeditor component as viewer if mozembed is not available.
 
 * htmleditor: when suppressing a tag with tal: instructions (define,
    ...), recreate it ? Or delete the whole block ?
@@ -190,21 +139,13 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * Revamp player API (player.position, player.duration, ...)
 
-* fix players (vlc, gstreamer) to be able to start from a given position
-
-* finder: implement set_current_element method
-
 * Bug in Advene2 export -> resources
 
 * Template: in _package_view, propose to Open adhoc views
 
 * Imagemap/SVG
 
-* LdT: handle #RRGGBB color specification
-
 * improve search results navigation (cf PA post on May 2 2008)
-
-* streamline ask_for_relationtype method (timeline relation creation)
 
 * Montage: double-click -> goto annotation
 
@@ -215,20 +156,12 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * timeline popup menu on annotation: offer access to possibly
    overlapping annotations
 
-* transcribe: insert begin/end marks (0, duration)
-
-* website/FAQ: justify "offline" approach (privacy, on the run, performances...)
-
-* activebookmark: DND to accumulator -> move annotation
-
 * Synchronise transcribe with annotations/timeline
  * create new type. On view rename -> set new type title
  * create/fusion/delete annotations when modifying timestamps
 
 * make all simple selections (annotation, timestamp, etc) able to get
    multiline data to represent element list
-
-* Dynamic view editing: Categorize events (annotation, player, application)
 
 * Selection: extend-to-next ?
 
@@ -238,8 +171,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * Data brushing p.181 -> selection in a view, highlight in others
 
-* Proeminently put GPL license info on the web site.
-
 * timeline: memorize zoom level and position when changing package
    (needs a timeline.zoom_level[package_uri] structure)
 
@@ -248,8 +179,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * shapewidget: complete support for <image> element. How to deal with
    images as resources ?
 
-* tts: send configure instructions for aplay to the pipe
-
 * adhoc view: imagemap, with DND of annotation to the image
 
 * fix timeline relation lines display
@@ -257,8 +186,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * write a ContentHandler for x-advene-quicksearch
 
 * shotdetect: allow to specify begin/end times, to allow to redo a segmentation with a new threshold
-
-* Package: static export (to web site) of a set of views+resources/images
 
 * Assistant for generating HTML views from annotations (propose some
    common layouts: plain TOC, illustrated TOC, etc)
@@ -269,8 +196,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * gtk locale in win32
 
-* clearlook theme in win32 ?
-
 * transcription: option to display timestamp marks and allow to modify
 
 * Montage: extend with 2nd video (cf bout-a-bout) ?
@@ -279,13 +204,9 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * annotation highlight: other representation (red thick border ?)
 
-* Thicker frame around widgets in editaccumulator -> not so simple
-
 * editaccumulator: distinguish incomplete annotations (missing entidtime)
 
-* edit.elements.annotation: next/prev should reuse the same window
-
-* Convert event names from strings to objects (faster comparison)
+* Convert event names from strings to objects (faster comparison?)
 
 * Allow to lock workspace modifications (to propose a read-only version)
 
@@ -297,17 +218,11 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * highlight: blink (wait for gtk.Transition in 2.12?)
 
-* Short version of shortcuts/tutorial for note taking
-
 * iMovie0.8-like movie exploration (skim through the paused movie through DND in the thumbnail)
-
-* rss checking to display project news
 
 * zippackage: implement a 'serialize'/'freeze' method, to save the data to the temp. directory (w/o overwriting the .azp package). This would allow regular backups of the data.
 
 * controller.get_url_for_alias: use correct baseurl from cherrypy request when possible
-
-* study psyco optimizer (cf scribes)
 
 * timeline
 
@@ -335,21 +250,13 @@ position of current marks in the video (with small lines) [cf linkmap
 
 ** rewrite importers with ElementTree
 
-** exmeralda importer
-
 * Main GUI
 
 ** new signal: CurrentAnnotation
 
-** review gtk.Style for whole app (viewbook labels and comboboxes smaller, more separation...)
-
-* transcription
- 
-** bug when opening a new package, the dialog "Annotations were modified" blocks the GUI
-
 * New views
 
-** Tag cloud view (maybe in swf via python-ming)
+** Tag cloud view
 
 * Players
 
@@ -376,15 +283,6 @@ position of current marks in the video (with small lines) [cf linkmap
   {'name': 'bar', 'type': 'str', 'constraints': { 'regexp': '^[a-z]+$' } },
  ] 
 Cf http://blog.hill-street.net/?p=7 for implementations comparison
-
-* add a progress bar for package loading -> need support in model
-
-* new query type: builtin-query, to allow to build adhoc and fast
-  queries such as search_content ? or builtin-condition ?
-
-* importer GUI: when trying to import .azp, advice to use Merge instead.
-
-* importer GUI: allow to define parameters (customize checkbox => new dialog)
 
 * Hook to define new events (spatial events: EnterZone, LeaveZone... for instance)
 
@@ -419,18 +317,6 @@ http://service.real.com/help/library/guides/ScriptingGuide/HTML/htmfiles/methodi
 
 * transtyping: preserve/recreate relations
 
-* Study transana code
-
-* replace highlight->activate by hightlight->color->...
-
-* think about printing support
-
-* HTML action to update all displayed screenshots
-
-* bug: begin event is generated when setting position inside an annotation.
-
-* Use screen:// as input stream. Allow to parameterize (source display...)
-
 * VerticalList : equiv. navigation history parameterized with 2 tales expressions: item list, representation [ history / annotation/fragment/formatted/duration ]
 
 * component "scroller" below the vout. Parameters: text, href (optional), past duration, current
@@ -439,8 +325,6 @@ http://service.real.com/help/library/guides/ScriptingGuide/HTML/htmfiles/methodi
 * Audio commentaries : add a "Record" button. While pressed, it
    records. Upon release, it creates an annotation with the correct
    bounds.
-
-* embed swfplayer
 
 * import fixer: allow to edit imports without loading the package
    (which fails if imported package is not accessible).
@@ -465,13 +349,9 @@ http://service.real.com/help/library/guides/ScriptingGuide/HTML/htmfiles/methodi
 p.imports[0].package.views[1]._getParent().uri, p.imports[1].package.uri
 that should return the same URI. The proposed solution is to enforce the importing package to explicitly import the second level imported ones. Pb: namespace clash
 
-* transcribe: make validity check on bounds only on demand or on export.
-
 * Write a advene-openoffice binding to automate video/presentation sync.
 
 * New action: translate ?
-
-* On-the-fly annotation: display as caption the edited content (for 1s)
 
 * webserver: implement a wiki-like syntax in views that dynamically generates links to Advene elements/TALES expressions (define a application/x-advene-wiki that will get converted into a TAL template)
 
@@ -486,15 +366,6 @@ that should return the same URI. The proposed solution is to enforce the importi
 * New action: display a fragment of a video then continue from the
 position where the link was activated. Parameters: fragment to play,
 return position, or display in a new video window
-
-* Model: maintain creation date + modification date for elements
-
-* MediaControl.idl :
-  * sound_[sg]et_volume: normalize volume in [0..100]
-  * implement set_visual in API
-  * implement get_aspect_ratio (or get_dimensions ?)
-  * implement get_api_version()
-  * implement get/set_rate
 
 * navigation history: put 2 snapshots (origin, destination) to contextualize
 
@@ -522,18 +393,7 @@ when there is a syntax error in a TALES expression (missing string orbadly writt
 * Create a 'shapes' package which will define various SVG shapes
   (moon, sun, triangle, etc) as views
 
-* Complete the bootstrap package
-
 * Edit element popup: check that the data was not modified before closing
-
-* More fine-grained snapshot specification. Idea: specify a percentage
-  of the annotation time. Can be implemented with an internal
-  "snapshot-schema" defining "snapshot" annotation types, that would
-  be linked through a "snapshot-relation" relation with the
-  corresponding annotations.
-
-* Make the absolute time specification work for display_text (rather
-  than relative positions) -> ok for gstreamer
 
 * Model related:
 
@@ -604,7 +464,6 @@ the current package's pwd first as default.
 http://www.rexx.com/~dkuhlman/generateDS.html (XML-Schema) Or SOAPy
 
 * Assistants:
-  - shot detection
   - voice recognition
   - relation creation (based on criteria like "shot in sequence" -> isPartOf)
 
