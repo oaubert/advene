@@ -762,7 +762,7 @@ class EditCondition(EditGeneric):
 
         if self.parent is None or isinstance(self.parent, EditRule):
             predefined=[
-                ('annotation/type/id', _('The id of the annotation type') ),
+                ('annotation/type/id', _('The annotation type') ),
                 ('annotation/content/data', _('The annotation content') ),
                 ] + [
                 ('annotation/content/parsed/%s' % p, _("The value of the %s attribute") % p)
@@ -790,7 +790,7 @@ class EditCondition(EditGeneric):
                 ('element/fragment/begin', _('The element begin time') ),
                 ('element/fragment/end', _('The element end time') ),
                 ('element/fragment/duration', _('The element duration') ),
-                ('element/type/id', _('The id of the element type') ),
+                ('element/type/id', _('The element type') ),
                 ('element/incomingRelations', _("The element's incoming relations") ),
                 ('element/outgoingRelations', _("The element's outgoing relations") ),
                 ('here', _('The context')),
@@ -806,10 +806,10 @@ class EditCondition(EditGeneric):
 
         if self.parent is None or isinstance(self.parent, EditRule):
             predef=[ ('string:%s' % at.id,
-                      "id of annotation-type %s" % self.controller.get_title(at) )
+                      _("annotation-type %s") % self.controller.get_title(at) )
                      for at in self.controller.package.annotationTypes
                      ] + [ ('string:%s' % at.id,
-                            "id of relation-type %s" % self.controller.get_title(at) )
+                            _("relation-type %s") % self.controller.get_title(at) )
                            for at in self.controller.package.relationTypes
                            ] + predefined
         elif isinstance(self.parent, EditQuery):
