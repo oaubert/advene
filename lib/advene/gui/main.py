@@ -4641,7 +4641,7 @@ class AdveneGUI(object):
         pb=gtk.ProgressBar()
         v.pack_start(pb, expand=False)
 
-        w.should_continue = True
+        w.should_continue = False
 
         def cb(val, msg):
             if val > 0 and val <= 1.0:
@@ -4654,20 +4654,22 @@ class AdveneGUI(object):
             return w.should_continue
 
         def do_conversion(b):
-            b.set_sensitive(False)
             d=unicode(dirname_entry.get_text())
             if not d:
                 return False
+
             video=unicode(video_entry.get_text())
 
             if (self.controller.package.getMetaData(config.data.namespace, 'website-export-directory') != d
                 or self.controller.package.getMetaData(config.data.namespace, 'website-export-video-url') != video):
                 self.controller.package._modified = True
-
             self.controller.package.setMetaData(config.data.namespace, 'website-export-directory', d)
             if video:
                 self.controller.package.setMetaData(config.data.namespace, 'website-export-video-url', video)
+
             b.set_sensitive(False)
+            w.should_continue = True
+
             try:
                 self.controller.website_export(destination=d,
                                                max_depth=max_depth.get_value_as_int(),
@@ -4683,7 +4685,10 @@ class AdveneGUI(object):
         dirname_entry.connect('activate', do_conversion)
 
         def do_cancel(*p):
-            w.should_continue = False
+            if w.should_continue:
+                w.should_continue = False
+            else:
+                w.destroy()
             return True
 
         hb=gtk.HButtonBox()
