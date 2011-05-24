@@ -773,7 +773,7 @@ class ActiveBookmark(object):
                 end=None
             else:
                 end=long(e)
-            content=urllib.unquote(c)
+            content=urllib.unquote(c).decode('utf-8', 'ignore')
 
         self.annotation=annotation
         if annotation is not None:
@@ -914,7 +914,7 @@ class ActiveBookmark(object):
         return ":".join( (ident,
                           str(self.begin),
                           str(self.end),
-                          urllib.quote(self.content) ) )
+                          urllib.quote(self.content.encode('utf-8')) ) )
 
     def as_html(self):
         if self.annotation is not None:
