@@ -51,7 +51,7 @@ class TranscriptionView(AdhocView):
 
     def __init__ (self, controller=None, source=None, elements=None, parameters=None):
         super(TranscriptionView, self).__init__(controller=controller)
-        self.close_on_package_load = True
+        self.close_on_package_load = False
         self.contextual_actions = (
             (_("Save view"), self.save_view),
             (_("Save default options"), self.save_default_options),
@@ -543,6 +543,10 @@ class TranscriptionView(AdhocView):
 
     def update_model(self, package=None):
         self.regenerate_model()
+        if not self.model:
+            # No more elements. It most probably is because the source
+            # expression is now invalid. Close the view.
+            self.close()
         self.generate_buffer_content()
         return True
 
