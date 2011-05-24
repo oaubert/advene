@@ -1260,6 +1260,9 @@ class TranscriptionEdit(AdhocView):
             elif event.keyval == gtk.keysyms.Page_Up:
                 self.goto_previous_mark()
                 return True
+            elif event.keyval == gtk.keysyms.c:
+                self.convert_transcription_cb()
+                return True
         elif self.options['autoinsert'] and self.options['automatic-mark-insertion-delay']:
             if (gtk.gdk.keyval_to_unicode(event.keyval)
                 and event.keyval != gtk.keysyms.space
