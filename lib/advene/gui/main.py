@@ -4658,8 +4658,13 @@ class AdveneGUI(object):
             d=unicode(dirname_entry.get_text())
             if not d:
                 return False
-            self.controller.package.setMetaData(config.data.namespace, 'website-export-directory', d)
             video=unicode(video_entry.get_text())
+
+            if (self.controller.package.getMetaData(config.data.namespace, 'website-export-directory') != d
+                or self.controller.package.getMetaData(config.data.namespace, 'website-export-video-url') != video):
+                self.controller.package._modified = True
+
+            self.controller.package.setMetaData(config.data.namespace, 'website-export-directory', d)
             if video:
                 self.controller.package.setMetaData(config.data.namespace, 'website-export-video-url', video)
             b.set_sensitive(False)
