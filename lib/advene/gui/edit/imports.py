@@ -414,7 +414,7 @@ class Importer:
 
         if self.controller.gui:
             self.controller.gui.init_window_size(window, 'importeditor')
-            window.set_icon_list(self.controller.gui.get_icon_list())
+            window.set_icon_list(*self.controller.gui.get_icon_list())
 
         self.buttonbox = gtk.HButtonBox()
 
