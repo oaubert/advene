@@ -1082,6 +1082,18 @@ $.widget("ui.video", {
                 for (key in options)
                     playerOptions[key] = options[key];
             $('.player_container').player( playerOptions );
+
+            // Check location.hash. If it is set, we look for the
+            // first sibling containing a time reference and start
+            // playing from this position.
+            if (window.location.hash.length) {
+                hash = window.location.hash.substr(1);
+                nodes = $("[name="+hash+"]").siblings().find('[data-begin]:first');
+                if (nodes.length) {
+                    //console.log("Playing directly at " + nodes.attr('data-begin'));
+                    $(document).advene('player', nodes.attr('data-video-url'), nodes.attr('data-begin'), nodes.attr('data-end'));
+                }
+            }
         },
 
         'overlay': function() {
