@@ -1656,7 +1656,7 @@ class AdveneGUI(object):
 
         self.pane['fareast'].show_all()
 
-        self.popupwidget.display_message(_("You can drag and drop view icons (timeline, treeview, transcription...) in this notebook to embed various views."), timeout=10000, title=_("Information"))
+        self.popupwidget.display_message(_("You can drag and drop view icons (timeline, treeview, transcription...) in notebooks to embed various views."), timeout=30000, title=_("Information"))
 
         return self.pane['fareast']
 
