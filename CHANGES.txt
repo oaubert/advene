@@ -1,3 +1,15 @@
+advene (0.47) unstable; urgency=low
+
+  * Main GUI:
+  
+     * Left-clicking on the video slider jumps to the designated position.
+  
+  * Note-taking view:
+   
+     * New shortcut: Ctrl-C to convert to annotations
+
+ --
+
 advene (0.46) unstable; urgency=low
 
   * Stable release. See the following 0.45 notes for more details.
