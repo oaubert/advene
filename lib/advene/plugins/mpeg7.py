@@ -29,7 +29,7 @@ import time
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 def register(controller=None):
     controller.register_importer(MPEG7Importer)

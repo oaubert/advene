@@ -25,7 +25,7 @@ from gettext import gettext as _
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 def register(controller=None):
     controller.register_importer(ShotdetectImporter)

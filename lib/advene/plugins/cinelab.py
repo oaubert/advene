@@ -31,7 +31,7 @@ import re
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 from advene.model.exception import AdveneException
 
 MIMETYPE = "application/x-cinelab-zip-package"

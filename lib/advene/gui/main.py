@@ -83,7 +83,7 @@ import advene.model.tal.context
 
 import advene.core.mediacontrol
 import advene.util.helper as helper
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 from advene.util.odict import odict
 
 import advene.util.importer

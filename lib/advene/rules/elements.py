@@ -24,7 +24,7 @@ events that match a condition."""
 import re
 import StringIO
 import urllib
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 import itertools
 
 import advene.core.config as config

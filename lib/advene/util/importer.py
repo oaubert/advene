@@ -73,7 +73,7 @@ from advene.model.fragment import MillisecondFragment
 import advene.util.helper as helper
 import advene.util.handyxml as handyxml
 import xml.dom
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 IMPORTERS=[]
 

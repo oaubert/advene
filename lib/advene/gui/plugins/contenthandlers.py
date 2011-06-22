@@ -31,7 +31,7 @@ from advene.gui.util import image_from_position, dialog, decode_drop_parameters,
 
 from advene.gui.edit.rules import EditRuleSet, EditQuery
 from advene.rules.elements import RuleSet, SimpleQuery
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 name="Default content handlers"
 

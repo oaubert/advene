@@ -71,7 +71,7 @@ import advene.model.tal.context
 
 import advene.util.helper as helper
 import advene.util.importer
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 from advene.util.audio import SoundPlayer
 
 from simpletal import simpleTAL, simpleTALES

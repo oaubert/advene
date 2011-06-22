@@ -31,7 +31,7 @@ from advene.model.content import Content
 from advene.gui.util import dialog, get_pixmap_button
 import advene.util.helper as helper
 
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 class AdhocView(object):
     """Implementation of the generic parts of AdhocViews.

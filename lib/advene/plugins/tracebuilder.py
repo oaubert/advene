@@ -39,7 +39,7 @@ from gettext import gettext as _
 import advene.core.config as config
 
 import advene.model.view
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 import advene.util.helper as helper
 import advene.util.handyxml as handyxml

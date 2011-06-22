@@ -57,7 +57,7 @@ from advene.model.exception import AdveneException
 # Initialize ElementTree namespace map with our own prefixes.  This
 # helps generating readable XML through ElementTree (the appropriate
 # namespace prefixes will be used)
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 ET._namespace_map.update({
     config.data.namespace: 'advene',
     'http://www.w3.org/2000/svg': 'svg',

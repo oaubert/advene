@@ -58,7 +58,7 @@ from advene.model.exception import AdveneException
 from advene.model.resources import Resources
 import mimetypes
 
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 from gettext import gettext as _
 

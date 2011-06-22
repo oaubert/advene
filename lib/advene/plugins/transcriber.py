@@ -26,7 +26,7 @@ name="Transcriber importer"
 from gettext import gettext as _
 
 from advene.util.importer import GenericImporter
-import advene.util.ElementTree as ETree
+import xml.etree.ElementTree as ETree
 
 def register(controller=None):
     controller.register_importer(TrsImporter)

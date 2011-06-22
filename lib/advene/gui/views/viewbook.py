@@ -27,7 +27,7 @@ from gettext import gettext as _
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
 from advene.gui.util import get_pixmap_button, dialog, decode_drop_parameters
-import advene.util.ElementTree as ET
+import xml.etree.ElementTree as ET
 from advene.gui.edit.elements import get_edit_popup
 
 class ViewBook(AdhocView):
