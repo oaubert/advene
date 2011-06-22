@@ -731,7 +731,7 @@ class Menu:
             self.controller.gui.edit_element(v)
             return True
         add_item(_('Create a comment view'), lambda i: create_static(element))
-        add_item(_('Generate a caption dynamic view'), lambda i: self.create_dynamic_view(element))
+        add_item(_('Generate a caption dynamic view...'), lambda i: self.create_dynamic_view(element))
         add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % element.id))
         add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations))
         add_item(_('Export to another format...'), lambda i: self.controller.gui.export_element(element))
@@ -740,9 +740,9 @@ class Menu:
         add_item(None)
         add_item(_('Select a color'), self.pick_color, element)
         add_item(_('Create a new annotation...'), self.create_element, Annotation, element)
-        add_item(_('Delete all annotations...'), self.delete_elements, element, element.annotations)
-        add_item(_('Renumber annotations'), self.renumber_annotations, element)
-        add_item(_('Adjust annotation bounds'), lambda m, at: self.controller.gui.adjust_annotationtype_bounds(at), element)
+        add_item(_('Delete all annotations'), self.delete_elements, element, element.annotations)
+        add_item(_('Renumber annotations...'), self.renumber_annotations, element)
+        add_item(_('Adjust annotation bounds...'), lambda m, at: self.controller.gui.adjust_annotationtype_bounds(at), element)
         add_item('')
         add_item(_('%d annotations(s) - statistics') % len(element.annotations), self.display_stats, element)
 
