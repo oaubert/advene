@@ -2732,7 +2732,7 @@ class TimeLine(AdhocView):
             # Reposition the next, prev buttons
             layout.foreach(move_nav, width)
 
-        layout.get_parent().get_parent().set_position (width + 30)
+        layout.get_parent().get_parent().set_position (width + 60)
 
     def restrict_playing(self, at, widget=None):
         """Restrict playing to the given annotation-type.
