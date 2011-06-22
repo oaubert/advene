@@ -17,9 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 
-# AIFF importer.
-
-name="AIFF importer"
+name="Final Cut Pro XML importer"
 
 from gettext import gettext as _
 
@@ -28,11 +26,11 @@ from advene.util.importer import GenericImporter
 import advene.util.ElementTree as ET
 
 def register(controller=None):
-    controller.register_importer(AiffImporter)
+    controller.register_importer(XMLFCPImporter)
     return True
 
-class AiffImporter(GenericImporter):
-    name = _("Aiff importer")
+class XMLFCPImporter(GenericImporter):
+    name = _("Final Cut Pro XML importer")
 
     def can_handle(fname):
         """Return a score between 0 and 100.
@@ -49,12 +47,12 @@ class AiffImporter(GenericImporter):
         root=tree.getroot()
 
         p, at = self.init_package(filename=dest,
-                                schemaid='aiff', annotationtypeid='aiff_subtitle')
+                                schemaid='fcp', annotationtypeid='fcp_subtitle')
         at.mimetype='text/plain'
-        at.title = "AIFF Subtitle"
+        at.title = "FCP Subtitle"
 
         self.at = {
-            'clipitem': self.create_annotation_type(at.schema, 'aiff_clipitem', title=_("AIFF clipitem")),
+            'clipitem': self.create_annotation_type(at.schema, 'fcp_clipitem', title=_("FCP clipitem")),
             'subtitle': at,
             }
 
@@ -66,7 +64,7 @@ class AiffImporter(GenericImporter):
 
     def iterator(self, root):
         if root.tag != 'xmeml':
-            print "Invalid AIFF file format: ", root.tag
+            print "Invalid FCP XML file format: ", root.tag
             return
 
         progress=0.01
