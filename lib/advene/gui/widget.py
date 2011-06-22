@@ -454,6 +454,8 @@ class AnnotationWidget(GenericColorButtonWidget):
             # 100.0) of the height (FIXME: define a scale somewhere)
             l=[ (1 - v / 100.0) for v in self.annotation.content.parsed() ]
             s=len(l)
+            if not s:
+                return
             if width < s:
                 # There are more samples than available pixels. Downsample the data
                 l=l[::(s/width)+1]
