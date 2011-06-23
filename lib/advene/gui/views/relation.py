@@ -28,16 +28,16 @@ import gtk
 
 class RelationView:
     """Controller for the MVC representing a relation."""
-    def popup(self, button):
-        menu = advene.gui.popup.Menu(self, controller=self.controller)
-        menu.popup()
-        return True
-
-    def __init__(self, relation=None, controller=None):
+    def __init__(self, relation=None, controller=None, parameters=None):
         self.relation=relation
         self.controller=controller
         self.widget=self.build_widget()
         self.widget.connect('clicked', self.activate)
+
+    def popup(self, button):
+        menu = advene.gui.popup.Menu(self, controller=self.controller)
+        menu.popup()
+        return True
 
     def activate(self, button):
         print "Relation %s activated" % self.relation.id

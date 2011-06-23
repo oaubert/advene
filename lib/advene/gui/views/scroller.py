@@ -28,7 +28,7 @@ import gtk
 class ScrollerView(AdhocView):
     view_name = _("Scroller")
     view_id = 'scroller'
-    def __init__(self, controller=None):
+    def __init__(self, controller=None, parameters=None):
         super(ScrollerView, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = ()

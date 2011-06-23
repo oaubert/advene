@@ -35,7 +35,7 @@ class ViewBook(AdhocView):
     """
     view_name = _("ViewBook")
     view_id = 'viewbook'
-    def __init__ (self, controller=None, views=None, location=None):
+    def __init__ (self, controller=None, parameters=None, views=None, location=None, ):
         super(ViewBook, self).__init__(controller=controller)
         self.controller=controller
         if views is None:

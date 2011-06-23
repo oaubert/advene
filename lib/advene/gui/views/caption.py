@@ -31,7 +31,7 @@ class CaptionView(AdhocView):
     view_id = 'caption'
     tooltip = _("Display a text caption below the video output")
 
-    def __init__(self, controller=None):
+    def __init__(self, controller=None, parameters=None):
         super(CaptionView, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = ()

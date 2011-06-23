@@ -31,7 +31,7 @@ class SingletonPopup(AdhocView):
     """
     view_name = _("SingletonPopup")
     view_id = 'singletonpopup'
-    def __init__ (self, controller=None, autohide=False):
+    def __init__ (self, controller=None, parameters=None, autohide=False):
         super(SingletonPopup, self).__init__(controller=controller)
         self.close_on_package_load = False
 

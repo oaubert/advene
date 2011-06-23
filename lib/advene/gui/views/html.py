@@ -287,7 +287,7 @@ class HTMLView(AdhocView):
     view_name = _("HTML Viewer")
     view_id = 'htmlview'
     tooltip = _("Embedded HTML widget")
-    def __init__ (self, controller=None, url=None):
+    def __init__ (self, controller=None, parameters=None, url=None):
         super(HTMLView, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.component=None
