@@ -282,7 +282,7 @@
 .ui-dialog .ui-dialog-titlebar-nostickonwindow{float: left; left:.83em; top: 50%; width: 19px; margin: -6px 0 0 0; padding: 1px; height: 18px; }
 .ui-dialog .ui-dialog-titlebar-nostickonwindow span { display: block; margin: 1px; }
 .ui-dialog .ui-dialog-titlebar-nostickonwindow:hover, .ui-dialog .ui-dialog-titlebar-nostickonwindow:focus { padding: 0; }
-.ui-dialog-fragment-title{position:absolute; top:30; left:10;width:auto;height:auto;font-size:12; color:white;oveflow:visible;}
+.ui-dialog-fragment-title{position:absolute; top:30; left:10;width:auto;height:auto;font-size:12; color:white;overflow:visible;}
 
 /* SCREENSHOT OVERLAY */
 .image-overlay { list-style: none; text-align: left; }
