@@ -53,7 +53,10 @@ class ShotValidation(AdhocView):
 
     def set_annotationtype(self, at):
         self._annotationtype=at
-        self.annotations = sorted(at.annotations, key=lambda a: a.fragment.begin)
+        if self._annotationtype is not None:
+            self.annotations = sorted(at.annotations, key=lambda a: a.fragment.begin)
+        else:
+            self.annotations = []
         self.current_index.set_upper(len(self.annotations))
 
     def get_annotationtype(self):
