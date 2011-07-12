@@ -60,6 +60,9 @@ class PluginCollection(list):
                 except (PluginException, ImportError, OSError):
                     # Silently ignore non-plugin files
                     pass
+                except (SyntaxError, AttributeError), e:
+                    print "!!!! Cannot load %s plugin" % fname
+                    print unicode(e)
 
     def standard_plugins(self, d):
         for name in os.listdir(d):
