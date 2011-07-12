@@ -326,8 +326,8 @@ class GenericImporter(object):
 
     def init_package(self,
                      filename=None,
-                     annotationtypeid='imported-type',
-                     schemaid='imported-schema'):
+                     annotationtypeid=None,
+                     schemaid=None):
         """Create (if necessary) a package with the given schema and  annotation type.
         Returns a tuple (package, annotationtype)
         """
@@ -343,10 +343,8 @@ class GenericImporter(object):
             p=self.package
 
         at=None
-        if schemaid:
-            s=self.create_schema(id_=schemaid, title=schemaid)
-            if annotationtypeid:
-                at=self.create_annotation_type(s, id_=annotationtypeid)
+        if annotationtypeid:
+            at = self.ensure_new_type(prefix=annotationtypeid, schemaid=schemaid)
         return p, at
 
     def convert(self, source):
@@ -365,7 +363,7 @@ class GenericImporter(object):
           - complete: boolean. Used to mark the completeness of the annotation.
         """
         if self.package is None:
-            self.package, self.defaulttype=self.init_package()
+            self.package, self.defaulttype=self.init_package(annotationtypeid='imported', schemaid='imported-schema')
         for d in source:
             try:
                 begin=helper.parse_time(d['begin'])
@@ -1141,8 +1139,8 @@ class SubtitleImporter(GenericImporter):
 
     def process_file(self, filename):
         f=open(filename, 'r')
-        self.init_package(filename=filename)
-        self.ensure_new_type('subtitle', _("Subtitles from %s") % os.path.basename(filename))
+        p, at = self.init_package(filename=filename, annotationtypeid='subtitle')
+        at.title = _("Subtitles from %s") % os.path.basename(filename)
         # FIXME: implement subtitle type detection
         self.convert(self.srt_iterator(f))
         f.close()
