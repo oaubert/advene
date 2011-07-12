@@ -1098,12 +1098,17 @@ class SubtitleImporter(GenericImporter):
             return 0
     can_handle=staticmethod(can_handle)
 
-    def srt_iterator(self, f):
+    def srt_iterator(self, f, filesize):
+        if filesize == 0:
+            # Dummy value, but we will be sure not to divide by 0
+            filesize = 1
         base=r'\d+:\d+:\d+[,\.]\d+'
         pattern=re.compile('(' + base + ').+(' + base + ')')
         tc=None
         content=[]
         for line in f:
+            if not self.progress(1.0 * f.tell() / filesize):
+                break
             line=line.rstrip()
             match=pattern.search(line)
             if match is not None:
@@ -1142,7 +1147,7 @@ class SubtitleImporter(GenericImporter):
         p, at = self.init_package(filename=filename, annotationtypeid='subtitle')
         at.title = _("Subtitles from %s") % os.path.basename(filename)
         # FIXME: implement subtitle type detection
-        self.convert(self.srt_iterator(f))
+        self.convert(self.srt_iterator(f, os.path.getsize(filename)))
         f.close()
         self.progress(1.0)
         return self.package
