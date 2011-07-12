@@ -79,7 +79,8 @@ class AeidonImporter(GenericImporter):
         incr=0.98/len(project.subtitles)
         for s in project.subtitles:
             progress += incr
-            self.progress(progress)
+            if not self.progress(progress):
+                break
             yield {
                 'type': self.annotationtype,
                 'content': s.main_text,
