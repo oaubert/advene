@@ -2153,6 +2153,8 @@ class AdveneController(object):
         @param position: an optional position
         @type position: Position
         """
+        if isinstance(position, Annotation):
+            position = position.fragment.begin
         position_before=self.player.current_position_value
         #print "update status:", status, position
         if (status == 'set' or status == 'start' or status == 'stop'):
