@@ -128,6 +128,9 @@ class VideoPlayer(AdhocView):
             self.set_file(fname)
         return True
 
+    def set_offset(self, offset):
+        self.offset_spin.set_value(offset)
+
     def set_file(self, fname):
         if self.player is None:
             return True
@@ -175,6 +178,20 @@ class VideoPlayer(AdhocView):
         elif position is not None:
             position = position + self.offset
         self.player.update_status(status, position)
+
+    def drag_received_cb(self, widget, context, x, y, selection, targetType, time):
+        refTime = None
+        if targetType == config.data.target_type['annotation']:
+            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+            if sources:
+                # use first annotation as reference
+                refTime = sources[0].fragment.begin
+        elif targetType == config.data.target_type['timestamp']:
+            data=decode_drop_parameters(selection.data)
+            refTime=long(data['timestamp'])
+        if refTime is not None:
+            self.set_offset(refTime - self.controller.player.current_position_value)
+        return True
 
     def _popup(self, *p):
         """Open a popup window for temporary anchoring the player video.
@@ -236,14 +253,14 @@ class VideoPlayer(AdhocView):
             return True
 
         ti = gtk.ToolItem()
-        spin = gtk.SpinButton(gtk.Adjustment(value = self.offset,
+        self.offset_spin = gtk.SpinButton(gtk.Adjustment(value = self.offset,
                                                          lower = - 24 * 60 * 60 * 1000,
                                                          upper =   24 * 60 * 60 * 1000,
                                                          step_incr = 1000 / 25,
                                                          page_incr = 1000))
-        spin.get_adjustment().connect('value-changed', offset_changed)
-        ti.add(spin)
-        spin.set_tooltip_text(_("Offset in ms"))
+        self.offset_spin.get_adjustment().connect('value-changed', offset_changed)
+        ti.add(self.offset_spin)
+        self.offset_spin.set_tooltip_text(_("Offset in ms"))
         self.toolbar.insert(ti, -1)
 
         self.label = gtk.Label()
@@ -267,5 +284,14 @@ class VideoPlayer(AdhocView):
 
         self.drawable.connect_after('realize', self.register_drawable)
 
+        # Accept annotation/timestamp drop, to adjust time offset
+        vbox.connect('drag-data-received', self.drag_received_cb)
+        vbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                           gtk.DEST_DEFAULT_HIGHLIGHT |
+                           gtk.DEST_DEFAULT_ALL,
+                           config.data.drag_type['annotation'] +
+                           config.data.drag_type['timestamp'],
+                           gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+        
         vbox.show_all()
         return vbox
