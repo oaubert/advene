@@ -25,6 +25,7 @@ import os
 import advene.core.config as config
 from advene.gui.views import AdhocView
 import advene.gui.util.dialog as dialog
+from advene.gui.util import get_pixmap_button, enable_drag_source, decode_drop_parameters
 
 name="Videoplayer view plugin"
 
@@ -184,13 +185,13 @@ class VideoPlayer(AdhocView):
     def drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         refTime = None
         if targetType == config.data.target_type['annotation']:
-            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+            sources = [ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
             if sources:
                 # use first annotation as reference
                 refTime = sources[0].fragment.begin
         elif targetType == config.data.target_type['timestamp']:
-            data=decode_drop_parameters(selection.data)
-            refTime=long(data['timestamp'])
+            data = decode_drop_parameters(selection.data)
+            refTime = long(data['timestamp'])
         if refTime is not None:
             self.set_offset(refTime - self.controller.player.current_position_value)
         return True
@@ -268,6 +269,14 @@ class VideoPlayer(AdhocView):
         self.label = gtk.Label()
         self.label.set_alignment(0, 0)
         self.label.modify_font(pango.FontDescription("sans 10"))
+
+        timestamp_button = get_pixmap_button('set-to-now.png')
+        timestamp_button.set_tooltip_text(_("Drag and drop to get player time"))
+        enable_drag_source(timestamp_button, lambda: long(self.player.get_stream_information().position), self.controller)
+        # Cannot use a gtk.ToolButton since it cannot be drag_source
+        ti = gtk.ToolItem()
+        ti.add(timestamp_button)
+        self.toolbar.insert(ti, -1)
 
         black=gtk.gdk.color_parse('black')
         white=gtk.gdk.color_parse('white')
