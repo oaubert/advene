@@ -443,29 +443,6 @@ class AdveneGUI(object):
             except OSError:
                 print "OSerror"
                 pass
-        # Adhoc view toolbuttons signal handling
-        def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
-            if targetType == config.data.target_type['adhoc-view']:
-                selection.set(selection.target, 8, encode_drop_parameters(name=name))
-                return True
-            return False
-
-        def adhoc_view_drag_begin(widget, context, pixmap, view_name):
-            w=gtk.Window(gtk.WINDOW_POPUP)
-            w.set_decorated(False)
-            hb=gtk.HBox()
-            i=gtk.Image()
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-            hb.pack_start(i, expand=False)
-            hb.pack_start(gtk.Label(view_name), expand=False)
-            w.add(hb)
-            w.show_all()
-            context.set_icon_widget(w, 16, 16)
-            return True
-
-        def open_view(widget, name, destination='default'):
-            self.open_adhoc_view(name, destination=destination)
-            return True
 
         def update_quicksearch_sources(mi):
             """Display a dialog allowing to edit quicksearch-sources setting.
@@ -499,119 +476,6 @@ class AdveneGUI(object):
                 self.quicksearch_entry.set_tooltip_text(_('String to search in %s') % label)
             d.destroy()
             return True
-
-        def open_view_menu(widget, name):
-            """Open the view menu.
-
-            In expert mode, directly open the view. Else, display a
-            popup menu proposing the various places where the view can
-            be opened.
-            """
-            if name == 'webbrowser':
-                open_view(widget, name)
-                return True
-
-            if config.data.preferences['expert-mode']:
-                # In expert mode, directly open the view. Experts know
-                # how to use drag and drop anyway.
-                open_view(widget, name)
-                return True
-
-            menu=gtk.Menu()
-
-            for (label, destination) in (
-                (_("Open this view..."), 'default'),
-                (_("...in its own window"), 'popup'),
-                (_("...embedded east of the video"), 'east'),
-                (_("...embedded west of the video"), 'west'),
-                (_("...embedded south of the video"), 'south'),
-                (_("...embedded at the right of the window"), 'fareast')):
-                item = gtk.MenuItem(label)
-                item.connect('activate', open_view, name, destination)
-                menu.append(item)
-
-            menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
-
-            return True
-
-        # Populate the View submenu
-        menu = self.gui.adhoc_view_menuitem.get_submenu()
-        it = gtk.MenuItem(_("All available views"))
-        menu.prepend(it)
-        it.show()
-        m = gtk.Menu()
-        it.set_submenu(m)
-        for name in sorted(self.registered_adhoc_views, reverse=True):
-            cl=self.registered_adhoc_views[name]
-            it=gtk.MenuItem(cl.view_name, use_underline=False)
-            it.set_tooltip_text(cl.tooltip)
-            it.connect('activate', open_view_menu, name)
-            m.prepend(it)
-
-        # Generate the adhoc view buttons
-        hb=self.gui.adhoc_hbox
-        item_index = 0
-        for name, tip, pixmap in (
-            ('timeline', _('Timeline'), 'timeline.png'),
-            ('tree', _('Tree view'), 'treeview.png'),
-            ('finder', _('Package finder'), 'finder.png'),
-            ('transcription', _('Transcription of annotations'), 'transcription.png'),
-
-            ('', '', ''),
-            ('transcribe', _('Note-taking editor'), 'transcribe.png'),
-            ('activebookmarks', _('Active bookmarks'), 'bookmarks.png'),
-            ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
-            ('', '', ''),
-
-            ('tagbag', _("Bag of tags"), 'tagbag.png'),
-            ('browser', _('TALES explorer'), 'browser.png'),
-            ('montage', _("Dynamic montage"), 'montage.png'),
-            ('videoplayer', _("Video player"), 'videoplayer.png'),
-            ('', '', ''),
-
-            ('webbrowser', _('Open a comment view in the web browser'), 'web.png'),
-            ('comment', _("Create or open a comment view"), 'comment.png'),
-            ('', '', ''),
-
-            ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
-            ('editionhistory', _("Display edition history"), 'editionhistory.png'),
-            ('tracepreview', _("Visualise the activity trace preview"), 'trace.png'),
-            ('tracetimeline', _("Visualise the activity trace as a timeline"), 'tracetimeline.png'),
-            ):
-            if not name:
-                # Separator
-                b=gtk.VSeparator()
-                hb.pack_start(b, expand=False, padding=5)
-
-                it = gtk.SeparatorMenuItem()
-                menu.insert(it, item_index)
-                item_index = item_index + 1
-                continue
-            if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
-                continue
-            if name not in ('webbrowser', 'comment') and not name in self.registered_adhoc_views:
-                self.log("Missing basic adhoc view %s" % name)
-                continue
-            b=gtk.Button()
-            i=gtk.Image()
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-            b.add(i)
-            b.set_tooltip_text(tip)
-            b.connect('drag-begin', adhoc_view_drag_begin, pixmap, tip)
-            b.connect('drag-data-get', adhoc_view_drag_sent, name)
-            b.connect('clicked', open_view_menu, name)
-            b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                              config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
-            hb.pack_start(b, expand=False)
-            if name in self.registered_adhoc_views:
-                it = gtk.MenuItem(self.registered_adhoc_views[name].view_name, use_underline=False)
-                it.connect('activate', open_view_menu, name)
-                it.set_tooltip_text(tip)
-                menu.insert(it, item_index)
-                item_index = item_index + 1
-        hb.show_all()
-        menu.show_all()
 
         # Trace switch button
         tsb = self.gui.traces_switch
@@ -707,6 +571,15 @@ class AdveneGUI(object):
                               for size in (16, 32, 48, 64, 128) ]
             self._icon_list=[ i for i in l if i is not None ]
         return self._icon_list
+
+    def set_cursor(self, c):
+        """Set the cursor for the main window.
+
+        The parameter is either a gtk cursor constant (gtk.gdk.CURSOR_WATCH) or None.
+        """
+        if c is not None:
+            c = gtk.gdk.Cursor(c)
+        self.gui.win.window.set_cursor(c)
 
     def update_player_labels(self):
         """Update the representation of player status.
@@ -1238,6 +1111,143 @@ class AdveneGUI(object):
                 menu.append(i)
                 i.show()
             return True
+
+        # Adhoc view toolbuttons signal handling
+        def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
+            if targetType == config.data.target_type['adhoc-view']:
+                selection.set(selection.target, 8, encode_drop_parameters(name=name))
+                return True
+            return False
+
+        def adhoc_view_drag_begin(widget, context, pixmap, view_name):
+            w=gtk.Window(gtk.WINDOW_POPUP)
+            w.set_decorated(False)
+            hb=gtk.HBox()
+            i=gtk.Image()
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
+            hb.pack_start(i, expand=False)
+            hb.pack_start(gtk.Label(view_name), expand=False)
+            w.add(hb)
+            w.show_all()
+            context.set_icon_widget(w, 16, 16)
+            return True
+
+        def open_view(widget, name, destination='default'):
+            self.open_adhoc_view(name, destination=destination)
+            return True
+
+        def open_view_menu(widget, name):
+            """Open the view menu.
+
+            In expert mode, directly open the view. Else, display a
+            popup menu proposing the various places where the view can
+            be opened.
+            """
+            if name == 'webbrowser':
+                open_view(widget, name)
+                return True
+
+            if config.data.preferences['expert-mode']:
+                # In expert mode, directly open the view. Experts know
+                # how to use drag and drop anyway.
+                open_view(widget, name)
+                return True
+
+            menu=gtk.Menu()
+
+            for (label, destination) in (
+                (_("Open this view..."), 'default'),
+                (_("...in its own window"), 'popup'),
+                (_("...embedded east of the video"), 'east'),
+                (_("...embedded west of the video"), 'west'),
+                (_("...embedded south of the video"), 'south'),
+                (_("...embedded at the right of the window"), 'fareast')):
+                item = gtk.MenuItem(label)
+                item.connect('activate', open_view, name, destination)
+                menu.append(item)
+
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+
+            return True
+
+        # Populate the View submenu
+        menu = self.gui.adhoc_view_menuitem.get_submenu()
+        it = gtk.MenuItem(_("All available views"))
+        menu.prepend(it)
+        it.show()
+        m = gtk.Menu()
+        it.set_submenu(m)
+        for name in sorted(self.registered_adhoc_views, reverse=True):
+            cl=self.registered_adhoc_views[name]
+            it=gtk.MenuItem(cl.view_name, use_underline=False)
+            it.set_tooltip_text(cl.tooltip)
+            it.connect('activate', open_view_menu, name)
+            m.prepend(it)
+
+        # Generate the adhoc view buttons
+        hb=self.gui.adhoc_hbox
+        item_index = 0
+        for name, tip, pixmap in (
+            ('timeline', _('Timeline'), 'timeline.png'),
+            ('tree', _('Tree view'), 'treeview.png'),
+            ('finder', _('Package finder'), 'finder.png'),
+            ('transcription', _('Transcription of annotations'), 'transcription.png'),
+
+            ('', '', ''),
+            ('transcribe', _('Note-taking editor'), 'transcribe.png'),
+            ('activebookmarks', _('Active bookmarks'), 'bookmarks.png'),
+            ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
+            ('', '', ''),
+
+            ('tagbag', _("Bag of tags"), 'tagbag.png'),
+            ('browser', _('TALES explorer'), 'browser.png'),
+            ('montage', _("Dynamic montage"), 'montage.png'),
+            ('videoplayer', _("Video player"), 'videoplayer.png'),
+            ('', '', ''),
+
+            ('webbrowser', _('Open a comment view in the web browser'), 'web.png'),
+            ('comment', _("Create or open a comment view"), 'comment.png'),
+            ('', '', ''),
+
+            ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
+            ('editionhistory', _("Display edition history"), 'editionhistory.png'),
+            ('tracepreview', _("Visualise the activity trace preview"), 'trace.png'),
+            ('tracetimeline', _("Visualise the activity trace as a timeline"), 'tracetimeline.png'),
+            ):
+            if not name:
+                # Separator
+                b=gtk.VSeparator()
+                hb.pack_start(b, expand=False, padding=5)
+
+                it = gtk.SeparatorMenuItem()
+                menu.insert(it, item_index)
+                item_index = item_index + 1
+                continue
+            if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
+                continue
+            if name not in ('webbrowser', 'comment') and not name in self.registered_adhoc_views:
+                self.log("Missing basic adhoc view %s" % name)
+                continue
+            b=gtk.Button()
+            i=gtk.Image()
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
+            b.add(i)
+            b.set_tooltip_text(tip)
+            b.connect('drag-begin', adhoc_view_drag_begin, pixmap, tip)
+            b.connect('drag-data-get', adhoc_view_drag_sent, name)
+            b.connect('clicked', open_view_menu, name)
+            b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                              config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
+            hb.pack_start(b, expand=False)
+            if name in self.registered_adhoc_views:
+                it = gtk.MenuItem(self.registered_adhoc_views[name].view_name, use_underline=False)
+                it.connect('activate', open_view_menu, name)
+                it.set_tooltip_text(tip)
+                menu.insert(it, item_index)
+                item_index = item_index + 1
+        hb.show_all()
+        menu.show_all()
 
         menu=gtk.Menu()
         self.gui.select_player_menuitem.set_submenu(menu)
