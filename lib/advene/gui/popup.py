@@ -645,7 +645,7 @@ class Menu:
         add_item(_('Create a new resource file...'), self.create_element, ResourceData, element)
         add_item(_('Insert a new resource file...'), self.insert_resource_data, element)
         add_item(_('Insert a new resource directory...'), self.insert_resource_directory, element)
-        print "Menu for", id(element), id(self.controller.package.resources), element.id
+        #print "Menu for", id(element), id(self.controller.package.resources), element.id
 
         if element.resourcepath == '':
             # Resources root
