@@ -68,19 +68,11 @@ class FileImporter(AdhocView):
 
         self.widget=self.build_widget()
 
-        def initial_focus(w, event):
-            self.filename_entry.grab_focus()
-            # Returning False does not seem enough to remove signal handler.
-            self.widget.disconnect(self.sig)
-            del self.sig
-            return False
-        self.sig = self.widget.connect('expose-event', initial_focus)
-
         if filename:
-            self.filename_entry.set_text(filename)
+            self.fb.set_filename(filename)
 
     def update_importers(self):
-        n=unicode(self.filename_entry.get_text())
+        n=unicode(self.fb.get_filename())
         model=self.importers.get_model()
         model.clear()
         if n.lower().endswith('.azp'):
@@ -135,9 +127,9 @@ class FileImporter(AdhocView):
 
         b.set_label(stop_label)
         self.importers.set_sensitive(False)
-        self.filename_entry.set_sensitive(False)
+        self.fb.set_sensitive(False)
         ic = self.importers.get_current_element()
-        fname = unicode(self.filename_entry.get_text())
+        fname = unicode(self.fb.get_filename())
         self.widget.get_toplevel().set_title(_('Importing %s') % os.path.basename(fname))
 
         if ic == dummy_advene_importer:
@@ -226,35 +218,18 @@ class FileImporter(AdhocView):
             self.update_importers()
             return True
 
-        def select_filename(b):
-            if config.data.path['data']:
-                d=config.data.path['data']
-            else:
-                d=None
-            filename=dialog.get_filename(title=_("Choose the file to import"),
-                                                  action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                                  button=gtk.STOCK_OPEN,
-                                                  default_dir=d,
-                                                  filter='any')
-            if not filename:
-                return True
-            self.filename_entry.set_text(filename)
-            return True
-
         line=gtk.HBox()
         vbox.pack_start(line, expand=False)
 
-        self.filename_entry=gtk.Entry()
-        self.filename_entry.connect('changed', updated_filename)
+        self.fb = gtk.FileChooserButton(_("Choose the file to import"))
+        self.fb.set_action(gtk.FILE_CHOOSER_ACTION_OPEN)
+        self.fb.set_current_folder(config.data.path['data'])
+        self.fb.connect('file-set', updated_filename)
 
         if self.message is not None:
             line.pack_start(gtk.Label(self.message))
         else:
-            line.pack_start(gtk.Label(_("Filename")), expand=False)
-            line.pack_start(self.filename_entry)
-            b=gtk.Button(stock=gtk.STOCK_OPEN)
-            b.connect('clicked', select_filename)
-            line.pack_start(b, expand=False)
+            line.pack_start(self.fb)
 
         self.progressbar=gtk.ProgressBar()
         vbox.pack_start(self.progressbar, expand=False)
