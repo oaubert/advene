@@ -47,16 +47,18 @@ class VideoPlayer(AdhocView):
         self.controller = controller
         self.registered_rules = []
 
+        # Offset in ms
+        self.offset = 0
+        self.uri = uri
+
         # Load options
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         a=dict(arg)
-        if uri is None and a.has_key('uri'):
-            uri=a['uri']
-
-        self.uri = uri
-        # Offset in ms
-        self.offset = 0
+        if uri is None and 'uri' in a:
+            self.uri=a['uri']
+        if 'offset' in a:
+            self.offset=long(a['offset'])
 
         self.widget = self.build_widget()
         if self.uri is None:
