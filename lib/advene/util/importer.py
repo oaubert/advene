@@ -1092,7 +1092,7 @@ class SubtitleImporter(GenericImporter):
                                      help=_("Specify the encoding of the input file (latin1, utf8...)"))
 
     def can_handle(fname):
-        if fname.endswith('.srt'):
+        if fname.lower().endswith('.srt') or fname.lower().endswith('.webvtt'):
             return 100
         else:
             return 0
