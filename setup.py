@@ -114,7 +114,7 @@ def get_packages_list():
     """
     l=[]
     def ispackage(pl, dirname, fnames):
-        if sys.platform == 'linux2' and ('cherrypy' in dirname or dirname.endswith('simpletal')):
+        if 'linux' in sys.platform and ('cherrypy' in dirname or dirname.endswith('simpletal')):
             # On linux (at least, Debian and Ubuntu), cherrypy and
             # simpletal are packaged. So do not consider them in the
             # packages list.
