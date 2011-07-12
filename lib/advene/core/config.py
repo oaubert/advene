@@ -98,7 +98,7 @@ class Config(object):
 
         if os.sys.platform in ( 'win32', 'darwin' ):
             self.os=os.sys.platform
-        elif 'linux' in os.sys.platform:
+        elif 'linux2' in os.sys.platform:
             self.os='linux'
         else:
             print "Warning: undefined platform: ", os.sys.platform
