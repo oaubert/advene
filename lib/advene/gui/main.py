@@ -231,6 +231,7 @@ class AdveneGUI(object):
         """Initializes the GUI and other attributes.
         """
         self.logbuffer = gtk.TextBuffer()
+        self.busy_cursor = gtk.gdk.Cursor(gtk.gdk.WATCH)
 
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
@@ -572,14 +573,10 @@ class AdveneGUI(object):
             self._icon_list=[ i for i in l if i is not None ]
         return self._icon_list
 
-    def set_cursor(self, c):
-        """Set the cursor for the main window.
-
-        The parameter is either a gtk cursor constant (gtk.gdk.CURSOR_WATCH) or None.
+    def set_busy_cursor(self, busy=False):
+        """Un/Set the busy cursor for the main window.
         """
-        if c is not None:
-            c = gtk.gdk.Cursor(c)
-        self.gui.win.window.set_cursor(c)
+        self.gui.win.window.set_cursor(self.busy_cursor if busy else None)
 
     def update_player_labels(self):
         """Update the representation of player status.
@@ -2293,8 +2290,10 @@ class AdveneGUI(object):
         """
         def open_history_file(button, fname):
             try:
+                self.set_busy_cursor(True)
                 self.controller.load_package (uri=fname)
             except (OSError, IOError), e:
+                self.set_busy_cursor(False)
                 dialog.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
                         'filename': fname,
                         'error': unicode(e)}, gtk.MESSAGE_ERROR)
@@ -2708,7 +2707,7 @@ class AdveneGUI(object):
                     pass
         # Reset quicksearch source value
         config.data.preferences['quicksearch-sources']=[ "all_annotations" ]
-        pass
+        self.set_busy_cursor(False)
 
     def manage_package_load (self, context, parameters):
         """Event Handler executed after loading a package.
@@ -3604,6 +3603,7 @@ class AdveneGUI(object):
             # Ask to save it first.
             dialog.message_dialog(_("An unsaved template package exists\nSave it first."))
         else:
+            self.set_busy_cursor(True)
             self.controller.load_package ()
         return True
 
@@ -3670,8 +3670,10 @@ class AdveneGUI(object):
                         return True
 
             try:
+                self.set_busy_cursor(True)
                 self.controller.load_package (uri=filename, alias=alias)
             except (OSError, IOError), e:
+                self.set_busy_cursor(False)
                 dialog.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
                         'filename': filename,
                         'error': unicode(e)}, gtk.MESSAGE_ERROR)
