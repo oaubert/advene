@@ -1397,7 +1397,7 @@ class AdveneGUI(object):
     def update_loop_button(self):
         """Update the loop button tooltip.
         """
-        b=self.loop_toggle_button
+        b=self.player_toolbar.buttons['loop']
         if self.current_annotation is None:
             mes=_("Select an annotation to loop on it")
         else:
@@ -1523,6 +1523,7 @@ class AdveneGUI(object):
         ti.add(self.audio_volume)
         self.audio_volume.connect('value-changed', volume_change)
         self.player_toolbar.insert(ti, -1)
+        self.player_toolbar.buttons['volume'] = ti
 
         # Append the volume control to the toolbar
         def rate_change(spin):
@@ -1538,6 +1539,7 @@ class AdveneGUI(object):
         ti.add(self.rate_control)
         self.rate_control.connect('value-changed', rate_change)
         self.player_toolbar.insert(ti, -1)
+        self.player_toolbar.buttons['rate'] = ti
 
         # Append the loop checkitem to the toolbar
         def loop_toggle_cb(b):
@@ -1546,7 +1548,7 @@ class AdveneGUI(object):
             if b.get_active():
                 if self.current_annotation:
                     def action_loop(context, target):
-                        if (self.loop_toggle_button.get_active()
+                        if (self.player_toolbar.buttons['loop'].get_active()
                             and context.globals['annotation'] == self.current_annotation):
                             self.controller.update_status('set', self.current_annotation.fragment.begin)
                         return True
@@ -1566,10 +1568,11 @@ class AdveneGUI(object):
                         self.controller.event_handler.remove_rule(self.annotation_loop_rule, type_="internal")
             return True
 
-        self.loop_toggle_button=gtk.ToggleToolButton(gtk.STOCK_REFRESH)
+        b = gtk.ToggleToolButton(gtk.STOCK_REFRESH)
+        self.player_toolbar.buttons['loop'] = b
         self.update_loop_button()
-        self.loop_toggle_button.connect('toggled', loop_toggle_cb)
-        self.player_toolbar.insert(self.loop_toggle_button, -1)
+        b.connect('toggled', loop_toggle_cb)
+        self.player_toolbar.insert(b, -1)
 
         # Append the player status label to the toolbar
         ts=gtk.SeparatorToolItem()
@@ -2108,7 +2111,7 @@ class AdveneGUI(object):
         checkbox to activate/deactivate looping.
         """
         self.set_current_annotation(a)
-        self.loop_toggle_button.set_active(True)
+        self.player_toolbar.buttons['loop'].set_active(True)
         return True
 
     def debug_cb(self, window, event, *p):
@@ -3050,7 +3053,7 @@ class AdveneGUI(object):
         is_playing = (c.player.status in (c.player.PlayingStatus, c.player.PauseStatus))
         self.toolbuttons['create_text_annotation'].set_sensitive(is_playing)
         self.toolbuttons['create_svg_annotation'].set_sensitive(is_playing)
-        for l in ('rewind', 'forward', 'previous_frame', 'next_frame'):
+        for l in ('rewind', 'forward', 'previous_frame', 'next_frame', 'loop'):
             self.player_toolbar.buttons[l].set_sensitive(is_playing)
 
         # Check snapshotter activity
