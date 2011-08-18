@@ -347,7 +347,6 @@ class AdveneGUI(object):
             ('save_as', gtk.STOCK_SAVE_AS, self.on_save_as1_activate, _("Save the package with a new name")),
             ('select_file', 'moviefile.png', self.on_b_addfile_clicked, _("Select movie file...")),
             ('select_dvd', gtk.STOCK_CDROM, self.on_b_selectdvd_clicked, _("Select DVD")),
-            ('quit', gtk.STOCK_QUIT, self.on_exit, _("Quit")),
             (None, None, None, None),
             ('undo', gtk.STOCK_UNDO, self.undo, _("Undo")),
             (None, None, None, None),
