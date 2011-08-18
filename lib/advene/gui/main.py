@@ -270,7 +270,7 @@ class AdveneGUI(object):
                     ( "", None, "" ),
                     ), "" ),
             (_("_Edit"), (
-                    ( _("_Undo") + " [Ctrl-Z]", self.on_undo1_activate, "" ),
+                    ( _("_Undo") + " [Ctrl-Z]", self.undo, "" ),
                     ( _("_Find"), self.on_find1_activate, "" ),
                     ( _("_Delete") + " [Del]", self.on_delete1_activate, "" ),
                     ( _("Create"), (
@@ -347,6 +347,8 @@ class AdveneGUI(object):
             self.gui.fileop_toolbar.insert(b, -1)
             if stock == gtk.STOCK_SAVE:
                 self.save_toolbutton = b
+            elif stock == gtk.STOCK_UNDO:
+                self.undo_toolbutton = b
         self.gui.fileop_toolbar.show_all()
 
         # Snapshotter activity monitor
@@ -3046,7 +3048,8 @@ class AdveneGUI(object):
 
         if self.gui.win.get_title().endswith('(*)') ^ self.controller.package._modified:
             self.update_window_title()
-
+        self.undo_toolbutton.set_sensitive(bool(self.controller.undomanager.history))
+            
         # Check snapshotter activity
         s = getattr(self.controller.player, 'snapshotter', None)
         if s:
@@ -3817,13 +3820,6 @@ class AdveneGUI(object):
             dialog.message_dialog(_("No associated video file"),
                                   icon=gtk.MESSAGE_ERROR)
         return False
-
-    def on_undo1_activate (self, button=None, data=None):
-        try:
-            self.controller.undomanager.undo()
-        except AttributeError:
-            pass
-        return True
 
     def on_find1_activate (self, button=None, data=None):
         self.open_adhoc_view('interactivequery', destination='east')
