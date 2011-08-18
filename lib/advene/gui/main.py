@@ -1466,6 +1466,7 @@ class AdveneGUI(object):
             return True
 
         edit_stbv_button=get_small_stock_button(gtk.STOCK_EDIT, on_edit_current_stbv_clicked)
+        edit_stbv_button.set_tooltip_text(_("Edit the current dynamic view."))
         hb.pack_start(edit_stbv_button, expand=False)
 
         def on_stbv_combo_changed (combo=None):
@@ -1476,10 +1477,10 @@ class AdveneGUI(object):
                 return False
             stbv=combo.get_model().get_value(i, 1)
             if stbv is None:
-                edit_stbv_button.set_tooltip_text(_("Create a new dynamic view."))
+                edit_stbv_button.set_sensitive(False)
                 combo.props.tooltip_text=_("No dynamic view")
             else:
-                edit_stbv_button.set_tooltip_text(_("Edit the current dynamic view."))
+                edit_stbv_button.set_sensitive(True)                
                 combo.props.tooltip_text=self.controller.get_title(stbv)
             self.controller.activate_stbv(stbv)
             return True
