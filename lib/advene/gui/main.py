@@ -2599,7 +2599,8 @@ class AdveneGUI(object):
                         'error': unicode(e)}).encode('latin1')
                 view=None
             if view is not None and view.widget.get_parent() is not None:
-                # Widget is already displayed.
+                # Widget is already displayed. Present it.
+                view.widget.get_toplevel().present()
                 view=None
             label=_("Editing %s") % self.controller.get_title(element)
         elif name == 'editaccumulator':
