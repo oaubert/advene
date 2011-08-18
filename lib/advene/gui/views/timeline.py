@@ -2150,24 +2150,24 @@ class TimeLine(AdhocView):
     def layout_drag_received(self, widget, context, x, y, selection, targetType, time):
         """Handle the drop from an annotation to the layout.
         """
+        # We received a drop. Determine the location.
+
+        # Correct y value according to scrollbar position
+        y += widget.parent.get_vscrollbar().get_adjustment().get_value()
+        drop_types=[ at
+                     for (at, p) in self.layer_position.iteritems()
+                     if (y >= p and y <= p + self.button_height + config.data.preferences['timeline']['interline-height']) ]
+        
         if targetType == config.data.target_type['annotation']:
             sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
-            # We received a drop. Determine the location.
-
-            # Correct y value according to scrollbar position
-            y += widget.parent.get_vscrollbar().get_adjustment().get_value()
-
-            a=[ at
-                for (at, p) in self.layer_position.iteritems()
-                if (y >= p and y <= p + self.button_height) ]
-            if a:
+            if drop_types:
                 # Copy/Move to a[0]
                 if config.data.os == 'win32':
                     # Control/Shift mods for DND is broken on win32. Force ACTION_ASK.
                     ac=gtk.gdk.ACTION_ASK
                 else:
                     ac=context.actions
-                self.move_or_copy_annotations(sources, a[0], position=self.pixel2unit(self.adjustment.value + x, absolute=True), action=ac)
+                self.move_or_copy_annotations(sources, drop_types[0], position=self.pixel2unit(self.adjustment.value + x, absolute=True), action=ac)
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
@@ -2178,14 +2178,10 @@ class TimeLine(AdhocView):
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
-            # We received a drop. Determine the location.
-            a=[ at
-                for (at, p) in self.layer_position.iteritems()
-                if (y >= p and y <= p + self.button_height) ]
-            if a:
-                # Copy/Move to a[0]
-                if source != a[0]:
-                    self.copy_annotation_type(source, a[0])
+            if drop_types:
+                # Copy/Move to drop_types[0]
+                if source != drop_types[0]:
+                    self.copy_annotation_type(source, drop_types[0])
                 else:
                     # Create an annotation in the type.
                     self.controller.create_annotation(position=self.pixel2unit(self.adjustment.value + x, absolute=True),
@@ -2202,11 +2198,8 @@ class TimeLine(AdhocView):
             return True
         elif targetType == config.data.target_type['timestamp']:
             # We received a drop. Create an annotation.
-            a=[ at
-                for (at, p) in self.layer_position.iteritems()
-                if (y >= p and y <= p + self.button_height) ]
-            if a:
-                typ=a[0]
+            if drop_types:
+                typ=drop_types[0]
             else:
                 typ=self.create_annotation_type()
             if typ is not None:
