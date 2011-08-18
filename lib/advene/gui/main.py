@@ -3052,6 +3052,8 @@ class AdveneGUI(object):
         is_playing = (c.player.status in (c.player.PlayingStatus, c.player.PauseStatus))
         self.toolbuttons['create_text_annotation'].set_sensitive(is_playing)
         self.toolbuttons['create_svg_annotation'].set_sensitive(is_playing)
+        for l in ('rewind', 'forward', 'previous_frame', 'next_frame'):
+            self.player_toolbar.buttons[l].set_sensitive(is_playing)
 
         # Check snapshotter activity
         s = getattr(c.player, 'snapshotter', None)
