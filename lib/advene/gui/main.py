@@ -319,36 +319,35 @@ class AdveneGUI(object):
             )
 
         self.gui = DummyGlade(menu_definition)
-        for (stock, callback, tip) in (
-            (gtk.STOCK_OPEN, self.on_open1_activate, _("Open a package file")),
-            (gtk.STOCK_SAVE, self.on_save1_activate, _("Save the current package")),
-            (gtk.STOCK_SAVE_AS, self.on_save_as1_activate, _("Save the package with a new name")),
-            ('moviefile.png', self.on_b_addfile_clicked, _("Select movie file...")),
-            (gtk.STOCK_CDROM, self.on_b_selectdvd_clicked, _("Select DVD")),
-            (gtk.STOCK_QUIT, self.on_exit, _("Quit")),
-            (None, None, None),
-            (gtk.STOCK_UNDO, self.undo, _("Undo")),
-            (None, None, None),
-            ('text_annotation.png', self.on_create_text_annotation, _("Create a text annotation")), 
-            ('svg_annotation.png', self.on_create_svg_annotation, _("Create a graphical annotation")),
+        self.toolbuttons = {}
+        for (ident, stock, callback, tip) in (
+            ('open', gtk.STOCK_OPEN, self.on_open1_activate, _("Open a package file")),
+            ('save', gtk.STOCK_SAVE, self.on_save1_activate, _("Save the current package")),
+            ('save_as', gtk.STOCK_SAVE_AS, self.on_save_as1_activate, _("Save the package with a new name")),
+            ('select_file', 'moviefile.png', self.on_b_addfile_clicked, _("Select movie file...")),
+            ('select_dvd', gtk.STOCK_CDROM, self.on_b_selectdvd_clicked, _("Select DVD")),
+            ('quit', gtk.STOCK_QUIT, self.on_exit, _("Quit")),
+            (None, None, None, None),
+            ('undo', gtk.STOCK_UNDO, self.undo, _("Undo")),
+            (None, None, None, None),
+            ('create_text_annotation', 'text_annotation.png', self.on_create_text_annotation, _("Create a text annotation")),
+            ('create_svg_annotation', 'svg_annotation.png', self.on_create_svg_annotation, _("Create a graphical annotation")),
            ):
             if stock is None:
-                b=gtk.SeparatorToolItem()
+                b = gtk.SeparatorToolItem()
             elif stock.startswith('gtk-'):
-                b=gtk.ToolButton(stock)
+                b = gtk.ToolButton(stock)
             else:
-                i=gtk.Image()
+                i = gtk.Image()
                 i.set_from_file( config.data.advenefile( ('pixmaps', stock ) ) )
-                b=gtk.ToolButton(icon_widget=i)
+                b = gtk.ToolButton(icon_widget=i)
             if tip is not None:
                 b.set_tooltip_text(tip)
             if callback is not None:
                 b.connect('clicked', callback)
             self.gui.fileop_toolbar.insert(b, -1)
-            if stock == gtk.STOCK_SAVE:
-                self.save_toolbutton = b
-            elif stock == gtk.STOCK_UNDO:
-                self.undo_toolbutton = b
+            if ident is not None:
+                self.toolbuttons[ident] = b
         self.gui.fileop_toolbar.show_all()
 
         # Snapshotter activity monitor
@@ -2767,9 +2766,9 @@ class AdveneGUI(object):
         t=" - ".join((_("Advene"), unicode(os.path.basename(self.controller.package.uri)), self.controller.get_title(self.controller.package)))
         if self.controller.package._modified:
             t += " (*)"
-            self.save_toolbutton.set_sensitive(True)
+            self.toolbuttons['save'].set_sensitive(True)
         else:
-            self.save_toolbutton.set_sensitive(False)
+            self.toolbuttons['save'].set_sensitive(False)
         self.gui.win.set_title(t)
         return True
 
@@ -3028,12 +3027,13 @@ class AdveneGUI(object):
         This method is regularly called by the Gtk mainloop, and
         updates elements with a slower rate than update_display
         """
-        vol=self.controller.player.sound_get_volume() / 100.0
+        c = self.controller
+        vol = c.player.sound_get_volume() / 100.0
         if self.audio_volume.get_value() != vol:
             self.audio_volume.set_value(vol)
 
         def do_save(aliases):
-            for alias, p in self.controller.packages.iteritems():
+            for alias, p in c.packages.iteritems():
                 if alias == 'advene':
                     continue
                 if p._modified:
@@ -3041,18 +3041,21 @@ class AdveneGUI(object):
                     if n.startswith('http:'):
                         continue
                     if n.startswith('file://'):
-                        n=n[7:]
-                    n=n+'.backup'+e
+                        n = n[7:]
+                    n = n + '.backup' + e
                     print "Temporarily saving ", alias, "as", n
                     p.save(name=n)
             return True
 
-        if self.gui.win.get_title().endswith('(*)') ^ self.controller.package._modified:
+        if self.gui.win.get_title().endswith('(*)') ^ c.package._modified:
             self.update_window_title()
-        self.undo_toolbutton.set_sensitive(bool(self.controller.undomanager.history))
-            
+        self.toolbuttons['undo'].set_sensitive(bool(c.undomanager.history))
+        is_playing = (c.player.status in (c.player.PlayingStatus, c.player.PauseStatus))
+        self.toolbuttons['create_text_annotation'].set_sensitive(is_playing)
+        self.toolbuttons['create_svg_annotation'].set_sensitive(is_playing)
+
         # Check snapshotter activity
-        s = getattr(self.controller.player, 'snapshotter', None)
+        s = getattr(c.player, 'snapshotter', None)
         if s:
             if s.timestamp_queue.empty():
                 self.snapshotter_monitor_icon.set_state('idle')
@@ -3068,14 +3071,14 @@ class AdveneGUI(object):
                 # Need to save
                 l=[ alias for (alias, p) in self.controller.packages.iteritems() if p._modified and alias != 'advene' ]
                 if l:
-                    if self.controller.tracers and config.data.preferences['record-actions']:
+                    if c.tracers and config.data.preferences['record-actions']:
                         try:
-                            fn = self.controller.tracers[0].export()
+                            fn = c.tracers[0].export()
                             print "trace exported to %s" % fn
                         except Exception, e:
                             print "error exporting trace : %s" % unicode(e).encode('utf-8')
                     if config.data.preferences['package-auto-save'] == 'always':
-                        self.controller.queue_action(do_save, l)
+                        c.queue_action(do_save, l)
                     else:
                         # Ask before saving. Use the non-modal dialog
                         # to avoid locking the interface
@@ -3086,10 +3089,10 @@ class AdveneGUI(object):
 
         # Fix the webserver reaction time on win32
         if config.data.os == 'win32':
-            if self.controller.player.status in self.active_player_status:
-                i=config.data.play_interval
+            if c.player.status in self.active_player_status:
+                i = config.data.play_interval
             else:
-                i=config.data.noplay_interval
+                i = config.data.noplay_interval
             if sys.getcheckinterval() != i:
                 sys.setcheckinterval(i)
 
