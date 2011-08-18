@@ -3043,7 +3043,6 @@ class AdveneGUI(object):
                     if n.startswith('file://'):
                         n = n[7:]
                     n = n + '.backup' + e
-                    print "Temporarily saving ", alias, "as", n
                     p.save(name=n)
             return True
 
