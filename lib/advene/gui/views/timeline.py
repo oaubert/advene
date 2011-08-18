@@ -2769,12 +2769,13 @@ class TimeLine(AdhocView):
             else:
                 l=[a
                    for a in typ.annotations
-                   if a.fragment.end < p ]
+                   if a.fragment.begin < p ]
                 # Sort in reverse order
                 l.sort(key=lambda a: a.fragment.begin, reverse=True)
             if l:
                 a=l[0]
                 self.controller.update_status("set", position=a.fragment.begin)
+                self.set_annotation(a)
             return True
 
         def restrict_playing(m, at, w):
