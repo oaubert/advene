@@ -244,7 +244,7 @@ class AdveneGUI(object):
             (_("_File"), (
                     ( _("_New package"), self.on_new1_activate, _("Create a new package")),
                     ( _("_Open package"), self.on_open1_activate, _("Open a package") ),
-                    ( _("_Save package"), self.on_save1_activate, _("Save the package") ),
+                    ( _("_Save package") + " [Ctrl-S]", self.on_save1_activate, _("Save the package") ),
                     ( _("Save package as..."), self.on_save_as1_activate, _("Save the package as...") ),
                     ( _("Close package"), self.on_close1_activate, _("Close the package") ),
                     ( "", None, "" ),
@@ -270,9 +270,9 @@ class AdveneGUI(object):
                     ( "", None, "" ),
                     ), "" ),
             (_("_Edit"), (
-                    ( _("_Undo"), self.on_undo1_activate, "" ),
+                    ( _("_Undo") + " [Ctrl-Z]", self.on_undo1_activate, "" ),
                     ( _("_Find"), self.on_find1_activate, "" ),
-                    ( _("_Delete"), self.on_delete1_activate, "" ),
+                    ( _("_Delete") + " [Del]", self.on_delete1_activate, "" ),
                     ( _("Create"), (
                             ( _("Schema"), self.on_create_schema_activate, "" ),
                             ( _("View"), self.on_create_view_activate, "" ),
@@ -280,7 +280,7 @@ class AdveneGUI(object):
                             ( _("Annotation Type"), self.on_create_annotation_type_activate, "" ),
                             ( _("Relation Type"), self.on_create_relation_type_activate, "" ),
                             ), "" ),
-                    ( _("Package _Imports"), self.on_package_imports1_activate, _("Edit imported element from other packages") ),
+#                    ( _("Package _Imports"), self.on_package_imports1_activate, _("Edit imported element from other packages") ),
 #                    ( _("_Standard Ruleset"), self.on_edit_ruleset1_activate, _("Edit the standard rules") ),
                     ( _("P_ackage properties"), self.on_package_properties1_activate, _("Edit package properties") ),
                     ( _("P_references"), self.on_preferences1_activate, _("Interface preferences") ),
@@ -290,7 +290,7 @@ class AdveneGUI(object):
                     ( _("_Start Web Browser"), self.on_adhoc_web_browser_activate, _("Start the web browser") ),
                     ( "", None, "" ),
                     ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)")),
-                    ( _("Evaluator"), self.on_evaluator2_activate, _("Open python evaluator window") ),
+                    ( _("Evaluator") + " [Ctrl-e]", self.on_evaluator2_activate, _("Open python evaluator window") ),
                     ( _("Webserver log"), self.on_webserver_log1_activate, "" ),
                     ( _("_MediaInformation"), self.on_view_mediainformation_activate, _("Display information about the media") ),
                     ), "" ),
