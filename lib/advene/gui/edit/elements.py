@@ -1519,30 +1519,41 @@ class TextContentHandler (ContentHandler):
             textview.set_editable (self.editable)
             textview.set_wrap_mode (gtk.WRAP_CHAR)
             textview.set_auto_indent(True)
+            b.begin_not_undoable_action()
             b.set_text (self.element.data)
+            b.end_not_undoable_action()
             textview.connect('key-press-event', self.key_pressed_cb)
 
-            def undo(b):
-                b=textview.get_buffer()
-                if b.can_undo():
-                    b.undo()
-                return True
-
-            def redo(b):
-                b=textview.get_buffer()
-                if b.can_redo():
-                    b.redo()
-                return True
-
             if not compact:
-                b=gtk.ToolButton(gtk.STOCK_UNDO)
-                b.connect('clicked', undo)
-                tb.insert(b, -1)
+                b_undo = gtk.ToolButton(gtk.STOCK_UNDO)
+                tb.insert(b_undo, -1)
 
-                b=gtk.ToolButton(gtk.STOCK_REDO)
-                b.connect('clicked', redo)
-                tb.insert(b, -1)
+                b_redo = gtk.ToolButton(gtk.STOCK_REDO)
+                tb.insert(b_redo, -1)
 
+                def undo_cb(buf):
+                    b_undo.set_sensitive(buf.can_undo())
+                    b_redo.set_sensitive(buf.can_redo())
+                    return True
+
+                def undo(b):
+                    b=textview.get_buffer()
+                    if b.can_undo():
+                        b.undo()
+                    undo_cb(b)
+                    return True
+
+                def redo(b):
+                    b=textview.get_buffer()
+                    if b.can_redo():
+                        b.redo()
+                    undo_cb(b)
+                    return True
+
+                textview.get_buffer().connect('changed', undo_cb)
+                b_undo.connect('clicked', undo)
+                b_redo.connect('clicked', redo)
+                undo_cb(textview.get_buffer())
         else:
             textview = gtk.TextView ()
             textview.set_editable (self.editable)
