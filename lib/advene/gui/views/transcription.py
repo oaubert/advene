@@ -520,10 +520,6 @@ class TranscriptionView(AdhocView):
 
     def update_model(self, package=None):
         self.regenerate_model()
-        if not self.model:
-            # No more elements. It most probably is because the source
-            # expression is now invalid. Close the view.
-            self.close()
         self.generate_buffer_content()
         return True
 
