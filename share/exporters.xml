@@ -359,7 +359,7 @@ div.${a/id} {
     <view dc:creator="oaubert" dc:date="2008-01-17" id="Advene2" viewable-class="package">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">Advene2</title>
-	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">advene2.xml</extension>
+	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">cxp</extension>
       </meta>
       <content encoding="utf-8" mime-type="application/xml">&lt;!-- Cinelab Advene XML exporter - v0.2 --&gt;
 &lt;package xmlns=&quot;http://advene.org/ns/cinelab/&quot;
