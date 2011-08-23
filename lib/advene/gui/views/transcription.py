@@ -193,29 +193,6 @@ class TranscriptionView(AdhocView):
             self.generate_buffer_content()
         return True
 
-    def close(self, *p):
-        l=self.check_modified()
-        if l:
-            if self.options['representation'] and not parsed_representation.match(self.options['representation']):
-                def close_cb():
-                    AdhocView.close(self)
-                    return True
-
-                dialog.message_dialog(label=_("%d annotation(s) were modified\nbut we cannot propagate the modifications\nsince the representation parameter is used.") % len(l), callback=close_cb)
-            else:
-                def handle_modified():
-                    self.log(_("Updating modified annotations"))
-                    self.ignore_updates = True
-                    self.update_modified(l)
-                    AdhocView.close(self)
-                    return True
-                dialog.message_dialog(label=_("%d annotations were modified.\nDo you want to update their content?") % len(l),
-                                      icon=gtk.MESSAGE_QUESTION,
-                                      callback=handle_modified)
-        else:
-            AdhocView.close(self)
-        return True
-
     def check_modified(self):
         b=self.textview.get_buffer()
         modified = []
