@@ -245,6 +245,10 @@ class AnnotationTable(AdhocView):
         def drag_received_cb(widget, context, x, y, selection, targetType, time):
             """Handle the drop of an annotation type.
             """
+            if context.get_source_widget().is_ancestor(self.widget):
+                # Ignore drops from our own widget
+                return False
+
             if targetType == config.data.target_type['annotation']:
                 sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
                 if sources:
@@ -499,6 +503,10 @@ class GenericTable(AdhocView):
         def drag_received_cb(widget, context, x, y, selection, targetType, time):
             """Handle the drop of an annotation type.
             """
+            if context.get_source_widget().is_ancestor(self.widget):
+                # Ignore drops from our own widget
+                return False
+
             if targetType == config.data.target_type['annotation']:
                 sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
                 if sources:
