@@ -1626,7 +1626,7 @@ class TimeLine(AdhocView):
                     # We have a simple representation (here/content/parsed/name)
                     # so we can update the name field.
                     name=m.group(1)
-                    reg = re.compile('^' + name + '=(.+?)$', re.MULTILINE)
+                    reg = re.compile('^' + name + '=(.*?)$', re.MULTILINE)
                     if reg.search(ann.content.data):
                         r = reg.sub(name + '=' + unicode(widget.get_text()).replace('\n', '\\n'), ann.content.data)
                     else:
