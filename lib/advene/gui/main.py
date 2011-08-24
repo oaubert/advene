@@ -294,7 +294,7 @@ class AdveneGUI(object):
                     ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)")),
                     ( _("Evaluator") + " [Ctrl-e]", self.on_evaluator2_activate, _("Open python evaluator window") ),
                     ( _("Webserver log"), self.on_webserver_log1_activate, "" ),
-                    ( _("_MediaInformation"), self.on_view_mediainformation_activate, _("Display information about the media") ),
+                    #( _("_MediaInformation"), self.on_view_mediainformation_activate, _("Display information about the media") ),
                     ), "" ),
             (_("_Player"), (
                     ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code") ),
