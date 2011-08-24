@@ -30,7 +30,7 @@ from advene.model.resources import Resources, ResourceData
 from advene.model.query import Query
 from advene.model.view import View
 from advene.gui.views import AdhocView
-from advene.gui.util import drag_data_get_cb, get_target_types, contextual_drag_begin
+from advene.gui.util import drag_data_get_cb, get_target_types, contextual_drag_begin, dialog
 
 import advene.gui.edit.elements
 import advene.gui.popup
@@ -468,6 +468,15 @@ class TreeWidget(AdhocView):
 
         tree_view.connect('drag-data-get', drag_data_get_cb, self.controller)
 
+        tree_view.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                gtk.DEST_DEFAULT_HIGHLIGHT |
+                                gtk.DEST_DEFAULT_ALL,
+                                config.data.drag_type['annotation']
+                                + config.data.drag_type['annotation-type']
+                                + config.data.drag_type['timestamp'],
+                                gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_ASK )
+        tree_view.connect('drag-data-received', self.drag_received)
+
         try:
             # set_enable_tree_lines is available in gtk >= 2.10
             tree_view.set_enable_tree_lines(True)
@@ -662,12 +671,190 @@ class TreeWidget(AdhocView):
             print "Unknown target type for drag: %d" % targetType
         return True
 
+    def create_relation(self, source, dest, rt):
+        """Create the reation of type rt between source and dest.
+        """
+        # Get the id from the idgenerator
+        p=self.controller.package
+        id_=self.controller.package._idgenerator.get_id(Relation)
+        relation=p.createRelation(ident=id_,
+                                 members=(source, dest),
+                                 type=rt)
+        p.relations.append(relation)
+        self.controller.notify("RelationCreate", relation=relation)
+        return True
+
+    def move_or_copy_annotations(self, sources, dest, action=gtk.gdk.ACTION_ASK):
+        """Display a popup menu to move or copy the sources annotation to the dest annotation type.
+
+        If action is specified, then the popup menu will be shortcircuited.
+        """
+        # FIXME: this method should be factorized with the original
+        # one (from timeline.py) and used in other views (finder...)
+        if not sources:
+            return True
+        source=sources[0]
+
+        def move_annotation(i, an, typ, position=None):
+            if an.relations and an.type != typ:
+                dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
+                                      icon=gtk.MESSAGE_WARNING)
+                return True
+
+            self.transmuted_annotation=self.controller.transmute_annotation(an,
+                                                                            typ,
+                                                                            delete=True)
+            return self.transmuted_annotation
+
+        def copy_annotation(i, an, typ, position=None, relationtype=None):
+            self.transmuted_annotation=self.controller.transmute_annotation(an,
+                                                                            typ,
+                                                                            delete=False)
+            if relationtype is not None:
+                # Directly create a relation
+                self.create_relation(an, self.transmuted_annotation, relationtype)
+            return self.transmuted_annotation
+
+        def copy_selection(i, sel, typ, delete=False):
+            for an in sel:
+                if an.typ != typ:
+                    self.transmuted_annotation=self.controller.transmute_annotation(an,
+                                                                                    typ,
+                                                                                    delete=delete)
+            return self.transmuted_annotation
+
+        # If there are compatible relation-types, propose to directly create a relation
+        relationtypes = helper.matching_relationtypes(self.controller.package,
+                                                      source.type,
+                                                      dest)
+
+        if action == gtk.gdk.ACTION_COPY:
+            # Direct copy
+            if len(sources) > 1:
+                if source.type == dest:
+                    return True
+                copy_selection(None, sources, dest)
+            else:
+                copy_annotation(None, source, dest)
+            return True
+        elif action == gtk.gdk.ACTION_MOVE:
+            if len(sources) > 1:
+                if source.type == dest:
+                    return True
+                copy_selection(None, sources, dest, delete=True)
+            else:
+                move_annotation(None, source, dest)
+            return True
+
+        # ACTION_ASK: Popup a menu to propose the drop options
+        menu=gtk.Menu()
+
+        dest_title=self.controller.get_title(dest)
+
+        if len(sources) > 1:
+            if source.type == dest:
+                return True
+            item=gtk.MenuItem(_("Duplicate selection to type %s") % dest_title, use_underline=False)
+            item.connect('activate', copy_selection, sources, dest)
+            menu.append(item)
+            item=gtk.MenuItem(_("Move selection to type %s") % dest_title, use_underline=False)
+            item.connect('activate', copy_selection, sources, dest, True)
+            menu.append(item)
+
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            return True
+
+        if source.type != dest:
+            item=gtk.MenuItem(_("Duplicate annotation to type %s") % dest_title, use_underline=False)
+            item.connect('activate', copy_annotation, source, dest)
+            menu.append(item)
+
+            item=gtk.MenuItem(_("Move annotation to type %s") % dest_title, use_underline=False)
+            item.connect('activate', move_annotation, source, dest)
+            menu.append(item)
+            if source.relations:
+                item.set_sensitive(False)
+
+        relationtypes=helper.matching_relationtypes(self.controller.package,
+                                                    source.type,
+                                                    dest)
+        if relationtypes:
+            if source.type != dest:
+                item=gtk.MenuItem(_("Duplicate and create a relation"), use_underline=False)
+                # build a submenu
+                sm=gtk.Menu()
+                for rt in relationtypes:
+                    sitem=gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
+                    sitem.connect('activate', copy_annotation, source, dest, None, rt)
+                    sm.append(sitem)
+                menu.append(item)
+                item.set_submenu(sm)
+
+        menu.show_all()
+        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        
+    def create_relation_popup(self, source, dest):
+        # FIXME: Idem as above: should be factorized with the original of timeline.py
+        # Popup a menu to propose the drop options
+        menu=gtk.Menu()
+
+        def create_relation(item, s, d, t):
+            self.create_relation(s, d, t)
+            return True
+
+        def create_relation_type_and_relation(item, s, d):
+            if self.controller.gui:
+                sc=self.controller.gui.ask_for_schema(text=_("Select the schema where you want to\ncreate the new relation type."), create=True)
+                if sc is None:
+                    return None
+                cr=self.controller.gui.create_element_popup(type_=RelationType,
+                                                            parent=sc,
+                                                            controller=self.controller)
+                rt=cr.popup(modal=True)
+                self.create_relation(s, d, rt)
+            return True
+
+        relationtypes=helper.matching_relationtypes(self.controller.package,
+                                                    source.type,
+                                                    dest.type)
+        item=gtk.MenuItem(_("Create a relation"))
+        menu.append(item)
+
+        sm=gtk.Menu()
+        for rt in relationtypes:
+            sitem=gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
+            sitem.connect('activate', create_relation, source, dest, rt)
+            sm.append(sitem)
+        if True:
+            # Propose to create a new one
+            sitem=gtk.MenuItem(_("Create a new relation-type."), use_underline=False)
+            sitem.connect('activate', create_relation_type_and_relation, source, dest)
+            sm.append(sitem)
+        item.set_submenu(sm)
+
+        menu.show_all()
+        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+
     def drag_received(self, widget, context, x, y, selection, targetType, time):
-        #print "drag_received event for %s" % widget.annotation.content.data
-        if targetType == config.data.target_type['annotation']:
-            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8').split('\n')[0])
-            dest=widget.annotation
-            self.create_relation_popup(source, dest)
-        else:
-            print "Unknown target type for drop: %d" % targetType
+        widget.stop_emission("drag-data-received")
+        t = widget.get_path_at_pos(x, y)
+        if t is not None:
+            path, col, cx, cy = t
+            it = self.model.get_iter(path)
+            node = self.model.get_value(it,
+                                        AdveneTreeModel.COLUMN_ELEMENT)
+            if not node:
+                return True
+            if isinstance(node, Annotation):
+                # Drop on an Annotation
+                if targetType == config.data.target_type['annotation']:
+                    source = self.controller.package.annotations.get(unicode(selection.data, 'utf8').split('\n')[0])
+                    self.create_relation_popup(source, node)
+            elif isinstance(node, AnnotationType):
+                if targetType == config.data.target_type['annotation']:
+                    sources = [ self.controller.package.annotations.get(u) for u in unicode(selection.data, 'utf8').split('\n') ]
+                    if sources:
+                        self.move_or_copy_annotations(sources, node)
+            return True
         return True
