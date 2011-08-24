@@ -301,7 +301,7 @@ class AdveneGUI(object):
                     ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
                     ( _("Reset ImageCache"), self.on_reset_imagecache_activate, _("Reset the ImageCache") ),
                     ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
-                    ( _("Capture screenshots"), self.generate_screenshots, _("Generate screenshots for the current video") ),
+                    #( _("Capture screenshots"), self.generate_screenshots, _("Generate screenshots for the current video") ),
                     ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds") ),
                     ( _("Detect shots"), self.on_shotdetect_activate, _("Automatically detect shots")),
                     ( _("_Select player"), None, _("Select the player plugin") ),
