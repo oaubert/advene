@@ -782,16 +782,6 @@ class AdveneController(object):
         self.event_handler.internal_rule (event="PackageLoad",
                                           method=self.manage_package_load)
 
-        if config.data.webserver['mode']:
-            try:
-                self.server = AdveneWebServer(controller=self, port=config.data.webserver['port'])
-                serverthread = threading.Thread (target=self.server.start)
-                serverthread.setName("Advene webserver")
-                serverthread.start ()
-            except socket.error:
-                if config.data.os != 'win32':
-                    self.busy_port_info()
-                self.log(_("Deactivating web server"))
         media=None
         # Arguments handling
         for uri in args:
@@ -844,6 +834,16 @@ class AdveneController(object):
 
         self.player.check_player()
 
+        if config.data.webserver['mode']:
+            try:
+                self.server = AdveneWebServer(controller=self, port=config.data.webserver['port'])
+                serverthread = threading.Thread (target=self.server.start)
+                serverthread.setName("Advene webserver")
+                serverthread.start ()
+            except socket.error:
+                if config.data.os != 'win32':
+                    self.busy_port_info()
+                self.log(_("Deactivating web server"))
         return True
 
     def create_annotation(self, position, type, duration=None, content=None):
