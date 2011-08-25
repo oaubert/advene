@@ -23,11 +23,10 @@ It depends on a Controller instance to be able to interact with the video player
 
 import advene.core.config as config
 
-import re
 import gtk
 import advene.util.helper as helper
 from advene.gui.widget import TimestampRepresentation
-from advene.gui.util import encode_drop_parameters, decode_drop_parameters, dialog
+from advene.gui.util import encode_drop_parameters, decode_drop_parameters
 from gettext import gettext as _
 
 class TimeAdjustment:
@@ -95,7 +94,10 @@ class TimeAdjustment:
             al.add(i)
             b.add(al)
 
-            b.connect('clicked', self.update_value_cb, incr_value)
+            def increment_value_cb(widget, increment):
+                self.set_value(self.value + increment)
+                return True
+            b.connect('clicked', increment_value_cb, incr_value)
             if incr_value < 0:
                 tip=_("Decrement value by %.2f s") % (incr_value / 1000.0)
             else:
@@ -120,7 +122,7 @@ class TimeAdjustment:
             width=50
         else:
             width=100
-        self.image=TimestampRepresentation(self.value, self.controller, width, epsilon=1000/25, visible_label=False)
+        self.image=TimestampRepresentation(self.value, self.controller, width, epsilon=1000/25, visible_label=False, callback=self.set_value)
         self.image.connect('button-press-event', image_button_press)
         self.image.connect('clicked', image_button_clicked)
         self.image.set_tooltip_text(_("Click to play\nControl+click to set to current time\Scroll to modify value (with control/shift)\nRight-click to invalidate screenshot"))
@@ -183,12 +185,8 @@ class TimeAdjustment:
             elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_RIGHT:
                 incr=i
 
-            v=self.value
-            v += incr
-            if self.callback and not self.callback(v):
+            if not self.set_value(self.value + incr):
                 return True
-            self.value=v
-            self.update_display()
             return True
 
         if self.editable:
@@ -210,17 +208,11 @@ class TimeAdjustment:
         if targetType == config.data.target_type['annotation']:
             source_uri=unicode(selection.data, 'utf8').split('\n')[0]
             source=self.controller.package.annotations.get(source_uri)
-            if self.callback and not self.callback(source.fragment.begin):
-                return True
-            self.value = source.fragment.begin
-            self.update_display()
+            self.set_value(source.fragment.begin)
         elif targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.data)
             v=long(float(data['timestamp']))
-            if self.callback and not self.callback(v):
-                return True
-            self.value=v
-            self.update_display()
+            self.set_value(v)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -243,11 +235,7 @@ class TimeAdjustment:
         return True
 
     def use_current_position(self, button):
-        v=self.controller.player.current_position_value
-        if self.callback and not self.callback(v):
-            return True
-        self.value=v
-        self.update_display()
+        self.set_value(self.controller.player.current_position_value)
         return True
 
     def update_snapshot(self, button):
@@ -259,17 +247,12 @@ class TimeAdjustment:
         t=unicode(self.entry.get_text())
         v=helper.parse_time(t)
         if v is not None and v != self.value:
-            v=self.check_bound_value(v)
-            if self.callback and not self.callback(v):
+            if not self.set_value(v):
                 return False
-            self.value = v
-            if self.sync_video:
-                self.controller.move_position(self.value, relative=False)
-            self.update_display()
         return False
 
     def check_bound_value(self, value):
-        if value < 0:
+        if value < 0 or value is None:
             value = 0
         elif (self.controller.cached_duration > 0
               and value > self.controller.cached_duration):
@@ -284,20 +267,25 @@ class TimeAdjustment:
         self.entry.set_text(helper.format_time(self.value))
         self.image.value=self.value
 
-    def update_value_cb(self, widget, increment):
-        if not self.editable:
-            return True
-        v=self.check_bound_value(self.value + increment)
-        if self.callback and not self.callback(v):
-            return True
-        self.value=v
-        if self.sync_video:
-            self.controller.move_position(self.value, relative=False)
-        self.update_display()
-        return True
-
     def get_widget(self):
         return self.widget
 
     def get_value(self):
         return self.value
+
+    def set_value(self, v):
+        """Set the new value.
+
+        The method does various consistency checks, and can leave the
+        value unset if a callback is defined and returns False.
+        """
+        if self.value == v:
+            return True
+        v = self.check_bound_value(v)
+        if self.callback and not self.callback(v):
+            return False
+        self.value=v
+        self.update_display()
+        if self.sync_video:
+            self.controller.move_position(self.value, relative=False)
+        return True
