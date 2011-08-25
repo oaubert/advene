@@ -3445,6 +3445,15 @@ class AdveneGUI(object):
         self.open_adhoc_view('shotvalidation', annotationtype=at)
         return True
 
+    def adjust_timestamp(self, t):
+        """Display the FrameSelector and return the selected value.
+        """
+        fs = FrameSelector(self.controller, t,
+                           label=_("Click on the frame corresponding to the timestamp value"),
+                           border_mode='both')
+        new = fs.get_value(_("Set new timestamp value"))
+        return new
+
     def display_statistics(self, annotations, label=None):
         """Display statistics about the given annotations.
         """
