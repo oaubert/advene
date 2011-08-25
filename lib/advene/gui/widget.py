@@ -818,7 +818,7 @@ class TimestampRepresentation(gtk.Button):
     @ivar label: the label (timestamp) widget
     @type label: gtk.Label
     """
-    def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None, visible_label=True, bgcolor=None):
+    def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None, visible_label=True, bgcolor=None, callback=None):
         """Instanciate a new TimestampRepresentation.
 
         @param value: the timestamp value
@@ -835,6 +835,8 @@ class TimestampRepresentation(gtk.Button):
         @type visible_label: boolean
         @param bgcolor: background color
         @type bgcolor: string
+        @value callback: a callback that will be called before value modification
+        @type callback: method. If it returns False, then the modification will be cancelled
         """
         super(TimestampRepresentation, self).__init__()
         self._value=value
@@ -854,6 +856,7 @@ class TimestampRepresentation(gtk.Button):
         self._bgcolor = None
         # Displayed text.
         self._text = '<span size="xx-small">%(timestamp)s</span>'
+        self.callback = callback
 
         box=gtk.VBox()
         self.image=gtk.Image()
@@ -932,6 +935,11 @@ class TimestampRepresentation(gtk.Button):
     def get_value(self):
         return self._value
     def set_value(self, v):
+        if self.callback is not None and v != self._value:
+            if self.callback(v) is False:
+                # If self.callback explicitly returns False (not
+                # None), then cancel the value setting.
+                return False
         if self.highlight:
             self.controller.notify('BookmarkUnhighlight', timestamp=self._value, immediate=True)
             self.highlight=False
@@ -1052,14 +1060,20 @@ class TimestampRepresentation(gtk.Button):
         item.connect('activate', self.refresh_snapshot)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Use current player position"))
-        item.connect('activate', lambda i: self.set_value(p.current_position_value))
-        if p.status != p.PauseStatus and p.status != p.PlayingStatus:
-            item.set_sensitive(False)
-        menu.append(item)
+        if self.callback is not None:
+            item = gtk.MenuItem(_("Use current player position"))
+            item.connect('activate', lambda i: self.set_value(p.current_position_value))
+            if p.status != p.PauseStatus and p.status != p.PlayingStatus:
+                item.set_sensitive(False)
+            menu.append(item)
+
+            item = gtk.MenuItem(_("Adjust timestamp"))
+            item.connect('activate', lambda i: self.set_value(self.controller.gui.adjust_timestamp(self.get_value())))
+            menu.append(item)
 
         if self.extend_popup_menu is not None:
             self.extend_popup_menu(menu, self)
+
         menu.show_all()
 
         if popup:
