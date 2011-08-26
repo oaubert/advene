@@ -39,6 +39,9 @@ gtk.gdk.threads_init ()
 
 from threading import Event, Thread
 import Queue
+from Queue import PriorityQueue
+import heapq
+
 try:
     from evaluator import Evaluator
 except ImportError:
@@ -86,6 +89,26 @@ class NotifySink(gst.BaseSink):
 gst.element_register(NotifySink, 'notifysink')
 gobject.type_register(NotifySink)
 
+class UniquePriorityQueue(Queue.PriorityQueue):
+    """PriorityQueue with unique elements.
+
+    Adapted from http://stackoverflow.com/questions/5997189/how-can-i-make-a-unique-value-priority-queue-in-python
+    Thanks to Eli Bendersky.
+    """
+    def _init(self, maxsize):
+        PriorityQueue._init(self, maxsize)
+        self.values = set()
+
+    def _put(self, item, heappush=heapq.heappush):
+        if item[1] not in self.values:
+            self.values.add(item[1])
+            PriorityQueue._put(self, item, heappush)
+
+    def _get(self, heappop=heapq.heappop):
+        item = PriorityQueue._get(self, heappop)
+        self.values.remove(item[1])
+        return item
+
 class Snapshotter(object):
     """Snapshotter class.
 
@@ -105,12 +128,7 @@ class Snapshotter(object):
     def __init__(self, notify=None, width=None):
         self.notify=notify
         # Snapshot queue handling
-        try:
-            self.timestamp_queue=Queue.PriorityQueue()
-        except AttributeError:
-            # python <= 2.5 does not implement PriorityQueue. Use a
-            # plain Queue.
-            self.timestamp_queue=Queue.Queue()
+        self.timestamp_queue=UniquePriorityQueue()
 
         self.snapshot_ready=Event()
         self.thread_running=False
