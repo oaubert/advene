@@ -16,12 +16,12 @@ python-gstreamer module (>= 0.10).
 You will need the following python packages (the package names are from
 Debian, they may slightly vary on other distributions) :
 
-python >= 2.4
+python >= 2.5
 python-gtk2 (>=2.12)
-python-cherrypy3 (>=3.0.0) [for convenience, a copy of cherrypy is included in
+python-cherrypy3 (>=3.0.0) [for convenience, a copy of cherrypy may be included in
 this Advene distribution]
-python-simpletal (>=3.12) [for convenience, a copy of simpletal is included in
-this Advene distribution] 
+python-simpletal (>=3.12) [for convenience, a copy of simpletal may be
+included in this Advene distribution] 
 
 For the gstreamer plugin:
 python-gst0.10
@@ -39,14 +39,12 @@ distribution.
 You should install in this order (note the version numbers) :
 
 Gtk/win32 v. >= 2.12 : http://gladewin32.sourceforge.net/ (runtime environment)
-v2.12 recommended to avoid problems with Vista environment.
 
-Python    v. 2.4 : http://www.python.org/ftp/python/2.4.4/Python-2.4.4.exe
-[ From http://python.org/ ]
+Python  >=  v. 2.5 : http://python.org/
 
-PyGtk for python2.4: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/ [ From http://www.pygtk.org ]
+PyGtk for python2.5: http://www.pygtk.org/
 
-CherryPy: http://download.cherrypy.org/cherrypy/3.0.1/ [for
+CherryPy: http://download.cherrypy.org/cherrypy/ [for
 convenience, a copy of cherrypy is included in this Advene
 distribution]
 
@@ -55,24 +53,25 @@ http://www.owlfish.com/software/simpleTAL/download.html [for
 convenience, a copy of simpletal is included in this Advene
 distribution]
 
-VLC + python-vlc mediacontrol extension (cf
+Optionaly, VLC + python-vlc mediacontrol extension (cf
 http://download.gna.org/advene/win32/ )
 
 ** Mac OS X version
 
 From macports (http://www.macports.org/), install :
 
-    * python24 [Note: after its install, make sure that
+    * python25 or later [Note: after its install, make sure that
       /opt/local/bin/python exists, and that your path begins with
       /opt/local/bin. Else, the installation of the other packages
       could use the /usr/bin/python version]
-    * py-gtk2 >= 2.12
-
-You will also need the vlc.so python module to control VLC. You can
-download a precompiled version for vlc0.8.6c/i3386 from
-http://liris.cnrs.fr/advene/download/mac/vlc-bindings/ or compile it
-by yourself (which is hard for vlc <= 0.8.6, and should work better
-for vlc >= 0.9.0).
+    * py25-gtk (>= 2.12)
+    * py25-goocanvas
+    * librsvg (optional)
+    * py25-pyobjc2 (optional)
+    * py25-gst-python
+    * gst-plugins-base
+    * gst-plugins-good gst-plugins-bad gst-plugins-ugly
+    * gst-ffmpeg
 
 * Testing
 
