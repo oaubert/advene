@@ -636,8 +636,8 @@ class TimeLine(AdhocView):
         self.update_model(self.controller.package, partial_update=True)
         return True
 
-    def set_annotation(self, a=None):
-        if self.locked_inspector:
+    def set_annotation(self, a=None, force=False):
+        if not force and self.locked_inspector:
             return
         self.quickview.set_annotation(a)
         for v in self._slave_views:
@@ -1546,6 +1546,7 @@ class TimeLine(AdhocView):
         """
         if event.button == 1 and getattr(widget, '_single_click_guard', None):
             # Single click on an annotation -> lock inspector
+            self.set_annotation(annotation, force=True)
             self.locked_inspector = True
             self.log(_("Inspector locked on annotation %s. Click in the background to unlock it.") % self.controller.get_title(annotation))
             self.controller.gui.set_current_annotation(annotation)
