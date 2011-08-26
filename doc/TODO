@@ -1,3 +1,5 @@
+* QRcode extractor
+
 * Have webcherry listen on both ipv4/ipv6
 
 * advene.js:  adapt behaviour (modify video url, display warning) based on jquery.browser
@@ -9,8 +11,6 @@
 * Shortcuts FCP: cf mail YP 2010/12/14
 
 * example SVG + lien -> json
-
-* Remove embedded ElementTree now that python2.5 is required
 
 * Update default-fps value when data is available from player
 
@@ -2634,6 +2634,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Pb when merging package with new view (double action) - see modele_analyse
 
 * Empty imagecache option
+
+* Remove embedded ElementTree now that python2.5 is required
 
 
 # Local Variables:

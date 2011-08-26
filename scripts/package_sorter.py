@@ -21,8 +21,8 @@ by timestamp, and all other elements ordered by id.
 """
 import sys
 
-import elementtree.ElementTree
-from elementtree.ElementTree import parse, Element, ElementTree, QName
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import parse, Element, ElementTree, QName
 import string
 
 def tag(name):
@@ -89,9 +89,9 @@ def sort_time(source):
 
 # Namespace handling
 ns='http://experience.univ-lyon1.fr/advene/ns'
-elementtree.ElementTree._namespace_map[ns]=''
-elementtree.ElementTree._namespace_map['http://purl.org/dc/elements/1.1/']='dc'
-elementtree.ElementTree._namespace_map['http://experience.univ-lyon1.fr/advene/ns/advenetool']='advenetool'
+ET._namespace_map[ns]=''
+ET._namespace_map['http://purl.org/dc/elements/1.1/']='dc'
+ET._namespace_map['http://experience.univ-lyon1.fr/advene/ns/advenetool']='advenetool'
 
 # Hack into elementtree to generate a readable (namespace-prefix-wise)
 # Advene package
@@ -103,7 +103,7 @@ def my_fixtag(tag, namespaces):
     namespace_uri, tag = string.split(tag[1:], "}", 1)
     prefix = namespaces.get(namespace_uri)
     if prefix is None:
-        prefix = elementtree.ElementTree._namespace_map.get(namespace_uri)
+        prefix = ET._namespace_map.get(namespace_uri)
         if prefix is None:
             prefix = "ns%d" % len(namespaces)
         namespaces[namespace_uri] = prefix
@@ -123,7 +123,7 @@ def my_fixtag(tag, namespaces):
         return "%s:%s" % (prefix, tag), xmlns
 
 # Hook into elementtree
-elementtree.ElementTree.fixtag = my_fixtag
+ET.fixtag = my_fixtag
 
 tree = parse(sys.argv[1])
 source = tree.getroot()
