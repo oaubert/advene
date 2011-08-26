@@ -844,6 +844,7 @@ class AdveneController(object):
                 if config.data.os != 'win32':
                     self.busy_port_info()
                 self.log(_("Deactivating web server"))
+                self.server = None
         return True
 
     def create_annotation(self, position, type, duration=None, content=None):
@@ -1089,6 +1090,14 @@ class AdveneController(object):
         if defaultview:
             url=u"%s/view/%s" % (url, defaultview)
         return url
+
+    def get_urlbase(self):
+        """Return the URL base.
+        """
+        if self.server is not None:
+            return self.server.urlbase
+        else:
+            return "http:///"
 
     def get_title(self, element, representation=None, max_size=None):
         """Return the title for the given element.
