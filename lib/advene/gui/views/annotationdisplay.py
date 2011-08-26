@@ -19,6 +19,7 @@
 """Module displaying the contents of an annotation.
 """
 
+import gobject
 import gtk
 from gettext import gettext as _
 
@@ -207,9 +208,29 @@ class AnnotationDisplay(AdhocView):
         h.pack_start(self.label['end'], expand=False)
         v.pack_start(h, expand=False)
 
+        def handle_motion(widget, event):
+            if isinstance(self.annotation, Annotation):
+                i = self.label['image']
+                i.epsilon = self.annotation.fragment.duration / widget.allocation.width
+                v = self.annotation.fragment.begin + i.epsilon * 20 * int(event.x / 20)
+                i.set_value(v)
+            return True
+
+        def handle_leave(widget, event):
+            if isinstance(self.annotation, Annotation):
+                i = self.label['image']
+                i.epsilon = config.data.preferences['bookmark-snapshot-precision']
+                i.set_value(self.annotation.fragment.begin)
+            return True
+
         fr = gtk.Expander ()
         fr.set_label(_("Screenshot"))
         self.label['image'] = TimestampRepresentation(-1, self.controller, width=config.data.preferences['drag-snapshot-width'], epsilon=config.data.preferences['bookmark-snapshot-precision'], visible_label=False)
+        self.label['image'].add_events(gtk.gdk.POINTER_MOTION_MASK
+                                       | gtk.gdk.LEAVE_NOTIFY_MASK)
+        self.label['image'].connect('motion-notify-event', handle_motion)
+        self.label['image'].connect('leave-notify-event', handle_leave)
+
         fr.add(self.label['image'])
         fr.set_expanded(True)
         v.pack_start(fr, expand=False)
