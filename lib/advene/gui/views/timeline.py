@@ -243,6 +243,8 @@ class TimeLine(AdhocView):
             'white': name2color('white'),
             }
 
+        self.locked_inspector = False
+
         def handle_autoscroll_combo(combo):
             self.options['autoscroll'] = combo.get_current_element()
             return True
@@ -635,6 +637,8 @@ class TimeLine(AdhocView):
         return True
 
     def set_annotation(self, a=None):
+        if self.locked_inspector:
+            return
         self.quickview.set_annotation(a)
         for v in self._slave_views:
             m=getattr(v, 'set_annotation', None)
@@ -1541,6 +1545,9 @@ class TimeLine(AdhocView):
         """Handle button release on annotation widgets.
         """
         if event.button == 1 and getattr(widget, '_single_click_guard', None):
+            # Single click on an annotation -> lock inspector
+            self.locked_inspector = True
+            self.log(_("Inspector locked on annotation %s. Click in the background to unlock it.") % self.controller.get_title(annotation))
             self.controller.gui.set_current_annotation(annotation)
             # Goto annotation
             c=self.controller
@@ -2303,6 +2310,8 @@ class TimeLine(AdhocView):
     def layout_button_release_cb(self, widget=None, event=None):
         """Handle mouse button release in timeline window.
         """
+        # Any click in the layout background unlocks the inspector
+        self.locked_inspector = False
         if event.button == 1:
             # Left click button in the upper part of the layout
             # or double-click anywhere in the background
