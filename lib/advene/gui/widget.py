@@ -935,6 +935,8 @@ class TimestampRepresentation(gtk.Button):
     def get_value(self):
         return self._value
     def set_value(self, v):
+        if v == self._value:
+            return
         if self.callback is not None and v != self._value:
             if self.callback(v) is False:
                 # If self.callback explicitly returns False (not
