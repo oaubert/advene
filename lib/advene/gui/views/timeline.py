@@ -49,6 +49,9 @@ def register(controller):
 # Temporary workaround to timeline update performance issue
 MAX_ANNOTATIONS=1500
 
+UNLOCKED_INSPECTOR_LABEL = _('Inspector')
+LOCKED_INSPECTOR_LABEL = "%s [%s]" % (UNLOCKED_INSPECTOR_LABEL, _("locked"))
+
 parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 
 class QuickviewBar(gtk.HBox):
@@ -1554,7 +1557,7 @@ class TimeLine(AdhocView):
             # Single click on an annotation -> lock inspector
             self.set_annotation(annotation, force=True)
             self.locked_inspector = True
-            self.log(_("Inspector locked on annotation %s. Click in the background to unlock it.") % self.controller.get_title(annotation))
+            self.inspector_frame.set_label(LOCKED_INSPECTOR_LABEL)
             self.controller.gui.set_current_annotation(annotation)
             # Goto annotation
             c=self.controller
@@ -2319,6 +2322,8 @@ class TimeLine(AdhocView):
         """
         # Any click in the layout background unlocks the inspector
         self.locked_inspector = False
+        self.inspector_frame.set_label(UNLOCKED_INSPECTOR_LABEL)
+
         if event.button == 1:
             # Left click button in the upper part of the layout
             # or double-click anywhere in the background
@@ -3259,9 +3264,9 @@ class TimeLine(AdhocView):
         self.inspector_pane=gtk.HPaned()
         self.inspector_pane.pack1(vbox, resize=True, shrink=True)
         a=AnnotationDisplay(controller=self.controller)
-        f=gtk.Frame(_('Inspector'))
-        f.add(a.widget)
-        self.inspector_pane.pack2(f, resize=False, shrink=True)
+        self.inspector_frame=gtk.Frame(UNLOCKED_INSPECTOR_LABEL)
+        self.inspector_frame.add(a.widget)
+        self.inspector_pane.pack2(self.inspector_frame, resize=False, shrink=True)
         self.controller.gui.register_view (a)
         a.set_master_view(self)
         a.widget.show_all()
