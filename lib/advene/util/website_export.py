@@ -198,7 +198,7 @@ class WebsiteExporter(object):
                 used_overlays.add( (ident, tales) )
                 continue
 
-            l=url.replace(self.controller.server.urlbase, '')
+            l=url.replace(self.controller.get_urlbase(), '')
 
             if l.startswith('http:'):
                 # It is an external url

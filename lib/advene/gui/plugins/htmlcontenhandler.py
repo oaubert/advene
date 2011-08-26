@@ -81,17 +81,13 @@ class AnnotationPlaceholder:
             return """<span advene:error="Non-existent annotation"></span>"""
 
         ctx=self.controller.build_context(self.annotation)
-        try:
-            urlbase=self.controller.server.urlbase.rstrip('/')
-        except AttributeError:
-            urlbase='http://localhost:1234'
         d={
             'id': self.annotation.id,
             'href': urlbase + ctx.evaluateValue('here/player_url'),
             'imgurl': urlbase + ctx.evaluateValue('here/snapshot_url'),
             'timestamp': helper.format_time(self.annotation.fragment.begin),
             'content': self.controller.get_title(self.annotation),
-            'urlbase': urlbase,
+            'urlbase': self.controller.get_urlbase().rstrip('/'),
             }
         data=[ """<span class="advene:annotation" advene:annotation="%s" advene:presentation="%s">""" % (self.annotation.id, ':'.join(self.presentation)) ]
 
@@ -272,15 +268,11 @@ class AnnotationTypePlaceholder:
             return """<span advene:error="Non-existent annotation type"></span>"""
 
         ctx=self.controller.build_context(self.annotationtype)
-        try:
-            urlbase=self.controller.server.urlbase.rstrip('/')
-        except AttributeError:
-            urlbase='http://localhost:1234'
         d={
             'id': self.annotationtype.id,
             'href': urlbase + ctx.evaluateValue('here/absolute_url'),
             'content': self.controller.get_title(self.annotationtype),
-            'urlbase': urlbase,
+            'urlbase': self.controller.get_urlbase().rstrip('/'),
             }
         data=[ """<span class="advene:annotationtype" advene:annotationtype="%s" advene:presentation="%s">""" % (self.annotationtype.id, ':'.join(self.presentation)) ]
 
