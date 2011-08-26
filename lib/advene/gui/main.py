@@ -1263,6 +1263,9 @@ class AdveneGUI(object):
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
             hb.pack_start(b, expand=False)
+            if name == 'webbrowser' and self.controller.server is None:
+                b.set_sensitive(False)
+                b.set_tooltip_text(_("The webserver could not be started. Static views cannot be accessed."))
             if name in self.registered_adhoc_views:
                 it = gtk.MenuItem(self.registered_adhoc_views[name].view_name, use_underline=False)
                 it.connect('activate', open_view_menu, name)
