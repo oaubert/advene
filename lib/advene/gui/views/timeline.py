@@ -292,6 +292,12 @@ class TimeLine(AdhocView):
         # Coordinates of the selected region.
         self.layout_selection=[ [None, None], [None, None] ]
 
+        # Session-set variable: if we get a horizontal scroll signal,
+        # then we know that the device pointer for the session is able
+        # to do both (vertical and horizontal), and we can act
+        # accordingly.
+        self.can_do_horizontal_scroll = False
+
         self.layout = gtk.Layout ()
         self.layout.add_events( gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.BUTTON1_MOTION_MASK )
         self.scale_layout = gtk.Layout()
@@ -2647,6 +2653,9 @@ class TimeLine(AdhocView):
     def layout_scroll_cb(self, widget=None, event=None):
         """Handle mouse scrollwheel events.
         """
+        if event.direction == gtk.gdk.SCROLL_RIGHT or event.direction == gtk.gdk.SCROLL_LEFT:
+            self.can_do_horizontal_scroll = True
+
         zoom=event.state & gtk.gdk.CONTROL_MASK
         if zoom:
             # Control+scroll: zoom in/out
@@ -2658,8 +2667,15 @@ class TimeLine(AdhocView):
             mouse_position=self.pixel2unit(event.x, absolute=True)
         else:
             # Plain scroll: scroll the timeline
-            a = self.adjustment
-            incr = a.step_increment
+            if (self.can_do_horizontal_scroll 
+                and (event.direction == gtk.gdk.SCROLL_UP 
+                     or event.direction == gtk.gdk.SCROLL_DOWN)):
+                # Vertical scroll with a device that knows how to do horizontal. Let's scroll vertically
+                a = self.vadjustment
+                incr = a.step_increment
+            else:
+                a = self.adjustment
+                incr = a.step_increment
 
         if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
             val = a.value + incr
@@ -3126,7 +3142,8 @@ class TimeLine(AdhocView):
         sw_layout = gtk.ScrolledWindow ()
         sw_layout.set_policy (gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
         sw_layout.set_hadjustment (self.adjustment)
-        sw_layout.set_vadjustment (sw_legend.get_vadjustment())
+        self.vadjustment = sw_legend.get_vadjustment()
+        sw_layout.set_vadjustment (self.vadjustment)
         sw_layout.add (self.layout)
         content_pane.add2 (sw_layout)
 
