@@ -32,6 +32,13 @@ try:
 except ImportError:
     aeidon = None
 
+# Reset textdomain. aeidon/gaupol improperly overwrites textdomain
+# with its own. It should follow
+# http://www.python.org/doc//current/library/gettext.html#localizing-your-module
+# instead.
+import advene.core.config as config
+config.init_gettext()
+
 def register(controller=None):
     if aeidon is not None:
         controller.register_importer(AeidonImporter)
