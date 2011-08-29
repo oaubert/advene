@@ -520,7 +520,14 @@ class OptionParserGUI(EditWidget):
                     self.add_spin(name, o.dest, o.help, -sys.maxint, sys.maxint)
                 elif o.type == 'string':
                     self.options[o.dest] = val or ""
-                    self.add_entry(name, o.dest, o.help)
+                    if o.help.endswith('[F]'):
+                        # Filename
+                        self.add_file_selector(name, o.dest, o.help)
+                    elif o.help.endswith('[D]'):
+                        # Directory
+                        self.add_dir_selector(name, o.dest, o.help)
+                    else:
+                        self.add_entry(name, o.dest, o.help)
                 elif o.type == 'float':
                     self.options[o.dest] = val
                     self.add_float_spin(name, o.dest, o.help, -sys.maxint, sys.maxint, 2)
