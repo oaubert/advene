@@ -258,7 +258,7 @@ class AdveneGUI(object):
                     ( _("Associate a _Video stream"), self.on_select_a_video_stream1_activate, _("Enter a video stream address") ),
                     ( "", None, "" ),
                     ( _("_Import File"), self.on_import_file1_activate, _("Import data from an external source") ),
-                    ( _("Process video"), self.on_process_video_activate, _("Import data from video processing algorithms")),
+                    ( _("_Process video"), self.on_process_video_activate, _("Import data from video processing algorithms")),
                     ( "", None, "" ),
                     ( _("Merge package"), self.on_merge_package_activate, _("Merge elements from another package") ),
                     ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters") ),
