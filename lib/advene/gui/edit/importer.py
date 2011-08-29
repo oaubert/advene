@@ -134,7 +134,6 @@ class FileImporter(AdhocView):
         self.fb.set_sensitive(False)
         ic = self.importers.get_current_element()
         fname = unicode(self.fb.get_filename())
-        self.widget.get_toplevel().set_title(_('Importing %s') % os.path.basename(fname))
 
         if ic == dummy_advene_importer:
             # Invoke the package merge functionality.
