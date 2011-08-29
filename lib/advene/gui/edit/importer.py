@@ -70,9 +70,13 @@ class FileImporter(AdhocView):
 
         if filename:
             self.fb.set_filename(filename)
+            self.update_importers(filename=filename)
 
-    def update_importers(self):
-        n=unicode(self.fb.get_filename())
+    def update_importers(self, filename=None):
+        if filename is not None:
+            n = filename
+        else:
+            n=unicode(self.fb.get_filename())
         model=self.importers.get_model()
         model.clear()
         if n.lower().endswith('.azp'):
