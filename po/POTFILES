@@ -8,9 +8,9 @@
 ../lib/advene/plugins/montagerenderer.py
 ../lib/advene/plugins/shotdetectapp.py
 ../lib/advene/plugins/tts.py
+../lib/advene/plugins/fcp.py
 ../lib/advene/plugins/mpeg7.py
 ../lib/advene/plugins/cinelab.py
-../lib/advene/plugins/aiff.py
 ../lib/advene/plugins/dcp.py
 ../lib/advene/plugins/brltty.py
 ../lib/advene/plugins/ttl.py
