@@ -37,6 +37,14 @@ import mimetypes
 import operator
 import time
 
+APP='advene'
+
+def init_gettext():
+    import gettext
+    gettext.bindtextdomain(APP, data.path['locale'])
+    gettext.textdomain(APP)
+    gettext.install(APP, localedir=data.path['locale'], unicode=True)
+
 def find_in_path(name):
     """Return the fullpath of the filename name if found in $PATH
 
