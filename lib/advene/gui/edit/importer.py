@@ -249,8 +249,11 @@ class FileImporter(AdhocView):
         exp = gtk.Expander(_("Options"))
         exp.set_expanded(True)
         self.options_frame = gtk.VBox()
-        exp.add(self.options_frame)
-        vbox.pack_start(exp, expand=False)
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw.add_with_viewport(self.options_frame)
+        exp.add(sw)
+        vbox.pack_start(exp, expand=True)
 
         bb=gtk.HButtonBox()
 
