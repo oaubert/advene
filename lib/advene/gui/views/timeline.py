@@ -47,9 +47,6 @@ name="Timeline view plugin"
 def register(controller):
     controller.register_viewclass(TimeLine)
 
-UNLOCKED_INSPECTOR_LABEL = _('Inspector')
-LOCKED_INSPECTOR_LABEL = "%s [%s]" % (UNLOCKED_INSPECTOR_LABEL, _("locked"))
-
 parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 
 class QuickviewBar(gtk.HBox):
@@ -1545,7 +1542,7 @@ class TimeLine(AdhocView):
             # Single click on an annotation -> lock inspector
             self.set_annotation(annotation, force=True)
             self.locked_inspector = True
-            self.inspector_frame.set_label(LOCKED_INSPECTOR_LABEL)
+            self.locked_icon.show()
             self.controller.gui.set_current_annotation(annotation)
             # Goto annotation
             c=self.controller
@@ -2337,7 +2334,7 @@ class TimeLine(AdhocView):
         """
         # Any click in the layout background unlocks the inspector
         self.locked_inspector = False
-        self.inspector_frame.set_label(UNLOCKED_INSPECTOR_LABEL)
+        self.locked_icon.hide()
 
         if event.button == 1:
             # Left click button in the upper part of the layout
@@ -3279,7 +3276,19 @@ class TimeLine(AdhocView):
         self.inspector_pane=gtk.HPaned()
         self.inspector_pane.pack1(vbox, resize=True, shrink=True)
         a=AnnotationDisplay(controller=self.controller)
-        self.inspector_frame=gtk.Frame(UNLOCKED_INSPECTOR_LABEL)
+        self.inspector_frame=gtk.Frame()
+        hbox = gtk.HBox()
+        hbox.pack_start(gtk.Label(_('Inspector')), expand=False)
+        def unlock(b):
+            b.hide()
+            self.locked_inspector = False
+            return True
+        self.locked_icon = get_pixmap_button('small_locked.png', unlock)
+        self.locked_icon.set_tooltip_text(_("Inspector locked. Click here or in the timeline background to unlock."))
+        self.locked_icon.set_no_show_all(True)
+        hbox.pack_start(self.locked_icon, expand=False)
+        self.inspector_frame.set_label_widget(hbox)
+
         self.inspector_frame.add(a.widget)
         self.inspector_pane.pack2(self.inspector_frame, resize=False, shrink=True)
         self.controller.gui.register_view (a)
