@@ -58,8 +58,7 @@ class QuickviewBar(gtk.HBox):
         self.controller=controller
         self.begin=gtk.Label()
         self.end=gtk.Label()
-        self.content=gtk.Label()
-        self.content.set_single_line_mode(True)
+        self.content=gtk.ProgressBar()
         self.content.set_ellipsize(pango.ELLIPSIZE_MIDDLE)
 
         self.annotation=None
@@ -68,10 +67,11 @@ class QuickviewBar(gtk.HBox):
         self.pack_start(self.begin, expand=False)
         self.pack_start(self.end, expand=False)
 
-    def set_text(self, s):
+    def set_text(self, s, progress=0):
         self.begin.set_text("")
         self.end.set_text("")
-        self.content.set_markup(u"<b>%s</b>" % s.replace('<', '&lt;'))
+        self.content.set_text(s)
+        self.content.set_fraction(progress)
 
     def set_annotation(self, a=None):
         if a is None:
@@ -100,7 +100,8 @@ class QuickviewBar(gtk.HBox):
         self.annotation=a
         self.begin.set_text(b)
         self.end.set_text(e)
-        self.content.set_markup(u"<b>%s</b>" % c.replace('<', '&lt;'))
+        self.content.set_text(c)
+        self.content.set_fraction(0)
 
 class TimeLine(AdhocView):
     """Representation of a set of annotations placed on a timeline.
@@ -1923,7 +1924,8 @@ class TimeLine(AdhocView):
         def create_annotations(annotations, length):
             i = counter[0]
             if i < length:
-                self.quickview.set_text(_("Displaying %d / %d annotations...") % (min(i + count, length), length))
+                self.quickview.set_text(_("Displaying %d / %d annotations...") % (min(i + count, length), length), 
+                                        1.0 * (i+count) / length)
                 for a in annotations[i:i+count]:
                     self.create_annotation_widget(a)
                 counter[0] += count
@@ -1937,11 +1939,13 @@ class TimeLine(AdhocView):
                 return False
         if l:
             self.layout.freeze_child_notify()
+            length = len(l)
             if hasattr(self, 'quickview'):
-                self.quickview.set_text(_("Displaying %d / %d annotations...") % (count, len(l)))
+                self.quickview.set_text(_("Displaying %d / %d annotations...") % (count, length),
+                                        1.0 * count / length)
                 self.locked_inspector = True
             self.controller.gui.set_busy_cursor(True)
-            gobject.idle_add(create_annotations, l, len(l))
+            gobject.idle_add(create_annotations, l, length)
 
         self.layout.set_size (u2p (self.maximum - self.minimum),
                               max(self.layer_position.values() or (0,))
