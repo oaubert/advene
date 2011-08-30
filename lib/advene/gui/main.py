@@ -2448,7 +2448,7 @@ class AdveneGUI(object):
             elif node.tag == 'layout':
                 layout=node
         # Restore layout
-        if layout and not preserve_layout:
+        if layout is not None and not preserve_layout:
             w=self.gui.win
             w.move(long(layout.attrib['x']), long(layout.attrib['y']))
             w.resize(min(long(layout.attrib['width']), gtk.gdk.screen_width()),
