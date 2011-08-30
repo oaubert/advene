@@ -21,6 +21,7 @@ import re
 import operator
 import cgi
 import struct
+import gobject
 import gtk
 import cairo
 import pango
@@ -1925,12 +1926,24 @@ class TimeLine(AdhocView):
     def populate (self):
         u2p = self.unit2pixel
         if self.list is None:
-            l=self.controller.package.annotations
+            l = self.controller.package.annotations
         else:
-            l=self.list
+            l = self.list
 
-        for annotation in l:
-            self.create_annotation_widget(annotation)
+        counter = [ 0 ]
+        def create_annotations(annotations):
+            i = counter[0]
+            if i < len(annotations):
+                for a in annotations[i:i+100]:
+                    self.create_annotation_widget(a)
+                counter[0] += 100
+                return True
+            else:
+                self.controller.gui.set_busy_cursor(False)
+                return False
+        if l:
+            self.controller.gui.set_busy_cursor(True)
+            gobject.idle_add(create_annotations, l)
 
         self.layout.set_size (u2p (self.maximum - self.minimum),
                               max(self.layer_position.values() or (0,))
