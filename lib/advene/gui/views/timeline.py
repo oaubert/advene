@@ -71,7 +71,7 @@ class QuickviewBar(gtk.HBox):
         self.begin.set_text("")
         self.end.set_text("")
         self.content.set_text(s)
-        self.content.set_fraction(progress)
+        self.content.set_fraction(min(progress, 1.0))
 
     def set_annotation(self, a=None):
         if a is None:
