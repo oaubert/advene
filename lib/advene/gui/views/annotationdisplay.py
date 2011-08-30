@@ -243,7 +243,6 @@ class AnnotationDisplay(AdhocView):
                 self.annotation.content.data = self.label['contents'].get_text()
                 self.controller.notify("AnnotationEditEnd", annotation=self.annotation)
                 self.controller.notify('EditSessionEnd', element=self.annotation)
-
             return True
 
         hbox = gtk.HBox()
@@ -286,6 +285,15 @@ class AnnotationDisplay(AdhocView):
             return b.get_text(*b.get_bounds())
         c.get_text = get_text.__get__(c)
         self.sw['contents']=sw
+
+        def handle_keypress(widget, event):
+            if (event.keyval == gtk.keysyms.Return 
+                and event.state & gtk.gdk.CONTROL_MASK
+                and widget.get_buffer().get_modified()):
+                handle_ok(ok_button)
+                return True
+            return False
+        c.connect('key-press-event', handle_keypress)
 
         image=self.label['imagecontents']=gtk.Image()
 
