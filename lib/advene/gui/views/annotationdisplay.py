@@ -26,7 +26,7 @@ from gettext import gettext as _
 import advene.core.config as config
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
-from advene.gui.util import overlay_svg_as_pixbuf
+from advene.gui.util import overlay_svg_as_pixbuf, get_pixmap_button
 from advene.model.annotation import Annotation
 from advene.model.schema import AnnotationType
 from advene.gui.widget import TimestampRepresentation
@@ -235,18 +235,56 @@ class AnnotationDisplay(AdhocView):
         fr.set_expanded(True)
         v.pack_start(fr, expand=False)
 
-        f=gtk.Frame(label=_("Contents"))
+        # Contents frame
+        def handle_ok(b):
+            b.hide()
+            if isinstance(self.annotation, Annotation):
+                self.controller.notify('EditSessionStart', element=self.annotation, immediate=True)
+                self.annotation.content.data = self.label['contents'].get_text()
+                self.controller.notify("AnnotationEditEnd", annotation=self.annotation)
+                self.controller.notify('EditSessionEnd', element=self.annotation)
+
+            return True
+
+        hbox = gtk.HBox()
+        hbox.pack_start(gtk.Label(_("Contents")), expand=False)
+        ok_button=get_pixmap_button('small_ok.png', handle_ok)
+        ok_button.set_relief(gtk.RELIEF_NONE)
+        ok_button.set_tooltip_text(_("Validate"))
+        ok_button.set_no_show_all(True)
+        hbox.pack_start(ok_button, expand=False)
+
+        f=gtk.Frame()
+        f.set_label_widget(hbox)
+
+        def contents_modified(buf):
+            if buf.get_modified():
+                if not buf.ignore_modified:
+                    ok_button.show()
+            else:
+                ok_button.hide()
+            return True
+
         c=self.label['contents']=gtk.TextView()
         c.set_wrap_mode(gtk.WRAP_WORD_CHAR)
+        c.get_buffer().ignore_modified = False
+        c.get_buffer().connect('modified-changed', contents_modified)
         sw=gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         sw.add(c)
         def set_text(widget, t):
             b=widget.get_buffer()
+            b.ignore_modified = True
             b.delete(*b.get_bounds())
             b.set_text(t)
+            b.set_modified(False)
+            b.ignore_modified = False
             return True
-        c.set_text=set_text.__get__(c)
+        c.set_text = set_text.__get__(c)
+        def get_text(widget):
+            b=widget.get_buffer()
+            return b.get_text(*b.get_bounds())
+        c.get_text = get_text.__get__(c)
         self.sw['contents']=sw
 
         image=self.label['imagecontents']=gtk.Image()
