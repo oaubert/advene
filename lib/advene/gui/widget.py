@@ -139,8 +139,8 @@ class GenericColorButtonWidget(gtk.DrawingArea):
             width=s[0]
         if height is None:
             height=s[1]
-        if width < 0:
-            print "Error: width ", width, " < 0 for ", self.element.id
+        if width <= 0:
+            print "Error: width ", width, " <= 0 for ", self.element.id
             width=5
         if (self.cached_surface
             and self.cached_surface.get_width() == width
