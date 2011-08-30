@@ -71,6 +71,11 @@ class QuickviewBar(gtk.HBox):
         self.pack_start(self.begin, expand=False)
         self.pack_start(self.end, expand=False)
 
+    def set_text(self, s):
+        self.begin.set_text("")
+        self.end.set_text("")
+        self.content.set_markup(u"<b>%s</b>" % s.replace('<', '&lt;'))
+
     def set_annotation(self, a=None):
         if a is None:
             b=""
@@ -1930,20 +1935,32 @@ class TimeLine(AdhocView):
         else:
             l = self.list
 
+        # Use a list so that the counter variable is valid in the
+        # closure.
         counter = [ 0 ]
-        def create_annotations(annotations):
+        count = 50
+        def create_annotations(annotations, length):
             i = counter[0]
-            if i < len(annotations):
-                for a in annotations[i:i+100]:
+            if i < length:
+                self.quickview.set_text(_("Displaying %d / %d annotations...") % (min(i + count, length), length))
+                for a in annotations[i:i+count]:
                     self.create_annotation_widget(a)
-                counter[0] += 100
+                counter[0] += count
                 return True
             else:
+                self.layout.thaw_child_notify()
+                if hasattr(self, 'quickview'):
+                    self.quickview.set_text(_("Displaying done."))
+                    self.locked_inspector = False
                 self.controller.gui.set_busy_cursor(False)
                 return False
         if l:
+            self.layout.freeze_child_notify()
+            if hasattr(self, 'quickview'):
+                self.quickview.set_text(_("Displaying %d / %d annotations...") % (count, len(l)))
+                self.locked_inspector = True
             self.controller.gui.set_busy_cursor(True)
-            gobject.idle_add(create_annotations, l)
+            gobject.idle_add(create_annotations, l, len(l))
 
         self.layout.set_size (u2p (self.maximum - self.minimum),
                               max(self.layer_position.values() or (0,))
