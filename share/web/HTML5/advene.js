@@ -661,9 +661,9 @@ $.widget("ui.video", {
             e.cancelBubble = true;
             if (e.preventDefault) e.preventDefault();
             if (e.stopPropagation) e.stopPropagation();
-            return true;
-        } else {
             return false;
+        } else {
+            return true;
         }
      },
 
