@@ -27,8 +27,7 @@
 	position: absolute;
 	right: 10px;
 	top: 4px;
-	font:caption;
-	font:bolder;
+	font-style:bold;
 	color:white;
 	background-color:#333333
 }
@@ -243,8 +242,8 @@
 	overflow:visible;
 	text-align:center;
 	margin: 0;
-	padding: 5;
-	border: 2;
+	padding: 5 5;
+	border: 2 2;
 }
 
 .ui-video-widget {
@@ -255,10 +254,10 @@
     text-align: center;
 }
 
-.ui-dialog .ui-dialog-content { border: 0; padding: 0 !important;margin:0% !important;  overflow: auto; zoom: 1;background-color: #C1CDCD ;}
+.ui-dialog .ui-dialog-content { border: 0; padding: 0 !important;margin:0% !important;  overflow: auto; background-color: #C1CDCD ;}
 
 .ui-dialog .ui-dialog-titlebar { padding: .3em .0em .0em 0em; position: relative; height:10 !important; text-align:left;background-image: none;background-color: #B9D3EE ;border-color:#42426F}
-.ui-dialog .ui-dialog-title { float: right; margin-top:-5; font-size:12px; color:#2F4F4F; font-style: bolder;font-variant: small-caps; }
+.ui-dialog .ui-dialog-title { float: right; margin-top:-5; font-size:12px; color:#2F4F4F; font-style: bold;font-variant: small-caps; }
 
 
 
