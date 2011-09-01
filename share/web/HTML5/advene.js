@@ -1090,11 +1090,15 @@ $.widget("ui.video", {
             $('.player_container').player( playerOptions );
 
             // Check location.hash. If it is set, we look for the
-            // first sibling containing a time reference and start
+            // first child containing a time reference and start
             // playing from this position.
             if (window.location.hash.length) {
                 hash = window.location.hash.substr(1);
-                nodes = $("[name="+hash+"]").siblings().find('[data-begin]:first');
+                nodes = $("[name="+hash+"]").find('[data-begin]:first');
+                if (! nodes.length) {
+                    // Not found in children. Try in the siblings.
+                    nodes = $("[name="+hash+"]").siblings().find('[data-begin]:first');
+                }
                 if (nodes.length) {
                     //console.log("Playing directly at " + nodes.attr('data-begin'));
                     $('.player_container').player('fragmentPlay',
