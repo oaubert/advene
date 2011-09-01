@@ -222,9 +222,8 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         """Refresh the widget.
         """
         if self.window and self.cached_surface:
-            width = self.cached_surface.get_width()
-            height = self.cached_surface.get_height()
-            self.window.invalidate_rect(gtk.gdk.Rectangle(0, 0, width, height), False)
+            self.window.invalidate_rect(gtk.gdk.Rectangle(self.allocation.x, self.allocation.y, 
+                                                          self.allocation.width, self.allocation.height), False)
 
     def expose_cb(self, widget, event):
         """Handle the expose event.
