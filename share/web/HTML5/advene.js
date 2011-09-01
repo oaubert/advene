@@ -1098,7 +1098,9 @@ $.widget("ui.video", {
                 nodes = $("[name="+hash+"]").siblings().find('[data-begin]:first');
                 if (nodes.length) {
                     //console.log("Playing directly at " + nodes.attr('data-begin'));
-                    $(document).advene('player', nodes.attr('data-video-url'), nodes.attr('data-begin'), nodes.attr('data-end'));
+                    $('.player_container').player('fragmentPlay',
+                                                  nodes.attr('data-begin'),
+                                                  nodes.attr('data-end'));
                 }
             }
         },
