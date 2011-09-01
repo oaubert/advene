@@ -419,10 +419,10 @@ class TimeLine(AdhocView):
         if self.bookmarks_to_draw:
             self.draw_bookmarks(layout, event)
         if self.options['display-all-relations']:
-            to_draw = [ (self.get_widget_for_annotation(r.members[0]), 
-                         self.get_widget_for_annotation(r.members[1]), 
-                         r) 
-                        for r in self.controller.package.relations ] 
+            to_draw = [ (self.get_widget_for_annotation(r.members[0]),
+                         self.get_widget_for_annotation(r.members[1]),
+                         r)
+                        for r in self.controller.package.relations ]
         else:
             to_draw = self.relations_to_draw
         if not to_draw:
@@ -715,7 +715,7 @@ class TimeLine(AdhocView):
         # is kept.
         l=sorted( ( t
                     for t in ( (w, abs(w.mark - pos)) for w in self.scale_layout.get_children()
-                               if isinstance(w, gtk.Image) ) 
+                               if isinstance(w, gtk.Image) )
                     if t[1] <= epsilon and t[1] < abs(t[0].timestamp - pos) ),
                  key=operator.itemgetter(1))
         for t in l:
@@ -1332,19 +1332,19 @@ class TimeLine(AdhocView):
             bestdist = []
 
             mindist = (abs(sa[0].fragment.begin - da[0].fragment.begin)
-                       + abs(sa[0].fragment.end - da[0].fragment.end) 
-                       + abs((sa[0].fragment.end - sa[0].fragment.begin) 
+                       + abs(sa[0].fragment.end - da[0].fragment.end)
+                       + abs((sa[0].fragment.end - sa[0].fragment.begin)
                              - (da[0].fragment.end - da[0].fragment.begin)))
             bestdist.append(mindist)
             bestpath.append([])
             bestpath[0].append(0)
-            
+
             for j in range(1,len(sa)):
                 bestpath.append([])
                 bestpath[j].append(j)
 
                 dist = (abs(sa[j].fragment.begin - da[0].fragment.begin)
-                        + abs(sa[j].fragment.end - da[0].fragment.end) 
+                        + abs(sa[j].fragment.end - da[0].fragment.end)
                         + abs((sa[j].fragment.end - sa[j].fragment.begin)
                               - (da[0].fragment.end - da[0].fragment.begin)))
                 if dist < mindist:
@@ -1354,7 +1354,7 @@ class TimeLine(AdhocView):
                 else:
                     bestpath[j] = list(bestpath[j-1])
                     bestdist.append(bestdist[j-1] + dist)
-            
+
             for i in range(1,len(da)):
                 currentdist = 0
                 prevsubdist = 0
@@ -1362,14 +1362,14 @@ class TimeLine(AdhocView):
                 prevsubpath = []
                 for j in range(0,len(sa)):
                     dist = (abs(sa[j].fragment.begin - da[i].fragment.begin)
-                            + abs(sa[j].fragment.end - da[i].fragment.end) 
-                            + abs((sa[j].fragment.end - sa[j].fragment.begin) 
+                            + abs(sa[j].fragment.end - da[i].fragment.end)
+                            + abs((sa[j].fragment.end - sa[j].fragment.begin)
                                   - (da[i].fragment.end - da[i].fragment.begin)))
-                    
+
                     if j == 0:
                         currentpath = list(bestpath[0])
                         currentdist = bestdist[0]
-                        
+
                         bestpath[0].append(0)
                         bestdist[0] = bestdist[0] + dist
 
@@ -1377,10 +1377,10 @@ class TimeLine(AdhocView):
                         insdist = bestdist[j] + dist
                         deldist = bestdist[j-1] + dist
                         subdist = prevsubdist + dist*1.5
-                        
+
                         currentdist =  bestdist[j]
                         currentpath = list(bestpath[j])
-                        
+
                         if insdist < deldist :
                             if insdist < subdist:
                                 bestpath[j].append(j)
@@ -1396,7 +1396,7 @@ class TimeLine(AdhocView):
                         else:
                            bestpath[j] = list(bestpath[j-1])
                            bestdist[j] = deldist
-                    
+
                     prevsubdist = currentdist
                     prevsubpath = list(currentpath)
 
@@ -1424,13 +1424,13 @@ class TimeLine(AdhocView):
             for (label, action) in (
                 (_("Duplicate all annotations to type %s") % dest_title,
                  (copy_annotations, source, dest, False) ),
-                (_("Move all annotations to type %s") % dest_title, 
+                (_("Move all annotations to type %s") % dest_title,
                  (copy_annotations, source, dest, True) ),
-                (_("Duplicate all annotations matching a string to type %s") % dest_title, 
+                (_("Duplicate all annotations matching a string to type %s") % dest_title,
                  (copy_annotations_filtered, source, dest, False) ),
-                (_("Move all annotations matching a string to type %s") % dest_title, 
+                (_("Move all annotations matching a string to type %s") % dest_title,
                  (copy_annotations_filtered, source, dest, True) ),
-                (_("Align all annotation time codes using %s as reference.") % source_title, 
+                (_("Align all annotation time codes using %s as reference.") % source_title,
                  (DTWalign_annotations, source, dest, 'time', True) ),
                 (_("Align all annotation contents using %s as reference") % source_title,
                  (DTWalign_annotations, source, dest, 'content', True) ),
@@ -1921,7 +1921,7 @@ class TimeLine(AdhocView):
         def create_annotations(annotations, length):
             i = counter[0]
             if i < length:
-                self.quickview.set_text(_("Displaying %d / %d annotations...") % (min(i + count, length), length), 
+                self.quickview.set_text(_("Displaying %d / %d annotations...") % (min(i + count, length), length),
                                         1.0 * (i+count) / length)
                 for a in annotations[i:i+count]:
                     self.create_annotation_widget(a)
@@ -2040,7 +2040,7 @@ class TimeLine(AdhocView):
             """
             ic=self.controller.package.imagecache
             png=ic.get(widget.mark, epsilon=step/2)
-            if (png == ic.not_yet_available_image 
+            if (png == ic.not_yet_available_image
                 and 'async-snapshot' in self.controller.player.player_capabilities):
                 self.controller.update_snapshot(widget.mark)
             else:
@@ -2186,7 +2186,7 @@ class TimeLine(AdhocView):
         drop_types=[ at
                      for (at, p) in self.layer_position.iteritems()
                      if (y >= p and y <= p + self.button_height + config.data.preferences['timeline']['interline-height']) ]
-        
+
         if targetType == config.data.target_type['annotation']:
             sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
             if drop_types:
@@ -2601,10 +2601,10 @@ class TimeLine(AdhocView):
     def zoom_on_region(self, begin, end):
         # Deactivate autoscroll...
         self.set_autoscroll_mode(0)
-        
+
         (w, h) = self.layout.window.get_size ()
         self.scale.value=1.3 * (end - begin) / w
-        
+
         # Center on annotation
         self.center_on_position( (begin + end) / 2 )
         return True
@@ -2684,8 +2684,8 @@ class TimeLine(AdhocView):
             mouse_position=self.pixel2unit(event.x, absolute=True)
         else:
             # Plain scroll: scroll the timeline
-            if (self.can_do_horizontal_scroll 
-                and (event.direction == gtk.gdk.SCROLL_UP 
+            if (self.can_do_horizontal_scroll
+                and (event.direction == gtk.gdk.SCROLL_UP
                      or event.direction == gtk.gdk.SCROLL_DOWN)):
                 # Vertical scroll with a device that knows how to do horizontal. Let's scroll vertically
                 a = self.vadjustment
@@ -3200,7 +3200,7 @@ class TimeLine(AdhocView):
             self.scale_label.set_no_show_all(True)
 
         self.limit_navtools = gtk.HBox()
-        
+
         def navigate(button, event, direction):
             # Navigate to the previous/next page, when display is limited
             page_duration=self.pixel2unit(self.adjustment.page_size, absolute=False)
@@ -3418,8 +3418,8 @@ class TimeLine(AdhocView):
                     (1.0 / pow(1.5, n)) for n in range(0, 10)
                     ]
                 ],
-                                                                entry=True,
-                                                                callback=zoom_change)
+                                                       entry=True,
+                                                       callback=zoom_change)
         self.zoom_combobox.child.connect('activate', zoom_entry)
         self.zoom_combobox.child.set_width_chars(4)
         i=gtk.ToolItem()
