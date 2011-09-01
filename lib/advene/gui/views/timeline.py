@@ -2388,10 +2388,9 @@ class TimeLine(AdhocView):
                     a=[ at
                         for (at, p) in self.layer_position.iteritems()
                         if (y1 >= p and y1 <= p + self.button_height) ]
-                    if not a:
-                        at = None
-                    else:
-                        at=a[0]
+                    at = None
+                    if a:
+                        at = a[0]
 
                     def create(i):
                         self.controller.create_annotation(position=self.pixel2unit(x1, absolute=True),
@@ -2413,8 +2412,8 @@ class TimeLine(AdhocView):
                         (_("Zoom on region"), zoom),
                         (_("Restrict display to region"), restrict),
                         ):
-                        if at is None and action == 'create':
-                            pass
+                        if at is None and action == create:
+                            continue
                         i=gtk.MenuItem(label)
                         i.connect('activate', action)
                         menu.append(i)
