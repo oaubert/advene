@@ -628,12 +628,9 @@ $.widget("ui.video", {
 
     _event_keydown: function(e) {
         var self = this;
+        var handled_event = true;
         if (!e)
-            var e = window.event
-        // handle event and stop propagating it!
-        e.cancelBubble = true;
-        if (e.preventDefault) e.preventDefault();
-        if (e.stopPropagation) e.stopPropagation();
+            var e = window.event;
 
         switch (e.keyCode){
             case 32:  // Space
@@ -657,6 +654,17 @@ $.widget("ui.video", {
             case 27: // Escape
                 self.stop();
                 break;
+            default: 
+                handled_event = false;
+        }
+        if (! handled_event) {
+            // handled event, stop propagating it!
+            e.cancelBubble = true;
+            if (e.preventDefault) e.preventDefault();
+            if (e.stopPropagation) e.stopPropagation();
+            return true;
+        } else {
+            return false;
         }
      },
 
@@ -672,8 +680,8 @@ $.widget("ui.video", {
 
     // Trigger Events manually
     triggerKeyBoardEvent: function(e) {
-       var self = this;
-       self._event_keydown(e);
+        var self = this;
+        return self._event_keydown(e);
     },
 
     getIntrinsicWidth: function() {
@@ -1002,8 +1010,7 @@ $.widget("ui.video", {
     // Capture CTRL + KEY events and forward them to the video widget of the main player
     document.onkeydown = function(e) {
         if (event.ctrlKey == 1) {
-            uiPlayer.find('video', this).video('triggerKeyBoardEvent', e);
-            return false;
+            return uiPlayer.find('video', this).video('triggerKeyBoardEvent', e);
         }
     }
 
