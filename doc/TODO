@@ -2637,6 +2637,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Remove embedded ElementTree now that python2.5 is required
 
+* Timestamprepresentation popup: save as...
+
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"

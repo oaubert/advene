@@ -56,7 +56,7 @@ from advene.gui.util import png_to_pixbuf, enable_drag_source, name2color, get_t
 from advene.gui.util import encode_drop_parameters, get_color_style
 import advene.util.helper as helper
 from advene.model.annotation import Annotation
-
+import advene.gui.util.dialog as dialog
 import advene.gui.popup
 
 active_color=name2color('#fdfd4b')
@@ -1053,12 +1053,37 @@ class TimestampRepresentation(gtk.Button):
             c.update_status (status="set", position=pos)
             return True
 
+        def save_as(it):
+            name = "%s-%010d.png" % (
+                os.path.splitext(
+                    os.path.basename(
+                        self.controller.get_default_media()))[0],
+                self.value)
+            fn = dialog.get_filename(title=_("Save screenshot to..."),
+                 action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                 button=gtk.STOCK_SAVE,
+                 default_file=name)
+            if fn is not None:
+                try:
+                    f = open(fn, 'wb')
+                    f.write(str(self.controller.package.imagecache.get(self.value, epsilon=self.epsilon)))
+                    f.close()
+                    self.log(_("Screenshot saved to %s") % fn)
+                except (IOError, OSError), e:
+                    dialog.message_dialog(_("Could not save screenshot:\n %s") % unicode(e),
+                                          icon=gtk.MESSAGE_ERROR)
+            return True
+
         item = gtk.MenuItem(_("Play"))
         item.connect('activate', goto, self.value)
         menu.append(item)
 
         item = gtk.MenuItem(_("Refresh snapshot"))
         item.connect('activate', self.refresh_snapshot)
+        menu.append(item)
+
+        item = gtk.MenuItem(_("Save as..."))
+        item.connect('activate', save_as)
         menu.append(item)
 
         if self.callback is not None:
