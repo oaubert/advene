@@ -1008,7 +1008,7 @@ $.widget("ui.video", {
 
     // Capture CTRL + KEY events and forward them to the video widget of the main player
     document.onkeydown = function(e) {
-        if (event.ctrlKey == 1) {
+        if (e.ctrlKey == 1) {
             return uiPlayer.find('video', this).video('triggerKeyBoardEvent', e);
         }
     }
