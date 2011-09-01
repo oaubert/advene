@@ -331,7 +331,6 @@ $.widget("ui.video", {
     _stop: function() {
         var self = this;
         self.stop();
-        $(".activeTranscript").each( $(this).removeClass("activeTranscript") );
     },
     _tooglePlayLoop: function() {
         var self = this;
@@ -709,7 +708,7 @@ $.widget("ui.video", {
         self._timeLinerSlider.slider('value', 0);
         self._currentProgressSpan.text(_formatTime(0));
 
-        $(".activeTranscript").each( $(this).removeClass("activeTranscript") );
+        $(".activeTranscript").each( function() { $(this).removeClass("activeTranscript") } );
     },
     mute: function() {
         var self = this;
