@@ -26,6 +26,8 @@ Use appsink to get data out of a pipeline:
 https://thomas.apestaart.org/thomas/trac/browser/tests/gst/crc/crc.py
 """
 
+from gettext import gettext as _
+
 import advene.core.config as config
 from advene.util.helper import format_time
 import os
@@ -35,7 +37,6 @@ import gobject
 gobject.threads_init()
 
 import gtk
-import os
 import sys
 
 if config.data.os == 'win32':
@@ -169,6 +170,12 @@ class Player:
         except Exception, e:
             self.log(u"Could not initialize snapshotter:" +  unicode(e))
             self.snapshotter = None
+
+        self.fullres_snapshotter = None
+        # This method has the following signature:
+        # self.fullres_snapshot_callback(snapshot=None, message=None)
+        # If snapshot is None, then there should be an explanation (string) in msg.
+        self.fullres_snapshot_callback = None
 
         #self.snapshotter.start()
         
@@ -390,6 +397,8 @@ class Player:
         self.player.set_property('uri', item)
         if self.snapshotter:
             self.snapshotter.set_uri(item)
+        if self.fullres_snapshotter:
+            self.fullres_snapshotter.set_uri(item)
         
     def playlist_clear(self):
         self.videofile=None
@@ -401,6 +410,32 @@ class Player:
         else:
             return [ ]
 
+    def fullres_snapshot_taken(self, buffer):
+        if self.fullres_snapshot_callback:
+            s=Snapshot( { 'data': buffer.data,
+                          'type': 'PNG',
+                          'date': buffer.timestamp / gst.MSECOND,
+                          # Hardcoded size values. They are not used
+                          # by the application, since they are
+                          # encoded in the PNG file anyway.
+                          'width': 160,
+                          'height': 100 } )
+            self.fullres_snapshot_callback(snapshot=s)
+            self.fullres_snapshot_callback = None
+
+    def async_fullres_snapshot(self, position, callback):
+        if self.fullres_snapshot_callback is not None:
+            callback(message=_("Cannot capture fullscreen snapshot, another capture is ongoing."))
+            return
+        if self.fullres_snapshotter is None:
+            # Initialise it.
+            self.fullres_snapshotter = Snapshotter(self.fullres_snapshot_taken)
+            self.fullres_snapshotter.set_uri(self.player.get_property('uri'))
+        self.fullres_snapshot_callback = callback
+        if not self.fullres_snapshotter.thread_running:
+                self.fullres_snapshotter.start()
+        self.fullres_snapshotter.enqueue(position)
+        
     def snapshot_taken(self, buffer):
         if self.snapshot_notify:
             s=Snapshot( { 'data': buffer.data,
