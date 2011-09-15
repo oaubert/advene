@@ -8,7 +8,32 @@ advene (0.47) unstable; urgency=low
    
      * New shortcut: Ctrl-C to convert to annotations
 
- --
+  * Timeline:
+  
+     * The annotation inspector can be locked on an annotation by clicking
+       on it. Clicking on the lock icon or in the timeline background unlocks
+       the inspector. The annotation content can be edited through the
+       inspector, and validated either with an icon, or with the
+       Control-Return shortcut.
+  
+  * Importers:
+  
+     * WebVTT files can be imported.
+  
+     * Speech recognition has been implemented through the pocketsphinx
+       speech recognition software. The pocketsphinx software is not bundled
+       with Advene and has to be installed separately to enable this
+       feature. See http://cmusphinx.sourceforge.net/wiki/gstreamer for
+       details.
+  
+  * The additional videoplayer offset can be customized by drag and drop
+    of an annotation.
+
+  * The popup menu on screenshot and annotations now offers to save the
+    screenshot as a PNG file. If the player supports it, the screenshot
+    will be in video-resolution.
+  
+--
 
 advene (0.46) unstable; urgency=low
 
