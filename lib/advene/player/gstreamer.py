@@ -424,6 +424,11 @@ class Player:
             self.fullres_snapshot_callback = None
 
     def async_fullres_snapshot(self, position, callback):
+        """Take full-resolution snapshots.
+
+        This method is not reentrant: as long as there is a call
+        pending, it is not available for another position.
+        """
         if self.fullres_snapshot_callback is not None:
             callback(message=_("Cannot capture fullscreen snapshot, another capture is ongoing."))
             return
