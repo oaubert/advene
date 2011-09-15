@@ -593,7 +593,7 @@ class AdveneGUI(object):
     def init_gettext(self):
         """Proxy for the module-level init_gettext method.
         """
-        init_gettext()
+        config.init_gettext()
 
     def get_icon_list(self):
         """Return the list of icon pixbuf appropriate for Window.set_icon_list.
