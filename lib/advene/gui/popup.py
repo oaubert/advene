@@ -504,12 +504,17 @@ class Menu:
             self.controller.gui.loop_on_annotation_gui(ann, goto=True)
             return True
 
+        def save_snapshot(menu, ann):
+            self.controller.gui.save_snapshot_as(ann.fragment.begin)
+            return True
+
         add_item(_("Go to..."), self.goto_annotation, element)
         add_item(_("Loop"), loop_on_annotation, element)
         add_item(_("Duplicate"), self.duplicate_annotation, element)
         item = gtk.MenuItem(_("Highlight"), use_underline=False)
         item.set_submenu(self.activate_submenu(element))
         menu.append(item)
+        add_item(_("Save snapshot..."), save_snapshot, element)
         if 'montagerenderer' in self.controller.generic_features:
             add_item(_("Extract video fragment"), self.extract_fragment, element)
 
