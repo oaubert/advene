@@ -2193,6 +2193,47 @@ class AdveneGUI(object):
             pass
         return True
 
+    def save_snapshot_as(self, position):
+        """Save the snapshot for the given position into a file.
+
+        If supported by the player, it will save the full-resolution screenshot.
+        """
+        def do_save_as(filename, png_data, notify=False):
+            try:
+                f = open(filename, 'wb')
+                f.write(str(png_data))
+                f.close()
+                self.controller.log(_("Screenshot saved to %s") % filename)
+                if notify:
+                    self.controller.queue_action(dialog.message_dialog, _("Screenshot saved in\n %s") % unicode(filename), modal=False)
+            except (IOError, OSError), e:
+                self.controller.queue_action(dialog.message_dialog, _("Could not save screenshot:\n %s") % unicode(e), icon=gtk.MESSAGE_ERROR, modal=False)
+
+        name = "%s-%010d.png" % (
+            os.path.splitext(
+                os.path.basename(
+                    self.controller.get_default_media()))[0],
+            position)
+        fn = dialog.get_filename(title=_("Save screenshot to..."),
+             action=gtk.FILE_CHOOSER_ACTION_SAVE,
+             button=gtk.STOCK_SAVE,
+             default_file=name)
+        if fn is not None:
+            if hasattr(self.controller.player, 'async_fullres_snapshot'):
+                def save_callback(snapshot=None, message=None):
+                    if snapshot is None and message is not None:
+                        dialog.message_dialog(message)
+                    elif snapshot:
+                        do_save_as(fn, snapshot.data, notify=True)
+                    else:
+                        self.controller.log("Unknown problem in full-resolution snapshot")
+                # Can capture full-res snapshot
+                self.controller.player.async_fullres_snapshot(position, save_callback)
+            else:
+                do_save_as(fn,
+                           self.controller.package.imagecache.get(position))
+        return True
+
     def export_element(self, element):
         def generate_default_filename(filter, filename=None):
             """Generate a filename for the given filter.
