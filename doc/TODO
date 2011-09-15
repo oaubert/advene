@@ -2639,6 +2639,7 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Timestamprepresentation popup: save as...
 
+* Save screenshot: use a secondary, full resolution snapshotter
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
