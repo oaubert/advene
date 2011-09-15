@@ -51,7 +51,7 @@ if config.data.os == 'win32':
         #even if gstpluginpath is defined, gst still may not be in path
         gstpath = unicode(os.getenv('PATH', ""), fsenc)
         h,t = os.path.split(ppath)
-        binpath,t = os.path.split(h) 
+        binpath,t = os.path.split(h)
         os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) ).encode(fsenc)
 
 try:
@@ -178,7 +178,7 @@ class Player:
         self.fullres_snapshot_callback = None
 
         #self.snapshotter.start()
-        
+
         # This method should be set by caller:
         self.snapshot_notify=None
         self.build_pipeline()
@@ -291,7 +291,7 @@ class Player:
             self._audio_ghostpad = gst.GhostPad('sink', elements[0].get_pad('audio_sink') or elements[0].get_pad('sink'))
             self.audio_sink.add_pad(self._audio_ghostpad)
 
-        
+
         bus = self.player.get_bus()
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', self.on_sync_message)
@@ -399,7 +399,7 @@ class Player:
             self.snapshotter.set_uri(item)
         if self.fullres_snapshotter:
             self.fullres_snapshotter.set_uri(item)
-        
+
     def playlist_clear(self):
         self.videofile=None
         self.player.set_property('uri', '')
@@ -435,7 +435,7 @@ class Player:
         if not self.fullres_snapshotter.thread_running:
                 self.fullres_snapshotter.start()
         self.fullres_snapshotter.enqueue(position)
-        
+
     def snapshot_taken(self, buffer):
         if self.snapshot_notify:
             s=Snapshot( { 'data': buffer.data,
@@ -447,7 +447,7 @@ class Player:
                           'width': 160,
                           'height': 100 } )
             self.snapshot_notify(s)
-            
+
     def async_snapshot(self, position):
         t = long(self.position2value(position))
         if self.snapshotter:
@@ -460,7 +460,7 @@ class Player:
             # (considering a 25f/s framerate).
             for pos in sorted((t - 20, t / 25 * 25, t)):
                 self.snapshotter.enqueue(pos)
-        
+
     def snapshot(self, position):
         if not self.check_uri():
             return None
@@ -640,12 +640,12 @@ class Player:
             self.log("Reparent " + hex(xid))
 
             gtk.gdk.display_get_default().sync()
-        
+
             self.imagesink.set_xwindow_id(xid)
         self.imagesink.set_property('force-aspect-ratio', True)
         self.imagesink.expose()
         #gtk.gdk.threads_leave()
-        
+
     def set_visual(self, xid):
         if not xid:
             return True
@@ -656,7 +656,7 @@ class Player:
     def set_widget(self, widget):
         self.set_visual( widget.get_id() )
         #self.set_visual( None )
-            
+
     def restart_player(self):
         # FIXME: destroy the previous player
         self.player.set_state(gst.STATE_READY)
@@ -729,7 +729,7 @@ class Player:
                 self.unfullscreen()
                 return True
             return False
-        
+
         def buttonpress(widget, event):
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
                 self.unfullscreen()
@@ -857,7 +857,7 @@ class Player:
             if capsname: line.append( '[%s]' % capsname )
             if ghostpath: line.append( "ghosts %s" % self.relpath(path, ghostpath) )
             line.append( "%s %s" % (direc, peerpath) )
-            
+
             #if peerpath and peerpath.find('proxy')!=-1: print peer
             ret.append( ''.join(line) )
         if recurse and isinstance(e, gst.Bin):
