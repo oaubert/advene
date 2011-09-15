@@ -820,7 +820,7 @@ class TraceBuilder(Thread):
         if typ == "Undefined":
             # some operations can be mapped to different actions, we check that
             typ = self.find_action_name(obj)
-        if self.opened_actions[typ]:
+        if self.opened_actions.get(typ):
             # an action is already opened for this event
             ac = self.opened_actions[typ]
             if typ == "Navigation" and (ope.name == "PlayerStop" or ope.name == "PlayerPause"):
