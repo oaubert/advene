@@ -1141,6 +1141,12 @@ class SubtitleImporter(GenericImporter):
                             data=unicode(line, 'latin1')
                     content.append(data)
                     # else We could check line =~ /^\d+$/
+        # End of for-loop: if there is a last item, convert it.
+        if tc is not None:
+            d={'begin': tc[0],
+               'end': tc[1],
+               'content': u"\n".join(content)}
+            yield d
 
     def process_file(self, filename):
         f=open(filename, 'r')
