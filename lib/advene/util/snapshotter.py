@@ -190,7 +190,6 @@ class Snapshotter(object):
         f.write(buffer.data)
         f.close()
         print "Snapshot written to", fname
-        os.system('qiv %s &' % fname)
         return True
 
     def snapshot(self, t):
