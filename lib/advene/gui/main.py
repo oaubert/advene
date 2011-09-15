@@ -4655,7 +4655,7 @@ class AdveneGUI(object):
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Video URL")), expand=False)
         video_entry=gtk.Entry()
-        video_entry.set_tooltip_text(_("URL for the video, if it is available on a sharing website.\nOnly for GoogleVideo and Youtube for the moment"))
+        video_entry.set_tooltip_text(_("URL for the video, if it is available on a sharing website (Only Youtube for the moment).\n It can also be a h264/ogg file, which will in this case be handled by the HTML5 video player."))
         u=self.controller.package.getMetaData(config.data.namespace, 'website-export-video-url')
         if u is None:
             u = self.controller.get_default_media()
