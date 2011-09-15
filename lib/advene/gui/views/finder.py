@@ -255,7 +255,7 @@ class ModelColumn(FinderColumn):
         vbox=gtk.VBox()
 
         sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         vbox.add (sw)
 
         self.liststore = self.get_liststore()
@@ -673,24 +673,25 @@ class Finder(AdhocView):
         return True
 
     def scroll_event(self, widget=None, event=None):
-        if event.state & gtk.gdk.SHIFT_MASK:
-            a=widget.get_hadjustment()
-            if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
-                val = a.value + a.step_increment
-                if val > a.upper - a.page_size:
-                    val = a.upper - a.page_size
-                if val != a.value:
-                    a.value = val
-                    a.value_changed ()
-                return True
-            elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
-                val = a.value - a.step_increment
-                if val < a.lower:
-                    val = a.lower
-                if val != a.value:
-                    a.value = val
-                    a.value_changed ()
-                return True
+        a=widget.get_hadjustment()
+        if ((event.direction == gtk.gdk.SCROLL_DOWN and event.state & gtk.gdk.SHIFT_MASK)
+            or event.direction == gtk.gdk.SCROLL_RIGHT):
+            val = a.value + a.step_increment
+            if val > a.upper - a.page_size:
+                val = a.upper - a.page_size
+            if val != a.value:
+                a.value = val
+                a.value_changed ()
+            return True
+        elif ((event.direction == gtk.gdk.SCROLL_UP and event.state & gtk.gdk.SHIFT_MASK)
+              or event.direction == gtk.gdk.SCROLL_LEFT):
+            val = a.value - a.step_increment
+            if val < a.lower:
+                val = a.lower
+            if val != a.value:
+                a.value = val
+                a.value_changed ()
+            return True
         return False
 
     def build_widget(self):
