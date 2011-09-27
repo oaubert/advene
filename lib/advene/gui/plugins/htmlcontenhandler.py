@@ -83,8 +83,8 @@ class AnnotationPlaceholder:
         ctx=self.controller.build_context(self.annotation)
         d={
             'id': self.annotation.id,
-            'href': urlbase + ctx.evaluateValue('here/player_url'),
-            'imgurl': urlbase + ctx.evaluateValue('here/snapshot_url'),
+            'href': self.controller.get_urlbase() + ctx.evaluateValue('here/player_url'),
+            'imgurl': self.controller.get_urlbase() + ctx.evaluateValue('here/snapshot_url'),
             'timestamp': helper.format_time(self.annotation.fragment.begin),
             'content': self.controller.get_title(self.annotation),
             'urlbase': self.controller.get_urlbase().rstrip('/'),
@@ -270,7 +270,7 @@ class AnnotationTypePlaceholder:
         ctx=self.controller.build_context(self.annotationtype)
         d={
             'id': self.annotationtype.id,
-            'href': urlbase + ctx.evaluateValue('here/absolute_url'),
+            'href': self.controller.get_urlbase() + ctx.evaluateValue('here/absolute_url'),
             'content': self.controller.get_title(self.annotationtype),
             'urlbase': self.controller.get_urlbase().rstrip('/'),
             }
