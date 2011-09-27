@@ -381,6 +381,9 @@ class TimeLine(AdhocView):
                 w, h = self.widget.window.get_size()
                 pane=w - 160
             self.inspector_pane.set_position(pane)
+            # Check if display is limited
+            if self.minimum > 0 and self.maximum < self.controller.package.cached_duration:
+                self.limit_navtools.show()
             self.widget.disconnect(self.expose_signal)
             return False
         # Convert values, that could be strings
