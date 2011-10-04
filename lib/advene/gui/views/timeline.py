@@ -1917,10 +1917,14 @@ class TimeLine(AdhocView):
         else:
             l = self.list
 
-        # Use a list so that the counter variable is valid in the
-        # closure.
+        # Use a list so that the counter variable can be modified in
+        # the closure.
         counter = [ 0 ]
         count = 50
+        length = len(l)
+        if length > 1000:
+            count = length / 5
+
         def create_annotations(annotations, length):
             i = counter[0]
             if i < length:
@@ -1939,7 +1943,6 @@ class TimeLine(AdhocView):
                 return False
         if l:
             self.layout.freeze_child_notify()
-            length = len(l)
             if hasattr(self, 'quickview'):
                 self.quickview.set_text(_("Displaying %d / %d annotations...") % (count, length),
                                         1.0 * count / length)
