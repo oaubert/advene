@@ -1009,7 +1009,7 @@ $.widget("ui.video", {
     // Capture CTRL + KEY events and forward them to the video widget of the main player
     document.onkeydown = function(e) {
         if (e.ctrlKey == 1) {
-            return uiPlayer.find('video', this).video('triggerKeyBoardEvent', e);
+            uiPlayer.find('video', this).video('triggerKeyBoardEvent', e);
         }
     }
 
@@ -1078,7 +1078,7 @@ $.widget("ui.video", {
             }
 
             $("body").append("<div class='player_container' style='position:relative; overflow:visible; '>" +
-                             "<video preload='auto' autoplay='false' style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
+                             "<video muted preload='auto' style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
                              "</video></div>");
 
             playerOptions =  { title:'Advene main player',
