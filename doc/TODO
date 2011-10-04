@@ -54,19 +54,11 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * montage: video export
 
-* integrate pyxdg RecentFiles (use gtk.RecentFiles), pyxdg.Mime
-
 * transcribe: allow search/replace
 
 * quick edit: integrate EntryCompletion on attributes
 
-* Fix message log file access on win32
-
-* fullscreen: optionally display information over the video (status, position)
-
 * add PyDiscoverer interface, to get movie details ASAP
-
-* option to stop second player synchronisation then use current position as time offset
 
 * trace replay mode of video navigation (replay video based on navigation events) -> trace player with controlled video player
 
@@ -75,8 +67,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * Save current workspace: display option in Save dialog
 
 * Ldt ZIP importer
-
-* Make the timeline inspector editable (thus sticky display)
 
 * Screen overlay interface: define a grid with sensitive areas + event
    -> need to implement player.get_dimensions() method
@@ -217,8 +207,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * slave view: record master view id in options when saving
 
 * highlight: blink (wait for gtk.Transition in 2.12?)
-
-* iMovie0.8-like movie exploration (skim through the paused movie through DND in the thumbnail)
 
 * zippackage: implement a 'serialize'/'freeze' method, to save the data to the temp. directory (w/o overwriting the .azp package). This would allow regular backups of the data.
 
@@ -2640,6 +2628,16 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Timestamprepresentation popup: save as...
 
 * Save screenshot: use a secondary, full resolution snapshotter
+
+* integrate pyxdg RecentFiles (use gtk.RecentFiles), pyxdg.Mime
+
+* fullscreen: optionally display information over the video (status, position)
+
+* option to stop second player synchronisation then use current position as time offset
+
+* Make the timeline inspector editable (thus sticky display)
+
+* iMovie0.8-like movie exploration (skim through the paused movie through DND in the thumbnail)
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
