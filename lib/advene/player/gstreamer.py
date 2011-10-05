@@ -430,7 +430,7 @@ class Player:
         pending, it is not available for another position.
         """
         if self.fullres_snapshot_callback is not None:
-            callback(message=_("Cannot capture fullscreen snapshot, another capture is ongoing."))
+            callback(message=_("Cannot capture full-resolution snapshot, another capture is ongoing."))
             return
         if self.fullres_snapshotter is None:
             # Initialise it.
