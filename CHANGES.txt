@@ -33,13 +33,13 @@ advene (0.47) unstable; urgency=low
     screenshot as a PNG file. If the player supports it, the screenshot
     will be in video-resolution.
   
---
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 04 Oct 2011 17:14:58 +0200
 
 advene (0.46) unstable; urgency=low
 
   * Stable release. See the following 0.45 notes for more details.
 
- -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 05 Apr 2011 18:00:07 +0200
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 04 Oct 2011 17:14:25 +0200
 
 advene (0.45) unstable; urgency=low
 
