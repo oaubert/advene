@@ -1928,7 +1928,9 @@ class TimeLine(AdhocView):
         def create_annotations(annotations, length):
             i = counter[0]
             if i < length:
-                self.quickview.set_text(_("Displaying %d / %d annotations...") % (min(i + count, length), length),
+                self.quickview.set_text(_("Displaying %(count)d / %(total)d annotations...") % {
+                        'count': min(i + count, length), 
+                        'total': length },
                                         1.0 * (i+count) / length)
                 for a in annotations[i:i+count]:
                     self.create_annotation_widget(a)
@@ -1944,7 +1946,9 @@ class TimeLine(AdhocView):
         if l:
             self.layout.freeze_child_notify()
             if hasattr(self, 'quickview'):
-                self.quickview.set_text(_("Displaying %d / %d annotations...") % (count, length),
+                self.quickview.set_text(_("Displaying %(count)d / %(total)d annotations...") % {
+                        'count': count, 
+                        'total': length },
                                         1.0 * count / length)
                 self.locked_inspector = True
             self.controller.gui.set_busy_cursor(True)
