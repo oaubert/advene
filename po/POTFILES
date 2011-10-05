@@ -1,5 +1,6 @@
 ../lib/advene/core/controller.py
 ../lib/advene/core/webcherry.py
+../lib/advene/player/gstreamer.py
 ../lib/advene/plugins/featuredetect.py
 ../lib/advene/plugins/anvil.py
 ../lib/advene/plugins/ted.py
