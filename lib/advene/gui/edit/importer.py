@@ -45,7 +45,7 @@ class FileImporter(AdhocView):
     view_name = _("Importer")
     view_id = 'importerview'
 
-    def __init__(self, controller=None, filename=None, message=None, parameters=None):
+    def __init__(self, controller=None, filename=None, message=None, display_unlikely=True, parameters=None):
         super(FileImporter, self).__init__(controller=controller)
         self.controller=controller
         self.parameters=parameters
@@ -54,6 +54,7 @@ class FileImporter(AdhocView):
         self.close_on_package_load = False
         self.contextual_actions = ()
         self.options={
+            'display-unlikely': display_unlikely,
             }
 
         # Flag used to cancel import
@@ -93,7 +94,7 @@ class FileImporter(AdhocView):
                 model.append( ( _("Advene package importer"), dummy_advene_importer, None) )
             if valid:
                 self.importers.set_active(0)
-            if invalid:
+            if invalid and self.options['display-unlikely']:
                 model.append( ( "--- " + _("Not likely") + " ---", None, None) )
                 for i in invalid:
                     model.append( (i.name, i, None) )
