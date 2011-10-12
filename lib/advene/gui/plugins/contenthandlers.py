@@ -182,7 +182,7 @@ class SVGContentHandler (ContentHandler):
                 dialog.message_dialog(
                     _("Error while parsing SVG content:\n\n%s") % unicode(e),
                     icon=gtk.MESSAGE_ERROR)
-            if root:
+            if root is not None:
                 self.view.drawer.clear_objects()
                 path=''
                 if self.parent is not None and hasattr(self.parent, 'file_'):
