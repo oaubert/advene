@@ -1906,8 +1906,9 @@ class TimeLine(AdhocView):
         count = 10
         length = len(l)
 
-        old_position = self.inspector_pane.get_position()
-        self.inspector_pane.set_position(2)
+        if l:
+            old_position = self.inspector_pane.get_position()
+            self.inspector_pane.set_position(2)
         def create_annotations(annotations, length):
             i = counter[0]
             if i < length:
@@ -1939,6 +1940,8 @@ class TimeLine(AdhocView):
                 self.locked_inspector = True
             self.controller.gui.set_busy_cursor(True)
             gobject.idle_add(create_annotations, l, length)
+        elif callback:
+            callback()
 
         self.layout.set_size (u2p (self.maximum - self.minimum),
                               max(self.layer_position.values() or (0,))
