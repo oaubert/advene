@@ -381,7 +381,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             c.queue_action(c.update_status, status="set", position=pos)
             c.gui.set_current_annotation(annotation)
             return True
-        elif event.keyval == gtk.keysyms.Delete:
+        elif event.keyval == gtk.keysyms.Delete or event.keyval == gtk.keysyms.BackSpace:
             # Delete annotation or selection
             try:
                 widgets=self.container.get_selected_annotation_widgets()
