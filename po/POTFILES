@@ -31,6 +31,7 @@
 ../lib/advene/gui/views/viewbook.py
 ../lib/advene/gui/views/editionhistory.py
 ../lib/advene/gui/views/browser.py
+../lib/advene/gui/views/checker.py
 ../lib/advene/gui/views/table.py
 ../lib/advene/gui/views/relation.py
 ../lib/advene/gui/views/tree.py
