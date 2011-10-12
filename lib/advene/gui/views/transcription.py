@@ -368,6 +368,7 @@ class TranscriptionView(AdhocView):
         mainbox.set_no_show_all(True)
 
         mainbox.connect('key-press-event', self.key_press_event_cb)
+        self.textview.connect('key-press-event', self.key_press_event_cb)
 
         return mainbox
 
@@ -477,6 +478,11 @@ class TranscriptionView(AdhocView):
     def key_press_event_cb (self, textview, event):
         if event.keyval == gtk.keysyms.F3:
             self.searchbox.show_all()
+            return True
+        elif event.keyval == gtk.keysyms.Return and event.state & gtk.gdk.CONTROL_MASK:
+            # Control-return: goto annotation
+            if self.currentannotation is not None:
+                self.play_annotation(self.currentannotation)
             return True
         return False
 
