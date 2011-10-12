@@ -67,6 +67,7 @@ class AnnotationTable(AdhocView):
         self.options={}
 
         self.mouseover_annotation = None
+        self.last_edited_path = None
 
         self.model = self.build_model(elements, custom_data)
         self.widget = self.build_widget()
@@ -157,6 +158,18 @@ class AnnotationTable(AdhocView):
         self.widget.treeview.set_model(model)
         self.model = model
         self.elements=elements
+        if self.last_edited_path is not None:
+            # We just edited an annotation. This update must come from
+            # it, so let us try to set the cursor position at the next element.
+            path = str(long(self.last_edited_path) + 1)
+            try:
+                i = self.model.get_iter(path)
+            except ValueError:
+                path = self.last_edited_path
+            self.widget.treeview.set_cursor(path,
+                                            focus_column=self.columns['content'],
+                                            start_editing=True)
+            self.last_edited_path = None
 
     def motion_notify_event_cb(self, tv, event):
         if not event.window is tv.get_bin_window():
@@ -212,6 +225,24 @@ class AnnotationTable(AdhocView):
         columns['snapshot'].set_reorderable(True)
         tree_view.append_column(columns['snapshot'])
 
+        def cell_edited(cell, path_string, text):
+            it = self.model.get_iter_from_string(path_string)
+            if not it:
+                return
+            a = self.model.get_value (it, COLUMN_ELEMENT)
+            new_content = helper.title2content(text,
+                                               a.content.data,
+                                               a.type.getMetaData(config.data.namespace, "representation"))
+            if new_content is None:
+                self.log(_("Cannot update the annotation, its representation is too complex"))
+            elif a.content.data != new_content:
+                self.last_edited_path = path_string
+                self.controller.notify('EditSessionStart', element=a)
+                a.content.data = new_content
+                self.controller.notify('AnnotationEditEnd', annotation=a)
+                self.controller.notify('EditSessionEnd', element=a)
+            return True
+
         for (name, label, col) in (
             ('content', _("Content"), COLUMN_CONTENT),
             ('type', _("Type"), COLUMN_TYPE),
@@ -219,7 +250,12 @@ class AnnotationTable(AdhocView):
             ('end', _("End"), COLUMN_END_FORMATTED),
             ('duration', _("Duration"), COLUMN_DURATION),
             ('id', _("Id"), COLUMN_ID) ):
-            columns[name]=gtk.TreeViewColumn(label, gtk.CellRendererText(), text=col)
+            renderer = gtk.CellRendererText()
+            columns[name]=gtk.TreeViewColumn(label, renderer, text=col)
+            if name == 'content':
+                renderer.connect('edited', cell_edited)
+                renderer.props.editable = True
+
             columns[name].set_reorderable(True)
             columns[name].set_sort_column_id(col)
             tree_view.append_column(columns[name])

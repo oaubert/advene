@@ -2639,6 +2639,10 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * iMovie0.8-like movie exploration (skim through the paused movie through DND in the thumbnail)
 
+* factorize transcription.update_modified.update and timeline.quick_edit.get_parsed_content, and use it in editable table.
+
+* views.table: make content editable
+
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
 # End:
