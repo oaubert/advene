@@ -1010,6 +1010,11 @@ class AdveneController(object):
 
         Cf http://cweiske.de/howto/launch/ for details.
         """
+        if (url.startswith(self.get_urlbase()) and
+                           (self.server is None or not self.server.is_running())):
+            # Cannot open a local URL: the webserver is not active
+            self.log(_("Cannot open Advene URL %s: the webserver is not running.") % url)
+            return True
         if self.gui and self.gui.open_url_embedded(url):
             return True
         if config.data.os == 'win32' or config.data.os == 'darwin':
