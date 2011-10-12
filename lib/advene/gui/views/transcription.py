@@ -38,6 +38,8 @@ import advene.gui.popup
 
 name="Transcription view plugin"
 
+ZERO_WIDTH_NOBREAK_SPACE = u"\uFEFF"
+
 def register(controller):
     controller.register_viewclass(TranscriptionView)
 
@@ -199,7 +201,7 @@ class TranscriptionView(AdhocView):
             try:
                 beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
                 enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
-                if unicode(b.get_text(beginiter, enditer)) != self.representation(a):
+                if unicode(b.get_text(beginiter, enditer)).strip(ZERO_WIDTH_NOBREAK_SPACE) != self.representation(a):
                     modified.append(a)
             except TypeError:
                 # Some missing annotations
@@ -219,7 +221,7 @@ class TranscriptionView(AdhocView):
             if not m:
                 break
             enditer  = b.get_iter_at_mark(m)
-            new_content = helper.title2content(unicode(b.get_text(beginiter, enditer)),
+            new_content = helper.title2content(unicode(b.get_text(beginiter, enditer)).strip(ZERO_WIDTH_NOBREAK_SPACE),
                                                a.content.data,
                                                a.type.getMetaData(config.data.namespace, 'representation') if self.options['default-representation'] else self.options['representation'])
             if new_content is None:
@@ -299,6 +301,7 @@ class TranscriptionView(AdhocView):
         b.create_tag("activated", background="skyblue")
         b.create_tag("current", background="lightblue")
         b.create_tag("searched_string", background="green")
+        b.create_tag("bound", editable=False)
 
         self.generate_buffer_content()
 
@@ -381,28 +384,36 @@ class TranscriptionView(AdhocView):
     def generate_buffer_content(self):
         b=self.textview.get_buffer()
         # Clear the buffer
-        begin,end=b.get_bounds()
+        begin, end = b.get_bounds()
         b.delete(begin, end)
+
+        def insert_at_cursor_with_tags_by_name(text, *tags):
+            b.insert_with_tags_by_name(b.get_iter_at_mark(b.get_insert()),
+                                       text, *tags)
 
         l=list(self.model)
         #l.sort(lambda a,b: cmp(a.fragment.begin, b.fragment.begin))
         for a in l:
             if self.options['display-time']:
-                b.insert_at_cursor("[%s]" % helper.format_time(a.fragment.begin))
+                insert_at_cursor_with_tags_by_name("[%s]" % helper.format_time(a.fragment.begin),
+                                                     "bound")
 
             mark = b.create_mark("b_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
                                  left_gravity=True)
             mark.set_visible(self.options['display-bounds'])
 
+            # Put a 0-width char to make it easier to edit annotations
+            insert_at_cursor_with_tags_by_name(ZERO_WIDTH_NOBREAK_SPACE, "bound")
             b.insert_at_cursor(unicode(self.representation(a)))
+            insert_at_cursor_with_tags_by_name(ZERO_WIDTH_NOBREAK_SPACE, "bound")
             mark = b.create_mark("e_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
                                  left_gravity=True)
             mark.set_visible(self.options['display-bounds'])
 
             if self.options['display-time']:
-                b.insert_at_cursor("[%s]" % helper.format_time(a.fragment.end))
+                insert_at_cursor_with_tags_by_name("[%s]" % helper.format_time(a.fragment.end), "bound")
 
             b.insert_at_cursor(self.options['separator'])
         return
@@ -590,7 +601,9 @@ class TranscriptionView(AdhocView):
             enditer  =b.get_iter_at_mark(endmark)
 
             b.delete(beginiter, enditer)
+            b.insert_with_tags_by_name(beginiter, ZERO_WIDTH_NOBREAK_SPACE, "bound")
             b.insert(beginiter, unicode(self.representation(annotation)))
+            b.insert_with_tags_by_name(beginiter, ZERO_WIDTH_NOBREAK_SPACE, "bound")
             # After insert, beginiter is updated to point to the end
             # of the invalidated text.
             b.move_mark(endmark, beginiter)
@@ -670,7 +683,7 @@ class TranscriptionView(AdhocView):
     def save_output(self, filename=None):
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()
-        out=unicode(b.get_text(begin, end))
+        out=unicode(b.get_text(begin, end)).replace(ZERO_WIDTH_NOBREAK_SPACE, '')
         try:
             f=open(filename, "w")
         except Exception, e:
