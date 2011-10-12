@@ -153,9 +153,10 @@ class AnnotationTable(AdhocView):
         tuple with the appropriate values for the annotation in the
         custom columns.
         """
-        self.elements=elements
         model=self.build_model(elements, custom_data)
         self.widget.treeview.set_model(model)
+        self.model = model
+        self.elements=elements
 
     def motion_notify_event_cb(self, tv, event):
         if not event.window is tv.get_bin_window():
@@ -435,9 +436,10 @@ class GenericTable(AdhocView):
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
     def set_elements(self, elements):
-        self.elements=elements
         model=self.build_model(elements)
         self.widget.treeview.set_model(model)
+        self.model = model
+        self.elements=elements
         
     def build_model(self, elements):
         """Build the ListStore containing the data.
