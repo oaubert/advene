@@ -163,7 +163,7 @@ class AnnotationTable(AdhocView):
             # it, so let us try to set the cursor position at the next element.
             path = str(long(self.last_edited_path) + 1)
             try:
-                i = self.model.get_iter(path)
+                self.model.get_iter(path)
             except ValueError:
                 path = self.last_edited_path
             self.widget.treeview.set_cursor(path,
@@ -207,6 +207,7 @@ class AnnotationTable(AdhocView):
         select.set_mode(gtk.SELECTION_MULTIPLE)
 
         tree_view.connect('button-press-event', self.tree_view_button_cb)
+        tree_view.connect('key-press-event', self.tree_view_key_cb)
         tree_view.connect('row-activated', self.row_activated_cb)
         tree_view.connect('motion-notify-event', self.motion_notify_event_cb)
         tree_view.connect('leave-notify-event', self.leave_notify_event_cb)
@@ -412,6 +413,17 @@ class AnnotationTable(AdhocView):
         if node is not None:
             self.controller.gui.edit_element(node)
             return True
+        return False
+
+    def tree_view_key_cb(self, widget=None, event=None):
+        if event.keyval == gtk.keysyms.Return and event.state & gtk.gdk.CONTROL_MASK:
+            # Control-return: goto annotation
+            nodes = self.get_selected_nodes ()
+            if len(nodes) == 1 and nodes[0] is not None:
+                ann = nodes[0]
+                self.controller.update_status (status="set", position=ann.fragment.begin)
+                self.controller.gui.set_current_annotation(ann)
+                return True
         return False
 
     def tree_view_button_cb(self, widget=None, event=None):
