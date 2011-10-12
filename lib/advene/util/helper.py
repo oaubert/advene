@@ -777,3 +777,38 @@ def common_fieldnames(elements):
         if e.content.mimetype == 'application/x-advene-structured':
             res.update( (regexp.findall(l) or [ '_error' ])[0] for l in e.content.data.split('\n') )
     return res
+
+parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
+empty_representation = re.compile(r'^\s*$')
+
+def title2content(new_title, original_content, representation):
+    """Converts a title (short representation) to the appropriate content.
+
+    It takes the 'representation' parameter into account. If it is
+    present, and in a common form (typically extraction of a field),
+    then we can convert the short representation back to the
+    appropriate content.
+
+    @return the new content or None if the content could not be updated.
+    """
+    r = None
+    if representation is None or empty_representation.match(representation):
+        r = unicode(new_title)
+    else:
+        m = parsed_representation.match(representation)
+        if m:
+            # We have a simple representation (here/content/parsed/name)
+            # so we can update the name field.
+            new_title = unicode(new_title).replace('\n', '\\n')
+            name=m.group(1)
+            reg = re.compile('^' + name + '=(.*?)$', re.MULTILINE)
+            if reg.search(original_content):
+                r = reg.sub(name + '=' + new_title, original_content)
+            else:
+                # The key is not present, add it
+                if original_content:
+                    r = original_content + "\n%s=%s" % (name, new_title)
+                else:
+                    r = "%s=%s" % (name, new_title)
+        # else: too complex representation. Return None as default value.
+    return r

@@ -36,9 +36,6 @@ from advene.gui.views import AdhocView
 from advene.gui.util import dialog, get_pixmap_button
 import advene.gui.popup
 
-parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
-empty_representation = re.compile(r'^\s*$')
-
 name="Transcription view plugin"
 
 def register(controller):
@@ -210,30 +207,6 @@ class TranscriptionView(AdhocView):
         return modified
 
     def update_modified(self, l):
-        def update(a, text):
-            """Update an annotation content according to its representation.
-
-            If the update is not possible (too complex representation), return False.
-            """
-            if self.options['default-representation']:
-                rep=a.type.getMetaData(config.data.namespace, 'representation') or ''
-            else:
-                rep=self.options['representation']
-            m=parsed_representation.match(rep)
-            if m:
-                # We have a simple representation (here/content/parsed/name)
-                # so we can update the name field.
-                name=m.group(1)
-                reg = re.compile('^' + name + '=(.+?)$', re.MULTILINE)
-                a.content.data = reg.sub(name + '=' + text, a.content.data)
-            else:
-                m=empty_representation.match(rep)
-                if m:
-                    a.content.data = text
-                else:
-                    return False
-            return True
-
         b=self.textview.get_buffer()
         impossible=[]
         batch_id=object()
@@ -246,12 +219,16 @@ class TranscriptionView(AdhocView):
             if not m:
                 break
             enditer  = b.get_iter_at_mark(m)
-            self.controller.notify('EditSessionStart', element=a, immediate=True)
-            if update(a, unicode(b.get_text(beginiter, enditer))):
-                self.controller.notify("AnnotationEditEnd", annotation=a, batch=batch_id)
-            else:
+            new_content = helper.title2content(unicode(b.get_text(beginiter, enditer)),
+                                               a.content.data,
+                                               a.type.getMetaData(config.data.namespace, 'representation') if self.options['default-representation'] else self.options['representation'])
+            if new_content is None:
                 impossible.append(a)
-            self.controller.notify('EditSessionEnd', element=a)
+            elif a.content.data != new_content:
+                self.controller.notify('EditSessionStart', element=a, immediate=True)
+                a.content.data = new_content
+                self.controller.notify("AnnotationEditEnd", annotation=a, batch=batch_id)
+                self.controller.notify('EditSessionEnd', element=a)
         if impossible:
             dialog.message_dialog(label=_("Cannot convert the following annotations,\nthe representation pattern is too complex.\n%s") % ",".join( [ a.id for a in impossible ] ))
         return True
@@ -263,7 +240,7 @@ class TranscriptionView(AdhocView):
     def validate(self, *p):
         l=self.check_modified()
         if l:
-            if self.options['representation'] and not parsed_representation.match(self.options['representation']):
+            if self.options['representation'] and not helper.parsed_representation.match(self.options['representation']):
                 dialog.message_dialog(label=_("Cannot validate the update.\nThe representation pattern is too complex."))
                 return True
             self.ignore_updates = True

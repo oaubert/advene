@@ -47,8 +47,6 @@ name="Timeline view plugin"
 def register(controller):
     controller.register_viewclass(TimeLine)
 
-parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
-
 class QuickviewBar(gtk.HBox):
     def __init__(self, controller=None):
         gtk.HBox.__init__(self)
@@ -579,7 +577,7 @@ class TimeLine(AdhocView):
             self.update_legend_widget(self.legend)
             self.legend.show_all()
             self.fraction_event(widget=None, forced_window_width=self.layout.window.get_size()[0])
-            
+
         self.populate(finalize_callback)
 
         if partial_update:
@@ -1596,44 +1594,21 @@ class TimeLine(AdhocView):
         e.set_text(self.controller.get_title(annotation))
         e.set_activates_default(True)
 
-        def get_parsed_content(widget, ann):
-            """Return the appropriate data generated from the widget content.
-            """
-            rep=ann.type.getMetaData(config.data.namespace, "representation")
-            if rep is None or rep == '' or re.match('^\s+', rep):
-                r=unicode(widget.get_text())
-            else:
-                m=parsed_representation.match(rep)
-                if m:
-                    # We have a simple representation (here/content/parsed/name)
-                    # so we can update the name field.
-                    name=m.group(1)
-                    reg = re.compile('^' + name + '=(.*?)$', re.MULTILINE)
-                    if reg.search(ann.content.data):
-                        r = reg.sub(name + '=' + unicode(widget.get_text()).replace('\n', '\\n'), ann.content.data)
-                    else:
-                        # The key is not present, add it
-                        if ann.content.data:
-                            r = ann.content.data + "\n%s=%s" % (name,
-                                                                unicode(widget.get_text()).replace('\n', '\\n'))
-                        else:
-                            r = "%s=%s" % (name,
-                                           unicode(widget.get_text()).replace('\n', '\\n'))
-                else:
-                    self.controller.log("Cannot update the annotation, its representation is too complex")
-                    r=ann.content.data
-            return r
-
         def key_handler(widget, event, ann, cb, controller, close_eb):
             if event.keyval == gtk.keysyms.Return:
-                r=get_parsed_content(widget, ann)
-                if cb:
-                    cb('validate', ann)
-                if r != ann.content.data:
-                    self.controller.notify('EditSessionStart', element=ann, immediate=True)
-                    ann.content.data = r
-                    controller.notify('AnnotationEditEnd', annotation=ann)
-                    self.controller.notify('EditSessionEnd', element=ann)
+                r = helper.title2content(widget.get_text(),
+                                         ann.content.data,
+                                         ann.type.getMetaData(config.data.namespace, "representation"))
+                if r is None:
+                    self.controller.log(_("Cannot update the annotation, its representation is too complex"))
+                else:
+                    if cb:
+                        cb('validate', ann)
+                    if r != ann.content.data:
+                        self.controller.notify('EditSessionStart', element=ann, immediate=True)
+                        ann.content.data = r
+                        controller.notify('AnnotationEditEnd', annotation=ann)
+                        self.controller.notify('EditSessionEnd', element=ann)
                 close_eb(widget)
                 return True
             elif event.keyval == gtk.keysyms.Escape:
@@ -1644,14 +1619,19 @@ class TimeLine(AdhocView):
                 return True
             elif event.keyval == gtk.keysyms.Tab:
                 # Validate the current annotation and go to the previous/next one
-                r=get_parsed_content(widget, ann)
-                if cb:
-                    cb('validate', ann)
-                if r != ann.content.data:
-                    self.controller.notify('EditSessionStart', element=ann, immediate=True)
-                    ann.content.data = r
-                    controller.notify('AnnotationEditEnd', annotation=ann)
-                    self.controller.notify('EditSessionEnd', element=ann)
+                r = helper.title2content(widget.get_text(),
+                                         ann.content.data,
+                                         ann.type.getMetaData(config.data.namespace, "representation"))
+                if r is None:
+                    self.controller.log("Cannot update the annotation, its representation is too complex")
+                else:
+                    if cb:
+                        cb('validate', ann)
+                    if r != ann.content.data:
+                        self.controller.notify('EditSessionStart', element=ann, immediate=True)
+                        ann.content.data = r
+                        controller.notify('AnnotationEditEnd', annotation=ann)
+                        self.controller.notify('EditSessionEnd', element=ann)
                 # Navigate
                 b=ann.fragment.begin
                 if event.state & gtk.gdk.SHIFT_MASK:
@@ -1889,7 +1869,7 @@ class TimeLine(AdhocView):
 
     def populate (self, callback=None):
         """Populate the annotations widget.
-        
+
         Since we do it asynchronously in the idle loop, the callback
         can be used to execute actions at the end of the annotation
         widgets creation.
