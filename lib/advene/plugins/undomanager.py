@@ -119,7 +119,7 @@ class UndoHistory:
     def element_edit_end(self, context, parameters):
         """Record the modified elements.
         """
-        if 'undone' in context.globals:
+        if context.globals.get('undone'):
             # The change is done in the context of an Undo.
             # Do not record it.
             #print "EditEnd in Undo context"
@@ -151,6 +151,11 @@ class UndoHistory:
     def element_create(self, context, parameters):
         """Record the created element id.
         """
+        if context.globals.get('undone'):
+            # The change is done in the context of an Undo.
+            # Do not record it.
+            #print "Create in Undo context"
+            return
         event=context.evaluateValue('event')
         el=event.replace('Create', '').lower()
         element=context.evaluateValue(el)
@@ -176,6 +181,11 @@ class UndoHistory:
     def element_delete(self, context, parameters):
         """Record the deleted elements.
         """
+        if context.globals.get('undone'):
+            # The change is done in the context of an Undo.
+            # Do not record it.
+            #print "Delete in Undo context"
+            return
         event=context.evaluateValue('event')
         el=event.replace('Delete', '').lower()
         element=context.evaluateValue(el)
