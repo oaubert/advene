@@ -320,7 +320,7 @@ class AdveneGUI(object):
         self.gui = DummyGlade(menu_definition)
 
         f = gtk.RecentFilter()
-        f.add_application("advene")
+        f.add_application(gobject.get_application_name())
         recent = gtk.RecentChooserMenu()
         recent.add_filter(f)
         recent.set_sort_type(gtk.RECENT_SORT_MRU)
@@ -357,7 +357,7 @@ class AdveneGUI(object):
                 b = gtk.MenuToolButton(stock)
                 b.set_arrow_tooltip_text(_("List recently opened packages"))
                 f = gtk.RecentFilter()
-                f.add_application("advene")
+                f.add_application(gobject.get_application_name())
                 recent = gtk.RecentChooserMenu()
                 recent.add_filter(f)
                 recent.set_sort_type(gtk.RECENT_SORT_MRU)
