@@ -43,6 +43,7 @@ COLUMN_BEGIN_FORMATTED=7
 COLUMN_END_FORMATTED=8
 COLUMN_PIXBUF=9
 COLUMN_COLOR=10
+COLUMN_CUSTOM_FIRST=11
 
 name="Element tabular view plugin"
 
@@ -55,7 +56,7 @@ class AnnotationTable(AdhocView):
     view_id = 'table'
     tooltip=_("Display annotations in a table")
 
-    def __init__(self, controller=None, parameters=None, elements=None):
+    def __init__(self, controller=None, parameters=None, custom_data=None, elements=None):
         super(AnnotationTable, self).__init__(controller=controller)
         self.registered_rules = []
         self.close_on_package_load = False
@@ -67,7 +68,7 @@ class AnnotationTable(AdhocView):
 
         self.mouseover_annotation = None
 
-        self.model=self.build_model(elements)
+        self.model = self.build_model(elements, custom_data)
         self.widget = self.build_widget()
 
         self.registered_rules.append( controller.event_handler.internal_rule (event="SnapshotUpdate",
@@ -105,11 +106,18 @@ class AnnotationTable(AdhocView):
         store, paths=selection.get_selected_rows()
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
-    def build_model(self, elements):
+    def build_model(self, elements, custom_data=None):
         """Build the ListStore containing the data.
 
+        See set_element docstring for the custom_data method explanation.
         """
-        l=gtk.ListStore(object, str, str, str, long, long, str, str, str, gtk.gdk.Pixbuf, str)
+        if custom_data is not None:
+            custom = custom_data
+        else:
+            def custom(a):
+                return tuple()
+        args = (object, str, str, str, long, long, str, str, str, gtk.gdk.Pixbuf, str) + custom(None)
+        l=gtk.ListStore(*args)
         if not elements:
             return l
         for a in elements:
@@ -125,13 +133,28 @@ class AnnotationTable(AdhocView):
                            helper.format_time(a.fragment.end),
                            png_to_pixbuf(self.controller.package.imagecache[a.fragment.begin],
                                          height=32),
-                           self.controller.get_element_color(a),
-                           ) )
+                           self.controller.get_element_color(a) 
+                           ) + custom(a),
+                          )
         return l
 
-    def set_elements(self, elements):
+    def set_elements(self, elements, custom_data=None):
+        """Use a new set of elements.
+
+        If custom_data is not None, then it is a function returning
+        tuples, that can be used to defined additional model columns.
+
+        When called with None as parameter, it must return a tuple
+        with the additional column types. It will be appended at the
+        end of the ListStore, in columns COLUMN_CUSTOM_FIRST,
+        COLUMN_CUSTOM_FIRST+1, etc.
+
+        When called with an annotation as parameter, it must return a
+        tuple with the appropriate values for the annotation in the
+        custom columns.
+        """
         self.elements=elements
-        model=self.build_model(elements)
+        model=self.build_model(elements, custom_data)
         self.widget.treeview.set_model(model)
 
     def motion_notify_event_cb(self, tv, event):
@@ -214,6 +237,9 @@ class AnnotationTable(AdhocView):
             columns[name].set_resizable(True)
             columns[name].set_min_width(40)
         columns['content'].set_expand(True)
+        
+        # Allow user classes to tweak behaviour
+        self.columns = columns
 
         # Drag and drop for annotations
         tree_view.drag_source_set(gtk.gdk.BUTTON1_MASK,
