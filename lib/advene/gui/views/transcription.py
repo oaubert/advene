@@ -415,7 +415,7 @@ class TranscriptionView(AdhocView):
             if self.options['display-time']:
                 insert_at_cursor_with_tags_by_name("[%s]" % helper.format_time(a.fragment.end), "bound")
 
-            b.insert_at_cursor(self.options['separator'])
+            insert_at_cursor_with_tags_by_name(self.options['separator'], "bound")
         return
 
     def highlight_search_forward(self, searched):
