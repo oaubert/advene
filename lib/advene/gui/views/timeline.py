@@ -571,15 +571,16 @@ class TimeLine(AdhocView):
 
         self.layer_position.clear()
         self.update_layer_position()
-        self.populate()
 
         self.draw_marks()
-
         self.draw_current_mark()
 
-        self.update_legend_widget(self.legend)
-        self.legend.show_all()
-        self.fraction_event(widget=None)
+        def finalize_callback():
+            self.update_legend_widget(self.legend)
+            self.legend.show_all()
+            self.fraction_event(widget=None, forced_window_width=self.layout.window.get_size()[0])
+            
+        self.populate(finalize_callback)
 
         if partial_update:
             self.set_middle_position(pos)
@@ -1886,7 +1887,13 @@ class TimeLine(AdhocView):
         b.show_all()
         return b
 
-    def populate (self):
+    def populate (self, callback=None):
+        """Populate the annotations widget.
+        
+        Since we do it asynchronously in the idle loop, the callback
+        can be used to execute actions at the end of the annotation
+        widgets creation.
+        """
         u2p = self.unit2pixel
         if self.list is None:
             l = self.controller.package.annotations
@@ -1899,6 +1906,8 @@ class TimeLine(AdhocView):
         count = 10
         length = len(l)
 
+        old_position = self.inspector_pane.get_position()
+        self.inspector_pane.set_position(2)
         def create_annotations(annotations, length):
             i = counter[0]
             if i < length:
@@ -1916,6 +1925,9 @@ class TimeLine(AdhocView):
                     self.quickview.set_text(_("Displaying done."))
                     self.locked_inspector = False
                 self.controller.gui.set_busy_cursor(False)
+                self.inspector_pane.set_position(old_position)
+                if callback:
+                    callback()
                 return False
         if l:
             self.layout.freeze_child_notify()
@@ -2620,7 +2632,7 @@ class TimeLine(AdhocView):
         self.limit_navtools.hide()
         return True
 
-    def fraction_event (self, widget=None, *p):
+    def fraction_event (self, widget=None, forced_window_width=0, *p):
         """Set the zoom factor to display the given fraction of the movie.
 
         fraction is > 0 and <= 1.
@@ -2629,6 +2641,8 @@ class TimeLine(AdhocView):
         if not parent:
             return True
         (w, h) = parent.get_size ()
+        if forced_window_width != 0:
+            w = forced_window_width
 
         if w < 2:
             return True
