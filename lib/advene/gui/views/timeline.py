@@ -183,6 +183,10 @@ class TimeLine(AdhocView):
         self.list = elements
         self.annotationtypes = annotationtypes
 
+        # package used when the update_model has been called from
+        # __init__. This is used to avoid a double initialization.
+        self.package_from_init = None
+
         self.current_marker = None
         self.current_marker_scale = None
 
@@ -336,6 +340,7 @@ class TimeLine(AdhocView):
             if self.minimum > 0 and self.maximum < self.controller.package.cached_duration:
                 self.limit_navtools.show()
             self.widget.disconnect(self.expose_signal)
+            self.update_model(from_init=True)
             return False
         # Convert values, that could be strings
         if default_position is not None:
@@ -496,20 +501,34 @@ class TimeLine(AdhocView):
         d.connect('response', handle_response)
         return True
 
-    def update_model(self, package=None, partial_update=False):
+    def update_model(self, package=None, partial_update=False, from_init=False):
         """Update the whole model.
 
         @param package: the package
         @type package: Package
-        @param update: it is only an update for the existing package, we do not need to rebuild everything
-        @param update: boolean
+        @param partial_update: it is only an update for the existing package, we do not need to rebuild everything
+        @param partial_update: boolean
         """
         if package is None:
             package = self.controller.package
 
+        if from_init:
+            self.package_from_init = package
+        else:
+            if package == self.package_from_init:
+                # update_model is called on the same package as in the
+                # __init__ method. This means that is is a result of
+                # the PackageActivate, so do not update it twice. Just
+                # reset package_from_init to enable future updates (in
+                # case of mass-modification of the package: merging,
+                # import...)
+                self.package_from_init = None
+                return
+
         if partial_update:
             pos=self.get_middle_position()
         else:
+            self.last_full_update_package = package
             # It is not just an update, do a full redraw
             oldmax = self.maximum
             self.minimum=0
