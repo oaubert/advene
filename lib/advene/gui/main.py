@@ -1198,14 +1198,14 @@ class AdveneGUI(object):
 
         # Populate the View submenu
         menu = self.gui.adhoc_view_menuitem.get_submenu()
-        it = gtk.MenuItem(_("All available views"))
+        it = gtk.MenuItem(_("_All available views"))
         menu.prepend(it)
         it.show()
         m = gtk.Menu()
         it.set_submenu(m)
         for name in sorted(self.registered_adhoc_views, reverse=True):
             cl=self.registered_adhoc_views[name]
-            it=gtk.MenuItem(cl.view_name, use_underline=False)
+            it=gtk.MenuItem('_' + cl.view_name, use_underline=True)
             it.set_tooltip_text(cl.tooltip)
             it.connect('activate', open_view_menu, name)
             m.prepend(it)
