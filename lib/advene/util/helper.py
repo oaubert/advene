@@ -48,7 +48,6 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
-from advene.model.util.defaultdict import DefaultDict
 import advene.model.zippackage
 
 from advene.model.tal.context import AdveneContext
@@ -323,7 +322,6 @@ def parse_time(s):
       ms: milliseconds
       NN: frame number
     """
-    f = config.data.preferences['timestamp-format']
     try:
         val=long(s)
     except ValueError:
