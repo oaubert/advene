@@ -136,7 +136,7 @@ class ShotDetector:
         self.DISS_START_THRESHOLD = 0.16
         self.DISS_END_THRESHOLD = 0.26
         self.DISS_MIN_FRAMES = 3
-        
+
 
     def dummy_progress(self, prg, label):
         pass
@@ -233,7 +233,7 @@ class ShotDetector:
             h = (histos[i] + histos[i-1]) / 2
             c = 0
             for k in range(1, K):
-                if i - k < 0 : 
+                if i - k < 0 :
                     break
                 c += numpy.sum(numpy.abs(h - histos[i - k])) / nbpix
             r.append(c / K)

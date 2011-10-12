@@ -1123,7 +1123,7 @@ class ShapeDrawer:
         self.selection = [[None, None], [None, None]]
         self.feedback_shape = None
         self.shape_class = Rectangle
-        
+
         self.resize_cursor = gtk.gdk.Cursor(gtk.gdk.BOTTOM_RIGHT_CORNER)
         self.inside_cursor = gtk.gdk.Cursor(gtk.gdk.HAND2)
 
@@ -1140,9 +1140,9 @@ class ShapeDrawer:
         self.widget.connect('button-press-event', self.button_press_event)
         self.widget.connect('button-release-event', self.button_release_event)
         self.widget.connect('motion-notify-event', self.motion_notify_event)
-        self.widget.set_events(gtk.gdk.EXPOSURE_MASK | gtk.gdk.LEAVE_NOTIFY_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK 
+        self.widget.set_events(gtk.gdk.EXPOSURE_MASK | gtk.gdk.LEAVE_NOTIFY_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK
                                | gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.POINTER_MOTION_HINT_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK )
-        
+
         self.background=None
         # FIXME: Hardcoded dimensions are bad.
         self.canvaswidth=320
@@ -1487,7 +1487,7 @@ class ShapeDrawer:
 
     def convert_unit(self, s, dimindex=0):
         """Convert a unit.
-        
+
         dimindex is the index of the unit in the .dimensions tuple: 0
         for width, 1 for height.
         """
@@ -1504,7 +1504,7 @@ class ShapeDrawer:
                 return val
         print 'Unhandled SVG dimension format for ', s
         return 0
-            
+
     def parse_svg(self, et, current_path=''):
         """Parse a SVG representation
 
@@ -1518,7 +1518,7 @@ class ShapeDrawer:
         w=et.attrib.get('width')
         h=et.attrib.get('height')
         if w is not None and h is not None:
-            self.svg_dimensions = (self.convert_unit(w, 0), 
+            self.svg_dimensions = (self.convert_unit(w, 0),
                                    self.convert_unit(h, 0))
         for c in et:
             for clazz in defined_shape_classes:

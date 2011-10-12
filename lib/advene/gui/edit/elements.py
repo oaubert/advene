@@ -1308,7 +1308,7 @@ class EditContentForm(EditForm):
             self.mimetype=dialog.list_selector_widget(members=l,
                                                       preselect=mt,
                                                       entry=self.mimetypeeditable)
-            
+
             hbox.pack_start(self.mimetype)
 
             vbox.pack_start(hbox, expand=False)
@@ -1797,7 +1797,7 @@ class EditFragmentForm(EditForm):
 
 class EditGenericForm(EditForm):
     def __init__(self, title=None, getter=None, setter=None,
-                 controller=None, editable=True, tooltip=None, type=None, elements=None, 
+                 controller=None, editable=True, tooltip=None, type=None, elements=None,
                  focus=False, sizegroup=None):
         self.title=title
         self.getter=getter
@@ -1932,7 +1932,7 @@ class EditGenericForm(EditForm):
 class EditMetaForm(EditGenericForm):
     def __init__(self, title=None, element=None, name=None,
                  namespaceid='advenetool', controller=None,
-                 editable=True, tooltip=None, type=None, 
+                 editable=True, tooltip=None, type=None,
                  elements=None,
                  focus=False, sizegroup=None):
         getter=self.metadata_get_method(element, name, namespaceid)
@@ -2370,7 +2370,7 @@ class EditRelationsForm(EditForm):
                 other=r.members[0]
             hb=gtk.HBox()
 
-            b=RelationRepresentation(r, controller=self.controller, direction=direction)            
+            b=RelationRepresentation(r, controller=self.controller, direction=direction)
             b.set_alignment(0, 0)
             col1.add_widget(b)
             hb.pack_start(b, expand=False)
@@ -2379,7 +2379,7 @@ class EditRelationsForm(EditForm):
             a.set_alignment(0, 0)
             col2.add_widget(a)
             hb.pack_start(a, expand=False)
-            
+
             self.view.pack_start(hb, expand=False)
         self.view.show_all()
         return

@@ -54,7 +54,7 @@ class TypedString(str):
     """String with a mimetype and a timestamp attribute.
     """
     def __new__(cls, value=""):
-        s=str.__new__(cls, value) 
+        s=str.__new__(cls, value)
         s.contenttype='text/plain'
         s.timestamp=-1
         return s

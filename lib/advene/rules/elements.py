@@ -861,7 +861,7 @@ class Quicksearch(EtreeMixin):
         @return: an ElementTree.Element
         """
         qnode=ET.Element(tag('quicksearch'))
-        
+
         for source in self.sources:
             qnode.append(ET.Element(tag('source'), { 'value': source } ))
 

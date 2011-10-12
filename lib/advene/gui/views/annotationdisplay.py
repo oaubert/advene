@@ -287,7 +287,7 @@ class AnnotationDisplay(AdhocView):
         self.sw['contents']=sw
 
         def handle_keypress(widget, event):
-            if (event.keyval == gtk.keysyms.Return 
+            if (event.keyval == gtk.keysyms.Return
                 and event.state & gtk.gdk.CONTROL_MASK
                 and widget.get_buffer().get_modified()):
                 handle_ok(ok_button)

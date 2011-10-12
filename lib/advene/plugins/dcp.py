@@ -37,7 +37,7 @@ def register(controller=None):
 timestamp_re = re.compile('(\d\d):(\d\d):(\d\d):(\d\d)')
 
 # Column -> (type, attr) mapping.
-# 
+#
 type_mapping = {
     u'Inquadratura'                      : (u'Inquadratura', 'num'),
     u'Descrizione inquadratura'          : (u'Inquadratura', 'descrizione'),
@@ -112,12 +112,12 @@ class DCPImporter(GenericImporter):
         incr = 1.0 / self.row_count
         # Column cache: store (in_time, content) for each column
         column_cache = {}
-        # Row cache: for coalesced types, store 
+        # Row cache: for coalesced types, store
         # (in_time, content) indexed by DCP type
         row_cache = {}
         for row in rows:
             row_cache.clear()
-            self.progress(progress, _("Converting #%(num)d / %(count)d") % { 'num': rows.line_num, 
+            self.progress(progress, _("Converting #%(num)d / %(count)d") % { 'num': rows.line_num,
                                                                              'count': self.row_count})
             progress += incr
             t = self.str2time(row[1])

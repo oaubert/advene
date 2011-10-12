@@ -541,7 +541,7 @@ class ExternalAppImporter(GenericImporter):
         in the end.
         """
         pass
-        
+
     def get_process_args(self, filename):
         """Get the process args.
 
@@ -590,7 +590,7 @@ class TextImporter(GenericImporter):
     - float numbers are considered as seconds
       Regexp: \d*\.\d*
       Example: 2.134 or .134 or 2.
-      
+
     - formatted timestamps with colons in them will be interpreted as follows.
       m:s (1 colon)
       m:s.ms (1 colon)
@@ -598,7 +598,7 @@ class TextImporter(GenericImporter):
       h:m:s (2 colons)
       h:m:s.ms (2 colons)
       h:m:sfNN
-      
+
       Legend:
       h: hours
       m: minutes

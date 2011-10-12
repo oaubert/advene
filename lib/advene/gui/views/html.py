@@ -223,7 +223,7 @@ class webkit_wrapper:
             self.notify(label=_("Title %s") % title)
 
         def _hover_link_cb(view, title, url):
-            
+
             if not (view and url):
                 url=''
             self.notify(label=url)
@@ -279,7 +279,7 @@ class webkit_wrapper:
         self.component=w
         s=gtk.ScrolledWindow()
         s.add(w)
-        
+
         return s
 
 class HTMLView(AdhocView):

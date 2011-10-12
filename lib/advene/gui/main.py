@@ -2801,6 +2801,7 @@ class AdveneGUI(object):
                            abbreviations=self.text_abbreviations)
         p._indexer.initialize()
 
+        # FIXME: it should not be here, but in activate, and called only once
         self.controller.queue_action(self.check_for_default_adhoc_view, p)
         return True
 

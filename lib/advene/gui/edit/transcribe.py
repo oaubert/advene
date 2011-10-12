@@ -964,18 +964,18 @@ class TranscriptionEdit(AdhocView):
         if not self.controller.gui:
             self.message(_("Cannot import annotations: no existing interface"))
             return True
-        at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to import"), 
-                                                       create=False, 
+        at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to import"),
+                                                       create=False,
                                                        default=self.controller.package.get_element_by_id(self.options['annotation-type-id']))
         if at is None:
             return True
 
         self.options['annotation-type-id'] = at.id
-        
+
         if not at.annotations:
             dialog.message_dialog(_("There are no annotations of type %s") % self.controller.get_title(at))
             return True
-            
+
         if not self.buffer_is_empty():
             if not dialog.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
                                                   icon=gtk.MESSAGE_QUESTION):

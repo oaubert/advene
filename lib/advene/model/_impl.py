@@ -79,7 +79,7 @@ class Metaed(object):
         r = StringIO()
         advene.model.util.dom.printElementText(dom_element, r)
         return r.getvalue().decode('utf-8')
-        
+
     def getMetaData(self, namespace_uri, name):
         """Return the text content of metadata with given NS and name
         """
@@ -125,7 +125,7 @@ class Metaed(object):
         return [ (e.namespaceURI, e.localName, self.elementValue(e))
                  for e in meta.childNodes
                  if e.nodeType is ELEMENT_NODE ]
-        
+
 class Authored(Metaed):
     """An implementation for the author property.
        Inheriting classes must have a _getModel method returning a DOM element
@@ -476,7 +476,7 @@ class Aliased(object):
        Inheriting classes must have a _getModel method returning a DOM element
        (inheriting the modeled.Modeled class looks like a good idea).
        Note that this implementation consider 'alias' to be optional.
-       
+
        Note: for historical reasons, this property is stored with the
        name "as" in the DOM tree. This original name introduced a
        clash in python2.6 with a reserved keyword. It has thus been

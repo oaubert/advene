@@ -215,13 +215,13 @@ class EditWidget(gtk.VBox):
             combo.show()
             for e in entries:
                 combo.append_text(e)
-            combo.set_tooltip_text(help)        
+            combo.set_tooltip_text(help)
             self.__add_line(1, align, combo)
         else:
             combo = None
             entry = gtk.Entry()
             entry.show()
-            entry.set_tooltip_text(help)        
+            entry.set_tooltip_text(help)
             self.__add_line(1, align, entry)
 
         if (passwd):
@@ -318,7 +318,7 @@ class EditWidget(gtk.VBox):
         align.add(lbl)
 
         value = self.__get_config(property)
-        
+
         adjustment = gtk.Adjustment(value, low, up, 10 ** -digits, 1, 0)
         spin_button = gtk.SpinButton(adjustment, 1, digits)
         spin_button.set_numeric(True)
@@ -499,7 +499,7 @@ class OptionParserGUI(EditWidget):
         self.options = {}
         super(OptionParserGUI, self).__init__(self.options.__setitem__, self.options.get)
         self.parse_options(parser)
-        
+
     def parse_options(self, parser):
         for o in parser.option_list:
             name = o.get_opt_string().replace('--', '')

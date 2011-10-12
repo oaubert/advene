@@ -45,7 +45,7 @@ class SVGOverlay(gst.Element):
         'data': ( gobject.TYPE_STRING, 'data', 'SVG data to overlay', None, gobject.PARAM_WRITABLE ),
         'location': ( gobject.TYPE_STRING, 'location', 'SVG file to overlay', None, gobject.PARAM_WRITABLE ),
         }
-    
+
     _sinkpadtemplate = gst.PadTemplate ("sink",
                                          gst.PAD_SINK,
                                          gst.PAD_ALWAYS,
@@ -54,7 +54,7 @@ class SVGOverlay(gst.Element):
                                          gst.PAD_SRC,
                                          gst.PAD_ALWAYS,
                                          gst.caps_from_string ("video/x-raw-rgb,bpp=32,depth=32,blue_mask=-16777216,green_mask=16711680, red_mask=65280, alpha_mask=255,width=[ 1, 2147483647 ],height=[ 1, 2147483647 ],framerate=[ 0/1, 2147483647/1 ]"))
-    
+
     def __init__(self):
         gst.Element.__init__(self)
 
@@ -87,7 +87,7 @@ class SVGOverlay(gst.Element):
 
     def eventfunc(self, pad, event):
         return self.srcpad.push_event (event)
-        
+
     def srcqueryfunc (self, pad, query):
         return self.sinkpad.query (query)
 
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     if sys.argv[1:]:
         player=gst.element_factory_make('playbin')
         player.props.uri = 'file://' + sys.argv[1]
-    
+
         bin=gst.Bin()
         elements = [
             gst.element_factory_make('textoverlay'),
@@ -162,12 +162,12 @@ if __name__ == '__main__':
         bin.add(*elements)
         gst.element_link_many(*elements)
         bin.add_pad(gst.GhostPad('sink', elements[0].get_pad('video_sink') or elements[0].get_pad('sink')))
-        
+
         player.props.video_sink=bin
     else:
         player = gst.parse_launch('videotestsrc ! ffmpegcolorspace ! videoscale ! pysvgoverlay name=overlay ! ffmpegcolorspace ! autovideosink')
         bin = player
-    
+
     pipe=player
     overlay=bin.get_by_name('overlay')
 
@@ -195,14 +195,14 @@ if __name__ == '__main__':
 </svg:svg>''' % (t[5], time.strftime("%H:%M:%S", t))
 ##        overlay.props.data='''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 ##<svg height="800" version="1.0" width="600" x="0" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" y="0">
-##  <rect x='50' y='290' width='230' height='60' fill='black' stroke='black' /> 
+##  <rect x='50' y='290' width='230' height='60' fill='black' stroke='black' />
 ##  <text x='55' y='335' fill="white" font-size="48" stroke="white" font-family="sans-serif">
 ##%s
 ##  </text>
 ##</svg>
 ##''' % time.strftime("%H:%M:%S", time.localtime())
         return True
-    
+
     gobject.timeout_add(1000, display)
     try:
         mainloop.run()

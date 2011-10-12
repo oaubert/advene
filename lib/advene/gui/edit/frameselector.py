@@ -28,7 +28,7 @@ from gettext import gettext as _
 
 class FrameSelector(object):
     """Frame selector interface.
-    
+
     Given a timestamp, it displays a series of snapshots around
     the timestamp and allows to select the most appropriate
     one.
@@ -56,7 +56,7 @@ class FrameSelector(object):
         # It is initialized in build_widget()
         self.frames = []
         self.widget = self.build_widget()
-        
+
     def set_timestamp(self, timestamp):
         """Set the reference timestamp.
 
@@ -66,10 +66,10 @@ class FrameSelector(object):
         self.timestamp = timestamp
         self.selected_value = timestamp
         self.update_timestamp(timestamp)
-        
+
     def update_timestamp(self, timestamp, focus_index=None):
         """Set the center timestamp.
-        
+
         If focus_index is not specified, the center timestamp will get
         the focus.
 
@@ -86,7 +86,7 @@ class FrameSelector(object):
             t = 0
         else:
             index_offset = 0
-        
+
         matching_index = -1
         for (i, f) in enumerate(self.frames):
             f.value = t
@@ -204,7 +204,7 @@ class FrameSelector(object):
             timestamp = self.selected_value
         d.destroy()
         return timestamp
-    
+
     def select_time(self, button=None):
         """General callback.
 
@@ -215,7 +215,7 @@ class FrameSelector(object):
         if self.callback is not None:
             self.callback(self.selected_value)
         return True
-        
+
     def build_widget(self):
         vb=gtk.VBox()
 
@@ -265,7 +265,7 @@ class FrameSelector(object):
             if self.border_mode in ('left', 'right'):
                 r.connect('enter-notify-event', enter_bookmark)
                 r.connect('leave-notify-event', leave_bookmark)
-            
+
             hb.pack_start(border, expand=False)
             hb.pack_start(r, expand=False)
 

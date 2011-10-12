@@ -35,7 +35,7 @@ import advene.rules.elements
 
 class MyThread(threading.Thread):
     """Override the standard run() method.
-    
+
     Its behaviour changed in 2.6, and removed the __target, _args and
     _kwargs variable. Since we keep reusing them, this broke our code.
     """
@@ -46,7 +46,7 @@ class MyThread(threading.Thread):
     def run(self):
         if self._target:
             self._target()
-            
+
 class ECAEngine:
     """ECAEngine class.
 
@@ -340,7 +340,7 @@ class ECAEngine:
         for k in sorted(self.ruledict.keys()):
             res.append("%s: %s" % (k, len(self.ruledict[k])))
         return res
-            
+
     def notify (self, event_name, *param, **kw):
         """Invoked by the application on the occurence of an event.
 

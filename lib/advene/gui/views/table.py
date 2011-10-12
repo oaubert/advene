@@ -133,7 +133,7 @@ class AnnotationTable(AdhocView):
                            helper.format_time(a.fragment.end),
                            png_to_pixbuf(self.controller.package.imagecache[a.fragment.begin],
                                          height=32),
-                           self.controller.get_element_color(a) 
+                           self.controller.get_element_color(a)
                            ) + custom(a),
                           )
         return l
@@ -238,7 +238,7 @@ class AnnotationTable(AdhocView):
             columns[name].set_resizable(True)
             columns[name].set_min_width(40)
         columns['content'].set_expand(True)
-        
+
         # Allow user classes to tweak behaviour
         self.columns = columns
 
@@ -440,7 +440,7 @@ class GenericTable(AdhocView):
         self.widget.treeview.set_model(model)
         self.model = model
         self.elements=elements
-        
+
     def build_model(self, elements):
         """Build the ListStore containing the data.
 

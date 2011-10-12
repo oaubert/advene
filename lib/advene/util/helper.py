@@ -114,7 +114,7 @@ class TypedUnicode(unicode):
     """Unicode string with a mimetype attribute.
     """
     def __new__(cls, value=""):
-        s=unicode.__new__(cls, value) 
+        s=unicode.__new__(cls, value)
         s.contenttype='text/plain'
         return s
 
@@ -122,7 +122,7 @@ class TypedString(str):
     """String with a mimetype attribute.
     """
     def __new__(cls, value=""):
-        s=str.__new__(cls, value) 
+        s=str.__new__(cls, value)
         s.contenttype='text/plain'
         return s
 
@@ -248,7 +248,7 @@ def unaccent(t):
 
 def format_time_reference(val = 0):
     """Formats a value (in milliseconds) into a time string.
-    
+
     Use the most complete format (HH:MM:SS.sss), for reference into
     saved files.
     """
@@ -259,7 +259,7 @@ def format_time_reference(val = 0):
     (s, ms) = divmod(long(val), 1000)
     # Format: HH:MM:SS.mmm
     return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
-        
+
 def format_time (val = 0):
     """Formats a value (in milliseconds) into a time string, respecting user preferences.
 
@@ -307,7 +307,7 @@ def parse_time(s):
     - float numbers are considered as seconds
       Regexp: \d*\.\d*
       Example: 2.134 or .134 or 2.
-      
+
     - formatted timestamps with colons in them will be interpreted as follows.
       m:s (1 colon)
       m:s.ms (1 colon)
@@ -315,7 +315,7 @@ def parse_time(s):
       h:m:s (2 colons)
       h:m:s.ms (2 colons)
       h:m:sfNN
-      
+
       Legend:
       h: hours
       m: minutes

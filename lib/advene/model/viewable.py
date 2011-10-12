@@ -30,7 +30,7 @@ class TypedUnicode(unicode):
     """Unicode string with a mimetype attribute.
     """
     def __new__(cls, value=""):
-        s=unicode.__new__(cls, value) 
+        s=unicode.__new__(cls, value)
         s.contenttype='text/plain'
         return s
 
@@ -38,7 +38,7 @@ class TypedString(str):
     """String with a mimetype attribute.
     """
     def __new__(cls, value=""):
-        s=str.__new__(cls, value) 
+        s=str.__new__(cls, value)
         s.contenttype='text/plain'
         return s
 

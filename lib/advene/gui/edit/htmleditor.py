@@ -420,7 +420,7 @@ class HTMLEditor(textview_class, HTMLParser):
             pixbuf=None
 
         if pixbuf is None:
-            pixbuf=gtk.gdk.pixbuf_new_from_xpm_data(broken_xpm)        
+            pixbuf=gtk.gdk.pixbuf_new_from_xpm_data(broken_xpm)
         pixbuf._tag=tag
         pixbuf._attr=attr
         self.insert_pixbuf(pixbuf)

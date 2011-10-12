@@ -104,7 +104,7 @@ class Montage(AdhocView):
 
         self.mainbox=None
         self.widget=self.build_widget()
-        
+
         # Annotation widget currently played
         self.current_widget = None
 
@@ -303,7 +303,7 @@ class Montage(AdhocView):
                                                   title = _("Extracting %s") % self.view_name,
                                                   label = _("Exporting montage %(title)s\nto %%(filename)s") % { 'title': self.view_name })
         return True
-        
+
     def play(self, *p):
         """Play the current montage.
         """

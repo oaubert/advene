@@ -226,7 +226,7 @@ class Player:
 
     def resume(self, position=None):
         # Ignore
-        return 
+        return
 
     def stop(self, position=None):
         self.stream_duration=self.current_position

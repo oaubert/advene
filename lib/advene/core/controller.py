@@ -236,7 +236,7 @@ class AdveneController(object):
         # view, tracer...). Here is a placeholder for keeping their
         # reference, indexed by view name. The value is a class.
         self.generic_features = {}
-        
+
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
         self.modifying_events = self.event_handler.catalog.modifying_events
@@ -432,7 +432,7 @@ class AdveneController(object):
         if name in self.generic_features:
             self.log(_("Warning: redefining an existing feature %s") % name)
         self.generic_features[name] = feature_class
-        
+
     def register_slave_player(self, p):
         """Register a slave video player.
         """
@@ -561,10 +561,10 @@ class AdveneController(object):
     def defined_quicksearch_sources(self):
         """Return a list of TitledElements
         """
-        return [ helper.TitledElement(expression, label) 
+        return [ helper.TitledElement(expression, label)
                  for (label, expression) in [ (_("All annotations"), "all_annotations") ] + [
                 (_("Annotations of type %s") % self.get_title(at),
-                 'here/annotationTypes/%s/annotations' % at.id) for at in self.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags'), (_("Ids"), 'ids') ] 
+                 'here/annotationTypes/%s/annotations' % at.id) for at in self.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags'), (_("Ids"), 'ids') ]
                  ]
 
     def search_string(self, searched=None, sources=None, case_sensitive=False):
@@ -597,7 +597,7 @@ class AdveneController(object):
 
         if sources is None:
             sources=[ "all_annotations" ]
-        
+
         # Replace standard \n/\t escape, because \ are parsed by shlex
         searched=searched.replace('\\n', '%n').replace('\\t', '%t')
         try:
@@ -971,7 +971,7 @@ class AdveneController(object):
         if snap is not None and snap.height != 0:
             self.package.imagecache[snap.date] = helper.snapshot2png(snap)
             self.notify('SnapshotUpdate', position=snap.date)
-        
+
     def update_snapshot (self, position=None):
         """Event handler used to take a snapshot for the given position.
 
@@ -1412,7 +1412,7 @@ class AdveneController(object):
                                                       an.type.mimetype))
                 an.content.data = annotation.content.data
         elif an.type.mimetype == 'image/svg+xml':
-            # Use a template for text->SVG conversion. 
+            # Use a template for text->SVG conversion.
             # FIXME: we should be able to propose a variety of templates, passed as parameter from the GUI
             an.content.data = """<svg:svg height="320pt" preserveAspectRatio="xMinYMin meet" version="1" viewBox="0 0 400 320" width="400pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg">
   <text fill="green" name="Content" stroke="green" style="stroke-width:1; font-family: sans-serif; font-size: 22" x="8" y="290">%s</text>
@@ -2334,11 +2334,11 @@ class AdveneController(object):
         """
         # Process the event queue
         self.process_queue()
-        
+
         p = self.player
 
         pos=self.position_update ()
-        
+
         if pos < self.last_position or pos > self.last_position + 1000:
             # We did a seek compared to the last time (backward, or
             # more than 1s forward), so we invalidate the
@@ -2468,7 +2468,7 @@ class AdveneController(object):
 	<strong tal:content="a/content/data">Nom</strong>
 </a><br />
 <span>(<span tal:content="a/fragment/formatted/begin">Debut</span> - <span tal:content="a/fragment/formatted/end">Fin</span>)</span>
-<br /> 
+<br />
 </div></span>""" % { 'id': elements[0].id,
                      'title': at_title,
                      }

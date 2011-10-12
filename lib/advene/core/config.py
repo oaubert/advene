@@ -100,7 +100,7 @@ class Config(object):
         self.debug=False
 
         self.startup_time=time.time()
-        
+
         self.config_file=''
         self.parse_options()
 
@@ -551,7 +551,7 @@ class Config(object):
         h=self.preferences['history']
         if len(h) > self.preferences['history-size-limit']:
             self.preferences['history']=h[-self.preferences['history-size-limit']:]
-        
+
         if self.os == 'darwin':
             # Force display-caption disabling on darwin.
             self.preferences['display-caption']=False

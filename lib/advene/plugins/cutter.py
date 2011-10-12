@@ -77,11 +77,11 @@ class CutterImporter(GenericImporter):
                     'begin': begin,
                     'end': end,
                     'content': 'sound',
-                    } 
+                    }
                           for begin, end in self.buffer )
             self.end_callback()
             return True
-        
+
         if message.type == gst.MESSAGE_EOS:
             finalize()
         ##elif message.type == gst.MESSAGE_STATE_CHANGED:
@@ -98,7 +98,7 @@ class CutterImporter(GenericImporter):
             s=message.structure
             #print "MSG " + bus.get_name() + ": " + s.to_string()
             if s.get_name() == 'progress' and self.progress is not None:
-                if not self.progress(s['percent-double'] / 100, _("Detected %(count)d segments until %(time)s") % { 'count': len(self.buffer), 
+                if not self.progress(s['percent-double'] / 100, _("Detected %(count)d segments until %(time)s") % { 'count': len(self.buffer),
                                                                                                                     'time': helper.format_time(s['current'] * 1000) }):
                     finalize()
             elif s.get_name() == 'cutter':
@@ -118,7 +118,7 @@ class CutterImporter(GenericImporter):
 
         at = self.ensure_new_type('sound_segment', title=_("Sound segment"))
         at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Sound segmentation with a threshold of %(threshold)d dB - channel: %(channel)s") % self.__dict__)
-        
+
         # Build pipeline
         self.pipeline = gst.parse_launch('uridecodebin name=decoder ! audioconvert ! audiopanorama method=1 panorama=%d ! audioconvert ! cutter threshold-dB=%s ! progressreport silent=true update-freq=1 name=report ! fakesink' % (self.channel_mapping[self.channel], str(self.threshold)))
         self.decoder = self.pipeline.get_by_name('decoder')

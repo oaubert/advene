@@ -60,7 +60,7 @@ class TEDImporter(GenericImporter):
             f=open(filename, 'r')
         data='\n'.join(f.readlines())
         f.close()
-        
+
         p, at=self.init_package(filename=filename, schemaid='ted')
         if self.package is None:
             self.package=p

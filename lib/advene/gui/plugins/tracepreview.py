@@ -48,7 +48,7 @@ except ImportError:
     # fail the module loading, and use them as a guard in register()
     goocanvas=None
     Group=object
-    
+
 def register(controller):
     if goocanvas is None:
         controller.log("Cannot register TracePreview: the goocanvas python module does not seem to be available.")
@@ -318,7 +318,7 @@ class TracePreview(AdhocView):
                         font = "Sans 5")
             else:
                 # no concerned object, we are in an action of navigation
-    
+
                 txt = obj_evt.content
                 if txt != None:
                     # content should be of the form pos_bef \n pos

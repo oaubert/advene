@@ -121,7 +121,7 @@ class FileImporter(AdhocView):
                 'statistics': self.importer.statistics_formatted() }
         dialog.message_dialog(msg, modal=False)
         self.log(msg)
-        
+
     def convert_file(self, b, *p):
         stop_label = _("Stop")
         if b.get_label() == stop_label:

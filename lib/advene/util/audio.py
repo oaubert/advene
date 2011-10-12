@@ -36,7 +36,7 @@ if config.data.os == 'win32':
         #even if gstpluginpath is defined, gst still may not be in path
         gstpath = unicode(os.getenv('PATH', ""), fsenc)
         h,t = os.path.split(ppath)
-        binpath,t = os.path.split(h) 
+        binpath,t = os.path.split(h)
         os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) ).encode(fsenc)
 
 try:

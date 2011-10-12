@@ -175,9 +175,9 @@ class AnnotationPlaceholder:
         context.fill()
 
         pixbuf = gtk.gdk.pixbuf_new_from_data(
-            surface.get_data(), 
-            gtk.gdk.COLORSPACE_RGB, True, 8, 
-            surface.get_width(), surface.get_height(), 
+            surface.get_data(),
+            gtk.gdk.COLORSPACE_RGB, True, 8,
+            surface.get_width(), surface.get_height(),
             surface.get_stride())
         return pixbuf
 
@@ -198,7 +198,7 @@ class AnnotationPlaceholder:
                 pixbuf=png_to_pixbuf(self.annotation.rootPackage.imagecache[self.annotation.fragment.begin],
                                      width=self.width)
         elif 'timestamp' in self.presentation:
-            # Generate only a timestamp 
+            # Generate only a timestamp
             pixbuf = self.render_text(helper.format_time(self.annotation.fragment.begin))
         elif 'content' in self.presentation:
             # Display text
@@ -214,7 +214,7 @@ class AnnotationPlaceholder:
 
 class AnnotationTypePlaceholder:
     """AnnotationType representation.
-    
+
     presentation is a list of presentation modalities. Values include:
     * list : display as a bulleted list
     * transcription : display as a transcription
@@ -241,7 +241,7 @@ class AnnotationTypePlaceholder:
 
     def process_enclosed_tags(self, typ, tag, attr=None):
         """Process enclosed data.
-        
+
         FIXME: what should we do here?
         """
         if typ == 'start' and tag == 'span':
@@ -289,7 +289,7 @@ class AnnotationTypePlaceholder:
 	<strong tal:content="a/content/data">Nom</strong>
 </a><br />
 <span>(<span tal:content="a/fragment/formatted/begin">Debut</span> - <span tal:content="a/fragment/formatted/end">Fin</span>)</span>
-<br /> 
+<br />
 </div>""" % d)
         elif 'transcription' in self.presentation:
             data.append("""<span class="transcript" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted" tal:attributes="annotation-id a/id">
@@ -351,9 +351,9 @@ class AnnotationTypePlaceholder:
         context.fill()
 
         pixbuf = gtk.gdk.pixbuf_new_from_data(
-            surface.get_data(), 
-            gtk.gdk.COLORSPACE_RGB, True, 8, 
-            surface.get_width(), surface.get_height(), 
+            surface.get_data(),
+            gtk.gdk.COLORSPACE_RGB, True, 8,
+            surface.get_width(), surface.get_height(),
             surface.get_stride())
         return pixbuf
 
@@ -544,14 +544,14 @@ class HTMLContentHandler (ContentHandler):
 
     def class_parser(self, tag, attr):
         if attr['class'] == 'advene:annotation':
-            a=AnnotationPlaceholder(annotation=None, 
-                                    controller=self.controller, 
+            a=AnnotationPlaceholder(annotation=None,
+                                    controller=self.controller,
                                     update_pixbuf=self.editor.update_pixbuf)
             self.placeholders.append(a)
             return a.parse_html(tag, attr)
         elif attr['class'] == 'advene:annotationtype':
-            a=AnnotationTypePlaceholder(annotationtype=None, 
-                                        controller=self.controller, 
+            a=AnnotationTypePlaceholder(annotationtype=None,
+                                        controller=self.controller,
                                         update_pixbuf=self.editor.update_pixbuf)
             self.placeholders.append(a)
             return a.parse_html(tag, attr)
@@ -608,7 +608,7 @@ class HTMLContentHandler (ContentHandler):
         return None
 
     def contextual_popup(self, ctx=None, menu=None):
-        """Popup a contextual menu for the given context.        
+        """Popup a contextual menu for the given context.
         """
         if menu is None:
             menu=gtk.Menu()
@@ -647,7 +647,7 @@ class HTMLContentHandler (ContentHandler):
                     new_menuitem(_("Show timestamp only"), select_presentation, ap, ['timestamp', 'link'])
                     new_menuitem(_("Show content only"), select_presentation, ap, ['content', 'link'])
                     new_menuitem(_("Show snapshot only"), select_presentation, ap, ['snapshot', 'link'])
-                    
+
                     new_menuitem(_("Show overlayed timestamp"), select_presentation, ap, ['timestamp', 'snapshot', 'link'])
                     new_menuitem(_("Show overlayed content"), select_presentation, ap, ['overlay', 'link'])
                 elif getattr(ap, 'annotationtype', None) is not None:

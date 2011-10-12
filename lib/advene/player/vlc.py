@@ -143,7 +143,7 @@ LibVLC Available Events
 
     def __ne__(self, other):
         return not self.__eq__(other)
-    
+
 EventType.MediaSubItemAdded=EventType(1)
 EventType.MediaDurationChanged=EventType(2)
 EventType.MediaPreparsedChanged=EventType(3)
@@ -214,7 +214,7 @@ LibVLC Media Meta
 
     def __ne__(self, other):
         return not self.__eq__(other)
-    
+
 Meta.Title=Meta(0)
 Meta.Artist=Meta(1)
 Meta.Genre=Meta(2)
@@ -262,7 +262,7 @@ STOPPING=5, ENDED=6, ERROR=7
 
     def __ne__(self, other):
         return not self.__eq__(other)
-    
+
 State.NothingSpecial=State(0)
 State.Opening=State(1)
 State.Buffering=State(2)
@@ -297,7 +297,7 @@ class AudioOutputDeviceTypes(ctypes.c_ulong):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-    
+
 AudioOutputDeviceTypes.Error=AudioOutputDeviceTypes(-1)
 AudioOutputDeviceTypes.Mono=AudioOutputDeviceTypes(1)
 AudioOutputDeviceTypes.Stereo=AudioOutputDeviceTypes(2)
@@ -330,7 +330,7 @@ class AudioOutputChannel(ctypes.c_ulong):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-    
+
 AudioOutputChannel.Error=AudioOutputChannel(-1)
 AudioOutputChannel.Stereo=AudioOutputChannel(1)
 AudioOutputChannel.RStereo=AudioOutputChannel(2)
@@ -360,7 +360,7 @@ class PositionOrigin(ctypes.c_ulong):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-    
+
 PositionOrigin.AbsolutePosition=PositionOrigin(0)
 PositionOrigin.RelativePosition=PositionOrigin(1)
 PositionOrigin.ModuloPosition=PositionOrigin(2)
@@ -387,7 +387,7 @@ class PositionKey(ctypes.c_ulong):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-    
+
 PositionKey.ByteCount=PositionKey(0)
 PositionKey.SampleCount=PositionKey(1)
 PositionKey.MediaTime=PositionKey(2)
@@ -418,7 +418,7 @@ libvlc_state_t and input_state_e enums.
 
     def __ne__(self, other):
         return not self.__eq__(other)
-    
+
 PlayerStatus.UndefinedStatus=PlayerStatus(0)
 PlayerStatus.InitStatus=PlayerStatus(1)
 PlayerStatus.BufferingStatus=PlayerStatus(2)
@@ -722,7 +722,7 @@ class Instance(object):
       - a list of strings as first parameters
       - the parameters given as the constructor parameters (must be strings)
       - a MediaControl instance
-    
+
     """
 
     @staticmethod
@@ -1533,7 +1533,7 @@ class MediaControl(object):
       - a list of strings as first parameters
       - the parameters given as the constructor parameters (must be strings)
       - a vlc.Instance
-    
+
     """
 
     @staticmethod
@@ -2049,7 +2049,7 @@ class MediaListPlayer(object):
     It may take as parameter either:
       - a vlc.Instance
       - nothing
-    
+
     """
 
     @staticmethod
@@ -2271,7 +2271,7 @@ class MediaPlayer(object):
     It may take as parameter either:
       - a string (media URI). In this case, a vlc.Instance will be created.
       - a vlc.Instance
-    
+
     """
 
     @staticmethod

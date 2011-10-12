@@ -147,7 +147,7 @@ class Snapshotter(object):
         if width is not None:
             filter=gst.element_factory_make("capsfilter")
             filter.set_property("caps", gst.Caps("video/x-raw-rgb,width=%d,pixel-aspect-ratio=(fraction)1/1" % width))
-            scale=gst.element_factory_make('videoscale')            
+            scale=gst.element_factory_make('videoscale')
             l=(csp, scale, filter, pngenc, queue, sink)
         else:
             l=(csp, pngenc, queue, sink)
@@ -215,7 +215,7 @@ class Snapshotter(object):
 
     def process_queue(self):
         """Process the timestamp queue.
-        
+
         This method is meant to run continuously in its own thread.
         """
         self.thread_running=True

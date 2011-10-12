@@ -19,7 +19,7 @@
 from cStringIO import StringIO
 import urllib
 try:
-    # In python2.6 stdlib 
+    # In python2.6 stdlib
     import json
 except ImportError:
     try:
@@ -138,7 +138,7 @@ class Content(modeled.Modeled,
             if not self.isTextual():
                 encoding = 'base64'
             else:
-                encoding = 'utf-8'                
+                encoding = 'utf-8'
             self._getModel().setAttributeNS(None, 'encoding', encoding)
             new = self._getDocument().createTextNode(data.encode(encoding))
             self._getModel().appendChild(new)

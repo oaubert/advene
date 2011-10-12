@@ -109,7 +109,7 @@ class TTLImporter(GenericImporter):
                     data = data.strip('"')
 
                 item[propname] = data
-                    
+
                 continue
 
             if l.startswith('.'):
@@ -135,7 +135,7 @@ class TTLImporter(GenericImporter):
                 item['_begin'] = helper.format_time_reference(item['begin'])
                 item['_end'] = helper.format_time_reference(item['end'])
 
-                yield { 
+                yield {
                     'content': "\n".join( "%s=%s" % (k, str(item[k])) for k in sorted(item.iterkeys())).encode('utf8'),
                     'begin': begin,
                     'end' : end,

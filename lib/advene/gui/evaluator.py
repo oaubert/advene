@@ -31,22 +31,22 @@ import inspect
 
 class Evaluator:
     """Evaluator window. Shortcuts:
-    
+
     F1: display this help
-    
+
     Control-Return: evaluate the expression. If a selection is
     active, evaluate only the selection.
-    
+
     Control-l: clear the expression buffer
     Control-S: save the expression buffer
     Control-n: next item in history
     Control-p: previous item in history
     Control-b: store the expression as a bookmark
     Control-space: display bookmarks
-    
+
     Control-PageUp/PageDown: scroll the output window
     Control-s: save the output
-    
+
     Control-d: display completion possibilities
     Tab: perform autocompletion
     Control-h:   display docstring for element before cursor

@@ -85,7 +85,7 @@ class TrsImporter(GenericImporter):
                 for s in Section:
                     self.progress(progress, _("Parsing section information"))
                     progress += incr
-                    
+
                     try:
                         s_begin=float(s.get('startTime')) ## 'startTime' is a "Section" required attribute
                     except AttributeError, e:
@@ -107,7 +107,7 @@ class TrsImporter(GenericImporter):
                     except AttributeError, e:
                         print str(e)
                         continue
-                    
+
                     topic = ""  ## 'topic' is a "Section" optional  attribute
                     try :
                         if s.get('topic') is not None:
@@ -134,7 +134,7 @@ class TrsImporter(GenericImporter):
                                 continue
 
                             t_begin=int(t_begin*1000)
-                            
+
                             try:
                                 t_end=float(t.get('endTime'))   ## 'endTime' is a "Turn" required attribute
                             except AttributeError, e:
@@ -163,7 +163,7 @@ class TrsImporter(GenericImporter):
                             seg = None
 
                             for elem in t.getchildren():
-                   
+
                                 if elem.tag == "Sync" :
                                     try:
                                         seg_time = float(elem.get('time'))
@@ -185,7 +185,7 @@ class TrsImporter(GenericImporter):
                                         'end': None,
                                         'content': "%s" % text
                                        }
-                                    
+
                                     text = elem.tail.replace("\n","")
 
                                 elif elem.tag == 'Background':
@@ -224,12 +224,12 @@ class TrsImporter(GenericImporter):
                                             'end': None,
                                             'content': None
                                             }
-                                        
+
                             if seg is not None:
                                 seg['end'] = t_end
                                 seg['content'] = text+"\n"
                                 yield seg
-                                    
+
                     except AttributeError,e: ## catch exception on Turn elements
                         print str(e)
                         continue
@@ -245,7 +245,7 @@ class TrsImporter(GenericImporter):
     def process_file(self, filename):
         trstree=ETree.parse(filename)
         trs = trstree.getroot()
-        
+
         if trs.tag != 'Trans':
             self.log("This does not look like a Transcriber file.")
             return

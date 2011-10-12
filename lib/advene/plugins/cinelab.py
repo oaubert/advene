@@ -52,7 +52,7 @@ def ns(path):
     """
     return prefix_re.sub(lambda m: '{%s}' % prefixes.get(m.group(1), 'FIXME'),
                          path)
-    
+
 def meta(node, t):
     n = node.find(ns('cinelab:meta/%s' % t))
     if n is not None:
@@ -89,11 +89,11 @@ class CinelabImporter(GenericImporter):
 
     def tempfile(self, *names):
         """Return a tempfile name in the filesystem encoding.
-        
+
         Try to deal appropriately with filesystem encodings:
-        
+
         self._tempdir is a unicode string.
-        
+
         tempfile takes unicode parameters, and returns a path encoded
         in sys.getfilesystemencoding()
         """
@@ -175,7 +175,7 @@ class CinelabImporter(GenericImporter):
         # Finalize
         self.progress(.3, _("Converting annotation types"))
         ats = root.find(ns('cinelab:annotation-types'))
-        # Note: do not use the shortcut ats = root.find(...) or [], 
+        # Note: do not use the shortcut ats = root.find(...) or [],
         # the result of root.find is always False
         if ats is None:
             return []
@@ -213,7 +213,7 @@ class CinelabImporter(GenericImporter):
                         data = dict( l.split('=') for l in c.text.splitlines() )
                         if data.get('mimetype'):
                             at.mimetype = data.get('mimetype')
-        
+
         self.progress(.6, _("Converting views"))
         size = len(views)
         for (i, node) in enumerate(views):

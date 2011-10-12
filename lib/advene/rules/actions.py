@@ -731,7 +731,7 @@ class DefaultActionsRepository:
         except ValueError:
             # Maybe it was a string value
             self.controller.package.state[name]=self.controller.package.state[name]+"1"
-            
+
         return True
 
     def ClearState(self, context, parameters):

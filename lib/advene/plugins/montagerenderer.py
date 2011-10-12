@@ -185,7 +185,7 @@ class MontageRenderer(object):
             if capsname: line.append( '[%s]' % capsname )
             if ghostpath: line.append( "ghosts %s" % self.relpath(path, ghostpath) )
             line.append( "%s %s" % (direc, peerpath) )
-            
+
             #if peerpath and peerpath.find('proxy')!=-1: print peer
             ret.append( ''.join(line) )
         if recurse and isinstance(e, gst.Bin):

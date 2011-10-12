@@ -459,12 +459,12 @@ class Media(Common):
         """Return the overlayed snapshot for the given annotation.
 
         Snapshot syntax: /media/overlay/package_alias/id
-        
+
         The expression can be followed by a TALES expression, which is
         then used to specify the element to display.
-        For instance, 
+        For instance,
         /media/overlay/advene/a25/fragment/begin/formatted
-        or 
+        or
         /media/overlay/advene/a25/content/parsed/name
         """
         res=[]

@@ -100,7 +100,7 @@ class WebsiteExporter(object):
                 p=cl(self.destination, self.video_url)
                 break
 
-        
+
         return p
 
     def progress_callback(self, value, msg):
@@ -263,7 +263,7 @@ class WebsiteExporter(object):
                                 if ext is not None:
                                     output = output + ext
                         elif len(path) > 1 and path[-2] in ('annotations', 'relations',
-                                                            'views', 
+                                                            'views',
                                                             'schemas', 'annotationTypes', 'relationTypes',
                                                             'queries'):
                             # Reference to an Advene element, without
@@ -508,7 +508,7 @@ class WebsiteExporter(object):
         else:
             default_href=''
             default=''
-            
+
         f.write("""<html><head>%(title)s</head>
 <body>
 <h1>%(title)s views</h1>
@@ -533,7 +533,7 @@ class WebsiteExporter(object):
   <frame name="video_player" src="" />
 </frameset>
 </html>
-""" % { 
+""" % {
                 'title': self.controller.get_title(self.controller.package),
                 'index': default_href or name,
                 })
@@ -701,9 +701,9 @@ class HTML5VideoPlayer(VideoPlayer):
     @staticmethod
     def can_handle(video_url):
         """Static method indicating wether the class can handle the given video url.
-        """        
+        """
         # We always can handle videos.
-        return True  
+        return True
 
     def player_url(self, begin, end=None):
         """Return the URL to play video at the given time.

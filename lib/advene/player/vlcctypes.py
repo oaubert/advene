@@ -95,7 +95,7 @@ class Player(object):
             pass
         class InternalException(Exception):
             pass
-        
+
     def __getattribute__ (self, name):
         """
         Use the defined method if necessary. Else, forward the request
@@ -159,7 +159,7 @@ class Player(object):
             args.append ('--vout-filter=%s' %":".join(filters))
         #print "player args", args
         return [ str(i) for i in args ]
-    
+
     def restart_player (self):
         """Restart (cleanly) the player."""
         del self.mc

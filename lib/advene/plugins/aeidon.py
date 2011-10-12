@@ -18,7 +18,7 @@
 #
 
 # AEIDON importer
-# See http://home.gna.org/gaupol/ 
+# See http://home.gna.org/gaupol/
 # Install python-aeidon on Debian
 
 name="AEIDON importer"

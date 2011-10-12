@@ -546,7 +546,7 @@ class TimeLine(AdhocView):
             # Ensure that self.maximum > self.minimum
             if self.maximum == self.minimum:
                 self.maximum = self.minimum + 10000
-                    
+
             if self.minimum > self.maximum:
                 self.minimum, self.maximum = self.maximum, self.minimum
 
@@ -1903,7 +1903,7 @@ class TimeLine(AdhocView):
             i = counter[0]
             if i < length:
                 self.quickview.set_text(_("Displaying %(count)d / %(total)d annotations...") % {
-                        'count': min(i + count, length), 
+                        'count': min(i + count, length),
                         'total': length },
                                         1.0 * (i+count) / length)
                 for a in annotations[i:i+count]:
@@ -1921,7 +1921,7 @@ class TimeLine(AdhocView):
             self.layout.freeze_child_notify()
             if hasattr(self, 'quickview'):
                 self.quickview.set_text(_("Displaying %(count)d / %(total)d annotations...") % {
-                        'count': count, 
+                        'count': count,
                         'total': length },
                                         1.0 * count / length)
                 self.locked_inspector = True

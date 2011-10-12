@@ -34,8 +34,8 @@ name="BrlTTY actions"
 # The Alva Satellite that we are using for experiments sends strange
 # keycodes. It may be a misconfiguration of brltty that should be
 # fixed, but in the meantime, hardcode appropriate values.
-ALVA_LPAD_UP=536870976 
-ALVA_LPAD_DOWN=536870977 
+ALVA_LPAD_UP=536870976
+ALVA_LPAD_DOWN=536870977
 ALVA_LPAD_LEFT=536870973
 ALVA_LPAD_RIGHT=536870975
 ALVA_LPAD_LEFTLEFT=536870974
@@ -145,7 +145,7 @@ class BrlEngine:
         if k is None:
             return True
         #command=self.brlconnection.expandKey(k)['command']
-        if k == brlapi.KEY_SYM_RIGHT or k == ALVA_LPAD_RIGHT or k == ALVA_MPAD_BUTTON4: 
+        if k == brlapi.KEY_SYM_RIGHT or k == ALVA_LPAD_RIGHT or k == ALVA_MPAD_BUTTON4:
             if self.currenttype == 'scroll':
                 i = self.char_index + self.brlconnection.displaySize[0]
                 if i <= len(self.current_message):

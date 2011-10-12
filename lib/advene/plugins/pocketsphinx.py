@@ -160,7 +160,7 @@ class PocketSphinxImporter(GenericImporter):
         # Build pipeline
         self.pipeline = gst.parse_launch('uridecodebin name=decoder ! audioconvert ! audioresample ! progressreport silent=true update-freq=1 name=report  ! vader name=vader auto-threshold=false threshold=%(noise).9f run-length=%(silence)d ! pocketsphinx name=pocketsphinx %(pocketsphinxargs)s ! fakesink' % ( {
                 'noise': self.noise,
-                'silence': self.silence * gst.MSECOND, 
+                'silence': self.silence * gst.MSECOND,
                 'pocketsphinxargs': args }))
         self.decoder = self.pipeline.get_by_name('decoder')
 

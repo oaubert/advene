@@ -168,7 +168,7 @@ class FeatureDetectImporter(GenericImporter):
                 start_pos = None
             if not self.progress(cv.GetCaptureProperty(video,
                                                        cv.CV_CAP_PROP_POS_AVI_RATIO),
-                                 _("Detected %(count)d feature(s) until %(time)s") % { 'count': count, 
+                                 _("Detected %(count)d feature(s) until %(time)s") % { 'count': count,
                                                                                        'time': helper.format_time(pos) }):
                 break
             pos = cv.GetCaptureProperty(video, cv.CV_CAP_PROP_POS_MSEC)

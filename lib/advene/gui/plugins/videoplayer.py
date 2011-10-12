@@ -40,7 +40,7 @@ class VideoPlayer(AdhocView):
     def __init__(self, controller=None, uri=None, parameters=None):
         super(VideoPlayer, self).__init__(controller=controller)
         self.close_on_package_load = False
-        self.contextual_actions = [ 
+        self.contextual_actions = [
             (_("Save view"), self.save_view),
             (_("Save default options"), self.save_default_options),
             (_("Select video file"), self.select_file),
@@ -71,7 +71,7 @@ class VideoPlayer(AdhocView):
         """Add the event handlers.
         """
         self.controller.register_slave_player(self)
-        self.registered_rules.extend( 
+        self.registered_rules.extend(
             controller.event_handler.internal_rule(event=name,
                                                    method=self.synchronize)
             for name in ('PlayerStart',
@@ -303,6 +303,6 @@ class VideoPlayer(AdhocView):
                            config.data.drag_type['annotation'] +
                            config.data.drag_type['timestamp'],
                            gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
-        
+
         vbox.show_all()
         return vbox

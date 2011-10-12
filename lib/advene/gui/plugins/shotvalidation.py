@@ -82,7 +82,7 @@ class ShotValidation(AdhocView):
             # Update annotation type, which will trigger an update of self.annotations
             self.annotationtype = annotation.type
             self.current_index.emit('value-changed')
-        
+
     def goto_current(self, *p):
         """Select annotation containing current player time.
         """
@@ -138,7 +138,7 @@ class ShotValidation(AdhocView):
         if self.index > 0:
             self.index = self.index - 1
         return True
-            
+
     def validate_and_next(self, new):
         """Validate the current annotation and display the next one.
         """
@@ -153,7 +153,7 @@ class ShotValidation(AdhocView):
                 self.controller.split_annotation(annotation, new)
                 self.message(_("Split annotation #%(current)d into #%(current)d and #%(next)d") % {
                         'current': i + 1,
-                        'next': i + 2 
+                        'next': i + 2
                         })
             else:
                 self.message(_("Cannot split annotation #%(current)d: out of bounds.") % {
@@ -188,7 +188,7 @@ class ShotValidation(AdhocView):
             return gtk.Label((_("No annotations to adjust")))
 
         vbox = gtk.VBox()
-                    
+
         self.title_widget = gtk.Label()
         vbox.pack_start(self.title_widget)
 
@@ -208,7 +208,7 @@ class ShotValidation(AdhocView):
                 # End: display a message ?
                 pass
         self.current_index.connect('value-changed', handle_index_change)
-        
+
         vbox.add(self.selector.widget)
 
         # Button bar

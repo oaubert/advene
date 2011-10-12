@@ -38,7 +38,7 @@ class SliceBuffer(gst.Element):
         'slicewidth':  ( gobject.TYPE_INT, 'slicewidth', 'Width of slices', 0, 65536, 0, gobject.PARAM_WRITABLE ),
         'offset': (gobject.TYPE_INT, 'offset', 'Offset of samples in the source video. If < 0, use the original offset.', -65536, 65536, 0, gobject.PARAM_WRITABLE),
         }
-    
+
     _sinkpadtemplate = gst.PadTemplate ("sink",
                                          gst.PAD_SINK,
                                          gst.PAD_ALWAYS,
@@ -47,7 +47,7 @@ class SliceBuffer(gst.Element):
                                          gst.PAD_SRC,
                                          gst.PAD_ALWAYS,
                                          gst.caps_from_string ("video/x-raw-rgb,bpp=32,depth=32,blue_mask=-16777216,green_mask=16711680, red_mask=65280, alpha_mask=255,width=[ 1, 2147483647 ],height=[ 1, 2147483647 ],framerate=[ 0/1, 2147483647/1 ]"))
-    
+
     def __init__(self):
         gst.Element.__init__(self)
 
@@ -108,7 +108,7 @@ class SliceBuffer(gst.Element):
 
     def eventfunc(self, pad, event):
         return self.srcpad.push_event (event)
-        
+
     def srcqueryfunc (self, pad, query):
         return self.sinkpad.query (query)
 
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     if files:
         player=gst.element_factory_make('playbin')
         player.props.uri = 'file://' + files[0]
-    
+
         bin=gst.Bin()
         elements = [
             gst.element_factory_make('ffmpegcolorspace'),
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     else:
         player = gst.parse_launch('videotestsrc ! clockoverlay ! ffmpegcolorspace ! videoscale ! slicebuffer %s ! ffmpegcolorspace ! xvimagesink' % " ".join(params))
         bin = player
-    
+
     pipe=player
     overlay=bin.get_by_name('overlay')
 
@@ -176,7 +176,7 @@ if __name__ == '__main__':
             return True
         if msg.structure.has_field('gerror'):
             print "MSG", msg.structure['debug']
-        
+
     def on_eos (bus, msg):
         mainloop.quit()
     bus = pipe.get_bus()

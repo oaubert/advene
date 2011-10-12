@@ -793,7 +793,7 @@ class TreeWidget(AdhocView):
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
-        
+
     def create_relation_popup(self, source, dest):
         # FIXME: Idem as above: should be factorized with the original of timeline.py
         # Popup a menu to propose the drop options
