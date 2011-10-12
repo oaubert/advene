@@ -1896,10 +1896,8 @@ class TimeLine(AdhocView):
         # Use a list so that the counter variable can be modified in
         # the closure.
         counter = [ 0 ]
-        count = 50
+        count = 10
         length = len(l)
-        if length > 1000:
-            count = length / 5
 
         def create_annotations(annotations, length):
             i = counter[0]
