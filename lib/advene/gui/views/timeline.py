@@ -124,8 +124,8 @@ class TimeLine(AdhocView):
     tooltip = _("Display annotations on a timeline")
 
     def __init__ (self, elements=None,
-                  minimum=None,
-                  maximum=None,
+                  minimum=0,
+                  maximum=0,
                   controller=None,
                   annotationtypes=None,
                   parameters=None):
@@ -150,7 +150,6 @@ class TimeLine(AdhocView):
         self.controller=controller
 
         self.registered_rules=[]
-
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         ats=[]
@@ -187,47 +186,8 @@ class TimeLine(AdhocView):
         self.current_marker = None
         self.current_marker_scale = None
 
-        # Now that self.list is initialized, we reuse the l variable
-        # for various checks.
-        if elements is None:
-            elements = controller.package.annotations
-        # Initialize annotation types if needed
-        if self.annotationtypes is None:
-            if self.list is None:
-                # We display the whole package, so display also
-                # empty annotation types
-                self.annotationtypes = list(self.controller.package.annotationTypes)
-            else:
-                # We specified a list. Display only the annotation
-                # types for annotations present in the set
-                self.annotationtypes = list(set([ a.type for a in self.list ]))
-
-        if minimum is None and maximum is None and controller is not None:
-            # No dimension. Get them from the controller.
-            duration = controller.cached_duration
-            if duration <= 0:
-                if controller.package.annotations:
-                    duration = max([a.fragment.end for a in elements])
-                else:
-                    duration = 0
-            minimum=0
-            maximum=duration
-
-        if minimum is None or maximum is None:
-            b, e = self.bounds ()
-            if minimum is None:
-                minimum = b
-            if maximum is None:
-                maximum = e
         self.minimum = minimum
         self.maximum = maximum
-
-        # Ensure that self.maximum > self.minimum
-        if self.maximum == self.minimum:
-            self.maximum = self.minimum + 10000
-
-        if self.minimum > self.maximum:
-            self.minimum, self.maximum = self.maximum, self.minimum
 
         if default_position is None:
             default_position=self.minimum
@@ -345,7 +305,7 @@ class TimeLine(AdhocView):
         self.bookmarks_to_draw = []
 
         # Current position in units
-        self.current_position = minimum
+        self.current_position = self.minimum
 
         # Holds the ref. to a newly created annotation, so that its
         # widget gets focus when it is created (cf  udpate_annotation)
@@ -354,20 +314,12 @@ class TimeLine(AdhocView):
         # The page_size is the really displayed area
         self.adjustment = gtk.Adjustment ()
         self.update_adjustment ()
-        self.adjustment.set_value(u2p(minimum, absolute=True))
+        self.adjustment.set_value(u2p(self.minimum, absolute=True))
 
         # Dictionary holding the vertical position for each type
         self.layer_position = {}
-
-        self.update_layer_position()
-
-        self.populate ()
-
-        self.draw_marks ()
-
         self.draw_current_mark()
         self.widget = self.get_full_widget()
-        self.update_legend_widget(self.legend)
 
         # Set default parameters (zoom) and refresh the legend widget
         # on the first expose signal
@@ -375,7 +327,6 @@ class TimeLine(AdhocView):
             self.fraction_adj.value=zoom
             if pos >= self.minimum and pos <= self.maximum:
                 self.adjustment.set_value(u2p(pos, absolute=True))
-            self.resize_legend_widget(self.legend)
             # Set annotation inspector width, so that it does not auto-resize
             if pane is None:
                 w, h = self.widget.window.get_size()
@@ -560,13 +511,12 @@ class TimeLine(AdhocView):
             pos=self.get_middle_position()
         else:
             # It is not just an update, do a full redraw
-            oldmax=self.maximum
+            oldmax = self.maximum
             self.minimum=0
             self.maximum=0
-            try:
-                duration=package.cached_duration
-            except:
-                duration=0
+            duration=self.controller.cached_duration
+            if duration <= 0:
+                duration = self.bounds()[1]
             if duration:
                 self.maximum = long(duration)
 
@@ -574,12 +524,19 @@ class TimeLine(AdhocView):
                 # self.maximum == 0, so try to compute it
                 self.maximum = self.bounds()[1]
 
+            # Ensure that self.maximum > self.minimum
+            if self.maximum == self.minimum:
+                self.maximum = self.minimum + 10000
+                    
+            if self.minimum > self.maximum:
+                self.minimum, self.maximum = self.maximum, self.minimum
+
             if self.maximum != oldmax:
                 # Reset to display whole timeline
                 (w, h)=self.layout.window.get_size()
                 self.scale.set_value( (self.maximum - self.minimum) / float(w) )
 
-            if self.list is None:
+            if self.annotationtypes is None or self.list is None:
                 # We display the whole package, so display also
                 # empty annotation types
                 self.annotationtypes = list(self.controller.package.annotationTypes)
