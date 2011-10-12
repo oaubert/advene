@@ -66,7 +66,6 @@ def register(controller=None):
         controller.log(_("BrlTTY not installed. There will be no braille support."))
     else:
         engine=BrlEngine(controller)
-        engine.brldisplay("Advene connected")
         try:
             engine.init_brlapi()
             if engine.brlconnection is not None:
@@ -74,6 +73,7 @@ def register(controller=None):
                                      gobject.IO_IN,
                                      engine.input_handler)
                 method=engine.action_brldisplay
+                engine.brldisplay("Advene connected")
         except:
             controller.log(_("Could not initialize BrlTTY. No braille support."))
 
