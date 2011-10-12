@@ -4581,7 +4581,9 @@ class AdveneGUI(object):
         try:
             source=Package(uri=filename)
         except Exception, e:
-            self.log("Cannot load %s file: %s" % (filename, unicode(e)))
+            msg = "Cannot load %s file: %s" % (filename, unicode(e))
+            self.log(msg)
+            dialog.message_dialog(msg, icon=gtk.MESSAGE_ERROR)
             return True
         m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
         m.popup()
@@ -4618,7 +4620,7 @@ class AdveneGUI(object):
             return True
 
         if not re.match(r'^[a-zA-Z0-9_]+$', ident):
-            dialog.message_dialog(_("Error: the identifier %s contains invalid characters.") % ident)
+            dialog.message_dialog(_("Error: the identifier %s contains invalid characters.") % ident, icon=gtk.MESSAGE_ERROR)
             return True
 
         v=helper.get_id(self.controller.package.views, ident)
@@ -4629,7 +4631,7 @@ class AdveneGUI(object):
         else:
             # Existing view. Check that it is already an workspace-view
             if v.content.mimetype != 'application/x-advene-workspace-view':
-                dialog.message_dialog(_("Error: the view %s exists and is not a workspace view.") % ident)
+                dialog.message_dialog(_("Error: the view %s exists and is not a workspace view.") % ident, icon=gtk.MESSAGE_ERROR)
                 return True
             create=False
         v.title=title
