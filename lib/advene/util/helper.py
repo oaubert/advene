@@ -770,23 +770,6 @@ def find_in_path(name):
             return fullname
     return None
 
-def overlapping_annotations(t):
-    """Return a set of overlapping annotations (couples)
-    """
-    res=DefaultDict(default=[])
-    l=t.annotations[:]
-    l.sort(key=lambda a: a.fragment.begin)
-    while l:
-        a=l.pop()
-        begin=a.fragment.begin
-        end=a.fragment.end
-        for b in l:
-            be=b.fragment.begin
-            en=b.fragment.end
-            if not (end <= be or en <= begin):
-                res.append( (a, b) )
-    return res
-
 def common_fieldnames(elements):
     """Extract common fieldnames from simple structured elements.
     """
