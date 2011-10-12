@@ -2191,10 +2191,19 @@ class AdveneWebServer:
     def start(self):
         """Start the webserver.
         """
-        self.controller.queue_action(cherrypy.engine.start)
+        def protected_start():
+            try:
+                cherrypy.engine.start()
+            except Exception, e:
+                self.controller.log(_("Cannot start HTTP server: %s") % unicode(e))
+        self.controller.queue_action(protected_start)
         return True
 
     def stop(self):
         """Stop the webserver.
         """
         cherrypy.engine.exit()
+
+    def is_running(self):
+        return cherrypy.engine.state == cherrypy.engine.states.STARTED
+
