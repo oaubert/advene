@@ -323,6 +323,7 @@ class AdveneGUI(object):
         f.add_application(gobject.get_application_name())
         recent = gtk.RecentChooserMenu()
         recent.add_filter(f)
+        recent.set_show_icons(False)
         recent.set_sort_type(gtk.RECENT_SORT_MRU)
         self.gui.recent_menuitem.set_submenu(recent)
         def open_history_file(rec):
@@ -360,6 +361,7 @@ class AdveneGUI(object):
                 f.add_application(gobject.get_application_name())
                 recent = gtk.RecentChooserMenu()
                 recent.add_filter(f)
+                recent.set_show_icons(False)
                 recent.set_sort_type(gtk.RECENT_SORT_MRU)
                 b.set_menu(recent)
                 recent.connect('item-activated', open_history_file)
