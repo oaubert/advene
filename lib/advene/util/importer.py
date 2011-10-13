@@ -1102,7 +1102,7 @@ class SubtitleImporter(GenericImporter):
         if filesize == 0:
             # Dummy value, but we will be sure not to divide by 0
             filesize = 1
-        base=r'\d+:\d+:\d+[,\.]\d+'
+        base=r'\d+:\d+:\d+[,\.:]\d+'
         pattern=re.compile('(' + base + ').+(' + base + ')')
         tc=None
         content=[]
@@ -1120,13 +1120,13 @@ class SubtitleImporter(GenericImporter):
                     if content:
                         print "Strange error: no timestamp was found for content ", "".join(content)
                         content = []
-                    continue
-                d={'begin': tc[0],
-                   'end': tc[1],
-                   'content': u"\n".join(content)}
-                tc=None
-                content=[]
-                yield d
+                else:
+                    d={'begin': tc[0],
+                       'end': tc[1],
+                       'content': u"\n".join(content)}
+                    tc=None
+                    content=[]
+                    yield d
             else:
                 if tc is not None:
                     if self.encoding:
