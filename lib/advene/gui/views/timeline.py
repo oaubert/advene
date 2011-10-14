@@ -26,6 +26,7 @@ import gtk
 import cairo
 import pango
 from gettext import gettext as _
+from threading import Lock
 
 # Advene part
 import advene.core.config as config
@@ -146,6 +147,8 @@ class TimeLine(AdhocView):
             'display-relation-content': True,
             }
         self.controller=controller
+
+        self.update_lock = Lock()
 
         self.registered_rules=[]
         opt, arg = self.load_parameters(parameters)
@@ -349,7 +352,6 @@ class TimeLine(AdhocView):
         self.expose_signal=self.widget.connect('expose-event', set_default_parameters,
                                                default_zoom, default_position, pane_position)
 
-
     def get_save_arguments(self):
         arguments = [ ('annotation-type', at.id) for at in self.annotationtypes ]
         arguments.append( ('minimum', self.minimum ) )
@@ -507,11 +509,18 @@ class TimeLine(AdhocView):
         @param partial_update: it is only an update for the existing package, we do not need to rebuild everything
         @param partial_update: boolean
         """
+        if not self.update_lock.acquire(False) or self.layout.window is None:
+            # An update is already ongoing or the layout is not realized yet
+            return
+
         if package is None:
             package = self.controller.package
 
         if from_init:
-            self.package_from_init = package
+            if len(self.layout.get_children()) < 3:
+                self.package_from_init = package
+            else:
+                return
         else:
             if package == self.package_from_init:
                 # update_model is called on the same package as in the
@@ -526,7 +535,6 @@ class TimeLine(AdhocView):
         if partial_update:
             pos=self.get_middle_position()
         else:
-            self.last_full_update_package = package
             # It is not just an update, do a full redraw
             oldmax = self.maximum
             self.minimum=0
@@ -577,6 +585,7 @@ class TimeLine(AdhocView):
             self.update_legend_widget(self.legend)
             self.legend.show_all()
             self.fraction_event(widget=None, forced_window_width=self.layout.window.get_size()[0])
+            self.update_lock.release()
 
         self.populate(finalize_callback)
 
@@ -674,8 +683,10 @@ class TimeLine(AdhocView):
 
     def duration_update_handler(self, context, parameters):
         if self.maximum != long(context.globals['duration']):
-            # Need a refresh
-            self.update_model()
+            # Need a refresh. Do it in an idle loop, so that we are
+            # sure that gtk events (esp. expose) are already
+            # processed.
+            gobject.idle_add(self.update_model, self.controller.package, True)
         return True
 
     def media_change_handler(self, context, parameters):
@@ -1886,6 +1897,8 @@ class TimeLine(AdhocView):
         count = 10
         length = len(l)
 
+        #print '----------------------------------------- populate', length
+        #import traceback; traceback.print_stack()
         if l:
             old_position = self.inspector_pane.get_position()
             self.inspector_pane.set_position(2)
@@ -2627,7 +2640,7 @@ class TimeLine(AdhocView):
         if forced_window_width != 0:
             w = forced_window_width
 
-        if w < 2:
+        if w < 10:
             return True
 
         if self.minimum == self.maximum:
