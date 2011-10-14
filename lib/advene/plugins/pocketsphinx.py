@@ -138,7 +138,9 @@ class PocketSphinxImporter(GenericImporter):
             s = message.structure
             #print "MSG " + s.get_name() + ": " + s.to_string()
             if s.get_name() == 'progress' and self.progress is not None:
-                if not self.progress(s['percent-double'] / 100, _("At %s") % helper.format_time(s['current'] * 1000)):
+                if not self.progress(s['percent-double'] / 100, _("%(count)d utterances until %(time)s") % {
+                        'count': len(self.buffer_list),
+                        'time': helper.format_time(s['current'] * 1000) }):
                     finalize()
         return True
 
