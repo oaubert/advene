@@ -201,8 +201,14 @@ class FileImporter(AdhocView):
             self.progressbar.set_fraction(value)
         if label is not None:
             self.progressbar.set_text(label)
-        while gtk.events_pending():
-            gtk.main_iteration()
+        # We could do a "while gtk.events_pending()" but we want to
+        # avoid process lock because of too many pending events
+        # processing.
+        for i in xrange(8):
+            if gtk.events_pending():
+                gtk.main_iteration()
+            else:
+                break
         return self.should_continue
 
     def update_options(self, combo):
