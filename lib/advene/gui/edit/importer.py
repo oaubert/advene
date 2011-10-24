@@ -61,7 +61,7 @@ class FileImporter(AdhocView):
         self.should_continue = True
 
         # Assume that the view is initialized in the current
-        # thread. Store it id, so that we detect if calls
+        # thread. Store its id, so that we detect if calls
         # (esp. progress_callback) are made from another thread and
         # act accordingly.
         self.main_thread_id = thread.get_ident()
@@ -185,9 +185,9 @@ class FileImporter(AdhocView):
             gtk.gdk.threads_enter()
             try:
                 func(*args, **kw)
-                return False
             finally:
                 gtk.gdk.threads_leave()
+            return False
         gobject.idle_add(idle_func)
 
     def progress_callback(self, value=None, label=None):
