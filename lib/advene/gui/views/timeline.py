@@ -190,9 +190,12 @@ class TimeLine(AdhocView):
 
         self.current_marker = None
         self.current_marker_scale = None
+        self.layout = gtk.Layout ()
 
         self.minimum = minimum
         self.maximum = maximum
+        if not self.maximum:
+            self.update_min_max()
 
         if default_position is None:
             default_position=self.minimum
@@ -233,11 +236,11 @@ class TimeLine(AdhocView):
         # How many units does a pixel represent ?
         # self.scale.value = unit by pixel
         # Unit = ms
-        self.scale = gtk.Adjustment (value=(self.maximum - self.minimum) / gtk.gdk.get_default_root_window().get_size()[0],
+        self.scale = gtk.Adjustment (value=((self.maximum - self.minimum) or 60 * 60 * 1000) / gtk.gdk.get_default_root_window().get_size()[0],
                                                 lower=5,
-                                                upper=36000,
-                                                step_incr=5,
-                                                page_incr=1000)
+                                                upper=360,
+                                                step_incr=20,
+                                                page_incr=100)
         self.scale.connect('value-changed', self.scale_event)
         self.scale.connect('changed', self.scale_event)
 
@@ -259,7 +262,6 @@ class TimeLine(AdhocView):
         # accordingly.
         self.can_do_horizontal_scroll = False
 
-        self.layout = gtk.Layout ()
         self.layout.add_events( gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.BUTTON1_MOTION_MASK )
         self.scale_layout = gtk.Layout()
         self.scale_layout.height=0
@@ -313,13 +315,11 @@ class TimeLine(AdhocView):
         self.current_position = self.minimum
 
         # Holds the ref. to a newly created annotation, so that its
-        # widget gets focus when it is created (cf  udpate_annotation)
+        # widget gets focus when it is created (cf  update_annotation)
         self.transmuted_annotation = None
         # Adjustment corresponding to the Virtual display
         # The page_size is the really displayed area
         self.adjustment = gtk.Adjustment ()
-        self.update_adjustment ()
-        self.adjustment.set_value(u2p(self.minimum, absolute=True))
 
         # Dictionary holding the vertical position for each type
         self.layer_position = {}
@@ -329,6 +329,8 @@ class TimeLine(AdhocView):
         # Set default parameters (zoom) and refresh the legend widget
         # on the first expose signal
         def set_default_parameters(widget, event, zoom, pos, pane):
+            self.update_adjustment ()
+            self.adjustment.set_value(u2p(self.minimum, absolute=True))
             self.fraction_adj.value=zoom
             if pos >= self.minimum and pos <= self.maximum:
                 self.adjustment.set_value(u2p(pos, absolute=True))
@@ -501,6 +503,32 @@ class TimeLine(AdhocView):
         d.connect('response', handle_response)
         return True
 
+    def update_min_max(self):
+        oldmax = self.maximum
+        self.minimum=0
+        self.maximum=0
+        duration = self.controller.cached_duration
+        if duration <= 0:
+            duration = self.bounds()[1]
+        if duration:
+            self.maximum = long(duration)
+
+        if not self.maximum:
+            # self.maximum == 0, so try to compute it
+            self.maximum = self.bounds()[1]
+
+        # Ensure that self.maximum > self.minimum
+        if self.maximum == self.minimum:
+            self.maximum = self.minimum + 10000
+
+        if self.minimum > self.maximum:
+            self.minimum, self.maximum = self.maximum, self.minimum
+
+        if self.maximum != oldmax and self.layout.window is not None:
+            # Reset to display whole timeline
+            (w, h) = self.layout.window.get_size()
+            self.scale.set_value( (self.maximum - self.minimum) / float(w) )
+
     def update_model(self, package=None, partial_update=False, from_init=False):
         """Update the whole model.
 
@@ -536,31 +564,7 @@ class TimeLine(AdhocView):
             pos=self.get_middle_position()
         else:
             # It is not just an update, do a full redraw
-            oldmax = self.maximum
-            self.minimum=0
-            self.maximum=0
-            duration=self.controller.cached_duration
-            if duration <= 0:
-                duration = self.bounds()[1]
-            if duration:
-                self.maximum = long(duration)
-
-            if not self.maximum:
-                # self.maximum == 0, so try to compute it
-                self.maximum = self.bounds()[1]
-
-            # Ensure that self.maximum > self.minimum
-            if self.maximum == self.minimum:
-                self.maximum = self.minimum + 10000
-
-            if self.minimum > self.maximum:
-                self.minimum, self.maximum = self.maximum, self.minimum
-
-            if self.maximum != oldmax:
-                # Reset to display whole timeline
-                (w, h)=self.layout.window.get_size()
-                self.scale.set_value( (self.maximum - self.minimum) / float(w) )
-
+            self.update_min_max()
             if self.annotationtypes is None or self.list is None:
                 # We display the whole package, so display also
                 # empty annotation types
@@ -682,11 +686,24 @@ class TimeLine(AdhocView):
         return True
 
     def duration_update_handler(self, context, parameters):
+        """Handle DurationUpdate event.
+        
+        There is a potential synchronization issue here: duration may
+        be updated while an update_model is already occuring. In this
+        case, the update_lock is held and the update_model call will
+        not do anything. However, we also will miss the correct update
+        of the timeline duration.
+
+        We should check the update_lock and if it is held, delay the
+        call to update_model intended to update the timeline duration.
+        """
         if self.maximum != long(context.globals['duration']):
             # Need a refresh. Do it in an idle loop, so that we are
             # sure that gtk events (esp. expose) are already
             # processed.
-            gobject.idle_add(self.update_model, self.controller.package, True)
+            # FIXME: if update_lock is held, then we should delay the
+            # execution of the method until we can process it.
+            gobject.idle_add(lambda: self.refresh() and False)
         return True
 
     def media_change_handler(self, context, parameters):
@@ -1919,7 +1936,15 @@ class TimeLine(AdhocView):
                     self.quickview.set_text(_("Displaying done."))
                     self.locked_inspector = False
                 self.controller.gui.set_busy_cursor(False)
-                self.inspector_pane.set_position(old_position)
+                if old_position:
+                    self.inspector_pane.set_position(old_position)
+                else:
+                    # old_position was = 0, because its value was
+                    # obtained before the widget was realized. There
+                    # is a good chance that the value is now
+                    # available.
+                    if self.widget.window:
+                        self.inspector_pane.set_position(max((0, self.widget.window.get_size()[0] - 160)))
                 if callback:
                     callback()
                 return False
