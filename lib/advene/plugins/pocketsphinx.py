@@ -127,10 +127,13 @@ class PocketSphinxImporter(GenericImporter):
 
     def on_bus_message(self, bus, message):
         def finalize():
+            """Finalize data creation.
+            """
             gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
             self.generate_annotations()
-            self.end_callback()
-            return True
+            if self.end_callback:
+                self.end_callback()
+            return False
 
         if message.type == gst.MESSAGE_EOS:
             finalize()
@@ -144,7 +147,7 @@ class PocketSphinxImporter(GenericImporter):
                     finalize()
         return True
 
-    def async_process_file(self, filename, end_callback):
+    def async_process_file(self, filename, end_callback=None):
         self.end_callback = end_callback
 
         at = self.ensure_new_type('speech', title=_("Speech"))
