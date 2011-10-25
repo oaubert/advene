@@ -700,12 +700,20 @@ class TimeLine(AdhocView):
         call to update_model intended to update the timeline duration.
         """
         if self.maximum != long(context.globals['duration']):
-            # Need a refresh. Do it in an idle loop, so that we are
-            # sure that gtk events (esp. expose) are already
-            # processed.
-            # FIXME: if update_lock is held, then we should delay the
-            # execution of the method until we can process it.
-            gobject.idle_add(lambda: self.refresh() and False)
+            # Need a refresh.  It can happen while an update_model is
+            # already taking place. In this case, we have to wait
+            # until the update_model is done before doing our own update.
+            def duration_updated(d):
+                if not self.update_lock.locked():
+                    # There is a race possibility here. Let's assume
+                    # that it will be rare enough...
+                    self.refresh()
+                    return False
+                else:
+                    print "duration_updated timeout"
+                    # Try again at next timeout.
+                    return True
+            gobject.timeout_add(100, duration_updated, long(context.globals['duration']))
         return True
 
     def media_change_handler(self, context, parameters):
