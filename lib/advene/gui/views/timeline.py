@@ -548,6 +548,7 @@ class TimeLine(AdhocView):
             if len(self.layout.get_children()) < 3:
                 self.package_from_init = package
             else:
+                self.update_lock.release()
                 return
         else:
             if package == self.package_from_init:
@@ -558,6 +559,7 @@ class TimeLine(AdhocView):
                 # case of mass-modification of the package: merging,
                 # import...)
                 self.package_from_init = None
+                self.update_lock.release()
                 return
 
         if partial_update:
