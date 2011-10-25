@@ -562,11 +562,11 @@ class TimeLine(AdhocView):
                 self.update_lock.release()
                 return
 
+        self.update_min_max()
         if partial_update:
             pos=self.get_middle_position()
         else:
             # It is not just an update, do a full redraw
-            self.update_min_max()
             if self.annotationtypes is None or self.list is None:
                 # We display the whole package, so display also
                 # empty annotation types
