@@ -29,7 +29,6 @@ try:
 except ImportError:
     import simplejson as json
 
-import advene.core.config as config
 from advene.util.importer import GenericImporter
 
 def register(controller=None):
@@ -70,14 +69,15 @@ class TEDImporter(GenericImporter):
             offset=long(offset[0])
         else:
             offset=0
+        m = re.findall('/talks/subtitles/id/(\d+)', data, re.MULTILINE)
+        if m:
+            ident=m[0]
+        else:
+            self.log("Cannot find talk id")
+            ident=None
         podcast=re.findall('(itpc://[^"]+)', data, re.MULTILINE)
         if podcast:
             podcast=podcast[0]
-            ident=re.findall('(\d+)$', podcast)
-            if ident:
-                ident=ident[0]
-            else:
-                ident=None
             self.progress(0.2, "Fetching podcast information")
             podcast=urllib.urlopen(podcast.replace('itpc:', 'http:'))
             data=podcast.read()
