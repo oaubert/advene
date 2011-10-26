@@ -2593,6 +2593,10 @@ class TimeLine(AdhocView):
         a.changed ()
 
     def scale_event (self, widget=None, data=None):
+        if not self.update_lock.acquire(False) or self.layout.window is None:
+            # An update is pending. Ignore the scale event.
+            return True
+
         self.update_adjustment ()
 
         # Update the layout and scale_layout dimensions
@@ -2608,6 +2612,7 @@ class TimeLine(AdhocView):
             self.scale_label.set_text('1mark=%dm%.02fs' % (int(dur / 60), dur % 60))
 
         self.redraw_event ()
+        self.update_lock.release()
         return True
 
     def layout_resize_event(self, widget=None, event=None, *p):
