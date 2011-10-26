@@ -70,14 +70,30 @@ class FileImporter(AdhocView):
         self.widget=self.build_widget()
 
         if filename:
-            self.fb.set_filename(filename)
+            self.fb.set_current_name(filename)
             self.update_importers(filename=filename)
 
     def update_importers(self, filename=None):
         if filename is not None:
             n = filename
         else:
-            n=unicode(self.fb.get_filename())
+            n=unicode(self.fb.get_uri())
+        if n.startswith('file://'):
+            n = n.replace('file://', '')
+        if not self.fb.get_filename():
+            # It was not a filename, hence the Button did not get
+            # updated. Update it explicitly.
+            b = self.fb.get_children()[0]
+            if isinstance(b, gtk.Button):
+                # Normally, the gtk.Button contains a gtk.HBox, which
+                # contains some widgets among which a gtk.Label
+                l = [ c 
+                      for w in b.get_children() 
+                      for c in w.get_children() 
+                      if isinstance(c, gtk.Label) ]
+                if l:
+                    # Found the label
+                    l[0].set_text(n)
         model=self.importers.get_model()
         model.clear()
         if n.lower().endswith('.azp'):
@@ -134,8 +150,9 @@ class FileImporter(AdhocView):
         self.importers.set_sensitive(False)
         self.fb.set_sensitive(False)
         ic = self.importers.get_current_element()
-        fname = unicode(self.fb.get_filename())
-
+        fname = unicode(self.fb.get_uri())
+        if fname.startswith('file://'):
+            fname = fname.replace('file://', '')
         if ic == dummy_advene_importer:
             # Invoke the package merge functionality.
             try:
@@ -232,6 +249,7 @@ class FileImporter(AdhocView):
         vbox.pack_start(line, expand=False)
 
         self.fb = gtk.FileChooserButton(_("Choose the file to import"))
+        self.fb.set_local_only(False)
         self.fb.set_action(gtk.FILE_CHOOSER_ACTION_OPEN)
         self.fb.set_current_folder(config.data.path['data'])
         self.fb.connect('file-set', updated_filename)
