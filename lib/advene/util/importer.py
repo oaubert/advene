@@ -342,9 +342,17 @@ class GenericImporter(object):
         else:
             p=self.package
 
+
         at=None
         if annotationtypeid:
             at = self.ensure_new_type(prefix=annotationtypeid, schemaid=schemaid)
+        elif schemaid is not None:
+            s = self.package.get_element_by_id(schemaid)
+            if s is None:
+                s = self.create_schema(id_=schemaid, title=schemaid)
+            if not isinstance(s, Schema):
+                raise Exception("Error during conversion: %s is not a schema" % schemaid)
+
         return p, at
 
     def convert(self, source):
