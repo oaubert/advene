@@ -9,7 +9,7 @@ Source: dist\doc\*; DestDir: {app}\doc; Flags: recursesubdirs; Components: adven
 Source: dist\locale\*; DestDir: {app}\locale; Flags: recursesubdirs; Components: advene
 Source: share\pixmaps\advene.ico; DestDir: {app}; DestName: advene.ico; Components: advene
 Source: c:\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs; Components: advene
-Source: examples\*v11.azp; DestDir: {app}\examples; Components: advene
+Source: examples\Nosferatu_v12.azp; DestDir: {app}\examples; Components: advene
 Source: c:\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs; Components: advene
 Source: c:\gtk\lib\gdk-pixbuf-2.0\*; DestDir: {app}\lib\gdk-pixbuf-2.0; Flags: recursesubdirs; Components: advene
 Source: c:\gtk\share\locale\fr\*; DestDir: {app}\lib\locale\fr; Flags: recursesubdirs; Components: advene
@@ -85,10 +85,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.47
+AppVerName=Advene 0.48
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.47
+VersionInfoVersion=0.48
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=doc\copyright
@@ -96,8 +96,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate Digital Videos, Exchange on the NEt
 InfoAfterFile=CHANGES.txt
-OutputBaseFilename=setup_advene_0.47r7291_vlc_1.0.3_gstreamer_0.10.7beta2
-VersionInfoTextVersion=0.47
+OutputBaseFilename=setup_advene_0.48r7513
+VersionInfoTextVersion=0.48
 ChangesAssociations=yes
 
 [Registry]
