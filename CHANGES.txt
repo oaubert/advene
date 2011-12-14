@@ -1,3 +1,9 @@
+advene (0.48) unstable; urgency=low
+
+  * New stable release, candidate for 1.0. See the following 0.45 notes for more details.
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 14 Dec 2011 15:54:20 +0100
+
 advene (0.47) unstable; urgency=low
 
   * Main GUI:
