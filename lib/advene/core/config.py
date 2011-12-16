@@ -406,6 +406,7 @@ class Config(object):
             '.avi',
             '.dv',
             '.flv',
+            '.m4v',
             '.mjpg', '.mjpg',
             '.mkv',
             '.mov',
