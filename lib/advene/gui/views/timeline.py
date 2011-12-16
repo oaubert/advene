@@ -238,11 +238,11 @@ class TimeLine(AdhocView):
         # Unit = ms
         self.scale = gtk.Adjustment (value=((self.maximum - self.minimum) or 60 * 60 * 1000) / gtk.gdk.get_default_root_window().get_size()[0],
                                                 lower=5,
-                                                upper=360,
+                                                upper=sys.maxint,
                                                 step_incr=20,
                                                 page_incr=100)
         self.scale.connect('value-changed', self.scale_event)
-        self.scale.connect('changed', self.scale_event)
+        #self.scale.connect('changed', self.scale_event)
 
         # The same value in relative form
         self.fraction_adj = gtk.Adjustment (value=1.0,
@@ -689,7 +689,7 @@ class TimeLine(AdhocView):
 
     def duration_update_handler(self, context, parameters):
         """Handle DurationUpdate event.
-        
+
         There is a potential synchronization issue here: duration may
         be updated while an update_model is already occuring. In this
         case, the update_lock is held and the update_model call will
@@ -2596,11 +2596,10 @@ class TimeLine(AdhocView):
         if not self.update_lock.acquire(False) or self.layout.window is None:
             # An update is pending. Ignore the scale event.
             return True
-
         self.update_adjustment ()
 
         # Update the layout and scale_layout dimensions
-        width=self.unit2pixel(self.maximum - self.minimum)
+        width = self.unit2pixel(self.maximum - self.minimum)
         (w, h) = self.layout.get_size ()
         self.layout.set_size (width, h)
         (w, h) = self.scale_layout.get_size ()
@@ -2686,7 +2685,8 @@ class TimeLine(AdhocView):
         if self.minimum == self.maximum:
             return True
 
-        fraction=self.fraction_adj.value
+        fraction = self.fraction_adj.value
+
         v = (self.maximum - self.minimum) / float(w) * fraction
         # New width in pixel
         if v < 5 or (self.maximum - self.minimum) / v > 65535:
