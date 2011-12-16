@@ -66,6 +66,7 @@ class FileImporter(AdhocView):
         # act accordingly.
         self.main_thread_id = thread.get_ident()
         self.importer = None
+        self.filename = filename
 
         self.widget=self.build_widget()
 
@@ -77,7 +78,7 @@ class FileImporter(AdhocView):
         if filename is not None:
             n = filename
         else:
-            n=unicode(self.fb.get_uri())
+            n=unicode(self.filename or self.fb.get_uri() or self.fb.get_filename())
         if n.startswith('file://'):
             n = n.replace('file://', '')
         if not self.fb.get_filename():
@@ -150,7 +151,8 @@ class FileImporter(AdhocView):
         self.importers.set_sensitive(False)
         self.fb.set_sensitive(False)
         ic = self.importers.get_current_element()
-        fname = unicode(self.fb.get_uri())
+        fname = unicode(self.filename or self.fb.get_uri() or self.fb.get_filename())
+
         if fname.startswith('file://'):
             fname = fname.replace('file://', '')
         if ic == dummy_advene_importer:
@@ -254,10 +256,11 @@ class FileImporter(AdhocView):
         self.fb.set_current_folder(config.data.path['data'])
         self.fb.connect('file-set', updated_filename)
 
+        line.pack_start(self.fb)
         if self.message is not None:
             line.pack_start(gtk.Label(self.message))
-        else:
-            line.pack_start(self.fb)
+            self.fb.set_no_show_all(True)
+            self.fb.hide()
 
         self.progressbar=gtk.ProgressBar()
         vbox.pack_start(self.progressbar, expand=False)
