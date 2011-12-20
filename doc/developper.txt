@@ -9,8 +9,10 @@ application, and can be reused in other applications.
 
 The main configuration options of the applications are located in
 ``advene.core.config``. The module, upon load, defines a
-``advene.core.config.data`` instance which holds configuration values and is a
-singleton shared by all other modules importing ``advene.core.config``. A common idiom if then to import it through ``import advene.core.config as config`` and to access ``config.data``.
+``advene.core.config.data`` instance which holds configuration values
+and is a singleton shared by all other modules importing
+``advene.core.config``.  A common idiom is to import it through
+``import advene.core.config as config`` and to access ``config.data``.
 
 The Advene application is articulated around the
 ``advene.core.controller`` class. This class holds a reference to 
@@ -22,7 +24,8 @@ The Advene application is articulated around the
 - the GUI (``controller.gui``, may be None if we are only running the webserver)
 
 It also maintains important state information such as
-``controller.active_annotations``
+``controller.active_annotations``, constantly updated while the player
+is running.
 
 The controller should centralize all interaction (esp. interaction
 with the player through the ``controller.update_status`` method) in order
@@ -33,9 +36,11 @@ events is defined in ``advene.rules.elements.ECACatalog``.
 
 The update of the information implies that the ``controller.update``
 method is called regularly. This is done by the GUI mainloop for the
-GUI version.
+GUI version. The ``self_loop`` method allows to start a mainloop
+without a GUI.
 
-The GUI starts in ``advene.gui.main``.
+The GUI code is intialized in ``advene.gui.__init__`` and starts in
+``advene.gui.main``.
 
 Localization
 ------------
@@ -52,7 +57,7 @@ Release
 To release a new version, you have to update :
 - ``lib/advene/core/version.py`` -- the version module
 - ``advene.iss`` -- the Windows installer config file
-- ``debian/changelog`` -- the changelog file
+- ``CHANGES.txt`` -- the changelog file
 
 View plugin infrastructure
 --------------------------
@@ -63,22 +68,5 @@ reference to a view (accessible through the ``widget`` attribute or
 property).
 
 A common API is defined for the views in
-``lib/advene/gui/views/viewplugin.py``
-
-Structure of the Advene code
-----------------------------
-
-Advene model
-++++++++++++
-
-- the Advene model is implemented in lib/advene/model. It offers
-  access to the data, supports saving/loading data from xml packages,
-  and deals with TAL/TALES issues.
-
-GUI
-+++
-
-- The GUI uses Glade to design the main interface. After editing the
-  share/advene.glade file, you have to run the script
-  scripts/fix_glade in order to correct references to pixmaps.
-
+``lib/advene/gui/views/viewplugin.py``. Some documentation is
+available in ``adhoc-views.txt``.

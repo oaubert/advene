@@ -4,12 +4,8 @@ How to install the Advene prototype
 
 ** Video player
 
-The only supported cross-platform player for the moment is VLC through
-a native VLC plugin. You have to install the python-vlc plugin (see
-http://liris.cnrs.fr/advene/download/) to access movies.
-
-Linux users may use the gstreamer framework, through the
-python-gstreamer module (>= 0.10).
+The video player is implemented on all platforms with the gstreamer
+framework, through the python-gstreamer module (>= 0.10).
 
 ** Linux version
 
@@ -30,13 +26,16 @@ gstreamer0.10-x
 + other gstreamer packages needed to decode various formats
 (esp. gstreamer0.10-plugins-good and gstreamer0.10-plugins-ugly).
 
+Optionaly:
+python-opencv (for some feature-extraction filters)
+
 Note that all these dependencies are already available in Debian and
 in standard installations of the Ubuntu Feisty Fawn (and later)
 distribution.
 
 ** Windows version
 
-You should install in this order (note the version numbers) :
+If you want to run Advene from sources on win32, you should install in this order (note the version numbers) :
 
 Gtk/win32 v. >= 2.12 : http://gladewin32.sourceforge.net/ (runtime environment)
 
@@ -53,22 +52,21 @@ http://www.owlfish.com/software/simpleTAL/download.html [for
 convenience, a copy of simpletal is included in this Advene
 distribution]
 
-Optionaly, VLC + python-vlc mediacontrol extension (cf
-http://download.gna.org/advene/win32/ )
+Optionally, python-opencv
 
 ** Mac OS X version
 
 From macports (http://www.macports.org/), install :
 
-    * python25 or later [Note: after its install, make sure that
+    * python26 or later [Note: after its install, make sure that
       /opt/local/bin/python exists, and that your path begins with
       /opt/local/bin. Else, the installation of the other packages
       could use the /usr/bin/python version]
-    * py25-gtk (>= 2.12)
-    * py25-goocanvas
+    * py26-gtk (>= 2.12)
+    * py26-goocanvas
     * librsvg (optional)
-    * py25-pyobjc2 (optional)
-    * py25-gst-python
+    * py26-pyobjc2 (optional)
+    * py26-gst-python
     * gst-plugins-base
     * gst-plugins-good gst-plugins-bad gst-plugins-ugly
     * gst-ffmpeg
@@ -76,24 +74,27 @@ From macports (http://www.macports.org/), install :
 * Testing
 
 You can run the script ./bin/advene directly from the source
-directory. It will adapt its paths to its location.
+directory. It will adapt its paths to this location.
 
 In a first step, you can try the Advene application without movie player
 support by using the "-pdummy" parameter :
-advene -pdummy
+
+  advene -pdummy
 
 To force the use of the gstreamer player, specify:
-advene -pgstreamer
+
+  advene -pgstreamer
 
 To force the use of the vlc player, specify:
-advene -pvlcnative
+
+  advene -pvlctypes
 
 * Installing
 
 To install the application, you can run the setup.py script with
 appropriate options. For a standard installation, run
 
-python setup.py install
+  python setup.py install
 
 Note that it is not necessary to install the application to run it. It
 can be used directly from its sources directory.

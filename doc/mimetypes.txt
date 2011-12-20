@@ -7,6 +7,15 @@ Advene uses internally mimetypes to identify specific elements.
 
   Parameters and arguments for adhoc views.
 
+* application/x-advene-bookmark
+
+  A bookmark structure. Used to implement drag-n-drop of bookmarks
+  (timestamp + text).
+
+* application/x-advene-timestamp
+
+  Timestamp information. Used to implement drag-n-drop of timestamps.
+
 * application/x-advene-ruleset
 
   Dynamic views (rulesets).
@@ -29,6 +38,10 @@ Advene uses internally mimetypes to identify specific elements.
 
   Simple query language based on ECA conditions.
 
+* application/x-advene-quicksearch
+
+  Serialization of a quicksearch (from the searchbox).
+
 * application/x-advene-zip-package
 
   An Advene Zip Package (cf advene.model.zippackage)
@@ -46,4 +59,9 @@ Advene uses internally mimetypes to identify specific elements.
 * application/x-advene-values
 
   A space-separated list of float values, 
-  usually in the 0.00 - 100.0 range.
+  in the 0.00 - 100.0 range.
+
+* application/x-advene-workspace
+
+  Serialization of the workspace environment (opened adhoc views,
+  window sizes, etc).

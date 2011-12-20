@@ -16,7 +16,9 @@ method which returns a Player instance.
 
 * Player
 
-It implements the various methods of the MediaControl IDL.
+It implements the various methods of the MediaControl IDL. Note that
+this API is expected to change in future version: it proved useful,
+but is too verbose and uncommon.
 
 It defines the following methods:
 - is_active(): Checks whether the player is active.

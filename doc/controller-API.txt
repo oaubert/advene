@@ -1,0 +1,94 @@
+= Controller API =
+
+Extracted through
+perl -lne 'print $1 if /self.controller\.(.+?)[([. ]/' **/*py | sort -u
+
+* Attributes
+aliases
+cached_duration
+current_stbv
+event_handler
+generic_features
+gui
+package
+packages
+player
+playerfactory
+server
+soundplayer
+tracers
+undomanager
+
+* Helper functions
+build_context
+create_position
+evaluate_query
+get_default_url
+get_defined_tags
+get_element_color
+get_stbv_list
+get_timestamp
+get_title
+get_utbv_list
+log
+open_url
+
+* Model manipulation
+create_annotation
+delete_annotation
+delete_element
+duplicate_annotation
+get_default_media
+merge_annotations
+set_default_media
+split_annotation
+transmute_annotation
+
+* View manipulation
+create_static_view
+website_export
+get_export_filters
+apply_export_filter
+
+* Player handling
+move_frame
+move_position
+position_update
+player_delayed_scrub
+restart_player
+restrict_playing
+update_snapshot
+update_status
+
+* Package handling
+activate_package
+activate_stbv
+load_package
+remove_package
+save_package
+save_session
+unregister_package
+
+* Misc
+init
+notify
+queue_action
+queue_registered_action
+register_event
+register_slave_player
+unregister_slave_player
+register_usertime_action
+register_usertime_delayed_action
+register_videotime_action
+reset
+search_string
+update
+
+* Internal
+load_plugins
+on_exit
+register_gui
+locate_mediafile
+get_urlbase
+select_player
+update_package_title
