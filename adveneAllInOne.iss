@@ -45,10 +45,6 @@ Source: vcredist_x86.exe; DestDir: {tmp}; Components: advene
 Source: c:\gtk\bin\gdk-pixbuf-query-loaders.exe; DestDir: {app}; Components: advene
 Source: post_install.bat; DestDir: {app}; Components: advene
 
-Source: c:\Program Files (x86)\VLC\libvlccore.dll; DestDir: {app}; Components: vlc
-Source: c:\Program Files (x86)\VLC\libvlc.dll; DestDir: {app}; Components: vlc
-Source: c:\Program Files (x86)\VLC\plugins\*; DestDir: {app}\vlcplugins; Components: vlc
-
 Source: gst\*; DestDir: {app}\gst; Flags: recursesubdirs; Components: gst
 Source: gst_bindings\libgstpython-v2.6.dll; Destdir: {app}; Components: gst
 
@@ -60,22 +56,18 @@ En.CleanPrefs=Clean &preferences
 Fr.CleanPrefs=Effacer les &préférences
 En.ITadvenegst=Advene with included gstreamer
 Fr.ITadvenegst=Advene et gstreamer inclus
-En.ITadvenevlc=Advene with included vlc
-Fr.ITadvenevlc=Advene et vlc inclus
-En.ITadvene=Advene without included vlc
-Fr.ITadvene=Advene sans vlc
+En.ITadvene=Advene without included gstreamer
+Fr.ITadvene=Advene sans gstreamer
 En.ITcustom=Custom installation
 Fr.ITcustom=Installation personnalisée
 
 [Types]
 Name: "AdveneGst"; Description: "{cm:ITadvenegst}"
-Name: "AdveneVlc"; Description: "{cm:ITadvenevlc}"
 Name: "AdveneOnly"; Description: "{cm:ITadvene}"
 Name: "Custom"; Description: "{cm:ITcustom}"; Flags: iscustom
 
 [Components]
-Name: advene; Description: Advene files; Types: AdveneOnly AdveneVlc AdveneGst Custom; Flags: fixed
-Name: vlc; Description: VLC files; Types: AdveneVlc Custom
+Name: advene; Description: Advene files; Types: AdveneOnly AdveneGst Custom; Flags: fixed
 Name: gst; Description: Gstreamer files; Types: AdveneGst Custom
 
 [Languages]
@@ -85,10 +77,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.48
+AppVerName=Advene 1.0
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.48
+VersionInfoVersion=1.0
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=doc\copyright
@@ -96,8 +88,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate Digital Videos, Exchange on the NEt
 InfoAfterFile=CHANGES.txt
-OutputBaseFilename=setup_advene_0.48r7513
-VersionInfoTextVersion=0.48
+OutputBaseFilename=setup_advene_1.0
+VersionInfoTextVersion=1.0
 ChangesAssociations=yes
 
 [Registry]
