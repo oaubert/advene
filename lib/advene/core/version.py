@@ -19,7 +19,7 @@
 """Versioning information.
 """
 
-version='0.48'
-date='20111214'
-svn='7512'
+version='1.0'
+date='20111220'
+svn='7523'
 major,minor=[ long(s) for s in version.split('.') ]
