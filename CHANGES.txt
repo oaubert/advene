@@ -1,3 +1,16 @@
+advene (1.0) unstable; urgency=low
+
+  * This release marks the end of a series that has been stable for a long
+    time, but never earned its major release number. This version now
+    enters a maintenance state, while development focuses on the next
+    major version (new data model, interface revamp to handle simultaneous
+    analysis of multiple video files...).
+  
+  * See the following 0.47 notes for more details about changes from
+    previous release.
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 20 Dec 2011 16:31:19 +0100
+
 advene (0.48) unstable; urgency=low
 
   * New stable release, candidate for 1.0. See the following 0.47 notes for more details.
