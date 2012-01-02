@@ -224,7 +224,7 @@ setup (name = "advene",
        classifiers = [
     'Environment :: X11 Applications :: GTK',
     'Environment :: Win32 (MS Windows)',
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 5 - Production/Stable',
     'License :: OSI Approved :: GNU General Public License (GPL)',
     'Programming Language :: Python',
     'Intended Audience :: End Users/Desktop',
