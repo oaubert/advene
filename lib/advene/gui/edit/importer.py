@@ -78,7 +78,7 @@ class FileImporter(AdhocView):
         if filename is not None:
             n = filename
         else:
-            n=unicode(self.filename or self.fb.get_uri() or self.fb.get_filename())
+            n=unicode(self.filename or self.fb.get_filename() or self.fb.get_uri())
         if n.startswith('file://'):
             n = n.replace('file://', '')
         if not self.fb.get_filename():
@@ -95,7 +95,7 @@ class FileImporter(AdhocView):
                 if l:
                     # Found the label
                     l[0].set_text(n)
-        model=self.importers.get_model()
+        model = self.importers.get_model()
         model.clear()
         if n.lower().endswith('.azp'):
             model.append( ( _("Advene package importer"), dummy_advene_importer, None) )
@@ -104,7 +104,7 @@ class FileImporter(AdhocView):
             return
         if (os.path.exists(n) and not os.path.isdir(n)) or n.startswith('http:'):
             # Valid filename. Guess importers
-            valid, invalid=advene.util.importer.get_valid_importers(n)
+            valid, invalid = advene.util.importer.get_valid_importers(n)
             for i in valid:
                 model.append( ( i.name, i, None) )
             if n.lower().endswith('.xml'):
@@ -151,7 +151,7 @@ class FileImporter(AdhocView):
         self.importers.set_sensitive(False)
         self.fb.set_sensitive(False)
         ic = self.importers.get_current_element()
-        fname = unicode(self.filename or self.fb.get_uri() or self.fb.get_filename())
+        fname = unicode(self.filename or self.fb.get_filename() or self.fb.get_uri())
 
         if fname.startswith('file://'):
             fname = fname.replace('file://', '')
