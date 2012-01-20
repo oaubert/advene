@@ -412,6 +412,7 @@ class Config(object):
             '.mov',
             '.mp3',
             '.mpg', '.mpeg',  '.mp4', '.mp4v',
+            '.mts',
             '.ogg', '.ogm', '.ogv', '.ogx',
             '.ps',
             '.qt', '.qtm',
