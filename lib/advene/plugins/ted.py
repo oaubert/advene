@@ -88,12 +88,19 @@ class TEDImporter(GenericImporter):
             moviepath=re.findall('<media:content\s+url="(.+?)"', data)
             if moviepath:
                 self.controller.set_default_media(moviepath[0])
-            self.progress(0.3, "Converting data")
-            self.convert(self.json_iterator(ident, offset))
         else:
             title=re.findall('<title>(.+?)</title>', data)
             if title:
                 self.package.title=title[0]
+            # Try to find a reference to a .mp4 file
+            movieurl=re.findall('(http://download.ted.com/.+?\.mp4)', data, re.MULTILINE)
+            if movieurl:
+                self.controller.set_default_media(movieurl[0])
+
+        self.progress(0.3, "Converting data")
+        if ident is not None:
+            self.convert(self.json_iterator(ident, offset))
+        else:
             self.convert(self.html_iterator(data, offset))
 
         self.progress(1.0)

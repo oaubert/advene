@@ -83,7 +83,7 @@ class DelakisShotDetectImporter(GenericImporter):
             self.progress(0, _("Loading histogram"))
             histos = numpy.load(histofile)
             # FIXME: how to cache FPS ?
-            fps = 25.0
+            fps = float(config.data.preferences['default-fps'])
         else :
             he = HistogramExtractor()
             print "Processing ", filename

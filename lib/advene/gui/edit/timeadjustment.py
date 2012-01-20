@@ -122,7 +122,9 @@ class TimeAdjustment:
             width=50
         else:
             width=100
-        self.image=TimestampRepresentation(self.value, self.controller, width, epsilon=1000/25, visible_label=False, callback=self.set_value)
+        self.image=TimestampRepresentation(self.value, self.controller, width,
+                                           epsilon=1000/config.data.preferences['default-fps'],
+                                           visible_label=False, callback=self.set_value)
         self.image.connect('button-press-event', image_button_press)
         self.image.connect('clicked', image_button_clicked)
         self.image.set_tooltip_text(_("Click to play\nControl+click to set to current time\Scroll to modify value (with control/shift)\nRight-click to invalidate screenshot"))
@@ -178,7 +180,7 @@ class TimeAdjustment:
                 i=config.data.preferences['second-scroll-increment']
             else:
                 # 1 frame
-                i=1000/25
+                i=1000 / config.data.preferences['default-fps']
 
             if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_LEFT:
                 incr=-i

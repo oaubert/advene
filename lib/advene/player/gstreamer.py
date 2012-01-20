@@ -331,8 +331,9 @@ class Player:
         return position
 
     def dvd_uri(self, title=None, chapter=None):
-        # FIXME: find the syntax to specify chapter
-        return "dvd://%s" % str(title)
+        # FIXME: find a way to specify chapter/title
+        # resindvd does not allow to specify it in the URI
+        return "dvd://"
 
     def check_uri(self):
         uri=self.player.get_property('uri')
@@ -462,8 +463,9 @@ class Player:
             # value minus 20ms (the async snapshotter goes to the
             # specified position then takes the video buffer which may then
             # be later) and its value aligned to a frame boundary
-            # (considering a 25f/s framerate).
-            for pos in sorted((t - 20, t / 25 * 25, t)):
+            for pos in sorted((t - 20,
+                               t / config.data.preferences['default-fps'] * config.data.preferences['default-fps'],
+                               t)):
                 self.snapshotter.enqueue(pos)
 
     def snapshot(self, position):

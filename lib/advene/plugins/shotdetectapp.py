@@ -128,7 +128,8 @@ class ShotdetectAppImporter(ExternalAppImporter):
                 yield {
                     'content': str(num),
                     'begin': begin,
-                    'end': ts,
+                    # Offset the end timecode by 1 frame.
+                    'end': ts - (1000 / config.data.preferences['default-fps'])
                     }
                 begin = ts
                 num += 1

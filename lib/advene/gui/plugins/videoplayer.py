@@ -259,7 +259,7 @@ class VideoPlayer(AdhocView):
         self.offset_spin = gtk.SpinButton(gtk.Adjustment(value = self.offset,
                                                          lower = - 24 * 60 * 60 * 1000,
                                                          upper =   24 * 60 * 60 * 1000,
-                                                         step_incr = 1000 / 25,
+                                                         step_incr = 1000 / config.data.preferences['default-fps'],
                                                          page_incr = 1000))
         self.offset_spin.get_adjustment().connect('value-changed', offset_changed)
         ti.add(self.offset_spin)

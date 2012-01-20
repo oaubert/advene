@@ -46,7 +46,7 @@ class FrameSelector(object):
 
         # Number of displayed timestamps
         self.count = 8
-        self.frame_length = 1000 / 25
+        self.frame_length = 1000 / config.data.preferences['default-fps']
 
         self.black_color = gtk.gdk.color_parse('black')
         self.red_color = gtk.gdk.color_parse('#ff6666')
@@ -242,7 +242,8 @@ class FrameSelector(object):
                 # Previous TimestampRepresentation -> right border
                 r.right_border = border
 
-            r = TimestampRepresentation(0, self.controller, width=100, visible_label=True, epsilon=30)
+            r = TimestampRepresentation(0, self.controller, width=100, visible_label=True,
+                                        epsilon=(1000 / config.data.preferences['default-fps'] - 10))
             self.frames.append(r)
             r.connect("clicked", self.select_time)
             r.left_border = border

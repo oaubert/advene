@@ -2136,7 +2136,7 @@ class AdveneController(object):
         p=self.player
         if p.status == p.PlayingStatus:
             self.update_status('pause')
-        self.move_position (int(1000 / 25.0 * number_of_frames), notify=False)
+        self.move_position (int(1000 * number_of_frames / config.data.preferences['default-fps']), notify=False)
         return True
 
     def move_position (self, value, relative=True, notify=True):
