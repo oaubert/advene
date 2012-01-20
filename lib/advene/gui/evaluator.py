@@ -21,13 +21,17 @@
 
 import os
 import time
-import StringIO
+import io
 import traceback
 import gtk
 import gobject
 import re
-import __builtin__
+try:
+    import builtins
+except ImportError: # python2.*
+    import __builtin__ as builtins
 import inspect
+import collections
 
 class Evaluator:
     """Evaluator window. Shortcuts:
@@ -207,7 +211,7 @@ class Evaluator:
         """
         b=self.output.get_buffer()
         begin,end=b.get_bounds()
-        out=unicode(b.get_text(begin, end))
+        out=str(b.get_text(begin, end))
         f=open(filename, "w")
         f.write(out)
         f.close()
@@ -218,7 +222,7 @@ class Evaluator:
         """Return the content of the expression window.
         """
         b=self.source.get_buffer()
-        return unicode(b.get_text(*b.get_bounds()))
+        return str(b.get_text(*b.get_bounds()))
 
     def set_expression(self, e, clear=True):
         """Set the content of the expression window.
@@ -333,14 +337,14 @@ class Evaluator:
             self.clear_output()
             if d is not None:
                 self.log("%s for %s:\n\n" % (typ, repr(expr)))
-                self.log(unicode(d))
+                self.log(str(d))
             else:
                 if typ == 'doc':
                     self.log("No available documentation for %s" % expr)
                 else:
                     self.log("Cannot get source for %s" % expr)
         except Exception:
-            f=StringIO.StringIO()
+            f=io.StringIO()
             traceback.print_exc(file=f)
             self.clear_output()
             self.log("Error in fetching %s for %s:\n\n" % (typ, expr))
@@ -360,7 +364,7 @@ class Evaluator:
             b.place_cursor(end)
         else:
             begin,end=b.get_bounds()
-        expr=unicode(b.get_text(begin, end))
+        expr=str(b.get_text(begin, end))
         if (not self.history) or self.history[-1] != expr:
             self.history.append(expr)
         symbol=None
@@ -375,7 +379,7 @@ class Evaluator:
                 self.log("Successfully imported %s" % modname)
             except ImportError:
                 self.log("Cannot import module %s:" % modname)
-                f=StringIO.StringIO()
+                f=io.StringIO()
                 traceback.print_exc(file=f)
                 self.log(f.getvalue())
                 f.close()
@@ -395,9 +399,9 @@ class Evaluator:
             self.status_message("Execution time: %f s" % (time.time() - t0))
             self.clear_output()
             try:
-                self.log(unicode(res))
+                self.log(str(res))
             except UnicodeDecodeError:
-                self.log(unicode(repr(res)))
+                self.log(str(repr(res)))
             if symbol is not None:
                 if not '.' in symbol and not symbol.endswith(']'):
                     self.log('\n\n[Value stored in %s]' % symbol)
@@ -408,7 +412,7 @@ class Evaluator:
                         obj, attr = m.group(1, 2)
                         try:
                             o=eval(obj, self.globals_, self.locals_)
-                        except Exception, e:
+                        except Exception as e:
                             self.log('\n\n[Unable to store data in %s[%s]]:\n%s'
                                      % (obj, attr, e))
                             return True
@@ -422,15 +426,15 @@ class Evaluator:
                         obj, attr = m.group(1, 2)
                         try:
                             o=eval(obj, self.globals_, self.locals_)
-                        except Exception, e:
+                        except Exception as e:
                             self.log('\n\n[Unable to store data in %s.%s]'
                                      % (obj, attr))
                             return True
                         setattr(o, attr, res)
                         self.log('\n\n[Value stored in %s]' % symbol)
 
-        except Exception, e:
-            f=StringIO.StringIO()
+        except Exception as e:
+            f=io.StringIO()
             traceback.print_exc(file=f)
             self.clear_output()
             self.log(f.getvalue())
@@ -462,7 +466,7 @@ class Evaluator:
         else:
             begin,end=b.get_bounds()
             cursor=b.get_iter_at_mark(b.get_insert())
-        expr=unicode(b.get_text(begin, cursor))
+        expr=str(b.get_text(begin, cursor))
         if expr.endswith('.'):
             expr=expr[:-1]
             trailingdot=True
@@ -495,7 +499,7 @@ class Evaluator:
                 # Beginning of an element name (in global() or locals() or builtins)
                 v=dict(self.globals_)
                 v.update(self.locals_)
-                v.update(__builtin__.__dict__)
+                v.update(builtins.__dict__)
                 completion=[ a
                              for a in v
                              if a.startswith(expr) ]
@@ -511,8 +515,8 @@ class Evaluator:
                         completion=[ a
                                      for a in dir(res)
                                      if a.startswith(attr) ]
-                    except Exception, e:
-                        print "Exception when trying to complete attribute for %s starting with %s:\n%s" % (expr, attr, e)
+                    except Exception as e:
+                        print("Exception when trying to complete attribute for %s starting with %s:\n%s" % (expr, attr, e))
                         self.status_message("Completion exception for %s starting with %s" % (expr, attr))
                     if completion and attr == '':
                         # Do not display private elements by default.
@@ -530,13 +534,13 @@ class Evaluator:
                             completion=[ k
                                          for k in o.keys()
                                          if k.startswith(key) ]
-                        except Exception, e:
-                            print "Exception when trying to complete dict key for %s starting with %s:\n%s" % (expr, attr, e)
+                        except Exception as e:
+                            print("Exception when trying to complete dict key for %s starting with %s:\n%s" % (expr, attr, e))
                             self.status_message("Completion exception for %s starting with %s" % (expr, attr))
 
         self.clear_output()
         if completion is None:
-            f=StringIO.StringIO()
+            f=io.StringIO()
             traceback.print_exc(file=f)
             self.log(f.getvalue())
             f.close()
@@ -575,7 +579,7 @@ class Evaluator:
         else:
             begin,end=b.get_bounds()
             cursor=b.get_iter_at_mark(b.get_insert())
-        expr=unicode(b.get_text(begin, cursor))
+        expr=str(b.get_text(begin, cursor))
 
         m=re.match('.+[=\(\[\s](.+?)$', expr)
         if m:
@@ -585,7 +589,7 @@ class Evaluator:
         except (Exception, SyntaxError):
             res=None
         if inspect.ismethod(res):
-            res=res.im_func
+            res=res.__func__
         args=None
         if inspect.isfunction(res):
             # Complete with getargspec
@@ -603,7 +607,7 @@ class Evaluator:
                 args.append("**" + varkw)
         #elif inspect.isbuiltin(res) and res.__doc__:
         # isbuiltin does not work
-        elif callable(res) and res.__doc__:
+        elif isinstance(res, collections.Callable) and res.__doc__:
             # Extract parameters from docstring
             args=re.findall('\((.*?)\)', res.__doc__.splitlines()[0])
 
@@ -630,7 +634,7 @@ class Evaluator:
         else:
             cursor=b.get_iter_at_mark(b.get_insert())
             begin=b.get_iter_at_line(cursor.get_line())
-        expr=unicode(b.get_text(begin, cursor))
+        expr=str(b.get_text(begin, cursor))
         return expr
 
     def make_window(self, widget=None):
@@ -688,7 +692,7 @@ class Evaluator:
 
     def status_message(self, m):
         cid=self.statusbar.get_context_id('info')
-        message_id=self.statusbar.push(cid, unicode(m))
+        message_id=self.statusbar.push(cid, str(m))
         # Display the message only 4 seconds
         def undisplay():
             self.statusbar.pop(cid)
