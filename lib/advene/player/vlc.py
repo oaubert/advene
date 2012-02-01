@@ -2,7 +2,7 @@
 
 #
 # Python ctypes bindings for VLC
-# Copyright (C) 2009 the VideoLAN team
+# Copyright (C) 2009-2012 the VideoLAN team
 # $Id: $
 #
 # Authors: Olivier Aubert <olivier.aubert at liris.cnrs.fr>

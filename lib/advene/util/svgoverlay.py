@@ -2,7 +2,7 @@
 
 """Gstreamer SVGOverlay element
 
-Copyright 2009 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+Copyright 2009-2012 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by

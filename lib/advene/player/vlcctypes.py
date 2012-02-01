@@ -1,6 +1,6 @@
 #
 # Advene: Annotate Digital Videos, Exchange on the NEt
-# Copyright (C) 2009 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+# Copyright (C) 2009-2012 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
 #
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
