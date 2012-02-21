@@ -99,7 +99,7 @@ class InteractiveQuery(AdhocView):
             el.title=_("Interactive query")
 
             # Create a basic query
-            q=SimpleQuery(sources=self.source,
+            q=SimpleQuery(sources=self.sources,
                           rvalue="element")
             q.add_condition(Condition(lhs="element/content/data",
                                       operator="contains",
