@@ -294,7 +294,7 @@ class EditWidget(gtk.VBox):
         align.show()
         align.add(lbl)
 
-        adjustment = gtk.Adjustment(0, int(low), int(up), 1, 1, 0)
+        adjustment = gtk.Adjustment(0, low, up, 1, 1, 0)
         spin_button = gtk.SpinButton(adjustment, 1, 0)
         spin_button.set_numeric(True)
         spin_button.show()
@@ -517,7 +517,7 @@ class OptionParserGUI(EditWidget):
             elif o.action == 'store':
                 if o.type in ('int', 'long'):
                     self.options[o.dest] = val
-                    self.add_spin(name, o.dest, o.help, -sys.maxint, sys.maxint)
+                    self.add_spin(name, o.dest, o.help, -1e300, 1e300)
                 elif o.type == 'string':
                     self.options[o.dest] = val or ""
                     if o.help.endswith('[F]'):
