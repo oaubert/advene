@@ -21,7 +21,10 @@
 
 import os
 import time
-import io
+try:
+    import StringIO
+except ImportError:
+    import io as StringIO
 import traceback
 import gtk
 import gobject
@@ -344,7 +347,7 @@ class Evaluator:
                 else:
                     self.log("Cannot get source for %s" % expr)
         except Exception:
-            f=io.StringIO()
+            f=StringIO.StringIO()
             traceback.print_exc(file=f)
             self.clear_output()
             self.log("Error in fetching %s for %s:\n\n" % (typ, expr))
@@ -379,7 +382,7 @@ class Evaluator:
                 self.log("Successfully imported %s" % modname)
             except ImportError:
                 self.log("Cannot import module %s:" % modname)
-                f=io.StringIO()
+                f=StringIO.StringIO()
                 traceback.print_exc(file=f)
                 self.log(f.getvalue())
                 f.close()
@@ -434,7 +437,7 @@ class Evaluator:
                         self.log('\n\n[Value stored in %s]' % symbol)
 
         except Exception as e:
-            f=io.StringIO()
+            f=StringIO.StringIO()
             traceback.print_exc(file=f)
             self.clear_output()
             self.log(f.getvalue())
@@ -540,7 +543,7 @@ class Evaluator:
 
         self.clear_output()
         if completion is None:
-            f=io.StringIO()
+            f=StringIO.StringIO()
             traceback.print_exc(file=f)
             self.log(f.getvalue())
             f.close()
