@@ -622,6 +622,22 @@ xmlns=&quot;http://advene.org/ns/linked-data/&quot;
 ]&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/at/end&quot;&gt;,&lt;/span&gt;
 &lt;/span&gt;
 }
+</content></view><view dc:creator="oaubert" dc:date="2012-02-21" id="TTL" viewable-class="package"><meta><extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">ttl</extension><title xmlns="http://purl.org/dc/elements/1.1/">TTL</title></meta><content encoding="utf-8" mime-type="text/plain">&lt;div tal:omit-tag=&quot;&quot; tal:repeat=&quot;at here/annotationTypes&quot;&gt;
+  &lt;div tal:omit-tag=&quot;&quot; tal:repeat=&quot;a at/annotations&quot;&gt;
+@prefix xsd: &amp;lt;http://www.w3.org/2001/XMLSchema#&gt; .
+@prefix ktbs: &amp;lt;http://liris.cnrs.fr/silex/2009/ktbs/&amp;gt; .
+@prefix : &amp;lt;../advene/&amp;gt; .
+
+[] a :&lt;span tal:replace=&quot;python:at.id.capitalize().replace('-', '_')&quot;&gt;id&lt;/span&gt;;
+ktbs:hasTrace &lt;&lt;span tal:replace=&quot;package/meta/advenetool/mediafile | no_source&quot;&gt;&lt;/span&gt;&gt; ;
+ktbs:hasBegin &lt;span tal:replace=&quot;a/fragment/begin&quot;&gt;b&lt;/span&gt;;
+ktbs:hasEnd &lt;span tal:replace=&quot;a/fragment/end&quot;&gt;e&lt;/span&gt;;
+ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/span&gt;&quot;;
+&lt;div tal:omit-tag=&quot;&quot; tal:condition=&quot;at/_fieldnames&quot;&gt;&lt;div tal:omit-tag=&quot;&quot; tal:repeat=&quot;fn python:list(at._fieldnames)&quot;&gt;:has&lt;span tal:replace=&quot;fn/capitalize&quot;&gt;Field&lt;/span&gt; &quot;&lt;span tal:replace=&quot;a/content/parsed/?fn&quot;&gt;value&lt;/span&gt;&quot;;
+&lt;/div&gt;.&lt;/div&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
 </content></view>
   </views>
 </package>
