@@ -2253,7 +2253,7 @@ class AdveneGUI(object):
         def generate_default_filename(filter, filename=None):
             """Generate a filename for the given filter.
             """
-            if filename is None:
+            if not filename:
                 # Get the current package title.
                 if isinstance(element, Package):
                     filename=self.controller.package.title
@@ -2287,7 +2287,7 @@ class AdveneGUI(object):
                                              gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
         def update_extension(sel):
             filter=sel.get_current_element()
-            f=generate_default_filename(filter, os.path.basename(fs.get_filename()))
+            f=generate_default_filename(filter, os.path.basename(fs.get_filename() or ""))
             fs.set_current_name(f)
             return True
         def valid_always(v):
