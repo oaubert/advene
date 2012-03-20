@@ -1039,11 +1039,33 @@ $.widget("ui.video", {
             if (($("[target = 'video_player']").length == 0))
                 // No video player link
                 return;
+            // Check for video type support
+            videotype="none";
+            v = document.createElement("video");
+            if (v.canPlayType)
+            {
+                if (v.canPlayType("video/mp4"))
+                {
+                    videotype = "mp4";
+                } else if (v.canPlayType("video/ogg"))
+                {
+                    videotype = "ogv";
+                }
+            }
+
             $("[target='video_player']").each( function() {
                 var data = /(.+)#t=([.\d]+)?,([.\d]+)?/.exec($(this).attr('href'));
-
                 if (data) {
-                    $(this).attr( { 'data-video-url': data[1],
+                    var v = data[1];
+                    if (v.match(/(.+)\.mp4/) && videotype == "ogv")
+                    {
+                        // mp4 file on a browser that only supports
+                        // ogg. Try to fallback to .ogv.
+                        v = v.match(/(.+)\.mp4/)[1] + ".ogv";
+                    }
+                    if (video_url == "")
+                        video_url = v;
+                    $(this).attr( { 'data-video-url': v,
                                     'data-begin': data[2],
                                     'data-end': data[3]
                                   });
@@ -1053,8 +1075,6 @@ $.widget("ui.video", {
                     $(this).click(function() {
                         return false;
                     });
-                    if (video_url == "")
-                        video_url = data[1];
                 }
                 $(this).advene('overlay');
             });
