@@ -405,11 +405,12 @@ $.widget("ui.video", {
         var self = this;
 
         // Cf https://github.com/aFarkas/jMediaelement/blob/1.1.3/src/mm.base-api.js#L312 for more complete implementation
-        if (this.buffered && this.buffered.length) {
+        if (e.target.buffered && e.target.buffered.length) {
             // current w3 spec using buffered TimeRange
-            fraction = this.buffered.end(0) / this.duration;
+            // FIXME: we only consider the 1st buffer.
+            fraction = e.target.buffered.end(0) / e.target.duration;
             this._bufferStatus.width(fraction * self._timeLinerSliderAbsoluteWidth);
-            self._waiting.text("Loaded " + (fraction*100) + "%...");
+            self._waiting.text("Loaded " + Math.floor(fraction * 100) + "%...");
         } else if (e.originalEvent && 'lengthComputable' in e.originalEvent && e.originalEvent.loaded) {
             // Firefox/old webkits
             var lengthComputable = e.originalEvent.lengthComputable,
@@ -419,11 +420,11 @@ $.widget("ui.video", {
                 var fraction = Math.max(Math.min(loaded / total, 1), 0);
 
                 this._bufferStatus.width(fraction * self._timeLinerSliderAbsoluteWidth);
-                self._waiting.text("Loaded " + (fraction*100) + "%...");
+                self._waiting.text("Loaded " + Math.floor(fraction*100) + "%...");
             }
             else
             {
-                self._waiting.text("Loaded " + (loaded / 1024) + " Kbytes...");
+                self._waiting.text("Loaded " + Math.floor(loaded / 1024) + " Kbytes...");
             }
         }
     },
