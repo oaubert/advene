@@ -409,7 +409,7 @@ $.widget("ui.video", {
             // current w3 spec using buffered TimeRange
             fraction = this.buffered.end(0) / this.duration;
             this._bufferStatus.width(fraction * self._timeLinerSliderAbsoluteWidth);
-            self._waiting.text("Loaded " + str(fraction*100) + "%...");
+            self._waiting.text("Loaded " + (fraction*100) + "%...");
         } else if (e.originalEvent && 'lengthComputable' in e.originalEvent && e.originalEvent.loaded) {
             // Firefox/old webkits
             var lengthComputable = e.originalEvent.lengthComputable,
@@ -419,7 +419,7 @@ $.widget("ui.video", {
                 var fraction = Math.max(Math.min(loaded / total, 1), 0);
 
                 this._bufferStatus.width(fraction * self._timeLinerSliderAbsoluteWidth);
-                self._waiting.text("Loaded " + str(fraction*100) + "%...");
+                self._waiting.text("Loaded " + (fraction*100) + "%...");
             }
             else
             {
@@ -1225,6 +1225,7 @@ $.widget("ui.video", {
             self.options.start_point = startx;
             self.options.end_point = endx;
 
+            console.log("Videocontainer", self._videoContainer);
             var parentC = null;
             return this.each(function() {
                 /**
