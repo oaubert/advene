@@ -1113,7 +1113,7 @@ $.widget("ui.video", {
             check_hash();
             // When following links inside the same document
             window.onhashchange = function () { check_hash(); };
-            uiPlayer.load();
+            uiPlayer.find("video")[0].load();
         },
 
         'overlay': function() {
