@@ -14,7 +14,7 @@ _formatTime = function( seconds ) {
     var hp = h >= 10 ? '' : '0';
     var mp = m >= 10 ? '' : '0';
     var sp = s >= 10 ? '' : '0';
-    return hp + h + ':' + mp + m + ":" + sp + s
+    return hp + h + ':' + mp + m + ":" + sp + s;
 };
 
 
@@ -111,7 +111,7 @@ $.widget("ui.video", {
             "waiting",
             "click",
             "keydown",
-            "mouseover",
+            "mouseover"
         ];
 
         $.each( videoEvents, function(){
@@ -417,7 +417,7 @@ $.widget("ui.video", {
                 total = e.originalEvent.total;
             if( total && lengthComputable ) {
                 var fraction = Math.max(Math.min(loaded / total, 1), 0);
-            
+
                 this._bufferStatus.width(fraction * self._timeLinerSliderAbsoluteWidth);
                 self._waiting.text("Loaded " + str(fraction*100) + "%...");
             }
@@ -468,7 +468,7 @@ $.widget("ui.video", {
 
         // Pause all other players
         if (self.options.singletonPlayer)
-            $("video", $(document)).each( function() { if (this !== self.element[0] && !this.paused && !this.ended) this.pause() } );
+            $("video", $(document)).each( function() { if (this !== self.element[0] && !this.paused && !this.ended) this.pause(); } );
         self._playButton.addClass(self.options.overlay ? 'ui-icon-pause' : 'ui-video-pause').removeClass(self.options.overlay ? 'ui-icon-play' : 'ui-video-play');
     },
     _event_pause: function() {
@@ -488,7 +488,7 @@ $.widget("ui.video", {
 
             if (self.options.fragmentPlay) {
                 if (currentTime < self.options.startPoint) {
-                    self.element[0].currentTime = self.options.startPoint
+                    self.element[0].currentTime = self.options.startPoint;
                 } else if (currentTime > self.options.endPoint) {
                     switch(self.options.endFragmentBehaviour) {
                     case "continue":
@@ -629,7 +629,7 @@ $.widget("ui.video", {
         var self = this;
         var handled_event = true;
         if (!e)
-            var e = window.event;
+            e = window.event;
 
         switch (e.keyCode){
             case 32:  // Space
@@ -653,7 +653,7 @@ $.widget("ui.video", {
             case 27: // Escape
                 self.stop();
                 break;
-            default: 
+            default:
                 handled_event = false;
         }
         if (! handled_event) {
@@ -708,7 +708,7 @@ $.widget("ui.video", {
         self._timeLinerSlider.slider('value', 0);
         self._currentProgressSpan.text(_formatTime(0));
 
-        $(".activeTranscript").each( function() { $(this).removeClass("activeTranscript") } );
+        $(".activeTranscript").each( function() { $(this).removeClass("activeTranscript"); } );
     },
     mute: function() {
         var self = this;
@@ -733,8 +733,8 @@ $.widget("ui.video", {
     timeline: function(pos){
         var self = this;
         var duration= self.element[0].duration;
-        var pos = Math.max(Math.min(parseInt(pos) / 100, 1), 0);
-        self.element[0].currentTime = duration * pos;
+        var p = Math.max(Math.min(parseInt(pos) / 100, 1), 0);
+        self.element[0].currentTime = duration * p;
     },
     setPlayingTime: function(pos){
         var self = this;
@@ -842,7 +842,7 @@ $.widget("ui.video", {
                 self.minplayer.hide("transfer", options, 1000, function(){} );
                 self.minplayer.hide();
                 return false;
-            })
+            });
 
         uiPlayer
             .bind('dragstop', function(event, ui) {
@@ -1003,15 +1003,15 @@ $.widget("ui.video", {
                 }
             uiPlayer.find(".ui-dialog-fragment-title").text(title);
             self.minplayer.click();
-        }
+        };
     };
 
     // Capture CTRL + KEY events and forward them to the video widget of the main player
     document.onkeydown = function(e) {
-        if (e.ctrlKey == 1) {
+        if (e.ctrlKey == 1 && uiPlayer != undefined) {
             uiPlayer.find('video', this).video('triggerKeyBoardEvent', e);
         }
-    }
+    };
 
     $.ui.player.prototype.videoObject = null;
     $.ui.player.prototype.options.title = 'Advene player';
@@ -1082,7 +1082,7 @@ $.widget("ui.video", {
                              "</video></div>");
 
             playerOptions =  { title:'Advene main player',
-                               endFragmentBehaviour: 'continue',
+                               endFragmentBehaviour: 'continue'
                              };
             if (options !== undefined)
                 for (key in options)
@@ -1107,11 +1107,11 @@ $.widget("ui.video", {
                                                       nodes.attr('data-end'));
                     }
                 }
-            }
+            };
             // For initial document loading
             check_hash();
             // When following links inside the same document
-            window.onhashchange = function () { check_hash() };
+            window.onhashchange = function () { check_hash(); };
         },
 
         'overlay': function() {
@@ -1121,7 +1121,7 @@ $.widget("ui.video", {
             var options = {
                 border_color : '#666',
                 overlay_color : '#000',
-                overlay_text_color : '#666',
+                overlay_text_color : '#666'
             };
 
             var self = this;
@@ -1211,7 +1211,8 @@ $.widget("ui.video", {
                 $(parentC).find('.caption').show();
                 $(parentC).find('.screenshot-overlay-player').removeClass('screenshot-overlay-player').addClass('screenshot-overlay-menu');
                 self.die();
-            } );
+                       } );
+            return true;
         },
 
         'player': function(videoURL, startx, endx) {
@@ -1246,7 +1247,7 @@ $.widget("ui.video", {
                                 {
                                     'class': ' ui-corner-all sampleContainer',
                                     'src': videoURL,
-                                    'poster': 'resources/HTML5/advene_logo.png',
+                                    'poster': 'resources/HTML5/advene_logo.png'
                                 }
                                )
                     .css('position', 'absolute')
@@ -1292,6 +1293,7 @@ $.widget("ui.video", {
             return methods.init.apply( this, arguments );
         } else {
             $.error( 'Method ' +  method + ' does not exist on jQuery.tooltip' );
+            return undefined;
         }
   };
 
