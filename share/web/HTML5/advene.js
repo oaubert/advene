@@ -1078,7 +1078,7 @@ $.widget("ui.video", {
             }
 
             $("body").append("<div class='player_container' style='position:relative; overflow:visible; '>" +
-                             "<video preload='auto' style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
+                             "<video preload='none' style='overflow:visible; width:100%; height:auto; border:thick #00FF00; top:10; bottom:10;right:10;left:10; ' src='" + video_url + "'>" +
                              "</video></div>");
 
             playerOptions =  { title:'Advene main player',
@@ -1112,6 +1112,7 @@ $.widget("ui.video", {
             check_hash();
             // When following links inside the same document
             window.onhashchange = function () { check_hash(); };
+            uiPlayer.load();
         },
 
         'overlay': function() {
