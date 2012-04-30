@@ -54,6 +54,8 @@ import time
 import re
 import os
 import optparse
+import gzip
+import urllib
 
 from gettext import gettext as _
 
@@ -626,9 +628,11 @@ class TextImporter(GenericImporter):
                                      help=_("Specify the encoding of the input file (latin1, utf8...)"))
 
     def can_handle(fname):
-        ext = os.path.splitext(fname)[1]
-        if ext == '.txt':
+        ext = os.path.splitext(fname)[1].lower()
+        if ext == '.txt' or ext == '.log':
             return 100
+        elif ext == '.gz':
+            return 50
         elif ext in config.data.video_extensions:
             return 0
         else:
@@ -706,12 +710,18 @@ class TextImporter(GenericImporter):
         self.re = re.compile(r)
 
     def process_file(self, filename):
-        f = open(filename, 'r')
+        if filename.lower().endswith('.gz'):
+            f = gzip.open(filename, 'r')
+        elif filename.startswith('http'):
+            f = urllib.urlopen(filename)
+        else:
+            f = open(filename, 'r')
         if self.package is None:
             self.init_package(filename=filename)
         self.ensure_new_type()
         self.convert(self.iterator(f))
         self.progress(1.0)
+        f.close()
         return self.package
 
 register(TextImporter)
