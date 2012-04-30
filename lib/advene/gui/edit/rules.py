@@ -766,7 +766,7 @@ class EditCondition(EditGeneric):
                 ('annotation/content/data', _('The annotation content') ),
                 ] + [
                 ('annotation/content/parsed/%s' % p, _("The value of the %s attribute") % p)
-                for p in set(a for at in self.controller.package.annotationTypes for a in at._fieldnames) ] + [
+                for p in set(a for at in self.controller.package.annotationTypes for a in getattr(at, '_fieldnames', [])) ] + [
                 ('annotation/fragment', _('The annotation fragment') ),
                 ('annotation/fragment/begin', _('The annotation begin time') ),
                 ('annotation/fragment/end', _('The annotation end time') ),
