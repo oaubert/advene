@@ -623,9 +623,14 @@ class TextImporter(GenericImporter):
         if encoding is None:
             encoding = 'latin1'
         self.encoding = encoding
+        self.unit = "ms"
         self.optionparser.add_option("-e", "--encoding",
                                      action="store", type="string", dest="encoding", default=self.encoding,
                                      help=_("Specify the encoding of the input file (latin1, utf8...)"))
+        self.optionparser.add_option("-u", "--unit",
+                                     action="store", type="choice", dest="unit", choices=("ms", "s"), default=self.unit,
+                                     help=_("Unit to consider for integers"))
+
 
     def can_handle(fname):
         ext = os.path.splitext(fname)[1].lower()
@@ -667,6 +672,9 @@ class TextImporter(GenericImporter):
                 self.log("cannot parse " + data[0] + " as a timestamp.")
                 continue
 
+            if self.unit == "s":
+                begin = begin * 1000
+
             # We have a begin time.
             if len(data) == 1:
                 # Only 1 time.
@@ -694,6 +702,8 @@ class TextImporter(GenericImporter):
                     index += 1
                     continue
                 # We have valid begin and end times.
+                if self.unit == "s":
+                    end = end * 1000
                 if len(data) == 3:
                     content = data[2]
                 else:
