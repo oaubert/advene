@@ -623,10 +623,15 @@ class TextImporter(GenericImporter):
         if encoding is None:
             encoding = 'latin1'
         self.encoding = encoding
+        self.relative = False
+        self.first_timestamp = None
         self.unit = "ms"
         self.optionparser.add_option("-e", "--encoding",
                                      action="store", type="string", dest="encoding", default=self.encoding,
                                      help=_("Specify the encoding of the input file (latin1, utf8...)"))
+        self.optionparser.add_option("-r", "--relative",
+                                     action="store_true", dest="relative", default=self.relative,
+                                     help=_("Should the timestamps be encoded relative to the first timestamp?"))
         self.optionparser.add_option("-u", "--unit",
                                      action="store", type="choice", dest="unit", choices=("ms", "s"), default=self.unit,
                                      help=_("Unit to consider for integers"))
@@ -671,6 +676,11 @@ class TextImporter(GenericImporter):
             except helper.InvalidTimestamp:
                 self.log("cannot parse " + data[0] + " as a timestamp.")
                 continue
+            if self.first_timestamp is None:
+                self.first_timestamp = begin
+
+            if self.relative:
+                begin = begin - self.first_timestamp
 
             if self.unit == "s":
                 begin = begin * 1000
@@ -702,6 +712,8 @@ class TextImporter(GenericImporter):
                     index += 1
                     continue
                 # We have valid begin and end times.
+                if self.relative:
+                    end = end - self.first_timestamp
                 if self.unit == "s":
                     end = end * 1000
                 if len(data) == 3:
