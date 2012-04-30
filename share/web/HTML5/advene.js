@@ -1133,6 +1133,44 @@ $.widget("ui.video", {
             check_hash();
             // When following links inside the same document
             window.onhashchange = function () { check_hash(); };
+
+            function filterHighlight(s)
+            {
+                if (s === "")
+                {
+                    this.previousFilterExpression = s;
+                    $(".filteredText").each( function () {
+                                                 $(this).replaceWith(this.innerHTML);
+                                                 this.normalize();
+                                             });
+                    $("p.transcription").show();
+                }
+                else
+                {
+                    if (this.filterPreviousExpression === undefined || s.indexOf(this.filterPreviousExpression) != 0)
+                    {
+                        // Not the continuation of a previous expression. Reset hidden state
+                        $("p.transcription").show();
+                    }
+                    this.filterPreviousExpression = s;
+
+                    $(".filteredText").each( function () {
+                                                          $(this).replaceWith(this.innerHTML);
+                                                          this.normalize();
+                                                      });
+                    $("p.transcription").find("span").highlight(s, 'filteredText');
+                    $("p.transcription").filter( function () { return $(this).find(".filteredText").length == 0 }).hide()
+                }
+            }
+
+            // To activate filterBox, declare a <div id="filterBox"></div> in your document.
+            if ($("#filterBox", document).length > 0)
+            {
+                $("#filterBox").append('<input id="filterInput" type="text" value="" /><button id="filterClear" value="Clear" />');
+                $("#filterInput").keyup(function (event) { if (event.keyCode == 13) { filterHighlight($("#filterInput").attr("value")); } });
+                $("#filterClear").click(function () { $("#filterInput").attr("value", ""); filterHighlight(""); });
+            }
+
             uiPlayer.find("video")[0].load();
         },
 
@@ -1247,7 +1285,6 @@ $.widget("ui.video", {
             self.options.start_point = startx;
             self.options.end_point = endx;
 
-            console.log("Videocontainer", self._videoContainer);
             var parentC = null;
             return this.each(function() {
                 /**
@@ -1320,4 +1357,16 @@ $.widget("ui.video", {
         }
   };
 
+     $.fn.highlight = function (str, className) {
+         var regex = new RegExp(str, "gi");
+         return this.each(function () {
+                              $(this).contents().filter(function() {
+                                                            return this.nodeType == 3 && regex.test(this.nodeValue);
+                                                        }).replaceWith(function() {
+                                                                           return (this.nodeValue || "").replace(regex, function(match) {
+                                                                                                                     return "<span class=\"" + className + "\">" + match + "</span>";
+            });
+        });
+    });
+};
 })(jQuery);
