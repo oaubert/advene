@@ -169,10 +169,6 @@ class Menu:
         self.controller.gui.edit_element(el)
         return True
 
-    def display_transcription(self, widget, annotationtype):
-        self.controller.gui.open_adhoc_view('transcription',
-                                            source="here/annotationTypes/%s/annotations/sorted" % annotationtype.id)
-        return True
 
     def popup_get_offset(self):
         offset=dialog.entry_dialog(title='Enter an offset',
