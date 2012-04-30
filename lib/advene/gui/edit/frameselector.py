@@ -22,6 +22,7 @@ It depends on a Controller instance to be able to interact with the video player
 """
 
 import gtk
+import advene.core.config as config
 from advene.gui.widget import TimestampRepresentation, GenericColorButtonWidget
 from advene.gui.util import dialog, get_color_style
 from gettext import gettext as _
