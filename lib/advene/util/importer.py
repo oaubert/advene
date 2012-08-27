@@ -678,6 +678,8 @@ class TextImporter(GenericImporter):
                 continue
             if self.first_timestamp is None:
                 self.first_timestamp = begin
+                if not self.relative:
+                    stored_begin = begin
 
             if self.relative:
                 begin = begin - self.first_timestamp
@@ -690,7 +692,7 @@ class TextImporter(GenericImporter):
                 # Only 1 time.
                 yield {
                     'begin': stored_begin,
-                    'end': begin,
+                    'end': max(begin - 1, 0),
                     'content': str(index),
                     }
                 stored_begin = begin
@@ -705,7 +707,7 @@ class TextImporter(GenericImporter):
                     data = whitespace_re.split(l, 1)
                     yield {
                         'begin': stored_begin,
-                        'end': begin,
+                        'end': max(begin - 1, 0),
                         'content': data[1],
                         }
                     stored_begin = begin
