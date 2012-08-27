@@ -242,7 +242,7 @@ class Menu:
         return True
 
     def query_element (self, widget, el):
-        self.controller.gui.open_adhoc_view('interactivequery', here=el, source="here")
+        self.controller.gui.open_adhoc_view('interactivequery', here=el, sources= [ "here" ])
         return True
 
     def delete_element (self, widget, el):
