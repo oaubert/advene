@@ -127,7 +127,7 @@ class TimeAdjustment:
                                            visible_label=False, callback=self.set_value)
         self.image.connect('button-press-event', image_button_press)
         self.image.connect('clicked', image_button_clicked)
-        self.image.set_tooltip_text(_("Click to play\nControl+click to set to current time\Scroll to modify value (with control/shift)\nRight-click to invalidate screenshot"))
+        self.image.set_tooltip_text(_("Click to play\nControl+click to set to current time\nScroll to modify value (with control/shift)\nRight-click to invalidate screenshot"))
         hbox.pack_start(self.image, expand=False)
 
         if self.editable:
