@@ -685,6 +685,24 @@ class EditQueryPopup (EditElementPopup):
         self.controller.notify("QueryEditEnd", query=element)
         return True
 
+    def apply_and_execute(self, b):
+        self.apply_cb(b, None)
+        try:
+            res, q = self.controller.evaluate_query(self.element)
+            self.controller.gui.open_adhoc_view('interactiveresult',
+                                                query=self.element,
+                                                result=res,
+                                                destination='east')
+        except Exception, e:
+            self.controller.log(_('Exception in query: %s') % unicode(e))
+        return True
+
+    def extend_toolbar(self, tb):
+        b = get_pixmap_toolbutton( 'gtk-execute', self.apply_and_execute)
+        b.set_tooltip_text(_("Validate and run query on package"))
+        tb.insert(b, -1)
+        return True
+
     def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
