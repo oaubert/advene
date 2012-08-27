@@ -84,7 +84,7 @@ class ImageCache(dict):
     not_yet_available_image.contenttype='image/png'
     not_yet_available_image.timestamp=-1
 
-    def __init__ (self, name=None, epsilon=20):
+    def __init__ (self, name=None, epsilon=35):
         """Initialize the Imagecache
 
         @param name: id of a previously saved ImageCache.
