@@ -109,7 +109,7 @@ class ZoneContentHandler (ContentHandler):
             # We are editing the content of an annotation. Use its snapshot as background.
             i=image_from_position(self.controller, self.parent.fragment.begin, height=160,
                                   epsilon=1000/config.data.preferences['default-fps'])
-            self.view = ShapeDrawer(callback=self.callback, background=i)
+            self.view = ShapeDrawer(callback=self.callback, background=i.get_pixbuf())
         else:
             self.view = ShapeDrawer(callback=self.callback)
 
