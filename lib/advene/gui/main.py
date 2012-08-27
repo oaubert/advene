@@ -1545,7 +1545,7 @@ class AdveneGUI(object):
                 self.controller.player.set_rate(v)
             return True
 
-        self.rate_control = gtk.SpinButton(gtk.Adjustment(1.0, 0.2, 4.0, 0.2, 0.5),
+        self.rate_control = gtk.SpinButton(gtk.Adjustment(1.0, 0.1, 100.0, 0.2, 0.5),
                                            0.2, 1)
         self.rate_control.set_tooltip_text(_("Playing rate"))
         ti = gtk.ToolItem()
