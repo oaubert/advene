@@ -71,7 +71,7 @@ class FileImporter(AdhocView):
         self.widget=self.build_widget()
 
         if filename:
-            self.fb.set_current_name(filename)
+            self.fb.set_filename(filename)
             self.update_importers(filename=filename)
 
     def update_importers(self, filename=None):
