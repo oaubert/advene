@@ -587,7 +587,11 @@ class TextImporter(GenericImporter):
     begin_time end_time annotation_data
     or
     begin_time annotation_data
-    (in the latter case, annotation data must not begin with a word that can look like a timestamp)
+
+    The "timestamp" setting specifies which format must be used. If
+    set to "auto" (automatic detection), it will try to detect the
+    appropriate format but can be mislead if annotation data looks
+    like a timestamp. In doubt, specify your format.
 
     begin_time and end_time can be formatted in various ways.
 
@@ -599,7 +603,7 @@ class TextImporter(GenericImporter):
 
     - float numbers are considered as seconds
       Regexp: \d*\.\d*
-      Example: 2.134 or .134 or 2.
+      Example: 2.134 or .134 or 2. (note the trailing dot)
 
     - formatted timestamps with colons in them will be interpreted as follows.
       m:s (1 colon)
@@ -626,6 +630,7 @@ class TextImporter(GenericImporter):
         self.relative = False
         self.first_timestamp = None
         self.unit = "ms"
+        self.timestampmode = "auto"
         self.optionparser.add_option("-e", "--encoding",
                                      action="store", type="string", dest="encoding", default=self.encoding,
                                      help=_("Specify the encoding of the input file (latin1, utf8...)"))
@@ -635,6 +640,9 @@ class TextImporter(GenericImporter):
         self.optionparser.add_option("-u", "--unit",
                                      action="store", type="choice", dest="unit", choices=("ms", "s"), default=self.unit,
                                      help=_("Unit to consider for integers"))
+        self.optionparser.add_option("-t", "--timestampmode",
+                                     action="store", type="choice", dest="timestamp", choices=("begin", "both", "auto"), default=self.timestampmode,
+                                     help=_("What timestamps are present in a line (only begin, both begin and end, or automatic recognition)"))
 
 
     def can_handle(fname):
@@ -660,16 +668,18 @@ class TextImporter(GenericImporter):
         # flexibility of having any blank char as separator
         whitespace_re = re.compile('\s+')
         stored_begin = 0
+        stored_data = None
         index = 1
         for l in f:
             if not self.progress(f.tell() / filesize):
                 break
             l = unicode(l.strip(), self.encoding)
-            data = whitespace_re.split(l, 2)
+            data = whitespace_re.split(l, 1)
 
             if not data:
                 # Error, cannot do anything with it.
                 self.log("invalid data: ", l)
+                continue
 
             try:
                 begin = helper.parse_time(data[0])
@@ -687,48 +697,70 @@ class TextImporter(GenericImporter):
             if self.unit == "s":
                 begin = begin * 1000
 
-            # We have a begin time.
+            # We have only a begin time.
             if len(data) == 1:
-                # Only 1 time.
-                yield {
-                    'begin': stored_begin,
-                    'end': max(begin - 1, 0),
-                    'content': str(index),
-                    }
-                stored_begin = begin
+                if self.timestampmode == 'both':
+                    self.log("Cannot find end timestamp: ", l)
+                    continue
+                if stored_data is None:
+                    # First line. Just buffer timestamp
+                    stored_data = str(index)
+                    stored_begin = begin
+                else:
+                    # Only 1 time.
+                    yield {
+                        'begin': stored_begin,
+                        'end': max(begin - 1, 0),
+                        'content': stored_data,
+                        }
+                    stored_begin = begin
                 index += 1
                 continue
             else:
                 try:
                     end = helper.parse_time(data[1])
                 except helper.InvalidTimestamp:
-                    # Invalid timestamp, consider that we have only a
-                    # begin time, followed by data.
+                    end = None
+
+                if self.timestampmode == 'begin' or (self.timestampmode == 'auto' and end is None):
+                    # Invalid timestamp or 'begin' mode - consider
+                    # that we have only a begin time, followed by
+                    # data.
                     data = whitespace_re.split(l, 1)
+                    if stored_data is None:
+                        # First line. Just buffer timestamp and data
+                        stored_data = data[1]
+                        stored_begin = begin
+                    else:
+                        yield {
+                            'begin': stored_begin,
+                            'end': max(begin - 1, 0),
+                            'content': stored_data,
+                        }
+                        stored_begin = begin
+                        stored_data = data[1]
+                    index += 1
+                    continue
+                elif end is None and self.timestampmode == 'both':
+                    self.log("Cannot find end timestamp: ", l)
+                    continue
+                else:
+                    # We have valid begin and end times.
+                    if self.relative:
+                        end = end - self.first_timestamp
+                    if self.unit == "s":
+                        end = end * 1000
+                    if len(data) == 3:
+                        content = data[2]
+                    else:
+                        content = ""
                     yield {
-                        'begin': stored_begin,
-                        'end': max(begin - 1, 0),
-                        'content': data[1],
+                        'begin': begin,
+                        'end': end,
+                        'content': content,
                         }
                     stored_begin = begin
                     index += 1
-                    continue
-                # We have valid begin and end times.
-                if self.relative:
-                    end = end - self.first_timestamp
-                if self.unit == "s":
-                    end = end * 1000
-                if len(data) == 3:
-                    content = data[2]
-                else:
-                    content = ""
-                yield {
-                    'begin': begin,
-                    'end': end,
-                    'content': content,
-                    }
-                stored_begin = begin
-                index += 1
 
     def set_regexp(self, r):
         self.re = re.compile(r)
