@@ -1,3 +1,7 @@
+* Allow to resize the SVG edit window
+
+* x-advene-values: normalize xx.xx notation (convert , to .)
+
 * Use simplejson instead of pickle for saving prefs
 
 * QRcode extractor
