@@ -201,7 +201,7 @@ class ShotValidation(AdhocView):
                 a=self.annotations[i]
                 self.selector.set_timestamp(a.fragment.begin)
                 self.set_title(_("Begin of #%(index)d (title: %(content)s)") % { 'index': i + 1,
-                                                                                 'content': self.controller.get_title(a, max_size=60).replace('<', '&lt;') })
+                                                                                 'content': self.controller.get_title(a, max_size=60).replace('&', '&amp;').replace('<', '&lt;') })
                 self.prev_button.set_sensitive(i > 0)
                 self.next_button.set_sensitive(i < len(self.annotations) - 1)
             else:
