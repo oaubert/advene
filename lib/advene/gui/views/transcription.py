@@ -22,6 +22,7 @@
 import re
 
 import gtk
+import pango
 
 import advene.core.config as config
 
@@ -298,7 +299,7 @@ class TranscriptionView(AdhocView):
         b=self.textview.get_buffer()
 
         # Create useful tags
-        b.create_tag("activated", background="skyblue")
+        b.create_tag("activated", weight=pango.WEIGHT_BOLD)
         b.create_tag("current", background="lightblue")
         b.create_tag("searched_string", background="green")
         b.create_tag("bound", editable=False)
