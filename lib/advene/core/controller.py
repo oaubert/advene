@@ -180,6 +180,9 @@ class AdveneController(object):
         self.aliases = {}
         self.current_alias = None
 
+        # Unknown arguments (neither a package nor a video file)
+        self.unknown_args = []
+
         self.cleanup_done=False
         if args is None:
             args = []
@@ -808,11 +811,12 @@ class AdveneController(object):
                         self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
                                 'uri': uri,
                                 'error': unicode(e)})
-                else:
+                elif ('dvd' in name
+                      or ext.lower() in config.data.video_extensions):
                     # Try to load the file as a video file
-                    if ('dvd' in name
-                        or ext.lower() in config.data.video_extensions):
-                        media = uri
+                    media = uri
+                else:
+                    self.unknown_args.append(uri)
 
         # If no package is defined yet, load the template
         if self.package is None:
