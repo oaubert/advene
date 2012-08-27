@@ -1298,6 +1298,10 @@ class AdveneGUI(object):
             self.open_adhoc_view('timeline', destination='south')
             self.open_adhoc_view('tree', destination='fareast')
 
+        # If there were unknown arguments, propose to import them
+        for uri in self.controller.unknown_args:
+            self.open_adhoc_view('importerview', filename=uri)
+
         # Use small toolbar button everywhere
         gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
         play=self.player_toolbar.get_children()[0]
