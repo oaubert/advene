@@ -87,13 +87,13 @@ class AnnotationTable(AdhocView):
             self.set_elements(self.elements)
 
     def update_snapshot(self, context, parameters):
-        pos=long(context.globals['position'])
-        eps=self.controller.package.imagecache.epsilon
+        pos = long(context.globals['position'])
+        eps = self.controller.package.imagecache.epsilon
         for r in self.widget.treeview.get_model():
             if abs(r[COLUMN_BEGIN] - pos) <= eps:
                 # Update pixbuf
                 r[COLUMN_PIXBUF] = png_to_pixbuf(self.controller.package.imagecache[pos],
-                                     height=32)
+                                                 height=32)
 
     def get_elements(self):
         """Return the list of elements in their displayed order.
@@ -123,6 +123,8 @@ class AnnotationTable(AdhocView):
             return l
         for a in elements:
             if isinstance(a, Annotation):
+                if not self.controller.package.imagecache.is_initialized(a.fragment.begin):
+                    self.controller.update_snapshot(a.fragment.begin)
                 l.append( (a,
                            self.controller.get_title(a),
                            self.controller.get_title(a.type),
