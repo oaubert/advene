@@ -459,11 +459,12 @@ class Player:
         if self.snapshotter:
             if not self.snapshotter.thread_running:
                 self.snapshotter.start()
-            # We enqueue 3 timestamps: the original timestamp, its
-            # value minus 20ms (the async snapshotter goes to the
+            # We enqueue 4 timestamps: the original timestamp, its
+            # value minus 50 and 20ms (the async snapshotter goes to the
             # specified position then takes the video buffer which may then
             # be later) and its value aligned to a frame boundary
-            for pos in sorted((t - 20,
+            for pos in sorted((t - 50,
+                               t - 20,
                                t / config.data.preferences['default-fps'] * config.data.preferences['default-fps'],
                                t)):
                 self.snapshotter.enqueue(pos)
