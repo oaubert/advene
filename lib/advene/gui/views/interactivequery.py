@@ -105,8 +105,8 @@ class InteractiveQuery(AdhocView):
                                       operator="contains",
                                       rhs="string:a"))
 
-            el.content.data=q.xml_repr()
             el.content.mimetype='application/x-advene-simplequery'
+            el.content.data=q.xml_repr()
 
             self.controller.package.queries.append(el)
 
