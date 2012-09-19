@@ -244,9 +244,7 @@ class GenericImporter(object):
 
         if schemaid is None:
             schemaid = 's_converted'
-        s=self.package.get_element_by_id(schemaid)
-        if s is None:
-            s = self.create_schema(id_=schemaid, title=schemaid)
+        s = self.create_schema(id_=schemaid, title=schemaid)
         if not isinstance(s, Schema):
             raise Exception("Error during conversion: %s is not a schema" % schemaid)
         self.defaulttype=self.create_annotation_type(s, atid, title=title)
