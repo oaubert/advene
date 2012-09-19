@@ -751,7 +751,7 @@ class Menu:
         add_item(_('Create a new annotation...'), self.create_element, Annotation, element)
         add_item(_('Delete all annotations'), self.delete_elements, element, element.annotations)
         add_item(_('Renumber annotations...'), self.renumber_annotations, element)
-        add_item(_('Adjust annotation bounds...'), lambda m, at: self.controller.gui.adjust_annotationtype_bounds(at), element)
+        add_item(_('Shot validation view...'), lambda m, at: self.controller.gui.adjust_annotationtype_bounds(at), element)
         add_item('')
         add_item(_('%d annotations(s) - statistics') % len(element.annotations), self.display_stats, element)
 
