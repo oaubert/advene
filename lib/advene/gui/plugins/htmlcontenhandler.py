@@ -280,17 +280,32 @@ class AnnotationTypePlaceholder:
             data.append("<ul>")
             data.append("""<li tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted"><a title="Click to play the movie" tal:attributes="href a/player_url" tal:content="a/content/data"></a>""" % d)
             data.append("""</li></ul>""")
-        elif 'table' in self.presentation:
+        elif 'grid' in self.presentation:
             data.append("""
 <div class="screenshot_container" style="text-align: center; float: left; width: 200; height: 170; font-size: 0.8em;" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted">
 <a title="Play this annotation" tal:attributes="href a/player_url">
         <img class="screenshot" style="border:1px solid #FFCCCC; height:100px; width:160px;" alt="" tal:attributes="src a/snapshot_url" />
 	<br />
-	<strong tal:content="a/content/data">Nom</strong>
+	<strong tal:content="a/representation">Nom</strong>
 </a><br />
 <span>(<span tal:content="a/fragment/formatted/begin">Debut</span> - <span tal:content="a/fragment/formatted/end">Fin</span>)</span>
 <br />
 </div>""" % d)
+        elif 'table' in self.presentation:
+            data.append("""
+<table border="1">
+
+<tr><td>Vignette</td><td>Contenu</td><td>D&eacute;but</td><td>Dur&eacute;</td></tr>
+
+<tr tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted">
+<td><a title="Play this annotation" tal:attributes="href a/player_url">
+        <img class="screenshot" style="border:1px solid #FFCCCC; height:100px; width:160px;" alt="" tal:attributes="src a/snapshot_url" /></a></td>
+<td><strong tal:content="a/representation">Nom</strong></td>
+<td><span tal:content="a/fragment/formatted/begin">Debut</span></td>
+<td><span tal:content="a/fragment/formatted/duration">Duree</span></td>
+</tr>
+
+</table>""" % d)
         elif 'transcription' in self.presentation:
             data.append("""<span class="transcript" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted" tal:attributes="annotation-id a/id">
 <a title="Click to play the movie" tal:attributes="href a/player_url" tal:content="a/content/data"></a></span>""" % d)
@@ -523,6 +538,7 @@ class HTMLContentHandler (ContentHandler):
                 m=gtk.Menu()
                 for (title, choice) in (
                     (_("as a list"), [ 'list' ]),
+                    (_("as a grid"), [ 'grid' ]),
                     (_("as a table"), [ 'table' ]),
                     (_("as a transcription"), ['transcription' ]),
                     ):
@@ -653,6 +669,7 @@ class HTMLContentHandler (ContentHandler):
                 elif getattr(ap, 'annotationtype', None) is not None:
                     new_menuitem(_("Annotation type %s") % self.controller.get_title(ap.annotationtype), None)
                     new_menuitem(_("display as list"), select_presentation, ap, ['list'])
+                    new_menuitem(_("display as grid"), select_presentation, ap, ['grid'])
                     new_menuitem(_("display as table"), select_presentation, ap, ['table'])
                     new_menuitem(_("display as transcription"), select_presentation, ap, ['transcription'])
 
