@@ -1,3 +1,5 @@
+* Port to gtk3.0/gstreamer1.0: https://wiki.ubuntu.com/Novacut/GStreamer1.0#Using_GStreamer_1.0_from_Python
+
 * Allow to resize the SVG edit window
 
 * x-advene-values: normalize xx.xx notation (convert , to .)
