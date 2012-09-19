@@ -439,6 +439,10 @@ class GenericImporter(object):
             if 'notify' in d and d['notify'] and self.controller is not None:
                 print "Notifying", a
                 self.controller.notify('AnnotationCreate', annotation=a)
+            try:
+                source.send(a)
+            except StopIteration:
+                pass
 
 class ExternalAppImporter(GenericImporter):
     """External application importer.
