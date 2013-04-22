@@ -240,7 +240,7 @@ class EditElementPopup (AdhocView):
             self.close()
         return True
 
-    def apply_and_open(self, b):
+    def apply_and_open(self, b, *p):
         self.apply_cb(b, None)
         # Open in web browser
         ctx=self.controller.build_context()
@@ -248,7 +248,7 @@ class EditElementPopup (AdhocView):
         self.controller.open_url('/'.join( (url, 'view', self.element.id) ))
         return True
 
-    def apply_and_activate(self, b):
+    def apply_and_activate(self, b, *p):
         self.apply_cb(b, None)
         self.controller.activate_stbv(self.element)
         p=self.controller.player
@@ -616,10 +616,12 @@ class EditViewPopup (EditElementPopup):
             b = get_pixmap_toolbutton( 'web.png', self.apply_and_open)
             b.set_tooltip_text(_("Apply changes and visualise in web browser"))
             tb.insert(b, -1)
+            self.key_cb[gtk.keysyms.F5] = self.apply_and_open
         elif t == 'dynamic':
             b = get_pixmap_toolbutton( gtk.STOCK_MEDIA_PLAY, self.apply_and_activate)
             b.set_tooltip_text(_("Apply changes and activate the view"))
             tb.insert(b, -1)
+            self.key_cb[gtk.keysyms.F5] = self.apply_and_activate
         return True
 
     def make_widget (self, editable=True, compact=False):
