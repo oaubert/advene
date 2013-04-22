@@ -306,6 +306,7 @@ class Config(object):
             'player-shortcuts-in-edit-windows': True,
             # Default FPS, used for smpte-style timestamp display
             'default-fps': 25,
+            'apply-edited-elements-on-save': True,
             }
 
         # Player options

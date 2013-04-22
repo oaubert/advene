@@ -3781,6 +3781,10 @@ class AdveneGUI(object):
                 if not default:
                     self.controller.package.setMetaData (config.data.namespace, "default_adhoc", '_default_workspace')
             alias=self.controller.aliases[package]
+            modified = [ p for p in self.edit_popups if p.get_modified() ]
+            if modified and config.data.preferences['apply-edited-elements-on-save']:
+                for p in modified:
+                    p.apply_cb()
             try:
                 self.controller.save_package (alias=alias)
             except (OSError, IOError), e:
@@ -3833,6 +3837,10 @@ class AdveneGUI(object):
                 if not default:
                     self.controller.package.setMetaData (config.data.namespace, "default_adhoc", '_default_workspace')
             alias=self.controller.aliases[package]
+            modified = [ p for p in self.edit_popups if p.get_modified() ]
+            if modified and config.data.preferences['apply-edited-elements-on-save']:
+                for p in modified:
+                    p.apply_cb()
             try:
                 self.controller.save_package(name=filename, alias=alias)
             except (OSError, IOError), e:
@@ -4210,7 +4218,7 @@ class AdveneGUI(object):
                         'record-actions', 'popup-destination',
                         'timestamp-format', 'default-fps',
                         'abbreviation-mode', 'text-abbreviations', 'completion-mode',
-                        'prefer-wysiwyg', 'player-shortcuts-in-edit-windows' )
+                        'prefer-wysiwyg', 'player-shortcuts-in-edit-windows', 'apply-edited-elements-on-save' )
         # Direct options needing a restart to be taken into account.
         restart_needed_options = ('tts-engine', 'language')
 
@@ -4292,6 +4300,7 @@ class AdveneGUI(object):
                 (_("always save the current workspace"), 'always'),
                 (_("ask before saving the current workspace"), 'ask'),
                 )))
+        ew.add_checkbox(_("Auto-validation of edited elements"), 'apply-edited-elements-on-save', _("Automatically validate modified elements when saving the package."))
 
         ew.add_option(_("On package load,"), 'restore-default-workspace',
                       _("Do you wish to load the workspace saved with the package?"), odict((
