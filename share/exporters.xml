@@ -172,8 +172,8 @@
         <title xmlns="http://purl.org/dc/elements/1.1/">Spreadsheet (tab separated values)</title>
 	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">tsv</extension>
       </meta>
-      <content mime-type="text/tab-separated-values">&lt;span tal:omit-tag=&quot;&quot;&gt;Begin	End	Type	Content
-&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;&lt;span tal:replace=&quot;a/fragment/formatted/begin&quot; &gt;Begin&lt;/span&gt;	&lt;span tal:replace=&quot;a/fragment/formatted/end&quot; &gt;End&lt;/span&gt;	&lt;span tal:replace=&quot;a/type/title&quot;&gt;Title&lt;/span&gt;	&lt;span tal:replace=&quot;a/representation&quot;&gt;Content&lt;/span&gt;
+      <content encoding="utf-8" mime-type="text/tab-separated-values">&lt;span tal:omit-tag=&quot;&quot;&gt;Begin_ms	End_ms	Duration_ms	Begin	End	Type	Content
+&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;&lt;span tal:replace=&quot;a/fragment/begin&quot; &gt;Begin&lt;/span&gt;	&lt;span tal:replace=&quot;a/fragment/end&quot; &gt;End&lt;/span&gt;	&lt;span tal:replace=&quot;a/fragment/duration&quot; &gt;Duration&lt;/span&gt;	&lt;span tal:replace=&quot;a/fragment/formatted/begin&quot; &gt;Begin&lt;/span&gt;	&lt;span tal:replace=&quot;a/fragment/formatted/end&quot; &gt;End&lt;/span&gt;	&lt;span tal:replace=&quot;a/type/title&quot;&gt;Title&lt;/span&gt;	&lt;span tal:replace=&quot;a/representation&quot;&gt;Content&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;</content>
     </view>
     <view dc:creator="oaubert" dc:date="2006-01-26" id="index" viewable-class="package">

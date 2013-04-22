@@ -1,3 +1,9 @@
+* Timeline Inspector view: enable completion in editor
+
+* Table view: implement csv export
+
+* Implement an issue reporting/fixing tool (non-adjacents shots for instance, 0 or negative duration, etc)
+
 * Port to gtk3.0/gstreamer1.0: https://wiki.ubuntu.com/Novacut/GStreamer1.0#Using_GStreamer_1.0_from_Python
 
 * Allow to resize the SVG edit window
@@ -2650,6 +2656,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * factorize transcription.update_modified.update and timeline.quick_edit.get_parsed_content, and use it in editable table.
 
 * views.table: make content editable
+
+* TSV export view: add raw timecode columns
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
