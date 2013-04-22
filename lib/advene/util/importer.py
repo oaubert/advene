@@ -369,6 +369,7 @@ class GenericImporter(object):
           - type (can be an annotation-type instance or a type-id)
           - notify: if True, then each annotation creation will generate a AnnotationCreate signal
           - complete: boolean. Used to mark the completeness of the annotation.
+          - send: yield should return the created annotation
         """
         if self.package is None:
             self.package, self.defaulttype=self.init_package(annotationtypeid='imported', schemaid='imported-schema')
@@ -437,10 +438,12 @@ class GenericImporter(object):
             if 'notify' in d and d['notify'] and self.controller is not None:
                 print "Notifying", a
                 self.controller.notify('AnnotationCreate', annotation=a)
-            try:
-                source.send(a)
-            except StopIteration:
-                pass
+            if 'send' in d:
+                # We are expected to return a value in the yield call
+                try:
+                    source.send(a)
+                except StopIteration:
+                    pass
 
 class ExternalAppImporter(GenericImporter):
     """External application importer.
