@@ -176,6 +176,10 @@ class WebsiteExporter(object):
 
             original_url=url
 
+            if url.startswith('javascript:'):
+                self.url_translation[original_url]=original_url
+                continue
+
             m=snapshot_re.search(url)
             # Image translation. Add a .png extension.
             if m:
