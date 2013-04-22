@@ -590,7 +590,8 @@ class TimeLine(AdhocView):
         def finalize_callback():
             self.update_legend_widget(self.legend)
             self.legend.show_all()
-            self.fraction_event(widget=None, forced_window_width=self.layout.window.get_size()[0])
+            if self.layout.window is not None:
+                self.fraction_event(widget=None, forced_window_width=self.layout.window.get_size()[0])
             self.update_lock.release()
 
         self.populate(finalize_callback)
@@ -2801,7 +2802,10 @@ class TimeLine(AdhocView):
             # Reposition the next, prev buttons
             layout.foreach(move_nav, width)
 
-        layout.get_parent().get_parent().set_position (width + 60)
+        if layout.get_parent() is not None:
+            p = layout.get_parent().get_parent()
+            if p is not None:
+                layout.get_parent().get_parent().set_position (width + 60)
 
     def restrict_playing(self, at, widget=None):
         """Restrict playing to the given annotation-type.
