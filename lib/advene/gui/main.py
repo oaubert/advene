@@ -3656,10 +3656,6 @@ class AdveneGUI(object):
                 # Popup the evaluator window
                 self.popup_evaluator()
                 return True
-            elif event.keyval == gtk.keysyms.a:
-                # EditAccumulator popup
-                self.popup_edit_accumulator()
-                return True
             elif event.keyval == gtk.keysyms.k:
                 # Get the cursor in the quicksearch entry
                 self.quicksearch_entry.grab_focus()
