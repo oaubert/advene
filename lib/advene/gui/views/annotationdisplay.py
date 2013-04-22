@@ -30,6 +30,7 @@ from advene.gui.util import overlay_svg_as_pixbuf, get_pixmap_button
 from advene.model.annotation import Annotation
 from advene.model.schema import AnnotationType
 from advene.gui.widget import TimestampRepresentation
+from advene.gui.util.completer import Completer
 
 name="Annotation display plugin"
 
@@ -47,13 +48,16 @@ class AnnotationDisplay(AdhocView):
         self.contextual_actions = ()
         self.controller=controller
         self.annotation=annotation
+        self.completer = None
         self.widget=self.build_widget()
         self.refresh()
 
     def set_annotation(self, a=None):
         """This method takes either an annotation, a time value or None as parameter.
         """
-        self.annotation=a
+        self.annotation = a
+        if self.completer is not None:
+            self.completer.element = a
         self.refresh()
         return True
 
@@ -294,6 +298,13 @@ class AnnotationDisplay(AdhocView):
                 return True
             return False
         c.connect('key-press-event', handle_keypress)
+
+        # Hook the completer component
+        if hasattr(self.controller.package, '_indexer'):
+            self.completer=Completer(textview=c,
+                                     controller=self.controller,
+                                     element=self.annotation,
+                                     indexer=self.controller.package._indexer)
 
         image=self.label['imagecontents']=gtk.Image()
 
