@@ -837,6 +837,26 @@ class Evaluator:
 
         return vbox
 
+def center_on_mouse(w):
+    """Center the given gtk.Window on the mouse position.
+    """
+    root=w.get_toplevel().get_root_window()
+    (screen, x, y, mod) = root.get_display().get_pointer()
+    r = screen.get_monitor_geometry(screen.get_monitor_at_point(x, y))
+
+    # Let's try to center the window on the mouse as much as possible.
+    width, height = w.get_size()
+
+    posx = max(r.x, x - width / 2)
+    if posx + width > r.x + r.width:
+        posx = r.x + r.width - width
+
+    posy = max(r.y, y - height / 2)
+    if posy + height > r.y + r.height:
+        posy = r.y + r.height - height
+
+    w.move(posx, posy)
+
 def launch(globals_=None, locals_=None, historyfile=None):
     if globals_ is None:
         globals_={}
@@ -848,6 +868,7 @@ def launch(globals_=None, locals_=None, historyfile=None):
 
     ev.locals_['self']=ev
     window=ev.popup(embedded=False)
+    center_on_mouse(window)
     ev.locals_['w']=window
 
     window.connect('destroy', lambda e: gtk.main_quit())
