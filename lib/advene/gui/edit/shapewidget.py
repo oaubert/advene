@@ -2114,7 +2114,9 @@ def main():
         ed=ShapeEditor(background=i)
         ed.drawer.add_object(Image(name='background', uri=os.path.basename(bg)))
     win.add(ed.widget)
+
     ed.key_mapping[gtk.keysyms.q]=lambda w, e: gtk.main_quit()
+    ed.key_mapping[gtk.keysyms.d]=lambda w, e: ET.dump(ed.drawer.get_svg())
 
     win.show_all()
 
