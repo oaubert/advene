@@ -2183,6 +2183,11 @@ def main():
 
     ed.key_mapping[gtk.keysyms.q]=lambda w, e: gtk.main_quit()
     ed.key_mapping[gtk.keysyms.d]=lambda w, e: ET.dump(ed.drawer.get_svg())
+    try:
+        from evaluator import Evaluator
+        ed.key_mapping[gtk.keysyms.e]=lambda w, e: Evaluator(locals_={'ed': ed}).popup()
+    except ImportError:
+        pass
 
     win.show_all()
 
