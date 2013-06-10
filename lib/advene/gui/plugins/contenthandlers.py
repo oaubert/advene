@@ -61,23 +61,10 @@ class ZoneContentHandler (ContentHandler):
     def set_editable (self, boolean):
         self.editable = boolean
 
-    def callback(self, l):
-        if l[0][0] is None or l[1][0] is None:
-            self.shape = None
-            self.view.plot()
-            return
-
-        if self.shape is None:
-            r = Rectangle()
-            r.name = "Selection"
-            r.color = "green"
-            r.set_bounds(l)
-            self.view.add_object(r)
-            self.shape=r
-        else:
-            self.shape.set_bounds(l)
-            self.view.plot()
-        return
+    def callback(self, shape=None):
+        """Called upon shape creation.
+        """
+        self.shape = shape
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
