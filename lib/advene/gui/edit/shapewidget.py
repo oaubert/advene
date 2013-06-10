@@ -97,12 +97,11 @@ class Shape(object):
         self.tolerance = 6
         self.link=None
         self.link_label=None
-        if dimensions:
-            self.set_bounds(dimensions)
-        else:
+        if dimensions is None:
             # It is needed since set_bounds initializes all the
             # dimension-related attributes of the object.
-            self.set_bounds( ( (0, 0), (10, 10) ) )
+            dimensions = ( (0, 0), (10, 10) )
+        self.set_bounds(dimensions)
         # Extra SVG attributes to preserve (esp. tal: instructions)
         self.svg_attrib={}
 
