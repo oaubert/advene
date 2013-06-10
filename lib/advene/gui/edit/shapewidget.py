@@ -84,7 +84,9 @@ class Shape(object):
     # Tag used for the generation/parsing of SVG representation
     SVGTAG=''
 
-    def __init__(self, name=SHAPENAME, color="green"):
+    # If True, then the shape needs more than 2 control points to be
+    # created. This implies a different interaction.
+    MULTIPOINT = False
 
     def __init__(self, name=SHAPENAME, color="green", dimensions=None):
         self.name=name
@@ -904,6 +906,167 @@ class Line(Rectangle):
         else:
             yield e
 
+class Path(Shape):
+    """A path.
+
+    It is composed of multiple Lines.
+    """
+    SHAPENAME=_("Path")
+    SVGTAG='path'
+
+    MULTIPOINT = True
+    coords = []
+
+    def __init__(self, name=SHAPENAME, color="green", dimensions=None):
+        # List of tuples (x, y) composing the path in absolute form
+        self.path = []
+        super(Path, self).__init__(name, color, dimensions)
+
+    def clone(self, style=None):
+        c = Path(self.name, self.color)
+        c.path = [ list(p) for p in self.path ]
+        return c
+
+    @property
+    def pathlines(self):
+        """Returns the coordinates of the lines composing the path
+        """
+        return zip(self.path, self.path[1:] + self.path[:0])
+
+    def add_point(self, point):
+        if self.path:
+            self.path.append( list(point) )
+        else:
+            self.path = [ list(point), list(point) ]
+
+    def set_bounds(self, bounds):
+        # Modify the last point
+        if self.path:
+            self.path[-1] = list(bounds[1])
+            if self.path[-2][0] != bounds[0][0] or self.path[-2][1] != bounds[0][1]:
+                print "Strange error in Path.set_bounds:", self.path[-2], bounds[0]
+        else:
+            self.path = [ list(bounds[0]),
+                          list(bounds[1]) ]
+
+    def get_bounds(self):
+        return ( (min(x for x, y in self.path),
+                  min(y for x, y in self.path)),
+                 (max(x for x, y in self.path),
+                  max(y for x, y in self.path)) )
+
+    def render(self, pixmap, invert=False, partial=False):
+        col = pixmap.get_colormap().alloc_color(self.color)
+        gc = pixmap.new_gc(foreground=col, line_width=self.linewidth)
+        if invert:
+            gc.set_function(gtk.gdk.INVERT)
+        if partial:
+            # Only redraw last line
+            for (x1, y1), (x2, y2) in self.pathlines[-1:]:
+                pixmap.draw_line(gc,
+                                 x1,
+                                 y1,
+                                 x2,
+                                 y2)
+        else:
+            for (x1, y1), (x2, y2) in self.pathlines:
+                pixmap.draw_line(gc,
+                                 x1,
+                                 y1,
+                                 x2,
+                                 y2)
+        return
+
+    def translate(self, vector):
+        dx = int(vector[0])
+        dy = int(vector[1])
+        self.path = [ (x + dx, y + dy) for (x, y) in self.path ]
+        # Recompute other attributes
+        self.set_bounds( self.get_bounds() )
+
+    def copy_from(self, shape, style=False):
+        shape.path = list(self.path)
+        shape.set_bounds( self.get_bounds() )
+        if style:
+            shape.color = self.color
+            shape.linewidth = self.linewidth
+
+    def control_point(self, point):
+        """If on a control point, return its coordinates (x, y) and those of the other bound, else None
+        """
+        x, y = point[0], point[1]
+        retval = None
+        for i, (x1, y1) in enumerate(self.path):
+            if (abs(x - x1) <= self.tolerance
+                and abs(y - y1) <= self.tolerance):
+                # We simply fetch the previous point as alternate
+                # point.
+                x2, y2 = self.path[i - 1]
+                retval = [ [x2, y2], [x1, y1] ]
+                break
+        return retval
+
+    def __contains__(self, point):
+        x, y = point
+        # FIXME: find a more efficient way
+        for (x1, y1), (x2, y2) in self.pathlines:
+            if (x2 - x1) == 0:
+                if (y > min(y1, y2)
+                    and y < max(y1, y2)
+                    and abs(x - x1) < self.tolerance ):
+                    return True
+            else:
+                a = 1.0 * (y2 - y1) / (x2 - x1)
+                b = y1 - a * x1
+                if ( x > min(x1, x2)
+                     and x < max(x1, x2)
+                     and y > min(y1, y2)
+                     and y < max(y1, y2)
+                     and abs(y - (a * x + b)) < self.tolerance ):
+                    return True
+        return False
+
+    def edit_properties_widget(self):
+        """Build a widget to edit the shape properties.
+        """
+        vbox=super(Path, self).edit_properties_widget()
+
+        def label_widget(label, widget):
+            hb=gtk.HBox()
+            hb.add(gtk.Label(label))
+            hb.pack_start(widget, expand=False)
+            return hb
+
+        return vbox
+
+    def post_parse(self):
+        """After parsing?
+        """
+        pass
+
+    def get_svg(self, relative=False, size=None):
+       """Return a SVG representation of the path
+
+       <path d="M 10 10 L 90 90 L 90 110 L 12 120 Z" fill="transparent" stroke="black"/>
+       """
+       e = super(Path, self).get_svg(relative, size).next()
+       if e.tag == 'a' or e.tag == ET.QName(SVGNS, 'a'):
+           # It is a link. Use the child.
+           el=e[0]
+       else:
+           el=e
+       if relative:
+           #res[n]="%.03f%%" % (getattr(self, n) * 100.0 / dimensions[dimindex])
+
+           # FIXME: path coords are always unitless, hence we cannot
+           # use % values here.  A solution could be to use a group
+           # with appropriate translation/scaling, but it will
+           # complicate the parsing code.
+           el.attrib['d'] = "M "  + " L ".join( "%d %d" %  (x, y) for x, y in self.path ) + " Z"
+       else:
+           el.attrib['d'] = "M "  + " L ".join( "%d %d" %  (x, y) for x, y in self.path ) + " Z"
+       yield e
+
 class Circle(Rectangle):
     """A Circle shape.
 
@@ -1131,7 +1294,7 @@ class ShapeDrawer:
         # Marked area point[0, 1][x, y]
         self.selection = [[None, None], [None, None]]
         self.feedback_shape = None
-        self.shape_class = Rectangle
+        self.shape_class = Path
         self.default_color = 'green'
 
         self.resize_cursor = gtk.gdk.Cursor(gtk.gdk.BOTTOM_RIGHT_CORNER)
@@ -1331,18 +1494,32 @@ class ShapeDrawer:
     def button_press_event(self, widget, event):
         point = (int(event.x), int(event.y))
         if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-            # Double-click. Open properties for the shape.
-            sel = self.clicked_shape( point )
-            if sel is not None and sel.edit_properties():
+            if self.feedback_shape and self.feedback_shape.MULTIPOINT and self.mode == 'create':
+                # Validate the shape
+                r = self.feedback_shape.clone()
+                self.add_object(r)
+                self.feedback_shape = None
                 self.plot()
-                # Update liststore
-                i = self.find_object(sel)
-                if i is not None:
-                    self.objects.set_value(i, 1, sel.name)
+            else:
+                # Double-click. Open properties for the shape.
+                sel = self.clicked_shape( point )
+                if sel is not None and sel.edit_properties():
+                    self.plot()
+                    # Update liststore
+                    i = self.find_object(sel)
+                    if i is not None:
+                        self.objects.set_value(i, 1, sel.name)
             return True
         elif event.button == 1:
             self.selection[0][0], self.selection[0][1] = point
             self.selection[1][0], self.selection[1][1] = None, None
+
+            if self.feedback_shape and self.feedback_shape.MULTIPOINT and self.mode == 'create':
+                # Multipoint shape editing: add a  new point
+                self.feedback_shape.add_point( point )
+                self.plot()
+                return
+
             sel, c = self.controlled_shape( point )
             if sel is not None:
                 # Existing shape controlled
@@ -1359,10 +1536,14 @@ class ShapeDrawer:
                                                            dimensions=(point, point))
                     self.mode = "create"
         elif event.button == 3:
-            # Popup menu
-            sel=self.clicked_shape( point )
-            if sel is not None:
-                self.popup_menu(sel)
+            if self.feedback_shape and self.mode == 'create' and self.feedback_shape.MULTIPOINT:
+                self.feedback_shape.remove_last_point()
+                self.plot()
+            else:
+                # Popup menu
+                sel = self.clicked_shape( point )
+                if sel is not None:
+                    self.popup_menu(sel)
         return True
 
     # End of selection
@@ -1373,6 +1554,16 @@ class ShapeDrawer:
         retval = ( self.selection[0][:], self.selection[1][:])
         if event.button == 1:
             if self.feedback_shape is not None:
+                if self.feedback_shape.MULTIPOINT and self.mode == 'create':
+                    # Multipoint shape: we do not reset it now, we
+                    # simply will validate the point upon next press
+                    return
+
+                if self.mode == "create":
+                    # Create the shape and add it to the stack
+                    r = self.feedback_shape
+                    self.add_object(r)
+
                 self.feedback_shape = None
                 self.plot()
 
@@ -1389,9 +1580,11 @@ class ShapeDrawer:
             y = event.y
             state = event.state
 
-        if state & gtk.gdk.BUTTON1_MASK and self.feedback_shape is not None:
+        if self.feedback_shape is not None:
             if self.selection[1][0] is not None:
+                # Remove previous feedback shape (with old dimensions)
                 self.feedback_shape.render(self.pixmap, invert=True)
+
             self.selection[1][0], self.selection[1][1] = int(x), int(y)
 
             if self.mode == "translate":
@@ -1400,9 +1593,13 @@ class ShapeDrawer:
                 self.selection[0][0] = x
                 self.selection[0][1] = y
             elif self.mode == "resize" or self.mode == "create":
+                # FIXME: if multipoint, specify resize (and which point)
                 self.feedback_shape.set_bounds( self.selection )
 
-            self.feedback_shape.render(self.pixmap, invert=True)
+            if self.feedback_shape.MULTIPOINT and self.mode == 'create':
+                self.feedback_shape.render(self.pixmap, invert=True, partial=True)
+            else:
+                self.feedback_shape.render(self.pixmap, invert=True)
             self.draw_drawable()
         else:
             # Check for control points
@@ -1582,10 +1779,9 @@ class ShapeEditor(object):
     """
     def __init__(self, background=None, pixmap_dir=None):
         if isinstance(background, gtk.Image):
-            background=background.get_pixbuf()
-        self.drawer=ShapeDrawer(callback=self.callback,
-                                background=background)
-        self.shapes = [ Rectangle, Ellipse, Line, Text ]
+            background = background.get_pixbuf()
+        self.drawer = ShapeDrawer(background=background)
+        self.shapes = [ Rectangle, Ellipse, Line, Text, Path ]
 
         self.colors = COLORS
         self.drawer.default_color = self.colors[0]
@@ -1595,6 +1791,7 @@ class ShapeEditor(object):
             gtk.keysyms.r: Rectangle,
             gtk.keysyms.t: Text,
             gtk.keysyms.c: Ellipse,
+            gtk.keysyms.p: Path,
             #gtk.keysyms.i: Image,
             }
 
@@ -1604,6 +1801,7 @@ class ShapeEditor(object):
             Text: 'shape_text.png',
             Ellipse: 'shape_ellipse.png',
             Image: 'shape_image.png',
+            Path: 'shape_path.png',
             }
         self.widget=self.build_widget(pixmap_dir)
         self.widget.connect('key-press-event', self.key_press_event)
@@ -1767,7 +1965,7 @@ class ShapeEditor(object):
 
         self.shape_icon=gtk.ToolButton()
         self.shape_icon.set_shape=set_shape.__get__(self.shape_icon)
-        self.shape_icon.set_shape(Rectangle)
+        self.shape_icon.set_shape(self.drawer.shape_class)
         self.shape_icon.connect('clicked', display_shape_menu)
         tb.insert(self.shape_icon, -1)
 
