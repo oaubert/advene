@@ -1304,7 +1304,7 @@ class ShapeDrawer:
     @ivar default_color: the default color for created shapes
     @type default_color: string
 
-    @ivar mode: the current editing mode ("create", "resize" or "translate")
+    @ivar mode: the current editing mode ("", "create", "resize" or "translate")
     @type mode: string
 
     @ivar pixmap: the edited pixmap
@@ -1346,7 +1346,7 @@ class ShapeDrawer:
         self._svg_dimensions = None
 
         # mode: "create", "resize" or "translate"
-        self.mode = "resize"
+        self.mode = ""
 
         self.pixmap = None
 
@@ -1605,6 +1605,9 @@ class ShapeDrawer:
         y = int(event.y)
 
         retval = ( self.selection[0][:], self.selection[1][:])
+        if self.mode in ('resize', 'translate'):
+            self.mode = ''
+
         if event.button == 1:
             if self.feedback_shape is not None:
                 if self.feedback_shape.MULTIPOINT and self.mode == 'create':
@@ -1646,7 +1649,6 @@ class ShapeDrawer:
                 self.selection[0][0] = x
                 self.selection[0][1] = y
             elif self.mode == "resize" or self.mode == "create":
-                # FIXME: if multipoint, specify resize (and which point)
                 self.feedback_shape.set_bounds( self.selection )
 
             if self.feedback_shape.MULTIPOINT and self.mode == 'create':
