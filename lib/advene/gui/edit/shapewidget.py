@@ -1016,6 +1016,24 @@ class Path(Shape):
             shape.color = self.color
             shape.linewidth = self.linewidth
 
+    def validate(self):
+        """Validation method
+
+        It is called upon shape finalization. It checks that the last
+        point is not present twice (since we can validate through
+        double-click). If so, it cleans the path.
+        """
+        if self.path:
+            while True:
+                last = self.path[-1]
+                prev = self.path[-2]
+                if (abs(last[0] - prev[0]) <= self.tolerance
+                    and abs(last[1] - prev[1]) <= self.tolerance):
+                    # Two close points: remove the last one
+                    self.path = self.path[:-1]
+                else:
+                    break
+
     def control_point(self, point):
         """If on a control point, return its coordinates (x, y) and those of the other bound, else None
         """
@@ -1524,8 +1542,8 @@ class ShapeDrawer:
         if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
             if self.feedback_shape and self.feedback_shape.MULTIPOINT and self.mode == 'create':
                 # Validate the shape
-                r = self.feedback_shape.clone()
-                self.add_object(r)
+                self.feedback_shape.validate()
+                self.add_object(self.feedback_shape)
                 self.feedback_shape = None
                 self.plot()
             else:
