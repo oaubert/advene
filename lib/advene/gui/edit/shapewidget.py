@@ -1965,7 +1965,6 @@ class ShapeEditor(object):
         column = gtk.TreeViewColumn('Name', renderer,
                                     text=1)
         self.treeview.append_column(column)
-        self.treeview.connect('row-activated', self.remove_item)
         self.treeview.connect('button-press-event', self.tree_view_button_cb)
 
         def set_shape(tb, shape):
