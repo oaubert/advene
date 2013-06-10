@@ -1517,7 +1517,7 @@ class AdveneController(object):
             # Re-encode ddata
             d.content.data="\n".join( [ "%s=%s" % (k, unicode(v).replace('\n', '%0A')) for (k, v) in ddata.iteritems() if k != '_all' ] )
         elif mtd == 'application/x-advene-structured':
-            d.content.data=d.content.data + '\nmerged_content="' + cgi.urllib.quote(s.content.data)+'"'
+            d.content.data=d.content.data + '\nmerged_content="' + urllib.quote(s.content.data)+'"'
         self.notify("AnnotationMerge", annotation=d,comment="Merge annotations", batch=batch_id)
         self.delete_element(s, batch=batch_id)
         self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations", batch=batch_id)
@@ -1882,7 +1882,7 @@ class AdveneController(object):
         # Parse tag_colors attribute.
         self.package.setMetaData (config.data.namespace,
                                   "tag_colors",
-                                  cgi.urllib.urlencode(self.package._tag_colors))
+                                  urllib.urlencode(self.package._tag_colors))
 
         # Check if we know the stream duration. If so, save it as
         # package metadata
