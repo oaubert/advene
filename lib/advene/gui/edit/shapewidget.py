@@ -962,6 +962,10 @@ class Path(Shape):
         else:
             self.path = [ list(point), list(point) ]
 
+    def remove_controlled_point(self):
+        del self.path[self.controlled_point_index]
+        self.controlled_point_index = -1
+
     def set_bounds(self, bounds):
         # Modify the controlled point
         if self.path:
@@ -1563,13 +1567,21 @@ class ShapeDrawer:
                     self.mode = "create"
         elif event.button == 3:
             if self.feedback_shape and self.mode == 'create' and self.feedback_shape.MULTIPOINT:
-                self.feedback_shape.remove_last_point()
+                self.feedback_shape.remove_controlled_point()
                 self.plot()
             else:
-                # Popup menu
-                sel = self.clicked_shape( point )
-                if sel is not None:
-                    self.popup_menu(sel)
+                if event.state & gtk.gdk.SHIFT_MASK:
+                    sel, c = self.controlled_shape( point )
+                    if sel is not None:
+                        # Right click on a control point - remove it
+                        sel.set_controlled_point(point=c)
+                        sel.remove_controlled_point()
+                        self.plot()
+                else:
+                    # Popup menu
+                    sel = self.clicked_shape( point )
+                    if sel is not None:
+                        self.popup_menu(sel)
         return True
 
     # End of selection
