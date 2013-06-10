@@ -1005,8 +1005,6 @@ class Path(Shape):
         dx = int(vector[0])
         dy = int(vector[1])
         self.path = [ (x + dx, y + dy) for (x, y) in self.path ]
-        # Recompute other attributes
-        self.set_bounds( self.get_bounds() )
 
     def copy_from(self, shape, style=False):
         shape.path = list(self.path)
