@@ -1080,7 +1080,6 @@ class TypeExplorer (gtk.ScrolledWindow):
         self.TMimeType = dialog.list_selector_widget(
             members=[ ('text/plain', _("Plain text content")),
                               ('application/x-advene-structured', _("Simple-structured content")),
-                              ('application/x-advene-zone', _("Rectangular zone content")),
                               ('image/svg+xml', _("SVG graphics content")),
                               ])
         # a remplacer par la selection de type Mime
@@ -1202,7 +1201,6 @@ class TypeExplorer (gtk.ScrolledWindow):
     def setMimeType(self, mimetype):
         store, i = dialog.generate_list_model( elements = [ ('text/plain', _("Plain text content")),
                               ('application/x-advene-structured', _("Simple-structured content")),
-                              ('application/x-advene-zone', _("Rectangular zone content")),
                               ('image/svg+xml', _("SVG graphics content")),
                               ],active_element=mimetype)
         self.TMimeType.set_model(store)

@@ -105,7 +105,6 @@ class CreateElementPopup(object):
             elif self.type_ in (AnnotationType, RelationType):
                 type_list = [ ViewType('text/plain', _("Plain text content")),
                               ViewType('application/x-advene-structured', _("Simple-structured content")),
-                              ViewType('application/x-advene-zone', _("Rectangular zone content")),
                               ViewType('image/svg+xml', _("SVG graphics content")),
                               ]
             elif self.type_ == View:
