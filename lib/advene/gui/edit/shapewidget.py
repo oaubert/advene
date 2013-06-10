@@ -413,7 +413,7 @@ class Shape(object):
             for n in ('linewidth', 'textsize', 'arrowwidth'):
                 if n in edit.widgets:
                     setattr(self, n, int(edit.widgets[n].get_value()))
-            for n in ('filled', 'arrow'):
+            for n in ('filled', 'arrow', 'closed'):
                 if n in edit.widgets:
                     setattr(self, n, edit.widgets[n].get_active())
             d.destroy()
@@ -921,6 +921,7 @@ class Path(Shape):
         self.path = []
         super(Path, self).__init__(name, color, dimensions)
         self.controlled_point_index = -1
+        self.closed = False
 
     def clone(self, style=None):
         c = Path(self.name, self.color)
@@ -931,11 +932,14 @@ class Path(Shape):
     def pathlines(self):
         """Returns the coordinates of the lines composing the path
         """
-        return zip(self.path, self.path[1:] + self.path[:0])
+        if self.closed:
+            return zip(self.path, self.path[1:] + self.path[:1])
+        else:
+            return zip(self.path, self.path[1:])
 
     def set_controlled_point(self, index=None, point=None):
         """Specify the index of the controlled point.
-        
+
         If index is not given, then we will try to infer it from the
         point information.
 
@@ -1051,7 +1055,6 @@ class Path(Shape):
 
     def __contains__(self, point):
         x, y = point
-        # FIXME: find a more efficient way
         for (x1, y1), (x2, y2) in self.pathlines:
             if (x2 - x1) == 0:
                 if (y > min(y1, y2)
@@ -1074,23 +1077,58 @@ class Path(Shape):
         """
         vbox=super(Path, self).edit_properties_widget()
 
-        def label_widget(label, widget):
-            hb=gtk.HBox()
-            hb.add(gtk.Label(label))
-            hb.pack_start(widget, expand=False)
-            return hb
+        closed_path = gtk.CheckButton(_("Close path"))
+        closed_path.set_active(self.closed)
+        vbox.pack_start(closed_path)
+        vbox.reorder_child(closed_path, 0)
+        vbox.widgets['closed']=closed_path
 
         return vbox
 
     def post_parse(self):
-        """After parsing?
+        """Populate path
         """
-        pass
+        self.path = []
+        data = self.svg_attrib.get('d', "").split()
+        # We reverse the list so that we can .pop() data out of it
+        # (instead of .pop(0))
+        data.reverse()
+
+        if not data or data.pop() != 'M':
+            # We need at least a starting point and a first line
+            print "SVG Path parsing error - wrong initial path element"
+            return
+
+        try:
+            self.path.append( (int(data.pop()), int(data.pop())) )
+            while data:
+                command = data.pop()
+                if command in ('l', 'h', 'v'):
+                    # Relative coordinates
+                    last = self.path[-1]
+                else:
+                    last = (0, 0)
+                if command.lower() == 'l':
+                    # Line: next 2 items are coordinates
+                    self.path.append( (last[0] + int(data.pop()), last[1] + int(data.pop())) )
+                elif command.lower() == 'h':
+                    self.path.append( (last[0] + int(data.pop()), last[1]) )
+                elif command.lower() == 'v':
+                    self.path.append( (last[0], last[1] + int(data.pop())) )
+                elif command.lower() == 'z':
+                    # Closed path
+                    self.closed = True
+                else:
+                    print "SVG Path parsing error - unknown command:", command
+        except (IndexError, ValueError), e:
+            print "SVG Path parsing error - invalid conversion", unicode(e)
 
     def get_svg(self, relative=False, size=None):
        """Return a SVG representation of the path
 
        <path d="M 10 10 L 90 90 L 90 110 L 12 120 Z" fill="transparent" stroke="black"/>
+
+       Z is optional (used for closed paths).
        """
        e = super(Path, self).get_svg(relative, size).next()
        if e.tag == 'a' or e.tag == ET.QName(SVGNS, 'a'):
@@ -1105,9 +1143,9 @@ class Path(Shape):
            # use % values here.  A solution could be to use a group
            # with appropriate translation/scaling, but it will
            # complicate the parsing code.
-           el.attrib['d'] = "M "  + " L ".join( "%d %d" %  (x, y) for x, y in self.path ) + " Z"
+           el.attrib['d'] = "M "  + " L ".join( "%d %d" %  (x, y) for x, y in self.path ) + (" Z" if self.closed else "")
        else:
-           el.attrib['d'] = "M "  + " L ".join( "%d %d" %  (x, y) for x, y in self.path ) + " Z"
+           el.attrib['d'] = "M "  + " L ".join( "%d %d" %  (x, y) for x, y in self.path ) + (" Z" if self.closed else "")
        yield e
 
 class Circle(Rectangle):
