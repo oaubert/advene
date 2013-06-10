@@ -921,6 +921,7 @@ class Path(Shape):
         # List of tuples (x, y) composing the path in absolute form
         self.path = []
         super(Path, self).__init__(name, color, dimensions)
+        self.controlled_point_index = -1
 
     def clone(self, style=None):
         c = Path(self.name, self.color)
@@ -933,6 +934,28 @@ class Path(Shape):
         """
         return zip(self.path, self.path[1:] + self.path[:0])
 
+    def set_controlled_point(self, index=None, point=None):
+        """Specify the index of the controlled point.
+        
+        If index is not given, then we will try to infer it from the
+        point information.
+
+        @param index: index of the point in self.path
+        @type index: integer (default -1)
+        @param point: coordinates of the controlled point
+        @type point: tuple (x, y)
+        """
+        if index is None:
+            # Default will be last point in any case
+            index = -1
+
+            # Try to infer index from given point
+            for i, p in enumerate(self.path):
+                if p[0] == point[0] and p[1] == point[1]:
+                    index = i
+                    break
+        self.controlled_point_index = index
+
     def add_point(self, point):
         if self.path:
             self.path.append( list(point) )
@@ -940,11 +963,9 @@ class Path(Shape):
             self.path = [ list(point), list(point) ]
 
     def set_bounds(self, bounds):
-        # Modify the last point
+        # Modify the controlled point
         if self.path:
-            self.path[-1] = list(bounds[1])
-            if self.path[-2][0] != bounds[0][0] or self.path[-2][1] != bounds[0][1]:
-                print "Strange error in Path.set_bounds:", self.path[-2], bounds[0]
+            self.path[self.controlled_point_index] = list(bounds[1])
         else:
             self.path = [ list(bounds[0]),
                           list(bounds[1]) ]
@@ -1004,6 +1025,9 @@ class Path(Shape):
                 x2, y2 = self.path[i - 1]
                 retval = [ [x2, y2], [x1, y1] ]
                 break
+        # Reset controlled_point_index: it quite possibly does not
+        # mean anything now
+        self.controlled_point_index = -1
         return retval
 
     def __contains__(self, point):
@@ -1525,6 +1549,8 @@ class ShapeDrawer:
                 # Existing shape controlled
                 self.feedback_shape = sel
                 self.selection = c
+                if self.feedback_shape.MULTIPOINT:
+                    self.feedback_shape.set_controlled_point(point=c[1])
                 self.mode = "resize"
             else:
                 sel = self.clicked_shape( point )
