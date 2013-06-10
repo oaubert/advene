@@ -1340,8 +1340,8 @@ class ShapeDrawer:
         self.shape_class = Path
         self.default_color = 'green'
 
-        self.resize_cursor = gtk.gdk.Cursor(gtk.gdk.BOTTOM_RIGHT_CORNER)
-        self.inside_cursor = gtk.gdk.Cursor(gtk.gdk.HAND2)
+        self.resize_cursor = gtk.gdk.Cursor(gtk.gdk.HAND2)
+        self.inside_cursor = gtk.gdk.Cursor(gtk.gdk.FLEUR)
 
         self._svg_dimensions = None
 
