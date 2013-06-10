@@ -1095,6 +1095,8 @@ class ShapeDrawer:
     @ivar feedback_shape: the currently edited shape, displayed as feedback
     @type feedback_shape: Shape
     @ivar shape_class: the default shape class to be created
+    @ivar default_color: the default color for created shapes
+    @type default_color: string
 
     @ivar mode: the current editing mode ("create", "resize" or "translate")
     @type mode: string
@@ -1130,6 +1132,7 @@ class ShapeDrawer:
         self.selection = [[None, None], [None, None]]
         self.feedback_shape = None
         self.shape_class = Rectangle
+        self.default_color = 'green'
 
         self.resize_cursor = gtk.gdk.Cursor(gtk.gdk.BOTTOM_RIGHT_CORNER)
         self.inside_cursor = gtk.gdk.Cursor(gtk.gdk.HAND2)
@@ -1586,7 +1589,7 @@ class ShapeEditor(object):
         self.shapes = [ Rectangle, Ellipse, Line, Text ]
 
         self.colors = COLORS
-        self.defaultcolor = self.colors[0]
+        self.drawer.default_color = self.colors[0]
 
         self.key_mapping={
             gtk.keysyms.l: Line,
@@ -1790,7 +1793,7 @@ class ShapeEditor(object):
 
         def select_color(button, color):
             self.color_icon.set_color(color)
-            self.defaultcolor=color
+            self.drawer.default_color=color
             button.get_toplevel().destroy()
             return True
 
