@@ -1515,7 +1515,7 @@ class ShapeDrawer:
                 # Update liststore
                 i = self.find_object(o)
                 if i is not None:
-                    self.objects.set_value(i, 1, o.name)
+                    self.objects.set_value(i, 1, o.name or o.SHAPENAME)
 
         def dump_svg(i, o):
             s=o.get_svg()
@@ -1551,7 +1551,7 @@ class ShapeDrawer:
                     # Update liststore
                     i = self.find_object(sel)
                     if i is not None:
-                        self.objects.set_value(i, 1, sel.name)
+                        self.objects.set_value(i, 1, sel.name or self.SHAPENAME)
             return True
         elif event.button == 1:
             self.selection[0][0], self.selection[0][1] = point
@@ -1916,7 +1916,7 @@ class ShapeEditor(object):
                     # Update liststore
                     i = self.drawer.find_object(node)
                     if i is not None:
-                        self.drawer.objects.set_value(i, 1, node.name)
+                        self.drawer.objects.set_value(i, 1, node.name or node.SHAPENAME)
                 retval=True
             else:
                 retval=False
