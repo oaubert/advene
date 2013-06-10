@@ -1083,8 +1083,8 @@ class ShapeDrawer:
     SVG. If it should be present in the output, it must be added
     (through add_object) as an Image object with the name 'background'.
 
-    @ivar callback: method called when the button is released.
-    @type callback: method taking a rectangle as parameter
+    @ivar callback: method called when a shape is created
+    @type callback: method taking an object (shape) as parameter
 
     @ivar background: the canvas background
     @type background: gtk.Image
@@ -1161,10 +1161,10 @@ class ShapeDrawer:
             self.set_background(background, reset_dimensions=True)
         self.widget.set_size_request(self.canvaswidth, self.canvasheight)
 
-    def default_callback(self, rectangle):
+    def default_callback(self, shape):
         """Default callback.
         """
-        print "Got selection ", str(rectangle)
+        print "Created shape ", str(shape)
 
     def set_background(self, pixbuf, reset_dimensions=False):
         """Set a new background pixbuf.
@@ -1190,6 +1190,7 @@ class ShapeDrawer:
         """Add an object (shape) to the object list.
         """
         self.objects.append( (o, o.name) )
+        self.callback(o)
         self.plot()
 
     def find_object(self, o):
@@ -1378,8 +1379,6 @@ class ShapeDrawer:
             self.selection[1][0] = None
             self.selection[0][0] = None
 
-            if self.mode == "create":
-                self.callback( retval )
 
     # Draw rectangle during mouse movement
     def motion_notify_event(self, widget, event):
@@ -1620,16 +1619,6 @@ class ShapeEditor(object):
             cl(widget, event)
             return True
         return False
-
-    def callback(self, l):
-        if l[0][0] is None or l[1][0] is None:
-            return
-        r = self.drawer.shape_class()
-        r.name = r.SHAPENAME + str(l)
-        r.color = self.defaultcolor
-        r.set_bounds(l)
-        self.drawer.add_object(r)
-        return
 
     def remove_item(self, treeview, path, column):
         m=treeview.get_model()
