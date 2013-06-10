@@ -85,6 +85,8 @@ class Shape(object):
     SVGTAG=''
 
     def __init__(self, name=SHAPENAME, color="green"):
+
+    def __init__(self, name=SHAPENAME, color="green", dimensions=None):
         self.name=name
         self.color=color
         self.linewidth=2
@@ -93,7 +95,12 @@ class Shape(object):
         self.tolerance = 6
         self.link=None
         self.link_label=None
-        self.set_bounds( ( (0, 0), (10, 10) ) )
+        if dimensions:
+            self.set_bounds(dimensions)
+        else:
+            # It is needed since set_bounds initializes all the
+            # dimension-related attributes of the object.
+            self.set_bounds( ( (0, 0), (10, 10) ) )
         # Extra SVG attributes to preserve (esp. tal: instructions)
         self.svg_attrib={}
 
@@ -507,8 +514,8 @@ class Text(Rectangle):
     coords=( ('x', 0),
              ('y', 1) )
 
-    def __init__(self, name=SHAPENAME, color="green"):
-        super(Text, self).__init__(name, color)
+    def __init__(self, name=SHAPENAME, color="green", dimensions=None):
+        super(Text, self).__init__(name, color, dimensions)
         self.linewidth=1
         self.filled=True
         self.text='Some text'
@@ -657,8 +664,8 @@ class Image(Rectangle):
              ('width', 0),
              ('height', 1) )
 
-    def __init__(self, name=SHAPENAME, color="green", uri=''):
-        super(Image, self).__init__(name, color)
+    def __init__(self, name=SHAPENAME, color="green", dimensions=None, uri=''):
+        super(Image, self).__init__(name, color, dimensions)
         self.uri=uri
 
     def render(self, pixmap, invert=False):
@@ -748,8 +755,8 @@ class Line(Rectangle):
              ('x2', 0),
              ('y2', 1) )
 
-    def __init__(self, name=SHAPENAME, color="green", arrow=False):
-        super(Line, self).__init__(name, color)
+    def __init__(self, name=SHAPENAME, color="green", dimensions=None, arrow=False):
+        super(Line, self).__init__(name, color, dimensions)
         self.arrow=arrow
         self.arrowwidth=10
 
@@ -1344,8 +1351,8 @@ class ShapeDrawer:
                     self.feedback_shape = sel
                     self.mode = "translate"
                 else:
-                    self.feedback_shape = self.shape_class()
-                    self.feedback_shape.set_bounds( ( self.selection[0], self.selection[0]) )
+                    self.feedback_shape = self.shape_class(color=self.default_color,
+                                                           dimensions=(point, point))
                     self.mode = "create"
         elif event.button == 3:
             # Popup menu
