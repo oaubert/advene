@@ -12,8 +12,8 @@ framework, through the python-gstreamer module (>= 0.10).
 You will need the following python packages (the package names are from
 Debian, they may slightly vary on other distributions) :
 
-python >= 2.5
-python-gtk2 (>=2.12)
+python >= 2.7
+python-gtk2 (>=2.24)
 python-cherrypy3 (>=3.0.0) [for convenience, a copy of cherrypy may be included in
 this Advene distribution]
 python-simpletal (>=3.12) [for convenience, a copy of simpletal may be
@@ -37,11 +37,11 @@ distribution.
 
 If you want to run Advene from sources on win32, you should install in this order (note the version numbers) :
 
-Gtk/win32 v. >= 2.12 : http://gladewin32.sourceforge.net/ (runtime environment)
+Python  >=  v. 2.7 : http://python.org/
 
-Python  >=  v. 2.5 : http://python.org/
-
-PyGtk for python2.5: http://www.pygtk.org/
+Gstreamer SDK from http://gstreamer.com/ (choosing complete install to
+get python bindings). It will install both Gstreamer and gtk (with
+python bindings).
 
 CherryPy: http://download.cherrypy.org/cherrypy/ [for
 convenience, a copy of cherrypy is included in this Advene
@@ -52,7 +52,10 @@ http://www.owlfish.com/software/simpleTAL/download.html [for
 convenience, a copy of simpletal is included in this Advene
 distribution]
 
-Optionally, python-opencv
+win32process from http://pywin32.sf.net/
+
+Optionally, 
+python-opencv
 
 ** Mac OS X version
 
