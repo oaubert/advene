@@ -267,17 +267,18 @@ class SVGContentHandler (ContentHandler):
             self.view = ShapeEditor(background=i, pixmap_dir=config.data.advenefile('pixmaps'))
 
             def snapshot_update_cb(context, target):
-                if abs(context.globals['position'] - self.parent.fragment.begin) <= 1000/config.data.preferences['default-fps']:
+                frag = self.parent.fragment
+                pos = frag.begin + long(self.view.background_adj.get_value() * frag.duration)
+                if abs(context.globals['position'] - pos) <= 1000/config.data.preferences['default-fps']:
                     # Refresh image
-                    i=image_from_position(self.controller, self.parent.fragment.begin, epsilon=1000/config.data.preferences['default-fps'])
+                    i=image_from_position(self.controller, pos, epsilon=1000/config.data.preferences['default-fps'])
                     self.view.set_background(i)
                 return True
             self.rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
                                                                            method=snapshot_update_cb))
 
             def annotation_update_cb(context, target):
-                i=image_from_position(self.controller, self.parent.fragment.begin, epsilon=1000/config.data.preferences['default-fps'])
-                self.view.set_background(i)
+                self.view.background_adj.set_value(0)
                 return True
             self.rules.append(self.controller.event_handler.internal_rule (event='AnnotationEditEnd',
                                                                            method=annotation_update_cb))
@@ -323,6 +324,24 @@ class SVGContentHandler (ContentHandler):
         b = get_pixmap_toolbutton('xml.png', edit_xml)
         b.set_tooltip_text(_("Edit XML"))
         self.view.toolbar.insert(b, 0)
+
+        def update_background(adj):
+            frag = self.parent.fragment
+            pos = frag.begin + long(adj.get_value() * frag.duration)
+            self.controller.update_snapshot(pos)
+            i = image_from_position(self.controller,
+                                    pos,
+                                    epsilon=1000/config.data.preferences['default-fps'])
+            self.view.set_background(i)
+            return True
+
+        self.view.background_adj = gtk.Adjustment(value=0, lower=0, upper=1.0, step_incr=0.1, page_incr=0.2)
+        slider = gtk.HScale(self.view.background_adj)
+        ti = gtk.ToolItem()
+        ti.add(slider)
+        ti.set_expand(True)
+        self.view.toolbar.insert(ti, -1)
+        self.view.background_adj.connect('value-changed', update_background)
 
         if config.data.preferences['prefer-wysiwyg']:
             edit_svg()
