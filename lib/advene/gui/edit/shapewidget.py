@@ -1025,7 +1025,7 @@ class Path(Shape):
         double-click). If so, it cleans the path.
         """
         if self.path:
-            while True:
+            while len(self.path) >= 2:
                 last = self.path[-1]
                 prev = self.path[-2]
                 if (abs(last[0] - prev[0]) <= self.tolerance
