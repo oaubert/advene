@@ -1,3 +1,5 @@
+* Shapewidget: allow to resize background image (then adapt to the widget size)
+
 * Table view: implement csv export
 
 * Implement an issue reporting/fixing tool (non-adjacents shots for instance, 0 or negative duration, etc)
@@ -58,7 +60,7 @@
 
 * MacOSX: use Cmd modifier equiv. as control
 
-* Import youtube annotations ( http://www.google.com/reviews/y/read2?video_id=YOUR_VIDEO_ID_HERE )
+* Import youtube annotations ( was http://www.google.com/reviews/y/read2?video_id=YOUR_VIDEO_ID_HERE )
 
 * gstreamer pipeline (videomixer) to generate 1-pixel-column sum-up of video:
 gst-launch -e filesrc location=/data/video/Bataille.avi ! decodebin ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=320,pixel-aspect-ratio=\(fraction\)1/1 ! videocrop left=158 right=160 ! progressreport update-freq=1 ! pngenc snapshot=false ! multifilesink location=%05d.png
@@ -2658,6 +2660,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * TSV export view: add raw timecode columns
 
 * Timeline Inspector view: enable completion in editor
+
+* shapewidget: allow to switch between begin/end images (or add a slider to select inside the annotation)
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
