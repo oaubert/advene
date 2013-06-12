@@ -43,6 +43,10 @@ Gstreamer SDK from http://gstreamer.com/ (choosing complete install to
 get python bindings). It will install both Gstreamer and gtk (with
 python bindings).
 
+win32process from http://pywin32.sf.net/
+
+Optionally, 
+python-opencv
 CherryPy: http://download.cherrypy.org/cherrypy/ [for
 convenience, a copy of cherrypy is included in this Advene
 distribution]
@@ -52,10 +56,6 @@ http://www.owlfish.com/software/simpleTAL/download.html [for
 convenience, a copy of simpletal is included in this Advene
 distribution]
 
-win32process from http://pywin32.sf.net/
-
-Optionally, 
-python-opencv
 
 ** Mac OS X version
 
