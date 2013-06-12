@@ -25,6 +25,7 @@ import xml.parsers.expat
 import StringIO
 
 import advene.core.config as config
+import advene.util.helper as helper
 from advene.gui.edit.elements import ContentHandler, TextContentHandler
 from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle, ShapeEditor
 from advene.gui.util import image_from_position, dialog, decode_drop_parameters, get_pixmap_toolbutton
@@ -337,6 +338,7 @@ class SVGContentHandler (ContentHandler):
 
         self.view.background_adj = gtk.Adjustment(value=0, lower=0, upper=1.0, step_incr=0.1, page_incr=0.2)
         slider = gtk.HScale(self.view.background_adj)
+        slider.connect("format-value", lambda s, v: helper.format_time(self.parent.fragment.begin + long(v * self.parent.fragment.duration)))
         ti = gtk.ToolItem()
         ti.add(slider)
         ti.set_expand(True)
