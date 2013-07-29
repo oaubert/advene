@@ -23,7 +23,8 @@ from gettext import gettext as _
 
 import gtk
 import gobject
-import cgi
+import urlparse
+import urllib
 import StringIO
 
 import advene.core.config as config
@@ -276,7 +277,7 @@ def encode_drop_parameters(**kw):
             kw[k]=kw[k].encode('utf8')
         if not isinstance(kw[k], basestring):
             kw[k]=str(kw[k])
-    return cgi.urllib.urlencode(kw).encode('utf8')
+    return urllib.urlencode(kw).encode('utf8')
 
 def decode_drop_parameters(data):
     """Decode the drop parameters.
@@ -284,7 +285,7 @@ def decode_drop_parameters(data):
     @return: a dict.
     """
     return dict( (k, unicode(v, 'utf8'))
-                 for (k, v) in cgi.parse_qsl(unicode(data, 'utf8').encode('utf8')) )
+                 for (k, v) in urlparse.parse_qsl(unicode(data, 'utf8').encode('utf8')) )
 
 def get_target_types(el):
     """Return DND target types for element.

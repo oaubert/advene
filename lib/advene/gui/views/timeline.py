@@ -19,7 +19,7 @@
 import sys
 import re
 import operator
-import cgi
+import urllib
 import struct
 import gobject
 import gtk
@@ -3043,7 +3043,7 @@ class TimeLine(AdhocView):
         def drag_sent(widget, context, selection, targetType, eventTime, name):
             if targetType == config.data.target_type['adhoc-view']:
                 selection.set(selection.target, 8,
-                              cgi.urllib.urlencode( {
+                              urllib.urlencode( {
                             'name': name,
                             'master': self.controller.gui.get_adhoc_view_instance_id(self),
                             } ).encode('utf8'))

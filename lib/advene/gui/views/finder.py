@@ -23,7 +23,7 @@ from gettext import gettext as _
 
 import gtk
 import gobject
-import cgi
+import urllib
 
 import advene.core.config as config
 from advene.gui.views.tree import DetailedTreeModel
@@ -389,7 +389,7 @@ class ViewColumn(FinderColumn):
                 if helper.get_view_type(self.element) != 'adhoc':
                     return False
                 selection.set(selection.target, 8,
-                              cgi.urllib.urlencode( {
+                              urllib.urlencode( {
                             'id': self.element.id,
                             } ).encode('utf8'))
                 return True
