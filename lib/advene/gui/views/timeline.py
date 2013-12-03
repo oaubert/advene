@@ -3492,7 +3492,7 @@ class TimeLine(AdhocView):
             if not b.get_active():
                 # If we deactivate the locked looping feature, then also
                 # disable the player loop toggle.
-                self.controller.gui.loop_toggle_button.set_active(False)
+                self.controller.gui.player_toolbar.buttons['loop'].set_active(False)
             return True
 
         self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
