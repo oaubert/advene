@@ -92,6 +92,7 @@ class Shape(object):
         self.name=name
         self.color=color
         self.linewidth=2
+        self.opacity = 1.0
         self.filled = False
         # Pixel tolerance for control point selection
         self.tolerance = 6
@@ -180,6 +181,7 @@ class Shape(object):
         s=cls(name=element.attrib.get('name', cls.SHAPENAME))
         s.filled=( element.attrib.get('fill', 'none') != 'none' )
         s.color=element.attrib.get('stroke', None)
+        s.opacity = element.attrib.get('opacity', 1.0)
         style=element.attrib.get('style', '')
         m=stroke_width_re.search(style)
         if m:
@@ -217,6 +219,8 @@ class Shape(object):
             attrib['fill']=self.color
         else:
             attrib['fill']='none'
+        if self.opacity != 1.0:
+            attrib['opacity'] = str(self.opacity)
         attrib['stroke']=self.color
         attrib['style']="stroke-width:%d" % self.linewidth
         attrib['name']=self.name
@@ -301,10 +305,10 @@ class Shape(object):
         """
         vbox=gtk.VBox()
 
-        def label_widget(label, widget):
+        def label_widget(label, widget, expand=False):
             hb=gtk.HBox()
             hb.add(gtk.Label(label))
-            hb.pack_start(widget, expand=False)
+            hb.pack_start(widget, expand=expand)
             return hb
 
         # Name
@@ -334,16 +338,24 @@ class Shape(object):
         vbox.pack_start(label_widget(_("Color"), colorsel), expand=False)
 
         # Linewidth
-        linewidthsel = gtk.SpinButton()
+        linewidthsel = gtk.HScale()
         linewidthsel.set_range(1, 15)
         linewidthsel.set_increments(1, 1)
         linewidthsel.set_value(self.linewidth)
-        vbox.pack_start(label_widget(_("Linewidth"), linewidthsel), expand=False)
+        vbox.pack_start(label_widget(_("Linewidth"), linewidthsel, True), expand=True)
 
         # Filled
         filledsel = gtk.ToggleButton()
         filledsel.set_active(self.filled)
         vbox.pack_start(label_widget(_("Filled"), filledsel), expand=False)
+
+        # Linewidth
+        opacitysel = gtk.HScale()
+        opacitysel.set_range(0, 1)
+        opacitysel.set_digits(1)
+        opacitysel.set_increments(.1, .2)
+        opacitysel.set_value(self.opacity)
+        vbox.pack_start(label_widget(_("Opacity"), opacitysel, True), expand=True)
 
         # svg_attrib
         store=gtk.ListStore(str, str)
@@ -371,6 +383,7 @@ class Shape(object):
         vbox.widgets = {
             'name': namesel,
             'color': colorsel,
+            'opacity': opacitysel,
             'linewidth': linewidthsel,
             'filled': filledsel,
             'link': linksel,
@@ -413,6 +426,9 @@ class Shape(object):
             for n in ('linewidth', 'textsize', 'arrowwidth'):
                 if n in edit.widgets:
                     setattr(self, n, int(edit.widgets[n].get_value()))
+            for n in ('opacity', ):
+                if n in edit.widgets:
+                    setattr(self, n, float(edit.widgets[n].get_value()))
             for n in ('filled', 'arrow', 'closed'):
                 if n in edit.widgets:
                     setattr(self, n, edit.widgets[n].get_active())
