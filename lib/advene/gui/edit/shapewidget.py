@@ -791,6 +791,8 @@ class Line(Rectangle):
         gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
         if invert:
             gc.set_function(gtk.gdk.INVERT)
+        if self.filled:
+            gc.set_fill(gtk.gdk.SOLID)
         pixmap.draw_line(gc,
                   self.x1,
                   self.y1,
