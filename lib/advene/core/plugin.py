@@ -57,10 +57,10 @@ class PluginCollection(list):
                 try:
                     p = Plugin(d, fname, self.prefix)
                     self.append(p)
-                except (PluginException, ImportError, OSError):
+                except (PluginException, OSError):
                     # Silently ignore non-plugin files
                     pass
-                except (SyntaxError, AttributeError), e:
+                except (ImportError, SyntaxError, AttributeError), e:
                     print "!!!! Cannot load %s plugin" % fname
                     print unicode(e)
 
