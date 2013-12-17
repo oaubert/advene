@@ -1931,7 +1931,7 @@ class AdveneController(object):
             if at.mimetype.endswith('/x-advene-structured'):
                 at._fieldnames=helper.common_fieldnames(at.annotations)
             else:
-                at._fieldnames=[]
+                at._fieldnames=set()
 
         p.imagecache.clear ()
         mediafile = self.get_default_media()

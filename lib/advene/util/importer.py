@@ -270,7 +270,7 @@ class GenericImporter(object):
         except AttributeError:
             # The package does not have a _color_palette
             pass
-        at._fieldnames = {}
+        at._fieldnames = set()
         schema.annotationTypes.append(at)
         self.update_statistics('annotation-type')
         return at

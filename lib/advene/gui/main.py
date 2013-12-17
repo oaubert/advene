@@ -2014,7 +2014,7 @@ class AdveneGUI(object):
                         at.mimetype = 'text/plain'
                         at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
                         at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
-                        at._fieldnames = []
+                        at._fieldnames = set()
                         sc.annotationTypes.append(at)
                         self.controller.notify('AnnotationTypeCreate', annotationtype=at)
                 c.create_annotation(self.edited_annotation_begin, at,
@@ -3346,7 +3346,7 @@ class AdveneGUI(object):
                 at.mimetype=mimetype_selector.get_current_element()
                 at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
                 at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
-                at._fieldnames=[]
+                at._fieldnames=set()
                 sc.annotationTypes.append(at)
                 self.controller.notify('AnnotationTypeCreate', annotationtype=at)
         else:
@@ -3607,7 +3607,7 @@ class AdveneGUI(object):
                 at.mimetype = "text/plain"
                 at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
                 at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
-                at._fieldnames=[]
+                at._fieldnames=set()
                 sc.annotationTypes.append(at)
                 self.controller.notify('AnnotationTypeCreate', annotationtype=at)
             if not isinstance(at, AnnotationType):
