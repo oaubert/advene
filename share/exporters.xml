@@ -638,6 +638,110 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
 
   &lt;/div&gt;
 &lt;/div&gt;
-</content></view>
+</content></view><view dc:creator="oaubert" dc:date="2013-12-03" id="metadataplayer" viewable-class="*"><meta><title xmlns="http://purl.org/dc/elements/1.1/">metadataplayer</title></meta><content encoding="utf-8" mime-type="text/html">{
+    &quot;views&quot;: [],
+    &quot;tags&quot;: [],
+    &quot;lists&quot;: [],
+    &quot;medias&quot;: [
+        {
+            &quot;origin&quot;: &quot;0&quot;,
+            &quot;url&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/meta/advenetool/mediafile/urlquote&quot;&gt;movie&lt;/span&gt;&quot;,
+            &quot;http://advene.liris.cnrs.fr/ns/frame_of_reference/ms&quot;: &quot;o=0&quot;,
+            &quot;meta&quot;: {
+                &quot;dc:contributor&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/author&quot;&gt;author&lt;/span&gt;&quot;,
+                &quot;dc:created&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/date&quot;&gt;date&lt;/span&gt;&quot;,
+                &quot;dc:duration&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/meta/advenetool/duration&quot;&gt;duration&lt;/span&gt;,
+                &quot;dc:creator&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/author&quot;&gt;author&lt;/span&gt;&quot;,
+                &quot;dc:created.contents&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/date&quot;&gt;date&lt;/span&gt;&quot;,
+                &quot;dc:title&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/meta/advenetool/mediafile/urlquote&quot;&gt;movie&lt;/span&gt;&quot;,
+                &quot;dc:creator.contents&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/author&quot;&gt;author&lt;/span&gt;&quot;,
+                &quot;dc:modified&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/date&quot;&gt;date&lt;/span&gt;&quot;,
+                &quot;dc:description&quot;: &quot;&quot;
+            },
+            &quot;id&quot;: &quot;m1&quot;,
+            &quot;unit&quot;: &quot;ms&quot;
+        }
+    ],
+    &quot;meta&quot;: {
+        &quot;dc:contributor&quot;: &quot;admin&quot;,
+        &quot;dc:created&quot;: &quot;2011-02-14T15:15:52.602502&quot;,
+        &quot;dc:creator&quot;: &quot;admin&quot;,
+        &quot;main_media&quot;: {
+            &quot;id-ref&quot;: &quot;package1&quot;
+        },
+        &quot;dc:description&quot;: &quot;&quot;,
+        &quot;dc:title&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/title&quot;&gt;title&lt;/span&gt;&quot;,
+        &quot;id&quot;: &quot;package1&quot;,
+         &quot;dc:modified&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/date&quot;&gt;date&lt;/span&gt;&quot;
+    },
+   &quot;annotations&quot;: [
+&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot; &gt;
+        {
+            &quot;content&quot;: {
+                &quot;mimetype&quot;: &quot;application/x-ldt-structured&quot;,
+                &quot;description&quot;: &quot;&quot;,
+                &quot;img&quot;: {
+                    &quot;src&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/snapshot_url&quot;&gt;url&lt;/span&gt;&quot;
+                },
+                &quot;title&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/representation&quot;&gt;data&lt;/span&gt;&quot;,
+                &quot;polemics&quot;: [],
+                &quot;audio&quot;: {
+                    &quot;mimetype&quot;: &quot;audio/mp3&quot;,
+                    &quot;src&quot;: &quot;&quot;,
+                    &quot;href&quot;: null
+                }
+            },
+           &quot;begin&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/fragment/begin&quot;&gt;begin&lt;/span&gt;,
+           &quot;end&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/fragment/end&quot;&gt;end&lt;/span&gt;,
+            &quot;meta&quot;: {
+                &quot;dc:contributor&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/author&quot;&gt;author&lt;/span&gt;&quot;,
+                &quot;id-ref&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/type/id&quot;&gt;type&lt;/span&gt;&quot;,
+                &quot;dc:created&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/date&quot;&gt;date&lt;/span&gt;&quot;,
+                &quot;dc:modified&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/date&quot;&gt;date&lt;/span&gt;&quot;,
+                &quot;dc:creator&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/author&quot;&gt;author&lt;/span&gt;&quot;
+            },
+            &quot;tags&quot;: null,
+            &quot;color&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/color&quot;&gt;color&lt;/span&gt;&quot;,
+            &quot;media&quot;: &quot;m1&quot;,
+            &quot;id&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/id&quot;&gt;aid&lt;/span&gt;&quot;
+         }&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/a/end&quot;&gt;,&lt;/span&gt;
+&lt;/span&gt;
+],
+   &quot;annotation-types&quot;: [
+&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;at here/annotationTypes/sorted&quot; &gt;
+        {
+            &quot;dc:contributor&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;at/author&quot;&gt;author&lt;/span&gt;&quot;,
+            &quot;dc:creator&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;at/author&quot;&gt;author&lt;/span&gt;&quot;,
+            &quot;dc:title&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;at/title&quot;&gt;title&lt;/span&gt;&quot;,
+            &quot;id&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;at/id&quot;&gt;id&lt;/span&gt;&quot;,
+            &quot;dc:created&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;at/date&quot;&gt;date&lt;/span&gt;&quot;,
+            &quot;dc:modified&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;at/date&quot;&gt;date&lt;/span&gt;&quot;,
+            &quot;dc:description&quot;: &quot;&quot;
+        }&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/at/end&quot;&gt;,&lt;/span&gt;
+    &lt;/span&gt;
+    ]
+ }
+</content></view><view dc:creator="oaubert" dc:date="2013-12-06" id="_default_workspace" viewable-class="package"><meta><title xmlns="http://purl.org/dc/elements/1.1/">Saved workspace</title></meta><content encoding="utf-8" mime-type="application/x-advene-workspace-view">&lt;workspace xmlns:advenetool=&quot;http://experience.univ-lyon1.fr/advene/ns/advenetool&quot;&gt;
+  &lt;layout height=&quot;1012&quot; width=&quot;1725&quot; x=&quot;0&quot; y=&quot;32&quot;&gt;
+    &lt;pane id=&quot;west&quot; position=&quot;66&quot; /&gt;
+    &lt;pane id=&quot;east&quot; position=&quot;320&quot; /&gt;
+    &lt;pane id=&quot;fareast&quot; position=&quot;965&quot; /&gt;
+    &lt;pane id=&quot;south&quot; position=&quot;315&quot; /&gt;
+  &lt;/layout&gt;&lt;advenetool:adhoc destination=&quot;south&quot; id=&quot;timeline&quot; title=&quot;Timeline&quot;&gt;
+    &lt;advenetool:option name=&quot;display-all-relations&quot; value=&quot;False&quot; /&gt;
+    &lt;advenetool:option name=&quot;pane-position&quot; value=&quot;811&quot; /&gt;
+    &lt;advenetool:option name=&quot;goto-on-click&quot; value=&quot;True&quot; /&gt;
+    &lt;advenetool:option name=&quot;autoscroll&quot; value=&quot;2&quot; /&gt;
+    &lt;advenetool:option name=&quot;highlight&quot; value=&quot;False&quot; /&gt;
+    &lt;advenetool:option name=&quot;display-relations&quot; value=&quot;True&quot; /&gt;
+    &lt;advenetool:option name=&quot;display-relation-type&quot; value=&quot;True&quot; /&gt;
+    &lt;advenetool:option name=&quot;display-relation-content&quot; value=&quot;True&quot; /&gt;
+    &lt;advenetool:argument name=&quot;minimum&quot; value=&quot;0&quot; /&gt;
+    &lt;advenetool:argument name=&quot;maximum&quot; value=&quot;10000&quot; /&gt;
+    &lt;advenetool:argument name=&quot;position&quot; value=&quot;0&quot; /&gt;
+    &lt;advenetool:argument name=&quot;zoom&quot; value=&quot;1.42862154687&quot; /&gt;
+  &lt;/advenetool:adhoc&gt;&lt;advenetool:adhoc destination=&quot;west&quot; id=&quot;editionhistory&quot; title=&quot;Edition History&quot; /&gt;
+  &lt;advenetool:adhoc destination=&quot;east&quot; id=&quot;finder&quot; title=&quot;Package finder&quot; /&gt;
+&lt;/workspace&gt;</content></view>
   </views>
 </package>
