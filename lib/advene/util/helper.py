@@ -281,7 +281,10 @@ def format_time (val = 0):
         ret = '%d.%03d' % (s, ms)
     else:
         f = f.replace('''%.S''', '''%S.''' + '%03d' % ms).replace('''%fS''', '''%Sf''' + '%02d' % long(ms * config.data.preferences['default-fps'] / 1000))
-        ret = time.strftime(f, time.gmtime(s))
+        try:
+            ret = time.strftime(f, time.gmtime(s))
+        except ValueError:
+            ret = '--:error:--'
 
     if dummy:
         return ret.replace('0', '-')
