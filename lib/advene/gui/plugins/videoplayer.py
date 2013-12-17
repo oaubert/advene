@@ -118,7 +118,7 @@ class VideoPlayer(AdhocView):
             arguments = [ ('offset', self.offset) ]
         return self.options, arguments
 
-    def select_file(self, button=None):
+    def select_file(self, button=None, *p):
         mp=[ d for d in config.data.path['moviepath'].split(os.path.pathsep) if d != '_' ]
         if mp:
             default=mp[0]
