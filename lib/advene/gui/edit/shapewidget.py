@@ -165,6 +165,10 @@ class Shape(object):
         """
         return False
 
+    def __unicode__(self):
+        return "%s {%s}" % (self.SHAPENAME,
+                            ",".join("%s: %d" % (c[0], getattr(self, c[0])) for c in self.coords))
+
     def parse_svg(cls, element, context):
         """Parse a SVG representation.
 
