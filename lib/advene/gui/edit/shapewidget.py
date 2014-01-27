@@ -1612,6 +1612,7 @@ class ShapeDrawer:
                     i = self.find_object(sel)
                     if i is not None:
                         self.objects.set_value(i, 1, sel.name or self.SHAPENAME)
+                self.feedback_shape = None
             return True
         elif event.button == 1:
             self.selection[0][0], self.selection[0][1] = point
