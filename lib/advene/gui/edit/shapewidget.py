@@ -1923,7 +1923,7 @@ class ShapeEditor(object):
         self.widget.connect('key-press-event', self.key_press_event)
 
     def key_press_event(self, widget, event):
-        cl=self.key_mapping.get(event.keyval, None)
+        cl = self.key_mapping.get(event.keyval, None)
         if isinstance(cl, types.TypeType) and issubclass(cl, Shape):
             # Select the appropriate shape
             self.shape_icon.set_shape(cl)
@@ -1931,6 +1931,11 @@ class ShapeEditor(object):
             return True
         elif callable(cl):
             cl(widget, event)
+            return True
+        elif event.keyval == gtk.keysyms.Delete:
+            s = self.get_selected_node(self.treeview)
+            if s is not None:
+                self.drawer.remove_object(s)
             return True
         return False
 
