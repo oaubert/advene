@@ -185,7 +185,7 @@ class Shape(object):
         s=cls(name=element.attrib.get('name', cls.SHAPENAME))
         s.filled=( element.attrib.get('fill', 'none') != 'none' )
         s.color=element.attrib.get('stroke', None)
-        s.opacity = element.attrib.get('opacity', 1.0)
+        s.opacity = float(element.attrib.get('opacity', 1.0))
         style=element.attrib.get('style', '')
         m=stroke_width_re.search(style)
         if m:
@@ -223,7 +223,7 @@ class Shape(object):
             attrib['fill']=self.color
         else:
             attrib['fill']='none'
-        if self.opacity != 1.0:
+        if self.opacity != 1.0  or  "opacity" in attrib:
             attrib['opacity'] = str(self.opacity)
         attrib['stroke']=self.color
         attrib['style']="stroke-width:%d" % self.linewidth
