@@ -333,6 +333,7 @@ def parse_time(s):
         m = float_regexp.match(s)
         if m:
             t = m.groupdict()
+            t['sep'] = ''
         else:
             m=time_regexp.match(s)
             if m:
