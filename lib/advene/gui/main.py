@@ -3525,14 +3525,7 @@ class AdveneGUI(object):
         """
         if label is None:
             label = _("<b>Annotation statistics</b>\n\n")
-        msg =  label
-        msg += "%d annotations\n" % len(annotations)
-        if annotations:
-            msg += "Min duration : %s\n" % helper.format_time(min( a.fragment.duration for a in annotations))
-            msg += "Max duration : %s\n" % helper.format_time(max( a.fragment.duration for a in annotations))
-            msg += "Mean duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in annotations) / len(annotations))
-            msg += "Total duration : %s\n" % helper.format_time(sum( a.fragment.duration for a in annotations))
-        dialog.message_dialog(msg)
+        dialog.message_dialog(label + helper.get_annotations_statistics(annotations))
         return True
 
     def display_textfile(self, path, title=None, viewname=None):

@@ -584,6 +584,19 @@ Description:
         }
     return m
 
+def get_annotations_statistics(annotations):
+    data = [ format_element_name('annotation', len(annotations)) ]
+    if annotations:
+        data.extend( "%s : %s" % (label, value)
+                     for label, value in (
+                             (_("Min duration"), format_time(min( a.fragment.duration for a in annotations))),
+                             (_("Max duration"), format_time(max( a.fragment.duration for a in annotations))),
+                             (_("Mean duration"), format_time(sum( a.fragment.duration for a in annotations) / len(annotations))),
+                             (_("Total duration"), format_time(sum( a.fragment.duration for a in annotations)))
+                     )
+                 )
+    return "\n".join(data)
+
 element_declinations={
     'schema': (_('schema'), _('schemas')),
     'annotation': (_('annotation'), _('annotations')),
