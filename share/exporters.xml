@@ -667,7 +667,7 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
         &quot;dc:created&quot;: &quot;2011-02-14T15:15:52.602502&quot;,
         &quot;dc:creator&quot;: &quot;admin&quot;,
         &quot;main_media&quot;: {
-            &quot;id-ref&quot;: &quot;package1&quot;
+            &quot;id-ref&quot;: &quot;m1&quot;
         },
         &quot;dc:description&quot;: &quot;&quot;,
         &quot;dc:title&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/title&quot;&gt;title&lt;/span&gt;&quot;,
