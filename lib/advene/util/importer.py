@@ -630,7 +630,7 @@ class TextImporter(GenericImporter):
     def __init__(self, regexp=None, encoding=None, **kw):
         super(TextImporter, self).__init__(**kw)
         if encoding is None:
-            encoding = 'latin1'
+            encoding = 'utf-8'
         self.encoding = encoding
         self.relative = False
         self.first_timestamp = None
@@ -792,7 +792,7 @@ class LsDVDImporter(GenericImporter):
     """
     name = _("lsdvd importer")
 
-    def __init__(self, regexp=None, encoding='latin1', **kw):
+    def __init__(self, regexp=None, encoding='utf-8', **kw):
         super(LsDVDImporter, self).__init__(**kw)
         lsdvd=helper.find_in_path('lsdvd')
         if lsdvd is None:
