@@ -679,7 +679,7 @@ class TextImporter(GenericImporter):
             if not self.progress(f.tell() / filesize):
                 break
             l = unicode(l.strip(), self.encoding)
-            data = whitespace_re.split(l, 1)
+            data = whitespace_re.split(l, 2)
 
             if not data:
                 # Error, cannot do anything with it.
@@ -703,7 +703,7 @@ class TextImporter(GenericImporter):
                 begin = begin * 1000
 
             # We have only a begin time.
-            if len(data) == 1:
+            if len(data) == 2:
                 if self.timestampmode == 'both':
                     self.log("Cannot find end timestamp: ", l)
                     continue
