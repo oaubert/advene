@@ -1787,21 +1787,16 @@ register(IRIDataImporter)
 
 if __name__ == "__main__":
     USAGE = "%prog filter_name input_file [options] output_file"
-    if len(sys.argv) < 2:
-        print """Syntax: %s
-filter_name can be "auto" for autodetection.
-Available filters:
-  * %s
-        """ % (USAGE.replace('%prog', sys.argv[0]),
-               "\n  * ".join(i.name for i in IMPORTERS))
-        sys.exit(1)
-
-    filtername = sys.argv[1]
-
+    if sys.argv[1:]:
+        filtername = sys.argv[1]
+    else:
+        filtername = None
     params = sys.argv[2:]
     sys.argv[2:] = []
 
     import advene.core.config as config
+    import advene.core.controller as controller
+    import advene
 
     from advene.model.package import Package
     from advene.model.annotation import Annotation
@@ -1810,6 +1805,34 @@ Available filters:
 
     import advene.util.helper as helper
     import advene.util.handyxml as handyxml
+
+    import StringIO
+
+    log = StringIO.StringIO()
+    saved, sys.stdout = sys.stdout, log
+    # Load plugins
+    c = controller.AdveneController()
+    try:
+        app_plugins = c.load_plugins(os.path.join(os.path.dirname(advene.__file__), 'plugins'),
+                                     prefix="advene_app_plugins")
+    except OSError:
+        pass
+
+    try:
+        user_plugins = c.load_plugins(config.data.advenefile('plugins', 'settings'),
+                                      prefix="advene_user_plugins")
+    except OSError:
+        pass
+    sys.stdout = saved
+
+    if filtername is None or len(params) == 0:
+        print """Syntax: %s
+filter_name can be "auto" for autodetection.
+Available filters:
+  * %s
+        """ % (USAGE.replace('%prog', sys.argv[0]),
+               "\n  * ".join(i.name for i in IMPORTERS))
+        sys.exit(0)
 
     if filtername == 'auto':
         i = get_importer(params[0])
@@ -1839,5 +1862,4 @@ Available filters:
     else:
         p.serialize()
     print i.statistics_formatted()
-else:
-    import_advene_modules()
+    sys.exit(0)
