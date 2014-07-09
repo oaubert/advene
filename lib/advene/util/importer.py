@@ -1827,11 +1827,17 @@ Available filters:
         i.optionparser.print_help()
         sys.exit(0)
     inputfile = args[0]
-    outputfile = args[1]
+    try:
+        outputfile = args[1]
+    except IndexError:
+        outputfile = ''
     # (for .sub conversion for instance, --fps, --offset)
     print "Converting %s to %s using %s" % (inputfile, outputfile, i.name)
     p=i.process_file(inputfile)
-    p.save(outputfile)
+    if outputfile:
+        p.save(outputfile)
+    else:
+        p.serialize()
     print i.statistics_formatted()
 else:
     import_advene_modules()
