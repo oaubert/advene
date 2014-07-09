@@ -65,17 +65,19 @@ import subprocess
 import signal
 import threading
 
-import advene.core.config as config
-
-from advene.model.package import Package
-from advene.model.annotation import Annotation
-from advene.model.schema import AnnotationType, Schema
-from advene.model.fragment import MillisecondFragment
-
-import advene.util.helper as helper
-import advene.util.handyxml as handyxml
 import xml.dom
 import xml.etree.ElementTree as ET
+
+if __name__ != '__main__':
+   import advene.core.config as config
+
+   from advene.model.package import Package
+   from advene.model.annotation import Annotation
+   from advene.model.schema import AnnotationType, Schema
+   from advene.model.fragment import MillisecondFragment
+
+   import advene.util.helper as helper
+   import advene.util.handyxml as handyxml
 
 IMPORTERS=[]
 
@@ -156,7 +158,8 @@ class GenericImporter(object):
         # The convention for OptionParser is to have the "dest"
         # attribute of the same name as the Importer attribute
         # (e.g. here offset)
-        self.optionparser = optparse.OptionParser(usage=_("Usage: %prog [options] source-file destination-file"))
+        self.optionparser = optparse.OptionParser(usage=_("Usage: %prog [options] source-file destination-file"),
+                                                  epilog=self.name)
         self.optionparser.add_option("-o", "--offset",
                                      action="store", type="int", dest="offset", default=0,
                                      help=_("Specify the offset in ms"))
@@ -182,9 +185,11 @@ class GenericImporter(object):
             return True
 
     def set_options(self, options):
-        for k, v in options.iteritems():
+        for k in (n
+                  for n in dir(options)
+                  if not n.startswith('_')):
             if hasattr(self, k):
-                setattr(self, k, v)
+                setattr(self, k, getattr(options, k))
 
     def process_options(self, source):
         (options, args) = self.optionparser.parse_args(args=source)
@@ -1781,24 +1786,52 @@ class IRIDataImporter(GenericImporter):
 register(IRIDataImporter)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print "Should provide a file name and a package name"
+    USAGE = "%prog filter_name input_file [options] output_file"
+    if len(sys.argv) < 2:
+        print """Syntax: %s
+filter_name can be "auto" for autodetection.
+Available filters:
+  * %s
+        """ % (USAGE.replace('%prog', sys.argv[0]),
+               "\n  * ".join(i.name for i in IMPORTERS))
         sys.exit(1)
 
-    fname=sys.argv[1]
-    pname=sys.argv[2]
+    filtername = sys.argv[1]
 
-    i = get_importer(fname)
+    params = sys.argv[2:]
+    sys.argv[2:] = []
+
+    import advene.core.config as config
+
+    from advene.model.package import Package
+    from advene.model.annotation import Annotation
+    from advene.model.schema import AnnotationType, Schema
+    from advene.model.fragment import MillisecondFragment
+
+    import advene.util.helper as helper
+    import advene.util.handyxml as handyxml
+
+    if filtername == 'auto':
+        i = get_importer(params[0])
+    else:
+        cl = [ f for f in IMPORTERS if f.name.startswith(filtername) ][0]
+        i = cl()
+
     if i is None:
-        print "No importer for %s" % fname
+        print "No importer for %s" % sys.argv[2]
         sys.exit(1)
 
-    # FIXME: i.process_options()
-    i.process_options(sys.argv[1:])
+    i.optionparser.set_usage(USAGE)
+    args = i.process_options(params)
+    if not args:
+        i.optionparser.print_help()
+        sys.exit(0)
+    inputfile = args[0]
+    outputfile = args[1]
     # (for .sub conversion for instance, --fps, --offset)
-    print "Converting %s to %s using %s" % (fname, pname, i.name)
-    p=i.process_file(fname)
-    p.save(pname)
+    print "Converting %s to %s using %s" % (inputfile, outputfile, i.name)
+    p=i.process_file(inputfile)
+    p.save(outputfile)
     print i.statistics_formatted()
-
-
+else:
+    import_advene_modules()
