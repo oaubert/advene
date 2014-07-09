@@ -1842,7 +1842,8 @@ Available filters:
         if len(cl) == 1:
             i = cl[0]()
         elif len(cl) > 1:
-            print "Too many possibilities:\n%s" % (f.name for f in cl)
+            print "Too many possibilities:\n%s" % "\n".join(f.name for f in cl)
+            sys.exit(1)
 
     if i is None:
         print "No matching importer for %s" % filtername
