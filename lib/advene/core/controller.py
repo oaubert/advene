@@ -2484,9 +2484,9 @@ class AdveneController(object):
         return v
 
     def get_export_filters(self):
-        importer_package=Package(uri=config.data.advenefile('exporters.xml'))
+        exporter_package=Package(uri=config.data.advenefile('exporters.xml'))
         return sorted( ( v
-                         for v in importer_package.views
+                         for v in exporter_package.views
                          if v.id != 'index' ), key=lambda v: v.title )
 
     def apply_export_filter(self, element, filter, filename):
