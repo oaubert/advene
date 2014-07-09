@@ -1831,17 +1831,21 @@ filter_name can be "auto" for autodetection.
 Available filters:
   * %s
         """ % (USAGE.replace('%prog', sys.argv[0]),
-               "\n  * ".join(i.name for i in IMPORTERS))
+               "\n  * ".join(i.name for i in controller.advene.util.importer.IMPORTERS))
         sys.exit(0)
 
     if filtername == 'auto':
         i = get_importer(params[0])
     else:
-        cl = [ f for f in IMPORTERS if f.name.startswith(filtername) ][0]
-        i = cl()
+        i = None
+        cl = [ f for f in controller.advene.util.importer.IMPORTERS if f.name.startswith(filtername) ]
+        if len(cl) == 1:
+            i = cl[0]()
+        elif len(cl) > 1:
+            print "Too many possibilities:\n%s" % (f.name for f in cl)
 
     if i is None:
-        print "No importer for %s" % sys.argv[2]
+        print "No matching importer for %s" % filtername
         sys.exit(1)
 
     i.optionparser.set_usage(USAGE)
