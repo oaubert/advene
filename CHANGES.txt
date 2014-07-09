@@ -1,3 +1,28 @@
+advene (1.0.1) unstable; urgency=medium
+
+  * Source-only release. Various bug fixes. The official source repository
+    is now http://github.com/oaubert/advene/
+
+  * Compressed (gzipped) text files can be directly imported.
+  
+  * Option to specify time unit (s or ms) in text import.
+  
+  * SVG editor
+  
+    * can edit paths (polylines)
+    
+    * slider to change background image
+  
+    * slider to change opacity value
+
+  * Export filters
+  
+    * TurTLe export filter
+  
+    * Metadataplayer export filter
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Wed, 09 Jul 2014 17:13:48 +0200
+
 advene (1.0) unstable; urgency=low
 
   * This release marks the end of a series that has been stable for a long
