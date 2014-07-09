@@ -164,7 +164,7 @@ if __name__ == '__main__':
                 slicer.set_property(name, long(value))
         player.props.video_sink=bin
     else:
-        player = gst.parse_launch('videotestsrc ! clockoverlay ! ffmpegcolorspace ! videoscale ! slicebuffer %s ! ffmpegcolorspace ! xvimagesink' % " ".join(params))
+        player = gst.parse_launch('autovideosrc ! ffmpegcolorspace ! videoscale ! slicebuffer %s ! ffmpegcolorspace ! xvimagesink' % " ".join(params))
         bin = player
 
     pipe=player
