@@ -1,5 +1,5 @@
 <package dc:creator="oaubert" dc:date="2004-06-15" xmlns="http://experience.univ-lyon1.fr/advene/ns" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <meta><default_adhoc xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">_default_workspace</default_adhoc>
+  <meta>
     <tag_colors xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"></tag_colors>
     <duration xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"/>
     <title xmlns="http://purl.org/dc/elements/1.1/">Export package</title>
@@ -679,11 +679,11 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
         {
             &quot;content&quot;: {
                 &quot;mimetype&quot;: &quot;application/x-ldt-structured&quot;,
-                &quot;description&quot;: &quot;&quot;,
+                &quot;description&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/content/parsed/body/json | a/representation/json&quot;&gt;data&lt;/span&gt;,
                 &quot;img&quot;: {
                     &quot;src&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/snapshot_url&quot;&gt;url&lt;/span&gt;&quot;
                 },
-                &quot;title&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/representation&quot;&gt;data&lt;/span&gt;&quot;,
+                &quot;title&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/representation/json&quot;&gt;data&lt;/span&gt;,
                 &quot;polemics&quot;: [],
                 &quot;audio&quot;: {
                     &quot;mimetype&quot;: &quot;audio/mp3&quot;,
@@ -721,27 +721,6 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
     &lt;/span&gt;
     ]
  }
-</content></view><view dc:creator="oaubert" dc:date="2013-12-06" id="_default_workspace" viewable-class="package"><meta><title xmlns="http://purl.org/dc/elements/1.1/">Saved workspace</title></meta><content encoding="utf-8" mime-type="application/x-advene-workspace-view">&lt;workspace xmlns:advenetool=&quot;http://experience.univ-lyon1.fr/advene/ns/advenetool&quot;&gt;
-  &lt;layout height=&quot;1012&quot; width=&quot;1725&quot; x=&quot;0&quot; y=&quot;32&quot;&gt;
-    &lt;pane id=&quot;west&quot; position=&quot;66&quot; /&gt;
-    &lt;pane id=&quot;east&quot; position=&quot;320&quot; /&gt;
-    &lt;pane id=&quot;fareast&quot; position=&quot;965&quot; /&gt;
-    &lt;pane id=&quot;south&quot; position=&quot;315&quot; /&gt;
-  &lt;/layout&gt;&lt;advenetool:adhoc destination=&quot;south&quot; id=&quot;timeline&quot; title=&quot;Timeline&quot;&gt;
-    &lt;advenetool:option name=&quot;display-all-relations&quot; value=&quot;False&quot; /&gt;
-    &lt;advenetool:option name=&quot;pane-position&quot; value=&quot;811&quot; /&gt;
-    &lt;advenetool:option name=&quot;goto-on-click&quot; value=&quot;True&quot; /&gt;
-    &lt;advenetool:option name=&quot;autoscroll&quot; value=&quot;2&quot; /&gt;
-    &lt;advenetool:option name=&quot;highlight&quot; value=&quot;False&quot; /&gt;
-    &lt;advenetool:option name=&quot;display-relations&quot; value=&quot;True&quot; /&gt;
-    &lt;advenetool:option name=&quot;display-relation-type&quot; value=&quot;True&quot; /&gt;
-    &lt;advenetool:option name=&quot;display-relation-content&quot; value=&quot;True&quot; /&gt;
-    &lt;advenetool:argument name=&quot;minimum&quot; value=&quot;0&quot; /&gt;
-    &lt;advenetool:argument name=&quot;maximum&quot; value=&quot;10000&quot; /&gt;
-    &lt;advenetool:argument name=&quot;position&quot; value=&quot;0&quot; /&gt;
-    &lt;advenetool:argument name=&quot;zoom&quot; value=&quot;1.42862154687&quot; /&gt;
-  &lt;/advenetool:adhoc&gt;&lt;advenetool:adhoc destination=&quot;west&quot; id=&quot;editionhistory&quot; title=&quot;Edition History&quot; /&gt;
-  &lt;advenetool:adhoc destination=&quot;east&quot; id=&quot;finder&quot; title=&quot;Package finder&quot; /&gt;
-&lt;/workspace&gt;</content></view>
+</content></view>
   </views>
 </package>
