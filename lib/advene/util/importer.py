@@ -1833,7 +1833,7 @@ Available filters:
         outputfile = ''
     # (for .sub conversion for instance, --fps, --offset)
     print "Converting %s to %s using %s" % (inputfile, outputfile, i.name)
-    p=i.process_file(inputfile)
+    p = i.process_file(inputfile)
     if outputfile:
         p.save(outputfile)
     else:
