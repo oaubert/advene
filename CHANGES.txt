@@ -1,4 +1,4 @@
-advene (1.0.1) unstable; urgency=medium
+advene (1.1) unstable; urgency=medium
 
   * Source-only release. Various bug fixes. The official source repository
     is now http://github.com/oaubert/advene/
