@@ -377,7 +377,7 @@ class Menu:
         l=gtk.Label(_("Offset"))
         hb.pack_start(l, expand=False)
         s=gtk.SpinButton()
-        s.set_range(1, len(at.annotations))
+        s.set_range(-5, len(at.annotations))
         s.set_value(1)
         s.set_increments(1, 5)
         hb.add(s)
