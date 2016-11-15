@@ -172,14 +172,14 @@ def generate_data_files():
     return r
 
 myname = "Olivier Aubert"
-myemail = "olivier.aubert@liris.cnrs.fr"
+myemail = "contact@olivieraubert.net"
 
 setup (name = "advene",
        version = _version,
        description = "Annotate DVds, Exchange on the NEt",
        keywords = "dvd,video,annotation",
        author = "Advene project team",
-       author_email = "advene@liris.cnrs.fr",
+       author_email = "contact@olivieraubert.net",
        maintainer = myname,
        maintainer_email = myemail,
        url = "http://www.advene.org/",
