@@ -1,6 +1,6 @@
 #
 # Advene: Annotate Digital Videos, Exchange on the NEt
-# Copyright (C) 2008-2012 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+# Copyright (C) 2008-2016 Olivier Aubert <contact@olivieraubert.net>
 #
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1260,7 +1260,7 @@ class TranscriptionEdit(AdhocView):
             elif event.keyval == gtk.keysyms.Page_Up:
                 self.goto_previous_mark()
                 return True
-            elif event.keyval == gtk.keysyms.c:
+            elif event.keyval == gtk.keysyms.c and event.state & gtk.gdk.SHIFT_MASK:
                 self.convert_transcription_cb()
                 return True
         elif self.options['autoinsert'] and self.options['automatic-mark-insertion-delay']:
