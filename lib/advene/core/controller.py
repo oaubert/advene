@@ -1118,6 +1118,7 @@ class AdveneController(object):
                 return s
 
         def cleanup(s):
+            s = unicode(s)
             i=s.find('\n')
             if i > 0:
                 return trim_size(s[:i])
