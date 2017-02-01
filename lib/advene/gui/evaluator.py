@@ -712,10 +712,16 @@ class Evaluator:
             self.display_completion()
             return True
 
-        if event.state & gtk.gdk.CONTROL_MASK:
+        if event.get_state() & gtk.gdk.CONTROL_MASK:
             action=self.control_shortcuts.get(event.keyval)
             if action:
-                action()
+                try:
+                    action()
+                except Exception:
+                    f=StringIO.StringIO()
+                    traceback.print_exc(file=f)
+                    self.log(f.getvalue())
+                    f.close()
                 return True
 
         return False
