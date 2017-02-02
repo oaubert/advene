@@ -246,6 +246,21 @@ class AnnotationTable(AdhocView):
                 self.controller.notify('EditSessionEnd', element=a)
             return True
 
+        def entry_editing_started(cell, editable, path):
+            if isinstance(editable, gtk.Entry):
+                completion = gtk.EntryCompletion()
+                it = self.model.get_iter_from_string(path)
+                if not it:
+                    return
+                el = self.model.get_value(it, COLUMN_ELEMENT)
+                # Build the completion list
+                store = gtk.ListStore(str)
+                for c in self.controller.package._indexer.get_completions("", context=el):
+                    store.append([ c ])
+                completion.set_model(store)
+                completion.set_text_column(0)
+                editable.set_completion(completion)
+
         for (name, label, col) in (
             ('content', _("Content"), COLUMN_CONTENT),
             ('type', _("Type"), COLUMN_TYPE),
@@ -256,6 +271,7 @@ class AnnotationTable(AdhocView):
             renderer = gtk.CellRendererText()
             columns[name]=gtk.TreeViewColumn(label, renderer, text=col)
             if name == 'content':
+                renderer.connect('editing-started', entry_editing_started)
                 renderer.connect('edited', cell_edited)
                 renderer.props.editable = True
 

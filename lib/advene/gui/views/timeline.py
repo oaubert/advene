@@ -1633,6 +1633,15 @@ class TimeLine(AdhocView):
         e.set_text(self.controller.get_title(annotation))
         e.set_activates_default(True)
 
+        completion = gtk.EntryCompletion()
+        # Build the completion list
+        store = gtk.ListStore(str)
+        for c in self.controller.package._indexer.get_completions("", context=annotation):
+            store.append([ c ])
+        completion.set_model(store)
+        completion.set_text_column(0)
+        e.set_completion(completion)
+
         def key_handler(widget, event, ann, cb, controller, close_eb):
             if event.keyval == gtk.keysyms.Return:
                 r = helper.title2content(widget.get_text(),
