@@ -644,6 +644,11 @@ class AdveneGUI(object):
                 v.update_annotation(annotation=annotation, event=event)
             except AttributeError:
                 pass
+            except:
+                import traceback
+                s=StringIO.StringIO()
+                traceback.print_exc (file = s)
+                self.log(_("Exception in update_annotation: %s.") % s.getvalue())
         # Update the content indexer
         if event.endswith('EditEnd') or event.endswith('Create'):
             # Update the type fieldnames
@@ -651,7 +656,7 @@ class AdveneGUI(object):
                 annotation.type._fieldnames.update(helper.common_fieldnames([ annotation ]))
 
         # Refresh the edit popup for the associated relations
-        for e in [ e for e in self.edit_popups if e.element in annotation.relations ]:
+        for e in [ el for el in self.edit_popups if el.element in annotation.relations ]:
             e.refresh()
         return True
 
@@ -670,8 +675,13 @@ class AdveneGUI(object):
                 v.update_relation(relation=relation, event=event)
             except AttributeError:
                 pass
+            except Exception:
+                import traceback
+                s=StringIO.StringIO()
+                traceback.print_exc (file = s)
+                self.log(_("Exception in update_relation: %s.") % s.getvalue())
         # Refresh the edit popup for the members
-        for e in [ e for e in self.edit_popups if e.element in relation.members ]:
+        for e in [ el for el in self.edit_popups if el.element in relation.members ]:
             e.refresh()
         return True
 
@@ -690,6 +700,11 @@ class AdveneGUI(object):
                 v.update_view(view=view, event=event)
             except AttributeError:
                 pass
+            except Exception:
+                import traceback
+                s=StringIO.StringIO()
+                traceback.print_exc (file = s)
+                self.log(_("Exception in update_view: %s.") % s.getvalue())
 
         if view.content.mimetype == 'application/x-advene-ruleset':
             # Update the combo box
@@ -716,6 +731,11 @@ class AdveneGUI(object):
                 v.update_query(query=query, event=event)
             except AttributeError:
                 pass
+            except Exception:
+                import traceback
+                s=StringIO.StringIO()
+                traceback.print_exc (file = s)
+                self.log(_("Exception in update_query: %s.") % s.getvalue())
         return True
 
     def resource_lifecycle(self, context, parameters):
@@ -734,6 +754,11 @@ class AdveneGUI(object):
                 v.update_resource(resource=resource, event=event)
             except AttributeError:
                 pass
+            except Exception:
+                import traceback
+                s=StringIO.StringIO()
+                traceback.print_exc (file = s)
+                self.log(_("Exception in update_resource: %s.") % s.getvalue())
         return True
 
     def schema_lifecycle(self, context, parameters):
@@ -752,6 +777,11 @@ class AdveneGUI(object):
                 v.update_schema(schema=schema, event=event)
             except AttributeError:
                 pass
+            except Exception:
+                import traceback
+                s=StringIO.StringIO()
+                traceback.print_exc (file = s)
+                self.log(_("Exception in update_schema: %s.") % s.getvalue())
         return True
 
     def annotationtype_lifecycle(self, context, parameters):
@@ -770,6 +800,11 @@ class AdveneGUI(object):
                 v.update_annotationtype(annotationtype=at, event=event)
             except AttributeError:
                 pass
+            except Exception:
+                import traceback
+                s=StringIO.StringIO()
+                traceback.print_exc (file = s)
+                self.log(_("Exception in update_annotationtype: %s.") % s.getvalue())
         # Update the current type menu
         self.update_gui()
         # Update the content indexer
@@ -793,6 +828,11 @@ class AdveneGUI(object):
                 v.update_relationtype(relationtype=rt, event=event)
             except AttributeError:
                 pass
+            except Exception:
+                import traceback
+                s=StringIO.StringIO()
+                traceback.print_exc (file = s)
+                self.log(_("Exception in update_relationtype: %s.") % s.getvalue())
         # Update the content indexer
         if event.endswith('Create'):
             self.controller.package._indexer.element_update(rt)
