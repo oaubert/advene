@@ -3542,7 +3542,6 @@ class TimeLine(AdhocView):
         notselectedtree.append_column(column)
         notselectedtree.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
 
-        hbox.add(selectedtree)
         actions = gtk.VBox()
 
         def transfer(b, source, dest):
@@ -3599,9 +3598,17 @@ class TimeLine(AdhocView):
         selectedtree.connect('row-activated', row_activated, selectedtree, notselectedtree)
         actions.add(b)
 
-        hbox.add(actions)
+        sw1 = gtk.ScrolledWindow()
+        sw1.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw1.add(selectedtree)
+        hbox.add(sw1)
 
-        hbox.add(notselectedtree)
+        hbox.pack_start(actions, False, False, 0)
+
+        sw2 = gtk.ScrolledWindow()
+        sw2.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw2.add(notselectedtree)
+        hbox.add(sw2)
 
         hbox.show_all()
 
@@ -3613,7 +3620,7 @@ class TimeLine(AdhocView):
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
 
         d.vbox.add(hbox)
-
+        hbox.set_size_request(600, 400)
         d.connect('key-press-event', dialog.dialog_keypressed_cb)
 
         d.show()
