@@ -3621,6 +3621,7 @@ class TimeLine(AdhocView):
         res=d.run()
         if res == gtk.RESPONSE_OK:
             self.annotationtypes = [ at[1] for at in selected_store ]
+            self.package_from_init = None
             self.update_model(partial_update=True)
         d.destroy()
 
