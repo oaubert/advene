@@ -81,7 +81,7 @@ class AnnotationTable(AdhocView):
         self.widget.connect('destroy', unregister)
 
     def update_annotation(self, annotation=None, event=None):
-        if annotation in self.elements:
+        if annotation in (self.elements or []):
             if event.endswith('Delete'):
                 self.elements.remove(annotation)
             self.set_elements(self.elements)
@@ -156,6 +156,8 @@ class AnnotationTable(AdhocView):
         tuple with the appropriate values for the annotation in the
         custom columns.
         """
+        if elements is None:
+            elements = []
         model=self.build_model(elements, custom_data)
         self.widget.treeview.set_model(model)
         self.model = model
