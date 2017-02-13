@@ -567,11 +567,11 @@ class TimeLine(AdhocView):
             pos=self.get_middle_position()
         else:
             # It is not just an update, do a full redraw
-            if self.annotationtypes is None or self.list is None:
+            if self.annotationtypes is None and self.list is None:
                 # We display the whole package, so display also
                 # empty annotation types
                 self.annotationtypes = list(self.controller.package.annotationTypes)
-            else:
+            elif self.list is not None:
                 # We specified a list. Display only the annotation
                 # types for annotations present in the set
                 self.annotationtypes = list(set([ a.type for a in self.list ]))
