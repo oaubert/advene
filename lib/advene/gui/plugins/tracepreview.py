@@ -22,7 +22,8 @@
 This widget allows to stack compact operation history to preview the trace.
 """
 
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 import time
 
 from gettext import gettext as _
@@ -94,32 +95,32 @@ class TracePreview(AdhocView):
         self.receive(self.tracer.trace)
 
     def build_widget(self):
-        mainbox = gtk.VBox()
-        btnbar=gtk.HBox()
-        btngt = gtk.Button(_('Full trace'))
+        mainbox = Gtk.VBox()
+        btnbar=Gtk.HBox()
+        btngt = Gtk.Button(_('Full trace'))
         btngt.set_tooltip_text(_('Open the trace timeline view fareast'))
         btngt.set_size_request(60, 20)
         def open_trace(w):
             l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'tracetimeline' ]
             if not l:
                 a=self.controller.gui.open_adhoc_view(name='tracetimeline', destination='fareast')
-        btnbar.pack_start(btngt, expand=False)
+        btnbar.pack_start(btngt, False, True, 0)
         btngt.connect('clicked', open_trace)
-        mainbox.pack_start(btnbar, expand=False)
-        mainbox.pack_start(gtk.HSeparator(), expand=False)
-        self.accuBox = gtk.VBox()
-        self.sw = gtk.ScrolledWindow()
-        self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        mainbox.pack_start(btnbar, False, True, 0)
+        mainbox.pack_start(Gtk.HSeparator(), False, False, 0)
+        self.accuBox = Gtk.VBox()
+        self.sw = Gtk.ScrolledWindow()
+        self.sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.sw.add_with_viewport(self.accuBox)
-        self.sw.set_vadjustment(gtk.Adjustment(value = 208, lower = 0, upper=208, step_incr=52, page_incr=208, page_size=208))
-        mainbox.pack_start(self.sw)
+        self.sw.set_vadjustment(Gtk.Adjustment.new(value = 208, lower = 0, upper=208, step_incr=52, page_incr=208, page_size=208))
+        mainbox.pack_start(self.sw, True, True, 0)
         return mainbox
 
 
     def scroll_win(self):
         a = self.sw.get_vadjustment()
         if a:
-            a.value=a.upper
+            a.set_value(a.get_upper())
         return
 
     def receive(self, trace, event=None, operation=None, action=None):
@@ -156,10 +157,10 @@ class TracePreview(AdhocView):
 
     def packObs(self, obj_evt, level):
         if obj_evt is not None:
-            vb=gtk.VBox()
+            vb=Gtk.VBox()
             self.last_obs_box = self.buildBox(obj_evt, level)
             def zoom_in_timeline(w, event, obj_evt):
-                if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+                if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
                     l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'tracetimeline' ]
                     if l:
                         a=l[-1]
@@ -174,8 +175,8 @@ class TracePreview(AdhocView):
             self.last_obs_box.connect('button-press-event', zoom_in_timeline, obj_evt)
             self.last_obs = obj_evt
             vb.add(self.last_obs_box)
-            vb.add(gtk.HSeparator())
-            self.accuBox.pack_start(vb, expand=False)
+            vb.add(Gtk.HSeparator())
+            self.accuBox.pack_start(vb, False, True, 0)
             self.accuBox.show_all()
             self.size = self.size + 1
 
@@ -230,44 +231,44 @@ class TracePreview(AdhocView):
                 entetestr = "%s : %s %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
             if obj_evt.content is not None:
                 corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
-            entete = gtk.Label(ev_time.encode("UTF-8"))
-            hb = gtk.HBox()
-            hb.pack_start(entete, expand=False)
+            entete = Gtk.Label(label=ev_time.encode("UTF-8"))
+            hb = Gtk.HBox()
+            hb.pack_start(entete, False, True, 0)
             objcanvas = goocanvas.Canvas()
             objcanvas.set_bounds (0,0,60,20)
-            hb.pack_end(objcanvas, expand=False)
+            hb.pack_end(objcanvas, False, True, 0)
             #BIG HACK to display icon
             te = obj_evt.name
             if te.find('Edit')>=0:
                 if te.find('Start')>=0:
-                    pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                         (( 'pixmaps', 'traces', 'edition.png')))
                 elif te.find('End')>=0 or te.find('Destroy')>=0:
-                    pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                    pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                         (( 'pixmaps', 'traces', 'finedition.png')))
             elif te.find('Creat')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                         (( 'pixmaps', 'traces', 'plus.png')))
             elif te.find('Delet')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                         (( 'pixmaps', 'traces', 'moins.png')))
             elif te.find('Set')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                         ( ('pixmaps', 'traces', 'allera.png')))
             elif te.find('Start')>=0 or te.find('Resume')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                         ( ('pixmaps', 'traces', 'lecture.png')))
             elif te.find('Pause')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                         ( ('pixmaps', 'traces', 'pause.png')))
             elif te.find('Stop')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                         ( ('pixmaps', 'traces', 'stop.png')))
             elif te.find('Activation')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'web.png')), 20,20)
             else:
-                pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'error.png')), 20,20)
                 print 'No icon for %s' % te
             goocanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
@@ -277,7 +278,7 @@ class TracePreview(AdhocView):
                 ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
                 temp_c = self.controller.get_element_color(ob)
                 if temp_c is not None:
-                    temp_c = gdk2intrgba(gtk.gdk.color_parse(temp_c))
+                    temp_c = gdk2intrgba(Gdk.color_parse(temp_c))
                 else:
                     temp_c = 0xFFFFFFFF
                 goocanvas.Ellipse(parent=objg,
@@ -314,7 +315,7 @@ class TracePreview(AdhocView):
                         x = 40,
                         y = 10,
                         width = -1,
-                        anchor = gtk.ANCHOR_CENTER,
+                        anchor = Gtk.ANCHOR_CENTER,
                         font = "Sans 5")
             else:
                 # no concerned object, we are in an action of navigation
@@ -335,12 +336,12 @@ class TracePreview(AdhocView):
                         x = 40,
                         y = 10,
                         width = -1,
-                        anchor = gtk.ANCHOR_CENTER,
+                        anchor = Gtk.ANCHOR_CENTER,
                         font = "Sans 7")
             cm = objcanvas.get_colormap()
             color = cm.alloc_color('#FFFFFF')
             if obj_evt.name in self.tracer.colormodel[level]:
-                color = gtk.gdk.color_parse(self.tracer.colormodel[level])
+                color = Gdk.color_parse(self.tracer.colormodel[level])
             elif self.tracer.modelmapping[level]:
                 for k in self.tracer.modelmapping[level]:
                     if obj_evt.name in self.tracer.modelmapping[level][k]:
@@ -348,7 +349,7 @@ class TracePreview(AdhocView):
                         if x >=0:
                             kn = self.tracer.tracemodel[k][x]
                             if kn in self.tracer.colormodel[k]:
-                                color = gtk.gdk.color_parse(self.tracer.colormodel[k][kn])
+                                color = Gdk.color_parse(self.tracer.colormodel[k][kn])
                                 break
                         else:
                             #BIG HACK, FIXME
@@ -367,9 +368,9 @@ class TracePreview(AdhocView):
                                     if x >=0:
                                         kn = self.tracer.tracemodel[k][x]
                                         if kn in self.tracer.colormodel[k]:
-                                            color = gtk.gdk.color_parse(self.tracer.colormodel[k][kn])
+                                            color = Gdk.color_parse(self.tracer.colormodel[k][kn])
                                             break
-            objcanvas.modify_base (gtk.STATE_NORMAL, color)
+            objcanvas.modify_base (Gtk.StateType.NORMAL, color)
             objcanvas.set_size_request(60,20)
             if corpsstr != "":
                 objcanvas.set_tooltip_text(corpsstr)

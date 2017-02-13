@@ -18,7 +18,8 @@
 #
 """Display and edit a Rule."""
 
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 
 import re
 
@@ -68,7 +69,7 @@ class EditRuleSet(EditGeneric):
 
     def get_packed_widget(self):
         """Return an enriched widget (with rules add and remove buttons)."""
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
         vbox.set_homogeneous (False)
 
         def add_rule_cb(button=None):
@@ -114,29 +115,29 @@ class EditRuleSet(EditGeneric):
                 print "Error in remove_rule"
             return True
 
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
 
-        b=gtk.Button(stock=gtk.STOCK_ADD)
+        b=Gtk.Button(stock=Gtk.STOCK_ADD)
         b.connect('clicked', add_rule_cb)
         b.set_sensitive(self.editable)
         b.set_tooltip_text(_("Add a new rule"))
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
-        b=gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+        b=Gtk.Button(stock=Gtk.STOCK_SELECT_COLOR)
         b.set_label(_("Subview"))
         b.connect('clicked', add_subview_cb)
         b.set_sensitive(self.editable)
         b.set_tooltip_text(_("Add a subview list"))
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
-        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b=Gtk.Button(stock=Gtk.STOCK_REMOVE)
         b.connect('clicked', remove_rule_cb)
         b.set_sensitive(self.editable)
         b.set_tooltip_text(_("Remove the current rule"))
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
 
-        vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hb, False, True, 0)
 
         vbox.add(self.get_widget())
 
@@ -151,15 +152,15 @@ class EditRuleSet(EditGeneric):
         elif isinstance(rule, SubviewList):
             edit=EditSubviewList(rule, controller=self.controller)
 
-        eb=gtk.EventBox()
-        l=gtk.Label(rule.name)
+        eb=Gtk.EventBox()
+        l=Gtk.Label(label=rule.name)
         edit.set_update_label(l)
         eb.add(l)
 
         eb.connect('drag-data-get', self.drag_sent)
-        eb.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                           config.data.drag_type['rule'],
-                           gtk.gdk.ACTION_COPY )
+        eb.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                           config.data.get_target_types('rule'),
+                           Gdk.DragAction.COPY )
         eb.show_all()
 
         self.editlist.append(edit)
@@ -185,7 +186,7 @@ class EditRuleSet(EditGeneric):
             dialog.message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
                 "\n".join(iv),
-                icon=gtk.MESSAGE_ERROR)
+                icon=Gtk.MessageType.ERROR)
             return False
         for e in self.editlist:
             e.update_value()
@@ -204,7 +205,7 @@ class EditRuleSet(EditGeneric):
             if len(l) == 1:
                 edit=l[0]
                 # We have the model. Convert it to XML
-                selection.set(selection.target, 8, edit.model.xml_repr().encode('utf8'))
+                selection.set(selection.get_target(), 8, edit.model.xml_repr().encode('utf8'))
             elif len(l) > 1:
                 print "Error in drag"
             return True
@@ -216,7 +217,7 @@ class EditRuleSet(EditGeneric):
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['rule']:
-            xml=unicode(selection.data, 'utf8')
+            xml=unicode(selection.get_data(), 'utf8')
             if 'subviewlist' in xml:
                 rule=SubviewList()
             else:
@@ -237,18 +238,18 @@ class EditRuleSet(EditGeneric):
 
     def build_widget(self):
         # Create a notebook:
-        notebook=gtk.Notebook()
-        notebook.set_tab_pos(gtk.POS_LEFT)
+        notebook=Gtk.Notebook()
+        notebook.set_tab_pos(Gtk.PositionType.LEFT)
         notebook.popup_enable()
         notebook.set_scrollable(True)
 
         notebook.connect('drag-data-received', self.drag_received)
-        notebook.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                               gtk.DEST_DEFAULT_HIGHLIGHT |
-                               gtk.DEST_DEFAULT_ALL,
-                               config.data.drag_type['rule'],
-                               gtk.gdk.ACTION_COPY)
-        #b=gtk.Button(rule.name)
+        notebook.drag_dest_set(Gtk.DestDefaults.MOTION |
+                               Gtk.DestDefaults.HIGHLIGHT |
+                               Gtk.DestDefaults.ALL,
+                               config.data.get_target_types('rule'),
+                               Gdk.DragAction.COPY)
+        #b=Gtk.Button(rule.name)
         #b.connect('clicked', popup_edit, rule, catalog)
         #b.show()
         #vbox.add(b)
@@ -318,7 +319,7 @@ class EditQuery(EditGeneric):
         return True
 
     def add_condition_widget(self, cond, conditionsbox):
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
         conditionsbox.add(hb)
 
         w=EditCondition(cond, editable=self.editable,
@@ -330,25 +331,25 @@ class EditQuery(EditGeneric):
         hb.add(w.get_widget())
         w.get_widget().show()
 
-        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b=Gtk.Button(stock=Gtk.STOCK_REMOVE)
         b.set_sensitive(self.editable)
         b.connect('clicked', self.remove_condition, w, hb)
         b.show()
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
         hb.show()
 
         return True
 
     def build_widget(self):
-        frame=gtk.Frame()
+        frame=Gtk.Frame()
 
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
         frame.add(vbox)
         vbox.show()
 
         # Event
-        ef=gtk.Frame(_("For all elements in "))
+        ef=Gtk.Frame.new(_("For all elements in "))
         predef=[ ('package/annotations', _("All annotations of the package")),
                  ('package/views', _("All views of the package")),
                  ('here/annotations', _("The context annotations")),
@@ -363,11 +364,11 @@ class EditQuery(EditGeneric):
         self.sourceentry.set_editable(self.editable)
         ef.add(self.sourceentry.widget)
         ef.show_all()
-        vbox.pack_start(ef, expand=False)
+        vbox.pack_start(ef, False, True, 0)
 
         if config.data.preferences['expert-mode']:
             # Return value
-            vf=gtk.Frame(_("Return "))
+            vf=Gtk.Frame.new(_("Return "))
             self.valueentry=TALESEntry(context=self.model,
                                        predefined=[ ('element', _("The element")),
                                                     ('element/content/data', _("The element's content")) ],
@@ -379,27 +380,27 @@ class EditQuery(EditGeneric):
             self.valueentry.set_editable(self.editable)
             vf.add(self.valueentry.widget)
             vf.show_all()
-            vbox.pack_start(vf, expand=False)
+            vbox.pack_start(vf, False, True, 0)
         else:
             self.valueentry=None
 
         # Conditions
         if config.data.preferences['expert-mode']:
-            cf=gtk.Frame(_("If the element matches "))
+            cf=Gtk.Frame.new(_("If the element matches "))
         else:
-            cf=gtk.Frame(_("Return the element if it matches "))
-        conditionsbox=gtk.VBox()
+            cf=Gtk.Frame.new(_("Return the element if it matches "))
+        conditionsbox=Gtk.VBox()
         cf.add(conditionsbox)
 
         # "Add condition" button
-        hb=gtk.HBox()
-        b=gtk.Button(stock=gtk.STOCK_ADD)
+        hb=Gtk.HBox()
+        b=Gtk.Button(stock=Gtk.STOCK_ADD)
         b.connect('clicked', self.add_condition, conditionsbox)
         b.set_sensitive(self.editable)
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
         hb.set_homogeneous(False)
 
-        hb.add(gtk.HBox())
+        hb.add(Gtk.HBox())
 
         def change_composition(combo):
             self.composition=combo.get_current_element()
@@ -409,9 +410,9 @@ class EditQuery(EditGeneric):
                                          ('or', _("Any condition can be met") ) ],
                                        preselect=self.composition,
                                        callback=change_composition)
-        hb.pack_start(c, expand=False)
+        hb.pack_start(c, False, True, 0)
 
-        conditionsbox.pack_start(hb, expand=False, fill=False)
+        conditionsbox.pack_start(hb, False, False, 0)
 
         cf.show_all()
 
@@ -419,7 +420,7 @@ class EditQuery(EditGeneric):
             for c in self.model.condition:
                 self.add_condition_widget(c, conditionsbox)
 
-        vbox.pack_start(cf, expand=False)
+        vbox.pack_start(cf, False, True, 0)
 
         frame.show()
 
@@ -449,7 +450,7 @@ class EditRule(EditGeneric):
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         if targetType == config.data.target_type['rule']:
-            selection.set(selection.target, 8, self.model.xml_repr().encode('utf8'))
+            selection.set(selection.get_target(), 8, self.model.xml_repr().encode('utf8'))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
@@ -511,7 +512,7 @@ class EditRule(EditGeneric):
         return True
 
     def add_condition_widget(self, cond, conditionsbox):
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
         conditionsbox.add(hb)
 
         w=EditCondition(cond, editable=self.editable, controller=self.controller, parent=self)
@@ -521,11 +522,11 @@ class EditRule(EditGeneric):
         hb.add(w.get_widget())
         w.get_widget().show()
 
-        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b=Gtk.Button(stock=Gtk.STOCK_REMOVE)
         b.set_sensitive(self.editable)
         b.connect('clicked', self.remove_condition, w, hb)
         b.show()
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
         hb.show()
 
@@ -540,7 +541,7 @@ class EditRule(EditGeneric):
     def add_action_widget(self, action, actionsbox):
         """Add an action widget to the given actionsbox."""
 
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
         actionsbox.add(hb)
 
         w=EditAction(action, self.catalog, editable=self.editable,
@@ -548,67 +549,67 @@ class EditRule(EditGeneric):
         self.editactionlist.append(w)
         hb.add(w.get_widget())
         w.get_widget().show()
-        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b=Gtk.Button(stock=Gtk.STOCK_REMOVE)
         b.connect('clicked', self.remove_action, w, hb)
         b.set_sensitive(self.editable)
         b.show()
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
         hb.show()
         return True
 
     def build_widget(self):
-        frame=gtk.Frame()
-        self.framelabel=gtk.Label()
+        frame=Gtk.Frame()
+        self.framelabel=Gtk.Label()
         self.framelabel.set_markup(_("Rule <b>%s</b>") % self.model.name.replace('<', '&lt;'))
         self.framelabel.show()
         frame.set_label_widget(self.framelabel)
 
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
         frame.add(vbox)
         vbox.show()
 
         # Rule name
-        hbox=gtk.HBox()
+        hbox=Gtk.HBox()
 
-        hbox.pack_start(gtk.Label(_("Rule name")), expand=False)
-        self.name_entry=gtk.Entry()
+        hbox.pack_start(Gtk.Label(_("Rule name")), False, False, 0)
+        self.name_entry=Gtk.Entry()
         self.name_entry.set_text(self.model.name)
         self.name_entry.set_editable(self.editable)
         self.name_entry.connect('changed', self.update_name)
         hbox.add(self.name_entry)
 
-        b=gtk.Button(stock=gtk.STOCK_COPY)
+        b=Gtk.Button(stock=Gtk.STOCK_COPY)
         b.connect('drag-data-get', self.drag_sent)
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['rule'], gtk.gdk.ACTION_COPY)
-        hbox.pack_start(b, expand=False)
+        b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                          config.data.get_target_types('rule'), Gdk.DragAction.COPY)
+        hbox.pack_start(b, False, True, 0)
 
         hbox.show_all()
-        vbox.pack_start(hbox, expand=False)
+        vbox.pack_start(hbox, False, True, 0)
 
         # Event
-        ef=gtk.Frame(_("Event"))
+        ef=Gtk.Frame.new(_("Event"))
         self.editevent=EditEvent(self.model.event, catalog=self.catalog,
                                  editable=self.editable, controller=self.controller)
         ef.add(self.editevent.get_widget())
         ef.show_all()
-        vbox.pack_start(ef, expand=False)
+        vbox.pack_start(ef, False, True, 0)
 
         # Conditions
-        cf=gtk.Frame(_("If"))
-        conditionsbox=gtk.VBox()
+        cf=Gtk.Frame.new(_("If"))
+        conditionsbox=Gtk.VBox()
         cf.add(conditionsbox)
 
         # "Add condition" button
-        hb=gtk.HBox()
-        b=gtk.Button(stock=gtk.STOCK_ADD)
+        hb=Gtk.HBox()
+        b=Gtk.Button(stock=Gtk.STOCK_ADD)
         b.connect('clicked', self.add_condition, conditionsbox)
         b.set_sensitive(self.editable)
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
         hb.set_homogeneous(False)
 
-        hb.add(gtk.HBox())
+        hb.add(Gtk.HBox())
 
         def change_composition(combo):
             self.composition=combo.get_current_element()
@@ -618,9 +619,9 @@ class EditRule(EditGeneric):
                                          ('or', _("Any condition can be met") ) ],
                                        preselect=self.composition,
                                        callback=change_composition)
-        hb.pack_start(c, expand=False)
+        hb.pack_start(c, False, True, 0)
 
-        conditionsbox.pack_start(hb, expand=False, fill=False)
+        conditionsbox.pack_start(hb, False, False, 0)
 
         cf.show_all()
 
@@ -632,25 +633,25 @@ class EditRule(EditGeneric):
                 # Should not happen
                 raise Exception("condition should be a conditionlist")
 
-        vbox.pack_start(cf, expand=False)
+        vbox.pack_start(cf, False, True, 0)
 
         # Actions
-        af=gtk.Frame(_("Then"))
-        actionsbox=gtk.VBox()
+        af=Gtk.Frame.new(_("Then"))
+        actionsbox=Gtk.VBox()
         af.add(actionsbox)
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
         # Add Action button
-        b=gtk.Button(stock=gtk.STOCK_ADD)
+        b=Gtk.Button(stock=Gtk.STOCK_ADD)
         b.connect('clicked', self.add_action, actionsbox)
         b.set_sensitive(self.editable)
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
         hb.set_homogeneous(False)
-        actionsbox.pack_start(hb, expand=False, fill=False)
+        actionsbox.pack_start(hb, False, False, 0)
 
         for a in self.model.action:
             self.add_action_widget(a, actionsbox)
 
-        vbox.pack_start(af, expand=False)
+        vbox.pack_start(af, False, True, 0)
         af.show_all()
 
         frame.show()
@@ -677,11 +678,11 @@ class EditEvent(EditGeneric):
             self.current_event=event
 
     def build_widget(self):
-        hbox=gtk.HBox()
+        hbox=Gtk.HBox()
         hbox.set_homogeneous(False)
 
-        label=gtk.Label(_("When the "))
-        hbox.pack_start(label)
+        label=Gtk.Label(label=_("When the "))
+        hbox.pack_start(label, True, True, 0)
 
         eventlist=self.catalog.get_described_events(expert=self.expert)
         if self.current_event not in eventlist:
@@ -693,7 +694,7 @@ class EditEvent(EditGeneric):
                                           editable=self.editable)
         hbox.add(eventname)
 
-        label=gtk.Label(_(" occurs,"))
+        label=Gtk.Label(_(" occurs,"))
         hbox.add(label)
 
         hbox.show_all()
@@ -758,7 +759,7 @@ class EditCondition(EditGeneric):
         return True
 
     def build_widget(self):
-        hbox=gtk.HBox()
+        hbox=Gtk.HBox()
 
         if self.parent is None or isinstance(self.parent, EditRule):
             predefined=[
@@ -938,9 +939,9 @@ class EditAction(EditGeneric):
         return True
 
     def build_parameter_widget(self, name, value, description):
-        hbox=gtk.HBox()
-        label=gtk.Label(name)
-        hbox.pack_start(label, expand=False)
+        hbox=Gtk.HBox()
+        label=Gtk.Label(label=name)
+        hbox.pack_start(label, False, True, 0)
 
         ra=self.registeredaction
         if ra:
@@ -961,14 +962,14 @@ class EditAction(EditGeneric):
 
         hbox.entry=entry
 
-        hbox.pack_start(entry.widget)
+        hbox.pack_start(entry.widget, True, True, 0)
         hbox.show_all()
         return hbox
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        vbox.add(gtk.HSeparator())
+        vbox.add(Gtk.HSeparator())
 
         def description_getter(element):
             if hasattr(element, 'description'):
@@ -1022,7 +1023,7 @@ class EditAction(EditGeneric):
                 self.paramlist[name]=p
                 vbox.add(p)
 
-        vbox.add(gtk.HSeparator())
+        vbox.add(Gtk.HSeparator())
 
         vbox.show_all()
         return vbox
@@ -1070,32 +1071,32 @@ class EditSubviewList(EditGeneric):
         return True
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        self.store=gtk.ListStore( object, str, str, bool )
+        self.store=Gtk.ListStore( object, str, str, bool )
         self.refresh()
 
-        self.treeview=gtk.TreeView(model=self.store)
+        self.treeview=Gtk.TreeView(model=self.store)
 
-        renderer = gtk.CellRendererToggle()
+        renderer = Gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
         renderer.connect('toggled', self.toggled_cb, self.store, self.COLUMN_STATUS)
-        column = gtk.TreeViewColumn(_('Activate?'), renderer, active=self.COLUMN_STATUS)
+        column = Gtk.TreeViewColumn(_('Activate?'), renderer, active=self.COLUMN_STATUS)
         self.treeview.append_column(column)
 
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('View'), renderer, text=self.COLUMN_LABEL)
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('View'), renderer, text=self.COLUMN_LABEL)
         column.set_resizable(True)
         self.treeview.append_column(column)
 
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('Id'), renderer, text=self.COLUMN_ID)
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('Id'), renderer, text=self.COLUMN_ID)
         column.set_resizable(True)
         self.treeview.append_column(column)
 
-        sw=gtk.ScrolledWindow()
+        sw=Gtk.ScrolledWindow()
         sw.add(self.treeview)
-        vbox.pack_start(sw, expand=True)
+        vbox.pack_start(sw, True, True, 0)
 
         vbox.show_all()
         return vbox

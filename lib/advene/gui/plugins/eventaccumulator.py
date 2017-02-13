@@ -22,7 +22,8 @@
 This widget allows to stack compact event history.
 """
 
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 import time
 
 from gettext import gettext as _
@@ -108,8 +109,8 @@ class EventAccumulator(AdhocView):
         self.receive(self.tracer.trace)
 
     def build_widget(self):
-        mainbox = gtk.VBox()
-        btnbar=gtk.HBox()
+        mainbox = Gtk.VBox()
+        btnbar=Gtk.HBox()
 
         # choix details
         if len(self.tracer.trace.levels.keys())<=0:
@@ -128,23 +129,23 @@ class EventAccumulator(AdhocView):
                 self.receive(self.tracer.trace)
                 return
             bdetLabel = self.options['detail']
-            bdet = gtk.Button(bdetLabel)
+            bdet = Gtk.Button(bdetLabel)
             self.DetB = bdet
             bdet.set_size_request(60, 20)
-            btnbar.pack_start(gtk.Label(_(' Trace : ')), expand=False)
-            btnbar.pack_start(bdet, expand=False)
+            btnbar.pack_start(Gtk.Label(_(' Trace : ')), False, False, 0)
+            btnbar.pack_start(bdet, False, True, 0)
             bdet.connect('clicked', details_changed)
 
-        self.btn_filter = gtk.Button(_(' Filters'))
+        self.btn_filter = Gtk.Button(_(' Filters'))
         self.btn_filter.connect('clicked', self.modify_filters)
-        btnbar.pack_start(self.btn_filter, expand=False)
+        btnbar.pack_start(self.btn_filter, False, True, 0)
 
-        self.init_btn_filter = gtk.Button(_('Reset'))
+        self.init_btn_filter = Gtk.Button(_('Reset'))
         self.init_btn_filter.connect('clicked', self.init_obj_filter)
         self.init_btn_filter.set_sensitive(False)
-        btnbar.pack_start(self.init_btn_filter, expand=False)
+        btnbar.pack_start(self.init_btn_filter, False, True, 0)
         self.filter_active(False)
-        btnbar.pack_start(gtk.VSeparator())
+        btnbar.pack_start(Gtk.VSeparator(), True, True, 0)
 
         # choix temps
         if not self.times:
@@ -162,53 +163,53 @@ class EventAccumulator(AdhocView):
                 return
 
             btimeLabel = self.options['time']
-            btime = gtk.Button(btimeLabel)
+            btime = Gtk.Button(btimeLabel)
             btime.set_size_request(60, 20)
-            btnbar.pack_start(gtk.Label(_(' Time : ')), expand=False)
-            btnbar.pack_start(btime, expand=False)
+            btnbar.pack_start(Gtk.Label(_(' Time : ')), False, False, 0)
+            btnbar.pack_start(btime, False, True, 0)
             btime.connect('clicked', time_changed)
-            btnbar.pack_start(gtk.VSeparator())
+            btnbar.pack_start(Gtk.VSeparator(), True, True, 0)
 
         # choix max
         def max_changed(w):
             self.options['max_size']=int(w.get_value())
             self.receive(self.tracer.trace)
             return
-        btnbar.pack_start(gtk.Label(_(' Max. : ')), expand=False)
-        self.sc = gtk.HScale(gtk.Adjustment ( value=20, lower=5, upper=5000, step_incr=1, page_incr=5, page_size=5))
+        btnbar.pack_start(Gtk.Label(_(' Max. : ')), False, False, 0)
+        self.sc = Gtk.HScale.new(Gtk.Adjustment.new(value=20, lower=5, upper=5000, step_incr=1, page_incr=5, page_size=5))
         self.sc.set_size_request(100, 10)
         self.sc.set_digits(0)
-        self.sc.set_value_pos(gtk.POS_LEFT)
+        self.sc.set_value_pos(Gtk.PositionType.LEFT)
         self.sc.connect('value_changed', max_changed)
-        btnbar.pack_start(self.sc, expand=False)
-        btnbar.pack_start(gtk.VSeparator())
+        btnbar.pack_start(self.sc, False, True, 0)
+        btnbar.pack_start(Gtk.VSeparator(), True, True, 0)
 
-        exp_b = gtk.Button(_('Export'))
+        exp_b = Gtk.Button(_('Export'))
         exp_b.connect('clicked', self.export)
-        btnbar.pack_start(exp_b, expand=False)
+        btnbar.pack_start(exp_b, False, True, 0)
 
-        mainbox.pack_start(btnbar, expand=False)
-        mainbox.pack_start(gtk.HSeparator(), expand=False)
-        self.accuBox=gtk.VBox()
-        self.sw = gtk.ScrolledWindow()
-        self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        mainbox.pack_start(btnbar, False, True, 0)
+        mainbox.pack_start(Gtk.HSeparator(), False, False, 0)
+        self.accuBox=Gtk.VBox()
+        self.sw = Gtk.ScrolledWindow()
+        self.sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.sw.add_with_viewport(self.accuBox)
-        self.sw.set_vadjustment(gtk.Adjustment(value = 208, lower = 0, upper=208, step_incr=52, page_incr=208, page_size=208))
-        mainbox.pack_start(self.sw)
+        self.sw.set_vadjustment(Gtk.Adjustment.new(value = 208, lower = 0, upper=208, step_incr=52, page_incr=208, page_size=208))
+        mainbox.pack_start(self.sw, True, True, 0)
         return mainbox
 
     def export(self, w):
         fname = self.tracer.export()
-        d = gtk.Dialog(title=_("Exporting traces"),
+        d = Gtk.Dialog(title=_("Exporting traces"),
                        parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK
+                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                       buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK
                                  ))
-        l=gtk.Label(_("Export done to\n%s") % fname)
+        l=Gtk.Label(label=_("Export done to\n%s") % fname)
         l.set_selectable(True)
         l.set_line_wrap(True)
         l.show()
-        d.vbox.pack_start(l, expand=False)
+        d.vbox.pack_start(l, False, True, 0)
         d.vbox.show_all()
         d.show()
         res=d.run()
@@ -216,7 +217,7 @@ class EventAccumulator(AdhocView):
         return
 
     def modify_filters(self, w):
-        w=gtk.Window(gtk.WINDOW_TOPLEVEL)
+        w=Gtk.Window(Gtk.WindowType.TOPLEVEL)
         def level_changed(w, options):
             v=w.get_label()
             i=self.tracer.trace.levels.keys().index(v)+1
@@ -227,28 +228,28 @@ class EventAccumulator(AdhocView):
             self.show_options(options, v)
             options.show_all()
             return
-        vb = gtk.VBox()
+        vb = Gtk.VBox()
         levelslab = self.options['detail']
-        levels = gtk.Button(levelslab)
-        vb.pack_start(levels, expand=False)
+        levels = Gtk.Button(levelslab)
+        vb.pack_start(levels, False, True, 0)
         #levels.set_size_request(60, 20)
-        vb.pack_start(gtk.HSeparator(), expand=False)
-        options = gtk.VBox()
+        vb.pack_start(Gtk.HSeparator(), False, False, 0)
+        options = Gtk.VBox()
         self.show_options(options, levelslab)
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.set_size_request(600, 480)
         sw.add_with_viewport(options)
-        vb.pack_start(sw, expand=False)
-        vb.pack_start(gtk.HSeparator(), expand=False)
+        vb.pack_start(sw, False, True, 0)
+        vb.pack_start(Gtk.HSeparator(), False, False, 0)
         def options_quit(w, window):
             window.destroy()
             return
-        hbb = gtk.HBox()
-        btn_q = gtk.Button(stock=gtk.STOCK_CLOSE)
-        hbb.pack_end(btn_q, expand=False)
+        hbb = Gtk.HBox()
+        btn_q = Gtk.Button(stock=Gtk.STOCK_CLOSE)
+        hbb.pack_end(btn_q, False, True, 0)
         btn_q.connect('clicked', options_quit, w)
-        vb.pack_end(hbb, expand=False)
+        vb.pack_end(hbb, False, True, 0)
         levels.connect('clicked', level_changed, options)
         w.set_name(_('Defining Filters'))
         w.add(vb)
@@ -268,8 +269,8 @@ class EventAccumulator(AdhocView):
             return
         if levelslab == 'events':
             for i in self.events_names:
-                option = gtk.CheckButton( ECACatalog.event_names[i])
-                options.pack_start(option, expand=False)
+                option = Gtk.CheckButton( ECACatalog.event_names[i])
+                options.pack_start(option, False, True, 0)
                 if i in self.filters[levelslab]:
                     option.set_active(False)
                 else:
@@ -277,16 +278,16 @@ class EventAccumulator(AdhocView):
                 option.connect('toggled', option_clicked, i, levelslab)
         if levelslab == 'events' or levelslab == 'operations':
             for i in self.operations_names:
-                option = gtk.CheckButton( ECACatalog.event_names[i])
-                options.pack_start(option, expand=False)
+                option = Gtk.CheckButton( ECACatalog.event_names[i])
+                options.pack_start(option, False, True, 0)
                 if i in self.filters[levelslab]:
                     option.set_active(False)
                 else:
                     option.set_active(True)
                 option.connect('toggled', option_clicked, i, levelslab)
             for i in self.incomplete_operations_names.keys():
-                option = gtk.CheckButton(self.incomplete_operations_names[i])
-                options.pack_start(option, expand=False)
+                option = Gtk.CheckButton(self.incomplete_operations_names[i])
+                options.pack_start(option, False, True, 0)
                 if i in self.filters[levelslab]:
                     option.set_active(False)
                 else:
@@ -294,8 +295,8 @@ class EventAccumulator(AdhocView):
                 option.connect('toggled', option_clicked, i, levelslab)
         if levelslab == 'actions':
             for i in self.tracer.action_types:
-                option = gtk.CheckButton(i)
-                options.pack_start(option, expand=False)
+                option = Gtk.CheckButton(i)
+                options.pack_start(option, False, True, 0)
                 if i in self.filters[levelslab]:
                     option.set_active(False)
                 else:
@@ -321,7 +322,7 @@ class EventAccumulator(AdhocView):
         return
 
     def filter_active(self, activate):
-        #i=gtk.Image()
+        #i=Gtk.Image()
         #if activate:
             #i.set_from_file(config.data.advenefile( ( 'pixmaps', 'filters_off.png') ))
         #else:
@@ -333,7 +334,7 @@ class EventAccumulator(AdhocView):
 
     def scroll_win(self):
         a = self.sw.get_vadjustment()
-        a.value=a.upper
+        a.set_value(a.get_upper())
         return
 
     def receive(self, trace, event=None, operation=None, action=None):
@@ -469,37 +470,37 @@ class EventAccumulator(AdhocView):
         return
 
     def packAction(self, obj_evt):
-        vb=gtk.VBox()
+        vb=Gtk.VBox()
         if obj_evt.name == 'Navigation':
             self.latest['nav_action'] = obj_evt
             self.latest['nav_actionBox'] = self.build_action_box(obj_evt)
         self.latest['actions'] = obj_evt
         self.latest['actionsBox'] = self.build_action_box(obj_evt)
         vb.add(self.latest['actionsBox'])
-        vb.add(gtk.HSeparator())
-        self.accuBox.pack_start(vb, expand=False)
+        vb.add(Gtk.HSeparator())
+        self.accuBox.pack_start(vb, False, True, 0)
         self.accuBox.show_all()
         self.size = self.size + 1
 
     def packOperation(self, obj_evt):
         if obj_evt is not None:
             self.latest['operations']=obj_evt
-            vb=gtk.VBox()
+            vb=Gtk.VBox()
             self.latest['operationsBox'] = self.build_operation_box(obj_evt)
             vb.add(self.latest['operationsBox'])
-            vb.add(gtk.HSeparator())
-            self.accuBox.pack_start(vb, expand=False)
+            vb.add(Gtk.HSeparator())
+            self.accuBox.pack_start(vb, False, True, 0)
             self.accuBox.show_all()
             self.size = self.size + 1
 
     def packEvent(self, obj_evt):
         if obj_evt is not None:
             self.latest['events']=obj_evt
-            vb=gtk.VBox()
+            vb=Gtk.VBox()
             self.latest['eventsBox'] = self.build_event_box(obj_evt)
             vb.add(self.latest['eventsBox'])
-            vb.add(gtk.HSeparator())
-            self.accuBox.pack_start(vb, expand=False)
+            vb.add(Gtk.HSeparator())
+            self.accuBox.pack_start(vb, False, True, 0)
             self.accuBox.show_all()
             self.size = self.size + 1
 
@@ -514,9 +515,9 @@ class EventAccumulator(AdhocView):
 
     def update_last_action_box(self, obj_evt, nav=False):
         if nav:
-            tup = gtk.tooltips_data_get(self.latest['nav_actionBox'])
+            tup = Gtk.tooltips_data_get(self.latest['nav_actionBox'])
         else:
-            tup = gtk.tooltips_data_get(self.latest['actionsBox'])
+            tup = Gtk.tooltips_data_get(self.latest['actionsBox'])
         if tup is None:
             return
         corpsstr = ""
@@ -576,13 +577,13 @@ class EventAccumulator(AdhocView):
         else:
             print "unlabelled event : %s" % obj_evt.name
             entetestr = "%s : %s" % (ev_time, obj_evt.name)
-        entete = gtk.Label(entetestr.encode("UTF-8"))
-        hb = gtk.HBox()
+        entete = Gtk.Label(label=entetestr.encode("UTF-8"))
+        hb = Gtk.HBox()
         tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , False)
         if tr is not None:
-            hb.pack_start(tr, expand=False)
-            hb.pack_start(gtk.VSeparator(), expand=False)
-        hb.pack_start(entete, expand=False)
+            hb.pack_start(tr, False, True, 0)
+            hb.pack_start(Gtk.VSeparator(), False, False, 0)
+        hb.pack_start(entete, False, True, 0)
         if corpsstr != "":
             hb.set_tooltip_text(corpsstr)
         return hb
@@ -630,18 +631,18 @@ class EventAccumulator(AdhocView):
         else:
             print "unlabelled event : %s" % obj_evt.name
             entetestr = "%s : %s" % (ev_time, obj_evt.name)
-        entete = gtk.Label(entetestr.encode("UTF-8"))
-        hb = gtk.HBox()
-        box = gtk.EventBox()
+        entete = Gtk.Label(label=entetestr.encode("UTF-8"))
+        hb = Gtk.HBox()
+        box = Gtk.EventBox()
         tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , False)
         if tr is not None:
-            hb.pack_start(tr, expand=False)
-            hb.pack_start(gtk.VSeparator(), expand=False)
+            hb.pack_start(tr, False, True, 0)
+            hb.pack_start(Gtk.VSeparator(), False, False, 0)
         if corpsstr != "":
             box.set_tooltip_text(corpsstr)
         def box_pressed(w, event, id):
             #print "%s %s" % (id, mtime)
-            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
                 if id is not None:
                     obj = self.controller.package.get_element_by_id(id)
                     if obj is not None:
@@ -653,7 +654,7 @@ class EventAccumulator(AdhocView):
             return
         box.add(entete)
         box.connect('button-press-event', box_pressed, obj_evt.concerned_object['id'])
-        hb.pack_start(box, expand=False)
+        hb.pack_start(box, False, True, 0)
         return hb
 
     def build_action_box(self, obj_evt):
@@ -675,17 +676,17 @@ class EventAccumulator(AdhocView):
                 corpsstr += urllib.unquote( op_time + " : " + op.name + "\n")
             else:
                 corpsstr += urllib.unquote( op_time + " : " + op.name + " ( " + op.concerned_object['name'] + " : " + op.concerned_object['id'] + " )\n")
-        entete = gtk.Label(entetestr.encode("UTF-8"))
-        hb = gtk.HBox()
-        box = gtk.EventBox()
+        entete = Gtk.Label(label=entetestr.encode("UTF-8"))
+        hb = Gtk.HBox()
+        box = Gtk.EventBox()
         tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , False)
         if tr is not None:
-            hb.pack_start(tr, expand=False)
-            hb.pack_start(gtk.VSeparator(), expand=False)
+            hb.pack_start(tr, False, True, 0)
+            hb.pack_start(Gtk.VSeparator(), False, False, 0)
         if corpsstr != "":
             hb.set_tooltip_text(corpsstr)
         def box_pressed(w, event, ops):
-            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
                 #FIXME : need to change details in another way
                 self.filters['objects']=[]
                 self.filters['objects'].extend(ops)
@@ -697,7 +698,7 @@ class EventAccumulator(AdhocView):
             return
         box.add(entete)
         box.connect('button-press-event', box_pressed, obj_evt.operations)
-        hb.pack_start(box, expand=False)
+        hb.pack_start(box, False, True, 0)
         return hb
 
     def destroy(self, source=None, event=None):

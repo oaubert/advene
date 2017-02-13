@@ -18,7 +18,7 @@
 #
 
 from gettext import gettext as _
-import gobject
+from gi.repository import GObject
 
 try:
     import brlapi
@@ -69,8 +69,8 @@ def register(controller=None):
         try:
             engine.init_brlapi()
             if engine.brlconnection is not None:
-                gobject.io_add_watch(engine.brlconnection.fileDescriptor,
-                                     gobject.IO_IN,
+                GObject.io_add_watch(engine.brlconnection.fileDescriptor,
+                                     GObject.IO_IN,
                                      engine.input_handler)
                 method=engine.action_brldisplay
                 engine.brldisplay("Advene connected")

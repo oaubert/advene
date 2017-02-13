@@ -25,7 +25,7 @@ import sys
 import re
 import tempfile
 
-import gobject
+from gi.repository import GObject
 
 import advene.util.helper as helper
 
@@ -90,8 +90,8 @@ class ShotdetectAppImporter(ExternalAppImporter):
                      '-o', self.tempdir.encode('utf8', sys.getfilesystemencoding()),
                      '-s', str(self.sensitivity) ]
         else:
-            args = [ '-i', gobject.filename_from_utf8(filename.encode('utf8')),
-                     '-o', gobject.filename_from_utf8(self.tempdir.encode('utf8')),
+            args = [ '-i', GObject.filename_from_utf8(filename.encode('utf8')),
+                     '-o', GObject.filename_from_utf8(self.tempdir.encode('utf8')),
                      '-s', str(self.sensitivity) ]
         return args
 

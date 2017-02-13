@@ -21,8 +21,9 @@
 
 import re
 
-import gtk
-import pango
+from gi.repository import Gdk
+from gi.repository import Gtk
+from gi.repository import Pango
 
 import advene.core.config as config
 
@@ -202,7 +203,7 @@ class TranscriptionView(AdhocView):
             try:
                 beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
                 enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
-                if unicode(b.get_text(beginiter, enditer)).strip(ZERO_WIDTH_NOBREAK_SPACE) != self.representation(a):
+                if unicode(b.get_text(beginiter, enditer, False)).strip(ZERO_WIDTH_NOBREAK_SPACE) != self.representation(a):
                     modified.append(a)
             except TypeError:
                 # Some missing annotations
@@ -222,7 +223,7 @@ class TranscriptionView(AdhocView):
             if not m:
                 break
             enditer  = b.get_iter_at_mark(m)
-            new_content = helper.title2content(unicode(b.get_text(beginiter, enditer)).strip(ZERO_WIDTH_NOBREAK_SPACE),
+            new_content = helper.title2content(unicode(b.get_text(beginiter, enditer, False)).strip(ZERO_WIDTH_NOBREAK_SPACE),
                                                a.content.data,
                                                a.type.getMetaData(config.data.namespace, 'representation') if self.options['default-representation'] else self.options['representation'])
             if new_content is None:
@@ -264,42 +265,42 @@ class TranscriptionView(AdhocView):
         return True
 
     def build_widget(self):
-        mainbox = gtk.VBox()
+        mainbox = Gtk.VBox()
 
-        tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
+        tb=Gtk.Toolbar()
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         for icon, action, tip in (
-            (gtk.STOCK_SAVE, self.save_transcription, _("Save transcription to a text file")),
-            (gtk.STOCK_APPLY, self.validate, _("Apply the modifications")),
-            (gtk.STOCK_FIND, self.show_searchbox, _("Find text")),
-            (gtk.STOCK_REDO, self.quick_options_toggle, _("Quickly switch display options")),
-            (gtk.STOCK_REFRESH, self.refresh, _("Refresh the transcription")),
-            (gtk.STOCK_PREFERENCES, self.edit_options, _("Edit preferences")),
+            (Gtk.STOCK_SAVE, self.save_transcription, _("Save transcription to a text file")),
+            (Gtk.STOCK_APPLY, self.validate, _("Apply the modifications")),
+            (Gtk.STOCK_FIND, self.show_searchbox, _("Find text")),
+            (Gtk.STOCK_REDO, self.quick_options_toggle, _("Quickly switch display options")),
+            (Gtk.STOCK_REFRESH, self.refresh, _("Refresh the transcription")),
+            (Gtk.STOCK_PREFERENCES, self.edit_options, _("Edit preferences")),
             ):
-            b=gtk.ToolButton(stock_id=icon)
+            b=Gtk.ToolButton(stock_id=icon)
             b.set_tooltip_text(tip)
             b.connect('clicked', action)
             tb.insert(b, -1)
-        mainbox.pack_start(tb, expand=False)
+        mainbox.pack_start(tb, False, True, 0)
 
         #if self.controller.gui:
         #    self.player_toolbar=self.controller.gui.get_player_control_toolbar()
-        #    mainbox.pack_start(self.player_toolbar, expand=False)
+        #    mainbox.pack_start(self.player_toolbar, False, True, 0)
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        sw.set_resize_mode(gtk.RESIZE_PARENT)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        sw.set_resize_mode(Gtk.ResizeMode.PARENT)
         mainbox.add (sw)
 
-        self.textview = gtk.TextView()
+        self.textview = Gtk.TextView()
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
-        self.textview.set_wrap_mode (gtk.WRAP_WORD)
+        self.textview.set_wrap_mode (Gtk.WrapMode.WORD)
         b=self.textview.get_buffer()
 
         # Create useful tags
-        b.create_tag("activated", weight=pango.WEIGHT_BOLD)
+        b.create_tag("activated", weight=Pango.Weight.BOLD)
         b.create_tag("current", background="lightblue")
         b.create_tag("searched_string", background="green")
         b.create_tag("bound", editable=False)
@@ -314,7 +315,7 @@ class TranscriptionView(AdhocView):
 
         sw.add(self.textview)
 
-        self.searchbox=gtk.HBox()
+        self.searchbox=Gtk.HBox()
 
         def hide_searchbox(*p):
             # Clear the searched_string tags
@@ -324,41 +325,40 @@ class TranscriptionView(AdhocView):
             return True
 
         close_button=get_pixmap_button('small_close.png', hide_searchbox)
-        close_button.set_relief(gtk.RELIEF_NONE)
-        self.searchbox.pack_start(close_button, expand=False, fill=False)
+        close_button.set_relief(Gtk.ReliefStyle.NONE)
+        self.searchbox.pack_start(close_button, False, False, 0)
 
         def search_entry_cb(e):
             self.highlight_search_forward(unicode(e.get_text()))
             return True
 
         def search_entry_key_press_cb(e, event):
-            if event.keyval == gtk.keysyms.Escape:
+            if event.keyval == Gdk.KEY_Escape:
                 hide_searchbox()
                 return True
             return False
 
-        self.searchbox.entry=gtk.Entry()
+        self.searchbox.entry=Gtk.Entry()
         self.searchbox.entry.connect('activate', search_entry_cb)
-        self.searchbox.pack_start(self.searchbox.entry, expand=False, fill=False)
+        self.searchbox.pack_start(self.searchbox.entry, False, False, 0)
         self.searchbox.entry.connect('key-press-event', search_entry_key_press_cb)
 
 #        def find_next(b):
 #            # FIXME
 #            return True
 #
-#        b=get_small_stock_button(gtk.STOCK_GO_FORWARD, find_next)
-#        b.set_relief(gtk.RELIEF_NONE)
+#        b=get_small_stock_button(Gtk.STOCK_GO_FORWARD, find_next)
+#        b.set_relief(Gtk.ReliefStyle.NONE)
 #        b.set_tooltip_text(_("Find next occurrence"))
-#        self.searchbox.pack_start(b, expand=False, fill=False)
+#        self.searchbox.pack_start(b, False, False, 0)
 
-        fill=gtk.HBox()
-        self.searchbox.pack_start(fill, expand=True, fill=True)
+        fill=Gtk.HBox()
+        self.searchbox.pack_start(fill, True, True, 0)
 
-        mainbox.pack_start(self.searchbox, expand=False)
+        mainbox.pack_start(self.searchbox, False, True, 0)
 
-        self.statusbar=gtk.Statusbar()
-        self.statusbar.set_has_resize_grip(False)
-        mainbox.pack_start(self.statusbar, expand=False)
+        self.statusbar=Gtk.Statusbar()
+        mainbox.pack_start(self.statusbar, False, True, 0)
 
         mainbox.show_all()
 
@@ -432,7 +432,7 @@ class TranscriptionView(AdhocView):
         finished=False
 
         while not finished:
-            res=begin.forward_search(searched, gtk.TEXT_SEARCH_TEXT_ONLY)
+            res=begin.forward_search(searched, Gtk.TextSearchFlags.TEXT_ONLY)
             if not res:
                 finished=True
             else:
@@ -454,11 +454,11 @@ class TranscriptionView(AdhocView):
             return False
         menu.foreach(menu.remove)
 
-        item=gtk.SeparatorMenuItem()
+        item=Gtk.SeparatorMenuItem()
         item.show()
         menu.append(item)
 
-        item = gtk.MenuItem(_("Annotation %s") % self.currentannotation.id, use_underline=False)
+        item = Gtk.MenuItem(_("Annotation %s") % self.currentannotation.id, use_underline=False)
         menuc=advene.gui.popup.Menu(self.currentannotation,
                                     controller=self.controller)
         item.set_submenu(menuc.menu)
@@ -469,7 +469,7 @@ class TranscriptionView(AdhocView):
             self.play_annotation(a)
             return True
 
-        item = gtk.MenuItem(_("Play"))
+        item = Gtk.MenuItem(_("Play"))
         item.connect('activate', play_annotation, self.currentannotation)
         item.show()
         menu.append(item)
@@ -477,10 +477,10 @@ class TranscriptionView(AdhocView):
         return False
 
     def key_press_event_cb (self, textview, event):
-        if event.keyval == gtk.keysyms.F3:
+        if event.keyval == Gdk.KEY_F3:
             self.searchbox.show_all()
             return True
-        elif event.keyval == gtk.keysyms.Return and event.state & gtk.gdk.CONTROL_MASK:
+        elif event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Control-return: goto annotation
             if self.currentannotation is not None:
                 self.play_annotation(self.currentannotation)
@@ -490,21 +490,21 @@ class TranscriptionView(AdhocView):
     def button_press_event_cb(self, textview, event):
         if event.button != 1:
             return False
-        textwin=textview.get_window(gtk.TEXT_WINDOW_TEXT)
-        if event.window != textwin:
+        textwin=textview.get_window(Gtk.TextWindowType.TEXT)
+        if event.get_window() != textwin:
             return False
 
-        (x, y) = textview.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
+        (x, y) = textview.window_to_buffer_coords(Gtk.TextWindowType.TEXT,
                                                   int(event.x),
                                                   int(event.y))
         it=textview.get_iter_at_location(x, y)
         if it is None:
             print "Error in get_iter_at_location"
             return False
-        textview.get_buffer().move_mark_by_name('insert', it)
-        textview.get_buffer().move_mark_by_name('selection_bound', it)
+        textview.get_buffer().move_mark_by_name('insert', it.iter)
+        textview.get_buffer().move_mark_by_name('selection_bound', it.iter)
         self.update_current_annotation()
-        if self.currentannotation is not None and event.type == gtk.gdk._2BUTTON_PRESS:
+        if self.currentannotation is not None and event.type == Gdk.EventType._2BUTTON_PRESS:
             # Double click -> goto annotation
             self.play_annotation(self.currentannotation)
         return False
@@ -646,7 +646,7 @@ class TranscriptionView(AdhocView):
             # Make sure that the annotation is visible
             m=self.textview.get_buffer().get_mark("b_%s" % a.id)
             if m:
-                self.textview.scroll_to_mark(m, 0.2)
+                self.textview.scroll_to_mark(m, 0.2, False, 0, 0)
 
         self.tag_annotation(a, "activated")
         return True
@@ -680,8 +680,8 @@ class TranscriptionView(AdhocView):
 
     def save_transcription(self, button=None):
         fname=dialog.get_filename(title= ("Save transcription to..."),
-                                           action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                           button=gtk.STOCK_SAVE)
+                                           action=Gtk.FileChooserAction.SAVE,
+                                           button=Gtk.STOCK_SAVE)
         if fname is not None:
             self.save_output(filename=fname)
             return True
@@ -690,7 +690,7 @@ class TranscriptionView(AdhocView):
     def save_output(self, filename=None):
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()
-        out=unicode(b.get_text(begin, end)).replace(ZERO_WIDTH_NOBREAK_SPACE, '')
+        out=unicode(b.get_text(begin, end, False)).replace(ZERO_WIDTH_NOBREAK_SPACE, '')
         try:
             f=open(filename, "w")
         except Exception, e:

@@ -18,7 +18,7 @@
 #
 """Gstreamer recorder interface.
 
-Based on gst >= 0.10 API.
+Based on gst >= 1.0 API.
 """
 
 import tempfile
@@ -26,22 +26,22 @@ import time
 
 import advene.core.config as config
 
-import gobject
-gobject.threads_init()
+from gi.repository import GObject
+GObject.threads_init()
 
 try:
-    import pygst
-    pygst.require('0.10')
-    import gst
+    import gi
+    gi.require_version('Gst', '1.0')
+    from gi.repository import Gst
 except ImportError:
-    gst=None
+    Gst=None
 
 import os
 
 name="GStreamer video recorder"
 
 def register(controller=None):
-    if gst is None:
+    if Gst is None:
         return False
     controller.register_player(Player)
     return True
@@ -138,7 +138,7 @@ class Player:
             # Generate black image
             videosrc = 'videotestsrc pattern=2'
 
-        self.pipeline=gst.parse_launch('%(videosrc)s name=videosrc ! video/x-raw-yuv,width=352,pixel-aspect-ratio=(fraction)1/1 ! queue ! tee name=tee ! ffmpegcolorspace ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s name=audiosrc ! audioconvert ! audiorate ! queue ! vorbisenc quality=0.5 ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
+        self.pipeline=Gst.parse_launch('%(videosrc)s name=videosrc ! video/x-raw-yuv,width=352,pixel-aspect-ratio=(fraction)1/1 ! queue ! tee name=tee ! ffmpegcolorspace ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s name=audiosrc ! audioconvert ! audiorate ! queue ! vorbisenc quality=0.5 ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
         self.imagesink=self.pipeline.get_by_name('sink')
         self.videosrc=self.pipeline.get_by_name('videosrc')
         self.audiosrc=self.pipeline.get_by_name('audiosrc')
@@ -174,9 +174,9 @@ class Player:
         if self.player is None:
             return self.UndefinedStatus
         st=self.player.get_state()[1]
-        if st == gst.STATE_PLAYING:
+        if st == Gst.State.PLAYING:
             return self.PlayingStatus
-        elif st == gst.STATE_PAUSED:
+        elif st == Gst.State.PAUSED:
             return self.PauseStatus
         else:
             return self.UndefinedStatus
@@ -187,11 +187,11 @@ class Player:
         if self.player is None:
             return 0
         try:
-            pos, format = self.player.query_position(gst.FORMAT_TIME)
+            pos, format = self.player.query_position(Gst.Format.TIME)
         except:
             position = 0
         else:
-            position = pos * 1.0 / gst.MSECOND
+            position = pos * 1.0 / Gst.MSECOND
         return position
 
     def dvd_uri(self, title=None, chapter=None):
@@ -218,7 +218,7 @@ class Player:
         self.build_pipeline()
         if self.player is None:
             return
-        self.player.set_state(gst.STATE_PLAYING)
+        self.player.set_state(Gst.State.PLAYING)
 
     def pause(self, position=None):
         # Ignore
@@ -232,12 +232,12 @@ class Player:
         self.stream_duration=self.current_position
         if self.player is None:
             return
-        self.player.set_state(gst.STATE_NULL)
+        self.player.set_state(Gst.State.NULL)
 
     def exit(self):
         if self.player is None:
             return
-        self.player.set_state(gst.STATE_NULL)
+        self.player.set_state(Gst.State.NULL)
 
     def playlist_add_item(self, item):
         if item is None:
@@ -358,8 +358,8 @@ class Player:
 
     def set_visual(self, xid):
         self.xid = xid
-        if self.imagesink.implements_interface(gst.interfaces.XOverlay):
-            realsink = autovideosink.get_by_interface(gst.interfaces.XOverlay)
+        if self.imagesink.implements_interface(Gst.interfaces.XOverlay):
+            realsink = self.autovideosink.get_by_interface(Gst.interfaces.XOverlay)
             if realsink:
                 realsink.set_xwindow_id(self.xid)
                 if hasattr(realsink.props, 'force-aspect-ratio'):
@@ -368,7 +368,7 @@ class Player:
 
     def restart_player(self):
         # FIXME: destroy the previous player
-        self.player.set_state(gst.STATE_READY)
+        self.player.set_state(Gst.State.READY)
         # Rebuilt the pipeline
         self.build_pipeline()
         self.playlist_add_item(self.videofile)

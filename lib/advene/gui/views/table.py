@@ -16,7 +16,9 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import gtk
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import Gtk
 import csv
 
 from gettext import gettext as _
@@ -81,7 +83,7 @@ class AnnotationTable(AdhocView):
         self.widget.connect('destroy', unregister)
 
     def update_annotation(self, annotation=None, event=None):
-        if annotation in self.elements:
+        if self.elements and annotation in self.elements:
             if event.endswith('Delete'):
                 self.elements.remove(annotation)
             self.set_elements(self.elements)
@@ -117,8 +119,8 @@ class AnnotationTable(AdhocView):
         else:
             def custom(a):
                 return tuple()
-        args = (object, str, str, str, long, long, str, str, str, gtk.gdk.Pixbuf, str) + custom(None)
-        l=gtk.ListStore(*args)
+        args = (object, str, str, str, long, long, str, str, str, GdkPixbuf.Pixbuf, str) + custom(None)
+        l=Gtk.ListStore(*args)
         if not elements:
             return l
         for a in elements:
@@ -156,6 +158,8 @@ class AnnotationTable(AdhocView):
         tuple with the appropriate values for the annotation in the
         custom columns.
         """
+        if elements is None:
+            elements = []
         model=self.build_model(elements, custom_data)
         self.widget.treeview.set_model(model)
         self.model = model
@@ -174,14 +178,14 @@ class AnnotationTable(AdhocView):
             self.last_edited_path = None
 
     def motion_notify_event_cb(self, tv, event):
-        if not event.window is tv.get_bin_window():
+        if not event.get_window() is tv.get_bin_window():
             return False
         if event.is_hint:
-            x, y, state = event.window.get_pointer()
+            x, y, state = event.get_window().get_pointer()
         else:
             x = long(event.x)
             y = long(event.y)
-            state = event.state
+            state = event.get_state()
         t = tv.get_path_at_pos(x, y)
         if t is not None:
             path, col, cx, cy = t
@@ -203,10 +207,10 @@ class AnnotationTable(AdhocView):
         return False
 
     def build_widget(self):
-        tree_view = gtk.TreeView(self.model)
+        tree_view = Gtk.TreeView(self.model)
 
         select = tree_view.get_selection()
-        select.set_mode(gtk.SELECTION_MULTIPLE)
+        select.set_mode(Gtk.SelectionMode.MULTIPLE)
 
         tree_view.connect('button-press-event', self.tree_view_button_cb)
         tree_view.connect('key-press-event', self.tree_view_key_cb)
@@ -224,7 +228,7 @@ class AnnotationTable(AdhocView):
 
         columns={}
 
-        columns['snapshot']=gtk.TreeViewColumn(_("Snapshot"), gtk.CellRendererPixbuf(), pixbuf=COLUMN_PIXBUF)
+        columns['snapshot']=Gtk.TreeViewColumn(_("Snapshot"), Gtk.CellRendererPixbuf(), pixbuf=COLUMN_PIXBUF)
         columns['snapshot'].set_reorderable(True)
         tree_view.append_column(columns['snapshot'])
 
@@ -246,6 +250,21 @@ class AnnotationTable(AdhocView):
                 self.controller.notify('EditSessionEnd', element=a)
             return True
 
+        def entry_editing_started(cell, editable, path):
+            if isinstance(editable, Gtk.Entry):
+                completion = Gtk.EntryCompletion()
+                it = self.model.get_iter_from_string(path)
+                if not it:
+                    return
+                el = self.model.get_value(it, COLUMN_ELEMENT)
+                # Build the completion list
+                store = Gtk.ListStore(str)
+                for c in self.controller.package._indexer.get_completions("", context=el):
+                    store.append([ c ])
+                completion.set_model(store)
+                completion.set_text_column(0)
+                editable.set_completion(completion)
+
         for (name, label, col) in (
             ('content', _("Content"), COLUMN_CONTENT),
             ('type', _("Type"), COLUMN_TYPE),
@@ -253,9 +272,10 @@ class AnnotationTable(AdhocView):
             ('end', _("End"), COLUMN_END_FORMATTED),
             ('duration', _("Duration"), COLUMN_DURATION),
             ('id', _("Id"), COLUMN_ID) ):
-            renderer = gtk.CellRendererText()
-            columns[name]=gtk.TreeViewColumn(label, renderer, text=col)
+            renderer = Gtk.CellRendererText()
+            columns[name]=Gtk.TreeViewColumn(label, renderer, text=col)
             if name == 'content':
+                renderer.connect('editing-started', entry_editing_started)
                 renderer.connect('edited', cell_edited)
                 renderer.props.editable = True
 
@@ -266,14 +286,14 @@ class AnnotationTable(AdhocView):
         # Column-specific settings
         columns['begin'].set_sort_column_id(COLUMN_BEGIN)
         columns['end'].set_sort_column_id(COLUMN_END)
-        self.model.set_sort_column_id(COLUMN_BEGIN, gtk.SORT_ASCENDING)
-        columns['type'].add_attribute(columns['type'].get_cell_renderers()[0],
+        self.model.set_sort_column_id(COLUMN_BEGIN, Gtk.SortType.ASCENDING)
+        columns['type'].add_attribute(columns['type'].get_cells()[0],
                                       'cell-background',
                                       COLUMN_COLOR)
 
         # Resizable columns: content, type
         for name in ('content', 'type', 'snapshot'):
-            columns[name].set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+            columns[name].set_sizing(Gtk.TreeViewColumnSizing.FIXED)
             columns[name].set_resizable(True)
             columns[name].set_min_width(40)
         columns['content'].set_expand(True)
@@ -282,13 +302,12 @@ class AnnotationTable(AdhocView):
         self.columns = columns
 
         # Drag and drop for annotations
-        tree_view.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                                  config.data.drag_type['annotation']
-                                  + config.data.drag_type['text-plain']
-                                  + config.data.drag_type['TEXT']
-                                  + config.data.drag_type['STRING']
-                                  ,
-                                  gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        tree_view.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                                  config.data.get_target_types('annotation',
+                                                               'text-plain',
+                                                               'TEXT',
+                                                               'STRING'),
+                                  Gdk.DragAction.LINK | Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
 
         def get_element():
             selection = tree_view.get_selection ()
@@ -311,32 +330,31 @@ class AnnotationTable(AdhocView):
         def drag_received_cb(widget, context, x, y, selection, targetType, time):
             """Handle the drop of an annotation type.
             """
-            if context.get_source_widget().is_ancestor(self.widget):
+            if Gtk.drag_get_source_widget(context).is_ancestor(self.widget):
                 # Ignore drops from our own widget
                 return False
 
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources)
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                sources=[ self.controller.package.annotationTypes.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotationTypes.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources[0].annotations)
                 return True
             return False
 
         tree_view.connect('drag-data-received', drag_received_cb)
-        tree_view.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'] +
-                        config.data.drag_type['annotation-type'],
-                        gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+        tree_view.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('annotation', 'annotation-type'),
+                        Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add(tree_view)
 
         sw.treeview = tree_view
@@ -349,14 +367,14 @@ class AnnotationTable(AdhocView):
         els=[ model[p][COLUMN_ELEMENT] for p in paths ]
 
         if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, "\n".join( e.uri.encode('utf8')
+            selection.set(selection.get_target(), 8, "\n".join( e.uri.encode('utf8')
                                                           for e in els
                                                           if isinstance(e, Annotation) ))
             return True
         elif (targetType == config.data.target_type['text-plain']
               or targetType == config.data.target_type['TEXT']
               or targetType == config.data.target_type['STRING']):
-            selection.set(selection.target, 8, "\n".join(e.content.data.encode('utf8')
+            selection.set(selection.get_target(), 8, "\n".join(e.content.data.encode('utf8')
                                                           for e in els
                                                           if isinstance(e, Annotation) ))
         else:
@@ -381,8 +399,8 @@ class AnnotationTable(AdhocView):
         if name is None:
             name=dialog.get_filename(title=_("Export data to file..."),
                                               default_file="advene_data.csv",
-                                              action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                              button=gtk.STOCK_SAVE)
+                                              action=Gtk.FileChooserAction.SAVE,
+                                              button=Gtk.STOCK_SAVE)
         if name is None:
             return True
         try:
@@ -392,7 +410,7 @@ class AnnotationTable(AdhocView):
                                           % {
                         'filename': name,
                         'error': unicode(e),
-                        }), icon=gtk.MESSAGE_ERROR)
+                        }), icon=Gtk.MessageType.ERROR)
         w=csv.writer(f)
         tv=self.widget.treeview
         store, paths=tv.get_selection().get_selected_rows()
@@ -418,7 +436,7 @@ class AnnotationTable(AdhocView):
         return False
 
     def tree_view_key_cb(self, widget=None, event=None):
-        if event.keyval == gtk.keysyms.Return and event.state & gtk.gdk.CONTROL_MASK:
+        if event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Control-return: goto annotation
             nodes = self.get_selected_nodes ()
             if len(nodes) == 1 and nodes[0] is not None:
@@ -429,7 +447,7 @@ class AnnotationTable(AdhocView):
         return False
 
     def tree_view_button_cb(self, widget=None, event=None):
-        if not event.window is widget.get_bin_window():
+        if not event.get_window() is widget.get_bin_window():
             return False
 
         retval = False
@@ -496,7 +514,7 @@ class GenericTable(AdhocView):
 
         Columns: element, content (title), type, id
         """
-        l=gtk.ListStore(object, str, str, str)
+        l=Gtk.ListStore(object, str, str, str)
         if not elements:
             return l
         for e in elements:
@@ -510,8 +528,8 @@ class GenericTable(AdhocView):
         if name is None:
             name=dialog.get_filename(title=_("Export data to file..."),
                                               default_file="advene_data.csv",
-                                              action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                              button=gtk.STOCK_SAVE)
+                                              action=Gtk.FileChooserAction.SAVE,
+                                              button=Gtk.STOCK_SAVE)
         if name is None:
             return True
         try:
@@ -522,7 +540,7 @@ class GenericTable(AdhocView):
                         'filename': name,
                         'error': unicode(e),
                         }),
-                                  icon=gtk.MESSAGE_ERROR)
+                                  icon=Gtk.MessageType.ERROR)
         w=csv.writer(f)
         tv=self.widget.treeview
         store, paths=tv.get_selection().get_selected_rows()
@@ -536,10 +554,10 @@ class GenericTable(AdhocView):
         self.log(_("Data exported to %s") % name)
 
     def build_widget(self):
-        tree_view = gtk.TreeView(self.model)
+        tree_view = Gtk.TreeView(self.model)
 
         select = tree_view.get_selection()
-        select.set_mode(gtk.SELECTION_MULTIPLE)
+        select.set_mode(Gtk.SelectionMode.MULTIPLE)
 
         tree_view.connect('button-press-event', self.tree_view_button_cb)
         tree_view.connect('row-activated', self.row_activated_cb)
@@ -557,22 +575,22 @@ class GenericTable(AdhocView):
             ('title', _("Title"), COLUMN_CONTENT),
             ('type', _("Type"), COLUMN_TYPE),
             ('id', _("Id"), COLUMN_ID) ):
-            columns[name]=gtk.TreeViewColumn(label, gtk.CellRendererText(), text=col)
+            columns[name]=Gtk.TreeViewColumn(label, Gtk.CellRendererText(), text=col)
             columns[name].set_reorderable(True)
             columns[name].set_sort_column_id(col)
             tree_view.append_column(columns[name])
 
-        self.model.set_sort_column_id(COLUMN_CONTENT, gtk.SORT_ASCENDING)
+        self.model.set_sort_column_id(COLUMN_CONTENT, Gtk.SortType.ASCENDING)
 
         # Resizable columns: title, type
         for name in ('title', 'type'):
-            columns[name].set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+            columns[name].set_sizing(Gtk.TreeViewColumnSizing.FIXED)
             columns[name].set_resizable(True)
             columns[name].set_min_width(40)
         columns['title'].set_expand(True)
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add(tree_view)
 
         sw.treeview = tree_view
@@ -581,29 +599,28 @@ class GenericTable(AdhocView):
         def drag_received_cb(widget, context, x, y, selection, targetType, time):
             """Handle the drop of an annotation type.
             """
-            if context.get_source_widget().is_ancestor(self.widget):
+            if Gtk.drag_get_source_widget(context).is_ancestor(self.widget):
                 # Ignore drops from our own widget
                 return False
 
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources)
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                sources=[ self.controller.package.annotationTypes.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotationTypes.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources[0].annotations)
                 return True
             return False
 
         tree_view.connect('drag-data-received', drag_received_cb)
-        tree_view.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'] +
-                        config.data.drag_type['annotation-type'],
-                        gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+        tree_view.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                Gtk.DestDefaults.HIGHLIGHT |
+                                Gtk.DestDefaults.ALL,
+                                config.data.get_target_types('annotation', 'annotation-type'),
+                                Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
 
         return sw
 
@@ -639,7 +656,7 @@ class GenericTable(AdhocView):
         y = int(event.y)
 
         if button == 3 or button == 2:
-            if event.window is widget.get_bin_window():
+            if event.get_window() is widget.get_bin_window():
                 model = self.model
                 t = widget.get_path_at_pos(x, y)
                 if t is not None:

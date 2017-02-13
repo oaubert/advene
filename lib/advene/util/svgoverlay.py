@@ -113,9 +113,9 @@ class SVGOverlay(gst.Element):
         Use None to reset.
         """
         if data is not None:
-            self.svg=rsvg.Handle(data=data)
+            self.svg=rsvg.Handle.new_from_data(data=data)
         elif filename is not None:
-            self.svg=rsvg.Handle(filename)
+            self.svg=rsvg.Handle.new_from_file(filename)
         else:
             self.svg=None
 

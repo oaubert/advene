@@ -19,15 +19,15 @@
 """PlayPause button.
 """
 
-import gtk
+from gi.repository import Gtk
 
 import advene.core.config as config
 
-class PlayPauseButton(gtk.ToolButton):
+class PlayPauseButton(Gtk.ToolButton):
     def __init__(self, *p, **kw):
         super(PlayPauseButton, self).__init__(*p, **kw)
-        self.active_id = gtk.STOCK_MEDIA_PLAY
-        self.inactive_id = gtk.STOCK_MEDIA_PAUSE
+        self.active_id = Gtk.STOCK_MEDIA_PLAY
+        self.inactive_id = Gtk.STOCK_MEDIA_PAUSE
         self.is_active = True
 
     def set_stock_ids(self, active_id, inactive_id):

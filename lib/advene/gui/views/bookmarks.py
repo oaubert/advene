@@ -18,8 +18,9 @@
 #
 """Module displaying time bookmarks (for navigation history for instance)."""
 
-import gtk
-import pango
+from gi.repository import Gdk
+from gi.repository import Gtk
+from gi.repository import Pango
 import urllib
 
 # Advene part
@@ -174,7 +175,7 @@ class Bookmarks(AdhocView):
             return True
         b=BookmarkWidget(self.controller, position, comment, self.display_comments)
         self.bookmarks.append(b)
-        self.mainbox.pack_start(b.widget, expand=False)
+        self.mainbox.pack_start(b.widget, False, True, 0)
         b.widget.show_all()
         self.autoscroll()
         return True
@@ -182,7 +183,7 @@ class Bookmarks(AdhocView):
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
         for b in self.bookmarks:
-            self.mainbox.pack_start(b.widget, expand=False)
+            self.mainbox.pack_start(b.widget, False, True, 0)
         self.mainbox.show_all()
         self.autoscroll()
         return True
@@ -198,17 +199,17 @@ class Bookmarks(AdhocView):
                 adj=self.scrollwindow.get_vadjustment()
             else:
                 adj=self.scrollwindow.get_hadjustment()
-            adj.set_value(adj.upper)
+            adj.set_value(adj.get_upper())
 
     def build_widget(self):
-        v=gtk.VBox()
+        v=Gtk.VBox()
 
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
         hb.set_homogeneous(False)
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['timestamp']:
-                data=decode_drop_parameters(selection.data)
+                data=decode_drop_parameters(selection.get_data())
                 position=long(data['timestamp'])
                 w=self.get_matching_bookmark(position)
                 if position is not None:
@@ -219,14 +220,15 @@ class Bookmarks(AdhocView):
                 print "Unknown target type for drop: %d" % targetType
             return False
 
-        b=get_small_stock_button(gtk.STOCK_DELETE)
+        b=get_small_stock_button(Gtk.STOCK_DELETE)
         b.set_tooltip_text(_("Drop a position here to remove it from the list"))
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+        b.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('timestamp'),
+                        Gdk.DragAction.LINK | Gdk.DragAction.COPY)
         b.connect('drag-data-received', remove_drag_received)
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
         def bookmark_current_time(b):
             p=self.controller.player
@@ -237,30 +239,30 @@ class Bookmarks(AdhocView):
                 self.append(v)
             return True
 
-        tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
+        tb=Gtk.Toolbar()
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
         for icon, action, tip in (
             ('set-to-now.png', bookmark_current_time, _("Insert a bookmark for the current video time")),
-            (gtk.STOCK_CONVERT, self.convert_to_annotations, _("Convert bookmarks to annotations")),
-            (gtk.STOCK_SAVE, self.save_view, _("Save view")),
+            (Gtk.STOCK_CONVERT, self.convert_to_annotations, _("Convert bookmarks to annotations")),
+            (Gtk.STOCK_SAVE, self.save_view, _("Save view")),
             ):
             if icon.endswith('.png'):
                 b=get_pixmap_toolbutton(icon)
             else:
-                b=gtk.ToolButton(stock_id=icon)
+                b=Gtk.ToolButton(stock_id=icon)
             b.set_tooltip_text(tip)
             b.connect('clicked', action)
             tb.insert(b, -1)
         hb.add(tb)
-        v.pack_start(hb, expand=False)
+        v.pack_start(hb, False, True, 0)
 
         if self.options['vertical']:
-            mainbox=gtk.VBox()
+            mainbox=Gtk.VBox()
         else:
-            mainbox=gtk.HBox()
+            mainbox=Gtk.HBox()
 
-        sw=gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw=Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
 
         sw.add_with_viewport(mainbox)
         self.scrollwindow=sw
@@ -268,7 +270,7 @@ class Bookmarks(AdhocView):
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['timestamp']:
-                data=decode_drop_parameters(selection.data)
+                data=decode_drop_parameters(selection.get_data())
                 position=long(data['timestamp'])
                 comment=data.get('comment', '')
                 self.append(position, comment=comment)
@@ -277,10 +279,10 @@ class Bookmarks(AdhocView):
                 print "Unknown target type for drop: %d" % targetType
             return False
 
-        self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                  gtk.DEST_DEFAULT_HIGHLIGHT |
-                                  gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+        self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                  Gtk.DestDefaults.HIGHLIGHT |
+                                  Gtk.DestDefaults.ALL,
+                                  config.data.get_target_types('timestamp'), Gdk.DragAction.LINK | Gdk.DragAction.COPY)
         self.mainbox.connect('drag-data-received', mainbox_drag_received)
 
         v.add(sw)
@@ -314,43 +316,43 @@ class BookmarkWidget(object):
         self.image.connect('clicked', self.image.goto_and_refresh)
 
         if self.display_comments:
-            hbox=gtk.HBox()
-            self.comment_entry=gtk.TextView()
+            hbox=Gtk.HBox()
+            self.comment_entry=Gtk.TextView()
             # Hook the completer component
             completer=Completer(textview=self.comment_entry,
                                 controller=self.controller,
                                 element=self.comment_entry.get_buffer(),
                                 indexer=self.controller.package._indexer)
-            self.comment_entry.set_wrap_mode(gtk.WRAP_WORD)
-            fd=pango.FontDescription('sans %d' % config.data.preferences['timeline']['font-size'])
+            self.comment_entry.set_wrap_mode(Gtk.WrapMode.WORD)
+            fd=Pango.FontDescription('sans %d' % config.data.preferences['timeline']['font-size'])
             self.comment_entry.modify_font(fd)
             b=self.comment_entry.get_buffer()
             b.set_text(self.comment)
 
             def focus_in_event(wid, event):
-                if unicode(b.get_text(*b.get_bounds())) == self.default_comment:
+                if unicode(b.get_text(*b.get_bounds() + [False])) == self.default_comment:
                     b.set_text('')
                 return False
             self.comment_entry.connect('focus-in-event', focus_in_event)
 
             def focus_out_event(wid, event):
-                if b.get_text(*b.get_bounds()) == '':
+                if b.get_text(*b.get_bounds() + [False]) == '':
                     b.set_text(self.default_comment)
                 return False
             self.comment_entry.connect('focus-out-event', focus_out_event)
 
             def update_comment(buf):
-                self.comment=unicode(buf.get_text(*buf.get_bounds()))
+                self.comment=unicode(buf.get_text(*buf.get_bounds() + [False]))
                 return True
             b.connect('changed', update_comment)
 
             #self.comment_entry.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
 
-            sw=gtk.ScrolledWindow()
+            sw=Gtk.ScrolledWindow()
             sw.add(self.comment_entry)
-            sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
-            hbox.pack_start(self.image, expand=False)
-            hbox.pack_start(sw, expand=True)
+            sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
+            hbox.pack_start(self.image, False, True, 0)
+            hbox.pack_start(sw, True, True, 0)
             hbox.show_all()
             return hbox
         else:

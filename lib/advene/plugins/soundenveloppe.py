@@ -23,21 +23,14 @@ from gettext import gettext as _
 
 import os
 import sys
-import urllib
-import gobject
-import gst
+from gi.repository import GObject
+from gi.repository import Gst
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
 import advene.util.helper as helper
 
-try:
-    from math import isinf, isnan
-except ImportError:
-    # python <= 2.5
-    def isnan(f):
-        return repr(f) == 'nan'
-    isinf = isnan
+from math import isinf, isnan
 
 def register(controller=None):
     controller.register_importer(SoundEnveloppeImporter)
@@ -98,15 +91,15 @@ class SoundEnveloppeImporter(GenericImporter):
 
     def on_bus_message(self, bus, message):
         def finalize():
-            pos = self.pipeline.query_position(gst.FORMAT_TIME)[0] / gst.MSECOND
-            gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
+            pos = self.pipeline.query_position(Gst.Format.TIME)[0] / Gst.MSECOND
+            GObject.idle_add(lambda: self.pipeline.set_state(Gst.State.NULL) and False)
             # Add last buffer data
             self.buffer_list.append((self.first_item_time, pos, list(self.buffer)))
             self.generate_normalized_annotations()
             self.end_callback()
             return True
 
-        if message.type == gst.MESSAGE_EOS:
+        if message.type == Gst.MessageType.EOS:
             finalize()
         elif message.structure:
             s=message.structure
@@ -116,7 +109,7 @@ class SoundEnveloppeImporter(GenericImporter):
                     finalize()
             elif s.get_name() == 'level':
                 if not self.buffer:
-                    self.first_item_time = s['stream-time'] / gst.MSECOND
+                    self.first_item_time = s['stream-time'] / Gst.MSECOND
                 rms = s['rms']
                 v = rms[0]
                 if len(rms) > 1:
@@ -133,7 +126,7 @@ class SoundEnveloppeImporter(GenericImporter):
                 self.lastval = v
                 self.buffer.append(v)
                 if len(self.buffer) >= self.count:
-                    self.buffer_list.append((self.first_item_time, s['endtime'] / gst.MSECOND, list(self.buffer)))
+                    self.buffer_list.append((self.first_item_time, s['endtime'] / Gst.MSECOND, list(self.buffer)))
                     self.buffer = []
         return True
 
@@ -145,7 +138,7 @@ class SoundEnveloppeImporter(GenericImporter):
         at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Sound enveloppe"))
 
         # Build pipeline
-        self.pipeline = gst.parse_launch('uridecodebin name=decoder ! audioconvert ! level name=level interval=%s ! progressreport silent=true update-freq=1 name=report ! fakesink' % str(self.interval * gst.MSECOND))
+        self.pipeline = Gst.parse_launch('uridecodebin name=decoder ! audioconvert ! level name=level interval=%s ! progressreport silent=true update-freq=1 name=report ! fakesink' % str(self.interval * Gst.MSECOND))
         self.decoder = self.pipeline.get_by_name('decoder')
         bus = self.pipeline.get_bus()
         # Enabling sync_message_emission will in fact force the
@@ -160,5 +153,5 @@ class SoundEnveloppeImporter(GenericImporter):
         else:
             self.decoder.props.uri = 'file://' + os.path.abspath(filename)
         self.progress(0, _("Extracting sound enveloppe"))
-        self.pipeline.set_state(gst.STATE_PLAYING)
+        self.pipeline.set_state(Gst.State.PLAYING)
         return self.package

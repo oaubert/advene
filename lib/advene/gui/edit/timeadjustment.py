@@ -23,7 +23,8 @@ It depends on a Controller instance to be able to interact with the video player
 
 import advene.core.config as config
 
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 import advene.util.helper as helper
 from advene.gui.widget import TimestampRepresentation
 from advene.gui.util import encode_drop_parameters, decode_drop_parameters
@@ -59,8 +60,8 @@ class TimeAdjustment:
             return True
 
         def image_button_clicked(button):
-            event=gtk.get_current_event()
-            if event.state & gtk.gdk.CONTROL_MASK:
+            event=Gtk.get_current_event()
+            if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 self.use_current_position(button)
                 return True
             else:
@@ -68,31 +69,23 @@ class TimeAdjustment:
                 return True
 
         def image_button_press(button, event):
-            if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
                 # Display the popup menu
-                menu = gtk.Menu()
-                item = gtk.MenuItem(_("Refresh snapshot"))
+                menu = Gtk.Menu()
+                item = Gtk.MenuItem(_("Refresh snapshot"))
                 item.connect('activate', refresh_snapshot)
                 menu.append(item)
                 menu.show_all()
-                menu.popup(None, None, None, 0, gtk.get_current_event_time())
+                menu.popup_at_pointer(None)
                 return True
             return False
 
         def make_button(incr_value, pixmap):
             """Helper function to build the buttons."""
-            b=gtk.Button()
-            i=gtk.Image()
+            b=Gtk.Button()
+            i=Gtk.Image()
             i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-            # FIXME: to re-enable
-            # The proper way is to do
-            #b.set_image(i)
-            # but it works only on linux, gtk 2.10
-            # and is broken on windows and mac
-            al=gtk.Alignment()
-            al.set_padding(0, 0, 0, 0)
-            al.add(i)
-            b.add(al)
+            b.set_image(i)
 
             def increment_value_cb(widget, increment):
                 self.set_value(self.value + increment)
@@ -105,18 +98,18 @@ class TimeAdjustment:
             b.set_tooltip_text(tip)
             return b
 
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        hbox=gtk.HBox()
+        hbox=Gtk.HBox()
         hbox.set_homogeneous(False)
 
         if self.editable:
-            vb=gtk.VBox()
+            vb=Gtk.VBox()
             b=make_button(-self.large_increment, "2leftarrow.png")
-            vb.pack_start(b, expand=False)
+            vb.pack_start(b, False, True, 0)
             b=make_button(-self.small_increment, "1leftarrow.png")
-            vb.pack_start(b, expand=False)
-            hbox.pack_start(vb, expand=False)
+            vb.pack_start(b, False, True, 0)
+            hbox.pack_start(vb, False, True, 0)
 
         if self.compact:
             width=50
@@ -128,41 +121,41 @@ class TimeAdjustment:
         self.image.connect('button-press-event', image_button_press)
         self.image.connect('clicked', image_button_clicked)
         self.image.set_tooltip_text(_("Click to play\nControl+click to set to current time\nScroll to modify value (with control/shift)\nRight-click to invalidate screenshot"))
-        hbox.pack_start(self.image, expand=False)
+        hbox.pack_start(self.image, False, True, 0)
 
         if self.editable:
-            vb=gtk.VBox()
+            vb=Gtk.VBox()
             b=make_button(self.large_increment, "2rightarrow.png")
-            vb.pack_start(b, expand=False)
+            vb.pack_start(b, False, True, 0)
             b=make_button(self.small_increment, "1rightarrow.png")
-            vb.pack_start(b, expand=False)
-            hbox.pack_start(vb, expand=False)
+            vb.pack_start(b, False, True, 0)
+            hbox.pack_start(vb, False, True, 0)
 
-        hb = gtk.HBox()
+        hb = Gtk.HBox()
 
         if self.editable:
-            self.entry=gtk.Entry()
+            self.entry=Gtk.Entry()
             self.entry.set_tooltip_text(_("Enter a timecode.\nAn integer value will be considered as milliseconds.\nA float value (12.2) will be considered as seconds.\nHH:MM:SS.sss values are possible."))
             # Default width of the entry field
             self.entry.set_width_chars(len(helper.format_time(0.0)))
             self.entry.connect('activate', self.convert_entered_value)
             self.entry.connect('focus-out-event', self.convert_entered_value)
             self.entry.set_editable(self.editable)
-            hb.pack_start(self.entry, expand=False)
+            hb.pack_start(self.entry, False, True, 0)
         else:
             self.entry=None
 
         if self.editable:
-            current_pos=gtk.Button()
-            i=gtk.Image()
+            current_pos=Gtk.Button()
+            i=Gtk.Image()
             i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
             current_pos.set_tooltip_text(_("Set to current player position"))
             current_pos.add(i)
             current_pos.connect('clicked', self.use_current_position)
-            hb.pack_start(current_pos, expand=False)
+            hb.pack_start(current_pos, False, True, 0)
 
-        vbox.pack_start(hbox, expand=False)
-        vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hbox, False, True, 0)
+        vbox.pack_start(hb, False, True, 0)
         hb.set_style(self.image.box.get_style())
         #self.entry.set_style(self.image.box.get_style())
         vbox.set_style(self.image.box.get_style())
@@ -174,17 +167,17 @@ class TimeAdjustment:
         hb.show()
 
         def handle_scroll_event(button, event):
-            if event.state & gtk.gdk.CONTROL_MASK:
+            if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 i=config.data.preferences['scroll-increment']
-            elif event.state & gtk.gdk.SHIFT_MASK:
+            elif event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 i=config.data.preferences['second-scroll-increment']
             else:
                 # 1 frame
                 i=1000 / config.data.preferences['default-fps']
 
-            if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_LEFT:
+            if event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.LEFT:
                 incr=-i
-            elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_RIGHT:
+            elif event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.RIGHT:
                 incr=i
 
             if not self.set_value(self.value + incr):
@@ -194,12 +187,11 @@ class TimeAdjustment:
         if self.editable:
             # The widget can receive drops from annotations
             vbox.connect('drag-data-received', self.drag_received)
-            vbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                               gtk.DEST_DEFAULT_HIGHLIGHT |
-                               gtk.DEST_DEFAULT_ALL,
-                               config.data.drag_type['annotation']
-                               + config.data.drag_type['timestamp'],
-                               gtk.gdk.ACTION_LINK)
+            vbox.drag_dest_set(Gtk.DestDefaults.MOTION |
+                               Gtk.DestDefaults.HIGHLIGHT |
+                               Gtk.DestDefaults.ALL,
+                               config.data.get_target_types('annotation', 'timestamp'),
+                               Gdk.DragAction.LINK)
 
             vbox.connect('scroll-event', handle_scroll_event)
 
@@ -208,11 +200,11 @@ class TimeAdjustment:
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source_uri=unicode(selection.data, 'utf8').split('\n')[0]
+            source_uri=unicode(selection.get_data(), 'utf8').split('\n')[0]
             source=self.controller.package.annotations.get(source_uri)
             self.set_value(source.fragment.begin)
         elif targetType == config.data.target_type['timestamp']:
-            data=decode_drop_parameters(selection.data)
+            data=decode_drop_parameters(selection.get_data())
             v=long(float(data['timestamp']))
             self.set_value(v)
         else:
@@ -223,12 +215,12 @@ class TimeAdjustment:
         """Handle the drag-sent event.
         """
         if targetType == config.data.target_type['timestamp']:
-            selection.set(selection.target, 8, encode_drop_parameters(timestamp=self.value))
+            selection.set(selection.get_target(), 8, encode_drop_parameters(timestamp=self.value))
             return True
         elif targetType in ( config.data.target_type['text-plain'],
                              config.data.target_type['TEXT'],
                              config.data.target_type['STRING'] ):
-            selection.set(selection.target, 8, helper.format_time(self.value))
+            selection.set(selection.get_target(), 8, helper.format_time(self.value))
             return True
         return False
 

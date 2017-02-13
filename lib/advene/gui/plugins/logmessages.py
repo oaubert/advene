@@ -19,7 +19,7 @@
 """Log messages display.
 """
 
-import gtk
+from gi.repository import Gtk
 
 from gettext import gettext as _
 from advene.gui.views import AdhocView
@@ -49,9 +49,9 @@ class LogMessages(AdhocView):
         return True
 
     def build_widget(self):
-        sw=gtk.ScrolledWindow()
-        self.textview=gtk.TextView(self.controller.gui.logbuffer)
-        self.textview.set_wrap_mode(gtk.WRAP_CHAR)
+        sw=Gtk.ScrolledWindow()
+        self.textview=Gtk.TextView.new_with_buffer(self.controller.gui.logbuffer)
+        self.textview.set_wrap_mode(Gtk.WrapMode.CHAR)
         self.textview.set_editable(False)
         sw.add(self.textview)
 

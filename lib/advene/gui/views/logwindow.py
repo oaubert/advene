@@ -30,7 +30,7 @@ import advene.util.helper as helper
 
 from gettext import gettext as _
 
-import gtk
+from gi.repository import Gtk
 
 import advene.rules.elements
 
@@ -66,13 +66,13 @@ class LogWindow(AdhocView):
         return False
 
     def build_widget(self):
-        w=gtk.VBox()
+        w=Gtk.VBox()
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         w.add(sw)
 
-        self.datawidget=gtk.VBox()
+        self.datawidget=Gtk.VBox()
         sw.add_with_viewport(self.datawidget)
 
         return w
@@ -114,24 +114,24 @@ class LogWindow(AdhocView):
         if l:
             return True
 
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
 
-        b=gtk.Button(message)
+        b=Gtk.Button(message)
         # Make the message left-aligned
-        b.child.set_alignment(0.0, 0.5)
+        b.get_child().set_alignment(0.0, 0.5)
         b.connect('clicked', self.goto_url, url)
         b.set_tooltip_text(_("Go to %s") % url)
         hb.add(b)
 
-        b=gtk.Button(helper.format_time(position))
-        b.child.set_alignment(0.0, 0.5)
+        b=Gtk.Button(helper.format_time(position))
+        b.get_child().set_alignment(0.0, 0.5)
         b.connect('clicked', self.goto_position, position)
         b.set_tooltip_text(_("Go to the given position"))
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
         hb.show_all()
 
-        self.datawidget.pack_start(hb, expand=False)
+        self.datawidget.pack_start(hb, False, True, 0)
         self.data.append( (time.time(), position, message, url, hb) )
         return True
 

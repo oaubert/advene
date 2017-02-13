@@ -24,7 +24,7 @@ from gettext import gettext as _
 import advene.gui.popup
 from advene.gui.util import name2color
 
-import gtk
+from gi.repository import Gtk
 
 class RelationView:
     """Controller for the MVC representing a relation."""
@@ -46,12 +46,12 @@ class RelationView:
         return True
 
     def build_widget(self):
-        l=gtk.Label()
+        l=Gtk.Label()
         l.set_markup("<b>%s</b> relation between\nann. <i>%s</i>\nand\nann. <i>%s</i>" %
                      (self.relation.type.title.replace('<', '&lt;'),
                       self.relation.members[0].id,
                       self.relation.members[1].id))
-        b=gtk.Button()
+        b=Gtk.Button()
         b.add(l)
         b.connect('clicked', self.popup)
 
@@ -73,15 +73,15 @@ class RelationsBox:
         self.controller=controller
         self.relationviews=[]
         self.active_color = name2color('red')
-        self.inactive_color = gtk.Button().get_style().bg[0]
+        self.inactive_color = Gtk.Button().get_style().bg[0]
         self.widget = self.build_widget()
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
         for r in self.package.relations:
             v=RelationView(relation=r, controller=self.controller)
             self.relationviews.append(v)
-            vbox.pack_start(v.get_widget(), expand=False)
+            vbox.pack_start(v.get_widget(), False, False, 0)
         vbox.show_all()
         return vbox
 
@@ -127,9 +127,9 @@ class RelationsBox:
         bs = self.get_widget_for_relation (relation)
         for b in bs:
             b.active = True
-            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                          gtk.STATE_PRELIGHT):
+            for style in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
+                          Gtk.StateType.SELECTED, Gtk.StateType.INSENSITIVE,
+                          Gtk.StateType.PRELIGHT):
                 b.modify_bg (style, self.active_color)
         return True
 
@@ -138,9 +138,9 @@ class RelationsBox:
         bs = self.get_widget_for_relation (relation)
         for b in bs:
             b.active = True
-            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                          gtk.STATE_PRELIGHT):
+            for style in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
+                          Gtk.StateType.SELECTED, Gtk.StateType.INSENSITIVE,
+                          Gtk.StateType.PRELIGHT):
                 b.modify_bg (style, self.inactive_color)
         return True
 
@@ -155,7 +155,7 @@ class RelationsBox:
             if element in self.list:
                 v=RelationView(relation=element, controller=self.controller)
                 self.relationviews.append(v)
-                self.widget.pack_start(v.get_widget(), expand=False)
+                self.widget.pack_start(v.get_widget(), False, False, 0)
             return True
 
         bs = self.get_widget_for_relation (element)
@@ -171,7 +171,7 @@ class RelationsBox:
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, widget.annotation.uri.encode('utf8'))
+            selection.set(selection.get_target(), 8, widget.annotation.uri.encode('utf8'))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
@@ -179,7 +179,7 @@ class RelationsBox:
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
-            source=self.package.annotations.get(unicode(selection.data, 'utf8').split('\n')[0])
+            source=self.package.annotations.get(unicode(selection.get_data(), 'utf8').split('\n')[0])
             dest=widget.annotation
             self.create_relation_popup(source, dest)
             # FIXME: TODO

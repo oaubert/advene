@@ -21,154 +21,22 @@
 FIXME: add navigation buttons (back, history)
 """
 
-import gtk
+from gi.repository import Gtk
 import urllib
 import urlparse
 import re
 
 engine=None
 try:
-    import webkit
+    import gi
+    gi.require_version('WebKit', '3.0')
+    from gi.repository import WebKit
     engine='webkit'
 except ImportError:
-    try:
-        import gtkmozembed
-        gtkmozembed.set_comp_path('')
-        engine='mozembed'
-    except ImportError:
-        try:
-            import gtkhtml2
-            engine='gtkhtml2'
-        except ImportError:
-            pass
+    pass
 
 from gettext import gettext as _
 from advene.gui.views import AdhocView
-
-class gtkhtml_wrapper:
-    def __init__(self, controller=None, notify=None):
-        self.controller=controller
-        self.notify=notify
-        self.history = []
-        self.current = ""
-        self.widget = self.build_widget()
-
-    def refresh(self, *p):
-        self.set_url(self.current)
-        return True
-
-    def back(self, *p):
-        if len(self.history) <= 1:
-            self.log(_("Cannot go back: first item in history"))
-        else:
-            # Current URL
-            u=self.history.pop()
-            # Previous one
-            self.set_url(self.history[-1])
-        return True
-
-    def set_url(self, url):
-        self.update_history(url)
-        d=self.component.document
-        d.clear()
-
-        u=urllib.urlopen(url)
-
-        d.open_stream(u.info().type)
-        for l in u:
-            d.write_stream (l)
-
-        u.close()
-        d.close_stream()
-
-        self.current=url
-        if self.notify:
-            self.notify(url=url)
-        return True
-
-    def get_url(self):
-        return self.current
-
-    def update_history(self, url):
-        if not self.history:
-            self.history.append(url)
-        elif self.history[-1] != url:
-            self.history.append(url)
-        return
-
-    def build_widget(self):
-        w=gtk.ScrolledWindow()
-        w.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-
-        c=gtkhtml2.View()
-        c.document=gtkhtml2.Document()
-
-        def request_url(document, url, stream):
-            print "request url", url, stream
-            pass
-
-        def link_clicked(document, link):
-            u=self.get_url()
-            if u:
-                url=urllib.basejoin(u, link)
-            else:
-                url=link
-            self.set_url(url)
-            return True
-
-        c.document.connect('link-clicked', link_clicked)
-        c.document.connect('request-url', request_url)
-
-        c.get_vadjustment().set_value(0)
-        w.set_hadjustment(c.get_hadjustment())
-        w.set_vadjustment(c.get_vadjustment())
-        c.document.clear()
-        c.set_document(c.document)
-        w.add(c)
-        self.component=c
-        return w
-
-class mozembed_wrapper:
-    def __init__(self, controller=None, notify=None):
-        self.controller=controller
-        self.notify=notify
-        self.widget=self.build_widget()
-
-    def refresh(self, *p):
-        self.component.reload(0)
-        return True
-
-    def back(self, *p):
-        self.component.go_back()
-        return True
-
-    def set_url(self, url):
-        self.component.load_url(url)
-        return True
-
-    def get_url(self):
-        return self.component.get_location()
-
-    def build_widget(self):
-        w=gtkmozembed.MozEmbed()
-        # A profile must be initialized, cf
-        # http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq19.018.htp
-        gtkmozembed.set_profile_path("/tmp", "foobar")
-
-        def update_location(c):
-            if self.notify:
-                self.notify(url=self.get_url())
-            return False
-
-        def update_label(c):
-            if self.notify:
-                self.notify(label=c.get_link_message())
-            return False
-
-        w.connect('location', update_location)
-        w.connect('link-message', update_label)
-        self.component=w
-        return w
 
 class webkit_wrapper:
     def __init__(self, controller=None, notify=None):
@@ -190,7 +58,7 @@ class webkit_wrapper:
         return True
 
     def build_widget(self):
-        w=webkit.WebView()
+        w = WebKit.WebView()
 
         def update_location(url):
             l=urlparse.urlparse(url)
@@ -277,7 +145,7 @@ class webkit_wrapper:
                               _javascript_script_prompt_cb)
 
         self.component=w
-        s=gtk.ScrolledWindow()
+        s=Gtk.ScrolledWindow()
         s.add(w)
 
         return s
@@ -311,12 +179,10 @@ class HTMLView(AdhocView):
 
     def build_widget(self):
         mapping={ 'webkit': webkit_wrapper,
-                  'mozembed': mozembed_wrapper,
-                  'gtkhtml2': gtkhtml_wrapper,
                   None: None}
         wrapper=mapping.get(engine)
         if wrapper is None:
-            w=gtk.Label(_("No available HTML rendering component"))
+            w=Gtk.Label(label=_("No available HTML rendering component"))
             self.component=w
         else:
             self.component = wrapper(controller=self.controller,
@@ -326,18 +192,18 @@ class HTMLView(AdhocView):
         def utbv_menu(*p):
             if self.controller and self.controller.gui:
                 m=self.controller.gui.build_utbv_menu(action=self.open_url)
-                m.popup(None, None, None, 0, gtk.get_current_event_time())
+                m.popup(None, None, None, 0, Gtk.get_current_event_time())
             return True
 
-        tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
+        tb=Gtk.Toolbar()
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         for icon, action in (
-            (gtk.STOCK_GO_BACK, self.component.back),
-            (gtk.STOCK_REFRESH, self.component.refresh),
-            (gtk.STOCK_HOME, utbv_menu),
+            (Gtk.STOCK_GO_BACK, self.component.back),
+            (Gtk.STOCK_REFRESH, self.component.refresh),
+            (Gtk.STOCK_HOME, utbv_menu),
             ):
-            b=gtk.ToolButton(stock_id=icon)
+            b=Gtk.ToolButton(stock_id=icon)
             b.connect('clicked', action)
             tb.insert(b, -1)
 
@@ -345,22 +211,22 @@ class HTMLView(AdhocView):
             self.component.set_url(self.current_url())
             return True
 
-        self.url_entry=gtk.Entry()
+        self.url_entry=Gtk.Entry()
         self.url_entry.connect('activate', entry_validated)
-        ti=gtk.ToolItem()
+        ti=Gtk.ToolItem()
         ti.add(self.url_entry)
         ti.set_expand(True)
         tb.insert(ti, -1)
 
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        vbox.pack_start(tb, expand=False)
+        vbox.pack_start(tb, False, True, 0)
 
         vbox.add(w)
 
-        self.url_label=gtk.Label('')
+        self.url_label=Gtk.Label(label='')
         self.url_label.set_alignment(0, 0)
-        vbox.pack_start(self.url_label, expand=False)
+        vbox.pack_start(self.url_label, False, True, 0)
 
         return vbox
 

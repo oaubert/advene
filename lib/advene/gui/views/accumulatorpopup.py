@@ -22,7 +22,7 @@
 import time
 import operator
 
-import gtk
+from gi.repository import Gtk
 
 from gettext import gettext as _
 
@@ -64,8 +64,8 @@ class AccumulatorPopup(AdhocView):
         self.scrollable=scrollable
 
         self.new_color = name2color('tomato')
-        self.old_color = gtk.Button().get_style().bg[0]
-
+        # FIXME: deprecated handling of background color.
+        self.old_color = Gtk.Button().get_style_context().get_background_color(Gtk.StateFlags.NORMAL)
         # List of tuples (widget, hidetime, frame)
         self.widgets=[]
         # Lock on self.widgets
@@ -81,11 +81,11 @@ class AccumulatorPopup(AdhocView):
     def display_message(self, message='', timeout=None, title=None):
         """Convenience method.
         """
-        t=gtk.TextView()
+        t=Gtk.TextView()
         t.set_editable(False)
         t.set_cursor_visible(False)
-        t.set_wrap_mode(gtk.WRAP_WORD)
-        t.set_justification(gtk.JUSTIFY_LEFT)
+        t.set_wrap_mode(Gtk.WrapMode.WORD)
+        t.set_justification(Gtk.Justification.LEFT)
         t.get_buffer().set_text(message)
         self.display(t, timeout, title)
 
@@ -106,24 +106,24 @@ class AccumulatorPopup(AdhocView):
             hidetime=None
 
         # Build a titled frame around the widget
-        f=gtk.Frame()
+        f=Gtk.Frame()
         if isinstance(title, basestring):
-            hb=gtk.HBox()
+            hb=Gtk.HBox()
 
-            l=gtk.Label(title)
-            hb.pack_start(l, expand=False)
+            l=Gtk.Label(label=title)
+            hb.pack_start(l, False, True, 0)
 
             b=get_pixmap_button('small_close.png')
-            b.set_relief(gtk.RELIEF_NONE)
+            b.set_relief(Gtk.ReliefStyle.NONE)
             b.connect('clicked', self.undisplay_cb, widget)
-            hb.pack_start(b, expand=False, fill=False)
+            hb.pack_start(b, False, False, 0)
 
             f.set_label_widget(hb)
         else:
             # Hopefully it is a gtk widget
             f.set_label_widget(title)
         f.set_label_align(0.1, 0.5)
-        f.set_shadow_type(gtk.SHADOW_ETCHED_OUT)
+        f.set_shadow_type(Gtk.ShadowType.ETCHED_OUT)
         f.add(widget)
 
         self.lock.acquire()
@@ -135,12 +135,12 @@ class AccumulatorPopup(AdhocView):
                                                       lambda c, time: self.undisplay(widget))
         self.widgets.sort(key=operator.itemgetter(1))
         self.lock.release()
-        self.contentbox.pack_start(f, expand=False, padding=2)
+        self.contentbox.pack_start(f, False, False, 2)
 
         f.show_all()
         self.show()
         nb=self.widget.get_parent()
-        if isinstance(nb, gtk.Notebook):
+        if isinstance(nb, Gtk.Notebook):
             # Ensure that the view is visible
             nb.set_current_page(nb.page_num(self.widget))
 
@@ -148,9 +148,9 @@ class AccumulatorPopup(AdhocView):
         return True
 
     def set_color(self, button, color):
-        for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
+        for style in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
+                      Gtk.StateType.SELECTED, Gtk.StateType.INSENSITIVE,
+                      Gtk.StateType.PRELIGHT):
             button.modify_bg (style, color)
 
     def get_popup_width(self):
@@ -203,21 +203,21 @@ class AccumulatorPopup(AdhocView):
         return True
 
     def build_widget(self):
-        mainbox=gtk.VBox()
+        mainbox=Gtk.VBox()
 
         if self.vertical:
-            self.contentbox = gtk.VBox()
+            self.contentbox = Gtk.VBox()
             mainbox.add(self.contentbox)
         else:
-            self.contentbox = gtk.HBox()
+            self.contentbox = Gtk.HBox()
             mainbox.add(self.contentbox)
 
         if self.controller.gui:
             self.controller.gui.register_view (self)
 
         if self.scrollable:
-            sw=gtk.ScrolledWindow()
-            sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+            sw=Gtk.ScrolledWindow()
+            sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
             sw.add_with_viewport(mainbox)
             return sw
         else:

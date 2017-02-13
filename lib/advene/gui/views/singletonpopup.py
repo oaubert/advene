@@ -21,7 +21,7 @@
 
 import time
 
-import gtk
+from gi.repository import Gtk
 
 from gettext import gettext as _
 from advene.gui.views import AdhocView
@@ -90,12 +90,12 @@ class SingletonPopup(AdhocView):
         return True
 
     def build_widget(self):
-        mainbox=gtk.VBox()
+        mainbox=Gtk.VBox()
 
-        self.vbox = gtk.VBox()
+        self.vbox = Gtk.VBox()
         mainbox.add(self.vbox)
 
-        self.widget=gtk.Label(_("Navigation popup"))
+        self.widget=Gtk.Label(label=_("Navigation popup"))
         self.vbox.add(self.widget)
 
         return mainbox

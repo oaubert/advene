@@ -23,8 +23,8 @@ Display the query results in a view (timeline, tree, etc).
 from gettext import gettext as _
 import pprint
 
-import gtk
-import pango
+from gi.repository import Gtk
+from gi.repository import Pango
 
 import advene.core.config as config
 from advene.gui.edit.rules import EditQuery
@@ -184,7 +184,7 @@ class InteractiveQuery(AdhocView):
         except AdveneTalesException, e:
             # Display a dialog with the value
             dialog.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
-                icon=gtk.MESSAGE_ERROR)
+                icon=Gtk.MessageType.ERROR)
             return True
 
         # Close the search window
@@ -203,30 +203,30 @@ class InteractiveQuery(AdhocView):
         return True
 
     def build_widget(self):
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
 
         self.eq=EditQuery(self.query,
                           editable=True,
                           controller=self.controller)
         vbox.add(self.eq.widget)
 
-        hb=gtk.HButtonBox()
+        hb=Gtk.HButtonBox()
 
-        b=gtk.Button(stock=gtk.STOCK_OK)
+        b=Gtk.Button(stock=Gtk.STOCK_OK)
         b.connect('clicked', self.validate)
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
-        b=gtk.Button(stock=gtk.STOCK_CANCEL)
+        b=Gtk.Button(stock=Gtk.STOCK_CANCEL)
         b.connect('clicked', self.cancel)
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
-        vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hb, False, True, 0)
 
         def handle_key_press_event(widget, event):
-            if event.keyval == gtk.keysyms.Return:
+            if event.keyval == Gdk.KEY_Return:
                 self.validate()
                 return True
-            elif event.keyval == gtk.keysyms.Escape:
+            elif event.keyval == Gdk.KEY_Escape:
                 self.cancel()
                 return True
             return False
@@ -383,37 +383,37 @@ class InteractiveResult(AdhocView):
         return True
 
     def build_widget(self):
-        v=gtk.VBox()
+        v=Gtk.VBox()
 
-        tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
-        v.pack_start(tb, expand=False)
+        tb=Gtk.Toolbar()
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
+        v.pack_start(tb, False, True, 0)
 
-        top_box=gtk.HBox()
-        v.pack_start(top_box, expand=False)
+        top_box=Gtk.HBox()
+        v.pack_start(top_box, False, True, 0)
 
         if hasattr(self.query, 'container') and self.query.container.id == '_interactive':
-            b=gtk.Button(_("Edit query again"))
+            b=Gtk.Button(_("Edit query again"))
             b.connect('clicked', self.edit_query)
-            top_box.pack_start(b, expand=False)
+            top_box.pack_start(b, False, True, 0)
         elif isinstance(self.query, SimpleQuery):
-            b=gtk.Button(_("Edit query"))
+            b=Gtk.Button(_("Edit query"))
             b.connect('clicked', lambda b: self.controller.gui.edit_element(self.query))
-            top_box.pack_start(b, expand=False)
+            top_box.pack_start(b, False, True, 0)
         elif isinstance(self.query, Quicksearch):
-            e=gtk.Entry()
+            e=Gtk.Entry()
             e.set_text(self.query.searched)
             e.set_width_chars(12)
             e.connect('activate', self.redo_quicksearch, e)
-            b=get_small_stock_button(gtk.STOCK_FIND, self.redo_quicksearch, e)
+            b=get_small_stock_button(Gtk.STOCK_FIND, self.redo_quicksearch, e)
             e.set_tooltip_text(_('String to search'))
             b.set_tooltip_text(_('Search again'))
-            top_box.pack_start(e, expand=False)
-            top_box.pack_start(b, expand=False)
+            top_box.pack_start(e, False, True, 0)
+            top_box.pack_start(b, False, True, 0)
 
         # Present choices to display the result
         if not self.result:
-            v.add(gtk.Label(_("Empty result")))
+            v.add(Gtk.Label(label=_("Empty result")))
         elif (isinstance(self.result, list) or isinstance(self.result, tuple)
             or isinstance(self.result, AbstractBundle)):
             # Check if there are annotations
@@ -428,8 +428,8 @@ class InteractiveResult(AdhocView):
                     'elements': helper.format_element_name("annotation", len(l)),
                     'number': len(self.result)}
 
-            label=gtk.Label(t)
-            label.set_ellipsize(pango.ELLIPSIZE_END)
+            label=Gtk.Label(label=t)
+            label.set_ellipsize(Pango.EllipsizeMode.END)
             label.set_line_wrap(True)
             top_box.add(label)
 
@@ -456,18 +456,18 @@ class InteractiveResult(AdhocView):
                     v.add(table.widget)
                 else:
                     # Mixed annotations + other elements
-                    notebook=gtk.Notebook()
-                    notebook.set_tab_pos(gtk.POS_TOP)
+                    notebook=Gtk.Notebook()
+                    notebook.set_tab_pos(Gtk.PositionType.TOP)
                     notebook.popup_disable()
                     v.add(notebook)
 
-                    notebook.append_page(table.widget, gtk.Label(_("Annotations")))
+                    notebook.append_page(table.widget, Gtk.Label(label=_("Annotations")))
 
                     gtable=GenericTable(controller=self.controller, elements=[ e
                                                                                for e in self.result
                                                                                if not isinstance(e, Annotation) ]
                                                                                )
-                    notebook.append_page(gtable.widget, gtk.Label(_("Other elements")))
+                    notebook.append_page(gtable.widget, Gtk.Label(label=_("Other elements")))
 
 
                 for (icon, tip, action) in (
@@ -478,16 +478,16 @@ class InteractiveResult(AdhocView):
                                                              destination=self._destination,
                                                              elements=l)),
                     ('highlight.png', _("Highlight annotations"), lambda b: toggle_highlight(b, l)),
-                    (gtk.STOCK_CONVERT, _("Export table"), lambda b: table.csv_export()),
-                    (gtk.STOCK_NEW, _("Create annotations from the result"), self.create_annotations),
+                    (Gtk.STOCK_CONVERT, _("Export table"), lambda b: table.csv_export()),
+                    (Gtk.STOCK_NEW, _("Create annotations from the result"), self.create_annotations),
                     ('montage.png', _("Define a montage with the result"), self.create_montage),
                     ('comment.png', _("Create a comment view with the result"), self.create_comment),
-                    (gtk.STOCK_FIND_AND_REPLACE, _("Search and replace strings in the annotations content"), self.search_replace),
+                    (Gtk.STOCK_FIND_AND_REPLACE, _("Search and replace strings in the annotations content"), self.search_replace),
                     ):
                     if icon.endswith('.png'):
                         ti=get_pixmap_toolbutton(icon)
                     else:
-                        ti=gtk.ToolButton(stock_id=icon)
+                        ti=Gtk.ToolButton(stock_id=icon)
                     ti.connect('clicked', action)
                     ti.set_tooltip_text(tip)
                     tb.insert(ti, -1)
@@ -498,7 +498,7 @@ class InteractiveResult(AdhocView):
                 gtable=GenericTable(controller=self.controller, elements=self.result)
                 v.add(gtable.widget)
 
-                ti=gtk.ToolButton(gtk.STOCK_CONVERT)
+                ti=Gtk.ToolButton(Gtk.STOCK_CONVERT)
                 ti.connect('clicked', lambda b: gtable.csv_export())
                 ti.set_tooltip_text(_("Export table"))
                 tb.insert(ti, -1)
@@ -516,7 +516,7 @@ class InteractiveResult(AdhocView):
                 ti.set_tooltip_text(_("Open in python evaluator"))
                 tb.insert(ti, -1)
         else:
-            v.add(gtk.Label(_("Result:\n%s") % unicode(self.result)))
+            v.add(Gtk.Label(label=_("Result:\n%s") % unicode(self.result)))
         v.show_all()
         return v
 

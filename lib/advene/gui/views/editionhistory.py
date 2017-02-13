@@ -23,7 +23,7 @@ This view displays a list of last n edited/created elements.
 
 from gettext import gettext as _
 
-import gtk
+from gi.repository import Gtk
 
 import advene.core.config as config
 from advene.gui.views import AdhocView
@@ -72,19 +72,19 @@ class EditionHistory(AdhocView):
                                (self.edited, g.last_edited) ):
             w.foreach(w.remove)
             for e in reversed(elements):
-                b=gtk.Button("\n".join((helper.get_type(e), self.controller.get_title(e))), use_underline=False)
+                b=Gtk.Button("\n".join((helper.get_type(e), self.controller.get_title(e))), use_underline=False)
                 b.set_alignment(0, 0)
                 colorname=self.controller.get_element_color(e)
                 if colorname:
                     if config.data.os == 'win32':
                         text=b.get_label()
                         b.foreach(b.remove)
-                        l=gtk.Label()
+                        l=Gtk.Label()
                         l.set_markup('<span background="%s">%s</span>' % (colorname, text))
                         l.show()
                         b.add(l)
                     else:
-                        style = b.modify_bg(gtk.STATE_NORMAL, name2color(colorname))
+                        style = b.modify_bg(Gtk.StateType.NORMAL, name2color(colorname))
                 b.connect('clicked', (lambda i, el: self.controller.gui.edit_element(el)),
                           e)
                 content=getattr(e, 'content', None)
@@ -92,23 +92,23 @@ class EditionHistory(AdhocView):
                     b.set_tooltip_text(content.data)
                 enable_drag_source(b, e, self.controller)
                 b.connect('button-press-event', display_popup, e)
-                w.pack_start(b, expand=False)
+                w.pack_start(b, False, True, 0)
         self.widget.show_all()
         return True
 
     def build_widget(self):
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
 
         for (label, attname) in ( (_("Created"), 'created'),
                                   (_("Edited"), 'edited' ) ):
-            c=gtk.VBox()
-            c.pack_start(gtk.Label(label), expand=False)
+            c=Gtk.VBox()
+            c.pack_start(Gtk.Label(label), False, False, 0)
 
-            sw = gtk.ScrolledWindow()
-            sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+            sw = Gtk.ScrolledWindow()
+            sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
             c.add(sw)
 
-            v=gtk.VBox()
+            v=Gtk.VBox()
             sw.add_with_viewport(v)
             setattr(self, attname, v)
 

@@ -24,13 +24,14 @@ import re
 import os
 import operator
 
-import gtk
-import pango
+from gi.repository import Gdk
+from gi.repository import Gtk
+from gi.repository import Pango
 
 try:
-    import gtksourceview2
+    from gi.repository import GtkSource
 except ImportError:
-    gtksourceview2=None
+    GtkSource=None
 
 import urllib
 
@@ -167,11 +168,11 @@ class TranscriptionEdit(AdhocView):
             size=self.options['font-size']
         if size == 0:
             # Get the default value from a temporary textview
-            t=gtk.TextView()
-            size=t.get_pango_context().get_font_description().get_size() / pango.SCALE
+            t=Gtk.TextView()
+            size=t.get_pango_context().get_font_description().get_size() / Pango.SCALE
             del t
         f=self.textview.get_pango_context().get_font_description()
-        f.set_size(size * pango.SCALE)
+        f.set_size(size * Pango.SCALE)
         self.textview.modify_font(f)
 
     def show_searchbox(self, *p):
@@ -191,7 +192,7 @@ class TranscriptionEdit(AdhocView):
         finished=False
 
         while not finished:
-            res=begin.forward_search(searched, gtk.TEXT_SEARCH_TEXT_ONLY)
+            res=begin.forward_search(searched, Gtk.TextSearchFlags.TEXT_ONLY)
             if not res:
                 finished=True
             else:
@@ -201,28 +202,28 @@ class TranscriptionEdit(AdhocView):
 
     def textview_drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['timestamp']:
-            data=decode_drop_parameters(selection.data)
+            data=decode_drop_parameters(selection.get_data())
             position=long(data['timestamp'])
-            #(x, y) = self.textview.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
+            #(x, y) = self.textview.get_window()_to_buffer_coords(Gtk.TextWindowType.TEXT,
             #                                               int(x),
             #                                               int(y))
             it=self.textview.get_iter_at_location(x, y)
             if it is None:
                 return False
             # Check that preceding mark.value is lower
-            m, i=self.find_preceding_mark(it)
+            m, i=self.find_preceding_mark(it.iter)
             if m is not None and m.value > position:
                 self.message(_("Invalid timestamp mark"))
                 return False
-            m, i=self.find_following_mark(it)
+            m, i=self.find_following_mark(it.iter)
             if m is not None and m.value < position:
                 self.message(_("Invalid timestamp mark"))
                 return False
             # Create the timestamp
-            self.create_timestamp_mark(position, it)
+            self.create_timestamp_mark(position, it.iter)
 
             # If the drag originated from our own widgets, remove it.
-            source=context.get_source_widget()
+            source=Gtk.drag_get_source_widget(context)
             if source in self.marks:
                 self.remove_timestamp_mark(source)
             return True
@@ -231,7 +232,7 @@ class TranscriptionEdit(AdhocView):
     def can_undo(self):
         try:
             return hasattr(self.textview.get_buffer(), 'can_undo')
-        except AttributeError, e:
+        except AttributeError:
             return False
 
     def undo(self, *p):
@@ -241,27 +242,27 @@ class TranscriptionEdit(AdhocView):
         return True
 
     def build_widget(self):
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
 
-        if gtksourceview2 is not None:
-            self.textview=gtksourceview2.View()
-            self.textview.set_buffer(gtksourceview2.Buffer())
+        if GtkSource is not None:
+            self.textview=GtkSource.View()
+            self.textview.set_buffer(GtkSource.Buffer())
         else:
-            self.textview = gtk.TextView()
+            self.textview = Gtk.TextView()
 
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
-        self.textview.set_wrap_mode (gtk.WRAP_WORD)
+        self.textview.set_wrap_mode (Gtk.WrapMode.WORD)
 
-        hb=gtk.HBox()
-        vbox.pack_start(hb, expand=False)
+        hb=Gtk.HBox()
+        vbox.pack_start(hb, False, True, 0)
         if self.controller.gui:
             self.player_toolbar=self.controller.gui.get_player_control_toolbar()
             hb.add(self.player_toolbar)
         hb.add(self.get_toolbar())
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         vbox.add (sw)
 
 
@@ -277,12 +278,11 @@ class TranscriptionEdit(AdhocView):
         self.textview.get_buffer().create_tag("past", background="#dddddd")
         self.textview.get_buffer().create_tag("ignored", strikethrough=True)
 
-        self.textview.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                    gtk.DEST_DEFAULT_HIGHLIGHT |
-                                    gtk.DEST_DEFAULT_ALL,
-                                    config.data.drag_type['timestamp']
-                                    ,
-                                    gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        self.textview.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                    Gtk.DestDefaults.HIGHLIGHT |
+                                    Gtk.DestDefaults.ALL,
+                                    config.data.get_target_types('timestamp'),
+                                    Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         self.textview.connect('drag-data-received', self.textview_drag_received)
 
         # Hook the completer component
@@ -301,7 +301,7 @@ class TranscriptionEdit(AdhocView):
         b.create_tag("current", background="lightblue")
         b.create_tag("searched_string", background="green")
 
-        self.searchbox=gtk.HBox()
+        self.searchbox=Gtk.HBox()
 
         def hide_searchbox(*p):
             # Clear the searched_string tags
@@ -311,39 +311,38 @@ class TranscriptionEdit(AdhocView):
             return True
 
         close_button=get_pixmap_button('small_close.png', hide_searchbox)
-        close_button.set_relief(gtk.RELIEF_NONE)
-        self.searchbox.pack_start(close_button, expand=False, fill=False)
+        close_button.set_relief(Gtk.ReliefStyle.NONE)
+        self.searchbox.pack_start(close_button, False, False, 0)
 
         def search_entry_cb(e):
             self.highlight_search_forward(unicode(e.get_text()))
             return True
 
         def search_entry_key_press_cb(e, event):
-            if event.keyval == gtk.keysyms.Escape:
+            if event.keyval == Gdk.KEY_Escape:
                 hide_searchbox()
                 return True
             return False
 
-        self.searchbox.entry=gtk.Entry()
+        self.searchbox.entry=Gtk.Entry()
         self.searchbox.entry.connect('activate', search_entry_cb)
-        self.searchbox.pack_start(self.searchbox.entry, expand=False, fill=False)
+        self.searchbox.pack_start(self.searchbox.entry, False, False, 0)
         self.searchbox.entry.connect('key-press-event', search_entry_key_press_cb)
 
-        b=get_small_stock_button(gtk.STOCK_FIND)
+        b=get_small_stock_button(Gtk.STOCK_FIND)
         b.connect('clicked', lambda b: self.highlight_search_forward(unicode(self.searchbox.entry.get_text())))
-        self.searchbox.pack_start(b, expand=False)
+        self.searchbox.pack_start(b, False, True, 0)
 
-        fill=gtk.HBox()
-        self.searchbox.pack_start(fill, expand=True, fill=True)
+        fill=Gtk.HBox()
+        self.searchbox.pack_start(fill, True, True, 0)
         self.searchbox.show_all()
         self.searchbox.hide()
 
         self.searchbox.set_no_show_all(True)
-        vbox.pack_start(self.searchbox, expand=False)
+        vbox.pack_start(self.searchbox, False, True, 0)
 
-        self.statusbar=gtk.Statusbar()
-        self.statusbar.set_has_resize_grip(False)
-        vbox.pack_start(self.statusbar, expand=False)
+        self.statusbar=Gtk.Statusbar()
+        vbox.pack_start(self.statusbar, False, True, 0)
         vbox.show_all()
 
         return vbox
@@ -388,23 +387,23 @@ class TranscriptionEdit(AdhocView):
     def button_press_event_cb(self, textview, event):
         if not self.options['timestamp']:
             return False
-        if event.state & gtk.gdk.CONTROL_MASK:
+        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             return False
 
         if self.options['insert-on-single-click']:
-            t=gtk.gdk.BUTTON_PRESS
+            t=Gdk.EventType.BUTTON_PRESS
         else:
-            t=gtk.gdk._2BUTTON_PRESS
+            t=Gdk.EventType._2BUTTON_PRESS
         if not (event.button == 1 and event.type == t):
             return False
-        textwin=textview.get_window(gtk.TEXT_WINDOW_TEXT)
+        textwin=textview.get_window(Gtk.TextWindowType.TEXT)
 
-        if event.window != textwin:
-            print "Event.window: %s" % str(event.window)
+        if event.get_window() != textwin:
+            print "Event.get_window(): %s" % str(event.get_window())
             print "Textwin: %s" % str(textwin)
             return False
 
-        (x, y) = textview.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
+        (x, y) = textview.window_to_buffer_coords(Gtk.TextWindowType.TEXT,
                                                   int(event.x),
                                                   int(event.y))
         it=textview.get_iter_at_location(x, y)
@@ -420,7 +419,7 @@ class TranscriptionEdit(AdhocView):
 
     def buffer_is_empty(self):
         b=self.textview.get_buffer()
-        return len(b.get_text(*b.get_bounds())) == 0
+        return len(b.get_text(*b.get_bounds() + [False])) == 0
 
     def toggle_ignore(self, button):
         button.ignore = not button.ignore
@@ -474,15 +473,15 @@ class TranscriptionEdit(AdhocView):
         def popup_modify(win, t):
             timestamp=child.value + t
             child.set_tooltip_text("%s" % helper.format_time(timestamp))
-            # FIXME: find a way to do this in the new gtk.Tooltip API?
+            # FIXME: find a way to do this in the new Gtk.Tooltip API?
             #if self.tooltips.active_tips_data is None:
-            #    button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
+            #    button.emit('show-help', Gtk.WIDGET_HELP_TOOLTIP)
             child.value=timestamp
             if self.options['play-on-scroll']:
                 popup_goto(child, timestamp)
             return True
 
-        if event.button == 1 and event.state & gtk.gdk.CONTROL_MASK:
+        if event.button == 1 and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Set current video time
             popup_modify(None, self.controller.player.current_position_value - timestamp)
             return True
@@ -491,57 +490,57 @@ class TranscriptionEdit(AdhocView):
             return False
 
         # Create a popup menu for timestamp
-        menu = gtk.Menu()
+        menu = Gtk.Menu()
 
-        item = gtk.MenuItem(_("Position %s") % helper.format_time(timestamp))
+        item = Gtk.MenuItem(_("Position %s") % helper.format_time(timestamp))
         menu.append(item)
 
-        item = gtk.SeparatorMenuItem()
+        item = Gtk.SeparatorMenuItem()
         menu.append(item)
 
-        item = gtk.MenuItem(_("Go to..."))
+        item = Gtk.MenuItem(_("Go to..."))
         item.connect('activate', popup_goto, timestamp)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Edit"))
+        item = Gtk.MenuItem(_("Edit"))
         item.connect('activate', popup_edit, button)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Ignore the following text (toggle)"))
+        item = Gtk.MenuItem(_("Ignore the following text (toggle)"))
         item.connect('activate', popup_ignore, button)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Remove mark"))
+        item = Gtk.MenuItem(_("Remove mark"))
         item.connect('activate', popup_remove)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Reaction-time offset"))
+        item = Gtk.MenuItem(_("Reaction-time offset"))
         item.connect('activate', popup_modify, -self.options['delay'])
         menu.append(item)
 
-        item = gtk.MenuItem(_("-1 sec"))
+        item = Gtk.MenuItem(_("-1 sec"))
         item.connect('activate', popup_modify, -1000)
         menu.append(item)
-        item = gtk.MenuItem(_("-0.5 sec"))
+        item = Gtk.MenuItem(_("-0.5 sec"))
         item.connect('activate', popup_modify, -500)
         menu.append(item)
-        item = gtk.MenuItem(_("-0.1 sec"))
+        item = Gtk.MenuItem(_("-0.1 sec"))
         item.connect('activate', popup_modify, -100)
         menu.append(item)
 
-        item = gtk.MenuItem(_("+1 sec"))
+        item = Gtk.MenuItem(_("+1 sec"))
         item.connect('activate', popup_modify, 1000)
         menu.append(item)
-        item = gtk.MenuItem(_("+0.5 sec"))
+        item = Gtk.MenuItem(_("+0.5 sec"))
         item.connect('activate', popup_modify, 500)
         menu.append(item)
-        item = gtk.MenuItem(_("+0.1 sec"))
+        item = Gtk.MenuItem(_("+0.1 sec"))
         item.connect('activate', popup_modify, 100)
         menu.append(item)
 
         menu.show_all()
 
-        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        menu.popup_at_pointer(None)
         return True
 
     def create_timestamp_mark(self, timestamp, it):
@@ -565,22 +564,22 @@ class TranscriptionEdit(AdhocView):
         b.end_user_action()
 
         def handle_scroll_event(button, event):
-            if not (event.state & gtk.gdk.CONTROL_MASK):
+            if not (event.get_state() & Gdk.ModifierType.CONTROL_MASK):
                 return False
-            if event.state & gtk.gdk.SHIFT_MASK:
+            if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 i='second-scroll-increment'
             else:
                 i='scroll-increment'
 
-            if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
+            if event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.RIGHT:
                 button.value -= config.data.preferences[i]
-            elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
+            elif event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
                 button.value += config.data.preferences[i]
 
                 button.set_tooltip_text("%s" % helper.format_time(button.value))
-            # FIXME: find a way to do this in the new gtk.Tooltip API?
+            # FIXME: find a way to do this in the new Gtk.Tooltip API?
             #if self.tooltips.active_tips_data is None:
-            #    button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
+            #    button.emit('show-help', Gtk.WIDGET_HELP_TOOLTIP)
             self.timestamp_play = button.value
             button.grab_focus()
             return True
@@ -589,7 +588,7 @@ class TranscriptionEdit(AdhocView):
             """Handler for key release on timestamp mark.
             """
             # Control key released. Goto the position if we were scrolling a mark
-            if self.timestamp_play is not None and (event.state & gtk.gdk.CONTROL_MASK):
+            if self.timestamp_play is not None and (event.get_state() & Gdk.ModifierType.CONTROL_MASK):
                 # self.timestamp_play contains the new value, but child.timestamp
                 # as well. So we can use popup_goto
                 self.timestamp_play = None
@@ -714,7 +713,7 @@ class TranscriptionEdit(AdhocView):
                 if it is not None:
                     b.apply_tag_by_name('past', begin, it)
                     if self.options['autoscroll']:
-                        self.textview.scroll_to_iter(it, 0.3)
+                        self.textview.scroll_to_iter(it, 0.3, False, 0, 0)
                 self.current_mark = cm
         else:
             if self.current_mark is not None:
@@ -859,8 +858,8 @@ class TranscriptionEdit(AdhocView):
             if l:
                 default_name=os.path.splitext(os.path.basename(l[0]))[0] + ".txt"
             fname=dialog.get_filename(title= ("Save transcription to..."),
-                                               action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                               button=gtk.STOCK_SAVE,
+                                               action=Gtk.FileChooserAction.SAVE,
+                                               button=Gtk.STOCK_SAVE,
                                                default_dir=config.data.path['data'],
                                                default_file=default_name
                                                )
@@ -877,7 +876,7 @@ class TranscriptionEdit(AdhocView):
         except IOError, e:
             dialog.message_dialog(
                 _("Cannot save the file: %s") % unicode(e),
-                icon=gtk.MESSAGE_ERROR)
+                icon=Gtk.MessageType.ERROR)
             return True
         f.writelines(self.generate_transcription())
         f.close()
@@ -888,7 +887,7 @@ class TranscriptionEdit(AdhocView):
     def load_transcription_cb(self, button=None):
         if not self.buffer_is_empty():
             if not dialog.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
-                                                  icon=gtk.MESSAGE_QUESTION):
+                                                  icon=Gtk.MessageType.QUESTION):
                 return True
         fname=dialog.get_filename(title=_("Select transcription file to load"),
                                            default_dir=config.data.path['data'])
@@ -978,7 +977,7 @@ class TranscriptionEdit(AdhocView):
 
         if not self.buffer_is_empty():
             if not dialog.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
-                                                  icon=gtk.MESSAGE_QUESTION):
+                                                  icon=Gtk.MessageType.QUESTION):
                 return True
 
         b=self.textview.get_buffer()
@@ -1005,21 +1004,21 @@ class TranscriptionEdit(AdhocView):
             self.message(_("Cannot convert the data: no associated package"))
             return True
 
-        d = gtk.Dialog(title=_("Converting transcription"),
+        d = Gtk.Dialog(title=_("Converting transcription"),
                        parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                       buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                 Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l=gtk.Label(_("Choose the annotation-type where to create annotations.\n"))
+        l=Gtk.Label(label=_("Choose the annotation-type where to create annotations.\n"))
         l.set_line_wrap(True)
         l.show()
-        d.vbox.pack_start(l, expand=False)
+        d.vbox.pack_start(l, False, True, 0)
 
         # Anticipated declaration of some widgets, which need to be
         # updated in the handle_new_type_selection callback.
-        new_type_dialog=gtk.VBox()
-        delete_existing_toggle=gtk.CheckButton(_("Delete existing annotations in this type"))
+        new_type_dialog=Gtk.VBox()
+        delete_existing_toggle=Gtk.CheckButton(_("Delete existing annotations in this type"))
         delete_existing_toggle.set_active(False)
 
         ats=list(self.controller.package.annotationTypes)
@@ -1041,44 +1040,44 @@ class TranscriptionEdit(AdhocView):
                                                    callback=handle_new_type_selection,
                                                    preselect=self.controller.package.get_element_by_id(self.options['annotation-type-id']))
 
-        hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Select type") + " "), expand=False)
-        hb.pack_start(type_selection, expand=False)
-        d.vbox.pack_start(hb, expand=False)
+        hb=Gtk.HBox()
+        hb.pack_start(Gtk.Label(_("Select type") + " "), False, False, 0)
+        hb.pack_start(type_selection, False, True, 0)
+        d.vbox.pack_start(hb, False, True, 0)
 
-        l=gtk.Label(_("You want to create a new type. Please specify its schema and title."))
+        l=Gtk.Label(label=_("You want to create a new type. Please specify its schema and title."))
         l.set_line_wrap(True)
         l.show()
-        new_type_dialog.pack_start(l, expand=False)
+        new_type_dialog.pack_start(l, False, True, 0)
 
-        hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Title") + " "), expand=False)
-        new_title=gtk.Entry()
-        hb.pack_start(new_title)
-        new_type_dialog.pack_start(hb, expand=False)
+        hb=Gtk.HBox()
+        hb.pack_start(Gtk.Label(_("Title") + " "), False, False, 0)
+        new_title=Gtk.Entry()
+        hb.pack_start(new_title, True, True, 0)
+        new_type_dialog.pack_start(hb, False, True, 0)
 
-        hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Containing schema") + " "), expand=False)
+        hb=Gtk.HBox()
+        hb.pack_start(Gtk.Label(_("Containing schema") + " "), False, False, 0)
         schemas=list(self.controller.package.schemas)
         schema_selection=dialog.list_selector_widget(members=[ (s, self.controller.get_title(s)) for s in schemas])
-        hb.pack_start(schema_selection, expand=False)
-        new_type_dialog.pack_start(hb, expand=False)
+        hb.pack_start(schema_selection, False, True, 0)
+        new_type_dialog.pack_start(hb, False, True, 0)
 
         new_type_dialog.show_all()
         new_type_dialog.set_no_show_all(True)
         new_type_dialog.hide()
 
-        d.vbox.pack_start(new_type_dialog)
+        d.vbox.pack_start(new_type_dialog, True, True, 0)
 
-        l=gtk.Label()
+        l=Gtk.Label()
         l.set_markup("<b>" + _("Export options") + "</b>")
-        d.vbox.pack_start(l, expand=False)
+        d.vbox.pack_start(l, False, True, 0)
 
-        d.vbox.pack_start(delete_existing_toggle, expand=False)
+        d.vbox.pack_start(delete_existing_toggle, False, True, 0)
 
-        empty_contents_toggle=gtk.CheckButton(_("Generate annotations for empty contents"))
+        empty_contents_toggle=Gtk.CheckButton(_("Generate annotations for empty contents"))
         empty_contents_toggle.set_active(self.options['empty-annotations'])
-        d.vbox.pack_start(empty_contents_toggle, expand=False)
+        d.vbox.pack_start(empty_contents_toggle, False, True, 0)
 
         d.connect('key-press-event', dialog.dialog_keypressed_cb)
 
@@ -1088,7 +1087,7 @@ class TranscriptionEdit(AdhocView):
         finished=None
         while not finished:
             res=d.run()
-            if res == gtk.RESPONSE_OK:
+            if res == Gtk.ResponseType.OK:
                 at=type_selection.get_current_element()
                 if at == newat:
                     new_type_title=unicode(new_title.get_text())
@@ -1102,7 +1101,7 @@ class TranscriptionEdit(AdhocView):
                         if self.controller.package._idgenerator.exists(id_):
                             dialog.message_dialog(
                                 _("The %s identifier already exists. Choose another one.") % id_,
-                                icon=gtk.MESSAGE_WARNING)
+                                icon=Gtk.MessageType.WARNING)
                             at=None
                             continue
                     # Creating a new type
@@ -1158,7 +1157,7 @@ class TranscriptionEdit(AdhocView):
             self.set_snapshot_scale(s)
             return True
 
-        m=gtk.Menu()
+        m=Gtk.Menu()
         for size, label in (
             ( 8, _("Smallish")),
             (16, _("Small")),
@@ -1167,46 +1166,46 @@ class TranscriptionEdit(AdhocView):
             (64, _("Larger")),
             (128, _("Huge")),
             ):
-            i=gtk.MenuItem(label)
+            i=Gtk.MenuItem(label)
             i.connect('activate', set_scale, size)
             m.append(i)
         m.show_all()
-        m.popup(None, None, None, 0, gtk.get_current_event_time())
+        m.popup(None, None, None, 0, Gtk.get_current_event_time())
         return True
 
     def get_toolbar(self):
-        tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
+        tb=Gtk.Toolbar()
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         def center_on_current(*p):
             # Make sure that the current mark is visible
             if self.current_mark is not None:
                 it=self.textview.get_buffer().get_iter_at_child_anchor(self.current_mark.anchor)
                 if it:
-                    self.textview.scroll_to_iter(it, 0.2)
+                    self.textview.scroll_to_iter(it, 0.2, False, 0, 0)
             return True
 
         tb_list = (
-            (_("Open"),    _("Open"), gtk.STOCK_OPEN, self.load_transcription_cb),
-            (_("Save"),    _("Save"), gtk.STOCK_SAVE, self.save_transcription_cb),
-            (_("Save As"), _("Save As"), gtk.STOCK_SAVE_AS, self.save_as_cb),
-            (_("Import"), _("Import from annotations"), gtk.STOCK_EXECUTE, self.import_annotations_cb),
-            (_("Convert"), _("Convert to annotations"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
-            (_("Preferences"), _("Preferences"), gtk.STOCK_PREFERENCES, self.edit_preferences),
-            (_("Center"), _("Center on the current mark"), gtk.STOCK_JUSTIFY_CENTER, center_on_current),
-            (_("Find"), _("Search a string"), gtk.STOCK_FIND, self.show_searchbox),
-            (_("Scale"), _("Set the size of snaphots"), gtk.STOCK_FULLSCREEN, self.scale_snaphots_menu),
+            (_("Open"),    _("Open"), Gtk.STOCK_OPEN, self.load_transcription_cb),
+            (_("Save"),    _("Save"), Gtk.STOCK_SAVE, self.save_transcription_cb),
+            (_("Save As"), _("Save As"), Gtk.STOCK_SAVE_AS, self.save_as_cb),
+            (_("Import"), _("Import from annotations"), Gtk.STOCK_EXECUTE, self.import_annotations_cb),
+            (_("Convert"), _("Convert to annotations"), Gtk.STOCK_CONVERT, self.convert_transcription_cb),
+            (_("Preferences"), _("Preferences"), Gtk.STOCK_PREFERENCES, self.edit_preferences),
+            (_("Center"), _("Center on the current mark"), Gtk.STOCK_JUSTIFY_CENTER, center_on_current),
+            (_("Find"), _("Search a string"), Gtk.STOCK_FIND, self.show_searchbox),
+            (_("Scale"), _("Set the size of snaphots"), Gtk.STOCK_FULLSCREEN, self.scale_snaphots_menu),
             )
 
         for text, tooltip, icon, callback in tb_list:
-            b=gtk.ToolButton(label=text)
+            b=Gtk.ToolButton(label=text)
             b.set_stock_id(icon)
             b.set_tooltip_text(tooltip)
             b.connect('clicked', callback)
             tb.insert(b, -1)
 
         if self.can_undo():
-            b=gtk.ToolButton(gtk.STOCK_UNDO)
+            b=Gtk.ToolButton(Gtk.STOCK_UNDO)
             b.connect('clicked', lambda i: self.undo())
             b.set_tooltip_text(_("Undo"))
             tb.insert(b, -1)
@@ -1216,16 +1215,16 @@ class TranscriptionEdit(AdhocView):
             self.options[option_name]=t.get_active()
             return True
 
-        b=gtk.ToggleToolButton(gtk.STOCK_JUMP_TO)
+        b=Gtk.ToggleToolButton(Gtk.STOCK_JUMP_TO)
         b.set_active(self.options['autoscroll'])
         b.set_tooltip_text(_("Automatically scroll to the mark position when playing"))
         b.connect('toggled', handle_toggle, 'autoscroll')
         b.set_label(_("Autoscroll"))
         tb.insert(b, -1)
 
-        i=gtk.Image()
+        i=Gtk.Image()
         i.set_from_file(config.data.advenefile( ( 'pixmaps', 'clock.png') ))
-        b=gtk.ToggleToolButton()
+        b=Gtk.ToggleToolButton()
         b.set_icon_widget(i)
         b.set_label(_("Autoinsert"))
         b.set_active(self.options['autoinsert'])
@@ -1245,27 +1244,27 @@ class TranscriptionEdit(AdhocView):
         if c.gui and c.gui.process_player_shortcuts(win, event):
             return True
 
-        if event.state & gtk.gdk.CONTROL_MASK:
-            if event.keyval == gtk.keysyms.Return:
+        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+            if event.keyval == Gdk.KEY_Return:
                 # Insert current timestamp mark
                 if p.status == p.PlayingStatus or p.status == p.PauseStatus:
-                    if event.state & gtk.gdk.SHIFT_MASK:
+                    if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                         # If Shift is held, pause/resume the video
                         c.update_status("pause")
                     self.insert_timestamp_mark()
                 return True
-            elif event.keyval == gtk.keysyms.Page_Down:
+            elif event.keyval == Gdk.KEY_Page_Down:
                 self.goto_next_mark()
                 return True
-            elif event.keyval == gtk.keysyms.Page_Up:
+            elif event.keyval == Gdk.KEY_Page_Up:
                 self.goto_previous_mark()
                 return True
-            elif event.keyval == gtk.keysyms.c and event.state & gtk.gdk.SHIFT_MASK:
+            elif event.keyval == Gdk.KEY_c and event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 self.convert_transcription_cb()
                 return True
         elif self.options['autoinsert'] and self.options['automatic-mark-insertion-delay']:
-            if (gtk.gdk.keyval_to_unicode(event.keyval)
-                and event.keyval != gtk.keysyms.space
+            if (Gdk.keyval_to_unicode(event.keyval)
+                and event.keyval != Gdk.KEY_space
                 and (event.time - self.last_keypress_time >= self.options['automatic-mark-insertion-delay'])):
                 # Insert a mark if the user pressed a character key, except space
                 # Is there any text after the cursor ? If so, do not insert the mark
@@ -1321,7 +1320,7 @@ if __name__ == "__main__":
 
     window = transcription.popup()
 
-    window.connect('destroy', lambda e: gtk.main_quit())
+    window.connect('destroy', lambda e: Gtk.main_quit())
 
-    gtk.main ()
+    Gtk.main ()
 

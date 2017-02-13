@@ -16,13 +16,14 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Autocomplete feature for gtk.TextView
+"""Autocomplete feature for Gtk.TextView
 
 This code is inspired and adapted from the Scribes project
 (http://scribes.sf.net/) - GPLv2
 """
 
-import gtk
+from gi.repository import Gtk
+from gi.repository import Gdk
 import re
 
 import advene.core.config as config
@@ -81,11 +82,12 @@ class Completer:
         return False
 
     def hide_completion_window(self, *p):
-        self.widget.hide_all()
+        self.widget.hide()
         self.is_visible=False
 
     def show_completion_window(self, *p):
-        width, height = self.treeview.size_request()
+        req = self.treeview.size_request()
+        width, height = req.width, req.height
         width += 24
         height += 24
         self.widget.resize(width, height)
@@ -108,7 +110,7 @@ class Completer:
     def get_cursor_textview_coordinates(self):
         rectangle=self.get_cursor_rectangle()
         # Get the cursor's window coordinates.
-        position = self.textview.buffer_to_window_coords(gtk.TEXT_WINDOW_TEXT, rectangle.x, rectangle.y)
+        position = self.textview.buffer_to_window_coords(Gtk.TextWindowType.TEXT, rectangle.x, rectangle.y)
         cursor_x = position[0]
         cursor_y = position[1]
         return cursor_x, cursor_y
@@ -132,18 +134,17 @@ class Completer:
         cursor_x, cursor_y = self.get_cursor_textview_coordinates()
         cursor_height = self.get_cursor_size()[1]
         # Get the text editor's textview coordinate and size.
-        window = self.textview.get_window(gtk.TEXT_WINDOW_TEXT)
-        rectangle = self.textview.get_visible_rect()
-        window_x, window_y = window.get_origin()
-        window_width, window_height = rectangle.width, rectangle.height
+        window = self.textview.get_window(Gtk.TextWindowType.TEXT)
+        origin = window.get_origin()
+        window_x, window_y = origin.x, origin.y
 
         # Determine where to position the completion window.
         position_x = window_x + cursor_x
         position_y = window_y + cursor_y + cursor_height
 
-        if position_x + width > gtk.gdk.screen_width():
+        if position_x + width > Gdk.Screen.width():
             position_x = window_x + cursor_x - width
-        if position_y + height > gtk.gdk.screen_height():
+        if position_y + height > Gdk.Screen.height():
             position_y = window_y + cursor_y - height
 
         #if not_(self.__signals_are_blocked):
@@ -182,7 +183,7 @@ class Completer:
         buffer.
 
         @param path: The selected row in the completion window.
-        @type path: A gtk.TreeRow object.
+        @type path: A Gtk.TreeRow object.
         """
         # Get the selected completion string.
         completion_string = self.model[path[0]][0].decode("utf8")
@@ -221,11 +222,11 @@ class Completer:
         if not self.is_visible:
             return False
 
-        if event.keyval in (gtk.keysyms.Tab, gtk.keysyms.Right, gtk.keysyms.Left,
-                            gtk.keysyms.Home, gtk.keysyms.End, gtk.keysyms.Insert,
-                            gtk.keysyms.Delete,
-                            gtk.keysyms.Page_Up, gtk.keysyms.Page_Down,
-                            gtk.keysyms.Escape):
+        if event.keyval in (Gdk.KEY_Tab, Gdk.KEY_Right, Gdk.KEY_Left,
+                            Gdk.KEY_Home, Gdk.KEY_End, Gdk.KEY_Insert,
+                            Gdk.KEY_Delete,
+                            Gdk.KEY_Page_Up, Gdk.KEY_Page_Down,
+                            Gdk.KEY_Escape):
             self.hide_completion_window()
             return True
 
@@ -239,11 +240,11 @@ class Completer:
             selection.select_path((0,))
             model, iterator = selection.get_selected()
         path = model.get_path(iterator)
-        if event.keyval == gtk.keysyms.Return:
+        if event.keyval == Gdk.KEY_Return:
             # Insert the selected item into the editor's buffer when the enter key
             # event is detected.
             self.treeview.row_activated(path, self.treeview.get_column(0))
-        elif event.keyval == gtk.keysyms.Up:
+        elif event.keyval == Gdk.KEY_Up:
             # If the up key is pressed check to see if the first row is selected.
             # If it is, select the last row. Otherwise, get the path to the row
             # above and select it.
@@ -254,7 +255,7 @@ class Completer:
             else:
                 selection.select_path((path[0] - 1, ))
                 self.treeview.scroll_to_cell((path[0] - 1, ))
-        elif event.keyval == gtk.keysyms.Down:
+        elif event.keyval == Gdk.KEY_Down:
             # Get the iterator of the next row.
             next_iterator = model.iter_next(iterator)
             # If the next row exists, select it, if not select the first row.
@@ -270,16 +271,16 @@ class Completer:
         return True
 
     def build_widget(self):
-        w=gtk.Window(gtk.WINDOW_POPUP)
+        w=Gtk.Window(Gtk.WindowType.POPUP)
 
-        w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_MENU)
+        w.set_type_hint(Gdk.WindowTypeHint.MENU)
         #w.set_size_request(200, 200)
 
-        self.treeview=gtk.TreeView()
+        self.treeview=Gtk.TreeView()
 
-        self.model = gtk.ListStore(str)
-        renderer = gtk.CellRendererText()
-        col=gtk.TreeViewColumn("", renderer, text=0)
+        self.model = Gtk.ListStore(str)
+        renderer = Gtk.CellRendererText()
+        col=Gtk.TreeViewColumn("", renderer, text=0)
         col.set_expand(False)
 
         self.treeview.append_column(col)
@@ -297,12 +298,12 @@ class Completer:
         self.treeview.connect('row-activated', treeview_row_activated_cb)
 
         style = self.textview.get_style()
-        color = style.base[gtk.STATE_SELECTED]
-        self.treeview.modify_base(gtk.STATE_ACTIVE, color)
+        #color = style.base[Gtk.StateType.SELECTED]
+        #self.treeview.modify_base(Gtk.StateType.ACTIVE, color)
 
-        scroll=gtk.ScrolledWindow()
+        scroll=Gtk.ScrolledWindow()
         scroll.add(self.treeview)
-        scroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroll.set_border_width(2)
         w.add(scroll)
 
@@ -387,7 +388,7 @@ class Indexer:
         in the annotation of the same type. If it is a view,
         completions will be searched for in other views.
 
-        If element is a gtk.TextBuffer, completions will be searched
+        If element is a Gtk.TextBuffer, completions will be searched
         in its content.
         """
         if isinstance(context, View):
@@ -395,9 +396,10 @@ class Indexer:
             # FIXME: maybe add ids (annotation-types, relations-types, views)
         elif isinstance(context, Annotation):
             s=self.index.get(context.type.id, [])
-        elif isinstance(context, gtk.TextBuffer):
+        elif isinstance(context, Gtk.TextBuffer):
             # The replace clause transforms the timestamp placeholders into spaces.
-            s=set(self.get_words(unicode(context.get_slice(*context.get_bounds()).replace('\xef\xbf\xbc', ' '))))
+            args = context.get_bounds() + (False, )
+            s=set(self.get_words(unicode(context.get_slice(*args).replace('\xef\xbf\xbc', ' '))))
             s.update(self.index['views'])
         else:
             s=self.index['views']
@@ -407,23 +409,23 @@ class Indexer:
 
 if __name__ == "__main__":
     import sys
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+    window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
     window.set_default_size (600, 400)
 
     def key_pressed_cb (win, event):
-        if event.state & gtk.gdk.CONTROL_MASK:
+        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # The Control-key is held. Special actions :
-            if event.keyval == gtk.keysyms.q:
-                gtk.main_quit ()
+            if event.keyval == Gdk.KEY_q:
+                Gtk.main_quit ()
                 return True
 
     window.connect('key_press_event', key_pressed_cb)
-    window.connect('destroy', lambda e: gtk.main_quit())
+    window.connect('destroy', lambda e: Gtk.main_quit())
     window.set_title ('test')
 
-    import gtksourceview2
-    t=gtksourceview2.View(gtksourceview2.Buffer())
-    #t=gtk.TextView()
+    from gi.repository import GtkSource
+    t=GtkSource.View(GtkSource.Buffer())
+    #t=Gtk.TextView()
     if sys.argv[1:]:
         print "loading ", sys.argv[1]
         t.get_buffer().set_text(open(sys.argv[1]).read())
@@ -436,4 +438,4 @@ if __name__ == "__main__":
 
     window.add (t)
     window.show_all()
-    gtk.main ()
+    Gtk.main ()

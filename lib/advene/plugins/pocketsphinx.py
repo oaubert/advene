@@ -22,16 +22,16 @@ name="Speech recognition"
 from gettext import gettext as _
 
 import os
-import gobject
-import gst
+from gi.repository import GObject
+from gi.repository import Gst
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
 import advene.util.helper as helper
 
 def register(controller=None):
-    if (gst.element_factory_find('vader')
-         and gst.element_factory_find('pocketsphinx')):
+    if (Gst.ElementFactory.find('vader')
+         and Gst.ElementFactory.find('pocketsphinx')):
         controller.register_importer(PocketSphinxImporter)
     else:
         controller.log(_("Cannot register speech recognition: Pocketsphinx plugins not found. See http://cmusphinx.sourceforge.net/wiki/gstreamer for details."))
@@ -98,14 +98,14 @@ class PocketSphinxImporter(GenericImporter):
     def on_vader_start(self, vader, pos):
         """Store start position.
         """
-        self.start_position = pos / gst.MSECOND
+        self.start_position = pos / Gst.MSECOND
         return True
 
     def on_vader_stop(self, vader, pos):
         """Store stop position.
         """
         if self.start_position and self.text:
-            self.buffer_list.append( (self.start_position, pos / gst.MSECOND, self.text) )
+            self.buffer_list.append( (self.start_position, pos / Gst.MSECOND, self.text) )
             self.text = None
             self.start_position = 0
         return True
@@ -129,13 +129,13 @@ class PocketSphinxImporter(GenericImporter):
         def finalize():
             """Finalize data creation.
             """
-            gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
+            GObject.idle_add(lambda: self.pipeline.set_state(Gst.State.NULL) and False)
             self.generate_annotations()
             if self.end_callback:
                 self.end_callback()
             return False
 
-        if message.type == gst.MESSAGE_EOS:
+        if message.type == Gst.MessageType.EOS:
             finalize()
         elif message.structure:
             s = message.structure
@@ -163,9 +163,9 @@ class PocketSphinxImporter(GenericImporter):
                 self.lang_model)
 
         # Build pipeline
-        self.pipeline = gst.parse_launch('uridecodebin name=decoder ! audioconvert ! audioresample ! progressreport silent=true update-freq=1 name=report  ! vader name=vader auto-threshold=false threshold=%(noise).9f run-length=%(silence)d ! pocketsphinx name=pocketsphinx %(pocketsphinxargs)s ! fakesink' % ( {
+        self.pipeline = Gst.parse_launch('uridecodebin name=decoder ! audioconvert ! audioresample ! progressreport silent=true update-freq=1 name=report  ! vader name=vader auto-threshold=false threshold=%(noise).9f run-length=%(silence)d ! pocketsphinx name=pocketsphinx %(pocketsphinxargs)s ! fakesink' % ( {
                 'noise': self.noise,
-                'silence': self.silence * gst.MSECOND,
+                'silence': self.silence * Gst.MSECOND,
                 'pocketsphinxargs': args }))
         self.decoder = self.pipeline.get_by_name('decoder')
 
@@ -189,5 +189,5 @@ class PocketSphinxImporter(GenericImporter):
         else:
             self.decoder.props.uri = 'file://' + os.path.abspath(filename)
         self.progress(0, _("Recognizing speech"))
-        self.pipeline.set_state(gst.STATE_PLAYING)
+        self.pipeline.set_state(Gst.State.PLAYING)
         return self.package

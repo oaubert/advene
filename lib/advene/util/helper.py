@@ -829,3 +829,8 @@ def title2content(new_title, original_content, representation):
                     r = "%s=%s" % (name, new_title)
         # else: too complex representation. Return None as default value.
     return r
+
+def clamp(x, minimum, maximum):
+    """Clamp given value between minimum and maximum.
+    """
+    return max(minimum, min(x, maximum))

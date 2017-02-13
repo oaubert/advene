@@ -25,7 +25,7 @@ from advene.rules.elements import RegisteredAction
 import advene.model.tal.context
 import advene.util.helper as helper
 import textwrap
-import gtk
+from gi.repository import Gtk
 
 name="Default GUI actions"
 
@@ -378,14 +378,14 @@ class DefaultGUIActions:
             self.gui.popupwidget.undisplay(widget)
             return True
 
-        v=gtk.VBox()
+        v=Gtk.VBox()
 
         w=self.gui.get_illustrated_text(message)
         v.add(w)
-        e=gtk.Entry()
+        e=Gtk.Entry()
         e.set_text(destination.content.data)
         v.add(e)
-        b=gtk.Button(stock=gtk.STOCK_OK)
+        b=Gtk.Button(stock=Gtk.STOCK_OK)
         b.connect('clicked', handle_response, v, e, destination)
         v.add(b)
 
@@ -429,12 +429,12 @@ class DefaultGUIActions:
         if duration == "" or duration == 0:
             duration = None
 
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        vbox.pack_start(self.gui.get_illustrated_text(description), expand=False)
+        vbox.pack_start(self.gui.get_illustrated_text(description), False, False, 0)
 
-        b=gtk.Button(message)
-        vbox.pack_start(b, expand=False)
+        b=Gtk.Button(message)
+        vbox.pack_start(b, False, True, 0)
 
         b.connect('clicked', handle_response, url, vbox)
 
@@ -464,13 +464,13 @@ class DefaultGUIActions:
         if duration == "" or duration == 0:
             duration = None
 
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        vbox.pack_start(self.gui.get_illustrated_text(description), expand=False)
+        vbox.pack_start(self.gui.get_illustrated_text(description), False, False, 0)
 
-        b=gtk.Button()
+        b=Gtk.Button()
         b.add(self.gui.get_illustrated_text(message, position))
-        vbox.pack_start(b, expand=False)
+        vbox.pack_start(b, False, True, 0)
 
         b.connect('clicked', handle_response, position, vbox)
 
@@ -485,7 +485,7 @@ class DefaultGUIActions:
                 self.gui.popupwidget.undisplay(widget)
                 return True
 
-            vbox=gtk.VBox()
+            vbox=Gtk.VBox()
 
             description=self.parse_parameter(context,
                                              parameters, 'description', _("Make a choice"))
@@ -503,7 +503,7 @@ class DefaultGUIActions:
 
                 position=self.parse_parameter(context, parameters, 'position%d' % i, 0)
 
-                b=gtk.Button()
+                b=Gtk.Button()
                 b.add(self.gui.get_illustrated_text(message, position))
                 b.connect('clicked', handle_response, position, vbox)
                 vbox.add(b)
@@ -560,13 +560,13 @@ class DefaultGUIActions:
         message=message.replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        vbox.pack_start(self.gui.get_illustrated_text(message), expand=False)
+        vbox.pack_start(self.gui.get_illustrated_text(message), False, False, 0)
 
         for r in relations:
             a=r.members[-1]
-            b=gtk.Button()
+            b=Gtk.Button()
             t=''
             if r.content.data:
                 t=' (%s)' % r.content.data
@@ -575,7 +575,7 @@ class DefaultGUIActions:
                 'relation_content': t,
                 'annotation_content': self.controller.get_title(a) }
             b.add(self.gui.get_illustrated_text(c, a.fragment.begin))
-            vbox.pack_start(b, expand=False)
+            vbox.pack_start(b, False, True, 0)
             b.connect('clicked', handle_response, a.fragment.begin, vbox)
 
         self.gui.popupwidget.display(widget=vbox, timeout=annotation.fragment.duration, title=_("Relation navigation"))

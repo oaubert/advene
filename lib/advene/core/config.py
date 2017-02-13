@@ -375,6 +375,7 @@ class Config(object):
         # Drag and drop parameters for URIed element and other elements
         self.target_type = {}
         self.drag_type = {}
+        self.target_entry = {}
         for name, typ, mime in (
             ('text-plain',           0, 'text/plain'),
             ('TEXT',                 1, 'TEXT'),
@@ -400,6 +401,7 @@ class Config(object):
             if mime is None:
                 mime = "application/x-advene-%s-uri" % name
             self.drag_type[name] = [ ( mime, 0, typ) ]
+            self.target_entry[name] = None
 
         self.video_extensions = (
             '.264',
@@ -645,6 +647,10 @@ class Config(object):
         self.players[player.player_id] = player
         return True
 
+    def get_target_types(self, *names):
+        return [ self.target_entry[n]
+                 for n in names ]
+
     def get_content_handler(self, mimetype):
         """Return a valid content handler for the given mimetype.
 
@@ -689,7 +695,7 @@ class Config(object):
         elif self.os == 'darwin':
             dirname = os.path.join( 'Library', 'Preferences', 'Advene' )
         else:
-            dirname = '.advene'
+            dirname = '.config/advene'
 
         return os.path.join( self.get_homedir(), dirname )
 
@@ -761,7 +767,6 @@ class Config(object):
             return False
 
         print "Reading configuration from %s" % conffile
-        config=sys.modules['advene.core.config']
         for li in fd:
             if li.startswith ("#"):
                 continue

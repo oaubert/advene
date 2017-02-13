@@ -21,7 +21,6 @@ import sys
 import os
 import time
 import StringIO
-import shutil
 
 #import psyco; psyco.log(); psyco.profile()
 
@@ -104,7 +103,7 @@ if not os.path.exists(config.data.path['resources']):
         if os.path.basename(d) == 'Resources':
             print "Seemingly running from a .app bundle"
 
-            # We will put pangorc, pango.modules and gdk-pixbuf.loaders files in a directory of the user preferences.
+            # We will put pangorc, Pango.modules and gdk-pixbuf.loaders files in a directory of the user preferences.
             userconf = config.data.advenefile('_config', 'settings')
             if not os.path.isdir(userconf):
                 recursive_mkdir(userconf)
@@ -123,8 +122,8 @@ if not os.path.exists(config.data.path['resources']):
             os.environ['XDG_DATA_DIRS'] = d
             os.environ['GST_PLUGIN_PATH'] = os.path.join(d, 'gst-plugins')
 
-            # Let us fix the pango.modules and pixbuf.loaders files if necessary
-            for n in ('pangorc', 'pango.modules', 'gdk-pixbuf.loaders'):
+            # Let us fix the Pango.modules and pixbuf.loaders files if necessary
+            for n in ('pangorc', 'Pango.modules', 'gdk-pixbuf.loaders'):
                 sname = os.path.join(d, n + '.in')
                 dname = os.path.join(userconf, n)
                 data = open(sname, 'r').readlines()
@@ -146,8 +145,9 @@ if config.data.os == 'win32':
         os.environ['GDK_PIXBUF_MODULE_FILE'] = os.path.join(os.path.abspath(os.path.dirname(sys.executable)), 'lib', 'gdk-pixbuf-2.0','2.10.0', 'loaders', 'loaders.cache')
     print os.environ['GDK_PIXBUF_MODULE_FILE']
     try:
-        import pygtk
-        import gtk
+        import gi
+        gi.require_version('Gtk', '3.0')
+        from gi.repository import Gtk
     except ImportError:
         # Gtk DLLs are not in the PATH. Try to get their directory
         # from the registry
@@ -158,12 +158,14 @@ if config.data.os == 'win32':
         os.environ['PATH'] += os.path.pathsep + os.path.join(path, 'bin').encode('utf8')
         print "Using GTK DLLs at %s" % path
         try:
-            import pygtk
-            import gtk
+            import gi
+            from gi.repository import Gtk
         except ImportError:
             print "Cannot import GTK, try installing visual studio 2008 redist."
 else:
-    import gtk
+    import gi
+    gi.require_version('Gtk', '3.0')
+    from gi.repository import Gtk
 
 if __name__ == '__main__':
 
@@ -228,19 +230,19 @@ Aborting.""" % config.data.path[d]
         err = s.getvalue()
         print err
 
-        import gtk
+        from gi.repository import Gtk
         if logfile is not None:
-            d = gtk.MessageDialog(None,
-                                gtk.DIALOG_MODAL,
-                                gtk.MESSAGE_ERROR,
-                                gtk.BUTTONS_OK,
+            d = Gtk.MessageDialog(None,
+                                Gtk.DialogFlags.MODAL,
+                                Gtk.MessageType.ERROR,
+                                Gtk.ButtonsType.OK,
                                 _("An error occurred."))
             d.format_secondary_text(_("You can inform the Advene developers by sending the file\n %s\n to advene@liris.cnrs.fr, along with a description of how the bug occurred.") % logfile)
 
             def q(*p):
-                gtk.main_quit()
+                Gtk.main_quit()
                 return True
 
             d.connect('response', q)
             d.show()
-            gtk.main()
+            Gtk.main()

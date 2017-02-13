@@ -29,7 +29,7 @@ if config.data.os == 'win32':
     fsenc = sys.getfilesystemencoding()
     ppath = unicode(os.getenv('GST_PLUGIN_PATH', ""), fsenc)
     if not ppath or not os.path.exists(ppath):
-        os.environ['GST_PLUGIN_PATH'] = os.path.join(config.data.path['advene'], 'gst', 'lib', 'gstreamer-0.10').encode(fsenc)
+        os.environ['GST_PLUGIN_PATH'] = os.path.join(config.data.path['advene'], 'gst', 'lib', 'gstreamer-1.0').encode(fsenc)
         gstpath = unicode(os.getenv('PATH', ""), fsenc)
         os.environ['PATH'] = os.pathsep.join( ( os.path.join(config.data.path['advene'], 'gst', 'bin'), gstpath) ).encode(fsenc)
     else:
@@ -40,11 +40,13 @@ if config.data.os == 'win32':
         os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) ).encode(fsenc)
 
 try:
-    import pygst
-    pygst.require('0.10')
-    import gst
+    import gi
+    gi.require_version('Gst', '1.0')
+    from gi.repository import GObject, Gst
+    GObject.threads_init()
+    Gst.init(None)
 except ImportError:
-    gst=None
+    Gst=None
 
 import advene.core.config as config
 
@@ -63,16 +65,16 @@ class SoundPlayer:
             uri = 'file:' + urllib.pathname2url(fname)
         else:
             uri = 'file://' + os.path.abspath(fname)
-        pipe = gst.parse_launch('uridecodebin name=decode uri=%s ! audioconvert ! audiopanorama panorama=%f ! audioamplify name=amplify amplification=%f ! autoaudiosink' % (uri, float(balance), int(volume) / 100.0 ))
+        pipe = Gst.parse_launch('uridecodebin name=decode uri=%s ! audioconvert ! audiopanorama panorama=%f ! audioamplify name=amplify amplification=%f ! autoaudiosink' % (uri, float(balance), int(volume) / 100.0 ))
         bus = pipe.get_bus()
         bus.add_signal_watch()
 
         def eos_cb(b, m):
             if m.src == pipe:
-                pipe.set_state(gst.STATE_NULL)
+                pipe.set_state(Gst.State_NULL)
 
         bus.connect('message::eos', eos_cb)
-        pipe.set_state(gst.STATE_PLAYING)
+        pipe.set_state(Gst.State.PLAYING)
         # FIXME: since we do not reuse the pipeline, we maybe should clean it up on state_change -> READY
         return True
 
@@ -108,7 +110,6 @@ class SoundPlayer:
 
         It ignores the balance parameter.
         """
-        import objc
         import AppKit
         sound = AppKit.NSSound.alloc().initWithContentsOfFile_byReference_(fname, True)
         sound.setVolume( volume / 100.0 )
@@ -119,7 +120,7 @@ class SoundPlayer:
         os.waitpid(-1, os.WNOHANG)
         return True
 
-    if gst is not None:
+    if Gst is not None:
         play = gst_play
         print "Using gstreamer to play sounds"
     elif config.data.os == 'win32':
@@ -131,4 +132,3 @@ class SoundPlayer:
         if not os.path.exists('/usr/bin/aplay'):
             print "Error: aplay is not installed. Advene will be unable to play sounds."
         play=linux_play
-

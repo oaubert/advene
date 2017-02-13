@@ -21,10 +21,11 @@
 It depends on a Controller instance to be able to interact with the video player.
 """
 
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 import advene.core.config as config
 from advene.gui.widget import TimestampRepresentation, GenericColorButtonWidget
-from advene.gui.util import dialog, get_color_style
+from advene.gui.util import dialog
 from gettext import gettext as _
 
 class FrameSelector(object):
@@ -49,9 +50,9 @@ class FrameSelector(object):
         self.count = 8
         self.frame_length = 1000 / config.data.preferences['default-fps']
 
-        self.black_color = gtk.gdk.color_parse('black')
-        self.red_color = gtk.gdk.color_parse('#ff6666')
-        self.mouseover_color = gtk.gdk.color_parse('#ff0000')
+        self.black_color = Gdk.color_parse('black')
+        self.red_color = Gdk.color_parse('#ff6666')
+        self.mouseover_color = Gdk.color_parse('#ff0000')
 
         # List of TimestampRepresentation widgets.
         # It is initialized in build_widget()
@@ -95,15 +96,15 @@ class FrameSelector(object):
             f.right_border.set_color(self.black_color)
 
             if t < self.timestamp:
-                f.bgcolor = '#666666'
+                f.set_class('advene_previous_frame')
             else:
                 if matching_index < 0:
                     matching_index = i
 
                 if t == self.timestamp and self.border_mode == 'right':
-                    f.bgcolor = '#666666'
+                    f.set_class('advene_previous_frame')
                 else:
-                    f.bgcolor = 'black'
+                    f.set_class('advene_next_frame')
 
             t += self.frame_length
 
@@ -143,9 +144,9 @@ class FrameSelector(object):
         return True
 
     def handle_scroll_event(self, widget, event):
-        if event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
+        if event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
             offset=-1
-        elif event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
+        elif event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.RIGHT:
             offset=+1
         self.update_offset(offset)
         return True
@@ -156,14 +157,14 @@ class FrameSelector(object):
         return self.frames.index(self.frames[0].get_parent().get_focus_child())
 
     def handle_key_press(self, widget, event):
-        if event.keyval == gtk.keysyms.Left:
+        if event.keyval == Gdk.KEY_Left:
             i = self.focus_index()
             if i == 0:
                 self.update_offset(-1, focus_index = 0)
             else:
                 self.frames[i - 1].grab_focus()
             return True
-        elif event.keyval == gtk.keysyms.Right:
+        elif event.keyval == Gdk.KEY_Right:
             i = self.focus_index()
             if i == len(self.frames) -1:
                 self.update_offset(+1, focus_index = -1)
@@ -175,33 +176,33 @@ class FrameSelector(object):
     def get_value(self, title=None):
         if title is None:
             title = _("Select the appropriate snapshot")
-        d = gtk.Dialog(title=title,
+        d = Gtk.Dialog(title=title,
                        parent=None,
-                       flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+                       flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                       buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                 Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
 
         def callback(v):
-            d.response(gtk.RESPONSE_OK)
+            d.response(Gtk.ResponseType.OK)
             return True
         self.callback = callback
 
         d.vbox.add(self.widget)
 
-        buttons = gtk.HBox()
-        b=gtk.Button(_("Refresh snapshots"))
+        buttons = Gtk.HBox()
+        b=Gtk.Button(_("Refresh snapshots"))
         b.set_tooltip_text(_("Refresh missing snapshots"))
         b.connect("clicked", lambda b: self.refresh_snapshots())
-        buttons.pack_start(b, expand=False)
-        d.vbox.pack_start(buttons, expand=False)
+        buttons.pack_start(b, False, True, 0)
+        d.vbox.pack_start(buttons, False, True, 0)
 
         d.show_all()
         dialog.center_on_mouse(d)
 
         res = d.run()
         timestamp = self.timestamp
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             timestamp = self.selected_value
         d.destroy()
         return timestamp
@@ -218,19 +219,19 @@ class FrameSelector(object):
         return True
 
     def build_widget(self):
-        vb=gtk.VBox()
+        vb=Gtk.VBox()
 
-        l = gtk.Label(self.label)
-        vb.pack_start(l, expand=False)
+        l = Gtk.Label(label=self.label)
+        vb.pack_start(l, False, True, 0)
 
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
 
-        eb = gtk.EventBox()
-        ar = gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
+        eb = Gtk.EventBox()
+        ar = Gtk.Arrow(Gtk.ArrowType.LEFT, Gtk.ShadowType.IN)
         ar.set_tooltip_text(_("Click to see more frames or scroll with the mouse wheel"))
         eb.connect('button-press-event', lambda b,e: self.update_offset(-1))
         eb.add(ar)
-        hb.pack_start(eb, expand=False)
+        hb.pack_start(eb, False, True, 0)
 
         r = None
         for i in xrange(self.count):
@@ -268,24 +269,24 @@ class FrameSelector(object):
                 r.connect('enter-notify-event', enter_bookmark)
                 r.connect('leave-notify-event', leave_bookmark)
 
-            hb.pack_start(border, expand=False)
-            hb.pack_start(r, expand=False)
+            hb.pack_start(border, False, True, 0)
+            hb.pack_start(r, False, True, 0)
 
         # Last right border
         border = GenericColorButtonWidget('border')
         border.default_size=(3, 110)
         border.local_color=self.black_color
         r.right_border = border
-        hb.pack_start(border, expand=False)
+        hb.pack_start(border, False, True, 0)
 
-        eb = gtk.EventBox()
-        ar = gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
+        eb = Gtk.EventBox()
+        ar = Gtk.Arrow(Gtk.ArrowType.RIGHT, Gtk.ShadowType.IN)
         ar.set_tooltip_text(_("Click to see more frames or scroll with the mouse wheel"))
         eb.connect('button-press-event', lambda b,e: self.update_offset(+1))
         eb.add(ar)
-        hb.pack_start(eb, expand=False)
+        hb.pack_start(eb, False, True, 0)
 
-        hb.set_style(get_color_style(hb, 'black', 'black'))
+        hb.get_style_context().add_class('black_on_black')
         hb.connect('scroll-event', self.handle_scroll_event)
         hb.connect('key-press-event', self.handle_key_press)
         vb.add(hb)

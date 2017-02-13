@@ -20,14 +20,15 @@
 
 import os
 from gettext import gettext as _
-import gtk
-import gobject
-import pango
+from gi.repository import Gdk
+from gi.repository import Gtk
+from gi.repository import GObject
+from gi.repository import Pango
 import urllib
 
 # Advene part
 import advene.core.config as config
-from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf, get_pixmap_toolbutton, get_color_style
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf, get_pixmap_toolbutton
 from advene.gui.util import encode_drop_parameters, decode_drop_parameters, shaped_window_from_xpm, arrow_right_xpm
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
@@ -84,7 +85,7 @@ class ActiveBookmarks(AdhocView):
                 b.widget.show_all()
                 self.bookmarks.append(b)
 
-        self.mainbox=gtk.VBox()
+        self.mainbox=Gtk.VBox()
         self.widget=self.build_widget()
         if typ is None:
             typ=self.controller.package.annotationTypes[0]
@@ -110,10 +111,10 @@ class ActiveBookmarks(AdhocView):
     type=property(get_type, set_type)
 
     def register_callback (self, controller=None):
-        self.loop_id=gobject.timeout_add(1000, self.check_contents)
+        self.loop_id=GObject.timeout_add(1000, self.check_contents)
 
     def unregister_callback(self, controller=None):
-        gobject.source_remove(self.loop_id)
+        GObject.source_remove(self.loop_id)
 
     def get_save_arguments(self):
         # Serialisation format: annotationid:begin:end:content where
@@ -124,7 +125,7 @@ class ActiveBookmarks(AdhocView):
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
         for w in self.bookmarks:
-            self.mainbox.pack_start(w.widget, expand=False)
+            self.mainbox.pack_start(w.widget, False, True, 0)
         self.mainbox.show_all()
         self.generate_focus_chain()
         return True
@@ -217,7 +218,7 @@ class ActiveBookmarks(AdhocView):
                 index=self.bookmarks.index(cur) + 1
         if index is None:
             self.bookmarks.append(b)
-            self.mainbox.pack_start(b.widget, expand=False)
+            self.mainbox.pack_start(b.widget, False, True, 0)
             self.generate_focus_chain()
         else:
             self.bookmarks.insert(index, b)
@@ -287,7 +288,7 @@ class ActiveBookmarks(AdhocView):
     def get_matching_bookmark(self, wid):
         """Return the bookmark whose begin or end image is wid.
 
-        Usually used in DND callbacks, with wid=context.get_source_widget()
+        Usually used in DND callbacks, with wid=Gtk.drag_get_source_widget(context)
         """
         l=[ b
             for b in self.bookmarks
@@ -301,7 +302,7 @@ class ActiveBookmarks(AdhocView):
         """Scroll to the bottom of the view.
         """
         adj=self.mainbox.get_parent().get_vadjustment()
-        adj.value = adj.upper
+        adj.set_value(adj.get_upper())
         return True
 
     def scroll_to_bookmark(self, b=None):
@@ -310,15 +311,15 @@ class ActiveBookmarks(AdhocView):
         if not self.bookmarks:
             return
         b=b or self.get_current_bookmark() or self.bookmarks[0]
-        if b.widget.window is None:
+        if b.widget.get_window() is None:
             return True
-        x, y, w, h, depth=b.widget.window.get_geometry()
+        x, y, w, h, depth=b.widget.get_window().get_geometry()
         parent=self.mainbox.get_parent()
         adj=parent.get_vadjustment()
-        pos=adj.value
-        height=parent.window.get_geometry()[3]
+        pos=adj.get_value()
+        height=parent.get_window().get_geometry()[3]
         if y < pos or y + h > pos + height:
-            adj.value = min(y, adj.upper - adj.page_size)
+            adj.set_value(helper.clamp(y, adj.get_lower(), adj.get_upper() - adj.get_page_size()))
         return True
 
     def delete_origin_timestamp(self, wid):
@@ -355,15 +356,15 @@ class ActiveBookmarks(AdhocView):
             return
         dt=config.data.drag_type
         b=ActiveBookmark(container=self, from_serialisation=data)
-        if selection.target in ( dt['STRING'][0][0], dt['text-plain'][0][0]):
+        if selection.get_target() in ( dt['STRING'][0][0], dt['text-plain'][0][0]):
             selection.set_text('%s : %s' % (helper.format_time(b.begin), b.content))
-        elif selection.target == dt['timestamp'][0][0]:
-            selection.set(selection.target, 8, encode_drop_parameters(begin=b.begin, comment=b.content))
-        elif selection.target == dt['bookmark'][0][0]:
-            selection.set(selection.target, 8, data)
-        elif selection.target == dt['annotation'][0][0]:
+        elif selection.get_target() == dt['timestamp'][0][0]:
+            selection.set(selection.get_target(), 8, encode_drop_parameters(begin=b.begin, comment=b.content))
+        elif selection.get_target() == dt['bookmark'][0][0]:
+            selection.set(selection.get_target(), 8, data)
+        elif selection.get_target() == dt['annotation'][0][0]:
             if b.annotation is not None:
-                selection.set(selection.target, 8, b.annotation.uri.encode('utf8'))
+                selection.set(selection.get_target(), 8, b.annotation.uri.encode('utf8'))
         else:
             del b
             return False
@@ -377,7 +378,7 @@ class ActiveBookmarks(AdhocView):
     def copy_current_bookmark(self):
         """Copy the current bookmark into the clipboard.
         """
-        c=gtk.clipboard_get()
+        c=Gtk.clipboard_get()
         cur=self.get_current_bookmark()
         if cur is None:
             return None
@@ -390,8 +391,8 @@ class ActiveBookmarks(AdhocView):
         return cur
 
     def build_widget(self):
-        v=gtk.VBox()
-        hb=gtk.HBox()
+        v=Gtk.VBox()
+        hb=Gtk.HBox()
         hb.set_homogeneous(False)
 
         def bookmark_current_time(b):
@@ -403,13 +404,13 @@ class ActiveBookmarks(AdhocView):
                 self.append(v)
                 return True
 
-        tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
+        tb=Gtk.Toolbar()
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['timestamp']:
                 # Check if we received the drag from one of our own widget.
-                wid=context.get_source_widget()
+                wid=Gtk.drag_get_source_widget(context)
                 b=self.get_matching_bookmark(wid)
                 if b is not None:
                     if b.end_widget == b.dropbox:
@@ -436,21 +437,21 @@ class ActiveBookmarks(AdhocView):
         def reorder(widget):
             """Display a popup menu proposing various sort options.
             """
-            m=gtk.Menu()
+            m=Gtk.Menu()
             for t, func in (
                 (_("Chronological order"), lambda a, b: cmp(a.begin, b.begin)),
                 (_("Completeness and chronological order"), lambda a, b: cmp(a.end_widget == a.dropbox,
                                                                              b.end_widget == b.dropbox) or cmp(a.begin, b.begin))
                 ):
-                i=gtk.MenuItem(t)
+                i=Gtk.MenuItem(t)
                 i.connect('activate', do_reorder, func)
                 m.append(i)
             m.show_all()
-            m.popup(None, widget, None, 0, gtk.get_current_event_time())
+            m.popup(None, widget, None, 0, Gtk.get_current_event_time())
             return True
 
         def do_complete(b, func):
-            l=[ b for b in self.bookmarks if b.annotation is None ]
+            l=[ bo for bo in self.bookmarks if bo.annotation is None ]
             if isinstance(func, long) or isinstance(func, int):
                 for b in l:
                     b.end=b.begin+func
@@ -476,17 +477,17 @@ class ActiveBookmarks(AdhocView):
                         b.end=self.controller.cached_duration
 
         def complete(widget):
-            m=gtk.Menu()
+            m=Gtk.Menu()
             for t, func in (
                 (_("User-specified duration"), 'user'),
                 (_("2s duration"), 2000),
                 (_("Complete coverage"), 'coverage'),
                 ):
-                i=gtk.MenuItem(t)
+                i=Gtk.MenuItem(t)
                 i.connect('activate', do_complete, func)
                 m.append(i)
             m.show_all()
-            m.popup(None, widget, None, 0, gtk.get_current_event_time())
+            m.popup(None, widget, None, 0, Gtk.get_current_event_time())
             return True
 
         def remove_current(widget):
@@ -497,22 +498,22 @@ class ActiveBookmarks(AdhocView):
                 self.remove(b)
             return True
 
-        b=get_small_stock_button(gtk.STOCK_DELETE)
+        b=get_small_stock_button(Gtk.STOCK_DELETE)
         b.set_tooltip_text(_("Drop a bookmark here to remove it from the list"))
         if config.data.os == 'win32':
             # DND on win32 is partially broken: it will not detect
             # ACTION_MOVE only. We have to add ACTION_COPY.
-            flags=gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE
+            flags=Gdk.DragAction.COPY | Gdk.DragAction.MOVE
         else:
-            flags=gtk.gdk.ACTION_MOVE
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['timestamp'],
+            flags=Gdk.DragAction.MOVE
+        b.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('timestamp'),
                         flags )
         b.connect('drag-data-received', remove_drag_received)
         b.connect('clicked', remove_current)
-        i=gtk.ToolItem()
+        i=Gtk.ToolItem()
         i.add(b)
         tb.insert(i, -1)
 
@@ -520,7 +521,7 @@ class ActiveBookmarks(AdhocView):
         b.set_tooltip_text(_("Insert a bookmark for the current video time"))
         tb.insert(b, -1)
 
-        i=gtk.ToolItem()
+        i=Gtk.ToolItem()
         types=[ (at, self.controller.get_title(at), self.controller.get_element_color(at)) for at in self.controller.package.annotationTypes ]
         types.sort(key=lambda a: a[1])
 
@@ -540,7 +541,7 @@ class ActiveBookmarks(AdhocView):
                 self.set_image_size(s)
                 return True
 
-            m=gtk.Menu()
+            m=Gtk.Menu()
             s=config.data.preferences['bookmark-snapshot-width']
             for size, label in (
                 (long(.5 * s), _("Smallish")),
@@ -550,57 +551,52 @@ class ActiveBookmarks(AdhocView):
                 (long(1.5 * s), _("Larger")),
                 (long(2 * s), _("Huge")),
                 ):
-                i=gtk.MenuItem(label)
+                i=Gtk.MenuItem(label)
                 i.connect('activate', set_scale, size)
                 m.append(i)
             m.show_all()
-            m.popup(None, None, None, 0, gtk.get_current_event_time())
+            m.popup(None, None, None, 0, Gtk.get_current_event_time())
             return True
 
         for (icon, tip, method) in (
-            (gtk.STOCK_REDO, _("Reorder active bookmarks"), reorder),
-            (gtk.STOCK_CONVERT, _("Complete bookmarks into annotations"), complete),
-            (gtk.STOCK_SAVE, _("Save the current state"), self.save_view),
-            (gtk.STOCK_FULLSCREEN, _("Set the size of snaphots"), scale_snaphots_menu),
+            (Gtk.STOCK_REDO, _("Reorder active bookmarks"), reorder),
+            (Gtk.STOCK_CONVERT, _("Complete bookmarks into annotations"), complete),
+            (Gtk.STOCK_SAVE, _("Save the current state"), self.save_view),
+            (Gtk.STOCK_FULLSCREEN, _("Set the size of snaphots"), scale_snaphots_menu),
             ):
             b=get_small_stock_button(icon)
             b.set_tooltip_text(tip)
             b.connect('clicked', method)
-            i=gtk.ToolItem()
+            i=Gtk.ToolItem()
             i.add(b)
             tb.insert(i, -1)
 
         hb.add(tb)
-        v.pack_start(hb, expand=False)
-        sw=gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        v.pack_start(hb, False, True, 0)
+        sw=Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add_with_viewport(self.mainbox)
         self.scrollwindow=sw
 
         def scroll_on_drag(widget, drag_context, x, y, timestamp):
             adj=widget.get_adjustment()
-            v=adj.value
+            v=adj.get_value()
             if y > widget.get_allocation().height / 2:
                 # Try to scroll down
                 v += max(adj.step_increment, adj.page_increment / 3)
             else:
                 v -= max(adj.step_increment, adj.page_increment / 3)
-            if v < 0:
-                v = 0
-            elif v > adj.upper - adj.page_size:
-                v=adj.upper - adj.page_size
-            adj.value=v
+            adj.set_value(helper.clamp(v, adj.get_lower(), adj.get_upper() - adj.get_page_size()))
             return True
 
         sb=sw.get_vscrollbar()
-        sb.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                         gtk.DEST_DEFAULT_HIGHLIGHT |
-                         gtk.DEST_DEFAULT_ALL,
-                         config.data.drag_type['annotation']
-                         + config.data.drag_type['timestamp']
-                         + config.data.drag_type['annotation-type']
-                         ,
-                         gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        sb.drag_dest_set(Gtk.DestDefaults.MOTION |
+                         Gtk.DestDefaults.HIGHLIGHT |
+                         Gtk.DestDefaults.ALL,
+                         config.data.get_target_types('annotation',
+                                                      'timestamp',
+                                                      'annotation-type'),
+                         Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         sb.connect('drag-motion', scroll_on_drag)
 
         def hide_arrow_mark(*p):
@@ -621,22 +617,22 @@ class ActiveBookmarks(AdhocView):
             else:
                 a=self.bookmarks[-1].widget.get_allocation()
                 y=a.y + a.height
-            rx, ry = widget.window.get_origin()
+            rx, ry = widget.get_window().get_origin()
             self.arrow_mark.move(long(rx), long(ry + y))
             self.arrow_mark.show_all()
-            actions=drag_context.actions
-            is_in_view=drag_context.get_source_widget().is_ancestor(widget)
-            if (actions == gtk.gdk.ACTION_MOVE
-                or actions == gtk.gdk.ACTION_LINK):
+            actions=drag_context.get_actions()
+            is_in_view=Gtk.drag_get_source_widget(drag_context).is_ancestor(widget)
+            if (actions == Gdk.DragAction.MOVE
+                or actions == Gdk.DragAction.LINK):
                 # Only 1 possible action. Use it.
                 drag_context.drag_status(actions, timestamp)
-            elif actions == gtk.gdk.ACTION_COPY and is_in_view and config.data.drag_type['annotation'][0][0] in drag_context.targets:
+            elif actions == Gdk.DragAction.COPY and is_in_view and config.data.drag_type['annotation'][0][0] in drag_context.list_targets():
                 # We cannot just copy an annotation from our own view,
                 # it just can be moved
-                drag_context.drag_status(gtk.gdk.ACTION_MOVE, timestamp)
-            elif gtk.gdk.ACTION_MOVE & actions and is_in_view:
+                drag_context.drag_status(Gdk.DragAction.MOVE, timestamp)
+            elif Gdk.DragAction.MOVE & actions and is_in_view:
                 # DND from the same view. Force default to move.
-                drag_context.drag_status(gtk.gdk.ACTION_MOVE, timestamp)
+                drag_context.drag_status(Gdk.DragAction.MOVE, timestamp)
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             index=None
@@ -649,25 +645,25 @@ class ActiveBookmarks(AdhocView):
                 if l:
                     index=self.bookmarks.index(l[0])
             if targetType == config.data.target_type['timestamp']:
-                data=decode_drop_parameters(selection.data)
+                data=decode_drop_parameters(selection.get_data())
                 position=long(data['timestamp'])
                 b=self.append(position, index)
                 if 'comment' in data:
                     b.content=data['comment']
                 # If the drag originated from our own widgets, remove it.
-                if context.action == gtk.gdk.ACTION_MOVE:
-                    self.delete_origin_timestamp(context.get_source_widget())
+                if context.action == Gdk.DragAction.MOVE:
+                    self.delete_origin_timestamp(Gtk.drag_get_source_widget(context))
                 return True
             elif targetType == config.data.target_type['annotation-type']:
                 # Populate the view with annotation begins
-                source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+                source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
                 if source is not None:
                     for a in source.annotations:
                         b=self.append(a.fragment.begin)
                         b.content=self.controller.get_title(a)
                 return True
             elif targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
                 for source in sources:
                     l=[ b for b in self.bookmarks if b.annotation == source ]
                     if l:
@@ -694,14 +690,11 @@ class ActiveBookmarks(AdhocView):
                 print "Unknown target type for drop: %d" % targetType
                 return False
 
-        self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                   gtk.DEST_DEFAULT_HIGHLIGHT |
-                                   gtk.DEST_DEFAULT_ALL,
-                                   config.data.drag_type['annotation']
-                                   + config.data.drag_type['timestamp']
-                                   + config.data.drag_type['annotation-type']
-                                   ,
-                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                   Gtk.DestDefaults.HIGHLIGHT |
+                                   Gtk.DestDefaults.ALL,
+                                   config.data.get_target_types('annotation', 'timestamp', 'annotation-type'),
+                                   Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         self.mainbox.connect('drag-data-received', mainbox_drag_received)
         self.mainbox.connect('drag-motion', mainbox_drag_motion)
         self.mainbox.connect('drag-end', hide_arrow_mark)
@@ -710,28 +703,28 @@ class ActiveBookmarks(AdhocView):
 
         # Shortcuts
         def mainbox_key_press(widget, event):
-            if event.keyval == gtk.keysyms.Delete or event.keyval == gtk.keysyms.BackSpace:
+            if event.keyval == Gdk.KEY_Delete or event.keyval == Gdk.KEY_BackSpace:
                 cur=self.get_current_bookmark()
                 if cur is not None:
                     self.remove(cur)
                 return True
-            elif event.keyval == gtk.keysyms.d and event.state & gtk.gdk.CONTROL_MASK:
+            elif event.keyval == Gdk.KEY_d and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 # Control-D: duplicate current bookmark
                 self.duplicate_bookmark()
                 return True
-            elif event.keyval == gtk.keysyms.c and event.state & gtk.gdk.CONTROL_MASK:
+            elif event.keyval == Gdk.KEY_c and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 # Copy.
                 self.copy_current_bookmark()
                 return True
-            elif event.keyval == gtk.keysyms.x and event.state & gtk.gdk.CONTROL_MASK:
+            elif event.keyval == Gdk.KEY_x and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 # Cut
                 cur = self.copy_current_bookmark()
                 if cur is not None:
                     self.remove(cur)
                 return True
-            elif event.keyval == gtk.keysyms.v and event.state & gtk.gdk.CONTROL_MASK:
+            elif event.keyval == Gdk.KEY_v and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 # Paste
-                c=gtk.clipboard_get()
+                c=Gtk.clipboard_get()
                 def paste_bookmark(cl, sel, data):
                     b=ActiveBookmark(container=self, from_serialisation=sel.data)
                     self.append(b, after_current=True)
@@ -787,17 +780,16 @@ class ActiveBookmark(object):
 
         # begin_widget and end_widget are both instances of BookmarkWidget.
         # end_widget may be self.dropbox (if end is not initialized yet)
-        self.dropbox=gtk.EventBox()
+        self.dropbox=Gtk.EventBox()
         self.dropbox.image=None
         self.dropbox.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
         self.dropbox.show()
         self.dropbox.set_no_show_all(True)
-        self.dropbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                            gtk.DEST_DEFAULT_HIGHLIGHT |
-                                            gtk.DEST_DEFAULT_ALL,
-                                            config.data.drag_type['timestamp']
-                                            + config.data.drag_type['annotation-type'],
-                                            gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        self.dropbox.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                            Gtk.DestDefaults.HIGHLIGHT |
+                                            Gtk.DestDefaults.ALL,
+                                            config.data.get_target_types('timestamp', 'annotation-type'),
+                                            Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         self.dropbox.connect('drag-data-received', self.begin_drag_received)
         self.dropbox.connect('drag-motion', self.bound_drag_motion)
 
@@ -838,15 +830,14 @@ class ActiveBookmark(object):
                                            width=self.container.options['snapshot-size'])
             self.end_widget.widget.set_property('can-focus', False)
             parent=self.begin_widget.widget.get_parent()
-            parent.pack_start(self.end_widget.widget, expand=False)
+            parent.pack_start(self.end_widget.widget, False, True, 0)
             self.end_widget.widget.show_all()
 
-            self.end_widget.image.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                                gtk.DEST_DEFAULT_HIGHLIGHT |
-                                                gtk.DEST_DEFAULT_ALL,
-                                                config.data.drag_type['timestamp']
-                                                + config.data.drag_type['annotation-type'],
-                                                gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+            self.end_widget.image.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                                Gtk.DestDefaults.HIGHLIGHT |
+                                                Gtk.DestDefaults.ALL,
+                                                config.data.get_target_types('timestamp', 'annotation-type'),
+                                                Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
             self.end_widget.image.connect('drag-data-received', self.end_drag_received)
             self.end_widget.image.connect('drag-motion', self.bound_drag_motion)
             self.end_widget.image.connect('scroll-event', self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
@@ -862,7 +853,7 @@ class ActiveBookmark(object):
                 for (label, action) in (
                     (_("Remove end timestamp"), lambda i: self.set_end(None)),
                     ):
-                    i=gtk.MenuItem(label)
+                    i=Gtk.MenuItem(label)
                     i.connect('activate', action)
                     menu.append(i)
                 return
@@ -930,25 +921,25 @@ class ActiveBookmark(object):
 
     def bound_drag_motion(self, widget, drag_context, x, y, timestamp):
         # Force the correct default action.
-        actions=drag_context.actions
-        is_in_view=drag_context.get_source_widget().is_ancestor(self.container.mainbox)
-        if (actions == gtk.gdk.ACTION_MOVE
-            or actions == gtk.gdk.ACTION_LINK
-            or actions == gtk.gdk.ACTION_COPY):
+        actions=drag_context.get_actions()
+        is_in_view=Gtk.drag_get_source_widget(context).is_ancestor(self.container.mainbox)
+        if (actions == Gdk.DragAction.MOVE
+            or actions == Gdk.DragAction.LINK
+            or actions == Gdk.DragAction.COPY):
             # Only 1 possible action. Use it.
             drag_context.drag_status(actions, timestamp)
-        elif gtk.gdk.ACTION_MOVE & actions and is_in_view:
+        elif Gdk.DragAction.MOVE & actions and is_in_view:
             # DND from the same view. Force default to move.
-            drag_context.drag_status(gtk.gdk.ACTION_MOVE, timestamp)
+            drag_context.drag_status(Gdk.DragAction.MOVE, timestamp)
 
     def begin_drag_received(self, widget, context, x, y, selection, targetType, time):
         if self.last_drag_time == time:
             return True
         self.last_drag_time=time
-        if self.is_widget_in_bookmark(context.get_source_widget()):
+        if self.is_widget_in_bookmark(Gtk.drag_get_source_widget(context)):
             return False
         if targetType == config.data.target_type['timestamp']:
-            data=decode_drop_parameters(selection.data)
+            data=decode_drop_parameters(selection.get_data())
             e=long(data['timestamp'])
             if self.end is None:
                 if e < self.begin:
@@ -970,24 +961,24 @@ class ActiveBookmark(object):
             # If the drag originated from our own widgets, remove it.
             # If the drop was done from within our view, then
             # delete the origin widget.
-            if context.action == gtk.gdk.ACTION_MOVE:
-                self.container.delete_origin_timestamp(context.get_source_widget())
+            if context.action == Gdk.DragAction.MOVE:
+                self.container.delete_origin_timestamp(Gtk.drag_get_source_widget(context))
             # Set the current status
             self.container.set_current_bookmark(self)
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+            source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
             if source is not None:
                 self.transtype(source)
             return True
         return False
 
     def end_drag_received(self, widget, context, x, y, selection, targetType, time):
-        if self.is_widget_in_bookmark(context.get_source_widget()):
+        if self.is_widget_in_bookmark(Gtk.drag_get_source_widget(context)):
             return False
         self.container.set_current_bookmark(self)
         if targetType == config.data.target_type['timestamp']:
-            data=decode_drop_parameters(selection.data)
+            data=decode_drop_parameters(selection.get_data())
             e=long(data['timestamp'])
             if self.end is not None:
                 # Save a copy of the deleted timestamp next to the current bookmark
@@ -1001,12 +992,12 @@ class ActiveBookmark(object):
             # If the drag originated from our own widgets, remove it.
             # If the drop was done from within our view, then
             # delete the origin widget.
-            if context.action == gtk.gdk.ACTION_MOVE:
-                self.container.delete_origin_timestamp(context.get_source_widget())
+            if context.action == Gdk.DragAction.MOVE:
+                self.container.delete_origin_timestamp(Gtk.drag_get_source_widget(context))
             self.container.set_current_bookmark(self)
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+            source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
             if source is not None:
                 self.transtype(source)
             return True
@@ -1024,7 +1015,7 @@ class ActiveBookmark(object):
             col=self.controller.get_element_color(self.annotation)
             if col is not None:
                 color=name2color(col)
-                self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, color)
+                self.begin_widget.comment_entry.modify_base(Gtk.StateType.NORMAL, color)
         return True
 
     def set_content(self, c):
@@ -1110,7 +1101,7 @@ class ActiveBookmark(object):
                 self.container.remove(self)
                 return True
             b=get_pixmap_button('small_ok.png', handle_ok)
-            b.set_relief(gtk.RELIEF_NONE)
+            b.set_relief(Gtk.ReliefStyle.NONE)
             b.set_tooltip_text(_("Validate the annotation"))
             def set_current(widget, event):
                 self.container.set_current_bookmark(self)
@@ -1123,14 +1114,14 @@ class ActiveBookmark(object):
             col=self.controller.get_element_color(self.annotation)
             if col is not None:
                 color=name2color(col)
-                self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, color)
+                self.begin_widget.comment_entry.modify_base(Gtk.StateType.NORMAL, color)
         else:
             # Reset the color and the label widget
             l=self.frame.get_label_widget()
             if l is not None:
                 l.destroy()
             # Reset the textview color
-            self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, self.default_background_color)
+            self.begin_widget.comment_entry.modify_base(Gtk.StateType.NORMAL, self.default_background_color)
 
     def grab_focus(self, *p):
         """Set the focus on the comment edition widget.
@@ -1140,16 +1131,16 @@ class ActiveBookmark(object):
 
     def handle_scroll_event(self, button, event, get_value, set_value, check_value):
         # Handle scroll actions
-        if not (event.state & gtk.gdk.CONTROL_MASK):
+        if not (event.get_state() & Gdk.ModifierType.CONTROL_MASK):
             return False
-        if event.state & gtk.gdk.SHIFT_MASK:
+        if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
             i='second-scroll-increment'
         else:
             i='scroll-increment'
 
-        if event.direction == gtk.gdk.SCROLL_DOWN:
+        if event.direction == Gdk.ScrollDirection.DOWN:
             incr=-config.data.preferences[i]
-        elif event.direction == gtk.gdk.SCROLL_UP:
+        elif event.direction == Gdk.ScrollDirection.UP:
             incr=config.data.preferences[i]
 
         v=get_value()
@@ -1183,28 +1174,28 @@ class ActiveBookmark(object):
 
     def timestamp_key_press(self, widget, event, source):
         def move_or_navigate(index, event):
-            if event.state & gtk.gdk.SHIFT_MASK:
+            if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 # Shift-up/down/home/end: move the bookmark
                 self.container.move_boomark(self, index)
             else:
                 # Set the current bookmark
                 self.container.select_bookmark(index)
 
-        if event.keyval == gtk.keysyms.Delete or event.keyval == gtk.keysyms.BackSpace:
+        if event.keyval == Gdk.KEY_Delete or event.keyval == Gdk.KEY_BackSpace:
             self.delete_timestamp(source)
             return True
-        elif event.keyval == gtk.keysyms.d and event.state & gtk.gdk.CONTROL_MASK:
+        elif event.keyval == Gdk.KEY_d and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Control-D: duplicate current bookmark
             self.container.duplicate_bookmark()
             return True
-        elif event.keyval == gtk.keysyms.Up or event.keyval == gtk.keysyms.Down:
+        elif event.keyval == Gdk.KEY_Up or event.keyval == Gdk.KEY_Down:
             # Up/Down navigation. It is normally handled by Gtk but
             # the default behaviour has a corner case which makes it
             # impractical in this case (going from a bookmark to an
             # annotation selects the annotation content, and prevents
             # further navigation). Hence we handle it manually.
             index=self.container.bookmarks.index(self)
-            if event.keyval == gtk.keysyms.Up:
+            if event.keyval == Gdk.KEY_Up:
                 if index == 0:
                     return True
                 index -= 1
@@ -1214,37 +1205,35 @@ class ActiveBookmark(object):
                     return True
             move_or_navigate(index, event)
             return True
-        elif event.keyval == gtk.keysyms.Home:
+        elif event.keyval == Gdk.KEY_Home:
             move_or_navigate(0, event)
-        elif event.keyval == gtk.keysyms.End:
+        elif event.keyval == Gdk.KEY_End:
             move_or_navigate(-1, event)
         return False
 
     def build_widget(self):
 
-        f=gtk.Frame()
+        f=Gtk.Frame()
 
-        box=gtk.HBox()
+        box=Gtk.HBox()
 
         self.begin_widget=BookmarkWidget(self.controller,
                                          display_comments=True,
                                          width=self.container.options['snapshot-size'])
-        self.begin_widget.image.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                              gtk.DEST_DEFAULT_HIGHLIGHT |
-                                              gtk.DEST_DEFAULT_ALL,
-                                              config.data.drag_type['timestamp']
-                                              + config.data.drag_type['annotation-type'],
-                                              gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
+        self.begin_widget.image.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                              Gtk.DestDefaults.HIGHLIGHT |
+                                              Gtk.DestDefaults.ALL,
+                                              config.data.get_target_types('timestamp', 'annotation-type'),
+                                              Gdk.DragAction.COPY | Gdk.DragAction.MOVE )
         self.begin_widget.image.connect('drag-data-received', self.begin_drag_received)
         self.begin_widget.image.connect('drag-motion', self.bound_drag_motion)
         self.begin_widget.image.connect('scroll-event', self.handle_scroll_event, self.get_begin, self.set_begin, lambda v: self.end is None or v < self.end)
 
-        self.begin_widget.comment_entry.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                              gtk.DEST_DEFAULT_HIGHLIGHT |
-                                              gtk.DEST_DEFAULT_ALL,
-                                              config.data.drag_type['timestamp']
-                                              + config.data.drag_type['annotation-type'],
-                                              gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
+        self.begin_widget.comment_entry.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                                      Gtk.DestDefaults.HIGHLIGHT |
+                                                      Gtk.DestDefaults.ALL,
+                                                      config.data.get_target_types('timestamp', 'annotation-type'),
+                                                      Gdk.DragAction.COPY | Gdk.DragAction.MOVE )
         self.begin_widget.comment_entry.connect('drag-data-received', self.begin_drag_received)
         self.begin_widget.comment_entry.connect('drag-motion', self.bound_drag_motion)
         self.begin_widget.image.connect('key-press-event', self.timestamp_key_press, 'begin')
@@ -1270,16 +1259,16 @@ class ActiveBookmark(object):
                     (_("Remove begin timestamp"), remove_begin)
                     )
             for (label, action) in l:
-                i=gtk.MenuItem(label)
+                i=Gtk.MenuItem(label)
                 i.connect('activate', action)
                 menu.append(i)
             if self.annotation is None:
-                i=gtk.MenuItem(_("Complete bookmark"))
+                i=Gtk.MenuItem(_("Complete bookmark"))
                 i.connect('activate', lambda i: self.set_end(self.begin + 2000))
                 menu.append(i)
             else:
-                i=gtk.MenuItem(_("Change type to"))
-                sm=gtk.Menu()
+                i=Gtk.MenuItem(_("Change type to"))
+                sm=Gtk.Menu()
                 i.set_submenu(sm)
                 menu.append(i)
                 l=[ (t, self.controller.get_title(t))
@@ -1287,7 +1276,7 @@ class ActiveBookmark(object):
                     if t != self.annotation.type ]
                 l.sort(key=lambda a: a[1])
                 for (typ, title) in l:
-                    i=gtk.MenuItem(title, use_underline=False)
+                    i=Gtk.MenuItem(title, use_underline=False)
                     i.connect('activate', (lambda i, t: self.transtype(t)), typ)
                     sm.append(i)
             return
@@ -1295,25 +1284,25 @@ class ActiveBookmark(object):
 
         self.begin_widget.comment_entry.set_accepts_tab(False)
 
-        box.pack_start(self.begin_widget.widget, expand=True)
-        box.pack_start(self.end_widget, expand=False)
+        box.pack_start(self.begin_widget.widget, True, True, 0)
+        box.pack_start(self.end_widget, False, True, 0)
         f.add(box)
         f.show_all()
 
         self.frame=f
 
         # Memorize the default textview color.
-        self.default_background_color=self.begin_widget.comment_entry.get_style().base[gtk.STATE_NORMAL]
+        self.default_background_color=self.begin_widget.comment_entry.get_style().base[Gtk.StateType.NORMAL]
 
         #if self.annotation is not None:
         self.set_frame_attributes()
 
         # Add a padding widget so that the frame fits the displayed elements
-        #padding=gtk.HBox()
-        #padding.pack_start(f, expand=False)
+        #padding=Gtk.HBox()
+        #padding.pack_start(f, False, True, 0)
 
         # Use an Event box to be able to drag the frame representing an annotation
-        eb=gtk.EventBox()
+        eb=Gtk.EventBox()
         eb.add(f)
 
         def drag_sent(widget, context, selection, targetType, eventTime):
@@ -1323,61 +1312,59 @@ class ActiveBookmark(object):
                 if self.annotation is None:
                     return False
                 else:
-                    selection.set(selection.target, 8, self.annotation.uri.encode('utf8'))
+                    selection.set(selection.get_target(), 8, self.annotation.uri.encode('utf8'))
             elif targetType == config.data.target_type['uri-list']:
                 if self.annotation is None:
                     return False
                 c=self.controller.build_context(here=self.annotation)
                 uri=c.evaluateValue('here/absolute_url')
-                selection.set(selection.target, 8, uri.encode('utf8'))
+                selection.set(selection.get_target(), 8, uri.encode('utf8'))
             elif (targetType == config.data.target_type['text-plain']
                   or targetType == config.data.target_type['TEXT']
                   or targetType == config.data.target_type['STRING']):
                 # Put the timecode + content
-                selection.set(selection.target, 8, ("%s : %s" % (helper.format_time(self.begin),
+                selection.set(selection.get_target(), 8, ("%s : %s" % (helper.format_time(self.begin),
                                                                  self.content)).encode('utf8'))
             elif targetType == config.data.target_type['timestamp']:
-                selection.set(selection.target, 8, encode_drop_parameters(timestamp=self.begin,
+                selection.set(selection.get_target(), 8, encode_drop_parameters(timestamp=self.begin,
                                                                           comment=self.content))
             else:
                 return False
             return True
 
-        eb.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                           config.data.drag_type['annotation']
-                           + config.data.drag_type['uri-list']
-                           + config.data.drag_type['text-plain']
-                           + config.data.drag_type['TEXT']
-                           + config.data.drag_type['STRING']
-                           + config.data.drag_type['timestamp']
-                           + config.data.drag_type['tag']
-                           ,
-                           gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        eb.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                           config.data.get_target_types('annotation'
+                                                        'uri-list',
+                                                        'text-plain',
+                                                        'TEXT',
+                                                        'STRING',
+                                                        'timestamp',
+                                                        'tag'),
+                           Gdk.DragAction.LINK | Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         eb.connect('drag-data-get', drag_sent)
 
         def _drag_begin(widget, context):
-            w=gtk.Window(gtk.WINDOW_POPUP)
+            w=Gtk.Window(Gtk.WindowType.POPUP)
             w.set_decorated(False)
 
-            style=get_color_style(w, 'black', 'white')
-            w.set_style(style)
+            w.get_style_context().add_class('advene_drag_icon')
 
-            v=gtk.VBox()
-            v.set_style(style)
-            h=gtk.HBox()
-            h.set_style(style)
-            begin=gtk.Image()
-            h.pack_start(begin, expand=False)
-            padding=gtk.HBox()
+            v=Gtk.VBox()
+            v.get_style_context().add_class('advene_drag_icon')
+            h=Gtk.HBox()
+            h.get_style_context().add_class('advene_drag_icon')
+            begin=Gtk.Image()
+            h.pack_start(begin, False, True, 0)
+            padding=Gtk.HBox()
             # Padding
-            h.pack_start(padding, expand=True)
-            end=gtk.Image()
-            h.pack_start(end, expand=False)
-            v.pack_start(h, expand=False)
-            l=gtk.Label()
-            l.set_ellipsize(pango.ELLIPSIZE_END)
-            l.set_style(style)
-            v.pack_start(l, expand=False)
+            h.pack_start(padding, True, True, 0)
+            end=Gtk.Image()
+            h.pack_start(end, False, True, 0)
+            v.pack_start(h, False, True, 0)
+            l=Gtk.Label()
+            l.set_ellipsize(Pango.EllipsizeMode.END)
+            l.get_style_context().add_class('advene_drag_icon')
+            v.pack_start(l, False, True, 0)
 
             def set_cursor(wid, t=None, precision=None):
                 if t is None:
@@ -1411,7 +1398,7 @@ class ActiveBookmark(object):
             w.set_cursor()
             w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
             widget._icon=w
-            context.set_icon_widget(w, 0, 0)
+            Gtk.drag_set_icon_widget(context, w, 0, 0)
             return True
 
         def _drag_end(widget, context):
@@ -1420,7 +1407,7 @@ class ActiveBookmark(object):
             return True
 
         def _drag_motion(widget, drag_context, x, y, timestamp):
-            w=drag_context.get_source_widget()
+            w=Gtk.drag_get_source_widget(drag_context)
             try:
                 w._icon.set_cursor()
             except AttributeError:
@@ -1434,7 +1421,7 @@ class ActiveBookmark(object):
             eb.connect('drag-motion', _drag_motion)
 
         def _button_press(widget, event):
-            if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
                 if self.annotation is not None:
                     menu=advene.gui.popup.Menu(self.annotation, controller=self.controller)
                     menu.popup()

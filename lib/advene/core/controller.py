@@ -37,7 +37,7 @@ import re
 import webbrowser
 import urllib
 import StringIO
-import gobject
+from gi.repository import GObject
 import shlex
 import itertools
 import operator
@@ -80,7 +80,7 @@ if config.data.webserver['mode']:
     from advene.core.webcherry import AdveneWebServer
 
 import threading
-gobject.threads_init()
+GObject.threads_init()
 
 class GlobalPackage(object):
     """Wrapper to access all packages loaded data.
@@ -222,7 +222,7 @@ class AdveneController(object):
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
         self.slave_players = set()
-        # source-id (returned by gobject.timeout_add)
+        # source-id (returned by GObject.timeout_add)
         self.slave_player_timeout = None
 
         # Some player can define a cleanup() method
@@ -283,7 +283,7 @@ class AdveneController(object):
     def self_loop(self):
         """Autonomous gobject loop for GUI-less controller.
         """
-        self.mainloop = gobject.MainLoop()
+        self.mainloop = GObject.MainLoop()
 
         def update_wrapper():
             """Wrapper for the application update.
@@ -295,7 +295,7 @@ class AdveneController(object):
             self.update()
             return True
 
-        gobject.timeout_add (100, update_wrapper)
+        GObject.timeout_add (100, update_wrapper)
         self.notify ("ApplicationStart")
         self.mainloop.run ()
         self.notify ("ApplicationEnd")
@@ -452,7 +452,7 @@ class AdveneController(object):
                 return True
 
         if self.slave_player_timeout is None and config.data.preferences['slave-player-sync-delay'] != 0:
-            self.slave_player_timeout = gobject.timeout_add(config.data.preferences['slave-player-sync-delay'], synchronize_players)
+            self.slave_player_timeout = GObject.timeout_add(config.data.preferences['slave-player-sync-delay'], synchronize_players)
 
     def unregister_slave_player(self, p):
         """Unregister a slave video player.
@@ -535,7 +535,7 @@ class AdveneController(object):
                     if self.restricted_annotations:
                         l=self.restricted_annotations
                     else:
-                        l=[ a.fragment.begin for a in at.annotations ]
+                        l=[ an.fragment.begin for an in at.annotations ]
                         l.sort()
                     self.queue_action(self.update_status, "set", position=l[0])
             return True
@@ -626,7 +626,6 @@ class AdveneController(object):
                     data_func=lambda e: [ normalize_case(t) for t in e.tags ]
             elif source == 'ids':
                 # Special search.
-                res=[]
                 for i in searched.split():
                     e=p.get_element_by_id(i)
                     if e is not None:
@@ -640,15 +639,15 @@ class AdveneController(object):
 
             for w in mandatory:
                 w=normalize_case(w)
-                sourcedata=[ e for e in sourcedata if w in data_func(e) ]
+                sourcedata=[ el for el in sourcedata if w in data_func(el) ]
             for w in exceptions:
                 w=normalize_case(w)
-                sourcedata=[ e for e in sourcedata if w not in data_func(e) ]
+                sourcedata=[ el for el in sourcedata if w not in data_func(el) ]
             if not normal:
                 # No "normal" search terms. Return the result.
                 result.extend(sourcedata)
             else:
-                normal=[ normalize_case(w) for w in normal ]
+                normal=[ normalize_case(el) for el in normal ]
                 for e in sourcedata:
                     data=data_func(e)
                     for w in normal:
@@ -1118,6 +1117,8 @@ class AdveneController(object):
                 return s
 
         def cleanup(s):
+            if not isinstance(s, basestring):
+                s = unicode(s)
             i=s.find('\n')
             if i > 0:
                 return trim_size(s[:i])
@@ -1947,7 +1948,7 @@ class AdveneController(object):
         # Handle 'auto-import' meta-attribute
         master_uri=p.getMetaData(config.data.namespace, 'auto-import')
         if master_uri:
-            i=[ p for p in p.imports if p.getUri(absolute=False) == master_uri ]
+            i=[ pk for pk in p.imports if pk.getUri(absolute=False) == master_uri ]
             if not i:
                 self.log(_("Cannot handle master attribute, the package %s is not imported.") % master_uri)
             else:
@@ -2207,7 +2208,7 @@ class AdveneController(object):
                     else:
                         position=position.value
                 self.update_snapshot(position)
-        except Exception, e:
+        except Exception:
             # FIXME: we should catch more specific exceptions and
             # devise a better feedback than a simple print
             import traceback
@@ -2268,7 +2269,7 @@ class AdveneController(object):
         if p.status == p.PauseStatus and 'frame-by-frame' in p.player_capabilities:
             if self.scrub_lastvalue is None:
                 # Not in a scrubbing state.
-                gobject.timeout_add(250, do_scrub)
+                GObject.timeout_add(250, do_scrub)
             self.scrub_lastvalue = pos
 
         return True

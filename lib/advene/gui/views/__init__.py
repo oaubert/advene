@@ -19,8 +19,9 @@
 import advene.core.config as config
 
 import re
-import gtk
-import gobject
+from gi.repository import Gdk
+from gi.repository import Gtk
+from gi.repository import GObject
 import StringIO
 import os
 import urllib
@@ -61,7 +62,7 @@ class AdhocView(object):
         # If self.buttonbox exists, then the widget has already
         # defined its own buttonbox, and the generic popup method
         # can but the "Close" button in it:
-        # self.buttonbox = gtk.HButtonBox()
+        # self.buttonbox = Gtk.HButtonBox()
 
         self._label=self.view_name
 
@@ -89,7 +90,7 @@ class AdhocView(object):
             pass
 
     def safe_connect(self, obj, *p):
-        """Connect a signal handler to a gobject.
+        """Connect a signal handler to a GObject.
 
         It memorizes the handler id so that it is properly
         disconnected upon view closing.
@@ -121,7 +122,7 @@ class AdhocView(object):
             def undisplay():
                 self.statusbar.pop(context_id)
                 return False
-            gobject.timeout_add(1500, undisplay)
+            GObject.timeout_add(1500, undisplay)
 
     def log(self, msg, level=None):
         m=": ".join( (self.view_name, msg) )
@@ -133,18 +134,18 @@ class AdhocView(object):
     def set_label(self, label):
         self._label=label
         p=self.widget.get_parent()
-        if isinstance(p, gtk.Notebook):
+        if isinstance(p, Gtk.Notebook):
             # We are in a notebook.
             l=p.get_tab_label(self.widget)
             if l is not None:
-                if isinstance(l, gtk.Label):
+                if isinstance(l, Gtk.Label):
                     l.set_text(label)
-                elif isinstance(l, gtk.HBox):
+                elif isinstance(l, Gtk.HBox):
                     # It may be a HBox with multiple elements. Find the label.
                     # Normally (cf gui.viewbook), the label is in an EventBox
                     l=l.get_children()[1].get_children()[0]
                     l.set_text(label)
-        elif isinstance(p, gtk.VBox):
+        elif isinstance(p, Gtk.VBox):
             # It is a popup window. Set its title.
             p.get_toplevel().set_title(label)
 
@@ -345,7 +346,7 @@ class AdhocView(object):
         v.content.data=self.as_html()
         self.controller.package.views.append(v)
         self.controller.notify('ViewCreate', view=v)
-        d=dialog.message_dialog(_("View successfully exported as %s.\nOpen it in the web browser ?") % v.title, icon=gtk.MESSAGE_QUESTION)
+        d=dialog.message_dialog(_("View successfully exported as %s.\nOpen it in the web browser ?") % v.title, icon=Gtk.MessageType.QUESTION)
         if d:
             c=self.controller.build_context(here=v)
             self.controller.open_url(c.evaluateValue('package/view/%s/absolute_url' % ident))
@@ -356,7 +357,7 @@ class AdhocView(object):
         return self.widget
 
     def build_widget(self):
-        return gtk.Label(self.view_name)
+        return Gtk.Label(label=self.view_name)
 
     def attach_view(self, menuitem, window):
         def relocate_view(item, v, d):
@@ -376,24 +377,24 @@ class AdhocView(object):
                 v.reparent_done()
             return True
 
-        menu=gtk.Menu()
+        menu=Gtk.Menu()
         for (label, destination) in (
             (_("...embedded east of the video"), 'east'),
             (_("...embedded west of the video"), 'west'),
             (_("...embedded south of the video"), 'south'),
             (_("...embedded at the right of the window"), 'fareast')):
-            item = gtk.MenuItem(label, use_underline=False)
+            item = Gtk.MenuItem(label, use_underline=False)
             item.connect('activate', relocate_view, self, destination)
             menu.append(item)
 
         menu.show_all()
-        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        menu.popup_at_pointer(None)
         return True
 
     def popup(self, label=None):
         if label is None:
             label=self.view_name
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         window.set_title (label)
 
         def close_popup(*p):
@@ -415,30 +416,30 @@ class AdhocView(object):
             window.add(self.widget)
             window.buttonbox = self.widget.buttonbox
         else:
-            vbox = gtk.VBox()
+            vbox = Gtk.VBox()
             window.add(vbox)
-            window.buttonbox = gtk.HBox()
-            vbox.pack_start(window.buttonbox, expand=False)
+            window.buttonbox = Gtk.HBox()
+            vbox.pack_start(window.buttonbox, False, True, 0)
             vbox.add (self.widget)
 
         # Insert contextual_actions in buttonbox
         if hasattr(self, 'contextual_actions') and self.contextual_actions:
-            menubar=gtk.MenuBar()
-            root=gtk.MenuItem(_("Actions"))
+            menubar=Gtk.MenuBar()
+            root=Gtk.MenuItem(_("Actions"))
             menubar.append(root)
-            menu=gtk.Menu()
+            menu=Gtk.Menu()
             root.set_submenu(menu)
             for label, action in self.contextual_actions:
-                b=gtk.MenuItem(label, use_underline=False)
+                b=Gtk.MenuItem(label, use_underline=False)
                 b.connect('activate', action)
                 menu.append(b)
-            window.buttonbox.pack_start(menubar, expand=False)
+            window.buttonbox.pack_start(menubar, False, True, 0)
             window.own_buttons.append(menubar)
 
         def drag_sent(widget_, context, selection, targetType, eventTime ):
             if targetType == config.data.target_type['adhoc-view-instance']:
                 # This is not very robust, but allows to transmit a view instance reference
-                selection.set(selection.target, 8, repr(self).encode('utf8'))
+                selection.set(selection.get_target(), 8, repr(self).encode('utf8'))
                 if hasattr(self, 'reparent_prepare'):
                     self.reparent_prepare()
                 self.widget.get_parent().remove(self.widget)
@@ -452,12 +453,12 @@ class AdhocView(object):
         b.set_tooltip_text(_("Click or drag-and-drop to reattach view"))
         b.connect('drag-data-get', drag_sent)
         # The widget can generate drags
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['adhoc-view-instance'],
-                          gtk.gdk.ACTION_LINK)
+        b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                          config.data.get_target_types('adhoc-view-instance'),
+                          Gdk.DragAction.LINK)
 
         window.own_buttons.append(b)
-        window.buttonbox.pack_start(b, expand=False)
+        window.buttonbox.pack_start(b, False, True, 0)
 
         b=get_pixmap_button('small_close.png')
         if self.controller and self.controller.gui:
@@ -465,7 +466,7 @@ class AdhocView(object):
         else:
             b.connect('clicked', lambda w: window.destroy())
         window.own_buttons.append(b)
-        window.buttonbox.pack_start (b, expand=False)
+        window.buttonbox.pack_start(b, False, False, 0)
 
         def remove_own_buttons(w):
             for b in window.own_buttons:
@@ -484,12 +485,12 @@ class AdhocView(object):
             self.controller.gui.register_view (self)
             window.cleanup_id=window.connect('destroy', self.controller.gui.close_view_cb, window, self)
             self.controller.gui.init_window_size(window, self.view_id)
-            window.set_icon_list(*self.controller.gui.get_icon_list())
+            window.set_icon_list(self.controller.gui.get_icon_list())
 
         if config.data.os == 'win32':
             # Force resize for win32
             oldmode=window.get_resize_mode()
-            window.set_resize_mode(gtk.RESIZE_IMMEDIATE)
+            window.set_resize_mode(Gtk.RESIZE_IMMEDIATE)
             window.resize_children()
             window.set_resize_mode(oldmode)
         return window

@@ -39,7 +39,9 @@ FIXME: find a way to pass the background path
 
 import os
 import sys
-import gtk
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import Gtk
 import cairo
 import urllib
 import re
@@ -129,7 +131,7 @@ class Shape(object):
         """Render the shape on the given pixmap.
 
         @param pixmap: the destination pixmap
-        @type pixmap: gtk.gdk.Pixmap
+        @type pixmap: Gdk.Pixmap
         @param invert: should the rendering inverse the selection ?
         @type invert: boolean
         """
@@ -307,31 +309,31 @@ class Shape(object):
     def edit_properties_widget(self):
         """Build a widget to edit the shape properties.
         """
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
         def label_widget(label, widget, expand=False):
-            hb=gtk.HBox()
-            hb.add(gtk.Label(label))
-            hb.pack_start(widget, expand=expand)
+            hb=Gtk.HBox()
+            hb.add(Gtk.Label(label=label))
+            hb.pack_start(widget, expand, True, 0)
             return hb
 
         # Name
-        namesel = gtk.Entry()
+        namesel = Gtk.Entry()
         namesel.set_text(self.name)
-        vbox.pack_start(label_widget(_("Name"), namesel), expand=False)
+        vbox.pack_start(label_widget(_("Name"), namesel), False, False, 0)
 
         # Link
-        linksel = gtk.Entry()
+        linksel = Gtk.Entry()
         linksel.set_text(self.link or '')
-        vbox.pack_start(label_widget(_("Link"), linksel), expand=False)
+        vbox.pack_start(label_widget(_("Link"), linksel), False, False, 0)
 
         # Linklabel
-        linklabelsel = gtk.Entry()
+        linklabelsel = Gtk.Entry()
         linklabelsel.set_text(self.link_label or '')
-        vbox.pack_start(label_widget(_("Link label"), linklabelsel), expand=False)
+        vbox.pack_start(label_widget(_("Link label"), linklabelsel), False, False, 0)
 
         # Color
-        colorsel = gtk.combo_box_new_text()
+        colorsel = Gtk.ComboBoxText()
         for s in COLORS:
             colorsel.append_text(s)
         try:
@@ -339,47 +341,47 @@ class Shape(object):
         except IndexError:
             i=0
         colorsel.set_active(i)
-        vbox.pack_start(label_widget(_("Color"), colorsel), expand=False)
+        vbox.pack_start(label_widget(_("Color"), colorsel), False, False, 0)
 
         # Linewidth
-        linewidthsel = gtk.HScale()
+        linewidthsel = Gtk.HScale()
         linewidthsel.set_range(1, 15)
         linewidthsel.set_increments(1, 1)
         linewidthsel.set_value(self.linewidth)
-        vbox.pack_start(label_widget(_("Linewidth"), linewidthsel, True), expand=True)
+        vbox.pack_start(label_widget(_("Linewidth"), linewidthsel, True), True, True, 0)
 
         # Filled
-        filledsel = gtk.ToggleButton()
+        filledsel = Gtk.ToggleButton()
         filledsel.set_active(self.filled)
-        vbox.pack_start(label_widget(_("Filled"), filledsel), expand=False)
+        vbox.pack_start(label_widget(_("Filled"), filledsel), False, False, 0)
 
         # Linewidth
-        opacitysel = gtk.HScale()
+        opacitysel = Gtk.HScale()
         opacitysel.set_range(0, 1)
         opacitysel.set_digits(1)
         opacitysel.set_increments(.1, .2)
         opacitysel.set_value(self.opacity)
-        vbox.pack_start(label_widget(_("Opacity"), opacitysel, True), expand=True)
+        vbox.pack_start(label_widget(_("Opacity"), opacitysel, True), True, 0)
 
         # svg_attrib
-        store=gtk.ListStore(str, str)
+        store=Gtk.ListStore(str, str)
         for k, v in self.svg_attrib.iteritems():
             store.append([k, v])
-        treeview=gtk.TreeView(model=store)
+        treeview=Gtk.TreeView(model=store)
 
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Attribute", renderer, text=0)
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Attribute", renderer, text=0)
         column.set_resizable(True)
         treeview.append_column(column)
 
-        renderer = gtk.CellRendererText()
+        renderer = Gtk.CellRendererText()
         renderer.set_property('editable', True)
-        column = gtk.TreeViewColumn("Value", renderer, text=1)
+        column = Gtk.TreeViewColumn("Value", renderer, text=1)
         column.set_resizable(True)
         treeview.append_column(column)
 
         treeview.show_all()
-        e=gtk.Expander('SVG attributes')
+        e=Gtk.Expander('SVG attributes')
         e.add(treeview)
         e.set_expanded(False)
         vbox.add(e)
@@ -401,27 +403,27 @@ class Shape(object):
         """
         edit=self.edit_properties_widget()
 
-        d = gtk.Dialog(title=_("Properties of %s") % self.name,
+        d = Gtk.Dialog(title=_("Properties of %s") % self.name,
                        parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ) )
+                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                       buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                                 Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ) )
 
         d.vbox.add(edit)
 
         def keypressed_cb(widget=None, event=None):
-            if event.keyval == gtk.keysyms.Return:
-                d.response(gtk.RESPONSE_OK)
+            if event.keyval == Gdk.KEY_Return:
+                d.response(Gtk.ResponseType.OK)
                 return True
-            elif event.keyval == gtk.keysyms.Escape:
-                d.response(gtk.RESPONSE_CANCEL)
+            elif event.keyval == Gdk.KEY_Escape:
+                d.response(Gtk.ResponseType.CANCEL)
                 return True
             return False
         d.connect('key-press-event', keypressed_cb)
 
         edit.show_all()
         res=d.run()
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             # Get new values
             for n in ('name', 'link', 'link_label', 'uri', 'text'):
                 if n in edit.widgets:
@@ -472,7 +474,7 @@ class Rectangle(Shape):
         col=pixmap.get_colormap().alloc_color(self.color)
         gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
         if invert:
-            gc.set_function(gtk.gdk.INVERT)
+            gc.set_function(Gdk.INVERT)
         pixmap.draw_rectangle(gc,
                   self.filled,
                   self.x,
@@ -560,7 +562,7 @@ class Text(Rectangle):
         # FIXME: does not work correctly...
         if invert:
             context.set_operator(cairo.OPERATOR_ADD)
-        color=gtk.gdk.color_parse(self.color)
+        color=Gdk.color_parse(self.color)
         rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1.0)
         context.set_source_rgba(*rgba)
 
@@ -641,27 +643,27 @@ class Text(Rectangle):
         vbox=super(Text, self).edit_properties_widget()
 
         def label_widget(label, widget):
-            hb=gtk.HBox()
-            hb.add(gtk.Label(label))
-            hb.pack_start(widget, expand=False)
+            hb=Gtk.HBox()
+            hb.add(Gtk.Label(label=label))
+            hb.pack_start(widget, False, True, 0)
             return hb
 
         # Text
-        textsel = gtk.Entry()
+        textsel = Gtk.Entry()
         textsel.set_text(self.text)
         l=label_widget(_("Text"), textsel)
-        vbox.pack_start(l, expand=False)
+        vbox.pack_start(l, False, True, 0)
         # Put the text at the beginning
         vbox.reorder_child(l, 0)
         vbox.widgets['text']=textsel
 
         # Text size
-        textsizesel = gtk.SpinButton()
+        textsizesel = Gtk.SpinButton()
         textsizesel.set_range(4, 80)
         textsizesel.set_increments(1, 4)
         textsizesel.set_value(self.textsize)
         l=label_widget(_("Textsize"), textsizesel)
-        vbox.pack_start(l, expand=False)
+        vbox.pack_start(l, False, True, 0)
         vbox.reorder_child(l, 1)
         vbox.widgets['textsize']=textsizesel
 
@@ -750,15 +752,15 @@ class Image(Rectangle):
         vbox=super(Image, self).edit_properties_widget()
 
         def label_widget(label, widget):
-            hb=gtk.HBox()
-            hb.add(gtk.Label(label))
-            hb.pack_start(widget, expand=False)
+            hb=Gtk.HBox()
+            hb.add(Gtk.Label(label=label))
+            hb.pack_start(widget, False, True, 0)
             return hb
 
         # URI
-        urisel = gtk.Entry()
+        urisel = Gtk.Entry()
         urisel.set_text(self.uri)
-        vbox.pack_start(label_widget(_("Href"), urisel), expand=False)
+        vbox.pack_start(label_widget(_("Href"), urisel), False, False, 0)
         vbox.widgets['uri']=urisel
         return vbox
 
@@ -794,9 +796,9 @@ class Line(Rectangle):
         col=pixmap.get_colormap().alloc_color(self.color)
         gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
         if invert:
-            gc.set_function(gtk.gdk.INVERT)
+            gc.set_function(Gdk.INVERT)
         if self.filled:
-            gc.set_fill(gtk.gdk.SOLID)
+            gc.set_fill(Gdk.SOLID)
         pixmap.draw_line(gc,
                   self.x1,
                   self.y1,
@@ -864,24 +866,24 @@ class Line(Rectangle):
         vbox=super(Line, self).edit_properties_widget()
 
         def label_widget(label, widget):
-            hb=gtk.HBox()
-            hb.add(gtk.Label(label))
-            hb.pack_start(widget, expand=False)
+            hb=Gtk.HBox()
+            hb.add(Gtk.Label(label=label))
+            hb.pack_start(widget, False, True, 0)
             return hb
 
-        draw_arrow = gtk.CheckButton(_("Draw an arrow"))
+        draw_arrow = Gtk.CheckButton(_("Draw an arrow"))
         draw_arrow.set_active(self.arrow)
-        vbox.pack_start(draw_arrow)
+        vbox.pack_start(draw_arrow, True, True, 0)
         vbox.reorder_child(draw_arrow, 0)
         vbox.widgets['arrow']=draw_arrow
 
         # Arrow size
-        arrowsize = gtk.SpinButton()
+        arrowsize = Gtk.SpinButton()
         arrowsize.set_range(1, 40)
         arrowsize.set_increments(1, 4)
         arrowsize.set_value(self.arrowwidth)
         l=label_widget(_("Arrow size"), arrowsize)
-        vbox.pack_start(l, expand=False)
+        vbox.pack_start(l, False, True, 0)
         vbox.reorder_child(l, 1)
         vbox.widgets['arrowwidth']=arrowsize
         return vbox
@@ -1009,7 +1011,7 @@ class Path(Shape):
         col = pixmap.get_colormap().alloc_color(self.color)
         gc = pixmap.new_gc(foreground=col, line_width=self.linewidth)
         if invert:
-            gc.set_function(gtk.gdk.INVERT)
+            gc.set_function(Gdk.INVERT)
         if partial:
             # Only redraw last line
             for (x1, y1), (x2, y2) in self.pathlines[-1:]:
@@ -1099,9 +1101,9 @@ class Path(Shape):
         """
         vbox=super(Path, self).edit_properties_widget()
 
-        closed_path = gtk.CheckButton(_("Close path"))
+        closed_path = Gtk.CheckButton(_("Close path"))
         closed_path.set_active(self.closed)
-        vbox.pack_start(closed_path)
+        vbox.pack_start(closed_path, True, True, 0)
         vbox.reorder_child(closed_path, 0)
         vbox.widgets['closed']=closed_path
 
@@ -1200,7 +1202,7 @@ class Circle(Rectangle):
         col=pixmap.get_colormap().alloc_color(self.color)
         gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
         if invert:
-            gc.set_function(gtk.gdk.INVERT)
+            gc.set_function(Gdk.INVERT)
         pixmap.draw_arc(gc,
                   self.filled,
                   self.x, self.y,
@@ -1259,7 +1261,7 @@ class Ellipse(Rectangle):
         col=pixmap.get_colormap().alloc_color(self.color)
         gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
         if invert:
-            gc.set_function(gtk.gdk.INVERT)
+            gc.set_function(Gdk.INVERT)
         pixmap.draw_arc(gc,
                   self.filled,
                   self.x, self.y,
@@ -1353,9 +1355,9 @@ class ShapeDrawer:
     @type callback: method taking an object (shape) as parameter
 
     @ivar background: the canvas background
-    @type background: gtk.Image
+    @type background: Gtk.Image
     @ivar objects: the list of defined objects
-    @type objects: gtk.ListStore
+    @type objects: Gtk.ListStore
     @ivar selection: the rectangular selection coordinates
     @type selection: a list of 2 lists
     @ivar feedback_shape: the currently edited shape, displayed as feedback
@@ -1368,24 +1370,24 @@ class ShapeDrawer:
     @type mode: string
 
     @ivar pixmap: the edited pixmap
-    @type pixmap: gtk.gdk.Pixmap
+    @type pixmap: Gdk.Pixmap
     @ivar canvaswidth, canvasheight: the canvas dimensions
     @type canvaswidth, canvasheight: int
 
     @ivar widget: the gtk Widget for the component
-    @type widget: gtk.Widget
+    @type widget: Gtk.Widget
 
     """
     def __init__(self, callback=None, background=None):
         """
         @param callback: the callback method
         @param background: an optional background image
-        @type background: gtk.gdk.Pixbuf
+        @type background: GdkPixbuf.Pixbuf
         """
         self.callback = callback or self.default_callback
 
         # Couples object - name
-        self.objects = gtk.ListStore( object, str )
+        self.objects = Gtk.ListStore( object, str )
         def handle_reorder(*p):
             self.plot()
             return True
@@ -1400,8 +1402,8 @@ class ShapeDrawer:
         self.shape_class = Path
         self.default_color = 'green'
 
-        self.resize_cursor = gtk.gdk.Cursor(gtk.gdk.HAND2)
-        self.inside_cursor = gtk.gdk.Cursor(gtk.gdk.FLEUR)
+        self.resize_cursor = Gdk.Cursor.new(Gdk.CursorType.HAND2)
+        self.inside_cursor = Gdk.Cursor.new(Gdk.CursorType.FLEUR)
 
         self._svg_dimensions = None
 
@@ -1410,14 +1412,14 @@ class ShapeDrawer:
 
         self.pixmap = None
 
-        self.widget = gtk.DrawingArea()
-        self.widget.connect('expose-event', self.expose_event)
+        self.widget = Gtk.DrawingArea()
+        self.widget.connect('draw', self.expose_event)
         self.widget.connect('configure-event', self.configure_event)
         self.widget.connect('button-press-event', self.button_press_event)
         self.widget.connect('button-release-event', self.button_release_event)
         self.widget.connect('motion-notify-event', self.motion_notify_event)
-        self.widget.set_events(gtk.gdk.EXPOSURE_MASK | gtk.gdk.LEAVE_NOTIFY_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK
-                               | gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.POINTER_MOTION_HINT_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK )
+        self.widget.set_events(Gdk.EventMask.EXPOSURE_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK | Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK
+                               | Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.POINTER_MOTION_HINT_MASK | Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK )
 
         self.background=None
         # FIXME: Hardcoded dimensions are bad.
@@ -1448,7 +1450,7 @@ class ShapeDrawer:
                 self.widget.set_size_request(self.canvaswidth, self.canvasheight)
             else:
                 # Resize background pixbuf
-                pixbuf=pixbuf.scale_simple(self.canvaswidth, self.canvasheight, gtk.gdk.INTERP_BILINEAR)
+                pixbuf=pixbuf.scale_simple(self.canvaswidth, self.canvasheight, GdkPixbuf.InterpType.BILINEAR)
         self.background = pixbuf
         self.plot()
 
@@ -1464,7 +1466,7 @@ class ShapeDrawer:
 
         @param o: the searched object
         @return: the iterator
-        @rtype: gtk.Iterator
+        @rtype: Gtk.Iterator
         """
         i = self.objects.get_iter_first()
         while i is not None:
@@ -1520,16 +1522,16 @@ class ShapeDrawer:
         else:
             x, y, w, h = widget.get_allocation()
 
-        self.pixmap = gtk.gdk.Pixmap(widget.window, w, h)
+        self.pixmap = Gdk.Pixmap(widget.get_window(), w, h)
         self.canvaswidth = w
         self.canvasheight = h
         self.plot()
         return True
 
     # Redraw the screen from the backing pixmap
-    def expose_event(self, widget, event):
+    def expose_event(self, widget, context):
         x, y, w, h = event.area
-        widget.window.draw_drawable(widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, x, y, x, y, w, h)
+        widget.get_window().draw_drawable(widget.get_style().fg_gc[Gtk.StateType.NORMAL], self.pixmap, x, y, x, y, w, h)
         return False
 
     def clicked_shape(self, point):
@@ -1553,15 +1555,15 @@ class ShapeDrawer:
 
     def add_menuitem(self, menu=None, item=None, action=None, *param, **kw):
         if item is None or item == "":
-            i = gtk.SeparatorMenuItem()
+            i = Gtk.SeparatorMenuItem()
         else:
-            i = gtk.MenuItem(item)
+            i = Gtk.MenuItem(item)
         if action is not None:
             i.connect('activate', action, *param, **kw)
         menu.append(i)
 
     def popup_menu(self, shape):
-        menu = gtk.Menu()
+        menu = Gtk.Menu()
 
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
@@ -1589,14 +1591,14 @@ class ShapeDrawer:
         add_item(_("SVG"), dump_svg, shape)
 
         menu.show_all()
-        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        menu.popup_at_pointer(None)
 
         return True
 
     # Start marking selection
     def button_press_event(self, widget, event):
         point = (int(event.x), int(event.y))
-        if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+        if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
             if self.feedback_shape and self.feedback_shape.MULTIPOINT and self.mode == 'create':
                 # Validate the shape
                 self.feedback_shape.validate()
@@ -1646,7 +1648,7 @@ class ShapeDrawer:
                 self.feedback_shape.remove_controlled_point()
                 self.plot()
             else:
-                if event.state & gtk.gdk.SHIFT_MASK:
+                if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                     sel, c = self.controlled_shape( point )
                     if sel is not None:
                         # Right click on a control point - remove it
@@ -1691,11 +1693,11 @@ class ShapeDrawer:
     # Draw rectangle during mouse movement
     def motion_notify_event(self, widget, event):
         if event.is_hint:
-            x, y, state = event.window.get_pointer()
+            x, y, state = event.get_window().get_pointer()
         else:
             x = event.x
             y = event.y
-            state = event.state
+            state = event.get_state()
 
         if self.feedback_shape is not None:
             if self.selection[1][0] is not None:
@@ -1728,15 +1730,15 @@ class ShapeDrawer:
                 if point in o[0]:
                     cursor = self.inside_cursor
                     break
-            self.widget.window.set_cursor(cursor)
+            self.widget.get_window().set_cursor(cursor)
 
     def draw_drawable(self):
         """Render the pixmap in the drawingarea."""
-        if self.widget.window is None:
+        if self.widget.get_window() is None:
             # The widget may not be realized, in which case simply return
             return
         x, y, w, h = self.widget.get_allocation()
-        self.widget.window.draw_drawable(self.widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, 0, 0, 0, 0, w, h)
+        self.widget.get_window().draw_drawable(self.widget.get_style().fg_gc[Gtk.StateType.NORMAL], self.pixmap, 0, 0, 0, 0, w, h)
 
     def plot(self):
         """Draw in the pixmap.
@@ -1851,7 +1853,7 @@ class ShapeDrawer:
                         if o.uri.startswith('http:'):
                             # http url, download the file
                             (fname, header)=urllib.urlretrieve(o.uri)
-                            i=gtk.Image()
+                            i=Gtk.Image()
                             print "Loaded background from ", o.uri, " copy in", fname
                             i.set_from_file(fname)
                         else:
@@ -1862,10 +1864,10 @@ class ShapeDrawer:
                                 uri=os.path.join( current_path, o.uri)
                             else:
                                 uri=o.uri
-                            i=gtk.Image()
+                            i=Gtk.Image()
                             i.set_from_file(uri)
-                            if i.get_storage_type() != gtk.IMAGE_PIXBUF:
-                                p=gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB,
+                            if i.get_storage_type() != Gtk.ImageType.PIXBUF:
+                                p=GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB,
                                                  True, 8, o.width, o.height)
                                 p.fill(0xdeadbeaf)
                                 i.set_from_pixbuf(p)
@@ -1894,7 +1896,7 @@ class ShapeEditor(object):
     This component provides an example of using ShapeWidget.
     """
     def __init__(self, background=None, pixmap_dir=None):
-        if isinstance(background, gtk.Image):
+        if isinstance(background, Gtk.Image):
             background = background.get_pixbuf()
         self.drawer = ShapeDrawer(background=background)
         self.shapes = [ Rectangle, Ellipse, Line, Text, Path ]
@@ -1903,12 +1905,12 @@ class ShapeEditor(object):
         self.drawer.default_color = self.colors[0]
 
         self.key_mapping={
-            gtk.keysyms.l: Line,
-            gtk.keysyms.r: Rectangle,
-            gtk.keysyms.t: Text,
-            gtk.keysyms.c: Ellipse,
-            gtk.keysyms.p: Path,
-            #gtk.keysyms.i: Image,
+            Gdk.KEY_l: Line,
+            Gdk.KEY_r: Rectangle,
+            Gdk.KEY_t: Text,
+            Gdk.KEY_c: Ellipse,
+            Gdk.KEY_p: Path,
+            #Gdk.KEY_i: Image,
             }
 
         self.pixmap_name={
@@ -1932,7 +1934,7 @@ class ShapeEditor(object):
         elif callable(cl):
             cl(widget, event)
             return True
-        elif event.keyval == gtk.keysyms.Delete:
+        elif event.keyval == Gdk.KEY_Delete:
             s = self.get_selected_node(self.treeview)
             if s is not None:
                 self.drawer.remove_object(s)
@@ -1946,7 +1948,7 @@ class ShapeEditor(object):
         return True
 
     def build_selector(self, l, callback):
-        sel = gtk.combo_box_new_text()
+        sel = Gtk.ComboBoxText()
         for s in l:
             sel.append_text(s)
         sel.connect('changed', callback)
@@ -1974,7 +1976,7 @@ class ShapeEditor(object):
         y = int(event.y)
 
         # On double-click, edit element
-        if event.type == gtk.gdk._2BUTTON_PRESS:
+        if event.type == Gdk.EventType._2BUTTON_PRESS:
             node = self.get_selected_node (widget)
             if node is not None:
                 if node.edit_properties():
@@ -1987,7 +1989,7 @@ class ShapeEditor(object):
             else:
                 retval=False
         elif button == 3:
-            if event.window is widget.get_bin_window():
+            if event.get_window() is widget.get_bin_window():
                 model = widget.get_model()
                 t = widget.get_path_at_pos(x, y)
                 if t is not None:
@@ -2002,33 +2004,33 @@ class ShapeEditor(object):
     def set_background(self, image):
         """Set the background image.
         """
-        if isinstance(image, gtk.Image):
+        if isinstance(image, Gtk.Image):
             self.drawer.set_background(image.get_pixbuf())
-        elif isinstance(image, gtk.gdk.Pixbuf):
+        elif isinstance(image, GdkPixbuf.Pixbuf):
             self.drawer.set_background(image)
         else:
-            raise Exception("set_background requires a gtk.Image or a gtk.gdk.Pixbuf")
+            raise Exception("set_background requires a Gtk.Image or a GdkPixbuf.Pixbuf")
 
     def build_widget(self, pixmap_dir):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        tb = self.toolbar = gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
+        tb = self.toolbar = Gtk.Toolbar()
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
 
-        vbox.pack_start(tb, expand=False)
+        vbox.pack_start(tb, False, True, 0)
 
-        hbox=gtk.HBox()
+        hbox=Gtk.HBox()
 
         vbox.add(hbox)
 
         hbox.pack_start(self.drawer.widget, True, True, 0)
         self.drawer.widget.connect('key-press-event', self.key_press_event)
 
-        self.treeview = gtk.TreeView(self.drawer.objects)
+        self.treeview = Gtk.TreeView(self.drawer.objects)
         self.treeview.set_reorderable(True)
 
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Name', renderer,
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn('Name', renderer,
                                     text=1)
         self.treeview.append_column(column)
         self.treeview.connect('button-press-event', self.tree_view_button_cb)
@@ -2037,7 +2039,7 @@ class ShapeEditor(object):
             """Update the toolbutton with the appropriate shape information.
             """
             if pixmap_dir is not None and self.pixmap_name.get(shape, None):
-                i=gtk.Image()
+                i=Gtk.Image()
                 i.set_from_file( os.path.join( pixmap_dir, self.pixmap_name.get(shape, None)) )
                 i.show()
                 tb.set_icon_widget(i)
@@ -2054,22 +2056,22 @@ class ShapeEditor(object):
             return True
 
         def display_shape_menu(tb):
-            bar=gtk.Toolbar()
-            bar.set_orientation(gtk.ORIENTATION_VERTICAL)
-            bar.set_style(gtk.TOOLBAR_ICONS)
+            bar=Gtk.Toolbar()
+            bar.set_orientation(Gtk.Orientation.VERTICAL)
+            bar.set_style(Gtk.ToolbarStyle.ICONS)
 
             for shape in self.shapes:
-                i=gtk.ToolButton()
+                i=Gtk.ToolButton()
                 i.set_visible_horizontal(True)
                 i.set_visible_vertical(True)
                 set_shape(i, shape)
                 i.connect('clicked', select_shape, shape)
                 bar.insert(i, -1)
 
-            w=gtk.Window(type=gtk.WINDOW_POPUP)
+            w=Gtk.Window(type=Gtk.WindowType.POPUP)
             w.add(bar)
             w.set_transient_for(tb.get_toplevel())
-            w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_TOOLBAR)
+            w.set_type_hint(Gdk.WindowTypeHint.TOOLBAR)
             w.set_modal(True)
             w.resize(20, 150)
             alloc = tb.get_allocation()
@@ -2083,7 +2085,7 @@ class ShapeEditor(object):
 
             return True
 
-        self.shape_icon=gtk.ToolButton()
+        self.shape_icon=Gtk.ToolButton()
         self.shape_icon.set_shape=set_shape.__get__(self.shape_icon)
         self.shape_icon.set_shape(self.drawer.shape_class)
         self.shape_icon.connect('clicked', display_shape_menu)
@@ -2105,22 +2107,22 @@ class ShapeEditor(object):
             return True
 
         def display_color_menu(tb):
-            bar=gtk.Toolbar()
-            bar.set_orientation(gtk.ORIENTATION_VERTICAL)
-            bar.set_style(gtk.TOOLBAR_ICONS)
+            bar=Gtk.Toolbar()
+            bar.set_orientation(Gtk.Orientation.VERTICAL)
+            bar.set_style(Gtk.ToolbarStyle.ICONS)
 
             for color in self.colors:
-                i=gtk.ToolButton(icon_widget=gtk.Label())
+                i=Gtk.ToolButton(icon_widget=Gtk.Label())
                 i.set_visible_horizontal(True)
                 i.set_visible_vertical(True)
                 set_color(i, color)
                 i.connect('clicked', select_color, color)
                 bar.insert(i, -1)
 
-            w=gtk.Window(type=gtk.WINDOW_POPUP)
+            w=Gtk.Window(type=Gtk.WindowType.POPUP)
             w.add(bar)
             w.set_transient_for(tb.get_toplevel())
-            w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_TOOLBAR)
+            w.set_type_hint(Gdk.WindowTypeHint.TOOLBAR)
             w.set_modal(True)
             bar.show_all()
             w.resize(20, 200)
@@ -2135,17 +2137,17 @@ class ShapeEditor(object):
 
             return True
 
-        self.color_icon=gtk.ToolButton(icon_widget=gtk.Label())
+        self.color_icon=Gtk.ToolButton(icon_widget=Gtk.Label())
         self.color_icon.set_color=set_color.__get__(self.color_icon)
         self.color_icon.set_color('red')
         self.color_icon.connect('clicked', display_color_menu)
         tb.insert(self.color_icon, -1)
 
         def load_svg(b):
-            fs=gtk.FileChooserDialog(title='Select a svg file',
-                                     buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+            fs=Gtk.FileChooserDialog(title='Select a svg file',
+                                     buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK, Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
             res=fs.run()
-            if res == gtk.RESPONSE_OK:
+            if res == Gtk.ResponseType.OK:
                 name=fs.get_filename()
                 root=ET.parse(name).getroot()
                 self.drawer.parse_svg(root)
@@ -2153,11 +2155,11 @@ class ShapeEditor(object):
             return True
 
         def save_svg(b):
-            fs=gtk.FileChooserDialog(title='Select a svg file to write to',
-                                     action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                     buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+            fs=Gtk.FileChooserDialog(title='Select a svg file to write to',
+                                     action=Gtk.FileChooserAction.SAVE,
+                                     buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK, Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
             res=fs.run()
-            if res == gtk.RESPONSE_OK:
+            if res == Gtk.ResponseType.OK:
                 name = fs.get_filename()
                 tree = ET.ElementTree(self.drawer.get_svg(relative=False))
                 f = open(name, 'w')
@@ -2166,22 +2168,22 @@ class ShapeEditor(object):
             fs.destroy()
             return True
 
-        tb.insert(gtk.SeparatorToolItem(), -1)
+        tb.insert(Gtk.SeparatorToolItem(), -1)
 
-        b=gtk.ToolButton(gtk.STOCK_OPEN)
+        b=Gtk.ToolButton(Gtk.STOCK_OPEN)
         b.set_tooltip_text(_("Load SVG"))
         b.connect('clicked', load_svg)
         tb.insert(b, -1)
 
         if True:
-            b=gtk.ToolButton(gtk.STOCK_SAVE)
+            b=Gtk.ToolButton(Gtk.STOCK_SAVE)
             b.set_tooltip_text(_("Save SVG"))
             b.connect('clicked', save_svg)
             tb.insert(b, -1)
 
-        control = gtk.VBox()
-        control.pack_start(self.treeview, expand=False)
-        hbox.pack_start(control, expand=False)
+        control = Gtk.VBox()
+        control.pack_start(self.treeview, False, True, 0)
+        hbox.pack_start(control, False, True, 0)
 
         vbox.show_all()
 
@@ -2193,33 +2195,33 @@ def main():
     else:
         bg = 'atelier.jpg'
 
-    win = gtk.Window(gtk.WINDOW_TOPLEVEL)
+    win = Gtk.Window(Gtk.WindowType.TOPLEVEL)
     win.set_title("Shape Editor test")
     #win.set_default_size(800, 600)
-    win.connect('delete-event', lambda w, e: gtk.main_quit())
+    win.connect('delete-event', lambda w, e: Gtk.main_quit())
 
     if bg.endswith('.svg'):
         ed=ShapeEditor()
         root=ET.parse(bg).getroot()
         ed.drawer.parse_svg(root)
     else:
-        i=gtk.Image()
+        i=Gtk.Image()
         i.set_from_file(bg)
         ed=ShapeEditor(background=i)
         ed.drawer.add_object(Image(name='background', uri=os.path.basename(bg)))
     win.add(ed.widget)
 
-    ed.key_mapping[gtk.keysyms.q]=lambda w, e: gtk.main_quit()
-    ed.key_mapping[gtk.keysyms.d]=lambda w, e: ET.dump(ed.drawer.get_svg())
+    ed.key_mapping[Gdk.KEY_q]=lambda w, e: Gtk.main_quit()
+    ed.key_mapping[Gdk.KEY_d]=lambda w, e: ET.dump(ed.drawer.get_svg())
     try:
         from evaluator import Evaluator
-        ed.key_mapping[gtk.keysyms.e]=lambda w, e: Evaluator(locals_={'ed': ed}).popup()
+        ed.key_mapping[Gdk.KEY_e]=lambda w, e: Evaluator(locals_={'ed': ed}).popup()
     except ImportError:
         pass
 
     win.show_all()
 
-    gtk.main()
+    Gtk.main()
 
 # Element-tree indent function.
 # in-place prettyprint formatter

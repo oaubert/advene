@@ -18,10 +18,10 @@
 #
 """GUI to merge packages.
 """
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import GObject
 import difflib
-import pango
+from gi.repository import Pango
 
 from gettext import gettext as _
 
@@ -61,11 +61,11 @@ class TreeViewMerger:
     def build_liststore(self):
         # Store reference to the element, string representation (title and id)
         # and boolean indicating wether it is imported or not
-        store=gtk.ListStore(
-            gobject.TYPE_PYOBJECT,
-            gobject.TYPE_STRING,
-            gobject.TYPE_STRING,
-            gobject.TYPE_BOOLEAN,
+        store=Gtk.ListStore(
+            GObject.TYPE_PYOBJECT,
+            GObject.TYPE_STRING,
+            GObject.TYPE_STRING,
+            GObject.TYPE_BOOLEAN,
             )
 
         for l in self.differ.diff():
@@ -86,17 +86,17 @@ class TreeViewMerger:
 
             diff=difflib.Differ()
 
-            w=gtk.Window()
+            w=Gtk.Window()
             w.set_title(_("Difference between original and merged elements"))
 
-            v=gtk.VBox()
+            v=Gtk.VBox()
 
-            sw = gtk.ScrolledWindow()
-            sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+            sw = Gtk.ScrolledWindow()
+            sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
             v.add(sw)
 
-            tv=gtk.TextView()
-            f=pango.FontDescription("courier 12")
+            tv=Gtk.TextView()
+            f=Pango.FontDescription("courier 12")
             tv.modify_font(f)
 
             b=tv.get_buffer()
@@ -115,12 +115,12 @@ class TreeViewMerger:
                     b.insert_at_cursor(l)
             sw.add(tv)
 
-            hb=gtk.HButtonBox()
-            b=gtk.Button(stock=gtk.STOCK_CLOSE)
+            hb=Gtk.HButtonBox()
+            b=Gtk.Button(stock=Gtk.STOCK_CLOSE)
             b.connect('clicked', lambda b: w.destroy())
             hb.add(b)
 
-            v.pack_start(hb, expand=False)
+            v.pack_start(hb, False, True, 0)
             w.add(v)
 
             w.show_all()
@@ -128,23 +128,23 @@ class TreeViewMerger:
             return True
 
         def build_popup_menu(l):
-            menu=gtk.Menu()
+            menu=Gtk.Menu()
 
             name, s, d, action = l
 
             if name != 'new':
-                i=gtk.MenuItem(_("Current element"))
+                i=Gtk.MenuItem(_("Current element"))
                 m = advene.gui.popup.Menu(d, controller=self.controller, readonly=False)
                 i.set_submenu(m.menu)
                 menu.append(i)
 
-            i=gtk.MenuItem(_("Updated element"))
+            i=Gtk.MenuItem(_("Updated element"))
             m = advene.gui.popup.Menu(s, controller=self.controller, readonly=True)
             i.set_submenu(m.menu)
             menu.append(i)
 
             if name == 'update_content':
-                i=gtk.MenuItem(_("Show diff"))
+                i=Gtk.MenuItem(_("Show diff"))
                 i.connect('activate', show_diff, l)
                 menu.append(i)
 
@@ -158,7 +158,7 @@ class TreeViewMerger:
             y = int(event.y)
 
             if button == 3:
-                if event.window is widget.get_bin_window():
+                if event.get_window() is widget.get_bin_window():
                     model = widget.get_model()
                     t = widget.get_path_at_pos(x, y)
                     if t is not None:
@@ -167,17 +167,17 @@ class TreeViewMerger:
                         node = model.get_value(it, self.COLUMN_ELEMENT)
                         widget.get_selection().select_path (path)
                         menu=build_popup_menu(node)
-                        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+                        menu.popup_at_pointer(None)
                         retval = True
             return retval
 
 
-        treeview=gtk.TreeView(model=self.store)
+        treeview=Gtk.TreeView(model=self.store)
         treeview.connect('button-press-event', tree_view_button_cb)
 
-        renderer = gtk.CellRendererToggle()
+        renderer = Gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
-        column = gtk.TreeViewColumn(_('Merge?'), renderer,
+        column = Gtk.TreeViewColumn(_('Merge?'), renderer,
                                     active=self.COLUMN_APPLY)
 
         def toggled_cb(renderer, path, model, column):
@@ -187,14 +187,14 @@ class TreeViewMerger:
 
         treeview.append_column(column)
 
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('Action'), renderer,
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('Action'), renderer,
                                     text=self.COLUMN_ACTION)
         column.set_resizable(True)
         treeview.append_column(column)
 
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('Element'), renderer,
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('Element'), renderer,
                                     text=self.COLUMN_ELEMENT_NAME)
         column.set_resizable(True)
         treeview.append_column(column)
@@ -210,14 +210,14 @@ class Merger:
         self.widget=self.build_widget()
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        vbox.pack_start(gtk.Label("Merge elements from %s into %s" % (self.sourcepackage.uri,
-                                                                     self.destpackage.uri)),
-                                  expand=False)
+        vbox.pack_start(Gtk.Label(_("Merge elements from %s into %s") % (self.sourcepackage.uri,
+                                                                      self.destpackage.uri)),
+                                  False, False, 0)
 
-        scroll_win = gtk.ScrolledWindow ()
-        scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll_win = Gtk.ScrolledWindow ()
+        scroll_win.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         vbox.add(scroll_win)
 
         self.mergerview=TreeViewMerger(controller=self.controller, differ=self.differ)
@@ -226,18 +226,18 @@ class Merger:
         return vbox
 
     def popup(self):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         window.set_title (_("Package %s") % (self.destpackage.title or _("No title")))
 
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         window.add (vbox)
 
         vbox.add (self.widget)
         if self.controller.gui:
             self.controller.gui.init_window_size(window, 'merge')
-            window.set_icon_list(*self.controller.gui.get_icon_list())
+            window.set_icon_list(self.controller.gui.get_icon_list())
 
-        self.buttonbox = gtk.HButtonBox()
+        self.buttonbox = Gtk.HButtonBox()
 
         def validate(b):
             print "Validate"
@@ -264,24 +264,24 @@ class Merger:
             return True
 
 
-        b = gtk.Button(_("All"))
+        b = Gtk.Button(_("All"))
         b.connect('clicked', select_all)
         self.buttonbox.add (b)
 
 
-        b = gtk.Button(_('None'))
+        b = Gtk.Button(_('None'))
         b.connect('clicked', unselect_all)
         self.buttonbox.add (b)
 
-        b = gtk.Button(stock=gtk.STOCK_OK)
+        b = Gtk.Button(stock=Gtk.STOCK_OK)
         b.connect('clicked', validate)
         self.buttonbox.add (b)
 
-        b = gtk.Button(stock=gtk.STOCK_CANCEL)
+        b = Gtk.Button(stock=Gtk.STOCK_CANCEL)
         b.connect('clicked', lambda b: window.destroy())
         self.buttonbox.add (b)
 
-        vbox.pack_start(self.buttonbox, expand=False)
+        vbox.pack_start(self.buttonbox, False, True, 0)
 
         window.show_all()
 
