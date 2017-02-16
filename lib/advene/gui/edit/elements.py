@@ -1642,7 +1642,7 @@ class GenericContentHandler (ContentHandler):
                 # Load the element content
                 loader = GdkPixbuf.PixbufLoader()
                 try:
-                    loader.write (self.data, len (self.data))
+                    loader.write (self.data)
                     loader.close ()
                     pixbuf = loader.get_pixbuf ()
                 except GObject.GError:
