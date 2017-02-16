@@ -97,13 +97,12 @@ from advene.gui.util import get_pixmap_button, get_small_stock_button, image_fro
 from advene.gui.util.playpausebutton import PlayPauseButton
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
-#import advene.gui.views.tree
 from advene.gui.views import AdhocViewParametersParser
 import advene.gui.views.timeline
 import advene.gui.views.table
 import advene.gui.views.logwindow
 import advene.gui.views.interactivequery
-#import advene.gui.views.finder
+import advene.gui.views.finder
 import advene.gui.views.activebookmarks
 from advene.gui.views.bookmarks import Bookmarks
 from advene.gui.edit.rules import EditRuleSet
