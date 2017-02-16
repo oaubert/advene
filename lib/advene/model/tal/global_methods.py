@@ -340,7 +340,6 @@ def formatted (target, context):
     """
     import advene.model.fragment
     from advene.util.helper import format_time
-    import time
 
     if isinstance(target, int) or isinstance(target, long):
         return format_time(target)
@@ -356,6 +355,8 @@ def formatted (target, context):
     for k in res.keys():
         t=getattr(target, k)
         res[k] = format_time(t)
+    res['begin_s'] = target.begin / 1000.
+    res['end_s'] = target.end / 1000.
     return res
 
 def first (target, context):
