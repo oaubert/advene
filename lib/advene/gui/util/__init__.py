@@ -375,11 +375,11 @@ def contextual_drag_begin(widget, context, element, controller):
             return False
 
     # set_icon_widget does not work on native Gtk on MacOS X
-    if config.data.os == 'darwin' and not os.environ.get('DISPLAY'):
-        return False
+    #if config.data.os == 'darwin' and not os.environ.get('DISPLAY'):
+    #    return False
     # set_icon_widget is broken ATM in recent gtk on win32.
-    elif config.data.os == 'win32':
-        return False
+    #elif config.data.os == 'win32':
+    #    return False
 
     w=Gtk.Window(Gtk.WindowType.POPUP)
     w.set_decorated(False)
@@ -449,7 +449,7 @@ def contextual_drag_begin(widget, context, element, controller):
     w.add(v)
     w.show_all()
     widget._icon=w
-    context.set_icon_widget(w, 0, 0)
+    Gtk.drag_set_icon_widget(context, w, 0, 0)
     return True
 
 def contextual_drag_end(widget, context):

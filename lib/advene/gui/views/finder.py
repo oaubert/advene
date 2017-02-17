@@ -375,10 +375,10 @@ class ModelColumn(FinderColumn):
             if threshold:
                 # A drag was started. Setup the appropriate target.
                 element=self.drag_data[3]
-                targets=get_target_types(element)
+                targets = Gtk.TargetList.new(get_target_types(element))
                 actions = Gdk.DragAction.MOVE | Gdk.DragAction.LINK | Gdk.DragAction.COPY
                 button = 1
-                self.drag_context = treeview.drag_begin(targets, actions, button, self.drag_data[2])
+                self.drag_context = treeview.drag_begin_with_coordinates(targets, actions, button, event, -1, -1)
                 contextual_drag_begin(treeview, self.drag_context, element, self.controller)
                 self.drag_context._element=element
 
