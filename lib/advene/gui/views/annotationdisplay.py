@@ -288,7 +288,7 @@ class AnnotationDisplay(AdhocView):
         c.set_text = set_text.__get__(c)
         def get_text(widget):
             b=widget.get_buffer()
-            return b.get_text(*b.get_bounds() + [ False ])
+            return b.get_text(*b.get_bounds() + ( False, ))
         c.get_text = get_text.__get__(c)
         self.sw['contents']=sw
 
