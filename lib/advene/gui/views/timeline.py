@@ -2973,6 +2973,7 @@ class TimeLine(AdhocView):
 
             # At the left of the annotation type : restrict_playing button
             p=get_pixmap_button('play.png', restrict_playing, t, b)
+            p.get_style_context().add_class('restrict_playing_button')
             p.set_playing = set_playing.__get__(p)
             p.annotationtype=t
             p.set_size_request(20, self.button_height)
