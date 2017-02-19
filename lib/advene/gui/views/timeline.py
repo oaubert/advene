@@ -2459,15 +2459,17 @@ class TimeLine(AdhocView):
 
     def draw_selection_rectangle(self, invert=False):
         drawable=self.layout.get_bin_window()
-        gc=drawable.new_gc(line_width=1, line_style=Gdk.LINE_ON_OFF_DASH)
+        ctx = drawable.cairo_create()
+        ctx.set_line_width(1)
+        ctx.set_dash([ 10 ])
 
         if self.layout_selection[1][0] is not None:
             # Invert the previous selection
             #col=pixmap.get_colormap().alloc_color(self.color)
             if invert:
-                gc.set_function(Gdk.INVERT)
+                ctx.set_operator(cairo.OPERATOR_XOR)
             else:
-                gc.set_function(Gdk.COPY)
+                ctx.set_operator(cairo.OPERATOR_OVER)
 
             x1=min(self.layout_selection[0][0], self.layout_selection[1][0])
             x2=max(self.layout_selection[0][0], self.layout_selection[1][0])
@@ -2475,7 +2477,8 @@ class TimeLine(AdhocView):
             y2=max(self.layout_selection[0][1], self.layout_selection[1][1])
 
             # Display the starting mark
-            drawable.draw_rectangle(gc, False, x1, y1, x2-x1, y2-y1)
+            ctx.rectangle(x1, y1, x2-x1, y2-y1)
+        ctx.stroke()
         return True
 
     # Draw rectangle during mouse movement
