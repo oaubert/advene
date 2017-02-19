@@ -3529,6 +3529,8 @@ class TimeLine(AdhocView):
                 return True
             store, paths = selection.get_selected_rows()
 
+            # Keep a stable reference of the selected rows, since we
+            # will remove them iteratively from the source model
             rows = [ Gtk.TreeRowReference(store, path) for path in paths ]
 
             m=dest.get_model()
@@ -3540,7 +3542,7 @@ class TimeLine(AdhocView):
                     continue
                 it=store.get_iter(path)
                 # Add el to dest
-                m.append(store[path])
+                m.append(list(store[path]))
                 store.remove(it)
             return True
 
@@ -3551,119 +3553,7 @@ class TimeLine(AdhocView):
                 it=s.get_iter_first()
                 if it is None:
                     break
-                d.append(s[it])
-                s.remove(it)
-            return True
-
-        def row_activated(treeview, path, view_column, source, dest):
-            transfer(None, source, dest)
-            return True
-
-        b=Gtk.Button('<<<')
-        b.connect('clicked', transfer, notselectedtree, selectedtree)
-        notselectedtree.connect('row_activated', row_activated, notselectedtree, selectedtree)
-        actions.add(b)
-
-        b=Gtk.Button(_('< All <'))
-        b.connect('clicked', transferall, notselectedtree, selectedtree)
-        actions.add(b)
-
-        b=Gtk.Button(_('> All >'))
-        b.connect('clicked', transferall, selectedtree, notselectedtree)
-        actions.add(b)
-
-        b=Gtk.Button('>>>')
-        b.connect('clicked', transfer, selectedtree, notselectedtree)
-        selectedtree.connect('row-activated', row_activated, selectedtree, notselectedtree)
-        actions.add(b)
-
-        actions = Gtk.VBox()
-
-        def transfer(b, source, dest):
-            selection = source.get_selection ()
-            if not selection:
-                return True
-            store, paths = selection.get_selected_rows()
-
-            rows = [ Gtk.TreeRowReference(store, path) for path in paths ]
-
-            m=dest.get_model()
-            for r in rows:
-                path=r.get_path()
-                if path is None:
-                    # Should not happen...
-                    print 'Strange...'
-                    continue
-                it=store.get_iter(path)
-                # Add el to dest
-                m.append(store[path])
-                store.remove(it)
-            return True
-
-        def transferall(b, source, dest):
-            s=source.get_model()
-            d=dest.get_model()
-            while True:
-                it=s.get_iter_first()
-                if it is None:
-                    break
-                d.append(s[it])
-                s.remove(it)
-            return True
-
-        def row_activated(treeview, path, view_column, source, dest):
-            transfer(None, source, dest)
-            return True
-
-        b=Gtk.Button('<<<')
-        b.connect('clicked', transfer, notselectedtree, selectedtree)
-        notselectedtree.connect('row_activated', row_activated, notselectedtree, selectedtree)
-        actions.add(b)
-
-        b=Gtk.Button(_('< All <'))
-        b.connect('clicked', transferall, notselectedtree, selectedtree)
-        actions.add(b)
-
-        b=Gtk.Button(_('> All >'))
-        b.connect('clicked', transferall, selectedtree, notselectedtree)
-        actions.add(b)
-
-        b=Gtk.Button('>>>')
-        b.connect('clicked', transfer, selectedtree, notselectedtree)
-        selectedtree.connect('row-activated', row_activated, selectedtree, notselectedtree)
-        actions.add(b)
-
-        actions = Gtk.VBox()
-
-        def transfer(b, source, dest):
-            selection = source.get_selection ()
-            if not selection:
-                return True
-            store, paths = selection.get_selected_rows()
-
-            rows = [ Gtk.TreeRowReference(store, path) for path in paths ]
-
-            m=dest.get_model()
-            for r in rows:
-                path=r.get_path()
-                if path is None:
-                    # Should not happen...
-                    print 'Strange...'
-                    continue
-                it=store.get_iter(path)
-                # Add el to dest
-                m.append(store[path])
-                store.remove(it)
-            return True
-
-        def transferall(b, source, dest):
-            s=source.get_model()
-            d=dest.get_model()
-            while True:
-                it=s.get_iter_first()
-                if it is None:
-                    break
-                d.append(s[it])
+                d.append(list(s[it]))
                 s.remove(it)
             return True
 
