@@ -234,15 +234,11 @@ arrow_right_xpm="""16 13 2 1
 def shaped_window_from_xpm(xpm):
     # Code adapted from evolution/widgets/table/e-table-header-item.c
     pixbuf = GdkPixbuf.Pixbuf.new_from_xpm_data(xpm)
-    pixmap, bitmap = pixbuf.render_pixmap_and_mask()
 
-    Gtk.widget_push_colormap(Gdk.rgb_get_colormap())
     win = Gtk.Window(Gtk.WindowType.POPUP)
-    pix = Gtk.Image()
-    pix.set_from_pixmap(pixmap, bitmap)
+    pix = Gtk.Image.new_from_pixbuf(pixbuf)
     win.realize()
     win.add(pix)
-    win.shape_combine_mask(bitmap, 0, 0)
     Gtk.widget_pop_colormap()
     return win
 
