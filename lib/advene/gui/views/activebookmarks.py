@@ -313,11 +313,11 @@ class ActiveBookmarks(AdhocView):
         b=b or self.get_current_bookmark() or self.bookmarks[0]
         if b.widget.get_window() is None:
             return True
-        x, y, w, h, depth=b.widget.get_window().get_geometry()
+        x, y, w, h = b.widget.get_window().get_geometry()
         parent=self.mainbox.get_parent()
         adj=parent.get_vadjustment()
         pos=adj.get_value()
-        height=parent.get_window().get_geometry()[3]
+        height=parent.get_window().get_geometry().height
         if y < pos or y + h > pos + height:
             adj.set_value(helper.clamp(y, adj.get_lower(), adj.get_upper() - adj.get_page_size()))
         return True
@@ -625,14 +625,14 @@ class ActiveBookmarks(AdhocView):
             if (actions == Gdk.DragAction.MOVE
                 or actions == Gdk.DragAction.LINK):
                 # Only 1 possible action. Use it.
-                drag_context.drag_status(actions, timestamp)
+                Gdk.drag_status(drag_context, actions, timestamp)
             elif actions == Gdk.DragAction.COPY and is_in_view and config.data.drag_type['annotation'][0][0] in drag_context.list_targets():
                 # We cannot just copy an annotation from our own view,
                 # it just can be moved
-                drag_context.drag_status(Gdk.DragAction.MOVE, timestamp)
+                Gdk.drag_status(drag_context, Gdk.DragAction.MOVE, timestamp)
             elif Gdk.DragAction.MOVE & actions and is_in_view:
                 # DND from the same view. Force default to move.
-                drag_context.drag_status(Gdk.DragAction.MOVE, timestamp)
+                Gdk.drag_status(drag_context, Gdk.DragAction.MOVE, timestamp)
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             index=None
@@ -922,15 +922,15 @@ class ActiveBookmark(object):
     def bound_drag_motion(self, widget, drag_context, x, y, timestamp):
         # Force the correct default action.
         actions=drag_context.get_actions()
-        is_in_view=Gtk.drag_get_source_widget(context).is_ancestor(self.container.mainbox)
+        is_in_view=Gtk.drag_get_source_widget(drag_context).is_ancestor(self.container.mainbox)
         if (actions == Gdk.DragAction.MOVE
             or actions == Gdk.DragAction.LINK
             or actions == Gdk.DragAction.COPY):
             # Only 1 possible action. Use it.
-            drag_context.drag_status(actions, timestamp)
+            Gdk.drag_status(drag_context, actions, timestamp)
         elif Gdk.DragAction.MOVE & actions and is_in_view:
             # DND from the same view. Force default to move.
-            drag_context.drag_status(Gdk.DragAction.MOVE, timestamp)
+            Gdk.drag_status(drag_context, Gdk.DragAction.MOVE, timestamp)
 
     def begin_drag_received(self, widget, context, x, y, selection, targetType, time):
         if self.last_drag_time == time:
@@ -1121,7 +1121,7 @@ class ActiveBookmark(object):
             if l is not None:
                 l.destroy()
             # Reset the textview color
-            self.begin_widget.comment_entry.modify_base(Gtk.StateType.NORMAL, self.default_background_color)
+            #self.begin_widget.comment_entry.modify_base(Gtk.StateType.NORMAL, self.default_background_color)
 
     def grab_focus(self, *p):
         """Set the focus on the comment edition widget.
@@ -1291,9 +1291,6 @@ class ActiveBookmark(object):
 
         self.frame=f
 
-        # Memorize the default textview color.
-        self.default_background_color=self.begin_widget.comment_entry.get_style().base[Gtk.StateType.NORMAL]
-
         #if self.annotation is not None:
         self.set_frame_attributes()
 
@@ -1333,7 +1330,7 @@ class ActiveBookmark(object):
             return True
 
         eb.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
-                           config.data.get_target_types('annotation'
+                           config.data.get_target_types('annotation',
                                                         'uri-list',
                                                         'text-plain',
                                                         'TEXT',
