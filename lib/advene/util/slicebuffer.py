@@ -172,9 +172,10 @@ if __name__ == '__main__':
 
 
     def on_msg(bus, msg):
-        if msg.structure is None:
+        s = msg.get_structure()
+        if s is None:
             return True
-        if msg.structure.has_field('gerror'):
+        if s.has_field('gerror'):
             print "MSG", msg.structure['debug']
 
     def on_eos (bus, msg):

@@ -280,7 +280,7 @@ class Player:
             self.player.props.audio_sink = self.audio_sink
             # Keep a ref. on elements
             self._audio_elements = elements
-            self._audio_ghostpad = Gst.GhostPad('sink', elements[0].get_static_pad('audio_sink') or elements[0].get_static_pad('sink'))
+            self._audio_ghostpad = Gst.GhostPad.new('sink', elements[0].get_static_pad('audio_sink') or elements[0].get_static_pad('sink'))
             self.audio_sink.add_pad(self._audio_ghostpad)
 
 

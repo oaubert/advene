@@ -82,6 +82,7 @@ class CutterImporter(GenericImporter):
             self.end_callback()
             return True
 
+        s = message.get_structure()
         if message.type == Gst.MessageType.EOS:
             finalize()
         ##elif message.type == Gst.MessageType.STATE_CHANGED:
@@ -94,8 +95,7 @@ class CutterImporter(GenericImporter):
         ##        GObject.idle_add(lambda: self.pipeline.set_state(Gst.State.NULL) and False)
         ##    #if new == Gst.State.NULL:
         ##    #    self.end_callback()
-        elif message.structure:
-            s=message.structure
+        elif s:
             #print "MSG " + bus.get_name() + ": " + s.to_string()
             if s.get_name() == 'progress' and self.progress is not None:
                 if not self.progress(s['percent-double'] / 100, _("Detected %(count)d segments until %(time)s") % { 'count': len(self.buffer),

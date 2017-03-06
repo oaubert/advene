@@ -99,11 +99,10 @@ class SoundEnveloppeImporter(GenericImporter):
             self.end_callback()
             return True
 
+        s = message.get_structure()
         if message.type == Gst.MessageType.EOS:
             finalize()
-        elif message.structure:
-            s=message.structure
-            #print "MSG " + bus.get_name() + ": " + s.to_string()
+        elif s:
             if s.get_name() == 'progress' and self.progress is not None:
                 if not self.progress(s['percent-double'] / 100, _("At %s") % helper.format_time(s['current'] * 1000)):
                     finalize()

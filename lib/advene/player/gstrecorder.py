@@ -148,9 +148,10 @@ class Player:
         bus = self.pipeline.get_bus()
         bus.enable_sync_message_emission()
         def on_sync_message(bus, message):
-            if message.structure is None:
+            s = message.get_structure()
+            if s is None:
                 return
-            if message.structure.get_name() == 'prepare-xwindow-id' and self.xid is not None:
+            if s.get_name() == 'prepare-xwindow-id' and self.xid is not None:
                 message.src.set_xwindow_id(self.xid)
                 if hasattr(message.src.props, 'force-aspect-ratio'):
                     message.src.set_property("force-aspect-ratio", True)

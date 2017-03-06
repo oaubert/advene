@@ -92,6 +92,7 @@ class MontageRenderer(object):
         sink.set_property("location", outputfile)
 
         def on_bus_message(bus, message):
+            s = message.get_structure()
             if message.type == gst.MESSAGE_STATE_CHANGED:
                 old, new, pending = message.parse_state_changed()
                 print "STATE", old.value_nick, new.value_nick, pending.value_nick
@@ -99,8 +100,7 @@ class MontageRenderer(object):
                 print " EOS"
                 pipe.set_state(gst.STATE_NULL)
                 progress_callback(None)
-            elif message.structure:
-                s=message.structure
+            elif s:
                 print "MSG " + bus.get_name() + ": " + s.to_string()
                 if s.get_name() == 'progress' and progress_callback is not None:
                     progress_callback(s['percent-double'] / 100)

@@ -135,10 +135,10 @@ class PocketSphinxImporter(GenericImporter):
                 self.end_callback()
             return False
 
+        s = message.get_structure()
         if message.type == Gst.MessageType.EOS:
             finalize()
-        elif message.structure:
-            s = message.structure
+        elif s:
             #print "MSG " + s.get_name() + ": " + s.to_string()
             if s.get_name() == 'progress' and self.progress is not None:
                 if not self.progress(s['percent-double'] / 100, _("%(count)d utterances until %(time)s") % {
