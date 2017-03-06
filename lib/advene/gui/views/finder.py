@@ -120,10 +120,11 @@ class DetailedTreeModel(object):
 
     def nodeChildren (self, node):
         #print "nodechildren %s" % node
+        children = []
         if isinstance (node, Annotation):
-            children = None
+            children = []
         elif isinstance (node, Relation):
-            children = None
+            children = []
         elif isinstance (node, AnnotationType):
             if not node in self.childrencache:
                 self.childrencache[node] = node.annotations
@@ -138,9 +139,9 @@ class DetailedTreeModel(object):
             l.extend(node.relationTypes)
             children = l
         elif isinstance (node, View):
-            children = None
+            children = []
         elif isinstance (node, Query):
-            children = None
+            children = []
         elif isinstance (node, Package):
             if not node in self.childrencache:
                 self.childrencache[node] = [node.schemas, self.virtual['views'], node.queries, node.resources ]
@@ -152,13 +153,13 @@ class DetailedTreeModel(object):
                 self.childrencache[node] = node.children()
             children = self.childrencache[node]
         elif isinstance (node, ResourceData):
-            children = None
+            children = []
         elif node == self.virtual['views']:
             children=[ self.virtual['static'], self.virtual['dynamic'], self.virtual['adhoc'], self.virtual['admin'] ]
-        elif node is None:
+        elif node is []:
             children = [ self.get_package() ]
         else:
-            children = None
+            children = []
             if node == self.virtual['admin']:
                 children=sorted([ v
                                   for v in node.rootPackage.views
