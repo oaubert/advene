@@ -630,7 +630,7 @@ class ActiveBookmarks(AdhocView):
                 if 'comment' in data:
                     b.content=data['comment']
                 # If the drag originated from our own widgets, remove it.
-                if context.action == Gdk.DragAction.MOVE:
+                if Gdk.DragAction.MOVE & context.get_actions():
                     self.delete_origin_timestamp(Gtk.drag_get_source_widget(context))
                 return True
             elif targetType == config.data.target_type['annotation-type']:
@@ -938,7 +938,7 @@ class ActiveBookmark(object):
             # If the drag originated from our own widgets, remove it.
             # If the drop was done from within our view, then
             # delete the origin widget.
-            if context.action == Gdk.DragAction.MOVE:
+            if Gdk.DragAction.MOVE & context.get_actions():
                 self.container.delete_origin_timestamp(Gtk.drag_get_source_widget(context))
             # Set the current status
             self.container.set_current_bookmark(self)
@@ -969,7 +969,7 @@ class ActiveBookmark(object):
             # If the drag originated from our own widgets, remove it.
             # If the drop was done from within our view, then
             # delete the origin widget.
-            if context.action == Gdk.DragAction.MOVE:
+            if Gdk.DragAction.MOVE & context.get_actions():
                 self.container.delete_origin_timestamp(Gtk.drag_get_source_widget(context))
             self.container.set_current_bookmark(self)
             return True
