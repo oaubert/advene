@@ -4534,11 +4534,19 @@ class AdveneGUI(object):
         return False
 
     def on_slider_scroll_event (self, widget=None, event=None):
+        incr = 0
         if event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.RIGHT:
             incr=+1
         if event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
             incr=-1
-        self.controller.move_frame(incr)
+        if event.direction == Gdk.ScrollDirection.SMOOTH:
+            deltax = event.get_scroll_deltas()[1]
+            if deltax > 0:
+                incr = +1
+            else:
+                incr = -1
+        if incr:
+            self.controller.move_frame(incr)
         return False
 
     def on_video_button_press_event (self, button=None, event=None):
