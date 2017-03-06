@@ -788,6 +788,16 @@ class Evaluator:
                 self.logbuffer.insert_at_cursor(time.strftime("%H:%M:%S") + l + "\n")
         return True
 
+    def dump_tree(self, w, indent=0):
+        """Dump a tree representation of the widget and its children.
+        """
+        tree = "%s%s %s %s" % (" " * indent, w.get_name(), w.get_css_name(), repr(w))
+        try:
+            tree = "\n".join((tree, "\n".join(self.dump_tree(c, indent+4) for c in w.get_children())))
+        except AttributeError:
+            pass
+        return tree
+
     def build_widget(self):
         """Build the evaluator widget.
         """
