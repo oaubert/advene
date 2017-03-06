@@ -29,7 +29,7 @@ import urllib
 # Advene part
 import advene.core.config as config
 from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf, get_pixmap_toolbutton
-from advene.gui.util import encode_drop_parameters, decode_drop_parameters, shaped_window_from_xpm, arrow_right_xpm
+from advene.gui.util import encode_drop_parameters, decode_drop_parameters
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
 from advene.model.annotation import Annotation
@@ -90,7 +90,6 @@ class ActiveBookmarks(AdhocView):
         if typ is None:
             typ=self.controller.package.annotationTypes[0]
         self.type = typ
-        self.arrow_mark=None
         self.refresh()
 
     def debug (self, widget, *p):
@@ -599,27 +598,9 @@ class ActiveBookmarks(AdhocView):
                          Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         sb.connect('drag-motion', scroll_on_drag)
 
-        def hide_arrow_mark(*p):
-            if self.arrow_mark is not None:
-                self.arrow_mark.hide()
-            return True
-
         def mainbox_drag_motion(widget, drag_context, x, y, timestamp):
-            if self.arrow_mark is None:
-                self.arrow_mark=shaped_window_from_xpm(arrow_right_xpm)
             if not self.bookmarks:
                 return True
-            l=[ b
-                for b in self.bookmarks
-                if y < b.widget.get_allocation().y + b.widget.get_allocation().height  ]
-            if l:
-                y=l[0].widget.get_allocation().y - 10
-            else:
-                a=self.bookmarks[-1].widget.get_allocation()
-                y=a.y + a.height
-            origin = widget.get_window().get_origin()
-            self.arrow_mark.move(long(origin.x), long(origin.y + y))
-            self.arrow_mark.show_all()
             actions=drag_context.get_actions()
             is_in_view=Gtk.drag_get_source_widget(drag_context).is_ancestor(widget)
             if (actions == Gdk.DragAction.MOVE
@@ -636,8 +617,6 @@ class ActiveBookmarks(AdhocView):
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             index=None
-            if self.arrow_mark is not None:
-                self.arrow_mark.hide()
             if widget == self.mainbox:
                 l=[ b
                     for b in self.bookmarks
@@ -697,8 +676,6 @@ class ActiveBookmarks(AdhocView):
                                    Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         self.mainbox.connect('drag-data-received', mainbox_drag_received)
         self.mainbox.connect('drag-motion', mainbox_drag_motion)
-        self.mainbox.connect('drag-end', hide_arrow_mark)
-        self.mainbox.connect('drag-leave', hide_arrow_mark)
         self.mainbox.set_spacing(8)
 
         # Shortcuts
