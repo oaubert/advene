@@ -227,7 +227,7 @@ class Evaluator:
         """Return the content of the expression window.
         """
         b=self.source.get_buffer()
-        return str(b.get_text(*b.get_bounds() + [ False ]))
+        return str(b.get_text(*b.get_bounds() + ( False,  )))
 
     def set_expression(self, e, clear=True):
         """Set the content of the expression window.
