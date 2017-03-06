@@ -617,8 +617,8 @@ class ActiveBookmarks(AdhocView):
             else:
                 a=self.bookmarks[-1].widget.get_allocation()
                 y=a.y + a.height
-            rx, ry = widget.get_window().get_origin()
-            self.arrow_mark.move(long(rx), long(ry + y))
+            origin = widget.get_window().get_origin()
+            self.arrow_mark.move(long(origin.x), long(origin.y + y))
             self.arrow_mark.show_all()
             actions=drag_context.get_actions()
             is_in_view=Gtk.drag_get_source_widget(drag_context).is_ancestor(widget)

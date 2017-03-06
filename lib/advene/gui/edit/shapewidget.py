@@ -381,7 +381,7 @@ class Shape(object):
         treeview.append_column(column)
 
         treeview.show_all()
-        e=Gtk.Expander('SVG attributes')
+        e=Gtk.Expander.new('SVG attributes')
         e.add(treeview)
         e.set_expanded(False)
         vbox.add(e)

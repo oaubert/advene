@@ -229,7 +229,7 @@ class ShotValidation(AdhocView):
 
         s=Gtk.SpinButton.new(self.current_index, 1, 0)
         s.set_increments(1, 10)
-        s.set_update_policy(Gtk.UPDATE_IF_VALID)
+        #s.set_update_policy(Gtk.UPDATE_IF_VALID)
         s.set_numeric(True)
 
         # For an unknown reason, the default behaviour of updating

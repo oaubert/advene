@@ -21,6 +21,7 @@
 import os
 import thread
 from gi.repository import GObject
+from gi.repository import Gdk
 from gi.repository import Gtk
 
 from gettext import gettext as _
@@ -273,7 +274,7 @@ class FileImporter(AdhocView):
         self.importers = dialog.list_selector_widget([], None, callback=self.update_options)
         line.pack_start(self.importers, False, True, 0)
 
-        exp = Gtk.Expander(_("Options"))
+        exp = Gtk.Expander.new(_("Options"))
         exp.set_expanded(True)
         self.options_frame = Gtk.VBox()
         sw = Gtk.ScrolledWindow()

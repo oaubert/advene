@@ -1865,7 +1865,7 @@ class TimeLine(AdhocView):
             if (config.data.drag_type['annotation'][0][0] in drag_context.list_targets()
                 and not actions in ( Gdk.DragAction.LINK, Gdk.DragAction.COPY, Gdk.DragAction.MOVE )):
                 # No single action was selected. Force ASK
-                drag_context.drag_status(Gdk.DragAction.ASK, timestamp)
+                Gdk.drag_status(drag_context, Gdk.DragAction.ASK, timestamp)
         b.connect('drag-motion', annotation_drag_motion)
 
         # Handle scroll actions
@@ -2518,7 +2518,7 @@ class TimeLine(AdhocView):
         if (config.data.drag_type['annotation'][0][0] in drag_context.list_targets()
             and not actions in ( Gdk.DragAction.LINK, Gdk.DragAction.COPY, Gdk.DragAction.MOVE )):
             # No single action was selected. Force ASK
-            drag_context.drag_status(Gdk.DragAction.ASK, timestamp)
+            Gdk.drag_status(drag_context, Gdk.DragAction.ASK, timestamp)
         return True
 
     def layout_drag_leave_cb(self, widget, drag_context, timestamp):

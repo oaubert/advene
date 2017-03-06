@@ -1658,7 +1658,7 @@ class AdveneGUI(object):
 
         # Create the slider
         adj = Gtk.Adjustment.new(0, 0, 100, 1, 1, 10)
-        self.gui.slider = Gtk.HScale.new(adj)
+        self.gui.slider = Gtk.Scale.new(Gtk.Orientation.HORIZONTAL, adj)
         self.gui.slider.set_draw_value(False)
         self.gui.slider.connect('button-press-event', self.on_slider_button_press_event)
         self.gui.slider.connect('button-release-event', self.on_slider_button_release_event)
