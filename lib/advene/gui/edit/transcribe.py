@@ -419,7 +419,7 @@ class TranscriptionEdit(AdhocView):
 
     def buffer_is_empty(self):
         b=self.textview.get_buffer()
-        return len(b.get_text(*b.get_bounds() + [False])) == 0
+        return len(b.get_text(*b.get_bounds() + (False,))) == 0
 
     def toggle_ignore(self, button):
         button.ignore = not button.ignore

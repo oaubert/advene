@@ -330,19 +330,19 @@ class BookmarkWidget(object):
             b.set_text(self.comment)
 
             def focus_in_event(wid, event):
-                if unicode(b.get_text(*b.get_bounds() + [False])) == self.default_comment:
+                if unicode(b.get_text(*b.get_bounds() + (False,))) == self.default_comment:
                     b.set_text('')
                 return False
             self.comment_entry.connect('focus-in-event', focus_in_event)
 
             def focus_out_event(wid, event):
-                if b.get_text(*b.get_bounds() + [False]) == '':
+                if b.get_text(*b.get_bounds() + (False,)) == '':
                     b.set_text(self.default_comment)
                 return False
             self.comment_entry.connect('focus-out-event', focus_out_event)
 
             def update_comment(buf):
-                self.comment=unicode(buf.get_text(*buf.get_bounds() + [False]))
+                self.comment=unicode(buf.get_text(*buf.get_bounds() + (False,)))
                 return True
             b.connect('changed', update_comment)
 
