@@ -148,7 +148,7 @@ class ShotValidation(AdhocView):
         batch=object()
 
         event = Gtk.get_current_event()
-        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+        if event.get_state().state & Gdk.ModifierType.CONTROL_MASK:
             # Control-key is held. Split the annotation.
             if new > annotation.fragment.begin and new < annotation.fragment.end:
                 self.controller.split_annotation(annotation, new)
