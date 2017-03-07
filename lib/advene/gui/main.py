@@ -183,7 +183,7 @@ class DummyGlade:
             elif not name:
                 i=Gtk.SeparatorMenuItem()
             else:
-                i=Gtk.MenuItem(name)
+                i=Gtk.MenuItem.new_with_mnemonic(name)
             if isinstance(action, tuple):
                 # There is a submenu
                 m=self.build_menubar(action)
