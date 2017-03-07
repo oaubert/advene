@@ -2507,7 +2507,7 @@ class AdveneGUI(object):
         w=self.gui.win
         d={}
         d['x'], d['y']=w.get_position()
-        d['width'], d['height'] = w.get_width(), w.get_height()
+        d['width'], d['height'] = w.get_size()
         for k, v in d.iteritems():
             d[k]=unicode(v)
         layout=ET.SubElement(workspace, 'layout', d)
