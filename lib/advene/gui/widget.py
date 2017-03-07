@@ -239,7 +239,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             widgets=self.container.get_selected_annotation_widgets()
             if not widget in widgets:
                 widgets=[]
-        except AttributeError:
+        except (AttributeError, RuntimeError):
             widgets=[]
 
         w=Gtk.Window(Gtk.WindowType.POPUP)
@@ -316,7 +316,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                 widgets=self.container.get_selected_annotation_widgets()
                 if not widget in widgets:
                     widgets=None
-            except AttributeError:
+            except (AttributeError, RuntimeError):
                 widgets=None
             if not widgets:
                 self.controller.gui.edit_element(annotation)
@@ -351,7 +351,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                 widgets=self.container.get_selected_annotation_widgets()
                 if not widget in widgets:
                     widgets=None
-            except AttributeError:
+            except (AttributeError, RuntimeError):
                 widgets=None
             if not widgets:
                 self.controller.delete_element(annotation)
