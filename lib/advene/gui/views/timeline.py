@@ -3147,7 +3147,8 @@ class TimeLine(AdhocView):
         """Return the widget packed into a scrolledwindow."""
         vbox = Gtk.VBox ()
 
-        content_pane = Gtk.HPaned ()
+        content_pane = Gtk.HPaned()
+        content_pane.set_name('content_pane')
 
         # The layout can receive drops
         self.legend.connect('drag-data-received', self.legend_drag_received)
@@ -3158,6 +3159,7 @@ class TimeLine(AdhocView):
                                   Gdk.DragAction.COPY | Gdk.DragAction.LINK)
 
         sw_legend = Gtk.ScrolledWindow ()
+        sw_legend.set_name('sw_legend')
         sw_legend.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
         sw_legend.set_placement(Gtk.CornerType.TOP_RIGHT)
         sw_legend.add (self.legend)
@@ -3189,6 +3191,7 @@ class TimeLine(AdhocView):
         sb.connect('drag-motion', scroll_on_drag, True)
 
         sw_layout = Gtk.ScrolledWindow ()
+        sw_layout.set_name('sw_layout')
         sw_layout.set_policy (Gtk.PolicyType.ALWAYS, Gtk.PolicyType.AUTOMATIC)
         sw_layout.set_hadjustment (self.adjustment)
         self.vadjustment = sw_legend.get_vadjustment()
@@ -3217,6 +3220,7 @@ class TimeLine(AdhocView):
 
         # Now build the scale_pane
         scale_pane = Gtk.HPaned()
+        scale_pane.set_name('scale_pane')
 
         vb=Gtk.VBox()
         self.scale_label = Gtk.Label(label='Scale')
@@ -3272,6 +3276,7 @@ class TimeLine(AdhocView):
         scale_pane.add1(vb)
 
         sw_scale=Gtk.ScrolledWindow()
+        sw_scale.set_name('sw_scale')
         sw_scale.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.NEVER)
         sw_scale.set_hadjustment (sw_layout.get_hadjustment())
         sw_scale.add(self.scale_layout)
@@ -3299,6 +3304,7 @@ class TimeLine(AdhocView):
         content_pane.set_position (max(self.legend.get_size()[0], 100))
 
         self.inspector_pane=Gtk.HPaned()
+        self.inspector_pane.set_name('inspector_pane')
         self.inspector_pane.pack1(vbox, resize=True, shrink=True)
         a=AnnotationDisplay(controller=self.controller)
         self.inspector_frame=Gtk.Frame()
