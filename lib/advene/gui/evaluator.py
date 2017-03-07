@@ -172,7 +172,7 @@ class Evaluator:
         """
         self.save_history()
 
-        if isinstance(self.widget.parent, Gtk.Window):
+        if isinstance(self.widget.get_parent(), Gtk.Window):
             # Embedded in a toplevel window
             self.widget.parent.destroy()
         else:
