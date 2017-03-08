@@ -174,7 +174,7 @@ class Evaluator:
 
         if isinstance(self.widget.get_parent(), Gtk.Window):
             # Embedded in a toplevel window
-            self.widget.parent.destroy()
+            self.widget.get_parent().destroy()
         else:
             # Embedded in another component, just destroy the widget
             self.widget.destroy()
