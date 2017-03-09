@@ -4271,7 +4271,7 @@ class AdveneGUI(object):
                         'abbreviation-mode', 'text-abbreviations', 'completion-mode',
                         'prefer-wysiwyg', 'player-shortcuts-in-edit-windows', 'apply-edited-elements-on-save' )
         # Direct options needing a restart to be taken into account.
-        restart_needed_options = ('tts-engine', 'language')
+        restart_needed_options = ('tts-engine', 'language', 'timestamp-format')
 
         path_options=('data', 'plugins', 'advene', 'imagecache', 'moviepath', 'shotdetect')
         cache={
