@@ -275,7 +275,7 @@ class TimeLine(AdhocView):
         # when it is changed by a given amount (typically 10 or 16
         # pixels)
         self.current_scale_height=0
-        # Global pane is the VPaned holding the scale and the layout.
+        # Global pane is the Paned holding the scale and the layout.
         self.global_pane=None
 
         self.legend = Gtk.Layout ()
@@ -2776,7 +2776,7 @@ class TimeLine(AdhocView):
         return False
 
     def resize_legend_widget(self, layout):
-        width=0
+        width=120
         for c in layout.get_children():
             if not isinstance(c, AnnotationTypeWidget):
                 continue
@@ -2807,7 +2807,7 @@ class TimeLine(AdhocView):
         if layout.get_parent() is not None:
             p = layout.get_parent().get_parent()
             if p is not None:
-                layout.get_parent().get_parent().set_position (width + 60)
+                p.set_position (width + 60)
 
     def restrict_playing(self, at, widget=None):
         """Restrict playing to the given annotation-type.
@@ -2838,7 +2838,6 @@ class TimeLine(AdhocView):
 
         Its content may have changed.
         """
-        width=0
         height=0
 
         def navigate(b, event, direction, typ):
@@ -3024,7 +3023,9 @@ class TimeLine(AdhocView):
                         config.data.get_target_types('annotation', 'timestamp'),
                         Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
 
-        layout.set_size (width + 20, height)
+        # Set a default size. We will resize it anyway.
+        layout.set_size(200, height)
+        layout.show()
         self.resize_legend_widget(layout)
         return
 
@@ -3147,7 +3148,7 @@ class TimeLine(AdhocView):
         """Return the widget packed into a scrolledwindow."""
         vbox = Gtk.VBox ()
 
-        content_pane = Gtk.HPaned()
+        content_pane = Gtk.Paned()
         content_pane.set_name('content_pane')
 
         # The layout can receive drops
@@ -3219,7 +3220,7 @@ class TimeLine(AdhocView):
         sb.connect('drag-motion', scroll_on_drag)
 
         # Now build the scale_pane
-        scale_pane = Gtk.HPaned()
+        scale_pane = Gtk.Paned()
         scale_pane.set_name('scale_pane')
 
         vb=Gtk.VBox()
@@ -3291,7 +3292,8 @@ class TimeLine(AdhocView):
         scale_pane.connect('button-press-event', ignore)
         scale_pane.connect('button-release-event', ignore)
 
-        self.global_pane=Gtk.VPaned()
+        self.global_pane=Gtk.Paned.new(Gtk.Orientation.VERTICAL)
+        self.global_pane.set_name('global_pane')
 
         self.global_pane.add1(scale_pane)
         self.global_pane.add2(content_pane)
@@ -3303,7 +3305,7 @@ class TimeLine(AdhocView):
 
         content_pane.set_position (max(self.legend.get_size()[0], 100))
 
-        self.inspector_pane=Gtk.HPaned()
+        self.inspector_pane=Gtk.Paned()
         self.inspector_pane.set_name('inspector_pane')
         self.inspector_pane.pack1(vbox, resize=True, shrink=True)
         a=AnnotationDisplay(controller=self.controller)
