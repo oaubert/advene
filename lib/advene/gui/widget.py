@@ -104,7 +104,6 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
         self.set_size_request(*self.needed_size())
 
     def _drag_begin(self, widget, context):
-        # FIXME3: replace Pixmap by cairo surface/pixbuf
         # see https://developer.gnome.org/gtk3/stable/ch26s02.html
         w,h = self.needed_size()
         pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, w, h)
@@ -199,6 +198,7 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
     def refresh(self):
         """Refresh the widget.
         """
+        self.reset_surface_size(*self.needed_size())
         self.queue_draw()
 
     def draw_cb(self, widget, context):
@@ -527,7 +527,7 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
 
         Method to be implemented by subclasses
         """
-        w=self.width or 60
+        w=self.width or 120
         return (w, self.container.button_height)
 
     def draw(self, context, width, height):
