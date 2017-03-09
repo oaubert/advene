@@ -2873,16 +2873,15 @@ class AdveneGUI(object):
         default_adhoc = package.getMetaData (config.data.namespace, "default_adhoc")
         view=helper.get_id(package.views, default_adhoc)
         if view:
-            load=False
             if config.data.preferences['restore-default-workspace'] == 'always':
                 self.controller.queue_action(self.open_adhoc_view, view, ask=False)
             elif config.data.preferences['restore-default-workspace'] == 'ask':
                 def open_view():
                     self.open_adhoc_view(view, ask=False)
                     return True
-                load=dialog.message_dialog(_("Do you want to restore the saved workspace ?"),
-                                           icon=Gtk.MessageType.QUESTION,
-                                           callback=open_view)
+                dialog.message_dialog(_("Do you want to restore the saved workspace ?"),
+                                      icon=Gtk.MessageType.QUESTION,
+                                      callback=open_view)
         return False
 
     def update_window_title(self):
@@ -3056,9 +3055,9 @@ class AdveneGUI(object):
             ev.locals_[v.view_id]=v
 
         # Hook completer
-        completer=Completer(textview=ev.source,
-                            controller=self.controller,
-                            indexer=self.controller.package._indexer)
+        ev.completer=Completer(textview=ev.source,
+                               controller=self.controller,
+                               indexer=self.controller.package._indexer)
 
         w=ev.popup()
         w.set_icon_list(self.get_icon_list())
