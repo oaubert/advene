@@ -201,7 +201,7 @@ class EventAccumulator(AdhocView):
     def export(self, w):
         fname = self.tracer.export()
         d = Gtk.Dialog(title=_("Exporting traces"),
-                       parent=None,
+                       parent=self.controller.gui.win,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK
                                  ))
@@ -212,7 +212,7 @@ class EventAccumulator(AdhocView):
         d.vbox.pack_start(l, False, True, 0)
         d.vbox.show_all()
         d.show()
-        res=d.run()
+        d.run()
         d.destroy()
         return
 

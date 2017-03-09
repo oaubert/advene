@@ -121,7 +121,7 @@ class TagBag(AdhocView):
         """Enter a new tag.
         """
         d = Gtk.Dialog(title=_("New tag name"),
-                       parent=None,
+                       parent=self.controller.gui.win,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,

@@ -487,7 +487,7 @@ class AdveneGUI(object):
             """Display a dialog allowing to edit quicksearch-sources setting.
             """
             d = Gtk.Dialog(title=_("Quicksearch lists"),
-                   parent=None,
+                   parent=self.gui.win,
                    flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                    buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
                              Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
@@ -960,7 +960,7 @@ class AdveneGUI(object):
         """Display a dialog to enter a time value.
         """
         d = Gtk.Dialog(title=_("Enter the new time value"),
-                       parent=None,
+                       parent=self.gui.win,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
@@ -985,7 +985,7 @@ class AdveneGUI(object):
         if title is None:
             title = _("Replace content in %d elements") % len(elements)
         d = Gtk.Dialog(title=title,
-                       parent=None,
+                       parent=self.gui.win,
                        flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
@@ -2630,7 +2630,7 @@ class AdveneGUI(object):
 
                 if kw.get('ask', True):
                     d = Gtk.Dialog(title=_("Restoring workspace..."),
-                                   parent=None,
+                                   parent=self.gui.win,
                                    flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                                    buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                              Gtk.STOCK_OK, Gtk.ResponseType.OK,
@@ -3259,7 +3259,7 @@ class AdveneGUI(object):
         if text is None:
             text=_("Choose an annotation type.")
         d = Gtk.Dialog(title=text,
-                       parent=None,
+                       parent=self.gui.win,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
@@ -3421,7 +3421,7 @@ class AdveneGUI(object):
         if text is None:
             text=_("Choose a schema.")
         d = Gtk.Dialog(title=text,
-                       parent=None,
+                       parent=self.gui.win,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,

@@ -663,7 +663,7 @@ class TraceTimeline(AdhocView):
         """
         fname = self.tracer.export()
         d = Gtk.Dialog(title=_("Exporting traces"),
-                       parent=None,
+                       parent=self.controller.gui.win,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK
                                  ))

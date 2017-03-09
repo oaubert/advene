@@ -362,7 +362,7 @@ class Menu:
         """Renumber all annotations of a given type.
         """
         d = Gtk.Dialog(title=_("Renumbering annotations of type %s") % self.get_title(at),
-                       parent=None,
+                       parent=self.controller.gui.win,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
@@ -397,7 +397,7 @@ class Menu:
             l=l[offset:]
             size=float(len(l))
             dial=Gtk.Dialog(_("Renumbering %d annotations") % size,
-                           None,
+                           self.controller.gui.win,
                            Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
             prg=Gtk.ProgressBar()
