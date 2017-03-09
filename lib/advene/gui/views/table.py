@@ -66,7 +66,7 @@ class AnnotationTable(AdhocView):
             )
         self.controller=controller
         self.elements=elements
-        self.options={}
+        self.options={ 'confirm-time-update': True }
 
         self.mouseover_annotation = None
         self.last_edited_path = None
@@ -185,7 +185,6 @@ class AnnotationTable(AdhocView):
         else:
             x = long(event.x)
             y = long(event.y)
-            state = event.get_state()
         t = tv.get_path_at_pos(x, y)
         if t is not None:
             path, col, cx, cy = t
@@ -382,13 +381,22 @@ class AnnotationTable(AdhocView):
         return True
 
     def get_selected_nodes (self):
-        """Return the currently selected node.
-
-        None if no node is selected or multiple nodes are selected.
+        """Return the currently selected nodes.
         """
         selection = self.widget.treeview.get_selection ()
         store, paths=selection.get_selected_rows()
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
+
+    def get_selected_node (self):
+        """Return the currently selected node.
+
+        None if no node is selected or multiple nodes are selected.
+        """
+        nodes = self.get_selected_nodes()
+        if len(nodes) != 1:
+            return None
+        else:
+            return nodes[0]
 
     def debug_cb (self, *p, **kw):
         print "Debug cb:\n"
@@ -426,24 +434,48 @@ class AnnotationTable(AdhocView):
     def row_activated_cb(self, widget, path, view_column):
         """Edit the element on Return or double click
         """
-        nodes = self.get_selected_nodes ()
-        if len(nodes) != 1:
-            return True
-        node=nodes[0]
-        if node is not None:
-            self.controller.gui.edit_element(node)
+        ann = self.get_selected_node ()
+        if ann is not None:
+            self.controller.gui.edit_element(ann)
             return True
         return False
 
+    def set_time(self, attr):
+        """Sets the time of the current annotation to the current player time.
+        """
+        an = self.get_selected_node()
+        if an is None:
+            return
+        current_time = self.controller.player.current_position_value
+        confirm = True
+        if self.options['confirm-time-update']:
+            confirm = dialog.message_dialog(_("Set %(attr)s time to %(time)s") % {
+                'attr': _(attr),
+                'time': helper.format_time(current_time)
+                }, icon=Gtk.MessageType.QUESTION)
+        if confirm:
+            self.controller.notify('EditSessionStart', element=an, immediate=True)
+            setattr(an.fragment, attr, current_time)
+            self.controller.notify("AnnotationEditEnd", annotation=an)
+            self.controller.notify('EditSessionEnd', element=an)
+
+
     def tree_view_key_cb(self, widget=None, event=None):
-        if event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
-            # Control-return: goto annotation
-            nodes = self.get_selected_nodes ()
-            if len(nodes) == 1 and nodes[0] is not None:
-                ann = nodes[0]
+        if event.keyval == Gdk.KEY_space or (event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK):
+            # Space or Control-return: goto annotation
+            ann = self.get_selected_node ()
+            if ann is not None:
                 self.controller.update_status (status="set", position=ann.fragment.begin)
                 self.controller.gui.set_current_annotation(ann)
                 return True
+        elif event.keyval == Gdk.KEY_less and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+            # Control-< : set begin time
+            self.set_time('begin')
+            return True
+        elif event.keyval == Gdk.KEY_greater and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+            # Control-> : set end time
+            self.set_time('end')
+            return True
         return False
 
     def tree_view_button_cb(self, widget=None, event=None):
@@ -486,7 +518,10 @@ class GenericTable(AdhocView):
             )
         self.controller=controller
         self.elements=elements
-        self.options={}
+        self.options = { }
+
+        opt, arg = self.load_parameters(parameters)
+        self.options.update(opt)
 
         self.model=self.build_model(elements)
         self.widget = self.build_widget()
@@ -633,6 +668,17 @@ class GenericTable(AdhocView):
         store, paths=selection.get_selected_rows()
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
+    def get_selected_node (self):
+        """Return the currently selected node.
+
+        None if no node is selected or multiple nodes are selected.
+        """
+        nodes = self.get_selected_nodes()
+        if len(nodes) != 1:
+            return None
+        else:
+            return nodes[0]
+
     def debug_cb (self, *p, **kw):
         print "Debug cb:\n"
         print "Parameters: %s" % str(p)
@@ -641,11 +687,9 @@ class GenericTable(AdhocView):
     def row_activated_cb(self, widget, path, view_column):
         """Edit the element on Return or double click
         """
-        nodes = self.get_selected_nodes ()
-        if len(nodes) != 1:
-            return True
-        if nodes[0] is not None:
-            self.controller.gui.edit_element(nodes[0])
+        el = self.get_selected_node ()
+        if el  is not None:
+            self.controller.gui.edit_element(el)
             return True
         return False
 
