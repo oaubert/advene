@@ -1517,7 +1517,6 @@ class AdveneGUI(object):
                       Gtk.StateType.PRELIGHT):
             self.drawable.modify_bg (state, black)
 
-        self.drawable.set_size_request(320, 200)
         self.drawable.add_events(Gdk.EventType.BUTTON_PRESS)
         self.drawable.connect_object('button-press-event', self.debug_cb, self.drawable)
 
