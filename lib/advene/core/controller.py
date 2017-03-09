@@ -1660,15 +1660,16 @@ class AdveneController(object):
                 self.activate_package(default_alias)
             return
         else:
-            t=time.time()
+            t = time.time()
             p = Package(uri=uri)
-            dur=time.time()-t
+            dur = time.time() - t
             self.log("Loaded package in %f seconds" % dur)
             # Check if the imported package was found. Else it will
             # fail when accessing elements...
+            imp = []
             for i in p.imports:
                 try:
-                    imp=i.package
+                    imp.append(i.package)
                 except Exception, e:
                     raise Exception(_("Cannot read the imported package %(uri)s: %(error)s") % {
                             'uri': i.uri,
