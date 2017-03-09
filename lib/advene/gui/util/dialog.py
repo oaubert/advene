@@ -38,6 +38,14 @@ _fs_encoding = sys.getfilesystemencoding()
 if _fs_encoding in ('ascii', 'ANSI_X3.4-1968', None):
     _fs_encoding='utf8'
 
+# Default transient toplevel window
+DEFAULT_PARENT = None
+
+def set_default_transient_parent(w):
+    global DEFAULT_PARENT
+    DEFAULT_PARENT = w
+    return w
+
 def dialog_keypressed_cb(widget=None, event=None):
     """Generic dialog keypress handler.
     """
@@ -158,7 +166,7 @@ def list_selector(title=None,
                                     entry=entry)
 
     d = Gtk.Dialog(title=title,
-                   parent=None,
+                   parent=DEFAULT_PARENT,
                    flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                    buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
                              Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
@@ -200,8 +208,7 @@ def message_dialog(label="", icon=Gtk.MessageType.INFO, modal=True, callback=Non
     else:
         flags=Gtk.DialogFlags.DESTROY_WITH_PARENT
 
-    dialog = Gtk.MessageDialog(None, flags,
-                               icon, button)
+    dialog = Gtk.MessageDialog(DEFAULT_PARENT, flags, icon, button)
     dialog.set_markup(label)
     label_widget = dialog.get_message_area().get_children()[0]
     if not label_widget.get_text():
@@ -239,7 +246,7 @@ def yes_no_cancel_popup(title=None,
     Return codes are in (Gtk.ResponseType.YES, Gtk.ResponseType.NO, Gtk.ResponseType.CANCEL)
     """
     d = Gtk.Dialog(title=title,
-                   parent=None,
+                   parent=DEFAULT_PARENT,
                    flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
                    buttons=( Gtk.STOCK_YES, Gtk.ResponseType.YES,
                              Gtk.STOCK_NO, Gtk.ResponseType.NO,
@@ -283,7 +290,7 @@ def entry_dialog(title=None,
     @rtype: string
     """
     d = Gtk.Dialog(title=title,
-                   parent=None,
+                   parent=DEFAULT_PARENT,
                    flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                    buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_OK, Gtk.ResponseType.OK,
@@ -426,7 +433,7 @@ def title_id_dialog(title=_("Name the element"),
     if flags is None:
         flags=Gtk.DialogFlags.DESTROY_WITH_PARENT
     d = Gtk.Dialog(title=title,
-                   parent=None,
+                   parent=DEFAULT_PARENT,
                    flags=flags,
                    buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_OK, Gtk.ResponseType.OK,
@@ -563,7 +570,7 @@ def get_filename(title=_("Open a file"),
     preview.connect('clicked', do_preview)
 
     fs=Gtk.FileChooserDialog(title=title,
-                             parent=None,
+                             parent=DEFAULT_PARENT,
                              action=action,
                              buttons=( button,
                                        Gtk.ResponseType.OK,
@@ -642,7 +649,7 @@ def get_dirname(title=_("Choose a directory"),
     """
 
     fs=Gtk.FileChooserDialog(title=title,
-                             parent=None,
+                             parent=DEFAULT_PARENT,
                              action=action,
                              buttons=( button,
                                        Gtk.ResponseType.OK,

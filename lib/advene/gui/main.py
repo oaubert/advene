@@ -324,6 +324,8 @@ class AdveneGUI(object):
 
         self.gui = DummyGlade(menu_definition)
 
+        dialog.set_default_transient_parent(self.gui.win)
+
         f = Gtk.RecentFilter()
         f.add_application(GObject.get_application_name())
         recent = Gtk.RecentChooserMenu()
