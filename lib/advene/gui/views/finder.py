@@ -242,9 +242,7 @@ class FinderColumn(object):
             self.previous.next=None
 
     def get_name(self):
-        if self.node is None:
-            return "FIXME"
-        return self.node[self.COLUMN_TITLE]
+        return self.controller.get_title(self.node)
     name=property(fget=get_name, doc="Displayed name for the element")
 
     def update(self, node=None):
@@ -260,7 +258,7 @@ class FinderColumn(object):
         return True
 
     def build_widget(self):
-        return Gtk.Label(label="Generic finder column")
+        return Gtk.Label(label="Generic column for %s" % self.name)
 
 class ModelColumn(FinderColumn):
     COLUMN_TITLE=0
@@ -396,7 +394,7 @@ class ModelColumn(FinderColumn):
         column = Gtk.TreeViewColumn("Attributes", renderer,
                                     text=self.COLUMN_TITLE,
                                     cell_background=self.COLUMN_COLOR)
-        column.set_widget(Gtk.Label())
+        column.set_title(self.get_name())
         self.listview.append_column(column)
 
         selection = self.listview.get_selection()
