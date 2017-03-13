@@ -58,14 +58,37 @@ class AnnotationTable(AdhocView):
     view_id = 'table'
     tooltip=_("Display annotations in a table")
 
-    def __init__(self, controller=None, parameters=None, custom_data=None, elements=None):
+    def __init__(self, controller=None, parameters=None, custom_data=None, elements=None, source=None):
+        """We can initialize the table using either a list of elements, or  a TALES source expression.
+
+        If both are specified, the list of elements takes precedence.
+        """
         super(AnnotationTable, self).__init__(controller=controller)
         self.registered_rules = []
         self.close_on_package_load = False
         self.contextual_actions = (
             )
         self.controller=controller
-        self.elements=elements
+        self.source = source
+
+        opt, arg = self.load_parameters(parameters)
+        self.options.update(opt)
+        a=dict(arg)
+        if source is None and a.has_key('source'):
+            source=a['source']
+
+        if elements is None and source:
+            c=self.controller.build_context()
+            try:
+                elements = c.evaluateValue(source)
+                self.source = source
+            except Exception, e:
+                self.log(_("Error in source evaluation %(source)s: %(error)s") % {
+                    'source': self.source,
+                    'error': unicode(e) })
+                elements = []
+
+        self.elements = elements
         self.options={ 'confirm-time-update': True }
 
         self.mouseover_annotation = None
@@ -81,6 +104,13 @@ class AnnotationTable(AdhocView):
             for r in self.registered_rules:
                 self.controller.event_handler.remove_rule(r, type_="internal")
         self.widget.connect('destroy', unregister)
+
+    def get_save_arguments(self):
+        if self.source is not None:
+            arguments = [ ('source', self.source) ]
+        else:
+            arguments = []
+        return self.options, arguments
 
     def update_annotation(self, annotation=None, event=None):
         if self.elements and annotation in self.elements:
@@ -511,20 +541,42 @@ class GenericTable(AdhocView):
     view_id = 'generictable'
     tooltip=_("Display Advene elements in a table.")
 
-    def __init__(self, controller=None, parameters=None, elements=None):
+    def __init__(self, controller=None, parameters=None, elements=None, source=None):
         super(GenericTable, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             )
         self.controller=controller
         self.elements=elements
+        self.source = source
         self.options = { }
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
+        a=dict(arg)
+        if source is None and a.has_key('source'):
+            source=a['source']
+
+        if elements is None and source:
+            c=self.controller.build_context()
+            try:
+                elements = c.evaluateValue(source)
+                self.source = source
+            except Exception, e:
+                self.log(_("Error in source evaluation %(source)s: %(error)s") % {
+                    'source': self.source,
+                    'error': unicode(e) })
+                elements = []
 
         self.model=self.build_model(elements)
         self.widget = self.build_widget()
+
+    def get_save_arguments(self):
+        if self.source is not None:
+            arguments = [ ('source', self.source) ]
+        else:
+            arguments = []
+        return self.options, arguments
 
     def get_elements(self):
         """Return the list of elements in their displayed order.
