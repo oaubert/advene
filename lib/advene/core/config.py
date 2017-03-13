@@ -36,6 +36,7 @@ from optparse import OptionParser
 import mimetypes
 import operator
 import time
+import xml.dom
 
 APP='advene'
 
@@ -345,8 +346,14 @@ class Config(object):
             }
 
         # Global context options
-        self.namespace_prefix = {'advenetool': self.namespace,
-                                 'dc': 'http://purl.org/dc/elements/1.1/'}
+        self.namespace_prefix = { 'advene': "http://experience.univ-lyon1.fr/advene/ns",
+                                  'advenetool': self.namespace,
+                                  'dc': 'http://purl.org/dc/elements/1.1/',
+                                  'svg': 'http://www.w3.org/2000/svg',
+                                  'xlink': "http://www.w3.org/1999/xlink",
+                                  'xml': xml.dom.XML_NAMESPACE,
+                                  'xmlnsNS': xml.dom.XMLNS_NAMESPACE }
+        self.reverse_namespace_prefix = dict( (v, k) for (k, v) in self.namespace_prefix.iteritems() )
 
         # Internal options. These should generally not be modified.
 

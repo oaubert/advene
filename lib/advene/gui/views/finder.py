@@ -28,6 +28,7 @@ from gi.repository import GObject
 import urllib
 
 import advene.core.config as config
+from advene.gui.edit.properties import EditWidget
 from advene.gui.views import AdhocView
 from advene.gui.views.annotationdisplay import AnnotationDisplay
 from advene.gui.views.relationdisplay import RelationDisplay
@@ -53,6 +54,30 @@ def register(controller):
 
 # Matching between element classes and the FinderColumn class
 CLASS2COLUMN={}
+
+class Metadata(object):
+    """Virtual object describing an element Metadata.
+    """
+    def __init__(self, element, package, viewableType=None):
+        self.element = element
+        self.rootPackage = package
+        self.viewableType = viewableType
+
+    def get_config(self, uri):
+        (ns, k) = uri.split(':')
+        return self.element.getMetaData(config.data.namespace_prefix[ns], k)
+
+    def set_config(self, uri, value):
+        (ns, k) = uri.split(':')
+        self.element.setMetaData(config.data.namespace_prefix[ns], k, value)
+
+    def list_keys(self):
+        try:
+            return [ "%s:%s" % (config.data.reverse_namespace_prefix[nsuri],
+                                name)
+                     for (nsuri, name, value) in self.element.listMetaData() ]
+        except AttributeError:
+            return []
 
 class VirtualNode:
     """Virtual node.
@@ -298,6 +323,7 @@ class ModelColumn(FinderColumn):
         self.liststore.clear()
         if self.node is None:
             return True
+        self.column.set_title(self.controller.get_title(node))
         for row in self.get_valid_members(node):
             self.liststore.append(row)
 
@@ -381,6 +407,12 @@ class ModelColumn(FinderColumn):
                 contextual_drag_begin(treeview, self.drag_context, element, self.controller)
                 self.drag_context._element=element
 
+    def on_title_clicked(self, column):
+        # Display metadata
+        if self.callback:
+            self.callback(self, Metadata(self.node, self.node.rootPackage))
+        return True
+
     def build_widget(self):
         vbox=Gtk.VBox()
 
@@ -394,7 +426,10 @@ class ModelColumn(FinderColumn):
         column = Gtk.TreeViewColumn("Attributes", renderer,
                                     text=self.COLUMN_TITLE,
                                     cell_background=self.COLUMN_COLOR)
+        self.column = column
         column.set_title(self.get_name())
+        column.set_clickable(True)
+        column.connect('clicked', self.on_title_clicked)
         self.listview.append_column(column)
 
         selection = self.listview.get_selection()
@@ -650,6 +685,66 @@ class ResourceColumn(FinderColumn):
         vbox.show_all()
         return vbox
 CLASS2COLUMN[ResourceData]=ResourceColumn
+
+class MetadataColumn(FinderColumn):
+    def update(self, node=None):
+        self.node=node
+        return True
+
+    def build_widget(self):
+        el = self.node.element
+        vbox=Gtk.VBox()
+
+        info = Gtk.TextView()
+        info.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+        def set_text(widget, t):
+            b=widget.get_buffer()
+            b.delete(*b.get_bounds())
+            b.set_text(t)
+            b.set_modified(False)
+            return True
+        info.set_text = set_text.__get__(info)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+ 
+        if isinstance(el, Package):
+            info.set_text(_("""Package %(title)s:
+%(schema)s
+%(annotation)s in %(annotation_type)s
+%(relation)s in %(relation_type)s
+%(query)s
+%(view)s
+
+Description:
+%(description)s
+""") % {
+        'title': el.title,
+        'schema': helper.format_element_name('schema', len(el.schemas)),
+        'annotation': helper.format_element_name('annotation', len(el.annotations)),
+        'annotation_type': helper.format_element_name('annotation_type', len(el.annotationTypes)),
+        'relation': helper.format_element_name('relation', len(el.relations)),
+        'relation_type': helper.format_element_name('relation_type', len(el.relationTypes)),
+        'query': helper.format_element_name('query', len(el.queries)),
+        'view': helper.format_element_name('view', len(el.views)),
+        'description': el.getMetaData(config.data.namespace_prefix['dc'], 'description')
+        })
+        else:
+            info.set_text(_("""%(type)s %(title)s""") % ({"type": type(el),
+                                                          "title": self.controller.get_title(el)}))
+
+        frame = Gtk.Expander.new(_("Metadata"))
+        frame.set_expanded(False)
+        self.view = EditWidget(self.node.set_config, self.node.get_config)
+        for p in self.node.list_keys():
+            self.view.add_entry(p, p, "")
+
+        sw.add(info)
+        vbox.add(sw)
+        frame.add(self.view)
+        vbox.add(frame)
+        vbox.show_all()
+        return vbox
+CLASS2COLUMN[Metadata] = MetadataColumn
 
 class Finder(AdhocView):
     view_name = _("Package finder")
