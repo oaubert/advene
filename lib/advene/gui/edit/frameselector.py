@@ -177,7 +177,7 @@ class FrameSelector(object):
         if title is None:
             title = _("Select the appropriate snapshot")
         d = Gtk.Dialog(title=title,
-                       parent=self.controller.gui.win,
+                       parent=self.controller.gui.gui.win,
                        flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,

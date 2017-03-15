@@ -482,7 +482,7 @@ class TimeLine(AdhocView):
 
     def dialog_too_many_annotations(self, n):
         d = Gtk.Dialog(title=_("%d annotations") % n,
-                       parent=self.controller.gui.win,
+                       parent=self.controller.gui.gui.win,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( _("Display all types"), Gtk.ResponseType.YES,
                                  Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE ) )
@@ -3603,7 +3603,7 @@ class TimeLine(AdhocView):
 
         # The widget is built. Put it in the dialog.
         d = Gtk.Dialog(title=_('Displayed annotation types'),
-                       parent=self.controller.gui.win,
+                       parent=self.controller.gui.gui.win,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT | Gtk.DialogFlags.MODAL,
                        buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))

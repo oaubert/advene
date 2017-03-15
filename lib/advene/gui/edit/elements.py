@@ -338,7 +338,7 @@ class EditElementPopup (AdhocView):
 
         if modal:
             d = Gtk.Dialog(title=title,
-                           parent=self.controller.gui.win,
+                           parent=self.controller.gui.gui.win,
                            flags=Gtk.DialogFlags.DESTROY_WITH_PARENT | Gtk.DialogFlags.MODAL,
                            buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                      Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))

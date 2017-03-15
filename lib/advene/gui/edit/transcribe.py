@@ -1005,7 +1005,7 @@ class TranscriptionEdit(AdhocView):
             return True
 
         d = Gtk.Dialog(title=_("Converting transcription"),
-                       parent=self.controller.gui.win,
+                       parent=self.controller.gui.gui.win,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
