@@ -211,7 +211,9 @@ class AnnotationTable(AdhocView):
         if not event.get_window() is tv.get_bin_window():
             return False
         if event.is_hint:
-            x, y, state = event.get_window().get_pointer()
+            pointer = event.get_window().get_pointer()
+            x = pointer.x
+            y = pointer.y
         else:
             x = long(event.x)
             y = long(event.y)
