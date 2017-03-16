@@ -43,6 +43,7 @@ from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 import cairo
+import math
 import urllib
 import re
 import types
@@ -90,8 +91,8 @@ class Shape(object):
     # created. This implies a different interaction.
     MULTIPOINT = False
 
-    def __init__(self, name=SHAPENAME, color="green", dimensions=None):
-        self.name=name
+    def __init__(self, name=None, color="green", dimensions=None):
+        self.name=name or self.SHAPENAME
         self.color=color
         self.linewidth=2
         self.opacity = 1.0
@@ -127,15 +128,29 @@ class Shape(object):
         """
         return ( (0, 0), (10, 10) )
 
-    def render(self, pixmap, invert=False):
-        """Render the shape on the given pixmap.
+    def render(self, context, invert=False):
+        """Render the shape on the given context
 
-        @param pixmap: the destination pixmap
-        @type pixmap: Gdk.Pixmap
+        @param context: the destination context
+        @type context: cairo.Context
         @param invert: should the rendering inverse the selection ?
         @type invert: boolean
         """
         return
+
+    def render_setup(self, context, invert=False):
+        """Setup context for common attributes.
+        """
+        context.set_line_width(self.linewidth)
+        col = Gdk.RGBA()
+        col.parse(self.color)
+        col.alpha = self.opacity
+        Gdk.cairo_set_source_rgba(context, col)
+
+        if invert:
+            context.set_operator(cairo.OPERATOR_XOR)
+        else:
+            context.set_operator(cairo.OPERATOR_OVER)
 
     def translate(self, vector):
         """Translate the shape.
@@ -361,7 +376,7 @@ class Shape(object):
         opacitysel.set_digits(1)
         opacitysel.set_increments(.1, .2)
         opacitysel.set_value(self.opacity)
-        vbox.pack_start(label_widget(_("Opacity"), opacitysel, True), True, 0)
+        vbox.pack_start(label_widget(_("Opacity"), opacitysel, True), True, True, 0)
 
         # svg_attrib
         store=Gtk.ListStore(str, str)
@@ -404,7 +419,7 @@ class Shape(object):
         edit=self.edit_properties_widget()
 
         d = Gtk.Dialog(title=_("Properties of %s") % self.name,
-                       parent=self.controller.gui.win,
+                       parent=None,
                        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ) )
@@ -470,17 +485,16 @@ class Rectangle(Shape):
     def get_bounds(self):
         return ( (self.x, self.y), (self.x + self.width, self.y + self.height) )
 
-    def render(self, pixmap, invert=False):
-        col=pixmap.get_colormap().alloc_color(self.color)
-        gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
-        if invert:
-            gc.set_function(Gdk.INVERT)
-        pixmap.draw_rectangle(gc,
-                  self.filled,
-                  self.x,
-                  self.y,
-                  self.width,
-                  self.height)
+    def render(self, context, invert=False):
+        self.render_setup(context, invert)
+        context.rectangle(self.x,
+                      self.y,
+                      self.width,
+                      self.height)
+        if self.filled:
+            context.fill()
+        else:
+            context.stroke()
         return
 
     def translate(self, vector):
@@ -545,27 +559,17 @@ class Text(Rectangle):
         # FIXME: maybe we should consider a relative size (wrt. canvas size)
         self.textsize=20
 
-    def render(self, pixmap, invert=False):
-        width, height=pixmap.get_size()
-        context=pixmap.cairo_create()
-
+    def render(self, context, invert=False):
+        self.render_setup(context, invert)
         context.select_font_face("Helvetica", cairo.FONT_SLANT_NORMAL,
                                  cairo.FONT_WEIGHT_NORMAL)
         context.set_font_size(self.textsize)
 
-        extents=context.text_extents(self.text)
+        extents = context.text_extents(self.text)
 
         # Fix width, height attributes
         self.width = extents[2]
         self.height = extents[3]
-
-        # FIXME: does not work correctly...
-        if invert:
-            context.set_operator(cairo.OPERATOR_ADD)
-        color=Gdk.color_parse(self.color)
-        rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1.0)
-        context.set_source_rgba(*rgba)
-
         context.move_to(self.x, self.y)
         try:
             context.show_text(self.text)
@@ -691,7 +695,7 @@ class Image(Rectangle):
         super(Image, self).__init__(name, color, dimensions)
         self.uri=uri
 
-    def render(self, pixmap, invert=False):
+    def render(self, context, invert=False):
         # FIXME
         return
 
@@ -792,31 +796,22 @@ class Line(Rectangle):
     def get_bounds(self):
         return ( (self.x1, self.y1), (self.x2, self.y2 ) )
 
-    def render(self, pixmap, invert=False):
-        col=pixmap.get_colormap().alloc_color(self.color)
-        gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
-        if invert:
-            gc.set_function(Gdk.INVERT)
-        if self.filled:
-            gc.set_fill(Gdk.SOLID)
-        pixmap.draw_line(gc,
-                  self.x1,
-                  self.y1,
-                  self.x2,
-                  self.y2)
+    def render(self, context, invert=False):
+        self.render_setup(context, invert)
+        context.move_to(self.x1, self.y1)
+        context.line_to(self.x2, self.y2)
         if self.arrow:
             theta=atan2( self.width, self.height )
             ox=self.arrowwidth / 2 + 1
             oy=self.arrowwidth
-            pixmap.draw_polygon(gc,
-                                True,
-                                ( (self.x2, self.y2),
-                                  (int(self.x2 - ox * cos(theta) - oy * sin(theta)),
-                                   int(self.y2 + ox * sin(theta) - oy * cos(theta)) ),
-                                  (int(self.x2 + ox * cos(theta) - oy * sin(theta)),
-                                   int(self.y2 - ox * sin(theta) - oy * cos(theta)) ),
-                                  )
-                                )
+            context.line_to(int(self.x2 - ox * cos(theta) - oy * sin(theta)),
+                            int(self.y2 + ox * sin(theta) - oy * cos(theta)))
+            context.line_to(int(self.x2 + ox * cos(theta) - oy * sin(theta)),
+                            int(self.y2 - ox * sin(theta) - oy * cos(theta)))
+        if self.filled:
+            context.fill()
+        else:
+            context.stroke()
         return
 
     def translate(self, vector):
@@ -1007,26 +1002,21 @@ class Path(Shape):
                  (max(x for x, y in self.path),
                   max(y for x, y in self.path)) )
 
-    def render(self, pixmap, invert=False, partial=False):
-        col = pixmap.get_colormap().alloc_color(self.color)
-        gc = pixmap.new_gc(foreground=col, line_width=self.linewidth)
-        if invert:
-            gc.set_function(Gdk.INVERT)
+    def render(self, context, invert=False, partial=False):
+        self.render_setup(context, invert)
         if partial:
             # Only redraw last line
             for (x1, y1), (x2, y2) in self.pathlines[-1:]:
-                pixmap.draw_line(gc,
-                                 x1,
-                                 y1,
-                                 x2,
-                                 y2)
+                context.move_to(x1, y1)
+                context.line_to(x2, y2)
         else:
             for (x1, y1), (x2, y2) in self.pathlines:
-                pixmap.draw_line(gc,
-                                 x1,
-                                 y1,
-                                 x2,
-                                 y2)
+                context.move_to(x1, y1)
+                context.line_to(x2, y2)
+        if self.filled:
+            context.fill()
+        else:
+            context.stroke()
         return
 
     def translate(self, vector):
@@ -1198,16 +1188,13 @@ class Circle(Rectangle):
         #self.r = int(sqrt( (self.width / 2) ** 2 + (self.height / 2) ** 2))
         self.r = self.width / 2
 
-    def render(self, pixmap, invert=False):
-        col=pixmap.get_colormap().alloc_color(self.color)
-        gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
-        if invert:
-            gc.set_function(Gdk.INVERT)
-        pixmap.draw_arc(gc,
-                  self.filled,
-                  self.x, self.y,
-                  self.width, self.width,
-                  0, 360 * 64)
+    def render(self, context, invert=False):
+        self.render_setup(context, invert)
+        context.arc(self.x, self.y, self.width, 0, 2 * math.pi)
+        if self.filled:
+            context.fill()
+        else:
+            context.stroke()
         return
 
     def __contains__(self, point):
@@ -1257,16 +1244,18 @@ class Ellipse(Rectangle):
         self.rx = self.width / 2
         self.ry = self.height / 2
 
-    def render(self, pixmap, invert=False):
-        col=pixmap.get_colormap().alloc_color(self.color)
-        gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
-        if invert:
-            gc.set_function(Gdk.INVERT)
-        pixmap.draw_arc(gc,
-                  self.filled,
-                  self.x, self.y,
-                  self.width, self.height,
-                  0, 360 * 64)
+    def render(self, context, invert=False):
+        self.render_setup(context, invert)
+        context.save()
+        context.translate(self.x + self.width / 2., self.y + self.height / 2.)
+        if self.width and self.height:
+            context.scale(self.width / 2., self.height / 2.)
+        context.arc(0., 0., 1., 0., 2 * math.pi)
+        context.restore()
+        if self.filled:
+            context.fill()
+        else:
+            context.stroke()
         return
 
     def __contains__(self, point):
@@ -1369,8 +1358,9 @@ class ShapeDrawer:
     @ivar mode: the current editing mode ("", "create", "resize" or "translate")
     @type mode: string
 
-    @ivar pixmap: the edited pixmap
-    @type pixmap: Gdk.Pixmap
+    @ivar surface: the cached surface
+    @type surface: cairo.Surface
+
     @ivar canvaswidth, canvasheight: the canvas dimensions
     @type canvaswidth, canvasheight: int
 
@@ -1410,11 +1400,11 @@ class ShapeDrawer:
         # mode: "create", "resize" or "translate"
         self.mode = ""
 
-        self.pixmap = None
+        self.surface = None
 
         self.widget = Gtk.DrawingArea()
-        self.widget.connect('draw', self.expose_event)
-        self.widget.connect('configure-event', self.configure_event)
+        self.widget.connect('configure-event', self.configure_cb)
+        self.widget.connect('draw', self.draw_cb)
         self.widget.connect('button-press-event', self.button_press_event)
         self.widget.connect('button-release-event', self.button_release_event)
         self.widget.connect('motion-notify-event', self.motion_notify_event)
@@ -1515,24 +1505,32 @@ class ShapeDrawer:
         self._svg_dimensions = t
     svg_dimensions = property(get_svg_dimensions, set_svg_dimensions)
 
-    def configure_event(self, widget, event):
-        if self.background:
-            w=self.background.get_width()
-            h=self.background.get_height()
-        else:
-            x, y, w, h = widget.get_allocation()
-
-        self.pixmap = Gdk.Pixmap(widget.get_window(), w, h)
-        self.canvaswidth = w
-        self.canvasheight = h
+    def configure_cb(self, drawingarea, event=None):
+        allocation = drawingarea.get_allocation()
+        self.surface = drawingarea.get_window().create_similar_surface(cairo.CONTENT_COLOR,
+                                                                       allocation.width,
+                                                                       allocation.height)
         self.plot()
         return True
 
-    # Redraw the screen from the backing pixmap
-    def expose_event(self, widget, context):
-        x, y, w, h = event.area
-        widget.get_window().draw_drawable(widget.get_style().fg_gc[Gtk.StateType.NORMAL], self.pixmap, x, y, x, y, w, h)
-        return False
+    def draw_cb(self, drawingarea, context):
+        context.set_source_surface(self.surface, 0, 0)
+        context.paint()
+        if self.feedback_shape is not None:
+            self.feedback_shape.render(context)
+        return True
+
+    # Redraw the cached surface
+    def draw_objects(self, context):
+        if self.background:
+            Gdk.cairo_set_source_pixbuf(context, self.background, 0, 0)
+            context.paint()
+        for o in self.objects:
+            # o[0] may be None, if plot() is called from the callback
+            # of a ListStore signal
+            if o[0] is not None:
+                o[0].render(context)
+        return
 
     def clicked_shape(self, point):
         """Check if point is on a shape.
@@ -1664,10 +1662,6 @@ class ShapeDrawer:
 
     # End of selection
     def button_release_event(self, widget, event):
-        x = int(event.x)
-        y = int(event.y)
-
-        retval = ( self.selection[0][:], self.selection[1][:])
         if self.mode in ('resize', 'translate'):
             self.mode = ''
 
@@ -1693,18 +1687,17 @@ class ShapeDrawer:
     # Draw rectangle during mouse movement
     def motion_notify_event(self, widget, event):
         if event.is_hint:
-            x, y, state = event.get_window().get_pointer()
+            pointer = event.get_window().get_pointer()
+            x = pointer.x
+            y = pointer.y
         else:
             x = event.x
             y = event.y
-            state = event.get_state()
 
         if self.feedback_shape is not None:
-            if self.selection[1][0] is not None:
-                # Remove previous feedback shape (with old dimensions)
-                self.feedback_shape.render(self.pixmap, invert=True)
-
             self.selection[1][0], self.selection[1][1] = int(x), int(y)
+
+            oldbounds = self.feedback_shape.get_bounds()
 
             if self.mode == "translate":
                 self.feedback_shape.translate( (x - self.selection[0][0],
@@ -1714,11 +1707,9 @@ class ShapeDrawer:
             elif self.mode == "resize" or self.mode == "create":
                 self.feedback_shape.set_bounds( self.selection )
 
-            if self.feedback_shape.MULTIPOINT and self.mode == 'create':
-                self.feedback_shape.render(self.pixmap, invert=True, partial=True)
-            else:
-                self.feedback_shape.render(self.pixmap, invert=True)
-            self.draw_drawable()
+            bounds = self.feedback_shape.get_bounds()
+            widget.queue_draw_area(*(oldbounds[0] + oldbounds[1]))
+            widget.queue_draw_area(*(bounds[0] + bounds[1]))
         else:
             # Check for control points
             cursor = None
@@ -1732,40 +1723,14 @@ class ShapeDrawer:
                     break
             self.widget.get_window().set_cursor(cursor)
 
-    def draw_drawable(self):
-        """Render the pixmap in the drawingarea."""
-        if self.widget.get_window() is None:
-            # The widget may not be realized, in which case simply return
-            return
-        x, y, w, h = self.widget.get_allocation()
-        self.widget.get_window().draw_drawable(self.widget.get_style().fg_gc[Gtk.StateType.NORMAL], self.pixmap, 0, 0, 0, 0, w, h)
-
     def plot(self):
-        """Draw in the pixmap.
+        """Draw in the cached surface
         """
-        if self.pixmap is None:
-            return
-        gc=self.widget.get_style().white_gc
-        if gc is None:
-            return
-        self.pixmap.draw_rectangle(gc, True, 0, 0, self.canvaswidth, self.canvasheight)
-
-        if self.background:
-            self.pixmap.draw_pixbuf(gc,
-                                    self.background,
-                                    0, 0,
-                                    0, 0)
-
-        for o in self.objects:
-            # o[0] may be None, if plot() is called from the callback
-            # of a ListStore signal
-            if o[0] is not None:
-                o[0].render(self.pixmap)
-
-        if self.feedback_shape is not None:
-            self.feedback_shape.render(self.pixmap, invert=True)
-
-        self.draw_drawable()
+        if self.surface:
+            context = cairo.Context(self.surface)
+            self.draw_objects(context)
+        self.widget.queue_draw()
+        return
 
     def get_svg(self, relative=False):
         """Return a SVG representation.
@@ -1895,7 +1860,7 @@ class ShapeEditor(object):
 
     This component provides an example of using ShapeWidget.
     """
-    def __init__(self, background=None, pixmap_dir=None):
+    def __init__(self, background=None, icon_dir=None):
         if isinstance(background, Gtk.Image):
             background = background.get_pixbuf()
         self.drawer = ShapeDrawer(background=background)
@@ -1913,7 +1878,7 @@ class ShapeEditor(object):
             #Gdk.KEY_i: Image,
             }
 
-        self.pixmap_name={
+        self.icon_name={
             Rectangle: 'shape_rectangle.png',
             Line: 'shape_arrow.png',
             Text: 'shape_text.png',
@@ -1921,7 +1886,7 @@ class ShapeEditor(object):
             Image: 'shape_image.png',
             Path: 'shape_path.png',
             }
-        self.widget=self.build_widget(pixmap_dir)
+        self.widget=self.build_widget(icon_dir)
         self.widget.connect('key-press-event', self.key_press_event)
 
     def key_press_event(self, widget, event):
@@ -2011,7 +1976,7 @@ class ShapeEditor(object):
         else:
             raise Exception("set_background requires a Gtk.Image or a GdkPixbuf.Pixbuf")
 
-    def build_widget(self, pixmap_dir):
+    def build_widget(self, icon_dir):
         vbox=Gtk.VBox()
 
         tb = self.toolbar = Gtk.Toolbar()
@@ -2038,9 +2003,9 @@ class ShapeEditor(object):
         def set_shape(tb, shape):
             """Update the toolbutton with the appropriate shape information.
             """
-            if pixmap_dir is not None and self.pixmap_name.get(shape, None):
+            if icon_dir is not None and self.icon_name.get(shape, None):
                 i=Gtk.Image()
-                i.set_from_file( os.path.join( pixmap_dir, self.pixmap_name.get(shape, None)) )
+                i.set_from_file( os.path.join( icon_dir, self.icon_name.get(shape, None)) )
                 i.show()
                 tb.set_icon_widget(i)
             else:
