@@ -266,7 +266,7 @@ class SVGContentHandler (ContentHandler):
         if self.parent is not None and hasattr(self.parent, 'fragment'):
             i = image_from_position(self.controller, self.parent.fragment.begin,
                                     epsilon=1000/config.data.preferences['default-fps'])
-            self.view = ShapeEditor(background=i, pixmap_dir=config.data.advenefile('pixmaps'))
+            self.view = ShapeEditor(background=i, icon_dir=config.data.advenefile('pixmaps'))
 
             def snapshot_update_cb(context, target):
                 frag = self.parent.fragment
@@ -286,7 +286,7 @@ class SVGContentHandler (ContentHandler):
                                                                            method=annotation_update_cb))
 
         else:
-            self.view = ShapeEditor(pixmap_dir=config.data.advenefile('pixmaps'))
+            self.view = ShapeEditor(icon_dir=config.data.advenefile('pixmaps'))
 
         self.parse_svg()
 
