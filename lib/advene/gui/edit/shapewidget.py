@@ -810,10 +810,14 @@ class Line(Rectangle):
             theta=atan2( self.width, self.height )
             ox=self.arrowwidth / 2 + 1
             oy=self.arrowwidth
+            context.stroke()
+            context.new_path()
+            context.move_to(self.x2, self.y2)
             context.line_to(int(self.x2 - ox * cos(theta) - oy * sin(theta)),
                             int(self.y2 + ox * sin(theta) - oy * cos(theta)))
             context.line_to(int(self.x2 + ox * cos(theta) - oy * sin(theta)),
                             int(self.y2 - ox * sin(theta) - oy * cos(theta)))
+            context.close_path()
         if self.filled:
             context.fill()
         else:
@@ -1020,6 +1024,7 @@ class Path(Shape):
                 context.move_to(x1, y1)
                 context.line_to(x2, y2)
         if self.filled:
+            context.close_path()
             context.fill()
         else:
             context.stroke()
