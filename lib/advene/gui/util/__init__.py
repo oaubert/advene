@@ -251,7 +251,7 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
     this method must be connected passing the controller as user data:
       widget.connect('drag-data-get', drag_data_get_cb, controller)
 
-    and the context must has a _element attribute (defined in a
+    and the context must have a _element attribute (defined in a
     'drag-begin' handler for instance).
     """
     typ=config.data.target_type
