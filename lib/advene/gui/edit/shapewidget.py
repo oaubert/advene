@@ -1708,8 +1708,16 @@ class ShapeDrawer:
                 self.feedback_shape.set_bounds( self.selection )
 
             bounds = self.feedback_shape.get_bounds()
-            widget.queue_draw_area(*(oldbounds[0] + oldbounds[1]))
-            widget.queue_draw_area(*(bounds[0] + bounds[1]))
+            minx = sys.maxint
+            miny = sys.maxint
+            maxx = 0
+            maxy = 0
+            for l in (oldbounds, bounds):
+                minx = min( (l[0][0], l[1][0], minx) )
+                miny = min( (l[0][1], l[1][1], miny) )
+                maxx = max( (l[0][0], l[1][0], maxx) )
+                maxy = max( (l[0][1], l[1][1], maxx) )
+            widget.queue_draw_area(minx - 1, miny - 1, maxx - minx + 2, maxy - miny + 2)
         else:
             # Check for control points
             cursor = None
