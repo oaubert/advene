@@ -562,6 +562,9 @@ class Text(Rectangle):
         # FIXME: maybe we should consider a relative size (wrt. canvas size)
         self.textsize=20
 
+    def get_bounds(self):
+        return ( (self.x, self.y - self.height), (self.x + self.width, self.y) )
+
     def render(self, context, invert=False):
         self.render_setup(context, invert)
         context.select_font_face("Helvetica", cairo.FONT_SLANT_NORMAL,
