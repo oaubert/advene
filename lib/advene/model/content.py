@@ -118,14 +118,21 @@ class Content(modeled.Modeled,
 
     def getData(self):
         """Return the data associated to the Content"""
-        data = StringIO()
-        advene.model.util.dom.printElementText(self._getModel(), data)
+        nodes = self._getModel().childNodes
+        if len(nodes) == 1 and nodes[0].nodeType == nodes[0].TEXT_NODE:
+            d = nodes[0].wholeText
+        else:
+            data = StringIO()
+            advene.model.util.dom.printElementText(self._getModel(), data)
+            d = data.getvalue()
         if self._getModel().hasAttributeNS(None, 'encoding'):
             encoding = self._getModel().getAttributeNS(None, 'encoding')
         else:
             encoding = 'utf-8'
-        d=data.getvalue().decode(encoding)
-        return d
+        if isinstance(d, unicode):
+            return d
+        else:
+            return d.decode(encoding)
 
     def setData(self, data):
         """Set the content's data"""
