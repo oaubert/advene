@@ -150,7 +150,7 @@ class TagBag(AdhocView):
         ret=None
         if res == Gtk.ResponseType.OK:
             try:
-                tag=unicode(tagname.get_text())
+                tag=tagname.get_text().decode('utf-8')
             except ValueError:
                 tag=None
             color=colorbutton.get_color()

@@ -238,7 +238,7 @@ class TimeAdjustment:
         pass
 
     def convert_entered_value(self, *p):
-        t=unicode(self.entry.get_text())
+        t=self.entry.get_text().decode('utf-8')
         v=helper.parse_time(t)
         if v is not None and v != self.value:
             if not self.set_value(v):

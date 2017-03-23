@@ -1400,7 +1400,7 @@ class TextContentHandler (ContentHandler):
             return False
         buf = self.view.get_buffer()
         start_iter, end_iter = buf.get_bounds ()
-        text = unicode(buf.get_text(start_iter, end_iter, False))
+        text = buf.get_text(start_iter, end_iter, False).decode('utf-8')
         self.element.data = text
         self.set_modified(False)
         return True
@@ -1497,7 +1497,7 @@ class TextContentHandler (ContentHandler):
                     icon=Gtk.MessageType.ERROR)
                 return True
             b=self.view.get_buffer()
-            f.write(unicode(b.get_text(*b.get_bounds() + [ False ])))
+            f.write(b.get_text(*b.get_bounds() + [ False ]).encode('utf-8'))
             f.close()
             self.fname=fname
         return True
@@ -1950,7 +1950,7 @@ class EditGenericForm(EditForm):
         if hasattr(self.entry, 'get_current_element'):
             v=self.entry.get_current_element()
         else:
-            v=unicode(self.entry.get_text())
+            v=self.entry.get_text().decode('utf-8')
         self.setter(v)
         return True
 

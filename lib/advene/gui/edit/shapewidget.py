@@ -445,7 +445,7 @@ class Shape(object):
             # Get new values
             for n in ('name', 'link', 'link_label', 'uri', 'text'):
                 if n in edit.widgets:
-                    setattr(self, n, unicode(edit.widgets[n].get_text()))
+                    setattr(self, n, edit.widgets[n].get_text().decode('utf-8'))
             self.color = COLORS[edit.widgets['color'].get_active()]
             for n in ('linewidth', 'textsize', 'arrowwidth'):
                 if n in edit.widgets:

@@ -160,7 +160,7 @@ class Evaluator:
         except IOError:
             return []
         for l in data:
-            f.write(l + "\n")
+            f.write(l.encode('utf-8') + "\n")
         f.close()
         return
 
@@ -216,7 +216,8 @@ class Evaluator:
         """
         b=self.output.get_buffer()
         begin,end=b.get_bounds()
-        out=str(b.get_text(begin, end, False))
+        # out is a utf-8 encoded string
+        out=b.get_text(begin, end, False)
         f=open(filename, "w")
         f.write(out)
         f.close()
@@ -227,7 +228,7 @@ class Evaluator:
         """Return the content of the expression window.
         """
         b=self.source.get_buffer()
-        return str(b.get_text(*b.get_bounds() + ( False,  )))
+        return b.get_text(*b.get_bounds() + ( False,  )).decode('utf-8')
 
     def set_expression(self, e, clear=True):
         """Set the content of the expression window.
@@ -371,7 +372,7 @@ class Evaluator:
             b.place_cursor(end)
         else:
             begin,end=b.get_bounds()
-        expr=str(b.get_text(begin, end, False))
+        expr=b.get_text(begin, end, False).decode('utf-8')
         if (not self.history) or self.history[-1] != expr:
             self.history.append(expr)
         symbol=None
@@ -484,7 +485,7 @@ class Evaluator:
         else:
             begin,end=b.get_bounds()
             cursor=b.get_iter_at_mark(b.get_insert())
-        expr=str(b.get_text(begin, cursor, False))
+        expr=b.get_text(begin, cursor, False).decode('utf-8')
         if expr.endswith('.'):
             expr=expr[:-1]
             trailingdot=True
@@ -597,7 +598,7 @@ class Evaluator:
         else:
             begin,end=b.get_bounds()
             cursor=b.get_iter_at_mark(b.get_insert())
-        expr=str(b.get_text(begin, cursor, False))
+        expr=b.get_text(begin, cursor, False).decode('utf-8')
 
         m=re.match('.+[=\(\[\s](.+?)$', expr)
         if m:
@@ -652,7 +653,7 @@ class Evaluator:
         else:
             cursor=b.get_iter_at_mark(b.get_insert())
             begin=b.get_iter_at_line(cursor.get_line())
-        expr=str(b.get_text(begin, cursor, False))
+        expr=b.get_text(begin, cursor, False).decode('utf-8')
         return expr
 
     def make_window(self, widget=None):

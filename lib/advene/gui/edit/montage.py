@@ -418,7 +418,7 @@ class Montage(AdhocView):
         tb.insert(b, -1)
 
         def zoom_entry(entry):
-            f=unicode(entry.get_text())
+            f=entry.get_text().decode('utf-8')
 
             i=re.findall(r'\d+', f)
             if i:

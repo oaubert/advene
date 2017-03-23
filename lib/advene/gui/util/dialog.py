@@ -122,7 +122,7 @@ def list_selector_widget(members=None,
             try:
                 return combo.get_model().get_value(combo.get_active_iter(), 1)
             except (TypeError, AttributeError):
-                return unicode(combo.get_child().get_text())
+                return combo.get_child().get_text().decode('utf-8')
         def set_current_element(combo, t):
             combo.get_child().set_text(t)
     else:
@@ -211,7 +211,7 @@ def message_dialog(label="", icon=Gtk.MessageType.INFO, modal=True, callback=Non
     dialog = Gtk.MessageDialog(DEFAULT_PARENT, flags, icon, button)
     dialog.set_markup(label)
     label_widget = dialog.get_message_area().get_children()[0]
-    if not label_widget.get_text():
+    if not label_widget.get_text().decode('utf-8'):
         # Hackish way of determining if there was an error while
         # parsing the markup. In this case, fallback to simple text
         label_widget.set_text(label)
@@ -325,7 +325,7 @@ def entry_dialog(title=None,
     ret=None
     if res == Gtk.ResponseType.OK:
         try:
-            ret=unicode(e.get_text())
+            ret=e.get_text().decode('utf-8')
         except ValueError:
             ret=None
     else:
@@ -402,7 +402,7 @@ def title_id_widget(element_title=None,
     v.attach(id_entry, 1, 2, 1, 2)
 
     def update_id(entry):
-        id_entry.set_text(helper.title2id(unicode(entry.get_text())))
+        id_entry.set_text(helper.title2id(entry.get_text().decode('utf-8')))
         return True
 
     title_entry.connect('changed', update_id)
@@ -476,8 +476,8 @@ def get_title_id(title=_("Name the element"),
     res=d.run()
     if res == Gtk.ResponseType.OK:
         try:
-            t=unicode(d.title_entry.get_text())
-            i=unicode(d.id_entry.get_text())
+            t=d.title_entry.get_text().decode('utf-8')
+            i=d.id_entry.get_text().decode('utf-8')
         except ValueError:
             t=None
             i=None
@@ -614,7 +614,7 @@ def get_filename(title=_("Open a file"),
     if res == Gtk.ResponseType.OK:
         filename=fs.get_filename()
         if alias:
-            al=unicode(alias_entry.get_text())
+            al=alias_entry.get_text().decode('utf-8')
             if not al:
                 # It may not have been updated, if the user typed the
                 # filename in the entry box.

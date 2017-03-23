@@ -203,7 +203,7 @@ class TranscriptionView(AdhocView):
             try:
                 beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
                 enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
-                if unicode(b.get_text(beginiter, enditer, False), 'utf-8').strip(ZERO_WIDTH_NOBREAK_SPACE) != self.representation(a):
+                if b.get_text(beginiter, enditer, False).decode('utf-8').strip(ZERO_WIDTH_NOBREAK_SPACE) != self.representation(a):
                     modified.append(a)
             except TypeError:
                 # Some missing annotations
@@ -223,7 +223,7 @@ class TranscriptionView(AdhocView):
             if not m:
                 break
             enditer  = b.get_iter_at_mark(m)
-            new_content = helper.title2content(unicode(b.get_text(beginiter, enditer, False), 'utf-8').strip(ZERO_WIDTH_NOBREAK_SPACE),
+            new_content = helper.title2content(b.get_text(beginiter, enditer, False).decode('utf-8').strip(ZERO_WIDTH_NOBREAK_SPACE),
                                                a.content.data,
                                                a.type.getMetaData(config.data.namespace, 'representation') if self.options['default-representation'] else self.options['representation'])
             if new_content is None:
@@ -329,7 +329,7 @@ class TranscriptionView(AdhocView):
         self.searchbox.pack_start(close_button, False, False, 0)
 
         def search_entry_cb(e):
-            self.highlight_search_forward(unicode(e.get_text()))
+            self.highlight_search_forward(e.get_text().decode('utf-8'))
             return True
 
         def search_entry_key_press_cb(e, event):
@@ -689,8 +689,8 @@ class TranscriptionView(AdhocView):
 
     def save_output(self, filename=None):
         b=self.textview.get_buffer()
-        begin,end=b.get_bounds()
-        out=unicode(b.get_text(begin, end, False), 'utf-8').replace(ZERO_WIDTH_NOBREAK_SPACE, '')
+        begin, end=b.get_bounds()
+        out=b.get_text(begin, end, False).decode('utf-8').replace(ZERO_WIDTH_NOBREAK_SPACE, '')
         try:
             f=open(filename, "w")
         except Exception, e:

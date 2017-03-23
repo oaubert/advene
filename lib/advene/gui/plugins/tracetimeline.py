@@ -247,7 +247,7 @@ class TraceTimeline(AdhocView):
             @type options: list
             @param options: a list containing the different options for the search query (see tracebuilder for more infos)
             """
-            tr=self.tracer.search(self.active_trace, unicode(self.quicksearch_entry.get_text(), 'utf-8'), options[0], options[1])
+            tr=self.tracer.search(self.active_trace, self.quicksearch_entry.get_text().decode('utf-8'), options[0], options[1])
             mod= self.trace_selector.get_model()
             if len(self.tracer.traces)>len(mod):
                 n = len(self.tracer.traces)-1
@@ -264,7 +264,7 @@ class TraceTimeline(AdhocView):
             """
             if w.is_focus():
                 return False
-            w.select_region(0, len(w.get_text()))
+            w.select_region(0, len(w.get_text().decode('utf-8')))
             w.grab_focus()
             return True
         def is_typing(w, event):
@@ -2053,8 +2053,9 @@ class Inspector (Gtk.VBox):
             """Save comment in the trace
             """
             if self.action:
-                self.action.event.change_comment(unicode(self.comment.get_text()))
-                if unicode(self.comment.get_text()) != '':
+                comment = self.comment.get_text().decode('utf-8')
+                self.action.event.change_comment(comment)
+                if comment != '':
                     self.action.addCommentMark()
                 else:
                     self.action.removeCommentMark()

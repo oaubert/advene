@@ -137,7 +137,6 @@ class TranscriptionEdit(AdhocView):
                 self.load_transcription(buffer=v)
 
     def get_save_arguments(self):
-        b=self.textview.get_buffer()
         arguments = [ ('text', "".join(self.generate_transcription())) ]
         return self.options, arguments
 
@@ -315,7 +314,7 @@ class TranscriptionEdit(AdhocView):
         self.searchbox.pack_start(close_button, False, False, 0)
 
         def search_entry_cb(e):
-            self.highlight_search_forward(unicode(e.get_text()))
+            self.highlight_search_forward(e.get_text().decode('utf-8'))
             return True
 
         def search_entry_key_press_cb(e, event):
@@ -330,7 +329,7 @@ class TranscriptionEdit(AdhocView):
         self.searchbox.entry.connect('key-press-event', search_entry_key_press_cb)
 
         b=get_small_stock_button(Gtk.STOCK_FIND)
-        b.connect('clicked', lambda b: self.highlight_search_forward(unicode(self.searchbox.entry.get_text())))
+        b.connect('clicked', lambda b: self.highlight_search_forward(self.searchbox.entry.get_text().decode('utf-8')))
         self.searchbox.pack_start(b, False, True, 0)
 
         fill=Gtk.HBox()
@@ -761,7 +760,7 @@ class TranscriptionEdit(AdhocView):
                     self.log(_('Invalid timestamp mark in conversion: %s') % helper.format_time_reference(timestamp))
                     t=timestamp
                     continue
-                text=unicode(b.get_text(begin, end, include_hidden_chars=False))
+                text=b.get_text(begin, end, include_hidden_chars=False).decode('utf-8')
                 if strip_blank:
                     text=text.rstrip().lstrip()
                 if self.empty_re.match(text) and not self.options['empty-annotations']:
@@ -782,7 +781,7 @@ class TranscriptionEdit(AdhocView):
                 begin=end.copy()
         # End of buffer. Create the last annotation
         timestamp=self.controller.cached_duration
-        text=unicode(b.get_text(begin, end, include_hidden_chars=False))
+        text=b.get_text(begin, end, include_hidden_chars=False).decode('utf-8')
         if self.empty_re.match(text) or ignore_next:
             # Last timestsamp mark
             pass
@@ -825,7 +824,7 @@ class TranscriptionEdit(AdhocView):
                 # Found a TextAnchor
                 child=a.get_widgets()[0]
 
-                text=unicode(b.get_text(begin, end, include_hidden_chars=False)).replace('\n', '<br />')
+                text=b.get_text(begin, end, include_hidden_chars=False).decode('utf-8').replace('\n', '<br />')
                 if ignore_next:
                     res.extend( ('<strike>', text, '</strike>') )
                 else:
@@ -836,7 +835,7 @@ class TranscriptionEdit(AdhocView):
                 begin=end.copy()
 
         # End of buffer.
-        text=unicode(b.get_text(begin, end, include_hidden_chars=False)).replace('\n', '<br />')
+        text=b.get_text(begin, end, include_hidden_chars=False).decode('utf-8').replace('\n', '<br />')
         if ignore_next:
             res.extend( ('<strike>', text, '</strike>') )
         else:
@@ -909,21 +908,15 @@ class TranscriptionEdit(AdhocView):
                 self.message(_("Cannot open %(filename)s: %(error)s") % {'filename': filename,
                                                                          'error': unicode(e) })
                 return
-            lines="".join(f.readlines())
+            data="".join(f.readlines())
             f.close()
         else:
-            lines=buffer
+            data=buffer
 
-        try:
-            data=unicode(lines)
-        except UnicodeDecodeError:
-            # Try UTF-16, which is used in quicktime text format
-            try:
-                data=unicode(lines, 'utf16')
-            except UnicodeDecodeError:
-                # Fallback on latin1, which is very common, but may
-                # sometimes fail
-                data=unicode(lines, 'latin1')
+        # We will need a utf-8 encoded str for insertion into the
+        # TextBuffer. Convert from unicode if necessary.
+        if isinstance(data, unicode):
+            data = data.encode('utf-8')
 
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()
@@ -1090,7 +1083,7 @@ class TranscriptionEdit(AdhocView):
             if res == Gtk.ResponseType.OK:
                 at=type_selection.get_current_element()
                 if at == newat:
-                    new_type_title=unicode(new_title.get_text())
+                    new_type_title=new_title.get_text().decode('utf-8')
                     if new_type_title == '':
                         # Empty title. Generate one.
                         id_=self.controller.package._idgenerator.get_id(AnnotationType)

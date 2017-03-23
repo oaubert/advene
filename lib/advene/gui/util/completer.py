@@ -176,7 +176,7 @@ class Completer:
         cursor_position=b.get_iter_at_mark(b.get_insert())
         word_start=cursor_position.copy()
         word_start.backward_word_start()
-        return unicode(word_start.get_text(cursor_position)), word_start, cursor_position
+        return word_start.get_text(cursor_position).decode('utf-8'), word_start, cursor_position
 
     def insert_word_completion(self, path):
         """Insert item selected in the completion window into the text editor's

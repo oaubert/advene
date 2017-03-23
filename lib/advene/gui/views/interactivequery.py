@@ -370,7 +370,7 @@ class InteractiveResult(AdhocView):
         return True
 
     def redo_quicksearch(self, b, entry):
-        s=unicode(entry.get_text())
+        s=entry.get_text().decode('utf-8')
         if not s:
             self.log(_("Empty quicksearch string"))
             return True

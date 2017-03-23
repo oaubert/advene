@@ -551,7 +551,7 @@ class AdveneGUI(object):
             menu=Gtk.Menu()
             item=Gtk.MenuItem(_("Launch search"))
             item.connect('activate', self.do_quicksearch)
-            if not self.quicksearch_entry.get_text():
+            if not self.quicksearch_entry.get_text().decode('utf-8'):
                 item.set_sensitive(False)
             menu.append(item)
             item=Gtk.CheckMenuItem(_("Ignore case"))
@@ -1013,8 +1013,8 @@ class AdveneGUI(object):
         dialog.center_on_mouse(d)
         res=d.run()
         if res == Gtk.ResponseType.OK:
-            search=unicode(search_entry.get_text()).replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
-            replace=unicode(replace_entry.get_text()).replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            search=search_entry.get_text().decode('utf-8').replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            replace=replace_entry.get_text().decode('utf-8').replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
             count=0
             batch_id=object()
             for a in elements:
@@ -3236,7 +3236,7 @@ class AdveneGUI(object):
                                              case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
 
     def do_quicksearch(self, *p):
-        s=unicode(self.quicksearch_entry.get_text())
+        s=self.quicksearch_entry.get_text().decode('utf-8')
         if not s:
             self.log(_("Empty quicksearch string"))
             return True
@@ -3367,8 +3367,8 @@ class AdveneGUI(object):
             at=type_selector.get_current_element()
             if at == newat:
                 # Creation of a new type.
-                attitle=unicode(new_type_title_dialog.title_entry.get_text())
-                atid=unicode(new_type_title_dialog.id_entry.get_text())
+                attitle=new_type_title_dialog.title_entry.get_text().decode('utf-8')
+                atid=new_type_title_dialog.id_entry.get_text().decode('utf-8')
                 at=self.controller.package.get_element_by_id(atid)
                 if at is not None:
                     dialog.message_dialog(_("You specified a annotation-type identifier that already exists. Aborting."))
@@ -3376,8 +3376,8 @@ class AdveneGUI(object):
                     return None
                 sc=schema_selector.get_current_element()
                 if sc == newschema:
-                    sctitle=unicode(new_schema_title_dialog.title_entry.get_text())
-                    scid=unicode(new_schema_title_dialog.id_entry.get_text())
+                    sctitle=new_schema_title_dialog.title_entry.get_text().decode('utf-8')
+                    scid=new_schema_title_dialog.id_entry.get_text().decode('utf-8')
                     sc=self.controller.package.get_element_by_id(scid)
                     if sc is None:
                         # Create the schema
@@ -3466,8 +3466,8 @@ class AdveneGUI(object):
         if res == Gtk.ResponseType.OK:
             sc=schema_selector.get_current_element()
             if sc == newschema:
-                sctitle=unicode(new_schema_title_dialog.title_entry.get_text())
-                scid=unicode(new_schema_title_dialog.id_entry.get_text())
+                sctitle=new_schema_title_dialog.title_entry.get_text().decode('utf-8')
+                scid=new_schema_title_dialog.id_entry.get_text().decode('utf-8')
                 sc=self.controller.package.get_element_by_id(scid)
                 if sc is None:
                     # Create the schema
@@ -4681,8 +4681,8 @@ class AdveneGUI(object):
         res=d.run()
         if res == Gtk.ResponseType.OK:
             try:
-                title=unicode(d.title_entry.get_text())
-                ident=unicode(d.id_entry.get_text())
+                title=d.title_entry.get_text().decode('utf-8')
+                ident=d.id_entry.get_text().decode('utf-8')
                 default=d.default.get_active()
             except ValueError:
                 pass
@@ -4810,11 +4810,11 @@ class AdveneGUI(object):
             return w.should_continue
 
         def do_conversion(b):
-            d=unicode(dirname_entry.get_text())
+            d=dirname_entry.get_text().decode('utf-8')
             if not d:
                 return False
 
-            video=unicode(video_entry.get_text())
+            video=video_entry.get_text().decode('utf-8')
 
             if (self.controller.package.getMetaData(config.data.namespace, 'website-export-directory') != d
                 or self.controller.package.getMetaData(config.data.namespace, 'website-export-video-url') != video):
