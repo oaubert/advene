@@ -414,7 +414,10 @@ class Evaluator:
                     view = unicode(res).encode('utf-8')
             except UnicodeDecodeError:
                 view = str(repr(res))
-            self.log(view)
+            try:
+                self.log(view)
+            except Exception, e:
+                self.log("Exception in result visualisation: ", unicode(e))
             if symbol is not None:
                 if not '.' in symbol and not symbol.endswith(']'):
                     self.log('\n\n[Value stored in %s]' % symbol)
