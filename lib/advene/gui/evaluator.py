@@ -255,7 +255,9 @@ class Evaluator:
         end=b.get_bounds()[1]
         b.place_cursor(end)
         for l in p:
-            b.insert_at_cursor(unicode(l))
+            if not isinstance(l, unicode):
+                l = unicode(l, 'utf-8')
+            b.insert_at_cursor(l)
         return True
 
     def help(self, *p, **kw):
