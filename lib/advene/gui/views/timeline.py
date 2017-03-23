@@ -462,21 +462,28 @@ class TimeLine(AdhocView):
 
         for t in self.bookmarks_to_draw:
             x=self.unit2pixel(t, absolute=True)
+            # There is a clipping area applied to the context which
+            # restricts drawing to the visible area. We have to use
+            # coordinates relative to the visible area to draw the
+            # marks
             if x < begin:
                 # The bookmark is outside. Draw an arrow.
-                context.move_to(begin + 16, 2)
-                context.line_to(begin + 16, 16)
-                context.line_to(begin + 2, 9)
+                context.move_to(16, 2)
+                context.line_to(16, 16)
+                context.line_to(2, 9)
                 context.fill()
             elif x > end:
+                # (x1, y2, x2, y2)
+                clip_extents = context.clip_extents()
+                width = clip_extents[2] - clip_extents[0]
                 # The bookmark is outside. Draw an arrow.
-                context.move_to(end - 16, 2)
-                context.line_to(end - 16, 16)
-                context.line_to(end - 2, 9)
+                context.move_to(width - 16, 2)
+                context.line_to(width - 16, 16)
+                context.line_to(width - 2, 9)
                 context.fill()
             else:
-                context.move_to(x, 0)
-                context.line_to(x, h)
+                context.move_to(x - begin, 0)
+                context.line_to(x - begin, h)
                 context.stroke()
         return False
 
