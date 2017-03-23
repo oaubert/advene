@@ -2594,7 +2594,7 @@ class AdveneGUI(object):
         stream=StringIO.StringIO()
         helper.indent(workspace)
         ET.ElementTree(workspace).write(stream, encoding='utf-8')
-        v.content.setData(stream.getvalue())
+        v.content.setData(stream.getvalue().decode('utf-8'))
         stream.close()
 
         if create:
