@@ -144,10 +144,13 @@ class Content(modeled.Modeled,
             self.delUri()
             if not self.isTextual():
                 encoding = 'base64'
+                data = data.encode(encoding)
             else:
                 encoding = 'utf-8'
+                if isinstance(data, str):
+                    data = data.decode('utf-8')
             self._getModel().setAttributeNS(None, 'encoding', encoding)
-            new = self._getDocument().createTextNode(data.encode(encoding))
+            new = self._getDocument().createTextNode(data)
             self._getModel().appendChild(new)
 
     def delData(self):
