@@ -1,3 +1,9 @@
+advene (1.5) unstable; urgency=medium
+
+  * Upgrade libs to Gtk3 / Gstreamer 1.0
+
+ --
+
 advene (1.1) unstable; urgency=medium
 
   * Source-only release. Various bug fixes. The official source repository
