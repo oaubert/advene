@@ -250,7 +250,7 @@ class Snapshotter(object):
         self.player.set_state(Gst.State.PAUSED)
         res = self.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE, p)
         if not res:
-            logger.warn("snapshotter: error when sending event", res)
+            logger.warn("snapshotter: error when sending event %s", res)
         return True
 
     def enqueue(self, *l):
