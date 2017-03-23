@@ -27,6 +27,7 @@ except ImportError:
     except ImportError:
         json = None
 
+import advene.core.config as config
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
 
@@ -114,7 +115,7 @@ class Content(modeled.Modeled,
         """Check if the data is textual, according to mimetype
         """
         mt = self.mimetype
-        return (mt.startswith('text') or 'x-advene' in mt or 'xml' in mt or 'javascript' in mt)
+        return (mt.startswith('text') or 'x-advene' in mt or 'xml' in mt or 'javascript' in mt or mt in config.data.text_mimetypes)
 
     def getData(self):
         """Return the data associated to the Content"""
