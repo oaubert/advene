@@ -431,7 +431,7 @@ class AdhocView(object):
             root.set_submenu(menu)
             for label, action in self.contextual_actions:
                 b=Gtk.MenuItem(label, use_underline=False)
-                b.connect('activate', action)
+                b.connect('activate', lambda w: action())
                 menu.append(b)
             window.buttonbox.pack_start(menubar, False, True, 0)
             window.own_buttons.append(menubar)

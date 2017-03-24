@@ -143,7 +143,7 @@ class ViewBook(AdhocView):
                 try:
                     for label, action in view.contextual_actions:
                         item = Gtk.MenuItem(label, use_underline=False)
-                        item.connect('activate', action, view)
+                        item.connect('activate', lambda w: action())
                         menu.append(item)
                 except AttributeError:
                     pass
