@@ -376,6 +376,9 @@ class Evaluator:
             self.history.append(expr)
         symbol=None
 
+        silent_mode = expr.startswith('@')
+        expr = expr.lstrip('@')
+
         m=re.match('(from\s+(\S+)\s+)?import\s+(\S+)(\s+as\s+(\S+))?', expr)
         if m is not None:
             modname = m.group(2)
@@ -408,18 +411,19 @@ class Evaluator:
             t0=time.time()
             res=eval(expr, self.globals_, self.locals_)
             self.status_message("Execution time: %f s" % (time.time() - t0))
-            self.clear_output()
-            try:
-                if isinstance(res, unicode):
-                    view = res.encode('utf-8')
-                else:
-                    view = unicode(res).encode('utf-8')
-            except UnicodeDecodeError:
-                view = str(repr(res))
-            try:
-                self.log(view)
-            except Exception, e:
-                self.log("Exception in result visualisation: ", unicode(e))
+            if not silent_mode:
+                self.clear_output()
+                try:
+                    if isinstance(res, unicode):
+                        view = res.encode('utf-8')
+                    else:
+                        view = unicode(res).encode('utf-8')
+                except UnicodeDecodeError:
+                    view = str(repr(res))
+                try:
+                    self.log(view)
+                except Exception, e:
+                    self.log("Exception in result visualisation: ", unicode(e))
             if symbol is not None:
                 if not '.' in symbol and not symbol.endswith(']'):
                     self.log('\n\n[Value stored in %s]' % symbol)
