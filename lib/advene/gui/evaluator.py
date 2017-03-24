@@ -228,7 +228,12 @@ class Evaluator:
         """Return the content of the expression window.
         """
         b=self.source.get_buffer()
-        return b.get_text(*b.get_bounds() + ( False,  )).decode('utf-8')
+        if b.get_selection_bounds():
+            begin, end = b.get_selection_bounds()
+            b.place_cursor(end)
+        else:
+            begin,end=b.get_bounds()
+        return b.get_text(begin, end, False).decode('utf-8')
 
     def set_expression(self, e, clear=True):
         """Set the content of the expression window.
@@ -366,13 +371,7 @@ class Evaluator:
         If a part of the expression is selected, then evaluate only
         the selection.
         """
-        b=self.source.get_buffer()
-        if b.get_selection_bounds():
-            begin, end = b.get_selection_bounds()
-            b.place_cursor(end)
-        else:
-            begin,end=b.get_bounds()
-        expr=b.get_text(begin, end, False).decode('utf-8')
+        expr = self.get_expression()
         if (not self.history) or self.history[-1] != expr:
             self.history.append(expr)
         symbol=None
@@ -477,15 +476,7 @@ class Evaluator:
     def display_completion(self, completeprefix=True):
         """Display the completion.
         """
-        b=self.source.get_buffer()
-        if b.get_selection_bounds():
-            begin, end = b.get_selection_bounds()
-            cursor=end
-            b.place_cursor(end)
-        else:
-            begin,end=b.get_bounds()
-            cursor=b.get_iter_at_mark(b.get_insert())
-        expr=b.get_text(begin, cursor, False).decode('utf-8')
+        expr = self.get_selection_or_cursor().lstrip('@')
         if expr.endswith('.'):
             expr=expr[:-1]
             trailingdot=True
@@ -571,6 +562,7 @@ class Evaluator:
                 element = self.commonprefix(completion)
 
             if element != "":
+                b = self.source.get_buffer()
                 # Got one completion. We can complete the buffer.
                 if attr is not None:
                     element=element.replace(attr, "", 1)
@@ -590,15 +582,7 @@ class Evaluator:
     def fill_method_parameters(self):
         """Fill the parameter names for the method before cursor.
         """
-        b=self.source.get_buffer()
-        if b.get_selection_bounds():
-            begin, end = b.get_selection_bounds()
-            cursor=end
-            b.place_cursor(end)
-        else:
-            begin,end=b.get_bounds()
-            cursor=b.get_iter_at_mark(b.get_insert())
-        expr=b.get_text(begin, cursor, False).decode('utf-8')
+        expr = self.get_selection_or_cursor().lstrip('@')
 
         m=re.match('.+[=\(\[\s](.+?)$', expr)
         if m:
@@ -631,6 +615,8 @@ class Evaluator:
             args=re.findall('\((.*?)\)', res.__doc__.splitlines()[0])
 
         if args is not None:
+            b = self.source.get_buffer()
+            cursor=b.get_iter_at_mark(b.get_insert())
             beginmark=b.create_mark(None, cursor, True)
             b.insert_at_cursor("(%s)" % ", ".join(args))
             it=b.get_iter_at_mark(beginmark)
