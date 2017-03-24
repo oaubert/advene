@@ -67,6 +67,7 @@ class AnnotationTable(AdhocView):
         self.registered_rules = []
         self.close_on_package_load = False
         self.contextual_actions = (
+            (_("Export as CSV"), self.csv_export),
             )
         self.controller=controller
         self.source = source
