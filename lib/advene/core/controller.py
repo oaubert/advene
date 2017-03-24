@@ -2307,11 +2307,13 @@ class AdveneController(object):
         active = []
 
         for a in self.package.annotations:
-            if a.fragment.begin >= position:
-                future_begins.append( (a, a.fragment.begin, a.fragment.end) )
-                future_ends.append( (a, a.fragment.begin, a.fragment.end) )
-            elif a.fragment.end >= position:
-                future_ends.append( (a, a.fragment.begin, a.fragment.end) )
+            begin = a.fragment.begin
+            end = a.fragment.end
+            if begin >= position:
+                future_begins.append( (a, begin, end) )
+                future_ends.append( (a, begin, end) )
+            elif end >= position:
+                future_ends.append( (a, begin, end) )
                 active.append(a)
         future_begins.sort(key=operator.itemgetter(1))
         future_ends.sort(key=operator.itemgetter(2))
