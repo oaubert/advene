@@ -710,7 +710,7 @@ class Evaluator:
 
     def status_message(self, m):
         cid=self.statusbar.get_context_id('info')
-        message_id=self.statusbar.push(cid, str(m))
+        self.statusbar.push(cid, str(m))
         # Display the message only 4 seconds
         def undisplay():
             self.statusbar.pop(cid)
