@@ -710,11 +710,19 @@ class AdveneController(object):
 
     def build_context(self, here=None, alias=None, baseurl=None):
         """Build a context object with additional information.
+
+        The information is cached if no additional parameter (alias,
+        baseurl) is specified.
         """
-        if baseurl is None:
-            baseurl=self.get_default_url(root=True, alias=alias)
         if here is None:
             here=self.package
+        if alias is None and baseurl is None:
+            try:
+                return here._cached_context
+            except AttributeError:
+                pass
+        if baseurl is None:
+            baseurl=self.get_default_url(root=True, alias=alias)
         c=advene.model.tal.context.AdveneContext(here,
                                                  options={
                 u'package_url': baseurl,
@@ -729,6 +737,7 @@ class AdveneController(object):
         c.addGlobal(u'player', self.player)
         for name, method in config.data.global_methods.iteritems():
             c.addMethod(name, method)
+        here._cached_context = c
         return c
 
     def busy_port_info(self):
