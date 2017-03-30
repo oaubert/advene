@@ -1699,8 +1699,8 @@ class ShapeDrawer:
     def motion_notify_event(self, widget, event):
         if event.is_hint:
             pointer = event.get_window().get_pointer()
-            x = pointer.x
-            y = pointer.y
+            x = pointer[1]
+            y = pointer[2]
         else:
             x = event.x
             y = event.y

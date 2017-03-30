@@ -2492,7 +2492,7 @@ class TimeLine(AdhocView):
     def layout_motion_notify_cb(self, widget, event):
         if event.is_hint:
             pointer = event.get_window().get_pointer()
-            x, y, state = pointer.x, pointer.y, pointer.mask
+            x, y, state = pointer[1], pointer[2], pointer[3]
         else:
             x = event.x
             y = event.y

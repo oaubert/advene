@@ -136,7 +136,8 @@ class Completer:
         # Get the text editor's textview coordinate and size.
         window = self.textview.get_window(Gtk.TextWindowType.TEXT)
         origin = window.get_origin()
-        window_x, window_y = origin.x, origin.y
+        # Note: do not use origin.x/origin.y since it does not work on win32
+        window_x, window_y = origin[1], origin[2]
 
         # Determine where to position the completion window.
         position_x = window_x + cursor_x
