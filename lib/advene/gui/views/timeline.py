@@ -203,7 +203,6 @@ class TimeLine(AdhocView):
 
         self.colors = {
             'active': name2color('#fdfd4b'),
-            'inactive': Gtk.Button().get_style_context().get_background_color(Gtk.StateFlags.NORMAL),
             'background': name2color('red'),
             'white': name2color('white'),
             }

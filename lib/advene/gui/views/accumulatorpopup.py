@@ -64,8 +64,6 @@ class AccumulatorPopup(AdhocView):
         self.scrollable=scrollable
 
         self.new_color = name2color('tomato')
-        # FIXME: deprecated handling of background color.
-        self.old_color = Gtk.Button().get_style_context().get_background_color(Gtk.StateFlags.NORMAL)
         # List of tuples (widget, hidetime, frame)
         self.widgets=[]
         # Lock on self.widgets
@@ -127,8 +125,6 @@ class AccumulatorPopup(AdhocView):
         f.add(widget)
 
         self.lock.acquire()
-        for t in self.widgets:
-            self.set_color(t[2].get_label_widget(), self.old_color)
         self.widgets.append( (widget, hidetime, f) )
         if hidetime:
             self.controller.register_usertime_action( hidetime,
@@ -146,12 +142,6 @@ class AccumulatorPopup(AdhocView):
 
         self.controller.notify('PopupDisplay', view=self)
         return True
-
-    def set_color(self, button, color):
-        for style in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
-                      Gtk.StateType.SELECTED, Gtk.StateType.INSENSITIVE,
-                      Gtk.StateType.PRELIGHT):
-            button.modify_bg (style, color)
 
     def get_popup_width(self):
         """Return the requested popup width
