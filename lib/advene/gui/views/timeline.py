@@ -341,7 +341,9 @@ class TimeLine(AdhocView):
             # Check if display is limited
             if self.minimum > 0 and self.maximum < self.controller.package.cached_duration:
                 self.limit_navtools.show()
-            self.widget.disconnect(self.expose_signal)
+            if self.expose_signal:
+                self.widget.disconnect(self.expose_signal)
+                self.expose_signal = None
             self.update_model(from_init=True)
             return False
         # Convert values, that could be strings
@@ -2089,7 +2091,7 @@ class TimeLine(AdhocView):
             widget.set_from_pixbuf(png_to_pixbuf (png, height=max(20, h)))
             if widget.expose_signal is not None:
                 widget.disconnect(widget.expose_signal)
-                widget.expose_signal=None
+                widget.expose_signal = None
             return False
 
         # Remove previous images
