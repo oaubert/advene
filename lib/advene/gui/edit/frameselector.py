@@ -96,15 +96,18 @@ class FrameSelector(object):
             f.right_border.set_color(self.black_color)
 
             if t < self.timestamp:
-                f.set_class('advene_previous_frame')
+                f.get_style_context().remove_class('advene_next_frame')
+                f.get_style_context().add_class('advene_previous_frame')
             else:
                 if matching_index < 0:
                     matching_index = i
 
                 if t == self.timestamp and self.border_mode == 'right':
-                    f.set_class('advene_previous_frame')
+                    f.get_style_context().remove_class('advene_next_frame')
+                    f.get_style_context().add_class('advene_previous_frame')
                 else:
-                    f.set_class('advene_next_frame')
+                    f.get_style_context().remove_class('advene_previous_frame')
+                    f.get_style_context().add_class('advene_next_frame')
 
             t += self.frame_length
 
