@@ -49,6 +49,9 @@ The general idea is:
 im.statistics hold a dictionary containing the creation statistics.
 """
 
+import logging
+logger = logging.getLogger(__name__)
+
 import sys
 import time
 import re
@@ -190,6 +193,8 @@ class GenericImporter(object):
                   if not n.startswith('_')):
             if hasattr(self, k):
                 setattr(self, k, getattr(options, k))
+            else:
+               logger.debug("Unknown option %s", k)
 
     def process_options(self, source):
         (options, args) = self.optionparser.parse_args(args=source)

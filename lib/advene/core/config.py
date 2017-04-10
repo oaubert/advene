@@ -27,6 +27,9 @@ It is meant to be used this way::
 
 @var data: an instance of Config (Singleton)
 """
+import logging
+logger = logging.getLogger(__name__)
+
 # FIXME: cf http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/473846
 # for windows-specific paths
 import sys
@@ -110,7 +113,7 @@ class Config(object):
         elif 'linux2' in os.sys.platform:
             self.os='linux'
         else:
-            print "Warning: undefined platform: ", os.sys.platform
+            logger.warning("Warning: undefined platform: %s", os.sys.platform)
             self.os=os.sys.platform
 
         if self.os == 'win32':
@@ -542,7 +545,7 @@ class Config(object):
 
         (self.options, self.args) = parser.parse_args()
         if self.options.version:
-            print self.get_version_string()
+            logger.info(self.get_version_string())
             sys.exit(0)
 
     def process_options(self):
@@ -596,9 +599,9 @@ class Config(object):
         self.player['dvd-device']='E:'
         advenehome=self.get_registry_value('software\\advene','path')
         if advenehome is None:
-            print "Cannot get the Advene location from registry"
+            logger.warning("Cannot get the Advene location from registry")
             return
-        print "Setting Advene paths from %s" % advenehome
+        logger.info("Setting Advene paths from %s", advenehome)
         self.path['advene'] = advenehome
         self.path['locale'] = os.path.sep.join( (advenehome, 'locale') )
         self.path['plugins'] = os.path.sep.join( (advenehome, 'vlcplugins') )
@@ -750,7 +753,7 @@ class Config(object):
             try:
                 os.mkdir(dp)
             except OSError, e:
-                print "Error: ", str(e)
+                logger.error("Error: %s", str(e))
                 return False
         try:
             f = open(preffile, "w")
@@ -773,7 +776,7 @@ class Config(object):
             self.config_file=''
             return False
 
-        print "Reading configuration from %s" % conffile
+        logger.info("Reading configuration from %s", conffile)
         for li in fd:
             if li.startswith ("#"):
                 continue
@@ -781,7 +784,7 @@ class Config(object):
             try:
                 exec obj
             except Exception, e:
-                print "Error in %s:\n%s" % (conffile, str(e))
+                logger.error("Error in %s:\n%s", conffile, str(e))
         fd.close ()
 
         self.config_file=conffile
@@ -858,7 +861,7 @@ class Config(object):
         # We override any modification that could have been made in
         # .advenerc. Rationale: if the .advenerc was really correct, it
         # would have set the correct paths in the first place.
-        print "Overriding 'resources', 'locale', 'advene' and 'web' config paths"
+        logger.info("Overriding 'resources', 'locale', 'advene' and 'web' config paths")
         self.path['resources']=os.path.sep.join((maindir, 'share'))
         self.path['locale']=os.path.sep.join( (maindir, 'locale') )
         self.path['web']=os.path.sep.join((maindir, 'share', 'web'))

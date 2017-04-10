@@ -286,7 +286,7 @@ class Snapshotter(object):
             (t, dummy) = self.timestamp_queue.get()
             logger.debug("Clearing event")
             self.snapshot_ready.clear()
-            logger.debug("Snapshot", t)
+            logger.debug("Snapshot %d", t)
             self.snapshot(t)
         return True
 

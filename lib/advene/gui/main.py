@@ -57,15 +57,15 @@ from gi.repository import GObject
 from gi.repository import Pango
 import pprint
 
+#Gdk.set_show_events(True)
 import locale
-print "Using localedir %s" % config.data.path['locale']
+logger.info("Using localedir %s" % config.data.path['locale'])
 
 # Locale initialisation
 try:
     locale.setlocale(locale.LC_ALL, '')
 except locale.Error:
-    print "Error in locale initialization. Interface translation may be incorrect."
-    pass
+    logger.error("Error in locale initialization. Interface translation may be incorrect.")
 config.init_gettext()
 # The following line is useless, since gettext.install defines _ as a
 # builtin. However, code checking applications need to be explicitly
@@ -480,8 +480,7 @@ class AdveneGUI(object):
                                                prefix="advene_gui_%s" % n)
                 self.gui_plugins.extend(l)
             except OSError:
-                print "OSerror"
-                pass
+                logger.error("OSerror while trying to load %s plugins" % n)
 
         def update_quicksearch_sources(mi):
             """Display a dialog allowing to edit quicksearch-sources setting.
@@ -1107,7 +1106,7 @@ class AdveneGUI(object):
         try:
             Gdk.threads_init ()
         except RuntimeError:
-            print "*** WARNING*** : Gtk.threads_init not available.\nThis may lead to unexpected behaviour."
+            logger.warning("*** WARNING*** : Gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
         self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
@@ -2186,10 +2185,10 @@ class AdveneGUI(object):
         return True
 
     def debug_cb(self, window, event, *p):
-        print "Got event %s (%d, %d) in window %s" % (str(event),
-                                                      event.x,
-                                                      event.y,
-                                                      str(window))
+        logger.debug("Got event %s (%d, %d) in window %s" % (str(event),
+                                                             event.x,
+                                                             event.y,
+                                                             str(window)))
         return False
 
     def init_window_size(self, window, name):
@@ -2469,7 +2468,6 @@ class AdveneGUI(object):
                 # because they are not opened through open_adhoc_view
                 pass
             if dest == 'popup':
-                print "Closing ", v
                 v.close()
 
     def workspace_serialize(self, with_arguments=True):
@@ -2721,10 +2719,9 @@ class AdveneGUI(object):
                 return None
             try:
                 view=get_edit_popup(element, self.controller)
-            except TypeError, e:
-                print (_(u"Error: unable to find an edit popup for %(element)s:\n%(error)s") % {
-                        'element': unicode(element),
-                        'error': unicode(e)}).encode('latin1')
+            except TypeError:
+                logger.error(_(u"Error: unable to find an edit popup for %(element)s") % {
+                    'element': unicode(element) }, exc_info=True)
                 view=None
             if view is not None and view.widget.get_parent() is not None:
                 # Widget is already displayed. Present it.
@@ -3082,7 +3079,7 @@ class AdveneGUI(object):
             pos=self.controller.update()
         except p.InternalException:
             # FIXME: something sensible to do here ?
-            print "Internal error on video player"
+            logger.error("Internal exception on video player")
             #Gtk.threads_leave()
             return True
         except Exception, e:
@@ -3199,9 +3196,9 @@ class AdveneGUI(object):
                     if c.tracers and config.data.preferences['record-actions']:
                         try:
                             fn = c.tracers[0].export()
-                            print "trace exported to %s" % fn
+                            logger.info(u"trace exported to %s" % fn)
                         except Exception, e:
-                            print "error exporting trace : %s" % unicode(e).encode('utf-8')
+                            logger.error(u"error exporting trace", exc_info=True)
                     if config.data.preferences['package-auto-save'] == 'always':
                         c.queue_action(do_save, l)
                     else:
@@ -3962,19 +3959,19 @@ class AdveneGUI(object):
         return True
 
     def on_cut1_activate (self, button=None, data=None):
-        print "Cut: Not implemented yet."
+        logger.error("Cut: Not implemented yet.")
         return False
 
     def on_copy1_activate (self, button=None, data=None):
-        print "Copy: Not implemented yet."
+        logger.error("Copy: Not implemented yet.")
         return False
 
     def on_paste1_activate (self, button=None, data=None):
-        print "Paste: Not implemented yet."
+        logger.error("Paste: Not implemented yet.")
         return False
 
     def on_delete1_activate (self, button=None, data=None):
-        print "Delete: Not implemented yet (cf popup menu)."
+        logger.error("Delete: Not implemented yet (cf popup menu).")
         return False
 
     def on_edit_ruleset1_activate (self, button=None, data=None):
@@ -4008,7 +4005,7 @@ class AdveneGUI(object):
             # edit.model has been edited
             self.controller.event_handler.set_ruleset(edit.model, type_=type_)
             # FIXME: implement ruleset save
-            print "Not implemented yet"
+            logger.error("Not implemented yet")
             return True
 
         hb=Gtk.HButtonBox()
@@ -4248,8 +4245,8 @@ class AdveneGUI(object):
                 if d != self.controller.package.cached_duration:
                     self.controller.package.cached_duration = d
                     self.controller.notify('DurationUpdate', duration=d)
-            except ValueError, e:
-                print "Cannot convert duration", str(e)
+            except ValueError:
+                logger.error(u"Cannot convert duration", exc_info=True)
                 pass
         return True
 
@@ -4885,7 +4882,7 @@ class AdveneGUI(object):
                 missing.add(a.fragment.end)
         if missing:
             dialog.message_dialog(_("Updating %d snapshots") % len(missing), modal=False)
-            print "Updating %d missing snapshots: " % len(missing), ", ".join(helper.format_time_reference(t) for t in sorted(missing))
+            logger.info("Updating %d missing snapshots: %s" % (len(missing), ", ".join(helper.format_time_reference(t) for t in sorted(missing))))
             for t in sorted(missing):
                 self.controller.player.async_snapshot(t)
         else:
@@ -4924,9 +4921,8 @@ class AdveneGUI(object):
             try:
                 p.position_update()
                 i = p.snapshot (p.relative_position)
-            except p.InternalException, e:
-                print "Exception in snapshot: %s" % e
-                return True
+            except p.InternalException:
+                logger.error(u"Exception in snapshot", exc_info=True)
             if i is not None and i.height != 0:
                 self.controller.package.imagecache[p.current_position_value] = helper.snapshot2png (i)
                 prg=1.0 * p.current_position_value / p.stream_duration
@@ -5091,8 +5087,8 @@ class AdveneGUI(object):
                         try:
                             os.kill(shots.pid, 9)
                             os.waitpid(shots.pid, os.WNOHANG)
-                        except OSError, e:
-                            print "Cannot kill shotdetect", unicode(e)
+                        except OSError:
+                            logger.error("Cannot kill shotdetect", exc_info=True)
 
             # Cleanup temp. dir.
             td=getattr(pb, '_tempdir', None)
@@ -5273,9 +5269,7 @@ if __name__ == '__main__':
         v.main (config.data.args)
     except Exception, e:
         e, v, tb = sys.exc_info()
-        print config.data.version_string
-        print "Got exception %s. Stopping services..." % str(e)
+        logger.error(config.data.version_string)
+        logger.error(u"Got exception %s. Stopping services..." % unicode(e))
         v.on_exit ()
-        print "*** Exception ***"
-        import code
-        code.traceback.print_exception (e, v, tb)
+        logger.error("*** Exception ***", exc_info=True)

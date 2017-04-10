@@ -21,6 +21,9 @@
 Code adapted from gDesklets.
 """
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
@@ -160,7 +163,7 @@ class EditWidget(Gtk.VBox):
             value = src.get_text(*src.get_bounds() + [ False ]).decode('utf-8')
 
         else:
-            print "Unknown type", str(mode)
+            logger.info("Unknown type %s", str(mode))
 
         if value is not None:
             self.__set_config(property, value)
@@ -537,7 +540,8 @@ class OptionParserGUI(EditWidget):
                     self.options[o.dest] = val
                     self.add_option(name, o.dest, o.help, dict( (c, c) for c in o.choices) )
             else:
-                print "Ignoring option", name
+                if name != 'help':
+                    logger.info("Ignoring option %s", name)
                 continue
 
 def test():
@@ -564,9 +568,9 @@ def test():
 
     res=ew.popup()
     if res:
-        print "Modified: " + str(val)
+        logger.info("Modified: %s" + str(val))
     else:
-        print "Cancel"
+        logger.info("Cancel")
 
     Gtk.main()
 

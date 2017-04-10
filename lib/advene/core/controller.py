@@ -28,6 +28,9 @@ The X{AdveneEventHandler} is used by the application to handle events
 notifications and actions triggering.
 """
 
+import logging
+logger = logging.getLogger(__name__)
+
 import sys
 import time
 import os
@@ -81,6 +84,15 @@ if config.data.webserver['mode']:
 
 import threading
 GObject.threads_init()
+
+class MessageHandler(logging.Handler):
+    def __init__(self, level=logging.NOTSET, controller=None):
+        super(MessageHandler, self).__init__(level)
+        self.controller = controller
+
+    def emit(self, record):
+        if self.controller.gui:
+            self.controller.gui.log(self.format(record))
 
 class GlobalPackage(object):
     """Wrapper to access all packages loaded data.
@@ -303,7 +315,7 @@ class AdveneController(object):
     def load_plugins(self, directory, prefix="advene_plugins"):
         """Load the plugins from the given directory.
         """
-        #print "Loading plugins from ", directory
+        logger.debug("Loading plugins from %s", directory)
         l=advene.core.plugin.PluginCollection(directory, prefix)
         for p in l:
             try:
@@ -317,8 +329,8 @@ class AdveneController(object):
                     self.log("Could not register " + p.name)
                 else:
                     self.log("Registering " + p.name)
-            except AttributeError, e:
-                print "AttributeError in", p.name, ":", str(e)
+            except AttributeError:
+                logger.error("AttributeError in %s/%s", directory, p.name, exc_info=True)
                 pass
         return l
 
@@ -352,7 +364,6 @@ class AdveneController(object):
 
         # Now we can process the events
         for (method, args, kw) in ev:
-            #print "Process action: %s" % str(method)
             try:
                 method(*args, **kw)
             except Exception, e:
@@ -369,6 +380,8 @@ class AdveneController(object):
         """Register the GUI for the controller.
         """
         self.gui=gui
+        # Log messages to GUI
+        logging.getLogger().addHandler(MessageHandler(controller=self))
 
     def register_tracer(self, tracer):
         """Register a trace builder
@@ -770,21 +783,20 @@ class AdveneController(object):
         try:
             self.player_plugins=self.load_plugins(os.path.join(os.path.dirname(advene.__file__), 'player'),
                                                   prefix="advene_player_plugins")
-        except OSError, e:
-            print "Error while loading player plugins", str(e).encode('utf-8')
-            pass
+        except OSError:
+            logger.error("Error while loading player plugins", exc_info=True)
 
         try:
             self.app_plugins=self.load_plugins(os.path.join(os.path.dirname(advene.__file__), 'plugins'),
                                                prefix="advene_app_plugins")
         except OSError:
-            pass
+            logger.error("Error while loading app plugins", exc_info=True)
 
         try:
             self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'),
                                                 prefix="advene_user_plugins")
         except OSError:
-            pass
+            logger.error("Error while loading user plugins", exc_info=True)
 
         # Read the default rules
         self.event_handler.read_ruleset_from_file(config.data.advenefile('default_rules.xml'),
@@ -932,13 +944,10 @@ class AdveneController(object):
         mainloop (main thread).
         """
         if False:
-            print "Notify %s (%s): %s" % (
+            logger.debug("Notify %s (%s): %s" % (
                 event_name,
                 helper.format_time_reference(self.player.current_position_value),
-                str(kw))
-            import traceback
-            traceback.print_stack()
-            print "-" * 80
+                str(kw)), exc_info=True)
 
         # Set the package._modified state
         # This does not really belong here, but it is the more convenient and
@@ -1006,8 +1015,8 @@ class AdveneController(object):
             # print "Update snapshot for %d" % position
             try:
                 i = self.player.snapshot (self.player.relative_position)
-            except self.player.InternalException, e:
-                print "Exception in snapshot: %s" % e
+            except self.player.InternalException:
+                logger.error("Exception in snapshot", exc_info=True)
                 return True
             if i is not None and i.height != 0:
                 self.package.imagecache[i.date] = helper.snapshot2png (i)
@@ -1742,13 +1751,13 @@ class AdveneController(object):
         # stricter wrt. namespaces. Fix common problems.
         for q in self.package.queries:
             if 'http://liris.cnrs.fr/advene/ruleset' in q.content.data:
-                print "Fixing query", q.id
+                logger.debug("Fixing query %s", q.id)
                 q.content.data = q.content.data.replace('http://liris.cnrs.fr/advene/ruleset',
                                                         config.data.namespace)
         for v in self.package.views:
             if (v.content.mimetype == 'application/x-advene-ruleset'
                 and '<ruleset>' in v.content.data):
-                print "Fixing view ", v.id
+                logger.debug("Fixing view %s", v.id)
                 v.content.data = v.content.data.replace('<ruleset>',
                                                         '<ruleset xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">')
 
@@ -1974,7 +1983,7 @@ class AdveneController(object):
             uris=[ e.uri for e in getattr(p, source) ]
             for e in getattr(i, source):
                 if not e.uri in uris:
-                    print "Missing %s: importing it" % str(e)
+                    logger.info("Missing %s: importing it" % str(e))
                     helper.import_element(p, e, self, notify=False)
         return True
 
@@ -2077,9 +2086,9 @@ class AdveneController(object):
         @param msg: the message
         @type msg: string
         """
-        if self.gui:
+        try:
             self.gui.log(msg, level)
-        else:
+        except AttributeError:
             print unicode(msg).encode('utf-8')
 
     def message_log (self, context, parameters):
@@ -2108,10 +2117,10 @@ class AdveneController(object):
                 end=self.event_handler.dump()
                 import difflib
                 diff=difflib.Differ()
-                print "-----------"
+                logger.debug("-----------")
                 for l in diff.compare(start, end):
-                    print l
-                print "-----------"
+                    logger.debug(l)
+                logger.debug("-----------")
             self.event_handler.reset_queue()
             self.event_handler.clear_state()
             self.event_handler.update_rulesets()
@@ -2246,7 +2255,7 @@ class AdveneController(object):
             self.player.position_update ()
         except self.player.InternalException, e:
             # The server is down. Restart it.
-            print "Restarting player...", str(e)
+            logger.info("Restarting player...", exc_info=True)
             self.player_restarted += 1
             if self.player_restarted > 5:
                 raise Exception (_("Unable to start the player."))
@@ -2547,11 +2556,7 @@ class AdveneController(object):
 if __name__ == '__main__':
     cont = AdveneController()
     try:
-        cont.main ()
+        cont.self_loop()
     except Exception, e:
-        print "Got exception %s. Stopping services..." % str(e)
-        import code
-        e, v, tb = sys.exc_info()
-        code.traceback.print_exception (e, v, tb)
-        cont.on_exit ()
-        print "*** Exception ***"
+        logger.error("Got exception %s. Stopping services...", exc_info=True)
+        cont.on_exit()
