@@ -2255,7 +2255,7 @@ class AdveneController(object):
         """
         try:
             self.player.position_update ()
-        except self.player.InternalException, e:
+        except self.player.InternalException:
             # The server is down. Restart it.
             logger.info("Restarting player...", exc_info=True)
             self.player_restarted += 1
