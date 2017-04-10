@@ -22,8 +22,6 @@ https://docs.google.com/spreadsheets/d/1HavJQRPpMuq-N0GoN1wJR-9KEGXpKy3-NEPpZZkU
 
 * x-advene-values: normalize xx.xx notation (convert , to .)
 
-* Use simplejson instead of pickle for saving prefs
-
 * QRcode extractor
 
 * Have webcherry listen on both ipv4/ipv6

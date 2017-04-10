@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 import sys
 import os
 import cPickle
+import json
 from optparse import OptionParser
 import mimetypes
 import operator
@@ -740,25 +741,34 @@ class Config(object):
         """Generic preferences reading.
         """
         if d is None:
-            d=self.preferences
-        preffile=self.advenefile(name+'.prefs', 'settings')
+            d = self.preferences
+        preffile = self.advenefile(name+'.json', 'settings')
         try:
             f = open(preffile, "r")
+            prefs = json.load(f)
         except IOError:
-            return None
-        try:
-            prefs=cPickle.load(f)
-        except (EOFError, cPickle.PickleError, cPickle.PicklingError):
-            return None
+            # No json file. Use old cPickle .prefs
+            preffile=self.advenefile(name+'.prefs', 'settings')
+            try:
+                f = open(preffile, "r")
+            except IOError:
+                return None
+            try:
+                prefs=cPickle.load(f)
+            except EOFError:
+                logger.error("Cannot load old prefs file", exc_info=True)
+                return None
         d.update(prefs)
         return prefs
 
     def save_preferences_file(self, d=None, name='advene'):
         """Generic preferences saving.
+
+        Save as json.
         """
         if d is None:
             d=self.preferences
-        preffile=self.advenefile(name+'.prefs', 'settings')
+        preffile=self.advenefile(name+'.json', 'settings')
         dp=os.path.dirname(preffile)
         if not os.path.isdir(dp):
             try:
@@ -771,8 +781,9 @@ class Config(object):
         except IOError:
             return False
         try:
-            cPickle.dump(d, f)
-        except (EOFError, cPickle.PickleError, cPickle.PicklingError):
+            json.dump(d, f, indent=2)
+        except EOFError:
+            logger.error("Cannot save prefs file", exc_info=True)
             return False
         return True
 
