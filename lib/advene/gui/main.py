@@ -3192,7 +3192,7 @@ class AdveneGUI(object):
                         try:
                             fn = c.tracers[0].export()
                             logger.info(u"trace exported to %s" % fn)
-                        except Exception, e:
+                        except Exception:
                             logger.error(u"error exporting trace", exc_info=True)
                     if config.data.preferences['package-auto-save'] == 'always':
                         c.queue_action(do_save, l)
