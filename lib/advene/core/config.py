@@ -502,6 +502,9 @@ class Config(object):
         parser=OptionParser(usage="""Advene - annotate digital videos, exchange on the Net.
     %prog [options] [file.azp|file.xml|alias=uri]""")
 
+        parser.add_option("-d", "--debug", dest="debug", action="store_true",
+                          help="Display debugging messages.")
+
         parser.add_option("-v", "--version", dest="version", action="store_true",
                           help="Display version number and exit.")
 
@@ -547,6 +550,9 @@ class Config(object):
         if self.options.version:
             logger.info(self.get_version_string())
             sys.exit(0)
+        if self.options.debug:
+            self.debug = True
+            logging.getLogger().setLevel(logging.DEBUG)
 
     def process_options(self):
         """Process command-line options.
