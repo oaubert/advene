@@ -2,10 +2,6 @@
 
 * Notebook: tab names hidden if content too large vertically
 
-* Timeline: wrong location for arrow/line feedback indicating current hovered time if horizontal scrolled
-
-* Issue in model (XML storage) with \u2019 chars
-
 * finder: handle DND of annotation type annotation type and other types
 * finder: update schemas content list on annotation type creation
 * Model: check dc: and xlink: prefixes in _impl.py code that uses uris for namespaces??
@@ -17,10 +13,6 @@
 - insert timestamp on control+click (to preserve standard double click)
 
 * Shapewidget: allow to resize background image (then adapt to the widget size)
-
-* Table view: implement csv export
-
-* Implement an issue reporting/fixing tool (non-adjacents shots for instance, 0 or negative duration, etc)
 
 * Port to gtk3.0/gstreamer1.0: https://wiki.ubuntu.com/Novacut/GStreamer1.0#Using_GStreamer_1.0_from_Python
 Stock items migration guide:
