@@ -243,7 +243,6 @@ class AdveneGUI(object):
         # available through the request/keyname TALES expression
         self.controller.register_event('KeyboardInput', _("Input from the keyboard (function keys)"))
 
-        # FIXME: we should use Gtk.UIManager
         menu_definition=(
             (_("_File"), (
                     ( _("_New package"), self.on_new1_activate, _("Create a new package")),
@@ -1279,7 +1278,6 @@ class AdveneGUI(object):
         item_index = 0
         for name, tip, pixmap in (
             ('timeline', _('Timeline'), 'timeline.png'),
-            ('tree', _('Tree view'), 'treeview.png'),
             ('finder', _('Package finder'), 'finder.png'),
             ('transcription', _('Transcription of annotations'), 'transcription.png'),
             ('table', _('Annotation table'), 'table.png'),
@@ -1287,7 +1285,6 @@ class AdveneGUI(object):
             ('', '', ''),
             ('transcribe', _('Note-taking editor'), 'transcribe.png'),
             ('activebookmarks', _('Active bookmarks'), 'bookmarks.png'),
-            ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
             ('', '', ''),
 
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
@@ -1302,8 +1299,6 @@ class AdveneGUI(object):
 
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
             ('editionhistory', _("Display edition history"), 'editionhistory.png'),
-            ('tracepreview', _("Visualise the activity trace preview"), 'trace.png'),
-            ('tracetimeline', _("Visualise the activity trace as a timeline"), 'tracetimeline.png'),
             ):
             if not name:
                 # Separator
