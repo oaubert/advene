@@ -329,6 +329,7 @@ class AnnotationTable(AdhocView):
             columns[name].set_resizable(True)
             columns[name].set_min_width(40)
         columns['content'].set_expand(True)
+        columns['content'].set_max_width(800)
 
         # Allow user classes to tweak behaviour
         self.columns = columns
