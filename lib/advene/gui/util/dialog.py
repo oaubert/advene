@@ -225,7 +225,7 @@ def message_dialog(label="", icon=Gtk.MessageType.INFO, modal=True, callback=Non
         res=dialog.run()
         dialog.destroy()
         if icon == Gtk.MessageType.QUESTION:
-            return (res == Gtk.ResponseType.YES)
+            return (res == Gtk.ResponseType.YES or res == Gtk.ResponseType.OK)
         else:
             return True
     else:
