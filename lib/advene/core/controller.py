@@ -89,7 +89,7 @@ class MessageHandler(logging.Handler):
     def __init__(self, level=logging.NOTSET, controller=None):
         super(MessageHandler, self).__init__(level)
         self.controller = controller
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
         self.setFormatter(formatter)
 
     def emit(self, record):
