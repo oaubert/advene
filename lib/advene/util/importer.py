@@ -111,7 +111,7 @@ def get_valid_importers(fname):
             invalid.append(i)
     # reverse sort along matching scores
     valid.sort(lambda a, b: cmp(b[1], a[1]))
-    return [ i for (i, v) in valid ], invalid
+    return [ i for (i, r) in valid ], invalid
 
 def get_importer(fname, **kw):
     """Return the first/best valid importer.
@@ -188,13 +188,26 @@ class GenericImporter(object):
             return True
 
     def set_options(self, options):
-        for k in (n
-                  for n in dir(options)
-                  if not n.startswith('_')):
-            if hasattr(self, k):
+       """Set importer options (attributes) according to the given options.
+
+       options may be either an option object from OptionParser (where
+       options are attributes of the object) or a dictionary.
+       """
+       if isinstance(options, dict):
+          for k, v in options.iteritems():
+             if hasattr(self, k):
+                logger.info("Set option %s %s", k, v)
+                setattr(self, k, v)
+             else:
+                logger.info("Unknown option %s", k)
+       else:
+          for k in (n
+                    for n in dir(options)
+                    if not n.startswith('_')):
+             if hasattr(self, k):
                 setattr(self, k, getattr(options, k))
-            else:
-               logger.debug("Unknown option %s", k)
+             else:
+                logger.info("Unknown option %s", k)
 
     def process_options(self, source):
         (options, args) = self.optionparser.parse_args(args=source)
