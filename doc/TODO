@@ -1,3 +1,21 @@
+* Forced text/audio alignment: https://www.readbeyond.it/aeneas/ / https://github.com/readbeyond/aeneas
+
+* Notebook: tab names hidden if content too large vertically
+
+* Timeline: wrong location for arrow/line feedback indicating current hovered time if horizontal scrolled
+
+* Issue in model (XML storage) with \u2019 chars
+
+* finder: handle DND of annotation type annotation type and other types
+* finder: update schemas content list on annotation type creation
+* Model: check dc: and xlink: prefixes in _impl.py code that uses uris for namespaces??
+
+* Gstreamer rendering: https://github.com/PhotoFilmStrip/PFS/blob/master/photofilmstrip/core/renderer/GStreamerRenderer.py
+
+* Transcribe:
+- make delete-existing element a saveable option
+- insert timestamp on control+click (to preserve standard double click)
+
 * Shapewidget: allow to resize background image (then adapt to the widget size)
 
 * Table view: implement csv export
@@ -476,27 +494,6 @@ http://www.rexx.com/~dkuhlman/generateDS.html (XML-Schema) Or SOAPy
   - concurrent annotation representation
   - annotation alignment (=~ arrange/align in Impress)
   - ability to specify line order and which types to display
-
-* Make the annotation interface as On-Screen Display over the video window
-
-* Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
-
-* Style setting:
-sendmail_styles="""
-style "green_button"
-{
-  fg[PRELIGHT] = { 1.0, 1.0, 1.0 }
-  bg[PRELIGHT] = { 0, 0.75, 0 }
-}
-widget "sendmail.*.Send*" style "green_button"
-
-style "blue_text"
-{
-  text[NORMAL] = { 0, 0, 0.75 }
-}
-widget "sendmail.*.mail" style "blue_text"
-"""
-gtk.rc_parse_string(sendmail_styles)
 
 ------------------------------------ Archive ------------------------------------------
 * Write the correct VLC/Python module -> DONE
@@ -2664,6 +2661,9 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Timeline Inspector view: enable completion in editor
 
 * shapewidget: allow to switch between begin/end images (or add a slider to select inside the annotation)
+
+* Make the annotation interface as On-Screen Display over the video window 
+
 
 # Local Variables:
 # auto-fill-inhibit-regexp: ".*"
