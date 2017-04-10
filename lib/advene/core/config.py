@@ -505,6 +505,9 @@ class Config(object):
         parser.add_option("-d", "--debug", dest="debug", action="store_true",
                           help="Display debugging messages.")
 
+        parser.add_option("-i", "--info", dest="info", action="store_true",
+                          help="Display info messages.")
+
         parser.add_option("-v", "--version", dest="version", action="store_true",
                           help="Display version number and exit.")
 
@@ -550,6 +553,8 @@ class Config(object):
         if self.options.version:
             logger.info(self.get_version_string())
             sys.exit(0)
+        if self.options.info:
+            logging.getLogger().setLevel(logging.INFO)
         if self.options.debug:
             self.debug = True
             logging.getLogger().setLevel(logging.DEBUG)
