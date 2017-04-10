@@ -280,9 +280,9 @@ class ViewBook(AdhocView):
                             if v.content.mimetype == 'application/x-advene-adhoc-view'
                             and ET.parse(v.content.stream).getroot().attrib['id'] == name ]
 
-                if name == 'transcription':
+                if name == 'transcription' or name == 'table':
                     menu=Gtk.Menu()
-                    i=Gtk.MenuItem(_("Open a new transcription for..."))
+                    i=Gtk.MenuItem(_("Open a new %s for...") % _(name))
                     menu.append(i)
                     sm=Gtk.Menu()
                     i.set_submenu(sm)

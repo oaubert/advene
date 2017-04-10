@@ -1283,6 +1283,7 @@ class AdveneGUI(object):
             ('tree', _('Tree view'), 'treeview.png'),
             ('finder', _('Package finder'), 'finder.png'),
             ('transcription', _('Transcription of annotations'), 'transcription.png'),
+            ('table', _('Annotation table'), 'table.png'),
 
             ('', '', ''),
             ('transcribe', _('Note-taking editor'), 'transcribe.png'),
