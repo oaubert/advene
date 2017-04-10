@@ -48,6 +48,9 @@ class SoundEnveloppeImporter(GenericImporter):
         self.count = 1000
         self.channel = 'both'
 
+        # Lower bound for db values, to avoid a too large value range
+        self.lower_db_limit = -80
+
         self.optionparser.add_option("-i", "--interval",
                                      action="store", type="int", dest="interval", default=self.interval,
                                      help=_("Interval (in ms) at which to take samples."))
@@ -86,7 +89,7 @@ class SoundEnveloppeImporter(GenericImporter):
             self.convert( [ {
                         'begin': tup[0],
                         'end': tup[1],
-                        'content': " ".join("%.02f" % (factor * (f -m)) for f in tup[2]),
+                        'content': " ".join("%.02f" % (factor * (f - m)) for f in tup[2]),
                         } ])
 
     def on_bus_message(self, bus, message):
@@ -94,7 +97,8 @@ class SoundEnveloppeImporter(GenericImporter):
             pos = self.pipeline.query_position(Gst.Format.TIME)[0] / Gst.MSECOND
             GObject.idle_add(lambda: self.pipeline.set_state(Gst.State.NULL) and False)
             # Add last buffer data
-            self.buffer_list.append((self.first_item_time, pos, list(self.buffer)))
+            if self.buffer and pos > self.first_item_time:
+                self.buffer_list.append((self.first_item_time, pos, list(self.buffer)))
             self.generate_normalized_annotations()
             self.end_callback()
             return True
@@ -116,7 +120,7 @@ class SoundEnveloppeImporter(GenericImporter):
                         v = rms[1]
                     elif self.channel == 'both':
                         v = (rms[0] + rms[1]) / 2
-                if isinf(v) or isnan(v):
+                if isinf(v) or isnan(v) or v < self.lower_db_limit:
                     v = self.lastval
                 if v < self.min:
                     self.min = v
