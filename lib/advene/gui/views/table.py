@@ -198,14 +198,14 @@ class AnnotationTable(AdhocView):
         if self.last_edited_path is not None:
             # We just edited an annotation. This update must come from
             # it, so let us try to set the cursor position at the next element.
-            path = str(long(self.last_edited_path) + 1)
+            path = self.last_edited_path.next()
             try:
                 self.model.get_iter(path)
-            except ValueError:
+            except (ValueError, TypeError):
                 path = self.last_edited_path
             self.widget.treeview.set_cursor(path,
-                                            focus_column=self.columns['content'],
-                                            start_editing=True)
+                                            self.columns['content'],
+                                            True)
             self.last_edited_path = None
 
     def motion_notify_event_cb(self, tv, event):
@@ -275,7 +275,7 @@ class AnnotationTable(AdhocView):
             if new_content is None:
                 self.log(_("Cannot update the annotation, its representation is too complex"))
             elif a.content.data != new_content:
-                self.last_edited_path = path_string
+                self.last_edited_path = Gtk.TreePath.new_from_string(path_string)
                 self.controller.notify('EditSessionStart', element=a)
                 a.content.data = new_content
                 self.controller.notify('AnnotationEditEnd', annotation=a)
@@ -414,19 +414,22 @@ class AnnotationTable(AdhocView):
             print "Unknown target type for drag: %d" % targetType
         return True
 
-    def get_selected_nodes (self):
+    def get_selected_nodes(self, with_path=False):
         """Return the currently selected nodes.
         """
-        selection = self.widget.treeview.get_selection ()
-        store, paths=selection.get_selected_rows()
-        return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
+        selection = self.widget.treeview.get_selection()
+        store, paths = selection.get_selected_rows()
+        if with_path:
+            return [ (store.get_value(store.get_iter(p), COLUMN_ELEMENT), p) for p in paths ]
+        else:
+            return [ store.get_value(store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
-    def get_selected_node (self):
+    def get_selected_node(self, with_path=False):
         """Return the currently selected node.
 
         None if no node is selected or multiple nodes are selected.
         """
-        nodes = self.get_selected_nodes()
+        nodes = self.get_selected_nodes(with_path)
         if len(nodes) != 1:
             return None
         else:
@@ -477,7 +480,7 @@ class AnnotationTable(AdhocView):
     def set_time(self, attr):
         """Sets the time of the current annotation to the current player time.
         """
-        an = self.get_selected_node()
+        an, an_path = self.get_selected_node(with_path=True)
         if an is None:
             return
         current_time = self.controller.player.current_position_value
@@ -488,6 +491,7 @@ class AnnotationTable(AdhocView):
                 'time': helper.format_time(current_time)
                 }, icon=Gtk.MessageType.QUESTION)
         if confirm:
+            self.last_edited_path = an_path
             self.controller.notify('EditSessionStart', element=an, immediate=True)
             setattr(an.fragment, attr, current_time)
             self.controller.notify("AnnotationEditEnd", annotation=an)
@@ -715,21 +719,22 @@ class GenericTable(AdhocView):
 
         return sw
 
-    def get_selected_nodes (self):
+    def get_selected_nodes(self, with_path=False):
+        """Return the currently selected nodes.
+        """
+        selection = self.widget.treeview.get_selection()
+        store, paths = selection.get_selected_rows()
+        if with_path:
+            return [ (store.get_value(store.get_iter(p), COLUMN_ELEMENT), p) for p in paths ]
+        else:
+            return [ store.get_value(store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
+
+    def get_selected_node(self, with_path=False):
         """Return the currently selected node.
 
         None if no node is selected or multiple nodes are selected.
         """
-        selection = self.widget.treeview.get_selection ()
-        store, paths=selection.get_selected_rows()
-        return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
-
-    def get_selected_node (self):
-        """Return the currently selected node.
-
-        None if no node is selected or multiple nodes are selected.
-        """
-        nodes = self.get_selected_nodes()
+        nodes = self.get_selected_nodes(with_path)
         if len(nodes) != 1:
             return None
         else:
