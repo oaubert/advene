@@ -274,8 +274,7 @@ class FileImporter(AdhocView):
         self.importers = dialog.list_selector_widget([], None, callback=self.update_options)
         line.pack_start(self.importers, False, True, 0)
 
-        exp = Gtk.Expander.new(_("Options"))
-        exp.set_expanded(True)
+        exp = Gtk.Frame.new(_("Options"))
         self.options_frame = Gtk.VBox()
         sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
