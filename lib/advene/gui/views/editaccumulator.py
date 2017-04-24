@@ -22,6 +22,7 @@
 This widget allows to stack compact editing widgets.
 """
 
+from gi.repository import Gdk
 from gi.repository import Gtk
 
 from gettext import gettext as _
