@@ -29,23 +29,15 @@ logger = logging.getLogger(__name__)
 import sys
 import time
 import os
-import subprocess
-import signal
-import shutil
-import tempfile
 import StringIO
 import textwrap
 import re
 import urllib2
 import socket
-import threading
 import Queue
 
 import advene.core.config as config
 import advene.core.version
-
-if config.data.os == 'win32':
-    import win32process
 
 import gi
 gi.require_version('Gdk', '3.0')
@@ -302,9 +294,7 @@ class AdveneGUI(object):
                     ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
                     ( _("Reset ImageCache"), self.on_reset_imagecache_activate, _("Reset the ImageCache") ),
                     ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
-                    #( _("Capture screenshots"), self.generate_screenshots, _("Generate screenshots for the current video") ),
                     ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds") ),
-                    ( _("Detect shots"), self.on_shotdetect_activate, _("Automatically detect shots")),
                     ( _("_Select player"), None, _("Select the player plugin") ),
                     ), "" ),
             (_("Packages"), (
@@ -4991,271 +4981,6 @@ class AdveneGUI(object):
                 v.widget.show()
             self.gui.toolbar_container.show()
             self.gui.stbv_combo.get_parent().show()
-        return True
-
-    def on_shotdetect_activate(self, *p):
-        if not os.path.exists(config.data.path['shotdetect']):
-            dialog.message_dialog(_("The <b>shotdetect</b> application does not seem to be installed. Please check that it is present and that its path is correctly specified in preferences." ), icon=Gtk.MessageType.ERROR)
-            return True
-        movie=self.controller.get_default_media()
-        if not movie:
-            # No defined movie.
-            dialog.message_dialog(_("You first must load a movie into Advene" ), icon=Gtk.MessageType.ERROR)
-            return True
-        if not os.path.exists(movie):
-            dialog.message_dialog(_("The movie %s does not seem to exist.") % movie, icon=Gtk.MessageType.ERROR)
-            return True
-
-        def do_gui_operation(function, *args, **kw):
-            """Execute a method in the main loop.
-
-            Ensure that we execute all Gtk operations in the mainloop.
-            """
-            def idle_func():
-                Gdk.threads_enter()
-                try:
-                    function(*args, **kw)
-                    return False
-                finally:
-                    Gdk.threads_leave()
-            GObject.idle_add(idle_func)
-
-        def import_data(progressbar, filename):
-            """Import data from filename.
-
-            filename is either result.xml (shotdetect output) or a
-            .txt file (generated from the intermediary data in case of
-            cancellation).
-            """
-            if filename.endswith('result.xml'):
-                iname='shotdetect'
-            else:
-                iname=filename
-            try:
-                i=advene.util.importer.get_importer(iname, controller=self.controller)
-            except Exception:
-                dialog.message_dialog(_("Cannot import shotdetect output. Did you install the shotdetect software?"),
-                                        icon=Gtk.MessageType.ERROR,
-                                      modal=False)
-                return True
-            def progress_callback(value=None, label=''):
-                progressbar.set_label_value(label or '', value)
-                while Gtk.events_pending():
-                    Gtk.main_iteration()
-                return True
-            i.package=self.controller.package
-            i.callback=progress_callback
-            i.process_file(filename)
-            if filename.endswith('.txt'):
-                # Intermediary import. Fix some details.
-                at=i.defaulttype
-                at.mimetype='application/x-advene-structured'
-                at.setMetaData(config.data.namespace, "representation", 'here/content/parsed/num')
-                at.title=_("Incomplete shots")
-            self.controller.package._modified = True
-            self.controller.notify('PackageLoad', package=self.controller.package)
-            msg=_("Detected %s shots") % i.statistics['annotation']
-            dialog.message_dialog(msg, modal=False)
-            self.log(msg)
-            return True
-
-        def do_cancel(b, pb, forced=False):
-            """Cancel action.
-
-            Close dialog and do various cleanups
-            """
-            s=getattr(pb, '_source', None)
-            if s:
-                GObject.source_remove(s)
-
-            # Terminate the process if necessary
-            shots=getattr(pb, '_shots', None)
-            if shots:
-                if config.data.os == 'win32':
-                    import ctypes
-                    ctypes.windll.kernel32.TerminateProcess(int(shots._handle), -1)
-                else:
-                    try:
-                        # Python 2.6 only
-                        shots.terminate()
-                    except AttributeError:
-                        try:
-                            os.kill(shots.pid, 9)
-                            os.waitpid(shots.pid, os.WNOHANG)
-                        except OSError:
-                            logger.error("Cannot kill shotdetect", exc_info=True)
-
-            # Cleanup temp. dir.
-            td=getattr(pb, '_tempdir', None)
-            if td and os.path.isdir(td):
-                # Remove temp dir.
-                shutil.rmtree(td, ignore_errors=True)
-
-            # Process intermediary data if present.
-            if forced and pb._datapoints:
-                # Shot detection was cancelled, but we got
-                # intermediary data points. Convert them anyway.
-                (fd, datafile)=tempfile.mkstemp('.txt', text=True)
-                pb._datapoints.insert(0, 0)
-                pb._datapoints.append(self.controller.cached_duration or (pb._datapoints[-1] + 5000))
-                for (i, t) in enumerate(zip( pb._datapoints[:-1], pb._datapoints[1:] )):
-                    os.write(fd, '%d %d num=%d\n' % (t[0], t[1], i + 1))
-                os.close(fd)
-                import_data( pb, datafile )
-                os.unlink(datafile)
-            pb._window.destroy()
-            return True
-
-        def on_shotdetect_end(progressbar):
-            # Detection is over. Import resulting file.
-
-            # First disconnect the automatic pulse (win32 only)
-            s=getattr(progressbar, '_source', None)
-            if s:
-                GObject.source_remove(s)
-                progressbar._source=None
-
-            filename=os.path.join( progressbar._tempdir, 'result.xml' )
-            if os.path.exists(filename):
-                # If the file does not exist, it should mean that
-                # the process was killed, so cancel was already
-                # invoked.
-                import_data(progressbar, filename)
-                progressbar._datapoints=[]
-                do_cancel(None, progressbar)
-            return False
-
-        def execute_shotdetect(pb):
-            """Execute shotdetect.
-
-            This method is meant to be run in its own thread.
-            """
-            def subprocess_setup():
-                # Python installs a SIGPIPE handler by default. This is usually not what
-                # non-Python subprocesses expect.
-                signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-
-            shot_re=re.compile('Shot log\s+::\s+(.+)')
-            exp_re = re.compile('(\d*\.\d*)e\+(\d+)')
-
-            argv=[ config.data.path['shotdetect'],
-                   '-i', GObject.filename_from_utf8(movie.encode('utf8')),
-                   '-o', GObject.filename_from_utf8(pb._tempdir.encode('utf8')),
-                   '-s', str(pb._sensitivity.get_value_as_int()) ]
-
-            if config.data.os == 'win32':
-                kw = { 'creationflags': win32process.CREATE_NO_WINDOW }
-            else:
-                kw = { 'preexec_fn': subprocess_setup }
-            try:
-                pb._shots=subprocess.Popen( argv,
-                                            bufsize=0,
-                                            shell=False,
-                                            stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE,
-                                            **kw )
-            except OSError, e:
-                do_cancel(None, pb)
-                dialog.message_dialog(_("Could not run shotdetect: %s") % unicode(e), modal=False)
-                return True
-
-            do_gui_operation(pb.set_label_value,
-                             _("Detecting shots from %s") % GObject.filename_display_name(movie),
-                             0.01)
-            while True:
-                l=pb._shots.stderr.readline()
-                if not l:
-                    break
-                ms=shot_re.findall(l)
-                if ms:
-                    ts=0
-                    try:
-                        ts=long(ms[0])
-                    except ValueError:
-                        m=exp_re.match(ms[0])
-                        if m:
-                            ts=long(float(m.group(1)) * 10 ** int(m.group(2)))
-
-                    pb._datapoints.append(ts)
-                    d=self.controller.cached_duration
-                    if d > 0:
-                        prg=1.0 * ts / d
-                    else:
-                        prg=None
-                    do_gui_operation(pb.set_label_value,
-                                     _("Detected shot #%(num)d at %(pos)s ") % {
-                            'num': len(pb._datapoints),
-                            'pos': helper.format_time_reference(ts)
-                            },
-                                     prg)
-
-            # Detection is over. Import result
-            do_gui_operation(on_shotdetect_end, pb)
-            return False
-
-        def do_detect(b, pb):
-            b.set_sensitive(False)
-
-            pb._tempdir=unicode(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
-            #~ if config.data.os == 'win32' or self.controller.cached_duration <= 0:
-                #~ # Async. reading from a pipe is a mess on win32. A
-                #~ # proper fix should be found, but in the meantime,
-                #~ # give a feedback to the user.  Do it also when the
-                #~ # movie length is unknown, so that the user can know
-                #~ # there is activity even if no shot is detected.
-                #~ def progress():
-                    #~ pb.pulse()
-                    #~ return True
-                #~ pb._source=GObject.timeout_add(500, progress)
-
-            t=threading.Thread(target=execute_shotdetect, args= [ pb ])
-            t.start()
-            return True
-
-        w=Gtk.Window()
-        w.set_title(_("Shot detection"))
-
-        v=Gtk.VBox()
-        w.add(v)
-
-        l=Gtk.Label()
-        l.set_markup(_("<b>Shot detection</b>\n\nAdvene will try to detect shots from the currently loaded movie. The threshold parameter is used to specify the sensitivity of the algorithm, and should typically be between 50 and 80. If too many shots are detected, try to augment its value."))
-        l.set_line_wrap(True)
-        v.pack_start(l, False, True, 0)
-
-        progressbar=Gtk.ProgressBar()
-
-        def set_label_value(s, label='', value=None):
-            s.set_text(label)
-            if value is None:
-                progressbar.pulse()
-            else:
-                progressbar.set_fraction(value)
-            return False
-        progressbar.set_label_value=set_label_value.__get__(progressbar)
-
-        hb=Gtk.HBox()
-        hb.pack_start(Gtk.Label(_("Sensitivity")), False, False, 0)
-        progressbar._sensitivity=Gtk.SpinButton.new(Gtk.Adjustment.new(60, 5, 95, 1, 5))
-        hb.pack_start(progressbar._sensitivity, True, True, 0)
-        v.pack_start(hb, False, True, 0)
-        v.pack_start(progressbar, False, True, 0)
-
-        progressbar._window=w
-        progressbar._datapoints=[]
-
-        hb=Gtk.HBox()
-
-        b=Gtk.Button(stock=Gtk.STOCK_EXECUTE)
-        b.connect('clicked', do_detect, progressbar)
-        hb.pack_start(b, False, True, 0)
-
-        b=Gtk.Button(stock=Gtk.STOCK_CANCEL)
-        b.connect('clicked', do_cancel, progressbar, True)
-        hb.pack_start(b, False, True, 0)
-
-        v.pack_start(hb, False, True, 0)
-        w.show_all()
         return True
 
 if __name__ == '__main__':
