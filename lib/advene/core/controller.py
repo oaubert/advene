@@ -2225,7 +2225,10 @@ class AdveneController(object):
                     if position.origin == self.player.RelativePosition:
                         position = self.player.current_position_value + position.value
                     elif position.origin == self.player.ModuloPosition:
-                        position = (self.player.current_position_value + position.value) % self.player.stream_duration
+                        if self.player.stream_duration:
+                            position = (self.player.current_position_value + position.value) % self.player.stream_duration
+                        else:
+                            position = self.player.current_position_value + position.value
                     else:
                         position=position.value
                 self.update_snapshot(position)
