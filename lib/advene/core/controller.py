@@ -733,7 +733,9 @@ class AdveneController(object):
             here=self.package
         if alias is None and baseurl is None:
             try:
-                return here._cached_context
+                c = here._cached_context
+                c.restore()
+                return c
             except AttributeError:
                 pass
         if baseurl is None:
@@ -752,7 +754,8 @@ class AdveneController(object):
         c.addGlobal(u'player', self.player)
         for name, method in config.data.global_methods.iteritems():
             c.addMethod(name, method)
-        here._cached_context = c
+        # Preserve a copy of globals/locals for later restoring
+        c.checkpoint()
         return c
 
     def busy_port_info(self):
