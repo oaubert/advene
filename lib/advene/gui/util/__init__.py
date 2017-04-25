@@ -249,6 +249,9 @@ def get_target_types(el):
 def drag_data_get_cb(widget, context, selection, targetType, timestamp, controller):
     """Generic drag-data-get handler.
 
+    It is used by the origin widget of a drag action, when the
+    destination widget queries for the DND data.
+
     Usage information:
     this method must be connected passing the controller as user data:
       widget.connect('drag-data-get', drag_data_get_cb, controller)
@@ -264,9 +267,9 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         widgets = widget.container.get_selected_annotation_widgets()
         if not widget in widgets:
             widgets = None
-    except (AttributeError, RuntimeError):
+    except AttributeError:
+        logger.error("Cannot get_selected_annotation_widgets", exc_info=True)
         widgets=None
-
 
     d={ typ['annotation']: Annotation,
         typ['annotation-type']: AnnotationType,
