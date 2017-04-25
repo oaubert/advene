@@ -47,7 +47,7 @@ import advene.rules.elements
 import advene.gui.popup
 import advene.util.helper as helper
 import advene.model.tal.context
-from advene.gui.util import drag_data_get_cb, get_target_types, enable_drag_source, contextual_drag_begin
+from advene.gui.util import get_target_types, enable_drag_source, contextual_drag_begin, drag_data_get_cb
 
 name="Package finder view plugin"
 
@@ -259,6 +259,9 @@ class FinderColumn(object):
             b.extend(self.get_child_buttons(c))
         return b
 
+    def get_selected_annotation_widgets(self):
+        return []
+
     def close(self):
         """Close this column, and all following ones.
         """
@@ -289,7 +292,7 @@ class FinderColumn(object):
 
 class ModelColumn(FinderColumn):
     COLUMN_TITLE=0
-    COLUMN_NODE=1
+    COLUMN_ELEMENT=1
     COLUMN_COLOR=2
 
     def get_valid_members(self, node):
@@ -307,6 +310,9 @@ class ModelColumn(FinderColumn):
         return [ (title(c),
                   c,
                   self.controller.get_element_color(c)) for c in self.model.nodeChildren(node) ]
+
+    def get_selected_annotation_widgets(self):
+        return []
 
     def get_focus(self):
         self.listview.grab_focus()
@@ -333,7 +339,7 @@ class ModelColumn(FinderColumn):
             # There is a next column. Should we still display it ?
             if not [ r
                      for r in self.liststore
-                     if r[self.COLUMN_NODE] == self.next.node ]:
+                     if r[self.COLUMN_ELEMENT] == self.next.node ]:
                 # The next node is no more in the current elements.
                 self.next.close()
                 self.next=None
@@ -353,7 +359,7 @@ class ModelColumn(FinderColumn):
             return False
         path, col, cx, cy = t
         it = model.get_iter(path)
-        node = model.get_value(it, self.COLUMN_NODE)
+        node = model.get_value(it, self.COLUMN_ELEMENT)
         widget.get_selection().select_path (path)
         if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
             # Double-click: edit the element
@@ -370,7 +376,7 @@ class ModelColumn(FinderColumn):
         if selection is not None:
             store, it = selection.get_selected()
             if it is not None:
-                att = model.get_value (it, self.COLUMN_NODE)
+                att = model.get_value (it, self.COLUMN_ELEMENT)
         if att and self.callback:
             self.callback(self, att)
             return True
@@ -383,7 +389,7 @@ class ModelColumn(FinderColumn):
             if row is None:
                 element=None
             else:
-                element = treeview.get_model()[row[0]][self.COLUMN_NODE]
+                element = treeview.get_model()[row[0]][self.COLUMN_ELEMENT]
             self.drag_data=(int(x), int(y), event, element)
 
     def on_treeview_button_release_event(self, treeview, event):
@@ -415,6 +421,15 @@ class ModelColumn(FinderColumn):
             self.callback(self, Metadata(self.node, self.node.rootPackage))
         return True
 
+    def own_drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
+        model, paths = treeview.get_selection().get_selected_rows()
+
+        els=[ model[p][self.COLUMN_ELEMENT] for p in paths ]
+
+        context._element = els[0]
+        drag_data_get_cb(treeview, context, selection, targetType, timestamp, self.controller)
+        return True
+
     def build_widget(self):
         vbox=Gtk.VBox()
 
@@ -424,6 +439,7 @@ class ModelColumn(FinderColumn):
 
         self.liststore = self.get_liststore()
         self.listview = Gtk.TreeView(self.liststore)
+        self.listview.container = self
         renderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn("Attributes", renderer,
                                     text=self.COLUMN_TITLE,
@@ -445,7 +461,7 @@ class ModelColumn(FinderColumn):
         self.listview.connect('button-press-event', self.on_treeview_button_press_event)
         self.listview.connect('button-release-event', self.on_treeview_button_release_event)
         self.listview.connect('motion-notify-event', self.on_treeview_motion_notify_event)
-        self.listview.connect('drag-data-get', drag_data_get_cb, self.controller)
+        self.listview.connect('drag-data-get', self.own_drag_data_get_cb)
 
         sw.add(self.listview)
 
@@ -458,6 +474,9 @@ class AnnotationColumn(FinderColumn):
         self.node=node
         self.view.set_annotation(node)
         return True
+
+    def get_selected_annotation_widgets(self):
+        return []
 
     def build_widget(self):
         vbox=Gtk.VBox()
@@ -561,7 +580,7 @@ class ViewColumn(FinderColumn):
                             } ).encode('utf8'))
                 return True
             else:
-                print "Unknown target type for drag: %d" % targetType
+                logger.warn("Unknown target type for drag: %d" % targetType)
             return True
 
         b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
@@ -708,7 +727,7 @@ class MetadataColumn(FinderColumn):
         info.set_text = set_text.__get__(info)
         sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
- 
+
         if isinstance(el, Package):
             info.set_text(_("""Package %(title)s:
 %(schema)s
