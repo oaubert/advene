@@ -298,10 +298,6 @@ class Completer:
             return True
         self.treeview.connect('row-activated', treeview_row_activated_cb)
 
-        style = self.textview.get_style()
-        #color = style.base[Gtk.StateType.SELECTED]
-        #self.treeview.modify_base(Gtk.StateType.ACTIVE, color)
-
         scroll=Gtk.ScrolledWindow()
         scroll.add(self.treeview)
         scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
