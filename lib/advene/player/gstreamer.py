@@ -639,6 +639,8 @@ class Player:
         return True
 
     def set_widget(self, widget):
+        # For win32, see
+        # http://stackoverflow.com/questions/25823541/get-the-window-handle-in-pygi
         self.set_visual( widget.get_id() )
         #self.set_visual( None )
 
