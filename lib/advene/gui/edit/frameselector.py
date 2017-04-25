@@ -248,7 +248,7 @@ class FrameSelector(object):
                 r.right_border = border
 
             r = TimestampRepresentation(0, self.controller, width=100, visible_label=True,
-                                        epsilon=(1000 / config.data.preferences['default-fps'] - 10))
+                                        epsilon=(1000 / 2 / config.data.preferences['default-fps'] - 10))
             self.frames.append(r)
             r.connect("clicked", self.select_time)
             r.left_border = border
