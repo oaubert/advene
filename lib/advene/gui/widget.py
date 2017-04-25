@@ -25,6 +25,8 @@ of the widgets defined in this module is a Gtk.Widget.
 Updated tutorial for gtk3:
 http://zetcode.com/gfx/pycairo/basicdrawing/
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import struct
 import os
@@ -617,7 +619,7 @@ class TagWidget(GenericColorButtonWidget):
         if targetType == config.data.target_type['tag']:
             selection.set(selection.get_target(), 8, unicode(self.tag).encode('utf8'))
         else:
-            self.log("Unknown target type for drag: %d" % targetType)
+            logger.warn("Unknown target type for drag: %d" % targetType)
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):

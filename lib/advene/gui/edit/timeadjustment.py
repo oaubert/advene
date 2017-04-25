@@ -20,6 +20,8 @@
 
 It depends on a Controller instance to be able to interact with the video player.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import advene.core.config as config
 
@@ -208,7 +210,7 @@ class TimeAdjustment:
             v=long(float(data['timestamp']))
             self.set_value(v)
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return True
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):

@@ -18,6 +18,9 @@
 #
 """Display and edit a Rule."""
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gi.repository import Gdk
 from gi.repository import Gtk
 
@@ -211,7 +214,7 @@ class EditRuleSet(EditGeneric):
             return True
 
         else:
-            print "Unknown target type for drag: %d" % targetType
+            logger.warn("Unknown target type for drag: %d" % targetType)
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
@@ -232,7 +235,7 @@ class EditRuleSet(EditGeneric):
             rule.name = name
             self.add_rule(rule)
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return True
 
 
@@ -452,7 +455,7 @@ class EditRule(EditGeneric):
         if targetType == config.data.target_type['rule']:
             selection.set(selection.get_target(), 8, self.model.xml_repr().encode('utf8'))
         else:
-            print "Unknown target type for drag: %d" % targetType
+            logger.warn("Unknown target type for drag: %d" % targetType)
         return True
 
     def invalid_items(self):

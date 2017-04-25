@@ -17,6 +17,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 # Advene part
+import logging
+logger = logging.getLogger(__name__)
+
 import advene.core.config as config
 
 from gettext import gettext as _
@@ -173,7 +176,7 @@ class RelationsBox:
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.get_target(), 8, widget.annotation.uri.encode('utf8'))
         else:
-            print "Unknown target type for drag: %d" % targetType
+            logger.warn("Unknown target type for drag: %d" % targetType)
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
@@ -198,5 +201,5 @@ class RelationsBox:
             #     # FIXME...
             #     rel=self.package.createRelation(chosen_relation, members=(source, dest))
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return True

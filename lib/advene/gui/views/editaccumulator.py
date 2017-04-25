@@ -21,6 +21,8 @@
 
 This widget allows to stack compact editing widgets.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from gi.repository import Gdk
 from gi.repository import Gtk
@@ -167,7 +169,7 @@ class EditAccumulator(AccumulatorPopup):
             for source in sources:
                 self.edit(source)
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return True
 
     def build_widget(self):

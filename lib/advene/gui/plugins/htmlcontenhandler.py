@@ -16,6 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
@@ -557,7 +559,7 @@ class HTMLContentHandler (ContentHandler):
             self.editor.get_buffer().insert_at_cursor(helper.format_time(t))
             return True
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return False
 
     def class_parser(self, tag, attr):

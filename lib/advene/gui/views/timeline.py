@@ -16,18 +16,22 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import sys
-import re
+import logging
+logger = logging.getLogger(__name__)
+
+from gettext import gettext as _
 import operator
-import urllib
+import re
+import sys
 import struct
+from threading import Lock
+import urllib
+
 from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
 import cairo
 from gi.repository import Pango
-from gettext import gettext as _
-from threading import Lock
 
 # Advene part
 import advene.core.config as config
@@ -1145,7 +1149,7 @@ class TimeLine(AdhocView):
             self.controller.notify('AnnotationEditEnd', annotation=a)
             self.controller.notify('EditSessionEnd', element=a)
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return True
 
     def move_or_copy_annotations(self, sources, dest, position=None, action=Gdk.DragAction.ASK):
@@ -1489,7 +1493,7 @@ class TimeLine(AdhocView):
             # Create an annotation with the timestamp as begin
             self.controller.create_annotation(begin, widget.annotationtype, content=content)
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return True
 
     def new_annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
@@ -2281,7 +2285,7 @@ class TimeLine(AdhocView):
                 # Create an annotation of type typ with the timestamp as begin
                 self.controller.create_annotation(begin, typ, content=content)
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return False
 
     def scale_layout_button_press_cb(self, widget=None, event=None):
@@ -3371,7 +3375,7 @@ class TimeLine(AdhocView):
                     self.annotationtypes.remove(source)
                     self.update_model(partial_update=True)
             else:
-                print 'Unknown target type for drop: %d' % targetType
+                logger.warn('Unknown target type for drop: %d' % targetType)
             return True
 
         b=Gtk.ToolButton(stock_id=Gtk.STOCK_SELECT_COLOR)

@@ -17,6 +17,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 """Module displaying time bookmarks (for navigation history for instance)."""
+import logging
+logger = logging.getLogger(__name__)
 
 from gi.repository import Gdk
 from gi.repository import Gtk
@@ -217,7 +219,7 @@ class Bookmarks(AdhocView):
                     self.refresh()
                 return True
             else:
-                print "Unknown target type for drop: %d" % targetType
+                logger.warn("Unknown target type for drop: %d" % targetType)
             return False
 
         b=get_small_stock_button(Gtk.STOCK_DELETE)
@@ -276,7 +278,7 @@ class Bookmarks(AdhocView):
                 self.append(position, comment=comment)
                 return True
             else:
-                print "Unknown target type for drop: %d" % targetType
+                logger.warn("Unknown target type for drop: %d" % targetType)
             return False
 
         self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |

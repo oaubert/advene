@@ -23,6 +23,9 @@ FIXME: loop option
 FIXME: replace button dropzone by EventBox 1pixel wide, with visual feedback
 """
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
@@ -277,7 +280,7 @@ class Montage(AdhocView):
                 self.refresh()
                 return True
             else:
-                print "Unknown target type for drag: %d" % targetType
+                logger.warn("Unknown target type for drag: %d" % targetType)
             return False
 
         b = Gtk.Button()
@@ -384,7 +387,7 @@ class Montage(AdhocView):
                         self.refresh()
                 return True
             else:
-                print "Unknown target type for drop: %d" % targetType
+                logger.warn("Unknown target type for drop: %d" % targetType)
             return False
 
         self.zoom_adjustment.connect('value-changed', zoom_adj_change)
@@ -518,7 +521,7 @@ class Montage(AdhocView):
                 self.refresh()
                 return True
             else:
-                print "Unknown target type for drag: %d" % targetType
+                logger.warn("Unknown target type for drag: %d" % targetType)
             return False
         v.drag_dest_set(Gtk.DestDefaults.MOTION |
                                    Gtk.DestDefaults.HIGHLIGHT |

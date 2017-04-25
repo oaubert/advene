@@ -18,6 +18,8 @@
 #
 
 # Advene finder, a la MacOS X
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 

@@ -29,6 +29,8 @@ Dragging a tag to an annotation with add the tag to the annotation's tag.
 Dragging an annotation to the tag bag will add the annotation tags to
 the presented list of tags.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 # Advene part
 import advene.core.config as config
@@ -295,7 +297,7 @@ class TagBag(AdhocView):
                         self.tags.append(tag)
                 self.refresh()
             else:
-                self.log("Unknown target type for mainbox drop: %d" % targetType)
+                logger.warn("Unknown target type for mainbox drop: %d" % targetType)
             return True
 
         self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |
@@ -312,7 +314,7 @@ class TagBag(AdhocView):
                     self.tags.remove(tag)
                 self.refresh()
             else:
-                self.log("Unknown target type for remove drop: %d" % targetType)
+                logger.warn("Unknown target type for remove drop: %d" % targetType)
             return True
 
 

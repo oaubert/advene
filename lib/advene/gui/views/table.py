@@ -16,6 +16,9 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
+
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
@@ -412,7 +415,7 @@ class AnnotationTable(AdhocView):
                                                           for e in els
                                                           if isinstance(e, Annotation) ))
         else:
-            print "Unknown target type for drag: %d" % targetType
+            logger.warn("Unknown target type for drag: %d" % targetType)
         return True
 
     def get_selected_nodes(self, with_path=False):
