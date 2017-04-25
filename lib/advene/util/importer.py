@@ -62,7 +62,8 @@ import urllib
 
 from gettext import gettext as _
 
-import gobject
+from gi.repository import GObject
+
 import shutil
 import subprocess
 import signal
@@ -524,7 +525,7 @@ class ExternalAppImporter(GenericImporter):
             msg = unicode(e.args)
             raise Exception(_("Could not run %(appname)s: %(msg)s") % locals())
 
-        self.progress(.01, _("Processing %s") % gobject.filename_display_name(filename))
+        self.progress(.01, _("Processing %s") % GObject.filename_display_name(filename))
 
         def execute_process():
             self.convert(self.iterator())
@@ -534,7 +535,7 @@ class ExternalAppImporter(GenericImporter):
             end_callback()
             return True
 
-        # Note: the "proper" way would be to use gobject.io_add_watch,
+        # Note: the "proper" way would be to use Gobject.io_add_watch,
         # but last time I tried, this had cross-platform issues. The
         # threading approach seems to work across platforms, so "if it
         # ain't broke, don't fix it".
