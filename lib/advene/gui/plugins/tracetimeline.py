@@ -47,12 +47,12 @@ try:
     import gi
     gi.require_version('GooCanvas', '2.0')
     from gi.repository import GooCanvas
-    from GooCanvas import Group
+    from gi.repository.GooCanvas import CanvasGroup
 except ImportError:
     # Goocanvas is not available. Define some globals in order not to
     # fail the module loading, and use them as a guard in register()
     GooCanvas=None
-    Group=object
+    CanvasGroup=object
 
 def register(controller):
     if GooCanvas is None:
@@ -1438,11 +1438,11 @@ class TraceTimeline(AdhocView):
         return
 
 
-class HeadGroup (Group):
+class HeadGroup (CanvasGroup):
     """Group containing a rectangle and a name used to display headers.
     """
     def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00ffff50):
-        Group.__init__(self, parent = canvas.get_root_item ())
+        CanvasGroup.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         #self.name=name[0:2]
         self.name=name[0:5]
@@ -1485,11 +1485,11 @@ class HeadGroup (Group):
             self.text.props.font="%s %s" % (font, str(self.fontsize))
             return
 
-class EventGroup (Group):
+class EventGroup (CanvasGroup):
     """Group containing a rectangle, commentmarks and ObjGroups used to display an action
     """
     def __init__(self, link_mode=0, controller=None, inspector=None, canvas=None, dg=None, type=None, event=None, x =0, y=0, l=1, w=90, ol=5, fontsize=6, color_c=0x00ffffff, blocked=False):
-        Group.__init__(self, parent = canvas.get_root_item ())
+        CanvasGroup.__init__(self, parent = canvas.get_root_item ())
         self.canvas = canvas
         self.controller=controller
         self.inspector = inspector
@@ -1700,11 +1700,11 @@ class EventGroup (Group):
         self.commentMark.props.tooltip=self.event.comment
 
 
-class ObjGroup (Group):
+class ObjGroup (CanvasGroup):
     """Group used to display informations on an operation
     """
     def __init__(self, link_mode=0, controller=None, inspector=None, canvas=None, dg=None, x=0, y=0, r=4, fontsize=5, op=None, blocked=False):
-        Group.__init__(self, parent = canvas.get_root_item ())
+        CanvasGroup.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.rep = None
         self.text = None
@@ -2214,7 +2214,7 @@ class Inspector (Gtk.VBox):
             print 'No icon for %s' % te
         GooCanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
         # object icon
-        objg = GooCanvas.Group(parent = objcanvas.get_root_item ())
+        objg = CanvasGroup(parent = objcanvas.get_root_item ())
         if sel:
             GooCanvas.Rect(parent=objg,
                             x=0,
@@ -2342,11 +2342,11 @@ class Inspector (Gtk.VBox):
         self.comment.set_text('')
         self.show_all()
 
-class DocGroup (Group):
+class DocGroup (CanvasGroup):
     """Group used to display a representation of the movie
     """
     def __init__(self, controller=None, canvas=None, name="N/A", x =10, y=10, w=80, h=20, fontsize=14, color_c=0x00000050):
-        Group.__init__(self, parent = canvas.get_root_item ())
+        CanvasGroup.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.canvas=canvas
         self.name=name
