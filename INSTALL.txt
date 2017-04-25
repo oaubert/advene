@@ -44,6 +44,10 @@ get python bindings). It will install both Gstreamer and gtk (with
 python bindings).
 
 win32process from http://pywin32.sf.net/
+gtk from http://gtk.org/
+
+Python bindings for gtk/gstreamer from
+https://wiki.gnome.org/action/show/Projects/PyGObject
 
 Optionally, 
 python-opencv
