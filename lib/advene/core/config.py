@@ -303,6 +303,8 @@ class Config(object):
             'embedded': True,
             'abbreviation-mode': True,
             'completion-mode': True,
+            # Complete with predefined terms only if they are defined
+            'completion-predefined-only': False,
             'text-abbreviations': '',
             # Automatically start the player when loading a media file
             # (either directly or through a package)

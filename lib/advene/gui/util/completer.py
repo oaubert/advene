@@ -396,7 +396,14 @@ class Indexer:
             s=self.index['views']
             # FIXME: maybe add ids (annotation-types, relations-types, views)
         elif isinstance(context, Annotation):
-            s=self.index.get(context.type.id, [])
+            s = []
+            if config.data.preferences['completion-predefined-only']:
+                terms = context.type.getMetaData(config.data.namespace, "completions")
+                if terms:
+                    s = self.get_words(terms)
+            if not s:
+                # No predefined completion anyway
+                s = self.index.get(context.type.id, [])
         elif isinstance(context, Gtk.TextBuffer):
             # The replace clause transforms the timestamp placeholders into spaces.
             args = context.get_bounds() + (False, )

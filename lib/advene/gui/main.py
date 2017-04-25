@@ -4250,7 +4250,7 @@ class AdveneGUI(object):
                         'tts-language', 'tts-encoding', 'tts-engine',
                         'record-actions', 'popup-destination',
                         'timestamp-format', 'default-fps',
-                        'abbreviation-mode', 'text-abbreviations', 'completion-mode',
+                        'abbreviation-mode', 'text-abbreviations', 'completion-mode', 'completion-predefined-only',
                         'prefer-wysiwyg', 'player-shortcuts-in-edit-windows', 'apply-edited-elements-on-save' )
         # Direct options needing a restart to be taken into account.
         restart_needed_options = ('tts-engine', 'language', 'timestamp-format')
@@ -4411,6 +4411,7 @@ class AdveneGUI(object):
 
         ew.add_title(_("Text content"))
         ew.add_checkbox(_("Completion mode"), 'completion-mode', _("Enable dynamic completion mode"))
+        ew.add_checkbox(_("Predefined terms only"), 'completion-predefined-only', _("If completion is enabled, complete only with predefined terms."))
         ew.add_checkbox(_("Abbreviation mode"), 'abbreviation-mode', _("Enable abbreviation mode"))
         ew.add_text(_("Abbreviations"), 'text-abbreviations', _("Text abbreviations. 1 entry per line. Each line consists of the abbreviation followed by its replacement."))
 
