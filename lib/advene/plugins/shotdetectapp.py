@@ -38,6 +38,13 @@ def register(controller=None):
     return True
 
 class ShotdetectAppImporter(ExternalAppImporter):
+    """Shot detection.
+
+    The threshold parameter is used to specify the sensitivity of the
+    algorithm, and should typically be between 50 and 80. If too many
+    shots are detected, try to increase its value.
+    """
+
     name = _("ShotdetectApp importer")
 
     def __init__(self, *p, **kw):
