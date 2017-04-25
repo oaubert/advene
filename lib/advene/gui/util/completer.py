@@ -327,12 +327,17 @@ class Indexer:
             'views': set(),
             }
         self.regexp=re.compile(r'[^\w\d_]+', re.UNICODE)
-        self.size_limit=4
+        self.alt_regexp = re.compile(r'\s*,\s*', re.UNICODE)
+        self.size_limit = 4
 
     def get_words(self, s):
         """Return the list of indexable words from the given string.
         """
-        return [ w for w in self.regexp.split(s) if len(w) >= self.size_limit ]
+        if ',' in s:
+            regexp = self.alt_regexp
+        else:
+            regexp = self.regexp
+        return [ w for w in regexp.split(s) if len(w) >= self.size_limit ]
 
     def initialize(self):
         """Initialize the indexer on package load.
