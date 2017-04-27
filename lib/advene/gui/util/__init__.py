@@ -48,6 +48,12 @@ predefined_content_mimetypes=[
     ('image/svg+xml', _("SVG graphics content")),
     ]
 
+if not hasattr(Gtk.Menu, 'popup_at_pointer'):
+    # Monkey patch Gtk.Menu (popup_at_pointer is available only in Gtk >= 3.22)
+    def popup_at_pointer(widget, event):
+        widget.popup(None, None, None, None, 0, Gtk.get_current_event_time())
+    Gtk.Menu.popup_at_pointer = popup_at_pointer
+
 def image_new_from_pixbuf(pb, width=None):
     i=Gtk.Image()
     if width:
