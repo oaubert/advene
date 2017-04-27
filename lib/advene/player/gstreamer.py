@@ -62,6 +62,9 @@ try:
     svgelement = 'rsvgoverlay'
     GObject.threads_init()
     Gst.init(None)
+    if True or not hasattr(Gst.Structure, '__getitem__'):
+        # Monkey patch __getitem__
+        Gst.Structure.__getitem__ = Gst.Structure.get_value
 except ImportError:
     Gst=None
 
