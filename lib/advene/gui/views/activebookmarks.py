@@ -488,7 +488,7 @@ class ActiveBookmarks(AdhocView):
                 i.connect('activate', do_complete, func)
                 m.append(i)
             m.show_all()
-            m.popup(None, widget, None, 0, Gtk.get_current_event_time())
+            m.popup_at_pointer(None)
             return True
 
         def remove_current(widget):
