@@ -1051,11 +1051,11 @@ class AdveneController(object):
         # does not exist, it does not always launch it in the
         # background, so it can freeze the GUI.
         web_browser = os.getenv("BROWSER", None)
-        if web_browser == None:
+        if web_browser is None:
             # Try to guess if we are running a Gnome/KDE desktop
-            if os.environ.has_key('KDE_FULL_SESSION'):
+            if 'KDE_FULL_SESSION' in os.environ:
                 web_browser = 'kfmclient exec'
-            elif os.environ.has_key('GNOME_DESKTOP_SESSION_ID'):
+            elif 'GNOME_DESKTOP_SESSION_ID' in os.environ:
                 web_browser = 'gnome-open'
             else:
                 term_command = os.getenv("TERMCMD", "xterm")
@@ -1079,7 +1079,7 @@ class AdveneController(object):
                                 break
                     if breaked:
                         break
-        if web_browser != None:
+        if web_browser is not None:
             os.system("%s \"%s\" &" % (web_browser, url))
 
         return True
@@ -1228,7 +1228,7 @@ class AdveneController(object):
             name=unicode(os.path.basename(n))
             for d in config.data.path['moviepath'].split(os.pathsep):
                 if d == '_':
-                  # Get package dirname
+                    # Get package dirname
                     d=self.package.uri
                     # And convert it to a pathname (for Windows)
                     if d.startswith('file:'):
@@ -1418,7 +1418,7 @@ class AdveneController(object):
                 d=dict([ (r.findall(l) or [ ('_error', l) ])[0] for l in annotation.content.data.split('\n') ])
                 name="Unknown"
                 for n in ('name', 'title', 'content'):
-                    if d.has_key(n):
+                    if n in d:
                         name=d[n]
                         break
                 d['name']=name.replace('\n', '\\n')
@@ -1564,7 +1564,7 @@ class AdveneController(object):
 
         # Start the new one
         self.player=p()
-        if not 'record' in p.player_capabilities:
+        if 'record' not in p.player_capabilities:
             # Store the selected player if it is not a recorder.
             config.data.player['plugin']=p.player_id
         self.notify('PlayerChange', player=p)
@@ -2106,7 +2106,7 @@ class AdveneController(object):
         @param parameters: the parameters (should have a 'message' one)
         @type parameters: dict
         """
-        if parameters.has_key('message'):
+        if 'message' in parameters:
             message=context.evaluateValue(parameters['message'])
         else:
             message="No message..."
