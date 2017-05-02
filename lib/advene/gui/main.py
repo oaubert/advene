@@ -3596,7 +3596,7 @@ class AdveneGUI(object):
         t.set_wrap_mode (Gtk.WrapMode.CHAR)
 
         scroll_win = Gtk.ScrolledWindow ()
-        scroll_win.set_policy (Gtk.PoliacyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scroll_win.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroll_win.add(t)
 
         vbox.add(scroll_win)
