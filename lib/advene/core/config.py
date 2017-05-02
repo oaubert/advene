@@ -297,9 +297,8 @@ class Config(object):
             # Engine
             'tts-engine': 'auto',
             'edition-history-size': 5,
-            # popup views may be forced into a specific viewbook,
-            # instead of default popup
-            'popup-destination': 'popup',
+            # popup views may be popup or opened into a specific viewbook,
+            'popup-destination': 'east',
             'embedded': True,
             'abbreviation-mode': True,
             'completion-mode': True,
