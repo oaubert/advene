@@ -272,7 +272,7 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         widgets = widget.container.get_selected_annotation_widgets()
         if not widget in widgets:
             widgets = None
-    except AttributeError:
+    except (AttributeError, RuntimeError):
         logger.error("Cannot get_selected_annotation_widgets", exc_info=True)
         widgets=None
 
