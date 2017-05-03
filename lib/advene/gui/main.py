@@ -3807,7 +3807,7 @@ class AdveneGUI(object):
             elif config.data.preferences['save-default-workspace'] == 'ask':
                 save=dialog.message_dialog(_("Do you want to save the current workspace ?"),
                                            icon=Gtk.MessageType.QUESTION)
-            if save:
+            if save and package.title != "Export package":
                 self.workspace_save('_default_workspace')
                 default=self.controller.package.getMetaData (config.data.namespace, "default_adhoc")
                 if not default:
@@ -3863,7 +3863,7 @@ class AdveneGUI(object):
             elif config.data.preferences['save-default-workspace'] == 'ask':
                 save=dialog.message_dialog(_("Do you want to save the current workspace ?"),
                                            icon=Gtk.MessageType.QUESTION)
-            if save:
+            if save and package.title != "Export package":
                 self.workspace_save('_default_workspace')
                 default=self.controller.package.getMetaData (config.data.namespace, "default_adhoc")
                 if not default:
