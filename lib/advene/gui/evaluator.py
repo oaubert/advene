@@ -787,9 +787,10 @@ class Evaluator:
     def dump_tree(self, w, indent=0):
         """Dump a tree representation of the widget and its children.
         """
-        tree = "%s%s %s %s" % (" " * indent, w.get_name(), w.get_css_name(), repr(w))
+        tree = "%s%s %s %s\n%s%s" % (" " * indent, w.get_name(), w.get_css_name(), repr(w),
+                                     " " * indent, " ".join(".%s" % cl for cl in w.get_style_context().list_classes()))
         try:
-            tree = "\n".join((tree, "\n".join(self.dump_tree(c, indent+4) for c in w.get_children())))
+            tree = "\n\n".join((tree, "\n".join(self.dump_tree(c, indent + 8) for c in w.get_children())))
         except AttributeError:
             pass
         return tree
