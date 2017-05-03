@@ -785,7 +785,7 @@ class TimestampRepresentation(Gtk.Button):
     @ivar label: the label (timestamp) widget
     @type label: Gtk.Label
     """
-    def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None, visible_label=True, bgcolor=None, callback=None):
+    def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None, visible_label=True, callback=None):
         """Instanciate a new TimestampRepresentation.
 
         @param value: the timestamp value
@@ -800,8 +800,6 @@ class TimestampRepresentation(Gtk.Button):
         @type comment_getter: method
         @param visible_label: should the timestamp label be displayed?
         @type visible_label: boolean
-        @param bgcolor: background color
-        @type bgcolor: string
         @value callback: a callback that will be called before value modification
         @type callback: method. If it returns False, then the modification will be cancelled
         """
@@ -820,7 +818,6 @@ class TimestampRepresentation(Gtk.Button):
         # element as parameter, and adds appropriate menu items.
         self.extend_popup_menu=None
         self.highlight=False
-        self._bgcolor = None
         # Displayed text.
         self._text = '<span size="xx-small">%(timestamp)s</span>'
         self.callback = callback
@@ -835,8 +832,6 @@ class TimestampRepresentation(Gtk.Button):
             self.label.hide()
         self.add(box)
         self.box=box
-
-        self._bgcolor = bgcolor
 
         self.refresh()
 
@@ -861,21 +856,13 @@ class TimestampRepresentation(Gtk.Button):
                                                                         method=self.snapshot_update_cb))
         self.connect('destroy', self.remove_rules)
 
-    def get_bgcolor(self):
-        return self._bgcolor
-    def set_bgcolor(self, color):
-        # FIXME: replace by CSS class, but cannot do for every color
-        #if color is None:
-        #    color='black'
-        #if color != self._bgcolor:
-        #    style = get_color_style(self, color, 'white')
-        #    self.set_style(style)
-        #    self.box.set_style(style)
-        #    self.image.set_style(style)
-        #    self.label.set_style(style)
-        #    self._bgcolor = color
-        pass
-    bgcolor = property(get_bgcolor, set_bgcolor)
+    def add_class(self, cl):
+        for w in (self, self.box, self.image):
+            w.get_style_context().add_class(cl)
+
+    def remove_class(self, cl):
+        for w in (self, self.box, self.image):
+            w.get_style_context().remove_class(cl)
 
     def set_width(self, w):
         self._width = w

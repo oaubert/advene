@@ -23,3 +23,9 @@
     padding: 0;
 }
 
+.frameselector_before {
+    background-color: #fcc;
+}
+.frameselector_after {
+    background-color: #000;
+}

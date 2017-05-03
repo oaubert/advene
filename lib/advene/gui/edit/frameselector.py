@@ -96,18 +96,18 @@ class FrameSelector(object):
             f.right_border.set_color(self.black_color)
 
             if t < self.timestamp:
-                f.get_style_context().remove_class('advene_next_frame')
-                f.get_style_context().add_class('advene_previous_frame')
+                f.remove_class('frameselector_after')
+                f.add_class('frameselector_before')
             else:
                 if matching_index < 0:
                     matching_index = i
 
                 if t == self.timestamp and self.border_mode == 'right':
-                    f.get_style_context().remove_class('advene_next_frame')
-                    f.get_style_context().add_class('advene_previous_frame')
+                    f.remove_class('frameselector_after')
+                    f.add_class('frameselector_before')
                 else:
-                    f.get_style_context().remove_class('advene_previous_frame')
-                    f.get_style_context().add_class('advene_next_frame')
+                    f.remove_class('frameselector_before')
+                    f.add_class('frameselector_after')
 
             t += self.frame_length
 
@@ -289,7 +289,6 @@ class FrameSelector(object):
         eb.add(ar)
         hb.pack_start(eb, False, True, 0)
 
-        hb.get_style_context().add_class('black_on_black')
         hb.connect('scroll-event', self.handle_scroll_event)
         hb.connect('key-press-event', self.handle_key_press)
         vb.add(hb)
