@@ -116,7 +116,8 @@ class NotifySink(GstBase.BaseSink):
 
 __gstelementfactory__ = ("notifysink", Gst.Rank.NONE, NotifySink)
 def plugin_init(plugin, userarg):
-    GObject.type_register(NotifySink)
+    NotifySinkType = GObject.type_register(NotifySink)
+    Gst.Element.register(plugin, 'notifysink', 0, NotifySinkType)
     return True
 
 version = Gst.version()
