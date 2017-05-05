@@ -373,12 +373,17 @@ class TimeLine(AdhocView):
         """
         width, height = layout.get_size()
         i=config.data.preferences['timeline']['interline-height']
-        #drawable=layout.get_bin_window()
-        #gc=drawable.new_gc(foreground=self.colors['background'], line_style=Gdk.LINE_ON_OFF_DASH)
+        offset = layout.get_vadjustment().get_value()
+        context.set_source_rgb(.3, .3, .3)
+        context.set_line_width(1)
+        context.set_dash( (1, 3) )
         for p in sorted(self.layer_position.itervalues()):
-            # Draw a different background
-            context.move_to(0, p - i / 2) 
-            context.line_to(width, p - i / 2)
+            y = p - offset - i / 2
+            if y >= 0:
+                context.move_to(0, y)
+                context.line_to(width, y)
+        context.stroke()
+        context.set_dash([])
         return False
 
     def update_relation_lines(self):
