@@ -13,44 +13,46 @@ You will need the following python packages (the package names are from
 Debian, they may slightly vary on other distributions) :
 
 python >= 2.7
-python-gtk2 (>=2.24)
-python-cherrypy3 (>=3.0.0) [for convenience, a copy of cherrypy may be included in
-this Advene distribution]
+python-gi
+gir1.2-gstreamer-1.0
+python-gi-cairo
+gir1.2-gtk-3.0 (>=3.4)
+gir1.2-webkit-3.0
+gir1.2-goocanvas-2.0
+gir1.2-rsvg-2.0
+python-cherrypy3 (>=3.0.0) [for convenience, a copy of cherrypy may be included in this Advene distribution]
 python-simpletal (>=3.12) [for convenience, a copy of simpletal may be
-included in this Advene distribution] 
+included in this Advene distribution]
 
-For the gstreamer plugin:
-python-gst0.10
-gstreamer0.10-plugins-base
-gstreamer0.10-x
-+ other gstreamer packages needed to decode various formats
-(esp. gstreamer0.10-plugins-good and gstreamer0.10-plugins-ugly).
-
-Optionaly:
-python-opencv (for some feature-extraction filters)
+For gstreamer, it is useful to also install the gstreamer packages
+needed to decode various formats (esp. gstreamer1.0-plugins-bad and
+gstreamer1.0-plugins-ugly).
 
 Note that all these dependencies are already available in Debian and
-in standard installations of the Ubuntu Feisty Fawn (and later)
-distribution.
+in standard installations of Ubuntu.
+
+When running on virtual machines (parallels, virtualbox...) : you must
+select the X11 video output in Edit/Preferences/Video Player.
 
 ** Windows version
 
 If you want to run Advene from sources on win32, you should install in this order (note the version numbers) :
 
-Python  >=  v. 2.7 : http://python.org/
-
-Gstreamer SDK from http://gstreamer.com/ (choosing complete install to
-get python bindings). It will install both Gstreamer and gtk (with
-python bindings).
+Python2  >=  v. 2.7 : http://python.org/
 
 win32process from http://pywin32.sf.net/
-gtk from http://gtk.org/
 
-Python bindings for gtk/gstreamer from
-https://wiki.gnome.org/action/show/Projects/PyGObject
+Python bindings for gtk/gstreamer and underlying libs from
+https://wiki.gnome.org/action/show/Projects/PyGObject enabling support for
+ - gtk
+ - cairo
+ - gstreamer
+ - rsvg
+ - webkit
+ - goocanvas
 
-Optionally, 
-python-opencv
+Optionally,
+
 CherryPy: http://download.cherrypy.org/cherrypy/ [for
 convenience, a copy of cherrypy is included in this Advene
 distribution]
@@ -60,28 +62,18 @@ http://www.owlfish.com/software/simpleTAL/download.html [for
 convenience, a copy of simpletal is included in this Advene
 distribution]
 
-
 ** Mac OS X version
 
-From macports (http://www.macports.org/), install :
-
-    * python26 or later [Note: after its install, make sure that
-      /opt/local/bin/python exists, and that your path begins with
-      /opt/local/bin. Else, the installation of the other packages
-      could use the /usr/bin/python version]
-    * py26-gtk (>= 2.12)
-    * py26-goocanvas
-    * librsvg (optional)
-    * py26-pyobjc2 (optional)
-    * py26-gst-python
-    * gst-plugins-base
-    * gst-plugins-good gst-plugins-bad gst-plugins-ugly
-    * gst-ffmpeg
+The new Advene code has not yet been tested in Mac OS X environement,
+for lack of dedicated hardware. You can consider a donation :-) or try
+yourself to install dependencies (python-gi, gtk, gstreamer) using the
+linux install information.
 
 * Testing
 
 You can run the script ./bin/advene directly from the source
-directory. It will adapt its paths to this location.
+directory. It will detect that it is running from sources and adapt
+its paths to this location.
 
 In a first step, you can try the Advene application without movie player
 support by using the "-pdummy" parameter :
@@ -109,7 +101,7 @@ can be used directly from its sources directory.
 * Documentation
 
 An (incomplete) user guide is in the public Advene wiki, feel free to contribute:
-http://liris.cnrs.fr/advene/wiki/index.php/Main_Page
+http://advene.org/wiki/index.php/Main_Page
 
 A summarized list of changes across versions is available in the
 CHANGES.txt file.
