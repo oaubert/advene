@@ -5,7 +5,7 @@ The Advene project (Annotate Digital Video, Exchange on the NEt) aims
 at providing a model and a format to share annotations about digital
 video documents (movies, courses, conferences...), as well as tools to
 edit and visualize the hypervideos generated from both the annotations
-and the audiovisual documents.  
+and the audiovisual documents.
 
 With the Advene software, teachers, moviegoers, etc. can exchange
 multimedia comments and analyses about video documents. The project
@@ -58,14 +58,14 @@ Basic use
 
 Sample packages are provided on the Advene website:
 
- http://liris.cnrs.fr/advene/examples.html
+ http://advene.org/examples.html
 
 Both the Nosferatu analysis and the Ted Nelson speech analysis can be
 used as tutorials to go through the Advene features.
 
 A user manual is also available at:
 
-http://liris.cnrs.fr/advene/wiki/index.php/Main_Page
+http://advene.org/wiki/index.php/Main_Page
 
 Copyright Information
 =====================
