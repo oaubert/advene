@@ -844,15 +844,16 @@ def title2content(new_title, original_content, representation):
 
     @return the new content or None if the content could not be updated.
     """
+    new_title = unicode(new_title, 'utf-8')
     r = None
     if representation is None or empty_representation.match(representation):
-        r = unicode(new_title)
+        r = new_title
     else:
         m = parsed_representation.match(representation)
         if m:
             # We have a simple representation (here/content/parsed/name)
             # so we can update the name field.
-            new_title = unicode(new_title).replace('\n', '\\n')
+            new_title = new_title.replace('\n', '\\n')
             name=m.group(1)
             reg = re.compile('^' + name + '=(.*?)$', re.MULTILINE)
             if reg.search(original_content):
