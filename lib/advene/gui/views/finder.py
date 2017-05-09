@@ -918,7 +918,7 @@ class Finder(AdhocView):
 
     def autoscroll_end(self):
         adj=self.sw.get_hadjustment()
-        adj.value = adj.get_upper() - adj.get_page_size()
+        adj.set_value(adj.get_upper() - adj.get_page_size())
         return True
 
     def scroll_event(self, widget=None, event=None):
