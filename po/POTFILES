@@ -68,6 +68,7 @@
 ../lib/advene/plugins/fcp.py
 ../lib/advene/plugins/tracebuilder.py
 ../lib/advene/plugins/goodshotdetector.py
+../lib/advene/plugins/webannotation_import.py
 ../lib/advene/plugins/montagerenderer.py
 ../lib/advene/plugins/transcriber.py
 ../lib/advene/plugins/tts.py
