@@ -87,7 +87,7 @@ class UndoHistory:
         """
         d={}
         if hasattr(el, 'content'):
-            d['content']=str(el.content.data)
+            d['content']=unicode(el.content.data)
             d['mimetype']=el.content.mimetype
         if hasattr(el, 'fragment'):
             d['begin']=long(el.fragment.begin)
