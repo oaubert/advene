@@ -300,7 +300,7 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
     elif targetType == typ['uri-list']:
 
         if widgets:
-            selection.set(selection.get_target(), 8, "\n".join( controller.build_context(here=w.annotation.uri).evaluateValue('here/absolute_url') for w in widgets ).encode('utf8'))
+            selection.set(selection.get_target(), 8, "\n".join( controller.build_context(here=w.annotation).evaluateValue('here/absolute_url') for w in widgets ).encode('utf8'))
         else:
             try:
                 uri=controller.build_context(here=el).evaluateValue('here/absolute_url')
