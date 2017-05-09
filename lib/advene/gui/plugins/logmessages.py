@@ -41,7 +41,7 @@ class LogMessages(AdhocView):
 
     def autoscroll(self, *p):
         # Autoscroll
-        self.textview.scroll_mark_onscreen(self.controller.gui.logbuffer.get_mark("insert"))
+        self.textview.scroll_mark_onscreen(self.textview.get_buffer().get_insert())
         return True
 
     def reparent_done(self):
@@ -58,9 +58,9 @@ class LogMessages(AdhocView):
         self.safe_connect(self.controller.gui.logbuffer, "changed", self.autoscroll)
 
         # Scroll for initial display
-        def initial_display(t):
+        def initial_display(*p):
             self.autoscroll()
             return False
-        self.textview.connect('map', initial_display)
+        self.textview.connect('size-allocate', initial_display)
 
         return sw
