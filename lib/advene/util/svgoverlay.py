@@ -2,7 +2,7 @@
 
 """Gstreamer SVGOverlay element
 
-Copyright 2009-2012 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+Copyright 2009-2017 Olivier Aubert <contact@olivieraubert.net>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -39,7 +39,7 @@ except ImportError:
 class SVGOverlay(gst.Element):
     __gtype_name__ = 'SVGOverlay'
     __gstdetails__ = ("SVG overlay", "Filter/Editor/Video", "Overlays SVG content over the video",
-                      "Olivier Aubert <olivier.aubert@liris.cnrs.fr>")
+                      "Olivier Aubert <contact@olivieraubert.net>")
 
     __gproperties__ = {
         'data': ( gobject.TYPE_STRING, 'data', 'SVG data to overlay', None, gobject.PARAM_WRITABLE ),

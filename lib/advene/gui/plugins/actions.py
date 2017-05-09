@@ -114,7 +114,7 @@ def register(controller=None):
                     ('string:'+_('See the annotation'), _('See the annotation')),
                     ),
                         'url': (
-                    ('string:http://liris.cnrs.fr', _("The Advene website")),
+                    ('string:http://advene.org/', _("The Advene website")),
                     ('annotation/absolute_url', _("The annotation URL")),
                         ),
                         'duration': (
@@ -424,7 +424,7 @@ class DefaultGUIActions:
         message=unicode(message).replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
-        url=self.parse_parameter(context, parameters, 'url', 'string:http://liris.cnrs.fr/advene/')
+        url=self.parse_parameter(context, parameters, 'url', 'string:http://advene.org/')
         duration=self.parse_parameter(context, parameters, 'duration', None)
         if duration == "" or duration == 0:
             duration = None

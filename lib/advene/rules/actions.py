@@ -224,7 +224,7 @@ def register(controller=None):
             method=ac.OpenURL,
             description=_("Open a URL in the web browser"),
             parameters={'url': _("URL")},
-            defaults={'url': 'string:http://liris.cnrs.fr/advene/'},
+            defaults={'url': 'string:http://advene.org/'},
             category='external',
             )
                                )

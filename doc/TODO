@@ -4,6 +4,7 @@
 
 * finder: handle DND of annotation type annotation type and other types
 * finder: update schemas content list on annotation type creation
+* finder: does not work correctly with empty packages (cf exporter)
 * Model: check dc: and xlink: prefixes in _impl.py code that uses uris for namespaces??
 
 * Gstreamer rendering: https://github.com/PhotoFilmStrip/PFS/blob/master/photofilmstrip/core/renderer/GStreamerRenderer.py

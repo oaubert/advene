@@ -244,7 +244,7 @@ Aborting.""" % config.data.path[d]
                                   Gtk.MessageType.ERROR,
                                   Gtk.ButtonsType.OK,
                                   _("An error occurred."))
-            d.format_secondary_text(_("You can inform the Advene developers by sending the file\n %s\n to advene@liris.cnrs.fr, along with a description of how the bug occurred.") % logfile)
+            d.format_secondary_text(_("You can inform the Advene developers by sending the file\n %s\n to support@advene.org, along with a description of how the bug occurred.") % logfile)
 
             def q(*p):
                 Gtk.main_quit()

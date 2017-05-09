@@ -3,10 +3,10 @@ Name: advene-bin
 Version: 0.21
 Release: 1
 License: GPL
-Packager: Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+Packager: Olivier Aubert <contact@olivieraubert.net>
 Group: Video
-URL: http://liris.cnrs.fr/advene/
-Source: http://liris.cnrs.fr/advene/download/
+URL: http://advene.org/
+Source: http://advene.org/download/
 Buildroot: FIXME
 
 %define _rpmdir ../

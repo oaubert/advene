@@ -405,4 +405,4 @@ class TestPlugin (ContentPlugin.withType ('text/*')):
     def hello(self):
         return "TEST (%s)" % self.__content.data
 
-ContentPlugin.register (TestPlugin, 'http://advene.liris.cnrs.fr/plugins/test')
+ContentPlugin.register (TestPlugin, 'http://advene.org/plugins/test')
