@@ -305,7 +305,7 @@ class AdveneGUI(object):
                     ( _("Get support"), self.on_support1_activate, "" ),
                     ( _("Check for updates"), self.check_for_update, "" ),
                     ( _("Display shortcuts"), self.on_helpshortcuts_activate, "" ),
-                    ( _("Display logfile"), self.on_advene_log_display, _("Display log file")),
+                    ( _("Display logfile"), self.on_advene_log_display, _("Display log messages")),
                     ( _("Open logfile folder"), self.on_advene_log_folder_display, _("Display logfile folder. It can help when sending the advene.log file by e-mail.")),
                     ( _("_About"), self.on_about1_activate, "" ),
                     ), "" ),
@@ -429,8 +429,7 @@ class AdveneGUI(object):
 
         # Log messages button
         def display_log_messages(v):
-            v=self.open_adhoc_view('logmessages', destination='south')
-            v.autoscroll()
+            self.open_adhoc_view('logmessages', destination='south')
             return True
         b=get_pixmap_button('logmessages.png', display_log_messages)
         b.set_tooltip_text(_("Display application log messages"))
@@ -4557,9 +4556,7 @@ class AdveneGUI(object):
         return True
 
     def on_advene_log_display(self, button=None, data=None):
-        self.display_textfile(config.data.advenefile('advene.log', 'settings'),
-                              title=_("Advene log"),
-                              viewname='advenelogview')
+        self.open_adhoc_view('logmessages', destination='south')
         return True
 
     def on_advene_log_folder_display(self, button=None, data=None):
