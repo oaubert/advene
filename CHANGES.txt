@@ -1,24 +1,35 @@
+advene (1.2) unstable; urgency=medium
+
+  * Source-only release. Various bug fixes. The official source repository
+    is now http://github.com/oaubert/advene/
+
+    This should be the last release of the 1.* series (based on gtk2 and
+    gstreamer 0.10). Development is now done on the new version
+    (based on gtk3/gstreamer1).
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Mon, 22 May 2017 16:08:41 +0200
+
 advene (1.1) unstable; urgency=medium
 
   * Source-only release. Various bug fixes. The official source repository
     is now http://github.com/oaubert/advene/
 
   * Compressed (gzipped) text files can be directly imported.
-  
+
   * Option to specify time unit (s or ms) in text import.
-  
+
   * SVG editor
-  
+
     * can edit paths (polylines)
-    
+
     * slider to change background image
-  
+
     * slider to change opacity value
 
   * Export filters
-  
+
     * TurTLe export filter
-  
+
     * Metadataplayer export filter
 
  -- Olivier Aubert <contact@olivieraubert.net>  Wed, 09 Jul 2014 17:13:48 +0200
@@ -30,7 +41,7 @@ advene (1.0) unstable; urgency=low
     enters a maintenance state, while development focuses on the next
     major version (new data model, interface revamp to handle simultaneous
     analysis of multiple video files...).
-  
+
   * See the following 0.47 notes for more details about changes from
     previous release.
 
