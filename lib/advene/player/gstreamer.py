@@ -18,9 +18,7 @@
 #
 """Gstreamer player interface.
 
-Based on gst >= 0.10 API.
-
-See http://pygstdocs.berlios.de/pygst-reference/index.html for API
+Based on gst >= 1.0 API.
 
 Use appsink to get data out of a pipeline:
 https://thomas.apestaart.org/thomas/trac/browser/tests/gst/crc/crc.py
@@ -33,10 +31,6 @@ from advene.util.helper import format_time
 import os
 import time
 
-import gobject
-gobject.threads_init()
-
-import gtk
 import sys
 
 if config.data.os == 'win32':
@@ -55,29 +49,29 @@ if config.data.os == 'win32':
         os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) ).encode(fsenc)
 
 try:
-    import pygst
-    pygst.require('0.10')
-    import gst
+    import gi
+    gi.require_version('Gst', '1.0')
+    gi.require_version('GstVideo', '1.0')
+    from gi.repository import GObject, Gst
+    from gi.repository import GstVideo
+    if config.data.os == 'linux':
+        from gi.repository import GdkX11
+    from gi.repository import Gdk
+    from gi.repository import Gtk
     from advene.util.snapshotter import Snapshotter
-    svgelement = None
-    # First try rsvgoverlay
-    if gst.element_factory_find('rsvgoverlay'):
-        svgelement = 'rsvgoverlay'
-    else:
-        # Not compiled. Try to fallback on the python version.
-        try:
-            import advene.util.svgoverlay
-            svgelement = 'pysvgoverlay'
-        except ImportError:
-            print "SVG overlay support not present"
-    print "SVG: Using %s element" % (svgelement or "None")
+    svgelement = 'rsvgoverlay'
+    GObject.threads_init()
+    Gst.init(None)
+    if True or not hasattr(Gst.Structure, '__getitem__'):
+        # Monkey patch __getitem__
+        Gst.Structure.__getitem__ = Gst.Structure.get_value
 except ImportError:
-    gst=None
+    Gst=None
 
 name="GStreamer video player"
 
 def register(controller):
-    if gst is None:
+    if Gst is None:
         return False
     controller.register_player(Player)
     return True
@@ -216,13 +210,13 @@ class Player:
         if config.data.os == 'win32':
             sink='directdrawsink'
 
-        self.player = gst.element_factory_make("playbin", "player")
+        self.player = Gst.ElementFactory.make("playbin", "player")
 
-        self.video_sink = gst.Bin()
+        self.video_sink = Gst.Bin()
 
         # TextOverlay does not seem to be present in win32 installer. Do without it.
         try:
-            self.captioner=gst.element_factory_make('textoverlay', 'captioner')
+            self.captioner=Gst.ElementFactory.make('textoverlay', 'captioner')
             # FIXME: move to config.data
             self.captioner.props.font_desc='Sans 24'
             #self.caption.props.text="Foobar"
@@ -232,42 +226,41 @@ class Player:
         self.imageoverlay=None
         if config.data.player['svg'] and svgelement:
             try:
-                self.imageoverlay=gst.element_factory_make(svgelement, 'overlay')
+                self.imageoverlay=Gst.ElementFactory.make(svgelement, 'overlay')
                 self.imageoverlay.props.fit_to_frame = True
             except:
                 pass
 
-        self.imagesink = gst.element_factory_make(sink, 'sink')
+        self.imagesink = Gst.ElementFactory.make(sink, 'sink')
 
         elements=[]
         if self.captioner is not None:
             elements.append(self.captioner)
         if self.imageoverlay is not None:
-            elements.append(gst.element_factory_make('queue'))
-            elements.append(gst.element_factory_make('ffmpegcolorspace'))
+            elements.append(Gst.ElementFactory.make('queue', None))
+            elements.append(Gst.ElementFactory.make('videoconvert', None))
             elements.append(self.imageoverlay)
-            # Note: do not remove the (seemingly superfluous)
-            # ffmpegcolorspace here, else it blocks the pipeline for
-            # some unknown reason.
-            elements.append(gst.element_factory_make('ffmpegcolorspace'))
+            elements.append(Gst.ElementFactory.make('videoconvert', None))
 
         if sink == 'xvimagesink':
             # Imagesink accepts both rgb/yuv and is able to do scaling itself.
             elements.append( self.imagesink )
         else:
-            csp=gst.element_factory_make('ffmpegcolorspace')
+            csp=Gst.ElementFactory.make('videoconvert', None)
             elements.extend( (csp, self.imagesink) )
 
-        self.video_sink.add(*elements)
+        for el in elements:
+            self.video_sink.add(el)
         if len(elements) >= 2:
-            gst.element_link_many(*elements)
+            for src, dst in zip(elements, elements[1:]):
+                src.link(dst)
 
         self.log("gstreamer: using " + sink)
 
         # Note: it is crucial to make ghostpad an attribute, so that
         # it is not garbage-collected at the end of the build_pipeline
         # method.
-        self._video_ghostpad = gst.GhostPad('sink', elements[0].get_pad('video_sink') or elements[0].get_pad('sink'))
+        self._video_ghostpad = Gst.GhostPad.new('sink', elements[0].get_static_pad('video_sink') or elements[0].get_static_pad('sink'))
         # Idem for elements
         self._video_elements = elements
 
@@ -275,20 +268,24 @@ class Player:
 
         self.player.props.video_sink=self.video_sink
 
-        if gst.element_factory_find('scaletempo'):
+        scaletempo = Gst.ElementFactory.make('scaletempo', None)
+        if scaletempo:
             # The scaletempo element is present. Use it.
-            self.audio_sink = gst.Bin()
+            self.audio_sink = Gst.Bin()
             elements = [
-                gst.element_factory_make('scaletempo'),
-                gst.element_factory_make('autoaudiosink'),
+                scaletempo,
+                Gst.ElementFactory.make('autoaudiosink', None),
                 ]
-            self.audio_sink.add(*elements)
+            for el in elements:
+                self.audio_sink.add(el)
             if len(elements) >= 2:
-                gst.element_link_many(*elements)
+                for src, dst in zip(elements, elements[1:]):
+                    src.link(dst)
+
             self.player.props.audio_sink = self.audio_sink
             # Keep a ref. on elements
             self._audio_elements = elements
-            self._audio_ghostpad = gst.GhostPad('sink', elements[0].get_pad('audio_sink') or elements[0].get_pad('sink'))
+            self._audio_ghostpad = Gst.GhostPad.new('sink', elements[0].get_static_pad('audio_sink') or elements[0].get_static_pad('sink'))
             self.audio_sink.add_pad(self._audio_ghostpad)
 
 
@@ -311,10 +308,10 @@ class Player:
         return long(v)
 
     def current_status(self):
-        st=self.player.get_state()[1]
-        if st == gst.STATE_PLAYING:
+        st = self.player.get_state(100)[1]
+        if st == Gst.State.PLAYING:
             return self.PlayingStatus
-        elif st == gst.STATE_PAUSED:
+        elif st == Gst.State.PAUSED:
             return self.PauseStatus
         else:
             return self.UndefinedStatus
@@ -323,11 +320,12 @@ class Player:
         """Returns the current position in ms.
         """
         try:
-            pos, format = self.player.query_position(gst.FORMAT_TIME)
-        except:
+            pos = self.player.query_position(Gst.Format.TIME)[1]
+        except Exception, e:
+            print "Current position exception", e
             position = 0
         else:
-            position = pos * 1.0 / gst.MSECOND
+            position = pos * 1.0 / Gst.MSECOND
         return position
 
     def dvd_uri(self, title=None, chapter=None):
@@ -336,11 +334,11 @@ class Player:
         return "dvd://"
 
     def check_uri(self):
-        uri=self.player.get_property('uri')
-        if uri and gst.uri_is_valid(uri):
+        uri = self.player.get_property('current-uri') or self.player.get_property('uri')
+        if uri and Gst.uri_is_valid(uri):
             return True
         else:
-            self.log(u"Invalid URI" + unicode(uri))
+            self.log(u"Invalid URI " + unicode(uri))
             return False
 
     def get_media_position(self, origin, key):
@@ -350,13 +348,9 @@ class Player:
         if not self.check_uri():
             return
         if self.current_status() == self.UndefinedStatus:
-            self.player.set_state(gst.STATE_PAUSED)
-        p = long(self.position2value(position) * gst.MSECOND)
-        event = gst.event_new_seek(self.rate, gst.FORMAT_TIME,
-                                   gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
-                                   gst.SEEK_TYPE_SET, p,
-                                   gst.SEEK_TYPE_NONE, 0)
-        res = self.player.send_event(event)
+            self.player.set_state(Gst.State.PAUSED)
+        p = long(self.position2value(position) * Gst.MSECOND)
+        res = self.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE, p)
         if not res:
             raise InternalException
 
@@ -365,15 +359,15 @@ class Player:
             return
         if position != 0:
             self.set_media_position(position)
-        self.player.set_state(gst.STATE_PLAYING)
+        self.player.set_state(Gst.State.PLAYING)
 
     def pause(self, position=0):
         if not self.check_uri():
             return
         if self.status == self.PlayingStatus:
-            self.player.set_state(gst.STATE_PAUSED)
+            self.player.set_state(Gst.State.PAUSED)
         else:
-            self.player.set_state(gst.STATE_PLAYING)
+            self.player.set_state(Gst.State.PLAYING)
 
     def resume(self, position=0):
         self.pause(position)
@@ -381,10 +375,10 @@ class Player:
     def stop(self, position=0):
         if not self.check_uri():
             return
-        self.player.set_state(gst.STATE_READY)
+        self.player.set_state(Gst.State.READY)
 
     def exit(self):
-        self.player.set_state(gst.STATE_NULL)
+        self.player.set_state(Gst.State.NULL)
 
     def playlist_add_item(self, item):
         self.videofile=item
@@ -411,16 +405,9 @@ class Player:
         else:
             return [ ]
 
-    def fullres_snapshot_taken(self, buffer):
+    def fullres_snapshot_taken(self, data):
         if self.fullres_snapshot_callback:
-            s=Snapshot( { 'data': buffer.data,
-                          'type': 'PNG',
-                          'date': buffer.timestamp / gst.MSECOND,
-                          # Hardcoded size values. They are not used
-                          # by the application, since they are
-                          # encoded in the PNG file anyway.
-                          'width': 160,
-                          'height': 100 } )
+            s=Snapshot(data)
             self.fullres_snapshot_callback(snapshot=s)
             self.fullres_snapshot_callback = None
 
@@ -442,16 +429,9 @@ class Player:
                 self.fullres_snapshotter.start()
         self.fullres_snapshotter.enqueue(position)
 
-    def snapshot_taken(self, buffer):
+    def snapshot_taken(self, data):
         if self.snapshot_notify:
-            s=Snapshot( { 'data': buffer.data,
-                          'type': 'PNG',
-                          'date': buffer.timestamp / gst.MSECOND,
-                          # Hardcoded size values. They are not used
-                          # by the application, since they are
-                          # encoded in the PNG file anyway.
-                          'width': 160,
-                          'height': 100 } )
+            s=Snapshot(data)
             self.snapshot_notify(s)
 
     def async_snapshot(self, position):
@@ -463,10 +443,10 @@ class Player:
             # value minus 50 and 20ms (the async snapshotter goes to the
             # specified position then takes the video buffer which may then
             # be later) and its value aligned to a frame boundary
-            for pos in sorted((t - 50,
-                               t - 20,
-                               t / config.data.preferences['default-fps'] * config.data.preferences['default-fps'],
-                               t)):
+            for pos in sorted((max(20, t - 50),
+                               max(20, t - 20),
+                               max(20, t / config.data.preferences['default-fps'] * config.data.preferences['default-fps']),
+                               max(20, t))):
                 self.snapshotter.enqueue(pos)
 
     def snapshot(self, position):
@@ -508,11 +488,11 @@ class Player:
             s.url=self.videofile
 
         try:
-            dur, format = self.player.query_duration(gst.FORMAT_TIME)
+            dur = self.player.query_duration(Gst.Format.TIME)[1]
         except:
             duration = 0
         else:
-            duration = dur * 1.0 / gst.MSECOND
+            duration = dur * 1.0 / Gst.MSECOND
 
         s.length=duration
         s.position=self.current_position()
@@ -647,9 +627,9 @@ class Player:
         if xid:
             self.log("Reparent " + hex(xid))
 
-            gtk.gdk.display_get_default().sync()
+            Gdk.Display().get_default().sync()
 
-            self.imagesink.set_xwindow_id(xid)
+            self.imagesink.set_window_handle(xid)
         self.imagesink.set_property('force-aspect-ratio', True)
         self.imagesink.expose()
         #gtk.gdk.threads_leave()
@@ -662,12 +642,14 @@ class Player:
         return True
 
     def set_widget(self, widget):
+        # For win32, see
+        # http://stackoverflow.com/questions/25823541/get-the-window-handle-in-pygi
         self.set_visual( widget.get_id() )
         #self.set_visual( None )
 
     def restart_player(self):
         # FIXME: destroy the previous player
-        self.player.set_state(gst.STATE_READY)
+        self.player.set_state(Gst.State.READY)
         # Rebuild the pipeline
         self.build_pipeline()
         if self.videofile is not None:
@@ -676,9 +658,10 @@ class Player:
         return True
 
     def on_sync_message(self, bus, message):
-        if message.structure is None:
+        s = message.get_structure() 
+        if s is None:
             return True
-        if message.structure.get_name() == 'prepare-xwindow-id':
+        if s.get_name() == 'prepare-window-handle':
             self.reparent(self.xid)
         return True
 
@@ -702,14 +685,14 @@ class Player:
             return
         self.rate = rate
         try:
-            p = self.player.query_position(gst.FORMAT_TIME)[0]
-        except gst.QueryError:
+            p = self.player.query_position(Gst.Format.TIME)[1]
+        except Gst.QueryError:
             self.log("Error in set_rate (query position)")
             return
-        event = gst.event_new_seek(self.rate, gst.FORMAT_TIME,
-                                   gst.SEEK_FLAG_FLUSH,
-                                   gst.SEEK_TYPE_SET, long(p),
-                                   gst.SEEK_TYPE_NONE, 0)
+        event = Gst.Event.new_seek(self.rate, Gst.Format.TIME,
+                                   Gst.SeekFlags.FLUSH,
+                                   Gst.SeekType.SET, long(p),
+                                   Gst.SeekType.NONE, 0)
         if event:
             res = self.player.send_event(event)
             if not res:
@@ -733,42 +716,40 @@ class Player:
     def fullscreen(self, connect=None):
 
         def keypress(widget, event):
-            if event.keyval == gtk.keysyms.Escape:
+            if event.keyval == Gdk.KEY_Escape:
                 self.unfullscreen()
                 return True
             return False
 
         def buttonpress(widget, event):
-            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
                 self.unfullscreen()
                 return True
             return False
 
         if self.fullscreen_window is None:
-            self.fullscreen_window=gtk.Window()
-            self.fullscreen_window.add_events(gtk.gdk.BUTTON_PRESS_MASK |
-                                              gtk.gdk.BUTTON_RELEASE_MASK |
-                                              gtk.gdk.KEY_PRESS_MASK |
-                                              gtk.gdk.KEY_RELEASE_MASK |
-                                              gtk.gdk.SCROLL_MASK)
+            self.fullscreen_window=Gtk.Window()
+            self.fullscreen_window.set_name("fullscreen_player")
+            self.fullscreen_window.add_events(Gdk.EventMask.BUTTON_PRESS_MASK |
+                                              Gdk.EventMask.BUTTON_RELEASE_MASK |
+                                              Gdk.EventMask.KEY_PRESS_MASK |
+                                              Gdk.EventMask.KEY_RELEASE_MASK |
+                                              Gdk.EventMask.SCROLL_MASK)
             self.fullscreen_window.connect('key-press-event', keypress)
             self.fullscreen_window.connect('button-press-event', buttonpress)
             self.fullscreen_window.connect('destroy', self.unfullscreen)
             if connect is not None:
                 connect(self.fullscreen_window)
 
-            style=self.fullscreen_window.get_style().copy()
-            black=gtk.gdk.color_parse('black')
-            for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                          gtk.STATE_PRELIGHT):
-                style.bg[state]=black
-                style.base[state]=black
-            self.fullscreen_window.set_style(style)
+            # Use black background
+            css_provider = Gtk.CssProvider()
+            css_provider.load_from_data("#fullscreen_player { color:#fff; background-color: #000; }")
+            context = Gtk.StyleContext()
+            context.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         if config.data.os == 'darwin':
             # Get geometry of the first monitor
-            r = gtk.gdk.screen_get_default().get_monitor_geometry(0)
+            r = Gdk.screen_get_default().get_monitor_geometry(0)
             self.fullscreen_window.set_decorated(False)
             self.fullscreen_window.set_size_request(r.width, r.height)
             #self.fullscreen_window.move(r.x, r.y)
@@ -776,21 +757,21 @@ class Player:
             self.fullscreen_window.show()
         else:
             self.fullscreen_window.show()
-            self.fullscreen_window.window.fullscreen()
+            self.fullscreen_window.get_window().fullscreen()
 
         self.fullscreen_window.grab_focus()
 
         if config.data.os == 'win32':
-            self.reparent(self.fullscreen_window.window.handle)
+            self.reparent(self.fullscreen_window.get_window().get_handle())
         else:
-            self.reparent(self.fullscreen_window.window.xid)
+            self.reparent(self.fullscreen_window.get_window().get_xid())
 
     def unfullscreen(self, *p):
         self.reparent(self.xid)
         if not self.overlay.data and self.imageoverlay:
             # Reset imageoverlay data in any case
             self.imageoverlay.props.data = None
-        if self.fullscreen_window.window:
+        if self.fullscreen_window.get_window():
             self.fullscreen_window.hide()
         else:
             # It has been destroyed
@@ -821,7 +802,7 @@ class Player:
         indentstr = depth * 8 * ' '
 
         # print element path and factory
-        path = e.get_path_string() + (isinstance(e, gst.Bin) and '/' or '')
+        path = e.get_path_string() + (isinstance(e, Gst.Bin) and '/' or '')
         factory = e.get_factory()
         if factory is not None:
             ret.append( '%s%s (%s)' % (indentstr, path, factory.get_name()) )
@@ -833,8 +814,8 @@ class Player:
             name = p.get_name()
 
             # negotiated capabilities
-            caps = p.get_negotiated_caps()
-            if caps: capsname = caps[0].get_name()
+            caps = p.get_current_caps()
+            if caps: capsname = caps.get_structure(0).get_name()
             elif showcaps: capsname = '; '.join(s.to_string() for s in set(p.get_caps()))
             else: capsname = None
 
@@ -844,7 +825,7 @@ class Player:
             if p.is_blocked(): flags.append('BLOCKED')
 
             # direction
-            direc = (p.get_direction() is gst.PAD_SRC) and "=>" or "<="
+            direc = (p.get_direction() is Gst.PadDirection.SRC) and "=>" or "<="
 
             # peer
             peer = p.get_peer()
@@ -852,7 +833,7 @@ class Player:
             else: peerpath = None
 
             # ghost target
-            if isinstance(p, gst.GhostPad):
+            if isinstance(p, Gst.GhostPad):
                 target = p.get_target()
                 if target: ghostpath = target.get_path_string()
                 else: ghostpath = None
@@ -868,7 +849,7 @@ class Player:
 
             #if peerpath and peerpath.find('proxy')!=-1: print peer
             ret.append( ''.join(line) )
-        if recurse and isinstance(e, gst.Bin):
+        if recurse and isinstance(e, Gst.Bin):
             ret.extend( self.dump_bin(e, depth+1, recurse) )
         return ret
 

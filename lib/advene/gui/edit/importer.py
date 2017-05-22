@@ -20,8 +20,9 @@
 """
 import os
 import thread
-import gobject
-import gtk
+from gi.repository import GObject
+from gi.repository import Gdk
+from gi.repository import Gtk
 
 from gettext import gettext as _
 
@@ -85,13 +86,13 @@ class FileImporter(AdhocView):
             # It was not a filename, hence the Button did not get
             # updated. Update it explicitly.
             b = self.fb.get_children()[0]
-            if isinstance(b, gtk.Button):
-                # Normally, the gtk.Button contains a gtk.HBox, which
-                # contains some widgets among which a gtk.Label
+            if isinstance(b, Gtk.Button):
+                # Normally, the Gtk.Button contains a Gtk.HBox, which
+                # contains some widgets among which a Gtk.Label
                 l = [ c 
                       for w in b.get_children() 
                       for c in w.get_children() 
-                      if isinstance(c, gtk.Label) ]
+                      if isinstance(c, Gtk.Label) ]
                 if l:
                     # Found the label
                     l[0].set_text(n)
@@ -201,13 +202,13 @@ class FileImporter(AdhocView):
         Ensure that we execute all Gtk operations in the mainloop.
         """
         def idle_func():
-            gtk.gdk.threads_enter()
+            Gdk.threads_enter()
             try:
                 func(*args, **kw)
             finally:
-                gtk.gdk.threads_leave()
+                Gdk.threads_leave()
             return False
-        gobject.idle_add(idle_func)
+        GObject.idle_add(idle_func)
 
     def progress_callback(self, value=None, label=None):
         if thread.get_ident() != self.main_thread_id:
@@ -220,12 +221,12 @@ class FileImporter(AdhocView):
             self.progressbar.set_fraction(value)
         if label is not None:
             self.progressbar.set_text(label)
-        # We could do a "while gtk.events_pending()" but we want to
+        # We could do a "while Gtk.events_pending()" but we want to
         # avoid process lock because of too many pending events
         # processing.
         for i in xrange(8):
-            if gtk.events_pending():
-                gtk.main_iteration()
+            if Gtk.events_pending():
+                Gtk.main_iteration()
             else:
                 break
         return self.should_continue
@@ -241,56 +242,55 @@ class FileImporter(AdhocView):
         return True
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
         def updated_filename(entry):
             self.update_importers()
             return True
 
-        line=gtk.HBox()
-        vbox.pack_start(line, expand=False)
+        line=Gtk.HBox()
+        vbox.pack_start(line, False, True, 0)
 
-        self.fb = gtk.FileChooserButton(_("Choose the file to import"))
+        self.fb = Gtk.FileChooserButton(_("Choose the file to import"))
         self.fb.set_local_only(False)
-        self.fb.set_action(gtk.FILE_CHOOSER_ACTION_OPEN)
+        self.fb.set_action(Gtk.FileChooserAction.OPEN)
         self.fb.set_current_folder(config.data.path['data'])
         self.fb.connect('file-set', updated_filename)
 
-        line.pack_start(self.fb)
+        line.pack_start(self.fb, True, True, 0)
         if self.message is not None:
-            line.pack_start(gtk.Label(self.message))
+            line.pack_start(Gtk.Label(self.message), True, True, 0)
             self.fb.set_no_show_all(True)
             self.fb.hide()
 
-        self.progressbar=gtk.ProgressBar()
-        vbox.pack_start(self.progressbar, expand=False)
+        self.progressbar=Gtk.ProgressBar()
+        vbox.pack_start(self.progressbar, False, True, 0)
 
         # Importer choice list
-        line=gtk.HBox()
-        vbox.pack_start(line, expand=False)
+        line=Gtk.HBox()
+        vbox.pack_start(line, False, True, 0)
 
-        line.pack_start(gtk.Label(_("Filter")), expand=False)
+        line.pack_start(Gtk.Label(_("Filter")), False, False, 0)
         self.importers = dialog.list_selector_widget([], None, callback=self.update_options)
-        line.pack_start(self.importers, expand=False)
+        line.pack_start(self.importers, False, True, 0)
 
-        exp = gtk.Expander(_("Options"))
-        exp.set_expanded(True)
-        self.options_frame = gtk.VBox()
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        exp = Gtk.Frame.new(_("Options"))
+        self.options_frame = Gtk.VBox()
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add_with_viewport(self.options_frame)
         exp.add(sw)
-        vbox.pack_start(exp, expand=True)
+        vbox.pack_start(exp, True, True, 0)
 
-        bb=gtk.HButtonBox()
+        bb=Gtk.HButtonBox()
 
-        b=gtk.Button(_("Start"))
+        b=Gtk.Button(_("Start"))
         b.connect('clicked', self.convert_file)
         b.set_sensitive(False)
-        bb.pack_start(b, expand=False)
+        bb.pack_start(b, False, True, 0)
         self.convert_button=b
 
-        vbox.pack_start(bb, expand=False)
+        vbox.pack_start(bb, False, True, 0)
 
         self.update_importers()
 

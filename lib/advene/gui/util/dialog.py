@@ -21,7 +21,8 @@
 
 from gettext import gettext as _
 
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 import re
 import os
 import sys
@@ -37,14 +38,22 @@ _fs_encoding = sys.getfilesystemencoding()
 if _fs_encoding in ('ascii', 'ANSI_X3.4-1968', None):
     _fs_encoding='utf8'
 
+# Default transient toplevel window
+DEFAULT_PARENT = None
+
+def set_default_transient_parent(w):
+    global DEFAULT_PARENT
+    DEFAULT_PARENT = w
+    return w
+
 def dialog_keypressed_cb(widget=None, event=None):
     """Generic dialog keypress handler.
     """
-    if event.keyval == gtk.keysyms.Return:
-        widget.response(gtk.RESPONSE_OK)
+    if event.keyval == Gdk.KEY_Return:
+        widget.response(Gtk.ResponseType.OK)
         return True
-    elif event.keyval == gtk.keysyms.Escape:
-        widget.response(gtk.RESPONSE_CANCEL)
+    elif event.keyval == Gdk.KEY_Escape:
+        widget.response(Gtk.ResponseType.CANCEL)
         return True
     return False
 
@@ -58,7 +67,7 @@ def generate_list_model(elements, active_element=None):
     @param elements: a list of couples (element, label) or tuples (element, label, color)
     @param active_element: the element that should be preselected
     """
-    store=gtk.ListStore(str, object, str)
+    store=Gtk.ListStore(str, object, str)
     active_iter=None
     if elements:
         if len(elements[0]) == 3:
@@ -93,11 +102,12 @@ def list_selector_widget(members=None,
                                  active_element=preselect)
 
     if entry:
-        combobox=gtk.ComboBoxEntry(store, column=0)
+        combobox=Gtk.ComboBoxText.new_with_entry()
+        combobox.set_model(store)
     else:
-        combobox=gtk.ComboBox(store)
-        cell = gtk.CellRendererText()
-        combobox.pack_start(cell, expand=True)
+        combobox=Gtk.ComboBox.new_with_model(store)
+        cell = Gtk.CellRendererText()
+        combobox.pack_start(cell, True)
         combobox.add_attribute(cell, 'text', 0)
         combobox.add_attribute(cell, 'background', 2)
 
@@ -112,9 +122,9 @@ def list_selector_widget(members=None,
             try:
                 return combo.get_model().get_value(combo.get_active_iter(), 1)
             except (TypeError, AttributeError):
-                return unicode(combo.child.get_text())
+                return combo.get_child().get_text().decode('utf-8')
         def set_current_element(combo, t):
-            combo.child.set_text(t)
+            combo.get_child().set_text(t)
     else:
         def get_current_element(combo):
             if combo.get_active_iter() is not None:
@@ -155,14 +165,14 @@ def list_selector(title=None,
                                     preselect=preselect,
                                     entry=entry)
 
-    d = gtk.Dialog(title=title,
-                   parent=None,
-                   flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                   buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
-                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+    d = Gtk.Dialog(title=title,
+                   parent=DEFAULT_PARENT,
+                   flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                   buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                             Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
 
     if text is not None:
-        l=gtk.Label(text)
+        l=Gtk.Label(label=text)
         l.show()
         d.vbox.add(l)
 
@@ -175,37 +185,37 @@ def list_selector(title=None,
     center_on_mouse(d)
     res=d.run()
     retval=None
-    if res == gtk.RESPONSE_OK:
+    if res == Gtk.ResponseType.OK:
         retval=combobox.get_current_element()
     d.destroy()
     return retval
 
-def message_dialog(label="", icon=gtk.MESSAGE_INFO, modal=True, callback=None):
+def message_dialog(label="", icon=Gtk.MessageType.INFO, modal=True, callback=None):
     """Message dialog.
 
     If callback is not None, then the dialog will not be modal and
     the callback function will be called upon validation.
     """
-    if icon == gtk.MESSAGE_QUESTION:
-        button=gtk.BUTTONS_YES_NO
+    if icon == Gtk.MessageType.QUESTION:
+        button=Gtk.ButtonsType.YES_NO
     else:
-        button=gtk.BUTTONS_OK
+        button=Gtk.ButtonsType.OK
     if callback is not None:
         # Force non-modal behaviour when there is a callback
         modal=False
     if modal:
-        flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
+        flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT
     else:
-        flags=gtk.DIALOG_DESTROY_WITH_PARENT
+        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT
 
-    dialog = gtk.MessageDialog(None, flags,
-                               icon, button)
+    dialog = Gtk.MessageDialog(DEFAULT_PARENT, flags, icon, button)
     dialog.set_markup(label)
-    if not dialog.label.get_text():
+    label_widget = dialog.get_message_area().get_children()[0]
+    if not label_widget.get_text().decode('utf-8'):
         # Hackish way of determining if there was an error while
         # parsing the markup. In this case, fallback to simple text
-        dialog.label.set_text(label)
-    dialog.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        label_widget.set_text(label)
+    dialog.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
     dialog.connect('key-press-event', dialog_keypressed_cb)
 
     dialog.show()
@@ -214,8 +224,8 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, modal=True, callback=None):
     if modal:
         res=dialog.run()
         dialog.destroy()
-        if icon == gtk.MESSAGE_QUESTION:
-            return (res == gtk.RESPONSE_YES)
+        if icon == Gtk.MessageType.QUESTION:
+            return (res == Gtk.ResponseType.YES or res == Gtk.ResponseType.OK)
         else:
             return True
     else:
@@ -223,7 +233,7 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, modal=True, callback=None):
         # Connect the signal handler.
         def handle_response(d, res):
             d.destroy()
-            if res == gtk.RESPONSE_YES and callback is not None:
+            if res == Gtk.ResponseType.YES and callback is not None:
                 callback()
             return True
         dialog.connect('response', handle_response)
@@ -233,25 +243,25 @@ def yes_no_cancel_popup(title=None,
                         text=None):
     """Build a Yes-No-Cancel popup window.
 
-    Return codes are in (gtk.RESPONSE_YES, gtk.RESPONSE_NO, gtk.RESPONSE_CANCEL)
+    Return codes are in (Gtk.ResponseType.YES, Gtk.ResponseType.NO, Gtk.ResponseType.CANCEL)
     """
-    d = gtk.Dialog(title=title,
-                   parent=None,
-                   flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                   buttons=( gtk.STOCK_YES, gtk.RESPONSE_YES,
-                             gtk.STOCK_NO, gtk.RESPONSE_NO,
-                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
-    hb=gtk.HBox()
+    d = Gtk.Dialog(title=title,
+                   parent=DEFAULT_PARENT,
+                   flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                   buttons=( Gtk.STOCK_YES, Gtk.ResponseType.YES,
+                             Gtk.STOCK_NO, Gtk.ResponseType.NO,
+                             Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
+    hb=Gtk.HBox()
     hb.show()
     d.vbox.add(hb)
 
-    i=gtk.Image()
-    i.set_from_stock(gtk.STOCK_DIALOG_QUESTION, gtk.ICON_SIZE_DIALOG)
+    i=Gtk.Image()
+    i.set_from_stock(Gtk.STOCK_DIALOG_QUESTION, Gtk.IconSize.DIALOG)
     i.show()
-    hb.pack_start(i, expand=False)
+    hb.pack_start(i, False, True, 0)
 
     if text is not None:
-        l=gtk.Label(text)
+        l=Gtk.Label(label=text)
         l.show()
         hb.add(l)
     d.connect('key-press-event', dialog_keypressed_cb)
@@ -279,26 +289,26 @@ def entry_dialog(title=None,
     @return: the entry value or None if the dialog was cancelled
     @rtype: string
     """
-    d = gtk.Dialog(title=title,
-                   parent=None,
-                   flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                   buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                             gtk.STOCK_OK, gtk.RESPONSE_OK,
+    d = Gtk.Dialog(title=title,
+                   parent=DEFAULT_PARENT,
+                   flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                   buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                             Gtk.STOCK_OK, Gtk.ResponseType.OK,
                              ))
     if text:
-        l=gtk.Label(text)
+        l=Gtk.Label(label=text)
         l.show()
         d.vbox.add(l)
 
-    e=gtk.Entry()
+    e=Gtk.Entry()
     e.show()
     if default:
         e.set_text(default)
 
     if completions:
-        completion = gtk.EntryCompletion()
+        completion = Gtk.EntryCompletion()
         e.set_completion(completion)
-        liststore = gtk.ListStore(str)
+        liststore = Gtk.ListStore(str)
         completion.set_text_column(0)
         completion.set_model(liststore)
         for s in completions:
@@ -313,9 +323,9 @@ def entry_dialog(title=None,
 
     res=d.run()
     ret=None
-    if res == gtk.RESPONSE_OK:
+    if res == Gtk.ResponseType.OK:
         try:
-            ret=unicode(e.get_text())
+            ret=e.get_text().decode('utf-8')
         except ValueError:
             ret=None
     else:
@@ -344,15 +354,15 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
         on_change_element(element)
         return True
 
-    store=gtk.ListStore(str, object)
+    store=Gtk.ListStore(str, object)
     active_iter=None
     for k, v in elements.iteritems():
         i=store.append( (v, k) )
         if k == current:
             active_iter=i
 
-    optionmenu = gtk.ComboBox(model=store)
-    cell = gtk.CellRendererText()
+    optionmenu = Gtk.ComboBox.new_with_model(store)
+    cell = Gtk.CellRendererText()
     optionmenu.pack_start(cell, True)
     optionmenu.add_attribute(cell, 'text', 0)
     optionmenu.set_active_iter(active_iter)
@@ -371,28 +381,28 @@ def title_id_widget(element_title=None,
     @type element_id: string
     @return: the widget
     """
-    v=gtk.Table(rows=2, columns=2)
+    v=Gtk.Table(rows=2, columns=2)
 
-    l=gtk.Label(_("Title"))
+    l=Gtk.Label(label=_("Title"))
     v.attach(l, 0, 1, 0, 1)
 
-    title_entry=gtk.Entry()
+    title_entry=Gtk.Entry()
     title_entry.show()
     if element_title:
         title_entry.set_text(element_title)
     v.attach(title_entry, 1, 2, 0, 1)
 
-    l=gtk.Label(_("Id"))
+    l=Gtk.Label(label=_("Id"))
     v.attach(l, 0, 1, 1, 2)
 
-    id_entry=gtk.Entry()
+    id_entry=Gtk.Entry()
     id_entry.show()
     if element_id:
         id_entry.set_text(element_id)
     v.attach(id_entry, 1, 2, 1, 2)
 
     def update_id(entry):
-        id_entry.set_text(helper.title2id(unicode(entry.get_text())))
+        id_entry.set_text(helper.title2id(entry.get_text().decode('utf-8')))
         return True
 
     title_entry.connect('changed', update_id)
@@ -416,25 +426,25 @@ def title_id_dialog(title=_("Name the element"),
     @type element_title: string
     @param element_id: default id
     @type element_id: string
-    @param flags: optional gtk.Dialog flags (such as gtk.DIALOG_MODAL)
+    @param flags: optional Gtk.Dialog flags (such as Gtk.DialogFlags.MODAL)
 
     @return: the dialog widget
     """
     if flags is None:
-        flags=gtk.DIALOG_DESTROY_WITH_PARENT
-    d = gtk.Dialog(title=title,
-                   parent=None,
+        flags=Gtk.DialogFlags.DESTROY_WITH_PARENT
+    d = Gtk.Dialog(title=title,
+                   parent=DEFAULT_PARENT,
                    flags=flags,
-                   buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                             gtk.STOCK_OK, gtk.RESPONSE_OK,
+                   buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                             Gtk.STOCK_OK, Gtk.ResponseType.OK,
                              ))
     if text:
-        l=gtk.Label(text)
+        l=Gtk.Label(label=text)
         l.show()
         d.vbox.add(l)
 
     v=title_id_widget(element_title, element_id)
-    d.vbox.pack_start(v, expand=False)
+    d.vbox.pack_start(v, False, True, 0)
     d.connect('key-press-event', dialog_keypressed_cb)
     d.id_entry=v.id_entry
     d.title_entry=v.title_entry
@@ -464,10 +474,10 @@ def get_title_id(title=_("Name the element"),
     center_on_mouse(d)
 
     res=d.run()
-    if res == gtk.RESPONSE_OK:
+    if res == Gtk.ResponseType.OK:
         try:
-            t=unicode(d.title_entry.get_text())
-            i=unicode(d.id_entry.get_text())
+            t=d.title_entry.get_text().decode('utf-8')
+            i=d.id_entry.get_text().decode('utf-8')
         except ValueError:
             t=None
             i=None
@@ -480,8 +490,8 @@ def get_title_id(title=_("Name the element"),
     return t, i
 
 def get_filename(title=_("Open a file"),
-                 action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                 button=gtk.STOCK_OPEN,
+                 action=Gtk.FileChooserAction.OPEN,
+                 button=Gtk.STOCK_OPEN,
                  default_dir=None,
                  default_file=None,
                  alias=False,
@@ -490,8 +500,8 @@ def get_filename(title=_("Open a file"),
 
     @param title: the dialog title
     @type title: string
-    @param action: the dialog action: gtk.FILE_CHOOSER_ACTION_OPEN (default) or gtk.FILE_CHOOSER_ACTION_SAVE
-    @param button: the validation button id: gtk.STOCK_OPEN (default) or gtk.STOCK_SAVE
+    @param action: the dialog action: Gtk.FileChooserAction.OPEN (default) or Gtk.FileChooserAction.SAVE
+    @param button: the validation button id: Gtk.STOCK_OPEN (default) or Gtk.STOCK_SAVE
     @param default_dir: the default directory
     @type default_dir: string
     @param default_file: the default file
@@ -502,16 +512,16 @@ def get_filename(title=_("Open a file"),
     @type filter: string
     @return: if alias, a tuple (filename, alias), else the filename
     """
-    preview_box = gtk.VBox()
+    preview_box = Gtk.VBox()
 
-    preview = gtk.Button(_("N/C"))
+    preview = Gtk.Button(_("N/C"))
     preview_box.add(preview)
 
     if alias:
-        h=gtk.HBox()
-        l=gtk.Label(_("Alias"))
+        h=Gtk.HBox()
+        l=Gtk.Label(label=_("Alias"))
         h.add(l)
-        alias_entry = gtk.Entry()
+        alias_entry = Gtk.Entry()
         h.add(alias_entry)
         preview_box.add(h)
     preview_box.show_all()
@@ -536,7 +546,7 @@ def get_filename(title=_("Open a file"),
             if config.data.os == 'win32':
                 # Force resize for win32
                 oldmode=chooser.get_resize_mode()
-                chooser.set_resize_mode(gtk.RESIZE_IMMEDIATE)
+                chooser.set_resize_mode(Gtk.RESIZE_IMMEDIATE)
                 chooser.resize_children()
                 chooser.set_resize_mode(oldmode)
         else:
@@ -559,13 +569,13 @@ def get_filename(title=_("Open a file"),
 
     preview.connect('clicked', do_preview)
 
-    fs=gtk.FileChooserDialog(title=title,
-                             parent=None,
+    fs=Gtk.FileChooserDialog(title=title,
+                             parent=DEFAULT_PARENT,
                              action=action,
                              buttons=( button,
-                                       gtk.RESPONSE_OK,
-                                       gtk.STOCK_CANCEL,
-                                       gtk.RESPONSE_CANCEL ))
+                                       Gtk.ResponseType.OK,
+                                       Gtk.STOCK_CANCEL,
+                                       Gtk.ResponseType.CANCEL ))
     fs.set_preview_widget(preview_box)
 
     # filter may be: 'any', 'advene', 'session', 'video'
@@ -580,7 +590,7 @@ def get_filename(title=_("Open a file"),
         ('audio', _("Audio files"), ('*.wav', '*.mp3', '*.ogg')),
         ('video', _("Video files"), [ "*%s" % e for e in config.data.video_extensions ])
         ):
-        filters[name]=gtk.FileFilter()
+        filters[name]=Gtk.FileFilter()
         filters[name].set_name(descr)
         for e in exts:
             filters[name].add_pattern(e)
@@ -601,10 +611,10 @@ def get_filename(title=_("Open a file"),
     res=fs.run()
     filename=None
     al=None
-    if res == gtk.RESPONSE_OK:
+    if res == Gtk.ResponseType.OK:
         filename=fs.get_filename()
         if alias:
-            al=unicode(alias_entry.get_text())
+            al=alias_entry.get_text().decode('utf-8')
             if not al:
                 # It may not have been updated, if the user typed the
                 # filename in the entry box.
@@ -624,27 +634,27 @@ def get_filename(title=_("Open a file"),
         return filename
 
 def get_dirname(title=_("Choose a directory"),
-                 action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                 button=gtk.STOCK_OK,
+                 action=Gtk.FileChooserAction.SELECT_FOLDER,
+                 button=Gtk.STOCK_OK,
                  default_dir=None):
     """Get a directory name.
 
     @param title: the dialog title
     @type title: string
-    @param action: the dialog action: gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER (default)
-    @param button: the validation button id: gtk.STOCK_OK (default)
+    @param action: the dialog action: Gtk.FileChooserAction.SELECT_FOLDER (default)
+    @param button: the validation button id: Gtk.STOCK_OK (default)
     @param default_dir: the default directory
     @type default_dir: string
     @return: the directory name
     """
 
-    fs=gtk.FileChooserDialog(title=title,
-                             parent=None,
+    fs=Gtk.FileChooserDialog(title=title,
+                             parent=DEFAULT_PARENT,
                              action=action,
                              buttons=( button,
-                                       gtk.RESPONSE_OK,
-                                       gtk.STOCK_CANCEL,
-                                       gtk.RESPONSE_CANCEL ))
+                                       Gtk.ResponseType.OK,
+                                       Gtk.STOCK_CANCEL,
+                                       Gtk.ResponseType.CANCEL ))
     if default_dir:
         fs.set_current_folder(default_dir)
 
@@ -652,7 +662,7 @@ def get_dirname(title=_("Choose a directory"),
     center_on_mouse(fs)
     res=fs.run()
     dirname=None
-    if res == gtk.RESPONSE_OK:
+    if res == Gtk.ResponseType.OK:
         dirname=fs.get_filename()
     fs.destroy()
 
@@ -691,26 +701,26 @@ class CategorizedSelector:
         self.button=None
 
     def popup_menu(self, *p):
-        m=gtk.Menu()
+        m=Gtk.Menu()
 
-        i=gtk.MenuItem(self.title, use_underline=False)
+        i=Gtk.MenuItem(self.title, use_underline=False)
         i.set_sensitive(False)
         m.append(i)
-        i=gtk.SeparatorMenuItem()
+        i=Gtk.SeparatorMenuItem()
         m.append(i)
 
         submenu={}
         for c in self.categories:
-            i=gtk.MenuItem(self.description_getter(c), use_underline=False)
+            i=Gtk.MenuItem(self.description_getter(c), use_underline=False)
             m.append(i)
-            submenu[c]=gtk.Menu()
+            submenu[c]=Gtk.Menu()
             i.set_submenu(submenu[c])
         for e in self.elements:
-            i=gtk.MenuItem(self.description_getter(e), use_underline=False)
+            i=Gtk.MenuItem(self.description_getter(e), use_underline=False)
             submenu[self.category_getter(e)].append(i)
             i.connect('activate', lambda menuitem, element: self.update_element(element), e)
         m.show_all()
-        m.popup(None, None, None, 0, gtk.get_current_event_time())
+        m.popup(None, None, None, 0, Gtk.get_current_event_time())
         return m
 
     def get_button(self):
@@ -718,7 +728,7 @@ class CategorizedSelector:
         """
         if self.button is not None:
             return self.button
-        b=gtk.Button(self.description_getter(self.current))
+        b=Gtk.Button(self.description_getter(self.current))
         if self.editable:
             b.connect('clicked', lambda w: self.popup_menu())
         b.show()
@@ -734,7 +744,7 @@ class CategorizedSelector:
         return True
 
 def center_on_mouse(w):
-    """Center the given gtk.Window on the mouse position.
+    """Center the given Gtk.Window on the mouse position.
     """
     root=w.get_toplevel().get_root_window()
     (screen, x, y, mod) = root.get_display().get_pointer()

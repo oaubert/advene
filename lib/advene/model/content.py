@@ -27,6 +27,7 @@ except ImportError:
     except ImportError:
         json = None
 
+import advene.core.config as config
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
 
@@ -114,18 +115,25 @@ class Content(modeled.Modeled,
         """Check if the data is textual, according to mimetype
         """
         mt = self.mimetype
-        return (mt.startswith('text') or 'x-advene' in mt or 'xml' in mt or 'javascript' in mt)
+        return (mt.startswith('text') or 'x-advene' in mt or 'xml' in mt or 'javascript' in mt or mt in config.data.text_mimetypes)
 
     def getData(self):
         """Return the data associated to the Content"""
-        data = StringIO()
-        advene.model.util.dom.printElementText(self._getModel(), data)
+        nodes = self._getModel().childNodes
+        if len(nodes) == 1 and nodes[0].nodeType == nodes[0].TEXT_NODE:
+            d = nodes[0].wholeText
+        else:
+            data = StringIO()
+            advene.model.util.dom.printElementText(self._getModel(), data)
+            d = data.getvalue()
         if self._getModel().hasAttributeNS(None, 'encoding'):
             encoding = self._getModel().getAttributeNS(None, 'encoding')
         else:
             encoding = 'utf-8'
-        d=data.getvalue().decode(encoding)
-        return d
+        if isinstance(d, unicode):
+            return d
+        else:
+            return d.decode(encoding)
 
     def setData(self, data):
         """Set the content's data"""
@@ -137,10 +145,13 @@ class Content(modeled.Modeled,
             self.delUri()
             if not self.isTextual():
                 encoding = 'base64'
+                data = data.encode(encoding)
             else:
                 encoding = 'utf-8'
+                if isinstance(data, str):
+                    data = data.decode('utf-8')
             self._getModel().setAttributeNS(None, 'encoding', encoding)
-            new = self._getDocument().createTextNode(data.encode(encoding))
+            new = self._getDocument().createTextNode(data)
             self._getModel().appendChild(new)
 
     def delData(self):
@@ -394,4 +405,4 @@ class TestPlugin (ContentPlugin.withType ('text/*')):
     def hello(self):
         return "TEST (%s)" % self.__content.data
 
-ContentPlugin.register (TestPlugin, 'http://advene.liris.cnrs.fr/plugins/test')
+ContentPlugin.register (TestPlugin, 'http://advene.org/plugins/test')

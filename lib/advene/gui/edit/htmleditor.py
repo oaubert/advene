@@ -27,11 +27,9 @@
 # - Insert bullets in list items
 # - Handle list item insertion
 
-import gobject
-import pygtk
-pygtk.require('2.0')
-import gtk
-import pango
+from gi.repository import GObject
+from gi.repository import Gtk
+from gi.repository import Pango
 import sys
 import urllib2
 import socket
@@ -39,14 +37,14 @@ import StringIO
 import re
 from HTMLParser import HTMLParser
 try:
-    import gtksourceview2
+    from gi.repository import GtkSource
 except ImportError:
-    gtksourceview2=None
+    GtkSource=None
 
-if gtksourceview2 is None:
-    textview_class=gtk.TextView
+if GtkSource is None:
+    textview_class=Gtk.TextView
 else:
-    textview_class=gtksourceview2.View
+    textview_class=GtkSource.View
 
 broken_xpm="""20 22 5 1
   c black
@@ -98,11 +96,11 @@ class HTMLEditor(textview_class, HTMLParser):
     # FIXME: we should parse at least a subset of CSS to get some things right
     __formats = {
          'h1': { 'font': "sans bold 16",
-                 #'justification': gtk.JUSTIFY_CENTER,
+                 #'justification': Gtk.Justification.CENTER,
                  'pixels-above-lines': 8,
                  'pixels-below-lines': 4 },
          'h2': { 'font': "sans bold 12",
-                 #'justification': gtk.JUSTIFY_CENTER,
+                 #'justification': Gtk.Justification.CENTER,
                  'pixels-above-lines': 6,
                  'pixels-below-lines': 3 },
          'h3': { 'font': "sans bold italic 10",
@@ -126,7 +124,7 @@ class HTMLEditor(textview_class, HTMLParser):
          'strong': { 'font': "sans bold italic 10" },
          'code': { 'font': "monospace 10" },
          'a': { 'font': "sans 10",
-                'underline': pango.UNDERLINE_SINGLE,
+                'underline': Pango.Underline.SINGLE,
                 'foreground': 'blue' },
          'head': { 'invisible': True },
          'table': {},
@@ -148,12 +146,12 @@ class HTMLEditor(textview_class, HTMLParser):
          __tags as a list of tags in the text and present their
          positions so we can allocate the formatting.
         """
-        gtk.TextView.__init__(self, *cnf, **kw)
+        GObject.GObject.__init__(self, *cnf, **kw)
         HTMLParser.__init__(self)
-        if gtksourceview2 is not None:
-            self.set_buffer(gtksourceview2.Buffer())
+        if GtkSource is not None:
+            self.set_buffer(GtkSource.Buffer())
         self.set_editable(True)
-        self.set_wrap_mode(gtk.WRAP_WORD)
+        self.set_wrap_mode(Gtk.WrapMode.WORD)
 
         # Callers can override this with a custom method to load URLs.
         # The method takes a URL as parameter, and returns the
@@ -394,7 +392,7 @@ class HTMLEditor(textview_class, HTMLParser):
             # Caveat: GdkPixbuf is known not to be safe to load images
             # from network... this program is now potentially hackable
             # ;)
-            loader = gtk.gdk.PixbufLoader()
+            loader = GdkPixbuf.PixbufLoader()
 
             def set_size(pixbuf, width, height):
                 if attrwidth and attrheight:
@@ -414,13 +412,13 @@ class HTMLEditor(textview_class, HTMLParser):
                 loader.write(data)
                 loader.close()
                 pixbuf = loader.get_pixbuf()
-            except gobject.GError:
+            except GObject.GError:
                 pixbuf=None
         else:
             pixbuf=None
 
         if pixbuf is None:
-            pixbuf=gtk.gdk.pixbuf_new_from_xpm_data(broken_xpm)
+            pixbuf=GdkPixbuf.Pixbuf.new_from_xpm_data(broken_xpm)
         pixbuf._tag=tag
         pixbuf._attr=attr
         self.insert_pixbuf(pixbuf)
@@ -446,9 +444,9 @@ class HTMLEditor(textview_class, HTMLParser):
             for p in self._class_parsers:
                 widget, self.enclosed_processor = p(tag, dattr)
                 if widget is not None:
-                    if isinstance(widget, gtk.gdk.Pixbuf):
+                    if isinstance(widget, GdkPixbuf.Pixbuf):
                         self.insert_pixbuf(widget)
-                    elif isinstance(widget, gtk.Widget):
+                    elif isinstance(widget, Gtk.Widget):
                         self.insert_widget(widget)
                     else:
                         self.log("Unknown element type")
@@ -829,10 +827,10 @@ class HTMLEditor(textview_class, HTMLParser):
             endmark._startmark=mark
             mark._endmark=endmark
 
-class ContextDisplay(gtk.TreeView):
+class ContextDisplay(Gtk.TreeView):
     def __init__(self):
         super(ContextDisplay, self).__init__()
-        self.set_model(gtk.TreeStore(object, str, str))
+        self.set_model(Gtk.TreeStore(object, str, str))
 
         def edited_cell(renderer, path, newtext, col):
             model=self.get_model()
@@ -859,15 +857,15 @@ class ContextDisplay(gtk.TreeView):
             print "Edited", mark._tag, mark._attr
             return False
 
-        cell=gtk.CellRendererText()
+        cell=Gtk.CellRendererText()
         cell.set_property('editable', True)
         cell.connect('edited', edited_cell, 1)
-        self.append_column(gtk.TreeViewColumn("Name", cell, text=1))
+        self.append_column(Gtk.TreeViewColumn("Name", cell, text=1))
 
-        cell=gtk.CellRendererText()
+        cell=Gtk.CellRendererText()
         cell.set_property('editable', True)
         cell.connect('edited', edited_cell, 2)
-        self.append_column(gtk.TreeViewColumn("Value", cell, text=2))
+        self.append_column(Gtk.TreeViewColumn("Value", cell, text=2))
 
     def set_context(self, context):
         model=self.get_model()
@@ -887,7 +885,7 @@ if __name__ == "__main__":
     if source is not None:
         t.set_text(open(source).read())
     t.show()
-    sb = gtk.ScrolledWindow()
+    sb = Gtk.ScrolledWindow()
     sb.add(t)
     sb.show()
 
@@ -907,8 +905,8 @@ if __name__ == "__main__":
     t.get_buffer().connect('mark-set', cursor_moved)
     context_data.show()
 
-    p=gtk.HPaned()
-    sw=gtk.ScrolledWindow()
+    p=Gtk.HPaned()
+    sw=Gtk.ScrolledWindow()
     sw.add(context_data)
     p.add1(sw)
     p.add2(sb)
@@ -917,37 +915,37 @@ if __name__ == "__main__":
     ev.widget.add(p)
 
     for (icon, action) in (
-        (gtk.STOCK_CONVERT, lambda i: t.dump_html()),
-        (gtk.STOCK_REFRESH, lambda i: t.refresh()),
-        (gtk.STOCK_BOLD, lambda i: t.apply_html_tag('b')),
-        (gtk.STOCK_ITALIC, lambda i: t.apply_html_tag('i')),
+        (Gtk.STOCK_CONVERT, lambda i: t.dump_html()),
+        (Gtk.STOCK_REFRESH, lambda i: t.refresh()),
+        (Gtk.STOCK_BOLD, lambda i: t.apply_html_tag('b')),
+        (Gtk.STOCK_ITALIC, lambda i: t.apply_html_tag('i')),
         ):
-        b=gtk.ToolButton(icon)
+        b=Gtk.ToolButton(icon)
         b.connect('clicked', action)
         ev.toolbar.insert(b, -1)
         b.show()
 
-    if gtksourceview2 is not None:
-        b=gtk.ToolButton(gtk.STOCK_UNDO)
+    if GtkSource is not None:
+        b=Gtk.ToolButton(Gtk.STOCK_UNDO)
         b.connect('clicked', lambda i: t.undo())
         ev.toolbar.insert(b, -1)
         b.show()
 
     actions={
-        gtk.keysyms.b: lambda: t.apply_html_tag('b'),
-        gtk.keysyms.i: lambda: t.apply_html_tag('i'),
-        gtk.keysyms.z: lambda: t.dump_html(),
+        Gdk.KEY_b: lambda: t.apply_html_tag('b'),
+        Gdk.KEY_i: lambda: t.apply_html_tag('i'),
+        Gdk.KEY_z: lambda: t.dump_html(),
         }
 
     w=ev.popup(embedded=False)
 
     def key_press(win, event):
         # Control-shortcuts
-        if event.state & gtk.gdk.CONTROL_MASK and event.keyval in actions:
+        if event.get_state() & Gdk.ModifierType.CONTROL_MASK and event.keyval in actions:
             actions[event.keyval]()
             return True
         return False
     w.connect('key-press-event', key_press)
 
     t.grab_focus()
-    gtk.main()
+    Gtk.main()

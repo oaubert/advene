@@ -36,8 +36,8 @@ gettext.textdomain(APP)
 gettext.install(APP, localedir=config.data.path['locale'], unicode=True)
 from gettext import gettext as _
 
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import GObject
 import os
 
 from advene.gui.edit.properties import EditWidget
@@ -61,8 +61,8 @@ class Config:
 
     def main(self):
         self.widget.show_all()
-        gobject.timeout_add (10, self.run_config)
-        gtk.main()
+        GObject.timeout_add (10, self.run_config)
+        Gtk.main()
 
     def run_config(self):
         res=self.widget.popup()
@@ -74,7 +74,7 @@ class Config:
             for k in ('data', 'imagecache', 'moviepath'):
                 config.data.path[k]=self.options[k]
             config.data.save_preferences()
-        gtk.main_quit()
+        Gtk.main_quit()
         return
 
     def build_widget(self):

@@ -1,0 +1,31 @@
+#fullscreen_player {
+    background-color: #000;
+    color: #fff;
+}
+
+.advene_drag_icon {
+    background-color: #000;
+    color: #fff;
+}
+
+.black_on_black {
+    background-color: #000;
+    color: #000;
+}
+
+.advene_caption {
+    background-color: #000;
+    color: #fff;
+}
+
+.restrict_playing_button {
+    margin: 0;
+    padding: 0;
+}
+
+.frameselector_before {
+    background-color: #fcc;
+}
+.frameselector_after {
+    background-color: #000;
+}

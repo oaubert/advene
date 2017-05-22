@@ -19,7 +19,7 @@
 """Widget used to select the DVD chapter in Advene.
 """
 
-import gtk
+from gi.repository import Gtk
 import re
 
 from gettext import gettext as _
@@ -86,30 +86,30 @@ class DVDSelect:
         return self.widget
 
     def make_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        label=gtk.Label(_("Select the correct\ntitle and chapter\nof the DVD"))
+        label=Gtk.Label(label=_("Select the correct\ntitle and chapter\nof the DVD"))
         vbox.add(label)
 
-        hbox=gtk.HBox()
-        hbox.add(gtk.Label(_("Title")))
-        sp=gtk.SpinButton()
+        hbox=Gtk.HBox()
+        hbox.add(Gtk.Label(label=_("Title")))
+        sp=Gtk.SpinButton()
         sp.set_range(1, 15)
         sp.set_increments(1, 1)
-        hbox.pack_start(sp, expand=False)
+        hbox.pack_start(sp, False, True, 0)
         self.titlewidget=sp
         vbox.add(hbox)
 
-        hbox=gtk.HBox()
-        hbox.add(gtk.Label(_("Chapter")))
-        sp=gtk.SpinButton()
+        hbox=Gtk.HBox()
+        hbox.add(Gtk.Label(label=_("Chapter")))
+        sp=Gtk.SpinButton()
         sp.set_range(1, 30)
         sp.set_increments(1, 1)
-        hbox.pack_start(sp, expand=False)
+        hbox.pack_start(sp, False, True, 0)
         self.chapterwidget=sp
         vbox.add(hbox)
 
-        b=gtk.Button(_("Preview"))
+        b=Gtk.Button(_("Preview"))
         b.connect('clicked', self.preview)
         vbox.add(b)
 
@@ -127,19 +127,19 @@ if __name__ == "__main__":
             self.player.check_player()
 
     def key_pressed_cb (win, event):
-        if event.state & gtk.gdk.CONTROL_MASK:
+        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # The Control-key is held. Special actions :
-            if event.keyval == gtk.keysyms.q:
-                gtk.main_quit ()
+            if event.keyval == Gdk.KEY_q:
+                Gtk.main_quit ()
                 return True
         return False
 
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+    window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
     window.connect('key-press-event', key_pressed_cb)
-    window.connect('destroy', lambda e: gtk.main_quit())
+    window.connect('destroy', lambda e: Gtk.main_quit())
 
     c = DummyController()
     sel=DVDSelect(controller=c)
     window.add(sel.get_widget())
     window.show_all()
-    gtk.main()
+    Gtk.main()

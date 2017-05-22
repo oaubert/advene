@@ -17,9 +17,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 
+import logging
+logger = logging.getLogger(__name__)
+
 import sys
 import os
-import StringIO
 
 # Magic stuff before the instanciation of Advene : we set the
 # sys.path and the various config.data.path
@@ -41,7 +43,7 @@ def fix_paths(path):
 if subdir == 'bin' and  os.path.exists(os.path.join(maindir, "setup.py")):
   # Chances are that we were in a development tree...
   libpath=os.path.join(maindir, "lib")
-  print "You seem to have a development tree at:\n%s." % libpath
+  logger.info("You seem to have a development tree at:\n%s." % libpath)
   sys.path.insert (0, libpath)
 
   import advene.core.config as config
@@ -50,8 +52,8 @@ else:
   try:
     import advene.core.config as config
   except ImportError:
-    print """Cannot guess a valid directory.
-    Please check your installation or set the PYTHONPATH environment variable."""
+    logger.error("""Cannot guess a valid directory.
+    Please check your installation or set the PYTHONPATH environment variable.""")
     sys.exit(1)
 
 # Maybe we are running from a pyinstaller version
@@ -60,25 +62,24 @@ if not os.path.exists(config.data.path['resources']):
   if os.path.exists(os.path.join( maindir, 'share' )):
     # There is a 'share' directory at the same level as the executable
     # This can mean that we are in a pyinstaller version
-    print "Seemingly running from a pyinstaller version in\n%s" % maindir
+    logger.info("Seemingly running from a pyinstaller version in\n%s" % maindir)
     fix_paths(maindir)
 
 if __name__ == '__main__':
     from advene.core.controller import AdveneController
     from advene.model.zippackage import ZipPackage
 
-
     controller=AdveneController()
     controller.init(config.data.args)
 
     if config.data.webserver['mode'] == 2:
-      print "Server ready to serve requests (threaded mode)."
+      logger.info("Server ready to serve requests (threaded mode).")
       controller.serverthread.join()
     elif config.data.webserver['mode'] == 1:
-      print "Server ready to serve requests (mainloop mode)."
+      logger.info( "Server ready to serve requests (mainloop mode).")
       controller.self_loop()
     else:
-      print "Web server deactived in configuration."
+      logger.info("Web server deactived in configuration.")
 
     # Cleanup the ZipPackage directories
     ZipPackage.cleanup()

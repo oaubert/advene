@@ -16,17 +16,22 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import sys
-import re
-import operator
-import urllib
-import struct
-import gobject
-import gtk
-import cairo
-import pango
+import logging
+logger = logging.getLogger(__name__)
+
 from gettext import gettext as _
+import operator
+import re
+import sys
+import struct
 from threading import Lock
+import urllib
+
+from gi.repository import GObject
+from gi.repository import Gdk
+from gi.repository import Gtk
+import cairo
+from gi.repository import Pango
 
 # Advene part
 import advene.core.config as config
@@ -48,20 +53,20 @@ name="Timeline view plugin"
 def register(controller):
     controller.register_viewclass(TimeLine)
 
-class QuickviewBar(gtk.HBox):
+class QuickviewBar(Gtk.HBox):
     def __init__(self, controller=None):
-        gtk.HBox.__init__(self)
+        GObject.GObject.__init__(self)
         self.controller=controller
-        self.begin=gtk.Label()
-        self.end=gtk.Label()
-        self.content=gtk.ProgressBar()
-        self.content.set_ellipsize(pango.ELLIPSIZE_MIDDLE)
+        self.begin=Gtk.Label()
+        self.end=Gtk.Label()
+        self.content=Gtk.ProgressBar()
+        self.content.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
 
         self.annotation=None
 
-        self.pack_start(self.content, expand=True)
-        self.pack_start(self.begin, expand=False)
-        self.pack_start(self.end, expand=False)
+        self.pack_start(self.content, True, True, 0)
+        self.pack_start(self.begin, False, True, 0)
+        self.pack_start(self.end, False, True, 0)
 
     def set_text(self, s, progress=0):
         self.begin.set_text("")
@@ -190,7 +195,7 @@ class TimeLine(AdhocView):
 
         self.current_marker = None
         self.current_marker_scale = None
-        self.layout = gtk.Layout ()
+        self.layout = Gtk.Layout ()
 
         self.minimum = minimum
         self.maximum = maximum
@@ -202,7 +207,6 @@ class TimeLine(AdhocView):
 
         self.colors = {
             'active': name2color('#fdfd4b'),
-            'inactive': gtk.Button().get_style().bg[0],
             'background': name2color('red'),
             'white': name2color('white'),
             }
@@ -223,9 +227,9 @@ class TimeLine(AdhocView):
             callback=handle_autoscroll_combo)
 
         # Create annotation widget style:
-        self.annotation_font = pango.FontDescription("sans %d" % config.data.preferences['timeline']['font-size'])
+        self.annotation_font = Pango.FontDescription("sans %d" % config.data.preferences['timeline']['font-size'])
         self.annotation_type_font = self.annotation_font.copy()
-        self.annotation_type_font.set_style(pango.STYLE_ITALIC)
+        self.annotation_type_font.set_style(Pango.Style.ITALIC)
 
         # Maybe we should ask pango the height of 'l' plus margins
         self.button_height = config.data.preferences['timeline']['button-height']
@@ -234,22 +238,24 @@ class TimeLine(AdhocView):
         u2p = self.unit2pixel
 
         # How many units does a pixel represent ?
-        # self.scale.value = unit by pixel
+        # self.scale.get_value = unit by pixel
         # Unit = ms
-        self.scale = gtk.Adjustment (value=((self.maximum - self.minimum) or 60 * 60 * 1000) / gtk.gdk.get_default_root_window().get_size()[0],
-                                                lower=5,
-                                                upper=sys.maxint,
-                                                step_incr=20,
-                                                page_incr=100)
+        self.scale = Gtk.Adjustment.new(value=((self.maximum - self.minimum) or 60 * 60 * 1000) / Gdk.get_default_root_window().get_width(),
+                                        lower=5,
+                                        upper=sys.maxint,
+                                        step_increment=20,
+                                        page_increment=100,
+                                        page_size=20)
         self.scale.connect('value-changed', self.scale_event)
         #self.scale.connect('changed', self.scale_event)
 
         # The same value in relative form
-        self.fraction_adj = gtk.Adjustment (value=1.0,
-                                            lower=0.01,
-                                            upper=1.0,
-                                            step_incr=.01,
-                                            page_incr=.1)
+        self.fraction_adj = Gtk.Adjustment.new(value=1.0,
+                                               lower=0.01,
+                                               upper=1.0,
+                                               step_increment=.01,
+                                               page_increment=.1,
+                                               page_size=.1)
         self.fraction_adj.connect('value-changed', self.fraction_event)
         self.fraction_adj.connect('changed', self.fraction_event)
 
@@ -262,20 +268,20 @@ class TimeLine(AdhocView):
         # accordingly.
         self.can_do_horizontal_scroll = False
 
-        self.layout.add_events( gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.BUTTON1_MOTION_MASK )
-        self.scale_layout = gtk.Layout()
+        self.layout.add_events( Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.BUTTON1_MOTION_MASK )
+        self.scale_layout = Gtk.Layout()
         self.scale_layout.height=0
         self.scale_layout.step=0
-        self.scale_layout.add_events( gtk.gdk.BUTTON_PRESS_MASK )
+        self.scale_layout.add_events( Gdk.EventMask.BUTTON_PRESS_MASK )
 
         # Memorize the current scale height, so that we can refresh it
         # when it is changed by a given amount (typically 10 or 16
         # pixels)
         self.current_scale_height=0
-        # Global pane is the VPaned holding the scale and the layout.
+        # Global pane is the Paned holding the scale and the layout.
         self.global_pane=None
 
-        self.legend = gtk.Layout ()
+        self.legend = Gtk.Layout ()
 
         self.layout.connect('key-press-event', self.layout_key_press_cb)
         self.scale_layout.connect('key-press-event', self.layout_key_press_cb)
@@ -291,21 +297,19 @@ class TimeLine(AdhocView):
         self.scale_layout.connect('button-press-event', self.scale_layout_button_press_cb)
 
         self.layout.connect('size-allocate', self.layout_resize_event)
-        self.layout.connect('expose-event', self.draw_background)
-        self.layout.connect_after('expose-event', self.draw_relation_lines)
-        self.scale_layout.connect_after('expose-event', self.draw_bookmarks)
+        self.layout.connect('draw', self.draw_background)
+        self.layout.connect_after('draw', self.draw_relation_lines)
+        self.scale_layout.connect_after('draw', self.draw_bookmarks)
 
         # The layout can receive drops
         self.layout.connect('drag-data-received', self.layout_drag_received)
-        self.layout.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                  gtk.DEST_DEFAULT_HIGHLIGHT |
-                                  gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['annotation']
-                                  + config.data.drag_type['annotation-type']
-                                  + config.data.drag_type['timestamp'],
-                                  gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_ASK )
+        self.layout.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                  Gtk.DestDefaults.HIGHLIGHT |
+                                  Gtk.DestDefaults.ALL,
+                                  config.data.get_target_types('annotation', 'annotation-type', 'timestamp'),
+                                  Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE | Gdk.DragAction.ASK )
 
-        self.old_scale_value = self.scale.value
+        self.old_scale_value = self.scale.get_value()
 
         # Lines to draw in order to indicate related annotations
         self.relations_to_draw = []
@@ -319,7 +323,7 @@ class TimeLine(AdhocView):
         self.transmuted_annotation = None
         # Adjustment corresponding to the Virtual display
         # The page_size is the really displayed area
-        self.adjustment = gtk.Adjustment ()
+        self.adjustment = Gtk.Adjustment()
 
         # Dictionary holding the vertical position for each type
         self.layer_position = {}
@@ -331,18 +335,19 @@ class TimeLine(AdhocView):
         def set_default_parameters(widget, event, zoom, pos, pane):
             self.update_adjustment ()
             self.adjustment.set_value(u2p(self.minimum, absolute=True))
-            self.fraction_adj.value=zoom
+            self.fraction_adj.set_value(zoom)
             if pos >= self.minimum and pos <= self.maximum:
                 self.adjustment.set_value(u2p(pos, absolute=True))
             # Set annotation inspector width, so that it does not auto-resize
             if pane is None:
-                w, h = self.widget.window.get_size()
-                pane=w - 160
+                pane = self.widget.get_window().get_width() - 160
             self.inspector_pane.set_position(pane)
             # Check if display is limited
             if self.minimum > 0 and self.maximum < self.controller.package.cached_duration:
                 self.limit_navtools.show()
-            self.widget.disconnect(self.expose_signal)
+            if self.expose_signal:
+                self.widget.disconnect(self.expose_signal)
+                self.expose_signal = None
             self.update_model(from_init=True)
             return False
         # Convert values, that could be strings
@@ -351,34 +356,42 @@ class TimeLine(AdhocView):
         if pane_position is not None:
             pane_position=long(float(pane_position))
 
-        self.expose_signal=self.widget.connect('expose-event', set_default_parameters,
+        self.expose_signal=self.widget.connect('draw', set_default_parameters,
                                                default_zoom, default_position, pane_position)
 
     def get_save_arguments(self):
         arguments = [ ('annotation-type', at.id) for at in self.annotationtypes ]
         arguments.append( ('minimum', self.minimum ) )
         arguments.append( ('maximum', self.maximum ) )
-        arguments.append( ('position', self.pixel2unit(self.adjustment.value, absolute=True) ) )
-        arguments.append( ('zoom', self.fraction_adj.value) )
+        arguments.append( ('position', self.pixel2unit(self.adjustment.get_value(), absolute=True) ) )
+        arguments.append( ('zoom', self.fraction_adj.get_value()) )
         self.options['pane-position']=self.inspector_pane.get_position()
         return self.options, arguments
 
-    def draw_background(self, layout, event):
+    def draw_background(self, layout, context):
+        """Draw annotation type separating lines
+        """
         width, height = layout.get_size()
         i=config.data.preferences['timeline']['interline-height']
-        drawable=layout.bin_window
-        gc=drawable.new_gc(foreground=self.colors['background'], line_style=gtk.gdk.LINE_ON_OFF_DASH)
+        offset = layout.get_vadjustment().get_value()
+        context.set_source_rgb(.3, .3, .3)
+        context.set_line_width(1)
+        context.set_dash( (1, 3) )
         for p in sorted(self.layer_position.itervalues()):
-            # Draw a different background
-            drawable.draw_line(gc, 0, p - i / 2, width, p - i / 2)
+            y = p - offset - i / 2
+            if y >= 0:
+                context.move_to(0, y)
+                context.line_to(width, y)
+        context.stroke()
+        context.set_dash([])
         return False
 
     def update_relation_lines(self):
         self.layout.queue_draw()
 
-    def draw_relation_lines(self, layout, event):
+    def draw_relation_lines(self, layout, context):
         if self.bookmarks_to_draw:
-            self.draw_bookmarks(layout, event)
+            self.draw_bookmarks(layout, context)
         if self.options['display-all-relations']:
             to_draw = [ (self.get_widget_for_annotation(r.members[0]),
                          self.get_widget_for_annotation(r.members[1]),
@@ -388,8 +401,6 @@ class TimeLine(AdhocView):
             to_draw = self.relations_to_draw
         if not to_draw:
             return False
-        context=layout.bin_window.cairo_create()
-
         for b1, b2, r in to_draw:
             if b1 is None or b2 is None:
                 continue
@@ -447,45 +458,52 @@ class TimeLine(AdhocView):
         self.scale_layout.queue_draw()
         self.layout.queue_draw()
 
-    def draw_bookmarks(self, layout, event):
+    def draw_bookmarks(self, layout, context):
         if not self.bookmarks_to_draw:
             return False
         a=self.adjustment
-        begin=long(a.value)
-        end=long(a.value + a.page_size)
-        context=layout.bin_window.cairo_create()
-        h=layout.get_size ()[1]
+        begin=long(a.get_value())
+        end=long(a.get_value() + a.get_page_size())
+
+        w, h = layout.get_size()
 
         context.set_source_rgb(1.0, 0, 0)
         context.set_line_width(2)
 
         for t in self.bookmarks_to_draw:
             x=self.unit2pixel(t, absolute=True)
+            # There is a clipping area applied to the context which
+            # restricts drawing to the visible area. We have to use
+            # coordinates relative to the visible area to draw the
+            # marks
             if x < begin:
                 # The bookmark is outside. Draw an arrow.
-                context.move_to(begin + 16, 2)
-                context.line_to(begin + 16, 16)
-                context.line_to(begin + 2, 9)
+                context.move_to(16, 2)
+                context.line_to(16, 16)
+                context.line_to(2, 9)
                 context.fill()
             elif x > end:
+                # (x1, y2, x2, y2)
+                clip_extents = context.clip_extents()
+                width = clip_extents[2] - clip_extents[0]
                 # The bookmark is outside. Draw an arrow.
-                context.move_to(end - 16, 2)
-                context.line_to(end - 16, 16)
-                context.line_to(end - 2, 9)
+                context.move_to(width - 16, 2)
+                context.line_to(width - 16, 16)
+                context.line_to(width - 2, 9)
                 context.fill()
             else:
-                context.move_to(x, 0)
-                context.line_to(x, h)
+                context.move_to(x - begin, 0)
+                context.line_to(x - begin, h)
                 context.stroke()
         return False
 
     def dialog_too_many_annotations(self, n):
-        d = gtk.Dialog(title=_("%d annotations") % n,
-                       parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( _("Display all types"), gtk.RESPONSE_YES,
-                                 gtk.STOCK_CLOSE, gtk.RESPONSE_CLOSE ) )
-        l = gtk.Label(_("There are %d annotations.\nThe current timeline may take a long time to display them, so only the first two annotation types are displayed. Use the annotation type selector (second button in the timeline) to select other annotations types to display, or click on the 'Display all types' button below.") % n)
+        d = Gtk.Dialog(title=_("%d annotations") % n,
+                       parent=self.controller.gui.gui.win,
+                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                       buttons=( _("Display all types"), Gtk.ResponseType.YES,
+                                 Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE ) )
+        l = Gtk.Label(_("There are %d annotations.\nThe current timeline may take a long time to display them, so only the first two annotation types are displayed. Use the annotation type selector (second button in the timeline) to select other annotations types to display, or click on the 'Display all types' button below.") % n)
         l.set_line_wrap(True)
         d.vbox.add(l)
         d.connect('key-press-event', dialog.dialog_keypressed_cb)
@@ -495,7 +513,7 @@ class TimeLine(AdhocView):
         dialog.center_on_mouse(d)
         def handle_response(d, res):
             d.destroy()
-            if res == gtk.RESPONSE_YES:
+            if res == Gtk.ResponseType.YES:
                 # Display all types
                 self.annotationtypes = list(self.controller.package.annotationTypes)
                 self.update_model(partial_update=True)
@@ -524,10 +542,9 @@ class TimeLine(AdhocView):
         if self.minimum > self.maximum:
             self.minimum, self.maximum = self.maximum, self.minimum
 
-        if self.maximum != oldmax and self.layout.window is not None:
+        if self.maximum != oldmax and self.layout.get_window() is not None:
             # Reset to display whole timeline
-            (w, h) = self.layout.window.get_size()
-            self.scale.set_value( (self.maximum - self.minimum) / float(w) )
+            self.scale.set_value( (self.maximum - self.minimum) / float(self.layout.get_window().get_height()) )
 
     def update_model(self, package=None, partial_update=False, from_init=False):
         """Update the whole model.
@@ -537,7 +554,7 @@ class TimeLine(AdhocView):
         @param partial_update: it is only an update for the existing package, we do not need to rebuild everything
         @param partial_update: boolean
         """
-        if not self.update_lock.acquire(False) or self.layout.window is None:
+        if not self.update_lock.acquire(False) or self.layout.get_window() is None:
             # An update is already ongoing or the layout is not realized yet
             return
 
@@ -590,8 +607,8 @@ class TimeLine(AdhocView):
         def finalize_callback():
             self.update_legend_widget(self.legend)
             self.legend.show_all()
-            if self.layout.window is not None:
-                self.fraction_event(widget=None, forced_window_width=self.layout.window.get_size()[0])
+            if self.layout.get_window() is not None:
+                self.fraction_event(widget=None, forced_window_width=self.layout.get_window().get_width())
             self.update_lock.release()
 
         self.populate(finalize_callback)
@@ -663,12 +680,11 @@ class TimeLine(AdhocView):
         alloc = self.layout.get_allocation()
         pos = self.unit2pixel(position, absolute=True) - (alloc.width / 2)
         a = self.adjustment
-        if pos < a.lower:
-            pos = a.lower
-        elif pos >= a.upper - a.page_size:
-            pos = a.upper - a.page_size
-        if a.value != pos:
-            a.set_value (pos)
+        pos = helper.clamp(pos,
+                           a.get_lower(),
+                           a.get_upper() - a.get_page_size())
+        if a.get_value() != pos:
+            a.set_value(pos)
         return True
 
     def activate_annotation_handler (self, context, parameters):
@@ -714,7 +730,7 @@ class TimeLine(AdhocView):
                     print "duration_updated timeout"
                     # Try again at next timeout.
                     return True
-            gobject.timeout_add(100, duration_updated, long(context.globals['duration']))
+            GObject.timeout_add(100, duration_updated, long(context.globals['duration']))
         return True
 
     def media_change_handler(self, context, parameters):
@@ -732,7 +748,7 @@ class TimeLine(AdhocView):
         # is kept.
         l=sorted( ( t
                     for t in ( (w, abs(w.mark - pos)) for w in self.scale_layout.get_children()
-                               if isinstance(w, gtk.Image) )
+                               if isinstance(w, Gtk.Image) )
                     if t[1] <= epsilon and t[1] < abs(t[0].timestamp - pos) ),
                  key=operator.itemgetter(1))
         for t in l:
@@ -845,15 +861,15 @@ class TimeLine(AdhocView):
 
     def unit2pixel (self, v, absolute=False):
         if absolute:
-            return (long( ( v - self.minimum) / self.scale.value )) or 1
+            return (long( ( v - self.minimum) / self.scale.get_value() )) or 1
         else:
-            return (long(v / self.scale.value)) or 1
+            return (long(v / self.scale.get_value())) or 1
 
     def pixel2unit (self, v, absolute=False):
         if absolute:
-            return long((v * self.scale.value) + self.minimum)
+            return long((v * self.scale.get_value()) + self.minimum)
         else:
-            return long(v * self.scale.value)
+            return long(v * self.scale.get_value())
 
     def get_element_color(self, element):
         """Return the gtk color for the given element.
@@ -950,7 +966,7 @@ class TimeLine(AdhocView):
             z=1.0 * ann.fragment.duration / (self.maximum - self.minimum)
             if z < 0.05:
                 z=0.05
-            self.fraction_adj.value=z
+            self.fraction_adj.set_value(z)
 
             # Center on annotation
             self.center_on_position(ann.fragment.begin)
@@ -975,7 +991,7 @@ class TimeLine(AdhocView):
         if a is None:
             a = self.adjustment
         print ("Lower: %.1f\tUpper: %.1f\tValue: %.1f\tPage size: %.1f"
-               % (a.lower, a.upper, a.value, a.page_size))
+               % (a.get_lower(), a.get_upper(), a.get_value(), a.get_page_size()))
 
     def align_annotations(self, source, dest, mode):
         new={
@@ -1006,7 +1022,7 @@ class TimeLine(AdhocView):
         @return: a fraction (float)
         """
         x, y = widget.get_pointer()
-        w = widget.allocation.width
+        w = widget.get_allocation().width
         f = 1.0 * x / w
         return f
 
@@ -1040,14 +1056,14 @@ class TimeLine(AdhocView):
 
     def annotation_drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8').split('\n')[0])
+            source=self.controller.package.annotations.get(unicode(selection.get_data(), 'utf8').split('\n')[0])
             dest=widget.annotation
 
             if source == dest:
                 return True
 
             # Popup a menu to propose the drop options
-            menu=gtk.Menu()
+            menu=Gtk.Menu()
 
             def create_relation(item, s, d, t):
                 self.create_relation(s, d, t)
@@ -1068,17 +1084,17 @@ class TimeLine(AdhocView):
             relationtypes=helper.matching_relationtypes(self.controller.package,
                                                         source.type,
                                                         dest.type)
-            item=gtk.MenuItem(_("Create a relation"))
+            item=Gtk.MenuItem(_("Create a relation"))
             menu.append(item)
 
-            sm=gtk.Menu()
+            sm=Gtk.Menu()
             for rt in relationtypes:
-                sitem=gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
+                sitem=Gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
                 sitem.connect('activate', create_relation, source, dest, rt)
                 sm.append(sitem)
             if True:
                 # Propose to create a new one
-                sitem=gtk.MenuItem(_("Create a new relation-type."), use_underline=False)
+                sitem=Gtk.MenuItem(_("Create a new relation-type."), use_underline=False)
                 sitem.connect('activate', create_relation_type_and_relation, source, dest)
                 sm.append(sitem)
             item.set_submenu(sm)
@@ -1104,7 +1120,7 @@ class TimeLine(AdhocView):
                     def merge_annotations(widget, s, d):
                         self.controller.merge_annotations(s, d, extend_bounds=(s.type == d.type))
                         return True
-                    item=gtk.MenuItem(_("Merge with this annotation"))
+                    item=Gtk.MenuItem(_("Merge with this annotation"))
                     item.connect('activate', merge_annotations, source, dest)
                     menu.append(item)
 
@@ -1121,16 +1137,16 @@ class TimeLine(AdhocView):
                 ):
                 if not condition:
                     continue
-                item=gtk.ImageMenuItem(title)
-                im=gtk.Image()
+                item=Gtk.ImageMenuItem(title)
+                im=Gtk.Image()
                 im.set_from_file(config.data.advenefile( ( 'pixmaps', mode + '.png') ))
                 item.set_image(im)
                 item.connect('activate', align_annotations, source, dest, mode)
                 menu.append(item)
             menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            menu.popup_at_pointer(None)
         elif targetType == config.data.target_type['tag']:
-            tags=unicode(selection.data, 'utf8').split(',')
+            tags=unicode(selection.get_data(), 'utf8').split(',')
             a=widget.annotation
             l=[t for t in tags if not t in a.tags ]
             self.controller.notify('EditSessionStart', element=a, immediate=True)
@@ -1138,10 +1154,10 @@ class TimeLine(AdhocView):
             self.controller.notify('AnnotationEditEnd', annotation=a)
             self.controller.notify('EditSessionEnd', element=a)
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return True
 
-    def move_or_copy_annotations(self, sources, dest, position=None, action=gtk.gdk.ACTION_ASK):
+    def move_or_copy_annotations(self, sources, dest, position=None, action=Gdk.DragAction.ASK):
         """Display a popup menu to move or copy the sources annotation to the dest annotation type.
 
         If position is given (in ms), then the choice will also be
@@ -1156,7 +1172,7 @@ class TimeLine(AdhocView):
         def move_annotation(i, an, typ, position=None):
             if an.relations and an.type != typ:
                 dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
-                                      icon=gtk.MESSAGE_WARNING)
+                                      icon=Gtk.MessageType.WARNING)
                 return True
 
             self.transmuted_annotation=self.controller.transmute_annotation(an,
@@ -1195,7 +1211,7 @@ class TimeLine(AdhocView):
                                                     source.type,
                                                     dest)
 
-        if action == gtk.gdk.ACTION_COPY:
+        if action == Gdk.DragAction.COPY:
             # Direct copy
             if len(sources) > 1:
                 if source.type == dest:
@@ -1208,7 +1224,7 @@ class TimeLine(AdhocView):
                     position=None
                 copy_annotation(None, source, dest, position=position)
             return True
-        elif action == gtk.gdk.ACTION_MOVE:
+        elif action == Gdk.DragAction.MOVE:
             if len(sources) > 1:
                 if source.type == dest:
                     return True
@@ -1220,7 +1236,7 @@ class TimeLine(AdhocView):
                     position=None
                 move_annotation(None, source, dest, position=position)
             return True
-        elif action == gtk.gdk.ACTION_LINK:
+        elif action == Gdk.DragAction.LINK:
             # Copy and create a relation. Ignore the selection (?)
             if len(relationtypes) == 1:
                 copy_annotation(None, source, dest, relationtype=relationtypes[0])
@@ -1229,56 +1245,56 @@ class TimeLine(AdhocView):
                 self.log("FIXME: no valid relation type is defined")
             else:
                 # Multiple valid relationtypes.
-                menu=gtk.Menu()
-                item=gtk.MenuItem(_("Select the appropriate relation type"))
+                menu=Gtk.Menu()
+                item=Gtk.MenuItem(_("Select the appropriate relation type"))
                 menu.append(item)
                 item.set_sensitive(False)
                 for rt in relationtypes:
-                    sitem=gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
+                    sitem=Gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
                     sitem.connect('activate', copy_annotation, source, dest, None, rt)
                     menu.append(sitem)
                 menu.show_all()
-                menu.popup(None, None, None, 0, gtk.get_current_event_time())
+                menu.popup_at_pointer(None)
             return True
 
         # ACTION_ASK: Popup a menu to propose the drop options
-        menu=gtk.Menu()
+        menu=Gtk.Menu()
 
         dest_title=self.controller.get_title(dest)
 
         if len(sources) > 1:
             if source.type == dest:
                 return True
-            item=gtk.MenuItem(_("Duplicate selection to type %s") % dest_title, use_underline=False)
+            item=Gtk.MenuItem(_("Duplicate selection to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_selection, sources, dest)
             menu.append(item)
-            item=gtk.MenuItem(_("Move selection to type %s") % dest_title, use_underline=False)
+            item=Gtk.MenuItem(_("Move selection to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_selection, sources, dest, True)
             menu.append(item)
 
             menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            menu.popup_at_pointer(None)
             return True
 
         if source.type != dest:
-            item=gtk.MenuItem(_("Duplicate annotation to type %s") % dest_title, use_underline=False)
+            item=Gtk.MenuItem(_("Duplicate annotation to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_annotation, source, dest)
             menu.append(item)
 
-            item=gtk.MenuItem(_("Move annotation to type %s") % dest_title, use_underline=False)
+            item=Gtk.MenuItem(_("Move annotation to type %s") % dest_title, use_underline=False)
             item.connect('activate', move_annotation, source, dest)
             menu.append(item)
             if source.relations:
                 item.set_sensitive(False)
 
         if position is not None and abs(position-source.fragment.begin) > 1000:
-            item=gtk.MenuItem(_("Duplicate to type %(type)s at %(position)s") % {
+            item=Gtk.MenuItem(_("Duplicate to type %(type)s at %(position)s") % {
                     'type': dest_title,
                     'position': helper.format_time(position) }, use_underline=False)
             item.connect('activate', copy_annotation, source, dest, position)
             menu.append(item)
 
-            item=gtk.MenuItem(_("Move to type %(type)s at %(position)s") % {
+            item=Gtk.MenuItem(_("Move to type %(type)s at %(position)s") % {
                         'type': dest_title,
                         'position': helper.format_time(position) }, use_underline=False)
             item.connect('activate', move_annotation, source, dest, position)
@@ -1288,29 +1304,29 @@ class TimeLine(AdhocView):
 
         if relationtypes:
             if source.type != dest:
-                item=gtk.MenuItem(_("Duplicate and create a relation"), use_underline=False)
+                item=Gtk.MenuItem(_("Duplicate and create a relation"), use_underline=False)
                 # build a submenu
-                sm=gtk.Menu()
+                sm=Gtk.Menu()
                 for rt in relationtypes:
-                    sitem=gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
+                    sitem=Gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
                     sitem.connect('activate', copy_annotation, source, dest, None, rt)
                     sm.append(sitem)
                 menu.append(item)
                 item.set_submenu(sm)
 
             if position is not None:
-                item=gtk.MenuItem(_("Duplicate at %s and create a relation") % helper.format_time(position), use_underline=False)
+                item=Gtk.MenuItem(_("Duplicate at %s and create a relation") % helper.format_time(position), use_underline=False)
                 # build a submenu
-                sm=gtk.Menu()
+                sm=Gtk.Menu()
                 for rt in relationtypes:
-                    sitem=gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
+                    sitem=Gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
                     sitem.connect('activate', copy_annotation, source, dest, position, rt)
                     sm.append(sitem)
                 menu.append(item)
                 item.set_submenu(sm)
 
         menu.show_all()
-        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        menu.popup_at_pointer(None)
 
     def copy_annotation_type(self, source, dest):
         """Display a popup menu to copy the source annotation type to the dest annotation type.
@@ -1432,7 +1448,7 @@ class TimeLine(AdhocView):
             return True
 
         # Popup a menu to propose the drop options
-        menu=gtk.Menu()
+        menu=Gtk.Menu()
 
         source_title=self.controller.get_title(source)
         dest_title=self.controller.get_title(dest)
@@ -1452,42 +1468,42 @@ class TimeLine(AdhocView):
                 (_("Align all annotation contents using %s as reference") % source_title,
                  (DTWalign_annotations, source, dest, 'content', True) ),
                 ):
-                item=gtk.MenuItem(label, use_underline=False)
+                item=Gtk.MenuItem(label, use_underline=False)
                 item.connect('activate', *action)
                 menu.append(item)
 
         menu.show_all()
-        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        menu.popup_at_pointer(None)
 
     def annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
             dest=widget.annotationtype
             self.move_or_copy_annotations(sources, dest)
         elif targetType == config.data.target_type['annotation-type']:
             # Copy annotations
-            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+            source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
             dest=widget.annotationtype
             self.copy_annotation_type(source, dest)
         elif targetType == config.data.target_type['color']:
             # Got a color
             # The structure consists in 4 unsigned shorts: r, g, b, opacity
-            (r, g, b, opacity)=struct.unpack('HHHH', selection.data)
+            (r, g, b, opacity)=struct.unpack('HHHH', selection.get_data())
             widget.annotationtype.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (r, g, b))
             self.controller.notify('AnnotationTypeEditEnd', annotationtype=widget.annotationtype)
         elif targetType == config.data.target_type['timestamp']:
-            data=decode_drop_parameters(selection.data)
+            data=decode_drop_parameters(selection.get_data())
             begin=long(data['timestamp'])
             content=data.get('comment', None)
             # Create an annotation with the timestamp as begin
             self.controller.create_annotation(begin, widget.annotationtype, content=content)
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return True
 
     def new_annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
             # Create a type
             dest=self.create_annotation_type()
             if dest is None:
@@ -1498,7 +1514,7 @@ class TimeLine(AdhocView):
         elif targetType == config.data.target_type['timestamp']:
             typ=self.create_annotation_type()
             if typ is not None:
-                data=decode_drop_parameters(selection.data)
+                data=decode_drop_parameters(selection.get_data())
                 begin=long(data['timestamp'])
                 content=data.get('comment', None)
                 # Create an annotation of type typ with the timestamp as begin
@@ -1509,12 +1525,12 @@ class TimeLine(AdhocView):
         """Handle the drop from an annotation-type to the legend
         """
         if targetType == config.data.target_type['annotation-type']:
-            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+            source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
             # We received a drop. Determine the location.
             s = config.data.preferences['timeline']['interline-height']
 
             # Correct y value according to scrollbar position
-            y += widget.parent.get_vscrollbar().get_adjustment().get_value()
+            y += widget.get_parent().get_vscrollbar().get_adjustment().get_value()
 
             f=[ at
                 for (at, p) in self.layer_position.iteritems()
@@ -1575,13 +1591,13 @@ class TimeLine(AdhocView):
         """Handle button presses on annotation widgets.
         """
         widget._single_click_guard=False
-        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+        if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
             self.annotation_cb(widget, annotation, event.x)
             return True
-        elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+        elif event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
             self.controller.gui.edit_element(annotation)
             return True
-        elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS and event.state & gtk.gdk.CONTROL_MASK:
+        elif event.button == 1 and event.type == Gdk.EventType.BUTTON_PRESS and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Control + click : set annotation begin/end time to current time
             f=self.annotation_fraction(widget)
             if f < .40:
@@ -1599,15 +1615,15 @@ class TimeLine(AdhocView):
             self.controller.notify('EditSessionEnd', element=annotation)
             return True
         elif (event.button == 1
-              and event.type == gtk.gdk.BUTTON_PRESS
-              and event.state & gtk.gdk.SHIFT_MASK):
+              and event.type == Gdk.EventType.BUTTON_PRESS
+              and event.get_state() & Gdk.ModifierType.SHIFT_MASK):
             # Shift-click: toggle annotation selection/activation
             if widget.active:
                 self.desactivate_annotation (annotation, buttons=[ widget ])
             else:
                 self.activate_annotation (annotation, buttons=[ widget ])
             return True
-        elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
+        elif event.button == 1 and event.type == Gdk.EventType.BUTTON_PRESS:
             widget._single_click_guard=True
             return True
         return False
@@ -1628,14 +1644,14 @@ class TimeLine(AdhocView):
             button.grab_focus()
             return True
 
-        e=gtk.Entry()
+        e=Gtk.Entry()
         # get_title will either return the content data, or the computed representation
         e.set_text(self.controller.get_title(annotation))
         e.set_activates_default(True)
 
-        completion = gtk.EntryCompletion()
+        completion = Gtk.EntryCompletion()
         # Build the completion list
-        store = gtk.ListStore(str)
+        store = Gtk.ListStore(str)
         for c in self.controller.package._indexer.get_completions("", context=annotation):
             store.append([ c ])
         completion.set_model(store)
@@ -1643,8 +1659,8 @@ class TimeLine(AdhocView):
         e.set_completion(completion)
 
         def key_handler(widget, event, ann, cb, controller, close_eb):
-            if event.keyval == gtk.keysyms.Return:
-                r = helper.title2content(widget.get_text(),
+            if event.keyval == Gdk.KEY_Return:
+                r = helper.title2content(widget.get_text().decode('utf-8'),
                                          ann.content.data,
                                          ann.type.getMetaData(config.data.namespace, "representation"))
                 if r is None:
@@ -1659,15 +1675,15 @@ class TimeLine(AdhocView):
                         self.controller.notify('EditSessionEnd', element=ann)
                 close_eb(widget)
                 return True
-            elif event.keyval == gtk.keysyms.Escape:
+            elif event.keyval == Gdk.KEY_Escape:
                 # Abort and close the entry
                 if cb:
                     cb('cancel', ann)
                 close_eb(widget)
                 return True
-            elif event.keyval == gtk.keysyms.Tab:
+            elif event.keyval == Gdk.KEY_Tab:
                 # Validate the current annotation and go to the previous/next one
-                r = helper.title2content(widget.get_text(),
+                r = helper.title2content(widget.get_text().decode('utf-8'),
                                          ann.content.data,
                                          ann.type.getMetaData(config.data.namespace, "representation"))
                 if r is None:
@@ -1682,7 +1698,7 @@ class TimeLine(AdhocView):
                         self.controller.notify('EditSessionEnd', element=ann)
                 # Navigate
                 b=ann.fragment.begin
-                if event.state & gtk.gdk.SHIFT_MASK:
+                if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                     # Previous.
                     l=[a
                        for a in ann.type.annotations
@@ -1714,15 +1730,15 @@ class TimeLine(AdhocView):
             # We have just create the annotation widget. Its child
             # properties wrt. layout are not yet updated. Simply
             # compute them again.
-            button.parent.put(e, self.unit2pixel(annotation.fragment.begin, absolute=True), self.layer_position[annotation.type])
+            button.get_parent().put(e, self.unit2pixel(annotation.fragment.begin, absolute=True), self.layer_position[annotation.type])
         else:
-            button.parent.put(e, al.x, al.y)
+            button.get_parent().put(e, al.x, al.y)
         e.connect('size-allocate', grab_focus)
         # Keep the inspector window open on the annotation
         self.set_annotation(annotation)
         if move_cursor:
-            d=gtk.gdk.display_get_default()
-            x,y=button.window.get_deskrelative_origin()
+            d=Gdk.Display.get_default()
+            x,y=button.get_window().get_deskrelative_origin()
             d.warp_pointer(d.get_default_screen(), x + 2, y + 2)
         return e
 
@@ -1732,21 +1748,21 @@ class TimeLine(AdhocView):
         if widget.keypress(widget, event, annotation):
             return True
 
-        if event.keyval == gtk.keysyms.Return and event.state & gtk.gdk.CONTROL_MASK:
+        if event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Control-return: split at current player position
             self.controller.split_annotation(annotation, self.controller.player.current_position_value)
             return True
-        elif event.keyval == gtk.keysyms.a:
+        elif event.keyval == Gdk.KEY_a:
             self.controller.gui.adjust_annotation_bound(annotation, 'begin')
-        elif event.keyval == gtk.keysyms.A:
+        elif event.keyval == Gdk.KEY_A:
             self.controller.gui.adjust_annotation_bound(annotation, 'end')
-        elif event.keyval == gtk.keysyms.p:
+        elif event.keyval == Gdk.KEY_p:
             # Play
             f=self.annotation_fraction(widget)
             x, y = widget.get_pointer()
             if (x < 0 or y < 0
-                or x > widget.allocation.width
-                or y > widget.allocation.height):
+                or x > widget.get_allocation().width
+                or y > widget.get_allocation().height):
                 # We are outside the widget. Let the key_pressed_cb
                 # callback from layout handle the key
                 return False
@@ -1761,7 +1777,7 @@ class TimeLine(AdhocView):
             c.update_status (status="set", position=pos)
             c.gui.set_current_annotation(annotation)
             return True
-        elif event.keyval == gtk.keysyms.Return:
+        elif event.keyval == Gdk.KEY_Return:
             # Quick edit
             self.quick_edit(annotation, button=widget)
             return True
@@ -1835,8 +1851,8 @@ class TimeLine(AdhocView):
                 self.controller.player.status != self.controller.player.PlayingStatus):
                 # Check if the annotation is not already visible
                 a = self.adjustment
-                start=a.value
-                finish=a.value + a.page_size
+                start=a.get_value()
+                finish=a.get_value() + a.get_page_size()
                 begin = self.unit2pixel(annotation.fragment.begin, absolute=True)
                 if begin >= start and begin <= finish:
                     return False
@@ -1854,34 +1870,33 @@ class TimeLine(AdhocView):
         b.connect('drag-begin', self.annotation_drag_begin)
         # The button can receive drops (to create relations)
         b.connect('drag-data-received', self.annotation_drag_received)
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation']
-                        + config.data.drag_type['tag']
-                        , gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_ASK )
+        b.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('annotation', 'tag'),
+                        Gdk.DragAction.LINK | Gdk.DragAction.COPY | Gdk.DragAction.MOVE | Gdk.DragAction.ASK )
 
         def annotation_drag_motion(widget, drag_context, x, y, timestamp):
-            actions=drag_context.actions
+            actions=drag_context.get_actions()
             # Dragging an annotation. Set the default action to ASK.
-            if (config.data.drag_type['annotation'][0][0] in drag_context.targets
-                and not actions in ( gtk.gdk.ACTION_LINK, gtk.gdk.ACTION_COPY, gtk.gdk.ACTION_MOVE )):
+            if (config.data.drag_type['annotation'][0][0] in drag_context.list_targets()
+                and not actions in ( Gdk.DragAction.LINK, Gdk.DragAction.COPY, Gdk.DragAction.MOVE )):
                 # No single action was selected. Force ASK
-                drag_context.drag_status(gtk.gdk.ACTION_ASK, timestamp)
+                Gdk.drag_status(drag_context, Gdk.DragAction.ASK, timestamp)
         b.connect('drag-motion', annotation_drag_motion)
 
         # Handle scroll actions
         def handle_scroll_event(button, event):
-            if not (event.state & gtk.gdk.CONTROL_MASK):
+            if not (event.get_state() & Gdk.ModifierType.CONTROL_MASK):
                 return False
-            if event.state & gtk.gdk.SHIFT_MASK:
+            if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 i='second-scroll-increment'
             else:
                 i='scroll-increment'
 
-            if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
+            if event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.RIGHT:
                 incr=-config.data.preferences[i]
-            elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
+            elif event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
                 incr=config.data.preferences[i]
 
             fr=self.annotation_fraction(button)
@@ -1890,7 +1905,7 @@ class TimeLine(AdhocView):
             self.controller.notify('EditSessionStart', element=button.annotation, immediate=True)
 
             newpos = None
-            if event.state & gtk.gdk.SHIFT_MASK:
+            if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 f.begin += incr
                 f.end += incr
                 newpos = f.begin
@@ -1963,8 +1978,8 @@ class TimeLine(AdhocView):
                     # obtained before the widget was realized. There
                     # is a good chance that the value is now
                     # available.
-                    if self.widget.window:
-                        self.inspector_pane.set_position(max((0, self.widget.window.get_size()[0] - 160)))
+                    if self.widget.get_window():
+                        self.inspector_pane.set_position(max((0, self.widget.get_window().get_width() - 160)))
                 if callback:
                     callback()
                 return False
@@ -1977,7 +1992,7 @@ class TimeLine(AdhocView):
                                         1.0 * count / length)
                 self.locked_inspector = True
             self.controller.gui.set_busy_cursor(True)
-            gobject.idle_add(create_annotations, l, length)
+            GObject.idle_add(create_annotations, l, length)
         elif callback:
             callback()
 
@@ -1990,7 +2005,7 @@ class TimeLine(AdhocView):
     def draw_current_mark (self):
         u2p = self.unit2pixel
 
-        red=gtk.gdk.color_parse('red2')
+        red=Gdk.color_parse('red2')
         a = GenericColorButtonWidget('layout_current_mark', container=self)
         a.default_size=(1, max(self.layer_position.values() or (0,)) + self.button_height)
         a.local_color=red
@@ -2036,8 +2051,8 @@ class TimeLine(AdhocView):
         elif (self.options['autoscroll'] == 2
             and (p.status == p.PlayingStatus or p.status == p.PauseStatus)):
             p=self.unit2pixel(pos, absolute=True)
-            begin=self.adjustment.value
-            end=begin + self.adjustment.page_size
+            begin=self.adjustment.get_value()
+            end=begin + self.adjustment.get_page_size()
             if p > end or p < begin:
                 self.center_on_position(pos)
         self.update_current_mark (pos)
@@ -2085,12 +2100,12 @@ class TimeLine(AdhocView):
             widget.set_from_pixbuf(png_to_pixbuf (png, height=max(20, h)))
             if widget.expose_signal is not None:
                 widget.disconnect(widget.expose_signal)
-                widget.expose_signal=None
+                widget.expose_signal = None
             return False
 
         # Remove previous images
         def remove_image(w):
-            if isinstance(w, gtk.Image):
+            if isinstance(w, Gtk.Image):
                 self.scale_layout.remove(w)
                 return True
         self.scale_layout.foreach(remove_image)
@@ -2110,9 +2125,9 @@ class TimeLine(AdhocView):
             u2p=self.unit2pixel
             while t <= self.maximum:
                 # Draw screenshots
-                i=gtk.Image()
+                i=Gtk.Image()
                 i.mark = t
-                i.expose_signal=i.connect('expose-event', display_image, height, step)
+                i.expose_signal=i.connect('draw', display_image, height, step)
                 i.pos = 20
                 # Real timestamp of the snapshot. If < 0 (and a
                 # large value, since it is after used to get best
@@ -2131,13 +2146,13 @@ class TimeLine(AdhocView):
         step = self.pixel2unit (110)
         t = self.minimum
 
-        font = pango.FontDescription("sans 10")
+        font = Pango.FontDescription("sans 10")
 
         while t <= self.maximum:
             x = u2p(t, absolute=True)
 
             # Draw label
-            l = gtk.Label ('|' + helper.format_time (t))
+            l = Gtk.Label(label='|' + helper.format_time (t))
             l.modify_font(font)
             l.mark = t
             l.pos = 1
@@ -2177,34 +2192,34 @@ class TimeLine(AdhocView):
         if event.keyval >= 49 and event.keyval <= 57:
             # 1-9 keys set the zoom factor
             pos=self.get_middle_position()
-            self.fraction_adj.value=1.0/pow(2, event.keyval-49)
+            self.fraction_adj.set_value(1.0/pow(2, event.keyval-49))
             self.set_middle_position(pos)
             return True
-        elif event.keyval == gtk.keysyms.plus and event.state & gtk.gdk.CONTROL_MASK:
+        elif event.keyval == Gdk.KEY_plus and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Zoom in
             a=self.fraction_adj
             pos=self.get_middle_position()
-            a.value=min(a.value + a.page_increment, a.upper)
+            a.set_value(min(a.get_value() + a.get_page_increment(), a.get_upper()))
             self.set_middle_position(pos)
-        elif event.keyval == gtk.keysyms.plus and event.state & gtk.gdk.CONTROL_MASK:
+        elif event.keyval == Gdk.KEY_plus and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Zoom out
             a=self.fraction_adj
             pos=self.get_middle_position()
-            a.value=max(a.value - a.page_increment, a.lower)
+            a.set_value(max(a.get_value() - a.get_page_increment(), a.get_lower()))
             self.set_middle_position(pos)
-        elif event.keyval == gtk.keysyms.e:
+        elif event.keyval == Gdk.KEY_e:
             if isinstance(self.quickview.annotation, Annotation):
                 self.controller.gui.edit_element(self.quickview.annotation)
                 return True
-        elif event.keyval == gtk.keysyms.c:
+        elif event.keyval == Gdk.KEY_c:
             self.center_on_position(self.current_position)
             return True
-        elif event.keyval == gtk.keysyms.p:
+        elif event.keyval == Gdk.KEY_p:
             # Play at the current position
             x, y = win.get_pointer()
             # Note: x is here relative to the visible portion of the window. Thus we must
-            # add self.adjustment.value
-            position=self.pixel2unit(self.adjustment.value + x, absolute=True)
+            # add self.adjustment.get_value
+            position=self.pixel2unit(self.adjustment.get_value() + x, absolute=True)
             c=self.controller
             pos = c.create_position (value=position,
                                      key=c.player.MediaTime,
@@ -2219,40 +2234,40 @@ class TimeLine(AdhocView):
         # We received a drop. Determine the location.
 
         # Correct y value according to scrollbar position
-        y += widget.parent.get_vscrollbar().get_adjustment().get_value()
+        y += widget.get_parent().get_vscrollbar().get_adjustment().get_value()
         drop_types=[ at
                      for (at, p) in self.layer_position.iteritems()
                      if (y >= p and y <= p + self.button_height + config.data.preferences['timeline']['interline-height']) ]
 
         if targetType == config.data.target_type['annotation']:
-            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
             if drop_types:
                 # Copy/Move to a[0]
                 if config.data.os == 'win32':
                     # Control/Shift mods for DND is broken on win32. Force ACTION_ASK.
-                    ac=gtk.gdk.ACTION_ASK
+                    ac=Gdk.DragAction.ASK
                 else:
-                    ac=context.actions
-                self.move_or_copy_annotations(sources, drop_types[0], position=self.pixel2unit(self.adjustment.value + x, absolute=True), action=ac)
+                    ac=context.get_actions()
+                self.move_or_copy_annotations(sources, drop_types[0], position=self.pixel2unit(self.adjustment.get_value() + x, absolute=True), action=ac)
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
                 dest=self.create_annotation_type()
                 if dest is None:
                     return True
-                self.move_or_copy_annotations(sources, dest, position=self.pixel2unit(self.adjustment.value + x, absolute=True), action=context.actions)
+                self.move_or_copy_annotations(sources, dest, position=self.pixel2unit(self.adjustment.get_value() + x, absolute=True), action=context.get_actions())
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+            source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
             if drop_types:
                 # Copy/Move to drop_types[0]
                 if source != drop_types[0]:
                     self.copy_annotation_type(source, drop_types[0])
                 else:
                     # Create an annotation in the type.
-                    self.controller.create_annotation(position=self.pixel2unit(self.adjustment.value + x, absolute=True),
+                    self.controller.create_annotation(position=self.pixel2unit(self.adjustment.get_value() + x, absolute=True),
                                                       type=source,
-                                                      duration=self.pixel2unit(context.get_source_widget().get_allocation().width),
+                                                      duration=self.pixel2unit(Gtk.drag_get_source_widget(context).get_allocation().width),
                                                       )
             else:
                 # Maybe we should propose to create a new annotation-type ?
@@ -2269,13 +2284,13 @@ class TimeLine(AdhocView):
             else:
                 typ=self.create_annotation_type()
             if typ is not None:
-                data=decode_drop_parameters(selection.data)
+                data=decode_drop_parameters(selection.get_data())
                 begin=long(data['timestamp'])
                 content=data.get('comment', None)
                 # Create an annotation of type typ with the timestamp as begin
                 self.controller.create_annotation(begin, typ, content=content)
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return False
 
     def scale_layout_button_press_cb(self, widget=None, event=None):
@@ -2287,8 +2302,8 @@ class TimeLine(AdhocView):
         # Convert x, y (relative to the layout allocation) into
         # values relative to the whole layout size
         p=widget.get_parent()
-        x=long(p.get_hadjustment().value + x)
-        y=long(p.get_vadjustment().value + y)
+        x=long(p.get_hadjustment().get_value() + x)
+        y=long(p.get_vadjustment().get_value() + y)
 
         if event.button == 3:
             self.context_cb (timel=self, position=self.pixel2unit(x, absolute=True), height=y)
@@ -2327,18 +2342,18 @@ class TimeLine(AdhocView):
         # Convert x, y (relative to the layout allocation) into
         # values relative to the whole layout size
         p=widget.get_parent()
-        x=long(p.get_hadjustment().value + x)
-        y=long(p.get_vadjustment().value + y)
+        x=long(p.get_hadjustment().get_value() + x)
+        y=long(p.get_vadjustment().get_value() + y)
 
         if event.button == 3:
             self.context_cb (timel=self, position=self.pixel2unit(x, absolute=True), height=y)
             return True
         elif event.button == 1:
-            if event.state & gtk.gdk.CONTROL_MASK:
+            if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 # Control-click: create annotation + edit it
                 ats=[ at
-                    for (at, p) in self.layer_position.iteritems()
-                    if (y >= p and y <= p + self.button_height) ]
+                      for (at, pos) in self.layer_position.iteritems()
+                      if (y >= pos and y <= pos + self.button_height) ]
                 if not ats:
                     at = None
                 else:
@@ -2353,7 +2368,7 @@ class TimeLine(AdhocView):
                         self.quick_edit(el, button=b, callback=set_end_time)
                 return True
 
-            if event.type == gtk.gdk._2BUTTON_PRESS:
+            if event.type == Gdk.EventType._2BUTTON_PRESS:
                 # Double click in the layout: in all cases, goto the position
                 c=self.controller
                 pos = c.create_position (value=self.pixel2unit(x, absolute=True),
@@ -2384,8 +2399,8 @@ class TimeLine(AdhocView):
             # Convert x, y (relative to the layout allocation) into
             # values relative to the whole layout size
             p=widget.get_parent()
-            x=long(p.get_hadjustment().value + x)
-            y=long(p.get_vadjustment().value + y)
+            x=long(p.get_hadjustment().get_value() + x)
+            y=long(p.get_vadjustment().get_value() + y)
 
             if self.layout_selection[0][0] is None:
                 # Some bug here, should not happen except in the case
@@ -2402,7 +2417,7 @@ class TimeLine(AdhocView):
 
             if (abs(x2-x1) > 10 and abs(y2-y1) > 5):
                 # The cursor has been significantly moved. Consider it is a selection.
-                if not (event.state & gtk.gdk.CONTROL_MASK or event.state & gtk.gdk.SHIFT_MASK):
+                if not (event.get_state() & Gdk.ModifierType.CONTROL_MASK or event.get_state() & Gdk.ModifierType.SHIFT_MASK):
                     # Control or shift was not held: it is a new selection.
                     self.unselect_all()
 
@@ -2413,18 +2428,18 @@ class TimeLine(AdhocView):
                     #x=self.layout.child_get_property(widget, 'x')
                     #y=self.layout.child_get_property(widget, 'y')
                     # memory leak in container.child_get_property
-                    x,y = widget.window.get_position()
-                    w,h = widget.window.get_size()
-                    if ( x >= x1 and x + w <= x2
-                         and y >= y1 and y + h <= y2):
+                    w = widget.get_window()
+                    x, y = w.get_position()
+                    if ( x >= x1 and x + w.get_width() <= x2
+                         and y >= y1 and y + w.get_height() <= y2):
                         self.activate_annotation(widget.annotation, buttons=[ widget ])
                         res.append(widget)
 
                 if not res:
                     # No selected annotations. Propose to create a new one.
                     a=[ at
-                        for (at, p) in self.layer_position.iteritems()
-                        if (y1 >= p and y1 <= p + self.button_height) ]
+                        for (at, pos) in self.layer_position.iteritems()
+                        if (y1 >= pos and y1 <= pos + self.button_height) ]
                     at = None
                     if a:
                         at = a[0]
@@ -2443,7 +2458,7 @@ class TimeLine(AdhocView):
                                            self.pixel2unit(x2, absolute=True))
                         return True
 
-                    menu=gtk.Menu()
+                    menu=Gtk.Menu()
                     for (label, action) in (
                         (_("Create a new annotation"), create),
                         (_("Zoom on region"), zoom),
@@ -2451,25 +2466,27 @@ class TimeLine(AdhocView):
                         ):
                         if at is None and action == create:
                             continue
-                        i=gtk.MenuItem(label)
+                        i=Gtk.MenuItem(label)
                         i.connect('activate', action)
                         menu.append(i)
                     menu.show_all()
-                    menu.popup(None, None, None, 0, gtk.get_current_event_time())
+                    menu.popup_at_pointer(None)
                 return True
         return False
 
     def draw_selection_rectangle(self, invert=False):
-        drawable=self.layout.bin_window
-        gc=drawable.new_gc(line_width=1, line_style=gtk.gdk.LINE_ON_OFF_DASH)
+        drawable=self.layout.get_bin_window()
+        ctx = drawable.cairo_create()
+        ctx.set_line_width(1)
+        ctx.set_dash([ 10 ])
 
         if self.layout_selection[1][0] is not None:
             # Invert the previous selection
             #col=pixmap.get_colormap().alloc_color(self.color)
             if invert:
-                gc.set_function(gtk.gdk.INVERT)
+                ctx.set_operator(cairo.OPERATOR_XOR)
             else:
-                gc.set_function(gtk.gdk.COPY)
+                ctx.set_operator(cairo.OPERATOR_OVER)
 
             x1=min(self.layout_selection[0][0], self.layout_selection[1][0])
             x2=max(self.layout_selection[0][0], self.layout_selection[1][0])
@@ -2477,21 +2494,23 @@ class TimeLine(AdhocView):
             y2=max(self.layout_selection[0][1], self.layout_selection[1][1])
 
             # Display the starting mark
-            drawable.draw_rectangle(gc, False, x1, y1, x2-x1, y2-y1)
+            ctx.rectangle(x1, y1, x2-x1, y2-y1)
+        ctx.stroke()
         return True
 
     # Draw rectangle during mouse movement
     def layout_motion_notify_cb(self, widget, event):
         if event.is_hint:
-            x, y, state = event.window.get_pointer()
+            pointer = event.get_window().get_pointer()
+            x, y, state = pointer[1], pointer[2], pointer[3]
         else:
             x = event.x
             y = event.y
-            state = event.state
+            state = event.get_state()
 
-        if state & gtk.gdk.BUTTON1_MASK:
+        if state & Gdk.ModifierType.BUTTON1_MASK:
             # Display current time
-            self.set_annotation(self.pixel2unit(self.adjustment.value + x, absolute=True))
+            self.set_annotation(self.pixel2unit(self.adjustment.get_value() + x, absolute=True))
             if self.layout_selection[0][0] is None:
                 return False
             if self.layout_selection[1][0] is not None:
@@ -2504,23 +2523,23 @@ class TimeLine(AdhocView):
         return True
 
     def layout_drag_motion_cb(self, widget, drag_context, x, y, timestamp):
-        t=self.pixel2unit(self.adjustment.value +  x, absolute=True)
-        w=drag_context.get_source_widget()
+        t=self.pixel2unit(self.adjustment.get_value() +  x, absolute=True)
+        w=Gtk.drag_get_source_widget(drag_context)
         precision=max(20, self.pixel2unit(1, absolute=False))
         try:
             w._icon.set_cursor(t, precision)
         except AttributeError:
             pass
-        actions=drag_context.actions
+        actions=drag_context.get_actions()
         # Dragging an annotation. Set the default action to ASK.
-        if (config.data.drag_type['annotation'][0][0] in drag_context.targets
-            and not actions in ( gtk.gdk.ACTION_LINK, gtk.gdk.ACTION_COPY, gtk.gdk.ACTION_MOVE )):
+        if (config.data.drag_type['annotation'][0][0] in drag_context.list_targets()
+            and not actions in ( Gdk.DragAction.LINK, Gdk.DragAction.COPY, Gdk.DragAction.MOVE )):
             # No single action was selected. Force ASK
-            drag_context.drag_status(gtk.gdk.ACTION_ASK, timestamp)
+            Gdk.drag_status(drag_context, Gdk.DragAction.ASK, timestamp)
         return True
 
     def layout_drag_leave_cb(self, widget, drag_context, timestamp):
-        w=drag_context.get_source_widget()
+        w=Gtk.drag_get_source_widget(drag_context)
         try:
             w._icon.set_cursor()
         except AttributeError:
@@ -2533,7 +2552,7 @@ class TimeLine(AdhocView):
         # This callback is called on a right-mouse-button press
         # in the timeline display. It is called with the
         # current position (in ms)
-        menu = gtk.Menu()
+        menu = Gtk.Menu()
 
         def popup_goto (win, position):
             c=self.controller
@@ -2556,25 +2575,25 @@ class TimeLine(AdhocView):
             self.controller.create_annotation(position, at)
             return True
 
-        item = gtk.MenuItem(_("Position %s") % helper.format_time(position))
+        item = Gtk.MenuItem(_("Position %s") % helper.format_time(position))
         menu.append(item)
 
-        item = gtk.SeparatorMenuItem()
+        item = Gtk.SeparatorMenuItem()
         menu.append(item)
 
-        item = gtk.MenuItem(_("Go to..."))
+        item = Gtk.MenuItem(_("Go to..."))
         item.connect('activate', popup_goto, position)
         menu.append(item)
 
-        item = gtk.MenuItem(_("New annotation at player time"))
+        item = Gtk.MenuItem(_("New annotation at player time"))
         item.connect('activate', create_annotation, self.controller.player.current_position_value)
         menu.append(item)
 
-        item = gtk.MenuItem(_("New annotation at mouse position"))
+        item = Gtk.MenuItem(_("New annotation at mouse position"))
         item.connect('activate', create_annotation, position)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Selection"))
+        item = Gtk.MenuItem(_("Selection"))
         if self.get_selected_annotation_widgets():
             item.set_submenu(self.selection_menu(popup=False))
         else:
@@ -2582,7 +2601,7 @@ class TimeLine(AdhocView):
         menu.append(item)
 
         menu.show_all()
-        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        menu.popup_at_pointer(None)
         return True
 
     def update_adjustment (self):
@@ -2593,27 +2612,25 @@ class TimeLine(AdhocView):
 
         width = self.maximum - self.minimum
 
-        #a.value=u2p(minimum)
-        a.lower=float(u2p(self.minimum, absolute=True))
-        a.upper=float(u2p(self.maximum, absolute=True))
-        a.step_increment=min(float(u2p(width / 100)), 10)
-        a.page_increment=float(u2p(width / 10))
-        a.page_size=min(a.upper, self.layout.get_allocation().width)
-        #print "Update: from %.2f to %.2f" % (a.lower, a.upper)
+        #a.set_value(u2p(minimum))
+        a.set_lower(float(u2p(self.minimum, absolute=True)))
+        a.set_upper(float(u2p(self.maximum, absolute=True)))
+        a.set_step_increment(min(float(u2p(width / 100)), 10))
+        a.set_page_increment(float(u2p(width / 10)))
+        a.set_page_size(min(a.get_upper(), self.layout.get_allocation().width))
+        #print "Update: from %.2f to %.2f" % (a.get_lower(), a.get_upper())
         a.changed ()
 
     def scale_event (self, widget=None, data=None):
-        if not self.update_lock.acquire(False) or self.layout.window is None:
+        if not self.update_lock.acquire(False) or self.layout.get_window() is None:
             # An update is pending. Ignore the scale event.
             return True
         self.update_adjustment ()
 
         # Update the layout and scale_layout dimensions
         width = self.unit2pixel(self.maximum - self.minimum)
-        (w, h) = self.layout.get_size ()
-        self.layout.set_size (width, h)
-        (w, h) = self.scale_layout.get_size ()
-        self.scale_layout.set_size (width, h)
+        self.layout.set_size (width, self.layout.get_size()[1])
+        self.scale_layout.set_size (width, self.scale_layout.get_size()[1])
 
         # Update the scale legend
         if config.data.preferences['expert-mode']:
@@ -2627,23 +2644,21 @@ class TimeLine(AdhocView):
     def layout_resize_event(self, widget=None, event=None, *p):
         """Recompute fraction_adj value when the layout size changes
         """
-        parent = self.layout.window
+        parent = self.layout.get_window()
         if not parent:
             return False
-        (w, h) = parent.get_size ()
         if self.maximum != self.minimum:
-            fraction=self.scale.value * float(w) / (self.maximum - self.minimum)
+            fraction=self.scale.get_value() * float(parent.get_width()) / (self.maximum - self.minimum)
             #print "Layout resize, reset fraction_adj to ", fraction, w
-            self.fraction_adj.value=fraction
-            self.zoom_combobox.child.set_text('%d%%' % long(100 * fraction))
+            self.fraction_adj.set_value(fraction)
+            self.zoom_combobox.get_child().set_text('%d%%' % long(100 * fraction))
         return False
 
     def zoom_on_region(self, begin, end):
         # Deactivate autoscroll...
         self.set_autoscroll_mode(0)
 
-        (w, h) = self.layout.window.get_size ()
-        self.scale.value=1.3 * (end - begin) / w
+        self.scale.set_value(1.3 * (end - begin) / self.layout.get_window().get_width())
 
         # Center on annotation
         self.center_on_position( (begin + end) / 2 )
@@ -2653,13 +2668,13 @@ class TimeLine(AdhocView):
         """Limit the timeline to the specified or currently displayed area.
         """
         if minimum is None:
-            minimum=self.pixel2unit(self.adjustment.value, absolute=True)
-            maximum=self.pixel2unit(self.adjustment.value + self.adjustment.page_size, absolute=True)
+            minimum=self.pixel2unit(self.adjustment.get_value(), absolute=True)
+            maximum=self.pixel2unit(self.adjustment.get_value() + self.adjustment.get_page_size(), absolute=True)
         # Cannot do the assignment immediately, since unit2pixel uses self.minimum
         self.minimum = minimum
         self.maximum = maximum
         self.update_model(partial_update=True)
-        self.fraction_adj.value=1.0
+        self.fraction_adj.set_value(1.0)
         self.limit_navtools.show()
         return True
 
@@ -2673,7 +2688,7 @@ class TimeLine(AdhocView):
             # Not valid data either. Use a default value.
             self.maximum=42000
         self.update_model(partial_update=True)
-        self.fraction_adj.value=1.0
+        self.fraction_adj.set_value(1.0)
         self.limit_navtools.hide()
         return True
 
@@ -2682,10 +2697,10 @@ class TimeLine(AdhocView):
 
         fraction is > 0 and <= 1.
         """
-        parent = self.layout.window
+        parent = self.layout.get_window()
         if not parent:
             return True
-        (w, h) = parent.get_size ()
+        w = parent.get_width()
         if forced_window_width != 0:
             w = forced_window_width
 
@@ -2695,7 +2710,7 @@ class TimeLine(AdhocView):
         if self.minimum == self.maximum:
             return True
 
-        fraction = self.fraction_adj.value
+        fraction = self.fraction_adj.get_value()
 
         v = (self.maximum - self.minimum) / float(w) * fraction
         # New width in pixel
@@ -2704,23 +2719,23 @@ class TimeLine(AdhocView):
             return True
 
         # Is it worth redrawing the whole timeline ?
-        if abs(v - self.scale.value) / float(self.scale.value) > 0.01:
+        if abs(v - self.scale.get_value()) / float(self.scale.get_value()) > 0.01:
             self.scale.set_value(v)
-        self.zoom_combobox.child.set_text('%d%%' % long(100 * fraction))
+        self.zoom_combobox.get_child().set_text('%d%%' % long(100 * fraction))
 
         return True
 
     def layout_scroll_cb(self, widget=None, event=None):
         """Handle mouse scrollwheel events.
         """
-        if event.direction == gtk.gdk.SCROLL_RIGHT or event.direction == gtk.gdk.SCROLL_LEFT:
+        if event.direction == Gdk.ScrollDirection.RIGHT or event.direction == Gdk.ScrollDirection.LEFT:
             self.can_do_horizontal_scroll = True
 
-        zoom=event.state & gtk.gdk.CONTROL_MASK
+        zoom=event.get_state() & Gdk.ModifierType.CONTROL_MASK
         if zoom:
             # Control+scroll: zoom in/out
             a = self.fraction_adj
-            incr = a.page_increment
+            incr = a.get_page_increment()
             # Memorize mouse position (in units)
             # Get x, y (relative to the layout allocation)
             x,y=widget.get_pointer()
@@ -2728,32 +2743,27 @@ class TimeLine(AdhocView):
         else:
             # Plain scroll: scroll the timeline
             if (self.can_do_horizontal_scroll
-                and (event.direction == gtk.gdk.SCROLL_UP
-                     or event.direction == gtk.gdk.SCROLL_DOWN)):
+                and (event.direction == Gdk.ScrollDirection.UP
+                     or event.direction == Gdk.ScrollDirection.DOWN)):
                 # Vertical scroll with a device that knows how to do horizontal. Let's scroll vertically
                 a = self.vadjustment
-                incr = a.step_increment
+                incr = a.get_step_increment()
             else:
                 a = self.adjustment
-                incr = a.step_increment
+                incr = a.get_step_increment()
 
-        if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
-            val = a.value + incr
-            if val > a.upper - a.page_size:
-                val = a.upper - a.page_size
-            if val != a.value:
-                a.value = val
-
-        elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
-            val = a.value - incr
-            if val < a.lower:
-                val = a.lower
-            if val != a.value:
-                a.value = val
+        if event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.RIGHT:
+            a.set_value(helper.clamp(a.get_value() + incr,
+                                     a.get_lower(),
+                                     a.get_upper() - a.get_page_size()))
+        elif event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
+            a.set_value(helper.clamp(a.get_value() - incr,
+                                     a.get_lower(),
+                                     a.get_upper() - a.get_page_size()))
 
         # Try to preserve the mouse position when zooming
         if zoom:
-            self.adjustment.value=self.unit2pixel(mouse_position, absolute=True) - x
+            self.adjustment.set_value(self.unit2pixel(mouse_position, absolute=True) - x)
         return True
 
     def redraw_event(self, widget=None, data=None):
@@ -2769,8 +2779,8 @@ class TimeLine(AdhocView):
                                   self.layer_position[w.annotation.type])
             return True
 
-        if self.old_scale_value != self.scale.value:
-            self.old_scale_value = self.scale.value
+        if self.old_scale_value != self.scale.get_value():
+            self.old_scale_value = self.scale.get_value()
             # Reposition all buttons
             self.layout.foreach(move_widget)
             self.layout.remove(self.current_marker)
@@ -2783,7 +2793,7 @@ class TimeLine(AdhocView):
         return False
 
     def resize_legend_widget(self, layout):
-        width=0
+        width=120
         for c in layout.get_children():
             if not isinstance(c, AnnotationTypeWidget):
                 continue
@@ -2814,7 +2824,7 @@ class TimeLine(AdhocView):
         if layout.get_parent() is not None:
             p = layout.get_parent().get_parent()
             if p is not None:
-                layout.get_parent().get_parent().set_position (width + 60)
+                p.set_position (width + 60)
 
     def restrict_playing(self, at, widget=None):
         """Restrict playing to the given annotation-type.
@@ -2845,7 +2855,6 @@ class TimeLine(AdhocView):
 
         Its content may have changed.
         """
-        width=0
         height=0
 
         def navigate(b, event, direction, typ):
@@ -2874,10 +2883,10 @@ class TimeLine(AdhocView):
         def annotationtype_keypress_handler(widget, event, at):
             if widget.keypress(widget, event, at):
                 return True
-            elif event.keyval == gtk.keysyms.a:
+            elif event.keyval == Gdk.KEY_a:
                 # Adjust bounds
                 self.controller.gui.adjust_annotationtype_bounds(at)
-            elif event.keyval == gtk.keysyms.Return:
+            elif event.keyval == Gdk.KEY_Return:
                 def set_end_time(action, an):
                     if action == 'validate':
                         v = self.controller.player.current_position_value
@@ -2905,7 +2914,7 @@ class TimeLine(AdhocView):
                     b.show()
                     self.quick_edit(el, button=b, callback=set_end_time)
                 return True
-            elif event.keyval == gtk.keysyms.space:
+            elif event.keyval == Gdk.KEY_space:
                 self.restrict_playing(at, widget)
                 return True
             return False
@@ -2913,7 +2922,7 @@ class TimeLine(AdhocView):
         def annotationtype_buttonpress_handler(widget, event, t):
             """Display the popup menu when right-clicking on annotation type.
             """
-            if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
                 menu=advene.gui.popup.Menu(t, controller=self.controller)
                 menu.popup()
                 return True
@@ -2936,10 +2945,10 @@ class TimeLine(AdhocView):
 
                 a=self.legend.get_vadjustment()
                 y=self.legend.child_get_property(button, 'y')
-                if y < a.value:
-                    pos=max(a.lower, y)
-                elif y > a.value + a.page_size:
-                    pos=min(a.upper - a.page_size, y)
+                if y < a.get_value():
+                    pos=max(a.get_lower(), y)
+                elif y > a.get_value() + a.get_page_size():
+                    pos=min(a.get_upper() - a.get_page_size(), y)
                 else:
                     pos=None
                 if pos is not None:
@@ -2957,14 +2966,14 @@ class TimeLine(AdhocView):
 
             # The button can receive drops (to transmute annotations)
             b.connect('drag-data-received', self.annotation_type_drag_received_cb)
-            b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                            gtk.DEST_DEFAULT_HIGHLIGHT |
-                            gtk.DEST_DEFAULT_ALL,
-                            config.data.drag_type['annotation'] +
-                            config.data.drag_type['annotation-type'] +
-                            config.data.drag_type['timestamp'] +
-                            config.data.drag_type['color'],
-                            gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+            b.drag_dest_set(Gtk.DestDefaults.MOTION |
+                            Gtk.DestDefaults.HIGHLIGHT |
+                            Gtk.DestDefaults.ALL,
+                            config.data.get_target_types('annotation',
+                                                         'annotation-type',
+                                                         'timestamp',
+                                                         'color'),
+                            Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
             # The button can generate drags (to change annotation type order)
             enable_drag_source(b, t, self.controller)
 
@@ -2980,6 +2989,7 @@ class TimeLine(AdhocView):
 
             # At the left of the annotation type : restrict_playing button
             p=get_pixmap_button('play.png', restrict_playing, t, b)
+            p.get_style_context().add_class('restrict_playing_button')
             p.set_playing = set_playing.__get__(p)
             p.annotationtype=t
             p.set_size_request(20, self.button_height)
@@ -2987,22 +2997,22 @@ class TimeLine(AdhocView):
             layout.put (p, 0, self.layer_position[t])
 
             # At the right of the annotation type : prev/next buttons
-            nav=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
+            nav=Gtk.Arrow(Gtk.ArrowType.LEFT, Gtk.ShadowType.IN)
             nav.set_size_request(16, self.button_height)
             nav.annotationtype=t
             nav.set_tooltip_text(_('Goto previous annotation'))
-            eb=gtk.EventBox()
+            eb=Gtk.EventBox()
             eb.connect('button-press-event', navigate, 'prev', t)
             eb.add(nav)
             eb.prev=True
             # Put it in an arbitrary location. It will be moved by resize_legend_widget
             layout.put (eb, 102, self.layer_position[t])
 
-            nav=gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
+            nav=Gtk.Arrow(Gtk.ArrowType.RIGHT, Gtk.ShadowType.IN)
             nav.set_size_request(16, self.button_height)
             nav.annotationtype=t
             nav.set_tooltip_text(_('Goto next annotation'))
-            eb=gtk.EventBox()
+            eb=Gtk.EventBox()
             eb.connect('button-press-event', navigate, 'next', t)
             eb.add(nav)
             eb.next=True
@@ -3010,8 +3020,8 @@ class TimeLine(AdhocView):
             layout.put (eb, 112, self.layer_position[t])
 
         # Add the 'New type' button at the end
-        b=gtk.Button()
-        l=gtk.Label()
+        b=Gtk.Button()
+        l=Gtk.Label()
         l.set_markup('<b><span style="normal">%s</span></b>' % _('+'))
         l.modify_font(self.annotation_type_font)
         b.add(l)
@@ -3024,24 +3034,25 @@ class TimeLine(AdhocView):
         b.connect('clicked', self.create_annotation_type)
         # The button can receive drops (to create type and transmute annotations)
         b.connect('drag-data-received', self.new_annotation_type_drag_received_cb)
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation']
-                        + config.data.drag_type['timestamp'],
-                        gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+        b.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('annotation', 'timestamp'),
+                        Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
 
-        layout.set_size (width + 20, height)
+        # Set a default size. We will resize it anyway.
+        layout.set_size(200, height)
+        layout.show()
         self.resize_legend_widget(layout)
         return
 
     def get_full_widget(self):
         """Return the layout with its controllers.
         """
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         vbox.connect('key-press-event', self.layout_key_press_cb)
 
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
         toolbar = self.get_toolbar()
         hb.add(toolbar)
 
@@ -3051,7 +3062,7 @@ class TimeLine(AdhocView):
         # but this prevents DND from working correctly.
         def drag_sent(widget, context, selection, targetType, eventTime, name):
             if targetType == config.data.target_type['adhoc-view']:
-                selection.set(selection.target, 8,
+                selection.set(selection.get_target(), 8,
                               urllib.urlencode( {
                             'name': name,
                             'master': self.controller.gui.get_adhoc_view_instance_id(self),
@@ -3069,29 +3080,29 @@ class TimeLine(AdhocView):
             v.set_master_view(self)
             return True
 
-        b=get_small_stock_button(gtk.STOCK_FIND, open_annotation_display)
+        b=get_small_stock_button(Gtk.STOCK_FIND, open_annotation_display)
         b.set_tooltip_text(_('Open an annotation display view'))
         b.connect('drag-data-get', drag_sent, 'annotationdisplay')
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
-        hb.pack_start(b, expand=False)
+        b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                          config.data.get_target_types('adhoc-view'), Gdk.DragAction.COPY)
+        hb.pack_start(b, False, True, 0)
 
         b=get_pixmap_button('montage.png', open_slave_montage)
         b.set_tooltip_text(_('Open a slave montage view (coordinated zoom level)'))
         b.connect('drag-data-get', drag_sent, 'montage')
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
-        hb.pack_start(b, expand=False)
+        b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                          config.data.get_target_types('adhoc-view'), Gdk.DragAction.COPY)
+        hb.pack_start(b, False, True, 0)
 
         if self.controller.gui:
             self.player_toolbar=self.controller.gui.get_player_control_toolbar()
             hb.add(self.player_toolbar)
 
-        vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hb, False, True, 0)
 
         vbox.add (self.get_packed_widget())
 
-        vbox.pack_start(self.quickview, expand=False)
+        vbox.pack_start(self.quickview, False, True, 0)
 
         return vbox
 
@@ -3115,18 +3126,18 @@ class TimeLine(AdhocView):
                                                    label=_("<b>Statistics about current selection</b>\n\n"))
             return True
 
-        m=gtk.Menu()
+        m=Gtk.Menu()
         l=self.get_selected_annotation_widgets()
         n=len(l)
         if n == 0:
-            i=gtk.MenuItem(_('No selected annotation'))
+            i=Gtk.MenuItem(_('No selected annotation'))
             m.append(i)
             i.set_sensitive(False)
         else:
-            i=gtk.MenuItem(_('%d selected annotation(s)') % n)
+            i=Gtk.MenuItem(_('%d selected annotation(s)') % n)
             m.append(i)
             i.set_sensitive(False)
-            i=gtk.SeparatorMenuItem()
+            i=Gtk.SeparatorMenuItem()
             m.append(i)
 
             for (label, action) in (
@@ -3141,39 +3152,41 @@ class TimeLine(AdhocView):
                 (_('Merge annotations'), self.selection_merge),
                 (_('Display statistics'), display_stats),
                 ):
-                i=gtk.MenuItem(label)
+                i=Gtk.MenuItem(label)
                 i.connect('activate', action, l)
                 m.append(i)
 
         m.show_all()
         if popup:
-            m.popup(None, None, None, 0, gtk.get_current_event_time())
+            m.popup(None, None, None, 0, Gtk.get_current_event_time())
         return m
 
     def get_packed_widget (self):
         """Return the widget packed into a scrolledwindow."""
-        vbox = gtk.VBox ()
+        vbox = Gtk.VBox ()
 
-        content_pane = gtk.HPaned ()
+        content_pane = Gtk.Paned()
+        content_pane.set_name('content_pane')
 
         # The layout can receive drops
         self.legend.connect('drag-data-received', self.legend_drag_received)
-        self.legend.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                  gtk.DEST_DEFAULT_HIGHLIGHT |
-                                  gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['annotation-type'],
-                                  gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
+        self.legend.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                  Gtk.DestDefaults.HIGHLIGHT |
+                                  Gtk.DestDefaults.ALL,
+                                  config.data.get_target_types('annotation-type'),
+                                  Gdk.DragAction.COPY | Gdk.DragAction.LINK)
 
-        sw_legend = gtk.ScrolledWindow ()
-        sw_legend.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
-        sw_legend.set_placement(gtk.CORNER_TOP_RIGHT)
+        sw_legend = Gtk.ScrolledWindow ()
+        sw_legend.set_name('sw_legend')
+        sw_legend.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
+        sw_legend.set_placement(Gtk.CornerType.TOP_RIGHT)
         sw_legend.add (self.legend)
         content_pane.add1 (sw_legend)
 
         # Vertical auto-scroll when DNDing
         def scroll_on_drag(widget, drag_context, x, y, timestamp, vertical=True):
             adj=widget.get_adjustment()
-            v=adj.value
+            v=adj.get_value()
             if vertical:
                 pointer=y
                 ref=widget.get_allocation().height / 2
@@ -3182,28 +3195,22 @@ class TimeLine(AdhocView):
                 ref=widget.get_allocation().width / 2
             if pointer > ref:
                 # Try to scroll down
-                v += max(adj.step_increment, adj.page_increment / 3)
+                v += max(adj.get_step_increment(), adj.get_page_increment() / 3)
             else:
-                v -= max(adj.step_increment, adj.page_increment / 3)
-            if v < 0:
-                v = 0
-            elif v > adj.upper - adj.page_size:
-                v=adj.upper - adj.page_size
-            adj.value=v
+                v -= max(adj.get_step_increment(), adj.get_page_increment() / 3)
+            adj.set_value(helper.clamp(v, 0, adj.get_upper() - adj.get_page_size()))
             return True
         sb=sw_legend.get_vscrollbar()
-        sb.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                         gtk.DEST_DEFAULT_HIGHLIGHT |
-                         gtk.DEST_DEFAULT_ALL,
-                         config.data.drag_type['annotation']
-                         + config.data.drag_type['timestamp']
-                         + config.data.drag_type['annotation-type']
-                         ,
-                         gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        sb.drag_dest_set(Gtk.DestDefaults.MOTION |
+                         Gtk.DestDefaults.HIGHLIGHT |
+                         Gtk.DestDefaults.ALL,
+                         config.data.get_target_types('annotation', 'timestamp', 'annotation-type'),
+                         Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         sb.connect('drag-motion', scroll_on_drag, True)
 
-        sw_layout = gtk.ScrolledWindow ()
-        sw_layout.set_policy (gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
+        sw_layout = Gtk.ScrolledWindow ()
+        sw_layout.set_name('sw_layout')
+        sw_layout.set_policy (Gtk.PolicyType.ALWAYS, Gtk.PolicyType.AUTOMATIC)
         sw_layout.set_hadjustment (self.adjustment)
         self.vadjustment = sw_legend.get_vadjustment()
         sw_layout.set_vadjustment (self.vadjustment)
@@ -3214,42 +3221,37 @@ class TimeLine(AdhocView):
         sw_layout.get_vadjustment().step_increment=10
 
         sb=sw_layout.get_hscrollbar()
-        sb.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                         gtk.DEST_DEFAULT_HIGHLIGHT |
-                         gtk.DEST_DEFAULT_ALL,
-                         config.data.drag_type['annotation']
-                         + config.data.drag_type['timestamp']
-                         + config.data.drag_type['annotation-type']
-                         ,
-                         gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        sb.drag_dest_set(Gtk.DestDefaults.MOTION |
+                         Gtk.DestDefaults.HIGHLIGHT |
+                         Gtk.DestDefaults.ALL,
+                         config.data.get_target_types('annotation', 'timestamp', 'annotation-type'),
+                         Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         sb.connect('drag-motion', scroll_on_drag, False)
 
         sb=sw_layout.get_vscrollbar()
-        sb.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                         gtk.DEST_DEFAULT_HIGHLIGHT |
-                         gtk.DEST_DEFAULT_ALL,
-                         config.data.drag_type['annotation']
-                         + config.data.drag_type['timestamp']
-                         + config.data.drag_type['annotation-type']
-                         ,
-                         gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        sb.drag_dest_set(Gtk.DestDefaults.MOTION |
+                         Gtk.DestDefaults.HIGHLIGHT |
+                         Gtk.DestDefaults.ALL,
+                         config.data.get_target_types('annotation', 'timestamp', 'annotation-type'),
+                         Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         sb.connect('drag-motion', scroll_on_drag)
 
         # Now build the scale_pane
-        scale_pane = gtk.HPaned()
+        scale_pane = Gtk.Paned()
+        scale_pane.set_name('scale_pane')
 
-        vb=gtk.VBox()
-        self.scale_label = gtk.Label('Scale')
-        vb.pack_start(self.scale_label, expand=False)
+        vb=Gtk.VBox()
+        self.scale_label = Gtk.Label(label='Scale')
+        vb.pack_start(self.scale_label, False, True, 0)
         if not config.data.preferences['expert-mode']:
             self.scale_label.hide()
             self.scale_label.set_no_show_all(True)
 
-        self.limit_navtools = gtk.HBox()
+        self.limit_navtools = Gtk.HBox()
 
         def navigate(button, event, direction):
             # Navigate to the previous/next page, when display is limited
-            page_duration=self.pixel2unit(self.adjustment.page_size, absolute=False)
+            page_duration=self.pixel2unit(self.adjustment.get_page_size(), absolute=False)
             if direction == -1:
                 # Previous page
                 mi = max(self.minimum - page_duration, 0)
@@ -3262,25 +3264,25 @@ class TimeLine(AdhocView):
             return True
 
         # At the right of the annotation type : prev/next buttons
-        nav=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
+        nav=Gtk.Arrow(Gtk.ArrowType.LEFT, Gtk.ShadowType.IN)
         nav.set_size_request(16, 16)
         nav.set_tooltip_text(_('Goto previous page'))
-        eb=gtk.EventBox()
+        eb=Gtk.EventBox()
         eb.connect('button-press-event', navigate, -1)
         eb.add(nav)
-        self.limit_navtools.pack_start(eb, expand=False)
+        self.limit_navtools.pack_start(eb, False, True, 0)
 
-        b=get_small_stock_button(gtk.STOCK_ZOOM_100, self.unlimit_display)
+        b=get_small_stock_button(Gtk.STOCK_ZOOM_100, self.unlimit_display)
         b.set_tooltip_text(_("Display whole movie"))
-        self.limit_navtools.pack_start(b, expand=False)
+        self.limit_navtools.pack_start(b, False, True, 0)
 
-        nav=gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
+        nav=Gtk.Arrow(Gtk.ArrowType.RIGHT, Gtk.ShadowType.IN)
         nav.set_size_request(16, 16)
         nav.set_tooltip_text(_('Goto next page'))
-        eb=gtk.EventBox()
+        eb=Gtk.EventBox()
         eb.connect('button-press-event', navigate, +1)
         eb.add(nav)
-        self.limit_navtools.pack_start(eb, expand=False)
+        self.limit_navtools.pack_start(eb, False, True, 0)
 
         # Show contained widgets
         self.limit_navtools.show_all()
@@ -3291,8 +3293,9 @@ class TimeLine(AdhocView):
 
         scale_pane.add1(vb)
 
-        sw_scale=gtk.ScrolledWindow()
-        sw_scale.set_policy(gtk.POLICY_NEVER, gtk.POLICY_NEVER)
+        sw_scale=Gtk.ScrolledWindow()
+        sw_scale.set_name('sw_scale')
+        sw_scale.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.NEVER)
         sw_scale.set_hadjustment (sw_layout.get_hadjustment())
         sw_scale.add(self.scale_layout)
         scale_pane.add2(sw_scale)
@@ -3306,7 +3309,8 @@ class TimeLine(AdhocView):
         scale_pane.connect('button-press-event', ignore)
         scale_pane.connect('button-release-event', ignore)
 
-        self.global_pane=gtk.VPaned()
+        self.global_pane=Gtk.Paned.new(Gtk.Orientation.VERTICAL)
+        self.global_pane.set_name('global_pane')
 
         self.global_pane.add1(scale_pane)
         self.global_pane.add2(content_pane)
@@ -3316,15 +3320,15 @@ class TimeLine(AdhocView):
 
         vbox.add (self.global_pane)
 
-        (w, h) = self.legend.get_size ()
-        content_pane.set_position (max(w, 100))
+        content_pane.set_position (max(self.legend.get_size()[0], 100))
 
-        self.inspector_pane=gtk.HPaned()
+        self.inspector_pane=Gtk.Paned()
+        self.inspector_pane.set_name('inspector_pane')
         self.inspector_pane.pack1(vbox, resize=True, shrink=True)
         a=AnnotationDisplay(controller=self.controller)
-        self.inspector_frame=gtk.Frame()
-        hbox = gtk.HBox()
-        hbox.pack_start(gtk.Label(_('Inspector')), expand=False)
+        self.inspector_frame=Gtk.Frame()
+        hbox = Gtk.HBox()
+        hbox.pack_start(Gtk.Label(_('Inspector')), False, False, 0)
         def unlock(b):
             b.hide()
             self.locked_inspector = False
@@ -3332,7 +3336,7 @@ class TimeLine(AdhocView):
         self.locked_icon = get_pixmap_button('small_locked.png', unlock)
         self.locked_icon.set_tooltip_text(_("Inspector locked. Click here or in the timeline background to unlock."))
         self.locked_icon.set_no_show_all(True)
-        hbox.pack_start(self.locked_icon, expand=False)
+        hbox.pack_start(self.locked_icon, False, True, 0)
         self.inspector_frame.set_label_widget(hbox)
 
         self.inspector_frame.add(a.widget)
@@ -3344,12 +3348,12 @@ class TimeLine(AdhocView):
         return self.inspector_pane
 
     def get_toolbar(self):
-        tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
+        tb=Gtk.Toolbar()
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     batch_id=object()
                     for a in sources:
@@ -3357,13 +3361,13 @@ class TimeLine(AdhocView):
                 return True
             return False
 
-        b=gtk.ToolButton(stock_id=gtk.STOCK_DELETE)
+        b=Gtk.ToolButton(stock_id=Gtk.STOCK_DELETE)
         b.set_tooltip_text(_('Delete the selected annotations or drop an annotation here to delete it.'))
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'],
-                        gtk.gdk.ACTION_MOVE )
+        b.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('annotation'),
+                        Gdk.DragAction.MOVE )
         b.connect('drag-data-received', remove_drag_received)
         b.connect('clicked', self.selection_delete)
         tb.insert(b, -1)
@@ -3371,23 +3375,23 @@ class TimeLine(AdhocView):
         # Annotation-type selection button
         def annotationtype_selection_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation-type']:
-                source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+                source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
                 if source in self.annotationtypes:
                     self.annotationtypes.remove(source)
                     self.update_model(partial_update=True)
             else:
-                print 'Unknown target type for drop: %d' % targetType
+                logger.warn('Unknown target type for drop: %d' % targetType)
             return True
 
-        b=gtk.ToolButton(stock_id=gtk.STOCK_SELECT_COLOR)
+        b=Gtk.ToolButton(stock_id=Gtk.STOCK_SELECT_COLOR)
         b.set_tooltip_text(_('Drag an annotation type here to remove it from display.\nClick to edit all displayed types'))
         b.connect('clicked', self.edit_annotation_types)
         b.connect('drag-data-received', annotationtype_selection_drag_received)
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation-type'],
-                        gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_COPY)
+        b.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('annotation-type'),
+                        Gdk.DragAction.MOVE | Gdk.DragAction.COPY)
         tb.insert(b, -1)
 
         # Selection menu
@@ -3401,28 +3405,28 @@ class TimeLine(AdhocView):
         def handle_toggle(b, option):
             self.options[option]=b.get_active()
             if option == 'display-all-relations':
-                region = self.layout.window.get_clip_region()
+                region = self.layout.get_window().get_clip_region()
                 if region:
-                    self.layout.window.invalidate_region(region, True)
+                    self.layout.get_window().invalidate_region(region, True)
             return True
 
-        self.display_relations_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_REDO)
+        self.display_relations_toggle=Gtk.ToggleToolButton(stock_id=Gtk.STOCK_REDO)
         self.display_relations_toggle.set_tooltip_text(_('Display relations'))
         self.display_relations_toggle.set_active(self.options['display-relations'])
         self.display_relations_toggle.connect('toggled', handle_toggle, 'display-relations')
         tb.insert(self.display_relations_toggle, -1)
 
-        self.display_all_relations_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_INFO)
+        self.display_all_relations_toggle=Gtk.ToggleToolButton(stock_id=Gtk.STOCK_INFO)
         self.display_all_relations_toggle.set_tooltip_text(_('Display all relations'))
         self.display_all_relations_toggle.set_active(self.options['display-all-relations'])
         self.display_all_relations_toggle.connect('toggled', handle_toggle, 'display-all-relations')
         tb.insert(self.display_all_relations_toggle, -1)
 
         # Separator
-        tb.insert(gtk.SeparatorToolItem(), -1)
+        tb.insert(Gtk.SeparatorToolItem(), -1)
 
         def zoom_entry(entry):
-            f=unicode(entry.get_text())
+            f=entry.get_text().decode('utf-8')
 
             i=re.findall(r'\d+', f)
             if i:
@@ -3430,7 +3434,7 @@ class TimeLine(AdhocView):
             else:
                 return True
             pos=self.get_middle_position()
-            self.fraction_adj.value=f
+            self.fraction_adj.set_value(f)
             self.set_middle_position(pos)
             return True
 
@@ -3438,22 +3442,22 @@ class TimeLine(AdhocView):
             v=combo.get_current_element()
             if isinstance(v, float):
                 pos=self.get_middle_position()
-                self.fraction_adj.value=v
+                self.fraction_adj.set_value(v)
                 self.set_middle_position(pos)
             return True
 
         def zoom(i, factor):
             pos=self.get_middle_position()
-            self.fraction_adj.set_value(self.fraction_adj.value * factor)
+            self.fraction_adj.set_value(self.fraction_adj.get_value() * factor)
             self.set_middle_position(pos)
             return True
 
-        i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
+        i=Gtk.ToolButton(stock_id=Gtk.STOCK_ZOOM_OUT)
         i.connect('clicked', zoom, 1.3)
         i.set_tooltip_text(_('Zoom out'))
         tb.insert(i, -1)
 
-        i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
+        i=Gtk.ToolButton(stock_id=Gtk.STOCK_ZOOM_IN)
         i.connect('clicked', zoom, .7)
         i.set_tooltip_text(_('Zoom in'))
         tb.insert(i, -1)
@@ -3466,19 +3470,19 @@ class TimeLine(AdhocView):
                 ],
                                                        entry=True,
                                                        callback=zoom_change)
-        self.zoom_combobox.child.connect('activate', zoom_entry)
-        self.zoom_combobox.child.set_width_chars(4)
-        i=gtk.ToolItem()
+        self.zoom_combobox.get_child().connect('activate', zoom_entry)
+        self.zoom_combobox.get_child().set_width_chars(4)
+        i=Gtk.ToolItem()
         i.add(self.zoom_combobox)
         tb.insert(i, -1)
 
-        i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_100)
+        i=Gtk.ToolButton(stock_id=Gtk.STOCK_ZOOM_100)
         i.connect('clicked', lambda i: self.fraction_adj.set_value(1.0))
         tb.insert(i, -1)
 
-        tb.insert(gtk.SeparatorToolItem(), -1)
+        tb.insert(Gtk.SeparatorToolItem(), -1)
 
-        i=gtk.ToolItem()
+        i=Gtk.ToolItem()
         i.add(self.autoscroll_choice)
         tb.insert(i, -1)
 
@@ -3489,10 +3493,10 @@ class TimeLine(AdhocView):
             return True
 
         for tooltip, icon, callback in (
-            (_('Preferences'), gtk.STOCK_PREFERENCES, self.edit_preferences),
-            (_('Center on current player position.'), gtk.STOCK_JUSTIFY_CENTER, center_on_current_position),
+            (_('Preferences'), Gtk.STOCK_PREFERENCES, self.edit_preferences),
+            (_('Center on current player position.'), Gtk.STOCK_JUSTIFY_CENTER, center_on_current_position),
             ):
-            b=gtk.ToolButton(stock_id=icon)
+            b=Gtk.ToolButton(stock_id=icon)
             b.set_tooltip_text(tooltip)
             b.connect('clicked', callback)
             tb.insert(b, -1)
@@ -3504,12 +3508,12 @@ class TimeLine(AdhocView):
                 self.controller.gui.player_toolbar.buttons['loop'].set_active(False)
             return True
 
-        self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
+        self.loop_toggle_button=Gtk.ToggleToolButton(stock_id=Gtk.STOCK_REFRESH)
         self.loop_toggle_button.connect('toggled', loop_toggle_cb)
         self.loop_toggle_button.set_tooltip_text(_('Automatically activate loop when clicking on an annotation'))
         tb.insert(self.loop_toggle_button, -1)
 
-        ti=gtk.SeparatorToolItem()
+        ti=Gtk.SeparatorToolItem()
         ti.set_expand(True)
         ti.set_property('draw', False)
         tb.insert(ti, -1)
@@ -3527,22 +3531,22 @@ class TimeLine(AdhocView):
         notselected_store, it = dialog.generate_list_model(
             [ (at, self.controller.get_title(at)) for at in notselected ])
 
-        hbox = gtk.HBox()
-        selectedtree = gtk.TreeView(model=selected_store)
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('Displayed'), cell, text=0)
+        hbox = Gtk.HBox()
+        selectedtree = Gtk.TreeView(model=selected_store)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('Displayed'), cell, text=0)
         selectedtree.append_column(column)
 
         selectedtree.set_reorderable(True)
-        selectedtree.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+        selectedtree.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
 
-        notselectedtree = gtk.TreeView(model=notselected_store)
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('Not displayed'), cell, text=0)
+        notselectedtree = Gtk.TreeView(model=notselected_store)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('Not displayed'), cell, text=0)
         notselectedtree.append_column(column)
-        notselectedtree.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+        notselectedtree.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
 
-        actions = gtk.VBox()
+        actions = Gtk.VBox()
 
         def transfer(b, source, dest):
             selection = source.get_selection ()
@@ -3550,7 +3554,9 @@ class TimeLine(AdhocView):
                 return True
             store, paths = selection.get_selected_rows()
 
-            rows = [ gtk.TreeRowReference(store, path) for path in paths ]
+            # Keep a stable reference of the selected rows, since we
+            # will remove them iteratively from the source model
+            rows = [ Gtk.TreeRowReference(store, path) for path in paths ]
 
             m=dest.get_model()
             for r in rows:
@@ -3561,7 +3567,7 @@ class TimeLine(AdhocView):
                     continue
                 it=store.get_iter(path)
                 # Add el to dest
-                m.append(store[path])
+                m.append(list(store[path]))
                 store.remove(it)
             return True
 
@@ -3572,7 +3578,7 @@ class TimeLine(AdhocView):
                 it=s.get_iter_first()
                 if it is None:
                     break
-                d.append(s[it])
+                d.append(list(s[it]))
                 s.remove(it)
             return True
 
@@ -3580,53 +3586,53 @@ class TimeLine(AdhocView):
             transfer(None, source, dest)
             return True
 
-        b=gtk.Button('<<<')
+        b=Gtk.Button('<<<')
         b.connect('clicked', transfer, notselectedtree, selectedtree)
         notselectedtree.connect('row_activated', row_activated, notselectedtree, selectedtree)
         actions.add(b)
 
-        b=gtk.Button(_('< All <'))
+        b=Gtk.Button(_('< All <'))
         b.connect('clicked', transferall, notselectedtree, selectedtree)
         actions.add(b)
 
-        b=gtk.Button(_('> All >'))
+        b=Gtk.Button(_('> All >'))
         b.connect('clicked', transferall, selectedtree, notselectedtree)
         actions.add(b)
 
-        b=gtk.Button('>>>')
+        b=Gtk.Button('>>>')
         b.connect('clicked', transfer, selectedtree, notselectedtree)
         selectedtree.connect('row-activated', row_activated, selectedtree, notselectedtree)
         actions.add(b)
 
-        sw1 = gtk.ScrolledWindow()
-        sw1.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw1 = Gtk.ScrolledWindow()
+        sw1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw1.add(selectedtree)
         hbox.add(sw1)
 
         hbox.pack_start(actions, False, False, 0)
 
-        sw2 = gtk.ScrolledWindow()
-        sw2.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw2 = Gtk.ScrolledWindow()
+        sw2.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw2.add(notselectedtree)
         hbox.add(sw2)
 
         hbox.show_all()
 
         # The widget is built. Put it in the dialog.
-        d = gtk.Dialog(title=_('Displayed annotation types'),
-                       parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+        d = Gtk.Dialog(title=_('Displayed annotation types'),
+                       parent=self.controller.gui.gui.win,
+                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT | Gtk.DialogFlags.MODAL,
+                       buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                                 Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
 
-        d.vbox.add(hbox)
+        d.vbox.pack_start(hbox, True, True, 0)
         hbox.set_size_request(600, 400)
         d.connect('key-press-event', dialog.dialog_keypressed_cb)
 
         d.show()
         dialog.center_on_mouse(d)
         res=d.run()
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             self.annotationtypes = [ at[1] for at in selected_store ]
             self.package_from_init = None
             self.update_model(partial_update=True)
@@ -3652,7 +3658,7 @@ class TimeLine(AdhocView):
         """Return the current middle position, in ms.
         """
         a=self.adjustment
-        return self.pixel2unit( a.value + a.page_size / 2, absolute=True )
+        return self.pixel2unit( a.get_value() + a.get_page_size() / 2, absolute=True )
 
     def set_middle_position(self, pos):
         """Set the current middle position, in ms.
@@ -3735,7 +3741,7 @@ class TimeLine(AdhocView):
             return True
         if not re.match('^[\w\d_]+$', tag):
             dialog.message_dialog(_('The tag contains invalid characters'),
-                                  icon=gtk.MESSAGE_ERROR)
+                                  icon=Gtk.MessageType.ERROR)
             return True
         batch_id=object()
         for w in selection:

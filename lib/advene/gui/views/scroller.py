@@ -23,7 +23,7 @@ from advene.gui.views import AdhocView
 
 from gettext import gettext as _
 
-import gtk
+from gi.repository import Gtk
 
 class ScrollerView(AdhocView):
     view_name = _("Scroller")
@@ -49,17 +49,17 @@ class ScrollerView(AdhocView):
         return True
 
     def build_widget(self):
-        v=gtk.HBox()
+        v=Gtk.HBox()
 
         style=v.get_style().copy()
         self.style = style
 
-        black=gtk.gdk.color_parse('black')
-        white=gtk.gdk.color_parse('white')
+        black=Gdk.color_parse('black')
+        white=Gdk.color_parse('white')
 
-        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
+        for state in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
+                      Gtk.StateType.SELECTED, Gtk.StateType.INSENSITIVE,
+                      Gtk.StateType.PRELIGHT):
             style.bg[state]=black
             style.fg[state]=white
             style.text[state]=white
@@ -67,17 +67,17 @@ class ScrollerView(AdhocView):
 
         v.set_style(style)
 
-        self.past_widget=gtk.VBox()
+        self.past_widget=Gtk.VBox()
         self.past_widget.set_style(style)
 
-        self.present_widget=gtk.VBox()
+        self.present_widget=Gtk.VBox()
         self.present_widget.set_style(style)
-        #self.present_alignment=gtk.Alignment(0.25, 0.25, 0, 0)
+        #self.present_alignment=Gtk.Alignment.new(0.25, 0.25, 0, 0)
         #self.present_alignment.add(self.present_widget)
         self.present_widget.set_style(style)
         #self.present_alignment.set_style(style)
 
-        self.future_widget=gtk.VBox()
+        self.future_widget=Gtk.VBox()
         self.future_widget.set_style(style)
 
         v.add(self.past_widget)
@@ -86,13 +86,13 @@ class ScrollerView(AdhocView):
         v.add(self.future_widget)
 
         def create_label(text, widget):
-            eb=gtk.EventBox()
-            l=gtk.Label(text)
+            eb=Gtk.EventBox()
+            l=Gtk.Label(label=text)
             l.set_single_line_mode(False)
             eb.add(l)
             l.set_style(style)
             eb.set_style(style)
-            widget.pack_start(eb)
+            widget.pack_start(eb, True, True, 0)
             return l
 
         self.present_label = create_label('present',

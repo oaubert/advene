@@ -1,8 +1,7 @@
 #
 # Advene: Annotate Digital Videos, Exchange on the NEt
-# Copyright (C) 2011-2012 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+# Copyright (C) 2011-2017 Olivier Aubert <contact@olivieraubert.net>
 #
-# Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
@@ -19,7 +18,7 @@
 
 import time
 from gettext import gettext as _
-import gtk
+from gi.repository import Gtk
 
 import advene.core.config as config
 from advene.gui.views import AdhocView
@@ -147,27 +146,27 @@ class KinectController(AdhocView):
                 self.handle_mode_selection(fx)
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        vbox.add(gtk.Label("Kinect control"))
+        vbox.add(Gtk.Label(label="Kinect control"))
 
-        hb = gtk.HBox()
+        hb = Gtk.HBox()
         self.mode_buttons = {
-            'rate': gtk.Button("Rate"),
-            'none': gtk.Button("Disabled"),
-            'seek': gtk.Button("Seek"),
+            'rate': Gtk.Button("Rate"),
+            'none': Gtk.Button("Disabled"),
+            'seek': Gtk.Button("Seek"),
             }
         for k in ('rate', 'none', 'seek'):
             hb.add(self.mode_buttons[k])
             self.mode_buttons[k].set_sensitive(False)
-        vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hb, False, True, 0)
 
-        self.label = gtk.Label("Perform a Wave to start.")
+        self.label = Gtk.Label(label="Perform a Wave to start.")
         vbox.add(self.label)
-        self.action = gtk.Label("No action")
+        self.action = Gtk.Label(label="No action")
         vbox.add(self.action)
         # FIXME
-        #self.slider = gtk.
+        #self.slider = Gtk.
 
         vbox.show_all()
         self.set_mode('none')

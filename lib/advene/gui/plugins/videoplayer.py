@@ -18,8 +18,9 @@
 #
 
 from gettext import gettext as _
-import gtk
-import pango
+from gi.repository import Gdk
+from gi.repository import Gtk
+from gi.repository import Pango
 import os
 
 import advene.core.config as config
@@ -185,12 +186,12 @@ class VideoPlayer(AdhocView):
     def drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         refTime = None
         if targetType == config.data.target_type['annotation']:
-            sources = [ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+            sources = [ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
             if sources:
                 # use first annotation as reference
                 refTime = sources[0].fragment.begin
         elif targetType == config.data.target_type['timestamp']:
-            data = decode_drop_parameters(selection.data)
+            data = decode_drop_parameters(selection.get_data())
             refTime = long(data['timestamp'])
         if refTime is not None:
             self.set_offset(refTime - self.controller.player.current_position_value)
@@ -201,37 +202,37 @@ class VideoPlayer(AdhocView):
         """
         if self.player is None:
             return None
-        w=gtk.Window()
-        d=gtk.Socket()
+        w=Gtk.Window()
+        d=Gtk.Socket()
         w.add(d)
         w.show_all()
         self.player.set_visual(d.get_id())
         return w
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
         self.player = self.controller.playerfactory.get_player()
 
         self.player.sound_mute()
 
-        self.drawable=gtk.Socket()
+        self.drawable=Gtk.Socket()
         def handle_remove(socket):
             # Do not kill the widget if the application exits
             return True
         self.drawable.connect('plug-removed', handle_remove)
 
-        black=gtk.gdk.Color(0, 0, 0)
-        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
+        black=Gdk.Color(0, 0, 0)
+        for state in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
+                      Gtk.StateType.SELECTED, Gtk.StateType.INSENSITIVE,
+                      Gtk.StateType.PRELIGHT):
             self.drawable.modify_bg (state, black)
 
         self.drawable.set_size_request(320, 200)
 
 
-        self.toolbar=gtk.Toolbar()
-        self.toolbar.set_style(gtk.TOOLBAR_ICONS)
+        self.toolbar=Gtk.Toolbar()
+        self.toolbar.set_style(Gtk.ToolbarStyle.ICONS)
 
         # Append the volume control to the toolbar
         def volume_change(scale, value):
@@ -239,14 +240,14 @@ class VideoPlayer(AdhocView):
                 self.player.sound_set_volume(int(value * 100))
             return True
 
-        self.audio_volume = gtk.VolumeButton()
+        self.audio_volume = Gtk.VolumeButton()
         self.audio_volume.set_value(self.player.sound_get_volume() / 100.0)
-        ti = gtk.ToolItem()
+        ti = Gtk.ToolItem()
         ti.add(self.audio_volume)
         self.audio_volume.connect('value-changed', volume_change)
         self.toolbar.insert(ti, -1)
 
-        sync_button=gtk.ToolButton(gtk.STOCK_CONNECT)
+        sync_button=Gtk.ToolButton(Gtk.STOCK_CONNECT)
         sync_button.set_tooltip_text(_("Synchronize"))
         sync_button.connect('clicked', self.synchronize)
         self.toolbar.insert(sync_button, -1)
@@ -255,54 +256,55 @@ class VideoPlayer(AdhocView):
             self.offset = long(spin.get_value())
             return True
 
-        ti = gtk.ToolItem()
-        self.offset_spin = gtk.SpinButton(gtk.Adjustment(value = self.offset,
-                                                         lower = - 24 * 60 * 60 * 1000,
-                                                         upper =   24 * 60 * 60 * 1000,
-                                                         step_incr = 1000 / config.data.preferences['default-fps'],
-                                                         page_incr = 1000))
+        ti = Gtk.ToolItem()
+        self.offset_spin = Gtk.SpinButton.new(Gtk.Adjustment.new(self.offset,
+                                                                 - 24 * 60 * 60 * 1000,
+                                                                 24 * 60 * 60 * 1000,
+                                                                 1000 / config.data.preferences['default-fps'],
+                                                                 1000,
+                                                                 500),
+                                              1000, 0)
         self.offset_spin.get_adjustment().connect('value-changed', offset_changed)
         ti.add(self.offset_spin)
         self.offset_spin.set_tooltip_text(_("Offset in ms"))
         self.toolbar.insert(ti, -1)
 
-        self.label = gtk.Label()
+        self.label = Gtk.Label()
         self.label.set_alignment(0, 0)
-        self.label.modify_font(pango.FontDescription("sans 10"))
+        self.label.modify_font(Pango.FontDescription("sans 10"))
 
         timestamp_button = get_pixmap_button('set-to-now.png')
         timestamp_button.set_tooltip_text(_("Drag and drop to get player time"))
         enable_drag_source(timestamp_button, lambda: long(self.player.get_stream_information().position), self.controller)
-        # Cannot use a gtk.ToolButton since it cannot be drag_source
-        ti = gtk.ToolItem()
+        # Cannot use a Gtk.ToolButton since it cannot be drag_source
+        ti = Gtk.ToolItem()
         ti.add(timestamp_button)
         self.toolbar.insert(ti, -1)
 
-        black=gtk.gdk.color_parse('black')
-        white=gtk.gdk.color_parse('white')
-        eb=gtk.EventBox()
+        black=Gdk.color_parse('black')
+        white=Gdk.color_parse('white')
+        eb=Gtk.EventBox()
         eb.add(self.label)
-        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
+        for state in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
+                      Gtk.StateType.SELECTED, Gtk.StateType.INSENSITIVE,
+                      Gtk.StateType.PRELIGHT):
             self.label.modify_bg(state, black)
             eb.modify_bg(state, black)
             self.label.modify_fg(state, white)
 
         vbox.add(self.drawable)
-        vbox.pack_start(eb, expand=False)
-        vbox.pack_start(self.toolbar, expand=False)
+        vbox.pack_start(eb, False, True, 0)
+        vbox.pack_start(self.toolbar, False, True, 0)
 
         self.drawable.connect_after('realize', self.register_drawable)
 
         # Accept annotation/timestamp drop, to adjust time offset
         vbox.connect('drag-data-received', self.drag_received_cb)
-        vbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                           gtk.DEST_DEFAULT_HIGHLIGHT |
-                           gtk.DEST_DEFAULT_ALL,
-                           config.data.drag_type['annotation'] +
-                           config.data.drag_type['timestamp'],
-                           gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+        vbox.drag_dest_set(Gtk.DestDefaults.MOTION |
+                           Gtk.DestDefaults.HIGHLIGHT |
+                           Gtk.DestDefaults.ALL,
+                           config.data.get_target_types('annotation', 'timestamp'),
+                           Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
 
         vbox.show_all()
         return vbox

@@ -20,7 +20,7 @@
 """
 
 import itertools
-import gtk
+from gi.repository import Gtk
 
 from gettext import gettext as _
 
@@ -82,15 +82,15 @@ class CheckerView(AdhocView):
                 end = "#ff6666"
             return (begin, end)
         self.overlap_table.set_elements(overlap, custom_data)
-        self.overlap_table.model.set_sort_column_id(advene.gui.views.table.COLUMN_TYPE, gtk.SORT_ASCENDING)
+        self.overlap_table.model.set_sort_column_id(advene.gui.views.table.COLUMN_TYPE, Gtk.SortType.ASCENDING)
 
     def build_widget(self):
-        mainbox = gtk.VBox()
+        mainbox = Gtk.VBox()
 
-        mainbox.pack_start(gtk.Label(_("List of possible issues in the current package")), expand=False)
+        mainbox.pack_start(Gtk.Label(_("List of possible issues in the current package")), False, False, 0)
 
-        notebook=gtk.Notebook()
-        notebook.set_tab_pos(gtk.POS_TOP)
+        notebook=Gtk.Notebook()
+        notebook.set_tab_pos(Gtk.PositionType.TOP)
         notebook.popup_disable()
         mainbox.add(notebook)
 
@@ -98,14 +98,14 @@ class CheckerView(AdhocView):
         self.overlap_table = table
 
         # Set colors
-        table.columns['begin'].add_attribute(table.columns['begin'].get_cell_renderers()[0],
+        table.columns['begin'].add_attribute(table.columns['begin'].get_cells()[0],
                                              'cell-background',
                                              advene.gui.views.table.COLUMN_CUSTOM_FIRST)
-        table.columns['end'].add_attribute(table.columns['end'].get_cell_renderers()[0],
+        table.columns['end'].add_attribute(table.columns['end'].get_cells()[0],
                                            'cell-background',
                                            advene.gui.views.table.COLUMN_CUSTOM_FIRST + 1)
 
-        notebook.append_page(table.widget, gtk.Label(_("Overlapping")))
+        notebook.append_page(table.widget, Gtk.Label(label=_("Overlapping")))
 
         return mainbox
 

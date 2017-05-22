@@ -300,7 +300,7 @@ class Player:
     def set_visual(self, xid):
         """Set the window id for the video output.
 
-        It is widget.window.xid on X, widget.window.handle on Win32.
+        It is widget.get_window().xid on X, widget.get_window().handle on Win32.
         """
         return True
 

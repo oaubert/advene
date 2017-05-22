@@ -584,18 +584,54 @@ Description:
         }
     return m
 
-def get_annotations_statistics(annotations):
-    data = [ format_element_name('annotation', len(annotations)) ]
-    if annotations:
-        data.extend( "%s : %s" % (label, value)
-                     for label, value in (
-                             (_("Min duration"), format_time(min( a.fragment.duration for a in annotations))),
-                             (_("Max duration"), format_time(max( a.fragment.duration for a in annotations))),
-                             (_("Mean duration"), format_time(sum( a.fragment.duration for a in annotations) / len(annotations))),
-                             (_("Total duration"), format_time(sum( a.fragment.duration for a in annotations)))
-                     )
-                 )
-    return "\n".join(data)
+def median(values):
+    """Return the median value of a list of values.
+    """
+    if not values:
+        return None
+    values = sorted(values)
+    n = len(values)
+    if n % 2:
+        return values[(n + 1) / 2 - 1]
+    else:
+        return sum(values[n / 2 - 1: n / 2 + 1]) / 2.0
+
+def get_annotations_statistics(annotations, format='text'):
+    """Return some statistics about the given annotations.
+
+    The returned format can be either text or dict
+    """
+    if not annotations:
+        if format == 'text':
+            return _("No annotation")
+        else:
+            return {
+                'min': 0,
+                'max': 0,
+                'mean': 0,
+                'median': 0,
+                'total': 0
+            }
+    total_duration = sum(a.fragment.duration for a in annotations)
+    res = {
+        'min': min(a.fragment.duration for a in annotations),
+        'max': max(a.fragment.duration for a in annotations),
+        'mean': total_duration / len(annotations),
+        'median': median(a.fragment.duration for a in annotations),
+        'total': total_duration
+    }
+    if format == 'text':
+        for k in res:
+            res[k] = format_time(res[k])
+        res['count'] = format_element_name('annotation', len(annotations))
+        return """Count: %(count)s
+Min duration: %(min)s
+Max duration: %(max)s
+Mean duration: %(mean)s
+Median duration: %(median)s
+Total duration: %(total)s""" % res
+    else:
+        return res
 
 element_declinations={
     'schema': (_('schema'), _('schemas')),
@@ -808,15 +844,16 @@ def title2content(new_title, original_content, representation):
 
     @return the new content or None if the content could not be updated.
     """
+    new_title = unicode(new_title, 'utf-8')
     r = None
     if representation is None or empty_representation.match(representation):
-        r = unicode(new_title)
+        r = new_title
     else:
         m = parsed_representation.match(representation)
         if m:
             # We have a simple representation (here/content/parsed/name)
             # so we can update the name field.
-            new_title = unicode(new_title).replace('\n', '\\n')
+            new_title = new_title.replace('\n', '\\n')
             name=m.group(1)
             reg = re.compile('^' + name + '=(.*?)$', re.MULTILINE)
             if reg.search(original_content):
@@ -829,3 +866,8 @@ def title2content(new_title, original_content, representation):
                     r = "%s=%s" % (name, new_title)
         # else: too complex representation. Return None as default value.
     return r
+
+def clamp(x, minimum, maximum):
+    """Clamp given value between minimum and maximum.
+    """
+    return max(minimum, min(x, maximum))

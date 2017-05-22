@@ -18,11 +18,16 @@
 #
 """GUI helper methods.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-import gtk
-import gobject
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import Gtk
+from gi.repository import GObject
+
 import urlparse
 import urllib
 import StringIO
@@ -43,46 +48,48 @@ predefined_content_mimetypes=[
     ('image/svg+xml', _("SVG graphics content")),
     ]
 
-if hasattr(gtk, 'image_new_from_pixbuf'):
-    image_new_from_pixbuf=gtk.image_new_from_pixbuf
-else:
-    def my_image_new_from_pixbuf(pb, width=None):
-        i=gtk.Image()
-        if width:
-            height = width * pb.get_height() / pb.get_width()
-            p=pb.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
-        else:
-            p=pb
-        i.set_from_pixbuf(p)
-        return i
-    image_new_from_pixbuf=my_image_new_from_pixbuf
+if not hasattr(Gtk.Menu, 'popup_at_pointer'):
+    # Monkey patch Gtk.Menu (popup_at_pointer is available only in Gtk >= 3.22)
+    def popup_at_pointer(widget, event):
+        widget.popup(None, None, None, None, 0, Gtk.get_current_event_time())
+    Gtk.Menu.popup_at_pointer = popup_at_pointer
+
+def image_new_from_pixbuf(pb, width=None):
+    i=Gtk.Image()
+    if width:
+        height = width * pb.get_height() / pb.get_width()
+        p=pb.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
+    else:
+        p=pb
+    i.set_from_pixbuf(p)
+    return i
 
 def png_to_pixbuf (png_data, width=None, height=None):
     """Load PNG data into a pixbuf
     """
-    loader = gtk.gdk.PixbufLoader ('png')
+    loader = GdkPixbuf.PixbufLoader.new_with_type('png')
     if not isinstance(png_data, str):
         png_data=str(png_data)
     try:
-        loader.write (png_data, len (png_data))
+        loader.write(png_data)
         pixbuf = loader.get_pixbuf ()
         loader.close ()
-    except gobject.GError:
+    except GObject.GError:
         # The PNG data was invalid.
-        pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+        pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
 
     if width and not height:
         height = width * pixbuf.get_height() / pixbuf.get_width()
     if height and not width:
         width = height * pixbuf.get_width() / pixbuf.get_height()
     if width and height:
-        p=pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+        p=pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
         return p
     else:
         return pixbuf
 
 def image_from_position(controller, position=None, width=None, height=None, epsilon=None):
-    i=gtk.Image()
+    i=Gtk.Image()
     if position is None:
         position=controller.player.current_position_value
     pb=png_to_pixbuf (controller.package.imagecache.get(position, epsilon), width=width, height=height)
@@ -103,32 +110,32 @@ def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
 """ % svg_data
 
     try:
-        loader = gtk.gdk.PixbufLoader('svg')
+        loader = GdkPixbuf.PixbufLoader.new_with_type('svg')
     except Exception, e:
         print "Unable to load the SVG pixbuf loader: ", str(e)
         loader=None
     if loader is not None:
         try:
-            loader.write(svg_data)
+            loader.write(svg_data.encode('utf-8'))
             loader.close ()
             p = loader.get_pixbuf ()
             w = p.get_width()
             h = p.get_height()
-            pixbuf=png_to_pixbuf (png_data).scale_simple(w, h, gtk.gdk.INTERP_BILINEAR)
-            p.composite(pixbuf, 0, 0, w, h, 0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
-        except gobject.GError, e:
+            pixbuf=png_to_pixbuf (png_data).scale_simple(w, h, GdkPixbuf.InterpType.BILINEAR)
+            p.composite(pixbuf, 0, 0, w, h, 0, 0, 1.0, 1.0, GdkPixbuf.InterpType.BILINEAR, 255)
+        except GObject.GError, e:
             # The PNG data was invalid.
             print "Invalid image data", e
-            pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+            pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
     else:
-        pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+        pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
 
     if width and not height:
         height = 1.0 * width * pixbuf.get_height() / pixbuf.get_width()
     if height and not width:
         width = 1.0 * height * pixbuf.get_width() / pixbuf.get_height()
     if width and height:
-        p=pixbuf.scale_simple(int(width), int(height), gtk.gdk.INTERP_BILINEAR)
+        p=pixbuf.scale_simple(int(width), int(height), GdkPixbuf.InterpType.BILINEAR)
         return p
     return pixbuf
 
@@ -142,15 +149,15 @@ def overlay_svg_as_png(png_data, svg_data):
     return s.getvalue()
 
 def get_small_stock_button(sid, callback=None, *p):
-    b=gtk.Button()
-    b.add(gtk.image_new_from_stock(sid, gtk.ICON_SIZE_SMALL_TOOLBAR))
+    b=Gtk.Button()
+    b.add(Gtk.Image.new_from_stock(sid, Gtk.IconSize.SMALL_TOOLBAR))
     if callback:
         b.connect('clicked', callback, *p)
     return b
 
 def get_pixmap_button(pixmap, callback=None, *p):
-    b=gtk.Button()
-    i=gtk.Image()
+    b=Gtk.Button()
+    i=Gtk.Image()
     i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
     b.add(i)
     i.show()
@@ -161,11 +168,11 @@ def get_pixmap_button(pixmap, callback=None, *p):
 def get_pixmap_toolbutton(pixmap, callback=None, *p):
     if pixmap.startswith('gtk-'):
         # Stock-id
-        b=gtk.ToolButton(pixmap)
+        b=Gtk.ToolButton(pixmap)
     else:
-        i=gtk.Image()
+        i=Gtk.Image()
         i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-        b=gtk.ToolButton(icon_widget=i)
+        b=Gtk.ToolButton(icon_widget=i)
         i.show()
     if callback:
         b.connect('clicked', callback, *p)
@@ -176,7 +183,7 @@ color_cache={}
 def name2color(color):
     """Return the gtk color for the given color name or code.
     """
-    if isinstance(color, gtk.gdk.Color):
+    if isinstance(color, Gdk.Color):
         gtk_color = color
     elif color:
         # Found a color. Cache it.
@@ -184,7 +191,7 @@ def name2color(color):
             gtk_color=color_cache[color]
         except KeyError:
             try:
-                color_cache[color]=gtk.gdk.color_parse(color)
+                color_cache[color]=Gdk.color_parse(color)
             except (TypeError, ValueError):
                 print "Unable to parse ", color
                 color_cache[color]=None
@@ -192,80 +199,6 @@ def name2color(color):
     else:
         gtk_color=None
     return gtk_color
-
-def get_color_style(w, background=None, foreground=None):
-    """Return a style for a widget with given colors.
-    """
-    if background is None:
-        background='white'
-    if foreground is None:
-        foreground='black'
-    b=name2color(background)
-    f=name2color(foreground)
-
-    style=w.get_style().copy()
-    for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                  gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                  gtk.STATE_PRELIGHT):
-        style.bg[state]=b
-        style.fg[state]=f
-        style.text[state]=f
-        #style.base[state]=white
-    return style
-
-arrow_up_xpm="""13 16 2 1
-       c None
-.      c #FF0000
-      .
-     ...
-    .....
-   .......
-  .........
- ...........
-.............
-     ...
-     ...
-     ...
-     ...
-     ...
-     ...
-     ...
-     ...
-     ...
-""".splitlines()
-
-arrow_right_xpm="""16 13 2 1
-. c None
-# c #ff0000
-................
-..........#.....
-..........##....
-..........###...
-..........####..
-###############.
-################
-###############.
-..........####..
-..........###...
-..........##....
-..........#.....
-................""".splitlines()
-
-
-def shaped_window_from_xpm(xpm):
-    # Code adapted from evolution/widgets/table/e-table-header-item.c
-    pixbuf = gtk.gdk.pixbuf_new_from_xpm_data(xpm)
-    pixmap, bitmap = pixbuf.render_pixmap_and_mask()
-
-    gtk.widget_push_colormap(gtk.gdk.rgb_get_colormap())
-    win = gtk.Window(gtk.WINDOW_POPUP)
-    pix = gtk.Image()
-    pix.set_from_pixmap(pixmap, bitmap)
-    win.realize()
-    win.add(pix)
-    win.shape_combine_mask(bitmap, 0, 0)
-    gtk.widget_pop_colormap()
-    return win
 
 def encode_drop_parameters(**kw):
     """Encode the given parameters as drop parameters.
@@ -292,42 +225,43 @@ def get_target_types(el):
     """
     targets = []
     if isinstance(el, Annotation):
-        targets.extend(config.data.drag_type['annotation']
-                       + config.data.drag_type['timestamp']
-                       + config.data.drag_type['tag'])
+        targets.extend(config.data.get_target_types('annotation', 'timestamp', 'tag'))
     elif isinstance(el, Relation):
-        targets.extend(config.data.drag_type['relation'])
+        targets.extend(config.data.get_target_types('relation'))
     elif isinstance(el, View):
         if helper.get_view_type(el) == 'adhoc':
-            targets.extend(config.data.drag_type['adhoc-view'])
+            targets.extend(config.data.get_target_types('adhoc-view'))
         else:
-            targets.extend(config.data.drag_type['view'])
+            targets.extend(config.data.get_target_types('view'))
     elif isinstance(el, AnnotationType):
-        targets.extend(config.data.drag_type['annotation-type'])
+        targets.extend(config.data.get_target_types('annotation-type'))
     elif isinstance(el, RelationType):
-        targets.extend(config.data.drag_type['relation-type'])
+        targets.extend(config.data.get_target_types('relation-type'))
     elif isinstance(el, Query):
-        targets.extend(config.data.drag_type['query'])
+        targets.extend(config.data.get_target_types('query'))
     elif isinstance(el, Schema):
-        targets.extend(config.data.drag_type['schema'])
+        targets.extend(config.data.get_target_types('schema'))
     elif isinstance(el, (int, long)):
-        targets.extend(config.data.drag_type['timestamp'])
+        targets.extend(config.data.get_target_types('timestamp'))
     # FIXME: Resource
 
-    targets.extend(config.data.drag_type['uri-list']
-                   + config.data.drag_type['text-plain']
-                   + config.data.drag_type['TEXT']
-                   + config.data.drag_type['STRING'])
+    targets.extend(config.data.get_target_types('uri-list',
+                                                'text-plain',
+                                                'TEXT',
+                                                'STRING'))
     return targets
 
 def drag_data_get_cb(widget, context, selection, targetType, timestamp, controller):
     """Generic drag-data-get handler.
 
+    It is used by the origin widget of a drag action, when the
+    destination widget queries for the DND data.
+
     Usage information:
     this method must be connected passing the controller as user data:
       widget.connect('drag-data-get', drag_data_get_cb, controller)
 
-    and the context must has a _element attribute (defined in a
+    and the context must have a _element attribute (defined in a
     'drag-begin' handler for instance).
     """
     typ=config.data.target_type
@@ -338,9 +272,9 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         widgets = widget.container.get_selected_annotation_widgets()
         if not widget in widgets:
             widgets = None
-    except AttributeError:
+    except (AttributeError, RuntimeError):
+        logger.error("Cannot get_selected_annotation_widgets", exc_info=True)
         widgets=None
-
 
     d={ typ['annotation']: Annotation,
         typ['annotation-type']: AnnotationType,
@@ -354,38 +288,38 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
         if not isinstance(el, d[targetType]):
             return False
         if widgets:
-            selection.set(selection.target, 8, "\n".join( w.annotation.uri for w in widgets ).encode('utf8'))
+            selection.set(selection.get_target(), 8, "\n".join( w.annotation.uri for w in widgets ).encode('utf8'))
         else:
-            selection.set(selection.target, 8, el.uri.encode('utf8'))
+            selection.set(selection.get_target(), 8, el.uri.encode('utf8'))
         return True
     elif targetType == typ['adhoc-view']:
         if helper.get_view_type(el) != 'adhoc':
             return False
-        selection.set(selection.target, 8, encode_drop_parameters(id=el.id))
+        selection.set(selection.get_target(), 8, encode_drop_parameters(id=el.id))
         return True
     elif targetType == typ['uri-list']:
 
         if widgets:
-            selection.set(selection.target, 8, "\n".join( controller.build_context(here=w.annotation.uri).evaluateValue('here/absolute_url') for w in widgets ).encode('utf8'))
+            selection.set(selection.get_target(), 8, "\n".join( controller.build_context(here=w.annotation).evaluateValue('here/absolute_url') for w in widgets ).encode('utf8'))
         else:
             try:
                 uri=controller.build_context(here=el).evaluateValue('here/absolute_url')
             except:
                 uri="No URI for " + unicode(el)
-            selection.set(selection.target, 8, uri.encode('utf8'))
+            selection.set(selection.get_target(), 8, uri.encode('utf8'))
     elif targetType == typ['timestamp']:
         if isinstance(el, (int, long)):
-            selection.set(selection.target, 8, encode_drop_parameters(timestamp=el))
+            selection.set(selection.get_target(), 8, encode_drop_parameters(timestamp=el))
         elif isinstance(el, Annotation):
-            selection.set(selection.target, 8, encode_drop_parameters(timestamp=el.fragment.begin,
+            selection.set(selection.get_target(), 8, encode_drop_parameters(timestamp=el.fragment.begin,
                                                                       comment=controller.get_title(el)))
         else:
             print "Inconsistent DND target"
         return True
     elif targetType in (typ['text-plain'], typ['STRING']):
-        selection.set(selection.target, 8, controller.get_title(el).encode('utf8'))
+        selection.set(selection.get_target(), 8, controller.get_title(el).encode('utf8'))
     else:
-        print "Unknown target type for drag: %d" % targetType
+        logger.warn("Unknown target type for drag: %d" % targetType)
     return True
 
 def contextual_drag_begin(widget, context, element, controller):
@@ -398,24 +332,22 @@ def contextual_drag_begin(widget, context, element, controller):
             return False
 
     # set_icon_widget does not work on native Gtk on MacOS X
-    if config.data.os == 'darwin' and not os.environ.get('DISPLAY'):
-        return False
+    #if config.data.os == 'darwin' and not os.environ.get('DISPLAY'):
+    #    return False
     # set_icon_widget is broken ATM in recent gtk on win32.
-    elif config.data.os == 'win32':
-        return False
+    #elif config.data.os == 'win32':
+    #    return False
 
-    w=gtk.Window(gtk.WINDOW_POPUP)
+    w=Gtk.Window(Gtk.WindowType.POPUP)
     w.set_decorated(False)
+    w.get_style_context().add_class('advene_drag_icon')
 
-    bw_style=get_color_style(w, 'black', 'white')
-    w.set_style(bw_style)
-
-    v=gtk.VBox()
-    v.set_style(bw_style)
+    v=Gtk.VBox()
+    v.get_style_context().add_class('advene_drag_icon')
 
     def get_coloured_label(t, color=None):
-        l=gtk.Label()
-        #l.set_ellipsize(pango.ELLIPSIZE_END)
+        l=Gtk.Label()
+        #l.set_ellipsize(Pango.EllipsizeMode.END)
         if color is None:
             color='white'
         l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (color, t.replace('<', '&lt;')))
@@ -425,58 +357,56 @@ def contextual_drag_begin(widget, context, element, controller):
 
     if isinstance(element, (long, int)):
         begin=image_new_from_pixbuf(png_to_pixbuf (cache.get(element, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
-        begin.set_style(bw_style)
+        begin.get_style_context().add_class('advene_drag_icon')
 
-        l=gtk.Label()
-        l.set_style(bw_style)
+        l=Gtk.Label()
         l.set_text(helper.format_time(element))
-        l.set_style(bw_style)
+        l.get_style_context().add_class('advene_drag_icon')
 
-        v.pack_start(begin, expand=False)
-        v.pack_start(l, expand=False)
-        w.set_style(bw_style)
+        v.pack_start(begin, False, True, 0)
+        v.pack_start(l, False, True, 0)
         w.set_size_request(long(1.5 * config.data.preferences['drag-snapshot-width']), -1)
     elif isinstance(element, Annotation):
         # Pictures HBox
-        h=gtk.HBox()
-        h.set_style(bw_style)
+        h=Gtk.HBox()
+        h.get_style_context().add_class('advene_drag_icon')
         begin=image_new_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
-        begin.set_style(bw_style)
-        h.pack_start(begin, expand=False)
+        begin.get_style_context().add_class('advene_drag_icon')
+        h.pack_start(begin, False, True, 0)
         # Padding
-        h.pack_start(gtk.HBox(), expand=True)
+        h.pack_start(Gtk.HBox(), True, True, 0)
         end=image_new_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.end), width=config.data.preferences['drag-snapshot-width']))
-        end.set_style(bw_style)
-        h.pack_start(end, expand=False)
-        v.pack_start(h, expand=False)
+        end.get_style_context().add_class('advene_drag_icon')
+        h.pack_start(end, False, True, 0)
+        v.pack_start(h, False, True, 0)
 
         l=get_coloured_label(controller.get_title(element), controller.get_element_color(element))
-        l.set_style(bw_style)
-        v.pack_start(l, expand=False)
-        w.set_style(bw_style)
+        l.get_style_context().add_class('advene_drag_icon')
+        v.pack_start(l, False, True, 0)
+        w.get_style_context().add_class('advene_drag_icon')
         w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
     elif isinstance(element, AnnotationType):
         l=get_coloured_label(_("Annotation Type %(title)s:\n%(count)s") % {
                 'title': controller.get_title(element),
                 'count': helper.format_element_name('annotation', len(element.annotations)),
                 }, controller.get_element_color(element))
-        v.pack_start(l, expand=False)
+        v.pack_start(l, False, True, 0)
     elif isinstance(element, RelationType):
         l=get_coloured_label(_("Relation Type %(title)s:\n%(count)s") % {
                 'title': controller.get_title(element),
                 'count': helper.format_element_name('relation', len(element.relations)),
                 }, controller.get_element_color(element))
-        v.pack_start(l, expand=False)
+        v.pack_start(l, False, True, 0)
     else:
         l=get_coloured_label("%s %s" % (helper.get_type(element),
                                         controller.get_title(element)),
                              controller.get_element_color(element))
-        v.pack_start(l, expand=False)
+        v.pack_start(l, False, True, 0)
 
     w.add(v)
     w.show_all()
     widget._icon=w
-    context.set_icon_widget(w, 0, 0)
+    Gtk.drag_set_icon_widget(context, w, 0, 0)
     return True
 
 def contextual_drag_end(widget, context):
@@ -498,15 +428,15 @@ def enable_drag_source(widget, element, controller):
     else:
         el=element
     # Generic support
-    widget.drag_source_set(gtk.gdk.BUTTON1_MASK,
+    widget.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
                            get_target_types(el),
-                           gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
+                           Gdk.DragAction.LINK | Gdk.DragAction.COPY | Gdk.DragAction.MOVE )
     widget.connect('drag-begin', contextual_drag_begin, element, controller)
     widget.connect('drag-end', contextual_drag_end)
     widget.connect('drag-data-get', drag_data_get_cb, controller)
 
 def gdk2intrgba(color, alpha=0xff):
-    """Convert a gdk.Color to int RGBA.
+    """Convert a Gdk.Color to int RGBA.
     """
     return ( (color.red >> 8) << 24) \
          | ( (color.green >> 8) << 16) \
@@ -514,7 +444,7 @@ def gdk2intrgba(color, alpha=0xff):
          | alpha
 
 def gdk2intrgb(color):
-    """Convert a gdk.Color to int RGB.
+    """Convert a Gdk.Color to int RGB.
     """
     return ( (color.red >> 8) << 16) \
          | ( (color.green >> 8) << 8) \

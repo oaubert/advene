@@ -16,7 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import gtk
+from gi.repository import Gtk
 import re
 
 import advene.core.config as config
@@ -96,7 +96,7 @@ class TALESEntry:
         self.default=t
 
     def get_text(self):
-        return self.text2tales(self.combo.get_current_element())
+        return self.text2tales(self.combo.get_current_element().decode('utf-8'))
 
     def set_no_show_all(self, b):
         self.widget.set_no_show_all(b)
@@ -124,7 +124,7 @@ class TALESEntry:
         return advene.util.helper.is_valid_tales(self.text2tales(expr))
 
     def build_widget(self):
-        hbox=gtk.HBox()
+        hbox=Gtk.HBox()
 
         if self.predefined:
             preselect=self.tales2text(self.predefined[0][0])
@@ -133,16 +133,16 @@ class TALESEntry:
         self.combo=dialog.list_selector_widget(members=[ (self.tales2text(e), d) for (e, d) in self.predefined ],
                                                preselect=preselect,
                                                entry=True)
-        self.entry=self.combo.child
+        self.entry=self.combo.get_child()
         self.entry.connect('changed', lambda e: self.entry.set_tooltip_text(self.combo.get_current_element()))
         self.entry.set_tooltip_text(self.combo.get_current_element())
 
-        hbox.pack_start(self.combo, expand=True)
+        hbox.pack_start(self.combo, True, True, 0)
 
         if config.data.preferences['expert-mode']:
-            b=gtk.Button(stock=gtk.STOCK_FIND)
+            b=Gtk.Button(stock=Gtk.STOCK_FIND)
             b.connect('clicked', self.browse_expression)
-            hbox.pack_start(b, expand=False)
+            hbox.pack_start(b, False, True, 0)
 
         hbox.show_all()
         return hbox

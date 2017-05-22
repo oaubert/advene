@@ -20,14 +20,15 @@
 from gettext import gettext as _
 
 import os
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 import xml.parsers.expat
 import StringIO
 
 import advene.core.config as config
 import advene.util.helper as helper
 from advene.gui.edit.elements import ContentHandler, TextContentHandler
-from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle, ShapeEditor
+from advene.gui.edit.shapewidget import ShapeDrawer, ShapeEditor
 from advene.gui.util import image_from_position, dialog, decode_drop_parameters, get_pixmap_toolbutton
 
 from advene.gui.edit.rules import EditRuleSet, EditQuery
@@ -78,7 +79,7 @@ class ZoneContentHandler (ContentHandler):
             return True
 
         shape=self.shape
-        shape.name=unicode(self.nameentry.get_text())
+        shape.name=self.nameentry.get_text().decode('utf-8')
         text="""shape=rect\nname=%s\nx=%02f\ny=%02f\nwidth=%02f\nheight=%02f""" % (
             shape.name,
             shape.x * 100.0 / self.view.canvaswidth,
@@ -91,7 +92,7 @@ class ZoneContentHandler (ContentHandler):
 
     def get_view (self, compact=False):
         """Generate a view widget for editing zone attributes."""
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
             # We are editing the content of an annotation. Use its snapshot as background.
@@ -118,14 +119,14 @@ class ZoneContentHandler (ContentHandler):
                     self.shape.name = self.element.data
 
         # Name edition
-        hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Label")), expand=False)
-        self.nameentry=gtk.Entry()
+        hb=Gtk.HBox()
+        hb.pack_start(Gtk.Label(_("Label")), False, False, 0)
+        self.nameentry=Gtk.Entry()
         if self.shape is not None:
             self.nameentry.set_text(self.shape.name)
-        hb.pack_start(self.nameentry)
+        hb.pack_start(self.nameentry, True, True, 0)
 
-        vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hb, False, True, 0)
 
         vbox.add(self.view.widget)
 
@@ -170,7 +171,7 @@ class SVGContentHandler (ContentHandler):
                 root=None
                 dialog.message_dialog(
                     _("Error while parsing SVG content:\n\n%s") % unicode(e),
-                    icon=gtk.MESSAGE_ERROR)
+                    icon=Gtk.MessageType.ERROR)
             if root is not None:
                 self.view.drawer.clear_objects()
                 path=''
@@ -211,9 +212,9 @@ class SVGContentHandler (ContentHandler):
         url=None
         title=''
         if targetType == config.data.target_type['annotation']:
-            here=self.controller.package.annotations.get(unicode(selection.data, 'utf8').split('\n')[0])
+            here=self.controller.package.annotations.get(unicode(selection.get_data(), 'utf8').split('\n')[0])
         elif targetType == config.data.target_type['view']:
-            data=decode_drop_parameters(selection.data)
+            data=decode_drop_parameters(selection.get_data())
             v=self.controller.package.get_element_by_id(data['id'])
             if v is None:
                 print "Cannot find view", data['id']
@@ -225,7 +226,7 @@ class SVGContentHandler (ContentHandler):
             url='%s/action/OpenView?id=%s' % (root, v.id)
         elif targetType == config.data.target_type['uri-list']:
             here=None
-            url=unicode(selection.data.splitlines()[0], 'utf8')
+            url=unicode(selection.get_data().splitlines()[0], 'utf8')
             title=url
         else:
             # Invalid drop target
@@ -260,12 +261,12 @@ class SVGContentHandler (ContentHandler):
 
     def get_view (self, compact=False):
         """Generate a view widget for editing SVG."""
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
             i = image_from_position(self.controller, self.parent.fragment.begin,
                                     epsilon=1000/config.data.preferences['default-fps'])
-            self.view = ShapeEditor(background=i, pixmap_dir=config.data.advenefile('pixmaps'))
+            self.view = ShapeEditor(background=i, icon_dir=config.data.advenefile('pixmaps'))
 
             def snapshot_update_cb(context, target):
                 frag = self.parent.fragment
@@ -285,18 +286,16 @@ class SVGContentHandler (ContentHandler):
                                                                            method=annotation_update_cb))
 
         else:
-            self.view = ShapeEditor(pixmap_dir=config.data.advenefile('pixmaps'))
+            self.view = ShapeEditor(icon_dir=config.data.advenefile('pixmaps'))
 
         self.parse_svg()
 
         self.view.drawer.widget.connect('drag-data-received', self.drawer_drag_received)
-        self.view.drawer.widget.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                              gtk.DEST_DEFAULT_HIGHLIGHT |
-                                              gtk.DEST_DEFAULT_ALL,
-                                              config.data.drag_type['view']
-                                              + config.data.drag_type['annotation']
-                                              + config.data.drag_type['uri-list'],
-                                              gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
+        self.view.drawer.widget.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                              Gtk.DestDefaults.HIGHLIGHT |
+                                              Gtk.DestDefaults.ALL,
+                                              config.data.get_target_types('view', 'annotation', 'uri-list'),
+                                              Gdk.DragAction.COPY | Gdk.DragAction.LINK)
 
         def edit_svg(b=None):
             vbox.foreach(vbox.remove)
@@ -336,10 +335,10 @@ class SVGContentHandler (ContentHandler):
             self.view.set_background(i)
             return True
 
-        self.view.background_adj = gtk.Adjustment(value=0, lower=0, upper=1.0, step_incr=0.1, page_incr=0.2)
-        slider = gtk.HScale(self.view.background_adj)
+        self.view.background_adj = Gtk.Adjustment.new(value=0, lower=0, upper=1.0, step_increment=0.1, page_increment=0.2, page_size=0.2)
+        slider = Gtk.HScale.new(self.view.background_adj)
         slider.connect("format-value", lambda s, v: helper.format_time(self.parent.fragment.begin + long(v * self.parent.fragment.duration)))
-        ti = gtk.ToolItem()
+        ti = Gtk.ToolItem()
         ti.add(slider)
         ti.set_expand(True)
         self.view.toolbar.insert(ti, -1)
@@ -377,7 +376,7 @@ class RuleSetContentHandler (ContentHandler):
             dialog.message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
                 "\n".join(iv),
-                icon=gtk.MESSAGE_ERROR)
+                icon=Gtk.MessageType.ERROR)
             return False
         else:
             return True
@@ -404,8 +403,8 @@ class RuleSetContentHandler (ContentHandler):
                               controller=self.controller)
         self.view = self.edit.get_packed_widget()
 
-        scroll_win = gtk.ScrolledWindow ()
-        scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll_win = Gtk.ScrolledWindow ()
+        scroll_win.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroll_win.add_with_viewport(self.view)
 
         return scroll_win
@@ -433,7 +432,7 @@ class SimpleQueryContentHandler (ContentHandler):
             dialog.message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
                 "\n".join(iv),
-                icon=gtk.MESSAGE_ERROR)
+                icon=Gtk.MessageType.ERROR)
             return False
         else:
             return True
@@ -462,8 +461,8 @@ class SimpleQueryContentHandler (ContentHandler):
                             editable=self.editable)
         self.view = self.edit.get_widget()
 
-        scroll_win = gtk.ScrolledWindow ()
-        scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll_win = Gtk.ScrolledWindow ()
+        scroll_win.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroll_win.add_with_viewport(self.view)
 
         return scroll_win

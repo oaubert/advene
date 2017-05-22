@@ -19,7 +19,7 @@
 """Module displaying the contents of a relation
 """
 
-import gtk
+from gi.repository import Gtk
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
@@ -87,32 +87,32 @@ class RelationDisplay(AdhocView):
             self.label['title'].set_markup(title)
             self.label['contents'].set_text('')
             for a in self.relation.members:
-                self.members_widget.pack_start(AnnotationRepresentation(a, self.controller), expand=False)
+                self.members_widget.pack_start(AnnotationRepresentation(a, self.controller), False, False, 0)
             self.widget.show_all()
         return False
 
     def build_widget(self):
-        v=gtk.VBox()
+        v=Gtk.VBox()
 
         self.label={}
 
-        self.label['title']=gtk.Label()
-        v.pack_start(self.label['title'], expand=False)
+        self.label['title']=Gtk.Label()
+        v.pack_start(self.label['title'], False, True, 0)
 
-        exp=gtk.Expander()
+        exp=Gtk.Expander()
         exp.set_expanded(False)
         exp.set_label(_("Contents"))
-        c=self.label['contents']=gtk.Label()
+        c=self.label['contents']=Gtk.Label()
         c.set_line_wrap(True)
         c.set_selectable(True)
         c.set_single_line_mode(False)
         c.set_alignment(0.0, 0.0)
         exp.add(c)
-        v.pack_start(exp, expand=False)
+        v.pack_start(exp, False, True, 0)
 
-        f=gtk.Frame(_("Members"))
+        f=Gtk.Frame.new(_("Members"))
         #  Display members
-        self.members_widget=gtk.VBox()
+        self.members_widget=Gtk.VBox()
         f.add(self.members_widget)
 
         v.add(f)

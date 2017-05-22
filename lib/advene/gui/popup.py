@@ -21,7 +21,7 @@
 Generic popup menu used by the various Advene views.
 """
 
-import gtk
+from gi.repository import Gtk
 import re
 import os
 
@@ -50,7 +50,7 @@ class Menu:
         self.menu=self.make_base_menu(element)
 
     def popup(self):
-        self.menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        self.menu.popup_at_pointer(None)
         return True
 
     def get_title (self, element):
@@ -233,7 +233,7 @@ class Menu:
         return True
 
     def copy_id (self, widget, el):
-        clip=gtk.clipboard_get()
+        clip=Gtk.clipboard_get()
         clip.set_text(el.id)
         return True
 
@@ -290,9 +290,9 @@ class Menu:
 
     def add_menuitem(self, menu=None, item=None, action=None, *param, **kw):
         if item is None or item == "":
-            i = gtk.SeparatorMenuItem()
+            i = Gtk.SeparatorMenuItem()
         else:
-            i = gtk.MenuItem(item, use_underline=False)
+            i = Gtk.MenuItem(item, use_underline=False)
         if action is not None:
             i.connect('activate', action, *param, **kw)
         menu.append(i)
@@ -305,9 +305,9 @@ class Menu:
         @type element: an Advene element
 
         @return: the built menu
-        @rtype: gtk.Menu
+        @rtype: Gtk.Menu
         """
-        menu = gtk.Menu()
+        menu = Gtk.Menu()
 
         def add_item(*p, **kw):
             return self.add_menuitem(menu, *p, **kw)
@@ -361,34 +361,34 @@ class Menu:
     def renumber_annotations(self, m, at):
         """Renumber all annotations of a given type.
         """
-        d = gtk.Dialog(title=_("Renumbering annotations of type %s") % self.get_title(at),
-                       parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+        d = Gtk.Dialog(title=_("Renumbering annotations of type %s") % self.get_title(at),
+                       parent=self.controller.gui.gui.win,
+                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                       buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                 Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l=gtk.Label()
+        l=Gtk.Label()
         l.set_markup(_("<b>Renumber all annotations according to their order.</b>\n\n<i>Note that this action cannot be undone.</i>\nReplace the first numeric value of the annotation content with the new annotation number.\nIf no numeric value is found and the annotation is structured, it will insert the number.\nIf no numeric value is found and the annotation is of type text/plain, it will overwrite the annotation content.\nThe offset parameter allows you to renumber from a given annotation."))
         l.set_line_wrap(True)
         l.show()
         d.vbox.add(l)
 
-        hb=gtk.HBox()
-        l=gtk.Label(_("Offset"))
-        hb.pack_start(l, expand=False)
-        s=gtk.SpinButton()
+        hb=Gtk.HBox()
+        l=Gtk.Label(label=_("Offset"))
+        hb.pack_start(l, False, True, 0)
+        s=Gtk.SpinButton()
         s.set_range(-5, len(at.annotations))
         s.set_value(1)
         s.set_increments(1, 5)
         hb.add(s)
-        d.vbox.pack_start(hb, expand=False)
+        d.vbox.pack_start(hb, False, True, 0)
 
         d.connect('key-press-event', dialog.dialog_keypressed_cb)
         d.show_all()
         dialog.center_on_mouse(d)
 
         res=d.run()
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             re_number=re.compile('(\d+)')
             re_struct=re.compile('^num=(\d+)$', re.MULTILINE)
             offset=s.get_value_as_int() - 1
@@ -396,19 +396,19 @@ class Menu:
             l.sort(key=lambda a: a.fragment.begin)
             l=l[offset:]
             size=float(len(l))
-            dial=gtk.Dialog(_("Renumbering %d annotations") % size,
-                           None,
-                           gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                           (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
-            prg=gtk.ProgressBar()
-            dial.vbox.pack_start(prg, expand=False)
+            dial=Gtk.Dialog(_("Renumbering %d annotations") % size,
+                           self.controller.gui.gui.win,
+                           Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                           (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
+            prg=Gtk.ProgressBar()
+            dial.vbox.pack_start(prg, False, True, 0)
             dial.show_all()
 
             for i, a in enumerate(l[offset:]):
                 prg.set_text(_("Annotation #%d") % i)
                 prg.set_fraction( i / size )
-                while gtk.events_pending():
-                    gtk.main_iteration()
+                while Gtk.events_pending():
+                    Gtk.main_iteration()
 
                 if a.type.mimetype == 'application/x-advene-structured':
                     if re_struct.search(a.content.data):
@@ -448,7 +448,7 @@ class Menu:
     def common_submenu(self, element):
         """Build the common submenu for all elements.
         """
-        submenu=gtk.Menu()
+        submenu=Gtk.Menu()
         def add_item(*p, **kw):
             self.add_menuitem(submenu, *p, **kw)
 
@@ -489,7 +489,7 @@ class Menu:
 
     def activate_submenu(self, element):
         """Build an "activate" submenu for the given annotation"""
-        submenu=gtk.Menu()
+        submenu=Gtk.Menu()
         def add_item(*p, **kw):
             self.add_menuitem(submenu, *p, **kw)
 
@@ -513,7 +513,7 @@ class Menu:
         add_item(_("Go to..."), self.goto_annotation, element)
         add_item(_("Loop"), loop_on_annotation, element)
         add_item(_("Duplicate"), self.duplicate_annotation, element)
-        item = gtk.MenuItem(_("Highlight"), use_underline=False)
+        item = Gtk.MenuItem(_("Highlight"), use_underline=False)
         item.set_submenu(self.activate_submenu(element))
         menu.append(item)
         add_item(_("Save snapshot..."), save_snapshot, element)
@@ -534,7 +534,7 @@ class Menu:
                     submenu.append(c)
             else:
                 for i in items:
-                    item=gtk.MenuItem(self.get_title(i), use_underline=False)
+                    item=Gtk.MenuItem(self.get_title(i), use_underline=False)
                     m=Menu(element=i, controller=self.controller)
                     item.set_submenu(m.menu)
                     submenu.append(item)
@@ -548,30 +548,30 @@ class Menu:
                 # The submenu was already populated.
                 return False
             if el.incomingRelations:
-                i=gtk.MenuItem(_("Incoming"))
+                i=Gtk.MenuItem(_("Incoming"))
                 submenu.append(i)
-                i=gtk.SeparatorMenuItem()
+                i=Gtk.SeparatorMenuItem()
                 submenu.append(i)
                 for t, l in el.typedRelatedIn.iteritems():
                     at=self.controller.package.get_element_by_id(t)
-                    m=gtk.MenuItem(self.get_title(at), use_underline=False)
-                    amenu=gtk.Menu()
+                    m=Gtk.MenuItem(self.get_title(at), use_underline=False)
+                    amenu=Gtk.Menu()
                     m.set_submenu(amenu)
                     amenu.connect('map', build_submenu, at, l)
                     submenu.append(m)
             if submenu.get_children():
                 # There were incoming annotations. Use a separator
-                i=gtk.SeparatorMenuItem()
+                i=Gtk.SeparatorMenuItem()
                 submenu.append(i)
             if el.outgoingRelations:
-                i=gtk.MenuItem(_("Outgoing"))
+                i=Gtk.MenuItem(_("Outgoing"))
                 submenu.append(i)
-                i=gtk.SeparatorMenuItem()
+                i=Gtk.SeparatorMenuItem()
                 submenu.append(i)
                 for t, l in el.typedRelatedOut.iteritems():
                     at=self.controller.package.get_element_by_id(t)
-                    m=gtk.MenuItem(self.get_title(at), use_underline=False)
-                    amenu=gtk.Menu()
+                    m=Gtk.MenuItem(self.get_title(at), use_underline=False)
+                    amenu=Gtk.Menu()
                     m.set_submenu(amenu)
                     amenu.connect('map', build_submenu, at, l)
                     submenu.append(m)
@@ -579,29 +579,29 @@ class Menu:
             return False
 
         if element.relations:
-            i=gtk.MenuItem(_("Related annotations"), use_underline=False)
-            submenu=gtk.Menu()
+            i=Gtk.MenuItem(_("Related annotations"), use_underline=False)
+            submenu=Gtk.Menu()
             i.set_submenu(submenu)
             submenu.connect('map', build_related, element)
             menu.append(i)
 
             if element.incomingRelations:
-                i=gtk.MenuItem(_("Incoming relations"), use_underline=False)
-                submenu=gtk.Menu()
+                i=Gtk.MenuItem(_("Incoming relations"), use_underline=False)
+                submenu=Gtk.Menu()
                 i.set_submenu(submenu)
                 submenu.connect('map', build_submenu, element, element.incomingRelations)
                 menu.append(i)
 
             if element.outgoingRelations:
-                i=gtk.MenuItem(_("Outgoing relations"), use_underline=False)
-                submenu=gtk.Menu()
+                i=Gtk.MenuItem(_("Outgoing relations"), use_underline=False)
+                submenu=Gtk.Menu()
                 i.set_submenu(submenu)
                 submenu.connect('map', build_submenu, element, element.outgoingRelations)
                 menu.append(i)
 
         add_item("")
 
-        item = gtk.MenuItem()
+        item = Gtk.MenuItem()
         item.add(image_from_position(self.controller,
                                      position=element.fragment.begin,
                                      height=60))
@@ -621,7 +621,7 @@ class Menu:
         add_item(element.content.data)
         add_item(_('Members:'))
         for a in element.members:
-            item=gtk.MenuItem(self.get_title(a), use_underline=False)
+            item=Gtk.MenuItem(self.get_title(a), use_underline=False)
             m=Menu(element=a, controller=self.controller)
             item.set_submenu(m.menu)
             menu.append(item)
@@ -740,7 +740,7 @@ class Menu:
         add_item(_('Create a comment view'), lambda i: create_static(element))
         add_item(_('Generate a caption dynamic view...'), lambda i: self.create_dynamic_view(element))
         add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % element.id))
-        add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations))
+        add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations, source='here/annotationTypes/%s/annotations' % element.id))
         add_item(_('Export to another format...'), lambda i: self.controller.gui.export_element(element))
         if [ i for i in advene.util.importer.IMPORTERS if 'NERD' in i.name ]:
             add_item(_('Extract Named Entities...'), self.nerd_service, element)
@@ -821,16 +821,16 @@ class Menu:
                 self.controller.log(_('Exception in query: %s') % unicode(e))
             return True
 
-        m=gtk.MenuItem(_('Apply query on...'))
+        m=Gtk.MenuItem(_('Apply query on...'))
         menu.append(m)
-        sm=gtk.Menu()
+        sm=Gtk.Menu()
         m.set_submenu(sm)
         for (expr, label) in (
              ('package', _('the package')),
              ('package/annotations', _('all annotations of the package')),
              ('package/annotations/first', _('the first annotation of the package')),
             ):
-            i=gtk.MenuItem(label)
+            i=Gtk.MenuItem(label)
             i.connect('activate', try_query, expr)
             sm.append(i)
         return

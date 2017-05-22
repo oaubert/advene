@@ -19,8 +19,10 @@
 """Module displaying the contents of an annotation.
 """
 
-import gobject
-import gtk
+from gi.repository import GObject
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import Gtk
 from gettext import gettext as _
 
 import advene.core.config as config
@@ -143,14 +145,14 @@ class AnnotationDisplay(AdhocView):
             elif self.annotation.content.mimetype.startswith('image/'):
                 # Image content, other than image/svg
                 # Load the element content
-                loader = gtk.gdk.PixbufLoader()
+                loader = GdkPixbuf.PixbufLoader()
                 try:
                     loader.write (self.annotation.content.data, len (self.annotation.content.data))
                     loader.close ()
                     pixbuf = loader.get_pixbuf ()
-                except gobject.GError:
+                except GObject.GError:
                     # The PNG data was invalid.
-                    pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+                    pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
 
                 d['contents']=''
                 d['imagecontents'] = pixbuf
@@ -175,7 +177,7 @@ class AnnotationDisplay(AdhocView):
                     height=pixbuf.get_height()
                     if width > w and w > 0:
                         height = 1.0 * w * height / width
-                        pixbuf=pixbuf.scale_simple(int(w), int(height), gtk.gdk.INTERP_BILINEAR)
+                        pixbuf=pixbuf.scale_simple(int(w), int(height), GdkPixbuf.InterpType.BILINEAR)
                     self.label['imagecontents'].set_from_pixbuf(pixbuf)
             else:
                 widget = self.label.get(k)
@@ -193,29 +195,29 @@ class AnnotationDisplay(AdhocView):
         return False
 
     def build_widget(self):
-        v=gtk.VBox()
+        v=Gtk.VBox()
 
         self.label={}
         self.sw={}
 
-        h=gtk.HBox()
-        self.label['title']=gtk.Label()
-        h.pack_start(self.label['title'], expand=False)
-        v.pack_start(h, expand=False)
+        h=Gtk.HBox()
+        self.label['title']=Gtk.Label()
+        h.pack_start(self.label['title'], False, True, 0)
+        v.pack_start(h, False, True, 0)
 
-        h=gtk.HBox()
-        self.label['begin']=gtk.Label()
-        h.pack_start(self.label['begin'], expand=False)
-        l=gtk.Label(' - ')
-        h.pack_start(l, expand=False)
-        self.label['end']=gtk.Label()
-        h.pack_start(self.label['end'], expand=False)
-        v.pack_start(h, expand=False)
+        h=Gtk.HBox()
+        self.label['begin']=Gtk.Label()
+        h.pack_start(self.label['begin'], False, True, 0)
+        l=Gtk.Label(label=' - ')
+        h.pack_start(l, False, True, 0)
+        self.label['end']=Gtk.Label()
+        h.pack_start(self.label['end'], False, True, 0)
+        v.pack_start(h, False, True, 0)
 
         def handle_motion(widget, event):
             if isinstance(self.annotation, Annotation):
                 i = self.label['image']
-                i.epsilon = self.annotation.fragment.duration / widget.allocation.width
+                i.epsilon = self.annotation.fragment.duration / widget.get_allocation().width
                 v = self.annotation.fragment.begin + i.epsilon * 20 * int(event.x / 20)
                 i.set_value(v)
             return True
@@ -227,37 +229,37 @@ class AnnotationDisplay(AdhocView):
                 i.set_value(self.annotation.fragment.begin)
             return True
 
-        fr = gtk.Expander ()
+        fr = Gtk.Expander ()
         fr.set_label(_("Screenshot"))
         self.label['image'] = TimestampRepresentation(-1, self.controller, width=config.data.preferences['drag-snapshot-width'], epsilon=config.data.preferences['bookmark-snapshot-precision'], visible_label=False)
-        self.label['image'].add_events(gtk.gdk.POINTER_MOTION_MASK
-                                       | gtk.gdk.LEAVE_NOTIFY_MASK)
+        self.label['image'].add_events(Gdk.EventMask.POINTER_MOTION_MASK
+                                       | Gdk.EventMask.LEAVE_NOTIFY_MASK)
         self.label['image'].connect('motion-notify-event', handle_motion)
         self.label['image'].connect('leave-notify-event', handle_leave)
 
         fr.add(self.label['image'])
         fr.set_expanded(True)
-        v.pack_start(fr, expand=False)
+        v.pack_start(fr, False, True, 0)
 
         # Contents frame
         def handle_ok(b):
             b.hide()
             if isinstance(self.annotation, Annotation):
                 self.controller.notify('EditSessionStart', element=self.annotation, immediate=True)
-                self.annotation.content.data = self.label['contents'].get_text()
+                self.annotation.content.data = self.label['contents'].get_text().decode('utf-8')
                 self.controller.notify("AnnotationEditEnd", annotation=self.annotation)
                 self.controller.notify('EditSessionEnd', element=self.annotation)
             return True
 
-        hbox = gtk.HBox()
-        hbox.pack_start(gtk.Label(_("Contents")), expand=False)
+        hbox = Gtk.HBox()
+        hbox.pack_start(Gtk.Label(_("Contents")), False, False, 0)
         ok_button=get_pixmap_button('small_ok.png', handle_ok)
-        ok_button.set_relief(gtk.RELIEF_NONE)
+        ok_button.set_relief(Gtk.ReliefStyle.NONE)
         ok_button.set_tooltip_text(_("Validate"))
         ok_button.set_no_show_all(True)
-        hbox.pack_start(ok_button, expand=False)
+        hbox.pack_start(ok_button, False, True, 0)
 
-        f=gtk.Frame()
+        f=Gtk.Frame()
         f.set_label_widget(hbox)
 
         def contents_modified(buf):
@@ -268,12 +270,12 @@ class AnnotationDisplay(AdhocView):
                 ok_button.hide()
             return True
 
-        c=self.label['contents']=gtk.TextView()
-        c.set_wrap_mode(gtk.WRAP_WORD_CHAR)
+        c=self.label['contents']=Gtk.TextView()
+        c.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
         c.get_buffer().ignore_modified = False
         c.get_buffer().connect('modified-changed', contents_modified)
-        sw=gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw=Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add(c)
         def set_text(widget, t):
             b=widget.get_buffer()
@@ -286,13 +288,13 @@ class AnnotationDisplay(AdhocView):
         c.set_text = set_text.__get__(c)
         def get_text(widget):
             b=widget.get_buffer()
-            return b.get_text(*b.get_bounds())
+            return b.get_text(*b.get_bounds() + ( False, ))
         c.get_text = get_text.__get__(c)
         self.sw['contents']=sw
 
         def handle_keypress(widget, event):
-            if (event.keyval == gtk.keysyms.Return
-                and event.state & gtk.gdk.CONTROL_MASK
+            if (event.keyval == Gdk.KEY_Return
+                and event.get_state() & Gdk.ModifierType.CONTROL_MASK
                 and widget.get_buffer().get_modified()):
                 handle_ok(ok_button)
                 return True
@@ -306,14 +308,14 @@ class AnnotationDisplay(AdhocView):
                                      element=self.annotation,
                                      indexer=self.controller.package._indexer)
 
-        image=self.label['imagecontents']=gtk.Image()
+        image=self.label['imagecontents']=Gtk.Image()
 
-        swi=gtk.ScrolledWindow()
-        swi.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        swi=Gtk.ScrolledWindow()
+        swi.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         swi.add_with_viewport(image)
         self.sw['imagecontents']=swi
 
-        vb=gtk.VBox()
+        vb=Gtk.VBox()
         vb.add(sw)
         vb.add(swi)
 
@@ -328,17 +330,17 @@ class AnnotationDisplay(AdhocView):
             """Handle the drop of an annotation.
             """
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_annotation(sources[0])
                 return True
             return False
         # The button can receive drops (to display annotations)
         v.connect('drag-data-received', annotation_drag_received_cb)
-        v.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'],
-                        gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+        v.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('annotation'),
+                        Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
 
         return v

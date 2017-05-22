@@ -18,28 +18,36 @@
 #
 
 # Advene finder, a la MacOS X
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-import gtk
-import gobject
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import Gtk
+from gi.repository import GObject
 import urllib
 
 import advene.core.config as config
-from advene.gui.views.tree import DetailedTreeModel
+from advene.gui.edit.properties import EditWidget
 from advene.gui.views import AdhocView
 from advene.gui.views.annotationdisplay import AnnotationDisplay
 from advene.gui.views.relationdisplay import RelationDisplay
-from advene.model.schema import AnnotationType, RelationType
+
+from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
-from advene.model.view import View
-from advene.model.resources import ResourceData
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.bundle import AbstractBundle
+from advene.model.resources import Resources, ResourceData
 from advene.model.query import Query
+from advene.model.view import View
+
 import advene.rules.elements
 import advene.gui.popup
 import advene.util.helper as helper
 import advene.model.tal.context
-from advene.gui.util import drag_data_get_cb, get_target_types, enable_drag_source, contextual_drag_begin, name2color
+from advene.gui.util import get_target_types, enable_drag_source, contextual_drag_begin, drag_data_get_cb
 
 name="Package finder view plugin"
 
@@ -49,26 +57,177 @@ def register(controller):
 # Matching between element classes and the FinderColumn class
 CLASS2COLUMN={}
 
+class Metadata(object):
+    """Virtual object describing an element Metadata.
+    """
+    def __init__(self, element, package, viewableType=None):
+        self.element = element
+        self.rootPackage = package
+        self.viewableType = viewableType
+
+    def get_config(self, uri):
+        (ns, k) = uri.split(':')
+        return self.element.getMetaData(config.data.namespace_prefix[ns], k)
+
+    def set_config(self, uri, value):
+        (ns, k) = uri.split(':')
+        self.element.setMetaData(config.data.namespace_prefix[ns], k, value)
+
+    def list_keys(self):
+        try:
+            return [ "%s:%s" % (config.data.reverse_namespace_prefix[nsuri],
+                                name)
+                     for (nsuri, name, value) in self.element.listMetaData() ]
+        except AttributeError:
+            return []
+
+class VirtualNode:
+    """Virtual node.
+    """
+    def __init__(self, name, package, viewableType=None):
+        self.title=name
+        self.rootPackage=package
+        self.viewableType=viewableType
+
+class DetailedTreeModel(object):
+    """Detailed Tree Model.
+
+    In this model,
+       - Annotations and Relations depend on their types.
+       - Types depend on their schema
+       - Schemas depend on their package list of schemas
+       - Views depend on their package list of views
+       - Resources depend on the Resource node
+    """
+    def __init__(self, controller=None, package=None):
+        self.childrencache = {}
+        self.virtual={}
+        self.virtual['root'] = VirtualNode(_("Package"), package)
+        self.virtual['views']=VirtualNode(_("List of views"), package, viewableType='view-list')
+        self.virtual['static']=VirtualNode(_("Static views"), package, viewableType='view-list')
+        self.virtual['dynamic']=VirtualNode(_("Dynamic views"), package, viewableType='view-list')
+        self.virtual['admin']=VirtualNode(_("Admin views"), package, viewableType='view-list')
+        self.virtual['adhoc']=VirtualNode(_("Adhoc views"), package)
+
+    def nodeParent (self, node):
+        #print "nodeparent %s" % node
+        if isinstance (node, Annotation):
+            parent = node.type
+        elif isinstance (node, Relation):
+            parent = node.type
+        elif isinstance (node, RelationType):
+            parent = node.schema
+        elif isinstance (node, AnnotationType):
+            parent = node.schema
+        elif isinstance (node, Schema):
+            parent = node.rootPackage.schemas
+        elif isinstance (node, View):
+            if node.id.startswith('_'):
+                parent=self.virtual['admin']
+            else:
+                t=helper.get_view_type(node)
+                parent=self.virtual[t]
+        elif isinstance (node, Query):
+            parent = node.rootPackage.queries
+        elif isinstance (node, Package):
+            parent = None
+        elif isinstance (node, AbstractBundle):
+            parent = node.rootPackage
+        elif isinstance (node, Resources):
+            parent = node.parent
+        elif isinstance (node, ResourceData):
+            parent = node.parent
+        elif node in (self.virtual['static'], self.virtual['dynamic'], self.virtual['adhoc'], self.virtual['admin']):
+            parent = self.virtual['views']
+        elif node == self.virtual['views']:
+            parent=node.rootPackage
+        else:
+            parent = None
+        return parent
+
+    def nodeChildren (self, node):
+        #print "nodechildren %s" % node
+        children = []
+        if isinstance (node, Annotation):
+            children = []
+        elif isinstance (node, Relation):
+            children = []
+        elif isinstance (node, AnnotationType):
+            if not node in self.childrencache:
+                self.childrencache[node] = node.annotations
+            children = self.childrencache[node]
+        elif isinstance (node, RelationType):
+            if not node in self.childrencache:
+                self.childrencache[node] = node.relations
+            children = self.childrencache[node]
+        elif isinstance (node, Schema):
+            # Do not cache these elements
+            l=list(node.annotationTypes)
+            l.extend(node.relationTypes)
+            children = l
+        elif isinstance (node, View):
+            children = []
+        elif isinstance (node, Query):
+            children = []
+        elif isinstance (node, Package):
+            if not node in self.childrencache:
+                self.childrencache[node] = [node.schemas, self.virtual['views'], node.queries, node.resources ]
+            children = self.childrencache[node]
+        elif isinstance (node, AbstractBundle):
+            children = node
+        elif isinstance (node, Resources):
+            if not node in self.childrencache:
+                self.childrencache[node] = node.children()
+            children = self.childrencache[node]
+        elif isinstance (node, ResourceData):
+            children = []
+        elif node == self.virtual['views']:
+            children=[ self.virtual['static'], self.virtual['dynamic'], self.virtual['adhoc'], self.virtual['admin'] ]
+        elif node is []:
+            children = [ self.get_package() ]
+        else:
+            children = []
+            if node == self.virtual['admin']:
+                children=sorted([ v
+                                  for v in node.rootPackage.views
+                                  if v.id.startswith('_') ],
+                                key=lambda e: (e.title or e.id).lower())
+            else:
+                for t in ('static', 'dynamic', 'adhoc'):
+                    if node == self.virtual[t]:
+                        children=sorted([ v
+                                          for v in node.rootPackage.views
+                                          if not v.id.startswith('_')
+                                          and helper.get_view_type(v) == t ],
+                                        key=lambda e: (e.title or e.id).lower())
+                        break
+        return children
+
+    def nodeHasChildren (self, node):
+        children = self.nodeChildren(node)
+        return (children is not None and children)
+
 class FinderColumn(object):
     """Abstract FinderColumn class.
     """
-    def __init__(self, controller=None, node=None, callback=None, parent=None):
+    def __init__(self, controller=None, model=None, node=None, callback=None, parent=None):
         self.controller=controller
+        self.model=model
         self.node=node
         self.callback=callback
         self.previous=parent
         self.next=None
-        self.widget=gtk.Frame()
+        self.widget=Gtk.Frame()
         self.widget.add(self.build_widget())
         self.widget.connect('key-press-event', self.key_pressed_cb)
 
     def key_pressed_cb(self, col, event):
-        if event.keyval == gtk.keysyms.Right:
+        if event.keyval == Gdk.KEY_Right:
             # Next column
             if self.next is not None:
                 self.next.get_focus()
             return True
-        elif event.keyval == gtk.keysyms.Left:
+        elif event.keyval == Gdk.KEY_Left:
             # Previous column
             if self.previous is not None:
                 self.previous.get_focus()
@@ -78,7 +237,7 @@ class FinderColumn(object):
     def get_focus(self):
         """Get the focus on the column.
 
-        As we use a gtk.Button at the top of every specialized
+        As we use a Gtk.Button at the top of every specialized
         ViewColumn, we want to use the second button.
         """
         b=self.get_child_buttons(self.widget)
@@ -89,16 +248,19 @@ class FinderColumn(object):
     def get_child_buttons(self, w):
         """Return the buttons contained in the widget.
         """
-        if isinstance(w, gtk.Frame):
+        if isinstance(w, Gtk.Frame):
             w=w.get_children()[0]
         b=[]
         try:
-            b=[ c for c in w.get_children() if isinstance(c, gtk.Button) ]
+            b=[ c for c in w.get_children() if isinstance(c, Gtk.Button) ]
         except AttributeError:
             return []
         for c in w.get_children():
             b.extend(self.get_child_buttons(c))
         return b
+
+    def get_selected_annotation_widgets(self):
+        return []
 
     def close(self):
         """Close this column, and all following ones.
@@ -110,9 +272,7 @@ class FinderColumn(object):
             self.previous.next=None
 
     def get_name(self):
-        if self.node is None:
-            return "FIXME"
-        return self.node[self.COLUMN_TITLE]
+        return self.controller.get_title(self.node)
     name=property(fget=get_name, doc="Displayed name for the element")
 
     def update(self, node=None):
@@ -128,35 +288,38 @@ class FinderColumn(object):
         return True
 
     def build_widget(self):
-        return gtk.Label("Generic finder column")
+        return Gtk.Label(label="Generic column for %s" % self.name)
 
 class ModelColumn(FinderColumn):
     COLUMN_TITLE=0
-    COLUMN_NODE=1
+    COLUMN_ELEMENT=1
     COLUMN_COLOR=2
 
-    def get_valid_members(self, el):
+    def get_valid_members(self, node):
         """Return the list of valid members for the element.
         """
-        def title(c):
-            el=c[DetailedTreeModel.COLUMN_ELEMENT]
+        def title(el):
+            t = self.controller.get_title(el)
             if isinstance(el, AnnotationType):
-                return "%s (%d)" % (c[DetailedTreeModel.COLUMN_TITLE], len(el.annotations))
+                return "%s (%d)" % (t, len(el.annotations))
             elif isinstance(el, RelationType):
-                return "%s (%d)" % (c[DetailedTreeModel.COLUMN_TITLE], len(el.relations))
+                return "%s (%d)" % (t, len(el.relations))
             else:
-                return c[DetailedTreeModel.COLUMN_TITLE]
+                return t
 
         return [ (title(c),
                   c,
-                  c[DetailedTreeModel.COLUMN_COLOR]) for c in self.node.iterchildren() ]
+                  self.controller.get_element_color(c)) for c in self.model.nodeChildren(node) ]
+
+    def get_selected_annotation_widgets(self):
+        return []
 
     def get_focus(self):
         self.listview.grab_focus()
         return True
 
     def get_liststore(self):
-        ls=gtk.ListStore(str, object, str)
+        ls=Gtk.ListStore(str, object, str)
         if self.node is None:
             return ls
         for row in self.get_valid_members(self.node):
@@ -168,6 +331,7 @@ class ModelColumn(FinderColumn):
         self.liststore.clear()
         if self.node is None:
             return True
+        self.column.set_title(self.controller.get_title(node))
         for row in self.get_valid_members(node):
             self.liststore.append(row)
 
@@ -175,7 +339,7 @@ class ModelColumn(FinderColumn):
             # There is a next column. Should we still display it ?
             if not [ r
                      for r in self.liststore
-                     if r[self.COLUMN_NODE][DetailedTreeModel.COLUMN_ELEMENT] == self.next.node[self.COLUMN_NODE] ]:
+                     if r[self.COLUMN_ELEMENT] == self.next.node ]:
                 # The next node is no more in the current elements.
                 self.next.close()
                 self.next=None
@@ -195,14 +359,14 @@ class ModelColumn(FinderColumn):
             return False
         path, col, cx, cy = t
         it = model.get_iter(path)
-        node = model.get_value(it, DetailedTreeModel.COLUMN_ELEMENT)
+        node = model.get_value(it, self.COLUMN_ELEMENT)
         widget.get_selection().select_path (path)
-        if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+        if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
             # Double-click: edit the element
-            self.controller.gui.edit_element(node[DetailedTreeModel.COLUMN_ELEMENT])
+            self.controller.gui.edit_element(node)
             return True
         elif event.button == 3:
-            menu = advene.gui.popup.Menu(node[DetailedTreeModel.COLUMN_ELEMENT], controller=self.controller)
+            menu = advene.gui.popup.Menu(node, controller=self.controller)
             menu.popup()
             return True
         return False
@@ -212,7 +376,7 @@ class ModelColumn(FinderColumn):
         if selection is not None:
             store, it = selection.get_selected()
             if it is not None:
-                att = model.get_value (it, self.COLUMN_NODE)
+                att = model.get_value (it, self.COLUMN_ELEMENT)
         if att and self.callback:
             self.callback(self, att)
             return True
@@ -225,7 +389,7 @@ class ModelColumn(FinderColumn):
             if row is None:
                 element=None
             else:
-                element = treeview.get_model()[row[0]][self.COLUMN_NODE][DetailedTreeModel.COLUMN_ELEMENT]
+                element = treeview.get_model()[row[0]][self.COLUMN_ELEMENT]
             self.drag_data=(int(x), int(y), event, element)
 
     def on_treeview_button_release_event(self, treeview, event):
@@ -233,7 +397,7 @@ class ModelColumn(FinderColumn):
         self.drag_context=None
 
     def on_treeview_motion_notify_event(self, treeview, event):
-        if (event.state == gtk.gdk.BUTTON1_MASK
+        if (event.get_state() == Gdk.ModifierType.BUTTON1_MASK
             and self.drag_context is None
             and self.drag_data is not None
             and self.drag_data[3] is not None):
@@ -244,27 +408,46 @@ class ModelColumn(FinderColumn):
             if threshold:
                 # A drag was started. Setup the appropriate target.
                 element=self.drag_data[3]
-                targets=get_target_types(element)
-                actions = gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY
+                targets = Gtk.TargetList.new(get_target_types(element))
+                actions = Gdk.DragAction.MOVE | Gdk.DragAction.LINK | Gdk.DragAction.COPY
                 button = 1
-                self.drag_context = treeview.drag_begin(targets, actions, button, self.drag_data[2])
+                self.drag_context = treeview.drag_begin_with_coordinates(targets, actions, button, event, -1, -1)
                 contextual_drag_begin(treeview, self.drag_context, element, self.controller)
                 self.drag_context._element=element
 
-    def build_widget(self):
-        vbox=gtk.VBox()
+    def on_title_clicked(self, column):
+        # Display metadata
+        if self.callback:
+            self.callback(self, Metadata(self.node, self.node.rootPackage))
+        return True
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+    def own_drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
+        model, paths = treeview.get_selection().get_selected_rows()
+
+        els=[ model[p][self.COLUMN_ELEMENT] for p in paths ]
+
+        context._element = els[0]
+        drag_data_get_cb(treeview, context, selection, targetType, timestamp, self.controller)
+        return True
+
+    def build_widget(self):
+        vbox=Gtk.VBox()
+
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         vbox.add (sw)
 
         self.liststore = self.get_liststore()
-        self.listview = gtk.TreeView(self.liststore)
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Attributes", renderer,
+        self.listview = Gtk.TreeView(self.liststore)
+        self.listview.container = self
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Attributes", renderer,
                                     text=self.COLUMN_TITLE,
                                     cell_background=self.COLUMN_COLOR)
-        column.set_widget(gtk.Label())
+        self.column = column
+        column.set_title(self.get_name())
+        column.set_clickable(True)
+        column.connect('clicked', self.on_title_clicked)
         self.listview.append_column(column)
 
         selection = self.listview.get_selection()
@@ -278,7 +461,7 @@ class ModelColumn(FinderColumn):
         self.listview.connect('button-press-event', self.on_treeview_button_press_event)
         self.listview.connect('button-release-event', self.on_treeview_button_release_event)
         self.listview.connect('motion-notify-event', self.on_treeview_motion_notify_event)
-        self.listview.connect('drag-data-get', drag_data_get_cb, self.controller)
+        self.listview.connect('drag-data-get', self.own_drag_data_get_cb)
 
         sw.add(self.listview)
 
@@ -289,13 +472,16 @@ class ModelColumn(FinderColumn):
 class AnnotationColumn(FinderColumn):
     def update(self, node=None):
         self.node=node
-        self.view.set_annotation(node[DetailedTreeModel.COLUMN_ELEMENT])
+        self.view.set_annotation(node)
         return True
 
-    def build_widget(self):
-        vbox=gtk.VBox()
+    def get_selected_annotation_widgets(self):
+        return []
 
-        self.view=AnnotationDisplay(controller=self.controller, annotation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
+    def build_widget(self):
+        vbox=Gtk.VBox()
+
+        self.view=AnnotationDisplay(controller=self.controller, annotation=self.node)
         vbox.add(self.view.widget)
         vbox.show_all()
         return vbox
@@ -304,27 +490,27 @@ CLASS2COLUMN[Annotation]=AnnotationColumn
 class RelationColumn(FinderColumn):
     def update(self, node=None):
         self.node=node
-        self.view.set_relation(node[DetailedTreeModel.COLUMN_ELEMENT])
+        self.view.set_relation(node)
         return True
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        self.view=RelationDisplay(controller=self.controller, relation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
+        self.view=RelationDisplay(controller=self.controller, relation=self.node)
         vbox.add(self.view.widget)
         vbox.show_all()
         return vbox
 CLASS2COLUMN[Relation]=RelationColumn
 
 class ViewColumn(FinderColumn):
-    def __init__(self, controller=None, node=None, callback=None, parent=None):
-        self.element=node[DetailedTreeModel.COLUMN_ELEMENT]
-        FinderColumn.__init__(self, controller, node, callback, parent)
+    def __init__(self, controller=None, model=None, node=None, callback=None, parent=None):
+        self.element=node
+        FinderColumn.__init__(self, controller, model, node, callback, parent)
         self.update(node)
 
     def update(self, node=None):
         self.node=node
-        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+        self.element = self.node
 
         self.label['title'].set_markup(_("View <b>%(title)s</b>\nId: %(id)s") % {
                 'title': self.controller.get_title(self.element).replace('<', '&lt;'),
@@ -363,22 +549,22 @@ class ViewColumn(FinderColumn):
         return True
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
         self.label={}
-        self.label['title']=gtk.Label()
-        vbox.pack_start(self.label['title'], expand=False)
-        self.label['info']=gtk.Label()
-        vbox.pack_start(self.label['info'], expand=False)
-        b=self.label['edit']=gtk.Button(_("Edit view"))
+        self.label['title']=Gtk.Label()
+        vbox.pack_start(self.label['title'], False, True, 0)
+        self.label['info']=Gtk.Label()
+        vbox.pack_start(self.label['info'], False, True, 0)
+        b=self.label['edit']=Gtk.Button(_("Edit view"))
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
         # Enable DND
         def get_element():
             return self.element
         enable_drag_source(b, get_element, self.controller)
 
-        vbox.pack_start(b, expand=False)
+        vbox.pack_start(b, False, True, 0)
 
-        b=self.label['activate']=gtk.Button(_("Open view"))
+        b=self.label['activate']=Gtk.Button(_("Open view"))
         b.connect('clicked', self.activate)
         # Drag and drop for adhoc views
 
@@ -388,35 +574,35 @@ class ViewColumn(FinderColumn):
                     return False
                 if helper.get_view_type(self.element) != 'adhoc':
                     return False
-                selection.set(selection.target, 8,
+                selection.set(selection.get_target(), 8,
                               urllib.urlencode( {
                             'id': self.element.id,
                             } ).encode('utf8'))
                 return True
             else:
-                print "Unknown target type for drag: %d" % targetType
+                logger.warn("Unknown target type for drag: %d" % targetType)
             return True
 
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['adhoc-view'],
-                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                          config.data.get_target_types('adhoc-view'),
+                          Gdk.DragAction.LINK | Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         b.connect('drag-data-get', drag_data_get_cb)
 
-        vbox.pack_start(b, expand=False)
+        vbox.pack_start(b, False, True, 0)
 
         vbox.show_all()
         return vbox
 CLASS2COLUMN[View]=ViewColumn
 
 class QueryColumn(FinderColumn):
-    def __init__(self, controller=None, node=None, callback=None, parent=None):
-        self.element=node[DetailedTreeModel.COLUMN_ELEMENT]
-        FinderColumn.__init__(self, controller, node, callback, parent)
+    def __init__(self, controller=None, model=None, node=None, callback=None, parent=None):
+        self.element=node
+        FinderColumn.__init__(self, controller, model, node, callback, parent)
         self.update(node)
 
     def update(self, node=None):
         self.node=node
-        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+        self.element=self.node
 
         self.label['title'].set_markup(_("%(type)s <b>%(title)s</b>\nId: %(id)s") % {
                 'type': helper.get_type(self.element),
@@ -428,21 +614,21 @@ class QueryColumn(FinderColumn):
         return True
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
         self.label={}
-        self.label['title']=gtk.Label()
-        vbox.pack_start(self.label['title'], expand=False)
+        self.label['title']=Gtk.Label()
+        vbox.pack_start(self.label['title'], False, True, 0)
 
-        b=self.label['edit']=gtk.Button(_("Edit query"))
+        b=self.label['edit']=Gtk.Button(_("Edit query"))
         # Enable DND
         def get_element():
             return self.element
         enable_drag_source(b, get_element, self.controller)
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
-        vbox.pack_start(b, expand=False)
+        vbox.pack_start(b, False, True, 0)
 
-        f=gtk.Frame(_("Try to apply the query on..."))
-        v=gtk.VBox()
+        f=Gtk.Frame.new(_("Try to apply the query on..."))
+        v=Gtk.VBox()
         f.add(v)
 
         def try_query(b, expr):
@@ -452,7 +638,7 @@ class QueryColumn(FinderColumn):
                                                     query=self.element,
                                                     result=res,
                                                     destination='east')
-            except Exception, e:
+            except Exception:
                 #print "********** Oops"
                 #import traceback
                 #traceback.print_exc()
@@ -465,9 +651,9 @@ class QueryColumn(FinderColumn):
              ('package/annotations', _("all annotations of the package")),
              ('package/annotations/first', _("the first annotation of the package")),
             ):
-            b=gtk.Button(label, use_underline=False)
+            b=Gtk.Button(label, use_underline=False)
             b.connect('clicked', try_query, expr)
-            v.pack_start(b, expand=False)
+            v.pack_start(b, False, True, 0)
             self.apply_buttons.append(b)
 
         vbox.add(f)
@@ -476,14 +662,14 @@ class QueryColumn(FinderColumn):
 CLASS2COLUMN[Query]=QueryColumn
 
 class ResourceColumn(FinderColumn):
-    def __init__(self, controller=None, node=None, callback=None, parent=None):
-        self.element=node[DetailedTreeModel.COLUMN_ELEMENT]
-        FinderColumn.__init__(self, controller, node, callback, parent)
+    def __init__(self, controller=None, model=None, node=None, callback=None, parent=None):
+        self.element=node
+        FinderColumn.__init__(self, controller, model, node, callback, parent)
         self.update(node)
 
     def update(self, node=None):
         self.node=node
-        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+        self.element=self.node
         self.label['title'].set_markup(_("%(type)s <b>%(title)s</b>\nId: %(id)s") % {
                 'type': helper.get_type(self.element),
                 'title': self.controller.get_title(self.element).replace('<', '&lt;'),
@@ -494,30 +680,92 @@ class ResourceColumn(FinderColumn):
     def update_preview(self):
         self.preview.foreach(self.preview.remove)
         if self.element.mimetype.startswith('image/'):
-            i=gtk.Image()
-            pixbuf=gtk.gdk.pixbuf_new_from_file(self.element.file_)
+            i=Gtk.Image()
+            pixbuf=GdkPixbuf.Pixbuf.new_from_file(self.element.file_)
             i.set_from_pixbuf(pixbuf)
             self.preview.add(i)
             i.show()
+        # FIXME: if self.element.mimetype.startswith('audio/'):
+        # Add play icon
         return True
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
         self.label={}
-        self.label['title']=gtk.Label()
-        vbox.pack_start(self.label['title'], expand=False)
-        b=self.label['edit']=gtk.Button(_("Edit resource"))
+        self.label['title']=Gtk.Label()
+        vbox.pack_start(self.label['title'], False, True, 0)
+        b=self.label['edit']=Gtk.Button(_("Edit resource"))
         # Enable DND
         def get_element():
             return self.element
         enable_drag_source(b, get_element, self.controller)
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
-        vbox.pack_start(b, expand=False)
-        self.preview=gtk.VBox()
+        vbox.pack_start(b, False, True, 0)
+        self.preview=Gtk.VBox()
         vbox.add(self.preview)
         vbox.show_all()
         return vbox
 CLASS2COLUMN[ResourceData]=ResourceColumn
+
+class MetadataColumn(FinderColumn):
+    def update(self, node=None):
+        self.node=node
+        return True
+
+    def build_widget(self):
+        el = self.node.element
+        vbox=Gtk.VBox()
+
+        info = Gtk.TextView()
+        info.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+        def set_text(widget, t):
+            b=widget.get_buffer()
+            b.delete(*b.get_bounds())
+            b.set_text(t)
+            b.set_modified(False)
+            return True
+        info.set_text = set_text.__get__(info)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+
+        if isinstance(el, Package):
+            info.set_text(_("""Package %(title)s:
+%(schema)s
+%(annotation)s in %(annotation_type)s
+%(relation)s in %(relation_type)s
+%(query)s
+%(view)s
+
+Description:
+%(description)s
+""") % {
+        'title': el.title,
+        'schema': helper.format_element_name('schema', len(el.schemas)),
+        'annotation': helper.format_element_name('annotation', len(el.annotations)),
+        'annotation_type': helper.format_element_name('annotation_type', len(el.annotationTypes)),
+        'relation': helper.format_element_name('relation', len(el.relations)),
+        'relation_type': helper.format_element_name('relation_type', len(el.relationTypes)),
+        'query': helper.format_element_name('query', len(el.queries)),
+        'view': helper.format_element_name('view', len(el.views)),
+        'description': el.getMetaData(config.data.namespace_prefix['dc'], 'description')
+        })
+        else:
+            info.set_text(_("""%(type)s %(title)s""") % ({"type": type(el),
+                                                          "title": self.controller.get_title(el)}))
+
+        frame = Gtk.Expander.new(_("Metadata"))
+        frame.set_expanded(False)
+        self.view = EditWidget(self.node.set_config, self.node.get_config)
+        for p in self.node.list_keys():
+            self.view.add_entry(p, p, "")
+
+        sw.add(info)
+        vbox.add(sw)
+        frame.add(self.view)
+        vbox.add(frame)
+        vbox.show_all()
+        return vbox
+CLASS2COLUMN[Metadata] = MetadataColumn
 
 class Finder(AdhocView):
     view_name = _("Package finder")
@@ -558,12 +806,12 @@ class Finder(AdhocView):
             while cb is not None:
                 if [ r
                      for r in cb.liststore
-                     if r[ModelColumn.COLUMN_NODE][DetailedTreeModel.COLUMN_ELEMENT] == element ]:
+                     if r.node == element ]:
                     # The element is present in the list of
                     # children. Remove the next column if necessary
                     # and update the children list.
                     cb.update(node=cb.node)
-                    if cb.next is not None and cb.next.node[DetailedTreeModel.COLUMN_ELEMENT] == element:
+                    if cb.next is not None and cb.next.node == element:
                         cb.next.close()
 
                 cb=cb.next
@@ -625,7 +873,7 @@ class Finder(AdhocView):
         self.model=DetailedTreeModel(controller=self.controller, package=package)
 
         # Update the rootcolumn element
-        self.rootcolumn.update(self.model[0])
+        self.rootcolumn.update(package)
         return True
 
     def clicked_callback(self, columnbrowser, node):
@@ -637,15 +885,16 @@ class Finder(AdhocView):
                 cb=cb.next
             self.rootcolumn.next=None
         elif columnbrowser.next is None:
-            t=type(node[DetailedTreeModel.COLUMN_ELEMENT])
+            t=type(node)
             clazz=CLASS2COLUMN.get(t, ModelColumn)
             # Create a new columnbrowser
             col=clazz(controller=self.controller,
+                      model=self.model,
                       node=node,
                       callback=self.clicked_callback,
                       parent=columnbrowser)
             col.widget.set_property("width-request", self.column_width)
-            self.hbox.pack_start(col.widget, expand=False)
+            self.hbox.pack_start(col.widget, False, True, 0)
             col.widget.show_all()
             columnbrowser.next=col
         else:
@@ -654,7 +903,7 @@ class Finder(AdhocView):
             if cb is not None:
                 cb.close()
             # Check if the column is still appropriate for the node
-            clazz=CLASS2COLUMN.get(type(node[DetailedTreeModel.COLUMN_ELEMENT]), ModelColumn)
+            clazz=CLASS2COLUMN.get(type(node), ModelColumn)
             if not isinstance(columnbrowser.next, clazz):
                 # The column is not appropriate for the new node.
                 # Close it and reopen it.
@@ -664,53 +913,54 @@ class Finder(AdhocView):
                 columnbrowser.next.update(node)
 
         # Scroll the columns
-        gobject.timeout_add(100, lambda: self.autoscroll_end() and False)
+        GObject.timeout_add(100, lambda: self.autoscroll_end() and False)
         return True
 
     def autoscroll_end(self):
         adj=self.sw.get_hadjustment()
-        adj.value = adj.upper - adj.page_size
+        adj.set_value(adj.get_upper() - adj.get_page_size())
         return True
 
     def scroll_event(self, widget=None, event=None):
         a=widget.get_hadjustment()
-        if ((event.direction == gtk.gdk.SCROLL_DOWN and event.state & gtk.gdk.SHIFT_MASK)
-            or event.direction == gtk.gdk.SCROLL_RIGHT):
-            val = a.value + a.step_increment
-            if val > a.upper - a.page_size:
-                val = a.upper - a.page_size
-            if val != a.value:
-                a.value = val
+        if ((event.direction == Gdk.ScrollDirection.DOWN and event.get_state() & Gdk.ModifierType.SHIFT_MASK)
+            or event.direction == Gdk.ScrollDirection.RIGHT):
+            val = a.get_value() + a.get_step_increment()
+            if val > a.get_upper() - a.get_page_size():
+                val = a.get_upper() - a.get_page_size()
+            if val != a.get_value():
+                a.set_value(val)
                 a.value_changed ()
             return True
-        elif ((event.direction == gtk.gdk.SCROLL_UP and event.state & gtk.gdk.SHIFT_MASK)
-              or event.direction == gtk.gdk.SCROLL_LEFT):
-            val = a.value - a.step_increment
-            if val < a.lower:
-                val = a.lower
-            if val != a.value:
-                a.value = val
+        elif ((event.direction == Gdk.ScrollDirection.UP and event.get_state() & Gdk.ModifierType.SHIFT_MASK)
+              or event.direction == Gdk.ScrollDirection.LEFT):
+            val = a.get_value() - a.get_step_increment()
+            if val < a.get_lower():
+                val = a.get_lower()
+            if val != a.get_value():
+                a.set_value(val)
                 a.value_changed ()
             return True
         return False
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        self.sw=gtk.ScrolledWindow()
-        self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.sw=Gtk.ScrolledWindow()
+        self.sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
 
         self.sw.connect('scroll-event', self.scroll_event)
         vbox.add(self.sw)
 
-        self.hbox = gtk.HBox()
+        self.hbox = Gtk.HBox()
 
         self.rootcolumn=ModelColumn(controller=self.controller,
-                                     node=self.model[0],
-                                     callback=self.clicked_callback,
-                                     parent=None)
+                                    model=self.model,
+                                    node=self.package,
+                                    callback=self.clicked_callback,
+                                    parent=None)
         self.rootcolumn.widget.set_property("width-request", self.column_width)
-        self.hbox.pack_start(self.rootcolumn.widget, expand=False)
+        self.hbox.pack_start(self.rootcolumn.widget, False, True, 0)
 
         self.sw.add_with_viewport(self.hbox)
 

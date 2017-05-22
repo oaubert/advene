@@ -28,7 +28,8 @@ from advene.model.exception import AdveneException
 
 from gettext import gettext as _
 
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 
 name="TALES browser view plugin"
 
@@ -46,12 +47,12 @@ class BrowserColumn:
         self.widget.connect('key-press-event', self.key_pressed_cb)
 
     def key_pressed_cb(self, col, event):
-        if event.keyval == gtk.keysyms.Right:
+        if event.keyval == Gdk.KEY_Right:
             # Next column
             if self.next is not None:
                 self.next.get_focus()
             return True
-        elif event.keyval == gtk.keysyms.Left:
+        elif event.keyval == Gdk.KEY_Left:
             # Previous column
             if self.previous is not None:
                 self.previous.get_focus()
@@ -70,7 +71,7 @@ class BrowserColumn:
         return self.widget
 
     def get_liststore(self):
-        ls=gtk.ListStore(str)
+        ls=Gtk.ListStore(str)
         if self.model is None:
             return ls
         for att in helper.get_valid_members(self.model):
@@ -130,21 +131,21 @@ class BrowserColumn:
         return False
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        self.label=gtk.Button(self.name, use_underline=False)
+        self.label=Gtk.Button(self.name, use_underline=False)
         self.label.connect('clicked', self.on_column_activation)
-        vbox.pack_start(self.label, expand=False)
+        vbox.pack_start(self.label, False, True, 0)
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         vbox.add (sw)
 
         self.liststore = self.get_liststore()
-        self.listview = gtk.TreeView(self.liststore)
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Attributes", renderer, text=0)
-        column.set_widget(gtk.Label())
+        self.listview = Gtk.TreeView(self.liststore)
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Attributes", renderer, text=0)
+        column.set_widget(Gtk.Label())
         self.listview.append_column(column)
         self.listview.connect('key-press-event', self.key_pressed_cb)
 
@@ -179,14 +180,14 @@ class Browser(AdhocView):
         if self.callback:
             def validate_path(*p):
                 if self.callback:
-                    p=unicode(self.pathlabel.get_text())
+                    p=self.pathlabel.get_text().decode('utf-8')
                     self.close()
                     self.callback(p)
                 return True
 
             def validate_value(*p):
                 if self.callback:
-                    v="string:%s" % unicode(self.valuelabel.get_text())
+                    v=u"string:%s" % self.valuelabel.get_text().decode('utf-8')
                     self.close()
                     self.callback(v)
                 return True
@@ -266,7 +267,7 @@ class Browser(AdhocView):
             col=BrowserColumn(element=el, name=attribute, callback=self.clicked_callback,
                               parent=columnbrowser)
             col.widget.set_property("width-request", self.column_width)
-            self.hbox.pack_start(col.get_widget(), expand=False)
+            self.hbox.pack_start(col.get_widget(), False, False, 0)
             columnbrowser.next=col
         else:
             # Delete all next+1 columns (we reuse the next one)
@@ -278,7 +279,7 @@ class Browser(AdhocView):
 
         # Scroll the columns
         adj=self.sw.get_hadjustment()
-        adj.value = adj.upper - .1
+        adj.set_value(adj.get_upper() - .1)
         return True
 
     def _update_view(self, path, element):
@@ -306,64 +307,64 @@ class Browser(AdhocView):
         return True
 
     def scroll_event(self, widget=None, event=None):
-        if event.state & gtk.gdk.CONTROL_MASK:
+        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             a=widget.get_hadjustment()
-            if event.direction == gtk.gdk.SCROLL_DOWN or event.direction == gtk.gdk.SCROLL_RIGHT:
-                val = a.value + a.step_increment
-                if val > a.upper - a.page_size:
-                    val = a.upper - a.page_size
-                if val != a.value:
-                    a.value = val
+            if event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.RIGHT:
+                val = helper.clamp(a.get_value() + a.get_step_increment(),
+                                   a.get_lower(),
+                                   a.get_upper() - a.get_page_size())
+                if val != a.get_value():
+                    a.set_value(val)
                     a.value_changed ()
                 return True
-            elif event.direction == gtk.gdk.SCROLL_UP or event.direction == gtk.gdk.SCROLL_LEFT:
-                val = a.value - a.step_increment
-                if val < a.lower:
-                    val = a.lower
-                if val != a.value:
-                    a.value = val
+            elif event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
+                val = helper.clamp(a.get_value() - a.get_step_increment(),
+                                   a.get_lower(),
+                                   a.get_upper() - a.get_page_size())
+                if val != a.get_value():
+                    a.set_value(val)
                     a.value_changed ()
                 return True
         return False
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        self.sw=gtk.ScrolledWindow()
-        self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.sw=Gtk.ScrolledWindow()
+        self.sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
 
         self.sw.connect('scroll-event', self.scroll_event)
         vbox.add(self.sw)
 
-        self.hbox = gtk.HBox()
+        self.hbox = Gtk.HBox()
 
         self.rootcolumn=BrowserColumn(element=self.element, name='here',
                                       callback=self.clicked_callback,
                                       parent=None)
         self.rootcolumn.widget.set_property("width-request", self.column_width)
-        self.hbox.pack_start(self.rootcolumn.get_widget(), expand=False)
+        self.hbox.pack_start(self.rootcolumn.get_widget(), False, False, 0)
 
         self.sw.add_with_viewport(self.hbox)
 
         def name_label(name, label):
-            hb=gtk.HBox()
-            l=gtk.Label()
+            hb=Gtk.HBox()
+            l=Gtk.Label()
             l.set_markup("<b>%s :</b> " % name)
-            hb.pack_start(l, expand=False)
-            hb.pack_start(label, expand=False)
+            hb.pack_start(l, False, True, 0)
+            hb.pack_start(label, False, True, 0)
             return hb
 
         # Display the type/value of the current element
-        self.pathlabel = gtk.Label("here")
+        self.pathlabel = Gtk.Label(label="here")
         self.pathlabel.set_selectable(True)
-        vbox.pack_start(name_label(_("Path"), self.pathlabel), expand=False)
+        vbox.pack_start(name_label(_("Path"), self.pathlabel), False, False, 0)
 
-        self.typelabel = gtk.Label(unicode(type(self.element)))
-        vbox.pack_start(name_label(_("Type"), self.typelabel), expand=False)
+        self.typelabel = Gtk.Label(label=unicode(type(self.element)))
+        vbox.pack_start(name_label(_("Type"), self.typelabel), False, False, 0)
 
-        self.valuelabel = gtk.Label("here")
+        self.valuelabel = Gtk.Label(label="here")
         self.valuelabel.set_selectable(True)
-        vbox.pack_start(name_label(_("Value"), self.valuelabel), expand=False)
+        vbox.pack_start(name_label(_("Value"), self.valuelabel), False, False, 0)
 
         vbox.show_all()
         def debug(*p):

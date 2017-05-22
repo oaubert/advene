@@ -20,8 +20,8 @@
 """
 import sys
 
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import GObject
 
 from gettext import gettext as _
 
@@ -74,7 +74,7 @@ class TreeViewImporter:
         y = int(event.y)
 
         if button == 3:
-            if event.window is widget.get_bin_window():
+            if event.get_window() is widget.get_bin_window():
                 model = widget.get_model()
                 t = widget.get_path_at_pos(x, y)
                 if t is not None:
@@ -223,12 +223,12 @@ class TreeViewImporter:
     def build_liststore(self):
         # Store reference to the element, string representation (title and id)
         # and boolean indicating wether it is imported or not
-        store=gtk.TreeStore(
-            gobject.TYPE_PYOBJECT,
-            gobject.TYPE_STRING,
-            gobject.TYPE_STRING,
-            gobject.TYPE_BOOLEAN,
-            gobject.TYPE_STRING,
+        store=Gtk.TreeStore(
+            GObject.TYPE_PYOBJECT,
+            GObject.TYPE_STRING,
+            GObject.TYPE_STRING,
+            GObject.TYPE_BOOLEAN,
+            GObject.TYPE_STRING,
             )
 
         for i in self.controller.package.imports:
@@ -304,37 +304,37 @@ class TreeViewImporter:
         return False
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
         # FIXME: implement package removal from the list
         self.store=self.build_liststore()
 
-        treeview=gtk.TreeView(model=self.store)
+        treeview=Gtk.TreeView(model=self.store)
         treeview.connect('button-press-event', self.tree_view_button_cb)
         treeview.connect('row-activated', self.row_activated_cb)
 
-        renderer = gtk.CellRendererToggle()
+        renderer = Gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
         renderer.connect('toggled', self.toggled_cb, self.store, self.COLUMN_IMPORTED)
 
-        column = gtk.TreeViewColumn(_('Imported?'), renderer,
+        column = Gtk.TreeViewColumn(_('Imported?'), renderer,
                                     active=self.COLUMN_IMPORTED)
         treeview.append_column(column)
 
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('Id'), renderer,
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('Id'), renderer,
                                     text=self.COLUMN_ID)
         column.set_resizable(True)
         treeview.append_column(column)
 
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('Title'), renderer,
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('Title'), renderer,
                                     text=self.COLUMN_LABEL)
         column.set_resizable(True)
         treeview.append_column(column)
 
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('URI'), renderer,
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('URI'), renderer,
                                     text=self.COLUMN_URI)
         column.set_resizable(True)
         treeview.append_column(column)
@@ -357,8 +357,8 @@ class Importer:
         else:
             d=None
         filename, alias=dialog.get_filename(title=_("Choose the package to import, and its alias"),
-                                                     action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                                     button=gtk.STOCK_OPEN,
+                                                     action=Gtk.FileChooserAction.OPEN,
+                                                     button=Gtk.STOCK_OPEN,
                                                      default_dir=d,
                                                      alias=True,
                                                      filter='advene')
@@ -377,34 +377,33 @@ class Importer:
         return True
 
     def build_widget(self):
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
-        vbox.pack_start(gtk.Label("Elements imported into %s" % self.controller.package.title),
-                        expand=False)
+        vbox.pack_start(Gtk.Label("Elements imported into %s" % self.controller.package.title), False, False, 0)
 
-        scroll_win = gtk.ScrolledWindow ()
-        scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll_win = Gtk.ScrolledWindow ()
+        scroll_win.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         vbox.add(scroll_win)
 
         self.ti=TreeViewImporter(controller=self.controller)
         scroll_win.add_with_viewport(self.ti.widget)
 
-        hb=gtk.HButtonBox()
+        hb=Gtk.HButtonBox()
 
-        b=gtk.Button(stock=gtk.STOCK_ADD)
+        b=Gtk.Button(stock=Gtk.STOCK_ADD)
         b.connect('clicked', self.add_package)
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
-        vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hb, False, True, 0)
 
         hb.show_all()
 
         return vbox
 
     def popup(self):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         window.set_title (_("Package %s") % (self.controller.package.title or _("No title")))
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         window.add (vbox)
 
         vbox.add (self.widget)
@@ -414,15 +413,15 @@ class Importer:
 
         if self.controller.gui:
             self.controller.gui.init_window_size(window, 'importeditor')
-            window.set_icon_list(*self.controller.gui.get_icon_list())
+            window.set_icon_list(self.controller.gui.get_icon_list())
 
-        self.buttonbox = gtk.HButtonBox()
+        self.buttonbox = Gtk.HButtonBox()
 
-        b = gtk.Button(stock=gtk.STOCK_CLOSE)
+        b = Gtk.Button(stock=Gtk.STOCK_CLOSE)
         b.connect('clicked', lambda w: window.destroy ())
         self.buttonbox.add (b)
 
-        vbox.pack_start(self.buttonbox, expand=False)
+        vbox.pack_start(self.buttonbox, False, True, 0)
 
         window.show_all()
 
@@ -447,7 +446,7 @@ if __name__ == "__main__":
     i=Importer(controller=controller)
     window=i.popup()
 
-    window.connect('destroy', lambda e: gtk.main_quit())
+    window.connect('destroy', lambda e: Gtk.main_quit())
 
-    gtk.main ()
+    Gtk.main ()
 

@@ -26,7 +26,7 @@ from gettext import gettext as _
 import sys
 import re
 
-import gtk
+from gi.repository import Gtk
 
 from advene.model.package import Package
 from advene.model.fragment import MillisecondFragment
@@ -74,9 +74,9 @@ class CreateElementPopup(object):
     def build_widget(self, modal=False):
         i=self.generate_id()
         if modal:
-            flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL
+            flags=Gtk.DialogFlags.DESTROY_WITH_PARENT | Gtk.DialogFlags.MODAL
         else:
-            flags=gtk.DIALOG_DESTROY_WITH_PARENT
+            flags=Gtk.DialogFlags.DESTROY_WITH_PARENT
 
         d=dialog.title_id_dialog(title=_("%s creation")  % element_label[self.type_],
                                           text=_("To create a new element of type %s,\nyou must give the following information.") % element_label[self.type_],
@@ -88,9 +88,9 @@ class CreateElementPopup(object):
         # Choose a type if possible
         if self.type_ in (Annotation, Relation, AnnotationType, RelationType,
                           View, Query, Resources, ResourceData):
-            hbox = gtk.HBox()
-            l = gtk.Label(_("Type"))
-            hbox.pack_start(l)
+            hbox = Gtk.HBox()
+            l = Gtk.Label(label=_("Type"))
+            hbox.pack_start(l, True, True, 0)
 
             if self.type_ == Annotation:
                 if isinstance(self.parent, AnnotationType):
@@ -142,7 +142,7 @@ class CreateElementPopup(object):
             d.type_combo = dialog.list_selector_widget(
                 members=[ (t, self.controller.get_title(t)) for t in type_list  ],
                 preselect=preselect)
-            hbox.pack_start(d.type_combo)
+            hbox.pack_start(d.type_combo, True, True, 0)
 
             d.vbox.add(hbox)
 
@@ -164,8 +164,8 @@ class CreateElementPopup(object):
 
         @return: the created element, None if an error occurred
         """
-        id_ = unicode(self.dialog.id_entry.get_text())
-        title_ = unicode(self.dialog.title_entry.get_text())
+        id_ = self.dialog.id_entry.get_text().decode('utf-8')
+        title_ = self.dialog.title_entry.get_text().decode('utf-8')
         # Check validity of id.
         if not self.is_valid_id(id_):
             dialog.message_dialog(
@@ -326,7 +326,7 @@ class CreateElementPopup(object):
             dialog.center_on_mouse(d)
             res=d.run()
             retval=None
-            if res == gtk.RESPONSE_OK:
+            if res == Gtk.ResponseType.OK:
                 retval=self.do_create_element()
 
                 if retval is not None:
@@ -347,11 +347,11 @@ if __name__ == "__main__":
 
     package = Package (uri=sys.argv[1])
 
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+    window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
 
     window.set_border_width(10)
     window.set_title (package.title)
-    vbox = gtk.VBox()
+    vbox = Gtk.VBox()
     window.add (vbox)
 
     def create_element_cb(button, t):
@@ -360,32 +360,32 @@ if __name__ == "__main__":
         return True
 
     for (t, l) in element_label.iteritems():
-        b = gtk.Button(l)
+        b = Gtk.Button(l)
         b.connect('clicked', create_element_cb, t)
         b.show()
-        vbox.pack_start(b)
+        vbox.pack_start(b, True, True, 0)
 
-    hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=False)
+    hbox = Gtk.HButtonBox()
+    vbox.pack_start(hbox, False, False, 0)
 
     def validate_cb (win, package):
         filename="/tmp/package.xml"
         package.save (name=filename)
         print "Package saved as %s" % filename
-        gtk.main_quit ()
+        Gtk.main_quit ()
 
-    b = gtk.Button (stock=gtk.STOCK_SAVE)
+    b = Gtk.Button (stock=Gtk.STOCK_SAVE)
     b.connect('clicked', validate_cb, package)
     hbox.add (b)
 
-    b = gtk.Button (stock=gtk.STOCK_QUIT)
+    b = Gtk.Button (stock=Gtk.STOCK_QUIT)
     b.connect('clicked', lambda w: window.destroy ())
     hbox.add (b)
 
     vbox.set_homogeneous (False)
 
-    window.connect('destroy', lambda e: gtk.main_quit())
+    window.connect('destroy', lambda e: Gtk.main_quit())
 
     window.show_all()
-    gtk.main ()
+    Gtk.main ()
 

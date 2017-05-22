@@ -29,6 +29,8 @@ Dragging a tag to an annotation with add the tag to the annotation's tag.
 Dragging an annotation to the tag bag will add the annotation tags to
 the presented list of tags.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 # Advene part
 import advene.core.config as config
@@ -39,7 +41,8 @@ from advene.gui.util import dialog, get_small_stock_button, name2color
 from gettext import gettext as _
 
 import re
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 
 from advene.gui.widget import TagWidget
 
@@ -119,27 +122,27 @@ class TagBag(AdhocView):
     def new_tag(self, *p):
         """Enter a new tag.
         """
-        d = gtk.Dialog(title=_("New tag name"),
-                       parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+        d = Gtk.Dialog(title=_("New tag name"),
+                       parent=self.controller.gui.gui.win,
+                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                       buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                 Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l=gtk.Label(_("Enter a new tag name and select its color."))
-        d.vbox.pack_start(l, expand=False)
+        l=Gtk.Label(label=_("Enter a new tag name and select its color."))
+        d.vbox.pack_start(l, False, True, 0)
 
-        hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Name")), expand=False)
-        tagname=gtk.Entry()
-        hb.pack_start(tagname, expand=False)
-        d.vbox.pack_start(hb, expand=False)
+        hb=Gtk.HBox()
+        hb.pack_start(Gtk.Label(_("Name")), False, False, 0)
+        tagname=Gtk.Entry()
+        hb.pack_start(tagname, False, True, 0)
+        d.vbox.pack_start(hb, False, True, 0)
 
-        hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Color")), expand=False)
-        colorbutton=gtk.ColorButton()
-        colorbutton.set_color(gtk.gdk.color_parse('red'))
-        hb.pack_start(colorbutton, expand=False)
-        d.vbox.pack_start(hb, expand=False)
+        hb=Gtk.HBox()
+        hb.pack_start(Gtk.Label(_("Color")), False, False, 0)
+        colorbutton=Gtk.ColorButton()
+        colorbutton.set_color(Gdk.color_parse('red'))
+        hb.pack_start(colorbutton, False, True, 0)
+        d.vbox.pack_start(hb, False, True, 0)
 
         d.connect('key-press-event', dialog.dialog_keypressed_cb)
         d.show_all()
@@ -147,9 +150,9 @@ class TagBag(AdhocView):
 
         res=d.run()
         ret=None
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             try:
-                tag=unicode(tagname.get_text())
+                tag=tagname.get_text().decode('utf-8')
             except ValueError:
                 tag=None
             color=colorbutton.get_color()
@@ -160,7 +163,7 @@ class TagBag(AdhocView):
         if tag and not tag in self.tags:
             if not re.match('^[\w\d_]+$', tag):
                 dialog.message_dialog(_("The tag contains invalid characters"),
-                                               icon=gtk.MESSAGE_ERROR)
+                                               icon=Gtk.MessageType.ERROR)
                 return True
             self.tags.append(tag)
             self.controller.package._tag_colors[tag]="#%04x%04x%04x" % (color.red, color.green, color.blue)
@@ -222,7 +225,7 @@ class TagBag(AdhocView):
             return True
 
         def set_color(widget, tag):
-            d=gtk.ColorSelectionDialog(_("Choose the color for tag %s") % tag)
+            d=Gtk.ColorSelectionDialog(_("Choose the color for tag %s") % tag)
             try:
                 color=self.get_element_color(tag)
                 if color:
@@ -231,7 +234,7 @@ class TagBag(AdhocView):
                 pass
 
             res=d.run()
-            if res == gtk.RESPONSE_OK:
+            if res == Gtk.ResponseType.OK:
                 col=d.colorsel.get_current_color()
                 self.controller.package._tag_colors[tag]="#%04x%04x%04x" % (col.red, col.green, col.blue)
                 self.controller.notify('TagUpdate', tag=tag)
@@ -240,108 +243,108 @@ class TagBag(AdhocView):
             return True
 
         def popup_menu(widget, event):
-            if not (event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS):
+            if not (event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS):
                 return False
 
-            menu=gtk.Menu()
+            menu=Gtk.Menu()
 
             for label, action in (
                 (_("Set color"), set_color),
                 (_("Remove"), remove)
                 ):
-                item = gtk.MenuItem(label, use_underline=False)
+                item = Gtk.MenuItem(label, use_underline=False)
                 item.connect('activate', action, t)
                 menu.append(item)
             menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            menu.popup_at_pointer(None)
             return True
 
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['tag'],
-                          gtk.gdk.ACTION_LINK)
+        b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                          config.data.get_target_types('tag'),
+                          Gdk.DragAction.LINK)
 
         b.connect('button-press-event', popup_menu)
         b.show()
-        self.mainbox.pack_start(b, expand=False)
+        self.mainbox.pack_start(b, False, True, 0)
 
     def build_widget(self):
 
         if self.vertical:
-            v=gtk.VBox()
-            mainbox=gtk.VBox()
+            v=Gtk.VBox()
+            mainbox=Gtk.VBox()
         else:
-            v=gtk.HBox()
-            mainbox=gtk.HBox()
+            v=Gtk.HBox()
+            mainbox=Gtk.HBox()
 
         mainbox.set_homogeneous(False)
-        sw=gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_NEVER)
+        sw=Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.NEVER)
         sw.add_with_viewport(mainbox)
         self.mainbox=mainbox
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
                 for a in sources:
                     for tag in a.tags:
                         if not tag in self.tags:
                             self.tags.append(tag)
                 self.refresh()
             elif targetType == config.data.target_type['tag']:
-                tags=unicode(selection.data, 'utf8').split(',')
+                tags=unicode(selection.get_data(), 'utf8').split(',')
                 for tag in tags:
                     if not tag in self.tags:
                         self.tags.append(tag)
                 self.refresh()
             else:
-                self.log("Unknown target type for mainbox drop: %d" % targetType)
+                logger.warn("Unknown target type for mainbox drop: %d" % targetType)
             return True
 
-        self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                  gtk.DEST_DEFAULT_HIGHLIGHT |
-                                  gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['annotation']
-                                  + config.data.drag_type['tag']
-                                   , gtk.gdk.ACTION_LINK)
+        self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                   Gtk.DestDefaults.HIGHLIGHT |
+                                   Gtk.DestDefaults.ALL,
+                                   config.data.get_target_types('annotation', 'tag'),
+                                   Gdk.DragAction.LINK)
         self.mainbox.connect('drag-data-received', mainbox_drag_received)
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['tag']:
-                tag=unicode(selection.data, 'utf8')
+                tag=unicode(selection.get_data(), 'utf8')
                 if tag in self.tags:
                     self.tags.remove(tag)
                 self.refresh()
             else:
-                self.log("Unknown target type for remove drop: %d" % targetType)
+                logger.warn("Unknown target type for remove drop: %d" % targetType)
             return True
 
 
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
         hb.set_homogeneous(False)
 
-        b=get_small_stock_button(gtk.STOCK_DELETE)
+        b=get_small_stock_button(Gtk.STOCK_DELETE)
 
         b.set_tooltip_text(_("Drop a tag here to remove it from the list"))
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['tag'], gtk.gdk.ACTION_LINK)
+        b.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('tag'),
+                        Gdk.DragAction.LINK)
         b.connect('drag-data-received', remove_drag_received)
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, False, True, 0)
 
         for (stock, tip, method) in (
-            (gtk.STOCK_SAVE, _("Save as adhoc view"), self.save_view),
-            (gtk.STOCK_ADD, _("Add a new tag"), self.new_tag),
-            (gtk.STOCK_INDEX, _("Display all defined tags"), self.all_tags),
+            (Gtk.STOCK_SAVE, _("Save as adhoc view"), self.save_view),
+            (Gtk.STOCK_ADD, _("Add a new tag"), self.new_tag),
+            (Gtk.STOCK_INDEX, _("Display all defined tags"), self.all_tags),
             ):
             b=get_small_stock_button(stock)
             b.set_tooltip_text(tip)
             b.connect('clicked', method)
-            hb.pack_start(b, expand=False)
+            hb.pack_start(b, False, True, 0)
 
         v.buttonbox=hb
 
-        v.pack_start(hb, expand=False)
+        v.pack_start(hb, False, True, 0)
         v.add(sw)
 
         return v

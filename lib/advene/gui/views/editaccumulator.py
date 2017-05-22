@@ -21,8 +21,11 @@
 
 This widget allows to stack compact editing widgets.
 """
+import logging
+logger = logging.getLogger(__name__)
 
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 
 from gettext import gettext as _
 
@@ -57,7 +60,7 @@ class EditAccumulator(AccumulatorPopup):
         w=e.compact()
 
         # Buttons hbox
-        hbox=gtk.HBox()
+        hbox=Gtk.HBox()
 
         def handle_ok(b, w):
             e.apply_cb()
@@ -66,20 +69,20 @@ class EditAccumulator(AccumulatorPopup):
 
         # OK button
         b=get_pixmap_button('small_ok.png', handle_ok, w)
-        b.set_relief(gtk.RELIEF_NONE)
+        b.set_relief(Gtk.ReliefStyle.NONE)
         b.set_tooltip_text(_("Validate"))
-        hbox.pack_start(b, expand=False)
+        hbox.pack_start(b, False, True, 0)
 
         # Close button
         b=get_pixmap_button('small_close.png', self.undisplay_cb, w)
-        b.set_relief(gtk.RELIEF_NONE)
+        b.set_relief(Gtk.ReliefStyle.NONE)
         b.set_tooltip_text(_("Close"))
-        hbox.pack_start(b, expand=False)
+        hbox.pack_start(b, False, True, 0)
 
         t=self.get_short_title(element)
-        l=gtk.Label()
+        l=Gtk.Label()
         l.set_markup('<b>%s</b>' % t.replace('<', '&lt;'))
-        hbox.pack_start(l, expand=True)
+        hbox.pack_start(l, True, True, 0)
 
         self.edited_elements[element]=w
         w._title_label=l
@@ -109,7 +112,7 @@ class EditAccumulator(AccumulatorPopup):
         # Limit label size
         # Ellipsize does not work well here, the label is always
         # allocated too small a space
-        #l.set_ellipsize(pango.ELLIPSIZE_END)
+        #l.set_ellipsize(Pango.EllipsizeMode.END)
         if len(t) > 80:
             t=unicode(t[:79])+u'\u2026'
         return t
@@ -162,11 +165,11 @@ class EditAccumulator(AccumulatorPopup):
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
             for source in sources:
                 self.edit(source)
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return True
 
     def build_widget(self):
@@ -174,9 +177,9 @@ class EditAccumulator(AccumulatorPopup):
 
         # The widget can receive drops from annotations
         mainbox.connect('drag-data-received', self.drag_received)
-        mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                  gtk.DEST_DEFAULT_HIGHLIGHT |
-                                  gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+        mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                  Gtk.DestDefaults.HIGHLIGHT |
+                                  Gtk.DestDefaults.ALL,
+                                  config.data.get_target_types('annotation'), Gdk.DragAction.LINK)
 
         return mainbox

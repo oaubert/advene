@@ -2,7 +2,7 @@
 
 """Gstreamer SliceBuffer element
 
-Copyright 2011-2012 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+Copyright 2011-2017 Olivier Aubert <contact@olivieraubert.net>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -32,7 +32,7 @@ import cairo
 class SliceBuffer(gst.Element):
     __gtype_name__ = 'SliceBuffer'
     __gstdetails__ = ("Slice buffer", "Filter/Editor/Video", "Buffers slices of data",
-                      "Olivier Aubert <olivier.aubert@liris.cnrs.fr>")
+                      "Olivier Aubert <contact@olivieraubert.net>")
 
     __gproperties__ = {
         'slicewidth':  ( gobject.TYPE_INT, 'slicewidth', 'Width of slices', 0, 65536, 0, gobject.PARAM_WRITABLE ),
@@ -172,9 +172,10 @@ if __name__ == '__main__':
 
 
     def on_msg(bus, msg):
-        if msg.structure is None:
+        s = msg.get_structure()
+        if s is None:
             return True
-        if msg.structure.has_field('gerror'):
+        if s.has_field('gerror'):
             print "MSG", msg.structure['debug']
 
     def on_eos (bus, msg):

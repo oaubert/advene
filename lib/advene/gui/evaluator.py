@@ -1,6 +1,6 @@
 #
 # Advene: Annotate Digital Videos, Exchange on the NEt
-# Copyright (C) 2008-2016 Olivier Aubert <contact@olivieraubert.net>
+# Copyright (C) 2008-2017 Olivier Aubert <contact@olivieraubert>
 #
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,8 +26,12 @@ try:
 except ImportError:
     import io as StringIO
 import traceback
-import gtk
-import gobject
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+from gi.repository import Gdk
+from gi.repository import Gtk
+from gi.repository import GObject
 import re
 try:
     import builtins
@@ -85,20 +89,20 @@ class Evaluator:
         self.history_index = None
 
         self.control_shortcuts = {
-            gtk.keysyms.w: self.close,
-            gtk.keysyms.b: self.add_bookmark,
-            gtk.keysyms.space: self.display_bookmarks,
-            gtk.keysyms.l: self.clear_expression,
-            gtk.keysyms.f: lambda: self.fill_method_parameters(),
-            gtk.keysyms.d: lambda: self.display_completion(completeprefix=False),
-            gtk.keysyms.h: lambda: self.display_info(self.get_selection_or_cursor(), typ="doc"),
-            gtk.keysyms.H: lambda: self.display_info(self.get_selection_or_cursor(), typ="source"),
-            gtk.keysyms.Return: self.evaluate_expression,
-            gtk.keysyms.s: self.save_output_cb,
-            gtk.keysyms.n: self.next_entry,
-            gtk.keysyms.p: self.previous_entry,
-            gtk.keysyms.Page_Down: lambda: self.scroll_output(+1),
-            gtk.keysyms.Page_Up: lambda: self.scroll_output(-1),
+            Gdk.KEY_w: self.close,
+            Gdk.KEY_b: self.add_bookmark,
+            Gdk.KEY_space: self.display_bookmarks,
+            Gdk.KEY_l: self.clear_expression,
+            Gdk.KEY_f: lambda: self.fill_method_parameters(),
+            Gdk.KEY_d: lambda: self.display_completion(completeprefix=False),
+            Gdk.KEY_h: lambda: self.display_info(self.get_selection_or_cursor(), typ="doc"),
+            Gdk.KEY_H: lambda: self.display_info(self.get_selection_or_cursor(), typ="source"),
+            Gdk.KEY_Return: self.evaluate_expression,
+            Gdk.KEY_s: self.save_output_cb,
+            Gdk.KEY_n: self.next_entry,
+            Gdk.KEY_p: self.previous_entry,
+            Gdk.KEY_Page_Down: lambda: self.scroll_output(+1),
+            Gdk.KEY_Page_Up: lambda: self.scroll_output(-1),
             }
 
         self.widget=self.build_widget()
@@ -156,7 +160,7 @@ class Evaluator:
         except IOError:
             return []
         for l in data:
-            f.write(l + "\n")
+            f.write(l.encode('utf-8') + "\n")
         f.close()
         return
 
@@ -168,9 +172,9 @@ class Evaluator:
         """
         self.save_history()
 
-        if isinstance(self.widget.parent, gtk.Window):
+        if isinstance(self.widget.get_parent(), Gtk.Window):
             # Embedded in a toplevel window
-            self.widget.parent.destroy()
+            self.widget.get_parent().destroy()
         else:
             # Embedded in another component, just destroy the widget
             self.widget.destroy()
@@ -185,28 +189,26 @@ class Evaluator:
 
     def scroll_output(self, d):
         a=self.resultscroll.get_vadjustment()
-        new=a.value + d * a.page_increment
-        if  new >= 0 and new < a.upper:
-            a.value=new
+        new=a.get_property("value") + d * a.get_property("page_increment")
+        if new < 0:
+            new = 0
+        if new < a.get_property("upper"):
+            a.set_property("value", new)
         a.value_changed ()
         return True
 
     def save_output_cb(self, *p, **kw):
         """Callback for save output functionality.
         """
-        fs = gtk.FileSelection ("Save output to...")
-
-        def close_and_save(button, fs):
-            """Save the output and close the fileselector dialog.
-            """
+        fs = Gtk.FileChooserDialog ("Save output to...",
+                                    self.widget.get_toplevel(),
+                                    Gtk.FileChooserAction.SAVE,
+                                    ("_Cancel", Gtk.ResponseType.CANCEL,
+                                     "_Save", Gtk.ResponseType.ACCEPT))
+        ret = fs.run()
+        if ret == Gtk.ResponseType.ACCEPT:
             self.save_output(filename=fs.get_filename())
-            fs.destroy()
-            return True
-
-        fs.ok_button.connect_after ('clicked', close_and_save, fs)
-        fs.cancel_button.connect('clicked', lambda win: fs.destroy ())
-
-        fs.show ()
+        fs.destroy()
         return True
 
     def save_output(self, filename=None):
@@ -214,7 +216,8 @@ class Evaluator:
         """
         b=self.output.get_buffer()
         begin,end=b.get_bounds()
-        out=str(b.get_text(begin, end))
+        # out is a utf-8 encoded string
+        out=b.get_text(begin, end, False)
         f=open(filename, "w")
         f.write(out)
         f.close()
@@ -225,7 +228,12 @@ class Evaluator:
         """Return the content of the expression window.
         """
         b=self.source.get_buffer()
-        return str(b.get_text(*b.get_bounds()))
+        if b.get_selection_bounds():
+            begin, end = b.get_selection_bounds()
+            b.place_cursor(end)
+        else:
+            begin,end=b.get_bounds()
+        return b.get_text(begin, end, False).decode('utf-8')
 
     def set_expression(self, e, clear=True):
         """Set the content of the expression window.
@@ -253,6 +261,8 @@ class Evaluator:
         end=b.get_bounds()[1]
         b.place_cursor(end)
         for l in p:
+            if not isinstance(l, unicode):
+                l = unicode(l, 'utf-8')
             b.insert_at_cursor(l)
         return True
 
@@ -361,25 +371,26 @@ class Evaluator:
         If a part of the expression is selected, then evaluate only
         the selection.
         """
-        b=self.source.get_buffer()
-        if b.get_selection_bounds():
-            begin, end = b.get_selection_bounds()
-            b.place_cursor(end)
-        else:
-            begin,end=b.get_bounds()
-        expr=str(b.get_text(begin, end))
+        expr = self.get_expression()
         if (not self.history) or self.history[-1] != expr:
             self.history.append(expr)
         symbol=None
 
-        m=re.match('import\s+(\S+)', expr)
+        silent_mode = expr.startswith('@')
+        expr = expr.lstrip('@')
+
+        m=re.match('(from\s+(\S+)\s+)?import\s+(\S+)(\s+as\s+(\S+))?', expr)
         if m is not None:
-            modname=m.group(1)
+            modname = m.group(2)
+            symname = m.group(3)
+            alias = m.group(5) or symname or modname
+            if modname and symname:
+                modname = '.'.join((modname, symname))
             self.clear_output()
             try:
-                mod=__import__(modname)
-                self.globals_[modname]=mod
-                self.log("Successfully imported %s" % modname)
+                mod = __import__(modname or symname)
+                self.globals_[alias]=mod
+                self.log("Successfully imported %s as %s" % (modname or symname, alias))
             except ImportError:
                 self.log("Cannot import module %s:" % modname)
                 f=StringIO.StringIO()
@@ -400,11 +411,19 @@ class Evaluator:
             t0=time.time()
             res=eval(expr, self.globals_, self.locals_)
             self.status_message("Execution time: %f s" % (time.time() - t0))
-            self.clear_output()
-            try:
-                self.log(str(res))
-            except UnicodeDecodeError:
-                self.log(str(repr(res)))
+            if not silent_mode:
+                self.clear_output()
+                try:
+                    if isinstance(res, unicode):
+                        view = res.encode('utf-8')
+                    else:
+                        view = unicode(res).encode('utf-8')
+                except UnicodeDecodeError:
+                    view = str(repr(res))
+                try:
+                    self.log(view)
+                except Exception, e:
+                    self.log("Exception in result visualisation: ", unicode(e))
             if symbol is not None:
                 if not '.' in symbol and not symbol.endswith(']'):
                     self.log('\n\n[Value stored in %s]' % symbol)
@@ -461,15 +480,7 @@ class Evaluator:
     def display_completion(self, completeprefix=True):
         """Display the completion.
         """
-        b=self.source.get_buffer()
-        if b.get_selection_bounds():
-            begin, end = b.get_selection_bounds()
-            cursor=end
-            b.place_cursor(end)
-        else:
-            begin,end=b.get_bounds()
-            cursor=b.get_iter_at_mark(b.get_insert())
-        expr=str(b.get_text(begin, cursor))
+        expr = self.get_selection_or_cursor().lstrip('@')
         if expr.endswith('.'):
             expr=expr[:-1]
             trailingdot=True
@@ -555,6 +566,7 @@ class Evaluator:
                 element = self.commonprefix(completion)
 
             if element != "":
+                b = self.source.get_buffer()
                 # Got one completion. We can complete the buffer.
                 if attr is not None:
                     element=element.replace(attr, "", 1)
@@ -574,15 +586,7 @@ class Evaluator:
     def fill_method_parameters(self):
         """Fill the parameter names for the method before cursor.
         """
-        b=self.source.get_buffer()
-        if b.get_selection_bounds():
-            begin, end = b.get_selection_bounds()
-            cursor=end
-            b.place_cursor(end)
-        else:
-            begin,end=b.get_bounds()
-            cursor=b.get_iter_at_mark(b.get_insert())
-        expr=str(b.get_text(begin, cursor))
+        expr = self.get_selection_or_cursor().lstrip('@')
 
         m=re.match('.+[=\(\[\s](.+?)$', expr)
         if m:
@@ -615,6 +619,8 @@ class Evaluator:
             args=re.findall('\((.*?)\)', res.__doc__.splitlines()[0])
 
         if args is not None:
+            b = self.source.get_buffer()
+            cursor=b.get_iter_at_mark(b.get_insert())
             beginmark=b.create_mark(None, cursor, True)
             b.insert_at_cursor("(%s)" % ", ".join(args))
             it=b.get_iter_at_mark(beginmark)
@@ -637,54 +643,54 @@ class Evaluator:
         else:
             cursor=b.get_iter_at_mark(b.get_insert())
             begin=b.get_iter_at_line(cursor.get_line())
-        expr=str(b.get_text(begin, cursor))
+        expr=b.get_text(begin, cursor, False).decode('utf-8')
         return expr
 
     def make_window(self, widget=None):
         """Built the application window.
         """
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        vbox=gtk.VBox()
+        window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
+        vbox=Gtk.VBox()
         window.add(vbox)
 
-        window.vbox = gtk.VBox()
+        window.vbox = Gtk.VBox()
         vbox.add(window.vbox)
         if widget:
             window.vbox.add(widget)
 
-        hb=gtk.HButtonBox()
-        b=gtk.Button(stock=gtk.STOCK_CLOSE)
+        hb=Gtk.HButtonBox()
+        b=Gtk.Button("window-close")
         b.connect('clicked', lambda b: window.destroy())
         hb.add(b)
-        vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hb, False, True, 0)
 
         return window
 
     def popup(self, embedded=True):
         """Popup the application window.
         """
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         window.connect('key-press-event', self.key_pressed_cb)
         window.set_title ("Python evaluation")
 
-        b=gtk.SeparatorToolItem()
+        b=Gtk.SeparatorToolItem()
         b.set_expand(True)
         b.set_draw(False)
         self.toolbar.insert(b, -1)
 
         if embedded:
             # Add the Close button to the toolbar
-            b=gtk.ToolButton(gtk.STOCK_CLOSE)
+            b=Gtk.ToolButton("window-close")
             b.connect('clicked', self.close)
             self.toolbar.insert(b, -1)
-            self.control_shortcuts[gtk.keysyms.w] = self.close
+            self.control_shortcuts[Gdk.KEY_w] = self.close
         else:
             # Add the Quit button to the toolbar
-            b=gtk.ToolButton(gtk.STOCK_QUIT)
+            b=Gtk.ToolButton("window-quit")
             b.connect('clicked', lambda b: window.destroy())
             self.toolbar.insert(b, -1)
-            window.connect('destroy', lambda e: gtk.main_quit())
-            self.control_shortcuts[gtk.keysyms.q] = lambda: gtk.main_quit()
+            window.connect('destroy', lambda e: Gtk.main_quit())
+            self.control_shortcuts[Gdk.KEY_q] = lambda: Gtk.main_quit()
 
         window.add (self.widget)
         window.show_all()
@@ -693,26 +699,35 @@ class Evaluator:
         self.source.grab_focus()
         return window
 
+    def run(self):
+        self.locals_['self'] = self
+        window = self.popup(embedded=False)
+        center_on_mouse(window)
+        self.locals_['w'] = window
+        window.connect('destroy', lambda e: Gtk.main_quit())
+        Gtk.main ()
+        self.save_history()
+
     def status_message(self, m):
         cid=self.statusbar.get_context_id('info')
-        message_id=self.statusbar.push(cid, str(m))
+        self.statusbar.push(cid, str(m))
         # Display the message only 4 seconds
         def undisplay():
             self.statusbar.pop(cid)
             return False
-        gobject.timeout_add(4000, undisplay)
+        GObject.timeout_add(4000, undisplay)
 
     def key_pressed_cb(self, win, event):
         """Handle key press event.
         """
-        if event.keyval == gtk.keysyms.F1:
+        if event.keyval == Gdk.KEY_F1:
             self.help()
             return True
-        if event.keyval == gtk.keysyms.Tab:
+        if event.keyval == Gdk.KEY_Tab:
             self.display_completion()
             return True
 
-        if event.get_state() & gtk.gdk.CONTROL_MASK:
+        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             action=self.control_shortcuts.get(event.keyval)
             if action:
                 try:
@@ -754,13 +769,13 @@ class Evaluator:
             return True
         if not self.bookmarks:
             return True
-        m=gtk.Menu()
+        m=Gtk.Menu()
         for b in reversed(self.bookmarks):
-            i=gtk.MenuItem(b, use_underline=False)
+            i=Gtk.MenuItem(b, use_underline=False)
             i.connect('activate', set_expression, b)
             m.append(i)
         m.show_all()
-        m.popup(None, widget, None, 0, gtk.get_current_event_time())
+        m.popup(None, widget, None, 0, 1, Gtk.get_current_event_time())
         return True
 
     def info(self, *p):
@@ -769,63 +784,73 @@ class Evaluator:
                 self.logbuffer.insert_at_cursor(time.strftime("%H:%M:%S") + l + "\n")
         return True
 
+    def dump_tree(self, w, indent=0):
+        """Dump a tree representation of the widget and its children.
+        """
+        tree = "%s%s %s %s\n%s%s" % (" " * indent, w.get_name(), w.get_css_name(), repr(w),
+                                     " " * indent, " ".join(".%s" % cl for cl in w.get_style_context().list_classes()))
+        try:
+            tree = "\n\n".join((tree, "\n".join(self.dump_tree(c, indent + 8) for c in w.get_children())))
+        except AttributeError:
+            pass
+        return tree
+
     def build_widget(self):
         """Build the evaluator widget.
         """
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
+        self.vbox = vbox
 
-        tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
-        # Use small toolbar button everywhere
-        gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
+        tb=Gtk.Toolbar()
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         for (icon, tip, action) in (
-            (gtk.STOCK_SAVE, "Save output window (C-s)", self.save_output_cb),
-            (gtk.STOCK_CLEAR, "Clear output window", self.clear_output),
-            (gtk.STOCK_DELETE, "Clear expression (C-l)", self.clear_expression),
-            (gtk.STOCK_EXECUTE, "Evaluate expression (C-Return)", self.evaluate_expression),
-            (gtk.STOCK_ADD, "Add a bookmark (C-b)", self.add_bookmark),
-            (gtk.STOCK_REMOVE, "Remove a bookmark", self.remove_bookmark),
-            (gtk.STOCK_INDEX, "Display bookmarks (C-Space)", self.display_bookmarks),
+            (Gtk.STOCK_SAVE, "Save output window (C-s)", self.save_output_cb),
+            (Gtk.STOCK_CLEAR, "Clear output window", self.clear_output),
+            (Gtk.STOCK_DELETE, "Clear expression (C-l)", self.clear_expression),
+            (Gtk.STOCK_EXECUTE, "Evaluate expression (C-Return)", self.evaluate_expression),
+            (Gtk.STOCK_ADD, "Add a bookmark (C-b)", self.add_bookmark),
+            (Gtk.STOCK_REMOVE, "Remove a bookmark", self.remove_bookmark),
+            (Gtk.STOCK_INDEX, "Display bookmarks (C-Space)", self.display_bookmarks),
             ):
-            b=gtk.ToolButton(icon)
+            b=Gtk.ToolButton(icon)
             b.connect('clicked', action)
             b.set_tooltip_text(tip)
             tb.insert(b, -1)
 
         # So that applications can define their own buttons
         self.toolbar=tb
-        vbox.pack_start(tb, expand=False)
+        vbox.pack_start(tb, False, True, 0)
 
-        self.source=gtk.TextView ()
+        self.source=Gtk.TextView ()
         self.source.set_editable(True)
-        self.source.set_wrap_mode (gtk.WRAP_CHAR)
+        self.source.set_wrap_mode (Gtk.WrapMode.CHAR)
 
-        f=gtk.Frame("Expression")
-        s=gtk.ScrolledWindow()
-        s.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        f=Gtk.Frame.new(label="Expression")
+        s=Gtk.ScrolledWindow()
+        s.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         s.add(self.source)
         f.add(s)
-        vbox.pack_start(f, expand=False)
+        vbox.pack_start(f, True, True, 0)
 
-        self.output=gtk.TextView()
+        self.output=Gtk.TextView()
         self.output.set_editable(False)
-        self.output.set_wrap_mode (gtk.WRAP_CHAR)
+        self.output.set_wrap_mode (Gtk.WrapMode.CHAR)
 
-        f=gtk.Frame("Result")
-        self.resultscroll=gtk.ScrolledWindow()
-        self.resultscroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        f=Gtk.Frame.new(label="Result")
+        self.resultscroll=Gtk.ScrolledWindow()
+        self.resultscroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.resultscroll.add(self.output)
         self.resultscroll.set_size_request( -1, 200 )
         f.add(self.resultscroll)
 
         if self.display_info_widget:
-            self.logwidget = gtk.TextView()
+            self.logwidget = Gtk.TextView()
             self.logbuffer = self.logwidget.get_buffer()
-            sw=gtk.ScrolledWindow()
+            sw=Gtk.ScrolledWindow()
             sw.add(self.logwidget)
 
-            pane=gtk.VPaned()
+            pane=Gtk.VPaned()
             vbox.add(pane)
             pane.add1(f)
             pane.pack2(sw)
@@ -835,16 +860,16 @@ class Evaluator:
         self.source.connect('key-press-event', self.key_pressed_cb)
         self.output.connect('key-press-event', self.key_pressed_cb)
 
-        self.statusbar=gtk.Statusbar()
-        self.statusbar.set_has_resize_grip(False)
-        vbox.pack_start(self.statusbar, expand=False)
+        self.statusbar=Gtk.Statusbar()
+        #self.statusbar.set_has_resize_grip(False)
+        vbox.pack_start(self.statusbar, False, True, 0)
 
         vbox.show_all()
 
         return vbox
 
 def center_on_mouse(w):
-    """Center the given gtk.Window on the mouse position.
+    """Center the given Gtk.Window on the mouse position.
     """
     root=w.get_toplevel().get_root_window()
     (screen, x, y, mod) = root.get_display().get_pointer()
@@ -864,23 +889,10 @@ def center_on_mouse(w):
     w.move(posx, posy)
 
 def launch(globals_=None, locals_=None, historyfile=None):
-    if globals_ is None:
-        globals_={}
-    if locals_ is None:
-        locals_={}
     if historyfile is None:
         historyfile=os.path.join(os.getenv('HOME'), '.pyeval.log')
-    ev=Evaluator(globals_=globals_, locals_=locals_, historyfile=historyfile)
-
-    ev.locals_['self']=ev
-    window=ev.popup(embedded=False)
-    center_on_mouse(window)
-    ev.locals_['w']=window
-
-    window.connect('destroy', lambda e: gtk.main_quit())
-
-    gtk.main ()
-    ev.save_history()
+    ev = Evaluator(globals_=globals_, locals_=locals_, historyfile=historyfile)
+    ev.run()
 
 if __name__ == "__main__":
     launch(globals(), locals())

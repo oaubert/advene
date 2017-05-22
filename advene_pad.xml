@@ -11,25 +11,22 @@
     </MASTER_PAD_VERSION_INFO>
     <Company_Info>
         <Company_Name>Advene</Company_Name>
-	<Address_1>LIRIS - Universite Lyon 1</Address_1>
-        <Address_2>UFR Informatique</Address_2>
-        <City_Town>VILLEURBANNE</City_Town>
-	<State_Province></State_Province>
-	<Zip_Postal_Code>69622</Zip_Postal_Code>
-	<Country>France</Country>
-	<Company_WebSite_URL>http://www.advene.org/</Company_WebSite_URL>
+        <City_Town>Nantes</City_Town>
+	    <Zip_Postal_Code>44100</Zip_Postal_Code>
+	    <Country>France</Country>
+	    <Company_WebSite_URL>http://www.advene.org/</Company_WebSite_URL>
         <Contact_Info>
           <Author_First_Name>Olivier</Author_First_Name>
           <Author_Last_Name>Aubert</Author_Last_Name>
-          <Author_Email>olivier.aubert@liris.cnrs.fr</Author_Email>
+          <Author_Email>contact@olivieraubert.net</Author_Email>
           <Contact_First_Name>Olivier</Contact_First_Name>
           <Contact_Last_Name>Aubert</Contact_Last_Name>
-          <Contact_Email>advene@liris.cnrs.fr</Contact_Email>
+          <Contact_Email>contact@olivieraubert.net</Contact_Email>
         </Contact_Info>
         <Support_Info>
-          <Sales_Email>advene@liris.cnrs.fr</Sales_Email>
-          <Support_Email>advene@liris.cnrs.fr</Support_Email>
-          <General_Email>advene@liris.cnrs.fr</General_Email>
+          <Sales_Email>support@advene.org</Sales_Email>
+          <Support_Email>support@advene.org</Support_Email>
+          <General_Email>support@advene.org</General_Email>
           <Sales_Phone></Sales_Phone><Support_Phone></Support_Phone>
           <General_Phone></General_Phone>
           <Fax_Phone></Fax_Phone>
@@ -37,10 +34,10 @@
     </Company_Info>
     <Program_Info>
       <Program_Name>Advene</Program_Name>
-      <Program_Version>1.0.2</Program_Version>
-      <Program_Release_Month>01</Program_Release_Month>
-      <Program_Release_Day>20</Program_Release_Day>
-      <Program_Release_Year>2012</Program_Release_Year>
+      <Program_Version>2.0</Program_Version>
+      <Program_Release_Month>FIXME</Program_Release_Month>
+      <Program_Release_Day>FIXME</Program_Release_Day>
+      <Program_Release_Year>2017</Program_Release_Year>
       <Program_Cost_Dollars>0</Program_Cost_Dollars>
       <Program_Cost_Other_Code></Program_Cost_Other_Code>
       <Program_Cost_Other></Program_Cost_Other>
@@ -50,14 +47,14 @@
       <Program_OS_Support>Linux,Mac OS X,Windows2000,Windows2003,WinXP</Program_OS_Support>
       <Program_Language>English,Esperanto,French</Program_Language>
       <File_Info>
-        <File_Size_Bytes>32211765</File_Size_Bytes>
-	<File_Size_K>31456</File_Size_K>
-	<File_Size_MB>30</File_Size_MB>
+        <File_Size_Bytes>FIXME32211765</File_Size_Bytes>
+	<File_Size_K>FIXME31456</File_Size_K>
+	<File_Size_MB>FIXME30</File_Size_MB>
       </File_Info>
       <Expire_Info>
         <Has_Expire_Info>N</Has_Expire_Info><Expire_Count></Expire_Count><Expire_Based_On></Expire_Based_On><Expire_Other_Info></Expire_Other_Info><Expire_Month></Expire_Month><Expire_Day></Expire_Day><Expire_Year></Expire_Year>
       </Expire_Info>
-      <Program_Change_Info>See the changelog at http://svn.gna.org/viewcvs/advene/trunk/CHANGES.txt</Program_Change_Info>
+      <Program_Change_Info>See the changelog at https://github.com/oaubert/advene/blob/master/CHANGES.txt</Program_Change_Info>
       <Program_Category_Class>Audio &amp; Multimedia::Video Tools</Program_Category_Class>
       <Program_Specific_Category></Program_Specific_Category>
       <Program_System_Requirements></Program_System_Requirements>

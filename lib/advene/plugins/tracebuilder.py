@@ -29,7 +29,7 @@ import os
 
 from threading import Thread
 import Queue
-import gobject
+from gi.repository import GObject
 import time
 import socket
 import urllib
@@ -127,7 +127,7 @@ class TraceBuilder(Thread):
 
         # FIXME: this does not belong here. It should be in a
         # view-related module, which would allow use to directly store
-        # gtk.gdk.Color instances.
+        # Gdk.Color instances.
         self.colormodel = {'events':{},
                             'operations':{},
                             'actions':{ 'Annotation': "#444488",
@@ -843,7 +843,7 @@ class TraceBuilder(Thread):
 
     def alert_registered(self, event, operation, action):
         for i in self.registered_views:
-            gobject.idle_add(i.receive, self.trace, event, operation, action)
+            GObject.idle_add(i.receive, self.trace, event, operation, action)
         return
 
     def register_view(self, view):

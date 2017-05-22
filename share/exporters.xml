@@ -725,10 +725,13 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
  </content></view><view dc:creator="oaubert" dc:date="2017-02-02" id="WebAnnotation" viewable-class="*"><meta><title xmlns="http://purl.org/dc/elements/1.1/">WebAnnotation</title>
 	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">json</extension>
  </meta><content encoding="utf-8" mime-type="text/plain">{
-  &quot;@context&quot;: &quot;http://www.w3.org/ns/anno.jsonld&quot;,
+  &quot;@context&quot;: [ 
+       &quot;http://www.w3.org/ns/anno.jsonld&quot;,
+        { &quot;local&quot;: &quot;http://advene.org/ns/local#&quot; } 
+        ],
   &quot;id&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;here/uri&quot;&gt;container_uri&lt;/span&gt;&quot;,
   &quot;type&quot;: &quot;AnnotationCollection&quot;,
-  &quot;label&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;here/representation&quot;&gt;container_title&lt;/span&gt;&quot;,
+  &quot;label&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;here/representation/json&quot;&gt;container_title&lt;/span&gt;,
   &quot;total&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;here/annotations/length&quot;&gt;annotation_count&lt;/span&gt;,
   &quot;first&quot;: {
     &quot;id&quot;: &quot;&quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;here/uri&quot;&gt;container_uri&lt;/span&gt;/page1&quot;,
@@ -738,17 +741,18 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
          &lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot; &gt;
          {
             &quot;@context&quot;: &quot;http://www.w3.org/ns/anno.jsonld&quot;,
-            &quot;id&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/uri&quot;&gt;annotation_uri&lt;/span&gt;&quot;,
-            &quot;type&quot;: &quot;Annotation&quot;,
+            &quot;id&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/uri/json&quot;&gt;annotation_uri&lt;/span&gt;&quot;,
+            &quot;type&quot;: [ &quot;Annotation&quot;, &quot;local:&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/type/id&quot;&gt;type&lt;/span&gt;&quot; ],
             &quot;creator&quot;: {
-                &quot;id&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/author&quot;&gt;author&lt;/span&gt;&quot;,
+                &quot;id&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/author/json&quot;&gt;author&lt;/span&gt;,
                 &quot;type&quot;: &quot;Person&quot;,
-                &quot;nick&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/author&quot;&gt;author&lt;/span&gt;&quot;
+                &quot;nick&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/author/json&quot;&gt;author&lt;/span&gt;
             },
-            &quot;created&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/date&quot;&gt;created&lt;/span&gt;&quot;,
+            &quot;created&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/date/json&quot;&gt;created&lt;/span&gt;,
             &quot;body&quot;: {
                 &quot;type&quot;: &quot;TextualBody&quot;,
-                &quot;text&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/content/data&quot;&gt;annotation_data&lt;/span&gt;&quot;
+                &quot;value&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/content/data/json&quot;&gt;annotation_data&lt;/span&gt;,
+                &quot;format&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/content/mimetype&quot;&gt;content type&lt;/span&gt;
             },
             &quot;target&quot;: {
                 &quot;source&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/meta/advenetool/mediafile/urlquote&quot;&gt;movie&lt;/span&gt;&quot;,

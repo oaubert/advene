@@ -20,55 +20,53 @@
 
 Note that, contrary to a common pattern found in the Advene sources
 (where the real widget is stored as the self.widget attribute), each
-of the widgets defined in this module is a gtk.Widget.
+of the widgets defined in this module is a Gtk.Widget.
 
-Documentation:
-http://www.tortall.net/mu/wiki/CairoTutorial
-
-http://www.pygtk.org/pygtk2reference/class-pangocairocairocontext.html
-http://www.nabble.com/Image-Manipulation-under-pyGTK-t3484319.html
-http://lists.freedesktop.org/archives/cairo/2007-February/009810.html
-http://www.tortall.net/mu/wiki/CairoTutorial#understanding-text
-http://nzlinux.virtuozzo.co.nz/blogs/2005/08/18/using-pangocairo/
-http://laszlok2.blogspot.com/2006/05/prince-of-cairo_28.html
+Updated tutorial for gtk3:
+http://zetcode.com/gfx/pycairo/basicdrawing/
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import struct
 import os
 
 from gettext import gettext as _
 
-import gtk
+import gi
 import cairo
-import pango
-import gobject
+from gi.repository import GObject
+from gi.repository import GdkPixbuf
+from gi.repository import Gdk
+from gi.repository import Gtk
+from gi.repository import Pango
 
 try:
-    import rsvg
+    gi.require_version('Rsvg', '2.0')
+    from gi.repository import Rsvg
 except ImportError:
-    import advene.util.ctypesrsvg as rsvg
+    import advene.util.ctypesrsvg as Rsvg
 
 # Advene part
 import advene.core.config as config
 from advene.core.imagecache import ImageCache
 
 from advene.gui.util import png_to_pixbuf, enable_drag_source, name2color
-from advene.gui.util import get_color_style
 import advene.util.helper as helper
 from advene.model.annotation import Annotation
 import advene.gui.popup
 
 active_color=name2color('#fdfd4b')
 
-class GenericColorButtonWidget(gtk.DrawingArea):
+class GenericColorButtonWidget(Gtk.DrawingArea):
     """ Widget emulating a color button widget
     """
     def __init__(self, element=None, container=None):
-        gtk.DrawingArea.__init__(self)
-        self.set_flags(self.flags() | gtk.CAN_FOCUS)
+        GObject.GObject.__init__(self)
+        self.set_can_focus(True)
         self.element=element
 
-        # If not None, it should contain a gtk.gdk.Color
+        # If not None, it should contain a Gdk.Color
         # which will override the normal color
         self.local_color=None
         # Alpha will be used to draw features
@@ -82,42 +80,43 @@ class GenericColorButtonWidget(gtk.DrawingArea):
             self.controller=container.controller
         else:
             self.controller=None
-        self.set_events(gtk.gdk.POINTER_MOTION_MASK |
-                        gtk.gdk.POINTER_MOTION_HINT_MASK |
-                        gtk.gdk.BUTTON_PRESS_MASK |
-                        gtk.gdk.BUTTON_RELEASE_MASK |
-                        gtk.gdk.BUTTON1_MOTION_MASK |
-                        gtk.gdk.KEY_PRESS_MASK |
-                        gtk.gdk.KEY_RELEASE_MASK |
-                        gtk.gdk.FOCUS_CHANGE_MASK |
-                        gtk.gdk.ENTER_NOTIFY_MASK |
-                        gtk.gdk.LEAVE_NOTIFY_MASK |
-                        gtk.gdk.SCROLL_MASK)
+        self.set_events(Gdk.EventMask.POINTER_MOTION_MASK |
+                        Gdk.EventMask.POINTER_MOTION_HINT_MASK |
+                        Gdk.EventMask.BUTTON_PRESS_MASK |
+                        Gdk.EventMask.BUTTON_RELEASE_MASK |
+                        Gdk.EventMask.BUTTON1_MOTION_MASK |
+                        Gdk.EventMask.KEY_PRESS_MASK |
+                        Gdk.EventMask.KEY_RELEASE_MASK |
+                        Gdk.EventMask.FOCUS_CHANGE_MASK |
+                        Gdk.EventMask.ENTER_NOTIFY_MASK |
+                        Gdk.EventMask.LEAVE_NOTIFY_MASK |
+                        Gdk.EventMask.SCROLL_MASK)
 
-        self.connect('expose-event', self.expose_cb)
+        self.connect('draw', self.draw_cb)
         self.connect('realize', self.realize_cb)
-        self.connect_after('size-request', self.size_request_cb)
+        self.connect_after('size-allocate', self.size_request_cb)
         self.connect('focus-in-event', self.update_widget)
         self.connect('focus-out-event', self.update_widget)
 
         #self.connect('event', self.debug_cb, "Event")
         #self.connect_after('event', self.debug_cb, "After")
 
-        self.cached_surface = None
-        self.cached_context = None
-
         self.default_size = (40, 10)
         # Initialize the size
         self.set_size_request(*self.needed_size())
 
     def _drag_begin(self, widget, context):
-        cm=gtk.gdk.colormap_get_system()
-        w,h=self.needed_size()
-        pixmap=gtk.gdk.Pixmap(None, w, h, cm.get_visual().depth)
-        cr=pixmap.cairo_create()
+        # see https://developer.gnome.org/gtk3/stable/ch26s02.html
+        w,h = self.needed_size()
+        pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, w, h)
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, pixbuf.get_width(),
+                                     pixbuf.get_height())
+        cr = cairo.Context(surface)
         self.draw(cr, w, h)
-        cr.paint_with_alpha(0.0)
-        widget.drag_source_set_icon(cm, pixmap)
+        Gdk.cairo_set_source_pixbuf(cr, pixbuf, 0, 0)
+        cr.paint()
+        # FIXME3: use drag_source_set_icon_pixbuf
+        widget.drag_source_set_icon_pixbuf(pixbuf)
         def set_cursor(wid, t=None, precision=None):
             try:
                 self.container.set_annotation(t)
@@ -125,30 +124,24 @@ class GenericColorButtonWidget(gtk.DrawingArea):
                 # The container does not implement the set_annotation method.
                 return False
             return True
-        pixmap.set_cursor = set_cursor.__get__(w)
+        pixbuf.set_cursor = set_cursor.__get__(w)
         return True
 
     def reset_surface_size(self, width=None, height=None):
-        """Redimension the cached widget content.
+        """Redimension the widget content.
         """
-        if not self.window:
+        w = self.get_window()
+        if not w:
             return False
-        s=self.window.get_size()
         if width is None:
-            width=s[0]
+            width = w.get_width()
         if height is None:
-            height=s[1]
+            height = w.get_height()
         if width <= 0:
             print "Error: width ", width, " <= 0 for ", self.element.id
             width=5
-        if (self.cached_surface
-            and self.cached_surface.get_width() == width
-            and self.cached_surface.get_height() == height):
-            return True
-        self.cached_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
-        self.cached_context = cairo.Context(self.cached_surface)
         self.set_size_request(width, height)
-        self.window.lower()
+        #self.get_window().lower()
         return True
 
     def realize_cb(self, widget):
@@ -199,50 +192,24 @@ class GenericColorButtonWidget(gtk.DrawingArea):
     def update_widget(self, *p):
         """Update the widget.
         """
-        if not self.window:
+        if not self.get_window():
             return False
-        if self.cached_context is None:
-            return False
-
-        # First check width
-        w=self.needed_size()[0]
-        if w != self.cached_surface.get_width():
-            self.reset_surface_size(w, self.needed_size()[1])
-
-        bwidth=self.cached_surface.get_width()
-        bheight=self.cached_surface.get_height()
-
-        self.draw(self.cached_context, bwidth, bheight)
-
         self.refresh()
         return False
 
     def refresh(self):
         """Refresh the widget.
         """
-        if self.window and self.cached_surface:
-            self.window.invalidate_rect(gtk.gdk.Rectangle(self.allocation.x, self.allocation.y,
-                                                          self.allocation.width, self.allocation.height), False)
+        self.reset_surface_size(*self.needed_size())
+        self.queue_draw()
 
-    def expose_cb(self, widget, event):
-        """Handle the expose event.
+    def draw_cb(self, widget, context):
+        """Handle the draw event.
         """
-        if self.cached_surface is None:
-            return False
-
-        context = widget.window.cairo_create()
-
-        # Set a clip region for the expose event
-        context.rectangle(event.area.x, event.area.y,
-                          event.area.width, event.area.height)
-        context.clip()
-
-        # copy the annotation_surface onto this context
-        context.set_source_surface(self.cached_surface, 0, 0)
         context.paint_with_alpha(self.expose_alpha)
-        #self.draw(context, *widget.window.get_size())
+        self.draw(context, widget.get_window().get_width(), widget.get_window().get_height())
         return False
-gobject.type_register(GenericColorButtonWidget)
+GObject.type_register(GenericColorButtonWidget)
 
 class AnnotationWidget(GenericColorButtonWidget):
     """ Widget representing an annotation
@@ -274,31 +241,30 @@ class AnnotationWidget(GenericColorButtonWidget):
             widgets=self.container.get_selected_annotation_widgets()
             if not widget in widgets:
                 widgets=[]
-        except AttributeError:
+        except (AttributeError, RuntimeError):
             widgets=[]
 
-        w=gtk.Window(gtk.WINDOW_POPUP)
+        w=Gtk.Window(Gtk.WindowType.POPUP)
         w.set_decorated(False)
         # Set white on black background
-        style=get_color_style(w, 'black', 'white')
-        w.set_style(style)
+        w.get_style_context().add_class('advene_drag_icon')
 
-        v=gtk.VBox()
-        v.set_style(style)
-        h=gtk.HBox()
-        h.set_style(style)
-        begin=gtk.Image()
-        h.pack_start(begin, expand=False)
-        padding=gtk.HBox()
+        v=Gtk.VBox()
+        v.get_style_context().add_class('advene_drag_icon')
+        h=Gtk.HBox()
+        h.get_style_context().add_class('advene_drag_icon')
+        begin=Gtk.Image()
+        h.pack_start(begin, False, True, 0)
+        padding=Gtk.HBox()
         # Padding
-        h.pack_start(padding, expand=True)
-        end=gtk.Image()
-        h.pack_start(end, expand=False)
-        v.pack_start(h, expand=False)
-        l=gtk.Label()
-        l.set_ellipsize(pango.ELLIPSIZE_END)
-        l.set_style(style)
-        v.pack_start(l, expand=False)
+        h.pack_start(padding, True, True, 0)
+        end=Gtk.Image()
+        h.pack_start(end, False, True, 0)
+        v.pack_start(h, False, True, 0)
+        l=Gtk.Label()
+        l.set_ellipsize(Pango.EllipsizeMode.END)
+        l.get_style_context().add_class('advene_drag_icon')
+        v.pack_start(l, False, True, 0)
 
         def set_cursor(wid, t=None, precision=None):
             if t is None:
@@ -337,7 +303,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         w.set_cursor()
         w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
         widget._icon=w
-        context.set_icon_widget(w, 0, 0)
+        Gtk.drag_set_icon_widget(context, w, 0, 0)
         return True
 
     def set_active(self, b):
@@ -347,12 +313,12 @@ class AnnotationWidget(GenericColorButtonWidget):
     def keypress(self, widget, event, annotation):
         """Handle the key-press event.
         """
-        if event.keyval == gtk.keysyms.e:
+        if event.keyval == Gdk.KEY_e:
             try:
                 widgets=self.container.get_selected_annotation_widgets()
                 if not widget in widgets:
                     widgets=None
-            except AttributeError:
+            except (AttributeError, RuntimeError):
                 widgets=None
             if not widgets:
                 self.controller.gui.edit_element(annotation)
@@ -360,7 +326,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                 for w in widgets:
                     self.controller.gui.edit_element(w.annotation)
             return True
-        elif event.keyval == gtk.keysyms.h:
+        elif event.keyval == Gdk.KEY_h:
             if self.active:
                 event="AnnotationDeactivate"
             else:
@@ -368,11 +334,11 @@ class AnnotationWidget(GenericColorButtonWidget):
             self.active=not self.active
             self.controller.notify(event, annotation=self.annotation)
             return True
-        elif event.keyval == gtk.keysyms.F11:
+        elif event.keyval == Gdk.KEY_F11:
             menu=advene.gui.popup.Menu(annotation, controller=self.controller)
             menu.popup()
             return True
-        elif event.keyval == gtk.keysyms.space:
+        elif event.keyval == Gdk.KEY_space:
             # Play the annotation
             c=self.controller
             pos = c.create_position (value=annotation.fragment.begin,
@@ -381,13 +347,13 @@ class AnnotationWidget(GenericColorButtonWidget):
             c.queue_action(c.update_status, status="set", position=pos)
             c.gui.set_current_annotation(annotation)
             return True
-        elif event.keyval == gtk.keysyms.Delete or event.keyval == gtk.keysyms.BackSpace:
+        elif event.keyval == Gdk.KEY_Delete or event.keyval == Gdk.KEY_BackSpace:
             # Delete annotation or selection
             try:
                 widgets=self.container.get_selected_annotation_widgets()
                 if not widget in widgets:
                     widgets=None
-            except AttributeError:
+            except (AttributeError, RuntimeError):
                 widgets=None
             if not widgets:
                 self.controller.delete_element(annotation)
@@ -469,17 +435,19 @@ class AnnotationWidget(GenericColorButtonWidget):
             context.line_to(int(c), height)
             context.fill()
             return
-        elif self.annotation.content.mimetype == 'image/svg+xml' and rsvg is not None:
+        elif self.annotation.content.mimetype == 'image/svg+xml' and Rsvg is not None:
             if width < 6:
                 return
             if self.annotation.content.data:
                 try:
-                    s=rsvg.Handle(data=self.annotation.content.data)
-                    scale = 1.0 * height / s.get_dimension_data()[1]
+                    s = Rsvg.Handle.new_from_data(self.annotation.content.data.encode('utf-8'))
+                    scale = 1.0 * height / s.get_dimensions().height
                     context.set_matrix(cairo.Matrix( scale, 0, 0, scale, 0, 0 ))
                     s.render_cairo(context)
-                except:
-                    print "Error when rendering SVG timeline component"
+                except Exception, e:
+                    print "Error when rendering SVG timeline component", e
+                    import traceback
+                    traceback.print_exc(e)
                     pass
             return
 
@@ -521,7 +489,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             context.line_to(x, height)
             context.stroke()
 
-gobject.type_register(AnnotationWidget)
+GObject.type_register(AnnotationWidget)
 
 class AnnotationTypeWidget(GenericColorButtonWidget):
     """ Widget representing an annotation type
@@ -551,7 +519,7 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
     def keypress(self, widget, event, annotationtype):
         """Handle the key-press event.
         """
-        if event.keyval == gtk.keysyms.e:
+        if event.keyval == Gdk.KEY_e:
             self.controller.gui.edit_element(annotationtype)
             return True
         return False
@@ -561,7 +529,7 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
 
         Method to be implemented by subclasses
         """
-        w=self.width or 60
+        w=self.width or 120
         return (w, self.container.button_height)
 
     def draw(self, context, width, height):
@@ -621,7 +589,7 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
             if ext[2] != self.width:
                 self.width=long(ext[2]) + 5
                 self.reset_surface_size(self.width, self.container.button_height)
-gobject.type_register(AnnotationTypeWidget)
+GObject.type_register(AnnotationTypeWidget)
 
 class TagWidget(GenericColorButtonWidget):
     """ Widget representing a tag
@@ -633,24 +601,25 @@ class TagWidget(GenericColorButtonWidget):
         # drag_set_icon_cursor does not work on native Gtk on MacOS X
         if not (config.data.os == 'darwin' and not os.environ.get('DISPLAY')):
             self.connect('drag-begin', self._drag_begin)
-        self.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                             config.data.drag_type['tag'],
-                             gtk.gdk.ACTION_LINK)
+        self.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                             config.data.get_target_types('tag'),
+                             Gdk.DragAction.LINK)
         # The button can generate drags
         self.connect('drag-data-get', self.drag_sent)
 
         # Allow the entry to get drops of type application/x-color
         self.connect('drag-data-received', self.drag_received)
-        self.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                 gtk.DEST_DEFAULT_HIGHLIGHT |
-                                 gtk.DEST_DEFAULT_ALL,
-                                 config.data.drag_type['color'], gtk.gdk.ACTION_COPY)
+        self.drag_dest_set(Gtk.DestDefaults.MOTION |
+                           Gtk.DestDefaults.HIGHLIGHT |
+                           Gtk.DestDefaults.ALL,
+                           config.data.get_target_types('color'),
+                           Gdk.DragAction.COPY)
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         if targetType == config.data.target_type['tag']:
-            selection.set(selection.target, 8, unicode(self.tag).encode('utf8'))
+            selection.set(selection.get_target(), 8, unicode(self.tag).encode('utf8'))
         else:
-            self.log("Unknown target type for drag: %d" % targetType)
+            logger.warn("Unknown target type for drag: %d" % targetType)
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
@@ -658,7 +627,7 @@ class TagWidget(GenericColorButtonWidget):
         """
         if targetType == config.data.target_type['color']:
             # The structure consists in 4 unsigned shorts: r, g, b, opacity
-            (r, g, b, opacity)=struct.unpack('HHHH', selection.data)
+            (r, g, b, opacity)=struct.unpack('HHHH', selection.get_data())
             if self.container is not None and hasattr(self.container, 'controller'):
                 c=self.container.controller
                 c.package._tag_colors[self.tag]="#%04x%04x%04x" % (r, g, b)
@@ -707,7 +676,7 @@ class TagWidget(GenericColorButtonWidget):
         if self.width != w:
             self.reset_surface_size(self.width, self.container.button_height)
             #print "Resetting width", self.width
-gobject.type_register(TagWidget)
+GObject.type_register(TagWidget)
 
 class TimestampMarkWidget(GenericColorButtonWidget):
     """ Widget representing an timestamp mark (for note-taking view)
@@ -736,9 +705,9 @@ class TimestampMarkWidget(GenericColorButtonWidget):
         context.line_to(2, height)
         context.fill()
         context.stroke()
-gobject.type_register(TimestampMarkWidget)
+GObject.type_register(TimestampMarkWidget)
 
-class AnnotationRepresentation(gtk.Button):
+class AnnotationRepresentation(Gtk.Button):
     """Representation for an annotation.
     """
     def __init__(self, annotation, controller):
@@ -754,17 +723,17 @@ class AnnotationRepresentation(gtk.Button):
         enable_drag_source(self, self.annotation, self.controller)
 
     def button_press_handler(self, widget, event, annotation):
-        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+        if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
             menu=advene.gui.popup.Menu(annotation, controller=self.controller)
             menu.popup()
             return True
-        elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+        elif event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
             self.controller.gui.edit_element(annotation)
             return True
         return False
-gobject.type_register(AnnotationRepresentation)
+GObject.type_register(AnnotationRepresentation)
 
-class RelationRepresentation(gtk.Button):
+class RelationRepresentation(Gtk.Button):
     """Representation for a relation.
     """
     if config.data.os == 'linux':
@@ -777,7 +746,7 @@ class RelationRepresentation(gtk.Button):
         self.controller=controller
         self.direction=direction
         super(RelationRepresentation, self).__init__()
-        l=gtk.Label()
+        l=Gtk.Label()
         self.add(l)
         l.show()
         self.refresh()
@@ -796,27 +765,27 @@ class RelationRepresentation(gtk.Button):
             l.set_text(t)
 
     def button_press_handler(self, widget, event, relation):
-        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+        if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
             menu=advene.gui.popup.Menu(relation, controller=self.controller)
             menu.popup()
             return True
-        elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+        elif event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
             self.controller.gui.edit_element(relation)
             return True
         return False
-gobject.type_register(RelationRepresentation)
+GObject.type_register(RelationRepresentation)
 
-class TimestampRepresentation(gtk.Button):
+class TimestampRepresentation(Gtk.Button):
     """Representation of a timestamp.
 
     It is a button with a representative image and the timestamp displayed under it.
 
     @ivar image: the image widget
-    @type image: gtk.Image
+    @type image: Gtk.Image
     @ivar label: the label (timestamp) widget
-    @type label: gtk.Label
+    @type label: Gtk.Label
     """
-    def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None, visible_label=True, bgcolor=None, callback=None):
+    def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None, visible_label=True, callback=None):
         """Instanciate a new TimestampRepresentation.
 
         @param value: the timestamp value
@@ -831,8 +800,6 @@ class TimestampRepresentation(gtk.Button):
         @type comment_getter: method
         @param visible_label: should the timestamp label be displayed?
         @type visible_label: boolean
-        @param bgcolor: background color
-        @type bgcolor: string
         @value callback: a callback that will be called before value modification
         @type callback: method. If it returns False, then the modification will be cancelled
         """
@@ -851,23 +818,20 @@ class TimestampRepresentation(gtk.Button):
         # element as parameter, and adds appropriate menu items.
         self.extend_popup_menu=None
         self.highlight=False
-        self._bgcolor = None
         # Displayed text.
         self._text = '<span size="xx-small">%(timestamp)s</span>'
         self.callback = callback
 
-        box=gtk.VBox()
-        self.image=gtk.Image()
-        self.label=gtk.Label()
-        box.pack_start(self.image, expand=False)
-        box.pack_start(self.label, expand=False)
+        box=Gtk.VBox()
+        self.image=Gtk.Image()
+        self.label=Gtk.Label()
+        box.pack_start(self.image, False, True, 0)
+        box.pack_start(self.label, False, True, 0)
         if not self.visible_label:
             self.label.set_no_show_all(True)
             self.label.hide()
         self.add(box)
         self.box=box
-
-        self._bgcolor = bgcolor
 
         self.refresh()
 
@@ -892,19 +856,13 @@ class TimestampRepresentation(gtk.Button):
                                                                         method=self.snapshot_update_cb))
         self.connect('destroy', self.remove_rules)
 
-    def get_bgcolor(self):
-        return self._bgcolor
-    def set_bgcolor(self, color):
-        if color is None:
-            color='black'
-        if color != self._bgcolor:
-            style = get_color_style(self, color, 'white')
-            self.set_style(style)
-            self.box.set_style(style)
-            self.image.set_style(style)
-            self.label.set_style(style)
-            self._bgcolor = color
-    bgcolor = property(get_bgcolor, set_bgcolor)
+    def add_class(self, cl):
+        for w in (self, self.box, self.image):
+            w.get_style_context().add_class(cl)
+
+    def remove_class(self, cl):
+        for w in (self, self.box, self.image):
+            w.get_style_context().remove_class(cl)
 
     def set_width(self, w):
         self._width = w
@@ -965,14 +923,14 @@ class TimestampRepresentation(gtk.Button):
                     # The image was updated. Refresh the display.
                     self.refresh()
                 return False
-            gobject.timeout_add (100, refresh_timeout)
+            GObject.timeout_add (100, refresh_timeout)
         return True
 
     def _button_press_handler(self, widget, event):
-        if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS and self._value is not None:
+        if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS and self._value is not None:
             self.goto_and_refresh()
             return True
-        elif event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS and self.popup_menu is not None:
+        elif event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS and self.popup_menu is not None:
             self.popup_menu()
             return True
         return False
@@ -997,7 +955,7 @@ class TimestampRepresentation(gtk.Button):
             self.image.show()
         ts=helper.format_time(self._value)
         self.label.set_markup(self._text % { 'timestamp': ts })
-        if self.visible_label and self.label.get_child_requisition()[0] <= 1.2 * self.image.get_child_requisition()[0]:
+        if self.visible_label and self.label.get_child_requisition().width <= 1.2 * self.image.get_child_requisition().width:
             self.label.show()
         else:
             self.label.hide()
@@ -1042,7 +1000,7 @@ class TimestampRepresentation(gtk.Button):
         """
         p=self.controller.player
 
-        menu = gtk.Menu()
+        menu = Gtk.Menu()
 
         def goto(it, t):
             c=self.controller
@@ -1056,26 +1014,26 @@ class TimestampRepresentation(gtk.Button):
             self.controller.gui.save_snapshot_as(self.value)
             return True
 
-        item = gtk.MenuItem(_("Play"))
+        item = Gtk.MenuItem(_("Play"))
         item.connect('activate', goto, self.value)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Refresh snapshot"))
+        item = Gtk.MenuItem(_("Refresh snapshot"))
         item.connect('activate', self.refresh_snapshot)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Save as..."))
+        item = Gtk.MenuItem(_("Save as..."))
         item.connect('activate', save_as)
         menu.append(item)
 
         if self.callback is not None:
-            item = gtk.MenuItem(_("Use current player position"))
+            item = Gtk.MenuItem(_("Use current player position"))
             item.connect('activate', lambda i: self.set_value(p.current_position_value))
             if p.status != p.PauseStatus and p.status != p.PlayingStatus:
                 item.set_sensitive(False)
             menu.append(item)
 
-            item = gtk.MenuItem(_("Adjust timestamp"))
+            item = Gtk.MenuItem(_("Adjust timestamp"))
             item.connect('activate', lambda i: self.set_value(self.controller.gui.adjust_timestamp(self.get_value())))
             menu.append(item)
 
@@ -1085,10 +1043,10 @@ class TimestampRepresentation(gtk.Button):
         menu.show_all()
 
         if popup:
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            menu.popup_at_pointer(None)
         return menu
 
     def set_color(self, color):
         self.bgcolor = color
 
-gobject.type_register(TimestampRepresentation)
+GObject.type_register(TimestampRepresentation)

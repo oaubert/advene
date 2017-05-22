@@ -25,7 +25,7 @@ import sys
 import re
 import tempfile
 
-import gobject
+from gi.repository import GObject
 
 import advene.util.helper as helper
 
@@ -38,6 +38,13 @@ def register(controller=None):
     return True
 
 class ShotdetectAppImporter(ExternalAppImporter):
+    """Shot detection.
+
+    The threshold parameter is used to specify the sensitivity of the
+    algorithm, and should typically be between 50 and 80. If too many
+    shots are detected, try to increase its value.
+    """
+
     name = _("ShotdetectApp importer")
 
     def __init__(self, *p, **kw):
@@ -90,8 +97,8 @@ class ShotdetectAppImporter(ExternalAppImporter):
                      '-o', self.tempdir.encode('utf8', sys.getfilesystemencoding()),
                      '-s', str(self.sensitivity) ]
         else:
-            args = [ '-i', gobject.filename_from_utf8(filename.encode('utf8')),
-                     '-o', gobject.filename_from_utf8(self.tempdir.encode('utf8')),
+            args = [ '-i', GObject.filename_from_utf8(filename.encode('utf8')),
+                     '-o', GObject.filename_from_utf8(self.tempdir.encode('utf8')),
                      '-s', str(self.sensitivity) ]
         return args
 
@@ -128,8 +135,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
                 yield {
                     'content': str(num),
                     'begin': begin,
-                    # Offset the end timecode by 1 frame.
-                    'end': ts - (1000 / config.data.preferences['default-fps'])
+                    'end': ts
                     }
                 begin = ts
                 num += 1

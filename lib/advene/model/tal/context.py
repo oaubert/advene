@@ -16,6 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import copy
 import sys
 
 from cStringIO import StringIO
@@ -237,6 +238,18 @@ class AdveneContext(_advene_context):
         ]
 
     defaultMethods = staticmethod(defaultMethods)
+
+    def checkpoint(self):
+        """Checkpoint locals/globals variables to preserve state
+        """
+        self._cached_locals = copy.copy(self.locals)
+        self._cached_globals = copy.copy(self.globals)
+
+    def restore(self):
+        """Restore locals/globals from a previous checkpoint state.
+        """
+        self.locals = copy.copy(self._cached_locals)
+        self.globals = copy.copy(self._cached_globals)
 
     def __str__ (self):
         return u"<pre>AdveneContext\nGlobals:\n\t%s\nLocals:\n\t%s</pre>" % (

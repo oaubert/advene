@@ -16,10 +16,14 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-import gtk
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import Gtk
 import re
 import cairo
 
@@ -145,7 +149,7 @@ class AnnotationPlaceholder:
         new=self.build_pixbuf()
         if not self.update_pixbuf:
             new.composite(old, 0, 0, old.get_width(), old.get_height(),
-                          0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
+                          0, 0, 1.0, 1.0, GdkPixbuf.InterpType.BILINEAR, 255)
         else:
             self.update_pixbuf(old, new)
         self.pixbuf=new
@@ -174,9 +178,9 @@ class AnnotationPlaceholder:
         context.stroke_preserve()
         context.fill()
 
-        pixbuf = gtk.gdk.pixbuf_new_from_data(
+        pixbuf = GdkPixbuf.Pixbuf.new_from_data(
             surface.get_data(),
-            gtk.gdk.COLORSPACE_RGB, True, 8,
+            GdkPixbuf.Colorspace.RGB, True, 8,
             surface.get_width(), surface.get_height(),
             surface.get_stride())
         return pixbuf
@@ -336,7 +340,7 @@ class AnnotationTypePlaceholder:
         new=self.build_pixbuf()
         if not self.update_pixbuf:
             new.composite(old, 0, 0, old.get_width(), old.get_height(),
-                          0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
+                          0, 0, 1.0, 1.0, GdkPixbuf.InterpType.BILINEAR, 255)
         else:
             self.update_pixbuf(old, new)
         self.pixbuf=new
@@ -365,9 +369,9 @@ class AnnotationTypePlaceholder:
         context.stroke_preserve()
         context.fill()
 
-        pixbuf = gtk.gdk.pixbuf_new_from_data(
+        pixbuf = GdkPixbuf.Pixbuf.new_from_data(
             surface.get_data(),
-            gtk.gdk.COLORSPACE_RGB, True, 8,
+            GdkPixbuf.Colorspace.RGB, True, 8,
             surface.get_width(), surface.get_height(),
             surface.get_stride())
         return pixbuf
@@ -401,7 +405,7 @@ class HTMLContentHandler (ContentHandler):
         self.last_dndtime=None
         self.last_x = None
         self.last_y = None
-        # HTMLEditor component (gtk.Textview subclass)
+        # HTMLEditor component (Gtk.Textview subclass)
         self.editor = None
 
         # Widgets holding editors (basic and html)
@@ -506,17 +510,17 @@ class HTMLContentHandler (ContentHandler):
         self.last_x=x
         self.last_y=y
 
-        x, y = self.editor.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
+        x, y = self.editor.window_to_buffer_coords(Gtk.TextWindowType.TEXT,
                                                    *widget.get_pointer())
         it = self.editor.get_iter_at_location(x, y)
-        self.editor.get_buffer().place_cursor(it)
+        self.editor.get_buffer().place_cursor(it.iter)
 
         if targetType == config.data.target_type['annotation']:
-            for uri in unicode(selection.data, 'utf8').split('\n'):
+            for uri in unicode(selection.get_data(), 'utf8').split('\n'):
                 source=self.controller.package.annotations.get(uri)
                 if source is None:
                     return True
-                m=gtk.Menu()
+                m=Gtk.Menu()
                 for (title, choice) in (
                     (_("Snapshot only"), ['link', 'snapshot', ]),
                     (_("Overlayed snapshot only"), ['link', 'overlay', ]),
@@ -524,38 +528,38 @@ class HTMLContentHandler (ContentHandler):
                     (_("Snapshot+timestamp"), ['link', 'snapshot', 'timestamp']),
                     (_("Annotation content"), ['link', 'content']),
                     ):
-                    i=gtk.MenuItem(title)
+                    i=Gtk.MenuItem(title)
                     i.connect('activate', (lambda it, ann, data: self.insert_annotation_content(data, ann, focus=True)), source, choice)
                     m.append(i)
                 m.show_all()
-                m.popup(None, None, None, 0, gtk.get_current_event_time())
+                m.popup(None, None, None, 0, Gtk.get_current_event_time())
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            for uri in unicode(selection.data, 'utf8').split('\n'):
+            for uri in unicode(selection.get_data(), 'utf8').split('\n'):
                 source = self.controller.package.annotationTypes.get(uri)
                 if source is None:
                     return True
-                m=gtk.Menu()
+                m=Gtk.Menu()
                 for (title, choice) in (
                     (_("as a list"), [ 'list' ]),
                     (_("as a grid"), [ 'grid' ]),
                     (_("as a table"), [ 'table' ]),
                     (_("as a transcription"), ['transcription' ]),
                     ):
-                    i=gtk.MenuItem(title)
+                    i=Gtk.MenuItem(title)
                     i.connect('activate', (lambda it, at, data: self.insert_annotationtype_content(data, at, focus=True)), source, choice)
                     m.append(i)
                 m.show_all()
-                m.popup(None, None, None, 0, gtk.get_current_event_time())
+                m.popup(None, None, None, 0, Gtk.get_current_event_time())
             return True
         elif targetType == config.data.target_type['timestamp']:
-            data=decode_drop_parameters(selection.data)
+            data=decode_drop_parameters(selection.get_data())
             t=long(data['timestamp'])
             # FIXME: propose various choices (insert timestamp, insert snapshot, etc)
             self.editor.get_buffer().insert_at_cursor(helper.format_time(t))
             return True
         else:
-            print "Unknown target type for drop: %d" % targetType
+            logger.warn("Unknown target type for drop: %d" % targetType)
         return False
 
     def class_parser(self, tag, attr):
@@ -627,7 +631,7 @@ class HTMLContentHandler (ContentHandler):
         """Popup a contextual menu for the given context.
         """
         if menu is None:
-            menu=gtk.Menu()
+            menu=Gtk.Menu()
 
         def open_link(i, l):
             self.open_link(l)
@@ -643,7 +647,7 @@ class HTMLContentHandler (ContentHandler):
             return True
 
         def new_menuitem(label, action, *params):
-            item=gtk.MenuItem(label)
+            item=Gtk.MenuItem(label)
             if action is not None:
                 item.connect('activate', action, *params)
             item.show()
@@ -684,20 +688,20 @@ class HTMLContentHandler (ContentHandler):
         return menu
 
     def button_press_cb(self, textview, event):
-        if not (event.button == 3 or (event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS)):
+        if not (event.button == 3 or (event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS)):
             return False
 
-        textwin=textview.get_window(gtk.TEXT_WINDOW_TEXT)
-        if event.window != textwin:
+        textwin=textview.get_window(Gtk.TextWindowType.TEXT)
+        if event.get_window() != textwin:
             return False
-        (x, y) = textview.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
+        (x, y) = textview.window_to_buffer_coords(Gtk.TextWindowType.TEXT,
                                                   int(event.x),
                                                   int(event.y))
         it=textview.get_iter_at_location(x, y)
         if it is None:
             print "Error in get_iter_at_location"
             return False
-        ctx=self.editor.get_current_context(it)
+        ctx=self.editor.get_current_context(it.iter)
         if not ctx:
             return False
 
@@ -706,7 +710,7 @@ class HTMLContentHandler (ContentHandler):
             if hasattr(ctx[-1], '_placeholder'):
                 # An annotation placeholder is here. Display popup menu.
                 menu=self.contextual_popup(ctx)
-                menu.popup(None, None, None, 0, event.time)
+                menu.popup_at_pointer(None)
             return True
         else:
             # Double click with left button
@@ -728,7 +732,7 @@ class HTMLContentHandler (ContentHandler):
 
     def get_view (self, compact=False):
         """Generate a view widget for editing HTML."""
-        vbox=gtk.VBox()
+        vbox=Gtk.VBox()
 
         self.editor=HTMLEditor()
         self.editor.custom_url_loader=self.custom_url_loader
@@ -739,27 +743,25 @@ class HTMLContentHandler (ContentHandler):
             self.controller.log(_("HTML editor: cannot parse content (%s)") % unicode(e))
 
         self.editor.connect('drag-data-received', self.editor_drag_received)
-        self.editor.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                  gtk.DEST_DEFAULT_HIGHLIGHT |
-                                  gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['annotation']
-                                  + config.data.drag_type['annotation-type']
-                                  + config.data.drag_type['timestamp'],
-                                  gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_ASK )
+        self.editor.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                  Gtk.DestDefaults.HIGHLIGHT |
+                                  Gtk.DestDefaults.ALL,
+                                  config.data.get_target_types('annotation', 'annotation-type', 'timestamp'),
+                                  Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.ASK )
         self.editor.connect('button-press-event', self.button_press_cb)
 
-        self.view = gtk.VBox()
+        self.view = Gtk.VBox()
 
         def sel_copy(i):
-            self.editor.get_buffer().copy_clipboard(gtk.clipboard_get())
+            self.editor.get_buffer().copy_clipboard(Gtk.clipboard_get())
             return True
 
         def sel_cut(i):
-            self.editor.get_buffer().cut_clipboard(gtk.clipboard_get())
+            self.editor.get_buffer().cut_clipboard(Gtk.clipboard_get())
             return True
 
         def sel_paste(i):
-            self.editor.get_buffer().paste_clipboard(gtk.clipboard_get())
+            self.editor.get_buffer().paste_clipboard(Gtk.clipboard_get())
             return True
 
         def refresh(i):
@@ -767,33 +769,33 @@ class HTMLContentHandler (ContentHandler):
             return True
 
         def display_header_menu(i):
-            m=gtk.Menu()
+            m=Gtk.Menu()
             for h in (1, 2, 3):
-                i=gtk.MenuItem(_("Heading %d") % h)
+                i=Gtk.MenuItem(_("Heading %d") % h)
                 i.connect('activate', lambda w, level: self.editor.apply_html_tag('h%d' % level), h)
                 m.append(i)
             m.show_all()
-            m.popup(None, i, None, 1, gtk.get_current_event_time())
+            m.popup(None, i, None, 1, Gtk.get_current_event_time())
             return True
 
-        tb=gtk.Toolbar()
+        tb=Gtk.Toolbar()
         vbox.toolbar=tb
-        tb.set_style(gtk.TOOLBAR_ICONS)
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
         for (icon, tooltip, action) in (
-            (gtk.STOCK_BOLD, _("Bold"), lambda i: self.editor.apply_html_tag('b')),
-            (gtk.STOCK_ITALIC, _("Italic"), lambda i: self.editor.apply_html_tag('i')),
+            (Gtk.STOCK_BOLD, _("Bold"), lambda i: self.editor.apply_html_tag('b')),
+            (Gtk.STOCK_ITALIC, _("Italic"), lambda i: self.editor.apply_html_tag('i')),
             ("title_icon.png", _("Header"), display_header_menu),
             (None, None, None),
-            (gtk.STOCK_COPY, _("Copy"), sel_copy),
-            (gtk.STOCK_CUT, _("Cut"), sel_cut),
-            (gtk.STOCK_PASTE, _("Paste"), sel_paste),
+            (Gtk.STOCK_COPY, _("Copy"), sel_copy),
+            (Gtk.STOCK_CUT, _("Cut"), sel_cut),
+            (Gtk.STOCK_PASTE, _("Paste"), sel_paste),
             (None, None, None),
-            (gtk.STOCK_REFRESH, _("Refresh"), refresh),
+            (Gtk.STOCK_REFRESH, _("Refresh"), refresh),
             ):
-            if not config.data.preferences['expert-mode'] and icon == gtk.STOCK_REFRESH:
+            if not config.data.preferences['expert-mode'] and icon == Gtk.STOCK_REFRESH:
                 continue
             if not icon:
-                b=gtk.SeparatorToolItem()
+                b=Gtk.SeparatorToolItem()
             else:
                 b=get_pixmap_toolbutton(icon, action)
                 b.set_tooltip_text(tooltip)
@@ -801,15 +803,15 @@ class HTMLContentHandler (ContentHandler):
             b.show()
 
         if self.editor.can_undo():
-            b=gtk.ToolButton(gtk.STOCK_UNDO)
+            b=Gtk.ToolButton(Gtk.STOCK_UNDO)
             b.connect('clicked', lambda i: self.editor.undo())
             b.set_tooltip_text(_("Undo"))
             tb.insert(b, -1)
             b.show()
 
-        self.view.pack_start(tb, expand=False)
-        sw=gtk.ScrolledWindow()
-        sw.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.view.pack_start(tb, False, True, 0)
+        sw=Gtk.ScrolledWindow()
+        sw.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add(self.editor)
 
         context_data=ContextDisplay()
@@ -818,11 +820,11 @@ class HTMLContentHandler (ContentHandler):
                 context_data.set_context(self.editor.get_current_context(it))
             return True
         self.editor.get_buffer().connect('mark-set', cursor_moved)
-        sw2=gtk.ScrolledWindow()
-        sw2.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw2=Gtk.ScrolledWindow()
+        sw2.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw2.add(context_data)
 
-        p=gtk.HPaned()
+        p=Gtk.HPaned()
         p.add1(sw2)
         p.add2(sw)
         # Hide by default

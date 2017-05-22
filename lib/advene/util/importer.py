@@ -49,6 +49,9 @@ The general idea is:
 im.statistics hold a dictionary containing the creation statistics.
 """
 
+import logging
+logger = logging.getLogger(__name__)
+
 import sys
 import time
 import re
@@ -59,7 +62,8 @@ import urllib
 
 from gettext import gettext as _
 
-import gobject
+from gi.repository import GObject
+
 import shutil
 import subprocess
 import signal
@@ -108,7 +112,7 @@ def get_valid_importers(fname):
             invalid.append(i)
     # reverse sort along matching scores
     valid.sort(lambda a, b: cmp(b[1], a[1]))
-    return [ i for (i, v) in valid ], invalid
+    return [ i for (i, r) in valid ], invalid
 
 def get_importer(fname, **kw):
     """Return the first/best valid importer.
@@ -185,11 +189,26 @@ class GenericImporter(object):
             return True
 
     def set_options(self, options):
-        for k in (n
-                  for n in dir(options)
-                  if not n.startswith('_')):
-            if hasattr(self, k):
+       """Set importer options (attributes) according to the given options.
+
+       options may be either an option object from OptionParser (where
+       options are attributes of the object) or a dictionary.
+       """
+       if isinstance(options, dict):
+          for k, v in options.iteritems():
+             if hasattr(self, k):
+                logger.info("Set option %s %s", k, v)
+                setattr(self, k, v)
+             else:
+                logger.info("Unknown option %s", k)
+       else:
+          for k in (n
+                    for n in dir(options)
+                    if not n.startswith('_')):
+             if hasattr(self, k):
                 setattr(self, k, getattr(options, k))
+             else:
+                logger.info("Unknown option %s", k)
 
     def process_options(self, source):
         (options, args) = self.optionparser.parse_args(args=source)
@@ -506,7 +525,7 @@ class ExternalAppImporter(GenericImporter):
             msg = unicode(e.args)
             raise Exception(_("Could not run %(appname)s: %(msg)s") % locals())
 
-        self.progress(.01, _("Processing %s") % gobject.filename_display_name(filename))
+        self.progress(.01, _("Processing %s") % GObject.filename_display_name(filename))
 
         def execute_process():
             self.convert(self.iterator())
@@ -516,7 +535,7 @@ class ExternalAppImporter(GenericImporter):
             end_callback()
             return True
 
-        # Note: the "proper" way would be to use gobject.io_add_watch,
+        # Note: the "proper" way would be to use Gobject.io_add_watch,
         # but last time I tried, this had cross-platform issues. The
         # threading approach seems to work across platforms, so "if it
         # ain't broke, don't fix it".

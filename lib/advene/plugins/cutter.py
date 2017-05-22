@@ -24,8 +24,8 @@ from gettext import gettext as _
 import os
 import urllib
 
-import gobject
-import gst
+from gi.repository import GObject
+from gi.repository import Gst
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
@@ -71,8 +71,8 @@ class CutterImporter(GenericImporter):
 
     def on_bus_message(self, bus, message):
         def finalize():
-            pos = self.pipeline.query_position(gst.FORMAT_TIME)[0] / gst.MSECOND
-            gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
+            pos = self.pipeline.query_position(Gst.Format.TIME)[0] / Gst.MSECOND
+            GObject.idle_add(lambda: self.pipeline.set_state(Gst.State.NULL) and False)
             self.convert( {
                     'begin': begin,
                     'end': end,
@@ -82,27 +82,27 @@ class CutterImporter(GenericImporter):
             self.end_callback()
             return True
 
-        if message.type == gst.MESSAGE_EOS:
+        s = message.get_structure()
+        if message.type == Gst.MessageType.EOS:
             finalize()
-        ##elif message.type == gst.MESSAGE_STATE_CHANGED:
+        ##elif message.type == Gst.MessageType.STATE_CHANGED:
         ##    old, new, pending = message.parse_state_changed()
-        ##    if old == gst.STATE_READY and new == gst.STATE_PAUSED:
+        ##    if old == Gst.State.READY and new == Gst.State.PAUSED:
         ##        # There has been a problem. Cancel.
         ##        self.progress(1.0, _("Problem when running detection"))
         ##        print "Undetermined problem when running silence detection."
         ##        self.end_callback()
-        ##        gobject.idle_add(lambda: self.pipeline.set_state(gst.STATE_NULL) and False)
-        ##    #if new == gst.STATE_NULL:
+        ##        GObject.idle_add(lambda: self.pipeline.set_state(Gst.State.NULL) and False)
+        ##    #if new == Gst.State.NULL:
         ##    #    self.end_callback()
-        elif message.structure:
-            s=message.structure
+        elif s:
             #print "MSG " + bus.get_name() + ": " + s.to_string()
             if s.get_name() == 'progress' and self.progress is not None:
                 if not self.progress(s['percent-double'] / 100, _("Detected %(count)d segments until %(time)s") % { 'count': len(self.buffer),
                                                                                                                     'time': helper.format_time(s['current'] * 1000) }):
                     finalize()
             elif s.get_name() == 'cutter':
-                t = s['timestamp'] / gst.MSECOND
+                t = s['timestamp'] / Gst.MSECOND
                 if s['above']:
                     self.last_above = t
                 else:
@@ -120,7 +120,7 @@ class CutterImporter(GenericImporter):
         at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Sound segmentation with a threshold of %(threshold)d dB - channel: %(channel)s") % self.__dict__)
 
         # Build pipeline
-        self.pipeline = gst.parse_launch('uridecodebin name=decoder ! audioconvert ! audiopanorama method=1 panorama=%d ! audioconvert ! cutter threshold-dB=%s ! progressreport silent=true update-freq=1 name=report ! fakesink' % (self.channel_mapping[self.channel], str(self.threshold)))
+        self.pipeline = Gst.parse_launch('uridecodebin name=decoder ! audioconvert ! audiopanorama method=1 panorama=%d ! audioconvert ! cutter threshold-dB=%s ! progressreport silent=true update-freq=1 name=report ! fakesink' % (self.channel_mapping[self.channel], str(self.threshold)))
         self.decoder = self.pipeline.get_by_name('decoder')
         self.report = self.pipeline.get_by_name('report')
         bus = self.pipeline.get_bus()
@@ -136,5 +136,5 @@ class CutterImporter(GenericImporter):
         else:
             self.decoder.props.uri = 'file://' + os.path.abspath(unicode(filename))
         self.progress(.1, _("Starting silence detection"))
-        self.pipeline.set_state(gst.STATE_PLAYING)
+        self.pipeline.set_state(Gst.State.PLAYING)
         return self.package

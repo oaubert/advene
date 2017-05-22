@@ -16,7 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 
 from gettext import gettext as _
 
@@ -41,7 +42,7 @@ class ShotValidation(AdhocView):
         self.controller=controller
         self._annotationtype=None
 
-        self.current_index = gtk.Adjustment(10, 1, 10, 1, 10)
+        self.current_index = Gtk.Adjustment.new(10, 1, 10, 1, 10, 5)
         self.options={}
 
         # Load options
@@ -120,11 +121,11 @@ class ShotValidation(AdhocView):
         return True
 
     def handle_keypress(self, widget, event):
-        if event.keyval == gtk.keysyms.Page_Down:
+        if event.keyval == Gdk.KEY_Page_Down:
             # Next annotation
             self.set_index(self.index + 1)
             return True
-        elif event.keyval == gtk.keysyms.Page_Up:
+        elif event.keyval == Gdk.KEY_Page_Up:
             # Previous annotation
             self.set_index(self.index - 1)
             return True
@@ -146,8 +147,8 @@ class ShotValidation(AdhocView):
         annotation = self.annotations[i]
         batch=object()
 
-        event = gtk.get_current_event()
-        if event.state & gtk.gdk.CONTROL_MASK:
+        event = Gtk.get_current_event()
+        if event.get_state().state & Gdk.ModifierType.CONTROL_MASK:
             # Control-key is held. Split the annotation.
             if new > annotation.fragment.begin and new < annotation.fragment.end:
                 self.controller.split_annotation(annotation, new)
@@ -185,12 +186,12 @@ class ShotValidation(AdhocView):
 
     def build_widget(self):
         if not self.annotations:
-            return gtk.Label((_("No annotations to adjust")))
+            return Gtk.Label(label=(_("No annotations to adjust")))
 
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
 
-        self.title_widget = gtk.Label()
-        vbox.pack_start(self.title_widget)
+        self.title_widget = Gtk.Label()
+        vbox.pack_start(self.title_widget, True, True, 0)
 
         self.selector = FrameSelector(self.controller, self.annotations[0].fragment.begin, label=_("Click on the frame just after the cut to adjust the cut time.\nControl-click on a frame to indicate a missing cut."))
         self.selector.callback = self.validate_and_next
@@ -212,31 +213,31 @@ class ShotValidation(AdhocView):
         vbox.add(self.selector.widget)
 
         # Button bar
-        hb=gtk.HBox()
+        hb=Gtk.HBox()
 
-        self.prev_button = gtk.Button(_("< Previous cut"))
+        self.prev_button = Gtk.Button(_("< Previous cut"))
         self.prev_button.set_tooltip_text(_("Display previous cut"))
         self.prev_button.connect("clicked", lambda b: self.set_index(self.index - 1))
         hb.add(self.prev_button)
 
-        l = gtk.Label("#")
-        hb.pack_start(l, expand=False)
+        l = Gtk.Label(label="#")
+        hb.pack_start(l, False, True, 0)
 
-        self.next_button = gtk.Button(_("Next cut >"))
+        self.next_button = Gtk.Button(_("Next cut >"))
         self.next_button.set_tooltip_text(_("Display next cut"))
         self.next_button.connect("clicked", lambda b: self.set_index(self.index + 1))
 
-        s=gtk.SpinButton(self.current_index, 1, 0)
+        s=Gtk.SpinButton.new(self.current_index, 1, 0)
         s.set_increments(1, 10)
-        s.set_update_policy(gtk.UPDATE_IF_VALID)
+        #s.set_update_policy(Gtk.UPDATE_IF_VALID)
         s.set_numeric(True)
 
         # For an unknown reason, the default behaviour of updating
         # SpinButton through scroll does not work. Emulate it.
         def handle_spin_scroll(widget, event):
-            if event.direction == gtk.gdk.SCROLL_UP:
+            if event.direction == Gdk.ScrollDirection.UP:
                 offset=+1
-            elif event.direction == gtk.gdk.SCROLL_DOWN:
+            elif event.direction == Gdk.ScrollDirection.DOWN:
                 offset=-1
             self.set_index(self.index + offset)
             return True
@@ -245,40 +246,40 @@ class ShotValidation(AdhocView):
 
         hb.add(self.next_button)
 
-        vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hb, False, True, 0)
 
-        hb = gtk.HButtonBox()
-        b=gtk.Button(_("Current time"))
+        hb = Gtk.HButtonBox()
+        b=Gtk.Button(_("Current time"))
         b.set_tooltip_text(_("Go to annotation containing current player time."))
         b.connect("clicked", self.goto_current)
         hb.add(b)
 
-        b=gtk.Button(_("Refresh snapshots"))
+        b=Gtk.Button(_("Refresh snapshots"))
         b.set_tooltip_text(_("Refresh missing snapshots"))
         b.connect("clicked", lambda b: self.selector.refresh_snapshots())
         hb.add(b)
 
-        b=gtk.Button(_("Undo"))
+        b=Gtk.Button(_("Undo"))
         b.set_tooltip_text(_("Undo last modification"))
         b.connect("clicked", self.undo)
         hb.add(b)
         b.set_sensitive(False)
         self.undo_button = b
 
-        b=gtk.Button(_("Merge with previous"))
+        b=Gtk.Button(_("Merge with previous"))
         b.set_tooltip_text(_("Merge with previous annotation, i.e. remove this bound."))
         b.connect("clicked", self.merge)
         hb.add(b)
 
-        b=gtk.Button(stock=gtk.STOCK_CLOSE)
+        b=Gtk.Button(stock=Gtk.STOCK_CLOSE)
         b.set_tooltip_text(_("Close view."))
         b.connect("clicked", self.close)
         hb.add(b)
 
-        vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hb, False, True, 0)
 
-        self.statusbar = gtk.Statusbar()
-        vbox.pack_start(self.statusbar, expand=False)
+        self.statusbar = Gtk.Statusbar()
+        vbox.pack_start(self.statusbar, False, True, 0)
 
         self.set_index(0)
         vbox.show_all()

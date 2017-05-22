@@ -23,6 +23,9 @@ FIXME: loop option
 FIXME: replace button dropzone by EventBox 1pixel wide, with visual feedback
 """
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
@@ -35,7 +38,8 @@ import advene.gui.popup
 
 from gettext import gettext as _
 
-import gtk
+from gi.repository import Gdk
+from gi.repository import Gtk
 import re
 
 name="Montage view plugin"
@@ -66,13 +70,14 @@ class Montage(AdhocView):
 
         # How many units (ms) does a pixel represent ?
         # How many units does a pixel represent ?
-        # self.scale.value = unit by pixel
+        # self.scale.get_value() = unit by pixel
         # Unit = ms
-        self.scale = gtk.Adjustment (value=(self.controller.package.cached_duration or 60*60*1000) / gtk.gdk.get_default_root_window().get_size()[0],
-                                     lower=5,
-                                     upper=36000,
-                                     step_incr=5,
-                                     page_incr=1000)
+        self.scale = Gtk.Adjustment.new((self.controller.package.cached_duration or 60*60*1000) / Gdk.get_default_root_window().get_width(),
+                                        5,
+                                        36000,
+                                        5,
+                                        1000,
+                                        100)
         self.scale.connect('value-changed', scale_event)
 
         opt, arg = self.load_parameters(parameters)
@@ -116,13 +121,13 @@ class Montage(AdhocView):
 
     def set_master_view(self, master):
         def master_value_changed(sc):
-            self.scale.value=sc.value
+            self.scale.set_value(sc.get_value())
             return False
         def master_changed(sc):
-            self.scale.set_all(self.scale.value,
-                               sc.lower, sc.upper,
-                               sc.step_increment, sc.page_increment,
-                               sc.page_size)
+            self.scale.set_all(self.scale.get_value(),
+                               sc.get_lower(), sc.get_upper(),
+                               sc.get_step_increment(), sc.get_page_increment(),
+                               sc.get_page_size())
             return False
 
         self.safe_connect(master.scale, 'value-changed', master_value_changed)
@@ -153,7 +158,7 @@ class Montage(AdhocView):
             if targetType == config.data.target_type['uri-list']:
                 uri="advene:/adhoc/%d/%d" % (hash(self),
                                                   hash(widget))
-                selection.set(selection.target, 8, uri.encode('utf8'))
+                selection.set(selection.get_target(), 8, uri.encode('utf8'))
                 return True
             return False
 
@@ -165,7 +170,7 @@ class Montage(AdhocView):
         def button_press(widget, event):
             """Handle button presses on annotation widgets.
             """
-            if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
                 # Display the popup menu when clicking on annotation.
                 menu=advene.gui.popup.Menu(widget.annotation, controller=self.controller)
                 menu.add_menuitem(menu.menu, _("Remove from montage"), remove_cb, widget)
@@ -187,10 +192,10 @@ class Montage(AdhocView):
         return True
 
     def unit2pixel(self, u):
-        return long(u / self.scale.value)
+        return long(u / self.scale.get_value())
 
     def pixel2unit(self, p):
-        return long(p * self.scale.value)
+        return long(p * self.scale.get_value())
 
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
@@ -263,35 +268,36 @@ class Montage(AdhocView):
         """
         def drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
                 for ann in sources:
                     self.insert(ann, i)
                     # If the origin is from the same montage, then
                     # consider it is a move and remove the origin
                     # annotation
-                    w=context.get_source_widget()
+                    w=Gtk.drag_get_source_widget(context)
                     if w in self.contents:
                         self.contents.remove(w)
                 self.refresh()
                 return True
             else:
-                print "Unknown target type for drag: %d" % targetType
+                logger.warn("Unknown target type for drag: %d" % targetType)
             return False
 
-        b = gtk.Button()
+        b = Gtk.Button()
         b.set_size_request(4, self.button_height)
         b.index=i
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'], gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
+        b.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('annotation'),
+                        Gdk.DragAction.COPY | Gdk.DragAction.LINK)
         b.connect('drag-data-received', drag_received)
 
-        self.mainbox.pack_start(b, expand=False, fill=False)
+        self.mainbox.pack_start(b, False, False, 0)
         return b
 
     def append_repr(self, w):
-        self.mainbox.pack_start(w, expand=False, fill=False)
+        self.mainbox.pack_start(w, False, False, 0)
         w.update_widget()
         return w
 
@@ -351,27 +357,27 @@ class Montage(AdhocView):
         return True
 
     def build_widget(self):
-        self.zoom_adjustment=gtk.Adjustment(value=1.0, lower=0.01, upper=2.0)
+        self.zoom_adjustment=Gtk.Adjustment.new(value=1.0, lower=0.01, upper=2.0)
 
         def zoom_adj_change(adj):
             # Update the value of self.scale accordingly
             # Get the window size
-            if not self.mainbox.window:
+            if not self.mainbox.get_window():
                 # The widget is not yet realized
                 return True
-            display_size=self.mainbox.parent.window.get_size()[0]
+            display_size=self.mainbox.get_parent().get_window().get_width()
             # Dropzones are approximately 10 pixels wide, and should
             # be taken into account, but it enforces handling the corner cases
-            self.scale.value = 1.0 * self.duration / (display_size / adj.value )
+            self.scale.set_value(1.0 * self.duration / (display_size / adj.get_value() ))
 
             # Update the zoom combobox value
-            self.zoom_combobox.child.set_text('%d%%' % long(100 * adj.value))
+            self.zoom_combobox.get_child().set_text('%d%%' % long(100 * adj.get_value()))
             return True
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['uri-list']:
                 m=re.match('advene:/adhoc/%d/(.+)' % hash(self),
-                           selection.data)
+                           selection.get_data())
                 if m:
                     h=long(m.group(1))
                     l=[ w for w in self.contents if hash(w) == h ]
@@ -381,65 +387,66 @@ class Montage(AdhocView):
                         self.refresh()
                 return True
             else:
-                print "Unknown target type for drop: %d" % targetType
+                logger.warn("Unknown target type for drop: %d" % targetType)
             return False
 
         self.zoom_adjustment.connect('value-changed', zoom_adj_change)
 
-        v=gtk.VBox()
+        v=Gtk.VBox()
 
         # Toolbar
-        tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
+        tb=Gtk.Toolbar()
+        tb.set_style(Gtk.ToolbarStyle.ICONS)
 
-        b=get_small_stock_button(gtk.STOCK_DELETE)
+        b=get_small_stock_button(Gtk.STOCK_DELETE)
         b.set_tooltip_text(_("Drop an annotation here to remove it from the list"))
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['uri-list'], gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
+        b.drag_dest_set(Gtk.DestDefaults.MOTION |
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('uri-list'),
+                        Gdk.DragAction.COPY | Gdk.DragAction.LINK)
         b.connect('drag-data-received', remove_drag_received)
-        ti=gtk.ToolItem()
+        ti=Gtk.ToolItem()
         ti.add(b)
         tb.insert(ti, -1)
 
-        b=gtk.ToolButton(gtk.STOCK_MEDIA_PLAY)
+        b=Gtk.ToolButton(Gtk.STOCK_MEDIA_PLAY)
         b.set_tooltip_text(_("Play the montage"))
         b.connect('clicked', self.play)
         tb.insert(b, -1)
 
-        b = gtk.ToolButton(gtk.STOCK_SAVE)
+        b = Gtk.ToolButton(Gtk.STOCK_SAVE)
         b.set_tooltip_text(_("Save the view in the package"))
         b.connect('clicked', self.save_view)
         tb.insert(b, -1)
 
         def zoom_entry(entry):
-            f=unicode(entry.get_text())
+            f=entry.get_text().decode('utf-8')
 
             i=re.findall(r'\d+', f)
             if i:
                 f=int(i[0])/100.0
             else:
                 return True
-            self.zoom_adjustment.value=f
+            self.zoom_adjustment.set_value(f)
             return True
 
         def zoom_change(combo):
             v=combo.get_current_element()
             if isinstance(v, float):
-                self.zoom_adjustment.value=v
+                self.zoom_adjustment.set_value(v)
             return True
 
         def zoom(i, factor):
-            self.zoom_adjustment.value=self.zoom_adjustment.value * factor
+            self.zoom_adjustment.set_value(self.zoom_adjustment.get_value() * factor)
             return True
 
-        b=gtk.ToolButton(gtk.STOCK_ZOOM_OUT)
+        b=Gtk.ToolButton(Gtk.STOCK_ZOOM_OUT)
         b.connect('clicked', zoom, 1.3)
         b.set_tooltip_text(_("Zoom out"))
         tb.insert(b, -1)
 
-        b=gtk.ToolButton(gtk.STOCK_ZOOM_IN)
+        b=Gtk.ToolButton(Gtk.STOCK_ZOOM_IN)
         b.connect('clicked', zoom, .7)
         b.set_tooltip_text(_("Zoom in"))
         tb.insert(b, -1)
@@ -452,15 +459,15 @@ class Montage(AdhocView):
                 ],
                                                        entry=True,
                                                        callback=zoom_change)
-        self.zoom_combobox.child.connect('activate', zoom_entry)
-        self.zoom_combobox.child.set_width_chars(4)
+        self.zoom_combobox.get_child().connect('activate', zoom_entry)
+        self.zoom_combobox.get_child().set_width_chars(4)
 
-        ti=gtk.ToolItem()
+        ti=Gtk.ToolItem()
         ti.add(self.zoom_combobox)
         ti.set_tooltip_text(_("Set zoom level"))
         tb.insert(ti, -1)
 
-        b=gtk.ToolButton(gtk.STOCK_ZOOM_100)
+        b=Gtk.ToolButton(Gtk.STOCK_ZOOM_100)
         b.connect('clicked', lambda i: self.zoom_adjustment.set_value(1.0))
         b.set_tooltip_text(_("Set 100% zoom"))
         tb.insert(b, -1)
@@ -478,22 +485,22 @@ class Montage(AdhocView):
             for a in set( [ w.annotation for w in self.contents ] ):
                 self.controller.notify(event, annotation=a)
             return True
-        i=gtk.Image()
+        i=Gtk.Image()
         i.set_from_file(config.data.advenefile( ( 'pixmaps', 'highlight.png') ))
-        b=gtk.ToggleToolButton()
+        b=Gtk.ToggleToolButton()
         b.set_tooltip_text(_("Highlight annotations"))
         b.set_icon_widget(i)
         b.highlight=True
         b.connect('clicked', toggle_highlight)
         tb.insert(b, -1)
 
-        v.pack_start(tb, expand=False)
+        v.pack_start(tb, False, True, 0)
 
-        self.mainbox=gtk.HBox()
+        self.mainbox=Gtk.HBox()
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
                 for ann in sources:
                     if ann is None:
                         self.log("Problem when getting annotation from DND")
@@ -502,50 +509,49 @@ class Montage(AdhocView):
                     # If the origin is from the same montage, then
                     # consider it is a move and remove the origin
                     # annotation
-                    w=context.get_source_widget()
+                    w=Gtk.drag_get_source_widget(context)
                     if w in self.contents:
                         self.contents.remove(w)
                 self.refresh()
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                at=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+                at=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
                 for a in at.annotations:
                     self.insert(a)
                 self.refresh()
                 return True
             else:
-                print "Unknown target type for drag: %d" % targetType
+                logger.warn("Unknown target type for drag: %d" % targetType)
             return False
-        v.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                   gtk.DEST_DEFAULT_HIGHLIGHT |
-                                   gtk.DEST_DEFAULT_ALL,
-                                   config.data.drag_type['annotation']
-                                   + config.data.drag_type['annotation-type'],
-                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+        v.drag_dest_set(Gtk.DestDefaults.MOTION |
+                                   Gtk.DestDefaults.HIGHLIGHT |
+                                   Gtk.DestDefaults.ALL,
+                                   config.data.get_target_types('annotation', 'annotation-type'),
+                                   Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
         v.connect('drag-data-received', mainbox_drag_received)
 
-        sw=gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
+        sw=Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
         sw.add_with_viewport(self.mainbox)
         self.scrollwindow=sw
 
-        v.pack_start(sw, expand=False)
+        v.pack_start(sw, False, True, 0)
 
         a=AnnotationDisplay(controller=self.controller)
-        f=gtk.Frame(_("Inspector"))
+        f=Gtk.Frame.new(_("Inspector"))
         f.add(a.widget)
         v.add(f)
         self.controller.gui.register_view (a)
         a.set_master_view(self)
         a.widget.show_all()
 
-        v.pack_start(gtk.VBox(), expand=True)
+        v.pack_start(Gtk.VBox(), True, True, 0)
 
-        hb=gtk.HBox()
-        l=gtk.Label(_("Total duration:"))
-        hb.pack_start(l, expand=False)
-        self.duration_label=gtk.Label('??')
-        hb.pack_start(self.duration_label, expand=False)
-        v.pack_start(hb, expand=False)
+        hb=Gtk.HBox()
+        l=Gtk.Label(label=_("Total duration:"))
+        hb.pack_start(l, False, True, 0)
+        self.duration_label=Gtk.Label(label='??')
+        hb.pack_start(self.duration_label, False, True, 0)
+        v.pack_start(hb, False, True, 0)
 
         return v

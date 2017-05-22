@@ -22,35 +22,40 @@
 This widget allows to present event history in a timeline view.
 """
 
-import urllib
-import gtk
 import time
-from gobject import timeout_add, source_remove
+import urllib
+
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import GObject
+from gi.repository import Gtk
+
 from gettext import gettext as _
+
 from advene.model.fragment import MillisecondFragment
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
-from math import floor
 from advene.gui.views import AdhocView
-#import advene.util.helper as helper
+import advene.util.helper as helper
 from advene.rules.elements import ECACatalog
 import advene.core.config as config
-from advene.gui.widget import TimestampRepresentation
 from advene.gui.util import dialog, get_small_stock_button, gdk2intrgba
 from advene.model.util.defaultdict import DefaultDict
 
 try:
-    import goocanvas
-    from goocanvas import Group
+    import gi
+    gi.require_version('GooCanvas', '2.0')
+    from gi.repository import GooCanvas
+    from gi.repository.GooCanvas import CanvasGroup
 except ImportError:
     # Goocanvas is not available. Define some globals in order not to
     # fail the module loading, and use them as a guard in register()
-    goocanvas=None
-    Group=object
+    GooCanvas=None
+    CanvasGroup=object
 
 def register(controller):
-    if goocanvas is None:
+    if GooCanvas is None:
         controller.log("Cannot register TraceTimeline: the goocanvas python module does not seem to be available.")
     else:
         controller.register_viewclass(TraceTimeline)
@@ -145,7 +150,7 @@ class TraceTimeline(AdhocView):
         self.context_t_max = time.time()
         for i, act in enumerate(self.tracer.tracemodel['actions']):
             self.cols[act] = (None, None)
-            c=gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][act]))
+            c=gdk2intrgba(Gdk.color_parse(self.tracer.colormodel['actions'][act]))
             self.context_cols[act]=(i, c, None)
         self.col_width = 80
         self.colspacing = 5
@@ -183,7 +188,7 @@ class TraceTimeline(AdhocView):
         # save zoom values
         h = self.canvas.get_allocation().height
         va=self.sw.get_vadjustment()
-        vc = (va.value + h/2.0) * self.timefactor
+        vc = (va.get_value() + h/2.0) * self.timefactor
         self.display_values[self.active_trace.name] = (self.canvasY, self.timefactor, self.obj_l, vc)
         self.active_trace = trace
         self.start_time=self.active_trace.start
@@ -198,12 +203,12 @@ class TraceTimeline(AdhocView):
             self.refresh()
 
     def build_widget(self):
-        mainbox = gtk.VBox()
+        mainbox = Gtk.VBox()
         # trace selector
         def trace_changed(w):
             self.select_trace(w.get_active())
             return True
-        self.selector_box = gtk.HBox()
+        self.selector_box = Gtk.HBox()
         self.trace_selector = dialog.list_selector_widget(
             members= [( n, _("%(name)s (%(index)d)") % {
                         'name': t.name,
@@ -212,8 +217,8 @@ class TraceTimeline(AdhocView):
             preselect=0,
             callback=trace_changed)
         #self.trace_selector.set_size_request(70,-1)
-        self.selector_box.pack_start(self.trace_selector, expand=True)
-        self.remove_trace_button = get_small_stock_button(gtk.STOCK_CANCEL)
+        self.selector_box.pack_start(self.trace_selector, True, True, 0)
+        self.remove_trace_button = get_small_stock_button(Gtk.STOCK_CANCEL)
         def remove_trace(button, event):
             """Remove a trace from the selector list
             """
@@ -227,12 +232,12 @@ class TraceTimeline(AdhocView):
                 #self.select_trace(tr-1)
 
         self.remove_trace_button.connect('button-press-event', remove_trace)
-        self.selector_box.pack_start(self.remove_trace_button, expand=False)
-        mainbox.pack_start(self.selector_box, expand=False)
+        self.selector_box.pack_start(self.remove_trace_button, False, True, 0)
+        mainbox.pack_start(self.selector_box, False, True, 0)
 
         quicksearch_options = [False, ['oname','oid','ocontent']] # exact search, where to search
-        self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
-        self.quicksearch_entry=gtk.Entry()
+        self.quicksearch_button=get_small_stock_button(Gtk.STOCK_FIND)
+        self.quicksearch_entry=Gtk.Entry()
         self.quicksearch_entry.set_text(_('Search'))
         def do_search(button, options):
             """Execute a search query in the active trace.
@@ -242,7 +247,7 @@ class TraceTimeline(AdhocView):
             @type options: list
             @param options: a list containing the different options for the search query (see tracebuilder for more infos)
             """
-            tr=self.tracer.search(self.active_trace, unicode(self.quicksearch_entry.get_text(), 'utf-8'), options[0], options[1])
+            tr=self.tracer.search(self.active_trace, self.quicksearch_entry.get_text().decode('utf-8'), options[0], options[1])
             mod= self.trace_selector.get_model()
             if len(self.tracer.traces)>len(mod):
                 n = len(self.tracer.traces)-1
@@ -259,41 +264,41 @@ class TraceTimeline(AdhocView):
             """
             if w.is_focus():
                 return False
-            w.select_region(0, len(w.get_text()))
+            w.select_region(0, len(w.get_text().decode('utf-8')))
             w.grab_focus()
             return True
         def is_typing(w, event):
             """Execute search query if <Enter> is pressed in search entry
             """
             #if return is hit, activate quicksearch_button
-            if event.keyval == gtk.keysyms.Return:
+            if event.keyval == Gdk.KEY_Return:
                 self.quicksearch_button.activate()
         self.quicksearch_entry.connect('button-press-event', is_focus)
         self.quicksearch_entry.connect('key-press-event', is_typing)
-        self.search_box = gtk.HBox()
-        self.search_box.pack_start(self.quicksearch_entry, expand=False)
-        self.search_box.pack_start(self.quicksearch_button, expand=False)
-        #mainbox.pack_start(self.search_box, expand=False)
+        self.search_box = Gtk.HBox()
+        self.search_box.pack_start(self.quicksearch_entry, False, True, 0)
+        self.search_box.pack_start(self.quicksearch_button, False, True, 0)
+        #mainbox.pack_start(self.search_box, False, True, 0)
 
-        toolbox = gtk.Toolbar()
-        toolbox.set_orientation(gtk.ORIENTATION_HORIZONTAL)
-        toolbox.set_style(gtk.TOOLBAR_ICONS)
-        #toolbox.set_icon_size(gtk.ICON_SIZE_MENU)
-        #mainbox.pack_start(toolbox, expand=False)
+        toolbox = Gtk.Toolbar()
+        toolbox.set_orientation(Gtk.Orientation.HORIZONTAL)
+        toolbox.set_style(Gtk.ToolbarStyle.ICONS)
+        #toolbox.set_icon_size(Gtk.IconSize.MENU)
+        #mainbox.pack_start(toolbox, False, True, 0)
 
 
-        htb = gtk.HBox()
-        htb.pack_start(toolbox, expand=True)
-        htb.pack_start(self.search_box, expand=False)
+        htb = Gtk.HBox()
+        htb.pack_start(toolbox, True, True, 0)
+        htb.pack_start(self.search_box, False, True, 0)
 
-        mainbox.pack_start(htb, expand=False)
+        mainbox.pack_start(htb, False, True, 0)
 
         c = len(self.cols)
         self.context_canvasX = c*(self.context_col_width+self.context_colspacing) + 5 # 1+4 for select square
 
-        bx = gtk.HPaned()
-        hbt = gtk.HBox()
-        self.context_canvas = goocanvas.Canvas()
+        bx = Gtk.HPaned()
+        hbt = Gtk.HBox()
+        self.context_canvas = GooCanvas.Canvas()
         self.context_canvas.set_bounds (0, 0, self.context_canvasX, self.context_canvasY)
         self.context_canvas.set_size_request(self.context_canvasX, -1)
 
@@ -307,34 +312,34 @@ class TraceTimeline(AdhocView):
                 self.context_update_time()
         self.context_canvas.connect('size-allocate', context_resize)
 
-        hbt.pack_start(self.context_canvas, expand=False)
-        hbt.pack_start(gtk.VSeparator(), expand=False)
-        hbt.pack_start(bx, expand=True)
-        mainbox.pack_start(hbt, expand=True)
+        hbt.pack_start(self.context_canvas, False, True, 0)
+        hbt.pack_start(Gtk.VSeparator(), False, False, 0)
+        hbt.pack_start(bx, True, True, 0)
+        mainbox.pack_start(hbt, True, True, 0)
 
-        timeline_box=gtk.VBox()
+        timeline_box=Gtk.VBox()
         bx.pack1(timeline_box, resize=False, shrink=False)
 
-        scrolled_win = gtk.ScrolledWindow ()
+        scrolled_win = Gtk.ScrolledWindow ()
         self.sw = scrolled_win
-        self.sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
+        self.sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.ALWAYS)
         def sw_scrolled(a):
             """Move context selection frame when scrolling the timeline
             """
             self.context_update_sel_frame()
         self.sw.get_vadjustment().connect('value-changed', sw_scrolled)
-        self.head_canvas = goocanvas.Canvas()
+        self.head_canvas = GooCanvas.Canvas()
 
         self.canvasX = c*(self.col_width+self.colspacing)
         self.head_canvas.set_bounds (0,0,self.canvasX,self.head_canvasY)
         self.head_canvas.set_size_request(-1, self.head_canvasY)
-        timeline_box.pack_start(self.head_canvas, expand=False, fill=False)
+        timeline_box.pack_start(self.head_canvas, False, False, 0)
 
-        self.canvas = goocanvas.Canvas()
+        self.canvas = GooCanvas.Canvas()
         self.canvas.set_bounds (0, 0,self.canvasX, self.canvasY)
         self.canvas.set_size_request(200, 25) # important to force a minimum size (else we could have problem with radius of objects < 0)
 
-        self.doc_canvas = goocanvas.Canvas()
+        self.doc_canvas = GooCanvas.Canvas()
         self.doc_canvas.set_bounds(0,0, self.doc_canvas_X, self.doc_canvas_Y)
         self.doc_canvas.set_size_request(-1, self.doc_canvas_Y)
         self.docgroup = DocGroup(controller=self.controller, canvas=self.doc_canvas, name="Nom du film", x = 15, y=10, w=self.doc_canvas_X-30, h=self.doc_canvas_Y-25, fontsize=8, color_c=0x00000050)
@@ -398,7 +403,7 @@ class TraceTimeline(AdhocView):
         def show_tooltip(w, x, y, km, tooltip):
             """Show a tooltip according to the item under the cursor
             """
-            under_cursor = self.canvas.get_items_at(x, y+w.get_vadjustment().value, False)
+            under_cursor = self.canvas.get_items_at(x, y+w.get_vadjustment().get_value(), False)
             if not under_cursor:
                 return False
             for item in under_cursor:
@@ -410,36 +415,36 @@ class TraceTimeline(AdhocView):
         scrolled_win.connect("query-tooltip", show_tooltip)
 
 
-        timeline_box.pack_start(gtk.HSeparator(), expand=False, fill=False)
+        timeline_box.pack_start(Gtk.HSeparator(), False, False, 0)
         timeline_box.add(scrolled_win)
 
-        mainbox.pack_start(gtk.HSeparator(), expand=False, fill=False)
+        mainbox.pack_start(Gtk.HSeparator(), False, False, 0)
 
-        mainbox.pack_start(self.doc_canvas, expand=False, fill=True)
+        mainbox.pack_start(self.doc_canvas, False, True, 0)
 
-        btnm = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
+        btnm = Gtk.ToolButton(stock_id=Gtk.STOCK_ZOOM_OUT)
         btnm.set_tooltip_text(_('Zoom out'))
         btnm.set_label('')
         toolbox.insert(btnm, -1)
 
-        btnp = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
+        btnp = Gtk.ToolButton(stock_id=Gtk.STOCK_ZOOM_IN)
         btnp.set_tooltip_text(_('Zoom in'))
         btnp.set_label('')
         toolbox.insert(btnp, -1)
 
-        btnc = gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_100)
+        btnc = Gtk.ToolButton(stock_id=Gtk.STOCK_ZOOM_100)
         btnc.set_tooltip_text(_('Zoom 100%'))
         btnc.set_label('')
         toolbox.insert(btnc, -1)
-        self.btnl = gtk.ToolButton()
+        self.btnl = Gtk.ToolButton()
         self.btnl.set_tooltip_text(_('Toggle links lock'))
-        img = gtk.Image()
+        img = Gtk.Image()
         img.set_from_file(config.data.advenefile( ( 'pixmaps', 'unlocked.png') ))
         self.btnl.set_icon_widget(img)
         toolbox.insert(self.btnl, -1)
         self.btnl.connect('clicked', self.toggle_lock)
         #btn to change link mode
-        b = gtk.ToolButton(label='L')
+        b = Gtk.ToolButton(label='L')
         b.set_tooltip_text(_('Toggle link mode'))
         toolbox.insert(b, -1)
         b.connect('clicked', self.toggle_link_mode)
@@ -448,8 +453,8 @@ class TraceTimeline(AdhocView):
             """Open a trace file, add it to the trace selector and make it active
             """
             fname=dialog.get_filename(title=_("Open a trace file"),
-                                   action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                   button=gtk.STOCK_OPEN,
+                                   action=Gtk.FileChooserAction.OPEN,
+                                   button=Gtk.STOCK_OPEN,
                                    default_dir=config.data.path['settings'],
                                    filter='any')
             if not fname:
@@ -461,29 +466,29 @@ class TraceTimeline(AdhocView):
             self.trace_selector.set_active(len(self.tracer.traces) - 1)
             return True
 
-        btnar = gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
+        btnar = Gtk.ToggleToolButton(stock_id=Gtk.STOCK_REFRESH)
         btnar.set_tooltip_text(_('Toggle auto refresh'))
         btnar.set_label('')
         btnar.connect('clicked', self.toggle_auto_refresh)
         toolbox.insert(btnar, -1)
 
 
-        s=gtk.SeparatorToolItem()
+        s=Gtk.SeparatorToolItem()
         s.set_draw(True)
         toolbox.insert(s, -1)
 
-        b=gtk.ToolButton(stock_id=gtk.STOCK_OPEN)
+        b=Gtk.ToolButton(stock_id=Gtk.STOCK_OPEN)
         b.set_tooltip_text(_('Open an existing trace'))
         toolbox.insert(b, -1)
         b.connect('clicked', open_trace)
 
         # Export trace
-        btne = gtk.ToolButton(stock_id=gtk.STOCK_SAVE)
+        btne = Gtk.ToolButton(stock_id=Gtk.STOCK_SAVE)
         btne.set_tooltip_text(_('Save trace'))
         toolbox.insert(btne, -1)
         btne.connect('clicked', self.export)
 
-        btnopt = gtk.ToolButton(stock_id=gtk.STOCK_PREFERENCES)
+        btnopt = Gtk.ToolButton(stock_id=Gtk.STOCK_PREFERENCES)
         btnopt.set_tooltip_text(_('Configuration'))
         btnopt.set_label('')
         #btnopt.connect('clicked', open_options)
@@ -502,40 +507,32 @@ class TraceTimeline(AdhocView):
             Horizontal scrolling if <shift> is pressed.
             Vertical scrolling if nothing special.
             """
-            zoom=event.state & gtk.gdk.CONTROL_MASK
+            zoom=event.get_state() & Gdk.ModifierType.CONTROL_MASK
             a = None
             if zoom:
                 center = event.y * self.timefactor
-                if event.direction == gtk.gdk.SCROLL_DOWN:
+                if event.direction == Gdk.ScrollDirection.DOWN:
                     zoom_out(widget, center)
-                elif  event.direction == gtk.gdk.SCROLL_UP:
+                elif  event.direction == Gdk.ScrollDirection.UP:
                     self.zoom_at_ratio(widget, 1.25, center)
                 return
-            elif event.state & gtk.gdk.SHIFT_MASK:
+            elif event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 # Horizontal scroll
                 a = scrolled_win.get_hadjustment()
-                incr = a.step_increment
+                incr = a.get_step_increment()
             else:
                 # Vertical scroll
                 a = scrolled_win.get_vadjustment()
-                incr = a.step_increment
+                incr = a.get_step_increment()
 
-            if event.direction == gtk.gdk.SCROLL_DOWN:
-                val = a.value + incr
-                if val > a.upper - a.page_size:
-                    val = a.upper - a.page_size
-                elif val < a.lower:
-                    val = a.lower
-                if val != a.value:
-                    a.value = val
-            elif event.direction == gtk.gdk.SCROLL_UP:
-                val = a.value - incr
-                if val < a.lower:
-                    val = a.lower
-                elif val > a.upper - a.page_size:
-                    val = a.upper - a.page_size
-                if val != a.value:
-                    a.value = val
+            if event.direction == Gdk.ScrollDirection.DOWN:
+                a.set_value(helper.clamp(a.get_value() + incr,
+                            a.get_lower(),
+                            a.get_upper() - a.get_page_size()))
+            elif event.direction == Gdk.ScrollDirection.UP:
+                a.set_value(helper.clamp(a.get_value() - incr,
+                            a.get_lower(),
+                            a.get_upper() - a.get_page_size()))
             return True
         self.canvas.connect('scroll-event', on_background_scroll)
 
@@ -545,19 +542,19 @@ class TraceTimeline(AdhocView):
             if <shift> is pressed, draw a selection frame
             if nothing is pressed, drag the canvas
             """
-            if not event.state & gtk.gdk.BUTTON1_MASK:
+            if not event.get_state() & Gdk.ModifierType.BUTTON1_MASK:
                 return False
-            if event.state & gtk.gdk.SHIFT_MASK:
+            if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 # redraw selection frame
-                #self.widget.get_parent_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.PLUS))
+                #self.widget.get_parent_window().set_cursor(Gdk.Cursor.new(Gdk.PLUS))
                 if self.selection[0]==0 and self.selection[1]==0:
                     self.selection[0]=event.x
                     self.selection[1]=event.y
-                p = goocanvas.Points([(self.selection[0],self.selection[1]),(self.selection[0],event.y),(event.x,event.y),(event.x,self.selection[1])])
+                p = GooCanvas.Points([(self.selection[0],self.selection[1]),(self.selection[0],event.y),(event.x,event.y),(event.x,self.selection[1])])
                 if self.sel_frame is not None:
                     self.sel_frame.props.points = p
                 else:
-                    self.sel_frame=goocanvas.Polyline (parent = self.canvas.get_root_item(),
+                    self.sel_frame=GooCanvas.Polyline (parent = self.canvas.get_root_item(),
                                         close_path = True,
                                         points = p,
                                         stroke_color = 0xFFFFFFFF,
@@ -572,19 +569,19 @@ class TraceTimeline(AdhocView):
 
             if not self.drag_coordinates:
                 self.drag_coordinates=(event.x_root, event.y_root)
-                self.widget.get_parent_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.DIAMOND_CROSS))
+                self.widget.get_parent_window().set_cursor(Gdk.Cursor.new(Gdk.DIAMOND_CROSS))
                 #curseur grab
                 return False
             x, y = self.drag_coordinates
             wa=widget.get_allocation()
             a=scrolled_win.get_hadjustment()
-            v=a.value + x - event.x_root
-            if v > a.lower and v+wa.width < a.upper:
-                a.value=v
+            a.set_value(helper.clamp(a.get_value() + x - event.x_root,
+                                     a.get_lower(),
+                                     a.get_upper() - wa.get_width()))
             a=scrolled_win.get_vadjustment()
-            v=a.value + y - event.y_root
-            if v > a.lower and v+wa.height < a.upper:
-                a.value=v
+            a.set_value(helper.clamp(a.get_value() + y - event.y_root,
+                        a.get_lower(),
+                                     a.get_upper() - wa.get_width()))
 
             self.drag_coordinates= (event.x_root, event.y_root)
             return False
@@ -636,7 +633,7 @@ class TraceTimeline(AdhocView):
         self.draw_marks()
         if self.autoscroll:
             a = self.sw.get_vadjustment()
-            a.value=a.upper-a.page_size
+            a.set_value(a.get_upper() - a.get_page_size())
         if self.auto_refresh_keep_100:
             self.zoom_100()
         self.context_update_time()
@@ -648,12 +645,12 @@ class TraceTimeline(AdhocView):
         #function to launch / stop autorefresh
         self.auto_refresh = not self.auto_refresh
         if self.auto_refresh:
-            self.ar_tag = timeout_add(self.auto_refresh_delay, self.refresh_time)
+            self.ar_tag = GObject.timeout_add(self.auto_refresh_delay, self.refresh_time)
             #should change an icon button
             print "auto_refresh started"
         else:
             #should change an icon button
-            source_remove(self.ar_tag)
+            GObject.source_remove(self.ar_tag)
             print "auto_refresh stopped"
 
     def show_inspector(self):
@@ -665,16 +662,16 @@ class TraceTimeline(AdhocView):
         """Export current trace to a predefined location
         """
         fname = self.tracer.export()
-        d = gtk.Dialog(title=_("Exporting traces"),
-                       parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK
+        d = Gtk.Dialog(title=_("Exporting traces"),
+                       parent=self.controller.gui.gui.win,
+                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                       buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK
                                  ))
-        l=gtk.Label(_("Export done to\n%s") % fname)
+        l=Gtk.Label(label=_("Export done to\n%s") % fname)
         l.set_selectable(True)
         l.set_line_wrap(True)
         l.show()
-        d.vbox.pack_start(l, expand=False)
+        d.vbox.pack_start(l, False, True, 0)
         d.vbox.show_all()
         d.show()
         res=d.run()
@@ -713,7 +710,7 @@ class TraceTimeline(AdhocView):
         va=self.sw.get_vadjustment()
 
         if center_v is None:
-            vc = (va.value + h/2.0) * self.timefactor
+            vc = (va.get_value() + h/2.0) * self.timefactor
         else:
             vc = center_v
         self.canvasY *= ratio
@@ -746,11 +743,9 @@ class TraceTimeline(AdhocView):
                 self.timemarks=[]
                 self.draw_marks()
         self.update_lines()
-        va.value = vc/self.timefactor-va.page_size/2.0
-        if va.value<va.lower:
-            va.value=va.lower
-        elif va.value>va.upper-va.page_size:
-            va.value=va.upper-va.page_size
+        va.set_value(helper.clamp(vc/self.timefactor-va.get_page_size()/2.0,
+                                  va.get_lower(),
+                                  va.get_upper() - va.get_page_size()))
 
     def zoom_on(self, w=None, canvas_item=None):
         """Zoom on an item (ObjGroup or EventGroup) in the canvas
@@ -795,7 +790,7 @@ class TraceTimeline(AdhocView):
         # 20.0 to keep a little space between border and object
         va=self.sw.get_vadjustment()
         rapp = h / (20.0 + max_y - min_y)
-        vc = self.timefactor * ((min_y + max_y) / 2.0) * (va.upper / self.canvasY)
+        vc = self.timefactor * ((min_y + max_y) / 2.0) * (va.get_upper() / self.canvasY)
         self.zoom_at_ratio(None, rapp, vc)
 
 
@@ -894,7 +889,7 @@ class TraceTimeline(AdhocView):
         if self.sel_frame:
             self.sel_frame.remove()
             self.sel_frame=None
-        if ev.state & gtk.gdk.SHIFT_MASK:
+        if ev.state & Gdk.ModifierType.SHIFT_MASK:
             if self.selection[0]==0 and self.selection[1]==0:
                 #not a simple click + maj + release
                 return
@@ -910,7 +905,7 @@ class TraceTimeline(AdhocView):
                 self.selection = [ 0, 0, 0, 0]
                 return
             rapp = h / float(max_y - min_y)
-            vc = self.timefactor * ((min_y + max_y) / 2.0) * (va.upper / self.canvasY)
+            vc = self.timefactor * ((min_y + max_y) / 2.0) * (va.get_upper() / self.canvasY)
             self.zoom_at_ratio(None, rapp, vc)
             self.selection = [ 0, 0, 0, 0]
             return
@@ -924,12 +919,12 @@ class TraceTimeline(AdhocView):
         Draw a selection frame if <shift> pressed and left click
         Display contextual menu according to under the cursor items if right click
         """
-        if ev.state & gtk.gdk.SHIFT_MASK:
+        if ev.state & Gdk.ModifierType.SHIFT_MASK:
             self.selection = [ ev.x, ev.y, 0, 0]
             if self.sel_frame:
                 self.sel_frame.remove()
                 self.sel_frame=None
-            self.widget.get_parent_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.PLUS))
+            self.widget.get_parent_window().set_cursor(Gdk.Cursor.new(Gdk.PLUS))
             return
         obj_gp = None
         evt_gp = None
@@ -945,10 +940,10 @@ class TraceTimeline(AdhocView):
             return
         if ev.button == 3:
             #clic droit sur un item
-            menu=gtk.Menu()
+            menu=Gtk.Menu()
             if obj_gp is not None:
                 if obj_gp.rep is not None:
-                    i=gtk.MenuItem(_("Zoom and center on linked items"))
+                    i=Gtk.MenuItem(_("Zoom and center on linked items"))
                     i.connect("activate", self.zoom_on, obj_gp)
                     menu.append(i)
                 obj = objt = None
@@ -957,14 +952,14 @@ class TraceTimeline(AdhocView):
                 if obj_gp.cobj['cid'] is not None:
                     objt = self.controller.package.get_element_by_id(obj_gp.cobj['cid'])
                 if obj is not None:
-                    i=gtk.MenuItem(_("Edit item"))
+                    i=Gtk.MenuItem(_("Edit item"))
                     i.connect("activate", self.edit_item, obj)
                     menu.append(i)
                 elif objt is not None:
-                    i=gtk.MenuItem(_("Recreate item"))
+                    i=Gtk.MenuItem(_("Recreate item"))
                     i.connect("activate", self.recreate_item, obj_gp)
                     menu.append(i)
-                m = gtk.Menu()
+                m = Gtk.Menu()
                 mt= []
 
                 if obj_gp.operation.movietime not in mt:
@@ -974,18 +969,18 @@ class TraceTimeline(AdhocView):
                     else:
                         n = ECACatalog.event_names[obj_gp.operation.name]
                     mt.append(obj_gp.operation.movietime)
-                    i = gtk.MenuItem("%s (%s)" % (time.strftime("%H:%M:%S", time.gmtime(obj_gp.operation.movietime/1000)), n))
+                    i = Gtk.MenuItem("%s (%s)" % (time.strftime("%H:%M:%S", time.gmtime(obj_gp.operation.movietime/1000)), n))
                     i.connect("activate", self.goto, obj_gp.operation.movietime)
                     m.append(i)
-                i=gtk.MenuItem(_("Go to..."))
+                i=Gtk.MenuItem(_("Go to..."))
                 i.set_submenu(m)
                 menu.append(i)
             if evt_gp is not None:
-                i=gtk.MenuItem(_("Zoom on action"))
+                i=Gtk.MenuItem(_("Zoom on action"))
                 i.connect("activate", self.zoom_on, evt_gp)
                 menu.append(i)
                 if obj_gp is None:
-                    m = gtk.Menu()
+                    m = Gtk.Menu()
                     mt= []
                     for op in evt_gp.event.operations:
                         if op.movietime not in mt:
@@ -995,14 +990,14 @@ class TraceTimeline(AdhocView):
                             else:
                                 n = ECACatalog.event_names[op.name]
                             mt.append(op.movietime)
-                            i = gtk.MenuItem("%s (%s)" % (time.strftime("%H:%M:%S", time.gmtime(op.movietime/1000)), n))
+                            i = Gtk.MenuItem("%s (%s)" % (time.strftime("%H:%M:%S", time.gmtime(op.movietime/1000)), n))
                             i.connect("activate", self.goto, op.movietime)
                             m.append(i)
-                    i=gtk.MenuItem(_("Go to..."))
+                    i=Gtk.MenuItem(_("Go to..."))
                     i.set_submenu(m)
                     menu.append(i)
             menu.show_all()
-            menu.popup(None, None, None, ev.button, ev.time)
+            menu.popup_at_pointer(None)
         elif ev.button == 1:
             if obj_gp is not None:
                 self.toggle_lock(w=obj_gp)
@@ -1068,12 +1063,12 @@ class TraceTimeline(AdhocView):
             else:
                tinc=self.timemarks[0].get_child(0).get_bounds().y1
             t=self.timemarks[-1].get_child(0).get_bounds().y1+tinc
-        ld = goocanvas.LineDash([5.0, 20.0])
+        ld = GooCanvas.LineDash([5.0, 20.0])
         while t < self.canvasY:
             #print self.start_time, t, t*self.timefactor
             txt = time.strftime("%H:%M:%S",time.localtime(self.start_time+t*self.timefactor))
-            mgroup = goocanvas.Group(parent=self.canvas.get_root_item())
-            a=goocanvas.polyline_new_line(mgroup,
+            mgroup = GooCanvas.Group(parent=self.canvas.get_root_item())
+            a=GooCanvas.polyline_new_line(mgroup,
                                         0,
                                         t,
                                         self.canvasX,
@@ -1081,22 +1076,22 @@ class TraceTimeline(AdhocView):
                                         line_dash=ld,
                                         line_width = 0.2)
             a.props.tooltip=txt
-            a=goocanvas.Text(parent = mgroup,
+            a=GooCanvas.Text(parent = mgroup,
                         text = txt,
                         x = 0,
                         y = t-5,
                         width = -1,
-                        anchor = gtk.ANCHOR_W,
+                        anchor = Gtk.ANCHOR_W,
                         fill_color_rgba=0x121212FF,
                         font = "Sans 7")
             a.props.tooltip=txt
-            a=goocanvas.Text(parent = mgroup,
+            a=GooCanvas.Text(parent = mgroup,
                         text = txt,
                         x = self.canvasX-4,
                         y = t-5,
                         width = -1,
                         fill_color_rgba=0x121212FF,
-                        anchor = gtk.ANCHOR_E,
+                        anchor = Gtk.ANCHOR_E,
                         font = "Sans 7")
             a.props.tooltip=txt
             self.timemarks.append(mgroup)
@@ -1118,7 +1113,7 @@ class TraceTimeline(AdhocView):
         """
         offset = 0
         for c in self.tracer.tracemodel['actions']:
-            etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][c])))
+            etgroup = HeadGroup(self.controller, self.head_canvas, c, (self.colspacing+self.col_width)*offset, 0, self.col_width, 8, gdk2intrgba(Gdk.color_parse(self.tracer.colormodel['actions'][c])))
             (og, oa) = self.cols[c]
             self.cols[c]=(etgroup, oa)
             offset += 1
@@ -1162,7 +1157,7 @@ class TraceTimeline(AdhocView):
         if self.links_locked:
             self.toggle_lock()
             self.inspector.clean()
-        self.widget.get_parent_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
+        self.widget.get_parent_window().set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         root=self.canvas.get_root_item()
         while root.get_n_children()>0:
             c = root.get_child(0)
@@ -1172,7 +1167,7 @@ class TraceTimeline(AdhocView):
         for c in self.cols:
             h,l = self.cols[c]
             self.cols[c]=(h,None)
-        self.now_line = goocanvas.polyline_new_line(root,
+        self.now_line = GooCanvas.polyline_new_line(root,
                                         0,
                                         self.canvasY-1,
                                         self.canvasX,
@@ -1190,11 +1185,11 @@ class TraceTimeline(AdhocView):
         self.draw_marks()
         if center:
             va=self.sw.get_vadjustment()
-            va.value = center/self.timefactor-va.page_size/2.0
+            va.value = center/self.timefactor-va.get_page_size()/2.0
             if va.value<va.lower:
                 va.value=va.lower
-            elif va.value>va.upper-va.page_size:
-                va.value=va.upper-va.page_size
+            elif va.value>va.get_upper()-va.get_page_size():
+                va.value=va.get_upper()-va.get_page_size()
         self.context_update_time()
         self.widget.get_parent_window().set_cursor(None)
         #print "----------------REFRESH END-----------------"
@@ -1270,7 +1265,6 @@ class TraceTimeline(AdhocView):
             oldlength = b.y2-b.y1
             #calculating new length
             newlength = float(action.time[1]-action.time[0])/self.timefactor
-            ratio = newlength/oldlength
             if b.y1+newlength >= self.canvasY-1:
                 #need to expand canvas
                 self.canvasY = b.y1+newlength+1
@@ -1301,7 +1295,7 @@ class TraceTimeline(AdhocView):
         self.canvas.show()
         if self.autoscroll:
             a = self.sw.get_vadjustment()
-            a.value=a.upper-a.page_size
+            a.set_value(a.get_upper()-a.get_page_size())
         if l and l.event == action:
             self.context_update_line(action)
         else:
@@ -1373,7 +1367,7 @@ class TraceTimeline(AdhocView):
             while n < root.get_n_children():
                 l=root.get_child(n)
                 n+=1
-                if isinstance(l,goocanvas.Polyline):
+                if isinstance(l,GooCanvas.Polyline):
                     l.props.y *= ratio
                     l.props.height *= ratio
         self.context_update_sel_frame()
@@ -1389,7 +1383,7 @@ class TraceTimeline(AdhocView):
         y2 = float(action.time[1]-self.active_trace.start)*self.context_canvasY/(self.context_t_max-self.active_trace.start)
         (i,color,line)=self.context_cols[action.name]
         x = 3+2*i
-        l = goocanvas.polyline_new_line(self.context_canvas.get_root_item(),
+        l = GooCanvas.polyline_new_line(self.context_canvas.get_root_item(),
                                         x,
                                         y1,
                                         x,
@@ -1416,7 +1410,7 @@ class TraceTimeline(AdhocView):
         """Draw the selection frame on context canvas, corresponding to what is displayed in the trace timeline
         """
         #refresh canvas bounds
-        self.context_frame = goocanvas.Rect (parent = self.context_canvas.get_root_item(),
+        self.context_frame = GooCanvas.Rect (parent = self.context_canvas.get_root_item(),
                                     x = 0,
                                     y = 0,
                                     width = self.context_canvasX,
@@ -1444,11 +1438,11 @@ class TraceTimeline(AdhocView):
         return
 
 
-class HeadGroup (Group):
+class HeadGroup (CanvasGroup):
     """Group containing a rectangle and a name used to display headers.
     """
     def __init__(self, controller=None, canvas=None, name="N/A", x = 5, y=0, w=90, fontsize=14, color_c=0x00ffff50):
-        Group.__init__(self, parent = canvas.get_root_item ())
+        CanvasGroup.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         #self.name=name[0:2]
         self.name=name[0:5]
@@ -1456,7 +1450,7 @@ class HeadGroup (Group):
         self.color_s = "black"
         self.color_c = color_c
         self.fontsize=fontsize
-        self.rect = goocanvas.Rect (parent = self,
+        self.rect = GooCanvas.Rect (parent = self,
                                     x = x,
                                     y = y,
                                     width = self.w,
@@ -1464,12 +1458,12 @@ class HeadGroup (Group):
                                     fill_color_rgba = 0xFFFFFF00,
                                     stroke_color = 0xFFFFFF00,
                                     line_width = 0)
-        self.text = goocanvas.Text (parent = self,
+        self.text = GooCanvas.Text (parent = self,
                                         text = self.name,
                                         x = x+w/2,
                                         y = y+15,
                                         width = -1,
-                                        anchor = gtk.ANCHOR_CENTER,
+                                        anchor = Gtk.ANCHOR_CENTER,
                                         font = "Sans Bold %s" % str(self.fontsize))
 
         def change_name(self, name):
@@ -1491,11 +1485,11 @@ class HeadGroup (Group):
             self.text.props.font="%s %s" % (font, str(self.fontsize))
             return
 
-class EventGroup (Group):
+class EventGroup (CanvasGroup):
     """Group containing a rectangle, commentmarks and ObjGroups used to display an action
     """
     def __init__(self, link_mode=0, controller=None, inspector=None, canvas=None, dg=None, type=None, event=None, x =0, y=0, l=1, w=90, ol=5, fontsize=6, color_c=0x00ffffff, blocked=False):
-        Group.__init__(self, parent = canvas.get_root_item ())
+        CanvasGroup.__init__(self, parent = canvas.get_root_item ())
         self.canvas = canvas
         self.controller=controller
         self.inspector = inspector
@@ -1541,10 +1535,10 @@ class EventGroup (Group):
         @type color_c: number
         @param color_c: fill color rgba
 
-        @rtype: goocanvas.Rect
+        @rtype: GooCanvas.Rect
         @return: the new rect
         """
-        return goocanvas.Rect (parent = self,
+        return GooCanvas.Rect (parent = self,
                                     x = self.x,
                                     y = self.y,
                                     width = self.w,
@@ -1600,7 +1594,6 @@ class EventGroup (Group):
         """
         w = self.rect.props.width
         l = self.rect.props.height
-        c_sel = None
         if l < 10:
             #not enough space
             for c in self.objs:
@@ -1696,9 +1689,9 @@ class EventGroup (Group):
         """Add comment mark to this group if it has a comment
         """
         if not self.commentMark:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                         ( ('pixmaps', 'traces', 'msg.png')), 16, 16)
-            self.commentMark = goocanvas.Image(parent=self,
+            self.commentMark = GooCanvas.Image(parent=self,
                                                 width=16,
                                                 height=16,
                                                 x=self.x,
@@ -1707,11 +1700,11 @@ class EventGroup (Group):
         self.commentMark.props.tooltip=self.event.comment
 
 
-class ObjGroup (Group):
+class ObjGroup (CanvasGroup):
     """Group used to display informations on an operation
     """
     def __init__(self, link_mode=0, controller=None, inspector=None, canvas=None, dg=None, x=0, y=0, r=4, fontsize=5, op=None, blocked=False):
-        Group.__init__(self, parent = canvas.get_root_item ())
+        CanvasGroup.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.rep = None
         self.text = None
@@ -1737,7 +1730,7 @@ class ObjGroup (Group):
             temp_it = self.controller.package.get_element_by_id(self.cobj['id'])
             temp_c = self.controller.get_element_color(temp_it)
             if temp_c is not None:
-                self.color_f = gdk2intrgba(gtk.gdk.color_parse(temp_c))
+                self.color_f = gdk2intrgba(Gdk.color_parse(temp_c))
             self.rep = self.newRep()
             self.text = self.newText()
         self.oprep = self.newOpRep()
@@ -1763,7 +1756,7 @@ class ObjGroup (Group):
             self.rep.props.center_x = self.x +3* self.r + 3
             self.rep.props.radius_x = self.r
             self.rep.props.radius_y = self.r
-        #move icon, cannot modify directly goocanvas.Image pixbuf property ... stretching ?
+        #move icon, cannot modify directly GooCanvas.Image pixbuf property ... stretching ?
         if self.oprep:
             #~ self.oprep.props.y = self.y +3
             #~ self.oprep.props.x = self.x
@@ -1870,8 +1863,8 @@ class ObjGroup (Group):
                     #this is an eventgroup
                     x1=g.rect.props.x+g.rect.props.width/2.0
                     y1=g.rect.props.y+g.rect.props.height
-                p = goocanvas.Points ([(x0, y0), (x1,y1)])
-                self.lines.append(goocanvas.Polyline (parent = self,
+                p = GooCanvas.Points ([(x0, y0), (x1,y1)])
+                self.lines.append(GooCanvas.Polyline (parent = self,
                                   close_path = False,
                                   points = p,
                                   stroke_color = 0xFFFFFFFF,
@@ -1895,8 +1888,8 @@ class ObjGroup (Group):
                     dic[g.operation.time]=(g.rep.props.center_x, g.rep.props.center_y)
             ks = dic.keys()
             ks.sort()
-            p=goocanvas.Points([dic[k] for k in ks])
-            self.lines.append(goocanvas.Polyline (parent = self,
+            p=GooCanvas.Points([dic[k] for k in ks])
+            self.lines.append(GooCanvas.Polyline (parent = self,
                                 close_path = False,
                                 points = p,
                                 stroke_color = 0xFFFFFFFF,
@@ -1941,53 +1934,53 @@ class ObjGroup (Group):
     def newOpRep(self):
         """Change icon representing operation.
 
-        @rtype: goocanvas.Image
+        @rtype: GooCanvas.Image
         @return: the newly created image
         """
         #BIG HACK to display icon
         te = self.operation.name
         if te.find('Edit')>=0:
             if te.find('Start')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     (( 'pixmaps', 'traces', 'edition.png')), int(2*self.r), int(2*self.r))
             elif te.find('End')>=0 or te.find('Destroy')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     (( 'pixmaps', 'traces', 'finedition.png')), int(2*self.r), int(2*self.r))
         elif te.find('Creat')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     (( 'pixmaps', 'traces', 'plus.png')), int(2*self.r), int(2*self.r))
         elif te.find('Delet')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     (( 'pixmaps', 'traces', 'moins.png')), int(2*self.r), int(2*self.r))
         elif te.find('Set')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'allera.png')), int(2*self.r), int(2*self.r))
         elif te.find('Start')>=0 or te.find('Resume')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'lecture.png')), int(2*self.r), int(2*self.r))
         elif te.find('Pause')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'pause.png')), int(2*self.r), int(2*self.r))
         elif te.find('Stop')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'stop.png')), int(2*self.r), int(2*self.r))
         elif te.find('Activation')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'web.png')), int(2*self.r), int(2*self.r))
         else:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'error.png')), int(2*self.r), int(2*self.r))
             print 'No icon for %s' % te
-        return goocanvas.Image(parent=self, width=int(2*self.r),height=int(2*self.r),x=self.x,y=self.y+3,pixbuf=pb)
+        return GooCanvas.Image(parent=self, width=int(2*self.r),height=int(2*self.r),x=self.x,y=self.y+3,pixbuf=pb)
 
 
     def newRep(self):
         """Create an advene object representation (ellipse).
 
-        @rtype: goocanvas.Ellipse
+        @rtype: GooCanvas.Ellipse
         @return: the newly created ellipse
         """
-        return goocanvas.Ellipse(parent=self,
+        return GooCanvas.Ellipse(parent=self,
                         center_x=self.x + 3*self.r + 3,
                         center_y=self.y+self.r + 3,
                         radius_x=self.r,
@@ -1999,7 +1992,7 @@ class ObjGroup (Group):
     def newText(self):
         """ Create a new text representation of the advene object
 
-        @rtype: goocanvas.Text
+        @rtype: GooCanvas.Text
         @return: the newly created text
         """
         txt = 'U'
@@ -2009,66 +2002,67 @@ class ObjGroup (Group):
             self.cobj['type']=type(o)
             #print self.type
         txt = TYPE_ABREVIATION[self.cobj['type']]
-        return goocanvas.Text (parent = self,
+        return GooCanvas.Text (parent = self,
                         text = txt,
                         x = self.x + 3 * self.r + 3,
                         y = self.y + self.r + 3,
                         width = -1,
-                        anchor = gtk.ANCHOR_CENTER,
+                        anchor = Gtk.ANCHOR_CENTER,
                         font = "Sans %s" % str(self.fontsize))
 
 
-class Inspector (gtk.VBox):
+class Inspector (Gtk.VBox):
     """Inspector component to display informations concerning items and actions in the timeline
     """
     def __init__ (self, controller=None):
-        gtk.VBox.__init__(self)
+        GObject.GObject.__init__(self)
         self.action=None
         self.item=None
         self.controller=controller
         self.tracer = self.controller.tracers[0]
-        self.pack_start(gtk.Label(_('Inspector')), expand=False)
-        self.pack_start(gtk.HSeparator(), expand=False)
-        self.inspector_id = gtk.Label('')
-        self.pack_start(self.inspector_id, expand=False)
+        self.pack_start(Gtk.Label(_('Inspector')), False, False, 0)
+        self.pack_start(Gtk.HSeparator(), False, False, 0)
+        self.inspector_id = Gtk.Label(label='')
+        self.pack_start(self.inspector_id, False, True, 0)
         self.inspector_id.set_alignment(0, 0.5)
         self.inspector_id.set_tooltip_text(_('Item Id'))
-        self.inspector_type = gtk.Label('')
-        self.pack_start(self.inspector_type, expand=False)
+        self.inspector_type = Gtk.Label(label='')
+        self.pack_start(self.inspector_type, False, True, 0)
         self.inspector_type.set_tooltip_text(_('Item name or class'))
         self.inspector_type.set_alignment(0, 0.5)
-        self.inspector_name = gtk.Label('')
-        self.pack_start(self.inspector_name, expand=False)
+        self.inspector_name = Gtk.Label(label='')
+        self.pack_start(self.inspector_name, False, True, 0)
         self.inspector_name.set_tooltip_text(_('Type or schema'))
         self.inspector_name.set_alignment(0, 0.5)
-        self.pack_start(gtk.HSeparator(), expand=False)
-        self.pack_start(gtk.Label(_('Operations')), expand=False)
-        self.pack_start(gtk.HSeparator(), expand=False)
-        opscwin = gtk.ScrolledWindow ()
-        opscwin.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.pack_start(Gtk.HSeparator(), False, False, 0)
+        self.pack_start(Gtk.Label(_('Operations')), False, False, 0)
+        self.pack_start(Gtk.HSeparator(), False, False, 0)
+        opscwin = Gtk.ScrolledWindow ()
+        opscwin.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         opscwin.set_border_width(0)
-        self.inspector_opes= gtk.VBox()
+        self.inspector_opes= Gtk.VBox()
         opscwin.add_with_viewport(self.inspector_opes)
-        self.pack_start(opscwin, expand=True)
-        self.commentBox = gtk.VBox()
-        self.comment=gtk.Entry()
-        save_btn=gtk.Button()
-        img = gtk.Image()
+        self.pack_start(opscwin, True, True, 0)
+        self.commentBox = Gtk.VBox()
+        self.comment=Gtk.Entry()
+        save_btn=Gtk.Button()
+        img = Gtk.Image()
         img.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces', 'msg_add.png') ))
         save_btn.add(img)
         def save_clicked(w):
             """Save comment in the trace
             """
             if self.action:
-                self.action.event.change_comment(unicode(self.comment.get_text()))
-                if unicode(self.comment.get_text()) != '':
+                comment = self.comment.get_text().decode('utf-8')
+                self.action.event.change_comment(comment)
+                if comment != '':
                     self.action.addCommentMark()
                 else:
                     self.action.removeCommentMark()
 
         save_btn.connect('clicked', save_clicked)
-        clear_btn=gtk.Button()
-        img = gtk.Image()
+        clear_btn=Gtk.Button()
+        img = Gtk.Image()
         img.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces', 'msg_del.png') ))
         clear_btn.add(img)
         def clear_clicked(w):
@@ -2078,15 +2072,15 @@ class Inspector (gtk.VBox):
             save_clicked(w)
 
         clear_btn.connect('clicked', clear_clicked)
-        btns = gtk.HBox()
-        btns.pack_start(save_btn, expand=False)
-        btns.pack_start(clear_btn, expand=False)
-        self.commentBox.pack_end(btns, expand=False)
-        self.commentBox.pack_end(self.comment, expand=False)
-        self.commentBox.pack_end(gtk.HSeparator(), expand=False)
-        self.commentBox.pack_end(gtk.Label(_('Comment')), expand=False)
-        self.commentBox.pack_end(gtk.HSeparator(), expand=False)
-        self.pack_end(self.commentBox, expand=False)
+        btns = Gtk.HBox()
+        btns.pack_start(save_btn, False, True, 0)
+        btns.pack_start(clear_btn, False, True, 0)
+        self.commentBox.pack_end(btns, False, True, 0)
+        self.commentBox.pack_end(self.comment, False, True, 0)
+        self.commentBox.pack_end(Gtk.HSeparator(), False, False, 0)
+        self.commentBox.pack_end(Gtk.Label(_('Comment')), False, False, 0)
+        self.commentBox.pack_end(Gtk.HSeparator(), False, False, 0)
+        self.pack_end(self.commentBox, False, True, 0)
         self.clean()
 
     def fillWithItem(self, item):
@@ -2119,7 +2113,7 @@ class Inspector (gtk.VBox):
         self.inspector_id.set_text(_('Action'))
         self.inspector_name.set_text('')
         self.inspector_type.set_text(action.event.name)
-        self.pack_end(self.commentBox, expand=False)
+        self.pack_end(self.commentBox, False, True, 0)
         self.comment.set_text(action.event.comment)
         self.addOperations(action.event.operations, op)
         self.show_all()
@@ -2146,7 +2140,7 @@ class Inspector (gtk.VBox):
         for o in op_list:
             l = self.addOperation(o, o==op_sel)
             l.set_size_request(-1, 20)
-            self.inspector_opes.pack_start(l, expand=False)
+            self.inspector_opes.pack_start(l, False, True, 0)
 
     def addOperation(self, obj_evt=None, sel=False):
         """Build a box to display an operation
@@ -2178,51 +2172,51 @@ class Inspector (gtk.VBox):
                 entetestr = entetestr + ' %s' % poss[1]
             else:
                 entetestr = entetestr + ' %s' % poss[0]
-        entete = gtk.Label(ev_time.encode("UTF-8"))
-        hb = gtk.HBox()
+        entete = Gtk.Label(label=ev_time.encode("UTF-8"))
+        hb = Gtk.HBox()
 
-        #hb.pack_start(entete, expand=False)
-        objcanvas = goocanvas.Canvas()
+        #hb.pack_start(entete, False, True, 0)
+        objcanvas = GooCanvas.Canvas()
         objcanvas.set_bounds (0,0,60,20)
         #BIG HACK to display icon
         te = obj_evt.name
         if te.find('Edit')>=0:
             if te.find('Start')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                     (( 'pixmaps', 'traces', 'edition.png')))
             elif te.find('End')>=0 or te.find('Destroy')>=0:
-                pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+                pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                     (( 'pixmaps', 'traces', 'finedition.png')))
         elif te.find('Creat')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                     (( 'pixmaps', 'traces', 'plus.png')))
         elif te.find('Delet')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                     (( 'pixmaps', 'traces', 'moins.png')))
         elif te.find('Set')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                     ( ('pixmaps', 'traces', 'allera.png')))
         elif te.find('Start')>=0 or te.find('Resume')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                     ( ('pixmaps', 'traces', 'lecture.png')))
         elif te.find('Pause')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                     ( ('pixmaps', 'traces', 'pause.png')))
         elif te.find('Stop')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile
                     ( ('pixmaps', 'traces', 'stop.png')))
         elif te.find('Activation')>=0:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'web.png')), 20,20)
         else:
-            pb = gtk.gdk.pixbuf_new_from_file_at_size(config.data.advenefile
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'error.png')), 20,20)
             print 'No icon for %s' % te
-        goocanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
+        GooCanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
         # object icon
-        objg = goocanvas.Group(parent = objcanvas.get_root_item ())
+        objg = CanvasGroup(parent = objcanvas.get_root_item ())
         if sel:
-            goocanvas.Rect(parent=objg,
+            GooCanvas.Rect(parent=objg,
                             x=0,
                             y=0,
                             width=60,
@@ -2234,10 +2228,10 @@ class Inspector (gtk.VBox):
             ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
             temp_c = self.controller.get_element_color(ob)
             if temp_c is not None:
-                temp_c = gdk2intrgba(gtk.gdk.color_parse(temp_c))
+                temp_c = gdk2intrgba(Gdk.color_parse(temp_c))
             else:
                 temp_c = 0xFFFFFFFF
-            goocanvas.Ellipse(parent=objg,
+            GooCanvas.Ellipse(parent=objg,
                     center_x=40,
                     center_y=10,
                     radius_x=9,
@@ -2246,12 +2240,12 @@ class Inspector (gtk.VBox):
                     fill_color_rgba=temp_c,
                     line_width=1.0)
             txt = TYPE_ABREVIATION[obj_evt.concerned_object['type']]
-            goocanvas.Text (parent = objg,
+            GooCanvas.Text (parent = objg,
                     text = txt,
                     x = 40,
                     y = 10,
                     width = -1,
-                    anchor = gtk.ANCHOR_CENTER,
+                    anchor = Gtk.ANCHOR_CENTER,
                     font = "Sans 5")
         else:
             # no concerned object, we are in an action of navigation
@@ -2266,17 +2260,17 @@ class Inspector (gtk.VBox):
                     txt=poss[0]
             else:
                 txt = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
-            goocanvas.Text (parent = objg,
+            GooCanvas.Text (parent = objg,
                     text = txt,
                     x = 40,
                     y = 10,
                     width = -1,
-                    anchor = gtk.ANCHOR_CENTER,
+                    anchor = Gtk.ANCHOR_CENTER,
                     font = "Sans 7")
         cm = objcanvas.get_colormap()
         color = cm.alloc_color('#FFFFFF')
         if obj_evt.name in self.tracer.colormodel['operations']:
-            color = gtk.gdk.color_parse(self.tracer.colormodel['operations'][obj_evt.name])
+            color = Gdk.color_parse(self.tracer.colormodel['operations'][obj_evt.name])
         elif self.tracer.modelmapping['operations']:
             for k in self.tracer.modelmapping['operations']:
                 if obj_evt.name in self.tracer.modelmapping['operations'][k]:
@@ -2284,7 +2278,7 @@ class Inspector (gtk.VBox):
                     if x >=0:
                         kn = self.tracer.tracemodel[k][x]
                         if kn in self.tracer.colormodel[k]:
-                            color = gtk.gdk.color_parse(self.tracer.colormodel[k][kn])
+                            color = Gdk.color_parse(self.tracer.colormodel[k][kn])
                             break
                     else:
                         #BIG HACK, FIXME
@@ -2303,23 +2297,23 @@ class Inspector (gtk.VBox):
                                 if x >=0:
                                     kn = self.tracer.tracemodel[k][x]
                                     if kn in self.tracer.colormodel[k]:
-                                        color = gtk.gdk.color_parse(self.tracer.colormodel[k][kn])
+                                        color = Gdk.color_parse(self.tracer.colormodel[k][kn])
                                         break
-        objcanvas.modify_base (gtk.STATE_NORMAL, color)
+        objcanvas.modify_base (Gtk.StateType.NORMAL, color)
         objcanvas.set_size_request(60,20)
         if corpsstr != "":
             objcanvas.set_tooltip_text(corpsstr)
         if entetestr != "":
             entete.set_tooltip_text(entetestr)
 
-        box = gtk.EventBox()
+        box = Gtk.EventBox()
         def box_pressed(w, event, id):
             """Edit the element if double clicked
 
             @type id: advene id
             @param id: the id of the package element to edit
             """
-            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
                 if id is not None:
                     obj = self.controller.package.get_element_by_id(id)
                     if obj is not None:
@@ -2330,8 +2324,8 @@ class Inspector (gtk.VBox):
         box.add(entete)
         box.connect('button-press-event', box_pressed, obj_evt.concerned_object['id'])
         objcanvas.connect('button-press-event', box_pressed, obj_evt.concerned_object['id'])
-        hb.pack_start(box, expand=False)
-        hb.pack_end(objcanvas, expand=False)
+        hb.pack_start(box, False, True, 0)
+        hb.pack_end(objcanvas, False, True, 0)
         return hb
 
     def clean(self):
@@ -2348,11 +2342,11 @@ class Inspector (gtk.VBox):
         self.comment.set_text('')
         self.show_all()
 
-class DocGroup (Group):
+class DocGroup (CanvasGroup):
     """Group used to display a representation of the movie
     """
     def __init__(self, controller=None, canvas=None, name="N/A", x =10, y=10, w=80, h=20, fontsize=14, color_c=0x00000050):
-        Group.__init__(self, parent = canvas.get_root_item ())
+        CanvasGroup.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.canvas=canvas
         self.name=name
@@ -2378,10 +2372,10 @@ class DocGroup (Group):
     def newRect(self):
         """Create a new rectangle to represent the movie.
 
-        @rtype: goocanvas.Rect
+        @rtype: GooCanvas.Rect
         @return: a new rectangle
         """
-        return goocanvas.Rect (parent = self,
+        return GooCanvas.Rect (parent = self,
                                     x = self.x,
                                     y = self.y,
                                     width = self.w,
@@ -2397,16 +2391,16 @@ class DocGroup (Group):
         if nbmax > 3:
             nbmax = 3
         #timestamp 0
-        self.timemarks.append(goocanvas.Text (parent = self,
+        self.timemarks.append(GooCanvas.Text (parent = self,
                                 text = time.strftime("%H:%M:%S", time.gmtime(0)),
                                 x = self.x,
                                 y = self.y+self.h+7,
                                 fill_color = self.color_c,
                                 width = -1,
-                                anchor = gtk.ANCHOR_CENTER,
+                                anchor = Gtk.ANCHOR_CENTER,
                                 font = "Sans 6"))
-        p = goocanvas.Points ([(self.x, self.y+self.h), (self.x, self.y+self.h+2)])
-        self.timemarks.append(goocanvas.Polyline (parent = self,
+        p = GooCanvas.Points ([(self.x, self.y+self.h), (self.x, self.y+self.h+2)])
+        self.timemarks.append(GooCanvas.Polyline (parent = self,
                                         close_path = False,
                                         points = p,
                                         stroke_color_rgba = self.color_c,
@@ -2415,16 +2409,16 @@ class DocGroup (Group):
                                         end_arrow = False
                                         ))
         #timestamp fin
-        self.timemarks.append(goocanvas.Text (parent = self,
+        self.timemarks.append(GooCanvas.Text (parent = self,
                                 text = time.strftime("%H:%M:%S", time.gmtime(self.movielength/1000)),
                                 x = self.x+self.w,
                                 y = self.y+self.h+7,
                                 fill_color = self.color_c,
                                 width = -1,
-                                anchor = gtk.ANCHOR_CENTER,
+                                anchor = Gtk.ANCHOR_CENTER,
                                 font = "Sans 6"))
-        p = goocanvas.Points ([(self.x+self.w, self.y+self.h), (self.x+self.w, self.y+self.h+2)])
-        self.timemarks.append(goocanvas.Polyline (parent = self,
+        p = GooCanvas.Points ([(self.x+self.w, self.y+self.h), (self.x+self.w, self.y+self.h+2)])
+        self.timemarks.append(GooCanvas.Polyline (parent = self,
                                         close_path = False,
                                         points = p,
                                         stroke_color_rgba = self.color_c,
@@ -2440,16 +2434,16 @@ class DocGroup (Group):
         #1-3 timestamps intermediaires
         for i in range(0, nbmax+1):
             rap = 1.0 * i / (nbmax+1)
-            self.timemarks.append(goocanvas.Text (parent = self,
+            self.timemarks.append(GooCanvas.Text (parent = self,
                                 text = time.strftime("%H:%M:%S", time.gmtime(sec * rap)),
                                 x = self.x + self.w * rap,
                                 y = self.y+self.h+7,
                                 fill_color = self.color_c,
                                 width = -1,
-                                anchor = gtk.ANCHOR_CENTER,
+                                anchor = Gtk.ANCHOR_CENTER,
                                 font = "Sans 6"))
-            p = goocanvas.Points ([(self.x + self.w * rap, self.y+self.h), (self.x + self.w * rap, self.y+self.h+2)])
-            self.timemarks.append(goocanvas.Polyline (parent = self,
+            p = GooCanvas.Points ([(self.x + self.w * rap, self.y+self.h), (self.x + self.w * rap, self.y+self.h+2)])
+            self.timemarks.append(GooCanvas.Polyline (parent = self,
                                         close_path = False,
                                         points = p,
                                         stroke_color_rgba = self.color_c,
@@ -2501,7 +2495,7 @@ class DocGroup (Group):
             #print "%s %s %s" % (action.name, ACTIONS.index(action.name), color)
             for op in action.operations:
                 self.addMark(op.movietime,
-                             gdk2intrgba(gtk.gdk.color_parse(self.tracer.colormodel['actions'][action.name])))
+                             gdk2intrgba(Gdk.color_parse(self.tracer.colormodel['actions'][action.name])))
         elif obj is not None:
             self.addMark(obj.operation.movietime, 0xD9D919FF)
 
@@ -2519,8 +2513,8 @@ class DocGroup (Group):
         x2 = x+offset
         y2=self.rect.get_bounds().y1
         y1=y2-offset
-        p = goocanvas.Points ([(x1, y1), (x, y2), (x2, y1)])
-        l = goocanvas.Polyline (parent = self,
+        p = GooCanvas.Points ([(x1, y1), (x, y2), (x2, y1)])
+        l = GooCanvas.Polyline (parent = self,
                                         close_path = False,
                                         points = p,
                                         stroke_color_rgba = color,
@@ -2558,9 +2552,9 @@ class DocGroup (Group):
         x=self.rect.get_bounds().x1 + self.w * time / self.movielength
         y1=self.rect.get_bounds().y1 - offset
         y2=self.rect.get_bounds().y2 + offset
-        p = goocanvas.Points ([(x, y1), (x, y2)])
-        #ld = goocanvas.LineDash([3.0, 3.0])
-        l = goocanvas.Polyline (parent = self,
+        p = GooCanvas.Points ([(x, y1), (x, y2)])
+        #ld = GooCanvas.LineDash([3.0, 3.0])
+        l = GooCanvas.Polyline (parent = self,
                                         close_path = False,
                                         points = p,
                                         stroke_color_rgba = color,

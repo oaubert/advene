@@ -19,7 +19,7 @@
 """Log messages display.
 """
 
-import gtk
+from gi.repository import Gtk
 
 from gettext import gettext as _
 from advene.gui.views import AdhocView
@@ -41,7 +41,7 @@ class LogMessages(AdhocView):
 
     def autoscroll(self, *p):
         # Autoscroll
-        self.textview.scroll_mark_onscreen(self.controller.gui.logbuffer.get_mark("insert"))
+        self.textview.scroll_mark_onscreen(self.textview.get_buffer().get_insert())
         return True
 
     def reparent_done(self):
@@ -49,18 +49,18 @@ class LogMessages(AdhocView):
         return True
 
     def build_widget(self):
-        sw=gtk.ScrolledWindow()
-        self.textview=gtk.TextView(self.controller.gui.logbuffer)
-        self.textview.set_wrap_mode(gtk.WRAP_CHAR)
+        sw=Gtk.ScrolledWindow()
+        self.textview=Gtk.TextView.new_with_buffer(self.controller.gui.logbuffer)
+        self.textview.set_wrap_mode(Gtk.WrapMode.CHAR)
         self.textview.set_editable(False)
         sw.add(self.textview)
 
         self.safe_connect(self.controller.gui.logbuffer, "changed", self.autoscroll)
 
         # Scroll for initial display
-        def initial_display(t):
+        def initial_display(*p):
             self.autoscroll()
             return False
-        self.textview.connect('map', initial_display)
+        self.textview.connect('size-allocate', initial_display)
 
         return sw
