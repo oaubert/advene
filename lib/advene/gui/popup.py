@@ -170,11 +170,8 @@ class Menu:
         self.controller.gui.edit_element(el)
         return True
 
-    def nerd_service(self, widget, annotationtype):
-        # Relatively ugly hack becase the Importer GUI API does not
-        # allow to specify default parameters easily.
-        config.data.preferences['nerd-annotation-type'] = annotationtype.id
-        v = self.controller.gui.open_adhoc_view('importerview', filename='http://nerd.eurecom.fr/', message=_("Named-Entity extraction using NERD"), display_unlikely=False)
+    def filter_service(self, widget, importer, annotationtype):
+        self.controller.gui.open_adhoc_view('importerview', message=_("Apply %s") % importer.name, display_unlikely=False, importerclass=importer, annotation_type=annotationtype)
 
     def popup_get_offset(self):
         offset=dialog.entry_dialog(title='Enter an offset',
@@ -742,8 +739,8 @@ class Menu:
         add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % element.id))
         add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations, source='here/annotationTypes/%s/annotations' % element.id))
         add_item(_('Export to another format...'), lambda i: self.controller.gui.export_element(element))
-        if [ i for i in advene.util.importer.IMPORTERS if 'NERD' in i.name ]:
-            add_item(_('Extract Named Entities...'), self.nerd_service, element)
+        for imp in [ i for i in advene.util.importer.IMPORTERS if hasattr(i, 'annotation_filter') ]:
+            add_item(_("Apply %s..." % imp.name), self.filter_service, imp, element)
         if self.readonly:
             return
         add_item(None)
