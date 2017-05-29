@@ -194,6 +194,11 @@ class TimeLine(AdhocView):
             annotationtypes=ats
 
         self.list = elements
+        if len(annotationtypes or []) != len(self.controller.package.annotationTypes):
+            # Selected annotation types (else we would use all package's types)
+            self.annotationtypes_selection = annotationtypes
+        else:
+            self.annotationtypes_selection = None
         self.annotationtypes = annotationtypes
 
         # package used when the update_model has been called from
@@ -527,6 +532,7 @@ class TimeLine(AdhocView):
             if res == Gtk.ResponseType.YES:
                 # Display all types
                 self.annotationtypes = list(self.controller.package.annotationTypes)
+                self.annotationtypes_selection = None
                 self.update_model(partial_update=True)
             return True
         d.connect('response', handle_response)
@@ -572,37 +578,21 @@ class TimeLine(AdhocView):
         if package is None:
             package = self.controller.package
 
-        if from_init:
-            if len(self.layout.get_children()) < 3:
-                self.package_from_init = package
-            else:
-                self.update_lock.release()
-                return
-        else:
-            if package == self.package_from_init:
-                # update_model is called on the same package as in the
-                # __init__ method. This means that is is a result of
-                # the PackageActivate, so do not update it twice. Just
-                # reset package_from_init to enable future updates (in
-                # case of mass-modification of the package: merging,
-                # import...)
-                self.package_from_init = None
-                self.update_lock.release()
-                return
-
         self.update_min_max()
         if partial_update:
             pos=self.get_middle_position()
         else:
             # It is not just an update, do a full redraw
-            if self.annotationtypes is None and self.list is None:
+            if self.list is not None:
+                # We specified a list of annotations. Display only the
+                # annotation types for annotations present in the set
+                self.annotationtypes = list(set([ a.type for a in self.list ]))
+            elif self.annotationtypes_selection is not None:
+                self.annotationtypes = self.annotationtypes_selection
+            else:
                 # We display the whole package, so display also
                 # empty annotation types
                 self.annotationtypes = list(self.controller.package.annotationTypes)
-            elif self.list is not None:
-                # We specified a list. Display only the annotation
-                # types for annotations present in the set
-                self.annotationtypes = list(set([ a.type for a in self.list ]))
 
         # Clear the layouts
         self.layout.foreach(self.layout.remove)
@@ -933,7 +923,7 @@ class TimeLine(AdhocView):
             print "Unknown event %s" % event
         return True
 
-    def update_annotationtype (self, annotationtype=None, event=None):
+    def update_annotationtype(self, annotationtype=None, event=None):
         """Update an annotationtype's representation.
         """
         if event == 'AnnotationTypeCreate':
@@ -1557,6 +1547,7 @@ class TimeLine(AdhocView):
                 l.append(source)
                 l.extend(self.annotationtypes[j+1:])
                 self.annotationtypes=l
+                self.annotationtypes_selection = self.annotationtypes
                 self.update_model(partial_update=True)
             elif y < self.button_height + s:
                 # Drop at the beginning of the list.
@@ -1567,6 +1558,7 @@ class TimeLine(AdhocView):
                 l=[ source ]
                 l.extend(self.annotationtypes)
                 self.annotationtypes=l
+                self.annotationtypes_selection = self.annotationtypes
                 self.update_model(partial_update=True)
             elif y > max(self.layer_position.values() or (0,)):
                 # Drop at the end of the list
@@ -1575,6 +1567,7 @@ class TimeLine(AdhocView):
                         return True
                     self.annotationtypes.remove(source)
                 self.annotationtypes.append(source)
+                self.annotationtypes_selection = self.annotationtypes
                 self.update_model(partial_update=True)
             return True
         return False
@@ -3389,6 +3382,7 @@ class TimeLine(AdhocView):
                 source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
                 if source in self.annotationtypes:
                     self.annotationtypes.remove(source)
+                    self.annotationtypes_selection = self.annotationtypes
                     self.update_model(partial_update=True)
             else:
                 logger.warn('Unknown target type for drop: %d' % targetType)
@@ -3645,6 +3639,10 @@ class TimeLine(AdhocView):
         res=d.run()
         if res == Gtk.ResponseType.OK:
             self.annotationtypes = [ at[1] for at in selected_store ]
+            self.annotationtypes_selection = self.annotationtypes
+            if len(self.annotationtypes) == len(self.controller.package.annotationTypes):
+                # All types selected
+                self.annotationtypes_selection = None
             self.package_from_init = None
             self.update_model(partial_update=True)
         d.destroy()
