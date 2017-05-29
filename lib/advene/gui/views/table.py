@@ -274,7 +274,7 @@ class AnnotationTable(AdhocView):
                 return
             a = self.model.get_value (it, COLUMN_ELEMENT)
             new_content = helper.title2content(text,
-                                               a.content.data,
+                                               a.content,
                                                a.type.getMetaData(config.data.namespace, "representation"))
             if new_content is None:
                 self.log(_("Cannot update the annotation, its representation is too complex"))

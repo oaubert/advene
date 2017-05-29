@@ -224,7 +224,7 @@ class TranscriptionView(AdhocView):
                 break
             enditer  = b.get_iter_at_mark(m)
             new_content = helper.title2content(b.get_text(beginiter, enditer, False).decode('utf-8').strip(ZERO_WIDTH_NOBREAK_SPACE),
-                                               a.content.data,
+                                               a.content,
                                                a.type.getMetaData(config.data.namespace, 'representation') if self.options['default-representation'] else self.options['representation'])
             if new_content is None:
                 impossible.append(a)

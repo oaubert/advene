@@ -1664,7 +1664,7 @@ class TimeLine(AdhocView):
         def key_handler(widget, event, ann, cb, controller, close_eb):
             if event.keyval == Gdk.KEY_Return:
                 r = helper.title2content(widget.get_text().decode('utf-8'),
-                                         ann.content.data,
+                                         ann.content,
                                          ann.type.getMetaData(config.data.namespace, "representation"))
                 if r is None:
                     self.controller.log(_("Cannot update the annotation, its representation is too complex"))
@@ -1687,7 +1687,7 @@ class TimeLine(AdhocView):
             elif event.keyval == Gdk.KEY_Tab:
                 # Validate the current annotation and go to the previous/next one
                 r = helper.title2content(widget.get_text().decode('utf-8'),
-                                         ann.content.data,
+                                         ann.content,
                                          ann.type.getMetaData(config.data.namespace, "representation"))
                 if r is None:
                     self.controller.log("Cannot update the annotation, its representation is too complex")

@@ -18,6 +18,8 @@
 #
 """Generic helper functions."""
 
+
+import json
 import time
 import StringIO
 import inspect
@@ -855,15 +857,21 @@ def title2content(new_title, original_content, representation):
             # so we can update the name field.
             new_title = new_title.replace('\n', '\\n')
             name=m.group(1)
-            reg = re.compile('^' + name + '=(.*?)$', re.MULTILINE)
-            if reg.search(original_content):
-                r = reg.sub(name + '=' + new_title, original_content)
-            else:
-                # The key is not present, add it
-                if original_content:
-                    r = original_content + "\n%s=%s" % (name, new_title)
+
+            if original_content.mimetype == 'application/x-advene-structured':
+                reg = re.compile('^' + name + '=(.*?)$', re.MULTILINE)
+                if reg.search(original_content):
+                    r = reg.sub(name + '=' + new_title, original_content)
                 else:
-                    r = "%s=%s" % (name, new_title)
+                    # The key is not present, add it
+                    if original_content:
+                        r = original_content + "\n%s=%s" % (name, new_title)
+                    else:
+                        r = "%s=%s" % (name, new_title)
+            elif original_content.mimetype == 'application/json':
+                data = json.loads(original_content.data)
+                data[name] = new_title
+                r = json.dumps(data)
         # else: too complex representation. Return None as default value.
     return r
 
