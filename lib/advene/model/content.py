@@ -16,6 +16,9 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
+
 from cStringIO import StringIO
 import urllib
 try:
@@ -267,6 +270,11 @@ class Content(modeled.Modeled,
         It returns a Node object whose attributes are the different
         attributes and children of the node.
 
+        JSON data
+        =========
+
+        It returns the structure corresponding to the JSON data.
+
         @return: a data structure
         """
         # FIXME: the right way to implement this would be to subclass the Content
@@ -282,7 +290,11 @@ class Content(modeled.Modeled,
             return StructuredContent(self.data)
         elif self.mimetype == 'application/json':
             if json is not None:
-                return json.loads(self.data)
+                try:
+                    return json.loads(self.data)
+                except ValueError:
+                    logger.error("Cannot interpret content as json: %s", self.data)
+                    return self.data
             else:
                 return {'data': self.data}
         elif self.mimetype == 'application/x-advene-values':
