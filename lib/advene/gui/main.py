@@ -4509,18 +4509,14 @@ class AdveneGUI(object):
 
     def on_slider_button_press_event (self, button=None, event=None):
         self.slider_move = True
-        if event.button == 1:
-            event.button = 2
-        return False
+        return
 
     def on_slider_button_release_event (self, button=None, event=None):
         if self.controller.player.playlist_get_list():
             p = self.controller.create_position (value = long(self.gui.slider.get_value ()))
             self.controller.update_status('set', p)
         self.slider_move = False
-        if event.button == 1:
-            event.button = 2
-        return False
+        return
 
     def on_slider_scroll_event (self, widget=None, event=None):
         incr = 0
@@ -4536,7 +4532,7 @@ class AdveneGUI(object):
                 incr = -1
         if incr:
             self.controller.move_frame(incr)
-        return False
+        return
 
     def on_video_button_press_event (self, button=None, event=None):
         if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
