@@ -654,9 +654,9 @@ class TimeLine(AdhocView):
             self.bookmarks_to_draw = []
 
     def debug_cb (self, widget, data=None):
-        print "Debug event."
+        logger.debug("Debug event.")
         if data is not None:
-            print "Data: %s" % data
+            logger.debug("Data: %s", data)
         return False
 
     def get_widget_for_annotation (self, annotation):
@@ -728,7 +728,6 @@ class TimeLine(AdhocView):
                     self.refresh()
                     return False
                 else:
-                    print "duration_updated timeout"
                     # Try again at next timeout.
                     return True
             GObject.timeout_add(100, duration_updated, long(context.globals['duration']))
@@ -920,7 +919,7 @@ class TimeLine(AdhocView):
         elif event == 'AnnotationCreate':
             pass
         else:
-            print "Unknown event %s" % event
+            logger.warn("Unknown event %s" % event)
         return True
 
     def update_annotationtype(self, annotationtype=None, event=None):
@@ -991,8 +990,8 @@ class TimeLine(AdhocView):
     def dump_adjustment (self, a=None):
         if a is None:
             a = self.adjustment
-        print ("Lower: %.1f\tUpper: %.1f\tValue: %.1f\tPage size: %.1f"
-               % (a.get_lower(), a.get_upper(), a.get_value(), a.get_page_size()))
+        logger.debug("Lower: %.1f\tUpper: %.1f\tValue: %.1f\tPage size: %.1f"
+                     % (a.get_lower(), a.get_upper(), a.get_value(), a.get_page_size()))
 
     def align_annotations(self, source, dest, mode):
         new={
@@ -1006,7 +1005,7 @@ class TimeLine(AdhocView):
             for k in ('begin', 'end'):
                 new[k]=getattr(dest.fragment, k)
         else:
-            print "Unknown drag mode: %s" % mode
+            logger.warn("Unknown drag mode: %s" % mode)
 
 
         if new['begin'] < new['end']:
@@ -3568,7 +3567,7 @@ class TimeLine(AdhocView):
                 path=r.get_path()
                 if path is None:
                     # Should not happen...
-                    print 'Strange...'
+                    logger.warn('Strange state in selection transfer...')
                     continue
                 it=store.get_iter(path)
                 # Add el to dest
