@@ -16,7 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""GUI to import external file formats.
+"""GUI to apply importers to files or internal data
 """
 import os
 import thread
@@ -37,17 +37,17 @@ from advene.gui.views import AdhocView
 
 dummy_advene_importer = object()
 
-name="FileImporter view plugin"
+name="AnnotationImporter view plugin"
 
 def register(controller):
-    controller.register_viewclass(FileImporter)
+    controller.register_viewclass(AnnotationImporter)
 
-class FileImporter(AdhocView):
+class AnnotationImporter(AdhocView):
     view_name = _("Importer")
     view_id = 'importerview'
 
-    def __init__(self, controller=None, filename=None, message=None, display_unlikely=True, parameters=None):
-        super(FileImporter, self).__init__(controller=controller)
+    def __init__(self, controller=None, filename=None, message=None, display_unlikely=True, parameters=None, importerclass=None, annotation_type=None):
+        super(AnnotationImporter, self).__init__(controller=controller)
         self.controller=controller
         self.parameters=parameters
         self.message = message
@@ -67,8 +67,10 @@ class FileImporter(AdhocView):
         # act accordingly.
         self.main_thread_id = thread.get_ident()
         self.importer = None
+        if importerclass is not None:
+            self.importer = importerclass(controller=self.controller, callback=self.progress_callback, annotation_type=annotation_type)
+        self.annotation_type = annotation_type
         self.filename = filename
-
         self.widget=self.build_widget()
 
         if filename:
@@ -89,9 +91,9 @@ class FileImporter(AdhocView):
             if isinstance(b, Gtk.Button):
                 # Normally, the Gtk.Button contains a Gtk.HBox, which
                 # contains some widgets among which a Gtk.Label
-                l = [ c 
-                      for w in b.get_children() 
-                      for c in w.get_children() 
+                l = [ c
+                      for w in b.get_children()
+                      for c in w.get_children()
                       if isinstance(c, Gtk.Label) ]
                 if l:
                     # Found the label
@@ -151,27 +153,32 @@ class FileImporter(AdhocView):
         b.set_label(stop_label)
         self.importers.set_sensitive(False)
         self.fb.set_sensitive(False)
-        ic = self.importers.get_current_element()
-        fname = unicode(self.filename or self.fb.get_filename() or self.fb.get_uri())
 
-        if fname.startswith('file://'):
-            fname = fname.replace('file://', '')
-        if ic == dummy_advene_importer:
-            # Invoke the package merge functionality.
-            try:
-                source=Package(uri=fname)
-            except Exception, e:
-                self.log("Cannot load %s file: %s" % (fname, unicode(e)))
+        if self.importer is None:
+            ic = self.importers.get_current_element()
+            fname = unicode(self.filename or self.fb.get_filename() or self.fb.get_uri())
+
+            if fname.startswith('file://'):
+                fname = fname.replace('file://', '')
+            if ic == dummy_advene_importer:
+                # Invoke the package merge functionality.
+                try:
+                    source=Package(uri=fname)
+                except Exception, e:
+                    self.log("Cannot load %s file: %s" % (fname, unicode(e)))
+                    return True
+                m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
+                m.popup()
+                self.close()
                 return True
-            m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
-            m.popup()
-            self.close()
-            return True
 
-        if ic is None:
-            return True
-        i = ic(controller=self.controller, callback=self.progress_callback)
-        self.importer = i
+            if ic is None:
+                return True
+            i = ic(controller=self.controller, callback=self.progress_callback)
+            self.importer = i
+        else:
+            i = self.importer
+            fname = self.filename
         i.set_options(self.optionform.options)
         i.package=self.controller.package
 
@@ -231,12 +238,18 @@ class FileImporter(AdhocView):
                 break
         return self.should_continue
 
-    def update_options(self, combo):
-        # Instanciate a dummy importer, to get its options.
-        ic = combo.get_current_element()
+    def update_options(self, combo, forced=None):
+        if forced:
+            ic = forced.__class__
+        else:
+            # Instanciate a dummy importer, to get its options.
+            ic = combo.get_current_element()
         self.options_frame.foreach(self.options_frame.remove)
         if ic is not None and ic != dummy_advene_importer:
-            i = ic(controller=self.controller)
+            if forced:
+                i = forced
+            else:
+                i = ic(controller=self.controller)
             self.optionform = OptionParserGUI(i.optionparser, i)
             self.options_frame.add(self.optionform)
         return True
@@ -258,6 +271,7 @@ class FileImporter(AdhocView):
         self.fb.connect('file-set', updated_filename)
 
         line.pack_start(self.fb, True, True, 0)
+        # We pass a message, assume that the source is already specified and hide FileChooser
         if self.message is not None:
             line.pack_start(Gtk.Label(self.message), True, True, 0)
             self.fb.set_no_show_all(True)
@@ -270,9 +284,14 @@ class FileImporter(AdhocView):
         line=Gtk.HBox()
         vbox.pack_start(line, False, True, 0)
 
-        line.pack_start(Gtk.Label(_("Filter")), False, False, 0)
+        line.pack_start(Gtk.Label(_("Filter") + " "), False, False, 0)
         self.importers = dialog.list_selector_widget([], None, callback=self.update_options)
         line.pack_start(self.importers, False, True, 0)
+        # An importer was specified. Do no display the importer list
+        if self.importer is not None:
+            self.importers.set_no_show_all(True)
+            self.importers.hide()
+            line.pack_start(Gtk.Label(self.importer.name), False, True, 0)
 
         exp = Gtk.Frame.new(_("Options"))
         self.options_frame = Gtk.VBox()
@@ -286,13 +305,17 @@ class FileImporter(AdhocView):
 
         b=Gtk.Button(_("Start"))
         b.connect('clicked', self.convert_file)
-        b.set_sensitive(False)
         bb.pack_start(b, False, True, 0)
         self.convert_button=b
 
         vbox.pack_start(bb, False, True, 0)
 
-        self.update_importers()
+        if self.importer is None:
+            self.convert_button.set_sensitive(False)
+            self.update_importers()
+        else:
+            self.update_options(self.importers, forced=self.importer)
+            self.convert_button.set_sensitive(True)
 
         vbox.show_all()
 
