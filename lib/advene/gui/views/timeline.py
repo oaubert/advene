@@ -175,6 +175,13 @@ class TimeLine(AdhocView):
                 c=self.controller.build_context()
                 # Override a potentially existing value of elements
                 elements=c.evaluateValue(v)
+            elif n == 'element':
+                # Add to potential list of elements
+                a = self.controller.package.get_element_by_id(v)
+                if a is not None:
+                    if elements is None:
+                        elements = []
+                    elements.append(a)
             elif n == 'position':
                 default_position=int(float(v))
             elif n == 'zoom':
@@ -360,7 +367,11 @@ class TimeLine(AdhocView):
                                                default_zoom, default_position, pane_position)
 
     def get_save_arguments(self):
-        arguments = [ ('annotation-type', at.id) for at in self.annotationtypes ]
+        arguments = []
+        if self.annotationtypes_selection:
+            arguments.append([ ('annotation-type', at.id) for at in self.annotationtypes_selection ])
+        if self.list:
+            arguments.append([ ('element', el.id) for el in self.list ])
         arguments.append( ('minimum', self.minimum ) )
         arguments.append( ('maximum', self.maximum ) )
         arguments.append( ('position', self.pixel2unit(self.adjustment.get_value(), absolute=True) ) )
