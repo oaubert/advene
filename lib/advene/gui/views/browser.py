@@ -249,8 +249,8 @@ class Browser(AdhocView):
                 columnbrowser.next=None
                 self._update_view(path, Exception(_("Expression returned None (there was an exception)")))
                 if config.data.preferences['expert-mode']:
-                    self.log("Exception when evaluating %s :\n%s" % ("/".join(path),
-                                                                     str(e)))
+                    self.log(u"Exception when evaluating %s :\n%s" % (u"/".join(path),
+                                                                      unicode(e)))
             return True
 
         self._update_view(path, el)
