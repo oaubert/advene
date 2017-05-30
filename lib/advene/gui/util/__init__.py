@@ -449,3 +449,6 @@ def gdk2intrgb(color):
     return ( (color.red >> 8) << 16) \
          | ( (color.green >> 8) << 8) \
          | (color.blue >> 8)
+
+def get_clipboard():
+    return Gtk.Clipboard.get(Gdk.Atom.intern("CLIPBOARD", True))

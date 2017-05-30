@@ -29,7 +29,7 @@ import cairo
 
 import advene.core.config as config
 from advene.gui.edit.elements import ContentHandler, TextContentHandler
-from advene.gui.util import png_to_pixbuf, decode_drop_parameters, get_pixmap_toolbutton, overlay_svg_as_pixbuf
+from advene.gui.util import png_to_pixbuf, decode_drop_parameters, get_pixmap_toolbutton, overlay_svg_as_pixbuf, get_clipboard
 
 from advene.gui.edit.htmleditor import HTMLEditor, ContextDisplay
 import advene.util.helper as helper
@@ -753,15 +753,15 @@ class HTMLContentHandler (ContentHandler):
         self.view = Gtk.VBox()
 
         def sel_copy(i):
-            self.editor.get_buffer().copy_clipboard(Gtk.clipboard_get())
+            self.editor.get_buffer().copy_clipboard(get_clipboard())
             return True
 
         def sel_cut(i):
-            self.editor.get_buffer().cut_clipboard(Gtk.clipboard_get())
+            self.editor.get_buffer().cut_clipboard(get_clipboard())
             return True
 
         def sel_paste(i):
-            self.editor.get_buffer().paste_clipboard(Gtk.clipboard_get())
+            self.editor.get_buffer().paste_clipboard(get_clipboard())
             return True
 
         def refresh(i):

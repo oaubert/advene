@@ -38,7 +38,7 @@ from advene.model.query import Query
 
 from advene.rules.elements import RuleSet, Rule, Event, Condition, Action
 
-from advene.gui.util import image_from_position, dialog
+from advene.gui.util import image_from_position, dialog, get_clipboard
 import advene.util.helper as helper
 import advene.util.importer
 
@@ -230,8 +230,8 @@ class Menu:
         return True
 
     def copy_id (self, widget, el):
-        clip=Gtk.clipboard_get()
-        clip.set_text(el.id)
+        clip = get_clipboard()
+        clip.set_text(el.id, -1)
         return True
 
     def browse_element (self, widget, el):

@@ -31,7 +31,7 @@ import urllib
 # Advene part
 import advene.core.config as config
 from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf, get_pixmap_toolbutton
-from advene.gui.util import encode_drop_parameters, decode_drop_parameters
+from advene.gui.util import encode_drop_parameters, decode_drop_parameters, get_clipboard
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
 from advene.model.annotation import Annotation
@@ -379,7 +379,7 @@ class ActiveBookmarks(AdhocView):
     def copy_current_bookmark(self):
         """Copy the current bookmark into the clipboard.
         """
-        c=Gtk.clipboard_get()
+        c = get_clipboard()
         cur=self.get_current_bookmark()
         if cur is None:
             return None
@@ -703,7 +703,7 @@ class ActiveBookmarks(AdhocView):
                 return True
             elif event.keyval == Gdk.KEY_v and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 # Paste
-                c=Gtk.clipboard_get()
+                c = get_clipboard()
                 def paste_bookmark(cl, sel, data):
                     b=ActiveBookmark(container=self, from_serialisation=sel.data)
                     self.append(b, after_current=True)
