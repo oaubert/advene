@@ -44,7 +44,6 @@ from Queue import PriorityQueue
 import heapq
 
 import logging
-
 logger = logging.getLogger(__name__)
 
 try:
@@ -238,6 +237,8 @@ class Snapshotter(object):
         if struct is None:
             logger.warn("Snapshotter: invalid struct")
             return True
+        logger.info("Timecode %010d - pts %010d" % (struct['date'],
+                                                    struct['pts']))
         t = struct['date']
         fname='/tmp/%010d.png' % t
         f=open(fname, 'wb')
@@ -320,6 +321,7 @@ class Snapshotter(object):
         t.start()
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     try:
         uri=sys.argv[1]
         if uri.startswith('/'):
