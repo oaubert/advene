@@ -112,7 +112,20 @@ class HPIImporter(GenericImporter):
     def iterator(self):
         """I iterate over the created annotations.
         """
-        # FIXME: make sure that we have all appropriate screenshots
+        src_atype = self.controller.package.get_element_by_id(self.atype)
+        minconf = self.confidence
+
+        # Make sure that we have all appropriate screenshots
+        missing_screenshots = []
+        for a in src_atype.annotations:
+            for t in (a.fragment.begin, (a.fragment.begin + a.fragment.end) / 2, a.fragment.end):
+                if not self.controller.package.imagecache.is_initialized(t):
+                    self.controller.update_snapshot(t)
+                    missing_screenshots.append(t)
+        if len(missing_screenshots) > 0:
+            self.output_message = _("Cannot run concept extraction, %d screenshots are missing. Wait for extraction to complete.") % len(missing_screenshots)
+            return
+
         self.progress(.1, "Concept extraction")
         if self.split_types:
             # Dict indexed by entity type name
@@ -135,9 +148,6 @@ class HPIImporter(GenericImporter):
             rtype.setHackedMemberTypes( ('*', '*') )
             schema.relationTypes.append(rtype)
             self.update_statistics('relation-type')
-
-        src_atype = self.controller.package.get_element_by_id(self.atype)
-        minconf = self.confidence
 
         # Use a requests.session to use a KeepAlive connection to the server
         session = requests.session()
