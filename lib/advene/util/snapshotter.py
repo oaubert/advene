@@ -102,10 +102,12 @@ class NotifySink(GstBase.BaseSink):
             logger.warn("Error in converting buffer")
             res = None
         else:
+            pos = self.query_position(Gst.Format.TIME)[1]
             res = {
                 'data': bytes(mapinfo.data),
                 'type': 'PNG',
-                'date': buffer.pts / Gst.MSECOND,
+                'date': pos / Gst.MSECOND,
+                'pts': buffer.pts / Gst.MSECOND,
                 # Hardcoded size values. They are not used
                 # by the application, since they are
                 # encoded in the PNG file anyway.
