@@ -137,7 +137,8 @@ class AnnotationImporter(AdhocView):
         self.controller.notify("PackageActivate", package=self.controller.package)
         self.close()
         if msg is None:
-            msg = _('Completed conversion: %(statistics)s') % {
+            msg = _('Completed conversion: %(message)s\n%(statistics)s') % {
+                'message': self.importer.output_message,
                 'statistics': self.importer.statistics_formatted() }
         dialog.message_dialog(msg, modal=False)
         self.log(msg)

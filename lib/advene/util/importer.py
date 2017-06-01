@@ -158,6 +158,9 @@ class GenericImporter(object):
             'view': 0,
             'package': 0,
             }
+        # Optional output message that can be set by the importer to
+        # provide feedback to the user
+        self.output_message = ""
 
         # The convention for OptionParser is to have the "dest"
         # attribute of the same name as the Importer attribute
