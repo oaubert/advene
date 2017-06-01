@@ -1,8 +1,35 @@
-advene (1.5) unstable; urgency=medium
+advene (3.0) unstable; urgency=medium
 
   * Upgrade libs to Gtk3 / Gstreamer 1.0
 
- --
+  * Preferences are now stored in json format, the old preferences file
+    advene.prefs is converted and can be removed.
+
+  * Many bug fixes, probably some bug introduction
+
+  * Completion:
+
+    - Content completion is available when editing through table view or
+      timeline quick edit mode.
+
+    - New global option completion: if there are predefined terms for the
+      annotation type, then use only these terms. Else fallback on dynamic
+      completion.
+
+    - Annotation type predefined terms used only space as separator (and
+      thus could not contain spaces). If a comma is present in the terms
+      field, then it will be considered as separator, allowing to define
+      terms containing spaces.
+
+  * Table view:
+    - new shortcuts Control-< and Control-> to modify begin/end time
+    - export to CSV action
+
+  * WebAnnotation export filter
+
+  * OWL Schema importer
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Thu, 01 Jun 2017 11:17:02 +0200
 
 advene (1.2) unstable; urgency=medium
 
