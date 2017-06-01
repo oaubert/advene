@@ -275,7 +275,7 @@ class ZipPackage:
 
         for (dirpath, dirnames, filenames) in os.walk(self._tempdir):
             # Ignore RCS directory paths
-            for d in ('.svn', 'CVS', '_darcs', '.bzr'):
+            for d in ('.svn', 'CVS', '_darcs', '.bzr', '.git'):
                 if d in dirnames:
                     dirnames.remove(d)
 
