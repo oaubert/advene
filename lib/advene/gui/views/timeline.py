@@ -264,7 +264,7 @@ class TimeLine(AdhocView):
         # The same value in relative form
         self.fraction_adj = Gtk.Adjustment.new(value=1.0,
                                                lower=0.01,
-                                               upper=1.0,
+                                               upper=10.0,
                                                step_increment=.01,
                                                page_increment=.1,
                                                page_size=.1)
@@ -561,7 +561,7 @@ class TimeLine(AdhocView):
 
         if self.maximum != oldmax and self.layout.get_window() is not None:
             # Reset to display whole timeline
-            self.scale.set_value( (self.maximum - self.minimum) / float(self.layout.get_window().get_height()) )
+            self.scale.set_value( (self.maximum - self.minimum) / float(self.layout.get_clip().width or 100) )
 
     def update_model(self, package=None, partial_update=False, from_init=False):
         """Update the whole model.
@@ -609,7 +609,7 @@ class TimeLine(AdhocView):
             self.update_legend_widget(self.legend)
             self.legend.show_all()
             if self.layout.get_window() is not None:
-                self.fraction_event(widget=None, forced_window_width=self.layout.get_window().get_width())
+                self.fraction_event(widget=None, forced_window_width=self.layout.get_clip().width or 100)
             self.update_lock.release()
 
         self.populate(finalize_callback)
@@ -2647,11 +2647,10 @@ class TimeLine(AdhocView):
     def layout_resize_event(self, widget=None, event=None, *p):
         """Recompute fraction_adj value when the layout size changes
         """
-        parent = self.layout.get_window()
-        if not parent:
+        if not self.layout.get_window():
             return False
         if self.maximum != self.minimum:
-            fraction=self.scale.get_value() * float(parent.get_width()) / (self.maximum - self.minimum)
+            fraction=self.scale.get_value() * float(self.layout.get_clip().width) / (self.maximum - self.minimum)
             #print "Layout resize, reset fraction_adj to ", fraction, w
             self.fraction_adj.set_value(fraction)
             self.zoom_combobox.get_child().set_text('%d%%' % long(100 * fraction))
@@ -2661,7 +2660,7 @@ class TimeLine(AdhocView):
         # Deactivate autoscroll...
         self.set_autoscroll_mode(0)
 
-        self.scale.set_value(1.3 * (end - begin) / self.layout.get_window().get_width())
+        self.scale.set_value(1.3 * (end - begin) / self.layout.get_clip().width or 100)
 
         # Center on annotation
         self.center_on_position( (begin + end) / 2 )
@@ -2700,13 +2699,12 @@ class TimeLine(AdhocView):
 
         fraction is > 0 and <= 1.
         """
-        parent = self.layout.get_window()
-        if not parent:
+        if not self.layout.get_window():
             return True
-        w = parent.get_width()
-        if forced_window_width != 0:
+        if forced_window_width > 0:
             w = forced_window_width
-
+        else:
+            w = self.layout.get_clip().width
         if w < 10:
             return True
 
@@ -2721,9 +2719,7 @@ class TimeLine(AdhocView):
             self.log(_("Cannot zoom more"))
             return True
 
-        # Is it worth redrawing the whole timeline ?
-        if abs(v - self.scale.get_value()) / float(self.scale.get_value()) > 0.01:
-            self.scale.set_value(v)
+        self.scale.set_value(v)
         self.zoom_combobox.get_child().set_text('%d%%' % long(100 * fraction))
 
         return True
