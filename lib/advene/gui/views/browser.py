@@ -297,7 +297,7 @@ class Browser(AdhocView):
         self.current_value=element
 
     def display_result(self, *p):
-        """Display the results as annotations in a timeline.
+        """Display the results as annotations in a table
         """
         if not hasattr(self.current_value, '__iter__'):
             self.log(_("Result is not a list"))
