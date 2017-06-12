@@ -85,7 +85,6 @@ class TranscriptionEdit(AdhocView):
         self.contextual_actions = (
             (_("Save view"), self.save_view),
             (_("Save default options"), self.save_default_options),
-            (_("Export as static view"), lambda v, t: self.export_as_static_view()),
             )
 
         self.controller=controller

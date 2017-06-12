@@ -44,8 +44,7 @@ class KinectController(AdhocView):
     def __init__(self, controller=None, uri=None, parameters=None):
         super(KinectController, self).__init__(controller=controller)
         self.close_on_package_load = False
-        self.contextual_actions = [
-            ]
+        self.contextual_actions = []
         self.controller = controller
         self.registered_rules = []
 

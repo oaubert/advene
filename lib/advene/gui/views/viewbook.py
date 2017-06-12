@@ -113,6 +113,10 @@ class ViewBook(AdhocView):
                 self.controller.gui.viewbook[d].add_view(v, name=v._label)
             return True
 
+        def handle_contextual_action(menuitem, action):
+            action()
+            return True
+
         def popup_menu(button, event, view):
             if event.button == 3:
                 menu = Gtk.Menu()
@@ -143,7 +147,7 @@ class ViewBook(AdhocView):
                 try:
                     for label, action in view.contextual_actions:
                         item = Gtk.MenuItem(label, use_underline=False)
-                        item.connect('activate', lambda w: action())
+                        item.connect('activate', handle_contextual_action, action)
                         menu.append(item)
                 except AttributeError:
                     pass

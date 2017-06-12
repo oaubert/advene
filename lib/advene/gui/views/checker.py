@@ -41,8 +41,7 @@ class CheckerView(AdhocView):
     def __init__ (self, controller=None, parameters=None):
         super(CheckerView, self).__init__(controller=controller)
         self.close_on_package_load = False
-        self.contextual_actions = (
-            )
+        self.contextual_actions = ()
         self.controller=controller
         self.options = {
             }

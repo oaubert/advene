@@ -139,8 +139,8 @@ class TimeLine(AdhocView):
             (_("Refresh"), self.refresh),
             (_("Save view"), self.save_view),
             (_("Save default options"), self.save_default_options),
-            (_("Limit display to current area"), lambda i, b: self.limit_display()),
-            (_("Display whole movie"), lambda i, b: self.unlimit_display()),
+            (_("Limit display to current area"), self.limit_display),
+            (_("Display whole movie"), self.unlimit_display),
             )
         self.options = {
             'highlight': False,

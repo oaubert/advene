@@ -37,8 +37,7 @@ class ShotValidation(AdhocView):
     def __init__(self, controller=None, parameters=None, annotationtype=None):
         super(ShotValidation, self).__init__(controller=controller)
         self.close_on_package_load = True
-        self.contextual_actions = (
-            )
+        self.contextual_actions = ()
         self.controller=controller
         self._annotationtype=None
 

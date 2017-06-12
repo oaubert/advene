@@ -556,8 +556,7 @@ class GenericTable(AdhocView):
     def __init__(self, controller=None, parameters=None, elements=None, source=None):
         super(GenericTable, self).__init__(controller=controller)
         self.close_on_package_load = False
-        self.contextual_actions = (
-            )
+        self.contextual_actions = ()
         self.controller=controller
         self.elements=elements
         self.source = source
