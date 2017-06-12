@@ -273,7 +273,7 @@ class AnnotationTable(AdhocView):
             if not it:
                 return
             a = self.model.get_value (it, COLUMN_ELEMENT)
-            new_content = helper.title2content(text,
+            new_content = helper.title2content(text.decode('utf-8'),
                                                a.content,
                                                a.type.getMetaData(config.data.namespace, "representation"))
             if new_content is None:

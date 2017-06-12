@@ -844,9 +844,11 @@ def title2content(new_title, original_content, representation):
     then we can convert the short representation back to the
     appropriate content.
 
+    new_title is expected to be unicode.
+
     @return the new content or None if the content could not be updated.
     """
-    new_title = unicode(new_title, 'utf-8')
+    assert(isinstance(new_title, unicode))
     r = None
     if representation is None or empty_representation.match(representation):
         r = new_title
