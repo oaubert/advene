@@ -492,7 +492,7 @@ class Config(object):
         """Check if the settings directory is present, and create it if necessary.
         """
         if not os.path.isdir(self.path['settings']):
-            os.mkdir(self.path['settings'])
+            os.makedirs(self.path['settings'])
             self.first_run=True
         else:
             self.first_run=False
@@ -773,7 +773,7 @@ class Config(object):
         dp=os.path.dirname(preffile)
         if not os.path.isdir(dp):
             try:
-                os.mkdir(dp)
+                os.makedirs(dp)
             except OSError, e:
                 logger.error("Error: %s", str(e))
                 return False
