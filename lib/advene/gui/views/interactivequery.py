@@ -23,6 +23,7 @@ Display the query results in a view (timeline, tree, etc).
 from gettext import gettext as _
 import pprint
 
+from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import Pango
 
