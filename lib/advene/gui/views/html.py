@@ -192,7 +192,7 @@ class HTMLView(AdhocView):
         def utbv_menu(*p):
             if self.controller and self.controller.gui:
                 m=self.controller.gui.build_utbv_menu(action=self.open_url)
-                m.popup(None, None, None, 0, Gtk.get_current_event_time())
+                m.popup_at_pointer()
             return True
 
         tb=Gtk.Toolbar()
