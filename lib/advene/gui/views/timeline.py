@@ -440,12 +440,15 @@ class TimeLine(AdhocView):
         for b1, b2, r in to_draw:
             if b1 is None or b2 is None:
                 continue
+            x_offset = self.layout.get_hadjustment().get_value()
+            y_offset = self.layout.get_vadjustment().get_value()
+
             r1 = b1.get_allocation()
             r2 = b2.get_allocation()
-            x_start = r1.x + 3 * r1.width / 4
-            y_start  = r1.y + r1.height / 4
-            x_end=r2.x + r2.width / 4
-            y_end=r2.y + 3 * r2.height / 4
+            x_start = (r1.x + 3 * r1.width / 4) - x_offset
+            y_start  = (r1.y + r1.height / 4) - y_offset
+            x_end=(r2.x + r2.width / 4) - x_offset
+            y_end=(r2.y + 3 * r2.height / 4) - y_offset
             context.set_source_rgb(0, 0, 0)
             context.set_line_width(1)
             context.move_to(x_start, y_start)
