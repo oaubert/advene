@@ -3417,10 +3417,6 @@ class TimeLine(AdhocView):
         # Relation display toggle
         def handle_toggle(b, option):
             self.options[option]=b.get_active()
-            if option == 'display-all-relations':
-                region = self.layout.get_window().get_clip_region()
-                if region:
-                    self.layout.get_window().invalidate_region(region, True)
             return True
 
         self.display_relations_toggle=Gtk.ToggleToolButton(stock_id=Gtk.STOCK_REDO)
