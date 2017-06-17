@@ -381,9 +381,9 @@ class TimeLine(AdhocView):
     def get_save_arguments(self):
         arguments = []
         if self.annotationtypes_selection:
-            arguments.append([ ('annotation-type', at.id) for at in self.annotationtypes_selection ])
+            arguments.extend([ ('annotation-type', at.id) for at in self.annotationtypes_selection ])
         if self.list:
-            arguments.append([ ('element', el.id) for el in self.list ])
+            arguments.extend([ ('element', el.id) for el in self.list ])
         arguments.append( ('minimum', self.minimum ) )
         arguments.append( ('maximum', self.maximum ) )
         arguments.append( ('position', self.pixel2unit(self.adjustment.get_value(), absolute=True) ) )
