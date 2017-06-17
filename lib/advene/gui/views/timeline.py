@@ -162,7 +162,7 @@ class TimeLine(AdhocView):
         # Default position in ms.
         default_position=None
         default_zoom=1.0
-        pane_position=opt.get('pane-position', None)
+        inspector_width = opt.get('inspector-width', None)
         for n, v in arg:
             if n == 'annotation-type':
                 at=helper.get_id(self.controller.package.annotationTypes,
@@ -344,32 +344,39 @@ class TimeLine(AdhocView):
 
         # Set default parameters (zoom) and refresh the legend widget
         # on the first expose signal
-        def set_default_parameters(widget, event, zoom, pos, pane):
-            self.update_adjustment ()
-            self.adjustment.set_value(u2p(self.minimum, absolute=True))
-            self.fraction_adj.set_value(zoom)
-            if pos >= self.minimum and pos <= self.maximum:
-                self.adjustment.set_value(u2p(pos, absolute=True))
+        def set_default_parameters(widget, event, default_zoom, pos, inspector_width):
+            logger.debug("set_default_parameters default zoom: %f  pos: %d inspector_width: %d", default_zoom or 0, pos or 0, inspector_width or 0)
+
             # Set annotation inspector width, so that it does not auto-resize
-            if pane is None:
-                pane = self.widget.get_window().get_width() - 160
-            self.inspector_pane.set_position(pane)
+            if inspector_width is None:
+                inspector_width = 160
+            self.set_inspector_size(inspector_width)
+
             # Check if display is limited
             if self.minimum > 0 and self.maximum < self.controller.package.cached_duration:
                 self.limit_navtools.show()
+
+            self.update_adjustment ()
+            if pos >= self.minimum and pos <= self.maximum:
+                self.adjustment.set_value(u2p(pos, absolute=True))
+            else:
+                self.adjustment.set_value(u2p(self.minimum, absolute=True))
+
             if self.expose_signal:
                 self.widget.disconnect(self.expose_signal)
                 self.expose_signal = None
             self.update_model(from_init=True)
+            logger.debug("set zoom value default zoom: %f width: %d", default_zoom, self.layout.get_clip().width)
+            self.fraction_adj.set_value(default_zoom)
             return False
         # Convert values, that could be strings
         if default_position is not None:
             default_position=long(float(default_position))
-        if pane_position is not None:
-            pane_position=long(float(pane_position))
+        if inspector_width is not None:
+            inspector_width = long(float(inspector_width))
 
-        self.expose_signal=self.widget.connect('draw', set_default_parameters,
-                                               default_zoom, default_position, pane_position)
+        self.expose_signal=self.widget.connect_after('draw', set_default_parameters,
+                                                     default_zoom, default_position, inspector_width)
 
     def get_save_arguments(self):
         arguments = []
@@ -381,8 +388,21 @@ class TimeLine(AdhocView):
         arguments.append( ('maximum', self.maximum ) )
         arguments.append( ('position', self.pixel2unit(self.adjustment.get_value(), absolute=True) ) )
         arguments.append( ('zoom', self.fraction_adj.get_value()) )
-        self.options['pane-position']=self.inspector_pane.get_position()
+        self.options['inspector-width'] = self.get_inspector_size()
         return self.options, arguments
+
+    def get_inspector_size(self):
+        return self.inspector_pane.get_clip().width - self.inspector_pane.get_position()
+
+    def set_inspector_size(self, inspector_width):
+        width = self.inspector_pane.get_clip().width
+        if inspector_width > width - 100:
+            logger.debug("Too large inspector. Use a default value")
+            if width > 300:
+                inspector_width = 160
+            else:
+                inspector_width = 0
+        self.inspector_pane.set_position(width - inspector_width)
 
     def draw_background(self, layout, context):
         """Draw annotation type separating lines
@@ -1974,15 +1994,8 @@ class TimeLine(AdhocView):
                     self.quickview.set_text(_("Displaying done."))
                     self.locked_inspector = False
                 self.controller.gui.set_busy_cursor(False)
-                if old_position:
-                    self.inspector_pane.set_position(old_position)
-                else:
-                    # old_position was = 0, because its value was
-                    # obtained before the widget was realized. There
-                    # is a good chance that the value is now
-                    # available.
-                    if self.widget.get_window():
-                        self.inspector_pane.set_position(max((0, self.widget.get_window().get_width() - 160)))
+                self.set_inspector_size(old_inspector_width or 20)
+                update_layout_size()
                 if callback:
                     callback()
                 return False
