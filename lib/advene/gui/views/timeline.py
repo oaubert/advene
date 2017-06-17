@@ -2661,7 +2661,6 @@ class TimeLine(AdhocView):
             return False
         if self.maximum != self.minimum:
             fraction=self.scale.get_value() * float(self.layout.get_clip().width) / (self.maximum - self.minimum)
-            #print "Layout resize, reset fraction_adj to ", fraction, w
             self.fraction_adj.set_value(fraction)
             self.zoom_combobox.get_child().set_text('%d%%' % long(100 * fraction))
         return False
