@@ -628,8 +628,6 @@ class TimeLine(AdhocView):
         def finalize_callback():
             self.update_legend_widget(self.legend)
             self.legend.show_all()
-            if self.layout.get_window() is not None:
-                self.fraction_event(widget=None, forced_window_width=self.layout.get_clip().width or 100)
             self.update_lock.release()
 
         self.populate(finalize_callback)
@@ -1972,11 +1970,15 @@ class TimeLine(AdhocView):
         count = 10
         length = len(l)
 
-        #print '----------------------------------------- populate', length
-        #import traceback; traceback.print_stack()
         if l:
-            old_position = self.inspector_pane.get_position()
-            self.inspector_pane.set_position(2)
+            old_inspector_width = self.get_inspector_size()
+
+        def update_layout_size():
+            self.layout.set_size (u2p (self.maximum - self.minimum),
+                                  max(self.layer_position.values() or (0,))
+                                  + self.button_height + config.data.preferences['timeline']['interline-height'])
+            self.scale_layout.set_size(u2p (self.maximum - self.minimum), 40)
+
         def create_annotations(annotations, length):
             i = counter[0]
             if i < length:
@@ -2010,13 +2012,8 @@ class TimeLine(AdhocView):
             self.controller.gui.set_busy_cursor(True)
             GObject.idle_add(create_annotations, l, length)
         elif callback:
+            update_layout_size()
             callback()
-
-        self.layout.set_size (u2p (self.maximum - self.minimum),
-                              max(self.layer_position.values() or (0,))
-                              + self.button_height + config.data.preferences['timeline']['interline-height'])
-
-        self.scale_layout.set_size(u2p (self.maximum - self.minimum), 40)
 
     def draw_current_mark (self):
         u2p = self.unit2pixel
@@ -2718,13 +2715,14 @@ class TimeLine(AdhocView):
             w = forced_window_width
         else:
             w = self.layout.get_clip().width
-        if w < 10:
+        if w < 50:
             return True
 
         if self.minimum == self.maximum:
             return True
 
         fraction = self.fraction_adj.get_value()
+        logger.debug("fraction_event %f width %d forced %d", fraction, w, forced_window_width)
 
         v = (self.maximum - self.minimum) / float(w) * fraction
         # New width in pixel
