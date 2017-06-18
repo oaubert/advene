@@ -69,9 +69,31 @@ class OWLImporter(GenericImporter):
         PREFIX = """PREFIX owl: <http://www.w3.org/2002/07/owl#>
         PREFIX ar: <http://ada.filmontology.org/resource/>
         PREFIX ao: <http://ada.filmontology.org/ontology/>
-        PREFIX rdf: <http://www.w3.org/1999/02/22-r:df-syntax-ns#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         """
+        def get_label(graph, subject, default=""):
+            """Return a label for the object.
+
+            Using preferably @en labels
+            """
+            labels = graph.preferredLabel(s, lang='en')
+            if labels:
+                # We have at least 1 @en label. Return it.
+                return labels[0][1]
+            else:
+                # No defined label. Use default
+                return default
+
+        def get_comment(graph, subject, default=""):
+            """Return the comment@en for the object.
+            """
+            results = list(graph.query(PREFIX + 'SELECT ?comment WHERE { <%s> rdfs:comment ?comment . FILTER langMatches( lang(?comment), "en" ) }' % unicode(subject)))
+            if results:
+                return unicode(results[0][0])
+            else:
+                return default
+
         progress=0.01
         self.progress(progress, "Starting conversion")
         RDF = rdflib.RDF
@@ -82,15 +104,15 @@ class OWLImporter(GenericImporter):
             # Create the schema
             # FIXME: there is no label neither description at the moment.
             schema_id = s.rpartition('/')[-1]
-            title = graph.label(s) or schema_id
-            description = graph.comment(s)
+            title = get_label(graph, s, schema_id)
+            description = get_comment(graph, s)
             schema = self.create_schema(schema_id, title=title, description=description)
             if not self.progress(progress, "Creating schema %s" % schema.title):
                 break
             for at in graph.objects(s, AO.term('hasAnnotationType')):
                 at_id = at.rpartition('/')[-1]
-                label = graph.label(at)
-                description = graph.comment(at)
+                label = get_label(graph, at, at_id)
+                description = get_comment(graph, at)
                 self.create_annotation_type(schema, at_id, title=label, description=description)
         self.progress(1.0)
         # Hack: we have an empty iterator (no annotations here), but
