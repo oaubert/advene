@@ -27,12 +27,12 @@ import os
 import advene.core.config as config
 from advene.util.importer import GenericImporter
 try:
-    import ontospy
+    import rdflib
 except ImportError:
-    ontospy = None
+    rdflib = None
 
 def register(controller=None):
-    if ontospy is not None:
+    if rdflib is not None:
         controller.register_importer(OWLImporter)
     return True
 
@@ -51,38 +51,47 @@ class OWLImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
-        model = ontospy.Ontospy(filename)
+        graph = rdflib.Graph()
+        graph.parse(filename)
         p, at = self.init_package(filename=dest)
         p.setMetaData(config.data.namespace_prefix['dc'],
                       'description',
                       _("Converted from %s") % filename)
-        self.convert(self.iterator(model))
+        self.convert(self.iterator(graph))
         self.progress(1.0)
         return self.package
 
-    def iterator(self, model):
+    def iterator(self, graph):
         """Iterate through the loaded OWL.
-
-        Assumptions:
-        - there is a toplevel element (AnnotationConcept) in the model toplayer
-        - the first level of children defines schemas
-        - the leaf elements for each schema define annotation types
+        """
+        AO = rdflib.Namespace('http://ada.filmontology.org/ontology/')
+        AR = rdflib.Namespace('http://ada.filmontology.org/resource/')
+        PREFIX = """PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        PREFIX ar: <http://ada.filmontology.org/resource/>
+        PREFIX ao: <http://ada.filmontology.org/ontology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-r:df-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         """
         progress=0.01
         self.progress(progress, "Starting conversion")
-        root = model.toplayer[0]
-        schemas = root.children()
-        incr=0.98/len(schemas)
+        RDF = rdflib.RDF
+        schemas = list(graph.subjects(RDF.type, AO.AnnotationLevel))
+        incr=0.98 / len(schemas)
         for s in schemas:
             progress += incr
             # Create the schema
-            schema = self.create_schema(s.qname.strip(':'), title=s.bestLabel(), description=s.bestDescription())
+            # FIXME: there is no label neither description at the moment.
+            schema_id = s.rpartition('/')[-1]
+            title = graph.label(s) or schema_id
+            description = graph.comment(s)
+            schema = self.create_schema(schema_id, title=title, description=description)
             if not self.progress(progress, "Creating schema %s" % schema.title):
                 break
-            for c in s.descendants():
-                if not c.children():
-                    # We consider only leaf nodes
-                    self.create_annotation_type(schema, c.qname.strip(':'), title=c.bestLabel(), description=c.bestDescription())
+            for at in graph.objects(s, AO.term('hasAnnotationType')):
+                at_id = at.rpartition('/')[-1]
+                label = graph.label(at)
+                description = graph.comment(at)
+                self.create_annotation_type(schema, at_id, title=label, description=description)
         self.progress(1.0)
         # Hack: we have an empty iterator (no annotations here), but
         # if the yield instruction is not present in the method code,
@@ -93,8 +102,8 @@ class OWLImporter(GenericImporter):
 
 if __name__ == "__main__":
     import sys
-    if ontospy is None:
-        print("Cannot import required ontospy module")
+    if rdflib is None:
+        print("Cannot import required rdflib module")
         sys.exit(1)
     if len(sys.argv) < 3:
         print "Should provide a file name and a package name"
