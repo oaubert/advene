@@ -102,15 +102,15 @@ class DetailedTreeModel(object):
     def __init__(self, controller=None, package=None):
         self.childrencache = {}
         self.virtual={}
-        self.virtual['root'] = VirtualNode(_("Package"), package)
-        self.virtual['views']=VirtualNode(_("List of views"), package, viewableType='view-list')
-        self.virtual['static']=VirtualNode(_("Static views"), package, viewableType='view-list')
-        self.virtual['dynamic']=VirtualNode(_("Dynamic views"), package, viewableType='view-list')
-        self.virtual['admin']=VirtualNode(_("Admin views"), package, viewableType='view-list')
-        self.virtual['adhoc']=VirtualNode(_("Adhoc views"), package)
+        self.virtual['root']    = VirtualNode(_("Package"),       package)
+        self.virtual['views']   = VirtualNode(_("List of views"), package, viewableType='view-list')
+        self.virtual['static']  = VirtualNode(_("Static views"),  package, viewableType='view-list')
+        self.virtual['dynamic'] = VirtualNode(_("Dynamic views"), package, viewableType='view-list')
+        self.virtual['admin']   = VirtualNode(_("Admin views"),   package, viewableType='view-list')
+        self.virtual['adhoc']   = VirtualNode(_("Adhoc views"),   package)
 
     def nodeParent (self, node):
-        #print "nodeparent %s" % node
+        logger.warn("nodeparent %s", node)
         if isinstance (node, Annotation):
             parent = node.type
         elif isinstance (node, Relation):
@@ -146,7 +146,7 @@ class DetailedTreeModel(object):
         return parent
 
     def nodeChildren (self, node):
-        #print "nodechildren %s" % node
+        logger.warn("nodechildren %s %s", type(node), node)
         children = []
         if isinstance (node, Annotation):
             children = []
@@ -171,7 +171,7 @@ class DetailedTreeModel(object):
             children = []
         elif isinstance (node, Package):
             if not node in self.childrencache:
-                self.childrencache[node] = [node.schemas, self.virtual['views'], node.queries, node.resources ]
+                self.childrencache[node] = [node.schemas, self.virtual['views'], node.queries, node.resources or _("No resources") ]
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
@@ -377,7 +377,7 @@ class ModelColumn(FinderColumn):
             store, it = selection.get_selected()
             if it is not None:
                 att = model.get_value (it, self.COLUMN_ELEMENT)
-        if att and self.callback:
+        if att is not None and self.callback:
             self.callback(self, att)
             return True
         return False
@@ -540,8 +540,11 @@ class ViewColumn(FinderColumn):
         t=helper.get_view_type(self.element)
         if t == 'static':
             c=self.controller.build_context()
-            url=c.evaluateValue('here/view/%s/absolute_url' % self.element.id)
-            self.controller.open_url(url)
+            try:
+                url=c.evaluateValue('here/view/%s/absolute_url' % self.element.id)
+                self.controller.open_url(url)
+            except:
+                logger.warn("Cannot open static view: error when trying to get its url", exc_info=True)
         elif t == 'dynamic':
             self.controller.activate_stbv(self.element)
         elif t == 'adhoc':
@@ -877,6 +880,7 @@ class Finder(AdhocView):
         return True
 
     def clicked_callback(self, columnbrowser, node):
+        logger.debug("clicked_callback %s %s %s", columnbrowser, node, columnbrowser.next)
         if columnbrowser is None:
             # We selected  the rootcolumn. Delete the next ones
             cb=self.rootcolumn.next
@@ -903,8 +907,8 @@ class Finder(AdhocView):
             if cb is not None:
                 cb.close()
             # Check if the column is still appropriate for the node
-            clazz=CLASS2COLUMN.get(type(node), ModelColumn)
-            if not isinstance(columnbrowser.next, clazz):
+            clazz=CLASS2COLUMN.get(type(node), None)
+            if clazz is None or not isinstance(columnbrowser.next, clazz):
                 # The column is not appropriate for the new node.
                 # Close it and reopen it.
                 columnbrowser.next.close()
