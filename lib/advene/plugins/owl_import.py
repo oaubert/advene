@@ -109,11 +109,15 @@ class OWLImporter(GenericImporter):
             schema = self.create_schema(schema_id, title=title, description=description)
             if not self.progress(progress, "Creating schema %s" % schema.title):
                 break
-            for at in graph.objects(s, AO.term('hasAnnotationType')):
-                at_id = at.rpartition('/')[-1]
-                label = get_label(graph, at, at_id)
-                description = get_comment(graph, at)
-                self.create_annotation_type(schema, at_id, title=label, description=description)
+            for atnode in graph.objects(s, AO.term('hasAnnotationType')):
+                at_id = atnode.rpartition('/')[-1]
+                label = get_label(graph, atnode, at_id)
+                description = get_comment(graph, atnode)
+                at = self.create_annotation_type(schema, at_id, title=label, description=description)
+                values = [ unicode(t[0])
+                           for t in graph.query(PREFIX + "SELECT ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . }" % unicode(atnode)) ]
+                if values:
+                    at.setMetaData(config.data.namespace, "completions", ",".join(values))
         self.progress(1.0)
         # Hack: we have an empty iterator (no annotations here), but
         # if the yield instruction is not present in the method code,
