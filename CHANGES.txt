@@ -1,3 +1,13 @@
+advene (3.1) unstable; urgency=medium
+
+  * Bug fixes.
+
+  * Timeline : improve zoom level setting
+
+  * OWL importer: adapt to new definition structure
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Sun, 18 Jun 2017 23:21:19 +0200
+
 advene (3.0) unstable; urgency=medium
 
   * Upgrade libs to Gtk3 / Gstreamer 1.0
