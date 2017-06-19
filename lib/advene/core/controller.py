@@ -85,6 +85,17 @@ if config.data.webserver['mode']:
 import threading
 GObject.threads_init()
 
+old_excepthook = sys.excepthook
+def _advene_excepthook(type, value, tracebk, thread=None):
+    """This function will replace sys.excepthook.
+    """
+    import traceback
+    tb = "".join(traceback.format_exception(type, value, tracebk))
+    logger.error(tb)
+    # Use standard method also
+    old_excepthook(type, value, tracebk)
+sys.excepthook = _advene_excepthook
+
 class MessageHandler(logging.Handler):
     def __init__(self, level=logging.NOTSET, controller=None):
         super(MessageHandler, self).__init__(level)
