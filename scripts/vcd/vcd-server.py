@@ -14,8 +14,6 @@ from io import BytesIO
 import base64
 import itertools
 
-concepts = [ "dog", "cat", "bird", "tree", "human" ]
-
 HOST_NAME = ''
 PORT_NUMBER = 9000
 
