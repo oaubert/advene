@@ -1474,13 +1474,16 @@ class AdveneGUI(object):
         # south, fareast)
         self.pane={}
 
-        # Video player socket
-        self.drawable=Gtk.Socket()
-
         def handle_remove(socket):
             # Do not kill the widget if the application exits
             return True
-        self.drawable.connect('plug-removed', handle_remove)
+
+        # Video player socket
+        if config.data.os == 'win32':
+            self.drawable = Gtk.DrawingArea()
+        else:
+            self.drawable=Gtk.Socket()
+            self.drawable.connect('plug-removed', handle_remove)
 
         def register_drawable(drawable):
             # The player is initialized. We can register the drawable id
