@@ -9,4 +9,7 @@ RUN pip install keras==2.0.5 tensorflow==1.2.0rc2
 
 ADD vcd-server.py /vcd-server.py
 
+VOLUME [ "/root/.keras/" ]
+VOLUME [ "/var/vcd/cache" ]
+
 ENTRYPOINT [ "python" , "/vcd-server.py"]
