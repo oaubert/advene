@@ -43,13 +43,17 @@ Python2  >=  v. 2.7 : http://python.org/
 win32process from http://pywin32.sf.net/
 
 Python bindings for gtk/gstreamer and underlying libs from
-https://wiki.gnome.org/action/show/Projects/PyGObject enabling support for
+https://wiki.gnome.org/Projects/PyGObject/OldIndex
+enabling support for:
+
  - gtk
- - cairo
- - gstreamer
- - rsvg
- - webkit
+ - gdk-pixbuf
+ - gstreamer and all gst-plugins* packages
+ - gtksourceview
+ - webkitgtk
  - goocanvas
+
+
 
 Optionally,
 
