@@ -4,6 +4,7 @@ import BaseHTTPServer
 import json
 import random
 import urlparse
+import os
 
 from keras.applications.resnet50 import ResNet50
 from keras.preprocessing import image
@@ -17,9 +18,15 @@ import itertools
 HOST_NAME = ''
 PORT_NUMBER = 9000
 
+CACHE_DIR = "/var/vcd/cache"
+
 model = ResNet50(weights='imagenet')
 target_size=(224,224)
 top_n_preds = 3
+
+#create cachedir
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
 
 class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_HEAD(s):
