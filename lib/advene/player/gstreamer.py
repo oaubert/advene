@@ -208,7 +208,7 @@ class Player:
         elif config.data.player['vout'] == 'gl':
             sink='glimagesink'
         if config.data.os == 'win32':
-            sink='directdrawsink'
+            sink='d3dvideosink'
 
         self.player = Gst.ElementFactory.make("playbin", "player")
 
