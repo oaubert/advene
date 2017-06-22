@@ -2900,7 +2900,9 @@ class AdveneGUI(object):
 
         # Display in statusbar
         cid=self.gui.statusbar.get_context_id('info')
-        message_id=self.gui.statusbar.push(cid, unicode(msg).replace("\n", " - "))
+        if not isinstance(msg, unicode):
+            msg = unicode(msg, 'utf-8', 'replace')
+        message_id=self.gui.statusbar.push(cid, msg.replace("\n", " - "))
         # Display the message only 4 seconds
         GObject.timeout_add(4000, undisplay, cid, message_id)
 
