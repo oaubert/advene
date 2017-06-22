@@ -22,6 +22,7 @@
 import os
 import sys
 import urllib
+from urlparse import urljoin
 import re
 
 import xml.sax
@@ -74,12 +75,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
            Providing None for the source parameter creates a new Package.
         """
         self.meta_cache={}
-        if isinstance(uri, unicode):
-            uri=uri.encode(sys.getfilesystemencoding())
-        if re.match('[a-zA-Z]:', uri):
-            # Windows drive: notation. Convert it to
-            # a more URI-compatible syntax
-            uri=urllib.pathname2url(uri)
+        uri = util.uri.normalize_filename(uri)
         self.__uri = uri
         self.__importer = importer
         # Possible container
@@ -114,7 +110,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                     # Windows drive: notation. Convert it to
                     # a more URI-compatible syntax
                     source=urllib.pathname2url(source)
-                source_uri = util.uri.urljoin (
+                source_uri = urljoin (
                     'file:%s/' % urllib.pathname2url (os.getcwd ()),
                      str(source)
                 )
@@ -151,7 +147,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         doc = di.createDocument(adveneNS, "package", None)
 
         elt = doc.documentElement
-        elt.setAttributeNS(xmlNS,   "xml:base", unicode(self.__uri))
+        elt.setAttributeNS(xmlNS,   "xml:base", unicode(self.__uri, 'utf-8'))
         elt.setAttributeNS(xmlnsNS, "xmlns", adveneNS)
         elt.setAttributeNS(xmlnsNS, "xmlns:xlink", xlinkNS)
         elt.setAttributeNS(xmlnsNS, "xmlns:dc", dcNS)
@@ -201,18 +197,18 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         You would probably rather use the uri read-only property, unless you
         want to set the parameter _absolute_.
         """
-        uri = self.__uri
+        uri = unicode(self.__uri or "", 'utf-8')
 
         if not absolute and context is self:
             return ''
 
         importer = self.__importer
         if importer is not None:
-            uri = util.uri.urljoin (importer.getUri (absolute, context), uri)
+            uri = urljoin (importer.getUri (absolute, context), uri)
 
         if absolute:
             base_uri = 'file:%s/' % urllib.pathname2url (os.getcwd ())
-            uri = util.uri.urljoin(base_uri, uri)
+            uri = urljoin(base_uri, uri)
 
         return uri
 
@@ -318,16 +314,14 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         stream.write(self._getModel().toxml(encoding='utf8'))
 
     def save(self, name=None):
-        """Save the Package in the specified file"""
+        """Save the Package in the specified file.
+
+        We expect that the name is a unicode string.
+        """
         if name is None:
             name=self.__uri
-        if name.startswith('file:///'):
-            name = name[7:]
 
-        if re.match('|/', name):
-            # Windows drive: notation. Convert it from
-            # a more URI-compatible syntax
-            name=urllib.url2pathname(name)
+        name = util.uri.normalize_filename(name)
 
         # handle .azp files.
         if name.lower().endswith('.azp') or name.endswith('/'):
@@ -420,7 +414,7 @@ class Import(modeled.Modeled, _impl.Aliased):
         rel_uri =  self._getModel().getAttributeNS(xlinkNS, 'href')
         if absolute:
             base_uri = self.getOwnerPackage().getUri(absolute=True)
-            return util.uri.urljoin(base_uri, rel_uri)
+            return urljoin(base_uri, rel_uri)
         else:
             return rel_uri
 
@@ -456,7 +450,7 @@ class Import(modeled.Modeled, _impl.Aliased):
             for url in self.getSources():
                 try:
                     base_url = self._getParent ().getUri (absolute=True)
-                    url = util.uri.urljoin (base_url, url)
+                    url = urljoin (base_url, url)
                     cached = Package(uri, source=url,
                                      importer=self._getParent())
                     break

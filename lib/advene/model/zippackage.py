@@ -49,25 +49,17 @@
 
 import zipfile
 import os
-import sys
 import tempfile
-import re
 import shutil
 import urllib
 from advene.model.exception import AdveneException
 from advene.model.resources import Resources
+from advene.model.util.uri import _fs_encoding, normalize_filename
 import mimetypes
 
 import xml.etree.ElementTree as ET
 
 from gettext import gettext as _
-
-_fs_encoding = sys.getfilesystemencoding()
-# In some cases, sys.getfilesystemencoding returns None. And if the
-# system is misconfigured, it will return ANSI_X3.4-1968
-# (apparently). In these cases, fallback to a sensible default value
-if _fs_encoding in ('ascii', 'ANSI_X3.4-1968', None):
-    _fs_encoding='utf8'
 
 # Some constants
 MIMETYPE='application/x-advene-zip-package'
@@ -102,28 +94,13 @@ class ZipPackage:
         self.file_ = None
 
         if uri:
-            # os.stat seems to not grok unicode pathnames with
-            # accents. Pass it an encoded string.
-            uri=uri.encode(_fs_encoding)
-            if uri.startswith('file:///'):
-                n=uri[7:]
-            else:
-                n=uri
-            if os.path.exists(n):
+            uri = normalize_filename(uri)
+            if os.path.exists(uri):
                 # It is a real filename
                 self.uri = uri
-                self.file_ = n
-            elif re.match('^[a-zA-Z]:', n):
-                # Windows drive: notation. Convert it to
-                # a more URI-compatible syntax
-                self.uri=uri
-                self.file_ = urllib.pathname2url(n)
-            elif re.search('/[a-zA-Z]|', n):
-                # It is a pathname2url encoded path
-                self.uri = uri
-                self.file_ = urllib.url2pathname(n)
+                self.file_ = uri
             else:
-                u=urllib.urlopen(uri)
+                u = urllib.urlopen(uri)
 
                 # Use the same extension
                 self.uri = uri
