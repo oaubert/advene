@@ -2371,7 +2371,7 @@ class AdveneGUI(object):
         if res == Gtk.ResponseType.OK:
             self.controller.apply_export_filter(element,
                                                 exporters.get_current_element(),
-                                                fs.get_filename())
+                                                fs.get_filename().decode('utf-8'))
         fs.destroy()
         return True
 

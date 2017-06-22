@@ -207,7 +207,7 @@ class Evaluator:
                                      "_Save", Gtk.ResponseType.ACCEPT))
         ret = fs.run()
         if ret == Gtk.ResponseType.ACCEPT:
-            self.save_output(filename=fs.get_filename())
+            self.save_output(filename=fs.get_filename().decode('utf-8'))
         fs.destroy()
         return True
 

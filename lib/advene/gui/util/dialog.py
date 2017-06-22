@@ -612,7 +612,7 @@ def get_filename(title=_("Open a file"),
     filename=None
     al=None
     if res == Gtk.ResponseType.OK:
-        filename=fs.get_filename()
+        filename=fs.get_filename().decode('utf-8')
         if alias:
             al=alias_entry.get_text().decode('utf-8')
             if not al:
@@ -621,12 +621,6 @@ def get_filename(title=_("Open a file"),
                 al=generate_alias(filename)
             al = re.sub('[^a-zA-Z0-9_]', '_', al)
     fs.destroy()
-
-    if filename is not None and not isinstance(filename, unicode):
-        # Strangely, specifying _fs_encoding crashes with accented
-        # characters on win32.
-        # filename=unicode(filename, _fs_encoding)
-        filename=unicode(filename)
 
     if alias:
         return filename, al
@@ -663,7 +657,7 @@ def get_dirname(title=_("Choose a directory"),
     res=fs.run()
     dirname=None
     if res == Gtk.ResponseType.OK:
-        dirname=fs.get_filename()
+        dirname=fs.get_filename().decode('utf-8')
     fs.destroy()
 
     return dirname

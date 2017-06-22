@@ -385,7 +385,7 @@ class EditWidget(Gtk.VBox):
             res=fs.run()
             filename=None
             if res == Gtk.ResponseType.OK:
-                filename=fs.get_filename()
+                filename=fs.get_filename().decode('utf-8')
                 entry.set_text(filename)
             fs.destroy()
 
@@ -432,7 +432,7 @@ class EditWidget(Gtk.VBox):
             res=fs.run()
             filename=None
             if res == Gtk.ResponseType.OK:
-                filename=fs.get_filename()
+                filename=fs.get_filename().decode('utf-8')
                 entry.set_text(filename)
             fs.destroy()
 

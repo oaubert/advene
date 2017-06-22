@@ -2132,7 +2132,7 @@ class ShapeEditor(object):
                                      buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK, Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
             res=fs.run()
             if res == Gtk.ResponseType.OK:
-                name=fs.get_filename()
+                name=fs.get_filename().decode('utf-8')
                 root=ET.parse(name).getroot()
                 self.drawer.parse_svg(root)
             fs.destroy()
@@ -2144,7 +2144,7 @@ class ShapeEditor(object):
                                      buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK, Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
             res=fs.run()
             if res == Gtk.ResponseType.OK:
-                name = fs.get_filename()
+                name = fs.get_filename().decode('utf-8')
                 tree = ET.ElementTree(self.drawer.get_svg(relative=False))
                 f = open(name, 'w')
                 tree.write(f, encoding='utf-8')
