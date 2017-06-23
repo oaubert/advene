@@ -1457,8 +1457,6 @@ class AdveneGUI(object):
         # Video player socket
         if config.data.os == 'win32':
             self.drawable = Gtk.DrawingArea()
-            if not self.drawable.get_window().ensure_native():
-                logger.error("Video embedding requires a native window")
             def get_id(widget):
                 import ctypes
                 Gdk.threads_enter()
