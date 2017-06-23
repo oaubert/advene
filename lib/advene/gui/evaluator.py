@@ -18,6 +18,8 @@
 #
 """Python expression evaluator.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import os
 import time
@@ -530,7 +532,7 @@ class Evaluator:
                                      for a in dir(res)
                                      if a.startswith(attr) ]
                     except Exception as e:
-                        print("Exception when trying to complete attribute for %s starting with %s:\n%s" % (expr, attr, e))
+                        logger.error("Exception when trying to complete attribute for %s starting with %s:\n%s", expr, attr, e)
                         self.status_message("Completion exception for %s starting with %s" % (expr, attr))
                     if completion and attr == '':
                         # Do not display private elements by default.
@@ -549,7 +551,7 @@ class Evaluator:
                                          for k in o.keys()
                                          if k.startswith(key) ]
                         except Exception as e:
-                            print("Exception when trying to complete dict key for %s starting with %s:\n%s" % (expr, attr, e))
+                            logger.error("Exception when trying to complete dict key for %s starting with %s:\n%s", expr, attr, e)
                             self.status_message("Completion exception for %s starting with %s" % (expr, attr))
 
         self.clear_output()
@@ -895,4 +897,5 @@ def launch(globals_=None, locals_=None, historyfile=None):
     ev.run()
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     launch(globals(), locals())

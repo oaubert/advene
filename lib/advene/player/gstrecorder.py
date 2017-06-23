@@ -20,6 +20,8 @@
 
 Based on gst >= 1.0 API.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import tempfile
 import time
@@ -163,7 +165,7 @@ class Player:
         if isinstance(p, Position):
             v=p.value
             if p.key != self.MediaTime:
-                print "gstrecorder: unsupported key ", p.key
+                logger.error("gstrecorder: unsupported key %s", p.key)
                 return 0
             if p.origin != self.AbsolutePosition:
                 v += self.current_position()
@@ -202,7 +204,7 @@ class Player:
         return True
 
     def log(self, *p):
-        print "gstrecorder player: %s" % p
+        logger.warn("gstrecorder: %s", str(p))
 
     def get_media_position(self, origin, key):
         return self.current_position()
@@ -248,7 +250,7 @@ class Player:
             # But the probability of a tempfile attack against Advene
             # is rather low at the time of writing this comment.
             self.videofile=tempfile.mktemp('.ogg', 'record_')
-            print "%s already exists. We will not overwrite, so use %s instead " % (item, self.videofile)
+            logger.warn("%s already exists. We will not overwrite, so using %s instead ", item, self.videofile)
         else:
             self.videofile=item
         self.build_pipeline()
@@ -333,7 +335,7 @@ class Player:
         @param position: the position
         @type position: long
         """
-        #print "gstrec - update_status ", status, str(position)
+        logger.debug("update_status %s %s", status, str(position))
 
         # We only handle "start" and "stop".
         if status == "start":
@@ -348,7 +350,7 @@ class Player:
         return True
 
     def check_player(self):
-        print "check player"
+        logger.debug("check player")
         return True
 
     def position_update(self):

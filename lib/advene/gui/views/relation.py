@@ -43,7 +43,7 @@ class RelationView:
         return True
 
     def activate(self, button):
-        print "Relation %s activated" % self.relation.id
+        logger.warn("Relation %s activated %s", self.relation.id)
         if self.controller:
             self.controller.notify("RelationActivate", relation=self.relation)
         return True
@@ -89,9 +89,7 @@ class RelationsBox:
         return vbox
 
     def debug_cb (self, widget, data=None):
-        print "Debug event."
-        if data is not None:
-            print "Data: %s" % data
+        logger.warn("Debug event: %s", data or "No data")
         return True
 
     def get_widget_for_relation (self, relation):
@@ -168,11 +166,10 @@ class RelationsBox:
             elif event == 'RelationDelete':
                 b.destroy()
             else:
-                print "Unknown event %s" % event
+                logger.warn("Unknown event %s", event)
         return True
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
-        #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.get_target(), 8, widget.annotation.uri.encode('utf8'))
         else:
@@ -180,7 +177,6 @@ class RelationsBox:
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
-        #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
             source=self.package.annotations.get(unicode(selection.get_data(), 'utf8').split('\n')[0])
             dest=widget.annotation

@@ -2092,7 +2092,6 @@ class EditAttributesForm (EditForm):
         it = model.get_iter_first ()
         while it is not None:
             at = model.get_value (it, EditAttributesForm.COLUMN_NAME)
-            #print "Updating value of %s.%s" % (str(self.element), at)
             if at in self.editable:
                 text = model.get_value (it, EditAttributesForm.COLUMN_VALUE)
                 v = None
@@ -2125,7 +2124,6 @@ class EditAttributesForm (EditForm):
         it = model.get_iter_first ()
         while it is not None:
             at = model.get_value (it, EditAttributesForm.COLUMN_NAME)
-            #print "Updating value of %s.%s" % (str(self.element), at)
             if at in self.editable:
                 text = model.get_value (it, EditAttributesForm.COLUMN_VALUE)
                 v = None
@@ -2137,7 +2135,6 @@ class EditAttributesForm (EditForm):
 
                 if v is not None:
                     try:
-                        #print "el.%s = %s (%s)" % (at, str(v), repr(type(v)))
                         setattr (self.element, at, v)
                     except ValueError, e:
                         invalid.append((at, e))

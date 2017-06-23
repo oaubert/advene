@@ -19,6 +19,8 @@
 
 # Advene browser, a la NeXT's workspace manager
 # FIXME: implement set_path to directly display a given path
+import logging
+logger = logging.getLogger(__name__)
 
 # Advene part
 import advene.core.config as config
@@ -368,9 +370,7 @@ class Browser(AdhocView):
 
         vbox.show_all()
         def debug(*p):
-            print "browser debug", p
-            import traceback
-            traceback.print_stack()
+            logger.warn("browser debug %s", str(p), exc_info=True)
             return True
 
         #vbox.connect('destroy', debug)

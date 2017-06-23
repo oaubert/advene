@@ -20,6 +20,8 @@
 Merge packages
 ==============
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import sys
 import os
@@ -340,7 +342,7 @@ class Differ:
                 # Any type, no import necessary
                 continue
             if not m.startswith('#'):
-                print "Cannot handle non-fragment membertypes", m
+                logger.error("Cannot handle non-fragment membertypes %s", m)
                 continue
             at=helper.get_id(self.destination.annotationTypes, m[1:])
             if not at:
@@ -479,7 +481,7 @@ class Differ:
         source_name=os.path.join(self.source.resources.dir_, d)
         destination_name=os.path.join(self.destination.resources.dir_, d)
         if not os.path.exists(source_name):
-            print "Package integrity problem: %s does not exist" % source_name
+            logger.error("Package integrity problem: %s does not exist", source_name)
             return
         if os.path.isdir(source_name):
             shutil.copytree(source_name, destination_name)
@@ -491,25 +493,26 @@ class Differ:
         destination_name=os.path.join(self.destination.resources.dir_, d)
         for rep in (source_name, destination_name):
             if not os.path.exists(rep):
-                print "Package integrity problem: %s does not exist" % source_name
+                logger.error("Package integrity problem: %s does not exist", source_name)
                 return
         shutil.copyfile(source_name, destination_name)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     if len(sys.argv) < 3:
-        print "Should provide 2 package names"
+        logger.error("Should provide 2 package names")
         sys.exit(1)
 
     sourcename=sys.argv[1]
     destname=sys.argv[2]
 
-    print sourcename, destname
+    logger.warn("Merging %s into %s", sourcename, destname)
     source=Package(uri=sourcename)
     dest=Package(uri=destname)
 
     differ=Differ(source, dest)
     diff=differ.diff()
     for name, s, d, action in diff:
-        print name, unicode(s).encode('utf-8'), unicode(d).encode('utf-8')
+        logger.info("%s %s %s", name, unicode(s).encode('utf-8'), unicode(d).encode('utf-8'))
         #action(s, d)
     #dest.save('foo.xml')

@@ -84,7 +84,6 @@ class TALESEntry:
         it=None
         i=m.get_iter_first()
         while i is not None:
-            #print m.get_value(i, 1)
             if m.get_value(i, 1) == t:
                 it=i
                 break

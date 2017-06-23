@@ -653,10 +653,7 @@ class AdveneGUI(object):
             except AttributeError:
                 pass
             except Exception:
-                import traceback
-                s=StringIO.StringIO()
-                traceback.print_exc (file = s)
-                self.log(_("Exception in update_annotation: %s.") % s.getvalue())
+                logger.error(_("Exception in update_annotation"), exc_info=True)
         # Update the content indexer
         if event.endswith('EditEnd') or event.endswith('Create'):
             # Update the type fieldnames
@@ -684,10 +681,7 @@ class AdveneGUI(object):
             except AttributeError:
                 pass
             except Exception:
-                import traceback
-                s=StringIO.StringIO()
-                traceback.print_exc (file = s)
-                self.log(_("Exception in update_relation: %s.") % s.getvalue())
+                logger.error(_("Exception in update_relation"), exc_info=True)
         # Refresh the edit popup for the members
         for e in [ el for el in self.edit_popups if el.element in relation.members ]:
             e.refresh()
@@ -709,10 +703,7 @@ class AdveneGUI(object):
             except AttributeError:
                 pass
             except Exception:
-                import traceback
-                s=StringIO.StringIO()
-                traceback.print_exc (file = s)
-                self.log(_("Exception in update_view: %s.") % s.getvalue())
+                logger.error(_("Exception in update_view"), exc_info=True)
 
         if view.content.mimetype == 'application/x-advene-ruleset':
             # Update the combo box
@@ -740,10 +731,7 @@ class AdveneGUI(object):
             except AttributeError:
                 pass
             except Exception:
-                import traceback
-                s=StringIO.StringIO()
-                traceback.print_exc (file = s)
-                self.log(_("Exception in update_query: %s.") % s.getvalue())
+                logger.error(_("Exception in update_query"), exc_info=True)
         return True
 
     def resource_lifecycle(self, context, parameters):
@@ -763,10 +751,7 @@ class AdveneGUI(object):
             except AttributeError:
                 pass
             except Exception:
-                import traceback
-                s=StringIO.StringIO()
-                traceback.print_exc (file = s)
-                self.log(_("Exception in update_resource: %s.") % s.getvalue())
+                logger.error(_("Exception in update_resource"), exc_info=True)
         return True
 
     def schema_lifecycle(self, context, parameters):
@@ -786,10 +771,7 @@ class AdveneGUI(object):
             except AttributeError:
                 pass
             except Exception:
-                import traceback
-                s=StringIO.StringIO()
-                traceback.print_exc (file = s)
-                self.log(_("Exception in update_schema: %s.") % s.getvalue())
+                logger.error(_("Exception in update_schema"), exc_info=True)
         return True
 
     def annotationtype_lifecycle(self, context, parameters):
@@ -809,10 +791,7 @@ class AdveneGUI(object):
             except AttributeError:
                 pass
             except Exception:
-                import traceback
-                s=StringIO.StringIO()
-                traceback.print_exc (file = s)
-                self.log(_("Exception in update_annotationtype: %s.") % s.getvalue())
+                logger.error(_("Exception in update_annotationtype"), exc_info=True)
         # Update the current type menu
         self.update_gui()
         # Update the content indexer
@@ -837,10 +816,7 @@ class AdveneGUI(object):
             except AttributeError:
                 pass
             except Exception:
-                import traceback
-                s=StringIO.StringIO()
-                traceback.print_exc (file = s)
-                self.log(_("Exception in update_relationtype: %s.") % s.getvalue())
+                logger.error(_("Exception in update_relationtype"), exc_info=True)
         # Update the content indexer
         if event.endswith('Create'):
             self.controller.package._indexer.element_update(rt)
@@ -3077,15 +3053,11 @@ class AdveneGUI(object):
             logger.error("Internal exception on video player")
             #Gtk.threads_leave()
             return True
-        except Exception, e:
+        except:
             # Catch-all exception, in order to keep the mainloop
             # runnning
             #Gtk.threads_leave()
-            import traceback
-            s=StringIO.StringIO()
-            traceback.print_exc (file = s)
-            self.log(_("Got exception %s. Trying to continue.") % str(e), s.getvalue())
-            traceback.print_exc()
+            logger.error(_("Got exception. Trying to continue."), exc_info=True)
             return True
         #Gtk.threads_leave()
 

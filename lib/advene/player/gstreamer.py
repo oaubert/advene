@@ -23,6 +23,8 @@ Based on gst >= 1.0 API.
 Use appsink to get data out of a pipeline:
 https://thomas.apestaart.org/thomas/trac/browser/tests/gst/crc/crc.py
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
@@ -199,7 +201,7 @@ class Player:
     def log (self, msg):
         """Display a message.
         """
-        print "gstreamer:", unicode(msg).encode('utf-8')
+        logger.warn("gstreamer: %s", msg.encode('utf-8', 'ignore'))
 
     def build_pipeline(self):
         sink='xvimagesink'
@@ -321,8 +323,8 @@ class Player:
         """
         try:
             pos = self.player.query_position(Gst.Format.TIME)[1]
-        except Exception, e:
-            print "Current position exception", e
+        except Exception:
+            logger.error("Current position exception", exc_info=True)
             position = 0
         else:
             position = pos * 1.0 / Gst.MSECOND
@@ -551,7 +553,7 @@ class Player:
         @param position: the position
         @type position: long
         """
-        #print "gst - update_status ", status, str(position)
+        logger.debug("gst - update_status %s %s ", status, str(position))
         if position is None:
             position=0
         else:
@@ -565,9 +567,7 @@ class Player:
                 elif self.status != self.PlayingStatus:
                     self.start(position)
                     time.sleep(0.005)
-#            print "Before s_m_p", position
             self.set_media_position(position)
-#            print "After s_m_p"
         else:
             if status == "pause":
                 self.position_update()

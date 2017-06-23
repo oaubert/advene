@@ -18,6 +18,8 @@
 #
 """Accumulator popup.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import time
 import operator
@@ -161,7 +163,7 @@ class AccumulatorPopup(AdhocView):
         if not frames:
             return True
         if len(frames) > 1:
-            print "Inconsistency in accumulatorpopup"
+            logger.error("Inconsistency in accumulatorpopup")
         t=frames[0]
         self.widgets.remove(t)
         self.lock.release()

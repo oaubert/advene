@@ -86,7 +86,6 @@ class DelakisShotDetectImporter(GenericImporter):
             fps = float(config.data.preferences['default-fps'])
         else :
             he = HistogramExtractor()
-            print "Processing ", filename
             histos, fps = he.process(filename, self.progress)
             if self.cache_histogram:
                 try:
@@ -142,7 +141,6 @@ class ShotDetector:
         pass
 
     def process(self, histos, mspf=40):
-        print "MSPF", mspf
         self.progress(.1, _("Computing hdiff"))
         nbpixel = numpy.sum(histos[0])
         #compute various histogram variations

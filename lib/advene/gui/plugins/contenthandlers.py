@@ -16,6 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
@@ -217,7 +219,7 @@ class SVGContentHandler (ContentHandler):
             data=decode_drop_parameters(selection.get_data())
             v=self.controller.package.get_element_by_id(data['id'])
             if v is None:
-                print "Cannot find view", data['id']
+                logger.error("Cannot find view %s", data['id'])
                 return True
             here=v
             title=self.controller.get_title(v)
@@ -238,7 +240,7 @@ class SVGContentHandler (ContentHandler):
             url=ctx.evaluateValue('here/absolute_url')
 
         if url is None:
-            print "Cannot guess url"
+            logger.error("Cannot guess url after DND")
             return True
 
         s=self.view.drawer.clicked_shape( (x, y) )

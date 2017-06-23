@@ -18,6 +18,8 @@
 #
 """Dialogs for the creation of new elements.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import advene.core.config as config
 
@@ -121,7 +123,7 @@ class CreateElementPopup(object):
             elif self.type_ == ResourceData:
                 type_list = [ ViewType("file", _("Resource File")) ]
             else:
-                print "Error in advene.gui.edit.create.build_widget: invalid type %s" % self.type_
+                logger.error("Error in advene.gui.edit.create.build_widget: invalid type %s", self.type_)
                 return None
 
             if not type_list:
@@ -268,7 +270,7 @@ class CreateElementPopup(object):
             self.controller.notify('SchemaCreate', schema=el)
         elif self.type_ == AnnotationType:
             if not isinstance(self.parent, Schema):
-                print "Error: bad invocation of CreateElementPopup"
+                logger.error("Error: bad invocation of CreateElementPopup for AnnotationType")
                 el=None
             else:
                 el=self.parent.createAnnotationType(
@@ -283,7 +285,7 @@ class CreateElementPopup(object):
             self.controller.notify('AnnotationTypeCreate', annotationtype=el)
         elif self.type_ == RelationType:
             if not isinstance(self.parent, Schema):
-                print "Error: bad invocation of CreateElementPopup"
+                logger.error("Error: bad invocation of CreateElementPopup for RelationType")
                 el=None
             else:
                 el=self.parent.createRelationType(
@@ -314,7 +316,7 @@ class CreateElementPopup(object):
 
         else:
             el=None
-            print "Not implemented yet."
+            logger.error("Not implemented yet.")
         return el
 
     def popup(self, modal=False):
@@ -341,8 +343,9 @@ class CreateElementPopup(object):
         return retval
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     if len(sys.argv) < 2:
-        print "Should provide a package name"
+        logger.error("Should provide a package name")
         sys.exit(1)
 
     package = Package (uri=sys.argv[1])
@@ -371,7 +374,7 @@ if __name__ == "__main__":
     def validate_cb (win, package):
         filename="/tmp/package.xml"
         package.save (name=filename)
-        print "Package saved as %s" % filename
+        logger.info("Package saved as %s", filename)
         Gtk.main_quit ()
 
     b = Gtk.Button (stock=Gtk.STOCK_SAVE)

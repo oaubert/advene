@@ -23,9 +23,12 @@ This dummy player can be used to test the Advene GUI without any player dependen
 It also presents the API that should be implemented by alternative players.
 """
 
-from time import time
-
 name="Dummy video player"
+
+import logging
+logger = logging.getLogger(__name__)
+
+from time import time
 
 def register(controller):
     controller.register_player(Player)
@@ -124,7 +127,7 @@ class Player:
                               str(chapter))
 
     def log(self, *m):
-        print "dummy plugin:", " ".join([str(i) for i in m])
+        logger.warn("dummy plugin: %s", " ".join([str(i) for i in m]))
 
     def get_media_position(self, origin=None, key=None):
         self.log("get_media_position")

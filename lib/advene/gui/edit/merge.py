@@ -240,7 +240,6 @@ class Merger:
         self.buttonbox = Gtk.HButtonBox()
 
         def validate(b):
-            print "Validate"
             m=self.mergerview.store
             for l in m:
                 if l[self.mergerview.COLUMN_APPLY]:

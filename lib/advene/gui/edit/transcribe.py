@@ -18,6 +18,8 @@
 #
 """Transcription view.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import sys
 import re
@@ -397,8 +399,7 @@ class TranscriptionEdit(AdhocView):
         textwin=textview.get_window(Gtk.TextWindowType.TEXT)
 
         if event.get_window() != textwin:
-            print "Event.get_window(): %s" % str(event.get_window())
-            print "Textwin: %s" % str(textwin)
+            logger.error("Event.get_window(): %s - Textwin: %s", str(event.get_window()), str(textwin))
             return False
 
         (x, y) = textview.window_to_buffer_coords(Gtk.TextWindowType.TEXT,
@@ -406,7 +407,7 @@ class TranscriptionEdit(AdhocView):
                                                   int(event.y))
         it=textview.get_iter_at_location(x, y)
         if it is None:
-            print "Error in get_iter_at_location"
+            logger.error("Error in get_iter_at_location")
             return False
 
         p=self.controller.player
@@ -1283,16 +1284,17 @@ class TranscriptionEdit(AdhocView):
         return False
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     if len(sys.argv) < 2:
-        print "Should provide a package name"
+        logger.error("Should provide a package name")
         sys.exit(1)
 
     class DummyController:
         def log(self, *p):
-            print p
+            logger.error(p)
 
         def notify(self, *p, **kw):
-            print "Notify %s %s" % (p, kw)
+            logger.info("Notify %s %s", p, kw)
 
 
     controller=DummyController()

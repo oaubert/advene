@@ -16,6 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 from gi.repository import GObject
@@ -220,11 +222,11 @@ class BrlEngine:
                 return True
             if self.revmap is None:
                 self.generate_reverse_mapping()
-            print "brltty: unknown key ", k, "expanded", str(d)
+            logger.error("brltty: unknown key %s - expanded %s", k, str(d))
             if k in self.revmap:
-                print "Symbol", self.revmap[k]
+                logger.info("Symbol %s", self.revmap[k])
             elif d['command'] in self.revmap:
-                print "Command", self.revmap[d['command']]
+                logger.info("Command %s", self.revmap[d['command']])
         return True
 
     def parse_parameter(self, context, parameters, name, default_value):

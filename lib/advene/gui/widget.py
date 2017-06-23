@@ -138,7 +138,7 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
         if height is None:
             height = w.get_height()
         if width <= 0:
-            print "Error: width ", width, " <= 0 for ", self.element.id
+            logger.warn("Error: width %d <= 0 for %s", width, self.element.id)
             width=5
         self.set_size_request(width, height)
         #self.get_window().lower()
@@ -388,7 +388,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         try:
             context.rectangle(0, 0, width, height)
         except MemoryError:
-            print "MemoryError when rendering rectangle for annotation ", self.annotation.id
+            logger.error("MemoryError when rendering rectangle for annotation %s", self.annotation.id)
             return
 
         color=None
@@ -445,10 +445,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                     context.set_matrix(cairo.Matrix( scale, 0, 0, scale, 0, 0 ))
                     s.render_cairo(context)
                 except Exception, e:
-                    print "Error when rendering SVG timeline component", e
-                    import traceback
-                    traceback.print_exc(e)
-                    pass
+                    logger.error("Error when rendering SVG timeline component %s", e, exc_info=True)
             return
 
         # Draw the border
@@ -479,7 +476,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         try:
             context.show_text(title.encode('utf8'))
         except MemoryError:
-            print "MemoryError while rendering title for annotation ", self.annotation.id
+            logger.error("MemoryError while rendering title for annotation %s", self.annotation.id, exc_info=True)
 
         if self._fraction_marker is not None:
             x=int(self._fraction_marker * width)
@@ -675,7 +672,7 @@ class TagWidget(GenericColorButtonWidget):
         w=long(ext[2]) + 5
         if self.width != w:
             self.reset_surface_size(self.width, self.container.button_height)
-            #print "Resetting width", self.width
+            logger.debug("Resetting width %d", self.width)
 GObject.type_register(TagWidget)
 
 class TimestampMarkWidget(GenericColorButtonWidget):

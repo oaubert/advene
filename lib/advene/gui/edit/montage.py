@@ -324,9 +324,7 @@ class Montage(AdhocView):
                     self.current_widget.fraction_marker=None
                 self.current_widget=w
                 a=w.annotation
-                #print "Playing ", a.id
             except StopIteration:
-                #print "StopIteration"
                 self.controller.update_status('pause')
                 for w in self.contents:
                     self.set_widget_active(w, False)

@@ -120,11 +120,10 @@ def get_importer(fname, **kw):
     valid, invalid=get_valid_importers(fname)
     i=None
     if len(valid) == 0:
-        print "No valid importer"
+        logger.warn("No valid importer")
     else:
         if len(valid) > 1:
-            print "Multiple importers: ", str(valid)
-            print "Using first one."
+            logger.warn("Multiple importers: %s. Using first one.", str(valid))
         i=valid[0](**kw)
     return i
 
@@ -248,7 +247,7 @@ class GenericImporter(object):
         if self.controller is not None:
             self.controller.log(*p)
         else:
-            print " ".join(p)
+            logger.warn(" ".join(p))
 
     def update_statistics(self, elementtype):
         self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
@@ -463,7 +462,7 @@ class GenericImporter(object):
             if 'complete' in d:
                 a.complete=d['complete']
             if 'notify' in d and d['notify'] and self.controller is not None:
-                print "Notifying", a
+                logger.debug("Notifying %s", a)
                 self.controller.notify('AnnotationCreate', annotation=a)
             if 'send' in d:
                 # We are expected to return a value in the yield call
@@ -551,20 +550,11 @@ class ExternalAppImporter(GenericImporter):
         """
         # Terminate the process if necessary
         if self.process:
-            if config.data.os == 'win32':
-                import ctypes
-                ctypes.windll.kernel32.TerminateProcess(int(self.process._handle), -1)
-            else:
-                try:
-                    # Python 2.6 only
-                    self.process.terminate()
-                except AttributeError:
-                    try:
-                        os.kill(self.process.pid, 9)
-                        os.waitpid(self.process.pid, os.WNOHANG)
-                    except OSError, e:
-                        print "Cannot kill application", unicode(e)
-            self.process = None
+           try:
+              self.process.terminate()
+           except:
+              logger.warn("Cannot terminate application", exc_info=True)
+        self.process = None
 
         for r in self.temporary_resources:
             # Cleanup temp. dir. and files
@@ -989,7 +979,7 @@ class XiImporter(GenericImporter):
             if filename is None:
                 filename = self.signals[a.refSignal]
             elif filename != self.signals[a.refSignal]:
-                print "Erreur: plusieurs fichiers sources, non supportes"
+                logger.error("Erreur: many source files, not supported")
                 sys.exit(1)
 
         if self.package.getMetaData(config.data.namespace, "mediafile") in (None, ""):
@@ -1065,9 +1055,6 @@ class ElanImporter(GenericImporter):
                 d={}
 
                 d['type']=self.atypes[tid]
-                #d['type']=self.atypes[tier.TIER_ID.replace(' ','_')]
-
-                #print "Creating " + al.ANNOTATION_ID
                 if hasattr(an, 'ALIGNABLE_ANNOTATION'):
                     # Annotation on a timeline
                     al=an.ALIGNABLE_ANNOTATION[0]
@@ -1108,7 +1095,6 @@ class ElanImporter(GenericImporter):
             dest=self.package.annotations['#'.join( (self.package.uri,
                                                      dest_id) ) ]
 
-            #print "Relation %s -> %s" % (source, dest)
             rtypeid='_'.join( ('rt', source.type.id, dest.type.id) )
             try:
                 rtype=self.package.relationTypes['#'.join( (self.package.uri,
@@ -1224,7 +1210,7 @@ class SubtitleImporter(GenericImporter):
                 # Convert it and reset the data
                 if tc is None:
                     if content:
-                        print "Strange error: no timestamp was found for content ", "".join(content)
+                        logger.warn("Strange error: no timestamp was found for content %s", "".join(content))
                         content = []
                 else:
                     d={'begin': tc[0],
@@ -1287,7 +1273,7 @@ class PraatImporter(GenericImporter):
     def iterator(self, f):
         l=f.readline()
         if not 'ooTextFile' in l:
-            print "Invalid PRAAT file"
+            logger.error("Invalid PRAAT file")
             return
 
         name_re=re.compile('^(\s+)name\s*=\s*"(.+)"')
@@ -1329,11 +1315,10 @@ class PraatImporter(GenericImporter):
             if m:
                 ws, text = m.group(1, 2)
                 if len(ws) <= type_align:
-                    print "Error: invalid alignment for %s" % l
+                    logger.error("Error: invalid alignment for %s", l)
                     continue
                 if begin is None or end is None or current_type is None:
-                    print "Error: found text tag before xmin or xmax info"
-                    print l
+                    logger.error("Error: found text tag before xmin or xmax info: %s", l)
                     continue
                 yield {
                     'type': self.atypes[current_type],
@@ -1428,8 +1413,8 @@ class CmmlImporter(GenericImporter):
             progress += incr
             try:
                 begin=clip.start
-            except AttributeError, e:
-                print str(e)
+            except AttributeError:
+                logger.error("Error in CMML importer", exc_info=True)
                 begin=0
             begin=self.npt2time(begin)
 
@@ -1458,8 +1443,8 @@ class CmmlImporter(GenericImporter):
                     delayed.append(d)
                 else:
                     yield d
-            except AttributeError, e:
-                #print "Erreur dans link" + str(e)
+            except AttributeError:
+                logger.error("CMML - link error", exc_info=True)
                 pass
 
             # img attribute
@@ -1608,7 +1593,6 @@ class IRIImporter(GenericImporter):
         incr=0.02
         for ensemble in ensembles:
             sid=ensemble.id
-            print "Ensemble", sid
             progress += incr
             if not self.progress(progress, _("Parsing ensemble %s") % sid):
                 break
@@ -1623,7 +1607,6 @@ class IRIImporter(GenericImporter):
                 progress += incr
                 if not self.progress(progress, _("Parsing decoupage %s") % tid):
                     break
-                print "  Decoupage ", tid
                 # Update self.duration
                 self.duration=max(long(decoupage.dur), self.duration)
 
@@ -1681,11 +1664,10 @@ class IRIImporter(GenericImporter):
                     progress += incr
                     if not self.progress(progress, view.title):
                         break
-                    print "     ", view.title.encode('latin1')
                     for ref in view.ref:
                         an = [a for a in self.package.annotations if a.id == ref.id ]
                         if not an:
-                            print "Invalid id", ref.id
+                            logger.error("IRIImporter: Invalid id %s", ref.id)
                         else:
                             an=an[0]
                             if self.multiple_types:
@@ -1808,6 +1790,7 @@ class IRIDataImporter(GenericImporter):
 register(IRIDataImporter)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     USAGE = "%prog filter_name input_file [options] output_file"
     if sys.argv[1:]:
         filtername = sys.argv[1]
@@ -1848,12 +1831,12 @@ if __name__ == "__main__":
     sys.stdout = saved
 
     if filtername is None or len(params) == 0:
-        print """Syntax: %s
+        logger.error("""Syntax: %s
 filter_name can be "auto" for autodetection.
 Available filters:
   * %s
         """ % (USAGE.replace('%prog', sys.argv[0]),
-               "\n  * ".join(i.name for i in controller.advene.util.importer.IMPORTERS))
+               "\n  * ".join(i.name for i in controller.advene.util.importer.IMPORTERS)))
         sys.exit(0)
 
     if filtername == 'auto':
@@ -1864,11 +1847,11 @@ Available filters:
         if len(cl) == 1:
             i = cl[0]()
         elif len(cl) > 1:
-            print "Too many possibilities:\n%s" % "\n".join(f.name for f in cl)
+            logger.error("Too many possibilities:\n%s", "\n".join(f.name for f in cl))
             sys.exit(1)
 
     if i is None:
-        print "No matching importer for %s" % filtername
+        logger.error("No matching importer for %s", filtername)
         sys.exit(1)
 
     i.optionparser.set_usage(USAGE)
@@ -1882,11 +1865,11 @@ Available filters:
     except IndexError:
         outputfile = ''
     # (for .sub conversion for instance, --fps, --offset)
-    print "Converting %s to %s using %s" % (inputfile, outputfile, i.name)
+    logger.info("Converting %s to %s using %s", inputfile, outputfile, i.name)
     p = i.process_file(inputfile)
     if outputfile:
         p.save(outputfile)
     else:
         p.serialize()
-    print i.statistics_formatted()
+    logger.info(i.statistics_formatted())
     sys.exit(0)

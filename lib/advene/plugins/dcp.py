@@ -19,12 +19,14 @@
 
 name="DCP importer"
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gettext import gettext as _
 
 import re
 import csv
 import itertools
-import urllib
 
 import advene.core.config as config
 import advene.util.helper as helper
@@ -88,7 +90,7 @@ class DCPImporter(GenericImporter):
         f.close()
         del rows
 
-        print "Converting ", self.row_count, " records"
+        logger.debug("Converting %s records", self.row_count)
         # Conversion
         f=open(filename, 'rU')
         rows=csv.reader(f, 'excel-tab')

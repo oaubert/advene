@@ -16,6 +16,9 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
+
 import copy
 import sys
 
@@ -37,24 +40,19 @@ class DebugLogger:
         verbosity = 3
 
         def debug (self, *args):
-            if self.verbosity > 3:
-                print >>sys.stderr, "TAL: Debug:   ", args
+            logger.debug(args)
 
         def info (self, *args):
-            if self.verbosity > 3:
-                print >>sys.stderr, "TAL: Info :   ", args
+            logger.info(args)
 
         def warn (self, *args):
-            if self.verbosity > 2:
-                print >>sys.stderr, "TAL: Warning: ", args
+            logger.warn(args)
 
         def error (self, *args):
-            if self.verbosity > 1:
-                print >>sys.stderr, "TAL: Error:   ", args
+            logger.error(args)
 
         def critical (self, *args):
-            if self.verbosity > 0:
-                print >>sys.stderr, "TAL: Critical:", args
+            logger.error(args)
 
 class NoCallVariable(simpleTALES.ContextVariable):
         """Not callable variable.

@@ -18,10 +18,11 @@
 #
 """Process Launcher module.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import os
 import signal
-import threading
 
 class ProcessLauncher:
     """Process launcher class.
@@ -76,20 +77,19 @@ class ProcessLauncher:
         """Private method used to launch the program."""
         args = (self.program_name, )+ tuple([str(i) for i in self.args])
         # FIXME: we should close all existing sockets
-        #print "Launching %s with %s" % (self.program_path, args)
+        logger.debug("Launching %s with %s", self.program_path, args)
         self.pid = os.spawnv (os.P_NOWAIT, self.program_path, tuple(args))
         try:
             signal.signal(signal.SIGCHLD, self.sigchld)
         except ValueError:
+            logger.warn("Strange ValueError", exc_info=True)
             # FIXME: we should investigate this rather than ignore it.
             pass
-        #os.waitpid (self.pid, 0)
-        #print "After waitpid"
         return True
 
     def sigchld(self, sig, stack_frame):
         (pid, status)=os.wait()
-        print "Caught child %d" % pid
+        logger.warn("Caught child %d", pid)
         return True
 
     def start (self, args=None):
@@ -125,6 +125,7 @@ class ProcessLauncher:
             return self.thread.isAlive()
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     args = ('10', )
     l = ProcessLauncher ('sleep', args=args)
-    print "l = Launcher(%s)" % l.program_name
+    logger.info("l = Launcher(%s)", l.program_name)

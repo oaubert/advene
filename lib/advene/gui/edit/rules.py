@@ -115,7 +115,7 @@ class EditRuleSet(EditGeneric):
                 self.model.remove(edit.model)
                 self.widget.remove_page(current)
             elif len(l) > 1:
-                print "Error in remove_rule"
+                logger.error("Error in remove_rule")
             return True
 
         hb=Gtk.HBox()
@@ -167,10 +167,8 @@ class EditRuleSet(EditGeneric):
         eb.show_all()
 
         self.editlist.append(edit)
-        #print "Model: %d rules" % len(self.model)
         if append and not rule in self.model:
             self.model.add_rule(rule)
-        #print "-> Model: %d rules" % len(self.model)
         self.widget.append_page(edit.get_widget(), eb)
         self.widget.set_current_page(-1)
         return True
@@ -196,7 +194,6 @@ class EditRuleSet(EditGeneric):
         return True
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
-        #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['rule']:
             # Get the current rule's content
 
@@ -210,7 +207,7 @@ class EditRuleSet(EditGeneric):
                 # We have the model. Convert it to XML
                 selection.set(selection.get_target(), 8, edit.model.xml_repr().encode('utf8'))
             elif len(l) > 1:
-                print "Error in drag"
+                logger.error("Error in drag")
             return True
 
         else:
@@ -218,7 +215,6 @@ class EditRuleSet(EditGeneric):
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
-        #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['rule']:
             xml=unicode(selection.get_data(), 'utf8')
             if 'subviewlist' in xml:
@@ -893,7 +889,6 @@ class EditAction(EditGeneric):
         for n, v in self.current_parameters.iteritems():
             # We ignore parameters fields that are empty or that match '^\(.+\)$'
             if not regexp.match(v):
-                #print "Updating %s = %s" % (n, v)
                 self.model.add_parameter(n, v)
         return True
 

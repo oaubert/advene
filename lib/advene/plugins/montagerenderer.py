@@ -95,13 +95,13 @@ class MontageRenderer(object):
             s = message.get_structure()
             if message.type == gst.MESSAGE_STATE_CHANGED:
                 old, new, pending = message.parse_state_changed()
-                print "STATE", old.value_nick, new.value_nick, pending.value_nick
+                logger.warn("STATE %s %s %s", old.value_nick, new.value_nick, pending.value_nick)
             elif message.type == gst.MESSAGE_EOS:
-                print " EOS"
+                logger.warn(" EOS")
                 pipe.set_state(gst.STATE_NULL)
                 progress_callback(None)
             elif s:
-                print "MSG " + bus.get_name() + ": " + s.to_string()
+                logger.warn("MSG %s %s", bus.get_name(), s.to_string())
                 if s.get_name() == 'progress' and progress_callback is not None:
                     progress_callback(s['percent-double'] / 100)
             return True

@@ -19,6 +19,8 @@
 """
 Imagecache module for advene
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import advene.core.config as config
 import operator
@@ -333,7 +335,7 @@ class ImageCache(dict):
                             n=0
                         i=long(n)
                     except ValueError:
-                        print "Invalid filename in imagecache: " + name
+                        logger.error("Invalid filename in imagecache: %s", name)
                         continue
                     s=CachedString(os.path.join (d, name))
                     s.contenttype='image/png'

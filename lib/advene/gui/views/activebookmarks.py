@@ -95,9 +95,7 @@ class ActiveBookmarks(AdhocView):
         self.refresh()
 
     def debug (self, widget, *p):
-        print "Debug event."
-        if p:
-            print "Data: %s" % str(p)
+        logger.debug("Debug event %s", str(p or "No data"))
         return True
 
     def get_type(self):

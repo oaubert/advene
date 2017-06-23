@@ -16,6 +16,9 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
+
 import advene.core.config as config
 
 import subprocess
@@ -99,7 +102,7 @@ class SoundPlayer:
             pid=subprocess.Popen( [ pathsp, fname ] )
             #no SIGCHLD handler for win32
         else:
-            print "pySoundPlayer.exe can not be found. Advene will be unable to play sounds."
+            logger.error("pySoundPlayer.exe can not be found. Advene will be unable to play sounds.")
         return True
 
     def macosx_play(self, fname, volume=100, balance=0):
@@ -122,13 +125,13 @@ class SoundPlayer:
 
     if Gst is not None:
         play = gst_play
-        print "Using gstreamer to play sounds"
+        logger.warn("Using gstreamer to play sounds")
     elif config.data.os == 'win32':
         play=win32_play
-        print "Using win32_player to play sounds (may not be present)"
+        logger.warn("Using win32_player to play sounds (may not be present)")
     elif config.data.os == 'darwin':
         play=macosx_play
     else:
         if not os.path.exists('/usr/bin/aplay'):
-            print "Error: aplay is not installed. Advene will be unable to play sounds."
+            logger.warn("Error: aplay is not installed. Advene will be unable to play sounds.")
         play=linux_play

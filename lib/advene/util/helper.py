@@ -17,7 +17,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 """Generic helper functions."""
-
+import logging
+logger = logging.getLogger(__name__)
 
 import json
 import time
@@ -40,7 +41,7 @@ from advene.core.imagecache import ImageCache
 try:
     import Image
 except ImportError:
-    print "Cannot load Image module. Image conversion is disabled."
+    logger.error("Cannot load Image module. Image conversion is disabled.")
 
 from gettext import gettext as _
 
@@ -140,7 +141,7 @@ def snapshot2png (image, output=None):
     @rtype: string
     """
     if image.height == 0 or image.height is None:
-        print "Error : 0 sized snapshot"
+        logger.error("Error : 0 sized snapshot")
         return ""
 
     png=None
@@ -158,9 +159,9 @@ def snapshot2png (image, output=None):
             png=TypedString(ostream.getvalue())
             png.contenttype='image/png'
         except NameError:
-            print "snapshot: conversion module not available"
+            logger.error("snapshot: conversion module not available")
     else:
-        print "snapshot: unknown image type ", repr(image.type)
+        logger.error("snapshot: unknown image type %s", repr(image.type))
 
     if png is None:
         png=ImageCache.not_yet_available_image
@@ -392,12 +393,11 @@ def matching_relationtypes(package, typ1, typ2):
         t1=get_id_from_fragment(typ1.uri)
         t2=get_id_from_fragment(typ2.uri)
 
-        #print "Testing (%s, %s) matching %s" % (t1, t2, lat)
+        logger.debug("Testing (%s, %s) matching %s", t1, t2, lat)
         if len (lat) == 2 \
         and (lat[0] == u'' or lat[0] == t1) \
         and (lat[1] == u'' or lat[1] == t2):
             r.append(rt)
-    #print "Matching: %s" % r
     return r
 
 element_label = {
@@ -490,7 +490,7 @@ def import_element(package, element, controller, notify=True):
         if notify:
             controller.notify("QueryCreate", query=q)
     else:
-        print "Import element of class %s not supported yet." % element.viewableClass
+        logger.warn("Import element of class %s not supported yet." % element.viewableClass)
 
 def unimport_element(package, element, controller, notify=True):
     p=package
@@ -515,7 +515,7 @@ def unimport_element(package, element, controller, notify=True):
         if notify:
             controller.notify("QueryDelete", query=element)
     else:
-        print "%s Not supported yet." % element.viewableClass
+        logger.warn("%s Not supported yet.", element.viewableClass)
 
 def get_statistics(fname):
     """Return formatted statistics about the package.

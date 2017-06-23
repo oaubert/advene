@@ -18,6 +18,8 @@
 #
 """Notebook containing multiple views
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import advene.core.config as config
 
@@ -344,7 +346,7 @@ class ViewBook(AdhocView):
                 if hasattr(v, 'reparent_done'):
                     v.reparent_done()
             else:
-                print "Cannot find view ", selection.get_data()
+                logger.error("Cannot find view %s", selection.get_data())
             return True
         elif targetType == config.data.target_type['view']:
             v=self.controller.package.views.get(unicode(selection.get_data(), 'utf8'))
@@ -352,7 +354,7 @@ class ViewBook(AdhocView):
                 # Edit the view.
                 self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
             else:
-                print "Unhandled case in viewbook: targetType=view"
+                logger.error("Unhandled case in viewbook (targetType=view) for %s", v.id)
             return True
         elif targetType == config.data.target_type['query']:
             v=self.controller.package.queries.get(unicode(selection.get_data(), 'utf8'))
@@ -452,7 +454,7 @@ class ViewBook(AdhocView):
             v.append(long(data['timestamp']), comment=data.get('comment', ''))
             return True
         else:
-            print "Unknown drag target received ", targetType
+            logger.error("Unknown drag target received %s", targetType)
         return False
 
     def build_widget(self):

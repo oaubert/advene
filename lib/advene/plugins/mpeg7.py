@@ -22,6 +22,9 @@
 
 name="MPEG7 importer"
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gettext import gettext as _
 
 import re
@@ -83,7 +86,7 @@ class MPEG7Importer(GenericImporter):
 
     def iterator(self, root):
         if root.tag != tag('Mpeg7'):
-            print "Invalid MPEG7 file format: ", root.tag
+            logger.error("Invalid MPEG7 file format: %s", root.tag)
             return
 
         for s in (root.findall('.//%s' % tag('AudioVisualSegment'))
@@ -146,9 +149,10 @@ def mpeg7_duration(target, context):
     return "PT%s%03dN1000" % (time.strftime("%HH%MM%SS", time.gmtime(target / 1000)), target % 1000)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     import sys
     if len(sys.argv) < 3:
-        print "Should provide a file name and a package name"
+        logger.error("Should provide a file name and a package name")
         sys.exit(1)
 
     fname=sys.argv[1]
@@ -159,7 +163,7 @@ if __name__ == "__main__":
     # FIXME: i.process_options()
     i.process_options(sys.argv[1:])
     # (for .sub conversion for instance, --fps, --offset)
-    print "Converting %s to %s using %s" % (fname, pname, i.name)
+    logger.info("Converting %s to %s using %s", fname, pname, i.name)
     p=i.process_file(fname)
     p.save(pname)
-    print i.statistics_formatted()
+    logger.info(i.statistics_formatted())

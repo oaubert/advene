@@ -17,7 +17,10 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+import logging
+logger = logging.getLogger(__name__)
 
+#FIXME: code not yet converted to gst1.x
 import sys
 
 import gobject
@@ -126,11 +129,12 @@ class SliceBuffer(gst.Element):
         elif key.name == 'offset':
             self.offset = value
         else:
-            print "No property %s" % key.name
+            logger.error("No property %s" % key.name)
 
 gst.element_register(SliceBuffer, 'slicebuffer')
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     mainloop = gobject.MainLoop()
 
     files = [ a for a in sys.argv[1:] if not '=' in a ]
@@ -176,7 +180,7 @@ if __name__ == '__main__':
         if s is None:
             return True
         if s.has_field('gerror'):
-            print "MSG", msg.structure['debug']
+            logger.error("MSG %s", msg.structure['debug'])
 
     def on_eos (bus, msg):
         mainloop.quit()
@@ -185,7 +189,7 @@ if __name__ == '__main__':
     bus.connect('message::eos', on_eos)
     bus.connect('message', on_msg)
 
-    print "PLAYING"
+    logger.info("PLAYING")
     pipe.set_state (gst.STATE_PLAYING)
 
     try:

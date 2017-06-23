@@ -373,8 +373,7 @@ class AdveneController(object):
                 s=StringIO.StringIO()
                 traceback.print_exc (file = s)
                 self.queue_action(self.log, _("Exception (traceback in console):") + str(e))
-                print str(e)
-                print s.getvalue()
+                logger.error("Exception in process_queue", exc_info=True)
 
         return True
 
@@ -1017,7 +1016,6 @@ class AdveneController(object):
                 return True
 
             # FIXME: only 0-relative position for the moment
-            # print "Update snapshot for %d" % position
             try:
                 i = self.player.snapshot (self.player.relative_position)
             except self.player.InternalException:
@@ -2145,15 +2143,11 @@ class AdveneController(object):
             for tr in self.tracers:
                 tr.equeue.put(tr.exit_code)
                 tr.join()
-            # Terminate the VLC server
+            # Terminate the video player
             try:
-                #print "Exiting vlc player"
                 self.player.exit()
-            except Exception, e:
-                import traceback
-                s=StringIO.StringIO()
-                traceback.print_exc (file = s)
-                self.log(_("Got exception %s when stopping player.") % str(e), s.getvalue())
+            except:
+                logger.error(_("Got exception when stopping player."), exc_info=True)
             self.cleanup_done = True
         return True
 
@@ -2199,7 +2193,7 @@ class AdveneController(object):
         if isinstance(position, Annotation):
             position = position.fragment.begin
         position_before=self.player.current_position_value
-        #print "update status:", status, position
+        logger.debug("update status: %s %s", status, position)
         if (status == 'set' or status == 'start' or status == 'stop'):
             if position != position_before:
                 self.reset_annotation_lists()
@@ -2213,10 +2207,6 @@ class AdveneController(object):
             # to be taken *before* moving
             self.update_snapshot(position_before)
         try:
-            # if hasattr(position, 'value'):
-            #     print "update_status %s %i" % (status, position.value)
-            # else:
-            #     print "update_status %s %s" % (status, position)
             if self.player.playlist_get_list() or 'record' in self.player.player_capabilities:
                 self.player.update_status (status, position)
                 for p in self.slave_players:
@@ -2238,8 +2228,7 @@ class AdveneController(object):
         except Exception:
             # FIXME: we should catch more specific exceptions and
             # devise a better feedback than a simple print
-            import traceback
-            self.log(_("Raised exception in update_status: %s") % traceback.format_exc())
+            logger.error(_("Video player problem"), exc_info=True)
         en=self.status2eventname.get(status, None)
         if en and notify:
             self.notify (en,
@@ -2344,9 +2333,9 @@ class AdveneController(object):
         future_begins.sort(key=operator.itemgetter(1))
         future_ends.sort(key=operator.itemgetter(2))
 
-        #print "Position: %s" % helper.format_time(position)
-        #print "Begins: %s\nEnds: %s" % ([ a[0].id for a in future_begins[:4] ],
-        #                                [ a[0].id for a in future_ends[:4] ])
+        #logger.debug("Position: %s" % helper.format_time(position))
+        #logger.debug("Begins: %s\nEnds: %s" % ([ a[0].id for a in future_begins[:4] ],
+        #                                [ a[0].id for a in future_ends[:4] ]))
         return future_begins, future_ends, active
 
     def reset_annotation_lists (self):
@@ -2405,16 +2394,15 @@ class AdveneController(object):
 
         if self.future_begins is None or self.future_ends is None:
             self.future_begins, self.future_ends, self.active_annotations = self.generate_sorted_lists(pos)
-            #print "New lists", [a.id for a in self.active_annotations], [t[0].id for t in self.future_begins ]
+            #logger.debug("New lists %s %s", [a.id for a in self.active_annotations], [t[0].id for t in self.future_begins ])
 
         if self.future_begins and (p.status == p.PlayingStatus or p.status == p.PauseStatus):
             a, b, e = self.future_begins[0]
-            #print "Future begin", a.id, b, pos
+            #logger.debug("Future begin %s %d %d", a.id, b, pos)
             while b <= pos:
                 # Ignore if we were after the annotation end
                 self.future_begins.pop(0)
                 if e > pos:
-                    #print "AnnotationBegin", a.id, e, pos
                     self.notify ("AnnotationBegin",
                                  annotation=a,
                                  immediate=True)
@@ -2427,7 +2415,6 @@ class AdveneController(object):
         if self.future_ends and (p.status == p.PlayingStatus or p.status == p.PauseStatus):
             a, b, e = self.future_ends[0]
             while e <= pos:
-                #print "Comparing %d < %d for %s" % (e, pos, a.content.data)
                 try:
                     self.active_annotations.remove(a)
                 except ValueError:

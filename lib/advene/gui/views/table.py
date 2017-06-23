@@ -440,9 +440,7 @@ class AnnotationTable(AdhocView):
             return nodes[0]
 
     def debug_cb (self, *p, **kw):
-        print "Debug cb:\n"
-        print "Parameters: %s" % str(p)
-        print "KW: %s" % str(kw)
+        logger.debug("Parameters: %s\nkw: %s", str(p), str(kw))
 
     def csv_export(self, name=None):
         if name is None:
@@ -744,9 +742,7 @@ class GenericTable(AdhocView):
             return nodes[0]
 
     def debug_cb (self, *p, **kw):
-        print "Debug cb:\n"
-        print "Parameters: %s" % str(p)
-        print "KW: %s" % str(kw)
+        logger.debug("Parameters: %s\nkw: %s", str(p), str(kw))
 
     def row_activated_cb(self, widget, path, view_column):
         """Edit the element on Return or double click

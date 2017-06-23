@@ -16,6 +16,9 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
+
 from gettext import gettext as _
 import subprocess
 import os
@@ -391,8 +394,6 @@ class CustomArgTTSEngine(TTSEngine):
             try:
                 m = unicode(e.message)
             except UnicodeDecodeError:
-                print "TTS: Error decoding error message with standard encoding"
-                m = unicode(e.message, fse, 'ignore')
-            self.controller.log("TTS Error: ", m.encode('ascii', 'ignore'))
+                logger.error("TTS: Error decoding error message with standard encoding", m.encode('ascii', 'replace'))
         return True
 ENGINES['customarg'] = CustomArgTTSEngine

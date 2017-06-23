@@ -137,9 +137,6 @@ class TraceBuilder(Thread):
                                         'View building': "#884488",
                                         }
                             }
-        #for i in self.tracemodel['operations']:
-        #    if i not in self.modelmapping['operations']['actions']:
-        #        print i
         self.editEndNames = ['ElementEditDestroy', 'ElementEditEnd', 'AnnotationEditEnd', 'RelationEditEnd', 'AnnotationTypeEditEnd', 'RelationTypeEditEnd', 'EditSessionEnd', 'ViewEditEnd', 'SchemaEditEnd']
 
         if package is None and controller is not None:

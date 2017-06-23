@@ -19,6 +19,8 @@
 #
 """Basic pseudo-WYSIWYG HTML editor, with simple ZPT editing facilities.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 # Derived from facilhtml code (GPLv2 - http://code.google.com/p/facilhtml/)
 
@@ -29,6 +31,7 @@
 
 from gi.repository import GObject
 from gi.repository import Gtk
+from gi.repository import GdkPixbuf
 from gi.repository import Pango
 import sys
 import urllib2
@@ -176,11 +179,10 @@ class HTMLEditor(textview_class, HTMLParser):
             self.__tb.create_tag(tag, **self.__formats[tag])
         def debug_mark(buf, m):
             if hasattr(m, '_tag'):
-                print "Deleted ", m._tag
+                logger.debug("Deleted %s", m._tag)
             elif hasattr(m, '_endtag'):
-                print "Deleted /", m._endtag
+                logger.debug("Deleted /%s", m._endtag)
             else:
-                #print "Deleted ", m
                 pass
 
             return True
@@ -201,8 +203,8 @@ class HTMLEditor(textview_class, HTMLParser):
                                 # instance, br tag have startmark ==
                                 # endmark)
                                 b.delete_mark(m._endmark)
-                        except AttributeError, e:
-                            print "Exception for %s" % m._tag, unicode(e).encode('utf-8')
+                        except AttributeError:
+                            logger.error("Exception for %s" % m._tag, exc_info=True)
                     elif  hasattr(m, '_endtag'):
                         b.remove_tag_by_name(m._endtag,
                                              b.get_iter_at_mark(m._startmark),
@@ -217,7 +219,7 @@ class HTMLEditor(textview_class, HTMLParser):
     def can_undo(self):
         try:
             return hasattr(self.get_buffer(), 'can_undo')
-        except AttributeError, e:
+        except AttributeError:
             return False
 
     def undo(self, *p):
@@ -266,7 +268,7 @@ class HTMLEditor(textview_class, HTMLParser):
             l=re.findall('http-equiv.+content-type.+charset=([\w\d-]+)', txt)
             if l:
                 charset=l[0]
-                print "Detected %s charset"
+                logger.warn("Detected %s charset")
             else:
                 charset='utf-8'
             try:
@@ -277,7 +279,7 @@ class HTMLEditor(textview_class, HTMLParser):
         self.feed(txt.encode('utf-8'))
         for k, v in self.__tags.iteritems():
             if v:
-                print "Unbalanced tag at end ", k
+                logger.error("Unbalanced tag at end %s", k)
 
     def _get_iter_for_creating_mark(self):
         """Return an appropriate iter for creating a mark.
@@ -294,7 +296,7 @@ class HTMLEditor(textview_class, HTMLParser):
             # Safety test. Normally useles...
             m=[ m for m in cursor.get_marks() if hasattr(m, '_tag') or hasattr(m, '_endtag') ]
             if m:
-                print "Strange, there should be not tag mark here."
+                logger.error("Strange, there should be not tag mark here.")
         return cursor
 
     def insert_widget(self, widget, cursor=None):
@@ -378,7 +380,7 @@ class HTMLEditor(textview_class, HTMLParser):
         if src:
             data, msg=self.url_load(src)
             if data is None:
-                print "Error loading %s: %s" % (src, msg)
+                logger.error("Error loading %s: %s", src, msg)
                 alt=dattr.get('alt', 'Broken image')
             else:
                 alt=dattr.get('alt', '')
@@ -537,11 +539,11 @@ class HTMLEditor(textview_class, HTMLParser):
             start_mark._endmark=mark
             return
         except IndexError:
-            print "Unbalanced tag", tag
+            logger.error("Unbalanced tag %s", tag)
             mark._startmark=mark
             mark._endmark=mark
         except KeyError:
-            print "Unhandled tag", tag
+            logger.error("Unhandled tag %s", tag)
             mark._startmark=mark
             mark._endmark=mark
 
@@ -720,7 +722,7 @@ class HTMLEditor(textview_class, HTMLParser):
                     try:
                         context.remove(m._startmark)
                     except ValueError:
-                        print "Cannot remove start mark for ", m._endtag
+                        logger.error("Cannot remove start mark for %s", m._endtag)
                 elif hasattr(m, '_tag') and not m._tag in self.__standalone:
                     context.append(m)
             if i.equal(cursor):
@@ -854,7 +856,7 @@ class ContextDisplay(Gtk.TreeView):
                     it=model.iter_next(it)
                 mark._attr=l
 
-            print "Edited", mark._tag, mark._attr
+            logger.debug("Edited %s %s", mark._tag, mark._attr)
             return False
 
         cell=Gtk.CellRendererText()

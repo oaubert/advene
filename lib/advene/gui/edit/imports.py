@@ -18,6 +18,9 @@
 #
 """GUI to import package elements.
 """
+import logging
+logger = logging.getLogger(__name__)
+
 import sys
 
 from gi.repository import Gtk
@@ -109,7 +112,7 @@ class TreeViewImporter:
             at=self.types_mapping[el.viewableClass]
             source=getattr(self.controller.package, at)
         except AttributeError:
-            print "Exception on %s" % str(el)
+            logger.error("Exception on %s", el.id, exc_info=True)
             return False
         l=[ e.uri for e in source if e.isImported() ]
         return (el.uri in l)
@@ -243,7 +246,7 @@ class TreeViewImporter:
         if model[path][column]:
             # If True, it means that it was previously False and that
             # we want to import the element
-            print "Importing %s" % model[path][self.COLUMN_LABEL]
+            logger.info("Importing %s", model[path][self.COLUMN_LABEL])
             # Depends on the type
             if hasattr(element, 'viewableClass'):
                 if element.viewableClass == 'list':
@@ -266,7 +269,7 @@ class TreeViewImporter:
                 elif element.viewableClass in ('annotation-type',
                                                'relation-type'):
                     # We should import the parent schema
-                    print "Annotation types and relation types are not directly importable.\nImport their schema instead."
+                    logger.warn("Annotation types and relation types are not directly importable.\nImport their schema instead.")
                 else:
                     helper.import_element(self.controller.package,
                                           element,
@@ -276,7 +279,7 @@ class TreeViewImporter:
                 # FIXME: does not seem to work yet
                 if self.is_imported(element):
                     # It was previously imported. Unimport it
-                    print "Removing %s" % model[path][self.COLUMN_LABEL]
+                    logger.warn("Removing %s", model[path][self.COLUMN_LABEL])
                     helper.unimport_element(self.controller.package,
                                             element,
                                             self.controller)
@@ -297,10 +300,10 @@ class TreeViewImporter:
                 elif element.viewableClass in ('annotation-type',
                                                'relation-type'):
                     # We should import the parent schema
-                    print "Annotation types and relation types are not directly importable.\nImport their schema instead."
+                    logger.warn("Annotation types and relation types are not directly importable.\nImport their schema instead.")
                 else:
                     # Package
-                    print "FIXME"
+                    logger.warn("Whole package import not implement yet - FIXME")
         return False
 
     def build_widget(self):
@@ -429,8 +432,9 @@ class Importer:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     if len(sys.argv) < 2:
-        print "Should provide a package name"
+        logger.error("Should provide a package name")
         sys.exit(1)
 
     class DummyController:

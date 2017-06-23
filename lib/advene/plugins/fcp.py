@@ -19,9 +19,11 @@
 
 name="Final Cut Pro XML importer"
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gettext import gettext as _
 
-import advene.core.config as config
 from advene.util.importer import GenericImporter
 import xml.etree.ElementTree as ET
 
@@ -64,7 +66,7 @@ class XMLFCPImporter(GenericImporter):
 
     def iterator(self, root):
         if root.tag != 'xmeml':
-            print "Invalid FCP XML file format: ", root.tag
+            logger.error("Invalid FCP XML file format: %s", root.tag)
             return
 
         progress=0.01

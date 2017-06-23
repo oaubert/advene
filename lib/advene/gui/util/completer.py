@@ -21,6 +21,8 @@
 This code is inspired and adapted from the Scribes project
 (http://scribes.sf.net/) - GPLv2
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from gi.repository import Gtk
 from gi.repository import Gdk
@@ -417,6 +419,7 @@ class Indexer:
         return res
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     import sys
     window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
     window.set_default_size (600, 400)
@@ -436,7 +439,7 @@ if __name__ == "__main__":
     t=GtkSource.View(GtkSource.Buffer())
     #t=Gtk.TextView()
     if sys.argv[1:]:
-        print "loading ", sys.argv[1]
+        logger.info("loading %s", sys.argv[1])
         t.get_buffer().set_text(open(sys.argv[1]).read())
 
     i=Indexer()

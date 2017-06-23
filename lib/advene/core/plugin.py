@@ -19,6 +19,8 @@
 """Plugin loader.
 
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import imp
 import os
@@ -60,9 +62,8 @@ class PluginCollection(list):
                 except (PluginException, OSError):
                     # Silently ignore non-plugin files
                     pass
-                except (ImportError, SyntaxError, AttributeError), e:
-                    print "!!!! Cannot load %s plugin" % fname
-                    print unicode(e)
+                except (ImportError, SyntaxError, AttributeError):
+                    logger.error("!!!! Cannot load %s plugin", fname, exc_info=True)
 
     def standard_plugins(self, d):
         for name in os.listdir(d):
@@ -146,7 +147,7 @@ class Plugin(object):
         return "Plugin %s" % name
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     l = PluginCollection('plugins')
     for p in l:
-        print p, ":", ",".join([ str(c) for c in p._classes ])
-
+        logger.warn("%s : %s", p, ",".join([ str(c) for c in p._classes ]))

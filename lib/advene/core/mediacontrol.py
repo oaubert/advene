@@ -18,11 +18,10 @@
 #
 """Player factory.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import advene.core.config as config
-import os
-
-from gettext import gettext as _
 
 class PlayerFactory:
     def __init__(self):
@@ -33,7 +32,7 @@ class PlayerFactory:
         """
         if p is None:
             p=config.data.player['plugin']
-        print "mediacontrol: using %s" % p
+        logger.warn("mediacontrol: using %s", p)
         # vlcnative is deprecated and has been removed.
         if p == 'vlcnative':
             p = 'vlcctypes'
@@ -52,18 +51,18 @@ class PlayerFactory:
             elif p == 'quicktime':
                 import advene.player.quicktime as playermodule
             else:
-                print "Fallback to dummy module"
+                logger.warn("Fallback to dummy module")
                 import advene.player.dummy as playermodule
         except ImportError, e:
             if p != 'gstreamer':
-                print "Cannot import %(player)s mediaplayer: %(error)s.\nTrying gstreamer player." % {
+                logger.warn("Cannot import %(player)s mediaplayer: %(error)s.\nTrying gstreamer player." % {
                     'player': p,
-                    'error': str(e) }
+                    'error': str(e) })
                 return self.get_player('gstreamer')
             else:
-                print "Cannot import %(player)s mediaplayer: %(error)s.\nUsing dummy player." % {
+                logger.warn("Cannot import %(player)s mediaplayer: %(error)s.\nUsing dummy player." % {
                     'player': p,
-                    'error': str(e) }
+                    'error': str(e) })
                 import advene.player.dummy as playermodule
 
         return playermodule.Player()

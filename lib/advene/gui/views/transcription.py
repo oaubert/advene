@@ -18,6 +18,8 @@
 #
 """Transcription view.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import re
 
@@ -499,7 +501,7 @@ class TranscriptionView(AdhocView):
                                                   int(event.y))
         it=textview.get_iter_at_location(x, y)
         if it is None:
-            print "Error in get_iter_at_location"
+            logger.error("Error in get_iter_at_location")
             return False
         textview.get_buffer().move_mark_by_name('insert', it.iter)
         textview.get_buffer().move_mark_by_name('selection_bound', it.iter)
@@ -626,7 +628,7 @@ class TranscriptionView(AdhocView):
             b.delete_mark(beginmark)
             b.delete_mark(endmark)
         else:
-            print "Unknown event %s" % event
+            logger.error("Unknown event %s", event)
         return True
 
     def tag_annotation(self, a, tagname):

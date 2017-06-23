@@ -16,8 +16,10 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-
 name="Youtube XML importer"
+
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
@@ -58,7 +60,7 @@ class TranscriptImporter(GenericImporter):
 
     def iterator(self, root):
         if root.tag != 'transcript':
-            print "Invalid Youtube XML file format: ", root.tag
+            logger.error("Invalid Youtube XML file format: %s", root.tag)
             return
 
         progress=0.01

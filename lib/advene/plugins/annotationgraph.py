@@ -21,6 +21,9 @@
 
 name="AnnotationGraph importer"
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gettext import gettext as _
 
 import advene.core.config as config
@@ -70,7 +73,7 @@ class AnnotationGraphImporter(GenericImporter):
     def iterator(self, root):
         schema=self.package.get_element_by_id('ag')
         if root.tag != tag('AGSet'):
-            print "Invalid AnnotationGraph file format: ", root.tag
+            logger.error("Invalid AnnotationGraph file format: %s", root.tag)
             return
 
         # Import anchors
@@ -78,7 +81,7 @@ class AnnotationGraphImporter(GenericImporter):
         for anchor in root.findall('%s/%s' % (tag('AG'), tag('Anchor'))):
             # FIXME: in multisignal version, use the appropriate signal
             if anchor.attrib['unit'] != 'milliseconds':
-                print "Unhandled anchor unit (", anchor.attrib['unit'], ") Positioning will be wrong."
+                logger.error("Unhandled anchor unit (%s) Positioning will be wrong.", anchor.attrib['unit'])
             self.anchors[anchor.attrib['id']]=long(anchor.attrib['offset'])
         ats={}
         attribs={}
@@ -120,9 +123,10 @@ class AnnotationGraphImporter(GenericImporter):
         self.progress(1.0)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     import sys
     if len(sys.argv) < 3:
-        print "Should provide a file name and a package name"
+        logger.error("Should provide a file name and a package name")
         sys.exit(1)
 
     fname=sys.argv[1]
@@ -133,7 +137,7 @@ if __name__ == "__main__":
     # FIXME: i.process_options()
     i.process_options(sys.argv[1:])
     # (for .sub conversion for instance, --fps, --offset)
-    print "Converting %s to %s using %s" % (fname, pname, i.name)
+    logger.info("Converting %s to %s using %s", fname, pname, i.name)
     p=i.process_file(fname)
     p.save(pname)
-    print i.statistics_formatted()
+    logger.info(i.statistics_formatted())

@@ -19,6 +19,9 @@
 
 name="Speech recognition"
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gettext import gettext as _
 
 import os
@@ -139,7 +142,7 @@ class PocketSphinxImporter(GenericImporter):
         if message.type == Gst.MessageType.EOS:
             finalize()
         elif s:
-            #print "MSG " + s.get_name() + ": " + s.to_string()
+            logger.debug("MSG ", s.get_name(), s.to_string())
             if s.get_name() == 'progress' and self.progress is not None:
                 if not self.progress(s['percent-double'] / 100, _("%(count)d utterances until %(time)s") % {
                         'count': len(self.buffer_list),

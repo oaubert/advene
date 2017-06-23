@@ -21,6 +21,8 @@
 This module holds the ECAEngine class which is dedicated to handling
 events and triggering actions.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import advene.core.config as config
 
@@ -29,7 +31,6 @@ import sched
 import threading
 import copy
 import StringIO
-import urllib
 
 import advene.rules.elements
 
@@ -210,7 +211,6 @@ class ECAEngine:
         if action.immediate or immediate:
             action.execute(context)
         else:
-            #print "Scheduling %s with delay %f" % (action.name, delay)
             if delay:
                 self.scheduler.enterabs(time.time()+delay, 0, action.execute, (context,))
             else:
@@ -218,7 +218,7 @@ class ECAEngine:
             if not self.schedulerthread.isAlive():
                 try:
                     self.schedulerthread.run()
-                except Exception, e:
+                except Exception:
                     import traceback
                     s=StringIO.StringIO()
                     traceback.print_exc (file = s)
@@ -329,10 +329,9 @@ class ECAEngine:
             # Ignore the error if the rule was already removed.
             # but display a warning anyway (it should not happen)
             try:
-                print "Trying to remove non-existant rule %s from %s ruleset" % (str(rule), type_)
+                logger.warn("Trying to remove non-existant rule %s from %s ruleset", str(rule), type_)
             except AttributeError:
-                print "********** ATTRIBUTE ERROR **********", dir(rule)
-                print hex(id(rule))
+                logger.error("********** ATTRIBUTE ERROR for rule %s **********", hex(id(rule)))
             pass
 
     def dump(self):
@@ -359,8 +358,6 @@ class ECAEngine:
         A special named parameter is delay, which will be given in ms.
         It contains the delay to apply to the rule execution.
         """
-        #print "notify %s for %s" % (event_name, str(kw))
-
         if config.data.preferences['record-actions']:
             # FIXME: we should not store the whole element, it is too costly
             d=dict(kw)
@@ -380,7 +377,7 @@ class ECAEngine:
         if kw.has_key('delay'):
             delay=long(kw['delay']) / 1000.0
             del kw['delay']
-            print "Delay specified: %f" % delay
+            logger.debug("Delay specified: %f", delay)
 
         context=self.build_context(event_name, **kw)
         try:

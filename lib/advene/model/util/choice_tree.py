@@ -77,7 +77,6 @@ class ChoiceTree (object):
                         self.children = None
 
     def dump (self, _prefix = ()):
-        print _prefix, self.instance
         children = self.children
         if children is not None:
             for k, subtree in children.iteritems ():

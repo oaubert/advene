@@ -20,6 +20,8 @@
 # AEIDON importer
 # See http://home.gna.org/gaupol/
 # Install python-aeidon on Debian
+import logging
+logger = logging.getLogger(__name__)
 
 name="AEIDON importer"
 
@@ -68,8 +70,8 @@ class AeidonImporter(GenericImporter):
                     project.open_main(filename, encoding='latin1')
                 except UnicodeError:
                     return
-        except Exception, e:
-            print "AEIDON: ", unicode(e)
+        except:
+            logger.error("Cannot process file ", exc_info=True)
             return
         p, at = self.init_package(filename=dest,
                                   schemaid='subtitle', annotationtypeid=project.main_file.format.name)
@@ -97,9 +99,10 @@ class AeidonImporter(GenericImporter):
         self.progress(1.0)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     import sys
     if len(sys.argv) < 3:
-        print "Should provide a file name and a package name"
+        logger.error("Should provide a file name and a package name")
         sys.exit(1)
 
     fname=sys.argv[1]
@@ -110,7 +113,7 @@ if __name__ == "__main__":
     # FIXME: i.process_options()
     i.process_options(sys.argv[1:])
     # (for .sub conversion for instance, --fps, --offset)
-    print "Converting %s to %s using %s" % (fname, pname, i.name)
+    logger.info("Converting %s to %s using %s", fname, pname, i.name)
     p=i.process_file(fname)
     p.save(pname)
-    print i.statistics_formatted()
+    logger.info(i.statistics_formatted())

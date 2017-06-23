@@ -16,6 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
 
 import advene.core.config as config
 
@@ -340,7 +342,7 @@ class DefaultActionsRepository:
         This method is overriden in the GUI by self.log
         """
         message=self.parse_parameter(context, parameters, 'message', "An event occurred.")
-        print "** Message ** " + message.encode('utf8')
+        logger.warn("** Message ** %s" + message.encode('utf8', 'ignore'))
         return True
 
     def PlayerStart (self, context, parameters):
@@ -362,8 +364,6 @@ class DefaultActionsRepository:
         """Goto the given position."""
         position=self.parse_parameter(context, parameters, 'position', None)
 
-        #print "Goto from %s to %s" % (helper.format_time_reference(self.controller.player.current_position_value),
-        #                              helper.format_time_reference(position))
         if position is not None:
             if hasattr(position, 'fragment'):
                 # Probably an annotation.
@@ -654,14 +654,13 @@ class DefaultActionsRepository:
         'soundclips' resource folder in the package.
         """
         if not ('soundclips' in self.controller.package.resources):
-            self.controller.log(_("No 'soundclips' resource folder in the package"))
-            print "No soundclips"
+            logger.error(_("No 'soundclips' resource folder in the package"))
             return True
         clip = self.parse_parameter(context, parameters, 'clip', None)
         volume = self.parse_parameter(context, parameters, 'volume', 100)
         balance = self.parse_parameter(context, parameters, 'balance', 0)
         if clip is None:
-            print "No clip"
+            logger.error("No clip")
             return True
         else:
             # Get the resource

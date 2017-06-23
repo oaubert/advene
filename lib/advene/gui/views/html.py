@@ -20,6 +20,8 @@
 
 FIXME: add navigation buttons (back, history)
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from gi.repository import Gtk
 import urllib
@@ -101,10 +103,10 @@ class webkit_wrapper:
             self.notify(label=text)
 
         def _icon_loaded_cb(self, *p):
-            print "icon loaded"
+            logger.info("icon loaded")
 
         def _selection_changed_cb(self):
-            print "selection changed"
+            logger.info("selection changed")
 
         def _navigation_requested_cb(view, frame, networkRequest):
             return 1

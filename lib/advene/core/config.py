@@ -23,7 +23,7 @@ It provides data, an instance of Config class.
 It is meant to be used this way::
 
   import config
-  print "Userid: %s" % config.data.userid
+  default_userid = config.data.userid
 
 @var data: an instance of Config (Singleton)
 """

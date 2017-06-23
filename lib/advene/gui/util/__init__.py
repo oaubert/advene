@@ -111,8 +111,8 @@ def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
 
     try:
         loader = GdkPixbuf.PixbufLoader.new_with_type('svg')
-    except Exception, e:
-        print "Unable to load the SVG pixbuf loader: ", str(e)
+    except:
+        logger.error("Unable to load the SVG pixbuf loader", exc_info=True)
         loader=None
     if loader is not None:
         try:
@@ -125,7 +125,7 @@ def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
             p.composite(pixbuf, 0, 0, w, h, 0, 0, 1.0, 1.0, GdkPixbuf.InterpType.BILINEAR, 255)
         except GObject.GError, e:
             # The PNG data was invalid.
-            print "Invalid image data", e
+            logger.error("Invalid image data %s", e)
             pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
     else:
         pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
@@ -193,7 +193,7 @@ def name2color(color):
             try:
                 color_cache[color]=Gdk.color_parse(color)
             except (TypeError, ValueError):
-                print "Unable to parse ", color
+                logger.error("Unable to parse color %s", color)
                 color_cache[color]=None
             gtk_color=color_cache[color]
     else:
@@ -314,7 +314,7 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
             selection.set(selection.get_target(), 8, encode_drop_parameters(timestamp=el.fragment.begin,
                                                                       comment=controller.get_title(el)))
         else:
-            print "Inconsistent DND target"
+            logger.error("Inconsistent DND target %s", targetType)
         return True
     elif targetType in (typ['text-plain'], typ['STRING']):
         selection.set(selection.get_target(), 8, controller.get_title(el).encode('utf8'))

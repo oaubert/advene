@@ -78,7 +78,7 @@ class StructuredContent(dict,object):
                 self[k] = urllib.unquote(v)
             else:
                 self['_error']=l
-                print "Syntax error in content: >%s<" % l.encode('utf8')
+                logger.warn("Syntax error in content: >%s<", l)
 
     def unparse(self):
         """Return the encoded version of the dictionary.

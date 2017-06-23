@@ -36,6 +36,8 @@ FIXME: XML load/dump should try to preserve unhandled information (especially TA
 FIXME: find a way to pass search paths for xlink:href elements resolution
 FIXME: find a way to pass the background path
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import os
 import sys
@@ -581,7 +583,7 @@ class Text(Rectangle):
             context.show_text(self.text)
             self.width, self.height = extents[2:4]
         except MemoryError:
-            print "MemoryError while rendering text"
+            logger.error("MemoryError while rendering text")
         return
 
     def control_point(self, point):
@@ -1121,7 +1123,7 @@ class Path(Shape):
 
         if not data or data.pop() != 'M':
             # We need at least a starting point and a first line
-            print "SVG Path parsing error - wrong initial path element"
+            logger.error("SVG Path parsing error - wrong initial path element")
             return
 
         try:
@@ -1144,9 +1146,9 @@ class Path(Shape):
                     # Closed path
                     self.closed = True
                 else:
-                    print "SVG Path parsing error - unknown command:", command
-        except (IndexError, ValueError), e:
-            print "SVG Path parsing error - invalid conversion", unicode(e)
+                    logger.error("SVG Path parsing error - unknown command: %s", command)
+        except (IndexError, ValueError):
+            logger.error("SVG Path parsing error - invalid conversion", exc_info=True)
 
     def get_svg(self, relative=False, size=None):
        """Return a SVG representation of the path
@@ -1323,7 +1325,7 @@ class Link(Shape):
                 if o is not None:
                     break
         if o is None:
-            print "Invalid <a> content in SVG"
+            logger.error("Invalid <a> content in SVG")
             return None
         o.link=element.attrib.get('xlink:href', element.attrib.get('{http://www.w3.org/1999/xlink}href', ''))
         o.link_label=element.attrib.get('title', 'Link to ' + o.link)
@@ -1341,7 +1343,7 @@ class Link(Shape):
         @return: the SVG representation
         @rtype: elementtree.Element
         """
-        print "Should not happen..."
+        logger.error("Should not happen (abstract method)...")
         yield None
 
 class ShapeDrawer:
@@ -1433,7 +1435,7 @@ class ShapeDrawer:
     def default_callback(self, shape):
         """Default callback.
         """
-        print "Created shape ", str(shape)
+        logger.warn("Created shape %s", str(shape))
 
     def set_background(self, pixbuf, reset_dimensions=False):
         """Set a new background pixbuf.
@@ -1445,7 +1447,7 @@ class ShapeDrawer:
             if reset_dimensions:
                 # FIXME: if we have objects, we should scale them...
                 if self.objects:
-                    print "Resizing SVG editor with existing objects... Strange things will happen"
+                    logger.warn("Resizing SVG editor with existing objects... Strange things will happen")
                 self.canvaswidth = w
                 self.canvasheight = h
                 self.widget.set_size_request(self.canvaswidth, self.canvasheight)
@@ -1808,9 +1810,9 @@ class ShapeDrawer:
             elif unit == '%':
                 return long(val * 100.0 / self.dimensions[dimindex])
             else:
-                print 'SVG: Unspecified unit for ', s
+                logger.warn('SVG: Unspecified unit for %s', s)
                 return val
-        print 'Unhandled SVG dimension format for ', s
+        logger.warn('Unhandled SVG dimension format for %s', s)
         return 0
 
     def parse_svg(self, et, current_path=''):
@@ -1822,7 +1824,8 @@ class ShapeDrawer:
         hrefs can be resolved)
         """
         if et.tag != 'svg' and et.tag != ET.QName(SVGNS, 'svg'):
-            print "Not a svg file"
+            logger.error("Not a svg file (root tag: %s)", et.tag)
+            return False
         w=et.attrib.get('width')
         h=et.attrib.get('height')
         if w is not None and h is not None:
@@ -1838,7 +1841,7 @@ class ShapeDrawer:
                             # http url, download the file
                             (fname, header)=urllib.urlretrieve(o.uri)
                             i=Gtk.Image()
-                            print "Loaded background from ", o.uri, " copy in", fname
+                            logger.warn("Loaded background from %s copy in %s", o.uri, fname)
                             i.set_from_file(fname)
                         else:
                             # Consider it as local.
@@ -1855,7 +1858,7 @@ class ShapeDrawer:
                                                  True, 8, o.width, o.height)
                                 p.fill(0xdeadbeaf)
                                 i.set_from_pixbuf(p)
-                            print "Loaded background from ", uri
+                            logger.warn("Loaded background from %s", uri)
                         p=i.get_pixbuf()
                         # We insert the background at the beginning of
                         # the object stack, so that other shapes are
@@ -2226,4 +2229,5 @@ defined_shape_classes=[ c for c in locals().values() if hasattr(c, 'SHAPENAME') 
 
 # Start it all
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     main()

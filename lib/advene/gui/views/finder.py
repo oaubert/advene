@@ -642,9 +642,7 @@ class QueryColumn(FinderColumn):
                                                     result=res,
                                                     destination='east')
             except Exception:
-                #print "********** Oops"
-                #import traceback
-                #traceback.print_exc()
+                logger.debug("Exception in query evaluation", exc_info=True)
                 b.set_sensitive(False)
             return True
 

@@ -16,13 +16,14 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-
 name="Audio segmentation importer"
+
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
 import os
-import urllib
 
 from gi.repository import GObject
 from gi.repository import Gst
@@ -96,7 +97,7 @@ class CutterImporter(GenericImporter):
         ##    #if new == Gst.State.NULL:
         ##    #    self.end_callback()
         elif s:
-            #print "MSG " + bus.get_name() + ": " + s.to_string()
+            logger.debug("MSG %s: %s", bus.get_name(), s.to_string())
             if s.get_name() == 'progress' and self.progress is not None:
                 if not self.progress(s['percent-double'] / 100, _("Detected %(count)d segments until %(time)s") % { 'count': len(self.buffer),
                                                                                                                     'time': helper.format_time(s['current'] * 1000) }):
@@ -109,7 +110,7 @@ class CutterImporter(GenericImporter):
                     if self.last_above is not None:
                         self.buffer.append( (self.last_above, t) )
                     else:
-                        print "Error: not above without matching above"
+                        logger.error("Error: not above without matching above")
                     self.last_above = t
         return True
 

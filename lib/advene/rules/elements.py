@@ -20,6 +20,8 @@
 
 The event framework makes it possible to bind actions to specific
 events that match a condition."""
+import logging
+logger = logging.getLogger(__name__)
 
 import re
 import StringIO
@@ -1170,10 +1172,11 @@ class ECACatalog:
             return self.actions.keys()
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     default='default_rules.txt'
     import sys
     if len(sys.argv) < 2:
-        print "No name provided. Using %s." % default
+        logger.error("No name provided. Using %s.", default)
         filename=default
     else:
         filename=sys.argv[1]
@@ -1182,4 +1185,4 @@ if __name__ == "__main__":
     catalog=ECACatalog()
     r=RuleSet()
     r.from_xml(uri=filename, catalog=catalog)
-    print "Read %d rules." % len(r)
+    logger.info("Read %d rules.", len(r))

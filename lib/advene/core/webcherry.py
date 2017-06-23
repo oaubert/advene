@@ -74,7 +74,7 @@ class Common:
         """
         err = sys.exc_info()
         if DEBUG:
-            print "Error handling"
+            logger.error("Error handling", exc_info=True)
             import traceback, StringIO
             bodyFile = StringIO.StringIO()
             traceback.print_exc(file = bodyFile)

@@ -16,6 +16,9 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
+
 import advene.core.config as config
 
 import re
@@ -512,7 +515,7 @@ class AdhocViewParametersParser:
             # File-like object
             self.parse_file(source)
         else:
-            print "Do not know what to do with ", source
+            logger.warn("Do not know what to do with %s", source)
 
     def parse_file(self, fd):
         tree=ET.parse(fd)
@@ -535,4 +538,4 @@ class AdhocViewParametersParser:
                 value=unicode(urllib.unquote(e.attrib['value']), 'utf8')
                 self.arguments.append( (name, value) )
             else:
-                print "Unknown tag %s in AdhocViewParametersParser" % e.tag
+                logger.warn("Unknown tag %s in AdhocViewParametersParser %s", e.tag)

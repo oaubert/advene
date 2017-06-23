@@ -17,9 +17,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 
-# AnnotationGraph importer.
+# ShotDetect XML output importer.
 
-name="ShotDetect importer"
+name="ShotDetect XML importer"
+
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
@@ -32,7 +35,7 @@ def register(controller=None):
     return True
 
 class ShotdetectImporter(GenericImporter):
-    name = _("Shotdetect importer")
+    name = _("Shotdetect XML importer")
 
     def can_handle(fname):
         """Return a score between 0 and 100.
@@ -68,7 +71,7 @@ class ShotdetectImporter(GenericImporter):
 
     def iterator(self, root):
         if root.tag != 'shotdetect':
-            print "Invalid Shotdetect file format: ", root.tag
+            logger.error("Invalid Shotdetect file format: %s", root.tag)
             return
 
         progress=0.01
@@ -91,9 +94,10 @@ class ShotdetectImporter(GenericImporter):
         self.progress(1.0)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     import sys
     if len(sys.argv) < 3:
-        print "Should provide a file name and a package name"
+        logger.error("Should provide a file name and a package name")
         sys.exit(1)
 
     fname=sys.argv[1]
@@ -104,7 +108,7 @@ if __name__ == "__main__":
     # FIXME: i.process_options()
     i.process_options(sys.argv[1:])
     # (for .sub conversion for instance, --fps, --offset)
-    print "Converting %s to %s using %s" % (fname, pname, i.name)
+    logger.info("Converting %s to %s using %s", fname, pname, i.name)
     p=i.process_file(fname)
     p.save(pname)
-    print i.statistics_formatted()
+    logger.info(i.statistics_formatted())

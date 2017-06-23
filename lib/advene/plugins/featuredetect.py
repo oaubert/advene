@@ -18,6 +18,9 @@
 #
 name="Feature detection importer"
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gettext import gettext as _
 
 import os
@@ -95,7 +98,7 @@ class FeatureDetectImporter(GenericImporter):
         frame = cv.QueryFrame(video)
         width, height = cv.GetSize(frame)
         scaled_width, scaled_height = int(width / self.scale), int(height / self.scale)
-        print width, height, scaled_width, scaled_height
+        logger.warn("Video dimensions %dx%d - scaled to %dx%d", width, height, scaled_width, scaled_height)
 
         # create storage for grayscale version
         largegrayscale = cv.CreateImage( (width, height), 8, 1)
@@ -137,6 +140,7 @@ class FeatureDetectImporter(GenericImporter):
             # We start a new annotation if the threshold is reached,
             # but we do not end if if we get below the threshold.
             if objects:
+                logger.debug("Detected object %s", objects)
                 # Detected face.
                 if start_pos is None:
                     # Only create a new annotation if above threshold

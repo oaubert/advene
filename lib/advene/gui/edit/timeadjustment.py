@@ -236,7 +236,7 @@ class TimeAdjustment:
 
     def update_snapshot(self, button):
         # FIXME: to implement
-        print "Not implemented yet."
+        logger.warn("Not implemented yet.")
         pass
 
     def convert_entered_value(self, *p):

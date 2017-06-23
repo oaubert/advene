@@ -25,8 +25,6 @@ from advene.gui.views import AdhocView
 
 name="Kinect view/control plugin"
 
-print "Trying to import", name
-
 try:
     import pytrack
 except ImportError:

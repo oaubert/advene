@@ -53,7 +53,7 @@ except ImportError:
 
 def debug(f):
     def wrap(*args):
-        print f.__name__, args
+        logger.warn("%s %s", f.__name__, args)
         return f(*args)
     return wrap
 
@@ -349,7 +349,7 @@ if __name__ == '__main__':
         loop.run()
     else:
         if Evaluator is None:
-            print "Missing evaluator module.\nFetch it from https://github.com/oaubert/advene/tree/master/lib/advene/gui/evaluator.py"
+            logger.warn("Missing evaluator module.\nFetch it from the repository")
             sys.exit(0)
 
         # Adding the following lines breaks the code, with a warning:

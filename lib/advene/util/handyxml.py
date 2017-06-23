@@ -56,7 +56,6 @@ class HandyXmlWrapper:
             return getattr(self.node, attr)
 
         if attr[0:2] != '__':
-            #print "Looking for "+attr, self.node, dir(self.node)
             if hasattr(self.node, 'hasAttribute'):
                 if self.node.hasAttribute(attr):
                     return self.node.getAttribute(attr)

@@ -16,6 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
@@ -141,9 +143,8 @@ class WebsiteExporter(object):
         ctx=self.controller.build_context()
         try:
             content=ctx.evaluateValue('here/%s' % address)
-        except Exception, e:
-            print "Exception when evaluating", address
-            print unicode(e).encode('utf-8')
+        except Exception:
+            logger.error("Exception when evaluating %s", address, exc_info=True)
             content=None
 
         if not isinstance(content, basestring):
@@ -338,7 +339,7 @@ class WebsiteExporter(object):
                 fragment=None
                 tr=self.url_translation.get(link)
             if tr is None:
-                print "website export bug: %s was not translated" % link
+                logger.error("website export bug: %s was not translated", link)
                 continue
             if link != tr:
                 extra=[]
@@ -385,7 +386,7 @@ class WebsiteExporter(object):
             # FIXME: not robust wrt. multiple packages/videos
             a=self.controller.package.get_element_by_id(ident)
             if not a:
-                print "Cannot find annotation %s for overlaying"
+                logger.error("Cannot find annotation %s for overlaying", ident)
                 continue
             name=ident+tales.replace('/', '_')
             if not os.path.isdir(self.imgdir):

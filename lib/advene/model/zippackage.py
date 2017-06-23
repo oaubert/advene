@@ -46,6 +46,8 @@
     meta.xml: metadata (cf OpenDocument specification)
     META-INF/manifest.xml : Manifest (package contents)
   """
+import logging
+logger = logging.getLogger(__name__)
 
 import zipfile
 import os
@@ -81,7 +83,7 @@ class ZipPackage:
         for d in ZipPackage.tempdir_list:
             # FIXME: there should be a way to determine wether it
             # is still used or not.
-            print "Cleaning up %s" % d
+            logger.info("Cleaning up %s", d)
             if os.path.isdir(d.encode(_fs_encoding)):
                 shutil.rmtree(d, ignore_errors=True)
 
@@ -105,7 +107,7 @@ class ZipPackage:
                 # Use the same extension
                 self.uri = uri
                 (n, e) = os.path.splitext(uri)
-                print "Making a local copy of %s" % uri
+                logger.info("Making a local copy of %s", uri)
                 f, self.file_ = tempfile.mkstemp(e, 'adv')
                 os.write(f, u.read())
                 os.close(f)
@@ -227,7 +229,7 @@ class ZipPackage:
                 pass
             n=name.replace('/', os.path.sep)
             if not os.path.exists( self.tempfile(n) ):
-                print "Warning: missing file : %s" % name
+                logger.info("Warning: missing file : %s", name)
 
         # FIXME: Make some validity checks (resources/ dir, etc)
         self.file_ = fname

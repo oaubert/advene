@@ -18,6 +18,8 @@
 #
 """A package to manipulate elements from the Advene model.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import os
 import sys
@@ -91,6 +93,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         element = None
         if source is None:
             element = self._make_model()
+            logger.debug("Instanciating package from %s", uri)
         else:
             reader = PyExpat.Reader()
             if source is _get_from_uri:
@@ -124,7 +127,6 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                     element = reader.fromUri(source_uri).documentElement
 
         modeled.Modeled.__init__(self, element, None)
-
         self.__imports = None
         self.__annotations = None
         self.__queries = None

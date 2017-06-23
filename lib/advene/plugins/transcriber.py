@@ -23,6 +23,9 @@
 
 name="Transcriber importer"
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gettext import gettext as _
 
 from advene.util.importer import GenericImporter
@@ -88,24 +91,24 @@ class TrsImporter(GenericImporter):
 
                     try:
                         s_begin=float(s.get('startTime')) ## 'startTime' is a "Section" required attribute
-                    except AttributeError, e:
-                        print str(e)
+                    except:
+                        logger.error("startTime Conversion", exc_info=True)
                         continue
 
                     s_begin=int(s_begin*1000)
 
                     try:
                         s_end=float(s.get('endTime'))    ## 'endTime' is a "Section" required attribute
-                    except AttributeError, e:
-                        print str(e)
+                    except:
+                        logger.error("endTime Conversion", exc_info=True)
                         continue
 
                     s_end=int(s_end*1000)
 
                     try:
                         typ = s.get('type')              ## 'type' is a "Section" required attribute
-                    except AttributeError, e:
-                        print str(e)
+                    except:
+                        logger.error("type Conversion", exc_info=True)
                         continue
 
                     topic = ""  ## 'topic' is a "Section" optional  attribute
@@ -129,16 +132,16 @@ class TrsImporter(GenericImporter):
 
                             try:
                                 t_begin=float(t.get('startTime')) ## 'startTime' is a "Turn" required attribute
-                            except AttributeError, e:
-                                print str(e)
+                            except:
+                                logger.error("startTime Conversion", exc_info=True)
                                 continue
 
                             t_begin=int(t_begin*1000)
 
                             try:
                                 t_end=float(t.get('endTime'))   ## 'endTime' is a "Turn" required attribute
-                            except AttributeError, e:
-                                print str(e)
+                            except:
+                                logger.error("endTime Conversion", exc_info=True)
                                 continue
 
                             t_end=int(t_end*1000)
@@ -167,9 +170,9 @@ class TrsImporter(GenericImporter):
                                 if elem.tag == "Sync" :
                                     try:
                                         seg_time = float(elem.get('time'))
-                                    except AttributeError, e:
-                                            print str(e)
-                                            continue
+                                    except:
+                                        logger.error("time Conversion", exc_info=True)
+                                        continue
 
                                     seg_time = int(seg_time*1000)
 
@@ -191,8 +194,8 @@ class TrsImporter(GenericImporter):
                                 elif elem.tag == 'Background':
                                     try:
                                         time = elem.get('time')
-                                    except AttributeError, e:
-                                        print str(e)
+                                    except:
+                                        logger.error("time Conversion", exc_info=True)
                                         continue
 
                                     level = 'off'
@@ -230,12 +233,12 @@ class TrsImporter(GenericImporter):
                                 seg['content'] = text+"\n"
                                 yield seg
 
-                    except AttributeError,e: ## catch exception on Turn elements
-                        print str(e)
+                    except AttributeError: ## catch exception on Turn elements
+                        logger.error("Exception on Turn element", exc_info=True)
                         continue
 
-            except AttributeError,e:  ## catch exceptions on Section elements
-                print str(e)
+            except AttributeError:  ## catch exceptions on Section elements
+                logger.error("Exception on Section element", exc_info=True)
                 continue
 
             if b['begin'] is not None:

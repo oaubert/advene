@@ -18,6 +18,10 @@
 #
 """VLC access using the python ctypes-based module.
 """
+name="VLC-ctypes video player"
+
+import logging
+logger = logging.getLogger(__name__)
 
 import advene.core.config as config
 import os
@@ -26,8 +30,6 @@ try:
     import advene.player.vlc as vlc
 except ImportError:
     vlc=None
-
-name="VLC-ctypes video player"
 
 def register(controller=None):
     if vlc is None:
@@ -101,7 +103,6 @@ class Player(object):
         Use the defined method if necessary. Else, forward the request
         to the mc object
         """
-        #print "********************** Getattr", name
         try:
             return object.__getattribute__ (self, name)
         except AttributeError, e:
@@ -157,7 +158,6 @@ class Player(object):
         if filters != []:
             # Some filters have been defined
             args.append ('--vout-filter=%s' %":".join(filters))
-        #print "player args", args
         return [ str(i) for i in args ]
 
     def restart_player (self):
@@ -166,9 +166,9 @@ class Player(object):
 
         self.args=self.get_player_args()
 
-        print "Before MC instanciation"
+        logger.debug("Before MC instanciation")
         self.mc = vlc.MediaControl( self.args )
-        print "After MC instanciation"
+        logger.debug("After MC instanciation")
 
         # 0 relative position
         pos = vlc.MediaControlPosition ()
@@ -224,7 +224,7 @@ class Player(object):
         @param position: the position
         @type position: vlc.Position
         """
-        print "update_status", status
+        logger.debug("update_status %s", status)
 
         if status == "start":
             if position is None:
@@ -267,7 +267,7 @@ class Player(object):
             elif status == "" or status == None:
                 pass
             else:
-                print "******* Error : unknown status %s in mediacontrol.py" % status
+                logger.error("******* Error : unknown status %s", status)
 
         self.position_update ()
 
@@ -278,7 +278,7 @@ class Player(object):
             try:
                 s = mc.get_stream_information(MediaTime)
             except Exception, e:
-                print "Exception", str(e)
+                logger.error("Exception", exc_info=True)
                 raise self.InternalException(str(e))
             # Make sure we store the (python) value of the status
             self.status = s.status.value
@@ -343,7 +343,7 @@ class Player(object):
         # < 100ms)
         if (self.current_position_value <= 100 and
             (config.data.os == 'win32' or config.data.os == 'darwin')):
-            print "Snapshots <=100ms dropped"
+            logger.warn("Snapshots <=100ms dropped")
             return None
         s=self.mc.snapshot(position)
         return s

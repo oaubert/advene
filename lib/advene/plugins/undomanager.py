@@ -20,6 +20,8 @@
 
 It provides a basic framework for simple undos.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
@@ -104,7 +106,7 @@ class UndoHistory:
         """
         el=context.evaluateValue('element')
         self._edits[el]=self.get_cached_representation(el)
-        #print "Recording cached for ", el
+        logger.debug("Recording cached for %s", el)
 
     def element_edit_cancel(self, context, parameters):
         """Remove the value from the cache.
@@ -112,7 +114,7 @@ class UndoHistory:
         el=context.evaluateValue('element')
         try:
             del self._edits[el]
-            #print "Removing cached value for ", el
+            logger.debug("Removing cached value for %s", el)
         except KeyError:
             pass
 
@@ -122,7 +124,7 @@ class UndoHistory:
         if context.globals.get('undone'):
             # The change is done in the context of an Undo.
             # Do not record it.
-            #print "EditEnd in Undo context"
+            logger.debug("EditEnd in Undo context")
             return
         batch=context.globals.get('batch', None)
         if batch:
@@ -146,7 +148,7 @@ class UndoHistory:
             # Store changed elements in history
             history.append( ('changed', element, changed) )
             self._edits[element]=new
-            #print "Saving diff for ", element
+            logger.debug("Saving diff for %s", element)
 
     def element_create(self, context, parameters):
         """Record the created element id.
@@ -154,7 +156,7 @@ class UndoHistory:
         if context.globals.get('undone'):
             # The change is done in the context of an Undo.
             # Do not record it.
-            #print "Create in Undo context"
+            logger.debug("Create in Undo context")
             return
         event=context.evaluateValue('event')
         el=event.replace('Create', '').lower()
@@ -184,7 +186,7 @@ class UndoHistory:
         if context.globals.get('undone'):
             # The change is done in the context of an Undo.
             # Do not record it.
-            #print "Delete in Undo context"
+            logger.debug("Delete in Undo context")
             return
         event=context.evaluateValue('event')
         el=event.replace('Delete', '').lower()
@@ -210,7 +212,7 @@ class UndoHistory:
             # element type (annotation, view...) as second parameter
             history.append( ('deleted', el, self._edits[element]) )
             del self._edits[element]
-            #print "Saving content for ", el
+            logger.debug("Saving content for %s", el)
 
     def log(self, *p):
         self.controller.log("UndoManager: " + str(p))
