@@ -81,7 +81,7 @@ class AnnotationImporter(AdhocView):
         if filename is not None:
             n = filename
         else:
-            n=unicode(self.filename or self.fb.get_filename() or self.fb.get_uri(), 'utf-8')
+            n=self.filename or self.fb.get_filename().decode('utf-8') or self.fb.get_uri().decode('utf-8')
         if n.startswith('file://'):
             n = n.replace('file://', '')
         if not self.fb.get_filename():
@@ -157,7 +157,7 @@ class AnnotationImporter(AdhocView):
 
         if self.importer is None:
             ic = self.importers.get_current_element()
-            fname = unicode(self.filename or self.fb.get_filename() or self.fb.get_uri(), ' utf-8')
+            fname = self.filename or self.fb.get_filename().decode('utf-8') or self.fb.get_uri().decode('utf-8')
 
             if fname.startswith('file://'):
                 fname = fname.replace('file://', '')
