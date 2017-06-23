@@ -1457,6 +1457,26 @@ class AdveneGUI(object):
         # Video player socket
         if config.data.os == 'win32':
             self.drawable = Gtk.DrawingArea()
+            if not self.drawable.get_window().ensure_native():
+                logger.error("Video embedding requires a native window")
+            def get_id(widget):
+                import ctypes
+                Gdk.threads_enter()
+                window = widget.get_window()
+                # Make sure to call ensure_native before e.g. on realize
+                if not widget.has_native():
+                    logger.warn("Your window will freeze as soon as you move or resize it...")
+                ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
+                ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
+                gpointer = ctypes.pythonapi.PyCapsule_GetPointer(window.__gpointer__, None)
+                #get the win32 handle
+                gdkdll = ctypes.CDLL ("libgdk-3-0.dll")
+                handle = gdkdll.gdk_win32_window_get_handle(gpointer)
+                Gdk.threads_leave()
+                return handle
+            # Define the get_id method on the drawable, so that it can
+            # be used by the player plugin code.
+            self.drawable.get_id = get_id.__get__(self.drawable)
         else:
             self.drawable=Gtk.Socket()
             self.drawable.connect('plug-removed', handle_remove)
