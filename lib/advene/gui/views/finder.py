@@ -110,7 +110,7 @@ class DetailedTreeModel(object):
         self.virtual['adhoc']   = VirtualNode(_("Adhoc views"),   package)
 
     def nodeParent (self, node):
-        logger.warn("nodeparent %s", node)
+        #logger.warn("nodeparent %s", node)
         if isinstance (node, Annotation):
             parent = node.type
         elif isinstance (node, Relation):
@@ -146,7 +146,7 @@ class DetailedTreeModel(object):
         return parent
 
     def nodeChildren (self, node):
-        logger.warn("nodechildren %s %s", type(node), node)
+        #logger.warn("nodechildren %s %s", type(node), node)
         children = []
         if isinstance (node, Annotation):
             children = []
