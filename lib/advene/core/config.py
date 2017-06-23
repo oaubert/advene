@@ -313,6 +313,8 @@ class Config(object):
             # Default FPS, used for smpte-style timestamp display
             'default-fps': 25,
             'apply-edited-elements-on-save': True,
+            'frameselector-width': 140,
+            'frameselector-count': 8,
             }
 
         # Player options

@@ -4251,9 +4251,11 @@ class AdveneGUI(object):
                         'record-actions', 'popup-destination',
                         'timestamp-format', 'default-fps',
                         'abbreviation-mode', 'text-abbreviations', 'completion-mode', 'completion-predefined-only',
-                        'prefer-wysiwyg', 'player-shortcuts-in-edit-windows', 'apply-edited-elements-on-save' )
+                        'prefer-wysiwyg', 'player-shortcuts-in-edit-windows', 'apply-edited-elements-on-save',
+                        'frameselector-count', 'frameselector-width',
+        )
         # Direct options needing a restart to be taken into account.
-        restart_needed_options = ('tts-engine', 'language', 'timestamp-format')
+        restart_needed_options = ('tts-engine', 'language', 'timestamp-format', 'expert-mode')
 
         path_options=('data', 'plugins', 'advene', 'imagecache', 'moviepath', 'shotdetect')
         cache={
@@ -4308,6 +4310,10 @@ class AdveneGUI(object):
         ew.add_checkbox(_("Remember window size"), "remember-window-size", _("Remember the size of opened windows"))
         ew.add_spin(_("Bookmark snapshot width"), 'bookmark-snapshot-width', _("Width of the snapshots representing bookmarks"), 50, 400)
         ew.add_spin(_("Bookmark snapshot precision"), 'bookmark-snapshot-precision', _("Precision (in ms) of the displayed bookmark snapshots."), 25, 500)
+
+        ew.add_label(_("Frame selector (shotvalidation...)"))
+        ew.add_spin(_("Frameselector snapshot width"), 'frameselector-width', _("Width of the snapshots in frameselector"), 50, 600)
+        ew.add_spin(_("Frameselector count"), 'frameselector-count', _("Number of frames displayed in frameselector."), 3, 25)
 
         ew.add_title(_("General"))
         ew.add_checkbox(_("Weekly update check"), 'update-check', _("Weekly check for updates on the Advene website"))
