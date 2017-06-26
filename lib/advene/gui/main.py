@@ -2910,6 +2910,8 @@ class AdveneGUI(object):
         # Dump to terminal
         if config.data.preferences['log-to-terminal']:
             print unicode(msg).encode('utf-8')
+        if 'gst-stream-error' in msg:
+            dialog.message_dialog(_("Video player error: %s") % msg, modal=False, icon=Gtk.MessageType.ERROR)
         return
 
     def get_illustrated_text(self, text, position=None, vertical=False, height=40, color=None):
