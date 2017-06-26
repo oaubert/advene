@@ -29,3 +29,7 @@
 .frameselector_after {
     background-color: #000;
 }
+
+.timestamp_label {
+    font-size: x-small;
+}

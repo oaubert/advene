@@ -816,7 +816,7 @@ class TimestampRepresentation(Gtk.Button):
         self.extend_popup_menu=None
         self.highlight=False
         # Displayed text.
-        self._text = '<span size="xx-small">%(timestamp)s</span>'
+        self._text = '%(timestamp)s'
         self.callback = callback
 
         box=Gtk.VBox()
@@ -952,6 +952,7 @@ class TimestampRepresentation(Gtk.Button):
             self.image.show()
         ts=helper.format_time(self._value)
         self.label.set_markup(self._text % { 'timestamp': ts })
+        self.label.get_style_context().add_class("timestamp_label")
         if self.visible_label and self.label.get_child_requisition().width <= 1.2 * self.image.get_child_requisition().width:
             self.label.show()
         else:
