@@ -16,6 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+
+from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
 
@@ -281,7 +283,13 @@ class ShotValidation(AdhocView):
         vbox.pack_start(self.statusbar, False, True, 0)
 
         self.set_index(0)
-        vbox.show_all()
         vbox.connect('key-press-event', self.handle_keypress)
+        vbox.show_all()
+        # Hack: since the view if often launched from the timeline
+        # view, moving the mouse in timeline steals the focus from the
+        # window. Let's only grab focus after a small timeout, so that
+        # the user has time to get the mouse out of the timeline
+        # window
+        GObject.timeout_add(2000, lambda: self.next_button.grab_focus())
         return vbox
 
