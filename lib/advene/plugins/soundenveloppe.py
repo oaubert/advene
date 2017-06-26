@@ -16,6 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
 
 name="Sound enveloppe importer"
 
@@ -106,6 +108,12 @@ class SoundEnveloppeImporter(GenericImporter):
         s = message.get_structure()
         if message.type == Gst.MessageType.EOS:
             finalize()
+        elif message.type == Gst.MessageType.ERROR:
+            title, message = message.parse_error()
+            logger.error("%s: %s", title, message)
+        elif message.type == Gst.MessageType.WARNING:
+            title, message = message.parse_warning()
+            logger.warn("%s: %s", title, message)
         elif s:
             if s.get_name() == 'progress' and self.progress is not None:
                 if not self.progress(s['percent-double'] / 100, _("At %s") % helper.format_time(s['current'] * 1000)):
