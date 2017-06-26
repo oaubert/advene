@@ -294,6 +294,9 @@ class Player:
         bus = self.player.get_bus()
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', self.on_sync_message)
+        bus.add_signal_watch()
+        bus.connect('message::error', self.on_bus_message_error)
+        bus.connect('message::warning', self.on_bus_message_warning)
 
     def position2value(self, p):
         """Returns a position in ms.
@@ -658,11 +661,27 @@ class Player:
         return True
 
     def on_sync_message(self, bus, message):
-        s = message.get_structure() 
+        s = message.get_structure()
         if s is None:
             return True
         if s.get_name() == 'prepare-window-handle':
             self.reparent(self.xid)
+        return True
+
+    def on_bus_message_error(self, bus, message):
+        s = message.get_structure()
+        if s is None:
+            return True
+        title, message = message.parse_error()
+        logger.error("%s: %s", title, message)
+        return True
+
+    def on_bus_message_warning(self, bus, message):
+        s = message.get_structure()
+        if s is None:
+            return True
+        title, message = message.parse_warning()
+        logger.warn("%s: %s", title, message)
         return True
 
     def sound_mute(self):
