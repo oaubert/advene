@@ -2153,7 +2153,7 @@ class AdveneWebServer:
                 'log.error_file': config.data.advenefile('webserver-error.log', 'settings'),
                 'server.reverse_dns': False,
                 'server.thread_pool': 10,
-                'engine.autoreload_on': False,
+                'engine.autoreload.on': False,
                 #'server.environment': "development",
                 'server.environment': "production",
                 },
