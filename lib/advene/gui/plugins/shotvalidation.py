@@ -41,7 +41,7 @@ class ShotValidation(AdhocView):
         self.controller=controller
         self._annotationtype=None
 
-        self.current_index = Gtk.Adjustment.new(10, 1, 10, 1, 10, 5)
+        self.current_index = Gtk.Adjustment.new(10, 1, 1000, 1, 1, 1)
         self.options={}
 
         # Load options
@@ -57,7 +57,7 @@ class ShotValidation(AdhocView):
             self.annotations = sorted(at.annotations, key=lambda a: a.fragment.begin)
         else:
             self.annotations = []
-        self.current_index.set_upper(len(self.annotations))
+        self.current_index.set_upper(len(self.annotations) + 2)
 
     def get_annotationtype(self):
         return self._annotationtype
