@@ -16,6 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
 
 from gi.repository import GObject
 from gi.repository import Gdk
@@ -121,8 +123,13 @@ class ShotValidation(AdhocView):
         self.current_index.emit('value-changed')
         return True
 
+    def handle_scroll_event(self, widget, event):
+        return self.selector.handle_scroll_event(widget, event)
+
     def handle_keypress(self, widget, event):
-        if event.keyval == Gdk.KEY_Page_Down:
+        if self.selector.handle_key_press(widget, event):
+            return True
+        elif event.keyval == Gdk.KEY_Page_Down:
             # Next annotation
             self.set_index(self.index + 1)
             return True
@@ -233,16 +240,6 @@ class ShotValidation(AdhocView):
         #s.set_update_policy(Gtk.UPDATE_IF_VALID)
         s.set_numeric(True)
 
-        # For an unknown reason, the default behaviour of updating
-        # SpinButton through scroll does not work. Emulate it.
-        def handle_spin_scroll(widget, event):
-            if event.direction == Gdk.ScrollDirection.UP:
-                offset=+1
-            elif event.direction == Gdk.ScrollDirection.DOWN:
-                offset=-1
-            self.set_index(self.index + offset)
-            return True
-        s.connect('scroll-event', handle_spin_scroll)
         hb.add(s)
 
         hb.add(self.next_button)
@@ -284,6 +281,8 @@ class ShotValidation(AdhocView):
 
         self.set_index(0)
         vbox.connect('key-press-event', self.handle_keypress)
+        vbox.connect('scroll-event', self.handle_scroll_event)
+
         vbox.show_all()
         # Hack: since the view if often launched from the timeline
         # view, moving the mouse in timeline steals the focus from the
