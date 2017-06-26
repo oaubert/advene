@@ -20,11 +20,13 @@
 
 It depends on a Controller instance to be able to interact with the video player.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from gi.repository import Gdk
 from gi.repository import Gtk
 import advene.core.config as config
-from advene.gui.widget import TimestampRepresentation, GenericColorButtonWidget
+from advene.gui.widget import TimestampRepresentation
 from advene.gui.util import dialog
 from gettext import gettext as _
 
@@ -50,10 +52,6 @@ class FrameSelector(object):
         self.count = config.data.preferences['frameselector-count']
         self.frame_length = 1000 / config.data.preferences['default-fps']
         self.frame_width = config.data.preferences['frameselector-width']
-
-        self.black_color = Gdk.color_parse('black')
-        self.red_color = Gdk.color_parse('#ff6666')
-        self.mouseover_color = Gdk.color_parse('#ff0000')
 
         # List of TimestampRepresentation widgets.
         # It is initialized in build_widget()
@@ -93,8 +91,7 @@ class FrameSelector(object):
         matching_index = -1
         for (i, f) in enumerate(self.frames):
             f.value = t
-            f.left_border.set_color(self.black_color)
-            f.right_border.set_color(self.black_color)
+            f.remove_class('frameselector_selected')
 
             if t < self.timestamp:
                 f.remove_class('frameselector_after')
@@ -114,10 +111,7 @@ class FrameSelector(object):
 
         if matching_index >= 0:
             f = self.frames[matching_index]
-            if self.border_mode == 'left' or self.border_mode ==  'both':
-                f.left_border.set_color(self.red_color)
-            if self.border_mode == 'right' or self.border_mode ==  'both':
-                f.right_border.set_color(self.red_color)
+            f.add_class('frameselector_selected')
 
         # Handle focus
         if focus_index is None:
@@ -148,6 +142,7 @@ class FrameSelector(object):
         return True
 
     def handle_scroll_event(self, widget, event):
+        logger.warn("scroll %d", event.direction)
         if event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
             offset=-1
         elif event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.RIGHT:
@@ -158,7 +153,11 @@ class FrameSelector(object):
     def focus_index(self):
         """Return the index of the TimestampRepresentation which has the focus.
         """
-        return self.frames.index(self.frames[0].get_parent().get_focus_child())
+        child = self.frames[0].get_parent().get_focus_child()
+        if child is not None:
+            return self.frames.index(child)
+        else:
+            return 0
 
     def handle_key_press(self, widget, event):
         if event.keyval == Gdk.KEY_Left:
@@ -178,6 +177,8 @@ class FrameSelector(object):
         return False
 
     def get_value(self, title=None):
+        """Popup a FrameSelector dialog to select a precise frame.
+        """
         if title is None:
             title = _("Select the appropriate snapshot")
         d = Gtk.Dialog(title=title,
@@ -240,48 +241,23 @@ class FrameSelector(object):
         r = None
         for i in xrange(self.count):
 
-            border = GenericColorButtonWidget('border')
-            border.default_size=(3, 110)
-            border.local_color=self.black_color
-
-            if r is not None:
-                # Previous TimestampRepresentation -> right border
-                r.right_border = border
-
             r = TimestampRepresentation(0, self.controller, width=self.frame_width, visible_label=True,
-                                        epsilon=(1000 / 2 / config.data.preferences['default-fps'] - 10))
+                                        epsilon=(1000 / 2 / config.data.preferences['default-fps'] - 10)) 
+            r.add_class("frameselector_frame")
+            r.add_class("frameselector_frame_%s" % self.border_mode)
             self.frames.append(r)
             r.connect("clicked", self.select_time)
-            r.left_border = border
 
             def enter_bookmark(widget, event):
-                if self.border_mode == 'left':
-                    b=widget.left_border
-                elif self.border_mode == 'right':
-                    b=widget.right_border
-                b.old_color = b.local_color
-                b.set_color(self.mouseover_color)
+                widget.add_class('frameselector_selected')
                 return False
             def leave_bookmark(widget, event):
-                if self.border_mode == 'left':
-                    b=widget.left_border
-                elif self.border_mode == 'right':
-                    b=widget.right_border
-                b.set_color(b.old_color)
+                widget.remove_class('frameselector_selected')
                 return False
-            if self.border_mode in ('left', 'right'):
-                r.connect('enter-notify-event', enter_bookmark)
-                r.connect('leave-notify-event', leave_bookmark)
+            r.connect('enter-notify-event', enter_bookmark)
+            r.connect('leave-notify-event', leave_bookmark)
 
-            hb.pack_start(border, False, True, 0)
             hb.pack_start(r, False, True, 0)
-
-        # Last right border
-        border = GenericColorButtonWidget('border')
-        border.default_size=(3, 110)
-        border.local_color=self.black_color
-        r.right_border = border
-        hb.pack_start(border, False, True, 0)
 
         eb = Gtk.EventBox()
         ar = Gtk.Arrow(Gtk.ArrowType.RIGHT, Gtk.ShadowType.IN)
@@ -290,9 +266,11 @@ class FrameSelector(object):
         eb.add(ar)
         hb.pack_start(eb, False, True, 0)
 
-        hb.connect('scroll-event', self.handle_scroll_event)
-        hb.connect('key-press-event', self.handle_key_press)
         vb.add(hb)
+
+        vb.set_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.KEY_PRESS_MASK)
+        vb.connect('scroll-event', self.handle_scroll_event)
+        vb.connect('key-press-event', self.handle_key_press)
 
         self.update_timestamp(self.timestamp)
         return vb

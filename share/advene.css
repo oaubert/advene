@@ -26,8 +26,38 @@
 .frameselector_before {
     background-color: #fcc;
 }
+
 .frameselector_after {
     background-color: #000;
+}
+
+.frameselector_frame {
+    border-width: 4px;
+}
+
+.frameselector_frame_both:focus {
+    border-color: green;
+}
+.frameselector_frame_left:focus {
+    border-color: green;
+    border-left-color: #ff8888;
+}
+.frameselector_frame_right:focus {
+    border-color: green;
+    border-right-color: #ff8888;
+}
+
+.frameselector_frame_both.frameselector_selected {
+    border-left-color: red;
+    border-right-color: red;
+}
+
+.frameselector_frame_left.frameselector_selected {
+    border-left-color: red;
+}
+
+.frameselector_frame_right.frameselector_selected {
+    border-right-color: red;
 }
 
 .timestamp_label {
