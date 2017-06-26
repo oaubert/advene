@@ -1489,8 +1489,8 @@ class AdveneGUI(object):
                 except AttributeError:
                     self.visual_id = self.drawable.get_id()
                     self.controller.player.set_visual(self.visual_id)
-            except Exception, e:
-                self.log("Cannot set visual: %s" % unicode(e))
+            except Exception:
+                logger.error("Cannot embed video player", exc_info=True)
             return True
         self.drawable.connect_after('realize', register_drawable)
 
