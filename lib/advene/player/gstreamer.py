@@ -31,9 +31,9 @@ from gettext import gettext as _
 import advene.core.config as config
 from advene.util.helper import format_time
 import os
-import time
-
 import sys
+import time
+import urllib
 
 if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
@@ -391,9 +391,9 @@ class Player:
             #item is a str, os.path needs to work with unicode obj to accept unicode path
             item = os.path.abspath(unicode(item))
             if os.path.exists(item):
-                item="file:///" + item
+                item="file://" + urllib.quote(item)
         elif os.path.exists(item):
-            item="file://" + os.path.abspath(item)
+            item="file://" + urllib.quote(os.path.abspath(item))
         self.player.set_property('uri', item)
         if self.snapshotter:
             self.snapshotter.set_uri(item)
