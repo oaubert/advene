@@ -536,7 +536,7 @@ def get_filename(title=_("Open a file"),
         if filename is not None:
             # The returned filename is a utf8-encoded string. Convert
             # it to unicode.
-            filename=unicode(filename, 'utf-8')
+            filename=filename.decode('utf-8')
         setattr(preview, '_filename', filename)
         if filename and (filename.endswith('.xml') or filename.endswith('.azp')):
             preview.set_label(_("Press to\ndisplay\ninformation"))
@@ -546,7 +546,11 @@ def get_filename(title=_("Open a file"),
             if config.data.os == 'win32':
                 # Force resize for win32
                 oldmode=chooser.get_resize_mode()
-                chooser.set_resize_mode(Gtk.RESIZE_IMMEDIATE)
+                try:
+                    chooser.set_resize_mode(Gtk.RESIZE_IMMEDIATE)
+                except AttributeError:
+                    # May be missing in some old gtk libs
+                    pass
                 chooser.resize_children()
                 chooser.set_resize_mode(oldmode)
         else:
