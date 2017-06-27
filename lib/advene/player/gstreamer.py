@@ -58,6 +58,8 @@ try:
     from gi.repository import GstVideo
     if config.data.os == 'linux':
         from gi.repository import GdkX11
+    elif config.data.os == 'win32':
+        from gi.repository import GdkWin32
     from gi.repository import Gdk
     from gi.repository import Gtk
     from advene.util.snapshotter import Snapshotter
@@ -781,7 +783,7 @@ class Player:
         self.fullscreen_window.grab_focus()
 
         if config.data.os == 'win32':
-            self.reparent(self.fullscreen_window.get_window().get_handle())
+            self.reparent(GdkWin32.Win32Window.get_handle(self.fullscreen_window.get_window()))
         else:
             self.reparent(self.fullscreen_window.get_window().get_xid())
 

@@ -43,11 +43,13 @@ import advene.core.version
 import gi
 gi.require_version('Gdk', '3.0')
 gi.require_version('Gtk', '3.0')
+from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
-from gi.repository import GObject
 from gi.repository import Pango
+if config.data.os == 'win32':
+    from gi.repository import GdkWin32
 import pprint
 
 #Gdk.set_show_events(True)
@@ -1458,20 +1460,7 @@ class AdveneGUI(object):
         if config.data.os == 'win32':
             self.drawable = Gtk.DrawingArea()
             def get_id(widget):
-                import ctypes
-                Gdk.threads_enter()
-                window = widget.get_window()
-                # Make sure to call ensure_native before e.g. on realize
-                if not widget.has_native():
-                    logger.warn("Your window will freeze as soon as you move or resize it...")
-                ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
-                ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
-                gpointer = ctypes.pythonapi.PyCapsule_GetPointer(window.__gpointer__, None)
-                #get the win32 handle
-                gdkdll = ctypes.CDLL ("libgdk-3-0.dll")
-                handle = gdkdll.gdk_win32_window_get_handle(gpointer)
-                Gdk.threads_leave()
-                return handle
+                return GdkWin32.Win32Window.get_handle(widget.get_window())
             # Define the get_id method on the drawable, so that it can
             # be used by the player plugin code.
             self.drawable.get_id = get_id.__get__(self.drawable)
