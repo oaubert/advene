@@ -49,6 +49,7 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 from gi.repository import Pango
 if config.data.os == 'win32':
+    gi.require_version('GdkWin32', '3.0')
     from gi.repository import GdkWin32
 import pprint
 

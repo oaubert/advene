@@ -59,6 +59,7 @@ try:
     if config.data.os == 'linux':
         from gi.repository import GdkX11
     elif config.data.os == 'win32':
+        gi.require_version('GdkWin32', '3.0')
         from gi.repository import GdkWin32
     from gi.repository import Gdk
     from gi.repository import Gtk
