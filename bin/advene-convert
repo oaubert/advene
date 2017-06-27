@@ -16,10 +16,11 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
 
 import sys
 import os
-import StringIO
 
 # Magic stuff before the instanciation of Advene : we set the
 # sys.path and the various config.data.path
@@ -40,7 +41,7 @@ def fix_paths(path):
 if subdir == 'bin' and  os.path.exists(os.sep.join((maindir, "setup.py"))):
   # Chances are that we were in a development tree...
   libpath=os.sep.join((maindir, "lib"))
-  print "You seem to have a development tree at:\n%s." % libpath
+  logging.warn("You seem to have a development tree at:\n%s.", libpath)
   sys.path.insert (0, libpath)
 
   import advene.core.config as config
@@ -49,8 +50,7 @@ else:
   try:
     import advene.core.config as config
   except ImportError:
-    print """Cannot guess a valid directory.
-    Please check your installation or set the PYTHONPATH environment variable."""
+    logging.error("""Cannot guess a valid directory.\nPlease check your installation or set the PYTHONPATH environment variable.""")
     sys.exit(1)
 
 # Maybe we are running from a pyinstaller version
@@ -59,12 +59,10 @@ if not os.path.exists(config.data.path['resources']):
   if os.path.exists(os.path.join( maindir, 'share' )):
     # There is a 'share' directory at the same level as the executable
     # This can mean that we are in a pyinstaller version
-    print "Seemingly running from a pyinstaller version in\n%s" % maindir
+    logging.warn("Seemingly running from a pyinstaller version in\n%s", maindir)
     fix_paths(maindir)
 
 if config.data.os == 'win32':
-  import _winreg
-
   # Encoding stuff, to please py2exe
   if hasattr(sys, 'setdefaultencoding'):
     import locale
@@ -80,8 +78,9 @@ import advene.util.importer
 
 if __name__ == '__main__':
 
+    logging.basicConfig()
     if config.data.args != 2:
-        print "Should provide a file name and a package name"
+        logging.error("Should provide a file name and a package name")
         sys.exit(1)
 
     fname, pname = config.data.args
@@ -94,7 +93,7 @@ if __name__ == '__main__':
     # FIXME: i.process_options()
     # i.process_options(sys.argv[1:])
     # (for .sub conversion for instance, --fps, --offset)
-    print "Converting %s to %s using %s..." % (fname, pname, i.name)
+    logging.warn("Converting %s to %s using %s...", fname, pname, i.name)
     p=i.process_file(fname)
     p.save(pname)
     print "done."
