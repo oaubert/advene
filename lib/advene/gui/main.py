@@ -26,6 +26,7 @@ with the C{on_} prefix).
 import logging
 logger = logging.getLogger(__name__)
 
+from collections import OrderedDict
 import sys
 import time
 import os
@@ -79,7 +80,6 @@ import advene.model.tal.context
 import advene.core.mediacontrol
 import advene.util.helper as helper
 import xml.etree.ElementTree as ET
-from advene.util.odict import odict
 
 import advene.util.importer
 from advene.gui.util.completer import Indexer, Completer
@@ -4287,7 +4287,7 @@ class AdveneGUI(object):
         ew.add_file_selector(_("Shotdetect"), "shotdetect", _("Shotdetect application"))
 
         ew.add_title(_("GUI"))
-        ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"), odict((
+        ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"), OrderedDict((
                 (_("System default"), ''),
                 ("English", 'C'),
                 ("Esperanto", 'eo'),
@@ -4299,7 +4299,7 @@ class AdveneGUI(object):
         ew.add_checkbox(_("Player control in edit popups"), 'player-shortcuts-in-edit-windows', _("Enable generic player controls in edit windows. This may be undesirable since it overloads some standard text-edition behaviours (esp. control-left/right)."))
 
         ew.add_option(_("Open popups"), 'popup-destination',
-                      _("Where should we open adhoc views?"), odict((
+                      _("Where should we open adhoc views?"), OrderedDict((
                 (_("as a popup window"), 'popup'),
                 (_("embedded east of the video"), 'east'),
                 (_("embedded west of the video"), 'west'),
@@ -4320,13 +4320,13 @@ class AdveneGUI(object):
         ew.add_title(_("General"))
         ew.add_checkbox(_("Weekly update check"), 'update-check', _("Weekly check for updates on the Advene website"))
         ew.add_option(_("On exit,"), 'imagecache-save-on-exit',
-                      _("How to handle screenshots on exit"), odict((
+                      _("How to handle screenshots on exit"), OrderedDict((
                 (_("never save screenshots"), 'never'),
                 (_("always save screenshots"), 'always'),
                 (_("ask before saving screenshots"), 'ask'),
                 )))
         ew.add_option(_("Auto-save"), 'package-auto-save',
-                      _("Data auto-save functionality"), odict((
+                      _("Data auto-save functionality"), OrderedDict((
                 (_("is desactivated"), 'never'),
                 (_("is done automatically"), 'always'),
                 (_("is done after confirmation"), 'ask'),
@@ -4336,7 +4336,7 @@ class AdveneGUI(object):
         ew.add_title(_("Workspace"))
 
         ew.add_option(_("On package saving,"), 'save-default-workspace',
-                      _("Do you wish to save the default workspace with the package?"), odict((
+                      _("Do you wish to save the default workspace with the package?"), OrderedDict((
                 (_("never save the current workspace"), 'never'),
                 (_("always save the current workspace"), 'always'),
                 (_("ask before saving the current workspace"), 'ask'),
@@ -4344,7 +4344,7 @@ class AdveneGUI(object):
         ew.add_checkbox(_("Auto-validation of edited elements"), 'apply-edited-elements-on-save', _("Automatically validate modified elements when saving the package."))
 
         ew.add_option(_("On package load,"), 'restore-default-workspace',
-                      _("Do you wish to load the workspace saved with the package?"), odict((
+                      _("Do you wish to load the workspace saved with the package?"), OrderedDict((
                 (_("never load the saved workspace"), 'never'),
                 (_("always load the saved workspace"), 'always'),
                 (_("ask before loading the saved workspace"), 'ask'),
@@ -4387,7 +4387,7 @@ class AdveneGUI(object):
             ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
 
         ew.add_title(_("Time-related"))
-        ew.add_option(_("Time format"), 'timestamp-format', _("Format used to display timecodes"), odict( (
+        ew.add_option(_("Time format"), 'timestamp-format', _("Format used to display timecodes"), OrderedDict( (
                     ('HH:MM:SS.sss', '%H:%M:%.S'),
                     ('HH:MM:SSfNN (frame number)', '%H:%M:%fS'),
                     ('HH:MM:SS', '%H:%M:%S'),
@@ -4402,7 +4402,7 @@ class AdveneGUI(object):
             fps.append(d)
             fps.sort()
         ew.add_option(_("Default FPS"), 'default-fps',
-                      _("Default FPS (frame-per-second) value, when entering or displaying timestamps with frame numbers."), odict( (str(f), f) for f in fps))
+                      _("Default FPS (frame-per-second) value, when entering or displaying timestamps with frame numbers."), OrderedDict( (str(f), f) for f in fps))
         ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 1, 300000)
         ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 1, 300000)
         ew.add_spin(_("Third time increment"), "third-time-increment", _("Skip duration, when using control-shift-up/down (in ms)."), 1, 300000)
@@ -4425,7 +4425,7 @@ class AdveneGUI(object):
 
         ew.add_title(_("Text-To-Speech"))
         ew.add_option(_("TTS language"), 'tts-language',
-                      _("What language settings should be used for text-to-speech"), odict((
+                      _("What language settings should be used for text-to-speech"), OrderedDict((
                 (_("English"), 'en'),
                 (_("French"), 'fr'),
                 (_("Spanish"), 'es'),
@@ -4433,7 +4433,7 @@ class AdveneGUI(object):
         ew.add_entry(_("TTS Encoding"), 'tts-encoding',
                       _("What encoding should be used to communicate with the TTS engine"), entries = [ 'utf8', 'utf16', 'latin1', 'cp1252' ] )
         ew.add_option(_("TTS Engine"), 'tts-engine',
-                      _("Which TTS engine should be used (modification requires restarting Advene to take into account)"), odict((
+                      _("Which TTS engine should be used (modification requires restarting Advene to take into account)"), OrderedDict((
                 (_("Automatic"), 'auto'),
                 (_("eSpeak"), 'espeak'),
                 (_("Custom script with standard input"), 'custom'),

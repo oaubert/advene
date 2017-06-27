@@ -23,6 +23,7 @@ events that match a condition."""
 import logging
 logger = logging.getLogger(__name__)
 
+from collections import OrderedDict
 import re
 import StringIO
 import urllib
@@ -33,7 +34,6 @@ import advene.core.config as config
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 
-from advene.util.odict import odict
 from gettext import gettext as _
 
 class Event(str):
@@ -1065,7 +1065,7 @@ class ECACatalog:
                   'PlayerResume', 'PlayerStop', 'ApplicationStart', 'ViewActivation',
                   'UserEvent']
 
-    action_categories=odict((
+    action_categories=OrderedDict((
             ('player', _("Player control")),
             ('sound', _("Audio enrichment")),
             ('image', _("Image enrichment")),
