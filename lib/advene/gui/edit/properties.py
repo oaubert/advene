@@ -27,10 +27,140 @@ logger = logging.getLogger(__name__)
 from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
+
 import os
 import sys
+import time
 
 from gettext import gettext as _
+
+class Popup(Gtk.Window):
+    """Popup widget (for KeyGrabber)
+
+    Code taken from GPLv2 UbuntuTweak which got it from GPLv2 ccsm.
+    """
+    def __init__(self, parent, text=None, child=None,
+                 decorated=True, mouse=False, modal=True):
+        GObject.GObject.__init__(self, type=Gtk.WindowType.TOPLEVEL)
+        self.set_type_hint(Gdk.WindowTypeHint.UTILITY)
+        self.set_position(mouse and Gtk.WindowPosition.MOUSE or
+                          Gtk.WindowPosition.CENTER_ALWAYS)
+
+        if parent:
+            self.set_transient_for(parent.get_toplevel())
+
+        self.set_modal(modal)
+        self.set_decorated(decorated)
+        self.set_title("")
+
+        if text:
+            label = Gtk.Label(label=text)
+            align = Gtk.Alignment()
+            align.set_padding(20, 20, 20, 20)
+            align.add(label)
+            self.add(align)
+        elif child:
+            self.add(child)
+
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+
+    def destroy(self):
+        Gtk.Window.destroy(self)
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+
+class KeyGrabber(Gtk.Button):
+    """KeyGrabber widget.
+
+    Code taken from GPLv2 UbuntuTweak which got it from GPLv2 ccsm.
+    """
+    __gsignals__ = {
+        "changed": (GObject.SignalFlags.RUN_FIRST, None,
+                    (GObject.TYPE_INT, GObject.TYPE_INT)),
+        "current-changed": (GObject.SignalFlags.RUN_FIRST, None,
+                            (GObject.TYPE_INT, Gdk.ModifierType))
+    }
+
+    key = 0
+    mods = 0
+    handler = None
+    popup = None
+
+    label = None
+
+    def __init__ (self, parent=None, key=0, mods=0, label=None):
+        '''Prepare widget'''
+        GObject.GObject.__init__(self)
+
+        self.main_window = parent
+        self.key = key
+        self.mods = mods
+
+        self.label = label
+
+        self.connect("clicked", self.begin_key_grab)
+        self.set_label()
+
+    def begin_key_grab(self, widget):
+        self.add_events(Gdk.EventMask.KEY_PRESS_MASK)
+        if self.main_window is None:
+            self.main_window = self.get_toplevel()
+        self.popup = Popup(self.main_window,
+                           _("Please press the new key combination"))
+        self.popup.show_all()
+
+        self.handler = self.popup.connect("key-press-event",
+                                          self.on_key_press_event)
+
+        while Gdk.keyboard_grab(self.main_window.get_window(),
+                                True,
+                                Gtk.get_current_event_time()) != Gdk.GrabStatus.SUCCESS:
+            time.sleep (0.1)
+
+    def end_key_grab(self):
+        Gdk.keyboard_ungrab(Gtk.get_current_event_time())
+        self.popup.disconnect(self.handler)
+        self.popup.destroy()
+
+    def on_key_press_event(self, widget, event):
+        mods = event.get_state()
+
+        if event.keyval in (Gdk.KEY_Escape, Gdk.KEY_Return) and not mods:
+            if event.keyval == Gdk.KEY_Escape:
+                self.emit("changed", self.key, self.mods)
+            self.end_key_grab()
+            self.set_label()
+            return
+
+        key = Gdk.keyval_to_lower(event.keyval)
+        if (key == Gdk.KEY_ISO_Left_Tab):
+            key = Gdk.KEY_Tab
+
+        if Gtk.accelerator_valid(key, mods) or (key == Gdk.KEY_Tab and mods):
+            self.set_label(key, mods)
+            self.end_key_grab()
+            self.key = key
+            self.mods = mods
+            self.emit("changed", self.key, self.mods)
+            return
+
+        self.set_label(key, mods)
+
+    def set_label(self, key=None, mods=None):
+        if self.label:
+            if key != None and mods != None:
+                self.emit("current-changed", key, mods)
+            Gtk.Button.set_label(self, self.label)
+            return
+        if key == None and mods == None:
+            key = self.key
+            mods = self.mods
+        label = Gtk.accelerator_name(key, mods)
+        if not len(label):
+            label = _("Disabled")
+        Gtk.Button.set_label(self, label)
+
 
 class EditNotebook(object):
     def __init__(self, set_config, get_config):
@@ -90,6 +220,7 @@ class EditWidget(Gtk.VBox):
     CHANGE_CHECKBOX = 3
     CHANGE_TEXT = 4
     CHANGE_FLOAT_SPIN = 2
+    CHANGE_ACCELERATOR = 5
 
     def __init__(self, set_config, get_config):
 
@@ -161,6 +292,9 @@ class EditWidget(Gtk.VBox):
 
         elif (mode == self.CHANGE_TEXT):
             value = src.get_text(*src.get_bounds() + [ False ]).decode('utf-8')
+
+        elif (mode == self.CHANGE_ACCELERATOR):
+            value = Gtk.accelerator_name(src.key, src.mods)
 
         else:
             logger.info("Unknown type %s", str(mode))
@@ -336,6 +470,27 @@ class EditWidget(Gtk.VBox):
         spin_button.set_value(value)
         spin_button.connect('value-changed', self.__on_change, property,
                             self.CHANGE_FLOAT_SPIN)
+
+    def add_accelerator(self, label, property, help):
+
+        lbl = Gtk.Label(label=label)
+        lbl.show()
+
+        align = Gtk.Alignment()
+        align.show()
+        align.add(lbl)
+
+        value = self.__get_config(property)
+
+        key, mods = Gtk.accelerator_parse(value)
+        grabber = KeyGrabber(parent=self.get_toplevel(),
+                             key=key,
+                             mods=mods)
+        grabber.connect('changed', self.__on_change, property, self.CHANGE_ACCELERATOR)
+
+        grabber.set_tooltip_text(help)
+        grabber.show_all()
+        self.__add_line(1, align, grabber)
 
     def add_option(self, label, property, help, options):
 
