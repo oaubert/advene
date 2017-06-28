@@ -360,7 +360,7 @@ class Player:
         p = long(self.position2value(position) * Gst.MSECOND)
         res = self.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE, p)
         if not res:
-            raise InternalException
+            logger.warn(_("Problem when seeking into media"))
 
     def start(self, position=0):
         if not self.check_uri():
