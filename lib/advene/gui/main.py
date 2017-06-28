@@ -2870,7 +2870,12 @@ class AdveneGUI(object):
         self.gui.win.set_title(t)
         return True
 
-    def log (self, msg, level=None):
+    def log(self, msg, level=None):
+        """Display log messages.
+        """
+        logger.info(msg)
+
+    def log_message(self, msg, level=None):
         """Add a new log message to the logmessage window.
 
         @param msg: the message
@@ -2878,6 +2883,10 @@ class AdveneGUI(object):
         @param level: the error level
         @type level: int
         """
+        # Do not clobber GUI log with Cherrypy log
+        if 'cherrypy.error' in msg:
+            return
+
         def undisplay(ctxid, msgid):
             self.gui.statusbar.remove(ctxid, msgid)
             return False
@@ -2897,12 +2906,8 @@ class AdveneGUI(object):
         buf.place_cursor(buf.get_end_iter ())
         buf.insert_at_cursor (mes)
 
-        # Dump to terminal
-        if config.data.preferences['log-to-terminal']:
-            print unicode(msg).encode('utf-8')
         if 'gst-stream-error' in msg:
             dialog.message_dialog(_("Video player error: %s") % msg, modal=False, icon=Gtk.MessageType.ERROR)
-        return
 
     def get_illustrated_text(self, text, position=None, vertical=False, height=40, color=None):
         """Return a HBox with the given text and a snapshot corresponding to position.

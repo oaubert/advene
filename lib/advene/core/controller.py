@@ -105,7 +105,7 @@ class MessageHandler(logging.Handler):
 
     def emit(self, record):
         if self.controller.gui:
-            self.controller.gui.log(self.format(record))
+            self.controller.gui.log_message(self.format(record))
 
 class GlobalPackage(object):
     """Wrapper to access all packages loaded data.

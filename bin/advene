@@ -16,40 +16,24 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+
+# Let's start by configuring logging
 import logging
+import logging.config
+import logging.handlers
 logger = logging.getLogger(__name__)
 
 import sys
 import os
 import time
 
-# import psyco; psyco.log(); psyco.profile()
-
-# Magic stuff before the instanciation of Advene : we set the
-# sys.path and the various config.data.path
-
-
-class AutoFlush(file):
-    """Auto-flushed file object.
-    """
-
-    def write(self, s):
-        super(AutoFlush, self).write(s)
-        self.flush()
-
-    def writelines(self, l):
-        super(AutoFlush, self).writelines(l)
-        self.flush()
-
-
-logfile = None
 # Try to find if we are in a development tree.
 (maindir, subdir) = os.path.split(
     os.path.dirname(os.path.abspath(sys.argv[0])))
 if subdir == 'bin' and os.path.exists(os.path.join(maindir, "setup.py")):
     # Chances are that we were in a development tree...
     libpath = os.path.join(maindir, "lib")
-    logging.warn("You seem to have a development tree at:\n%s.", libpath)
+    logging.warn("You seem to have a development tree at:\n%s." % libpath)
     sys.path.insert(0, libpath)
 
     import advene.core.config as config
@@ -61,16 +45,47 @@ else:
         logging.error("""Cannot guess a valid directory.
         Please check your installation or set the PYTHONPATH environment variable.""", exc_info=True)
         sys.exit(1)
-    # If running from a binary version, redirect stdout, stderr to a file
-    logfile = config.data.advenefile('advene.log', 'settings')
-    try:
-        f = AutoFlush(logfile, 'w')
-        logging.warn("Advene output is stored into %s", logfile)
-        sys.stdout = f
-        sys.stderr = f
-    except IOError:
-        # The file cannot be written. Well, let us use the console...
-        pass
+
+logfile = config.data.advenefile('advene.log', 'settings')
+# We have the logfile name. Let's configure RotatingFileHandler logging handler
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(name)s %(message)s'
+        },
+        'simple': {
+            'format': '%(name)s %(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level':'WARNING',
+            'class':'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'logfile': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': logfile,
+            'formatter': 'verbose',
+            'backupCount': 7,
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers':['console', 'logfile'],
+            'propagate': True,
+            'level':'INFO',
+        },
+    }
+}
+logging.config.dictConfig(LOGGING)
+# Do a forced rollover for the RotatingFileHandler
+for h in logging.root.handlers:
+    if hasattr(h, 'doRollover'):
+        h.doRollover()
 
 # Locale selection
 if config.data.preferences['language']:
