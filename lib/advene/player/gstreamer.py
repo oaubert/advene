@@ -273,26 +273,9 @@ class Player:
 
         self.player.props.video_sink=self.video_sink
 
-        scaletempo = Gst.ElementFactory.make('scaletempo', None)
-        if scaletempo:
-            # The scaletempo element is present. Use it.
-            self.audio_sink = Gst.Bin()
-            elements = [
-                scaletempo,
-                Gst.ElementFactory.make('autoaudiosink', None),
-                ]
-            for el in elements:
-                self.audio_sink.add(el)
-            if len(elements) >= 2:
-                for src, dst in zip(elements, elements[1:]):
-                    src.link(dst)
-
-            self.player.props.audio_sink = self.audio_sink
-            # Keep a ref. on elements
-            self._audio_elements = elements
-            self._audio_ghostpad = Gst.GhostPad.new('sink', elements[0].get_static_pad('audio_sink') or elements[0].get_static_pad('sink'))
-            self.audio_sink.add_pad(self._audio_ghostpad)
-
+        self.audio_sink = Gst.parse_launch('scaletempo name=scaletempo ! audioconvert ! audioresample ! autoaudiosink')
+        self.audio_sink.add_pad(Gst.GhostPad.new('sink', self.audio_sink.get_child_by_name('scaletempo').get_static_pad('sink')))
+        self.player.props.audio_sink=self.audio_sink
 
         bus = self.player.get_bus()
         bus.enable_sync_message_emission()
