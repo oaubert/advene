@@ -310,6 +310,8 @@ class Config(object):
             'player-autostart': True,
             'prefer-wysiwyg': True,
             'player-shortcuts-in-edit-windows': True,
+            # See Gtk.accelerator_parse for possible values
+            'player-shortcuts-modifier':'<Control>',
             # Default FPS, used for smpte-style timestamp display
             'default-fps': 25,
             'apply-edited-elements-on-save': True,

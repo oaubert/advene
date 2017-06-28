@@ -232,6 +232,10 @@ class AdveneGUI(object):
         self.logbuffer = Gtk.TextBuffer()
         self.busy_cursor = Gdk.Cursor.new(Gdk.CursorType.WATCH)
 
+        # Default value
+        self.player_shortcuts_modifier = Gdk.ModifierType.CONTROL_MASK
+        self.update_player_control_modifier()
+
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
         # The KeyboardInput event has a 'keyname' parameter ("F1" to "F12")
@@ -639,6 +643,17 @@ class AdveneGUI(object):
             p.EndStatus      : _("End"),
             p.UndefinedStatus: _("Undefined"),
             }
+
+    def update_player_control_modifier(self):
+        """Update the actual value of player control modifier.
+        """
+        pref = config.data.preferences['player-shortcuts-modifier']
+        modifier = Gtk.accelerator_parse(pref).accelerator_mods
+        if int(modifier) != 0:
+            self.player_shortcuts_modifier = modifier
+        else:
+            logger.error(_("Wrong player shortcut modifier %s in configuration. Fallback on Control."), pref)
+            self.player_shortcuts_modifier = Gdk.ModifierType.CONTROL_MASK
 
     def annotation_lifecycle(self, context, parameters):
         """Method used to update the active views.
@@ -1986,17 +2001,12 @@ class AdveneGUI(object):
         Control-home/-end: start/end of the stream
         """
 
-        if (event.keyval == Gdk.KEY_nobreakspace
-            or (event.get_state() & Gdk.ModifierType.MOD1_MASK and event.keyval == Gdk.KEY_space)):
-            # Alt-Space on MacOS X generates nobreakspace
-            self.player_create_bookmark(event)
-            return True
-        elif event.keyval in self.key_shortcuts:
+        if event.keyval in self.key_shortcuts:
             self.key_shortcuts[event.keyval](self, event)
             return True
         elif event.keyval in self.control_key_shortcuts and (
-            event.get_state() & Gdk.ModifierType.CONTROL_MASK
-            or not self.is_focus_on_editable()):
+                event.get_state() & self.player_shortcuts_modifier == self.player_shortcuts_modifier
+                or not self.is_focus_on_editable()):
             self.control_key_shortcuts[event.keyval](self, event)
             return True
         return False
@@ -4248,7 +4258,9 @@ class AdveneGUI(object):
                         'record-actions', 'popup-destination',
                         'timestamp-format', 'default-fps',
                         'abbreviation-mode', 'text-abbreviations', 'completion-mode', 'completion-predefined-only',
-                        'prefer-wysiwyg', 'player-shortcuts-in-edit-windows', 'apply-edited-elements-on-save',
+                        'prefer-wysiwyg',
+                        'player-shortcuts-in-edit-windows', 'player-shortcuts-modifier',
+                        'apply-edited-elements-on-save',
                         'frameselector-count', 'frameselector-width',
         )
         # Direct options needing a restart to be taken into account.
@@ -4291,8 +4303,8 @@ class AdveneGUI(object):
         ew.add_checkbox(_("Record activity trace"), "record-actions", _("Record activity trace"))
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
         ew.add_checkbox(_("Prefer WYSIWYG"), "prefer-wysiwyg", _("Use WYSIWYG editors when possible (HTML, SVG)"))
+        ew.add_accelerator(_("Player control modifier"), 'player-shortcuts-modifier', _("Generic player control modifier: key used in combination with arrows/space/tab to control the player. Click the button and press key+space to choose the modifier."))
         ew.add_checkbox(_("Player control in edit popups"), 'player-shortcuts-in-edit-windows', _("Enable generic player controls in edit windows. This may be undesirable since it overloads some standard text-edition behaviours (esp. control-left/right)."))
-
         ew.add_option(_("Open popups"), 'popup-destination',
                       _("Where should we open adhoc views?"), OrderedDict((
                 (_("as a popup window"), 'popup'),
@@ -4462,6 +4474,8 @@ class AdveneGUI(object):
                     config.data.preferences['path'][k]=cache[k]
                     if k == 'plugins':
                         player_need_restart = True
+
+            self.update_player_control_modifier()
 
             for n in config.data.player.keys():
                 if config.data.player[n] != cache['player-' + n]:
