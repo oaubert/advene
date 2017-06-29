@@ -139,16 +139,20 @@ class HPIImporter(GenericImporter):
                                   'here/content/parsed/label')
         if self.create_relations:
             schema = self.create_schema('s_concept')
-            # FIXME: may crash when invoking multiple times
-            rtype = schema.createRelationType(ident='concept_relation')
-            rtype.author = config.data.get_userid()
-            rtype.date = self.timestamp
-            rtype.title = "Related concept"
-            rtype.mimetype='text/plain'
-            rtype.setHackedMemberTypes( ('*', '*') )
-            schema.relationTypes.append(rtype)
-            self.update_statistics('relation-type')
-
+            rtype_id = 'concept_relation'
+            rtype = self.package.get_element_by_id(rtype_id)
+            if not rtype:
+                # Create a relation type if it does not exist.
+                rtype = schema.createRelationType(ident=rtype_id)
+                rtype.author = config.data.get_userid()
+                rtype.date = self.timestamp
+                rtype.title = "Related concept"
+                rtype.mimetype='text/plain'
+                rtype.setHackedMemberTypes( ('*', '*') )
+                schema.relationTypes.append(rtype)
+                self.update_statistics('relation-type')
+            if not hasattr(rtype, 'getHackedMemberTypes'):
+                logger.error("%s is not a valid relation type" % rtype_id)
         # Use a requests.session to use a KeepAlive connection to the server
         session = requests.session()
         self.progress(.2, "Parsing results")
