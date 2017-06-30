@@ -375,7 +375,7 @@ class Montage(AdhocView):
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['uri-list']:
                 m=re.match('advene:/adhoc/%d/(.+)' % hash(self),
-                           selection.get_data())
+                           selection.get_data().decode('utf-8'))
                 if m:
                     h=int(m.group(1))
                     l=[ w for w in self.contents if hash(w) == h ]

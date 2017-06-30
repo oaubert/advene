@@ -947,7 +947,7 @@ class TimestampRepresentation(Gtk.Button):
             png = ic.get(v, epsilon=self.epsilon)
             if png == ic.not_yet_available_image and 'async-snapshot' in self.controller.player.player_capabilities:
                 self.controller.queue_action(self.controller.update_snapshot, v)
-            self.image.set_from_pixbuf(png_to_pixbuf(png, width=self.width))
+            self.image.set_from_pixbuf(png_to_pixbuf(bytes(png), width=self.width))
             self.set_size_request(-1, -1)
             self.image.show()
         ts=helper.format_time(self._value)

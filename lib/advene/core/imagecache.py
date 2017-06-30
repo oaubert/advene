@@ -42,11 +42,10 @@ class CachedString:
         else:
             self.timestamp=-1
 
-    def __str__(self):
+    def __bytes__(self):
         try:
-            f=open(self._filename, 'rb')
-            data=f.read()
-            f.close()
+            with open(self._filename, 'rb') as f:
+                data=f.read()
             return data
         except (IOError, OSError):
             return ''
@@ -62,6 +61,9 @@ class TypedString(bytes):
         s.contenttype='text/plain'
         s.timestamp=-1
         return s
+
+    def __bytes__(self):
+        return self
 
 class ImageCache(MutableMapping):
     """ImageCache class.

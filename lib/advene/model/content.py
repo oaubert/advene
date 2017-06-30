@@ -131,10 +131,10 @@ class Content(modeled.Modeled,
             encoding = self._getModel().getAttributeNS(None, 'encoding')
         else:
             encoding = 'utf-8'
-        if isinstance(d, str):
-            return d
-        else:
+        if isinstance(d, bytes):
             return d.decode(encoding)
+        else:
+            return d
 
     def setData(self, data):
         """Set the content's data"""
@@ -149,7 +149,7 @@ class Content(modeled.Modeled,
                 data = data.encode(encoding)
             else:
                 encoding = 'utf-8'
-                if isinstance(data, str):
+                if isinstance(data, bytes):
                     data = data.decode('utf-8')
             self._getModel().setAttributeNS(None, 'encoding', encoding)
             new = self._getDocument().createTextNode(data)
@@ -227,8 +227,7 @@ class Content(modeled.Modeled,
         if value is None and self._getModel().hasAttributeNS(None, 'mime-type'):
             self._getModel().removeAttributeNS(None, 'mime-type')
         else:
-            MimeType (value)
-            self._getModel().setAttributeNS(None, 'mime-type', str(value))
+            self._getModel().setAttributeNS(None, 'mime-type', value)
 
     def getPlugin (self):
         """

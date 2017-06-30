@@ -206,7 +206,7 @@ class TimeAdjustment:
             source=self.controller.package.annotations.get(source_uri)
             self.set_value(source.fragment.begin)
         elif targetType == config.data.target_type['timestamp']:
-            data=decode_drop_parameters(selection.get_data())
+            data=decode_drop_parameters(selection.get_data().decode('utf-8'))
             v=int(float(data['timestamp']))
             self.set_value(v)
         else:

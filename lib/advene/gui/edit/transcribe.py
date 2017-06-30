@@ -202,7 +202,7 @@ class TranscriptionEdit(AdhocView):
 
     def textview_drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['timestamp']:
-            data=decode_drop_parameters(selection.get_data())
+            data=decode_drop_parameters(selection.get_data().decode('utf-8'))
             position=int(data['timestamp'])
             #(x, y) = self.textview.get_window()_to_buffer_coords(Gtk.TextWindowType.TEXT,
             #                                               int(x),
@@ -913,10 +913,8 @@ class TranscriptionEdit(AdhocView):
         else:
             data=buffer
 
-        # We will need a utf-8 encoded str for insertion into the
-        # TextBuffer. Convert from unicode if necessary.
-        if isinstance(data, str):
-            data = data.encode('utf-8')
+        if isinstance(data, bytes):
+            data = data.decode('utf-8')
 
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()

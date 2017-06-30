@@ -217,8 +217,10 @@ def decode_drop_parameters(data):
 
     @return: a dict.
     """
-    return dict( (k, str(v, 'utf8'))
-                 for (k, v) in urllib.parse.parse_qsl(str(data, 'utf8').encode('utf8')) )
+    if isinstance(data, bytes):
+        data = data.decode('utf-8') 
+    return dict( (k, v)
+                 for (k, v) in urllib.parse.parse_qsl(data) )
 
 def get_target_types(el):
     """Return DND target types for element.

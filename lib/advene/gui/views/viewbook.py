@@ -170,7 +170,7 @@ class ViewBook(AdhocView):
         def label_drag_sent(widget, context, selection, targetType, eventTime, v):
             if targetType == config.data.target_type['adhoc-view-instance']:
                 # This is not very robust, but allows to transmit a view instance reference
-                selection.set(selection.get_target(), 8, self.controller.gui.get_adhoc_view_instance_id(v))
+                selection.set(selection.get_target(), 8, self.controller.gui.get_adhoc_view_instance_id(v).encode('utf-8'))
                 self.detach_view(v)
                 return True
             return False
@@ -340,7 +340,7 @@ class ViewBook(AdhocView):
                 view.set_master_view(master)
             return True
         elif targetType == config.data.target_type['adhoc-view-instance']:
-            v=self.controller.gui.get_adhoc_view_instance_from_id(selection.get_data())
+            v=self.controller.gui.get_adhoc_view_instance_from_id(selection.get_data().decode('utf-8'))
             if v is not None:
                 self.add_view(v, name=v._label)
                 if hasattr(v, 'reparent_done'):
