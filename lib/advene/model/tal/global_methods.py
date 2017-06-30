@@ -83,7 +83,7 @@ def absolute_url(target, context):
 
     if path is not None and context is not None:
         options = context.globals['options']
-        if options.has_key('package_url'):
+        if 'package_url' in options:
             path = '%s%s' % (options['package_url'], path)
     return path
 
@@ -108,20 +108,20 @@ def isa (target, context):
             dict.__init__(self)
             self.__default = default
             if values:
-                for k, v in values.iteritems():
+                for k, v in values.items():
                     self[k]=v
 
-        def has_key (self, key):
+        def __in__(self, key):
             return True
 
         def __getitem__ (self, key):
-            if dict.has_key (self, key):
+            if key in dict:
                 return dict.__getitem__ (self, key)
             else:
                 return self.__default
 
         def merge (self, dico):
-            for k, v in dico.iteritems():
+            for k, v in dico.items():
                 self[k]=v
 
     try:
@@ -172,7 +172,7 @@ def meta(target, context):
             self.__target = target
             self.__namespace_uri = namespace_uri
 
-        def has_key(self, key):
+        def __in__(self, key):
             return (self[key] is not None)
 
         def __getitem__(self, key):
@@ -184,17 +184,17 @@ def meta(target, context):
             options = context.globals['options']
             self.__ns_dict = options.get('namespace_prefix', {})
 
-        def has_key(self, key):
+        def __in__(self, key):
             return key in self.__ns_dict
 
         def __getitem__(self, key):
-            if self.has_key(key):
+            if key in self:
                 return MetaNameWrapper(self.__target, self.__ns_dict[key])
             else:
                 return None
 
         def keys(self):
-            return self.__ns_dict.keys()
+            return list(self.__ns_dict.keys())
 
     if isinstance (target, advene.model._impl.Metaed):
         r = MetaNSWrapper (target, context)
@@ -232,7 +232,7 @@ def view(target, context):
         def __call__ (self):
             return self._target.view (context=self._context)
 
-        def has_key (self, key):
+        def __in__ (self, key):
             v = self._target._find_named_view (key, self._context)
             return v is not None
 
@@ -283,7 +283,7 @@ def snapshot_url (target, context):
     elif isinstance(target, advene.model.fragment.MillisecondFragment):
         begin = target.begin
         p=target.rootPackage
-    elif isinstance(target, int) or isinstance(target, long):
+    elif isinstance(target, int) or isinstance(target, int):
         begin=target
         # Use the current package
         p=context.evaluateValue('package')
@@ -302,7 +302,7 @@ def player_url (target, context):
     """
     import advene.model.annotation
     import advene.model.fragment
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
 
     begin=""
     end=None
@@ -315,7 +315,7 @@ def player_url (target, context):
         begin = target.begin
         end = target.end
         p=target.rootPackage
-    elif isinstance(target, int) or isinstance(target, long):
+    elif isinstance(target, int) or isinstance(target, int):
         begin=target
     else:
         return None
@@ -329,7 +329,7 @@ def player_url (target, context):
         return base_url
     else:
         c=context.evaluateValue('options/controller')
-        return base_url + "?" + urllib.urlencode( {'filename': c.get_default_media(p)} )
+        return base_url + "?" + urllib.parse.urlencode( {'filename': c.get_default_media(p)} )
 
 def formatted (target, context):
     """Return a formatted timestamp as hh:mm:ss.mmmm
@@ -341,18 +341,18 @@ def formatted (target, context):
     import advene.model.fragment
     from advene.util.helper import format_time
 
-    if isinstance(target, int) or isinstance(target, long):
+    if isinstance(target, int) or isinstance(target, int):
         return format_time(target)
 
     if not isinstance(target, advene.model.fragment.MillisecondFragment):
         return None
 
     res = {
-        'begin': u'--:--:--.---',
-        'end'  : u'--:--:--.---',
-        'duration': u'--:--:--.---'
+        'begin': '--:--:--.---',
+        'end'  : '--:--:--.---',
+        'duration': '--:--:--.---'
         }
-    for k in res.keys():
+    for k in list(res.keys()):
         t=getattr(target, k)
         res[k] = format_time(t)
     res['begin_s'] = target.begin / 1000.
@@ -439,7 +439,7 @@ def query(target, context):
             else:
                 return None
 
-        def has_key (self, key):
+        def __in__(self, key):
             return self._get_query_by_id(key)
 
         def __getitem__ (self, key):
@@ -603,15 +603,15 @@ def transition_fix_date(target, context):
     import datetime
     m=re.search('(\d\d\d\d)-(\d\d?)-(\d\d)', target)
     if m:
-        return datetime.datetime(long(m.group(1)), long(m.group(2)), long(m.group(3))).isoformat()
+        return datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3))).isoformat()
     else:
         return target
 
 def urlquote(target, context):
     """Percent-encode the given string.
     """
-    import urllib
-    return urllib.quote(unicode(target).encode('utf-8'))
+    import urllib.request, urllib.parse, urllib.error
+    return urllib.parse.quote(str(target).encode('utf-8'))
 
 def json(target, context):
     """JSON-encode the parameter.

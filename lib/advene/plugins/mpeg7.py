@@ -114,7 +114,7 @@ class MPEG7Importer(GenericImporter):
                 d=m.groupdict()
                 for k in d:
                     if d[k] is not None:
-                        d[k]=long(d[k])
+                        d[k]=int(d[k])
                 if d['fraction'] is None:
                     d['fraction']=1.0
                 begin=d['ms']/d['fraction']+d['s']*1000+d['m']*60000+d['h']*3600000
@@ -125,7 +125,7 @@ class MPEG7Importer(GenericImporter):
                 d=m.groupdict()
                 for k in d:
                     if d[k] is not None:
-                        d[k]=long(d[k])
+                        d[k]=int(d[k])
                 if d['fraction'] is None:
                     d['fraction']=1.0
                 duration=d['ms']/d['fraction']+d['s']*1000+d['m']*60000+d['h']*3600000

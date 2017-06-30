@@ -45,7 +45,7 @@ prefixes = {
     'advene': ADVENE,
     'cinelab': CINELAB,
     }
-prefix_re = re.compile('(%s):' % "|".join( prefixes.keys() ))
+prefix_re = re.compile('(%s):' % "|".join( list(prefixes.keys()) ))
 
 def ns(path):
     """Convert NS prefixes to {URL} in ET path expressions
@@ -122,7 +122,7 @@ class CinelabImporter(GenericImporter):
 
         # The file is an advene2 zip package. We can extract its contents
         # to a temporary directory
-        self._tempdir=unicode(tempfile.mkdtemp('', 'czp'), _fs_encoding)
+        self._tempdir=str(tempfile.mkdtemp('', 'czp'), _fs_encoding)
 
         for name in z.namelist():
             if name.endswith('/'):
@@ -148,7 +148,7 @@ class CinelabImporter(GenericImporter):
         self._tempdir = None
         if filename.endswith('.zip') or filename.endswith('.czp'):
             self.extract(filename)
-            filename = self.tempfile(u'content.xml')
+            filename = self.tempfile('content.xml')
 
         tree=ET.parse(filename)
         root=tree.getroot()

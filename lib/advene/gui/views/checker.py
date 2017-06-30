@@ -61,7 +61,7 @@ class CheckerView(AdhocView):
         begins = set()
         ends = set()
         for at in self.controller.package.annotationTypes:
-            for a, b in itertools.izip(at.annotations, at.annotations[1:]):
+            for a, b in zip(at.annotations, at.annotations[1:]):
                 if a.fragment.end > b.fragment.begin:
                     ends.add(a)
                     begins.add(b)

@@ -23,19 +23,19 @@ logger = logging.getLogger(__name__)
 
 import os
 import sys
-import urllib
-from urlparse import urljoin
+import urllib.request, urllib.parse, urllib.error
+from urllib.parse import urljoin
 import re
 
 import xml.sax
 import xml.dom
 
-import util.uri
+from .util.uri import normalize_filename
 
-from util.auto_properties import auto_properties
+from .util.auto_properties import auto_properties
 
 import advene.core.config as config
-import _impl
+from . import _impl
 import advene.model.annotation as annotation
 import advene.model.modeled as modeled
 import advene.model.query as query
@@ -61,14 +61,12 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
              annotation.RelationFactory,
              schema.SchemaFactory,
              query.QueryFactory,
-             view.ViewFactory,
+             view.ViewFactory, metaclass=auto_properties
              ):
 
     """A package is the container of all the elements of an annotation
     (schemas, types, annotations, relations, views, queries). It
     provides factory methods to create attached annotations, views, ..."""
-
-    __metaclass__ = auto_properties
 
     def __init__(self, uri, source=_get_from_uri, importer=None):
         """Calling the constructor with just a URI tries to read the package
@@ -77,7 +75,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
            Providing None for the source parameter creates a new Package.
         """
         self.meta_cache={}
-        uri = util.uri.normalize_filename(uri)
+        uri = normalize_filename(uri)
         self.__uri = uri
         self.__importer = importer
         # Possible container
@@ -102,7 +100,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                 if abs_uri.lower().endswith('.azp') or abs_uri.endswith('/'):
                     # Advene Zip Package. Do some magic.
                     self.__zip = ZipPackage(abs_uri)
-                    f=urllib.pathname2url(self.__zip.getContentsFile())
+                    f=urllib.request.pathname2url(self.__zip.getContentsFile())
                     element = reader.fromUri("file://" + f).documentElement
                 else:
                     element = reader.fromUri(abs_uri).documentElement
@@ -112,16 +110,16 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                 if re.match('[a-zA-Z]:', source):
                     # Windows drive: notation. Convert it to
                     # a more URI-compatible syntax
-                    source=urllib.pathname2url(source)
+                    source=urllib.request.pathname2url(source)
                 source_uri = urljoin (
-                    'file:%s/' % urllib.pathname2url (os.getcwd ()),
+                    'file:%s/' % urllib.request.pathname2url (os.getcwd ()),
                      str(source)
                 )
 
                 if source_uri.lower().endswith('.azp') or source_uri.endswith('/'):
                     # Advene Zip Package. Do some magic.
                     self.__zip = ZipPackage(source_uri)
-                    f=urllib.pathname2url(self.__zip.getContentsFile())
+                    f=urllib.request.pathname2url(self.__zip.getContentsFile())
                     element = reader.fromUri("file://" + f).documentElement
                 else:
                     element = reader.fromUri(source_uri).documentElement
@@ -149,7 +147,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         doc = di.createDocument(adveneNS, "package", None)
 
         elt = doc.documentElement
-        elt.setAttributeNS(xmlNS,   "xml:base", unicode(self.__uri, 'utf-8'))
+        elt.setAttributeNS(xmlNS,   "xml:base", self.__uri)
         elt.setAttributeNS(xmlnsNS, "xmlns", adveneNS)
         elt.setAttributeNS(xmlnsNS, "xmlns:xlink", xlinkNS)
         elt.setAttributeNS(xmlnsNS, "xmlns:dc", dcNS)
@@ -199,7 +197,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         You would probably rather use the uri read-only property, unless you
         want to set the parameter _absolute_.
         """
-        uri = unicode(self.__uri or "", 'utf-8')
+        uri = self.__uri or ""
 
         if not absolute and context is self:
             return ''
@@ -209,7 +207,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             uri = urljoin (importer.getUri (absolute, context), uri)
 
         if absolute:
-            base_uri = 'file:%s/' % urllib.pathname2url (os.getcwd ())
+            base_uri = 'file:%s/' % urllib.request.pathname2url (os.getcwd ())
             uri = urljoin(base_uri, uri)
 
         return uri
@@ -294,12 +292,12 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
     def generate_statistics(self):
         """Generate the statistics.xml file.
         """
-        out=u"""<?xml version="1.0" encoding="UTF-8"?>
+        out="""<?xml version="1.0" encoding="UTF-8"?>
     <statistics:statistics xmlns:statistics="urn:advene:names:tc:opendocument:xmlns:manifest:1.0">
     """
         # Note: we do not use urllib.quote, since it chokes on non-ASCII characters (unicode)
-        out += u"""<statistics:title value="%s" />""" % ((self.title or '').replace('"', '%22') or "")
-        out += u"""<statistics:description value="%s" />""" % ((self.getMetaData(config.data.namespace_prefix['dc'], 'description') or "").replace('"', '%22') or "")
+        out += """<statistics:title value="%s" />""" % ((self.title or '').replace('"', '%22') or "")
+        out += """<statistics:description value="%s" />""" % ((self.getMetaData(config.data.namespace_prefix['dc'], 'description') or "").replace('"', '%22') or "")
         for n, l in ( ('schema', len(self.schemas)),
                       ('annotation', len(self.annotations)),
                       ('annotation_type', len(self.annotationTypes)),
@@ -307,8 +305,8 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                       ('relation_type', len(self.relationTypes)),
                       ('query', len(self.queries)),
                       ('view', len(self.views)) ):
-            out += u"""<statistics:item name="%s" value="%d" />""" % (n, l)
-        out += u"""</statistics:statistics>"""
+            out += """<statistics:item name="%s" value="%d" />""" % (n, l)
+        out += """</statistics:statistics>"""
         return out
 
     def serialize(self, stream=sys.stdout):
@@ -323,7 +321,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if name is None:
             name=self.__uri
 
-        name = util.uri.normalize_filename(name)
+        name = normalize_filename(name)
 
         # handle .azp files.
         if name.lower().endswith('.azp') or name.endswith('/'):
@@ -370,9 +368,8 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             return self.getQnamePrefix(item._getParent())
 
 
-class Import(modeled.Modeled, _impl.Aliased):
+class Import(modeled.Modeled, _impl.Aliased, metaclass=auto_properties):
     """Import represents the different imported elements"""
-    __metaclass__ = auto_properties
 
     def getNamespaceUri(): return adveneNS
     getNamespaceUri = staticmethod(getNamespaceUri)
@@ -391,7 +388,7 @@ class Import(modeled.Modeled, _impl.Aliased):
             if re.match('[a-zA-Z]:', uri):
                 # Windows drive: notation. Convert it to
                 # a more URI-compatible syntax
-                uri=urllib.pathname2url(uri)
+                uri=urllib.request.pathname2url(uri)
 
             # doc = self._getParent()._getDocument()
             doc = parent._getDocument()
@@ -425,7 +422,7 @@ class Import(modeled.Modeled, _impl.Aliased):
         if re.match('[a-zA-Z]:', uri):
             # Windows drive: notation. Convert it to
             # a more URI-compatible syntax
-            uri=urllib.pathname2url(uri)
+            uri=urllib.request.pathname2url(uri)
         return self._getModel().setAttributeNS(xlinkNS, 'xlink:href', uri)
 
     def getSources(self):
@@ -482,9 +479,9 @@ class StatisticsHandler(xml.sax.handler.ContentHandler):
 
     def startElement(self, name, attributes):
         if name == "statistics:title":
-            self.data['title']=urllib.unquote(attributes['value'])
+            self.data['title']=urllib.parse.unquote(attributes['value'])
         elif name == 'statistics:description':
-            self.data['description']=urllib.unquote(attributes['value'])
+            self.data['description']=urllib.parse.unquote(attributes['value'])
         elif name == 'statistics:item':
             self.data[attributes['name']]=int(attributes['value'])
 

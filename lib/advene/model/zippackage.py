@@ -53,7 +53,7 @@ import zipfile
 import os
 import tempfile
 import shutil
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from advene.model.exception import AdveneException
 from advene.model.resources import Resources
 from advene.model.util.uri import _fs_encoding, normalize_filename
@@ -102,7 +102,7 @@ class ZipPackage:
                 self.uri = uri
                 self.file_ = uri
             else:
-                u = urllib.urlopen(uri)
+                u = urllib.request.urlopen(uri)
 
                 # Use the same extension
                 self.uri = uri
@@ -122,7 +122,7 @@ class ZipPackage:
         @return: the XML filename
         @rtype: string
         """
-        return self.tempfile(u'content.xml')
+        return self.tempfile('content.xml')
 
     def tempfile(self, *names):
         """Return a tempfile name in the filesystem encoding.
@@ -139,12 +139,12 @@ class ZipPackage:
     def new(self):
         """Prepare a new AZP expanded package.
         """
-        self._tempdir=unicode(tempfile.mkdtemp('', 'adv'), _fs_encoding)
+        self._tempdir=str(tempfile.mkdtemp('', 'adv'), _fs_encoding)
         self.tempdir_list.append(self._tempdir)
 
-        open(self.tempfile(u'mimetype'), 'w').write(MIMETYPE)
+        open(self.tempfile('mimetype'), 'w').write(MIMETYPE)
 
-        os.mkdir(self.tempfile(u'resources'))
+        os.mkdir(self.tempfile('resources'))
 
     def extract(self, fname):
         """Extract the zip file to a temporary directory.
@@ -161,7 +161,7 @@ class ZipPackage:
 
         # Check the validity of mimetype
         try:
-            typ = z.read('mimetype')
+            typ = z.read('mimetype').decode('utf-8')
         except KeyError:
             raise AdveneException(_("File %s is not an Advene zip package.") % self.file_)
         if typ != MIMETYPE:
@@ -169,8 +169,8 @@ class ZipPackage:
 
         # The file is an advene zip package. We can extract its contents
         # to a temporary directory
-        self._tempdir=unicode(tempfile.mkdtemp('', 'adv'), _fs_encoding)
-        os.mkdir(self.tempfile(u'resources'))
+        self._tempdir=tempfile.mkdtemp('', 'adv')
+        os.mkdir(self.tempfile('resources'))
         self.tempdir_list.append(self._tempdir)
 
         # FIXME: check the portability (convert / to os.path.sep ?)
@@ -194,7 +194,7 @@ class ZipPackage:
         z.close()
 
         # Create the resources directory if necessary
-        resource_dir = self.tempfile(u'resources' )
+        resource_dir = self.tempfile('resources' )
         if not os.path.exists(resource_dir):
             os.mkdir(resource_dir)
         return self._tempdir
@@ -215,7 +215,7 @@ class ZipPackage:
             # want it to be removed upon application exit.
             self._tempdir=fname
             try:
-                typ=open(self.tempfile(u'mimetype'), 'r').read()
+                typ=open(self.tempfile('mimetype'), 'r').read()
             except IOError:
                 typ=None
             if typ != MIMETYPE:
@@ -224,8 +224,8 @@ class ZipPackage:
             self._tempdir=self.extract(fname)
 
         # FIXME: Check against the MANIFEST file
-        for (name, mimetype) in self.manifest_to_list(self.tempfile(u'META-INF', u'manifest.xml')):
-            if name == u'/':
+        for (name, mimetype) in self.manifest_to_list(self.tempfile('META-INF', 'manifest.xml')):
+            if name == '/':
                 pass
             n=name.replace('/', os.path.sep)
             if not os.path.exists( self.tempfile(n) ):
@@ -276,14 +276,14 @@ class ZipPackage:
                 else:
                     name=f
                 if isinstance(name, str):
-                    name=unicode(name, _fs_encoding)
+                    name=str(name, _fs_encoding)
                 manifest.append(name)
                 if z is not None:
                     z.write( os.path.join(dirpath, f),
                              name.encode('utf-8') )
 
         # Generation of the manifest file
-        fname=self.tempfile(u"META-INF", u"manifest.xml")
+        fname=self.tempfile("META-INF", "manifest.xml")
         tree=ET.ElementTree(self.list_to_manifest(manifest))
         tree.write(fname, encoding='utf-8')
         if z is not None:
@@ -295,10 +295,10 @@ class ZipPackage:
     def update_statistics(self, p):
         """Update the META-INF/statistics.xml file
         """
-        d=self.tempfile(u'META-INF')
+        d=self.tempfile('META-INF')
         if not os.path.isdir(d):
             os.mkdir(d)
-        f=open(self.tempfile(u'META-INF', u'statistics.xml'), 'w')
+        f=open(self.tempfile('META-INF', 'statistics.xml'), 'w')
         f.write(p.generate_statistics().encode('utf-8'))
         f.close()
         return True
@@ -323,8 +323,8 @@ class ZipPackage:
             if mimetype is None:
                 mimetype = 'text/plain'
             ET.SubElement(root, ET.QName(MANIFEST, 'file-entry'),  {
-                    ET.QName(MANIFEST, 'full-path'): unicode(f),
-                    ET.QName(MANIFEST, 'media-type'): unicode(mimetype),
+                    ET.QName(MANIFEST, 'full-path'): str(f),
+                    ET.QName(MANIFEST, 'media-type'): str(mimetype),
                     })
         return root
 

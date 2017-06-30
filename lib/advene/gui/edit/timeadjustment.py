@@ -202,12 +202,12 @@ class TimeAdjustment:
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source_uri=unicode(selection.get_data(), 'utf8').split('\n')[0]
+            source_uri=str(selection.get_data(), 'utf8').split('\n')[0]
             source=self.controller.package.annotations.get(source_uri)
             self.set_value(source.fragment.begin)
         elif targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.get_data())
-            v=long(float(data['timestamp']))
+            v=int(float(data['timestamp']))
             self.set_value(v)
         else:
             logger.warn("Unknown target type for drop: %d" % targetType)

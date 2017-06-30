@@ -178,7 +178,7 @@ class Menu:
                                    text=_("Give the offset to use\non specified element.\nIt is in ms and can be\neither positive or negative."),
                                    default="0")
         if offset is not None:
-            return long(offset)
+            return int(offset)
         else:
             return offset
 
@@ -340,7 +340,7 @@ class Menu:
             ResourceData: self.make_resourcedata_menu,
             }
 
-        for t, method in specific_builder.iteritems():
+        for t, method in specific_builder.items():
             if isinstance(element, t):
                 method(element, menu)
 
@@ -549,7 +549,7 @@ class Menu:
                 submenu.append(i)
                 i=Gtk.SeparatorMenuItem()
                 submenu.append(i)
-                for t, l in el.typedRelatedIn.iteritems():
+                for t, l in el.typedRelatedIn.items():
                     at=self.controller.package.get_element_by_id(t)
                     m=Gtk.MenuItem(self.get_title(at), use_underline=False)
                     amenu=Gtk.Menu()
@@ -565,7 +565,7 @@ class Menu:
                 submenu.append(i)
                 i=Gtk.SeparatorMenuItem()
                 submenu.append(i)
-                for t, l in el.typedRelatedOut.iteritems():
+                for t, l in el.typedRelatedOut.items():
                     at=self.controller.package.get_element_by_id(t)
                     m=Gtk.MenuItem(self.get_title(at), use_underline=False)
                     amenu=Gtk.Menu()
@@ -653,7 +653,7 @@ class Menu:
 
         if element.resourcepath == '':
             # Resources root
-            if not element.has_key('soundclips'):
+            if 'soundclips' not in element:
                 # Create the soundclips folder
                 element['soundclips'] = element.DIRECTORY_TYPE
                 self.controller.notify('ResourceCreate', resource=element['soundclips'])
@@ -814,8 +814,8 @@ class Menu:
                                                     query=element,
                                                     result=res,
                                                     destination='east')
-            except Exception, e:
-                self.controller.log(_('Exception in query: %s') % unicode(e))
+            except Exception as e:
+                self.controller.log(_('Exception in query: %s') % str(e))
             return True
 
         m=Gtk.MenuItem(_('Apply query on...'))

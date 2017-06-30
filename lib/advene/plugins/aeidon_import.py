@@ -93,8 +93,8 @@ class AeidonImporter(GenericImporter):
             yield {
                 'type': self.annotationtype,
                 'content': s.main_text,
-                'begin': long(s.start_seconds * 1000),
-                'duration': long(s.duration_seconds * 1000)
+                'begin': int(s.start_seconds * 1000),
+                'duration': int(s.duration_seconds * 1000)
                 }
         self.progress(1.0)
 

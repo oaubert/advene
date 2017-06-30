@@ -35,7 +35,7 @@ try:
 except ImportError:
     GtkSource=None
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import advene.core.config as config
 
@@ -203,7 +203,7 @@ class TranscriptionEdit(AdhocView):
     def textview_drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.get_data())
-            position=long(data['timestamp'])
+            position=int(data['timestamp'])
             #(x, y) = self.textview.get_window()_to_buffer_coords(Gtk.TextWindowType.TEXT,
             #                                               int(x),
             #                                               int(y))
@@ -628,7 +628,7 @@ class TranscriptionEdit(AdhocView):
                 pass
             it=b.get_iter_at_mark(b.get_insert())
             self.create_timestamp_mark(begin, it)
-            b.insert_at_cursor(unicode(a.content.data))
+            b.insert_at_cursor(str(a.content.data))
             it=b.get_iter_at_mark(b.get_insert())
             self.create_timestamp_mark(end, it)
             last_end=end
@@ -872,9 +872,9 @@ class TranscriptionEdit(AdhocView):
             filename=filename+'.txt'
         try:
             f=open(filename, "w")
-        except IOError, e:
+        except IOError as e:
             dialog.message_dialog(
-                _("Cannot save the file: %s") % unicode(e),
+                _("Cannot save the file: %s") % str(e),
                 icon=Gtk.MessageType.ERROR)
             return True
         f.writelines(self.generate_transcription())
@@ -900,13 +900,13 @@ class TranscriptionEdit(AdhocView):
                 if re.match('[a-zA-Z]:', filename):
                     # Windows drive: notation. Convert it to
                     # a more URI-compatible syntax
-                    fname=urllib.pathname2url(filename)
+                    fname=urllib.request.pathname2url(filename)
                 else:
                     fname=filename
-                f=urllib.urlopen(fname)
-            except IOError, e:
+                f=urllib.request.urlopen(fname)
+            except IOError as e:
                 self.message(_("Cannot open %(filename)s: %(error)s") % {'filename': filename,
-                                                                         'error': unicode(e) })
+                                                                         'error': str(e) })
                 return
             data="".join(f.readlines())
             f.close()
@@ -915,7 +915,7 @@ class TranscriptionEdit(AdhocView):
 
         # We will need a utf-8 encoded str for insertion into the
         # TextBuffer. Convert from unicode if necessary.
-        if isinstance(data, unicode):
+        if isinstance(data, str):
             data = data.encode('utf-8')
 
         b=self.textview.get_buffer()
@@ -1104,7 +1104,7 @@ class TranscriptionEdit(AdhocView):
                     at.date=self.controller.get_timestamp()
                     at.title=new_type_title
                     at.mimetype='text/plain'
-                    at.setMetaData(config.data.namespace, 'color', s.rootPackage._color_palette.next())
+                    at.setMetaData(config.data.namespace, 'color', next(s.rootPackage._color_palette))
                     at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
                     s.annotationTypes.append(at)
                     self.controller.notify('AnnotationTypeCreate', annotationtype=at)

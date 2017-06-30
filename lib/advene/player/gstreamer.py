@@ -33,19 +33,19 @@ from advene.util.helper import format_time
 import os
 import sys
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
     fsenc = sys.getfilesystemencoding()
-    ppath = unicode(os.getenv('GST_PLUGIN_PATH', ""), fsenc)
+    ppath = str(os.getenv('GST_PLUGIN_PATH', ""), fsenc)
     if not ppath or not os.path.exists(ppath):
         os.environ['GST_PLUGIN_PATH'] = os.path.join(config.data.path['advene'], 'gst', 'lib', 'gstreamer-0.10').encode(fsenc)
-        gstpath = unicode(os.getenv('PATH', ""), fsenc)
+        gstpath = str(os.getenv('PATH', ""), fsenc)
         os.environ['PATH'] = os.pathsep.join( ( os.path.join(config.data.path['advene'], 'gst', 'bin'), gstpath) ).encode(fsenc)
     else:
         #even if gstpluginpath is defined, gst still may not be in path
-        gstpath = unicode(os.getenv('PATH', ""), fsenc)
+        gstpath = str(os.getenv('PATH', ""), fsenc)
         h,t = os.path.split(ppath)
         binpath,t = os.path.split(h)
         os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) ).encode(fsenc)
@@ -166,8 +166,8 @@ class Player:
 
         try:
             self.snapshotter = Snapshotter(self.snapshot_taken, width=config.data.player['snapshot-width'])
-        except Exception, e:
-            self.log(u"Could not initialize snapshotter:" +  unicode(e))
+        except Exception as e:
+            self.log("Could not initialize snapshotter:" +  str(e))
             self.snapshotter = None
 
         self.fullres_snapshotter = None
@@ -296,7 +296,7 @@ class Player:
                 v += self.current_position()
         else:
             v=p
-        return long(v)
+        return int(v)
 
     def current_status(self):
         st = self.player.get_state(100)[1]
@@ -329,7 +329,7 @@ class Player:
         if uri and Gst.uri_is_valid(uri):
             return True
         else:
-            self.log(u"Invalid URI " + unicode(uri))
+            self.log("Invalid URI " + str(uri))
             return False
 
     def get_media_position(self, origin, key):
@@ -340,7 +340,7 @@ class Player:
             return
         if self.current_status() == self.UndefinedStatus:
             self.player.set_state(Gst.State.PAUSED)
-        p = long(self.position2value(position) * Gst.MSECOND)
+        p = int(self.position2value(position) * Gst.MSECOND)
         res = self.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE, p)
         if not res:
             logger.warn(_("Problem when seeking into media"))
@@ -375,11 +375,11 @@ class Player:
         self.videofile=item
         if config.data.os == 'win32':
             #item is a str, os.path needs to work with unicode obj to accept unicode path
-            item = os.path.abspath(unicode(item))
+            item = os.path.abspath(str(item))
             if os.path.exists(item):
-                item="file://" + urllib.quote(item)
+                item="file://" + urllib.parse.quote(item)
         elif os.path.exists(item):
-            item="file://" + urllib.quote(os.path.abspath(item))
+            item="file://" + urllib.parse.quote(os.path.abspath(item))
         self.player.set_property('uri', item)
         if self.snapshotter:
             self.snapshotter.set_uri(item)
@@ -426,7 +426,7 @@ class Player:
             self.snapshot_notify(s)
 
     def async_snapshot(self, position):
-        t = long(self.position2value(position))
+        t = int(self.position2value(position))
         if self.snapshotter:
             if not self.snapshotter.thread_running:
                 self.snapshotter.start()
@@ -464,7 +464,7 @@ class Player:
             return True
 
         if not self.captioner:
-            self.log(u"Cannot caption " + unicode(message))
+            self.log("Cannot caption " + str(message))
             return
         self.caption.begin=self.position2value(begin)
         self.caption.end=self.position2value(end)
@@ -496,7 +496,7 @@ class Player:
         The result is a long value in [0, 100]
         """
         v = self.player.get_property('volume') * 100 / 4
-        return long(v)
+        return int(v)
 
     def sound_set_volume(self, v):
         if v > 100:
@@ -590,7 +590,7 @@ class Player:
 
         self.status = s.status
         self.stream_duration = s.length
-        self.current_position_value = long(s.position)
+        self.current_position_value = int(s.position)
         if self.caption.text and (s.position < self.caption.begin
                                   or s.position > self.caption.end):
             self.display_text('', -1, -1)
@@ -696,7 +696,7 @@ class Player:
             return
         event = Gst.Event.new_seek(self.rate, Gst.Format.TIME,
                                    Gst.SeekFlags.FLUSH,
-                                   Gst.SeekType.SET, long(p),
+                                   Gst.SeekType.SET, int(p),
                                    Gst.SeekType.NONE, 0)
         if event:
             res = self.player.send_event(event)

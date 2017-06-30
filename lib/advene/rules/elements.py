@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 
 from collections import OrderedDict
 import re
-import StringIO
-import urllib
+import io
+import urllib.request, urllib.parse, urllib.error
 import xml.etree.ElementTree as ET
 import itertools
 
@@ -69,7 +69,7 @@ class EtreeMixin(object):
 
     def xml_repr(self):
         """Return the XML representation of the instance."""
-        s=StringIO.StringIO()
+        s=io.StringIO()
         self.to_xml(stream=s)
         buf=s.getvalue()
         s.close()
@@ -78,7 +78,7 @@ class EtreeMixin(object):
     def from_xml_string(self, xmlstring, catalog=None):
         """Read the rule from a XML string.
         """
-        s=StringIO.StringIO(xmlstring)
+        s=io.StringIO(xmlstring)
         rulenode=ET.parse(s).getroot()
         self.from_etree(rulenode, catalog=catalog, origin='XML string')
         s.close()
@@ -91,7 +91,7 @@ class EtreeMixin(object):
         @type catalog: ECACatalog
         """
         rulesetnode=ET.parse(uri).getroot()
-        if origin is None and isinstance(uri, basestring):
+        if origin is None and isinstance(uri, str):
             origin=uri
         self.from_etree(rulesetnode, catalog=catalog, origin=origin)
 
@@ -393,7 +393,7 @@ class Action:
         @return: an ElementTree.Element
         """
         node=ET.Element(tag('action'), { 'name': self.name })
-        for pname, pvalue in self.parameters.iteritems():
+        for pname, pvalue in self.parameters.items():
             paramnode=ET.Element(tag('param'), {
                     'name': pname,
                     'value': pvalue })
@@ -522,14 +522,14 @@ class Rule(EtreeMixin):
                         method=unknown_action,
                         description=_("Unknown action %s") % name,
                         parameters=dict( (name, _("Unknown parameter %s") % name)
-                                         for (name, value) in param.iteritems() ),
+                                         for (name, value) in param.items() ),
                         defaults=dict(param),
                         category='unknown',
                         ))
                 catalog.action_categories['unknown']=_("Unknown actions")
 
             action=Action(registeredaction=catalog.get_action(name), catalog=catalog)
-            for name, value in param.iteritems():
+            for name, value in param.items():
                 action.add_parameter(name, value)
             self.add_action(action)
         return self
@@ -849,7 +849,7 @@ class Quicksearch(EtreeMixin):
         # Searched string
         s=element.find('searched')
         if s is not None:
-            self.searched=urllib.unquote(unicode(s.attrib['value']).encode('utf-8'))
+            self.searched=urllib.parse.unquote(str(s.attrib['value']).encode('utf-8'))
 
         # Case-sensitive
         s=element.find['case_sensitive']
@@ -869,7 +869,7 @@ class Quicksearch(EtreeMixin):
 
         qnode.append(ET.Element(tag('searched'),
                      { 'value':
-                       urllib.quote(unicode(self.searched).encode('utf-8'))} ))
+                       urllib.parse.quote(str(self.searched).encode('utf-8'))} ))
 
         qnode.append(ET.Element('case_sensitive'),
                      { 'value': str(int(self.case_sensitive)) })
@@ -928,7 +928,7 @@ class RegisteredAction:
         if defaults is None:
             defaults={}
         # Set default values for non-specified default
-        for k, v in parameters.iteritems():
+        for k, v in parameters.items():
             defaults.setdefault(k, "string:%s" % v)
         self.defaults=defaults
         # If immediate, the action will be run in the main thread, and not
@@ -952,7 +952,7 @@ class RegisteredAction:
 
     def as_html(self, action_url):
         r="""<form method="GET" action="%s">""" % action_url
-        l=self.parameters.keys()
+        l=list(self.parameters.keys())
         l.sort()
         for k in l:
             r += """%s: <input name="%s" title="%s" value="%s"/>""" % (k,
@@ -1099,7 +1099,7 @@ class ECACatalog:
         @return: True if name is a valid action name
         @rtype: boolean
         """
-        return self.actions.has_key(name)
+        return name in self.actions
 
     def get_action(self, name):
         """Return the action matching name.
@@ -1135,7 +1135,7 @@ class ECACatalog:
         @rtype: list
         """
         if expert:
-            return self.event_names.keys()
+            return list(self.event_names.keys())
         else:
             return self.basic_events
 
@@ -1167,9 +1167,9 @@ class ECACatalog:
         """Return the list of defined actions.
         """
         if expert:
-            return self.actions.keys()
+            return list(self.actions.keys())
         else:
-            return self.actions.keys()
+            return list(self.actions.keys())
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

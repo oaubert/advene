@@ -106,14 +106,14 @@ class TTSEngine:
         if name in parameters:
             try:
                 result=context.evaluateValue(parameters[name])
-            except advene.model.tal.context.AdveneTalesException, e:
+            except advene.model.tal.context.AdveneTalesException as e:
                 try:
                     rulename=context.evaluateValue('rule')
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
                 self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
                                                                                                                           'parametername': name})
-                self.controller.log(unicode(e.message)[:160])
+                self.controller.log(str(e.message)[:160])
                 result=default_value
         else:
             result=default_value
@@ -185,8 +185,8 @@ class FestivalTTSEngine(TTSEngine):
             self.init()
             if self.festival_process is not None:
                 self.festival_process.stdin.write('(SayText "%s")\n' % helper.unaccent(sentence))
-        except OSError, e:
-            self.controller.log(u"TTS Error: " + unicode(e.message))
+        except OSError as e:
+            self.controller.log("TTS Error: " + str(e.message))
         return True
 ENGINES['festival'] = FestivalTTSEngine
 
@@ -271,8 +271,8 @@ class EspeakTTSEngine(TTSEngine):
                     kw = { 'preexec_fn': subprocess_setup }
                 self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, **kw)
             self.espeak_process.stdin.write((sentence + "\n").encode(config.data.preferences['tts-encoding'], 'ignore'))
-        except OSError, e:
-            self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
+        except OSError as e:
+            self.controller.log("TTS Error: ", str(e.message).encode('utf8'))
         return True
 ENGINES['espeak'] = EspeakTTSEngine
 
@@ -350,8 +350,8 @@ class CustomTTSEngine(TTSEngine):
             if self.prg_process is None:
                 self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, creationflags = CREATE_NO_WINDOW)
             self.prg_process.stdin.write((sentence + "\n").encode(config.data.preferences['tts-encoding'], 'ignore'))
-        except OSError, e:
-            self.controller.log("TTS Error: ", unicode(e.message).encode('utf8'))
+        except OSError as e:
+            self.controller.log("TTS Error: ", str(e.message).encode('utf8'))
         return True
 ENGINES['custom'] = CustomTTSEngine
 
@@ -389,10 +389,10 @@ class CustomArgTTSEngine(TTSEngine):
             self.language=lang
         try:
             fse = sys.getfilesystemencoding()
-            subprocess.Popen(unicode(" ".join([self.prg_path, '-v', self.language, '"%s"' % (sentence.replace('\n',' ').replace('"', '') + u"\n")])).encode(config.data.preferences['tts-encoding'], 'ignore'), creationflags = CREATE_NO_WINDOW)
-        except OSError, e:
+            subprocess.Popen(str(" ".join([self.prg_path, '-v', self.language, '"%s"' % (sentence.replace('\n',' ').replace('"', '') + "\n")])).encode(config.data.preferences['tts-encoding'], 'ignore'), creationflags = CREATE_NO_WINDOW)
+        except OSError as e:
             try:
-                m = unicode(e.message)
+                m = str(e.message)
             except UnicodeDecodeError:
                 logger.error("TTS: Error decoding error message with standard encoding", m.encode('ascii', 'replace'))
         return True

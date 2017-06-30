@@ -16,7 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-from __future__ import division
+
 
 name="Shot detection importer"
 
@@ -59,7 +59,7 @@ class DelakisShotDetectImporter(GenericImporter):
                                      action="store_true", dest="cache_histogram", default=self.cache_histogram,
                                      help=_("Cache histogram alongside video files."))
         self.optionparser.add_option("-p", "--profile",
-                                     action="store", type="choice", dest="profile", choices=self.profiles.keys(), default=self.profile,
+                                     action="store", type="choice", dest="profile", choices=list(self.profiles.keys()), default=self.profile,
                                      help=_("Parameter profile: safe will detect less cuts, aggressive will detect more cuts (but more false ones too). default is a compromise."))
 
     def can_handle(fname):
@@ -90,11 +90,11 @@ class DelakisShotDetectImporter(GenericImporter):
             if self.cache_histogram:
                 try:
                     numpy.save(histofile, histos)
-                except Exception, e:
+                except Exception as e:
                     self.controller.log("Cannot save histogram: %s" % e.message)
 
         sd = ShotDetector()
-        for k, v in self.profiles[self.profile].iteritems():
+        for k, v in self.profiles[self.profile].items():
             setattr(sd, k, v)
         #Detect cut and dissolve
         self.convert(sd.process(histos, 1000 / fps))
@@ -195,7 +195,7 @@ class ShotDetector:
         for f in numpy.flatnonzero(hcumul > self.DISS_THRESHOLD):
             #new frame not in current dissolve, record dissolve
             if start > 0 and f > end:
-                motion = numpy.sum(motion_frames[range(start,end)])
+                motion = numpy.sum(motion_frames[list(range(start,end))])
                 if not motion and end - start > self.DISS_MIN_FRAMES:
                     yield (start,end)
                 start = end = -1
@@ -211,7 +211,7 @@ class ShotDetector:
 
         #add the last dissolve
         if start > 0 and end > 0 :
-            motion = numpy.sum(motion_frames[range(start,end)])
+            motion = numpy.sum(motion_frames[list(range(start,end))])
             if not motion and end - start > self.DISS_MIN_FRAMES:
                 yield (start,end)
 
@@ -261,7 +261,7 @@ class ShotDetector:
 class HistogramExtractor:
     def process(self, videofile, progress):
         progress(0, _("Extracting histogram"))
-        video = hg.cvCreateFileCapture(unicode(videofile).encode(sys.getfilesystemencoding()))
+        video = hg.cvCreateFileCapture(str(videofile).encode(sys.getfilesystemencoding()))
         if not video:
             raise Exception("Could not open video file")
         histo = cv.cvCreateHist([256],cv.CV_HIST_ARRAY,[[0,256]], 1)

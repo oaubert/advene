@@ -41,26 +41,26 @@ timestamp_re = re.compile('(\d\d):(\d\d):(\d\d):(\d\d)')
 # Column -> (type, attr) mapping.
 #
 type_mapping = {
-    u'Inquadratura'                      : (u'Inquadratura', 'num'),
-    u'Descrizione inquadratura'          : (u'Inquadratura', 'descrizione'),
-    u'Piani/Immagini'                    : (u'Inquadratura', 'piani_immagini'),
-    u'Ampiezza temporale inquadratura'   : (u'Inquadratura', 'ampiezza_temporale'),
+    'Inquadratura'                      : ('Inquadratura', 'num'),
+    'Descrizione inquadratura'          : ('Inquadratura', 'descrizione'),
+    'Piani/Immagini'                    : ('Inquadratura', 'piani_immagini'),
+    'Ampiezza temporale inquadratura'   : ('Inquadratura', 'ampiezza_temporale'),
 
-    u'Ampiezza temporale raccordo'       : (u'Raccordo'    , 'ampiezza_temporale'),
-    u'Raccordi di contenuto'             : (u'Raccordo'    , 'contenuto'),
-    u'Raccordi spaziali'                 : (u'Raccordo'    , 'spaziali'),
-    u'Raccordi tecnici'                  : (u'Raccordo'    , 'tecnici'),
-    u'Raccordi temporali'                : (u'Raccordo'    , 'temporali'),
+    'Ampiezza temporale raccordo'       : ('Raccordo'    , 'ampiezza_temporale'),
+    'Raccordi di contenuto'             : ('Raccordo'    , 'contenuto'),
+    'Raccordi spaziali'                 : ('Raccordo'    , 'spaziali'),
+    'Raccordi tecnici'                  : ('Raccordo'    , 'tecnici'),
+    'Raccordi temporali'                : ('Raccordo'    , 'temporali'),
 
-    u'Grande unit\xe0'                   : (u'Grande_unita', 'num'),
-    u'Ampiezza temporale grande unit\xe0': (u'Grande_unita', 'ampiezza_temporale'),
-    u'Descrizione grande unit\xe0'       : (u'Grande_unita', 'descrizione'),
-    u'Transizioni fra grandi unit\xe0'   : (u'Grande_unita', 'transizioni_fra'),
+    'Grande unit\xe0'                   : ('Grande_unita', 'num'),
+    'Ampiezza temporale grande unit\xe0': ('Grande_unita', 'ampiezza_temporale'),
+    'Descrizione grande unit\xe0'       : ('Grande_unita', 'descrizione'),
+    'Transizioni fra grandi unit\xe0'   : ('Grande_unita', 'transizioni_fra'),
 
-    u'Sequenza'                          : (u'Sequenza'    , 'num'),
-    u'Ampiezza temporale sequenza'       : (u'Sequenza'    , 'ampiezza_temporale'),
-    u'Descrizione sequenza'              : (u'Sequenza'    , 'descrizione'),
-    u'Transizioni fra sequenze'          : (u'Sequenza'    , 'transizioni_fra'),
+    'Sequenza'                          : ('Sequenza'    , 'num'),
+    'Ampiezza temporale sequenza'       : ('Sequenza'    , 'ampiezza_temporale'),
+    'Descrizione sequenza'              : ('Sequenza'    , 'descrizione'),
+    'Transizioni fra sequenze'          : ('Sequenza'    , 'transizioni_fra'),
     }
 
 class DCPImporter(GenericImporter):
@@ -94,7 +94,7 @@ class DCPImporter(GenericImporter):
         # Conversion
         f=open(filename, 'rU')
         rows=csv.reader(f, 'excel-tab')
-        self.labels = rows.next()
+        self.labels = next(rows)
         self.label2type = {}
         self.convert(self.iterator(rows))
         self.progress(1.0)
@@ -104,7 +104,7 @@ class DCPImporter(GenericImporter):
         m=timestamp_re.match(s)
         if m:
             (h, m, s, f) = m.groups()
-            t=( ((long(h) * 60 + long(m)) * 60) + long(s) ) * 1000 + long(f) * (1000 / config.data.preferences['default-fps'])
+            t=( ((int(h) * 60 + int(m)) * 60) + int(s) ) * 1000 + int(f) * (1000 / config.data.preferences['default-fps'])
         else:
             t=0
         return t
@@ -123,12 +123,12 @@ class DCPImporter(GenericImporter):
                                                                              'count': self.row_count})
             progress += incr
             t = self.str2time(row[1])
-            for (label, tc, value) in itertools.izip(self.labels[2::2], row[2::2], row[3::2]):
-                label = unicode(label, 'mac_roman')
+            for (label, tc, value) in zip(self.labels[2::2], row[2::2], row[3::2]):
+                label = str(label, 'mac_roman')
 
                 if tc == 'IN':
                     # Store into column_cache
-                    column_cache[label]=( t, unicode(value, 'mac_roman') )
+                    column_cache[label]=( t, str(value, 'mac_roman') )
                 elif tc == 'OUT':
                     (begin, content) = column_cache.get(label, (0, 'OUT without IN'))
                     if label in type_mapping:
@@ -146,7 +146,7 @@ class DCPImporter(GenericImporter):
                         }
             # Process row_cache
             output = {}
-            for dcp_type, data in row_cache.iteritems():
+            for dcp_type, data in row_cache.items():
                 label, attr = type_mapping[dcp_type]
                 begin, content = data
                 at = self.label2type.get(label)
@@ -157,7 +157,7 @@ class DCPImporter(GenericImporter):
                 #if info[begin] != begin:
                 #    # FIXME: consistency check on begin time. What to do here???
                 info['content'].append('%s=%s' % (attr, content.replace('\n', ' -- ')))
-            for at, info in output.iteritems():
+            for at, info in output.items():
                 yield {
                     'begin': info['begin'],
                     'end': t,

@@ -17,9 +17,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 import xml.dom
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
-from cStringIO import StringIO
+from io import StringIO
 
 import advene.model.util.uri
 
@@ -78,7 +78,7 @@ class Metaed(object):
         """
         r = StringIO()
         advene.model.util.dom.printElementText(dom_element, r)
-        return r.getvalue().decode('utf-8')
+        return r.getvalue()
 
     def getMetaData(self, namespace_uri, name):
         """Return the text content of metadata with given NS and name
@@ -188,7 +188,7 @@ class Authored(Metaed):
 
             textnode = doc.createTextNode(author)
             eltnode.appendChild(textnode)
-            eltnode.setAttributeNS(xlinkNS, "xlink:href", unicode(authorUrl))
+            eltnode.setAttributeNS(xlinkNS, "xlink:href", str(authorUrl))
   #
   # public methods
   #
@@ -268,7 +268,7 @@ class Tagged(Metaed):
         if tagmeta is None:
             return []
         else:
-            return [ urllib.unquote(t) for t in tagmeta.split(',') ]
+            return [ urllib.parse.unquote(t) for t in tagmeta.split(',') ]
 
     def _updateTagsMeta(self, tagset, ns=None):
         """Update the tags metadata.
@@ -278,7 +278,7 @@ class Tagged(Metaed):
         if ns is None:
             ns=adveneNS
         if tagset:
-            self.setMetaData (ns, "tags", ','.join( [ urllib.quote(t) for t in tagset ] ))
+            self.setMetaData (ns, "tags", ','.join( [ urllib.parse.quote(t) for t in tagset ] ))
         else:
             if self.getMetaData (ns, "tags"):
                 self.setMetaData (ns, "tags", None)
@@ -340,7 +340,7 @@ class Dated(Metaed):
            You would probably rather use the date property.
         """
         if value is not None:
-            self._getModel().setAttributeNS(dcNS, "dc:date", unicode(value))
+            self._getModel().setAttributeNS(dcNS, "dc:date", str(value))
         else:
             self._getModel().removeAttributeNS(dcNS, "date")
 
@@ -374,9 +374,9 @@ class Titled(Metaed):
         if value is not None:
             if self._getModel().hasAttributeNS(dcNS, "title"):
                 self._getModel().setAttributeNS(dcNS, "dc:title",
-                                                unicode(value))
+                                                str(value))
             else:
-                self.setMetaData(dcNS, "title", unicode(value))
+                self.setMetaData(dcNS, "title", str(value))
         else:
             if self._getModel().hasAttributeNS(dcNS, "title"):
                 self._getModel().removeAttributeNS(dcNS, "title")
@@ -417,7 +417,7 @@ class Ided(object):
     id = property(getId, setId)
 
     def _set_id (element, value):
-        element.setAttributeNS(None, "id", unicode(value))
+        element.setAttributeNS(None, "id", str(value))
     _set_id = staticmethod (_set_id)
 
 class Uried(Ided):
@@ -494,7 +494,7 @@ class Aliased(object):
            You would probably rather use the 'alias' property.
         """
         if value:
-            self._getModel().setAttributeNS(None, "as", unicode(value))
+            self._getModel().setAttributeNS(None, "as", str(value))
         else:
             self._getModel().removeAttributeNS(None, "as")
 
@@ -523,7 +523,7 @@ class Hrefed(object):
            You would probably rather use the 'href' property.
         """
         if value:
-            self._getModel().setAttributeNS(xlinkNS, "xlink:href", unicode(value))
+            self._getModel().setAttributeNS(xlinkNS, "xlink:href", str(value))
         else:
             raise AttributeError("href is a required attribute")
 

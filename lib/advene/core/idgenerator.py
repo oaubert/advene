@@ -49,7 +49,7 @@ class Generator:
     def __init__(self, package=None):
         self.last_used={}
         self.existing=[]
-        for k in self.prefix.keys():
+        for k in list(self.prefix.keys()):
             self.last_used[k]=0
         if package is not None:
             self.init(package)
@@ -74,7 +74,7 @@ class Generator:
 
     def init(self, package):
         """Initialize the indexes for the given package."""
-        prefixes=self.prefix.values()
+        prefixes=list(self.prefix.values())
         re_id = re.compile("^(" + "|".join(prefixes) + ")([0-9]+)")
         last_id={}
         for k in prefixes:
@@ -89,7 +89,7 @@ class Generator:
                 self.existing.append(i)
                 m=re_id.match(i)
                 if m:
-                    n=long(m.group(2))
+                    n=int(m.group(2))
                     k=m.group(1)
                     if last_id[k] < n:
                         last_id[k] = n

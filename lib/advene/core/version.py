@@ -21,4 +21,4 @@
 
 version='3.1'
 date='20170618'
-major,minor=[ long(s) for s in version.split('.') ]
+major,minor=[ int(s) for s in version.split('.') ]

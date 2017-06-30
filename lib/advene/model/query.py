@@ -29,28 +29,27 @@ from advene.model.util.auto_properties import auto_properties
 
 class Query(modeled.Importable, viewable.Viewable.withClass('query'),
             content.WithContent,
-            _impl.Uried, _impl.Authored, _impl.Dated, _impl.Titled):
+            _impl.Uried, _impl.Authored, _impl.Dated, _impl.Titled, metaclass=auto_properties):
     """Query object offering query capabilities on the model"""
-    __metaclass__ = auto_properties
 
     def __init__(self, parent=None, element=None, ident=None, author=None):
         _impl.Uried.__init__(self, parent=parent)
         if element is not None:
             modeled.Importable.__init__(self, element, parent,
-                                        parent.getQueries.im_func)
+                                        parent.getQueries.__func__)
             _impl.Uried.__init__(self, parent=self.getOwnerPackage())
         else:
             doc = parent._getDocument()
             element = doc.createElementNS(self.getNamespaceUri(),
                                           self.getLocalName())
             modeled.Importable.__init__(self, element, parent,
-                                        parent.getQueries.im_func)
+                                        parent.getQueries.__func__)
 
             if ident is None:
                 # FIXME: cf thread
                 # Weird use of hash() -- will this work?
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = u"q" + unicode(id(self)) + unicode(time.clock()).replace('.','')
+                ident = "q" + str(id(self)) + str(time.clock()).replace('.','')
             self.setId(ident)
             if author is not None:
                 self.setAuthor(author)

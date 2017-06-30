@@ -114,7 +114,7 @@ class EditAccumulator(AccumulatorPopup):
         # allocated too small a space
         #l.set_ellipsize(Pango.EllipsizeMode.END)
         if len(t) > 80:
-            t=unicode(t[:79])+u'\u2026'
+            t=str(t[:79])+'\u2026'
         return t
 
     def edit_element_handler(self, context, parameters):
@@ -165,7 +165,7 @@ class EditAccumulator(AccumulatorPopup):
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+            sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
             for source in sources:
                 self.edit(source)
         else:

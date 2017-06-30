@@ -171,7 +171,7 @@ class Player:
                 v += self.current_position()
         else:
             v=p
-        return long(v)
+        return int(v)
 
     def current_status(self):
         if self.player is None:
@@ -357,7 +357,7 @@ class Player:
         s = self.get_stream_information ()
         self.status = s.status
         self.stream_duration = s.length
-        self.current_position_value = long(s.position)
+        self.current_position_value = int(s.position)
 
     def set_visual(self, xid):
         self.xid = xid

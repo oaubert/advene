@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 import os
 import time
 try:
-    import StringIO
+    import io
 except ImportError:
     import io as StringIO
 import traceback
@@ -35,10 +35,7 @@ from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GObject
 import re
-try:
-    import builtins
-except ImportError: # python2.*
-    import __builtin__ as builtins
+import builtins
 import inspect
 import collections
 
@@ -162,7 +159,7 @@ class Evaluator:
         except IOError:
             return []
         for l in data:
-            f.write(l.encode('utf-8') + "\n")
+            f.write(l + "\n")
         f.close()
         return
 
@@ -209,7 +206,7 @@ class Evaluator:
                                      "_Save", Gtk.ResponseType.ACCEPT))
         ret = fs.run()
         if ret == Gtk.ResponseType.ACCEPT:
-            self.save_output(filename=fs.get_filename().decode('utf-8'))
+            self.save_output(filename=fs.get_filename())
         fs.destroy()
         return True
 
@@ -218,7 +215,6 @@ class Evaluator:
         """
         b=self.output.get_buffer()
         begin,end=b.get_bounds()
-        # out is a utf-8 encoded string
         out=b.get_text(begin, end, False)
         f=open(filename, "w")
         f.write(out)
@@ -235,7 +231,7 @@ class Evaluator:
             b.place_cursor(end)
         else:
             begin,end=b.get_bounds()
-        return b.get_text(begin, end, False).decode('utf-8')
+        return b.get_text(begin, end, False)
 
     def set_expression(self, e, clear=True):
         """Set the content of the expression window.
@@ -263,8 +259,8 @@ class Evaluator:
         end=b.get_bounds()[1]
         b.place_cursor(end)
         for l in p:
-            if not isinstance(l, unicode):
-                l = unicode(l, 'utf-8')
+            if not isinstance(l, str):
+                l = str(l, 'utf-8')
             b.insert_at_cursor(l)
         return True
 
@@ -359,7 +355,7 @@ class Evaluator:
                 else:
                     self.log("Cannot get source for %s" % expr)
         except Exception:
-            f=StringIO.StringIO()
+            f=io.StringIO()
             traceback.print_exc(file=f)
             self.clear_output()
             self.log("Error in fetching %s for %s:\n\n" % (typ, expr))
@@ -395,7 +391,7 @@ class Evaluator:
                 self.log("Successfully imported %s as %s" % (modname or symname, alias))
             except ImportError:
                 self.log("Cannot import module %s:" % modname)
-                f=StringIO.StringIO()
+                f=io.StringIO()
                 traceback.print_exc(file=f)
                 self.log(f.getvalue())
                 f.close()
@@ -416,16 +412,13 @@ class Evaluator:
             if not silent_mode:
                 self.clear_output()
                 try:
-                    if isinstance(res, unicode):
-                        view = res.encode('utf-8')
-                    else:
-                        view = unicode(res).encode('utf-8')
+                    view = str(res)
                 except UnicodeDecodeError:
                     view = str(repr(res))
                 try:
                     self.log(view)
-                except Exception, e:
-                    self.log("Exception in result visualisation: ", unicode(e))
+                except Exception as e:
+                    self.log("Exception in result visualisation: ", str(e))
             if symbol is not None:
                 if not '.' in symbol and not symbol.endswith(']'):
                     self.log('\n\n[Value stored in %s]' % symbol)
@@ -458,7 +451,7 @@ class Evaluator:
                         self.log('\n\n[Value stored in %s]' % symbol)
 
         except Exception as e:
-            f=StringIO.StringIO()
+            f=io.StringIO()
             traceback.print_exc(file=f)
             self.clear_output()
             self.log(f.getvalue())
@@ -548,7 +541,7 @@ class Evaluator:
                         try:
                             o=eval(obj, self.globals_, self.locals_)
                             completion=[ k
-                                         for k in o.keys()
+                                         for k in list(o.keys())
                                          if k.startswith(key) ]
                         except Exception as e:
                             logger.error("Exception when trying to complete dict key for %s starting with %s:\n%s", expr, attr, e)
@@ -556,7 +549,7 @@ class Evaluator:
 
         self.clear_output()
         if completion is None:
-            f=StringIO.StringIO()
+            f=io.StringIO()
             traceback.print_exc(file=f)
             self.log(f.getvalue())
             f.close()
@@ -645,7 +638,7 @@ class Evaluator:
         else:
             cursor=b.get_iter_at_mark(b.get_insert())
             begin=b.get_iter_at_line(cursor.get_line())
-        expr=b.get_text(begin, cursor, False).decode('utf-8')
+        expr=b.get_text(begin, cursor, False)
         return expr
 
     def make_window(self, widget=None):
@@ -735,7 +728,7 @@ class Evaluator:
                 try:
                     action()
                 except Exception:
-                    f=StringIO.StringIO()
+                    f=io.StringIO()
                     traceback.print_exc(file=f)
                     self.log(f.getvalue())
                     f.close()

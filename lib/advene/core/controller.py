@@ -38,8 +38,9 @@ import cgi
 import socket
 import re
 import webbrowser
-import urllib
-import StringIO
+import urllib.request, urllib.parse, urllib.error
+from urllib.parse import urljoin
+import io
 from gi.repository import GObject
 import shlex
 import itertools
@@ -114,27 +115,27 @@ class GlobalPackage(object):
         self.controller = controller
 
     def annotations(self):
-        for p in self.controller.packages.itervalues():
+        for p in self.controller.packages.values():
             for a in p.annotations:
                 yield a
 
     def relations(self):
-        for p in self.controller.packages.itervalues():
+        for p in self.controller.packages.values():
             for r in p.relations:
                 yield r
 
     def annotationTypes(self):
-        for p in self.controller.packages.itervalues():
+        for p in self.controller.packages.values():
             for at in p.annotationTypes:
                 yield at
 
     def relationTypes(self):
-        for p in self.controller.packages.itervalues():
+        for p in self.controller.packages.values():
             for rt in p.relationTypes:
                 yield rt
 
     def schemas(self):
-        for p in self.controller.packages.itervalues():
+        for p in self.controller.packages.values():
             for s in p.schemas:
                 yield s
 
@@ -299,7 +300,7 @@ class AdveneController(object):
 
     def set_cached_duration(self, value):
         if self.package is not None:
-            self.package.cached_duration = long(value)
+            self.package.cached_duration = int(value)
 
     cached_duration = property(get_cached_duration,
                                set_cached_duration,
@@ -379,9 +380,9 @@ class AdveneController(object):
         for (method, args, kw) in ev:
             try:
                 method(*args, **kw)
-            except Exception, e:
+            except Exception as e:
                 import traceback
-                s=StringIO.StringIO()
+                s=io.StringIO()
                 traceback.print_exc (file = s)
                 self.queue_action(self.log, _("Exception (traceback in console):") + str(e))
                 logger.error("Exception in process_queue", exc_info=True)
@@ -629,12 +630,12 @@ class AdveneController(object):
         # Replace standard \n/\t escape, because \ are parsed by shlex
         searched=searched.replace('\\n', '%n').replace('\\t', '%t')
         try:
-            words=[ unicode(w, 'utf8').replace('%n', "\n").replace('%t', "\t") for w in shlex.split(searched.encode('utf8')) ]
+            words=[ w.replace('%n', "\n").replace('%t', "\t") for w in shlex.split(searched) ]
         except ValueError:
             # Unbalanced quote. Just do a split along whitespace, the
             # user may be looking for a string with a quote and not
             # know it should be escaped.
-            words=[ unicode(w, 'utf8').replace('%n', "\n").replace('%t', "\t") for w in searched.encode('utf8').split() ]
+            words=[ w.replace('%n', "\n").replace('%t', "\t") for w in searched.split() ]
 
         mandatory=[ w[1:] for w in words if w.startswith('+') ]
         exceptions=[ w[1:] for w in words if w.startswith('-') ]
@@ -752,17 +753,17 @@ class AdveneController(object):
             baseurl=self.get_default_url(root=True, alias=alias)
         c=advene.model.tal.context.AdveneContext(here,
                                                  options={
-                u'package_url': baseurl,
-                u'snapshot': self.package.imagecache,
-                u'namespace_prefix': config.data.namespace_prefix,
-                u'config': config.data.web,
-                u'aliases': self.aliases,
-                u'controller': self,
+                'package_url': baseurl,
+                'snapshot': self.package.imagecache,
+                'namespace_prefix': config.data.namespace_prefix,
+                'config': config.data.web,
+                'aliases': self.aliases,
+                'controller': self,
                 })
-        c.addGlobal(u'package', self.package)
-        c.addGlobal(u'packages', self.packages)
-        c.addGlobal(u'player', self.player)
-        for name, method in config.data.global_methods.iteritems():
+        c.addGlobal('package', self.package)
+        c.addGlobal('packages', self.packages)
+        c.addGlobal('player', self.player)
+        for name, method in config.data.global_methods.items():
             c.addMethod(name, method)
         # Preserve a copy of globals/locals for later restoring
         c.checkpoint()
@@ -830,10 +831,10 @@ class AdveneController(object):
                 try:
                     self.load_package (uri=uri, alias=alias)
                     self.log(_("Loaded %(uri)s as %(alias)s") % {'uri': uri, 'alias': alias})
-                except Exception, e:
+                except Exception as e:
                     self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
                             'uri': uri,
-                            'error': unicode(e)})
+                            'error': str(e)})
             else:
                 name, ext = os.path.splitext(uri)
                 if ext.lower() in ('.xml', '.azp', '.apl'):
@@ -842,10 +843,10 @@ class AdveneController(object):
                         self.load_package (uri=uri, alias=alias)
                         self.log(_("Loaded %(uri)s as %(alias)s") % {
                                 'uri': uri, 'alias':  alias})
-                    except Exception, e:
+                    except Exception as e:
                         self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
                                 'uri': uri,
-                                'error': unicode(e)})
+                                'error': str(e)})
                 elif ('dvd' in name
                       or ext.lower() in config.data.video_extensions):
                     # Try to load the file as a video file
@@ -887,7 +888,7 @@ class AdveneController(object):
         return True
 
     def create_annotation(self, position, type, duration=None, content=None):
-        position=long(position)
+        position=int(position)
         if position > self.cached_duration:
             return None
         id_=self.package._idgenerator.get_id(Annotation)
@@ -914,7 +915,7 @@ class AdveneController(object):
                         # Add other keys
                         data.update(dict( (f, "") for f in sorted(el.type._fieldnames) ))
                         # Serialize
-                        content = "\n".join( "%s=%s" % (k, v) for (k, v) in data.iteritems() )
+                        content = "\n".join( "%s=%s" % (k, v) for (k, v) in data.items() )
                     except ValueError:
                         # Badly formatted data
                         content = "\n".join( "%s=" % f for f in sorted(el.type._fieldnames) ) + "\ncontent=%s" % content.replace("\n", " ")
@@ -998,8 +999,8 @@ class AdveneController(object):
         """
         try:
             v=self.player.sound_get_volume()
-        except Exception, e:
-            self.log(_("Cannot get audio volume: %s") % unicode(e))
+        except Exception as e:
+            self.log(_("Cannot get audio volume: %s") % str(e))
             v=0
         return v
 
@@ -1099,7 +1100,7 @@ class AdveneController(object):
         # FIXME: it should be more integrated with the webserver, in
         # order to use the same BaseURL as the calling context.
         if self.server:
-            return urllib.basejoin(self.server.urlbase, "/packages/" + alias)
+            return urljoin(self.server.urlbase, "/packages/" + alias)
         else:
             return "/packages/" + alias
 
@@ -1125,10 +1126,10 @@ class AdveneController(object):
         if not url:
             return None
         if root:
-            return unicode(url)
+            return str(url)
         defaultview=self.package.getMetaData(config.data.namespace, 'default_utbv')
         if defaultview:
-            url=u"%s/view/%s" % (url, defaultview)
+            url="%s/view/%s" % (url, defaultview)
         return url
 
     def get_urlbase(self):
@@ -1144,13 +1145,13 @@ class AdveneController(object):
         """
         def trim_size(s):
             if max_size is not None and len(s) > max_size:
-                return s[:max_size]+'\u2026'
+                return s[:max_size]+'\\u2026'
             else:
                 return s
 
         def cleanup(s):
-            if not isinstance(s, basestring):
-                s = unicode(s)
+            if not isinstance(s, str):
+                s = str(s)
             i=s.find('\n')
             if i > 0:
                 return trim_size(s[:i])
@@ -1159,7 +1160,7 @@ class AdveneController(object):
 
         if element is None:
             return _("None")
-        if isinstance(element, unicode) or isinstance(element, str):
+        if isinstance(element, str) or isinstance(element, str):
             return trim_size(element)
         if isinstance(element, Annotation) or isinstance(element, Relation):
             if representation is not None and representation != "":
@@ -1193,15 +1194,15 @@ class AdveneController(object):
                 return cleanup(r)
         if isinstance(element, RelationType):
             if config.data.os == 'win32':
-                arrow=u'->'
+                arrow='->'
             else:
-                arrow=u'\u2192'
-            return arrow + unicode(cleanup(element.title))
+                arrow='\u2192'
+            return arrow + str(cleanup(element.title))
         if hasattr(element, 'title') and element.title:
-            return unicode(cleanup(element.title))
+            return str(cleanup(element.title))
         if hasattr(element, 'id') and element.id:
-            return unicode(element.id)
-        return cleanup(unicode(element))
+            return str(element.id)
+        return cleanup(str(element))
 
     def get_default_media (self, package=None):
         """Return the current media for the given package.
@@ -1234,7 +1235,7 @@ class AdveneController(object):
             # UNIX/Windows interoperability: convert pathnames
             n=mediafile.replace('\\', os.sep).replace('/', os.sep)
 
-            name=unicode(os.path.basename(n))
+            name=str(os.path.basename(n))
             for d in config.data.path['moviepath'].split(os.pathsep):
                 if d == '_':
                     # Get package dirname
@@ -1242,11 +1243,11 @@ class AdveneController(object):
                     # And convert it to a pathname (for Windows)
                     if d.startswith('file:'):
                         d=d.replace('file://', '')
-                    d=urllib.url2pathname(d)
-                    d=unicode(os.path.dirname(d), sys.getfilesystemencoding())
+                    d=urllib.request.url2pathname(d)
+                    d=str(os.path.dirname(d), sys.getfilesystemencoding())
                 if '~' in d:
                     # Expand userdir
-                    d=unicode(os.path.expanduser(d), sys.getfilesystemencoding())
+                    d=str(os.path.expanduser(d), sys.getfilesystemencoding())
 
                 n=os.path.join(d, name)
                 # FIXME: if d is a URL, use appropriate method (urllib.??)
@@ -1276,8 +1277,6 @@ class AdveneController(object):
         """Set the current media in the video player.
         """
         p=self.player
-        if isinstance(uri, unicode):
-            uri=uri.encode('utf8')
         if p.status == p.PlayingStatus or p.status == p.PauseStatus:
             p.stop(0)
         p.playlist_clear()
@@ -1295,7 +1294,7 @@ class AdveneController(object):
                  or self.package.title == "Template package"
                  or self.package.title.startswith(_("Analysis of ")))
             and self.get_default_media()):
-            self.package.title = _("Analysis of ") + unicode(os.path.basename(self.get_default_media()))
+            self.package.title = _("Analysis of ") + str(os.path.basename(self.get_default_media()))
             self.notify("PackageEditEnd", package=self.package)
             return True
         else:
@@ -1310,7 +1309,6 @@ class AdveneController(object):
         if m:
             title,chapter=m.group(1,2)
             uri="dvd@%s:%s" % (title, chapter)
-        uri=unicode(uri).encode('utf8')
         package.setMetaData (config.data.namespace, "mediafile", uri)
         if m:
             uri=self.player.dvd_uri(title, chapter)
@@ -1438,7 +1436,7 @@ class AdveneController(object):
             d.setdefault('width', 10)
             d.setdefault('height', 10)
             d.setdefault('shape', 'rect')
-            an.content.data="\n".join( [ "%s=%s" % (k, v) for k, v in d.iteritems() ] )
+            an.content.data="\n".join( [ "%s=%s" % (k, v) for k, v in d.items() ] )
         elif an.type.mimetype == 'application/x-advene-structured':
             if annotation.type.mimetype == 'text/plain':
                 an.content.data = "title=" + annotation.content.data.replace('\n', '\\n')
@@ -1541,16 +1539,16 @@ class AdveneController(object):
             # Compare fields and merge identical fields
             sdata=s.content.parsed()
             ddata=d.content.parsed()
-            for k, v in sdata.iteritems():
+            for k, v in sdata.items():
                 if k in ddata:
                     # Merge fields
                     ddata[k] = "|".join( (sdata[k], ddata[k]) )
                 else:
                     ddata[k] = sdata[k]
             # Re-encode ddata
-            d.content.data="\n".join( [ "%s=%s" % (k, unicode(v).replace('\n', '%0A')) for (k, v) in ddata.iteritems() if k != '_all' ] )
+            d.content.data="\n".join( [ "%s=%s" % (k, str(v).replace('\n', '%0A')) for (k, v) in ddata.items() if k != '_all' ] )
         elif mtd == 'application/x-advene-structured':
-            d.content.data=d.content.data + '\nmerged_content="' + urllib.quote(s.content.data)+'"'
+            d.content.data=d.content.data + '\nmerged_content="' + urllib.parse.quote(s.content.data)+'"'
         self.notify("AnnotationMerge", annotation=d,comment="Merge annotations", batch=batch_id)
         self.delete_element(s, batch=batch_id)
         self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations", batch=batch_id)
@@ -1659,10 +1657,10 @@ class AdveneController(object):
             try:
                 self.package = Package (uri="new_pkg",
                                         source=config.data.advenefile(config.data.templatefilename))
-            except Exception, e:
+            except Exception as e:
                 self.log(_("Cannot find the template package %(filename)s: %(error)s")
                          % {'filename': config.data.advenefile(config.data.templatefilename),
-                            'error': unicode(e)})
+                            'error': str(e)})
                 alias='new_pkg'
                 self.package = Package (alias, source=None)
             self.package.author = config.data.userid
@@ -1681,7 +1679,7 @@ class AdveneController(object):
                 if node.tag == tag('package'):
                     u=node.attrib['uri']
                     a=node.attrib['alias']
-                    d=node.attrib.has_key('default')
+                    d='default' in node.attrib
                     self.load_package(u, a, activate=False)
                     if d:
                         default_alias=a
@@ -1702,10 +1700,10 @@ class AdveneController(object):
             for i in p.imports:
                 try:
                     imp.append(i.package)
-                except Exception, e:
+                except Exception as e:
                     raise Exception(_("Cannot read the imported package %(uri)s: %(error)s") % {
                             'uri': i.uri,
-                            'error': unicode(e)})
+                            'error': str(e)})
             self.package=p
 
         if alias is None:
@@ -1751,7 +1749,7 @@ class AdveneController(object):
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
             try:
-                v=long(float(duration))
+                v=int(float(duration))
                 self.pending_duration_update = False
             except ValueError:
                 v=0
@@ -1802,7 +1800,7 @@ class AdveneController(object):
         """
         # If we load a new file and only the template package was present,
         # then remove the template package
-        if len(self.packages) <= 2 and 'new_pkg' in self.packages.keys():
+        if len(self.packages) <= 2 and 'new_pkg' in list(self.packages.keys()):
             self.unregister_package('new_pkg')
         self.packages[alias] = package
         self.aliases[package] = alias
@@ -1818,7 +1816,7 @@ class AdveneController(object):
         del (self.aliases[p])
         del (self.packages[alias])
         if self.package == p:
-            l=[ a for a in self.packages.keys() if a != 'advene' ]
+            l=[ a for a in list(self.packages.keys()) if a != 'advene' ]
             # There should be at least 1 key
             if l:
                 self.activate_package(l[0])
@@ -1841,7 +1839,7 @@ class AdveneController(object):
 
         # Reset the cached duration
         duration = self.package.getMetaData (config.data.namespace, "duration")
-        self.cached_duration = long(float(duration or 0))
+        self.cached_duration = int(float(duration or 0))
         if not self.cached_duration:
             self.pending_duration_update = True
 
@@ -1883,7 +1881,7 @@ class AdveneController(object):
             return ET.QName(config.data.namespace, i)
 
         root=ET.Element(tag('package-list'))
-        for a, p in self.packages.iteritems():
+        for a, p in self.packages.items():
             if a == 'advene' or a == 'new_pkg':
                 # Do not write the default or template package
                 continue
@@ -1916,14 +1914,14 @@ class AdveneController(object):
         # Parse tag_colors attribute.
         self.package.setMetaData (config.data.namespace,
                                   "tag_colors",
-                                  urllib.urlencode(self.package._tag_colors))
+                                  urllib.parse.urlencode(self.package._tag_colors))
 
         # Check if we know the stream duration. If so, save it as
         # package metadata
         d=self.cached_duration
         if d > 0:
             p.setMetaData (config.data.namespace,
-                           "duration", unicode(d))
+                           "duration", str(d))
 
         if p == self.package:
             # Set if necessary the mediafile metadata
@@ -2103,7 +2101,7 @@ class AdveneController(object):
         try:
             self.gui.log(msg, level)
         except AttributeError:
-            print unicode(msg).encode('utf-8')
+            print(str(msg))
 
     def message_log (self, context, parameters):
         """Event Handler for the message action.
@@ -2444,11 +2442,11 @@ class AdveneController(object):
             # length movie.  The "+ 2000" is here to make sure that we
             # do not spend our time updating, since it could be a live
             # stream played/recorded.
-            self.cached_duration=long(p.stream_duration)
+            self.cached_duration=int(p.stream_duration)
             self.notify('DurationUpdate', duration=self.cached_duration)
         # Update the cached duration if necessary
         elif self.pending_duration_update and p.stream_duration > 0:
-            self.cached_duration=long(p.stream_duration)
+            self.cached_duration=int(p.stream_duration)
             self.notify('DurationUpdate', duration=self.cached_duration)
             self.pending_duration_update = False
 
@@ -2523,7 +2521,7 @@ class AdveneController(object):
         ctx=self.build_context(here=element)
         try:
             stream=open(filename, 'wb')
-        except Exception, e:
+        except Exception as e:
             self.log(_("Cannot export to %(filename)s: %(e)s") % locals())
             return True
 
@@ -2533,13 +2531,13 @@ class AdveneController(object):
             compiler.parseTemplate (filter.content.stream, 'utf-8')
             if filter.content.mimetype == 'text/plain':
                 # Convert HTML entities to their values
-                output = StringIO.StringIO()
+                output = io.StringIO()
             else:
                 output = stream
             try:
                 compiler.getTemplate ().expand (context=ctx, outputFile=output, outputEncoding='utf-8')
-            except simpleTALES.ContextContentException, e:
-                self.log(_("Error when exporting: %s") % unicode(e))
+            except simpleTALES.ContextContentException as e:
+                self.log(_("Error when exporting: %s") % str(e))
             if filter.content.mimetype == 'text/plain':
                 stream.write(output.getvalue().replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&'))
         else:
@@ -2547,8 +2545,8 @@ class AdveneController(object):
             compiler.parseTemplate (filter.content.stream)
             try:
                 compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
-            except simpleTALES.ContextContentException, e:
-                self.log(_("Error when exporting: %s") % unicode(e))
+            except simpleTALES.ContextContentException as e:
+                self.log(_("Error when exporting: %s") % str(e))
         stream.close()
         self.log(_("Data exported to %s") % filename)
         return True
@@ -2563,6 +2561,6 @@ if __name__ == '__main__':
     cont = AdveneController()
     try:
         cont.self_loop()
-    except Exception, e:
+    except Exception as e:
         logger.error("Got exception %s. Stopping services...", exc_info=True)
         cont.on_exit()

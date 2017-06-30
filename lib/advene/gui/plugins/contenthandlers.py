@@ -25,7 +25,7 @@ import os
 from gi.repository import Gdk
 from gi.repository import Gtk
 import xml.parsers.expat
-import StringIO
+import io
 
 import advene.core.config as config
 import advene.util.helper as helper
@@ -169,10 +169,10 @@ class SVGContentHandler (ContentHandler):
         if self.element.data:
             try:
                 root=ET.parse(self.element.stream).getroot()
-            except xml.parsers.expat.ExpatError, e:
+            except xml.parsers.expat.ExpatError as e:
                 root=None
                 dialog.message_dialog(
-                    _("Error while parsing SVG content:\n\n%s") % unicode(e),
+                    _("Error while parsing SVG content:\n\n%s") % str(e),
                     icon=Gtk.MessageType.ERROR)
             if root is not None:
                 self.view.drawer.clear_objects()
@@ -200,7 +200,7 @@ class SVGContentHandler (ContentHandler):
 
         tree=ET.ElementTree(self.view.drawer.get_svg(relative=False))
         #ET.dump(tree)
-        s=StringIO.StringIO()
+        s=io.StringIO()
         tree.write(s, encoding='utf-8')
         self.element.data = s.getvalue()
         s.close()
@@ -214,7 +214,7 @@ class SVGContentHandler (ContentHandler):
         url=None
         title=''
         if targetType == config.data.target_type['annotation']:
-            here=self.controller.package.annotations.get(unicode(selection.get_data(), 'utf8').split('\n')[0])
+            here=self.controller.package.annotations.get(str(selection.get_data(), 'utf8').split('\n')[0])
         elif targetType == config.data.target_type['view']:
             data=decode_drop_parameters(selection.get_data())
             v=self.controller.package.get_element_by_id(data['id'])
@@ -228,7 +228,7 @@ class SVGContentHandler (ContentHandler):
             url='%s/action/OpenView?id=%s' % (root, v.id)
         elif targetType == config.data.target_type['uri-list']:
             here=None
-            url=unicode(selection.get_data().splitlines()[0], 'utf8')
+            url=str(selection.get_data().splitlines()[0], 'utf8')
             title=url
         else:
             # Invalid drop target
@@ -272,7 +272,7 @@ class SVGContentHandler (ContentHandler):
 
             def snapshot_update_cb(context, target):
                 frag = self.parent.fragment
-                pos = frag.begin + long(self.view.background_adj.get_value() * frag.duration)
+                pos = frag.begin + int(self.view.background_adj.get_value() * frag.duration)
                 if abs(context.globals['position'] - pos) <= 1000/config.data.preferences['default-fps']:
                     # Refresh image
                     i=image_from_position(self.controller, pos, epsilon=1000/config.data.preferences['default-fps'])
@@ -329,7 +329,7 @@ class SVGContentHandler (ContentHandler):
 
         def update_background(adj):
             frag = self.parent.fragment
-            pos = frag.begin + long(adj.get_value() * frag.duration)
+            pos = frag.begin + int(adj.get_value() * frag.duration)
             self.controller.update_snapshot(pos)
             i = image_from_position(self.controller,
                                     pos,
@@ -339,7 +339,7 @@ class SVGContentHandler (ContentHandler):
 
         self.view.background_adj = Gtk.Adjustment.new(value=0, lower=0, upper=1.0, step_increment=0.1, page_increment=0.2, page_size=0.2)
         slider = Gtk.HScale.new(self.view.background_adj)
-        slider.connect("format-value", lambda s, v: helper.format_time(self.parent.fragment.begin + long(v * self.parent.fragment.duration)))
+        slider.connect("format-value", lambda s, v: helper.format_time(self.parent.fragment.begin + int(v * self.parent.fragment.duration)))
         ti = Gtk.ToolItem()
         ti.add(slider)
         ti.set_expand(True)

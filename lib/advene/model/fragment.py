@@ -57,14 +57,14 @@ class AbstractFragment(viewable.Viewable.withClass('fragment')):
             """
             return self
 
-        def next (self):
+        def __next__ (self):
             """
             Iterator implementation
             """
             cls = self.__cls
             it = self.__iter
             while (True):
-                a = it.next ()
+                a = next(it)
                 if isinstance (a.getFragment (), cls):
                     return a
 
@@ -74,14 +74,12 @@ class AbstractFragment(viewable.Viewable.withClass('fragment')):
     def __init__(self):
         object.__init__(self)
 
-class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
+class AbstractNbeFragment (AbstractFragment, modeled.Modeled, metaclass=auto_properties):
     """Abstract Numerical Begin-End fragment class.
 
        Implements operators '==' and 'in' (for other ByteCountFragments and
        numbers).
     """
-
-    __metaclass__ = auto_properties
 
     #
     # Instance methods
@@ -107,7 +105,7 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
             if end is not None:
                 self.setEnd(end)
             elif duration is not None:
-                self.setEnd(self.getBegin() + long(duration))
+                self.setEnd(self.getBegin() + int(duration))
             else:
                 self.setEnd(self.getBegin())
 
@@ -122,16 +120,16 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
         return "Begin-End (%d,%d)" % (self.getBegin(), self.getEnd())
 
     def getBegin(self):
-        return long(self._getModel().getAttributeNS(None, 'begin'))
+        return int(self._getModel().getAttributeNS(None, 'begin'))
 
     def setBegin(self, value):
-        return self._getModel().setAttributeNS(None, 'begin', unicode(long(value)))
+        return self._getModel().setAttributeNS(None, 'begin', str(int(value)))
 
     def getEnd(self):
-        return long(self._getModel().getAttributeNS(None, 'end'))
+        return int(self._getModel().getAttributeNS(None, 'end'))
 
     def setEnd(self, value):
-        return self._getModel().setAttributeNS(None, 'end', unicode(long(value)))
+        return self._getModel().setAttributeNS(None, 'end', str(int(value)))
 
     def getDuration(self):
         return self.getEnd() - self.getBegin()
@@ -148,7 +146,7 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
             return self.getBegin() <= other.getBegin() \
                    and other.getEnd() <= self.getEnd()
         else:
-            o = long(other)
+            o = int(other)
             return self.getBegin() <= o and o <= self.getEnd()
 
     def isBounded(self):
@@ -233,7 +231,7 @@ class MillisecondFragment(AbstractNbeFragment):
         @return: the formatted string
         @rtype: string
         """
-        (s, ms) = divmod(long(val), 1000)
+        (s, ms) = divmod(int(val), 1000)
         # Format: HH:MM:SS.mmm
         return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
 

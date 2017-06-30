@@ -101,13 +101,13 @@ class AccumulatorPopup(AdhocView):
             # Remove the last one
             self.undisplay(self.widgets[0][0])
         if timeout is not None and timeout != 0:
-            hidetime=time.time() * 1000 + long(timeout)
+            hidetime=time.time() * 1000 + int(timeout)
         else:
             hidetime=None
 
         # Build a titled frame around the widget
         f=Gtk.Frame()
-        if isinstance(title, basestring):
+        if isinstance(title, str):
             hb=Gtk.HBox()
 
             l=Gtk.Label(label=title)

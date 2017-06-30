@@ -30,7 +30,7 @@ import time
 import sched
 import threading
 import copy
-import StringIO
+import io
 
 import advene.rules.elements
 
@@ -106,7 +106,7 @@ class ECAEngine:
         @param state: a previously saved state (cf L{get_state})
         @type state: dict
         """
-        for k, v in state.iteritems():
+        for k, v in state.items():
             self.set_ruleset(v, type_=k)
 
     def clear_state(self):
@@ -219,11 +219,7 @@ class ECAEngine:
                 try:
                     self.schedulerthread.run()
                 except Exception:
-                    import traceback
-                    s=StringIO.StringIO()
-                    traceback.print_exc (file = s)
-                    v = unicode(s.getvalue(), 'utf8', 'ignore')
-                    self.controller.queue_action(self.controller.log, "Exception (traceback in console):" + v)
+                    logger.error("Exception in scheduler", exc_info=True)
 
     def reset_queue (self):
         """Reset the scheduler's queue.
@@ -256,7 +252,7 @@ class ECAEngine:
             'event': event
             }
         globals_.update(kw)
-        for k, v in globals_.iteritems():
+        for k, v in globals_.items():
             context.addGlobal(k, v)
         return context
 
@@ -374,8 +370,8 @@ class ECAEngine:
             del kw['immediate']
 
         delay=0
-        if kw.has_key('delay'):
-            delay=long(kw['delay']) / 1000.0
+        if 'delay' in kw:
+            delay=int(kw['delay']) / 1000.0
             del kw['delay']
             logger.debug("Delay specified: %f", delay)
 

@@ -83,7 +83,7 @@ class EditPopupClass (type):
         if hasattr (cls, 'can_edit'):
             _edit_popup_list.append(cls)
 
-class EditElementPopup (AdhocView):
+class EditElementPopup (AdhocView, metaclass=EditPopupClass):
     """Abstract class for editing Advene elements.
 
     To create a specialized edit window, define the make_widget
@@ -94,7 +94,6 @@ class EditElementPopup (AdhocView):
     On validation, the registered forms are asked to update the values
     of their respective elements.
     """
-    __metaclass__ = EditPopupClass
 
     view_name = _("Edit Window")
     view_id = 'editwindow'
@@ -699,8 +698,8 @@ class EditQueryPopup (EditElementPopup):
                                                 query=self.element,
                                                 result=res,
                                                 destination='east')
-        except Exception, e:
-            self.controller.log(_('Exception in query: %s') % unicode(e))
+        except Exception as e:
+            self.controller.log(_('Exception in query: %s') % str(e))
         return True
 
     def extend_toolbar(self, tb):
@@ -755,7 +754,7 @@ class EditPackagePopup (EditElementPopup):
         d=element.getMetaData (config.data.namespace, "duration")
         if d:
             try:
-                d=long(d)
+                d=int(d)
             except ValueError:
                 d=0
             element.cached_duration = d
@@ -1205,7 +1204,7 @@ class EditForm(object):
                 #    i=str(element)
                 #print "Messed up value for %s" % element.id
                 value=""
-            element.setMetaData(namespace, data, unicode(value))
+            element.setMetaData(namespace, data, str(value))
             return True
         return set_method
 
@@ -1432,7 +1431,7 @@ class TextContentHandler (ContentHandler):
                 if e.startswith('string:'):
                     e=e.replace('string:', '')
                 b=self.view.get_buffer()
-                b.insert_at_cursor(unicode(e))
+                b.insert_at_cursor(str(e))
             return True
         browser = Browser(element=self.element,
                           controller=self.controller,
@@ -1456,19 +1455,19 @@ class TextContentHandler (ContentHandler):
         if fname is not None:
             try:
                 f=open(fname, 'r')
-            except IOError, e:
+            except IOError as e:
                 dialog.message_dialog(
-                    _("Cannot read the data:\n%s") % unicode(e),
+                    _("Cannot read the data:\n%s") % str(e),
                     icon=Gtk.MessageType.ERROR)
                 return True
             lines="".join(f.readlines())
             f.close()
             try:
-                data=unicode(lines, 'utf8')
+                data=str(lines, 'utf8')
             except UnicodeDecodeError:
                 # Fallback on latin1, which is very common, but may
                 # sometimes fail
-                data=unicode(lines, 'latin1')
+                data=str(lines, 'latin1')
 
             self.content_set(data.encode('utf-8'))
             self.fname=fname
@@ -1491,9 +1490,9 @@ class TextContentHandler (ContentHandler):
                 os.rename(fname, fname + '~')
             try:
                 f=open(fname, 'w')
-            except IOError, e:
+            except IOError as e:
                 dialog.message_dialog(
-                    _("Cannot save the data:\n%s") % unicode(e),
+                    _("Cannot save the data:\n%s") % str(e),
                     icon=Gtk.MessageType.ERROR)
                 return True
             b=self.view.get_buffer()
@@ -1681,9 +1680,9 @@ class GenericContentHandler (ContentHandler):
         if fname is not None:
             try:
                 f=open(fname, 'rb')
-            except IOError, e:
+            except IOError as e:
                 dialog.message_dialog(
-                    _("Cannot read the data:\n%s") % unicode(e),
+                    _("Cannot read the data:\n%s") % str(e),
                     icon=Gtk.MessageType.ERROR)
                 return True
             self.set_filename(fname)
@@ -1719,9 +1718,9 @@ class GenericContentHandler (ContentHandler):
                 f=open(fname, 'wb')
                 f.write(self.data)
                 f.close()
-            except IOError, e:
+            except IOError as e:
                 dialog.message_dialog(
-                    _("Cannot save the data:\n%s") % unicode(e),
+                    _("Cannot save the data:\n%s") % str(e),
                     icon=Gtk.MessageType.ERROR)
                 return True
             self.set_filename(fname)
@@ -2031,7 +2030,7 @@ class EditAttributesForm (EditForm):
         else:
             # No specific type was given. Guess it...
             e=getattr(self.element, at)
-            if isinstance (e, int) or isinstance (e, long):
+            if isinstance (e, int) or isinstance (e, int):
                 typ='int'
         return typ
 
@@ -2044,14 +2043,14 @@ class EditAttributesForm (EditForm):
         typ = self.attribute_type (at)
         if typ == 'int':
             try:
-                val = long(v)
+                val = int(v)
             except ValueError:
                 raise ValueError (_('Expecting an integer.'))
         elif typ == 'advene':
             # We should not have writable Advene elements in attributes anyway
             pass
         elif isinstance(v, str):
-            val = unicode(v)
+            val = str(v)
         else:
             val=v
         return val
@@ -2065,21 +2064,22 @@ class EditAttributesForm (EditForm):
         if typ == 'advene':
             return self.controller.get_title(v)
         elif v is not None:
-            return unicode(v)
+            return str(v)
         else:
             return None
 
-    def cell_edited(self, cell, path_string, text, (model, column)):
+    def cell_edited(self, cell, path_string, text, xxx_todo_changeme):
+        (model, column) = xxx_todo_changeme
         it = model.get_iter_from_string(path_string)
         if not it:
             return
         at = model.get_value (it, self.COLUMN_NAME)
         try:
             val = self.repr_to_value (at, text)
-        except ValueError, e:
+        except ValueError as e:
             dialog.message_dialog(
                 _("The %(attribute)s attribute could not be updated:\n\n%(error)s\n\nResetting to the original value.")
-                % {'attribute': at, 'error': unicode(e)},
+                % {'attribute': at, 'error': str(e)},
                 icon=Gtk.MessageType.WARNING)
             # Invalid value -> we take the original value
             val = getattr(self.element, at)
@@ -2097,7 +2097,7 @@ class EditAttributesForm (EditForm):
                 v = None
                 try:
                     v = self.repr_to_value (at, text)
-                except ValueError, e:
+                except ValueError as e:
                     v = None
                     invalid.append((at, e))
             it = model.iter_next(it)
@@ -2129,14 +2129,14 @@ class EditAttributesForm (EditForm):
                 v = None
                 try:
                     v = self.repr_to_value (at, text)
-                except ValueError, e:
+                except ValueError as e:
                     v = None
                     invalid.append((at, e))
 
                 if v is not None:
                     try:
                         setattr (self.element, at, v)
-                    except ValueError, e:
+                    except ValueError as e:
                         invalid.append((at, e))
             it = model.iter_next(it)
         # Display list of invalid attributes

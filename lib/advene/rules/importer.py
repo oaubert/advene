@@ -52,7 +52,7 @@ class EventHistoryImporter(GenericImporter):
                 type.date=time.strftime("%Y-%m-%d")
                 type.title=type_
                 type.mimetype='application/x-advene-structured'
-                type.setMetaData(config.data.namespace, 'color', self.package._color_palette.next())
+                type.setMetaData(config.data.namespace, 'color', next(self.package._color_palette))
                 type.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
                 schema.annotationTypes.append(type)
 
@@ -63,7 +63,7 @@ class EventHistoryImporter(GenericImporter):
                 'timestamp': e['timestamp'],
                 'content': '',
             }
-            if e.has_key('content'):
+            if 'content' in e:
                 d['content']=e['content']+'\nposition='+str(e['movietime'])+'\n'
             else:
                 d['content']='position='+str(e['movietime'])+'\n'

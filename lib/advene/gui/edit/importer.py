@@ -19,7 +19,7 @@
 """GUI to apply importers to files or internal data
 """
 import os
-import thread
+import _thread
 from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
@@ -65,7 +65,7 @@ class AnnotationImporter(AdhocView):
         # thread. Store its id, so that we detect if calls
         # (esp. progress_callback) are made from another thread and
         # act accordingly.
-        self.main_thread_id = thread.get_ident()
+        self.main_thread_id = _thread.get_ident()
         self.importer = None
         if importerclass is not None:
             self.importer = importerclass(controller=self.controller, callback=self.progress_callback, annotation_type=annotation_type)
@@ -130,7 +130,7 @@ class AnnotationImporter(AdhocView):
         return True
 
     def processing_ended(self, msg=None):
-        if thread.get_ident() != self.main_thread_id:
+        if _thread.get_ident() != self.main_thread_id:
             self.do_gui_operation(self.processing_ended, msg=msg)
             return True
         self.progress_callback(1.0)
@@ -165,8 +165,8 @@ class AnnotationImporter(AdhocView):
                 # Invoke the package merge functionality.
                 try:
                     source=Package(uri=fname)
-                except Exception, e:
-                    self.log("Cannot load %s file: %s" % (fname, unicode(e)))
+                except Exception as e:
+                    self.log("Cannot load %s file: %s" % (fname, str(e)))
                     return True
                 m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
                 m.popup()
@@ -187,15 +187,15 @@ class AnnotationImporter(AdhocView):
             # Asynchronous version.
             try:
                 i.async_process_file(fname, self.processing_ended)
-            except Exception, e:
-                dialog.message_dialog(unicode(e.args), modal=False)
+            except Exception as e:
+                dialog.message_dialog(str(e.args), modal=False)
                 self.close()
         else:
             # Standard, synchronous version
             try:
                 i.process_file(fname)
-            except Exception, e:
-                dialog.message_dialog(unicode(e.args), modal=False)
+            except Exception as e:
+                dialog.message_dialog(str(e.args), modal=False)
                 import sys
                 import code
                 e, v, tb = sys.exc_info()
@@ -219,7 +219,7 @@ class AnnotationImporter(AdhocView):
         GObject.idle_add(idle_func)
 
     def progress_callback(self, value=None, label=None):
-        if thread.get_ident() != self.main_thread_id:
+        if _thread.get_ident() != self.main_thread_id:
             self.do_gui_operation(self.progress_callback, value=value, label=label)
             return self.should_continue
 
@@ -232,7 +232,7 @@ class AnnotationImporter(AdhocView):
         # We could do a "while Gtk.events_pending()" but we want to
         # avoid process lock because of too many pending events
         # processing.
-        for i in xrange(8):
+        for i in range(8):
             if Gtk.events_pending():
                 Gtk.main_iteration()
             else:

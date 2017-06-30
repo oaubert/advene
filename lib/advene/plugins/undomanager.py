@@ -27,7 +27,7 @@ from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 from advene.model.view import View
 from advene.model.query import Query
-from cPickle import dumps, loads
+from pickle import dumps, loads
 
 name="Undo Manager"
 
@@ -89,11 +89,11 @@ class UndoHistory:
         """
         d={}
         if hasattr(el, 'content'):
-            d['content']=unicode(el.content.data)
+            d['content']=str(el.content.data)
             d['mimetype']=el.content.mimetype
         if hasattr(el, 'fragment'):
-            d['begin']=long(el.fragment.begin)
-            d['end']=long(el.fragment.end)
+            d['begin']=int(el.fragment.begin)
+            d['end']=int(el.fragment.end)
         if hasattr(el, 'tags'):
             d['tags']=dumps(el.tags)
         for a in ('id', 'title', 'author', 'date', 'viewableClass', 'type'):
@@ -144,7 +144,7 @@ class UndoHistory:
         if element in self._edits:
             cached=self._edits[element]
             new=self.get_cached_representation(element)
-            changed=[ (k, v) for (k, v) in cached.iteritems() if new[k] != v ]
+            changed=[ (k, v) for (k, v) in cached.items() if new[k] != v ]
             # Store changed elements in history
             history.append( ('changed', element, changed) )
             self._edits[element]=new

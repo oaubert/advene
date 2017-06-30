@@ -24,7 +24,7 @@ from gettext import gettext as _
 import os
 import time
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import mimetypes
 import shutil
 
@@ -114,8 +114,8 @@ class WebsiteExporter(object):
 
     def unconverted(self, url, reason):
         return 'unconverted.html?url=%s&reason=%s' % (
-            urllib.quote(url),
-            urllib.quote_plus(reason))
+            urllib.parse.quote(url),
+            urllib.parse.quote_plus(reason))
 
     def get_contents(self, url):
         """Return the contents of the given view.
@@ -147,14 +147,14 @@ class WebsiteExporter(object):
             logger.error("Exception when evaluating %s", address, exc_info=True)
             content=None
 
-        if not isinstance(content, basestring):
+        if not isinstance(content, str):
             # Not a string. Could be an Advene element
             try:
                 c=content.view(context=self.controller.build_context(here=content))
                 content=c
             except AttributeError:
                 # Apparently not. Fallback on explicit string conversion.
-                content=unicode(content)
+                content=str(content)
         return content
 
     def translate_links(self, content, baseurl=None, max_depth_exceeded=False):
@@ -444,7 +444,7 @@ class WebsiteExporter(object):
         progress=.01
         depth=1
 
-        links_to_be_processed=view_url.values()
+        links_to_be_processed=list(view_url.values())
 
         while depth <= self.max_depth:
             max_depth_exceeded = (depth == self.max_depth)
@@ -502,7 +502,7 @@ class WebsiteExporter(object):
 
         # Generate a default index.html
         name="index.html"
-        if name in self.url_translation.values():
+        if name in list(self.url_translation.values()):
             name="_index.html"
         f=open(os.path.join(self.destination, name), 'w')
         defaultview=self.controller.package.getMetaData(config.data.namespace, 'default_utbv')
@@ -528,7 +528,7 @@ class WebsiteExporter(object):
         f.close()
 
         frame="frame.html"
-        if frame in self.url_translation.values():
+        if frame in list(self.url_translation.values()):
             frame="_frame.html"
         f=open(os.path.join(self.destination, frame), 'w')
         f.write("""<html>
@@ -633,7 +633,7 @@ class GoogleVideoPlayer(VideoPlayer):
         """Return the URL to play video at the given time.
         """
         # Format: HH:MM:SS.mmm
-        return '%s#%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(long(begin) / 1000)))
+        return '%s#%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(int(begin) / 1000)))
 
     def fix_link(self, link):
         """
@@ -673,7 +673,7 @@ class YoutubeVideoPlayer(VideoPlayer):
         """Return the URL to play video at the given time.
         """
         # Format: HHhMMmSSs
-        return '%s#t=%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(long(begin) / 1000)))
+        return '%s#t=%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(int(begin) / 1000)))
 
     def fix_link(self, link):
         """
@@ -736,7 +736,7 @@ class HTML5VideoPlayer(VideoPlayer):
 
         # Note: Firefox does not seem to like <link href=... /> style
         # of closing tags. Use the explicit end tag.
-        jsinject=u'''
+        jsinject='''
 <link type="text/css" href="./resources/HTML5/theme/jqueryui.css" rel="stylesheet"></link>
 <link href="./resources/HTML5/style.css" rel="stylesheet" type="text/css"></link>
 
@@ -748,7 +748,7 @@ class HTML5VideoPlayer(VideoPlayer):
         $(document).advene();
     });
 </script>
-''' % { 'video_url': unicode(self.video_url) }
+''' % { 'video_url': str(self.video_url) }
         head_re = re.compile('<head>', re.IGNORECASE)
         if head_re.findall(content):
             content = head_re.sub('''<head>%s''' % jsinject, content)

@@ -122,7 +122,7 @@ def list_selector_widget(members=None,
             try:
                 return combo.get_model().get_value(combo.get_active_iter(), 1)
             except (TypeError, AttributeError):
-                return combo.get_child().get_text().decode('utf-8')
+                return combo.get_child().get_text()
         def set_current_element(combo, t):
             combo.get_child().set_text(t)
     else:
@@ -138,7 +138,7 @@ def list_selector_widget(members=None,
                 # The element is present.
                 combo.set_active(l[0])
             else:
-                combo.set_active_iter(combo.get_model().append( (unicode(el), el, None) ))
+                combo.set_active_iter(combo.get_model().append( (str(el), el, None) ))
 
     # Bind the method to the combobox object
     combobox.get_current_element = get_current_element.__get__(combobox)
@@ -211,7 +211,7 @@ def message_dialog(label="", icon=Gtk.MessageType.INFO, modal=True, callback=Non
     dialog = Gtk.MessageDialog(DEFAULT_PARENT, flags, icon, button)
     dialog.set_markup(label)
     label_widget = dialog.get_message_area().get_children()[0]
-    if not label_widget.get_text().decode('utf-8'):
+    if not label_widget.get_text():
         # Hackish way of determining if there was an error while
         # parsing the markup. In this case, fallback to simple text
         label_widget.set_text(label)
@@ -325,7 +325,7 @@ def entry_dialog(title=None,
     ret=None
     if res == Gtk.ResponseType.OK:
         try:
-            ret=e.get_text().decode('utf-8')
+            ret=e.get_text()
         except ValueError:
             ret=None
     else:
@@ -356,7 +356,7 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
 
     store=Gtk.ListStore(str, object)
     active_iter=None
-    for k, v in elements.iteritems():
+    for k, v in elements.items():
         i=store.append( (v, k) )
         if k == current:
             active_iter=i
@@ -402,7 +402,7 @@ def title_id_widget(element_title=None,
     v.attach(id_entry, 1, 2, 1, 2)
 
     def update_id(entry):
-        id_entry.set_text(helper.title2id(entry.get_text().decode('utf-8')))
+        id_entry.set_text(helper.title2id(entry.get_text()))
         return True
 
     title_entry.connect('changed', update_id)
@@ -476,8 +476,8 @@ def get_title_id(title=_("Name the element"),
     res=d.run()
     if res == Gtk.ResponseType.OK:
         try:
-            t=d.title_entry.get_text().decode('utf-8')
-            i=d.id_entry.get_text().decode('utf-8')
+            t=d.title_entry.get_text()
+            i=d.id_entry.get_text()
         except ValueError:
             t=None
             i=None
@@ -533,10 +533,8 @@ def get_filename(title=_("Open a file"),
 
     def update_preview(chooser):
         filename=chooser.get_preview_filename()
-        if filename is not None:
-            # The returned filename is a utf8-encoded string. Convert
-            # it to unicode.
-            filename=filename.decode('utf-8')
+        if filename is None:
+            return True
         setattr(preview, '_filename', filename)
         if filename and (filename.endswith('.xml') or filename.endswith('.azp')):
             preview.set_label(_("Press to\ndisplay\ninformation"))
@@ -565,8 +563,8 @@ def get_filename(title=_("Open a file"),
             button.set_label(_("Wait..."))
             try:
                 st=helper.get_statistics(button._filename)
-            except AdveneException, e:
-                st=_("Error: %s") % unicode(e)
+            except AdveneException as e:
+                st=_("Error: %s") % str(e)
             button.set_label(st)
             button._filename=None
         return True
@@ -616,9 +614,9 @@ def get_filename(title=_("Open a file"),
     filename=None
     al=None
     if res == Gtk.ResponseType.OK:
-        filename=fs.get_filename().decode('utf-8')
+        filename=fs.get_filename()
         if alias:
-            al=alias_entry.get_text().decode('utf-8')
+            al=alias_entry.get_text()
             if not al:
                 # It may not have been updated, if the user typed the
                 # filename in the entry box.
@@ -661,7 +659,7 @@ def get_dirname(title=_("Choose a directory"),
     res=fs.run()
     dirname=None
     if res == Gtk.ResponseType.OK:
-        dirname=fs.get_filename().decode('utf-8')
+        dirname=fs.get_filename()
     fs.destroy()
 
     return dirname

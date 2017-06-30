@@ -182,7 +182,7 @@ class InteractiveQuery(AdhocView):
         c=self.controller.build_context(here=self.here)
         try:
             res=c.evaluateValue("here/query/_interactive")
-        except AdveneTalesException, e:
+        except AdveneTalesException as e:
             # Display a dialog with the value
             dialog.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
                 icon=Gtk.MessageType.ERROR)
@@ -262,7 +262,7 @@ class InteractiveResult(AdhocView):
             result=query.result
         self.result=result
 
-        if isinstance(self.query, basestring):
+        if isinstance(self.query, str):
             # Quicksearch entry. Convert to Quicksearch class.
             q=Quicksearch(controller=self.controller,
                           sources=config.data.preferences['quicksearch-sources'],
@@ -517,7 +517,7 @@ class InteractiveResult(AdhocView):
                 ti.set_tooltip_text(_("Open in python evaluator"))
                 tb.insert(ti, -1)
         else:
-            v.add(Gtk.Label(label=_("Result:\n%s") % unicode(self.result)))
+            v.add(Gtk.Label(label=_("Result:\n%s") % str(self.result)))
         v.show_all()
         return v
 

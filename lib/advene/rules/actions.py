@@ -325,10 +325,10 @@ class DefaultActionsRepository:
         self.soundplayer=None
 
     def parse_parameter(self, context, parameters, name, default_value):
-        if parameters.has_key(name):
+        if name in parameters:
             try:
                 result=context.evaluateValue(parameters[name])
-            except AdveneTalesException, e:
+            except AdveneTalesException as e:
                 self.controller.log(_("Error in the evaluation of the parameter %s:" % name))
                 self.controller.log(str(e))
                 result=default_value
@@ -356,7 +356,7 @@ class DefaultActionsRepository:
                 # Probably a fragment
                 position = position.begin
             else:
-                position=long(position)
+                position=int(position)
         self.controller.update_status ("start", position)
         return True
 
@@ -372,7 +372,7 @@ class DefaultActionsRepository:
                 # Probably a fragment
                 position = position.begin
             else:
-                position=long(position)
+                position=int(position)
         c=self.controller
         pos = c.create_position (value=position,
                                  key=c.player.MediaTime,
@@ -414,7 +414,7 @@ class DefaultActionsRepository:
         if pos is None:
             pos=self.controller.player.current_position_value
         else:
-            pos = long(pos)
+            pos = int(pos)
         if abs(pos - self.controller.player.current_position_value) > 100:
             # The current position is too far away from the requested position
             # FIXME: do something useful (warning) ?
@@ -432,7 +432,7 @@ class DefaultActionsRepository:
 
         begin = self.controller.player.relative_position
         if duration is not None:
-            duration=long(duration)
+            duration=int(duration)
         else:
             duration=config.data.player_preferences['default_caption_duration']
 
@@ -470,9 +470,9 @@ class DefaultActionsRepository:
             code='<circle cx="%s%%" cy="%s%%" r="%sem" fill="%s" />' % (x, y, size, color)
         elif shape == 'triangle':
             # Size is 800x600 (see code below)
-            x=long(x)*8
-            y=long(y)*6
-            s=long(size)*10
+            x=int(x)*8
+            y=int(y)*6
+            s=int(size)*10
             code='<polygon fill="%s" points="%d,%d %d,%d %d,%d" />' % (color,
                                                                        x-s, y+s,
                                                                        x+s, y+s,
@@ -487,7 +487,7 @@ class DefaultActionsRepository:
         c=self.controller
         begin = c.player.relative_position
         if duration is not None:
-            duration=long(duration)
+            duration=int(duration)
         else:
             duration=config.data.player_preferences['default_caption_duration']
         end = c.create_position (value=duration,
@@ -570,7 +570,7 @@ class DefaultActionsRepository:
         delay=self.parse_parameter(context, parameters, 'delay', None)
         if delay is None:
             delay=0
-        delay=long(delay)
+        delay=int(delay)
 
         self.controller.notify('UserEvent', identifier=identifier, delay=delay)
         return True
@@ -715,7 +715,7 @@ class DefaultActionsRepository:
             return True
         try:
             val=int(float(value))
-        except ValueError, e:
+        except ValueError as e:
             # Store it as a string.
             val=value
         self.controller.package.state[name]=value

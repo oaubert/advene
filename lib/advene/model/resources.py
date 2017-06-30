@@ -27,7 +27,7 @@
 """
 import os
 import mimetypes
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import base64
 
 from advene.util.expat import PyExpat
@@ -35,12 +35,11 @@ from advene.util.expat import PyExpat
 from advene.model.util.auto_properties import auto_properties
 import advene.model.viewable as viewable
 
-class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
+class ResourceData(viewable.Viewable.withClass('data', 'getMimetype'), metaclass=auto_properties):
     """Class accessing a resource data (file).
 
     FIXME: should fully implement advene.model.content.Content API
     """
-    __metaclass__ = auto_properties
 
     def __init__(self, package, resourcepath, parent=None):
         self.package = package
@@ -88,7 +87,7 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
     def getUri (self):
         """Return the URI of the element.
         """
-        p=urllib.quote(self.resourcepath, safe='')
+        p=urllib.parse.quote(self.resourcepath, safe='')
         return "%s#data_%s" % (self.package.uri, p)
 
     def getStream(self):
@@ -99,10 +98,9 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
         data = base64.encodestring(data)
         return data
 
-class Resources:
+class Resources(metaclass=auto_properties):
     """Class accessing a resource dir.
     """
-    __metaclass__ = auto_properties
 
     DIRECTORY_TYPE=object()
 
@@ -136,9 +134,9 @@ class Resources:
             return "ResourceFolder %s" % self.resourcepath
 
     def children (self):
-        return [ self[n] for n in self.keys() ]
+        return [ self[n] for n in list(self.keys()) ]
 
-    def has_key(self, key):
+    def __in__(self, key):
         self.init_filenames()
         return (key in self.filenames)
 
@@ -216,7 +214,7 @@ class Resources:
     def getUri (self):
         """Return the URI of the element.
         """
-        p=urllib.quote(self.resourcepath, safe='')
+        p=urllib.parse.quote(self.resourcepath, safe='')
         return "%s#data_%s" % (self.package.uri, p)
 
     def getId(self):

@@ -165,7 +165,7 @@ if __name__ == '__main__':
                 caps = gst.caps_from_string('video/x-raw-rgb,%s' % p)
                 capsfilter.set_property('caps', caps)
             else:
-                slicer.set_property(name, long(value))
+                slicer.set_property(name, int(value))
         player.props.video_sink=bin
     else:
         player = gst.parse_launch('autovideosrc ! ffmpegcolorspace ! videoscale ! slicebuffer %s ! ffmpegcolorspace ! xvimagesink' % " ".join(params))

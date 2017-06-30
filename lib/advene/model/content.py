@@ -19,8 +19,8 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from cStringIO import StringIO
-import urllib
+from io import StringIO
+import urllib.request, urllib.parse, urllib.error
 try:
     # In python2.6 stdlib
     import json
@@ -58,7 +58,7 @@ class StructuredContent(dict,object):
     So prefer a more verbose but explicit behaviour.
     """
     def __init__(self, *p, **kw):
-        if p and isinstance(p[0], basestring):
+        if p and isinstance(p[0], str):
             # Initialize with a content.
             self.parse(p[0])
         else:
@@ -75,7 +75,7 @@ class StructuredContent(dict,object):
                 continue
             if '=' in l:
                 (k, v) = l.split('=', 1)
-                self[k] = urllib.unquote(v)
+                self[k] = urllib.parse.unquote(v)
             else:
                 self['_error']=l
                 logger.warn("Syntax error in content: >%s<", l)
@@ -92,19 +92,17 @@ class StructuredContent(dict,object):
             return v.replace('\n', '%0A').replace('=', '%3D').replace('%', '%25')
 
         return "\n".join( ("%s=%s" % (k, quote(v)))
-                          for (k, v) in self.iteritems()
+                          for (k, v) in self.items()
                           if not k.startswith('_') )
 
 class Content(modeled.Modeled,
-              viewable.Viewable.withClass('content', 'getMimetype')):
+              viewable.Viewable.withClass('content', 'getMimetype'), metaclass=auto_properties):
     """
     Represents the Content of an element (mainly of Annotation and
     Relation elements)
 
     TODO: handle content types more complex than TEXT_NODE
     """
-
-    __metaclass__ = auto_properties
 
     def __init__(self, parent, element):
         modeled.Modeled.__init__(self, element, parent)
@@ -133,7 +131,7 @@ class Content(modeled.Modeled,
             encoding = self._getModel().getAttributeNS(None, 'encoding')
         else:
             encoding = 'utf-8'
-        if isinstance(d, unicode):
+        if isinstance(d, str):
             return d
         else:
             return d.decode(encoding)
@@ -209,7 +207,7 @@ class Content(modeled.Modeled,
         uri = self.getUri(absolute=True)
         if not uri:
             # TODO: maybe find a better way to get a stream from the DOM
-            return StringIO(self.getData().encode('utf-8'))
+            return StringIO(self.getData())
         return advene.model.util.uri.open(uri)
 
     def getMimetype(self):
@@ -230,7 +228,7 @@ class Content(modeled.Modeled,
             self._getModel().removeAttributeNS(None, 'mime-type')
         else:
             MimeType (value)
-            self._getModel().setAttributeNS(None, 'mime-type', unicode(value))
+            self._getModel().setAttributeNS(None, 'mime-type', str(value))
 
     def getPlugin (self):
         """
@@ -321,13 +319,11 @@ class Content(modeled.Modeled,
         # Last fallback:
         return self.data
 
-class WithContent(object):
+class WithContent(object, metaclass=auto_properties):
     """An implementation for the 'content' property and related properties.
        Inheriting classes must have a _getModel method returning a DOM element
        (inheriting the modeled.Modeled class looks like a good idea).
     """
-
-    __metaclass__ = auto_properties
 
     __content = None
 
@@ -385,7 +381,7 @@ class ContentPlugin (object):
         found = None
         found_type = None
 
-        for p in _content_plugin_registry.itervalues ():
+        for p in _content_plugin_registry.values ():
             plugin_type = MimeType(p.getMimetype())
             if plugin_type >= mimetype:
                 if found is None or found_type >= plugin_type:

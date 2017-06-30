@@ -51,7 +51,7 @@ class BrowserColumn:
     def key_pressed_cb(self, col, event):
         if event.keyval == Gdk.KEY_Right:
             # Next column
-            if self.next is not None:
+            if self.__next__ is not None:
                 self.next.get_focus()
             return True
         elif event.keyval == Gdk.KEY_Left:
@@ -189,7 +189,7 @@ class Browser(AdhocView):
 
             def validate_value(*p):
                 if self.callback:
-                    v=u"string:%s" % self.valuelabel.get_text().decode('utf-8')
+                    v="string:%s" % self.valuelabel.get_text().decode('utf-8')
                     self.close()
                     self.callback(v)
                 return True
@@ -208,10 +208,10 @@ class Browser(AdhocView):
             package = self.controller.package
 
         # Reset to the rootcolumn
-        cb=self.rootcolumn.next
+        cb=self.rootcolumn.__next__
         while cb is not None:
             cb.widget.destroy()
-            cb=cb.next
+            cb=cb.__next__
         self.rootcolumn.next=None
 
         # Update the rootcolumn element
@@ -231,40 +231,40 @@ class Browser(AdhocView):
         if columnbrowser is not None:
             col=self.rootcolumn
             while (col is not columnbrowser) and (col is not None):
-                col=col.next
+                col=col.__next__
                 if col is not None:
                     path.append(col.name)
             path.append(attribute)
 
         try:
             el=context.evaluateValue("/".join(path))
-        except (AdveneException, TypeError), e:
+        except (AdveneException, TypeError) as e:
             # Delete all next columns
             if columnbrowser is None:
-                cb=self.rootcolumn.next
+                cb=self.rootcolumn.__next__
             else:
-                cb=columnbrowser.next
+                cb=columnbrowser.__next__
             while cb is not None:
                 cb.widget.destroy()
-                cb=cb.next
+                cb=cb.__next__
             if columnbrowser is not None:
                 columnbrowser.next=None
                 self._update_view(path, Exception(_("Expression returned None (there was an exception)")))
                 if config.data.preferences['expert-mode']:
-                    self.log(u"Exception when evaluating %s :\n%s" % (u"/".join(path),
-                                                                      unicode(e)))
+                    self.log("Exception when evaluating %s :\n%s" % ("/".join(path),
+                                                                      str(e)))
             return True
 
         self._update_view(path, el)
 
         if columnbrowser is None:
             # We selected  the rootcolumn. Delete the next ones
-            cb=self.rootcolumn.next
+            cb=self.rootcolumn.__next__
             while cb is not None:
                 cb.widget.destroy()
-                cb=cb.next
+                cb=cb.__next__
             self.rootcolumn.next=None
-        elif columnbrowser.next is None:
+        elif columnbrowser.__next__ is None:
             # Create a new columnbrowser
             col=BrowserColumn(element=el, name=attribute, callback=self.clicked_callback,
                               parent=columnbrowser)
@@ -273,10 +273,10 @@ class Browser(AdhocView):
             columnbrowser.next=col
         else:
             # Delete all next+1 columns (we reuse the next one)
-            cb=columnbrowser.next.next
+            cb=columnbrowser.next.__next__
             while cb is not None:
                 cb.widget.destroy()
-                cb=cb.next
+                cb=cb.__next__
             columnbrowser.next.update(element=el, name=attribute)
 
         # Scroll the columns
@@ -286,11 +286,11 @@ class Browser(AdhocView):
 
     def _update_view(self, path, element):
         self.pathlabel.set_text("/".join(path))
-        self.typelabel.set_text(unicode(type(element)))
+        self.typelabel.set_text(str(type(element)))
         try:
-            val=unicode(element)
+            val=str(element)
         except UnicodeDecodeError:
-            val=unicode(repr(element))
+            val=str(repr(element))
         if '\n' in val:
             val=val[:val.index('\n')]+'...'
         if len(val) > 80:
@@ -361,7 +361,7 @@ class Browser(AdhocView):
         self.pathlabel.set_selectable(True)
         vbox.pack_start(name_label(_("Path"), self.pathlabel), False, False, 0)
 
-        self.typelabel = Gtk.Label(label=unicode(type(self.element)))
+        self.typelabel = Gtk.Label(label=str(type(self.element)))
         vbox.pack_start(name_label(_("Type"), self.typelabel), False, False, 0)
 
         self.valuelabel = Gtk.Label(label="here")

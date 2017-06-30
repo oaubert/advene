@@ -58,7 +58,7 @@ import re
 import os
 import optparse
 import gzip
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from gettext import gettext as _
 
@@ -197,7 +197,7 @@ class GenericImporter(object):
        options are attributes of the object) or a dictionary.
        """
        if isinstance(options, dict):
-          for k, v in options.iteritems():
+          for k, v in options.items():
              if hasattr(self, k):
                 logger.info("Set option %s %s", k, v)
                 setattr(self, k, v)
@@ -291,7 +291,7 @@ class GenericImporter(object):
         if representation:
             at.setMetaData(config.data.namespace, "representation", representation)
         try:
-            color=self.package._color_palette.next()
+            color=next(self.package._color_palette)
             at.setMetaData(config.data.namespace, "color", color)
         except AttributeError:
             # The package does not have a _color_palette
@@ -343,7 +343,7 @@ class GenericImporter(object):
     def statistics_formatted(self):
         """Return a string representation of the statistics."""
         res=[]
-        kl=self.statistics.keys()
+        kl=list(self.statistics.keys())
         kl.sort()
         for k in kl:
             v=self.statistics[k]
@@ -420,7 +420,7 @@ class GenericImporter(object):
                 ident=None
             try:
                 type_=d['type']
-                if isinstance(type_, basestring):
+                if isinstance(type_, str):
                     # A type id was specified. Dereference it, and
                     # create it if necessary.
                     type_id = type_
@@ -522,9 +522,9 @@ class ExternalAppImporter(GenericImporter):
                                              stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE,
                                              **kw )
-        except OSError, e:
+        except OSError as e:
             self.cleanup()
-            msg = unicode(e.args)
+            msg = str(e.args)
             raise Exception(_("Could not run %(appname)s: %(msg)s") % locals())
 
         self.progress(.01, _("Processing %s") % GObject.filename_display_name(filename))
@@ -695,7 +695,7 @@ class TextImporter(GenericImporter):
         for l in f:
             if not self.progress(f.tell() / filesize):
                 break
-            l = unicode(l.strip(), self.encoding)
+            l = str(l.strip(), self.encoding)
             data = whitespace_re.split(l, 2)
 
             if not data:
@@ -791,7 +791,7 @@ class TextImporter(GenericImporter):
         if filename.lower().endswith('.gz'):
             f = gzip.open(filename, 'r')
         elif filename.startswith('http'):
-            f = urllib.urlopen(filename)
+            f = urllib.request.urlopen(filename)
         else:
             f = open(filename, 'r')
         if self.package is None:
@@ -837,7 +837,7 @@ class LsDVDImporter(GenericImporter):
             if not self.progress(progress, _("Processing data")):
                 break
             l=l.rstrip()
-            l=unicode(l, self.encoding).encode('utf-8')
+            l=str(l, self.encoding).encode('utf-8')
             m=reg.search(l)
             if m is not None:
                 d=m.groupdict()
@@ -892,7 +892,7 @@ class ChaplinImporter(GenericImporter):
         chapter=None
         for l in f:
             l=l.rstrip()
-            l=unicode(l, self.encoding).encode('utf-8')
+            l=str(l, self.encoding).encode('utf-8')
             m=reg.search(l)
             if m is not None:
                 d=m.groupdict()
@@ -975,7 +975,7 @@ class XiImporter(GenericImporter):
         # self.anchors init
         filename=None
         for a in xi.Anchors[0].Anchor:
-            self.anchors[a.id] = long(float(a.offset.replace(',','.')) * self.factors[a.unit])
+            self.anchors[a.id] = int(float(a.offset.replace(',','.')) * self.factors[a.unit])
             if filename is None:
                 filename = self.signals[a.refSignal]
             elif filename != self.signals[a.refSignal]:
@@ -1045,7 +1045,7 @@ class ElanImporter(GenericImporter):
 
             tid=valid_id_re.sub('', tid)
 
-            if not self.atypes.has_key(tid):
+            if tid not in self.atypes:
                 self.atypes[tid]=self.create_annotation_type(self.schema, tid)
 
             if not self.progress(progress, _("Converting tier %s") % tid):
@@ -1073,7 +1073,7 @@ class ElanImporter(GenericImporter):
                     rel_id = ref.ANNOTATION_REF
                     rel_uri = '#'.join( (self.package.uri, rel_id) )
 
-                    if self.package.annotations.has_key(rel_uri):
+                    if rel_uri in self.package.annotations:
                         rel_an=self.package.annotations[rel_uri]
                         # We reuse the related annotation fragment
                         d['begin'] = rel_an.fragment.begin
@@ -1148,7 +1148,7 @@ class ElanImporter(GenericImporter):
         self.progress(0.1, _("Processing time slots"))
         for a in elan.TIME_ORDER[0].TIME_SLOT:
             try:
-                self.anchors[a.TIME_SLOT_ID] = long(a.TIME_VALUE)
+                self.anchors[a.TIME_SLOT_ID] = int(a.TIME_VALUE)
             except AttributeError:
                 # FIXME: should not silently ignore error
                 self.anchors[a.TIME_SLOT_ID] = 0
@@ -1215,29 +1215,29 @@ class SubtitleImporter(GenericImporter):
                 else:
                     d={'begin': tc[0],
                        'end': tc[1],
-                       'content': u"\n".join(content)}
+                       'content': "\n".join(content)}
                     tc=None
                     content=[]
                     yield d
             else:
                 if tc is not None:
                     if self.encoding:
-                        data=unicode(line, self.encoding)
+                        data=str(line, self.encoding)
                     else:
                         # We will try utf8 first, then fallback on latin1
                         try:
-                            data=unicode(line, 'utf8')
+                            data=str(line, 'utf8')
                         except UnicodeDecodeError:
                             # Fallback on latin1, which is very common, but may
                             # sometimes fail
-                            data=unicode(line, 'latin1')
+                            data=str(line, 'latin1')
                     content.append(data)
                     # else We could check line =~ /^\d+$/
         # End of for-loop: if there is a last item, convert it.
         if tc is not None:
             d={'begin': tc[0],
                'end': tc[1],
-               'content': u"\n".join(content)}
+               'content': "\n".join(content)}
             yield d
 
     def process_file(self, filename):
@@ -1290,12 +1290,12 @@ class PraatImporter(GenericImporter):
             l=f.readline()
             if not l:
                 break
-            l=unicode(l, 'iso-8859-1').encode('utf-8')
+            l=str(l, 'iso-8859-1').encode('utf-8')
             m=name_re.match(l)
             if m:
                 ws, current_type=m.group(1, 2)
                 type_align=len(ws)
-                if not self.atypes.has_key(current_type):
+                if current_type not in self.atypes:
                     self.atypes[current_type]=self.create_annotation_type(self.schema, current_type)
                 continue
             m=boundary_re.match(l)
@@ -1305,7 +1305,7 @@ class PraatImporter(GenericImporter):
                     # It is either the xmin/xmax for the current type
                     # or a upper-level xmin. Ignore.
                     continue
-                v=long(float(t) * 1000)
+                v=int(float(t) * 1000)
                 if name == 'xmin':
                     begin=v
                 else:
@@ -1366,7 +1366,7 @@ class CmmlImporter(GenericImporter):
 
         Cf http://www.annodex.net/TR/draft-pfeiffer-temporal-fragments-03.html#anchor5
         """
-        if isinstance(npt, long) or isinstance(npt, int):
+        if isinstance(npt, int) or isinstance(npt, int):
             return npt
 
         if npt.startswith('npt:'):
@@ -1374,7 +1374,7 @@ class CmmlImporter(GenericImporter):
 
         try:
             msec=helper.parse_time(npt)
-        except Exception, e:
+        except Exception as e:
             self.log("Unhandled NPT format: " + npt)
             self.log(str(e))
             msec=0
@@ -1482,7 +1482,7 @@ class CmmlImporter(GenericImporter):
             # Meta attributes (need to create schemas as needed)
             try:
                 for meta in clip.meta:
-                    if not self.atypes.has_key(meta.name):
+                    if meta.name not in self.atypes:
                         self.atypes[meta.name]=self.create_annotation_type(self.schema, meta.name)
                     d={
                         'type': self.atypes[meta.name],
@@ -1539,7 +1539,7 @@ class CmmlImporter(GenericImporter):
         try:
             t=s.basetime
             if t:
-                t=long(t)
+                t=int(t)
         except AttributeError:
             t=0
         self.basetime=t
@@ -1608,10 +1608,10 @@ class IRIImporter(GenericImporter):
                 if not self.progress(progress, _("Parsing decoupage %s") % tid):
                     break
                 # Update self.duration
-                self.duration=max(long(decoupage.dur), self.duration)
+                self.duration=max(int(decoupage.dur), self.duration)
 
                 # Create the type
-                if not self.atypes.has_key(tid):
+                if tid not in self.atypes:
                     at=self.create_annotation_type(schema, tid,
                                                    mimetype='application/x-advene-structured',
                                                    author=decoupage.author or self.author,
@@ -1632,9 +1632,9 @@ class IRIImporter(GenericImporter):
                        'author': el.author or self.author,
                        'date': el.date,
                        'content': "title=%s\nabstract=%s\nsrc=%s" % (
-                            unicode(el.title).encode('utf-8').replace('\n', '\\n'),
-                            unicode(el.abstract).encode('utf-8').replace('\n', '\\n'),
-                            unicode(el.src).encode('utf-8').replace('\n', '\\n'),
+                            str(el.title).encode('utf-8').replace('\n', '\\n'),
+                            str(el.abstract).encode('utf-8').replace('\n', '\\n'),
+                            str(el.src).encode('utf-8').replace('\n', '\\n'),
                             )
                        }
                     yield d
@@ -1650,7 +1650,7 @@ class IRIImporter(GenericImporter):
                 for view in views:
                     if self.multiple_types:
                         tid=view.id
-                        if not self.atypes.has_key(tid):
+                        if tid not in self.atypes:
                             at=self.create_annotation_type(schema, tid,
                                                            mimetype='text/plain',
                                                            author=view.author or self.author,
@@ -1811,9 +1811,9 @@ if __name__ == "__main__":
     import advene.util.helper as helper
     import advene.util.handyxml as handyxml
 
-    import StringIO
+    import io
 
-    log = StringIO.StringIO()
+    log = io.StringIO()
     saved, sys.stdout = sys.stdout, log
     # Load plugins
     c = controller.AdveneController()

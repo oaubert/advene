@@ -44,8 +44,8 @@ class DVDSelect:
         m = re.match("dvd\w*:.+@(\d+)[,:](\d+)", current)
         if m is not None:
             (title, chapter) = m.groups()
-            self.titlewidget.set_value(long(title))
-            self.chapterwidget.set_value(long(chapter))
+            self.titlewidget.set_value(int(title))
+            self.chapterwidget.set_value(int(chapter))
         return True
 
     def get_chapter(self):
@@ -66,7 +66,7 @@ class DVDSelect:
             self.oldplaylist=self.controller.player.playlist_get_list()
             self.controller.player.playlist_clear()
             mediafile=self.get_url()
-            if isinstance(mediafile, unicode):
+            if isinstance(mediafile, str):
                 mediafile=mediafile.encode('utf8')
             self.controller.player.playlist_add_item(mediafile)
             self.controller.player.update_status("start")
@@ -75,7 +75,7 @@ class DVDSelect:
             self.controller.player.update_status("stop")
             self.controller.player.playlist_clear()
             for i in self.oldplaylist:
-                if isinstance(i, unicode):
+                if isinstance(i, str):
                     i=i.encode('utf8')
                 self.controller.player.playlist_add_item(i)
             del self.oldplaylist

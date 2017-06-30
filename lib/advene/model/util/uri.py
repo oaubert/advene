@@ -20,9 +20,9 @@
 import os
 import re
 import sys
-import urllib
-from urllib2 import urlopen
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+from urllib.request import urlopen
+import urllib.parse
 
 _fs_encoding = sys.getfilesystemencoding()
 # In some cases, sys.getfilesystemencoding returns None. And if the
@@ -31,7 +31,7 @@ _fs_encoding = sys.getfilesystemencoding()
 if _fs_encoding in ('ascii', 'ANSI_X3.4-1968', None):
     _fs_encoding='utf-8'
 
-urljoin = urlparse.urljoin
+urljoin = urllib.parse.urljoin
 
 def push(uri, id_):
     return "%s#%s" % (uri, id_)
@@ -72,18 +72,10 @@ def normalize_filename(name):
     if re.match('|/', name) or re.match('[a-zA-Z]:', name):
         # Windows drive: notation. Convert it from
         # a more URI-compatible syntax
-        name=urllib.url2pathname(name)
+        name=urllib.request.url2pathname(name)
 
-    if not isinstance(name, unicode):
+    if not isinstance(name, str):
         # We should only have utf8 encoded strings internally
         name = name.decode('utf-8')
 
-    if not os.path.supports_unicode_filenames:
-        # The underlying OS does not support unicode filenames, so
-        # we have to encode it. Normally, only win32 supports
-        # unicode filenames. We have to explicitly encode
-        # filenames for linux and OSX. OSX uses utf-8, and for
-        # linux, it is a mess to determine so let's just use utf-8
-        # as well.
-        name = name.encode('utf-8')
     return name

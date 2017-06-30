@@ -18,7 +18,7 @@
 #
 import locale
 
-from choice_tree import ChoiceTree
+from .choice_tree import ChoiceTree
 
 try:
     import xml.dom

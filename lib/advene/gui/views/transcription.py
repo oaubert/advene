@@ -42,7 +42,7 @@ import advene.gui.popup
 
 name="Transcription view plugin"
 
-ZERO_WIDTH_NOBREAK_SPACE = u"\uFEFF"
+ZERO_WIDTH_NOBREAK_SPACE = "\uFEFF"
 
 def register(controller):
     controller.register_viewclass(TranscriptionView)
@@ -78,7 +78,7 @@ class TranscriptionView(AdhocView):
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         a=dict(arg)
-        if source is None and a.has_key('source'):
+        if source is None and 'source' in a:
             source=a['source']
 
         if source is None and elements is None:
@@ -145,10 +145,10 @@ class TranscriptionView(AdhocView):
         c=self.controller.build_context()
         try:
             self.model=c.evaluateValue(self.source)
-        except Exception, e:
+        except Exception as e:
             self.log(_("Error in source evaluation %(source)s: %(error)s") % {
                     'source': self.source,
-                    'error': unicode(e) })
+                    'error': str(e) })
             self.model=[]
         return
 
@@ -262,7 +262,7 @@ class TranscriptionView(AdhocView):
     def quick_options_toggle(self, *p):
         """Quickly toggle between different presentation options.
         """
-        self.options['separator'], self.options['display-time']=self.quick_options.next()
+        self.options['separator'], self.options['display-time']=next(self.quick_options)
         self.refresh()
         return True
 
@@ -409,7 +409,7 @@ class TranscriptionView(AdhocView):
 
             # Put a 0-width char to make it easier to edit annotations
             insert_at_cursor_with_tags_by_name(ZERO_WIDTH_NOBREAK_SPACE, "bound")
-            b.insert_at_cursor(unicode(self.representation(a)))
+            b.insert_at_cursor(str(self.representation(a)))
             insert_at_cursor_with_tags_by_name(ZERO_WIDTH_NOBREAK_SPACE, "bound")
             mark = b.create_mark("e_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
@@ -611,7 +611,7 @@ class TranscriptionView(AdhocView):
 
             b.delete(beginiter, enditer)
             b.insert_with_tags_by_name(beginiter, ZERO_WIDTH_NOBREAK_SPACE, "bound")
-            b.insert(beginiter, unicode(self.representation(annotation)))
+            b.insert(beginiter, str(self.representation(annotation)))
             b.insert_with_tags_by_name(beginiter, ZERO_WIDTH_NOBREAK_SPACE, "bound")
             # After insert, beginiter is updated to point to the end
             # of the invalidated text.
@@ -695,10 +695,10 @@ class TranscriptionView(AdhocView):
         out=b.get_text(begin, end, False).decode('utf-8').replace(ZERO_WIDTH_NOBREAK_SPACE, '')
         try:
             f=open(filename, "w")
-        except Exception, e:
+        except Exception as e:
             self.message(_("Cannot write to %(filename)s: %(error)s:") %
                      {'filename': filename,
-                      'error': unicode(e)})
+                      'error': str(e)})
             return True
         f.write(out)
         f.close()

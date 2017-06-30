@@ -88,8 +88,8 @@ class ShotdetectImporter(GenericImporter):
             yield {
                 'type': self.annotationtype,
                 'content': "num=" + an.attrib['id'],
-                'begin': long(an.attrib['msbegin']),
-                'duration': long(an.attrib['msduration']),
+                'begin': int(an.attrib['msbegin']),
+                'duration': int(an.attrib['msduration']),
                 }
         self.progress(1.0)
 

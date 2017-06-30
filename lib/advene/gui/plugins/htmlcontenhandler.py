@@ -75,7 +75,7 @@ class AnnotationPlaceholder:
             aid=attr['advene:annotation']
             self.annotation=self.controller.package.get_element_by_id(aid)
             if self.annotation is None:
-                print "Problem: non-existent annotation"
+                print("Problem: non-existent annotation")
             self.refresh()
             return self.pixbuf, self.process_enclosed_tags
         return None, None
@@ -262,7 +262,7 @@ class AnnotationTypePlaceholder:
             aid=attr['advene:annotationtype']
             self.annotationtype = self.controller.package.get_element_by_id(aid)
             if self.annotationtype is None:
-                print "Problem: non-existent annotation type"
+                print("Problem: non-existent annotation type")
             self.refresh()
             return self.pixbuf, self.process_enclosed_tags
         return None, None
@@ -460,7 +460,7 @@ class HTMLContentHandler (ContentHandler):
             pos=re.findall('/media/play/(\d+)', link)
             if pos:
                 # A position was specified. Directly use it.
-                self.controller.update_status('set', long(pos[0]))
+                self.controller.update_status('set', int(pos[0]))
             else:
                 self.controller.open_url(link)
         return True
@@ -516,7 +516,7 @@ class HTMLContentHandler (ContentHandler):
         self.editor.get_buffer().place_cursor(it.iter)
 
         if targetType == config.data.target_type['annotation']:
-            for uri in unicode(selection.get_data(), 'utf8').split('\n'):
+            for uri in str(selection.get_data(), 'utf8').split('\n'):
                 source=self.controller.package.annotations.get(uri)
                 if source is None:
                     return True
@@ -535,7 +535,7 @@ class HTMLContentHandler (ContentHandler):
                 m.popup(None, None, None, 0, Gtk.get_current_event_time())
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            for uri in unicode(selection.get_data(), 'utf8').split('\n'):
+            for uri in str(selection.get_data(), 'utf8').split('\n'):
                 source = self.controller.package.annotationTypes.get(uri)
                 if source is None:
                     return True
@@ -554,7 +554,7 @@ class HTMLContentHandler (ContentHandler):
             return True
         elif targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.get_data())
-            t=long(data['timestamp'])
+            t=int(data['timestamp'])
             # FIXME: propose various choices (insert timestamp, insert snapshot, etc)
             self.editor.get_buffer().insert_at_cursor(helper.format_time(t))
             return True
@@ -607,7 +607,7 @@ class HTMLContentHandler (ContentHandler):
                 # There is a TALES expression
                 path='here/'+path
                 ctx=self.controller.build_context(here=a)
-                svg_data=unicode( ctx.evaluateValue(path) )
+                svg_data=str( ctx.evaluateValue(path) )
             elif 'svg' in a.content.mimetype:
                 # Overlay svg
                 svg_data=a.content.data
@@ -624,7 +624,7 @@ class HTMLContentHandler (ContentHandler):
             p=self.controller.packages.get(alias)
             if p is None:
                 return None
-            return str(p.imagecache[long(timestamp)])
+            return str(p.imagecache[int(timestamp)])
         return None
 
     def contextual_popup(self, ctx=None, menu=None):
@@ -699,7 +699,7 @@ class HTMLContentHandler (ContentHandler):
                                                   int(event.y))
         it=textview.get_iter_at_location(x, y)
         if it is None:
-            print "Error in get_iter_at_location"
+            print("Error in get_iter_at_location")
             return False
         ctx=self.editor.get_current_context(it.iter)
         if not ctx:
@@ -739,8 +739,8 @@ class HTMLContentHandler (ContentHandler):
         self.editor.register_class_parser(self.class_parser)
         try:
             self.editor.set_text(self.element.data)
-        except Exception, e:
-            self.controller.log(_("HTML editor: cannot parse content (%s)") % unicode(e))
+        except Exception as e:
+            self.controller.log(_("HTML editor: cannot parse content (%s)") % str(e))
 
         self.editor.connect('drag-data-received', self.editor_drag_received)
         self.editor.drag_dest_set(Gtk.DestDefaults.MOTION |

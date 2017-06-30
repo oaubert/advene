@@ -85,7 +85,7 @@ class EditRuleSet(EditGeneric):
             for p in ra.parameters:
                 action.add_parameter(p, ra.defaults.get(p, ''))
             # Find the next rulename index
-            l=[ int(i) for i in re.findall(unicode(_('Rule')+'\s*(\d+)'), ''.join(r.name for r in self.model)) ]
+            l=[ int(i) for i in re.findall(str(_('Rule')+'\s*(\d+)'), ''.join(r.name for r in self.model)) ]
             idx=max(l or [ 0 ] ) + 1
             rule=Rule(name=_("Rule") + str(idx),
                       event=event,
@@ -216,7 +216,7 @@ class EditRuleSet(EditGeneric):
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['rule']:
-            xml=unicode(selection.get_data(), 'utf8')
+            xml=str(selection.get_data(), 'utf8')
             if 'subviewlist' in xml:
                 rule=SubviewList()
             else:
@@ -284,7 +284,7 @@ class EditQuery(EditGeneric):
     def update_value(self):
         if not self.editable:
             return False
-        self.model.sources=unicode(self.sourceentry.get_text()).split(';')
+        self.model.sources=str(self.sourceentry.get_text()).split(';')
         if self.valueentry is None:
             v='element'
         else:
@@ -832,8 +832,8 @@ class EditCondition(EditGeneric):
                 return operators[element][0]
 
         self.selector=dialog.CategorizedSelector(title=_("Select a condition"),
-                                          elements=operators.keys(),
-                                          categories=Condition.condition_categories.keys(),
+                                          elements=list(operators.keys()),
+                                          categories=list(Condition.condition_categories.keys()),
                                           current=self.current_operator,
                                           description_getter=description_getter,
                                           category_getter=lambda e: operators[e][1],
@@ -886,7 +886,7 @@ class EditAction(EditGeneric):
         ra=self.catalog.get_action(self.current_name)
         self.model = Action(registeredaction=ra, catalog=self.catalog)
         regexp=re.compile('^(\(.+\)|)$')
-        for n, v in self.current_parameters.iteritems():
+        for n, v in self.current_parameters.items():
             # We ignore parameters fields that are empty or that match '^\(.+\)$'
             if not regexp.match(v):
                 self.model.add_parameter(n, v)
@@ -895,7 +895,7 @@ class EditAction(EditGeneric):
     def sorted(self, l):
         """Return a sorted version of the list."""
         if isinstance(l, dict):
-            res=l.keys()
+            res=list(l.keys())
         else:
             res=l[:]
         res.sort()
@@ -908,7 +908,7 @@ class EditAction(EditGeneric):
         self.cached_parameters[self.current_name]=self.current_parameters.copy()
 
         self.current_name=element.name
-        for w in self.paramlist.values():
+        for w in list(self.paramlist.values()):
             w.destroy()
         self.paramlist={}
 
@@ -990,7 +990,7 @@ class EditAction(EditGeneric):
 
         self.selector=dialog.CategorizedSelector(title=_("Select an action"),
                                                  elements=expert_filter(sorted(c.actions.values()), 'category'),
-                                                 categories=expert_filter(c.action_categories.keys()),
+                                                 categories=expert_filter(list(c.action_categories.keys())),
                                                  current=c.actions[self.current_name],
                                                  description_getter=description_getter,
                                                  category_getter=lambda e: e.category,

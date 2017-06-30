@@ -188,7 +188,7 @@ class PocketSphinxImporter(GenericImporter):
         bus.connect('sync-message', self.on_bus_message)
 
         if config.data.os == 'win32':
-            self.decoder.props.uri = 'file:///' + os.path.abspath(unicode(filename))
+            self.decoder.props.uri = 'file:///' + os.path.abspath(str(filename))
         else:
             self.decoder.props.uri = 'file://' + os.path.abspath(filename)
         self.progress(0, _("Recognizing speech"))

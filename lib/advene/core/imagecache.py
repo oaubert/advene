@@ -25,6 +25,8 @@ logger = logging.getLogger(__name__)
 import advene.core.config as config
 import operator
 
+from collections.abc import MutableMapping
+from collections import defaultdict
 import os
 import re
 
@@ -36,7 +38,7 @@ class CachedString:
         self.contenttype='text/plain'
         ts=re.findall('(\d+).png$', filename)
         if ts:
-            self.timestamp=long(ts[0])
+            self.timestamp=int(ts[0])
         else:
             self.timestamp=-1
 
@@ -52,16 +54,16 @@ class CachedString:
     def __repr__(self):
         return "Cached content from " + self._filename
 
-class TypedString(str):
+class TypedString(bytes):
     """String with a mimetype and a timestamp attribute.
     """
-    def __new__(cls, value=""):
-        s=str.__new__(cls, value)
+    def __new__(cls, value=b""):
+        s=bytes.__new__(cls, value)
         s.contenttype='text/plain'
         s.timestamp=-1
         return s
 
-class ImageCache(dict):
+class ImageCache(MutableMapping):
     """ImageCache class.
 
     It interacts with the player to return annotation snapshots. It approximates
@@ -98,7 +100,7 @@ class ImageCache(dict):
         # (in ms) and values the snapshot in PNG format.
         # value = self.not_yet_available_image if the image has
         # not yet been updated.
-        dict.__init__ (self)
+        self._dict = defaultdict(lambda: self.not_yet_available_image)
 
         self._modified=False
 
@@ -119,10 +121,11 @@ class ImageCache(dict):
         """
         if key is None:
             return
-        if not dict.has_key (self, key):
-            dict.__setitem__(self, key, self.not_yet_available_image)
+        if key not in self._dict:
+            # Accessing it will initialize its value
+            self._dict[key]
 
-    def has_key (self, key):
+    def __in__(self, key):
         if key is None:
             return True
         try:
@@ -145,7 +148,17 @@ class ImageCache(dict):
         if key is None:
             return self.not_yet_available_image
         key = self.approximate(key)
-        return dict.__getitem__(self, key)
+        return self._dict[key]
+
+
+    def __delitem__(self, key):
+        self._dict.__delitem(key)
+
+    def __iter__(self):
+        return self._dict.__iter__()
+
+    def __len__(self):
+        return self._dict.__len__()
 
     def get(self, key, epsilon=None):
         """Return a snapshot for the image corresponding to the position pos.
@@ -160,7 +173,7 @@ class ImageCache(dict):
         if key is None:
             return self.not_yet_available_image
         key = self.approximate(key, epsilon)
-        return dict.__getitem__(self, key)
+        return self._dict[key]
 
     def __setitem__ (self, key, value):
         """Set the snapshot for the image corresponding to the position key.
@@ -184,11 +197,12 @@ class ImageCache(dict):
                 f.close ()
                 value=CachedString(filename)
                 value.contenttype='image/png'
-            elif isinstance(value, basestring):
+            elif isinstance(value, (str, bytes)):
                 value=TypedString(value)
                 value.timestamp=key
                 value.contenttype='image/png'
-            return dict.__setitem__(self, key, value)
+            self._dict[key] = value
+            return value
         else:
             return self.not_yet_available_image
 
@@ -200,16 +214,16 @@ class ImageCache(dict):
         """
         if key is None:
             return None
-        key=long(key)
-        if dict.has_key(self, key) and dict.__getitem__(self, key) != self.not_yet_available_image:
+        key=int(key)
+        if self._dict.get(key, self.not_yet_available_image) != self.not_yet_available_image:
             return key
 
         if epsilon is None:
             epsilon=self.epsilon
         valids = [ (pos, abs(pos-key))
-                   for pos in self.keys()
+                   for pos in self._dict
                    if abs(pos - key) <= epsilon
-                   and dict.__getitem__(self, pos) != self.not_yet_available_image ]
+                   and self._dict.get(pos, self.not_yet_available_image) != self.not_yet_available_image ]
         valids.sort(key=operator.itemgetter(1))
 
         if valids:
@@ -234,8 +248,7 @@ class ImageCache(dict):
         if epsilon is None:
             epsilon=self.epsilon
         key = self.approximate(key, epsilon)
-        if dict.__getitem__(self, key) != self.not_yet_available_image:
-            dict.__setitem__(self, key, self.not_yet_available_image)
+        self._dict[key] = self.not_yet_available_image
         return key
 
     def missing_snapshots (self):
@@ -244,8 +257,8 @@ class ImageCache(dict):
         @return: a list of keys
         """
         return [ pos
-                 for pos in self.keys()
-                 if dict.__getitem__(self, pos) == self.not_yet_available_image ]
+                 for pos in self._dict
+                 if self._dict.get(pos) == self.not_yet_available_image ]
 
     def valid_snapshots (self):
         """Return the list of positions of valid snapshots.
@@ -253,8 +266,8 @@ class ImageCache(dict):
         @return: a list of keys
         """
         return [ pos
-                 for pos in self.keys()
-                 if dict.__getitem__(self, pos) != self.not_yet_available_image ]
+                 for pos in self._dict
+                 if self._dict.get(pos) != self.not_yet_available_image ]
 
     def is_initialized (self, key, epsilon=None):
         """Return True if the given key is initialized.
@@ -265,10 +278,7 @@ class ImageCache(dict):
         if key is None:
             return False
         key = self.approximate(key, epsilon)
-        if dict.__getitem__(self, key) == self.not_yet_available_image:
-            return False
-        else:
-            return True
+        return self._dict[key] != self.not_yet_available_image
 
     def save (self, name):
         """Save the content of the cache under a specified name (id).
@@ -298,8 +308,7 @@ class ImageCache(dict):
             else:
                 os.mkdir (d)
 
-        for k in self.iterkeys():
-            i=dict.__getitem__(self, k)
+        for k, i in self._dict.items():
             if i == self.not_yet_available_image:
                 continue
             if isinstance(i, CachedString):
@@ -333,28 +342,28 @@ class ImageCache(dict):
                         n=n.lstrip('0')
                         if n == '':
                             n=0
-                        i=long(n)
+                        i=int(n)
                     except ValueError:
                         logger.error("Invalid filename in imagecache: %s", name)
                         continue
                     s=CachedString(os.path.join (d, name))
                     s.contenttype='image/png'
-                    dict.__setitem__(self, i, s)
+                    self._dict[i] = s
         self._modified=False
 
     def reset(self):
         """Reset imagecache.
         """
-        for pos in self.keys():
-            dict.__setitem__(self, pos, self.not_yet_available_image)
+        for pos in self._dict:
+            self._dict[pos] = self.not_yet_available_image
 
     def ids (self):
         """Return the list of currents ids.
         """
-        return [ str(k) for k in self.keys () ]
+        return [ str(k) for k in self._dict ]
 
     def __str__ (self):
-        return "ImageCache object (%d images)" % len(self)
+        return "ImageCache object (%d images)" % len(self._dict)
 
     def __repr__ (self):
-        return "ImageCache object (%d images)" % len(self)
+        return "ImageCache object (%d images)" % len(self._dict)

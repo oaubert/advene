@@ -49,7 +49,7 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 import cairo
 import math
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import re
 import types
 from math import atan2, cos, sin
@@ -221,7 +221,7 @@ class Shape(object):
                 # Default fallback
                 s.color = 'green'
         c=cls.xml2coords(cls.coords, element.attrib, context)
-        for n, v in c.iteritems():
+        for n, v in c.items():
             setattr(s, n, v)
         s.svg_attrib=dict(element.attrib)
         if hasattr(s, 'post_parse'):
@@ -385,7 +385,7 @@ class Shape(object):
 
         # svg_attrib
         store=Gtk.ListStore(str, str)
-        for k, v in self.svg_attrib.iteritems():
+        for k, v in self.svg_attrib.items():
             store.append([k, v])
         treeview=Gtk.TreeView(model=store)
 
@@ -611,7 +611,7 @@ class Text(Rectangle):
         if m:
             s.linewidth=int(m.group(1))
         c=cls.xml2coords(cls.coords, element.attrib, context)
-        for n, v in c.iteritems():
+        for n, v in c.items():
             setattr(s, n, v)
         s.svg_attrib=dict(element.attrib)
         if hasattr(s, 'post_parse'):
@@ -723,7 +723,7 @@ class Image(Rectangle):
         s=cls(name=element.attrib.get('name', cls.SHAPENAME))
         s.uri=element.attrib.get('xlink:href', element.attrib.get('{http://www.w3.org/1999/xlink}href', ''))
         c=cls.xml2coords(cls.coords, element.attrib, context)
-        for n, v in c.iteritems():
+        for n, v in c.items():
             setattr(s, n, v)
         s.svg_attrib=dict(element.attrib)
         if hasattr(s, 'post_parse'):
@@ -910,7 +910,7 @@ class Line(Rectangle):
         <polyline points="0,0 10,5 0,10 1,5" fill="darkblue" />
         </marker></defs>
         """
-        e=super(Line, self).get_svg(relative, size).next()
+        e=next(super(Line, self).get_svg(relative, size))
         if self.arrow:
             if e.tag == 'a' or e.tag == ET.QName(SVGNS, 'a'):
                 # It is a link. Use the child.
@@ -964,9 +964,9 @@ class Path(Shape):
         """Returns the coordinates of the lines composing the path
         """
         if self.closed:
-            return zip(self.path, self.path[1:] + self.path[:1])
+            return list(zip(self.path, self.path[1:] + self.path[:1]))
         else:
-            return zip(self.path, self.path[1:])
+            return list(zip(self.path, self.path[1:]))
 
     def set_controlled_point(self, index=None, point=None):
         """Specify the index of the controlled point.
@@ -1157,7 +1157,7 @@ class Path(Shape):
 
        Z is optional (used for closed paths).
        """
-       e = super(Path, self).get_svg(relative, size).next()
+       e = next(super(Path, self).get_svg(relative, size))
        if e.tag == 'a' or e.tag == ET.QName(SVGNS, 'a'):
            # It is a link. Use the child.
            el=e[0]
@@ -1721,8 +1721,8 @@ class ShapeDrawer:
                 self.feedback_shape.set_bounds( self.selection )
 
             bounds = self.feedback_shape.get_bounds()
-            minx = sys.maxint
-            miny = sys.maxint
+            minx = sys.maxsize
+            miny = sys.maxsize
             maxx = 0
             maxy = 0
             for l in (oldbounds, bounds):
@@ -1803,12 +1803,12 @@ class ShapeDrawer:
         """
         m=re.match('(\d+)(\w*)', s)
         if m:
-            val=long(m.group(1))
+            val=int(m.group(1))
             unit=m.group(2)
             if unit in ('px', 'pt'):
                 return val
             elif unit == '%':
-                return long(val * 100.0 / self.dimensions[dimindex])
+                return int(val * 100.0 / self.dimensions[dimindex])
             else:
                 logger.warn('SVG: Unspecified unit for %s', s)
                 return val
@@ -1839,7 +1839,7 @@ class ShapeDrawer:
                         # We have a background image.
                         if o.uri.startswith('http:'):
                             # http url, download the file
-                            (fname, header)=urllib.urlretrieve(o.uri)
+                            (fname, header)=urllib.request.urlretrieve(o.uri)
                             i=Gtk.Image()
                             logger.warn("Loaded background from %s copy in %s", o.uri, fname)
                             i.set_from_file(fname)
@@ -1913,7 +1913,7 @@ class ShapeEditor(object):
 
     def key_press_event(self, widget, event):
         cl = self.key_mapping.get(event.keyval, None)
-        if isinstance(cl, types.TypeType) and issubclass(cl, Shape):
+        if isinstance(cl, type) and issubclass(cl, Shape):
             # Select the appropriate shape
             self.shape_icon.set_shape(cl)
             self.drawer.shape_class = cl
@@ -2225,7 +2225,7 @@ def ET_indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
-defined_shape_classes=[ c for c in locals().values() if hasattr(c, 'SHAPENAME') ]
+defined_shape_classes=[ c for c in list(locals().values()) if hasattr(c, 'SHAPENAME') ]
 
 # Start it all
 if __name__ == '__main__':

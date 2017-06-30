@@ -41,7 +41,7 @@ if subdir == 'bin' and os.path.exists(os.path.join(maindir, "setup.py")):
 else:
     try:
         import advene.core.config as config
-    except ImportError, e:
+    except ImportError as e:
         logging.error("""Cannot guess a valid directory.
         Please check your installation or set the PYTHONPATH environment variable.""", exc_info=True)
         sys.exit(1)
@@ -143,12 +143,12 @@ if not os.path.exists(config.data.path['resources']):
                     f.close()
 
 if config.data.os == 'win32':
-    import _winreg
+    import winreg
 
     # win32 platform, add the "lib" folder to the system path
     os.environ['PATH'] += os.path.pathsep + "lib"
     # add pixbufloader dir in environment
-    if not ('GDK_PIXBUF_MODULE_FILE' in os.environ.keys() and os.path.exists(os.environ['GDK_PIXBUF_MODULE_FILE'])):
+    if not ('GDK_PIXBUF_MODULE_FILE' in list(os.environ.keys()) and os.path.exists(os.environ['GDK_PIXBUF_MODULE_FILE'])):
         os.environ['GDK_PIXBUF_MODULE_FILE'] = os.path.join(
             os.path.abspath(os.path.dirname(sys.executable)),
             'lib',
@@ -235,7 +235,7 @@ Aborting.""", config.data.path[d])
         # prof.runcall(gui.main, config.data.args)
         # prof.close()
         gui.main(config.data.args)
-    except Exception, e:
+    except Exception as e:
         logging.warn("Got exception. Stopping services...", exc_info=True)
 
         from gi.repository import Gtk

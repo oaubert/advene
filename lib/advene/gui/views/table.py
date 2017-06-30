@@ -78,7 +78,7 @@ class AnnotationTable(AdhocView):
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         a=dict(arg)
-        if source is None and a.has_key('source'):
+        if source is None and 'source' in a:
             source=a['source']
 
         if elements is None and source:
@@ -86,10 +86,10 @@ class AnnotationTable(AdhocView):
             try:
                 elements = c.evaluateValue(source)
                 self.source = source
-            except Exception, e:
+            except Exception as e:
                 self.log(_("Error in source evaluation %(source)s: %(error)s") % {
                     'source': self.source,
-                    'error': unicode(e) })
+                    'error': str(e) })
                 elements = []
 
         self.elements = elements
@@ -123,7 +123,7 @@ class AnnotationTable(AdhocView):
             self.set_elements(self.elements)
 
     def update_snapshot(self, context, parameters):
-        pos = long(context.globals['position'])
+        pos = int(context.globals['position'])
         eps = self.controller.package.imagecache.epsilon
         for r in self.widget.treeview.get_model():
             if abs(r[COLUMN_BEGIN] - pos) <= eps:
@@ -153,7 +153,7 @@ class AnnotationTable(AdhocView):
         else:
             def custom(a):
                 return tuple()
-        args = (object, str, str, str, long, long, str, str, str, GdkPixbuf.Pixbuf, str) + custom(None)
+        args = (object, str, str, str, int, int, str, str, str, GdkPixbuf.Pixbuf, str) + custom(None)
         l=Gtk.ListStore(*args)
         if not elements:
             return l
@@ -201,7 +201,7 @@ class AnnotationTable(AdhocView):
         if self.last_edited_path is not None:
             # We just edited an annotation. This update must come from
             # it, so let us try to set the cursor position at the next element.
-            path = self.last_edited_path.next()
+            path = next(self.last_edited_path)
             try:
                 self.model.get_iter(path)
             except (ValueError, TypeError):
@@ -220,8 +220,8 @@ class AnnotationTable(AdhocView):
             x = pointer.x
             y = pointer.y
         else:
-            x = long(event.x)
-            y = long(event.y)
+            x = int(event.x)
+            y = int(event.y)
         t = tv.get_path_at_pos(x, y)
         if t is not None:
             path, col, cx, cy = t
@@ -372,12 +372,12 @@ class AnnotationTable(AdhocView):
                 return False
 
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources)
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                sources=[ self.controller.package.annotationTypes.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotationTypes.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources[0].annotations)
                 return True
@@ -452,11 +452,11 @@ class AnnotationTable(AdhocView):
             return True
         try:
             f=open(name, 'w')
-        except IOError, e:
+        except IOError as e:
             dialog.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
                                           % {
                         'filename': name,
-                        'error': unicode(e),
+                        'error': str(e),
                         }), icon=Gtk.MessageType.ERROR)
         w=csv.writer(f)
         tv=self.widget.treeview
@@ -466,7 +466,7 @@ class AnnotationTable(AdhocView):
             source=tv.get_model()
         w.writerow( (_("id"), _("type"), _("begin"), _("end"), _("content")) )
         for r in source:
-            w.writerow( (r[COLUMN_ID], unicode(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_BEGIN], r[COLUMN_END], unicode(r[COLUMN_ELEMENT].content.data).encode('utf-8') ) )
+            w.writerow( (r[COLUMN_ID], str(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_BEGIN], r[COLUMN_END], str(r[COLUMN_ELEMENT].content.data).encode('utf-8') ) )
         f.close()
         self.log(_("Data exported to %s") % name)
 
@@ -563,7 +563,7 @@ class GenericTable(AdhocView):
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         a=dict(arg)
-        if source is None and a.has_key('source'):
+        if source is None and 'source' in a:
             source=a['source']
 
         if elements is None and source:
@@ -571,10 +571,10 @@ class GenericTable(AdhocView):
             try:
                 elements = c.evaluateValue(source)
                 self.source = source
-            except Exception, e:
+            except Exception as e:
                 self.log(_("Error in source evaluation %(source)s: %(error)s") % {
                     'source': self.source,
-                    'error': unicode(e) })
+                    'error': str(e) })
                 elements = []
 
         self.model=self.build_model(elements)
@@ -630,11 +630,11 @@ class GenericTable(AdhocView):
             return True
         try:
             f=open(name, 'w')
-        except IOError, e:
+        except IOError as e:
             dialog.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
                                           % {
                         'filename': name,
-                        'error': unicode(e),
+                        'error': str(e),
                         }),
                                   icon=Gtk.MessageType.ERROR)
         w=csv.writer(f)
@@ -645,7 +645,7 @@ class GenericTable(AdhocView):
             source=tv.get_model()
         w.writerow( (_("Element title"), _("Element type"), _("Element id")) )
         for r in source:
-            w.writerow( (unicode(r[COLUMN_CONTENT]).encode('utf-8'), unicode(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_ID]) )
+            w.writerow( (str(r[COLUMN_CONTENT]).encode('utf-8'), str(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_ID]) )
         f.close()
         self.log(_("Data exported to %s") % name)
 
@@ -700,12 +700,12 @@ class GenericTable(AdhocView):
                 return False
 
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources)
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                sources=[ self.controller.package.annotationTypes.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotationTypes.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources[0].annotations)
                 return True

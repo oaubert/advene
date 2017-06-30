@@ -115,7 +115,7 @@ class TrsImporter(GenericImporter):
                     try :
                         if s.get('topic') is not None:
                             topic = self.topics[s.get('topic')].rstrip('[]')
-                    except AttributeError, KeyError:
+                    except AttributeError as KeyError:
                         pass
 
 

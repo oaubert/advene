@@ -192,10 +192,10 @@ class Montage(AdhocView):
         return True
 
     def unit2pixel(self, u):
-        return long(u / self.scale.get_value())
+        return int(u / self.scale.get_value())
 
     def pixel2unit(self, p):
-        return long(p * self.scale.get_value())
+        return int(p * self.scale.get_value())
 
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
@@ -268,7 +268,7 @@ class Montage(AdhocView):
         """
         def drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 for ann in sources:
                     self.insert(ann, i)
                     # If the origin is from the same montage, then
@@ -319,7 +319,7 @@ class Montage(AdhocView):
             """Go to the beginning of the annotation, and program the next jump.
             """
             try:
-                w=annotation_queue.next()
+                w=next(annotation_queue)
                 if self.current_widget is not None:
                     self.current_widget.fraction_marker=None
                 self.current_widget=w
@@ -369,7 +369,7 @@ class Montage(AdhocView):
             self.scale.set_value(1.0 * self.duration / (display_size / adj.get_value() ))
 
             # Update the zoom combobox value
-            self.zoom_combobox.get_child().set_text('%d%%' % long(100 * adj.get_value()))
+            self.zoom_combobox.get_child().set_text('%d%%' % int(100 * adj.get_value()))
             return True
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
@@ -377,7 +377,7 @@ class Montage(AdhocView):
                 m=re.match('advene:/adhoc/%d/(.+)' % hash(self),
                            selection.get_data())
                 if m:
-                    h=long(m.group(1))
+                    h=int(m.group(1))
                     l=[ w for w in self.contents if hash(w) == h ]
                     if l:
                         # Found the element. Remove it.
@@ -450,7 +450,7 @@ class Montage(AdhocView):
         tb.insert(b, -1)
 
         self.zoom_combobox=dialog.list_selector_widget(members=[
-                ( f, "%d%%" % long(100*f) )
+                ( f, "%d%%" % int(100*f) )
                 for f in [
                     (1.0 / pow(1.5, n)) for n in range(0, 10)
                     ]
@@ -498,7 +498,7 @@ class Montage(AdhocView):
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 for ann in sources:
                     if ann is None:
                         self.log("Problem when getting annotation from DND")
@@ -513,7 +513,7 @@ class Montage(AdhocView):
                 self.refresh()
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                at=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
+                at=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
                 for a in at.annotations:
                     self.insert(a)
                 self.refresh()

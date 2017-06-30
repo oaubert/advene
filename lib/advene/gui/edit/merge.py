@@ -76,7 +76,7 @@ class TreeViewMerger:
                                labels.setdefault(name, name),
                                "%s %s (%s)" % (helper.get_type(s),
                                                self.controller.get_title(s),
-                                               getattr(s, 'id', unicode(s))),
+                                               getattr(s, 'id', str(s))),
                                True ])
         return store
 

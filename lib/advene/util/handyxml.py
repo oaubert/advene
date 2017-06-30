@@ -12,11 +12,6 @@ from advene.util.expat import PyExpat
 __version__ = '1.1.20040127'        # History at the end of the file.
 __all__ = ['path', 'xml', 'xpath']
 
-try:
-    True, False
-except NameError:
-    True, False = (1==1, 1==0)
-
 # Try to use 4Suite for speed.
 bDomlette = False
 try:
@@ -77,12 +72,12 @@ class HandyXmlWrapper:
             if els:
                 # Save the attribute, since this could be a hasattr
                 # that will be followed by getattr
-                els = map(HandyXmlWrapper, els)
+                els = list(map(HandyXmlWrapper, els))
                 if type(self.node) == types.InstanceType:
                     setattr(self.node, attr, els)
                 return els
 
-        raise AttributeError, "Couldn't find %s for node" % attr
+        raise AttributeError("Couldn't find %s for node" % attr)
 
 # The path on which we look for XML files.
 path = ['.']
@@ -93,7 +88,7 @@ def _findFile(filename):
     ret = None
     searchPath = path
     # If cog is in use, then use its path as well.
-    if sys.modules.has_key('cog'):
+    if 'cog' in sys.modules:
         searchPath += sys.modules['cog'].path
     # Search the directories on the path.
     for dir in searchPath:
@@ -116,13 +111,13 @@ def xml(xmlin, forced=False):
     filename = None
 
     # A string argument is a file name.
-    if isinstance(xmlin, types.StringTypes):
+    if isinstance(xmlin, (str,)):
         filename = _findFile(xmlin)
         if not filename:
             raise "Couldn't find XML to parse: %s" % xmlin
 
     if filename:
-        if _xmlcache.has_key(filename) and not forced:
+        if filename in _xmlcache and not forced:
             return _xmlcache[filename]
         xmlin = open(filename)
 
@@ -144,10 +139,10 @@ if bXPath:
     def xpath(input, expr):
         """ Evaluate the xpath expression against the input XML.
         """
-        if isinstance(input, types.StringTypes) or hasattr(input, 'read'):
+        if isinstance(input, (str,)) or hasattr(input, 'read'):
             # If input is a filename or an open file, then parse the XML.
             input = xml(input)
-        return map(HandyXmlWrapper, xml_xpath.Evaluate(expr, input))
+        return list(map(HandyXmlWrapper, xml_xpath.Evaluate(expr, input)))
 
 else:
     def xpath(input, expr):

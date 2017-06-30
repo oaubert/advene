@@ -28,11 +28,11 @@ Widgets can register with this trace builder to receive the trace.
 import os
 
 from threading import Thread
-import Queue
+import queue
 from gi.repository import GObject
 import time
 import socket
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import xml.dom
 from gettext import gettext as _
 
@@ -61,7 +61,7 @@ name="Trace Builder plugin"
 class TraceBuilder(Thread):
     def __init__ (self, controller=None, parameters=None, package=None, ntbd=False, nte=False):
         Thread.__init__(self)
-        self.equeue = Queue.Queue(-1)
+        self.equeue = queue.Queue(-1)
         self.exit_code = "###\n"
         #self.close_on_package_load = False
 
@@ -159,7 +159,7 @@ class TraceBuilder(Thread):
         if self.controller:
             self.controller.log(m, level)
         else:
-            print m
+            print(m)
 
     def run(self):
         while (1):
@@ -186,20 +186,20 @@ class TraceBuilder(Thread):
         if config.data.preferences['record-actions']:
             try:
                 fn = self.export()
-            except Exception, e:
-                self.log("error exporting trace : %s" % unicode(e).encode('utf-8'))
+            except Exception as e:
+                self.log("error exporting trace : %s" % str(e).encode('utf-8'))
 
         if self.network_broadcasting:
             self.end_broadcasting()
 
     def init_broadcasting(self):
-        self.bdq = Queue.Queue(-1)
+        self.bdq = queue.Queue(-1)
         self.tbroad = TBroadcast(self.host, self.port, self.bdq)
         self.tbroad.start()
 
     def export(self):
         # Check that there are events to record
-        if not sum( len(l) for l in self.trace.levels.itervalues() ):
+        if not sum( len(l) for l in self.trace.levels.values() ):
             self.log("No event to export")
             return ''
 
@@ -211,7 +211,7 @@ class TraceBuilder(Thread):
                                      category='settings')
         try:
             stream=open(fname, 'wb')
-        except (OSError, IOError), e:
+        except (OSError, IOError) as e:
             #self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             return None
@@ -284,7 +284,7 @@ class TraceBuilder(Thread):
         self.alert_registered(None, None, None)
         return True
 
-    def search(self, trace, words=u'', exact=False, options=None):
+    def search(self, trace, words='', exact=False, options=None):
         if options is None:
             options=['oname', 'oid', 'ocontent']
         # exact will be to match exact terms or just find the terms in a string
@@ -309,9 +309,9 @@ class TraceBuilder(Thread):
                     if contentb > 0 :
                         contentb = contentb+9
                         contentf = content.find('"', contentb)
-                        content = urllib.unquote(content[contentb:contentf])
-                        content = unicode(content)
-                    name = unicode(o.concerned_object['name'])
+                        content = urllib.parse.unquote(content[contentb:contentf])
+                        content = str(content)
+                    name = str(o.concerned_object['name'])
                     _id = o.concerned_object['id']
                     found = False or (not exact and 'oname' in options and name.find(words.lower())>=0) or (exact and 'oname' in options and name==words) or (not exact and 'oid' in options and _id.lower().find(words.lower())>=0) or (exact and 'oid' in options and _id==words) or (not exact and 'ocontent' in options and content.lower().find(words.lower())>=0) or (exact and 'ocontent' in options and content==words)
                     if found and not o in temp.levels['operations']:
@@ -463,7 +463,7 @@ class TraceBuilder(Thread):
                         elif ot==advene.model.view.View:
                             typ="View building"
                         else:
-                            print "undefined action type ! %s" % ev.o_type
+                            print("undefined action type ! %s" % ev.o_type)
                             continue
                     if tmp_opened_actions[typ]:
                         # an action is already opened for this type of event
@@ -475,7 +475,7 @@ class TraceBuilder(Thread):
                             tmp_opened_actions[typ]=None
                         continue
                     #no corresponding action was already opened
-                    for t in tmp_opened_actions.keys():
+                    for t in list(tmp_opened_actions.keys()):
                         #we close every opened actions except Navigation
                         if t != "Navigation":
                             tmp_opened_actions[t]=None
@@ -562,7 +562,7 @@ class TraceBuilder(Thread):
                       'mimetype=' + elem.type.mimetype,
                       'begin=' + str(elem.fragment.begin),
                       'end=' + str(elem.fragment.end),
-                      'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
+                      'content="'+ urllib.parse.quote(elem.content.data.encode('utf-8'))+'"')
                             )
                 elem_name='annotation'
                 elem_id=elem.id
@@ -577,7 +577,7 @@ class TraceBuilder(Thread):
                       'mimetype=' + elem.type.mimetype,
                       'source=' + elem.members[0].id,
                       'dest=' + elem.members[1].id,
-                      'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
+                      'content="'+ urllib.parse.quote(elem.content.data.encode('utf-8'))+'"')
                     )
                 elem_name='relation'
                 elem_id=elem.id
@@ -620,7 +620,7 @@ class TraceBuilder(Thread):
                 if isinstance(elem, advene.model.view.View):
                     ev_content= "\n".join(
                         ('view=' + elem.id,
-                         'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
+                         'content="'+ urllib.parse.quote(elem.content.data.encode('utf-8'))+'"')
                         )
                     elem_name=elem.title
                     elem_id=elem.id
@@ -654,7 +654,7 @@ class TraceBuilder(Thread):
         ev_undo=False
         if 'undone' in obj:
             ev_undo = True
-        ev = Event(ev_name, ev_time, ev_activity_time, unicode(ev_content), ev_movie, ev_movie_time, elem_name, elem_id, elem_type, elem_class_id)
+        ev = Event(ev_name, ev_time, ev_activity_time, str(ev_content), ev_movie, ev_movie_time, elem_name, elem_id, elem_type, elem_class_id)
         #ev = Event(ev_name, ev_time, ev_activity_time, ev_snapshot, ev_content, ev_movie, ev_movie_time, elem_name, elem_id)
         self.trace.add_to_trace('events', ev)
         return ev
@@ -707,7 +707,7 @@ class TraceBuilder(Thread):
                       'mimetype=' + elem.type.mimetype,
                       'begin=' + str(elem.fragment.begin),
                       'end=' + str(elem.fragment.end),
-                      'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
+                      'content="'+ urllib.parse.quote(elem.content.data.encode('utf-8'))+'"')
                             )
                 elem_name='annotation'
                 elem_id=elem.id
@@ -722,7 +722,7 @@ class TraceBuilder(Thread):
                       'mimetype=' + elem.type.mimetype,
                       'source=' + elem.members[0].id,
                       'dest=' + elem.members[1].id,
-                      'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
+                      'content="'+ urllib.parse.quote(elem.content.data.encode('utf-8'))+'"')
                     )
                 elem_name='relation'
                 elem_id=elem.id
@@ -765,7 +765,7 @@ class TraceBuilder(Thread):
                 if isinstance(elem, advene.model.view.View):
                     op_content= "\n".join(
                         ('view=' + elem.id,
-                         'content="'+ urllib.quote(elem.content.data.encode('utf-8'))+'"')
+                         'content="'+ urllib.parse.quote(elem.content.data.encode('utf-8'))+'"')
                         )
                     elem_name=elem.title
                     elem_id=elem.id
@@ -799,7 +799,7 @@ class TraceBuilder(Thread):
             prev = self.trace.levels['operations'][-1]
             if op_name in self.editEndNames and prev.name in self.editEndNames and prev.concerned_object['id'] == elem_id:
                 return
-        op = Operation(op_name, op_time, op_activity_time, unicode(op_content), op_movie, op_movie_time, elem_name, elem_id, elem_type, elem_class_id)
+        op = Operation(op_name, op_time, op_activity_time, str(op_content), op_movie, op_movie_time, elem_name, elem_id, elem_type, elem_class_id)
         self.trace.add_to_trace('operations', op)
         return op
 
@@ -827,7 +827,7 @@ class TraceBuilder(Thread):
             ac.add_operation(ope)
             return ac
         #no existing action found, we close every previously opened actions except navigation
-        for t in self.opened_actions.keys():
+        for t in list(self.opened_actions.keys()):
             if t != "Navigation":
                 self.opened_actions[t]=None
         # we create a new action
@@ -888,21 +888,21 @@ class Trace:
 
     def add_to_trace(self, level, obj):
         # add an object to a level of the trace
-        if obj is None or not self.levels.has_key(level):
+        if obj is None or level not in self.levels:
             return None
         self.levels[level].append(obj)
         return obj
 
     def remove_from_trace(self, level, obj):
         # remove an object from the trace
-        if obj is None or not self.levels.has_key(level) or obj not in self.levels[level]:
+        if obj is None or level not in self.levels or obj not in self.levels[level]:
             return None
         self.levels[level].remove(obj)
         return obj
 
     def add_level(self, level):
         # create a new level in the trace
-        if self.levels.has_key(level):
+        if level in self.levels:
             return None
         self.levels[level]=[]
         return self.levels[level]
@@ -910,32 +910,32 @@ class Trace:
     def remove_level(self, level):
         # remove a level from the trace
         if level == 'actions' or level == 'operations' or level=='events':
-            print 'You cannot delete events, operations and actions levels'
+            print('You cannot delete events, operations and actions levels')
             return
-        if self.levels.has_key(level):
+        if level in self.levels:
             del self.levels[level]
         return
 
     def rename_level(self, level, new_name):
         # change the name of a level of the trace
-        if (not self.levels.has_key(level)) or self.levels.has_key(new_name) or level == 'actions' or level == 'operations':
-            print 'You cannot rename operations and actions levels'
+        if (level not in self.levels) or new_name in self.levels or level == 'actions' or level == 'operations':
+            print('You cannot rename operations and actions levels')
             return None
         self.levels[new_name]=self.levels[level]
         del self.levels[level]
         return self.levels[new_name]
 
     def get_level(self, level):
-        if self.levels.has_key(level):
+        if level in self.levels:
             return self.levels[level]
         else:
             return None
 
     def list_all(self):
         for i in self.levels:
-            print "Trace niveau \'%s\'" % i
+            print("Trace niveau \'%s\'" % i)
             for t in self.levels[i]:
-                print "    %s : \'%s\'" % (t, t.name)
+                print("    %s : \'%s\'" % (t, t.name))
         return
 
 class Event:
@@ -943,7 +943,7 @@ class Event:
         self.name = name
         self.time = time_
         self.activity_time = actime
-        self.content = content or u''
+        self.content = content or ''
         self.movie = movie
         self.movietime = movietime
         self.comment = ''
@@ -1001,7 +1001,7 @@ class Operation:
         self.name = name
         self.time = time_
         self.activity_time = actime
-        self.content = content or u''
+        self.content = content or ''
         self.movie = movie
         self.movietime = movietime
         self.comment = ''
@@ -1064,7 +1064,7 @@ class Action:
         self.time = [ begintime, endtime ]
         self.activity_time = [ acbegintime, acendtime ]
 
-        self.content = content or u''
+        self.content = content or ''
 
         self.movie = movie
         self.movietime = movietime
@@ -1122,11 +1122,11 @@ class TExport(Thread):
             sck = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
             addr = socket.getaddrinfo(self.host, self.port)
             sck.connect(addr[0][4])
-        except (socket.error, socket.gaierror), e:
-            print(_("Cannot export to %(host)s:%(port)s %(error)s") % {
+        except (socket.error, socket.gaierror) as e:
+            print((_("Cannot export to %(host)s:%(port)s %(error)s") % {
                     'host': self.host,
                     'port': self.port,
-                    'error': e})
+                    'error': e}))
             return
         nbe=0
         try:
@@ -1136,14 +1136,14 @@ class TExport(Thread):
                 tmp=e.to_xml_string(id_e)
                 sck.sendall(tmp)
                 nbe+=1
-        except (socket.error, socket.gaierror), e:
-            print(_("Cannot send data to %(host)s:%(port)s %(error)s") % {
+        except (socket.error, socket.gaierror) as e:
+            print((_("Cannot send data to %(host)s:%(port)s %(error)s") % {
                     'host': self.host,
                     'port': self.port,
-                    'error': e } )
+                    'error': e } ))
             sck.close()
             return
-        print '%s events exported to %s:%s' % (nbe, self.host, self.port)
+        print('%s events exported to %s:%s' % (nbe, self.host, self.port))
         sck.close()
 
 class TBroadcast(Thread):
@@ -1161,11 +1161,11 @@ class TBroadcast(Thread):
             sck = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
             addr = socket.getaddrinfo(self.host, self.port)
             sck.connect(addr[0][4])
-        except (socket.error, socket.gaierror), e:
-            print(_("Cannot export to %(host)s:%(port)s %(error)s") % {
+        except (socket.error, socket.gaierror) as e:
+            print((_("Cannot export to %(host)s:%(port)s %(error)s") % {
                     'host': self.host,
                     'port': self.port,
-                    'error': e})
+                    'error': e}))
             return
         nbe=0
         # Infinite loop waiting for event to send
@@ -1176,7 +1176,7 @@ class TBroadcast(Thread):
             self.obsel = self.bdq.get()
             if not isinstance(self.obsel, Event):
                 if self.obsel == "###\n":
-                    print "Broadcasting: death received"
+                    print("Broadcasting: death received")
                     break
                 else:
                     continue
@@ -1184,15 +1184,15 @@ class TBroadcast(Thread):
             try:
                 sck.sendall(tmp)
                 nbe+=1
-            except (socket.error, socket.gaierror), e:
-                print(_("Cannot send event %(nb)s to %(host)s:%(port)s %(error)s") % {
+            except (socket.error, socket.gaierror) as e:
+                print((_("Cannot send event %(nb)s to %(host)s:%(port)s %(error)s") % {
                         'nb': nbe,
                         'host': self.host,
                         'port': self.port,
-                        'error': e})
+                        'error': e}))
                 return
-        print _('%(nb)s events sent to %(host)s:%(port)s during session.') % {
+        print(_('%(nb)s events sent to %(host)s:%(port)s during session.') % {
             'nb': nbe,
             'host': self.host,
-            'port': self.port }
+            'port': self.port })
         sck.close()

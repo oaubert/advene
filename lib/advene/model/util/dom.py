@@ -27,11 +27,7 @@ def printElementSource(element, stream):
 
 def printElementText(element, stream):
     if element.nodeType is TEXT_NODE:
-        # Note: element.data returns a unicode object
-        # that happens to be in the default encoding (iso-8859-1
-        # currently on my system). We encode it to utf-8 to
-        # be sure to deal only with this encoding afterwards.
-        stream.write(element.data.encode('utf-8'))
+        stream.write(element.data)
     elif element.nodeType is ELEMENT_NODE:
         for e in element.childNodes:
             printElementText(e, stream)

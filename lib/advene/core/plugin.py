@@ -22,7 +22,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-import imp
+from importlib.util import spec_from_file_location, module_from_spec
 import os
 import inspect
 import zipfile
@@ -115,14 +115,15 @@ class Plugin(object):
             self._plugin=zi.load_module(fname.replace('/', os.sep))
         else:
             name, ext = os.path.splitext(fname)
-            if ext == '.py':
-                f=open(fullname, 'r')
-                self._plugin = imp.load_source('_'.join( (prefix, name) ), fullname, f )
-                f.close()
-            elif ext == '.pyc':
-                f=open(fullname, 'r')
-                self._plugin = imp.load_compiled('_'.join( (prefix, name) ), fullname, f )
-                f.close()
+            if not ext == '.py' or ext == '.pyc':
+                logger.error("%s is not a python file", fullname)
+                raise PluginException("%s is not a plugin" % fullname)
+
+            f=open(fullname, 'r')
+            self._spec = spec_from_file_location('_'.join( (prefix, name) ), fullname)
+            self._plugin = module_from_spec(self._spec)
+            f.close()
+            self._spec.loader.exec_module(self._plugin)
 
         # Is this really a plugin ?
         if not hasattr(self._plugin, 'name') or not hasattr(self._plugin, 'register'):

@@ -29,11 +29,11 @@ APP='advene'
 try:
     locale.setlocale(locale.LC_ALL, '')
 except locale.Error:
-    print "Error in locale initialization. Interface translation may be incorrect."
+    print("Error in locale initialization. Interface translation may be incorrect.")
     pass
 gettext.bindtextdomain(APP, config.data.path['locale'])
 gettext.textdomain(APP)
-gettext.install(APP, localedir=config.data.path['locale'], unicode=True)
+gettext.install(APP, localedir=config.data.path['locale'], str=True)
 from gettext import gettext as _
 
 from gi.repository import Gtk

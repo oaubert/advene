@@ -38,7 +38,7 @@ import advene.core.version
 import sys
 import os
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import cgi
 import socket
 import imghdr
@@ -75,8 +75,8 @@ class Common:
         err = sys.exc_info()
         if DEBUG:
             logger.error("Error handling", exc_info=True)
-            import traceback, StringIO
-            bodyFile = StringIO.StringIO()
+            import traceback, io
+            bodyFile = io.StringIO()
             traceback.print_exc(file = bodyFile)
             cherrypy.response.status=500
             cherrypy.response.headers['Content-type']='text/html'
@@ -96,8 +96,8 @@ class Common:
         @return: a HTML string
         @rtype: string
         """
-        s = urllib.splittag(
-            urllib.splitquery(cherrypy.request.path_info)[0]
+        s = urllib.parse.splittag(
+            urllib.parse.splitquery(cherrypy.request.path_info)[0]
             )[0]
         path = s.split('/')[1:]
         return """<a href="/">/</a>""" + "/".join(
@@ -389,7 +389,7 @@ class Media(Common):
     def load(self, **params):
         """Load a media file.
         """
-        if params.has_key ('filename'):
+        if 'filename' in params:
             name = params['filename']
             res=[]
             if name == 'dvd':
@@ -409,7 +409,7 @@ class Media(Common):
         if not args:
             res.append(self.start_html (_("Access to packages snapshots"), duplicate_title=True, mode='navigation'))
             res.append ("<ul>")
-            for alias in self.controller.packages.keys ():
+            for alias in list(self.controller.packages.keys ()):
                 res.append ("""<li><a href="/media/snapshot/%s">%s</a></li>""" % (alias, alias))
             res.append("</ul>")
             return "".join(res)
@@ -420,11 +420,11 @@ class Media(Common):
             return self.send_error(400, _("Unknown package alias"))
 
         try:
-            position=long(args[1])
+            position=int(args[1])
         except IndexError:
             # No position was given. Display all available snapshots
             res.append(self.start_html (_("Available snapshots for %s") % alias, duplicate_title=True, mode='navigation'))
-            if (params.has_key('mode') and params['mode'] == 'inline'):
+            if ('mode' in params and params['mode'] == 'inline'):
                 template="""<li><a href="/media/snapshot/%(alias)s/%(position)d"><img src="/media/snapshot/%(alias)s/%(position)d" /></a></li>"""
                 res.append ("""<p><a href="/media/snapshot/%s">Display with no inline images</a></p>""" % alias)
             else:
@@ -432,7 +432,7 @@ class Media(Common):
                 res.append (_("""<p><a href="/media/snapshot/%s?mode=inline">Display with inline images</a></p>""") % alias)
             res.append ("<ul>")
 
-            k = i.keys ()
+            k = list(i.keys ())
             k.sort ()
             for position in k:
                 if i.is_initialized (position):
@@ -471,7 +471,7 @@ class Media(Common):
         if not args:
             res.append(self.start_html (_("Access to packages snapshots"), duplicate_title=True, mode='navigation'))
             res.append ("<ul>")
-            for alias in self.controller.packages.keys ():
+            for alias in list(self.controller.packages.keys ()):
                 res.append ("""<li><a href="/media/snapshot/%s">%s</a></li>""" % (alias, alias))
             res.append("</ul>")
             return "".join(res)
@@ -498,7 +498,7 @@ class Media(Common):
             path.extend(args[2:])
             path='/'.join(path)
             ctx=self.controller.build_context(here=a)
-            svg_data=unicode( ctx.evaluateValue(path) )
+            svg_data=str( ctx.evaluateValue(path) )
         elif 'svg' in a.content.mimetype:
             # Overlay svg
             svg_data=a.content.data
@@ -524,9 +524,9 @@ class Media(Common):
         - position: the position in ms
         """
         c=self.controller
-        if params.has_key('stbv'):
+        if 'stbv' in params:
             self.activate_stbvid(params['stbv'])
-        if params.has_key ('filename'):
+        if 'filename' in params:
             c.queue_action(c.set_media, params['filename'])
 
         if not c.player.playlist_get_list():
@@ -537,7 +537,7 @@ class Media(Common):
                 begin=params['position']
             except KeyError:
                 begin=0
-        pos=c.create_position (value=long(begin),
+        pos=c.create_position (value=int(begin),
                                key=c.player.MediaTime,
                                origin=c.player.AbsolutePosition)
         c.queue_action( c.update_status, "start", pos )
@@ -550,7 +550,7 @@ class Media(Common):
         Optional parameters:
         - stbv: the id of the dynamic view that should be activated
         """
-        if params.has_key('stbv'):
+        if 'stbv' in params:
             self.activate_stbvid(params['stbv'])
         self.controller.queue_action(self.controller.update_status, 'pause')
         return self.send_no_content()
@@ -562,7 +562,7 @@ class Media(Common):
         Optional parameters:
         - stbv: the id of the dynamic view that should be activated
         """
-        if params.has_key('stbv'):
+        if 'stbv' in params:
             self.activate_stbvid(params['stbv'])
         self.controller.queue_action(self.controller.update_status, 'stop')
         return self.send_no_content()
@@ -574,7 +574,7 @@ class Media(Common):
         Optional parameters:
         - stbv: the id of the dynamic view that should be activated
         """
-        if params.has_key('stbv'):
+        if 'stbv' in params:
             self.activate_stbvid(params['stbv'])
         self.controller.queue_action(self.controller.update_status, 'resume')
         return self.send_no_content()
@@ -594,7 +594,7 @@ class Media(Common):
     def stbv(self, *args, **query):
         """Activate the given stbv.
         """
-        if not args and not query.has_key('id'):
+        if not args and 'id' not in query:
             cherrypy.response.headers['Content-Type']='text/plain'
             return self.controller.current_stbv.id or 'None'
         else:
@@ -606,9 +606,9 @@ class Media(Common):
                 stbvid=None
             try:
                 self.activate_stbvid(stbvid)
-            except Exception, e:
+            except Exception as e:
                 return self.send_error(400, _("Cannot activate stbvid %(stbvid)s: %(error)s") % { 'stbvid': stbvid,
-                                                                                           'error': unicode(e) })
+                                                                                           'error': str(e) })
             return self.send_redirect("/application/")
 
     stbv.exposed=True
@@ -676,7 +676,7 @@ class Application(Common):
         else:
             res.append(_("""<p>Opened adhoc views: %s</p>""") % ", ".join([ v.view_name for v in c.gui.adhoc_views]))
             res.append(_("""<p>Available adhoc views:</p><ul>"""))
-            l=c.gui.registered_adhoc_views.keys()
+            l=list(c.gui.registered_adhoc_views.keys())
             l.sort()
             for name in l:
                 view=c.gui.registered_adhoc_views[name]
@@ -724,9 +724,9 @@ class Application(Common):
             try:
                 self.activate_stbvid(stbvid)
                 return self.send_redirect("/application/")
-            except Exception, e:
+            except Exception as e:
                 self.send_error(400, _("Cannot activate stbvid %(stbvid)s: %(error)s") % { 'stbvid': stbvid,
-                                                                                           'error': unicode(e) })
+                                                                                           'error': str(e) })
     stbv.exposed=True
 
     def adhoc(self, view=None, arg=None, **query):
@@ -808,9 +808,9 @@ class Application(Common):
         elif cherrypy.request.method == 'PUT':
             data=cherrypy.request.rfile.read()
             # Convert the type.
-            if isinstance(v, int) or isinstance(v, long):
+            if isinstance(v, int) or isinstance(v, int):
                 try:
-                    data=long(data)
+                    data=int(data)
                 except ValueError:
                     return self.send_error(500, _("Invalid value"))
             config.data.web[name]=data
@@ -853,7 +853,7 @@ class Access(Common):
         <input type="text" name="hostname"><input type="submit" value="Add">
         </form>
         """) % "\n".join(["""<tr><td>%(name)s</td><td>%(ip)s</td><td><a href="/admin/access/delete/%(name)s">Remove</a></td></tr>""" % { 'ip': ip, 'name': name }
-                          for (name, ip) in self.controller.server.authorized_hosts.items()])
+                          for (name, ip) in list(self.controller.server.authorized_hosts.items())])
 
     def index(self):
         return "".join( ( self.start_html(_('Access control'), duplicate_title=True, mode='navigation'),
@@ -969,7 +969,7 @@ class Admin(Common):
         </form>
         </body></html>
         """) % { 'packagelist': " | ".join( ['<a href="/packages/%s">%s</a>' % (alias, alias)
-                                             for alias in self.controller.packages.keys() ] ),
+                                             for alias in list(self.controller.packages.keys()) ] ),
                  'displaymode': mode_sw })
         return "".join(res)
     index.exposed=True
@@ -1020,7 +1020,7 @@ class Admin(Common):
                 self.start_html (_("Package %s loaded") % alias, duplicate_title=True, mode='navigation'),
                 _("""<p>Go to the <a href="/packages/%(alias)s">%(alias)s</a> package, or to the <a href="/packages">package list</a>.""") % { 'alias': alias }
                 ))
-        except Exception, e:
+        except Exception as e:
             return self.send_error(501, _("""<p>Cannot load package %(alias)s : %(error)s</p>""" % {
                         'alias': alias,
                         'error': str(e) }))
@@ -1035,7 +1035,7 @@ class Admin(Common):
                 self.start_html (_("Package %s deleted") % alias, duplicate_title=True, mode='navigation'),
                 _("""<p>Go to the <a href="/packages">package list</a>.""")
                 ))
-        except Exception, e:
+        except Exception as e:
             return self.send_error(501, _("""<p>Cannot delete package %(alias)s : %(error)s</p>""" % {
                         'alias': alias,
                         'error': str(e) }
@@ -1056,7 +1056,7 @@ class Admin(Common):
                 self.start_html (_("Package %s saved") % alias, duplicate_title=True, mode='navigation'),
                 _("""<p>Go to the <a href="/packages/%(alias)s">%(alias)s</a> package, or to the <a href="/packages">package list</a>.""") % { 'alias': alias }
                 ))
-        except Exception, e:
+        except Exception as e:
             return self.send_error(501, _("""<p>Cannot save package %(alias)s : %(error)s</p>""" % {
                         'alias': alias,
                         'error': str(e) }
@@ -1076,7 +1076,7 @@ class Admin(Common):
         res=[ self.start_html (_('Available TALES methods'), duplicate_title=True, mode='navigation') ]
         res.append('<ul>')
         c=self.controller.build_context(here=None)
-        k=c.methods.keys()
+        k=list(c.methods.keys())
         k.sort()
         for name in k:
             descr=c.methods[name].__doc__
@@ -1126,7 +1126,7 @@ class Packages(Common):
         <th>Annotations</th>
         </tr>
         """))
-        for alias in self.controller.packages.keys():
+        for alias in list(self.controller.packages.keys()):
             p = self.controller.packages[alias]
             res.append (_("""<tr>
             <td><a href="/packages/%(alias)s">%(alias)s</a></td>
@@ -1196,14 +1196,14 @@ class Packages(Common):
         context.setLocal('request', query)
         # FIXME: the following line is a hack for having qname-keys work
         #        It is a hack because obviously, p is not a "view"
-        context.setLocal (u'view', p)
+        context.setLocal ('view', p)
 
         try:
             objet = context.evaluateValue (expr)
-        except AdveneException, e:
+        except AdveneException as e:
             self.start_html (_("Error"), duplicate_title=True, mode='navigation')
             res.append (_("""The TALES expression %s is not valid.""") % tales)
-            res.append (unicode(e.args[0]).encode('utf-8'))
+            res.append (str(e.args[0]).encode('utf-8'))
             return
 
         displaymode = self.controller.server.displaymode
@@ -1212,7 +1212,7 @@ class Packages(Common):
         # with a content-type method : if it is HTML, we return it normally ;
         # if it is some other thing, we return it with the correct content-type
         # header).
-        if query.has_key('mode'):
+        if 'mode' in query:
             displaymode = query['mode']
             del (query['mode'])
         if isinstance(objet, str) and self.image_type (objet) is not None:
@@ -1232,7 +1232,7 @@ class Packages(Common):
                     # Non-initialized snapshot. Ask for update.
                     ts=re.findall('imagecache/(\d+)', expr)
                     if ts:
-                        self.controller.queue_action(self.controller.update_snapshot, long(ts[0]))
+                        self.controller.queue_action(self.controller.update_snapshot, int(ts[0]))
             cherrypy.response.status=200
             cherrypy.response.headers['Content-type']=mimetype
             self.no_cache ()
@@ -1267,15 +1267,15 @@ class Packages(Common):
             context.pushLocals()
             context.setLocal('request', query)
             # FIXME: should be default view
-            context.setLocal(u'view', objet)
+            context.setLocal('view', objet)
             try:
                 v=objet.view (context=context)
                 res.append( self.start_html(mimetype=v.contenttype) )
                 if v.contenttype.startswith('text'):
-                    res.append (unicode(v).encode('utf-8'))
+                    res.append (str(v).encode('utf-8'))
                 else:
                     res.append(v)
-            except simpletal.simpleTAL.TemplateParseException, e:
+            except simpletal.simpleTAL.TemplateParseException as e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error in the template code.</p>
@@ -1284,19 +1284,19 @@ class Packages(Common):
                         'tagname': cgi.escape(e.location),
                         'message': e.errorDescription} )
                 return "".join(res)
-            except simpleTALES.ContextContentException, e:
+            except simpleTALES.ContextContentException as e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>An invalid character is in the Context:</p>
                 <p>Error message: <em>%(error)s</em></p><pre>%(message)s</pre>""")
                                  % {'error': e.errorDescription,
-                                    'message': unicode(e.args[0]).encode('utf-8')})
+                                    'message': str(e.args[0]).encode('utf-8')})
                 return "".join(res)
-            except AdveneException, e:
+            except AdveneException as e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error in the TALES expression.</p>
-                <pre>%s</pre>""") % cgi.escape(unicode(e.args[0]).encode('utf-8')))
+                <pre>%s</pre>""") % cgi.escape(str(e.args[0]).encode('utf-8')))
                 return "".join(res)
         else:
             mimetype=None
@@ -1310,14 +1310,14 @@ class Packages(Common):
             try:
                 res.append( self.start_html(mimetype=mimetype) )
                 if mimetype and mimetype.startswith('text'):
-                    res.append (unicode(objet).encode('utf-8'))
+                    res.append (str(objet).encode('utf-8'))
                 else:
                     res.append(str(objet))
-            except AdveneException, e:
+            except AdveneException as e:
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error.</p>
-                <pre>%s</pre>""") % cgi.escape(unicode(e.args[0]).encode('utf-8')))
-            except simpletal.simpleTAL.TemplateParseException, e:
+                <pre>%s</pre>""") % cgi.escape(str(e.args[0]).encode('utf-8')))
+            except simpletal.simpleTAL.TemplateParseException as e:
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error in the template code.</p>
                 <p>Tag name: <strong>%(tagname)s</strong></p>
@@ -1415,7 +1415,7 @@ class Packages(Common):
                                     % pkgid)
 
         # Handle form parameters (from the navigation interface)
-        if query.has_key('view'):
+        if 'view' in query:
             if query['view'] != '':
                 # The 'view' parameter is in fact the new path
                 # that we should redirect to
@@ -1425,7 +1425,7 @@ class Packages(Common):
                 # the view field will exist but be empty, so delete it
                 del(query['view'])
 
-        if query.has_key('path'):
+        if 'path' in query:
             # Append the given path to the current URL
             p="/".join( (cherrypy.url(), query['path']) )
             if query['path'].find ('..') != -1:
@@ -1435,8 +1435,8 @@ class Packages(Common):
                 location = p
             else:
                 location = "%s?%s" % (p,
-                                      "&".join (["%s=%s" % (k,urllib.quote(query[k]))
-                                                 for k in query.keys()]))
+                                      "&".join (["%s=%s" % (k,urllib.parse.quote(query[k]))
+                                                 for k in list(query.keys())]))
             return self.send_redirect (location)
 
         tales = "/".join (args[1:])
@@ -1450,7 +1450,7 @@ class Packages(Common):
 
         try:
             return self.display_package_element (p , tales, query)
-        except simpletal.simpleTAL.TemplateParseException, e:
+        except simpletal.simpleTAL.TemplateParseException as e:
             res=[ self.start_html(_("Error")) ]
             res.append(_("<h1>Error</h1>"))
             res.append(_("""<p>There was an error in the template code.</p>
@@ -1458,11 +1458,11 @@ class Packages(Common):
             <p>Error message: <em>%(message)s</em></p>""") % {
                         'tagname': cgi.escape(e.location),
                         'message': e.errorDescription })
-        except AdveneException, e:
+        except AdveneException as e:
             res=[ self.start_html(_("Error")) ]
             res.append(_("<h1>Error</h1>"))
             res.append(_("""<p>There was an error in the expression.</p>
-            <pre>%s</pre>""") % cgi.escape(unicode(e.args[0]).encode('utf-8')))
+            <pre>%s</pre>""") % cgi.escape(str(e.args[0]).encode('utf-8')))
         except:
             # FIXME: should use standard Cherrypy error handling.
             t, v, tr = sys.exc_info()
@@ -1475,8 +1475,8 @@ class Packages(Common):
             %(traceback)s</pre>""") % {
                     'expr': tales,
                     'package': pkgid,
-                    'type': unicode(tales),
-                    'value': unicode(v),
+                    'type': str(tales),
+                    'value': str(v),
                     'traceback': "\n".join(code.traceback.format_tb (tr)) })
 
         return "".join(res)
@@ -1603,13 +1603,13 @@ class Packages(Common):
 
         try:
             objet = context.evaluateValue (expr)
-        except Exception, e:
-            return self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
+        except Exception as e:
+            return self.send_error(501, _("<h1>Error</h1>") + str(e.args[0]).encode('utf-8'))
         try:
             objet.__setattr__(attribute, data)
             cherrypy.response.status=200
             return _("Value successfuly updated")
-        except Exception, e:
+        except Exception as e:
             return self.send_error(501, _("Unable to update the attribute %(attribute)s for element %(element)s: %(error)s." ) % { 'attribute': attribute, 'element': objet, 'error': e })
 
     def handle_post_request(self, *args, **query):
@@ -1773,8 +1773,8 @@ class Packages(Common):
         if query['action'] == 'update':
             try:
                 objet = context.evaluateValue (expr)
-            except Exception, e:
-                return self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
+            except Exception as e:
+                return self.send_error(501, _("<h1>Error</h1>") + str(e.args[0]).encode('utf-8'))
             if hasattr(objet, attribute):
                 objet.__setattr__(attribute, data)
                 if 'redirect' in query and query['redirect']:
@@ -1884,11 +1884,11 @@ class Packages(Common):
                 try:
                     v = objet.createView(**kw)
                     objet.views.append(v)
-                except Exception, e:
+                except Exception as e:
                     return self.send_error(500,
                                            _("<p>Error while creating view %(id)s</p><pre>%(error)s</pre>") % {
                             'id': kw['ident'],
-                            'error': unicode(e).encode('utf-8') })
+                            'error': str(e).encode('utf-8') })
 
                 if 'redirect' in query and query['redirect']:
                     return self.send_redirect(query['redirect'])
@@ -1908,7 +1908,7 @@ class Packages(Common):
                 # member2 = second member (annotation id)
                 # data = content data (optional)
                 for k in ('relationtype', 'member1', 'member2'):
-                    if not query.has_key(k):
+                    if k not in query:
                         return self.send_error(500, _("Missing %s parameter") % k)
                 rt = context.evaluateValue("here/relationTypes/%s" % query['relationtype'])
                 if rt is None:
@@ -1935,8 +1935,8 @@ class Packages(Common):
                     relation.content.data=data
                     objet.relations.append(relation)
                     self.controller.notify("RelationCreate", relation=relation)
-                except Exception, e:
-                    query['error']=unicode(e).encode('utf-8')
+                except Exception as e:
+                    query['error']=str(e).encode('utf-8')
                     return self.send_error(500, _("<p>Error while creating relation between %(member1)s and %(member2)s :</p><pre>%(error)s</pre>") % query)
                 if 'redirect' in query and query['redirect']:
                     return self.send_redirect(query['redirect'])
@@ -1957,15 +1957,15 @@ class Packages(Common):
                 except KeyError:
                     id_ = objet._idgenerator.get_id(Annotation)
                 try:
-                    begin=long(query['begin'])
-                    end=long(query['end'])
+                    begin=int(query['begin'])
+                    end=int(query['end'])
                     fragment=MillisecondFragment(begin=begin, end=end)
                     a=objet.createAnnotation(ident=id_, type=at, fragment=fragment)
                     objet._idgenerator.add(id_)
                     a.content.data = data
                     objet.annotations.append(a)
                     self.controller.notify("AnnotationCreate", annotation=a)
-                except Exception, e:
+                except Exception as e:
                     t, v, tr = sys.exc_info()
                     import code
                     return self.send_error(500, _("""<p>Error while creating annotation of type %(type)s :<pre>
@@ -1973,8 +1973,8 @@ class Packages(Common):
                     %(value)s
                     %(traceback)s</pre>""") % {
                             'type': query['annotationtype'],
-                            'errortype': unicode(t),
-                            'value': unicode(v),
+                            'errortype': str(t),
+                            'value': str(v),
                             'traceback': "\n".join(code.traceback.format_tb (tr))
                             })
 
@@ -1985,7 +1985,7 @@ class Packages(Common):
                 return self.send_error(500, _("Error: Cannot create an object of type %s.") % (query['type']))
 
         else:
-            return self.send_error(500, _("Error: Cannot perform the action <em>%(action)s</em> on <code>%(object)s</code></p>") % { 'action': query['action'], 'object': cgi.escape(unicode(objet)) })
+            return self.send_error(500, _("Error: Cannot perform the action <em>%(action)s</em> on <code>%(object)s</code></p>") % { 'action': query['action'], 'object': cgi.escape(str(objet)) })
 
 class Action(Common):
     """Handles the X{/action}  requests.
@@ -2000,8 +2000,8 @@ class Action(Common):
         catalog=self.controller.event_handler.catalog
         res=[ self.start_html(_("Available actions"), duplicate_title=True, mode='navigation') ]
         res.append("<ul>")
-        d=dict(catalog.get_described_actions(expert=True).iteritems())
-        k=d.keys()
+        d=dict(iter(catalog.get_described_actions(expert=True).items()))
+        k=list(d.keys())
         k.sort()
         for name in k:
             a=catalog.get_action(name)
@@ -2168,7 +2168,7 @@ class AdveneWebServer:
         # Not used for the moment.
         self.authorized_hosts = {'127.0.0.1': 'localhost'}
 
-        self.urlbase = u"http://localhost:%d/" % port
+        self.urlbase = "http://localhost:%d/" % port
 
         app_config={
             '/favicon.ico': {
@@ -2185,8 +2185,8 @@ class AdveneWebServer:
         try:
             # engine.start *must* be started from the main thread.
             cherrypy.engine.start()
-        except Exception, e:
-            self.controller.log(_("Cannot start HTTP server: %s") % unicode(e))
+        except Exception as e:
+            self.controller.log(_("Cannot start HTTP server: %s") % str(e))
 
     def start(self):
         """Start the webserver.
@@ -2194,8 +2194,8 @@ class AdveneWebServer:
         def protected_start():
             try:
                 cherrypy.engine.start()
-            except Exception, e:
-                self.controller.log(_("Cannot start HTTP server: %s") % unicode(e))
+            except Exception as e:
+                self.controller.log(_("Cannot start HTTP server: %s") % str(e))
         self.controller.queue_action(protected_start)
         return True
 

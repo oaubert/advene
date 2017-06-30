@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 import json
 import time
-import StringIO
+import io
 import inspect
 try:
     from hashlib import md5
@@ -32,7 +32,7 @@ import os
 import sys
 import re
 import zipfile
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import unicodedata
 
 import advene.core.config as config
@@ -92,7 +92,7 @@ def fourcc2rawcode (code):
         'png ' : 'PNG',
         ' gnp' : 'PNG', # On PPC-MacOS X
         }
-    if isinstance(code, int) or isinstance(code, long):
+    if isinstance(code, int) or isinstance(code, int):
         fourcc = "%c%c%c%c" % (code & 0xff,
                                code >> 8 & 0xff,
                                code >> 16 & 0xff,
@@ -112,19 +112,19 @@ class TitledElement:
         self.value=value
         self.title=title
 
-class TypedUnicode(unicode):
+class TypedUnicode(str):
     """Unicode string with a mimetype attribute.
     """
     def __new__(cls, value=""):
-        s=unicode.__new__(cls, value)
+        s=str.__new__(cls, value)
         s.contenttype='text/plain'
         return s
 
-class TypedString(str):
-    """String with a mimetype attribute.
+class TypedString(bytes):
+    """Bytes with a mimetype attribute.
     """
     def __new__(cls, value=""):
-        s=str.__new__(cls, value)
+        s=bytes.__new__(cls, value)
         s.contenttype='text/plain'
         return s
 
@@ -154,7 +154,7 @@ def snapshot2png (image, output=None):
         try:
             i = Image.fromstring ("RGB", (image.width, image.height), image.data,
                                   "raw", code)
-            ostream = StringIO.StringIO ()
+            ostream = io.StringIO ()
             i.save(ostream, 'png')
             png=TypedString(ostream.getvalue())
             png.contenttype='image/png'
@@ -182,7 +182,7 @@ def mediafile2id (mediafile):
     @return: an id
     @rtype: string
     """
-    m=md5(mediafile)
+    m=md5(mediafile.encode('utf-8'))
     return m.hexdigest()
 
 def package2id (p):
@@ -214,7 +214,7 @@ def title2id(t):
     It will replace spaces by underscores, accented chars by their
     accented equivalent, and other characters by -
     """
-    t=unicode(t)
+    t=str(t)
     (text, count)=re.subn(r'\s', '_', t)
     res=[]
     for c in text:
@@ -233,7 +233,7 @@ def title2id(t):
 def unaccent(t):
     """Remove accents from a string.
     """
-    t=unicode(t)
+    t=str(t)
     res=[]
     for c in t:
         if not extended_valid_re.match(c):
@@ -258,7 +258,7 @@ def format_time_reference(val = 0):
         return '--:--:--.---'
     elif val < 0:
         return '00:00:00.000'
-    (s, ms) = divmod(long(val), 1000)
+    (s, ms) = divmod(int(val), 1000)
     # Format: HH:MM:SS.mmm
     return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
 
@@ -276,14 +276,14 @@ def format_time (val = 0):
         val = 0
     elif val < 0:
         val = 0
-    (s, ms) = divmod(long(val), 1000)
+    (s, ms) = divmod(int(val), 1000)
     f = config.data.preferences['timestamp-format']
     if f == '%S':
         ret = str(s)
     elif f == '%.S':
         ret = '%d.%03d' % (s, ms)
     else:
-        f = f.replace('''%.S''', '''%S.''' + '%03d' % ms).replace('''%fS''', '''%Sf''' + '%02d' % long(ms * config.data.preferences['default-fps'] / 1000))
+        f = f.replace('''%.S''', '''%S.''' + '%03d' % ms).replace('''%fS''', '''%Sf''' + '%02d' % int(ms * config.data.preferences['default-fps'] / 1000))
         try:
             ret = time.strftime(f, time.gmtime(s))
         except ValueError:
@@ -329,7 +329,7 @@ def parse_time(s):
       NN: frame number
     """
     try:
-        val=long(s)
+        val=int(s)
     except ValueError:
         # It was not a plain integer. Try to determine its format.
         t=None
@@ -351,7 +351,7 @@ def parse_time(s):
             if 'ms' in t and t['ms']:
                 if t['sep'] == 'f':
                     # Frame number
-                    t['ms'] = long(long(t['ms']) * (1000 / config.data.preferences['default-fps']))
+                    t['ms'] = int(int(t['ms']) * (1000 / config.data.preferences['default-fps']))
                 else:
                     t['ms']=(t['ms'] + ("0" * 4))[:3]
             else:
@@ -360,7 +360,7 @@ def parse_time(s):
                 if t[k] is None:
                     t[k] = 0
                 try:
-                    t[k] = long(t[k] or 0)
+                    t[k] = int(t[k] or 0)
                 except ValueError:
                     t[k] = 0
             val= t.get('ms', 0) + t.get('s', 0) * 1000 + t.get('m', 0) * 60000 + t.get('h', 0) * 3600000
@@ -381,7 +381,7 @@ def matching_relationtypes(package, typ1, typ2):
                 i=uri[uri.index('#')+1:]
             except ValueError:
                 i=uri
-            return unicode(i)
+            return str(i)
 
         # URI version
         # lat=[ absolute_uri(package, t) for t in rt.getHackedMemberTypes() ]
@@ -395,8 +395,8 @@ def matching_relationtypes(package, typ1, typ2):
 
         logger.debug("Testing (%s, %s) matching %s", t1, t2, lat)
         if len (lat) == 2 \
-        and (lat[0] == u'' or lat[0] == t1) \
-        and (lat[1] == u'' or lat[1] == t2):
+        and (lat[0] == '' or lat[0] == t1) \
+        and (lat[1] == '' or lat[1] == t2):
             r.append(rt)
     return r
 
@@ -417,7 +417,7 @@ def get_type(el):
     try:
         t=element_label[type(el)]
     except:
-        t=unicode(type(el))
+        t=str(type(el))
     return t
 
 def get_valid_members (el):
@@ -441,7 +441,7 @@ def get_valid_members (el):
         l.extend(el.ids())
     except AttributeError:
         try:
-            l.extend(el.keys())
+            l.extend(list(el.keys()))
         except AttributeError:
             pass
     if l:
@@ -525,13 +525,13 @@ def get_statistics(fname):
         # If the file is a .azp, then it may have a
         # META-INF/statistics.xml file. Use it.
         # Encoding issues on win32:
-        if isinstance(fname, unicode):
+        if isinstance(fname, str):
             fname=fname.encode(sys.getfilesystemencoding())
         try:
             z=zipfile.ZipFile(fname, 'r')
-        except Exception, e:
+        except Exception as e:
             raise AdveneException(_("Cannot read %(filename)s: %(error)s") % {'filename': fname,
-                                                                              'error': unicode(e)})
+                                                                              'error': str(e)})
 
         # Check the validity of mimetype
         try:
@@ -553,13 +553,13 @@ def get_statistics(fname):
         # Generate it (it can take some time)
         try:
             p=Package(uri=fname)
-        except Exception, e:
-            raise(_("Error:\n%s") % unicode(e))
+        except Exception as e:
+            raise _("Error:\n%s")
         st=p.generate_statistics()
         p.close()
 
     # We have the statistics in XML format. Render it.
-    s=StringIO.StringIO(st)
+    s=io.StringIO(st)
     h=advene.model.package.StatisticsHandler()
     data=h.parse_file(s)
     s.close()
@@ -722,17 +722,17 @@ def get_video_stream_from_website(url):
     if  'dailymotion' in url:
         if '/get/' in url:
             return url
-        u=urllib.urlopen(url)
+        u=urllib.request.urlopen(url)
         data=[ l for l in u.readlines() if '.addVariable' in l and 'flv' in l ]
         u.close()
         if data:
             addr=re.findall('\"(http.+?)\"', data[0])
             if addr:
-                stream=urllib.unquote(addr[0])
+                stream=urllib.parse.unquote(addr[0])
     elif 'youtube.com' in url:
         if '/get_video' in url:
             return url
-        u=urllib.urlopen(url)
+        u=urllib.request.urlopen(url)
         data=[ l for l in u.readlines() if 'player2.swf' in l ]
         u.close()
         if data:
@@ -742,13 +742,13 @@ def get_video_stream_from_website(url):
     elif 'video.google.com' in url:
         if '/videodownload' in url:
             return url
-        u=urllib.urlopen(url)
+        u=urllib.request.urlopen(url)
         data=[ l for l in u.readlines() if '.gvp' in l ]
         u.close()
         if data:
             addr=re.findall('http://.+?.gvp\?docid=.\d+', data[0])
             if addr:
-                u=urllib.urlopen(addr[0])
+                u=urllib.request.urlopen(addr[0])
                 data=[ l for l in u.readlines() if 'url:' in l ]
                 u.close()
                 if data:
@@ -783,7 +783,7 @@ class CircularList(list):
         else:
             return None
 
-    def next(self):
+    def __next__(self):
         self._index = (self._index + 1) % len(self)
         return self.current()
 
@@ -848,7 +848,7 @@ def title2content(new_title, original_content, representation):
 
     @return the new content or None if the content could not be updated.
     """
-    assert(isinstance(new_title, unicode))
+    assert(isinstance(new_title, str))
     r = None
     if representation is None or empty_representation.match(representation):
         r = new_title

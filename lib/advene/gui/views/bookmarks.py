@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import Pango
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 # Advene part
 import advene.core.config as config
@@ -100,7 +100,7 @@ class Bookmarks(AdhocView):
         for n, v in arg:
             if n == 'bookmark':
                 t, c = v.split(':', 1)
-                h.append( (long(float(t)), urllib.unquote(c)) )
+                h.append( (int(float(t)), urllib.parse.unquote(c)) )
         if h:
             history=h
 
@@ -154,7 +154,7 @@ class Bookmarks(AdhocView):
             return True
 
         try:
-            d=long(d)
+            d=int(d)
         except ValueError:
             # Use a default value
             d=2000
@@ -212,7 +212,7 @@ class Bookmarks(AdhocView):
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['timestamp']:
                 data=decode_drop_parameters(selection.get_data())
-                position=long(data['timestamp'])
+                position=int(data['timestamp'])
                 w=self.get_matching_bookmark(position)
                 if position is not None:
                     self.bookmarks.remove(w)
@@ -273,7 +273,7 @@ class Bookmarks(AdhocView):
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['timestamp']:
                 data=decode_drop_parameters(selection.get_data())
-                position=long(data['timestamp'])
+                position=int(data['timestamp'])
                 comment=data.get('comment', '')
                 self.append(position, comment=comment)
                 return True

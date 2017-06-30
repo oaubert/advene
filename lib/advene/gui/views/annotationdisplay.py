@@ -88,7 +88,7 @@ class AnnotationDisplay(AdhocView):
                 'end': helper.format_time(None),
                 'contents': '',
                 'imagecontents': None}
-        elif isinstance(self.annotation, int) or isinstance(self.annotation, long):
+        elif isinstance(self.annotation, int) or isinstance(self.annotation, int):
             d={ 'title': _("Current time"),
                 'begin': helper.format_time(self.annotation),
                 'end': helper.format_time(None),
@@ -160,7 +160,7 @@ class AnnotationDisplay(AdhocView):
                 d['contents']=self.annotation.content.data
                 d['imagecontents']=None
 
-        for k, v in d.iteritems():
+        for k, v in d.items():
             if k == 'title':
                 self.label[k].set_markup(v)
             elif k == 'imagecontents':
@@ -186,7 +186,7 @@ class AnnotationDisplay(AdhocView):
         if self.annotation is None or isinstance(self.annotation, AnnotationType):
             self.label['image'].hide()
         else:
-            if isinstance(self.annotation, int) or isinstance(self.annotation, long):
+            if isinstance(self.annotation, int) or isinstance(self.annotation, int):
                 b=self.annotation
             elif isinstance(self.annotation, Annotation):
                 b=self.annotation.fragment.begin
@@ -330,7 +330,7 @@ class AnnotationDisplay(AdhocView):
             """Handle the drop of an annotation.
             """
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_annotation(sources[0])
                 return True

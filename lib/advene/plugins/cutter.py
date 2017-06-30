@@ -133,9 +133,9 @@ class CutterImporter(GenericImporter):
         bus.connect('message', self.on_bus_message)
 
         if config.data.os == 'win32':
-            self.decoder.props.uri = 'file:///' + os.path.abspath(unicode(filename))
+            self.decoder.props.uri = 'file:///' + os.path.abspath(str(filename))
         else:
-            self.decoder.props.uri = 'file://' + os.path.abspath(unicode(filename))
+            self.decoder.props.uri = 'file://' + os.path.abspath(str(filename))
         self.progress(.1, _("Starting silence detection"))
         self.pipeline.set_state(Gst.State.PLAYING)
         return self.package

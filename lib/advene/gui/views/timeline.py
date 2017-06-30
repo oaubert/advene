@@ -25,7 +25,7 @@ import re
 import sys
 import struct
 from threading import Lock
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from gi.repository import GObject
 from gi.repository import Gdk
@@ -79,7 +79,7 @@ class QuickviewBar(Gtk.HBox):
             b=""
             e=""
             c=""
-        elif isinstance(a, long) or isinstance(a, int):
+        elif isinstance(a, int) or isinstance(a, int):
             # Only display a time
             b="   " + helper.format_time(a)
             e=""
@@ -187,9 +187,9 @@ class TimeLine(AdhocView):
             elif n == 'zoom':
                 default_zoom=float(v)
             elif n == 'minimum':
-                minimum=long(v)
+                minimum=int(v)
             elif n == 'maximum':
-                maximum=long(v)
+                maximum=int(v)
         if ats:
             annotationtypes=ats
 
@@ -254,7 +254,7 @@ class TimeLine(AdhocView):
         # Unit = ms
         self.scale = Gtk.Adjustment.new(value=((self.maximum - self.minimum) or 60 * 60 * 1000) / Gdk.get_default_root_window().get_width(),
                                         lower=5,
-                                        upper=sys.maxint,
+                                        upper=sys.maxsize,
                                         step_increment=20,
                                         page_increment=100,
                                         page_size=20)
@@ -371,9 +371,9 @@ class TimeLine(AdhocView):
             return False
         # Convert values, that could be strings
         if default_position is not None:
-            default_position=long(float(default_position))
+            default_position=int(float(default_position))
         if inspector_width is not None:
-            inspector_width = long(float(inspector_width))
+            inspector_width = int(float(inspector_width))
 
         self.expose_signal=self.widget.connect_after('draw', set_default_parameters,
                                                      default_zoom, default_position, inspector_width)
@@ -413,7 +413,7 @@ class TimeLine(AdhocView):
         context.set_source_rgb(.3, .3, .3)
         context.set_line_width(1)
         context.set_dash( (1, 3) )
-        for p in sorted(self.layer_position.itervalues()):
+        for p in sorted(self.layer_position.values()):
             y = p - offset - i / 2
             if y >= 0:
                 context.move_to(0, y)
@@ -501,8 +501,8 @@ class TimeLine(AdhocView):
         if not self.bookmarks_to_draw:
             return False
         a=self.adjustment
-        begin=long(a.get_value())
-        end=long(a.get_value() + a.get_page_size())
+        begin=int(a.get_value())
+        end=int(a.get_value() + a.get_page_size())
 
         w, h = layout.get_size()
 
@@ -569,7 +569,7 @@ class TimeLine(AdhocView):
         if duration <= 0:
             duration = self.bounds()[1]
         if duration:
-            self.maximum = long(duration)
+            self.maximum = int(duration)
 
         if not self.maximum:
             # self.maximum == 0, so try to compute it
@@ -738,7 +738,7 @@ class TimeLine(AdhocView):
         We should check the update_lock and if it is held, delay the
         call to update_model intended to update the timeline duration.
         """
-        if self.maximum != long(context.globals['duration']):
+        if self.maximum != int(context.globals['duration']):
             # Need a refresh.  It can happen while an update_model is
             # already taking place. In this case, we have to wait
             # until the update_model is done before doing our own update.
@@ -751,7 +751,7 @@ class TimeLine(AdhocView):
                 else:
                     # Try again at next timeout.
                     return True
-            GObject.timeout_add(100, duration_updated, long(context.globals['duration']))
+            GObject.timeout_add(100, duration_updated, int(context.globals['duration']))
         return True
 
     def media_change_handler(self, context, parameters):
@@ -761,7 +761,7 @@ class TimeLine(AdhocView):
         return True
 
     def snapshot_update_handler(self, context, parameters):
-        pos=long(context.globals['position'])
+        pos=int(context.globals['position'])
         epsilon=self.scale_layout.step / 2
         # Note: we check here w.timestamp, which is the timestamp of
         # the displayed snapshot, instead of w.mark (which is the
@@ -817,13 +817,13 @@ class TimeLine(AdhocView):
         return True
 
     def bookmark_highlight_handler(self, context, parameters):
-        position=long(context.globals['timestamp'])
+        position=int(context.globals['timestamp'])
         self.bookmarks_to_draw.append(position)
         self.update_bookmarks()
         return True
 
     def bookmark_unhighlight_handler(self, context, parameters):
-        position=long(context.globals['timestamp'])
+        position=int(context.globals['timestamp'])
         try:
             self.bookmarks_to_draw.remove(position)
             self.update_bookmarks()
@@ -882,15 +882,15 @@ class TimeLine(AdhocView):
 
     def unit2pixel (self, v, absolute=False):
         if absolute:
-            return (long( ( v - self.minimum) / self.scale.get_value() )) or 1
+            return (int( ( v - self.minimum) / self.scale.get_value() )) or 1
         else:
-            return (long(v / self.scale.get_value())) or 1
+            return (int(v / self.scale.get_value())) or 1
 
     def pixel2unit (self, v, absolute=False):
         if absolute:
-            return long((v * self.scale.get_value()) + self.minimum)
+            return int((v * self.scale.get_value()) + self.minimum)
         else:
-            return long(v * self.scale.get_value())
+            return int(v * self.scale.get_value())
 
     def get_element_color(self, element):
         """Return the gtk color for the given element.
@@ -1077,7 +1077,7 @@ class TimeLine(AdhocView):
 
     def annotation_drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source=self.controller.package.annotations.get(unicode(selection.get_data(), 'utf8').split('\n')[0])
+            source=self.controller.package.annotations.get(str(selection.get_data(), 'utf8').split('\n')[0])
             dest=widget.annotation
 
             if source == dest:
@@ -1167,7 +1167,7 @@ class TimeLine(AdhocView):
             menu.show_all()
             menu.popup_at_pointer(None)
         elif targetType == config.data.target_type['tag']:
-            tags=unicode(selection.get_data(), 'utf8').split(',')
+            tags=str(selection.get_data(), 'utf8').split(',')
             a=widget.annotation
             l=[t for t in tags if not t in a.tags ]
             self.controller.notify('EditSessionStart', element=a, immediate=True)
@@ -1498,23 +1498,23 @@ class TimeLine(AdhocView):
 
     def annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+            sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
             dest=widget.annotationtype
             self.move_or_copy_annotations(sources, dest)
         elif targetType == config.data.target_type['annotation-type']:
             # Copy annotations
-            source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
+            source=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
             dest=widget.annotationtype
             self.copy_annotation_type(source, dest)
         elif targetType == config.data.target_type['color']:
             # Got a color
             # The structure consists in 4 unsigned shorts: r, g, b, opacity
             (r, g, b, opacity)=struct.unpack('HHHH', selection.get_data())
-            widget.annotationtype.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (r, g, b))
+            widget.annotationtype.setMetaData(config.data.namespace, 'color', "string:#%04x%04x%04x" % (r, g, b))
             self.controller.notify('AnnotationTypeEditEnd', annotationtype=widget.annotationtype)
         elif targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.get_data())
-            begin=long(data['timestamp'])
+            begin=int(data['timestamp'])
             content=data.get('comment', None)
             # Create an annotation with the timestamp as begin
             self.controller.create_annotation(begin, widget.annotationtype, content=content)
@@ -1524,7 +1524,7 @@ class TimeLine(AdhocView):
 
     def new_annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+            sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
             # Create a type
             dest=self.create_annotation_type()
             if dest is None:
@@ -1536,7 +1536,7 @@ class TimeLine(AdhocView):
             typ=self.create_annotation_type()
             if typ is not None:
                 data=decode_drop_parameters(selection.get_data())
-                begin=long(data['timestamp'])
+                begin=int(data['timestamp'])
                 content=data.get('comment', None)
                 # Create an annotation of type typ with the timestamp as begin
                 self.controller.create_annotation(begin, typ, content=content)
@@ -1546,7 +1546,7 @@ class TimeLine(AdhocView):
         """Handle the drop from an annotation-type to the legend
         """
         if targetType == config.data.target_type['annotation-type']:
-            source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
+            source=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
             # We received a drop. Determine the location.
             s = config.data.preferences['timeline']['interline-height']
 
@@ -1554,10 +1554,10 @@ class TimeLine(AdhocView):
             y += widget.get_parent().get_vscrollbar().get_adjustment().get_value()
 
             f=[ at
-                for (at, p) in self.layer_position.iteritems()
+                for (at, p) in self.layer_position.items()
                 if (y - s >= p and y - s <= p + self.button_height) ]
             t=[ at
-                for (at, p) in self.layer_position.iteritems()
+                for (at, p) in self.layer_position.items()
                 if (y + s >= p and y + s <= p + self.button_height) ]
             if f and t and f[0] != source and t[0] != source:
                 if source in self.annotationtypes:
@@ -1580,7 +1580,7 @@ class TimeLine(AdhocView):
                 self.annotationtypes=l
                 self.annotationtypes_selection = self.annotationtypes
                 self.update_model(partial_update=True)
-            elif y > max(self.layer_position.values() or (0,)):
+            elif y > max(list(self.layer_position.values()) or (0,)):
                 # Drop at the end of the list
                 if source in self.annotationtypes:
                     if self.annotationtypes.index(source) == len(self.annotationtypes) - 1:
@@ -1632,7 +1632,7 @@ class TimeLine(AdhocView):
                 return False
             f=annotation.fragment
             self.controller.notify('EditSessionStart', element=annotation, immediate=True)
-            setattr(f, at, long(self.controller.player.current_position_value))
+            setattr(f, at, int(self.controller.player.current_position_value))
             if f.begin > f.end:
                 f.begin, f.end = f.end, f.begin
             self.controller.notify('AnnotationEditEnd', annotation=annotation)
@@ -1978,7 +1978,7 @@ class TimeLine(AdhocView):
 
         def update_layout_size():
             self.layout.set_size (u2p (self.maximum - self.minimum),
-                                  max(self.layer_position.values() or (0,))
+                                  max(list(self.layer_position.values()) or (0,))
                                   + self.button_height + config.data.preferences['timeline']['interline-height'])
             self.scale_layout.set_size(u2p (self.maximum - self.minimum), 40)
 
@@ -2023,7 +2023,7 @@ class TimeLine(AdhocView):
 
         red=Gdk.color_parse('red2')
         a = GenericColorButtonWidget('layout_current_mark', container=self)
-        a.default_size=(1, max(self.layer_position.values() or (0,)) + self.button_height)
+        a.default_size=(1, max(list(self.layer_position.values()) or (0,)) + self.button_height)
         a.local_color=red
         a.alpha=.5
         self.current_marker = a
@@ -2185,7 +2185,7 @@ class TimeLine(AdhocView):
         Return a tuple corresponding to the min and max values of the
         list, in list units.
         """
-        minimum=sys.maxint
+        minimum=sys.maxsize
         maximum=0
         if self.list is None:
             l=self.controller.package.annotations
@@ -2252,11 +2252,11 @@ class TimeLine(AdhocView):
         # Correct y value according to scrollbar position
         y += widget.get_parent().get_vscrollbar().get_adjustment().get_value()
         drop_types=[ at
-                     for (at, p) in self.layer_position.iteritems()
+                     for (at, p) in self.layer_position.items()
                      if (y >= p and y <= p + self.button_height + config.data.preferences['timeline']['interline-height']) ]
 
         if targetType == config.data.target_type['annotation']:
-            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+            sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
             if drop_types:
                 # Copy/Move to a[0]
                 if config.data.os == 'win32':
@@ -2274,7 +2274,7 @@ class TimeLine(AdhocView):
                 self.move_or_copy_annotations(sources, dest, position=self.pixel2unit(self.adjustment.get_value() + x, absolute=True), action=context.get_actions())
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
+            source=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
             if drop_types:
                 # Copy/Move to drop_types[0]
                 if source != drop_types[0]:
@@ -2301,7 +2301,7 @@ class TimeLine(AdhocView):
                 typ=self.create_annotation_type()
             if typ is not None:
                 data=decode_drop_parameters(selection.get_data())
-                begin=long(data['timestamp'])
+                begin=int(data['timestamp'])
                 content=data.get('comment', None)
                 # Create an annotation of type typ with the timestamp as begin
                 self.controller.create_annotation(begin, typ, content=content)
@@ -2318,8 +2318,8 @@ class TimeLine(AdhocView):
         # Convert x, y (relative to the layout allocation) into
         # values relative to the whole layout size
         p=widget.get_parent()
-        x=long(p.get_hadjustment().get_value() + x)
-        y=long(p.get_vadjustment().get_value() + y)
+        x=int(p.get_hadjustment().get_value() + x)
+        y=int(p.get_vadjustment().get_value() + y)
 
         if event.button == 3:
             self.context_cb (timel=self, position=self.pixel2unit(x, absolute=True), height=y)
@@ -2358,8 +2358,8 @@ class TimeLine(AdhocView):
         # Convert x, y (relative to the layout allocation) into
         # values relative to the whole layout size
         p=widget.get_parent()
-        x=long(p.get_hadjustment().get_value() + x)
-        y=long(p.get_vadjustment().get_value() + y)
+        x=int(p.get_hadjustment().get_value() + x)
+        y=int(p.get_vadjustment().get_value() + y)
 
         if event.button == 3:
             self.context_cb (timel=self, position=self.pixel2unit(x, absolute=True), height=y)
@@ -2368,7 +2368,7 @@ class TimeLine(AdhocView):
             if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 # Control-click: create annotation + edit it
                 ats=[ at
-                      for (at, pos) in self.layer_position.iteritems()
+                      for (at, pos) in self.layer_position.items()
                       if (y >= pos and y <= pos + self.button_height) ]
                 if not ats:
                     at = None
@@ -2415,8 +2415,8 @@ class TimeLine(AdhocView):
             # Convert x, y (relative to the layout allocation) into
             # values relative to the whole layout size
             p=widget.get_parent()
-            x=long(p.get_hadjustment().get_value() + x)
-            y=long(p.get_vadjustment().get_value() + y)
+            x=int(p.get_hadjustment().get_value() + x)
+            y=int(p.get_vadjustment().get_value() + y)
 
             if self.layout_selection[0][0] is None:
                 # Some bug here, should not happen except in the case
@@ -2454,7 +2454,7 @@ class TimeLine(AdhocView):
                 if not res:
                     # No selected annotations. Propose to create a new one.
                     a=[ at
-                        for (at, pos) in self.layer_position.iteritems()
+                        for (at, pos) in self.layer_position.items()
                         if (y1 >= pos and y1 <= pos + self.button_height) ]
                     at = None
                     if a:
@@ -2581,8 +2581,8 @@ class TimeLine(AdhocView):
         def create_annotation(win, position):
             # Determine annotation type
             at=None
-            h=long(height)
-            for a, p in self.layer_position.iteritems():
+            h=int(height)
+            for a, p in self.layer_position.items():
                 if h >= p and h < p + self.button_height:
                     at=a
                     break
@@ -2665,7 +2665,7 @@ class TimeLine(AdhocView):
         if self.maximum != self.minimum:
             fraction=self.scale.get_value() * float(self.layout.get_clip().width) / (self.maximum - self.minimum)
             self.fraction_adj.set_value(fraction)
-            self.zoom_combobox.get_child().set_text('%d%%' % long(100 * fraction))
+            self.zoom_combobox.get_child().set_text('%d%%' % int(100 * fraction))
         return False
 
     def zoom_on_region(self, begin, end):
@@ -2733,7 +2733,7 @@ class TimeLine(AdhocView):
             return True
 
         self.scale.set_value(v)
-        self.zoom_combobox.get_child().set_text('%d%%' % long(100 * fraction))
+        self.zoom_combobox.get_child().set_text('%d%%' % int(100 * fraction))
 
         return True
 
@@ -2919,7 +2919,7 @@ class TimeLine(AdhocView):
                     and self.controller.player.status != self.controller.player.PauseStatus):
                     return True
                 # Create a new annotation
-                el=self.controller.create_annotation(position=long(self.controller.player.current_position_value),
+                el=self.controller.create_annotation(position=int(self.controller.player.current_position_value),
                                                      type=widget.annotationtype)
                 if el is not None:
                     b=self.create_annotation_widget(el)
@@ -3075,7 +3075,7 @@ class TimeLine(AdhocView):
         def drag_sent(widget, context, selection, targetType, eventTime, name):
             if targetType == config.data.target_type['adhoc-view']:
                 selection.set(selection.get_target(), 8,
-                              urllib.urlencode( {
+                              urllib.parse.urlencode( {
                             'name': name,
                             'master': self.controller.gui.get_adhoc_view_instance_id(self),
                             } ).encode('utf8'))
@@ -3365,7 +3365,7 @@ class TimeLine(AdhocView):
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     batch_id=object()
                     for a in sources:
@@ -3387,7 +3387,7 @@ class TimeLine(AdhocView):
         # Annotation-type selection button
         def annotationtype_selection_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation-type']:
-                source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
+                source=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
                 if source in self.annotationtypes:
                     self.annotationtypes.remove(source)
                     self.annotationtypes_selection = self.annotationtypes
@@ -3472,7 +3472,7 @@ class TimeLine(AdhocView):
         tb.insert(i, -1)
 
         self.zoom_combobox=dialog.list_selector_widget(members=[
-                ( f, '%d%%' % long(100*f) )
+                ( f, '%d%%' % int(100*f) )
                 for f in [
                     (1.0 / pow(1.5, n)) for n in range(0, 10)
                     ]

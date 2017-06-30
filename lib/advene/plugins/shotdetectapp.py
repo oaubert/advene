@@ -81,7 +81,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
             self.duration = self.controller.cached_duration
         # FIXME: else we could/should get it somehow
 
-        self.tempdir = unicode(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
+        self.tempdir = str(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
         self.temporary_resources.append(self.tempdir)
 
         self.ensure_new_type('shots', title=_("Detected shots"), schemaid='detected')
@@ -125,11 +125,11 @@ class ShotdetectAppImporter(ExternalAppImporter):
             if ms:
                 ts = 0
                 try:
-                    ts = long(ms[0])
+                    ts = int(ms[0])
                 except ValueError:
                     m = exp_re.match(ms[0])
                     if m:
-                        ts = long(float(m.group(1)) * 10 ** int(m.group(2)))
+                        ts = int(float(m.group(1)) * 10 ** int(m.group(2)))
                 if ts == 0:
                     continue
                 yield {

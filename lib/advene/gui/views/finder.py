@@ -27,7 +27,7 @@ from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 from gi.repository import GObject
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import advene.core.config as config
 from advene.gui.edit.properties import EditWidget
@@ -224,7 +224,7 @@ class FinderColumn(object):
     def key_pressed_cb(self, col, event):
         if event.keyval == Gdk.KEY_Right:
             # Next column
-            if self.next is not None:
+            if self.__next__ is not None:
                 self.next.get_focus()
             return True
         elif event.keyval == Gdk.KEY_Left:
@@ -265,7 +265,7 @@ class FinderColumn(object):
     def close(self):
         """Close this column, and all following ones.
         """
-        if self.next is not None:
+        if self.__next__ is not None:
             self.next.close()
         self.widget.destroy()
         if self.previous is not None:
@@ -281,7 +281,7 @@ class FinderColumn(object):
 
     def on_column_activation(self, widget):
         # Delete all next columns
-        cb=self.next
+        cb=self.__next__
         if cb:
             cb.close()
         self.next=None
@@ -335,7 +335,7 @@ class ModelColumn(FinderColumn):
         for row in self.get_valid_members(node):
             self.liststore.append(row)
 
-        if self.next is not None:
+        if self.__next__ is not None:
             # There is a next column. Should we still display it ?
             if not [ r
                      for r in self.liststore
@@ -578,7 +578,7 @@ class ViewColumn(FinderColumn):
                 if helper.get_view_type(self.element) != 'adhoc':
                     return False
                 selection.set(selection.get_target(), 8,
-                              urllib.urlencode( {
+                              urllib.parse.urlencode( {
                             'id': self.element.id,
                             } ).encode('utf8'))
                 return True
@@ -789,8 +789,8 @@ class Finder(AdhocView):
     def refresh(self):
         c=self.rootcolumn
         c.update(c.node)
-        while c.next is not None:
-            c=c.next
+        while c.__next__ is not None:
+            c=c.__next__
             c.update(c.node)
         return True
 
@@ -803,7 +803,7 @@ class Finder(AdhocView):
             self.refresh()
         elif event.endswith('Delete'):
             self.model.remove_element(element)
-            cb=self.rootcolumn.next
+            cb=self.rootcolumn.__next__
             while cb is not None:
                 if [ r
                      for r in cb.liststore
@@ -812,10 +812,10 @@ class Finder(AdhocView):
                     # children. Remove the next column if necessary
                     # and update the children list.
                     cb.update(node=cb.node)
-                    if cb.next is not None and cb.next.node == element:
+                    if cb.__next__ is not None and cb.next.node == element:
                         cb.next.close()
 
-                cb=cb.next
+                cb=cb.__next__
             #self.update_model(element.rootPackage)
         else:
             return "Unknown event %s" % event
@@ -864,10 +864,10 @@ class Finder(AdhocView):
             package = self.controller.package
 
         # Reset to the rootcolumn
-        cb=self.rootcolumn.next
+        cb=self.rootcolumn.__next__
         while cb is not None:
             cb.widget.destroy()
-            cb=cb.next
+            cb=cb.__next__
         self.rootcolumn.next=None
 
         self.package = package
@@ -878,15 +878,15 @@ class Finder(AdhocView):
         return True
 
     def clicked_callback(self, columnbrowser, node):
-        logger.debug("clicked_callback %s %s %s", columnbrowser, node, columnbrowser.next)
+        logger.debug("clicked_callback %s %s %s", columnbrowser, node, columnbrowser.__next__)
         if columnbrowser is None:
             # We selected  the rootcolumn. Delete the next ones
-            cb=self.rootcolumn.next
+            cb=self.rootcolumn.__next__
             while cb is not None:
                 cb.widget.destroy()
-                cb=cb.next
+                cb=cb.__next__
             self.rootcolumn.next=None
-        elif columnbrowser.next is None:
+        elif columnbrowser.__next__ is None:
             t=type(node)
             clazz=CLASS2COLUMN.get(t, ModelColumn)
             # Create a new columnbrowser
@@ -901,12 +901,12 @@ class Finder(AdhocView):
             columnbrowser.next=col
         else:
             # Delete all next+1 columns (we reuse the next one)
-            cb=columnbrowser.next.next
+            cb=columnbrowser.next.__next__
             if cb is not None:
                 cb.close()
             # Check if the column is still appropriate for the node
             clazz=CLASS2COLUMN.get(type(node), None)
-            if clazz is None or not isinstance(columnbrowser.next, clazz):
+            if clazz is None or not isinstance(columnbrowser.__next__, clazz):
                 # The column is not appropriate for the new node.
                 # Close it and reopen it.
                 columnbrowser.next.close()

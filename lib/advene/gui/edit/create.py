@@ -166,8 +166,8 @@ class CreateElementPopup(object):
 
         @return: the created element, None if an error occurred
         """
-        id_ = self.dialog.id_entry.get_text().decode('utf-8')
-        title_ = self.dialog.title_entry.get_text().decode('utf-8')
+        id_ = self.dialog.id_entry.get_text()
+        title_ = self.dialog.title_entry.get_text()
         # Check validity of id.
         if not self.is_valid_id(id_):
             dialog.message_dialog(
@@ -279,7 +279,7 @@ class CreateElementPopup(object):
                 el.date=self.get_date()
                 el.title=title_
                 el.mimetype=t.id
-                el.setMetaData(config.data.namespace, 'color', self.parent.rootPackage._color_palette.next())
+                el.setMetaData(config.data.namespace, 'color', next(self.parent.rootPackage._color_palette))
                 el.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
             self.parent.annotationTypes.append(el)
             self.controller.notify('AnnotationTypeCreate', annotationtype=el)
@@ -294,10 +294,10 @@ class CreateElementPopup(object):
                 el.date=self.get_date()
                 el.title=title_
                 el.mimetype=t.id
-                el.setMetaData(config.data.namespace, 'color', self.parent.rootPackage._color_palette.next())
+                el.setMetaData(config.data.namespace, 'color', next(self.parent.rootPackage._color_palette))
                 el.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
                 # Create a generic binary relationType
-                el.hackedMemberTypes=(u'', u'')
+                el.hackedMemberTypes=('', '')
             self.parent.relationTypes.append(el)
             self.controller.notify('RelationTypeCreate', relationtype=el)
         elif self.type_ == Resources:
@@ -362,7 +362,7 @@ if __name__ == "__main__":
         cr.popup()
         return True
 
-    for (t, l) in element_label.iteritems():
+    for (t, l) in element_label.items():
         b = Gtk.Button(l)
         b.connect('clicked', create_element_cb, t)
         b.show()

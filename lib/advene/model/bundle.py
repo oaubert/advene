@@ -43,7 +43,7 @@ Permitted list operations are
 Permitted dict operations are
  - b.clear
  - b.get
- - b.has_key
+ - in b
  - b.items
  - b.iteritems
  - b.iterkeys
@@ -82,7 +82,7 @@ class AbstractBundle (object):
         Note that items in the bundle are indexed by their keys. Hence, this
         method is equivalent to _keys_.
         """
-        return self._dict.keys ()
+        return list(self._dict.keys ())
 
     def getQName (self, key, namespaces, default=None):
         """
@@ -120,7 +120,7 @@ class AbstractBundle (object):
              or v in self._dict)
 
     def __getitem__ (self, index):
-        if isinstance (index, int):
+        if isinstance (index, (int, slice)):
             return self._list[index]
         else:
             return self._dict[index]
@@ -148,23 +148,23 @@ class AbstractBundle (object):
     def get (self, id_, default=None):
         return self._dict.get (id_, default)
 
-    def has_key (self, key):
-        return self._dict.has_key (key)
+    def __in__(self, key):
+        return key in self._dict
 
     def items (self):
-        return self._dict.items ()
+        return list(self._dict.items ())
 
     def iteritems (self):
-        return self._dict.iteritems ()
+        return iter(self._dict.items ())
 
     def iterkeys (self):
-        return self._dict.iterkeys ()
+        return iter(self._dict.keys ())
 
     def itervalues (self):
-        return self._dict.itervalues ()
+        return iter(self._dict.values ())
 
     def ids (self):
-        return [ e.id for e in self._dict.itervalues() ]
+        return [ e.id for e in self._dict.values() ]
 
     def keys (self):
         """
@@ -173,10 +173,10 @@ class AbstractBundle (object):
         Note that items in the bundle are indexed by their keys. Hence, this
         method is equivalent to _uris_.
         """
-        return self._dict.keys ()
+        return list(self._dict.keys ())
 
     def values (self):
-        return self._dict.values ()
+        return list(self._dict.values ())
 
     #
     # helper method
@@ -185,7 +185,7 @@ class AbstractBundle (object):
     def get_by_id(self, id_):
         """Inefficient but helpful method.
         """
-        l=[ e for e in self._dict.itervalues() if e.id == id_ ]
+        l=[ e for e in self._dict.values() if e.id == id_ ]
         if len(l) == 1:
             return l[0]
         else:
@@ -282,7 +282,7 @@ class WritableBundle (AbstractBundle):
 
         length = len(self)
         if not (-length <= index <= length):
-            raise IndexError, (index, self._list)
+            raise IndexError(index, self._list)
 
         self._list.insert(index, item)
         self._dict[item.getUri (absolute=True)] = item
@@ -293,7 +293,7 @@ class WritableBundle (AbstractBundle):
         if check is item:
             del self[uri]
             return
-        raise ValueError, _('%s not in bundle') % item
+        raise ValueError(_('%s not in bundle') % item)
 
     def pop(self, index=0):
         r = self[index]
@@ -546,8 +546,7 @@ class RefBundle (AbstractXmlBundle):
             r = self.__source[uri]
         except KeyError:
             # INTEGRITY CONSTRAINT: xxx
-            raise AdveneException, \
-                  '%s does not belong to the package' % href
+            raise AdveneException('%s does not belong to the package' % href)
         self.__elt_dict[r] = element
         return r
 

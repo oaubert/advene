@@ -22,7 +22,7 @@ name="TED transcription importer"
 from gettext import gettext as _
 
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 try:
     # json is standard in python 2.6
     import json
@@ -54,7 +54,7 @@ class TEDImporter(GenericImporter):
         self.progress(0.1, "Fetching " + filename)
         if filename.startswith('http://www.ted.com'):
             filename=filename.strip('#/')
-            f=urllib.urlopen(filename)
+            f=urllib.request.urlopen(filename)
         else:
             f=open(filename, 'r')
         data='\n'.join(f.readlines())
@@ -66,7 +66,7 @@ class TEDImporter(GenericImporter):
 
         offset=re.findall('introDuration\s*:\s*(\d+)', data)
         if offset:
-            offset=long(offset[0])
+            offset=int(offset[0])
         else:
             offset=0
         m = re.findall('/talks/subtitles/id/(\d+)', data, re.MULTILINE)
@@ -79,7 +79,7 @@ class TEDImporter(GenericImporter):
         if podcast:
             podcast=podcast[0]
             self.progress(0.2, "Fetching podcast information")
-            podcast=urllib.urlopen(podcast.replace('itpc:', 'http:'))
+            podcast=urllib.request.urlopen(podcast.replace('itpc:', 'http:'))
             data=podcast.read()
             podcast.close()
             title=re.findall('<title>(.+?)</title>', data)
@@ -117,7 +117,7 @@ class TEDImporter(GenericImporter):
             'end': offset,
             }
         for timestamp, buf in re.findall('seekVideo.(\d+).+?>(.+?)</a>', data):
-            t=long(timestamp) + offset
+            t=int(timestamp) + offset
             if start is not None:
                 yield {
                     'type': at,
@@ -141,7 +141,7 @@ class TEDImporter(GenericImporter):
             self.progress(0.1, "Converting %s subtitles" % lang)
             at=self.create_annotation_type(self.package.get_element_by_id('ted'), lang)
             url=urlbase+'/lang/'+lang
-            f=urllib.urlopen(url)
+            f=urllib.request.urlopen(url)
             data=f.read()
             f.close()
             data=json.loads(data)

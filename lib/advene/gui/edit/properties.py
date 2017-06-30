@@ -365,7 +365,7 @@ class EditWidget(Gtk.VBox):
 
         if (passwd):
             entry.set_visibility(False)
-            entry.set_invisible_char(unichr(0x2022))
+            entry.set_invisible_char(chr(0x2022))
 
         value = self.__get_config(property)
         entry.set_text(value)
@@ -505,7 +505,7 @@ class EditWidget(Gtk.VBox):
 
         store=Gtk.ListStore(str, object)
         active_iter=None
-        for k, v in options.iteritems():
+        for k, v in options.items():
             i=store.append( ( k, v ) )
             if v == value:
                 active_iter=i
@@ -690,7 +690,7 @@ class OptionParserGUI(EditWidget):
                         self.add_entry(name, o.dest, o.help)
                 elif o.type == 'float':
                     self.options[o.dest] = val
-                    self.add_float_spin(name, o.dest, o.help, -sys.maxint, sys.maxint, 2)
+                    self.add_float_spin(name, o.dest, o.help, -sys.maxsize, sys.maxsize, 2)
                 elif o.type == 'choice':
                     self.options[o.dest] = val
                     self.add_option(name, o.dest, o.help, dict( (c, c) for c in o.choices) )

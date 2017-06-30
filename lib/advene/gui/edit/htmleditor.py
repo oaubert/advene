@@ -34,11 +34,11 @@ from gi.repository import Gtk
 from gi.repository import GdkPixbuf
 from gi.repository import Pango
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import socket
-import StringIO
+import io
 import re
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 try:
     from gi.repository import GtkSource
 except ImportError:
@@ -263,7 +263,7 @@ class HTMLEditor(textview_class, HTMLParser):
         PyGTK.
         """
         self.html_reset()
-        if not isinstance(txt, unicode):
+        if not isinstance(txt, str):
             # <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
             l=re.findall('http-equiv.+content-type.+charset=([\w\d-]+)', txt)
             if l:
@@ -272,12 +272,12 @@ class HTMLEditor(textview_class, HTMLParser):
             else:
                 charset='utf-8'
             try:
-                txt=unicode(txt, charset)
+                txt=str(txt, charset)
             except UnicodeDecodeError:
                 # Fallback to latin1.
-                txt=unicode(txt, 'latin1')
+                txt=str(txt, 'latin1')
         self.feed(txt.encode('utf-8'))
-        for k, v in self.__tags.iteritems():
+        for k, v in self.__tags.items():
             if v:
                 logger.error("Unbalanced tag at end %s", k)
 
@@ -291,7 +291,7 @@ class HTMLEditor(textview_class, HTMLParser):
             # position. So if we add a new mark here, we cannot
             # guarantee their order.
             # Insert an invisible char to alleviate this problem.
-            self.__tb.insert_at_cursor(u'\u2063')
+            self.__tb.insert_at_cursor('\u2063')
             cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
             # Safety test. Normally useles...
             m=[ m for m in cursor.get_marks() if hasattr(m, '_tag') or hasattr(m, '_endtag') ]
@@ -345,14 +345,14 @@ class HTMLEditor(textview_class, HTMLParser):
             try:
                 data=self.custom_url_loader(url)
                 msg=''
-            except Exception, ex:
+            except Exception as ex:
                 data=None
                 msg=ex
             if data is not None:
                 return data, msg
             elif isinstance(msg, Exception):
                 # There was an error.
-                return data, unicode(msg)
+                return data, str(msg)
             # Useless else: use default code.
             # else:
             #    pass
@@ -363,11 +363,11 @@ class HTMLEditor(textview_class, HTMLParser):
         if not url.startswith('http:') and not url.startswith('file:'):
             url='file:'+url
         try:
-            f = urllib2.urlopen(url)
+            f = urllib.request.urlopen(url)
             data = f.read()
             f.close()
             msg=''
-        except Exception, ex:
+        except Exception as ex:
             data=None
             msg=str(ex)
         socket.setdefaulttimeout(dto)
@@ -736,7 +736,7 @@ class HTMLEditor(textview_class, HTMLParser):
     def get_html(self):
         """Return the buffer contents as html.
         """
-        s=StringIO.StringIO()
+        s=io.StringIO()
         self.dump_html(s)
         res=s.getvalue()
         s.close()

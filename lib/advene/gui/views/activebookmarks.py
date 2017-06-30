@@ -26,7 +26,7 @@ from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GObject
 from gi.repository import Pango
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 # Advene part
 import advene.core.config as config
@@ -451,7 +451,7 @@ class ActiveBookmarks(AdhocView):
 
         def do_complete(b, func):
             l=[ bo for bo in self.bookmarks if bo.annotation is None ]
-            if isinstance(func, long) or isinstance(func, int):
+            if isinstance(func, int) or isinstance(func, int):
                 for b in l:
                     b.end=b.begin+func
             elif func == 'user':
@@ -460,7 +460,7 @@ class ActiveBookmarks(AdhocView):
                                       default="2000")
                 if d is not None:
                     try:
-                        d=long(d)
+                        d=int(d)
                     except ValueError:
                         return
                     for b in l:
@@ -543,12 +543,12 @@ class ActiveBookmarks(AdhocView):
             m=Gtk.Menu()
             s=config.data.preferences['bookmark-snapshot-width']
             for size, label in (
-                (long(.5 * s), _("Smallish")),
-                (long(.8 * s), _("Small")),
+                (int(.5 * s), _("Smallish")),
+                (int(.8 * s), _("Small")),
                 (s, _("Normal")),
-                (long(1.2 * s), _("Large")),
-                (long(1.5 * s), _("Larger")),
-                (long(2 * s), _("Huge")),
+                (int(1.2 * s), _("Large")),
+                (int(1.5 * s), _("Larger")),
+                (int(2 * s), _("Huge")),
                 ):
                 i=Gtk.MenuItem(label)
                 i.connect('activate', set_scale, size)
@@ -625,7 +625,7 @@ class ActiveBookmarks(AdhocView):
                     index=self.bookmarks.index(l[0])
             if targetType == config.data.target_type['timestamp']:
                 data=decode_drop_parameters(selection.get_data())
-                position=long(data['timestamp'])
+                position=int(data['timestamp'])
                 b=self.append(position, index)
                 if 'comment' in data:
                     b.content=data['comment']
@@ -635,14 +635,14 @@ class ActiveBookmarks(AdhocView):
                 return True
             elif targetType == config.data.target_type['annotation-type']:
                 # Populate the view with annotation begins
-                source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
+                source=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
                 if source is not None:
                     for a in source.annotations:
                         b=self.append(a.fragment.begin)
                         b.content=self.controller.get_title(a)
                 return True
             elif targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 for source in sources:
                     l=[ b for b in self.bookmarks if b.annotation == source ]
                     if l:
@@ -738,12 +738,12 @@ class ActiveBookmark(object):
                 annotation=helper.get_id(self.controller.package.annotations, ident)
             else:
                 annotation=None
-            begin=long(b)
+            begin=int(b)
             if e == 'None':
                 end=None
             else:
-                end=long(e)
-            content=urllib.unquote(c).decode('utf-8', 'ignore')
+                end=int(e)
+            content=urllib.parse.unquote(c).decode('utf-8', 'ignore')
 
         self.annotation=annotation
         if annotation is not None:
@@ -882,7 +882,7 @@ class ActiveBookmark(object):
         return ":".join( (ident,
                           str(self.begin),
                           str(self.end),
-                          urllib.quote(self.content.encode('utf-8')) ) )
+                          urllib.parse.quote(self.content.encode('utf-8')) ) )
 
     def as_html(self):
         if self.annotation is not None:
@@ -917,7 +917,7 @@ class ActiveBookmark(object):
             return False
         if targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.get_data())
-            e=long(data['timestamp'])
+            e=int(data['timestamp'])
             if self.end is None:
                 if e < self.begin:
                     # Invert begin and end.
@@ -944,7 +944,7 @@ class ActiveBookmark(object):
             self.container.set_current_bookmark(self)
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
+            source=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
             if source is not None:
                 self.transtype(source)
             return True
@@ -956,7 +956,7 @@ class ActiveBookmark(object):
         self.container.set_current_bookmark(self)
         if targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.get_data())
-            e=long(data['timestamp'])
+            e=int(data['timestamp'])
             if self.end is not None:
                 # Save a copy of the deleted timestamp next to the current bookmark
                 i=self.container.bookmarks.index(self)
@@ -974,7 +974,7 @@ class ActiveBookmark(object):
             self.container.set_current_bookmark(self)
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            source=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
+            source=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
             if source is not None:
                 self.transtype(source)
             return True
@@ -1043,7 +1043,7 @@ class ActiveBookmark(object):
                         at.date=self.controller.get_timestamp()
                         at.title=_("Active bookmark")
                         at.mimetype='text/plain'
-                        at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
+                        at.setMetaData(config.data.namespace, 'color', next(self.controller.package._color_palette))
                         at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
                         schema.annotationTypes.append(at)
                         self.controller.notify('AnnotationTypeCreate', annotationtype=at)
@@ -1054,8 +1054,8 @@ class ActiveBookmark(object):
                     type=at,
                     author=config.data.userid,
                     date=self.controller.get_timestamp(),
-                    fragment=MillisecondFragment(begin=long(self.begin),
-                                                 end=long(self.end)))
+                    fragment=MillisecondFragment(begin=int(self.begin),
+                                                 end=int(self.end)))
                 el.content.data=self.content
                 self.controller.package.annotations.append(el)
                 self.annotation=el
@@ -1347,7 +1347,7 @@ class ActiveBookmark(object):
                 if self.no_image_pixbuf is None:
                     self.no_image_pixbuf=png_to_pixbuf(cache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
                 if not t == w._current:
-                    if isinstance(t, long) or isinstance(t, int):
+                    if isinstance(t, int) or isinstance(t, int):
                         if cache.is_initialized(t, epsilon=config.data.preferences['bookmark-snapshot-precision']):
                             begin.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
                         elif begin.get_pixbuf() != self.no_image_pixbuf:
@@ -1370,7 +1370,7 @@ class ActiveBookmark(object):
             w._current=None
             w.set_cursor = set_cursor.__get__(w)
             w.set_cursor()
-            w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
+            w.set_size_request(int(2.5 * config.data.preferences['drag-snapshot-width']), -1)
             widget._icon=w
             Gtk.drag_set_icon_widget(context, w, 0, 0)
             return True

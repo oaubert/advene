@@ -24,8 +24,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 from gi.repository import Gtk
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 import re
 
 engine=None
@@ -63,7 +63,7 @@ class webkit_wrapper:
         w = WebKit.WebView()
 
         def update_location(url):
-            l=urlparse.urlparse(url)
+            l=urllib.parse.urlparse(url)
             if self.no_content_re.match(l[2]):
                 # webkit does not correctly handle 204 return code.
                 # Automatically go back.

@@ -82,7 +82,7 @@ class AnnotationGraphImporter(GenericImporter):
             # FIXME: in multisignal version, use the appropriate signal
             if anchor.attrib['unit'] != 'milliseconds':
                 logger.error("Unhandled anchor unit (%s) Positioning will be wrong.", anchor.attrib['unit'])
-            self.anchors[anchor.attrib['id']]=long(anchor.attrib['offset'])
+            self.anchors[anchor.attrib['id']]=int(anchor.attrib['offset'])
         ats={}
         attribs={}
 
@@ -111,7 +111,7 @@ class AnnotationGraphImporter(GenericImporter):
                 'end': self.anchors[an.attrib['end']],
                 }
 
-        for typename, atnames in attribs.iteritems():
+        for typename, atnames in attribs.items():
             if len(atnames) == 1:
                 n=list(atnames)[0]
                 # Only 1 attribute name. Define an appropriate

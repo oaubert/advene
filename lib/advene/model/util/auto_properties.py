@@ -36,10 +36,10 @@ class auto_properties(type):
         cls=self
         super(auto_properties, cls).__init__(name, bases, dic)
         props = {}
-        for name, f in dic.iteritems():
+        for name, f in dic.items():
             try:
-                nb_args = (f.func_code.co_argcount
-                           - len (f.func_defaults or ()))
+                nb_args = (f.__code__.co_argcount
+                           - len (f.__defaults__ or ()))
             except AttributeError:
                 continue
             propname = None
@@ -52,7 +52,7 @@ class auto_properties(type):
             if propname:
                 props[propname] = 1
 
-        for propname in props.iterkeys ():
+        for propname in props.keys ():
             fget = getattr(cls, "get%s" % upperFirstChar(propname), None)
             fset = getattr(cls, "set%s" % upperFirstChar(propname), None)
             fdel = getattr(cls, "del%s" % upperFirstChar(propname), None)
@@ -60,9 +60,7 @@ class auto_properties(type):
 
 
 if __name__ == "__main__":
-    class Test(object):
-        __metaclass__ = auto_properties
-
+    class Test(object, metaclass=auto_properties):
         def getTheA(self): return self._a
 
         def setTheB(self, v): self._b = v

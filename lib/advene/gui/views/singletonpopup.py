@@ -60,7 +60,7 @@ class SingletonPopup(AdhocView):
         self.widget=widget
         self.vbox.add(widget)
         if timeout is not None and timeout != 0:
-            self.hidetime=time.time() + (long(timeout) / 1000.0)
+            self.hidetime=time.time() + (int(timeout) / 1000.0)
         self.show()
         return True
 

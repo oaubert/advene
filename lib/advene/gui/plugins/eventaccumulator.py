@@ -30,7 +30,7 @@ from gettext import gettext as _
 
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import advene.model.view
 from advene.gui.widget import TimestampRepresentation
 from advene.rules.elements import ECACatalog
@@ -113,15 +113,15 @@ class EventAccumulator(AdhocView):
         btnbar=Gtk.HBox()
 
         # choix details
-        if len(self.tracer.trace.levels.keys())<=0:
-            print "EventAccumulator error : no trace level"
+        if len(list(self.tracer.trace.levels.keys()))<=0:
+            print("EventAccumulator error : no trace level")
         else:
             def details_changed(w):
                 v=w.get_label()
-                i=self.tracer.trace.levels.keys().index(v)+1
-                if i>=len(self.tracer.trace.levels.keys()):
+                i=list(self.tracer.trace.levels.keys()).index(v)+1
+                if i>=len(list(self.tracer.trace.levels.keys())):
                     i=0
-                v=self.tracer.trace.levels.keys()[i]
+                v=list(self.tracer.trace.levels.keys())[i]
                 w.set_label(v)
                 #updating options
                 self.options['detail']=v
@@ -149,7 +149,7 @@ class EventAccumulator(AdhocView):
 
         # choix temps
         if not self.times:
-            print "EventAccumulator error : no times defined"
+            print("EventAccumulator error : no times defined")
         else:
             def time_changed(w):
                 v=w.get_label()
@@ -220,10 +220,10 @@ class EventAccumulator(AdhocView):
         w=Gtk.Window(Gtk.WindowType.TOPLEVEL)
         def level_changed(w, options):
             v=w.get_label()
-            i=self.tracer.trace.levels.keys().index(v)+1
-            if i>=len(self.tracer.trace.levels.keys()):
+            i=list(self.tracer.trace.levels.keys()).index(v)+1
+            if i>=len(list(self.tracer.trace.levels.keys())):
                 i=0
-            v=self.tracer.trace.levels.keys()[i]
+            v=list(self.tracer.trace.levels.keys())[i]
             w.set_label(v)
             self.show_options(options, v)
             options.show_all()
@@ -285,7 +285,7 @@ class EventAccumulator(AdhocView):
                 else:
                     option.set_active(True)
                 option.connect('toggled', option_clicked, i, levelslab)
-            for i in self.incomplete_operations_names.keys():
+            for i in list(self.incomplete_operations_names.keys()):
                 option = Gtk.CheckButton(self.incomplete_operations_names[i])
                 options.pack_start(option, False, True, 0)
                 if i in self.filters[levelslab]:
@@ -446,7 +446,7 @@ class EventAccumulator(AdhocView):
                 t_temp = t_temp -1
             for i in tracelevel[trace_min:trace_max]:
                 if i.name == "Undefined":
-                    print "Undefined action for object %s" % i
+                    print("Undefined action for object %s" % i)
                     pass
                 if i.name not in self.filters['actions']:
                     #print "%s %s" % (self.size, i.name)
@@ -455,7 +455,7 @@ class EventAccumulator(AdhocView):
             return
         #adjust the current display to the modified trace
         if action.name == "Undefined":
-            print "Undefined action for object %s" % action
+            print("Undefined action for object %s" % action)
             return
         if action == self.latest['actions']:
             # same action as before, we just need to refresh it
@@ -508,7 +508,7 @@ class EventAccumulator(AdhocView):
         if self.accuBox.get_children():
             self.accuBox.remove(self.accuBox.get_children()[0])
         else:
-            print "no event to unpack ? %s" % self.size
+            print("no event to unpack ? %s" % self.size)
         if self.size>0:
             self.size = self.size-1
 
@@ -526,9 +526,9 @@ class EventAccumulator(AdhocView):
             if self.options['time'] == 'activity':
                 op_time = helper.format_time_reference(op.activity_time)
             if op.concerned_object['name'] is None:
-                corpsstr += urllib.unquote( op_time + " : " + op.name + "\n")
+                corpsstr += urllib.parse.unquote( op_time + " : " + op.name + "\n")
             else:
-                corpsstr += urllib.unquote( op_time + " : " + op.name + " ( " + op.concerned_object['name'] + " : " + op.concerned_object['id'] + " )\n")
+                corpsstr += urllib.parse.unquote( op_time + " : " + op.name + " ( " + op.concerned_object['name'] + " : " + op.concerned_object['id'] + " )\n")
         tup[1].set_tooltip_text(corpsstr)
         self.receive(self.tracer.trace)
         # workaround to solve tooltip refresh problem
@@ -541,7 +541,7 @@ class EventAccumulator(AdhocView):
         corpsstr = ''
         entetestr = ''
         if obj_evt.content is not None:
-            corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
+            corpsstr = urllib.parse.unquote(obj_evt.content.encode('utf-8'))
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
         if self.options['time'] == 'activity':
             ev_time = helper.format_time_reference(obj_evt.activity_time)
@@ -552,7 +552,7 @@ class EventAccumulator(AdhocView):
                 entetestr = "%s : %s" % (ev_time, "Event not described")
             if obj_evt.concerned_object['id']:
                 entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
-        elif obj_evt.name in self.incomplete_operations_names.keys():
+        elif obj_evt.name in list(self.incomplete_operations_names.keys()):
             comp = ''
             ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
             #print "%s %s %s" % (self.controller.package, obj_evt.concerned_object['id'], ob)
@@ -575,7 +575,7 @@ class EventAccumulator(AdhocView):
                 #print "%s" % ob
             entetestr = "%s : %s %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
         else:
-            print "unlabelled event : %s" % obj_evt.name
+            print("unlabelled event : %s" % obj_evt.name)
             entetestr = "%s : %s" % (ev_time, obj_evt.name)
         entete = Gtk.Label(label=entetestr.encode("UTF-8"))
         hb = Gtk.HBox()
@@ -595,7 +595,7 @@ class EventAccumulator(AdhocView):
         # label with the time of the event
         corpsstr = ''
         if obj_evt.content is not None:
-            corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
+            corpsstr = urllib.parse.unquote(obj_evt.content.encode('utf-8'))
         ev_time = time.strftime("%H:%M:%S", time.localtime(obj_evt.time))
         if self.options['time'] == 'activity':
             ev_time = helper.format_time_reference(obj_evt.activity_time)
@@ -606,7 +606,7 @@ class EventAccumulator(AdhocView):
                 entetestr = "%s : %s" % (ev_time, "Operation not described")
             if obj_evt.concerned_object['id']:
                 entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
-        elif obj_evt.name in self.incomplete_operations_names.keys():
+        elif obj_evt.name in list(self.incomplete_operations_names.keys()):
             comp = ''
             # store type of item in the trace
             ob = self.controller.package.get_element_by_id(obj_evt.concerned_object['id'])
@@ -629,7 +629,7 @@ class EventAccumulator(AdhocView):
                 comp = _('of an unknown item (%s)') % obj_evt.concerned_object['id']
             entetestr = "%s : %s %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
         else:
-            print "unlabelled event : %s" % obj_evt.name
+            print("unlabelled event : %s" % obj_evt.name)
             entetestr = "%s : %s" % (ev_time, obj_evt.name)
         entete = Gtk.Label(label=entetestr.encode("UTF-8"))
         hb = Gtk.HBox()
@@ -650,7 +650,7 @@ class EventAccumulator(AdhocView):
                         #print obj
                         self.controller.gui.edit_element(obj)
                     else:
-                        print "item %s no longuer exists" % id
+                        print("item %s no longuer exists" % id)
             return
         box.add(entete)
         box.connect('button-press-event', box_pressed, obj_evt.concerned_object['id'])
@@ -673,9 +673,9 @@ class EventAccumulator(AdhocView):
             if self.options['time'] == 'activity':
                 op_time = helper.format_time_reference(op.activity_time)
             if op.concerned_object['name'] is None:
-                corpsstr += urllib.unquote( op_time + " : " + op.name + "\n")
+                corpsstr += urllib.parse.unquote( op_time + " : " + op.name + "\n")
             else:
-                corpsstr += urllib.unquote( op_time + " : " + op.name + " ( " + op.concerned_object['name'] + " : " + op.concerned_object['id'] + " )\n")
+                corpsstr += urllib.parse.unquote( op_time + " : " + op.name + " ( " + op.concerned_object['name'] + " : " + op.concerned_object['id'] + " )\n")
         entete = Gtk.Label(label=entetestr.encode("UTF-8"))
         hb = Gtk.HBox()
         box = Gtk.EventBox()

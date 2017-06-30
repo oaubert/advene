@@ -25,19 +25,19 @@ import subprocess
 import signal
 import os
 import sys
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
     fsenc = sys.getfilesystemencoding()
-    ppath = unicode(os.getenv('GST_PLUGIN_PATH', ""), fsenc)
+    ppath = str(os.getenv('GST_PLUGIN_PATH', ""), fsenc)
     if not ppath or not os.path.exists(ppath):
         os.environ['GST_PLUGIN_PATH'] = os.path.join(config.data.path['advene'], 'gst', 'lib', 'gstreamer-1.0').encode(fsenc)
-        gstpath = unicode(os.getenv('PATH', ""), fsenc)
+        gstpath = str(os.getenv('PATH', ""), fsenc)
         os.environ['PATH'] = os.pathsep.join( ( os.path.join(config.data.path['advene'], 'gst', 'bin'), gstpath) ).encode(fsenc)
     else:
         #even if gstpluginpath is defined, gst still may not be in path
-        gstpath = unicode(os.getenv('PATH', ""), fsenc)
+        gstpath = str(os.getenv('PATH', ""), fsenc)
         h,t = os.path.split(ppath)
         binpath,t = os.path.split(h)
         os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) ).encode(fsenc)
@@ -65,7 +65,7 @@ class SoundPlayer:
         if fname.startswith('file:') or fname.startswith('http:'):
             uri = fname
         elif config.data.os == 'win32':
-            uri = 'file:' + urllib.pathname2url(fname)
+            uri = 'file:' + urllib.request.pathname2url(fname)
         else:
             uri = 'file://' + os.path.abspath(fname)
         pipe = Gst.parse_launch('uridecodebin name=decode uri=%s ! audioconvert ! audiopanorama panorama=%f ! audioamplify name=amplify amplification=%f ! autoaudiosink' % (uri, float(balance), int(volume) / 100.0 ))

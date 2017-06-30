@@ -18,7 +18,7 @@
 #
 """Legacy expat wrapping functions."""
 
-from urllib2 import urlopen
+from urllib.request import urlopen
 
 from xml.dom.minidom import parse, parseString
 class PyExpat:

@@ -18,21 +18,21 @@
 #
 import time
 
-import util.uri
+from .util.uri import urljoin
 
-from util.auto_properties import auto_properties
+from .util.auto_properties import auto_properties
 
-import _impl
-import content
-import modeled
-import viewable
+from . import _impl
+from . import content
+from . import modeled
+from . import viewable
 
-from exception import AdveneException, AdveneValueError
+from .exception import AdveneException, AdveneValueError
 
-from constants import *
+from .constants import *
 
 
-class _match_filter_dict (dict):
+class _match_filter_dict (dict, metaclass=auto_properties):
     """
     A specific dictionnary meant to reflect the state of both attributes
     'viewable-class' and 'viewable-type' of a 'view' element. The corresponding
@@ -40,8 +40,6 @@ class _match_filter_dict (dict):
 
     It also has a _class_ and a _type_ property.
     """
-
-    __metaclass__ = auto_properties
 
     __slots__ = ['view']
 
@@ -65,7 +63,7 @@ class _match_filter_dict (dict):
             #if (v_type not in ('', '*')
             #and v_class in self.__classes_w_uri_types):
             #    pkg_uri = view.getOwnerPackage ().getUri (absolute=True)
-            #    v_type = util.uri.urljoin (pkg_uri, v_type)
+            #    v_type = urljoin (pkg_uri, v_type)
             setitem ('type', v_type)
             self.__manage_values ()
 
@@ -125,7 +123,7 @@ class _match_filter_dict (dict):
             # resolve relative URIs
             elif v_type != '*' and v_class in self.__classes_w_uri_types:
                 pkg_uri =self.view.getOwnerPackage ().getUri (absolute=True)
-                v_type = util.uri.urljoin (pkg_uri, v_type)
+                v_type = urljoin (pkg_uri, v_type)
                 super (_match_filter_dict, self).__setitem__ ('type', v_type)
 
     def getClass (self):
@@ -144,12 +142,10 @@ class _match_filter_dict (dict):
 
 class View(modeled.Importable, content.WithContent,
            viewable.Viewable.withClass('view'),
-           _impl.Uried, _impl.Authored, _impl.Dated, _impl.Titled):
+           _impl.Uried, _impl.Authored, _impl.Dated, _impl.Titled, metaclass=auto_properties):
     """
     An advene View.
     """
-
-    __metaclass__ = auto_properties
 
     def __init__(self,                   # mode 1 & 2
                  parent,                 # mode 1 & 2
@@ -199,7 +195,7 @@ class View(modeled.Importable, content.WithContent,
                 raise TypeError("incompatible parameter 'content_mimetype'")
 
             modeled.Importable.__init__(self, element, parent,
-                                        parent.getViews.im_func)
+                                        parent.getViews.__func__)
 
             _impl.Uried.__init__(self, parent=self._getParent())
 
@@ -207,13 +203,13 @@ class View(modeled.Importable, content.WithContent,
             if clazz is None:
                 raise TypeError("parameter 'clazz' required")
             if len(kw):
-                raise TypeError ('Unkown parameters: %s' % kw.keys ())
+                raise TypeError ('Unkown parameters: %s' % list(kw.keys ()))
 
             doc = parent._getDocument()
             element = doc.createElementNS(self.getNamespaceUri(),
                                                self.getLocalName())
             modeled.Importable.__init__(self, element, parent,
-                                        parent.getViews.im_func)
+                                        parent.getViews.__func__)
 
             mf = self.getMatchFilter ()
             mf.setClass (clazz)
@@ -224,7 +220,7 @@ class View(modeled.Importable, content.WithContent,
                 # FIXME: cf thread
                 # Weird use of hash() -- will this work?
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = u"v" + unicode(id(self)) + unicode(time.clock()).replace('.','')
+                ident = "v" + str(id(self)) + str(time.clock()).replace('.','')
             self.setId(ident)
 
             if title is not None: self.setTitle(date)

@@ -53,7 +53,7 @@ class PlayerFactory:
             else:
                 logger.warn("Fallback to dummy module")
                 import advene.player.dummy as playermodule
-        except ImportError, e:
+        except ImportError as e:
             if p != 'gstreamer':
                 logger.warn("Cannot import %(player)s mediaplayer: %(error)s.\nTrying gstreamer player." % {
                     'player': p,

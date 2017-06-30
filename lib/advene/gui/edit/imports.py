@@ -98,7 +98,7 @@ class TreeViewImporter:
                 pop = advene.gui.edit.elements.get_edit_popup (node,
                                                                controller=self.controller,
                                                                editable=False)
-            except TypeError, e:
+            except TypeError as e:
                 pass
             else:
                 pop.edit ()

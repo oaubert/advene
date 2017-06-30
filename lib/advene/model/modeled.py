@@ -18,25 +18,23 @@
 #
 import xml.dom
 
-import util.uri
+from .util.uri import urljoin, no_fragment
 
-import _impl
+from . import _impl
 
 from advene.model.constants import xlinkNS, ELEMENT_NODE
 
-from exception import AdveneException
+from .exception import AdveneException
 
-from util.auto_properties import auto_properties
+from .util.auto_properties import auto_properties
 
-class Modeled(object):
+class Modeled(object, metaclass=auto_properties):
     """An implementation for objects being _views_ of a DOM element.
 
        This DOM element is called the _model_ of the object.
        Every Modeled instance can also have a _parent_, which is, when not None,
        a Modeled instance whose model is the parent element of 'element'.
     """
-
-    __metaclass__ = auto_properties
 
     def __init__(self, element, parent):
         """The parameter element is the DOM model of this object.
@@ -138,13 +136,10 @@ class Modeled(object):
         return self._getParent().getAccessPath()
 
 
-class Importable(Modeled, _impl.Ided):
+class Importable(Modeled, _impl.Ided, metaclass=auto_properties):
     """Common superclass of for every element which can be imported in a
        package.
     """
-    # TODO: manage read-only'ness for imported elements
-
-    __metaclass__ = auto_properties
 
     def __init__(self, element, parent, locator=None):
         if hasattr(parent, 'getAccessPath'):
@@ -161,11 +156,11 @@ class Importable(Modeled, _impl.Ided):
 
             href = self.__importator.getHref()
             base_uri= parent.getOwnerPackage ().getUri (absolute=True)
-            uri = util.uri.urljoin(base_uri, href)
-            pkg_uri = util.uri.no_fragment(uri)
+            uri = urljoin(base_uri, href)
+            pkg_uri = no_fragment(uri)
 
             imports = parent.getOwnerPackage().getImports()
-            if not imports.has_key(pkg_uri):
+            if pkg_uri not in imports:
                 raise AdveneException(
                          "Tried to use element from non imported package: %s" %
                          pkg_uri)
@@ -219,9 +214,8 @@ class Importable(Modeled, _impl.Ided):
 
 
 
-class Importator(Modeled, _impl.Hrefed):
+class Importator(Modeled, _impl.Hrefed, metaclass=auto_properties):
     """ FIXME """
-    __metaclass__ = auto_properties
 
     def __init__(self, parent, element, target):
         Modeled.__init__(self, element, parent)
@@ -276,11 +270,10 @@ class Factory:
         copying an instance.
         """
         e1 = modeled._getModel ()
-        canCopy = ('newOwner' in e1.cloneNode.im_func.func_code.co_varnames)
+        canCopy = ('newOwner' in e1.cloneNode.__func__.__code__.co_varnames)
         if not canCopy:
             # FIXME: find a way to do it
-            raise AdveneException, \
-                      'Can not copy %s in this implementation of DOM' % modeled
+            raise AdveneException('Can not copy %s in this implementation of DOM' % modeled)
         return e1.cloneNode (deep=True, newOwner=e1.ownerDocument)
 
     def of (theClass):
@@ -294,7 +287,7 @@ class Factory:
                 automatically parameter _parent_).
                 """
                 if args:
-                    raise AdveneException, ('createX factory methods only accept keyword arguments')
+                    raise AdveneException(('createX factory methods only accept keyword arguments'))
                 return theClass (parent=self, **kw)
             setattr(_create, '__doc__', theClass.__init__.__doc__)
 
@@ -303,7 +296,7 @@ class Factory:
                 FIXME
                 """
                 if not isinstance (instance, theClass):
-                    raise AdveneException, ("%s is not an instance of %s" %
+                    raise AdveneException("%s is not an instance of %s" %
                                             (instance, theClass.__name__))
                 e = self._make_import_element (instance)
                 return theClass (parent=self, element=e)
@@ -314,7 +307,7 @@ class Factory:
                 """
                 # TODO: implement default id
                 if not isinstance (instance, theClass):
-                    raise AdveneException, ("%s is not an instance of %s" %
+                    raise AdveneException("%s is not an instance of %s" %
                                             (instance, theClass.__name__))
                 e = self._make_copy_element (instance)
                 e.setAttributeNS (None, 'id', id)

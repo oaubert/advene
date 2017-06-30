@@ -18,28 +18,26 @@
 #
 import time
 
-import util.uri
+from .util.uri import urljoin
 
-from util.auto_properties import auto_properties
+from .util.auto_properties import auto_properties
 
-import _impl
-import bundle
-import content
-import modeled
-import viewable
+from . import _impl
+from . import bundle
+from . import content
+from . import modeled
+from . import viewable
 
 from advene.model.constants import adveneNS
 
-from exception import AdveneException
-from fragment import fragmentFactory, unknownFragment
+from .exception import AdveneException
+from .fragment import fragmentFactory, unknownFragment
 
 from advene.model.util.defaultdict import DefaultDict
 
 class Annotation(modeled.Importable, content.WithContent,
                  viewable.Viewable.withClass('annotation','_get_type_uri'),
-                 _impl.Authored, _impl.Dated, _impl.Uried, _impl.Tagged):
-
-    __metaclass__ = auto_properties
+                 _impl.Authored, _impl.Dated, _impl.Uried, _impl.Tagged, metaclass=auto_properties):
 
     def getNamespaceUri(): return adveneNS
     getNamespaceUri = staticmethod(getNamespaceUri)
@@ -123,7 +121,7 @@ class Annotation(modeled.Importable, content.WithContent,
                 # FIXME: cf thread
                 # Weird use of hash() -- will this work?
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = u"a" + unicode(id(self)) + unicode(time.clock()).replace('.','')
+                ident = "a" + str(id(self)) + str(time.clock()).replace('.','')
             self.setId(ident)
 
             if date is not None: self.setDate(date)
@@ -151,7 +149,7 @@ class Annotation(modeled.Importable, content.WithContent,
         if self._cached_type is None:
             type_uri = self._getModel().getAttributeNS(None, "type")
             pkg_uri = self.getOwnerPackage ().getUri (absolute=True)
-            type_uri = util.uri.urljoin (pkg_uri, type_uri)
+            type_uri = urljoin (pkg_uri, type_uri)
             self._cached_type=self.getOwnerPackage().getAnnotationTypes()[type_uri]
         return self._cached_type
 
@@ -328,9 +326,8 @@ class Annotation(modeled.Importable, content.WithContent,
 
 class Relation(modeled.Importable, content.WithContent,
                viewable.Viewable.withClass('relation', '_get_type_uri'),
-               _impl.Authored, _impl.Dated, _impl.Uried, _impl.Tagged):
+               _impl.Authored, _impl.Dated, _impl.Uried, _impl.Tagged, metaclass=auto_properties):
     """Relation between annotations"""
-    __metaclass__ = auto_properties
 
     def __init__(self,                 # mode 1 & 2
                  parent,               # mode 1 & 2
@@ -412,7 +409,7 @@ class Relation(modeled.Importable, content.WithContent,
                 # FIXME: cf thread
                 # Weird use of hash() -- will this work?
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = u"r" + unicode(id(self)) + unicode(time.clock()).replace('.','')
+                ident = "r" + str(id(self)) + str(time.clock()).replace('.','')
             self.setId(ident)
 
             if date is not None: self.setDate(date)
@@ -441,7 +438,7 @@ class Relation(modeled.Importable, content.WithContent,
         """Return the type of this relation"""
         type_uri = self._getModel().getAttributeNS(None, "type")
         pkg_uri = self.getOwnerPackage ().getUri (absolute=True)
-        type_uri = util.uri.urljoin (pkg_uri, type_uri)
+        type_uri = urljoin (pkg_uri, type_uri)
         return self.getOwnerPackage().getRelationTypes()[type_uri]
 
     def setType(self, type):

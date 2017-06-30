@@ -32,9 +32,7 @@ import xml.dom
 ELEMENT_NODE = xml.dom.Node.ELEMENT_NODE
 
 class AbstractType(modeled.Importable,
-                   _impl.Uried, _impl.Authored, _impl.Dated, _impl.Titled):
-
-    __metaclass__ = auto_properties
+                   _impl.Uried, _impl.Authored, _impl.Dated, _impl.Titled, metaclass=auto_properties):
 
     def __init__(self, parent, element, locator):
         modeled.Importable.__init__(self, element, parent, locator)
@@ -83,7 +81,7 @@ class AbstractType(modeled.Importable,
             if cte is None:
                 cte = self._getDocument ().createElementNS (adveneNS, "content-type")
                 self._getModel ().appendChild (cte)
-            cte.setAttributeNS (None, 'mime-type', unicode (value))
+            cte.setAttributeNS (None, 'mime-type', str (value))
         else:
             if cte is not None:
                 self._getModel ().removeChild (cte)
@@ -154,7 +152,7 @@ class AnnotationType(AbstractType,
                 raise TypeError("incompatible parameter 'ident'")
             # mode 1 initialization
             AbstractType.__init__(self, parent, element,
-                            parent.getOwnerPackage().getAnnotationTypes.im_func)
+                            parent.getOwnerPackage().getAnnotationTypes.__func__)
 
         else:
             # should be mode 2, checling parameter consistency
@@ -166,7 +164,7 @@ class AnnotationType(AbstractType,
             element = doc.createElementNS(self.getNamespaceUri(),
                                           self.getLocalName())
             AbstractType.__init__(self, parent, element,
-                            parent.getOwnerPackage().getAnnotationTypes.im_func)
+                            parent.getOwnerPackage().getAnnotationTypes.__func__)
             self.setId(ident)
 
 
@@ -218,7 +216,7 @@ class RelationType(AbstractType,
                 raise TypeError("incompatible parameter 'ident'")
             # mode 1 initialization
             AbstractType.__init__(self, parent, element,
-                            parent.getOwnerPackage().getRelationTypes.im_func)
+                            parent.getOwnerPackage().getRelationTypes.__func__)
 
         else:
             # should be mode 2, checling parameter consistency
@@ -230,7 +228,7 @@ class RelationType(AbstractType,
             element = doc.createElementNS(self.getNamespaceUri(),
                                           self.getLocalName())
             AbstractType.__init__(self, parent, element,
-                            parent.getOwnerPackage().getRelationTypes.im_func)
+                            parent.getOwnerPackage().getRelationTypes.__func__)
             self.setId(ident)
 
     def __str__(self):
@@ -292,7 +290,7 @@ class RelationType(AbstractType,
         for m in membertypes:
             c = self._getDocument ().createElementNS (adveneNS, "member-type")
             if m is not None:
-                c.setAttributeNS (xlinkNS, 'xlink:href', unicode(m))
+                c.setAttributeNS (xlinkNS, 'xlink:href', str(m))
             e.appendChild (c)
         return True
 
@@ -326,9 +324,8 @@ class RelationTypeFactory (modeled.Factory.of (RelationType)):
 class Schema(modeled.Importable,
              viewable.Viewable.withClass('schema'),
              _impl.Uried, _impl.Authored, _impl.Dated, _impl.Titled,
-             AnnotationTypeFactory, RelationTypeFactory):
+             AnnotationTypeFactory, RelationTypeFactory, metaclass=auto_properties):
     """A Schema defines Annotation types and Relation types."""
-    __metaclass__ = auto_properties
 
     def __init__(self, parent, element=None, ident=None):
         """
@@ -358,7 +355,7 @@ class Schema(modeled.Importable,
 
         # common to mode 1 and mode 2
         modeled.Importable.__init__(self, element, parent,
-                                    locator=parent.getSchemas.im_func)
+                                    locator=parent.getSchemas.__func__)
 
         _impl.Uried.__init__(self, parent=self._getParent())
 

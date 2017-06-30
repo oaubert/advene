@@ -179,7 +179,7 @@ class ViewBook(AdhocView):
         e.set_visible_window(False)
         e.set_above_child(True)
         if len(name) > 13:
-            shortname=unicode(name)[:12] + u'\u2026'
+            shortname=str(name)[:12] + '\u2026'
         else:
             shortname=name
         l=Gtk.Label()
@@ -349,7 +349,7 @@ class ViewBook(AdhocView):
                 logger.error("Cannot find view %s", selection.get_data())
             return True
         elif targetType == config.data.target_type['view']:
-            v=self.controller.package.views.get(unicode(selection.get_data(), 'utf8'))
+            v=self.controller.package.views.get(str(selection.get_data(), 'utf8'))
             if helper.get_view_type(v) in ('static', 'dynamic'):
                 # Edit the view.
                 self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
@@ -357,22 +357,22 @@ class ViewBook(AdhocView):
                 logger.error("Unhandled case in viewbook (targetType=view) for %s", v.id)
             return True
         elif targetType == config.data.target_type['query']:
-            v=self.controller.package.queries.get(unicode(selection.get_data(), 'utf8'))
+            v=self.controller.package.queries.get(str(selection.get_data(), 'utf8'))
             if v is not None:
                 self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
             return True
         elif targetType == config.data.target_type['schema']:
-            v=self.controller.package.schemas.get(unicode(selection.get_data(), 'utf8'))
+            v=self.controller.package.schemas.get(str(selection.get_data(), 'utf8'))
             if v is not None:
                 self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
             return True
         elif targetType == config.data.target_type['relation']:
-            v=self.controller.package.relations.get(unicode(selection.get_data(), 'utf8'))
+            v=self.controller.package.relations.get(str(selection.get_data(), 'utf8'))
             if v is not None:
                 self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            at=self.controller.package.annotationTypes.get(unicode(selection.get_data(), 'utf8'))
+            at=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
             # Propose a menu to open various views for the annotation-type:
             menu=Gtk.Menu()
             title=self.controller.get_title(at, max_size=40)
@@ -389,14 +389,14 @@ class ViewBook(AdhocView):
                 (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location, label=_("Query %s") % title)),
                 (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location, label=_("Browsing %s") % title)),
                 ):
-                i=Gtk.MenuItem(u"    " + label, use_underline=False)
+                i=Gtk.MenuItem("    " + label, use_underline=False)
                 i.connect('activate', action)
                 menu.append(i)
             menu.show_all()
             menu.popup_at_pointer(None)
             return True
         elif targetType == config.data.target_type['annotation']:
-            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+            sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
             # Propose a menu to open various views for the annotation:
             menu=Gtk.Menu()
 
@@ -413,7 +413,7 @@ class ViewBook(AdhocView):
                     (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
                     (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin ], destination=self.location)),
                     ):
-                    i=Gtk.MenuItem(u"    " + label, use_underline=False)
+                    i=Gtk.MenuItem("    " + label, use_underline=False)
                     i.connect('activate', action)
                     menu.append(i)
 
@@ -429,7 +429,7 @@ class ViewBook(AdhocView):
                         i=Gtk.MenuItem(self.controller.get_title(q, max_size=40), use_underline=False)
                         i.connect('activate', apply_query, q)
                         sm.append(i)
-                    i=Gtk.MenuItem(u"    " + _("as the context for the query..."), use_underline=False)
+                    i=Gtk.MenuItem("    " + _("as the context for the query..."), use_underline=False)
                     i.set_submenu(sm)
                     menu.append(i)
             else:
@@ -442,7 +442,7 @@ class ViewBook(AdhocView):
                     (_("to create a new static view"), lambda i: create_and_open_view(sources)),
                     (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin for a in sources ], destination=self.location)),
                     ):
-                    i=Gtk.MenuItem(u"    " + label, use_underline=False)
+                    i=Gtk.MenuItem("    " + label, use_underline=False)
                     i.connect('activate', action)
                     menu.append(i)
             menu.show_all()
@@ -451,7 +451,7 @@ class ViewBook(AdhocView):
         elif targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.get_data())
             v=self.controller.gui.open_adhoc_view('activebookmarks', destination=self.location)
-            v.append(long(data['timestamp']), comment=data.get('comment', ''))
+            v.append(int(data['timestamp']), comment=data.get('comment', ''))
             return True
         else:
             logger.error("Unknown drag target received %s", targetType)

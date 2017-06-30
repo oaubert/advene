@@ -79,7 +79,7 @@ class ChoiceTree (object):
     def dump (self, _prefix = ()):
         children = self.children
         if children is not None:
-            for k, subtree in children.iteritems ():
+            for k, subtree in children.items ():
                 subtree.dump (_prefix = _prefix + (k,))
 
     def getSubtree (self, seq):
@@ -110,7 +110,7 @@ class ChoiceTree (object):
             else:
                 # this ChoiceTree is not empty, so at least one subtree must
                 # have a value
-                for k, subtree in children.iteritems ():
+                for k, subtree in children.items ():
                     r = subtree.getAny (_whereami + (k,))
                     if r[1] is not None:
                         return r

@@ -73,8 +73,8 @@ class TranscriptImporter(GenericImporter):
             for e in l:
                 progress += incr
                 self.progress(progress)
-                begin = long(float(e.attrib['start']) * 1000)
-                end = begin + long(float(e.attrib['dur']) * 1000)
+                begin = int(float(e.attrib['start']) * 1000)
+                end = begin + int(float(e.attrib['dur']) * 1000)
                 yield {
                     'type': self.at,
                     'content': e.text,

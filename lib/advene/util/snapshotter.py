@@ -39,8 +39,8 @@ GObject.threads_init()
 Gst.init(None)
 
 from threading import Event, Thread
-import Queue
-from Queue import PriorityQueue
+import queue
+from queue import PriorityQueue
 import heapq
 
 import logging
@@ -126,23 +126,23 @@ reg = Gst.Plugin.register_static_full(version[0], version[1],
                                       'notify_plugin', 'Notify plugin',
                                       plugin_init, '1.0', 'Proprietary', 'abc', 'def', 'ghi', None)
 
-class UniquePriorityQueue(Queue.PriorityQueue):
+class UniquePriorityQueue(queue.PriorityQueue):
     """PriorityQueue with unique elements.
 
     Adapted from http://stackoverflow.com/questions/5997189/how-can-i-make-a-unique-value-priority-queue-in-python
     Thanks to Eli Bendersky.
     """
     def _init(self, maxsize):
-        PriorityQueue._init(self, maxsize)
+        super()._init(maxsize)
         self.values = set()
 
-    def _put(self, item, heappush=heapq.heappush):
+    def _put(self, item):
         if item[1] not in self.values:
             self.values.add(item[1])
-            PriorityQueue._put(self, item, heappush)
+            super()._put(item)
 
     def _get(self, heappop=heapq.heappop):
-        item = PriorityQueue._get(self, heappop)
+        item = super()._get()
         self.values.remove(item[1])
         return item
 
@@ -269,7 +269,7 @@ class Snapshotter(object):
     def snapshot(self, t):
         """Set movie time to a specific time.
         """
-        p = long(t * Gst.MSECOND)
+        p = int(t * Gst.MSECOND)
         self.player.set_state(Gst.State.PAUSED)
         res = self.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE, p)
         if not res:
@@ -304,7 +304,7 @@ class Snapshotter(object):
                         # there is a producer thread that continuously
                         # adds new elements.
                         self.timestamp_queue.get_nowait()
-                    except Queue.Empty:
+                    except queue.Empty:
                         break
             (t, dummy) = self.timestamp_queue.get()
             logger.debug("Clearing event")
@@ -355,7 +355,7 @@ if __name__ == '__main__':
 
     if sys.argv[2:]:
         # Timestamps have been specified. Non-interactive version.
-        s.enqueue( *(long(t) for t in sys.argv[2:]) )
+        s.enqueue( *(int(t) for t in sys.argv[2:]) )
 
         loop=GObject.MainLoop()
         def wait_for_completion():

@@ -39,6 +39,8 @@ class Completer:
     def __init__(self, textview=None, controller=None, element=None, indexer=None):
         self.textview=textview
         self.controller=controller
+        if indexer is None:
+            indexer = Indexer()
         self.indexer=indexer
         # If defined, element is the element being edited, which
         # allows to do a more precise completion search
@@ -179,7 +181,7 @@ class Completer:
         cursor_position=b.get_iter_at_mark(b.get_insert())
         word_start=cursor_position.copy()
         word_start.backward_word_start()
-        return word_start.get_text(cursor_position).decode('utf-8'), word_start, cursor_position
+        return word_start.get_text(cursor_position), word_start, cursor_position
 
     def insert_word_completion(self, path):
         """Insert item selected in the completion window into the text editor's
@@ -189,7 +191,7 @@ class Completer:
         @type path: A Gtk.TreeRow object.
         """
         # Get the selected completion string.
-        completion_string = self.model[path[0]][0].decode("utf8")
+        completion_string = self.model[path[0]][0]
 
         word, begin, end=self.get_word_before_cursor()
         complete=completion_string.replace(word.encode('utf8'), '')
@@ -410,7 +412,7 @@ class Indexer:
         elif isinstance(context, Gtk.TextBuffer):
             # The replace clause transforms the timestamp placeholders into spaces.
             args = context.get_bounds() + (False, )
-            s=set(self.get_words(unicode(context.get_slice(*args).replace('\xef\xbf\xbc', ' '))))
+            s=set(self.get_words(str(context.get_slice(*args).replace('\xef\xbf\xbc', ' '))))
             s.update(self.index['views'])
         else:
             s=self.index['views']

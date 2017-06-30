@@ -70,7 +70,7 @@ class TTLImporter(GenericImporter):
         propname = ''
         data = ''
         for l in fd:
-            l=unicode(l.strip().rstrip(";").strip(), 'latin1')
+            l=str(l.strip().rstrip(";").strip(), 'latin1')
             if self.model is None:
                 if '/modelLDT/' in l:
                     self.model = 'ldt'
@@ -104,7 +104,7 @@ class TTLImporter(GenericImporter):
                     continue
 
                 if num_re.match(data):
-                    data = long(data)
+                    data = int(data)
                 elif data.startswith('"') and data.endswith('"'):
                     data = data.strip('"')
 
@@ -136,7 +136,7 @@ class TTLImporter(GenericImporter):
                 item['_end'] = helper.format_time_reference(item['end'])
 
                 yield {
-                    'content': "\n".join( "%s=%s" % (k, str(item[k])) for k in sorted(item.iterkeys())).encode('utf8'),
+                    'content': "\n".join( "%s=%s" % (k, str(item[k])) for k in sorted(item.keys())).encode('utf8'),
                     'begin': begin,
                     'end' : end,
                     }

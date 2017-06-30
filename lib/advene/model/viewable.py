@@ -16,7 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import cStringIO
+import io
 
 import advene.model.modeled as modeled
 import advene.model.tal.context
@@ -24,13 +24,13 @@ import advene.model.tal.context
 from advene.model.exception import AdveneException
 
 import advene.model.util as util
-from util.auto_properties import auto_properties
+from .util.auto_properties import auto_properties
 
-class TypedUnicode(unicode):
+class TypedUnicode(str):
     """Unicode string with a mimetype attribute.
     """
     def __new__(cls, value=""):
-        s=unicode.__new__(cls, value)
+        s=str.__new__(cls, value)
         s.contenttype='text/plain'
         return s
 
@@ -42,7 +42,7 @@ class TypedString(str):
         s.contenttype='text/plain'
         return s
 
-class Viewable(object):
+class Viewable(object, metaclass=auto_properties):
     """
     A viewable is an object on which advene Views can be applied. A viewable has
     a viewable-class (boldly corresponding to its python class), and can have a
@@ -56,8 +56,6 @@ class Viewable(object):
 
     Subclassing Viewable directly may have unpredictable results.
     """
-
-    __metaclass__ = auto_properties
 
     def __init__(self):
         object.__init__(self)
@@ -105,7 +103,7 @@ class Viewable(object):
         Return all the declared viewable classes
         """
         r = []
-        for subcls in Viewable.__subclasses.values():
+        for subcls in list(Viewable.__subclasses.values()):
             r.append(subcls.getViewableClass())
         return tuple(r)
 
@@ -146,7 +144,7 @@ class Viewable(object):
         view_source = view.getContent().getStream()
         mimetype = view.getContent().getMimetype()
 
-        result = cStringIO.StringIO()
+        result = io.StringIO()
         #result.write((u"<!-- view %s applied to %s -->\n"
         #              % (unicode(view), unicode(self))).encode('utf-8'))
         #context.addLocals( (('here', self), ('view', view)) )
@@ -265,7 +263,7 @@ class GenericViewable(Viewable.withClass('generic')):
         #print "getattr", name
         try:
             return object.__getattribute__ (self, name)
-        except AttributeError, e:
+        except AttributeError as e:
             return object.__getattribute__ (self, '_o').__getattribute__ (name)
 
 class GenericViewableList(Viewable.withClass('list'), GenericViewable):
@@ -278,8 +276,8 @@ class GenericViewableList(Viewable.withClass('list'), GenericViewable):
     def __getitem__(self, n):
         return object.__getattribute__(self, '_o').__getitem__(n)
 
-__system_default_view = cStringIO.StringIO("""<!-- ADVENE DEFAULT VIEW-->
-<span tal:replace='here'>the object</span>""".encode('utf-8'))
+__system_default_view = io.StringIO("""<!-- ADVENE DEFAULT VIEW-->
+<span tal:replace='here'>the object</span>""")
 
 def getSystemDefaultView():
     global __system_default_view

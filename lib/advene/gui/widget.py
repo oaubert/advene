@@ -275,7 +275,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             if self.no_image_pixbuf is None:
                 self.no_image_pixbuf=png_to_pixbuf(ImageCache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
             if not t == w._current:
-                if isinstance(t, long) or isinstance(t, int):
+                if isinstance(t, int) or isinstance(t, int):
                     if cache.is_initialized(t, epsilon=precision):
                         begin.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=precision), width=config.data.preferences['drag-snapshot-width']))
                     elif begin.get_pixbuf() != self.no_image_pixbuf:
@@ -301,7 +301,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         w._current=None
         w.set_cursor = set_cursor.__get__(w)
         w.set_cursor()
-        w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
+        w.set_size_request(int(2.5 * config.data.preferences['drag-snapshot-width']), -1)
         widget._icon=w
         Gtk.drag_set_icon_widget(context, w, 0, 0)
         return True
@@ -422,7 +422,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                 return
             if width < s:
                 # There are more samples than available pixels. Downsample the data
-                l=l[::(s/width)+1]
+                l=l[::int(s/width)+1]
                 s=len(l)
             w=1.0 * width / s
             c = 0
@@ -444,7 +444,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                     scale = 1.0 * height / s.get_dimensions().height
                     context.set_matrix(cairo.Matrix( scale, 0, 0, scale, 0, 0 ))
                     s.render_cairo(context)
-                except Exception, e:
+                except Exception as e:
                     logger.error("Error when rendering SVG timeline component %s", e, exc_info=True)
             return
 
@@ -472,9 +472,9 @@ class AnnotationWidget(GenericColorButtonWidget):
         context.move_to(2, int(height * 0.7))
 
         context.set_source_rgba(0, 0, 0, self.alpha)
-        title=unicode(self.controller.get_title(self.annotation))
+        title=str(self.controller.get_title(self.annotation))
         try:
-            context.show_text(title.encode('utf8'))
+            context.show_text(title)
         except MemoryError:
             logger.error("MemoryError while rendering title for annotation %s", self.annotation.id, exc_info=True)
 
@@ -579,12 +579,12 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         context.move_to(2, int(height * 0.7))
 
         context.set_source_rgba(0, 0, 0, 1)
-        title=unicode(self.controller.get_title(self.annotationtype))
-        context.show_text(title.encode('utf8'))
+        title=str(self.controller.get_title(self.annotationtype))
+        context.show_text(title)
         if self.width is None:
             ext=context.text_extents(title)
             if ext[2] != self.width:
-                self.width=long(ext[2]) + 5
+                self.width=int(ext[2]) + 5
                 self.reset_surface_size(self.width, self.container.button_height)
 GObject.type_register(AnnotationTypeWidget)
 
@@ -614,7 +614,7 @@ class TagWidget(GenericColorButtonWidget):
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         if targetType == config.data.target_type['tag']:
-            selection.set(selection.get_target(), 8, unicode(self.tag).encode('utf8'))
+            selection.set(selection.get_target(), 8, str(self.tag))
         else:
             logger.warn("Unknown target type for drag: %d" % targetType)
         return True
@@ -667,9 +667,9 @@ class TagWidget(GenericColorButtonWidget):
         context.move_to(2, int(height * 0.7))
 
         context.set_source_rgba(0, 0, 0, 1)
-        context.show_text(unicode(self.tag).encode('utf8'))
+        context.show_text(str(self.tag))
         ext=context.text_extents(self.tag)
-        w=long(ext[2]) + 5
+        w=int(ext[2]) + 5
         if self.width != w:
             self.reset_surface_size(self.width, self.container.button_height)
             logger.debug("Resetting width %d", self.width)
@@ -734,9 +734,9 @@ class RelationRepresentation(Gtk.Button):
     """Representation for a relation.
     """
     if config.data.os == 'linux':
-        arrow={ 'to': u'\u2192', 'from': u'\u2190' }
+        arrow={ 'to': '\u2192', 'from': '\u2190' }
     else:
-        arrow={ 'to': u'->', 'from': u'<-' }
+        arrow={ 'to': '->', 'from': '<-' }
 
     def __init__(self, relation, controller, direction='to'):
         self.relation=relation
@@ -752,7 +752,7 @@ class RelationRepresentation(Gtk.Button):
 
     def refresh(self):
         l=self.get_children()[0]
-        t=u'%s %s %s' % (self.arrow[self.direction],
+        t='%s %s %s' % (self.arrow[self.direction],
                          self.controller.get_title(self.relation),
                          self.arrow[self.direction])
         color=self.controller.get_element_color(self.relation)

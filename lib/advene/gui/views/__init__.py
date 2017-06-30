@@ -25,9 +25,9 @@ import re
 from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GObject
-import StringIO
+import io
 import os
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from gettext import gettext as _
 
@@ -132,7 +132,7 @@ class AdhocView(object):
         if self.controller:
             self.controller.log(m, level)
         else:
-            print m
+            print(m)
 
     def set_label(self, label):
         self._label=label
@@ -198,7 +198,7 @@ class AdhocView(object):
             return False
 
         # Post-processing of options
-        for name, value in p.options.iteritems():
+        for name, value in p.options.items():
             # If there is a self.options dictionary, try to guess
             # value types from its content.
             try:
@@ -209,8 +209,8 @@ class AdhocView(object):
                     value=True
                 elif value == 'False':
                     value=False
-                elif isinstance(op, int) or isinstance(op, long):
-                    value=long(value)
+                elif isinstance(op, int) or isinstance(op, int):
+                    value=int(value)
                 elif isinstance(op, float):
                     value=float(value)
             except (KeyError, AttributeError):
@@ -224,11 +224,11 @@ class AdhocView(object):
         root=ET.Element(ET.QName(config.data.namespace, 'adhoc'), id=self.view_id)
 
         if options:
-            for n, v in options.iteritems():
-                ET.SubElement(root, ET.QName(config.data.namespace, 'option'), name=n, value=urllib.quote(unicode(v).encode('utf8')))
+            for n, v in options.items():
+                ET.SubElement(root, ET.QName(config.data.namespace, 'option'), name=n, value=urllib.parse.quote(v))
         if arguments:
             for n, v in arguments:
-                ET.SubElement(root, ET.QName(config.data.namespace, 'argument'), name=n, value=urllib.quote(unicode(v).encode('utf8')))
+                ET.SubElement(root, ET.QName(config.data.namespace, 'argument'), name=n, value=urllib.parse.quote(v))
         return root
 
     def save_default_options(self, *p):
@@ -239,8 +239,8 @@ class AdhocView(object):
             # Create it
             try:
                 helper.recursive_mkdir(d)
-            except OSError, e:
-                self.controller.log(_("Cannot save default options: %s") % unicode(e))
+            except OSError as e:
+                self.controller.log(_("Cannot save default options: %s") % str(e))
                 return True
         defaults=config.data.advenefile( ('defaults', self.view_id + '.xml'), 'settings')
 
@@ -263,7 +263,7 @@ class AdhocView(object):
         content.mimetype='application/x-advene-adhoc-view'
 
         root=self.parameters_to_element(options, arguments)
-        stream=StringIO.StringIO()
+        stream=io.StringIO()
         helper.indent(root)
         ET.ElementTree(root).write(stream, encoding='utf-8')
         content.setData(stream.getvalue())
@@ -531,11 +531,11 @@ class AdhocViewParametersParser:
         for e in root:
             if e.tag == ET.QName(config.data.namespace, 'option'):
                 name=e.attrib['name']
-                value=unicode(urllib.unquote(e.attrib['value']), 'utf8')
+                value=urllib.parse.unquote(e.attrib['value'])
                 self.options[name]=value
             elif e.tag == ET.QName(config.data.namespace, 'argument'):
                 name=e.attrib['name']
-                value=unicode(urllib.unquote(e.attrib['value']), 'utf8')
+                value=urllib.parse.unquote(e.attrib['value'])
                 self.arguments.append( (name, value) )
             else:
                 logger.warn("Unknown tag %s in AdhocViewParametersParser %s", e.tag)

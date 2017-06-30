@@ -239,7 +239,7 @@ class FrameSelector(object):
         hb.pack_start(eb, False, True, 0)
 
         r = None
-        for i in xrange(self.count):
+        for i in range(self.count):
 
             r = TimestampRepresentation(0, self.controller, width=self.frame_width, visible_label=True,
                                         epsilon=(1000 / 2 / config.data.preferences['default-fps'] - 10)) 

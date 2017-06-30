@@ -111,7 +111,7 @@ class BrlEngine:
 
     def generate_reverse_mapping(self):
         self.revmap={}
-        for n, v in brlapi.__dict__.iteritems():
+        for n, v in brlapi.__dict__.items():
             if n.startswith('KEY_'):
                 self.revmap[v]=n
 
@@ -235,14 +235,14 @@ class BrlEngine:
         if name in parameters:
             try:
                 result=context.evaluateValue(parameters[name])
-            except advene.model.tal.context.AdveneTalesException, e:
+            except advene.model.tal.context.AdveneTalesException as e:
                 try:
                     rulename=context.evaluateValue('rule')
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
                 self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
                                                                                                                           'parametername': name})
-                self.controller.log(unicode(e)[:160])
+                self.controller.log(str(e)[:160])
                 result=default_value
         else:
             result=default_value
@@ -254,8 +254,8 @@ class BrlEngine:
             b = brlapi.Connection()
             b.enterTtyMode()
             self.brlconnection=b
-        except (brlapi.ConnectionError, TypeError), e:
-            self.controller.log(_("BrlTTY connection error: %s") % unicode(e))
+        except (brlapi.ConnectionError, TypeError) as e:
+            self.controller.log(_("BrlTTY connection error: %s") % str(e))
             self.brlconnection=None
 
     def disconnect_brlapi(self):

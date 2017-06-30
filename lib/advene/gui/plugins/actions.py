@@ -227,14 +227,14 @@ class DefaultGUIActions:
         if name in parameters:
             try:
                 result=context.evaluateValue(parameters[name])
-            except advene.model.tal.context.AdveneTalesException, e:
+            except advene.model.tal.context.AdveneTalesException as e:
                 try:
                     rulename=context.evaluateValue('rule')
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
                 self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
                                                                                                                           'parametername': name})
-                self.controller.log(unicode(e)[:160])
+                self.controller.log(str(e)[:160])
                 result=default_value
         else:
             result=default_value
@@ -280,7 +280,7 @@ class DefaultGUIActions:
         d={
             'guiview': [
                 ( 'string:' + ident, view.view_name)
-                for (ident, view) in controller.gui.registered_adhoc_views.iteritems()
+                for (ident, view) in controller.gui.registered_adhoc_views.items()
                 ],
             'destination': (
                 ('string:popup', _("...in its own window")),
@@ -338,7 +338,7 @@ class DefaultGUIActions:
         Displays a popup with an informational message.
         """
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
-        message=unicode(message).replace('\\n', '\n')
+        message=str(message).replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         duration=self.parse_parameter(context, parameters, 'duration', None)
@@ -356,7 +356,7 @@ class DefaultGUIActions:
         Displays a popup to ask for a text string.
         """
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
-        message=unicode(message).replace('\\n', '\n')
+        message=str(message).replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         destination=self.parse_parameter(context, parameters, 'destination', None)
@@ -421,7 +421,7 @@ class DefaultGUIActions:
         description=textwrap.fill(description, config.data.preferences['gui']['popup-textwidth'])
 
         message=self.parse_parameter(context, parameters, 'message', _("Click to open the URL"))
-        message=unicode(message).replace('\\n', '\n')
+        message=str(message).replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         url=self.parse_parameter(context, parameters, 'url', 'string:http://advene.org/')
@@ -456,7 +456,7 @@ class DefaultGUIActions:
         description=textwrap.fill(description, config.data.preferences['gui']['popup-textwidth'])
 
         message=self.parse_parameter(context, parameters, 'message', _("Click to go to another position"))
-        message=unicode(message).replace('\\n', '\n')
+        message=str(message).replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         position=self.parse_parameter(context, parameters, 'position', 0)
@@ -481,7 +481,7 @@ class DefaultGUIActions:
         def generate (context, parameters):
             """Display a popup with 'size' choices."""
             def handle_response(button, position, widget):
-                self.controller.update_status("set", long(position))
+                self.controller.update_status("set", int(position))
                 self.gui.popupwidget.undisplay(widget)
                 return True
 

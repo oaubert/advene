@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 # for windows-specific paths
 import sys
 import os
-import cPickle
+import pickle
 import json
 from optparse import OptionParser
 import mimetypes
@@ -48,7 +48,7 @@ def init_gettext():
     import gettext
     gettext.bindtextdomain(APP, data.path['locale'])
     gettext.textdomain(APP)
-    gettext.install(APP, localedir=data.path['locale'], unicode=True)
+    gettext.install(APP, localedir=data.path['locale'])
 
 def find_in_path(name):
     """Return the fullpath of the filename name if found in $PATH
@@ -111,7 +111,7 @@ class Config(object):
 
         if os.sys.platform in ( 'win32', 'darwin' ):
             self.os=os.sys.platform
-        elif 'linux2' in os.sys.platform:
+        elif 'linux' in os.sys.platform:
             self.os='linux'
         else:
             logger.warning("Warning: undefined platform: %s", os.sys.platform)
@@ -362,7 +362,7 @@ class Config(object):
                                   'xlink': "http://www.w3.org/1999/xlink",
                                   'xml': xml.dom.XML_NAMESPACE,
                                   'xmlnsNS': xml.dom.XMLNS_NAMESPACE }
-        self.reverse_namespace_prefix = dict( (v, k) for (k, v) in self.namespace_prefix.iteritems() )
+        self.reverse_namespace_prefix = dict( (v, k) for (k, v) in self.namespace_prefix.items() )
 
         # Internal options. These should generally not be modified.
 
@@ -448,34 +448,34 @@ class Config(object):
             )
 
         self.color_palette = (
-            u'string:#cccc99',
-            u'string:#AAAAEE',
-            u'string:#ccaaaa',
-            u'string:#ffcc52',
-            u'string:#AACCAA',
-            u'string:#deadbe',
-            u'string:#fedcba',
-            u'string:#abcdef',
-            u'string:#ff6666',
-            u'string:#66ff66',
-            u'string:#FFFF88',
-            u'string:#CDEB8B',
-            u'string:#C3D9FF',
-            u'string:#FF1A00',
-            u'string:#CC0000',
-            u'string:#FF7400',
-            u'string:#008C00',
-            u'string:#006E2E',
-            u'string:#4096EE',
-            u'string:#F0C5ED',
-            u'string:#B02B2C',
-            u'string:#D15600',
-            u'string:#C79810',
-            u'string:#73880A',
-            u'string:#6BBA70',
-            u'string:#3F4C6B',
-            u'string:#356AA0',
-            u'string:#D01F3C',
+            'string:#cccc99',
+            'string:#AAAAEE',
+            'string:#ccaaaa',
+            'string:#ffcc52',
+            'string:#AACCAA',
+            'string:#deadbe',
+            'string:#fedcba',
+            'string:#abcdef',
+            'string:#ff6666',
+            'string:#66ff66',
+            'string:#FFFF88',
+            'string:#CDEB8B',
+            'string:#C3D9FF',
+            'string:#FF1A00',
+            'string:#CC0000',
+            'string:#FF7400',
+            'string:#008C00',
+            'string:#006E2E',
+            'string:#4096EE',
+            'string:#F0C5ED',
+            'string:#B02B2C',
+            'string:#D15600',
+            'string:#C79810',
+            'string:#73880A',
+            'string:#6BBA70',
+            'string:#3F4C6B',
+            'string:#356AA0',
+            'string:#D01F3C',
             )
 
         # Content-handlers
@@ -639,14 +639,14 @@ class Config(object):
         """
         if self.os != 'win32':
             return None
-        import _winreg
+        import winreg
         value = None
-        for hkey in _winreg.HKEY_LOCAL_MACHINE, _winreg.HKEY_CURRENT_USER:
+        for hkey in winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER:
             try:
-                reg = _winreg.OpenKey(hkey, subkey)
-                value, type_id = _winreg.QueryValueEx(reg, name)
-                _winreg.CloseKey(reg)
-            except _winreg.error:
+                reg = winreg.OpenKey(hkey, subkey)
+                value, type_id = winreg.QueryValueEx(reg, name)
+                winreg.CloseKey(reg)
+            except winreg.error:
                 #value=None
                 pass
         return value
@@ -664,7 +664,7 @@ class Config(object):
         """
         # FIXME: check signature ?
         if name is None:
-            name=method.func_name
+            name=method.__name__
         self.global_methods[name]=method
         return True
 
@@ -695,15 +695,15 @@ class Config(object):
         """Return the user's homedir.
         """
         h=None
-        if self.os == 'win32' and os.environ.has_key('USERPROFILE'):
+        if self.os == 'win32' and 'USERPROFILE' in os.environ:
             return os.environ['USERPROFILE']
         try:
             h=os.path.expanduser('~')
         except:
             # FIXME: find the appropriate exception to catch (on win32?)
-            if os.environ.has_key('HOME'):
+            if 'HOME' in os.environ:
                 h=os.environ['HOME']
-            elif os.environ.has_key('HOMEPATH'):
+            elif 'HOMEPATH' in os.environ:
                 # Fallback for Windows
                 h=os.path.join(os.environ['HOMEDRIVE'],
                                os.environ['HOMEPATH'])
@@ -730,7 +730,7 @@ class Config(object):
         """Update self.preferences from the preferences file.
         """
         prefs=self.read_preferences_file(d=self.preferences, name='advene')
-        if prefs and prefs.has_key('path'):
+        if prefs and 'path' in prefs:
             self.path.update(prefs['path'])
         self.read_preferences_file(d=self.player, name='player')
         return True
@@ -759,7 +759,7 @@ class Config(object):
             except IOError:
                 return None
             try:
-                prefs=cPickle.load(f)
+                prefs=pickle.load(f)
             except EOFError:
                 logger.error("Cannot load old prefs file", exc_info=True)
                 return None
@@ -778,7 +778,7 @@ class Config(object):
         if not os.path.isdir(dp):
             try:
                 os.makedirs(dp)
-            except OSError, e:
+            except OSError as e:
                 logger.error("Error: %s", str(e))
                 return False
         try:
@@ -809,8 +809,8 @@ class Config(object):
                 continue
             obj = compile (li, conffile, 'single')
             try:
-                exec obj
-            except Exception, e:
+                exec(obj)
+            except Exception as e:
                 logger.error("Error in %s:\n%s", conffile, str(e))
         fd.close ()
 
@@ -828,20 +828,9 @@ class Config(object):
 
         id_ = "Undefined id"
         for name in ('USER', 'USERNAME', 'LOGIN'):
-            if os.environ.has_key (name):
+            if name in os.environ:
                 id_ = os.environ[name]
                 break
-        # Convert to unicode
-        try:
-            # If there are any accented characters and the encoding is
-            # not UTF-8, this will fail
-            id_ = unicode(id_, 'utf-8')
-        except UnicodeDecodeError:
-            # Decoding to latin1 will always work (but may produce
-            # strange characters depending on the system charset).
-            # This looks however like the best fallback for the moment
-            # (even on win32)
-            id_ = unicode(id_, 'latin1')
         return id_
 
     def advenefile(self, filename, category='resources'):
@@ -878,7 +867,7 @@ class Config(object):
     def register_mimetype_file(self, fname):
         """Register a mimetype for a given extension.
         """
-        for ext, t in mimetypes.read_mime_types(fname).iteritems():
+        for ext, t in mimetypes.read_mime_types(fname).items():
             mimetypes.add_type(t, ext)
 
     def fix_paths(self, maindir):

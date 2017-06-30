@@ -22,14 +22,14 @@ logger = logging.getLogger(__name__)
 import copy
 import sys
 
-from cStringIO import StringIO
+from io import StringIO
 
 from simpletal import simpleTAL
 from simpletal import simpleTALES
 
 from advene.model.exception import AdveneException
 
-import global_methods
+from . import global_methods
 
 class AdveneTalesException(AdveneException): pass
 
@@ -98,7 +98,7 @@ class _advene_context (simpleTALES.Context):
 
         val = None
 
-        if self.methods.has_key(path):
+        if path in self.methods:
             #print "Evaluating %s on %s" % (path, obj)
             val = self.methods[path](obj, self)
             # If the result is None, the method is not appliable
@@ -106,13 +106,13 @@ class _advene_context (simpleTALES.Context):
             # object
 
         if val is None and hasattr (obj, 'getQName'):
-            if self.locals.has_key('view'):
+            if 'view' in self.locals:
                 ref = self.locals['view']
-            elif self.globals.has_key('view'):
+            elif 'view' in self.globals:
                 ref = self.globals['view']
-            elif self.locals.has_key('here'):
+            elif 'here' in self.locals:
                 ref = self.locals['here']
-            elif self.globals.has_key('here'):
+            elif 'here' in self.globals:
                 ref = self.globals['here']
             else:
                 ref = None
@@ -140,19 +140,19 @@ class _advene_context (simpleTALES.Context):
                 path = pathList[0]
                 if path.startswith ('?'):
                         path = path[1:]
-                        if self.locals.has_key(path):
+                        if path in self.locals:
                                 path = self.locals[path]
                                 if (isinstance (path, simpleTALES.ContextVariable)): path = path.value()
-                                elif (callable (path)):path = apply (path, ())
+                                elif (callable (path)):path = path(*())
 
-                        elif self.globals.has_key(path):
+                        elif path in self.globals:
                                 path = self.globals[path]
                                 if (isinstance (path, simpleTALES.ContextVariable)): path = path.value()
-                                elif (callable (path)):path = apply (path, ())
+                                elif (callable (path)):path = path(*())
                                 #self.log.debug ("Dereferenced to %s" % path)
-                if self.locals.has_key(path):
+                if path in self.locals:
                         val = self.locals[path]
-                elif self.globals.has_key(path):
+                elif path in self.globals:
                         val = self.globals[path]
                 else:
                         # If we can't find it then raise an exception
@@ -168,20 +168,20 @@ class _advene_context (simpleTALES.Context):
                         #self.log.debug ("Looking for path element %s" % path)
                         if path.startswith ('?'):
                                 path = path[1:]
-                                if self.locals.has_key(path):
+                                if path in self.locals:
                                         path = self.locals[path]
                                         if (isinstance (path, simpleTALES.ContextVariable)): path = path.value()
-                                        elif (callable (path)):path = apply (path, ())
-                                elif self.globals.has_key(path):
+                                        elif (callable (path)):path = path(*())
+                                elif path in self.globals:
                                         path = self.globals[path]
                                         if (isinstance (path, simpleTALES.ContextVariable)): path = path.value()
-                                        elif (callable (path)):path = apply (path, ())
+                                        elif (callable (path)):path = path(*())
                                 #self.log.debug ("Dereferenced to %s" % path)
                         try:
                                 if (isinstance (val, simpleTALES.ContextVariable)): temp = val.value((index, pathList))
-                                elif (callable (val)):temp = apply (val, ())
+                                elif (callable (val)):temp = val(*())
                                 else: temp = val
-                        except simpleTALES.ContextVariable, e:
+                        except simpleTALES.ContextVariable as e:
                                 # Fast path for those functions that return values
                                 self.popLocals()
                                 return e.value()
@@ -215,10 +215,10 @@ class _advene_context (simpleTALES.Context):
                                         result = val.value((index,pathList))
                                         # Advene hook: introduced by the NoCallVariable
                                         if callable(result):
-                                                result = apply(val.value((index, pathList)),())
-                                elif (callable (val)):result = apply (val, ())
+                                                result = val.value((index, pathList))(*())
+                                elif (callable (val)):result = val(*())
                                 else: result = val
-                        except simpleTALES.ContextVariable, e:
+                        except simpleTALES.ContextVariable as e:
                                 # Fast path for those functions that return values
                                 return e.value()
                 else:
@@ -250,11 +250,11 @@ class AdveneContext(_advene_context):
         self.globals = copy.copy(self._cached_globals)
 
     def __str__ (self):
-        return u"<pre>AdveneContext\nGlobals:\n\t%s\nLocals:\n\t%s</pre>" % (
-                "\n\t".join([ "%s: %s" % (k, unicode(v).replace("<", "&lt;"))
-                              for k, v in self.globals.iteritems() ]),
-                "\n\t".join([ "%s: %s" % (k, unicode(v).replace("<", "&lt;"))
-                              for k, v in self.locals.iteritems() ]))
+        return "<pre>AdveneContext\nGlobals:\n\t%s\nLocals:\n\t%s</pre>" % (
+                "\n\t".join([ "%s: %s" % (k, str(v).replace("<", "&lt;"))
+                              for k, v in self.globals.items() ]),
+                "\n\t".join([ "%s: %s" % (k, str(v).replace("<", "&lt;"))
+                              for k, v in self.locals.items() ]))
 
 
     def __init__(self, here, options=None):
@@ -292,8 +292,8 @@ class AdveneContext(_advene_context):
         if stream is None:
             stream = StringIO ()
 
-        if isinstance (view_source, str) or isinstance (view_source, unicode):
-            view_source = StringIO (unicode(view_source))
+        if isinstance (view_source, str) or isinstance (view_source, str):
+            view_source = StringIO (str(view_source))
 
         kw = {}
         if mimetype is None or mimetype.startswith('text/'):
@@ -317,7 +317,7 @@ class AdveneContext(_advene_context):
         """
         try:
                 r = self.evaluate (expr)
-        except simpleTALES.PathNotFoundException, e:
+        except simpleTALES.PathNotFoundException as e:
                 raise AdveneTalesException(
                         'TALES expression %s returned None in context %s' %
                         (e, self))

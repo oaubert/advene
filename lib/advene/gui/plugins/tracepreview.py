@@ -30,7 +30,7 @@ from gettext import gettext as _
 
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import advene.model.view
 from advene.gui.widget import TimestampRepresentation
 from advene.rules.elements import ECACatalog
@@ -182,7 +182,7 @@ class TracePreview(AdhocView):
 
     def buildBox(self, obj_evt, level):
         if level<0:
-            print 'refresh trace'
+            print('refresh trace')
         else:
             ### FIXME : this code should be factorized with the
             ### similar one in tracetimeline (addOperation)
@@ -230,7 +230,7 @@ class TracePreview(AdhocView):
                     #print "%s" % ob
                 entetestr = "%s : %s %s" % (ev_time, self.incomplete_operations_names[obj_evt.name], comp)
             if obj_evt.content is not None:
-                corpsstr = urllib.unquote(obj_evt.content.encode('utf-8'))
+                corpsstr = urllib.parse.unquote(obj_evt.content.encode('utf-8'))
             entete = Gtk.Label(label=ev_time.encode("UTF-8"))
             hb = Gtk.HBox()
             hb.pack_start(entete, False, True, 0)
@@ -270,7 +270,7 @@ class TracePreview(AdhocView):
             else:
                 pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'error.png')), 20,20)
-                print 'No icon for %s' % te
+                print('No icon for %s' % te)
             goocanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
             # object icon
             objg = Group(parent = objcanvas.get_root_item ())
@@ -382,7 +382,7 @@ class TracePreview(AdhocView):
         if self.accuBox.get_children():
             self.accuBox.remove(self.accuBox.get_children()[0])
         else:
-            print "Trace Preview: no event to unpack ? %s" % self.size
+            print("Trace Preview: no event to unpack ? %s" % self.size)
         if self.size>0:
             self.size = self.size-1
 

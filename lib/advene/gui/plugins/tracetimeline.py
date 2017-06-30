@@ -23,7 +23,7 @@ This widget allows to present event history in a timeline view.
 """
 
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
@@ -177,7 +177,7 @@ class TraceTimeline(AdhocView):
         @param trace: the trace to display
 
         """
-        if isinstance(trace, (int, long)):
+        if isinstance(trace, int):
             # Interpret it as an index into the self.tracers.traces
             # list
             trace=self.tracer.traces[trace]
@@ -647,11 +647,11 @@ class TraceTimeline(AdhocView):
         if self.auto_refresh:
             self.ar_tag = GObject.timeout_add(self.auto_refresh_delay, self.refresh_time)
             #should change an icon button
-            print "auto_refresh started"
+            print("auto_refresh started")
         else:
             #should change an icon button
             GObject.source_remove(self.ar_tag)
-            print "auto_refresh stopped"
+            print("auto_refresh stopped")
 
     def show_inspector(self):
         """Expand inspector zone to show it
@@ -705,7 +705,7 @@ class TraceTimeline(AdhocView):
         h = self.canvas.get_allocation().height
         #print float(h*self.timefactor)/ratio<1, h, self.timefactor
         if float(h*self.timefactor)/ratio<1:
-            print "TraceTimeline: minimal zoom is 1s"
+            print("TraceTimeline: minimal zoom is 1s")
             return
         va=self.sw.get_vadjustment()
 
@@ -809,14 +809,14 @@ class TraceTimeline(AdhocView):
             b=d=0
             t = self.controller.package.get_element_by_id(obj_group.cobj['cid'])
             if t is None or not isinstance(t, AnnotationType):
-                print "No corresponding type, creation aborted"
+                print("No corresponding type, creation aborted")
                 return
             a = int(c.find("begin=")+6)
             aa = int(c.find("\n", a))
-            b = long(c[a:aa])
+            b = int(c[a:aa])
             a = int(c.find("end=")+4)
             aa = int(c.find("\n", a))
-            e = long(c[a:aa])
+            e = int(c[a:aa])
             d = e-b
             a = int(c.find("content=")+9)
             aa = len(c)-1
@@ -828,14 +828,14 @@ class TraceTimeline(AdhocView):
                 date=self.controller.get_timestamp(),
                 fragment=MillisecondFragment(begin=b,
                                              duration=d))
-            an.content.data = urllib.unquote(cont.encode('utf-8'))
+            an.content.data = urllib.parse.unquote(cont.encode('utf-8'))
             self.controller.package.annotations.append(an)
             self.controller.notify("AnnotationCreate", annotation=an, comment="Recreated from Trace")
         elif obj_group.cobj['type'] == Relation:
             t=None
             t = self.controller.package.get_element_by_id(obj_group.cobj['cid'])
             if t is None or not isinstance(t, RelationType):
-                print "No corresponding type, creation aborted"
+                print("No corresponding type, creation aborted")
                 return
             a = int(c.find("source=")+7)
             aa = int(c.find("\n", a))
@@ -849,16 +849,16 @@ class TraceTimeline(AdhocView):
             aa = len(c)-1
             cont = c[a:aa]
             if source is None or dest is None or not isinstance(source, Annotation) or not isinstance(dest, Annotation):
-                print "Source or Destination missing, creation aborted"
+                print("Source or Destination missing, creation aborted")
                 return
             r = self.controller.package.createRelation(ident=obj_group.cobj['id'],
                                  members=(source, dest),
                                  type=t)
-            r.content.data = urllib.unquote(cont.encode('utf-8'))
+            r.content.data = urllib.parse.unquote(cont.encode('utf-8'))
             self.controller.package.relations.append(r)
             self.controller.notify("RelationCreate", relation=r)
         else:
-            print 'TODO'
+            print('TODO')
 
         return
 
@@ -1254,7 +1254,7 @@ class TraceTimeline(AdhocView):
         h,l = self.cols[action.name]
         #print "INIT %s" % l
         if (l and not l.get_canvas()):
-            print "Tracetimeline : Synchronization between tracer and view lost - droping event"
+            print("Tracetimeline : Synchronization between tracer and view lost - droping event")
             #to avoid crashing when tracebuilder is calling receive of a tracetimeline being closed
             return
         color = h.color_c
@@ -1886,7 +1886,7 @@ class ObjGroup (CanvasGroup):
                                 dic[op.time]=(x,y)
                 else:
                     dic[g.operation.time]=(g.rep.props.center_x, g.rep.props.center_y)
-            ks = dic.keys()
+            ks = list(dic.keys())
             ks.sort()
             p=GooCanvas.Points([dic[k] for k in ks])
             self.lines.append(GooCanvas.Polyline (parent = self,
@@ -1970,7 +1970,7 @@ class ObjGroup (CanvasGroup):
         else:
             pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'error.png')), int(2*self.r), int(2*self.r))
-            print 'No icon for %s' % te
+            print('No icon for %s' % te)
         return GooCanvas.Image(parent=self, width=int(2*self.r),height=int(2*self.r),x=self.x,y=self.y+3,pixbuf=pb)
 
 
@@ -2152,7 +2152,7 @@ class Inspector (Gtk.VBox):
         """
         corpsstr = ''
         if obj_evt.content is not None and obj_evt.content != 'None':
-            corpsstr = urllib.unquote(obj_evt.content.encode("UTF-8"))
+            corpsstr = urllib.parse.unquote(obj_evt.content.encode("UTF-8"))
         elif obj_evt.name.startswith('Player'):
             #we should display the movietime instead of the content.
             corpsstr = time.strftime("%H:%M:%S", time.gmtime(obj_evt.movietime/1000))
@@ -2211,7 +2211,7 @@ class Inspector (Gtk.VBox):
         else:
             pb = GdkPixbuf.Pixbuf.new_from_file_at_size(config.data.advenefile
                     ( ('pixmaps', 'traces', 'error.png')), 20,20)
-            print 'No icon for %s' % te
+            print('No icon for %s' % te)
         GooCanvas.Image(parent=objcanvas.get_root_item(), width=20,height=20,x=0,y=0,pixbuf=pb)
         # object icon
         objg = CanvasGroup(parent = objcanvas.get_root_item ())
@@ -2319,7 +2319,7 @@ class Inspector (Gtk.VBox):
                     if obj is not None:
                         self.controller.gui.edit_element(obj)
                     else:
-                        print "item %s no longuer exists" % id
+                        print("item %s no longuer exists" % id)
             return
         box.add(entete)
         box.connect('button-press-event', box_pressed, obj_evt.concerned_object['id'])

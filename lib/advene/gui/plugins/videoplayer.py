@@ -60,7 +60,7 @@ class VideoPlayer(AdhocView):
         if uri is None and 'uri' in a:
             self.uri=a['uri']
         if 'offset' in a:
-            self.offset=long(a['offset'])
+            self.offset=int(a['offset'])
 
         self.widget = self.build_widget()
         if self.uri is None:
@@ -107,7 +107,7 @@ class VideoPlayer(AdhocView):
         # Synchronize time
         if ( (ps == self.player.PauseStatus or ps == self.player.PlayingStatus)
              and self.controller.player.current_position_value > 0
-             and abs( long(s.position) + self.offset - self.controller.player.current_position_value ) > 80 ):
+             and abs( int(s.position) + self.offset - self.controller.player.current_position_value ) > 80 ):
             self.player.update_status("set", self.controller.player.current_position_value + self.offset)
         return True
 
@@ -186,13 +186,13 @@ class VideoPlayer(AdhocView):
     def drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         refTime = None
         if targetType == config.data.target_type['annotation']:
-            sources = [ self.controller.package.annotations.get(uri) for uri in unicode(selection.get_data(), 'utf8').split('\n') ]
+            sources = [ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
             if sources:
                 # use first annotation as reference
                 refTime = sources[0].fragment.begin
         elif targetType == config.data.target_type['timestamp']:
             data = decode_drop_parameters(selection.get_data())
-            refTime = long(data['timestamp'])
+            refTime = int(data['timestamp'])
         if refTime is not None:
             self.set_offset(refTime - self.controller.player.current_position_value)
         return True
@@ -253,7 +253,7 @@ class VideoPlayer(AdhocView):
         self.toolbar.insert(sync_button, -1)
 
         def offset_changed(spin):
-            self.offset = long(spin.get_value())
+            self.offset = int(spin.get_value())
             return True
 
         ti = Gtk.ToolItem()
@@ -275,7 +275,7 @@ class VideoPlayer(AdhocView):
 
         timestamp_button = get_pixmap_button('set-to-now.png')
         timestamp_button.set_tooltip_text(_("Drag and drop to get player time"))
-        enable_drag_source(timestamp_button, lambda: long(self.player.get_stream_information().position), self.controller)
+        enable_drag_source(timestamp_button, lambda: int(self.player.get_stream_information().position), self.controller)
         # Cannot use a Gtk.ToolButton since it cannot be drag_source
         ti = Gtk.ToolItem()
         ti.add(timestamp_button)

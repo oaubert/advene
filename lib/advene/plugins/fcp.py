@@ -83,8 +83,8 @@ class XMLFCPImporter(GenericImporter):
                 yield {
                     'type': self.at['subtitle'],
                     'content': "\n".join([ p.findtext('value') for p in e.findall('.//parameter') if p.findtext('parameterid').startswith('str') and p.findtext('value') ]),
-                    'begin': long(e.find('in').text) * invrate,
-                    'end': long(e.find('out').text) * invrate,
+                    'begin': int(e.find('in').text) * invrate,
+                    'end': int(e.find('out').text) * invrate,
                     }
         else:
             progress = .5
@@ -102,8 +102,8 @@ class XMLFCPImporter(GenericImporter):
             yield {
                 'type': self.at['clipitem'],
                 'content': "\n".join([ p.text.strip() for p in e.find('comments') if p.text and p.text.strip() ]),
-                'begin': long(e.findtext('start')) * invrate,
-                'end': long(e.findtext('end')) * invrate,
+                'begin': int(e.findtext('start')) * invrate,
+                'end': int(e.findtext('end')) * invrate,
                 }
 
         self.progress(1.0)

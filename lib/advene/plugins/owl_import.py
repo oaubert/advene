@@ -91,9 +91,9 @@ class OWLImporter(GenericImporter):
         def get_comment(graph, subject, default=""):
             """Return the comment@en for the object.
             """
-            results = list(graph.query(PREFIX + 'SELECT ?comment WHERE { <%s> rdfs:comment ?comment . FILTER langMatches( lang(?comment), "en" ) }' % unicode(subject)))
+            results = list(graph.query(PREFIX + 'SELECT ?comment WHERE { <%s> rdfs:comment ?comment . FILTER langMatches( lang(?comment), "en" ) }' % str(subject)))
             if results:
-                return unicode(results[0][0])
+                return str(results[0][0])
             else:
                 return default
 
@@ -117,8 +117,8 @@ class OWLImporter(GenericImporter):
                 label = get_label(graph, atnode, at_id)
                 description = get_comment(graph, atnode)
                 at = self.create_annotation_type(schema, at_id, title=label, description=description)
-                values = [ unicode(t[0])
-                           for t in graph.query(PREFIX + "SELECT ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . }" % unicode(atnode)) ]
+                values = [ str(t[0])
+                           for t in graph.query(PREFIX + "SELECT ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . }" % str(atnode)) ]
                 if values:
                     at.setMetaData(config.data.namespace, "completions", ",".join(values))
         self.progress(1.0)

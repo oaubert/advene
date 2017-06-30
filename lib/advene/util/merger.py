@@ -271,7 +271,7 @@ class Differ:
         for t in handle_dircmp(d):
             yield t
 
-        for sd in d.subdirs.itervalues():
+        for sd in d.subdirs.values():
             for t in handle_dircmp(sd):
                 yield t
         return
@@ -468,7 +468,7 @@ class Differ:
         el.date=s.date or self.controller.get_timestamp()
         el.title=s.title or id_
         el.matchFilter['class']=s.matchFilter['class']
-        if s.matchFilter.has_key('type'):
+        if 'type' in s.matchFilter:
             el.matchFilter['type']=s.matchFilter['type']
         # FIXME: ideally, we should try to fix translated_ids in
         # views. Or at least try to signal possible occurrences.
@@ -513,6 +513,6 @@ if __name__ == "__main__":
     differ=Differ(source, dest)
     diff=differ.diff()
     for name, s, d, action in diff:
-        logger.info("%s %s %s", name, unicode(s).encode('utf-8'), unicode(d).encode('utf-8'))
+        logger.info("%s %s %s", name, str(s).encode('utf-8'), str(d).encode('utf-8'))
         #action(s, d)
     #dest.save('foo.xml')

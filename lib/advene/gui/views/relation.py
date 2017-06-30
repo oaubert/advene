@@ -178,7 +178,7 @@ class RelationsBox:
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source=self.package.annotations.get(unicode(selection.get_data(), 'utf8').split('\n')[0])
+            source=self.package.annotations.get(str(selection.get_data(), 'utf8').split('\n')[0])
             dest=widget.annotation
             self.create_relation_popup(source, dest)
             # FIXME: TODO

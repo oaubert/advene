@@ -111,7 +111,7 @@ class Player:
             else:
                 v=self.current_position() + p.value
         else:
-            v=long(p)
+            v=int(p)
         return v
 
     def current_position(self):

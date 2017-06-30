@@ -28,9 +28,9 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 from gi.repository import GObject
 
-import urlparse
-import urllib
-import StringIO
+import urllib.parse
+import urllib.request, urllib.parse, urllib.error
+import io
 
 import advene.core.config as config
 from advene.model.schema import Schema, AnnotationType, RelationType
@@ -68,8 +68,8 @@ def png_to_pixbuf (png_data, width=None, height=None):
     """Load PNG data into a pixbuf
     """
     loader = GdkPixbuf.PixbufLoader.new_with_type('png')
-    if not isinstance(png_data, str):
-        png_data=str(png_data)
+    if not isinstance(png_data, bytes):
+        png_data=bytes(png_data)
     try:
         loader.write(png_data)
         pixbuf = loader.get_pixbuf ()
@@ -123,7 +123,7 @@ def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
             h = p.get_height()
             pixbuf=png_to_pixbuf (png_data).scale_simple(w, h, GdkPixbuf.InterpType.BILINEAR)
             p.composite(pixbuf, 0, 0, w, h, 0, 0, 1.0, 1.0, GdkPixbuf.InterpType.BILINEAR, 255)
-        except GObject.GError, e:
+        except GObject.GError as e:
             # The PNG data was invalid.
             logger.error("Invalid image data %s", e)
             pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
@@ -141,7 +141,7 @@ def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
 
 def overlay_svg_as_png(png_data, svg_data):
     pixbuf=overlay_svg_as_pixbuf(png_data, svg_data)
-    s=StringIO.StringIO()
+    s=io.StringIO()
     def pixbuf_save_func(buf):
         s.write(buf)
         return True
@@ -206,19 +206,19 @@ def encode_drop_parameters(**kw):
     @return: a string
     """
     for k in kw:
-        if isinstance(kw[k], unicode):
+        if isinstance(kw[k], str):
             kw[k]=kw[k].encode('utf8')
-        if not isinstance(kw[k], basestring):
+        if not isinstance(kw[k], str):
             kw[k]=str(kw[k])
-    return urllib.urlencode(kw).encode('utf8')
+    return urllib.parse.urlencode(kw).encode('utf8')
 
 def decode_drop_parameters(data):
     """Decode the drop parameters.
 
     @return: a dict.
     """
-    return dict( (k, unicode(v, 'utf8'))
-                 for (k, v) in urlparse.parse_qsl(unicode(data, 'utf8').encode('utf8')) )
+    return dict( (k, str(v, 'utf8'))
+                 for (k, v) in urllib.parse.parse_qsl(str(data, 'utf8').encode('utf8')) )
 
 def get_target_types(el):
     """Return DND target types for element.
@@ -241,7 +241,7 @@ def get_target_types(el):
         targets.extend(config.data.get_target_types('query'))
     elif isinstance(el, Schema):
         targets.extend(config.data.get_target_types('schema'))
-    elif isinstance(el, (int, long)):
+    elif isinstance(el, int):
         targets.extend(config.data.get_target_types('timestamp'))
     # FIXME: Resource
 
@@ -305,10 +305,10 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
             try:
                 uri=controller.build_context(here=el).evaluateValue('here/absolute_url')
             except:
-                uri="No URI for " + unicode(el)
+                uri="No URI for " + str(el)
             selection.set(selection.get_target(), 8, uri.encode('utf8'))
     elif targetType == typ['timestamp']:
-        if isinstance(el, (int, long)):
+        if isinstance(el, int):
             selection.set(selection.get_target(), 8, encode_drop_parameters(timestamp=el))
         elif isinstance(el, Annotation):
             selection.set(selection.get_target(), 8, encode_drop_parameters(timestamp=el.fragment.begin,
@@ -355,7 +355,7 @@ def contextual_drag_begin(widget, context, element, controller):
 
     cache=controller.package.imagecache
 
-    if isinstance(element, (long, int)):
+    if isinstance(element, int):
         begin=image_new_from_pixbuf(png_to_pixbuf (cache.get(element, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
         begin.get_style_context().add_class('advene_drag_icon')
 
@@ -365,7 +365,7 @@ def contextual_drag_begin(widget, context, element, controller):
 
         v.pack_start(begin, False, True, 0)
         v.pack_start(l, False, True, 0)
-        w.set_size_request(long(1.5 * config.data.preferences['drag-snapshot-width']), -1)
+        w.set_size_request(int(1.5 * config.data.preferences['drag-snapshot-width']), -1)
     elif isinstance(element, Annotation):
         # Pictures HBox
         h=Gtk.HBox()
@@ -384,7 +384,7 @@ def contextual_drag_begin(widget, context, element, controller):
         l.get_style_context().add_class('advene_drag_icon')
         v.pack_start(l, False, True, 0)
         w.get_style_context().add_class('advene_drag_icon')
-        w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
+        w.set_size_request(int(2.5 * config.data.preferences['drag-snapshot-width']), -1)
     elif isinstance(element, AnnotationType):
         l=get_coloured_label(_("Annotation Type %(title)s:\n%(count)s") % {
                 'title': controller.get_title(element),

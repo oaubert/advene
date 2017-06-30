@@ -88,8 +88,8 @@ class AnvilImporter(GenericImporter):
                 yield {
                     'type': at,
                     'content': content,
-                    'begin': long(float(el.attrib['start']) * 1000),
-                    'end': long(float(el.attrib['end']) * 1000),
+                    'begin': int(float(el.attrib['start']) * 1000),
+                    'end': int(float(el.attrib['end']) * 1000),
                     }
             if len(attribnames) == 1:
                 n=list(attribnames)[0]
