@@ -246,7 +246,7 @@ class AnnotationDisplay(AdhocView):
             b.hide()
             if isinstance(self.annotation, Annotation):
                 self.controller.notify('EditSessionStart', element=self.annotation, immediate=True)
-                self.annotation.content.data = self.label['contents'].get_text().decode('utf-8')
+                self.annotation.content.data = self.label['contents'].get_text()
                 self.controller.notify("AnnotationEditEnd", annotation=self.annotation)
                 self.controller.notify('EditSessionEnd', element=self.annotation)
             return True

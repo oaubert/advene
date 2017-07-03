@@ -1399,7 +1399,7 @@ class TextContentHandler (ContentHandler):
             return False
         buf = self.view.get_buffer()
         start_iter, end_iter = buf.get_bounds ()
-        text = buf.get_text(start_iter, end_iter, False).decode('utf-8')
+        text = buf.get_text(start_iter, end_iter, False)
         self.element.data = text
         self.set_modified(False)
         return True
@@ -1482,8 +1482,8 @@ class TextContentHandler (ContentHandler):
                 os.rename(fname, fname + '~')
             try:
                 b=self.view.get_buffer()
-                with open(fname, 'w') as f:
-                    f.write(b.get_text(*b.get_bounds() + [ False ]))
+                with open(fname, 'w', encoding='utf-8') as f:
+                    f.write(b.get_text(*b.get_bounds() + ( False, )))
                 self.fname=fname
             except IOError as e:
                 dialog.message_dialog(
@@ -1940,7 +1940,7 @@ class EditGenericForm(EditForm):
         if hasattr(self.entry, 'get_current_element'):
             v=self.entry.get_current_element()
         else:
-            v=self.entry.get_text().decode('utf-8')
+            v=self.entry.get_text()
         self.setter(v)
         return True
 

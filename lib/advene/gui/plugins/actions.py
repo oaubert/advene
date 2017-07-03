@@ -373,7 +373,7 @@ class DefaultGUIActions:
 
         def handle_response(button, widget, entry, dest):
             # Update the destination
-            dest.content.data = entry.get_text().decode('utf-8')
+            dest.content.data = entry.get_text()
             # FIXME: notify element modification
             self.gui.popupwidget.undisplay(widget)
             return True

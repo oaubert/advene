@@ -276,7 +276,7 @@ class EditWidget(Gtk.VBox):
         value = None
 
         if (mode == self.CHANGE_ENTRY):
-            value = src.get_text().decode('utf-8')
+            value = src.get_text()
 
         elif (mode == self.CHANGE_OPTION):
             value = src.get_model()[src.get_active()][1]

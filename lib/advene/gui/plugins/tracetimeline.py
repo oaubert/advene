@@ -264,7 +264,7 @@ class TraceTimeline(AdhocView):
             """
             if w.is_focus():
                 return False
-            w.select_region(0, len(w.get_text().decode('utf-8')))
+            w.select_region(0, len(w.get_text()))
             w.grab_focus()
             return True
         def is_typing(w, event):
@@ -2053,7 +2053,7 @@ class Inspector (Gtk.VBox):
             """Save comment in the trace
             """
             if self.action:
-                comment = self.comment.get_text().decode('utf-8')
+                comment = self.comment.get_text()
                 self.action.event.change_comment(comment)
                 if comment != '':
                     self.action.addCommentMark()

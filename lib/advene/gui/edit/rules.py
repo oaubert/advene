@@ -288,7 +288,7 @@ class EditQuery(EditGeneric):
         if self.valueentry is None:
             v='element'
         else:
-            v=self.valueentry.get_text().decode('utf-8')
+            v=self.valueentry.get_text()
         if v == '' or v == 'element':
             self.model.rvalue=None
         else:
@@ -472,7 +472,7 @@ class EditRule(EditGeneric):
         for w in self.editconditionlist:
             w.update_value()
 
-        self.model.name=self.name_entry.get_text().decode('utf-8')
+        self.model.name=self.name_entry.get_text()
 
         self.model.event=Event(self.editevent.current_event)
 
@@ -489,8 +489,8 @@ class EditRule(EditGeneric):
 
     def update_name(self, entry):
         if self.namelabel:
-            self.namelabel.set_label(entry.get_text().decode('utf-8'))
-        self.framelabel.set_markup(_("Rule <b>%s</b>") % entry.get_text().decode('utf-8').replace('<', '&lt;'))
+            self.namelabel.set_label(entry.get_text())
+        self.framelabel.set_markup(_("Rule <b>%s</b>") % entry.get_text().replace('<', '&lt;'))
         return True
 
     def remove_condition(self, widget, conditionwidget, hbox):
@@ -720,10 +720,10 @@ class EditCondition(EditGeneric):
     def invalid_items(self):
         iv=[]
         if not self.lhs.is_valid():
-            iv.append(_("Condition expression: %s") % self.lhs.get_text().decode('utf-8'))
+            iv.append(_("Condition expression: %s") % self.lhs.get_text())
         if (self.current_operator in Condition.binary_operators
             and not self.rhs.is_valid()):
-            iv.append(_("Condition expression: %s") % self.lhs.get_text().decode('utf-8'))
+            iv.append(_("Condition expression: %s") % self.lhs.get_text())
         return iv
 
     def update_value(self):
@@ -731,9 +731,9 @@ class EditCondition(EditGeneric):
             return False
         c=self.model
         c.operator=self.current_operator
-        c.lhs=self.lhs.get_text().decode('utf-8')
+        c.lhs=self.lhs.get_text()
         if c.operator in Condition.binary_operators:
-            c.rhs=self.rhs.get_text().decode('utf-8')
+            c.rhs=self.rhs.get_text()
         return True
 
     def update_widget(self):
@@ -932,7 +932,7 @@ class EditAction(EditGeneric):
         return True
 
     def on_change_parameter(self, entry, talesentry, name):
-        value=talesentry.get_text().decode('utf-8')
+        value=talesentry.get_text()
         self.current_parameters[name]=value
         return True
 
@@ -1049,7 +1049,7 @@ class EditSubviewList(EditGeneric):
 
     def update_name(self, entry):
         if self.namelabel:
-            self.namelabel.set_label(entry.get_text().decode('utf-8'))
+            self.namelabel.set_label(entry.get_text())
         return True
 
     def refresh(self):

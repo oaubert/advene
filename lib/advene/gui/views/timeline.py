@@ -1684,7 +1684,7 @@ class TimeLine(AdhocView):
 
         def key_handler(widget, event, ann, cb, controller, close_eb):
             if event.keyval == Gdk.KEY_Return:
-                r = helper.title2content(widget.get_text().decode('utf-8'),
+                r = helper.title2content(widget.get_text(),
                                          ann.content,
                                          ann.type.getMetaData(config.data.namespace, "representation"))
                 if r is None:
@@ -1707,7 +1707,7 @@ class TimeLine(AdhocView):
                 return True
             elif event.keyval == Gdk.KEY_Tab:
                 # Validate the current annotation and go to the previous/next one
-                r = helper.title2content(widget.get_text().decode('utf-8'),
+                r = helper.title2content(widget.get_text(),
                                          ann.content,
                                          ann.type.getMetaData(config.data.namespace, "representation"))
                 if r is None:
@@ -3435,7 +3435,7 @@ class TimeLine(AdhocView):
         tb.insert(Gtk.SeparatorToolItem(), -1)
 
         def zoom_entry(entry):
-            f=entry.get_text().decode('utf-8')
+            f=entry.get_text()
 
             i=re.findall(r'\d+', f)
             if i:
