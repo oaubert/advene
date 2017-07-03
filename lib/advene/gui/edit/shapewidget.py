@@ -2225,7 +2225,7 @@ def ET_indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
-defined_shape_classes=[ c for c in list(locals().values()) if hasattr(c, 'SHAPENAME') ]
+defined_shape_classes=[ c for c in locals().values() if hasattr(c, 'SHAPENAME') ]
 
 # Start it all
 if __name__ == '__main__':

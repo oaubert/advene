@@ -291,7 +291,7 @@ class EditWidget(Gtk.VBox):
             value = src.get_value()
 
         elif (mode == self.CHANGE_TEXT):
-            value = src.get_text(*src.get_bounds() + [ False ]).decode('utf-8')
+            value = src.get_text(*src.get_bounds() + ( False, ))
 
         elif (mode == self.CHANGE_ACCELERATOR):
             value = Gtk.accelerator_name(src.key, src.mods)
@@ -365,7 +365,7 @@ class EditWidget(Gtk.VBox):
 
         if (passwd):
             entry.set_visibility(False)
-            entry.set_invisible_char(chr(0x2022))
+            entry.set_invisible_char('\u0222')
 
         value = self.__get_config(property)
         entry.set_text(value)

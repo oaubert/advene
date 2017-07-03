@@ -79,7 +79,7 @@ class QuickviewBar(Gtk.HBox):
             b=""
             e=""
             c=""
-        elif isinstance(a, int) or isinstance(a, int):
+        elif isinstance(a, int):
             # Only display a time
             b="   " + helper.format_time(a)
             e=""
@@ -414,7 +414,7 @@ class TimeLine(AdhocView):
         context.set_line_width(1)
         context.set_dash( (1, 3) )
         for p in sorted(self.layer_position.values()):
-            y = p - offset - i / 2
+            y = p - offset - int(i / 2)
             if y >= 0:
                 context.move_to(0, y)
                 context.line_to(width, y)

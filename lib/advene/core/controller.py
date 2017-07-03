@@ -1160,7 +1160,7 @@ class AdveneController(object):
 
         if element is None:
             return _("None")
-        if isinstance(element, str) or isinstance(element, str):
+        if isinstance(element, str):
             return trim_size(element)
         if isinstance(element, Annotation) or isinstance(element, Relation):
             if representation is not None and representation != "":
@@ -1196,7 +1196,7 @@ class AdveneController(object):
             arrow = helper.arrow_to
             return arrow + str(cleanup(element.title))
         if hasattr(element, 'title') and element.title:
-            return str(cleanup(element.title))
+            return cleanup(element.title)
         if hasattr(element, 'id') and element.id:
             return str(element.id)
         return cleanup(str(element))
@@ -1797,7 +1797,7 @@ class AdveneController(object):
         """
         # If we load a new file and only the template package was present,
         # then remove the template package
-        if len(self.packages) <= 2 and 'new_pkg' in list(self.packages.keys()):
+        if len(self.packages) <= 2 and 'new_pkg' in self.packages:
             self.unregister_package('new_pkg')
         self.packages[alias] = package
         self.aliases[package] = alias
@@ -1813,7 +1813,7 @@ class AdveneController(object):
         del (self.aliases[p])
         del (self.packages[alias])
         if self.package == p:
-            l=[ a for a in list(self.packages.keys()) if a != 'advene' ]
+            l=[ a for a in self.packages.keys() if a != 'advene' ]
             # There should be at least 1 key
             if l:
                 self.activate_package(l[0])

@@ -1454,23 +1454,15 @@ class TextContentHandler (ContentHandler):
             fname=dialog.get_filename(default_file=self.fname)
         if fname is not None:
             try:
-                f=open(fname, 'r')
+                with open(fname, 'r') as f:
+                    lines="".join(f.readlines())
+                    self.content_set(data)
+                    self.fname=fname
             except IOError as e:
                 dialog.message_dialog(
                     _("Cannot read the data:\n%s") % str(e),
                     icon=Gtk.MessageType.ERROR)
                 return True
-            lines="".join(f.readlines())
-            f.close()
-            try:
-                data=str(lines, 'utf8')
-            except UnicodeDecodeError:
-                # Fallback on latin1, which is very common, but may
-                # sometimes fail
-                data=str(lines, 'latin1')
-
-            self.content_set(data.encode('utf-8'))
-            self.fname=fname
         return True
 
     def content_save(self, b=None, fname=None):
@@ -1489,16 +1481,15 @@ class TextContentHandler (ContentHandler):
             if os.path.exists(fname):
                 os.rename(fname, fname + '~')
             try:
-                f=open(fname, 'w')
+                b=self.view.get_buffer()
+                with open(fname, 'w') as f:
+                    f.write(b.get_text(*b.get_bounds() + [ False ]))
+                self.fname=fname
             except IOError as e:
                 dialog.message_dialog(
                     _("Cannot save the data:\n%s") % str(e),
                     icon=Gtk.MessageType.ERROR)
                 return True
-            b=self.view.get_buffer()
-            f.write(b.get_text(*b.get_bounds() + [ False ]).encode('utf-8'))
-            f.close()
-            self.fname=fname
         return True
 
     def get_view (self, compact=False):
@@ -2030,7 +2021,7 @@ class EditAttributesForm (EditForm):
         else:
             # No specific type was given. Guess it...
             e=getattr(self.element, at)
-            if isinstance (e, int) or isinstance (e, int):
+            if isinstance (e, int):
                 typ='int'
         return typ
 
@@ -2068,8 +2059,7 @@ class EditAttributesForm (EditForm):
         else:
             return None
 
-    def cell_edited(self, cell, path_string, text, xxx_todo_changeme):
-        (model, column) = xxx_todo_changeme
+    def cell_edited(self, cell, path_string, text, model, column):
         it = model.get_iter_from_string(path_string)
         if not it:
             return
@@ -2166,7 +2156,7 @@ class EditAttributesForm (EditForm):
         treeview.append_column(column)
 
         renderer = Gtk.CellRendererText()
-        renderer.connect('edited', self.cell_edited, (model, 1))
+        renderer.connect('edited', self.cell_edited, model, 1)
         column = Gtk.TreeViewColumn(_('Value'), renderer,
                                     text=self.COLUMN_VALUE,
                                     editable=self.COLUMN_EDITABLE,

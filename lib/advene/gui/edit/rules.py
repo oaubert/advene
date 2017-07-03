@@ -85,7 +85,7 @@ class EditRuleSet(EditGeneric):
             for p in ra.parameters:
                 action.add_parameter(p, ra.defaults.get(p, ''))
             # Find the next rulename index
-            l=[ int(i) for i in re.findall(str(_('Rule')+'\s*(\d+)'), ''.join(r.name for r in self.model)) ]
+            l=[ int(i) for i in re.findall(_('Rule')+'\s*(\d+)', ''.join(r.name for r in self.model)) ]
             idx=max(l or [ 0 ] ) + 1
             rule=Rule(name=_("Rule") + str(idx),
                       event=event,
@@ -284,7 +284,7 @@ class EditQuery(EditGeneric):
     def update_value(self):
         if not self.editable:
             return False
-        self.model.sources=str(self.sourceentry.get_text()).split(';')
+        self.model.sources=self.sourceentry.get_text().split(';')
         if self.valueentry is None:
             v='element'
         else:
@@ -832,13 +832,13 @@ class EditCondition(EditGeneric):
                 return operators[element][0]
 
         self.selector=dialog.CategorizedSelector(title=_("Select a condition"),
-                                          elements=list(operators.keys()),
-                                          categories=list(Condition.condition_categories.keys()),
-                                          current=self.current_operator,
-                                          description_getter=description_getter,
-                                          category_getter=lambda e: operators[e][1],
-                                          callback=self.on_change_operator,
-                                          editable=self.editable)
+                                                 elements=list(operators),
+                                                 categories=list(Condition.condition_categories),
+                                                 current=self.current_operator,
+                                                 description_getter=description_getter,
+                                                 category_getter=lambda e: operators[e][1],
+                                                 callback=self.on_change_operator,
+                                                 editable=self.editable)
         self.operator=self.selector.get_button()
 
         hbox.add(self.lhs.widget)
@@ -895,7 +895,7 @@ class EditAction(EditGeneric):
     def sorted(self, l):
         """Return a sorted version of the list."""
         if isinstance(l, dict):
-            res=list(l.keys())
+            res=list(l)
         else:
             res=l[:]
         res.sort()
@@ -908,7 +908,7 @@ class EditAction(EditGeneric):
         self.cached_parameters[self.current_name]=self.current_parameters.copy()
 
         self.current_name=element.name
-        for w in list(self.paramlist.values()):
+        for w in self.paramlist.values():
             w.destroy()
         self.paramlist={}
 
@@ -990,7 +990,7 @@ class EditAction(EditGeneric):
 
         self.selector=dialog.CategorizedSelector(title=_("Select an action"),
                                                  elements=expert_filter(sorted(c.actions.values()), 'category'),
-                                                 categories=expert_filter(list(c.action_categories.keys())),
+                                                 categories=expert_filter(list(c.action_categories)),
                                                  current=c.actions[self.current_name],
                                                  description_getter=description_getter,
                                                  category_getter=lambda e: e.category,

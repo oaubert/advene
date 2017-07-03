@@ -88,7 +88,7 @@ class AnnotationDisplay(AdhocView):
                 'end': helper.format_time(None),
                 'contents': '',
                 'imagecontents': None}
-        elif isinstance(self.annotation, int) or isinstance(self.annotation, int):
+        elif isinstance(self.annotation, int):
             d={ 'title': _("Current time"),
                 'begin': helper.format_time(self.annotation),
                 'end': helper.format_time(None),
@@ -186,7 +186,7 @@ class AnnotationDisplay(AdhocView):
         if self.annotation is None or isinstance(self.annotation, AnnotationType):
             self.label['image'].hide()
         else:
-            if isinstance(self.annotation, int) or isinstance(self.annotation, int):
+            if isinstance(self.annotation, int):
                 b=self.annotation
             elif isinstance(self.annotation, Annotation):
                 b=self.annotation.fragment.begin

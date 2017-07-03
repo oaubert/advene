@@ -38,7 +38,7 @@ import urllib.request, urllib.parse, urllib.error
 if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
     fsenc = sys.getfilesystemencoding()
-    ppath = str(os.getenv('GST_PLUGIN_PATH', ""), fsenc)
+    ppath = os.getenv('GST_PLUGIN_PATH', "")
     if not ppath or not os.path.exists(ppath):
         os.environ['GST_PLUGIN_PATH'] = os.path.join(config.data.path['advene'], 'gst', 'lib', 'gstreamer-0.10').encode(fsenc)
         gstpath = str(os.getenv('PATH', ""), fsenc)

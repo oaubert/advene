@@ -66,8 +66,6 @@ class DVDSelect:
             self.oldplaylist=self.controller.player.playlist_get_list()
             self.controller.player.playlist_clear()
             mediafile=self.get_url()
-            if isinstance(mediafile, str):
-                mediafile=mediafile.encode('utf8')
             self.controller.player.playlist_add_item(mediafile)
             self.controller.player.update_status("start")
             button.set_label(_("Stop"))
@@ -75,8 +73,6 @@ class DVDSelect:
             self.controller.player.update_status("stop")
             self.controller.player.playlist_clear()
             for i in self.oldplaylist:
-                if isinstance(i, str):
-                    i=i.encode('utf8')
                 self.controller.player.playlist_add_item(i)
             del self.oldplaylist
             button.set_label(_("Preview"))

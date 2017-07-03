@@ -451,7 +451,7 @@ class ActiveBookmarks(AdhocView):
 
         def do_complete(b, func):
             l=[ bo for bo in self.bookmarks if bo.annotation is None ]
-            if isinstance(func, int) or isinstance(func, int):
+            if isinstance(func, int):
                 for b in l:
                     b.end=b.begin+func
             elif func == 'user':
@@ -1347,7 +1347,7 @@ class ActiveBookmark(object):
                 if self.no_image_pixbuf is None:
                     self.no_image_pixbuf=png_to_pixbuf(cache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
                 if not t == w._current:
-                    if isinstance(t, int) or isinstance(t, int):
+                    if isinstance(t, int):
                         if cache.is_initialized(t, epsilon=config.data.preferences['bookmark-snapshot-precision']):
                             begin.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
                         elif begin.get_pixbuf() != self.no_image_pixbuf:

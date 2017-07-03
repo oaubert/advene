@@ -604,7 +604,7 @@ class AdveneGUI(object):
         """
         def log_error(prov, section, error):
             logger.error("Error while parsing advene.css file in %s: %s" % (section, error))
-        for name, item in list(config.data.drag_type.items()):
+        for name, item in config.data.drag_type.items():
             config.data.target_entry[name] = Gtk.TargetEntry.new(item[0][0], 0, item[0][2])
         # Load advene.css file
         css_provider = Gtk.CssProvider()
@@ -3234,7 +3234,7 @@ class AdveneGUI(object):
         if not s:
             self.log(_("Empty quicksearch string"))
             return True
-        res=self.search_string(str(s))
+        res=self.search_string(s)
         self.open_adhoc_view('interactiveresult', destination='east', result=res, label=_("'%s'") % s, query=s)
         return True
 

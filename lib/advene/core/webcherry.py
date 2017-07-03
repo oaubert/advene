@@ -409,7 +409,7 @@ class Media(Common):
         if not args:
             res.append(self.start_html (_("Access to packages snapshots"), duplicate_title=True, mode='navigation'))
             res.append ("<ul>")
-            for alias in list(self.controller.packages.keys ()):
+            for alias in self.controller.packages:
                 res.append ("""<li><a href="/media/snapshot/%s">%s</a></li>""" % (alias, alias))
             res.append("</ul>")
             return "".join(res)
@@ -424,7 +424,7 @@ class Media(Common):
         except IndexError:
             # No position was given. Display all available snapshots
             res.append(self.start_html (_("Available snapshots for %s") % alias, duplicate_title=True, mode='navigation'))
-            if ('mode' in params and params['mode'] == 'inline'):
+            if params.get('mode', None) == 'inline':
                 template="""<li><a href="/media/snapshot/%(alias)s/%(position)d"><img src="/media/snapshot/%(alias)s/%(position)d" /></a></li>"""
                 res.append ("""<p><a href="/media/snapshot/%s">Display with no inline images</a></p>""" % alias)
             else:
@@ -471,7 +471,7 @@ class Media(Common):
         if not args:
             res.append(self.start_html (_("Access to packages snapshots"), duplicate_title=True, mode='navigation'))
             res.append ("<ul>")
-            for alias in list(self.controller.packages.keys ()):
+            for alias in self.controller.packages:
                 res.append ("""<li><a href="/media/snapshot/%s">%s</a></li>""" % (alias, alias))
             res.append("</ul>")
             return "".join(res)
@@ -676,7 +676,7 @@ class Application(Common):
         else:
             res.append(_("""<p>Opened adhoc views: %s</p>""") % ", ".join([ v.view_name for v in c.gui.adhoc_views]))
             res.append(_("""<p>Available adhoc views:</p><ul>"""))
-            l=list(c.gui.registered_adhoc_views.keys())
+            l=list(c.gui.registered_adhoc_views)
             l.sort()
             for name in l:
                 view=c.gui.registered_adhoc_views[name]
@@ -808,7 +808,7 @@ class Application(Common):
         elif cherrypy.request.method == 'PUT':
             data=cherrypy.request.rfile.read()
             # Convert the type.
-            if isinstance(v, int) or isinstance(v, int):
+            if isinstance(v, int):
                 try:
                     data=int(data)
                 except ValueError:
@@ -853,7 +853,7 @@ class Access(Common):
         <input type="text" name="hostname"><input type="submit" value="Add">
         </form>
         """) % "\n".join(["""<tr><td>%(name)s</td><td>%(ip)s</td><td><a href="/admin/access/delete/%(name)s">Remove</a></td></tr>""" % { 'ip': ip, 'name': name }
-                          for (name, ip) in list(self.controller.server.authorized_hosts.items())])
+                          for (name, ip) in self.controller.server.authorized_hosts.items()])
 
     def index(self):
         return "".join( ( self.start_html(_('Access control'), duplicate_title=True, mode='navigation'),
@@ -969,7 +969,7 @@ class Admin(Common):
         </form>
         </body></html>
         """) % { 'packagelist': " | ".join( ['<a href="/packages/%s">%s</a>' % (alias, alias)
-                                             for alias in list(self.controller.packages.keys()) ] ),
+                                             for alias in self.controller.packages] ),
                  'displaymode': mode_sw })
         return "".join(res)
     index.exposed=True
@@ -1076,7 +1076,7 @@ class Admin(Common):
         res=[ self.start_html (_('Available TALES methods'), duplicate_title=True, mode='navigation') ]
         res.append('<ul>')
         c=self.controller.build_context(here=None)
-        k=list(c.methods.keys())
+        k=list(c.methods)
         k.sort()
         for name in k:
             descr=c.methods[name].__doc__
@@ -1126,7 +1126,7 @@ class Packages(Common):
         <th>Annotations</th>
         </tr>
         """))
-        for alias in list(self.controller.packages.keys()):
+        for alias in self.controller.packages:
             p = self.controller.packages[alias]
             res.append (_("""<tr>
             <td><a href="/packages/%(alias)s">%(alias)s</a></td>
@@ -1201,9 +1201,9 @@ class Packages(Common):
         try:
             objet = context.evaluateValue (expr)
         except AdveneException as e:
-            self.start_html (_("Error"), duplicate_title=True, mode='navigation')
-            res.append (_("""The TALES expression %s is not valid.""") % tales)
-            res.append (str(e.args[0]).encode('utf-8'))
+            self.start_html(_("Error"), duplicate_title=True, mode='navigation')
+            res.append(_("""The TALES expression %s is not valid.""") % tales)
+            res.append(str(e.args[0]))
             return
 
         displaymode = self.controller.server.displaymode
@@ -1436,7 +1436,7 @@ class Packages(Common):
             else:
                 location = "%s?%s" % (p,
                                       "&".join (["%s=%s" % (k,urllib.parse.quote(query[k]))
-                                                 for k in list(query.keys())]))
+                                                 for k in list(query)]))
             return self.send_redirect (location)
 
         tales = "/".join (args[1:])

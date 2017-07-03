@@ -283,7 +283,7 @@ def snapshot_url (target, context):
     elif isinstance(target, advene.model.fragment.MillisecondFragment):
         begin = target.begin
         p=target.rootPackage
-    elif isinstance(target, int) or isinstance(target, int):
+    elif isinstance(target, int):
         begin=target
         # Use the current package
         p=context.evaluateValue('package')
@@ -315,7 +315,7 @@ def player_url (target, context):
         begin = target.begin
         end = target.end
         p=target.rootPackage
-    elif isinstance(target, int) or isinstance(target, int):
+    elif isinstance(target, int):
         begin=target
     else:
         return None
@@ -341,7 +341,7 @@ def formatted (target, context):
     import advene.model.fragment
     from advene.util.helper import format_time
 
-    if isinstance(target, int) or isinstance(target, int):
+    if isinstance(target, int):
         return format_time(target)
 
     if not isinstance(target, advene.model.fragment.MillisecondFragment):
@@ -352,7 +352,7 @@ def formatted (target, context):
         'end'  : '--:--:--.---',
         'duration': '--:--:--.---'
         }
-    for k in list(res.keys()):
+    for k in res:
         t=getattr(target, k)
         res[k] = format_time(t)
     res['begin_s'] = target.begin / 1000.

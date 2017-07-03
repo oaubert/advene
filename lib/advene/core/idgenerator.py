@@ -49,7 +49,7 @@ class Generator:
     def __init__(self, package=None):
         self.last_used={}
         self.existing=[]
-        for k in list(self.prefix.keys()):
+        for k in self.prefix:
             self.last_used[k]=0
         if package is not None:
             self.init(package)
