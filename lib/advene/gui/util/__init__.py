@@ -206,8 +206,6 @@ def encode_drop_parameters(**kw):
     @return: a string
     """
     for k in kw:
-        if isinstance(kw[k], str):
-            kw[k]=kw[k].encode('utf8')
         if not isinstance(kw[k], str):
             kw[k]=str(kw[k])
     return urllib.parse.urlencode(kw).encode('utf8')
@@ -218,7 +216,7 @@ def decode_drop_parameters(data):
     @return: a dict.
     """
     if isinstance(data, bytes):
-        data = data.decode('utf-8') 
+        data = data.decode('utf-8')
     return dict( (k, v)
                  for (k, v) in urllib.parse.parse_qsl(data) )
 
