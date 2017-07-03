@@ -148,7 +148,7 @@ if config.data.os == 'win32':
     # win32 platform, add the "lib" folder to the system path
     os.environ['PATH'] += os.path.pathsep + "lib"
     # add pixbufloader dir in environment
-    if not ('GDK_PIXBUF_MODULE_FILE' in list(os.environ.keys()) and os.path.exists(os.environ['GDK_PIXBUF_MODULE_FILE'])):
+    if 'GDK_PIXBUF_MODULE_FILE' in os.environ and os.path.exists(os.environ['GDK_PIXBUF_MODULE_FILE']):
         os.environ['GDK_PIXBUF_MODULE_FILE'] = os.path.join(
             os.path.abspath(os.path.dirname(sys.executable)),
             'lib',
