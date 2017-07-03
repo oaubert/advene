@@ -310,7 +310,11 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         return out
 
     def serialize(self, stream=sys.stdout):
-        """Serialize the Package on the specified stream"""
+        """Serialize the Package on the specified stream.
+
+        Note that it returns a utf-8 encoded serialization, that must
+        be written as binary afterwards.
+        """
         stream.write(self._getModel().toxml(encoding='utf8'))
 
     def save(self, name=None):
@@ -332,8 +336,8 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                 z.new()
                 self.__zip = z
 
-            # Save the content.xml
-            stream = open (self.__zip.getContentsFile(), "w", encoding='utf-8')
+            # Save the content.xml (using binary mode since serialize is handling encoding)
+            stream = open (self.__zip.getContentsFile(), "wb")
             self.serialize(stream)
             stream.close ()
 
@@ -344,7 +348,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             self.__zip.save(name)
         else:
             # Assuming plain XML format
-            stream = open (name, "w", encoding='utf-8')
+            stream = open (name, "wb")
             self.serialize(stream)
             stream.close ()
 
