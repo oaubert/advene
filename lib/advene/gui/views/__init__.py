@@ -132,7 +132,7 @@ class AdhocView(object):
         if self.controller:
             self.controller.log(m, level)
         else:
-            print(m)
+            logger.warn(m)
 
     def set_label(self, label):
         self._label=label
