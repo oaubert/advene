@@ -56,7 +56,7 @@ import shutil
 import urllib.request, urllib.parse, urllib.error
 from advene.model.exception import AdveneException
 from advene.model.resources import Resources
-from advene.model.util.uri import _fs_encoding, normalize_filename
+from advene.model.util.uri import normalize_filename
 import mimetypes
 
 import xml.etree.ElementTree as ET
@@ -84,7 +84,7 @@ class ZipPackage:
             # FIXME: there should be a way to determine wether it
             # is still used or not.
             logger.info("Cleaning up %s", d)
-            if os.path.isdir(d.encode(_fs_encoding)):
+            if os.path.isdir(d):
                 shutil.rmtree(d, ignore_errors=True)
 
     cleanup = staticmethod(cleanup)
@@ -125,24 +125,21 @@ class ZipPackage:
         return self.tempfile('content.xml')
 
     def tempfile(self, *names):
-        """Return a tempfile name in the filesystem encoding.
-
-        Try to deal appropriately with filesystem encodings:
+        """Return a tempfile name.
 
         self._tempdir is a unicode string.
 
-        tempfile takes unicode parameters, and returns a path encoded
-        in sys.getfilesystemencoding()
+        tempfile takes unicode parameters and returns a path.
         """
-        return os.path.join(self._tempdir, *names).encode(_fs_encoding)
+        return os.path.join(self._tempdir, *names)
 
     def new(self):
         """Prepare a new AZP expanded package.
         """
-        self._tempdir=str(tempfile.mkdtemp('', 'adv'), _fs_encoding)
+        self._tempdir=tempfile.mkdtemp('', 'adv')
         self.tempdir_list.append(self._tempdir)
 
-        open(self.tempfile('mimetype'), 'w').write(MIMETYPE)
+        open(self.tempfile('mimetype'), 'w', encoding='utf-8').write(MIMETYPE)
 
         os.mkdir(self.tempfile('resources'))
 
@@ -215,7 +212,7 @@ class ZipPackage:
             # want it to be removed upon application exit.
             self._tempdir=fname
             try:
-                typ=open(self.tempfile('mimetype'), 'r').read()
+                typ=open(self.tempfile('mimetype'), 'r', encoding='utf-8').read()
             except IOError:
                 typ=None
             if typ != MIMETYPE:
@@ -275,17 +272,14 @@ class ZipPackage:
                     name='/'.join( (zpath, f) )
                 else:
                     name=f
-                if isinstance(name, str):
-                    name=str(name, _fs_encoding)
                 manifest.append(name)
                 if z is not None:
-                    z.write( os.path.join(dirpath, f),
-                             name.encode('utf-8') )
+                    z.write( os.path.join(dirpath, f), name )
 
         # Generation of the manifest file
         fname=self.tempfile("META-INF", "manifest.xml")
         tree=ET.ElementTree(self.list_to_manifest(manifest))
-        tree.write(fname, encoding='utf-8')
+        tree.write(fname)
         if z is not None:
             # Generation of the manifest file
             z.write( fname,
@@ -298,8 +292,8 @@ class ZipPackage:
         d=self.tempfile('META-INF')
         if not os.path.isdir(d):
             os.mkdir(d)
-        f=open(self.tempfile('META-INF', 'statistics.xml'), 'w')
-        f.write(p.generate_statistics().encode('utf-8'))
+        f=open(self.tempfile('META-INF', 'statistics.xml'), 'w', encoding='utf-8')
+        f.write(p.generate_statistics())
         f.close()
         return True
 
@@ -348,7 +342,7 @@ class ZipPackage:
     def close(self):
         """Close the package and remove temporary files.
         """
-        shutil.rmtree(self._tempdir.encode(_fs_encoding), ignore_errors=True)
+        shutil.rmtree(self._tempdir, ignore_errors=True)
         self.tempdir_list.remove(self._tempdir)
         return True
 
