@@ -594,9 +594,9 @@ def median(values):
     values = sorted(values)
     n = len(values)
     if n % 2:
-        return values[(n + 1) / 2 - 1]
+        return values[int((n + 1) / 2) - 1]
     else:
-        return sum(values[n / 2 - 1: n / 2 + 1]) / 2.0
+        return sum(values[int(n / 2) - 1:int(n / 2) + 1]) / 2.0
 
 def get_annotations_statistics(annotations, format='text'):
     """Return some statistics about the given annotations.

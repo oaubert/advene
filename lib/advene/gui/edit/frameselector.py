@@ -79,11 +79,11 @@ class FrameSelector(object):
         @param focus_index: the index of the child widget which should get the focus
         @type focus_index: int
         """
-        t = timestamp - self.count / 2 * self.frame_length
+        t = timestamp - int(self.count / 2) * self.frame_length
         if t < 0:
             # Display from 0. But we have to take this into account
             # when handling focus_index
-            index_offset = t / self.frame_length
+            index_offset = int(t / self.frame_length)
             t = 0
         else:
             index_offset = 0
@@ -115,7 +115,7 @@ class FrameSelector(object):
 
         # Handle focus
         if focus_index is None:
-            focus_index = self.count / 2
+            focus_index = int(self.count / 2)
 
         self.frames[focus_index + index_offset].grab_focus()
         return True
@@ -129,7 +129,7 @@ class FrameSelector(object):
         else:
             ref=self.frames[offset]
             start = ref.value
-        self.update_timestamp(start + self.count / 2 * self.frame_length, focus_index)
+        self.update_timestamp(start + int(self.count / 2) * self.frame_length, focus_index)
         return True
 
     def refresh_snapshots(self):
@@ -242,7 +242,7 @@ class FrameSelector(object):
         for i in range(self.count):
 
             r = TimestampRepresentation(0, self.controller, width=self.frame_width, visible_label=True,
-                                        epsilon=(1000 / 2 / config.data.preferences['default-fps'] - 10)) 
+                                        epsilon=int(1000 / 2 / config.data.preferences['default-fps'] - 10)) 
             r.add_class("frameselector_frame")
             r.add_class("frameselector_frame_%s" % self.border_mode)
             self.frames.append(r)
