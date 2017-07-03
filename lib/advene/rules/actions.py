@@ -342,7 +342,7 @@ class DefaultActionsRepository:
         This method is overriden in the GUI by self.log
         """
         message=self.parse_parameter(context, parameters, 'message', "An event occurred.")
-        logger.warn("** Message ** %s" + message.encode('utf8', 'ignore'))
+        logger.warn("** Message ** %s", message)
         return True
 
     def PlayerStart (self, context, parameters):
@@ -441,10 +441,10 @@ class DefaultActionsRepository:
                                  key=c.player.MediaTime,
                                  origin=c.player.RelativePosition)
         if c.gui and c.gui.captionview:
-            c.gui.captionview.display_text(message.encode('utf8'),
+            c.gui.captionview.display_text(message,
                                            duration)
         else:
-            c.player.display_text (message.encode('utf8'), begin, end)
+            c.player.display_text (message, begin, end)
         return True
 
     def DisplayMarker (self, context, parameters):
@@ -494,10 +494,10 @@ class DefaultActionsRepository:
                                  key=c.player.MediaTime,
                                  origin=c.player.RelativePosition)
         if c.gui and c.gui.captionview:
-            c.gui.captionview.display_text(message.encode('utf8'),
+            c.gui.captionview.display_text(message,
                                            duration)
         else:
-            c.player.display_text (message.encode('utf8'), begin, end)
+            c.player.display_text (message, begin, end)
         return True
 
     def AnnotationCaption (self, context, parameters):
@@ -516,10 +516,10 @@ class DefaultActionsRepository:
             #begin = c.create_position (value=annotation.fragment.begin)
             #end = c.create_position (value=annotation.fragment.end)
             if c.gui and c.gui.captionview:
-                c.gui.captionview.display_text(message.encode('utf8'),
+                c.gui.captionview.display_text(message,
                                                duration)
             else:
-                c.player.display_text (message.encode('utf8'), begin, end)
+                c.player.display_text (message, begin, end)
         return True
 
     def SoundOff (self, context, parameters):

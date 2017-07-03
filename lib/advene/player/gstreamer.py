@@ -204,7 +204,7 @@ class Player:
     def log (self, msg):
         """Display a message.
         """
-        logger.warn("gstreamer: %s", msg.encode('utf-8', 'ignore'))
+        logger.warn("gstreamer: %s", msg)
 
     def build_pipeline(self):
         sink='xvimagesink'

@@ -545,7 +545,7 @@ class AdveneGUI(object):
             menu=Gtk.Menu()
             item=Gtk.MenuItem(_("Launch search"))
             item.connect('activate', self.do_quicksearch)
-            if not self.quicksearch_entry.get_text().decode('utf-8'):
+            if not self.quicksearch_entry.get_text():
                 item.set_sensitive(False)
             menu.append(item)
             item=Gtk.CheckMenuItem(_("Ignore case"))
@@ -994,8 +994,8 @@ class AdveneGUI(object):
         dialog.center_on_mouse(d)
         res=d.run()
         if res == Gtk.ResponseType.OK:
-            search=search_entry.get_text().decode('utf-8').replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
-            replace=replace_entry.get_text().decode('utf-8').replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            search=search_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            replace=replace_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
             count=0
             batch_id=object()
             for a in elements:
@@ -2365,7 +2365,7 @@ class AdveneGUI(object):
         if res == Gtk.ResponseType.OK:
             self.controller.apply_export_filter(element,
                                                 exporters.get_current_element(),
-                                                fs.get_filename().decode('utf-8'))
+                                                fs.get_filename())
         fs.destroy()
         return True
 
@@ -2580,7 +2580,7 @@ class AdveneGUI(object):
         stream=io.StringIO()
         helper.indent(workspace)
         ET.ElementTree(workspace).write(stream, encoding='utf-8')
-        v.content.setData(stream.getvalue().decode('utf-8'))
+        v.content.setData(stream.getvalue())
         stream.close()
 
         if create:
@@ -3226,7 +3226,7 @@ class AdveneGUI(object):
                                              case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
 
     def do_quicksearch(self, *p):
-        s=self.quicksearch_entry.get_text().decode('utf-8')
+        s=self.quicksearch_entry.get_text()
         if not s:
             self.log(_("Empty quicksearch string"))
             return True
@@ -3357,8 +3357,8 @@ class AdveneGUI(object):
             at=type_selector.get_current_element()
             if at == newat:
                 # Creation of a new type.
-                attitle=new_type_title_dialog.title_entry.get_text().decode('utf-8')
-                atid=new_type_title_dialog.id_entry.get_text().decode('utf-8')
+                attitle=new_type_title_dialog.title_entry.get_text()
+                atid=new_type_title_dialog.id_entry.get_text()
                 at=self.controller.package.get_element_by_id(atid)
                 if at is not None:
                     dialog.message_dialog(_("You specified a annotation-type identifier that already exists. Aborting."))
@@ -3366,8 +3366,8 @@ class AdveneGUI(object):
                     return None
                 sc=schema_selector.get_current_element()
                 if sc == newschema:
-                    sctitle=new_schema_title_dialog.title_entry.get_text().decode('utf-8')
-                    scid=new_schema_title_dialog.id_entry.get_text().decode('utf-8')
+                    sctitle=new_schema_title_dialog.title_entry.get_text()
+                    scid=new_schema_title_dialog.id_entry.get_text()
                     sc=self.controller.package.get_element_by_id(scid)
                     if sc is None:
                         # Create the schema
@@ -3456,8 +3456,8 @@ class AdveneGUI(object):
         if res == Gtk.ResponseType.OK:
             sc=schema_selector.get_current_element()
             if sc == newschema:
-                sctitle=new_schema_title_dialog.title_entry.get_text().decode('utf-8')
-                scid=new_schema_title_dialog.id_entry.get_text().decode('utf-8')
+                sctitle=new_schema_title_dialog.title_entry.get_text()
+                scid=new_schema_title_dialog.id_entry.get_text()
                 sc=self.controller.package.get_element_by_id(scid)
                 if sc is None:
                     # Create the schema
@@ -4676,8 +4676,8 @@ class AdveneGUI(object):
         res=d.run()
         if res == Gtk.ResponseType.OK:
             try:
-                title=d.title_entry.get_text().decode('utf-8')
-                ident=d.id_entry.get_text().decode('utf-8')
+                title=d.title_entry.get_text()
+                ident=d.id_entry.get_text()
                 default=d.default.get_active()
             except ValueError:
                 pass
@@ -4805,11 +4805,11 @@ class AdveneGUI(object):
             return w.should_continue
 
         def do_conversion(b):
-            d=dirname_entry.get_text().decode('utf-8')
+            d=dirname_entry.get_text()
             if not d:
                 return False
 
-            video=video_entry.get_text().decode('utf-8')
+            video=video_entry.get_text()
 
             if (self.controller.package.getMetaData(config.data.namespace, 'website-export-directory') != d
                 or self.controller.package.getMetaData(config.data.namespace, 'website-export-video-url') != video):
