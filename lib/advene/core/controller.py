@@ -1193,7 +1193,7 @@ class AdveneController(object):
                     r=element.id
                 return cleanup(r)
         if isinstance(element, RelationType):
-            arrow = helper.arrow_to
+            arrow = helper.chars.arrow_to
             return arrow + str(cleanup(element.title))
         if hasattr(element, 'title') and element.title:
             return cleanup(element.title)
