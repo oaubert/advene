@@ -1326,12 +1326,15 @@ class AdveneGUI(object):
 
         defaults=config.data.advenefile( ('defaults', 'workspace.xml'), 'settings')
         if os.path.exists(defaults):
-            # a default workspace has been saved. Load it and
-            # ignore the default adhoc view specification.
-            stream=open(defaults)
-            tree=ET.parse(stream)
-            stream.close()
-            self.workspace_restore(tree.getroot())
+            try:
+                # a default workspace has been saved. Load it and
+                # ignore the default adhoc view specification.
+                stream=open(defaults, encoding='utf-8')
+                tree=ET.parse(stream)
+                stream.close()
+                self.workspace_restore(tree.getroot())
+            except:
+                logger.error("Cannot restore default workspace", exc_info=True)
         else:
             # Open default views
             self.open_adhoc_view('timeline', destination='south')
