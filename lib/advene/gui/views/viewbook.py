@@ -360,19 +360,28 @@ class ViewBook(AdhocView):
             v=self.controller.package.queries.get(str(selection.get_data(), 'utf8'))
             if v is not None:
                 self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
+            else:
+                logger.error("Unhandled case in viewbook (targetType=query) for %s", v.id)
             return True
         elif targetType == config.data.target_type['schema']:
             v=self.controller.package.schemas.get(str(selection.get_data(), 'utf8'))
             if v is not None:
                 self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
+            else:
+                logger.error("Unhandled case in viewbook (targetType=schema) for %s", v.id)
             return True
         elif targetType == config.data.target_type['relation']:
             v=self.controller.package.relations.get(str(selection.get_data(), 'utf8'))
             if v is not None:
                 self.controller.gui.open_adhoc_view('edit', element=v, destination=self.location)
+            else:
+                logger.error("Unhandled case in viewbook (targetType=relation) for %s", v.id)
             return True
         elif targetType == config.data.target_type['annotation-type']:
             at=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
+            if at is None:
+                logger.error("Unhandled case in viewbook (targetType=relation) for %s", v.id)
+                return True
             # Propose a menu to open various views for the annotation-type:
             menu=Gtk.Menu()
             title=self.controller.get_title(at, max_size=40)
