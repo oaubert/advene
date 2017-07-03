@@ -216,7 +216,7 @@ class FinderColumn(object):
         self.node=node
         self.callback=callback
         self.previous=parent
-        self.next=None
+        self.next_column=None
         self.widget=Gtk.Frame()
         self.widget.add(self.build_widget())
         self.widget.connect('key-press-event', self.key_pressed_cb)
@@ -224,8 +224,8 @@ class FinderColumn(object):
     def key_pressed_cb(self, col, event):
         if event.keyval == Gdk.KEY_Right:
             # Next column
-            if self.__next__ is not None:
-                self.next.get_focus()
+            if self.next_column is not None:
+                self.next_column.get_focus()
             return True
         elif event.keyval == Gdk.KEY_Left:
             # Previous column
@@ -265,11 +265,11 @@ class FinderColumn(object):
     def close(self):
         """Close this column, and all following ones.
         """
-        if self.__next__ is not None:
-            self.next.close()
+        if self.next_column is not None:
+            self.next_column.close()
         self.widget.destroy()
         if self.previous is not None:
-            self.previous.next=None
+            self.previous.next_column=None
 
     def get_name(self):
         return self.controller.get_title(self.node)
@@ -281,10 +281,10 @@ class FinderColumn(object):
 
     def on_column_activation(self, widget):
         # Delete all next columns
-        cb=self.__next__
+        cb=self.next_column
         if cb:
             cb.close()
-        self.next=None
+        self.next_column=None
         return True
 
     def build_widget(self):
@@ -335,14 +335,14 @@ class ModelColumn(FinderColumn):
         for row in self.get_valid_members(node):
             self.liststore.append(row)
 
-        if self.__next__ is not None:
+        if self.next_column is not None:
             # There is a next column. Should we still display it ?
             if not [ r
                      for r in self.liststore
-                     if r[self.COLUMN_ELEMENT] == self.next.node ]:
+                     if r[self.COLUMN_ELEMENT] == self.next_column.node ]:
                 # The next node is no more in the current elements.
-                self.next.close()
-                self.next=None
+                self.next_column.close()
+                self.next_column=None
         return True
 
     def on_button_press(self, widget, event):
@@ -789,8 +789,8 @@ class Finder(AdhocView):
     def refresh(self):
         c=self.rootcolumn
         c.update(c.node)
-        while c.__next__ is not None:
-            c=c.__next__
+        while c.next_column is not None:
+            c=c.next_column
             c.update(c.node)
         return True
 
@@ -803,7 +803,7 @@ class Finder(AdhocView):
             self.refresh()
         elif event.endswith('Delete'):
             self.model.remove_element(element)
-            cb=self.rootcolumn.__next__
+            cb=self.rootcolumn.next_column
             while cb is not None:
                 if [ r
                      for r in cb.liststore
@@ -812,10 +812,10 @@ class Finder(AdhocView):
                     # children. Remove the next column if necessary
                     # and update the children list.
                     cb.update(node=cb.node)
-                    if cb.__next__ is not None and cb.next.node == element:
-                        cb.next.close()
+                    if cb.next_column is not None and cb.next_column.node == element:
+                        cb.next_column.close()
 
-                cb=cb.__next__
+                cb=cb.next_column
             #self.update_model(element.rootPackage)
         else:
             return "Unknown event %s" % event
@@ -864,11 +864,11 @@ class Finder(AdhocView):
             package = self.controller.package
 
         # Reset to the rootcolumn
-        cb=self.rootcolumn.__next__
+        cb=self.rootcolumn.next_column
         while cb is not None:
             cb.widget.destroy()
-            cb=cb.__next__
-        self.rootcolumn.next=None
+            cb=cb.next_column
+        self.rootcolumn.next_column=None
 
         self.package = package
         self.model=DetailedTreeModel(controller=self.controller, package=package)
@@ -878,15 +878,15 @@ class Finder(AdhocView):
         return True
 
     def clicked_callback(self, columnbrowser, node):
-        logger.debug("clicked_callback %s %s %s", columnbrowser, node, columnbrowser.__next__)
+        logger.debug("clicked_callback %s %s %s", columnbrowser, node, columnbrowser.next_column)
         if columnbrowser is None:
             # We selected  the rootcolumn. Delete the next ones
-            cb=self.rootcolumn.__next__
+            cb=self.rootcolumn.next_column
             while cb is not None:
                 cb.widget.destroy()
-                cb=cb.__next__
-            self.rootcolumn.next=None
-        elif columnbrowser.__next__ is None:
+                cb=cb.next_column
+            self.rootcolumn.next_column=None
+        elif columnbrowser.next_column is None:
             t=type(node)
             clazz=CLASS2COLUMN.get(t, ModelColumn)
             # Create a new columnbrowser
@@ -898,21 +898,21 @@ class Finder(AdhocView):
             col.widget.set_property("width-request", self.column_width)
             self.hbox.pack_start(col.widget, False, True, 0)
             col.widget.show_all()
-            columnbrowser.next=col
+            columnbrowser.next_column=col
         else:
             # Delete all next+1 columns (we reuse the next one)
-            cb=columnbrowser.next.__next__
+            cb=columnbrowser.next_column.next_column
             if cb is not None:
                 cb.close()
             # Check if the column is still appropriate for the node
             clazz=CLASS2COLUMN.get(type(node), None)
-            if clazz is None or not isinstance(columnbrowser.__next__, clazz):
+            if clazz is None or not isinstance(columnbrowser.next_column, clazz):
                 # The column is not appropriate for the new node.
                 # Close it and reopen it.
-                columnbrowser.next.close()
+                columnbrowser.next_column.close()
                 self.clicked_callback(columnbrowser, node)
             else:
-                columnbrowser.next.update(node)
+                columnbrowser.next_column.update(node)
 
         # Scroll the columns
         GObject.timeout_add(100, lambda: self.autoscroll_end() and False)

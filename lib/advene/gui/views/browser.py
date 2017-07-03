@@ -43,7 +43,7 @@ class BrowserColumn:
         self.model=element
         self.name=name
         self.callback=callback
-        self.next=None
+        self.next_column=None
         self.previous=parent
         self.widget=self.build_widget()
         self.widget.connect('key-press-event', self.key_pressed_cb)
@@ -51,8 +51,8 @@ class BrowserColumn:
     def key_pressed_cb(self, col, event):
         if event.keyval == Gdk.KEY_Right:
             # Next column
-            if self.__next__ is not None:
-                self.next.get_focus()
+            if self.next_column is not None:
+                self.next_column.get_focus()
             return True
         elif event.keyval == Gdk.KEY_Left:
             # Previous column
@@ -88,7 +88,7 @@ class BrowserColumn:
         self.name=name
         self.label.set_label(name)
         # Destroy all following columns
-        self.next=None
+        self.next_column=None
         return True
 
     def row_activated(self, widget, treepath, treecolumn):
@@ -208,11 +208,11 @@ class Browser(AdhocView):
             package = self.controller.package
 
         # Reset to the rootcolumn
-        cb=self.rootcolumn.__next__
+        cb=self.rootcolumn.next_column
         while cb is not None:
             cb.widget.destroy()
-            cb=cb.__next__
-        self.rootcolumn.next=None
+            cb=cb.next_column
+        self.rootcolumn.next_column=None
 
         # Update the rootcolumn element
         self.rootcolumn.update(element=package, name="here")
@@ -231,7 +231,7 @@ class Browser(AdhocView):
         if columnbrowser is not None:
             col=self.rootcolumn
             while (col is not columnbrowser) and (col is not None):
-                col=col.__next__
+                col=col.next_column
                 if col is not None:
                     path.append(col.name)
             path.append(attribute)
@@ -241,14 +241,14 @@ class Browser(AdhocView):
         except (AdveneException, TypeError) as e:
             # Delete all next columns
             if columnbrowser is None:
-                cb=self.rootcolumn.__next__
+                cb=self.rootcolumn.next_column
             else:
-                cb=columnbrowser.__next__
+                cb=columnbrowser.next_column
             while cb is not None:
                 cb.widget.destroy()
-                cb=cb.__next__
+                cb=cb.next_column
             if columnbrowser is not None:
-                columnbrowser.next=None
+                columnbrowser.next_column=None
                 self._update_view(path, Exception(_("Expression returned None (there was an exception)")))
                 if config.data.preferences['expert-mode']:
                     self.log("Exception when evaluating %s :\n%s" % ("/".join(path),
@@ -259,25 +259,25 @@ class Browser(AdhocView):
 
         if columnbrowser is None:
             # We selected  the rootcolumn. Delete the next ones
-            cb=self.rootcolumn.__next__
+            cb=self.rootcolumn.next_column
             while cb is not None:
                 cb.widget.destroy()
-                cb=cb.__next__
-            self.rootcolumn.next=None
-        elif columnbrowser.__next__ is None:
+                cb=cb.next_column
+            self.rootcolumn.next_column=None
+        elif columnbrowser.next_column is None:
             # Create a new columnbrowser
             col=BrowserColumn(element=el, name=attribute, callback=self.clicked_callback,
                               parent=columnbrowser)
             col.widget.set_property("width-request", self.column_width)
             self.hbox.pack_start(col.get_widget(), False, False, 0)
-            columnbrowser.next=col
+            columnbrowser.next_column=col
         else:
             # Delete all next+1 columns (we reuse the next one)
-            cb=columnbrowser.next.__next__
+            cb=columnbrowser.next_column.next_column
             while cb is not None:
                 cb.widget.destroy()
-                cb=cb.__next__
-            columnbrowser.next.update(element=el, name=attribute)
+                cb=cb.next_column
+            columnbrowser.next_column.update(element=el, name=attribute)
 
         # Scroll the columns
         adj=self.sw.get_hadjustment()
