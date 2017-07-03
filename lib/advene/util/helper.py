@@ -39,7 +39,7 @@ import advene.core.config as config
 from advene.core.imagecache import ImageCache
 
 try:
-    import Image
+    from PIL import Image
 except ImportError:
     logger.error("Cannot load Image module. Image conversion is disabled.")
 
