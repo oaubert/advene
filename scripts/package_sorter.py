@@ -24,16 +24,12 @@ import sys
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import parse, Element, ElementTree, QName
 import string
+import operator
 
 def tag(name):
     """Return the namespaced tag.
     """
     return '{%s}%s' % (ns, name)
-
-def cmp_id(a, b):
-    """Compare id
-    """
-    return cmp(a.attrib['id'], b.attrib['id'])
 
 def sort_id(source):
     """Sort the source Element elements along their id.
@@ -44,16 +40,11 @@ def sort_id(source):
     dest.attrib.update(source.attrib)
     
     res=[ e for e in source ]
-    res.sort(cmp_id)
+    res.sort(key=lambda a: a.attrib['id'])
     
     for e in res:
         dest.append(e)
     return dest
-
-def cmp_time(a, b):
-    """Compare time
-    """
-    return cmp(a._begin, b._begin)
 
 def sort_time(source):
     """Sort the source Element elements along their time (for annotations) and id (for relations).
@@ -67,7 +58,7 @@ def sort_time(source):
     reltag=tag('relation')
 
     rel=[ e for e in source if e.tag == reltag ]
-    rel.sort(cmp_id)
+    rel.sort(key=operator.itemgetter('_begin'))
 
     an=[ e for e in source if e.tag == antag ]
     # Pre-parse begin times
@@ -78,7 +69,7 @@ def sort_time(source):
         else:
             print "Error: cannot find begin time for ", a.attrib['id']
             a._begin = 0
-    an.sort(cmp_time)
+    an.sort(key=operator.itemgetter('_begin'))
     
     for e in an:
         dest.append(e)

@@ -986,7 +986,7 @@ class Admin(Common):
         l=[ os.path.join(config.data.path['data'], n)
             for n in os.listdir(config.data.path['data'])
             if n.lower().endswith('.xml') or n.lower().endswith('.azp') ]
-        l.sort(lambda a, b: cmp(a.lower(), b.lower()))
+        l.sort(key=lambda a: a.lower())
         for uri in l:
             name, ext = os.path.splitext(uri)
             alias = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))

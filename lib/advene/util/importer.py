@@ -111,7 +111,7 @@ def get_valid_importers(fname):
         else:
             invalid.append(i)
     # reverse sort along matching scores
-    valid.sort(lambda a, b: cmp(b[1], a[1]))
+    valid.sort(key=lambda a: a[1], reverse=True)
     return [ i for (i, r) in valid ], invalid
 
 def get_importer(fname, **kw):
