@@ -247,7 +247,7 @@ class TraceTimeline(AdhocView):
             @type options: list
             @param options: a list containing the different options for the search query (see tracebuilder for more infos)
             """
-            tr=self.tracer.search(self.active_trace, self.quicksearch_entry.get_text().decode('utf-8'), options[0], options[1])
+            tr=self.tracer.search(self.active_trace, self.quicksearch_entry.get_text(), options[0], options[1])
             mod= self.trace_selector.get_model()
             if len(self.tracer.traces)>len(mod):
                 n = len(self.tracer.traces)-1

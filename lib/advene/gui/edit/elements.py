@@ -1534,7 +1534,7 @@ class TextContentHandler (ContentHandler):
             textview.set_wrap_mode (Gtk.WrapMode.CHAR)
             textview.set_auto_indent(True)
             b.begin_not_undoable_action()
-            b.set_text(self.element.data.decode('utf-8'))
+            b.set_text(self.element.data)
             b.end_not_undoable_action()
             textview.connect('key-press-event', self.key_pressed_cb)
 

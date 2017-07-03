@@ -95,7 +95,7 @@ class TALESEntry:
         self.default=t
 
     def get_text(self):
-        return self.text2tales(self.combo.get_current_element().decode('utf-8'))
+        return self.text2tales(self.combo.get_current_element())
 
     def set_no_show_all(self, b):
         self.widget.set_no_show_all(b)
