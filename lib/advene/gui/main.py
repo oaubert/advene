@@ -1476,7 +1476,11 @@ class AdveneGUI(object):
         if config.data.os == 'win32':
             self.drawable = Gtk.DrawingArea()
             def get_id(widget):
-                return GdkWin32.Win32Window.get_handle(widget.get_window())
+                if hasattr(GdkWin32.Win32Window.get_handle):
+                    return GdkWin32.Win32Window.get_handle(widget.get_window())
+                else:
+                    logger.error("Cannot embed player on win32 - missing API")
+                    return None
             # Define the get_id method on the drawable, so that it can
             # be used by the player plugin code.
             self.drawable.get_id = get_id.__get__(self.drawable)
