@@ -30,6 +30,7 @@ import mimetypes
 import urllib.request, urllib.parse, urllib.error
 import base64
 
+import advene.core.config as config
 from advene.util.expat import PyExpat
 
 from advene.model.util.auto_properties import auto_properties
@@ -62,12 +63,20 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype'), metaclass
         return self.resourcepath.split('/')[-1]
 
     def getData(self):
-        return open(self.file_, 'rb').read()
+        data=open(self.file_, 'rb').read()
+        mimetype=self.getMimetype()
+        if mimetype.startswith('text/') or mimetype in config.data.text_mimetypes:
+            # Textual data, return a string
+            data = data.decode()
+        return data
 
     def setData(self, data):
-        f=open(self.file_, 'wb')
-        f.write(data)
-        f.close()
+        if isinstance(data, str):
+            mode = 'w'
+        else:
+            mode = 'wb'
+        with open(self.file_, mode) as f:
+            f.write(data)
 
     def getMimetype(self):
         if self._mimetype is None:
@@ -187,11 +196,13 @@ class Resources(metaclass=auto_properties):
             else:
                 os.mkdir(fname)
         else:
-            # Some content
-            f=open(fname, 'wb')
-            f.write(item)
-            f.close()
-
+            if isinstance(item, str):
+                mode = 'w'
+            else:
+                mode = 'wb'
+            with open(fname, mode) as f:
+                # Some content
+                f.write(item)
 
     def __delitem__(self, key):
 
