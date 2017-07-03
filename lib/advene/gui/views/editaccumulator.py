@@ -33,6 +33,7 @@ import advene.core.config as config
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 from advene.gui.edit.elements import get_edit_popup
 from advene.gui.util import get_pixmap_button
+import advene.util.helper as helper
 
 name="Edit accumulator view plugin"
 
@@ -114,7 +115,7 @@ class EditAccumulator(AccumulatorPopup):
         # allocated too small a space
         #l.set_ellipsize(Pango.EllipsizeMode.END)
         if len(t) > 80:
-            t=str(t[:79])+'\u2026'
+            t=str(t[:79])+helper.chars.ellipsis
         return t
 
     def edit_element_handler(self, context, parameters):

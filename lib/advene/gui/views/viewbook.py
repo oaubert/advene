@@ -179,7 +179,7 @@ class ViewBook(AdhocView):
         e.set_visible_window(False)
         e.set_above_child(True)
         if len(name) > 13:
-            shortname=str(name)[:12] + '\u2026'
+            shortname=str(name)[:12] + helper.chars.ellipsis
         else:
             shortname=name
         l=Gtk.Label()

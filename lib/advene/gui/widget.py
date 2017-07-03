@@ -734,7 +734,7 @@ class RelationRepresentation(Gtk.Button):
     """Representation for a relation.
     """
     if config.data.os == 'linux':
-        arrow={ 'to': '\u2192', 'from': '\u2190' }
+        arrow={ 'to': helper.chars.arrow_to, 'from': helper.chars.arrow_from }
     else:
         arrow={ 'to': '->', 'from': '<-' }
 

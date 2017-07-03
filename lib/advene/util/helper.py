@@ -70,6 +70,11 @@ ET._namespace_map.update({
     'http://xml.zope.org/namespaces/metal': 'metal',
     })
 
+class chars:
+    ellipsis=b'\\u2026'.decode('unicode_escape')
+    arrow_from=b'\\u2190'.decode('unicode_escape')
+    arrow_to=b'\\u2192'.decode('unicode_escape')
+
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
 

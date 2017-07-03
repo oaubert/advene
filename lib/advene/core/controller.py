@@ -1145,7 +1145,7 @@ class AdveneController(object):
         """
         def trim_size(s):
             if max_size is not None and len(s) > max_size:
-                return s[:max_size]+'\\u2026'
+                return s[:max_size]+helper.chars.ellipsis
             else:
                 return s
 
@@ -1193,10 +1193,7 @@ class AdveneController(object):
                     r=element.id
                 return cleanup(r)
         if isinstance(element, RelationType):
-            if config.data.os == 'win32':
-                arrow='->'
-            else:
-                arrow='\u2192'
+            arrow = helper.arrow_to
             return arrow + str(cleanup(element.title))
         if hasattr(element, 'title') and element.title:
             return str(cleanup(element.title))
