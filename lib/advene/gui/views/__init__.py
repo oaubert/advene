@@ -249,7 +249,7 @@ class AdhocView(object):
         root=self.parameters_to_element(options, [])
         stream=open(defaults, 'w', encoding='utf-8')
         helper.indent(root)
-        ET.ElementTree(root).write(stream)
+        ET.ElementTree(root).write(stream, encoding='unicode')
         stream.close()
         self.controller.log(_("Default options saved for view %s") % self.view_name)
         return True
@@ -265,7 +265,7 @@ class AdhocView(object):
         root=self.parameters_to_element(options, arguments)
         stream=io.StringIO()
         helper.indent(root)
-        ET.ElementTree(root).write(stream, encoding='utf-8')
+        ET.ElementTree(root).write(stream, encoding='unicode')
         content.setData(stream.getvalue())
         stream.close()
         return True

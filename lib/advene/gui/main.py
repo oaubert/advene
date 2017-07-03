@@ -2586,7 +2586,8 @@ class AdveneGUI(object):
         workspace=self.workspace_serialize()
         stream=io.StringIO()
         helper.indent(workspace)
-        ET.ElementTree(workspace).write(stream, encoding='utf-8')
+        tree = ET.ElementTree(workspace)
+        tree.write(stream, encoding='unicode')
         v.content.setData(stream.getvalue())
         stream.close()
 
@@ -4715,7 +4716,7 @@ class AdveneGUI(object):
         workspace=self.workspace_serialize()
         stream=io.StringIO()
         helper.indent(workspace)
-        ET.ElementTree(workspace).write(stream, encoding='utf-8')
+        ET.ElementTree(workspace).write(stream, encoding='unicode')
         v.content.setData(stream.getvalue())
         stream.close()
 
@@ -4744,7 +4745,7 @@ class AdveneGUI(object):
         root=self.workspace_serialize(with_arguments=False)
         stream=open(defaults, 'w', encoding='utf-8')
         helper.indent(root)
-        ET.ElementTree(root).write(stream)
+        ET.ElementTree(root).write(stream, encoding='unicode')
         stream.close()
         self.controller.log(_("Standard workspace has been saved"))
         return True

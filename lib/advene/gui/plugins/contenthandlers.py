@@ -201,7 +201,7 @@ class SVGContentHandler (ContentHandler):
         tree=ET.ElementTree(self.view.drawer.get_svg(relative=False))
         #ET.dump(tree)
         s=io.StringIO()
-        tree.write(s, encoding='utf-8')
+        tree.write(s, encoding='unicode')
         self.element.data = s.getvalue()
         s.close()
         # Update the XML source representation

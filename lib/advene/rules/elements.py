@@ -63,9 +63,9 @@ class EtreeMixin(object):
         root=self.to_etree()
         etree=ET.ElementTree(root)
         if stream is None:
-            etree.write(uri, encoding='utf-8')
+            etree.write(uri, encoding='unicode')
         else:
-            etree.write(stream, encoding='utf-8')
+            etree.write(stream, encoding='unicode')
 
     def xml_repr(self):
         """Return the XML representation of the instance."""

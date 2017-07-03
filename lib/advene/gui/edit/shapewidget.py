@@ -2150,7 +2150,7 @@ class ShapeEditor(object):
                 name = fs.get_filename().decode('utf-8')
                 tree = ET.ElementTree(self.drawer.get_svg(relative=False))
                 f = open(name, 'w', encoding='utf-8')
-                tree.write(f)
+                tree.write(f, encoding='unicode')
                 f.close()
             fs.destroy()
             return True

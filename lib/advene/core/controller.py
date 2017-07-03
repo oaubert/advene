@@ -1888,7 +1888,7 @@ class AdveneController(object):
 
         f=open(name, 'w', encoding='utf-8')
         helper.indent(root)
-        ET.ElementTree(root).write(f)
+        ET.ElementTree(root).write(f, encoding='unicode')
         f.close()
         return True
 
