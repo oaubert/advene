@@ -75,7 +75,7 @@ class AnnotationPlaceholder:
             aid=attr['advene:annotation']
             self.annotation=self.controller.package.get_element_by_id(aid)
             if self.annotation is None:
-                print("Problem: non-existent annotation")
+                logger.warn("Problem: non-existent annotation %s", aid)
             self.refresh()
             return self.pixbuf, self.process_enclosed_tags
         return None, None
@@ -262,7 +262,7 @@ class AnnotationTypePlaceholder:
             aid=attr['advene:annotationtype']
             self.annotationtype = self.controller.package.get_element_by_id(aid)
             if self.annotationtype is None:
-                print("Problem: non-existent annotation type")
+                logger.warn("Problem: non-existent annotation type %s", aid)
             self.refresh()
             return self.pixbuf, self.process_enclosed_tags
         return None, None
@@ -699,7 +699,7 @@ class HTMLContentHandler (ContentHandler):
                                                   int(event.y))
         it=textview.get_iter_at_location(x, y)
         if it is None:
-            print("Error in get_iter_at_location")
+            logger.warn("Error in get_iter_at_location")
             return False
         ctx=self.editor.get_current_context(it.iter)
         if not ctx:
