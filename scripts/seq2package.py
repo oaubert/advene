@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 """Convert a sequence to advene annotations.
 
@@ -34,7 +34,7 @@ def ts2ms(ts):
 
 filename=sys.argv[0]
 
-f=open(filename, 'r')
+f=open(filename, 'r', encoding='utf-8')
 regexp=re.compile('(\d+:\d+)\s(\d+:\d+)\s(.*)')
 
 for l in f:
@@ -43,9 +43,8 @@ for l in f:
         (t1, t2, data) = m.groups()
     begin=ts2ms(t1)
     end=ts2ms(t2)
-    print """<annotation type='#sequence' id='i%s%s'>
+    print("""<annotation type='#sequence' id='i%s%s'>
       <millisecond-fragment begin='%s' end='%s'/>
       <content>%s</content>
-    </annotation>    
-    """ % (begin, end, begin, end, data)
-
+    </annotation>
+    """ % (begin, end, begin, end, data))

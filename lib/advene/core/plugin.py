@@ -119,7 +119,7 @@ class Plugin(object):
                 logger.error("%s is not a python file", fullname)
                 raise PluginException("%s is not a plugin" % fullname)
 
-            f=open(fullname, 'r')
+            f=open(fullname, 'r', encoding='utf-8')
             self._spec = spec_from_file_location('_'.join( (prefix, name) ), fullname)
             self._plugin = module_from_spec(self._spec)
             f.close()

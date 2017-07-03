@@ -749,13 +749,13 @@ class Config(object):
             d = self.preferences
         preffile = self.advenefile(name+'.json', 'settings')
         try:
-            f = open(preffile, "r")
+            f = open(preffile, "r", encoding='utf-8')
             prefs = json.load(f)
         except IOError:
             # No json file. Use old cPickle .prefs
             preffile=self.advenefile(name+'.prefs', 'settings')
             try:
-                f = open(preffile, "r")
+                f = open(preffile, "r", encoding='utf-8')
             except IOError:
                 return None
             try:
@@ -782,7 +782,7 @@ class Config(object):
                 logger.error("Error: %s", str(e))
                 return False
         try:
-            f = open(preffile, "w")
+            f = open(preffile, "w", encoding='utf-8')
         except IOError:
             return False
         try:
@@ -798,7 +798,7 @@ class Config(object):
         conffile=self.advenefile('advene.ini', 'settings')
 
         try:
-            fd=open(conffile, "r")
+            fd=open(conffile, "r", encoding='utf-8')
         except IOError:
             self.config_file=''
             return False

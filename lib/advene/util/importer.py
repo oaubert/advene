@@ -789,11 +789,11 @@ class TextImporter(GenericImporter):
 
     def process_file(self, filename):
         if filename.lower().endswith('.gz'):
-            f = gzip.open(filename, 'r')
+            f = gzip.open(filename, 'r', encoding='utf-8')
         elif filename.startswith('http'):
             f = urllib.request.urlopen(filename)
         else:
-            f = open(filename, 'r')
+            f = open(filename, 'r', encoding='utf-8')
         if self.package is None:
             self.init_package(filename=filename)
         self.ensure_new_type()
@@ -1241,7 +1241,7 @@ class SubtitleImporter(GenericImporter):
             yield d
 
     def process_file(self, filename):
-        f=open(filename, 'r')
+        f=open(filename, 'rb')
         p, at = self.init_package(filename=filename, annotationtypeid='subtitle')
         at.title = _("Subtitles from %s") % os.path.basename(filename)
         # FIXME: implement subtitle type detection
@@ -1328,7 +1328,7 @@ class PraatImporter(GenericImporter):
                     }
 
     def process_file(self, filename):
-        f=open(filename, 'r')
+        f=open(filename, 'rb')
 
         self.init_package(filename)
         self.schema=self.create_schema('praat',

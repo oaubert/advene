@@ -51,7 +51,7 @@ class TTLImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
-        f=open(filename, 'r')
+        f=open(filename, 'rb')
         if self.package is None:
             self.init_package(filename=filename, schemaid='traces', annotationtypeid=None)
         self.model = None

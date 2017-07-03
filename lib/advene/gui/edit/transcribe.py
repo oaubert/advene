@@ -871,14 +871,13 @@ class TranscriptionEdit(AdhocView):
             # No extension was given. Add '.txt'
             filename=filename+'.txt'
         try:
-            f=open(filename, "w")
+            with open(filename, "w", encoding='utf-8') as f:
+                f.writelines(self.generate_transcription())
         except IOError as e:
             dialog.message_dialog(
                 _("Cannot save the file: %s") % str(e),
                 icon=Gtk.MessageType.ERROR)
             return True
-        f.writelines(self.generate_transcription())
-        f.close()
         self.message(_("Transcription saved to %s") % filename)
         self.sourcefile=filename
         return True

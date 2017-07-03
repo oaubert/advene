@@ -451,7 +451,7 @@ class AnnotationTable(AdhocView):
         if name is None:
             return True
         try:
-            f=open(name, 'w')
+            f=open(name, 'w', encoding='utf-8')
         except IOError as e:
             dialog.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
                                           % {
@@ -629,7 +629,7 @@ class GenericTable(AdhocView):
         if name is None:
             return True
         try:
-            f=open(name, 'w')
+            f=open(name, 'w', encoding='utf-8')
         except IOError as e:
             dialog.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
                                           % {

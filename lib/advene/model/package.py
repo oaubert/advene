@@ -333,7 +333,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                 self.__zip = z
 
             # Save the content.xml
-            stream = open (self.__zip.getContentsFile(), "w")
+            stream = open (self.__zip.getContentsFile(), "w", encoding='utf-8')
             self.serialize(stream)
             stream.close ()
 
@@ -344,7 +344,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             self.__zip.save(name)
         else:
             # Assuming plain XML format
-            stream = open (name, "w")
+            stream = open (name, "w", encoding='utf-8')
             self.serialize(stream)
             stream.close ()
 

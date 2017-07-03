@@ -141,7 +141,7 @@ class Evaluator:
         if name is None:
             return res
         try:
-            f=open(name, 'r')
+            f=open(name, 'r', encoding='utf-8')
         except IOError:
             return []
         for l in f:
@@ -155,7 +155,7 @@ class Evaluator:
         if name is None:
             return
         try:
-            f=open(name, 'w')
+            f=open(name, 'w', encoding='utf-8')
         except IOError:
             return []
         for l in data:
@@ -216,7 +216,7 @@ class Evaluator:
         b=self.output.get_buffer()
         begin,end=b.get_bounds()
         out=b.get_text(begin, end, False)
-        f=open(filename, "w")
+        f=open(filename, "w", encoding='utf-8')
         f.write(out)
         f.close()
         self.status_message("Output saved to %s" % filename)

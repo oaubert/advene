@@ -1454,7 +1454,7 @@ class TextContentHandler (ContentHandler):
             fname=dialog.get_filename(default_file=self.fname)
         if fname is not None:
             try:
-                with open(fname, 'r') as f:
+                with open(fname, 'r', encoding='utf-8') as f:
                     lines="".join(f.readlines())
                     self.content_set(data)
                     self.fname=fname

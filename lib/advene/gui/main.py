@@ -3588,7 +3588,7 @@ class AdveneGUI(object):
             b=t.get_buffer()
             b.delete(*b.get_bounds ())
             try:
-                f=open(path, 'r')
+                f=open(path, 'r', encoding='utf-8')
                 b.set_text("".join(f.readlines()))
                 f.close()
             except (IOError, OSError) as e:
@@ -4739,9 +4739,9 @@ class AdveneGUI(object):
 
         # Do not save package-specific arguments.
         root=self.workspace_serialize(with_arguments=False)
-        stream=open(defaults, 'w')
+        stream=open(defaults, 'w', encoding='utf-8')
         helper.indent(root)
-        ET.ElementTree(root).write(stream, encoding='utf-8')
+        ET.ElementTree(root).write(stream)
         stream.close()
         self.controller.log(_("Standard workspace has been saved"))
         return True

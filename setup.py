@@ -13,13 +13,13 @@ SCRIPTNAME='advene'
 
 def check_changelog(maindir, version):
     """Check that the changelog for maindir matches the given version."""
-    f=open(os.path.join( maindir, "CHANGES.txt" ), 'r')
+    f=open(os.path.join( maindir, "CHANGES.txt" ), 'r', encoding='utf-8')
     l=f.readline()
     f.close()
     if not l.startswith('advene (' + version + ')'):
-        print "The CHANGES.txt does not seem to match version " + version
-        print l
-        print "Update either the CHANGES.txt or the lib/advene/core/version.py file"
+        print("The CHANGES.txt does not seem to match version " + version)
+        print(l)
+        print("Update either the CHANGES.txt or the lib/advene/core/version.py file")
         sys.exit(1)
     return True
 
@@ -165,7 +165,7 @@ def generate_data_files():
     if os.path.isdir("locale"):
         r.extend(generate_data_dir("locale", prefix=prefix))
     else:
-        print """**WARNING** You should generate the locales with "cd po; make mo"."""
+        print("""**WARNING** You should generate the locales with "cd po; make mo".""")
     if sys.platform.startswith('linux'):
         # Install specific data files
         r.append( ( 'share/applications', [ 'debian/advene.desktop' ] ) )

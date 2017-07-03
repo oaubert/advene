@@ -1886,9 +1886,9 @@ class AdveneController(object):
             if a == self.current_alias:
                 n.attrib['default']=''
 
-        f=open(name, 'w')
+        f=open(name, 'w', encoding='utf-8')
         helper.indent(root)
-        ET.ElementTree(root).write(f, encoding='utf-8')
+        ET.ElementTree(root).write(f)
         f.close()
         return True
 

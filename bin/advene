@@ -138,7 +138,7 @@ if not os.path.exists(config.data.path['resources']):
                 # Rewrite only if necessary
                 if [l for l in data if '@executable_path' in l or '@userconf' in l]:
                     relocated = [l.replace('@executable_path/..', executable_path_dot_dot).replace('@userconf', userconf) for l in data]
-                    f = open(dname, 'w')
+                    f = open(dname, 'w', encoding='utf-8')
                     f.writelines(relocated)
                     f.close()
 

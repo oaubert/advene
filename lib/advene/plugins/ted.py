@@ -56,7 +56,7 @@ class TEDImporter(GenericImporter):
             filename=filename.strip('#/')
             f=urllib.request.urlopen(filename)
         else:
-            f=open(filename, 'r')
+            f=open(filename, 'r', encoding='utf-8')
         data='\n'.join(f.readlines())
         f.close()
 

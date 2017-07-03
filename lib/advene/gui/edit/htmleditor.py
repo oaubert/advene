@@ -885,7 +885,7 @@ if __name__ == "__main__":
 
     t = HTMLEditor()
     if source is not None:
-        t.set_text(open(source).read())
+        t.set_text(open(source, encoding='utf-8').read())
     t.show()
     sb = Gtk.ScrolledWindow()
     sb.add(t)

@@ -442,7 +442,7 @@ if __name__ == "__main__":
     #t=Gtk.TextView()
     if sys.argv[1:]:
         logger.info("loading %s", sys.argv[1])
-        t.get_buffer().set_text(open(sys.argv[1]).read())
+        t.get_buffer().set_text(open(sys.argv[1], encoding='utf-8').read())
 
     i=Indexer()
     compl=Completer(textview=t,

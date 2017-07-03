@@ -368,7 +368,7 @@ class WebsiteExporter(object):
         """
         # Write the content.
         output=self.url_translation[url]
-        f=open(os.path.join(self.destination, output), 'w')
+        f=open(os.path.join(self.destination, output), 'w', encoding='utf-8')
         f.write(content)
         f.close()
 
@@ -504,7 +504,7 @@ class WebsiteExporter(object):
         name="index.html"
         if name in list(self.url_translation.values()):
             name="_index.html"
-        f=open(os.path.join(self.destination, name), 'w')
+        f=open(os.path.join(self.destination, name), 'w', encoding='utf-8')
         defaultview=self.controller.package.getMetaData(config.data.namespace, 'default_utbv')
         v=self.controller.package.views.get_by_id(defaultview)
         if defaultview and v:
@@ -530,7 +530,7 @@ class WebsiteExporter(object):
         frame="frame.html"
         if frame in list(self.url_translation.values()):
             frame="_frame.html"
-        f=open(os.path.join(self.destination, frame), 'w')
+        f=open(os.path.join(self.destination, frame), 'w', encoding='utf-8')
         f.write("""<html>
 <head><title>%(title)s</title></head>
 <frameset cols="70%%,30%%">
@@ -544,7 +544,7 @@ class WebsiteExporter(object):
                 })
         f.close()
 
-        f=open(os.path.join(self.destination, "unconverted.html"), 'w')
+        f=open(os.path.join(self.destination, "unconverted.html"), 'w', encoding='utf-8')
         f.write("""<html><head>%(title)s - not converted</head>
 <body>
 <h1>%(title)s - not converted resource</h1>

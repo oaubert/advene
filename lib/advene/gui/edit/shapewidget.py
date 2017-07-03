@@ -2149,8 +2149,8 @@ class ShapeEditor(object):
             if res == Gtk.ResponseType.OK:
                 name = fs.get_filename().decode('utf-8')
                 tree = ET.ElementTree(self.drawer.get_svg(relative=False))
-                f = open(name, 'w')
-                tree.write(f, encoding='utf-8')
+                f = open(name, 'w', encoding='utf-8')
+                tree.write(f)
                 f.close()
             fs.destroy()
             return True

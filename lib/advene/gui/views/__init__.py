@@ -170,7 +170,7 @@ class AdhocView(object):
             # Load default options
             n=config.data.advenefile( ('defaults', self.view_id + '.xml'), 'settings')
             if os.path.exists(n):
-                stream=open(n)
+                stream=open(n, encoding='utf-8')
                 p=AdhocViewParametersParser(stream)
                 stream.close()
             else:
@@ -247,9 +247,9 @@ class AdhocView(object):
         options, args=self.get_save_arguments()
         # Do not save package-specific arguments.
         root=self.parameters_to_element(options, [])
-        stream=open(defaults, 'w')
+        stream=open(defaults, 'w', encoding='utf-8')
         helper.indent(root)
-        ET.ElementTree(root).write(stream, encoding='utf-8')
+        ET.ElementTree(root).write(stream)
         stream.close()
         self.controller.log(_("Default options saved for view %s") % self.view_name)
         return True

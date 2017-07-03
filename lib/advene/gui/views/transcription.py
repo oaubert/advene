@@ -694,7 +694,7 @@ class TranscriptionView(AdhocView):
         begin, end=b.get_bounds()
         out=b.get_text(begin, end, False).decode('utf-8').replace(ZERO_WIDTH_NOBREAK_SPACE, '')
         try:
-            f=open(filename, "w")
+            f=open(filename, "w", encoding='utf-8')
         except Exception as e:
             self.message(_("Cannot write to %(filename)s: %(error)s:") %
                      {'filename': filename,
