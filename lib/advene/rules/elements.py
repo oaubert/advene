@@ -24,6 +24,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from collections import OrderedDict
+import functools
 import re
 import io
 import urllib.request, urllib.parse, urllib.error
@@ -885,6 +886,7 @@ class Quicksearch(EtreeMixin):
                                              sources=self.sources,
                                              case_sensitive=self.case_sensitive)
 
+@functools.total_ordering
 class RegisteredAction:
     """Registered action.
 
@@ -937,6 +939,12 @@ class RegisteredAction:
         # The available categories are described in Catalog
         self.category=category
         self.predefined=predefined
+
+    def __eq__(self, other):
+        return other is self
+
+    def __lt__(self, other):
+        return self.name < other.name
 
     def add_parameter(self, name, description):
         """Add a new parameter to the action."""
