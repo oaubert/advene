@@ -2809,7 +2809,7 @@ class TimeLine(AdhocView):
         for c in layout.get_children():
             if not isinstance(c, AnnotationTypeWidget):
                 continue
-            width=max(width, c.width)
+            width=max(width, c.width or 5)
 
         def resize(b, w):
             if isinstance(b, AnnotationTypeWidget):
