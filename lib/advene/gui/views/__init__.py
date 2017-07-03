@@ -225,10 +225,10 @@ class AdhocView(object):
 
         if options:
             for n, v in options.items():
-                ET.SubElement(root, ET.QName(config.data.namespace, 'option'), name=n, value=urllib.parse.quote(v))
+                ET.SubElement(root, ET.QName(config.data.namespace, 'option'), name=n, value=urllib.parse.quote(str(v)))
         if arguments:
             for n, v in arguments:
-                ET.SubElement(root, ET.QName(config.data.namespace, 'argument'), name=n, value=urllib.parse.quote(v))
+                ET.SubElement(root, ET.QName(config.data.namespace, 'argument'), name=n, value=urllib.parse.quote(str(v)))
         return root
 
     def save_default_options(self, *p):
