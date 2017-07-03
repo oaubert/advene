@@ -199,7 +199,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         You would probably rather use the uri read-only property, unless you
         want to set the parameter _absolute_.
         """
-        uri = unicode(self.__uri or "", 'utf-8')
+        uri = (self.__uri or "").decode('utf-8')
 
         if not absolute and context is self:
             return ''
