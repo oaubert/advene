@@ -118,7 +118,9 @@ class HPIImporter(GenericImporter):
         # Make sure that we have all appropriate screenshots
         missing_screenshots = []
         for a in src_atype.annotations:
-            for t in (a.fragment.begin, (a.fragment.begin + a.fragment.end) / 2, a.fragment.end):
+            for t in (a.fragment.begin,
+                      int((a.fragment.begin + a.fragment.end) / 2),
+                      a.fragment.end):
                 if not self.controller.package.imagecache.is_initialized(t):
                     self.controller.update_snapshot(t)
                     missing_screenshots.append(t)
@@ -170,7 +172,9 @@ class HPIImporter(GenericImporter):
                                                                           {
                                                                               'screenshot': base64.encodestring(str(self.controller.package.imagecache.get(t))),
                                                                               'timecode': t
-                                                                          } for t in (a.fragment.begin, (a.fragment.begin + a.fragment.end) / 2, a.fragment.end)
+                                                                          } for t in (a.fragment.begin,
+                                                                                      int((a.fragment.begin + a.fragment.end) / 2),
+                                                                                      a.fragment.end)
                                                                       ]
             })
             output = response.json()

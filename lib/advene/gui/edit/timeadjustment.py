@@ -175,7 +175,7 @@ class TimeAdjustment:
                 i=config.data.preferences['second-scroll-increment']
             else:
                 # 1 frame
-                i=1000 / config.data.preferences['default-fps']
+                i=int(1000 / config.data.preferences['default-fps'])
 
             if event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.LEFT:
                 incr=-i

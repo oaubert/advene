@@ -564,9 +564,9 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
             # Draw a highlight mark
             context.set_source_rgba(0, 0, 0, .5)
             context.set_line_width(1)
-            context.move_to(width / 2, 0)
-            context.line_to(width / 2 + 10, height / 2)
-            context.line_to(width / 2, height)
+            context.move_to(int(width / 2, 0))
+            context.line_to(int(width / 2) + 10, int(height / 2))
+            context.line_to(int(width / 2), height)
             context.fill()
             context.stroke()
 
@@ -698,7 +698,7 @@ class TimestampMarkWidget(GenericColorButtonWidget):
         context.set_source_rgba(0, 0, 0, .5)
         context.set_line_width(1)
         context.move_to(2, 0)
-        context.line_to(width - 2, height / 2)
+        context.line_to(width - 2, int(height / 2))
         context.line_to(2, height)
         context.fill()
         context.stroke()

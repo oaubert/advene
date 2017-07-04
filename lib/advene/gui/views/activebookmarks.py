@@ -580,11 +580,11 @@ class ActiveBookmarks(AdhocView):
         def scroll_on_drag(widget, drag_context, x, y, timestamp):
             adj=widget.get_adjustment()
             v=adj.get_value()
-            if y > widget.get_allocation().height / 2:
+            if y > int(widget.get_allocation().height / 2):
                 # Try to scroll down
-                v += max(adj.step_increment, adj.page_increment / 3)
+                v += max(adj.step_increment, int(adj.page_increment / 3))
             else:
-                v -= max(adj.step_increment, adj.page_increment / 3)
+                v -= max(adj.step_increment, int(adj.page_increment / 3))
             adj.set_value(helper.clamp(v, adj.get_lower(), adj.get_upper() - adj.get_page_size()))
             return True
 

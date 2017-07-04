@@ -894,7 +894,7 @@ class AdveneController(object):
         id_=self.package._idgenerator.get_id(Annotation)
 
         if duration is None:
-            duration = self.cached_duration / 20
+            duration = int(self.cached_duration / 20)
         if position + duration > self.cached_duration:
             duration = self.cached_duration - position
 

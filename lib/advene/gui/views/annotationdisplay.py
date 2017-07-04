@@ -217,7 +217,7 @@ class AnnotationDisplay(AdhocView):
         def handle_motion(widget, event):
             if isinstance(self.annotation, Annotation):
                 i = self.label['image']
-                i.epsilon = self.annotation.fragment.duration / widget.get_allocation().width
+                i.epsilon = int(self.annotation.fragment.duration / widget.get_allocation().width)
                 v = self.annotation.fragment.begin + i.epsilon * 20 * int(event.x / 20)
                 i.set_value(v)
             return True

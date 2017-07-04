@@ -104,7 +104,7 @@ class DCPImporter(GenericImporter):
         m=timestamp_re.match(s)
         if m:
             (h, m, s, f) = m.groups()
-            t=( ((int(h) * 60 + int(m)) * 60) + int(s) ) * 1000 + int(f) * (1000 / config.data.preferences['default-fps'])
+            t=( ((int(h) * 60 + int(m)) * 60) + int(s) ) * 1000 + int(f) * int(1000 / config.data.preferences['default-fps'])
         else:
             t=0
         return t

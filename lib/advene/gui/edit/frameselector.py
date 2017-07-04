@@ -50,7 +50,7 @@ class FrameSelector(object):
 
         # Number of displayed timestamps
         self.count = config.data.preferences['frameselector-count']
-        self.frame_length = 1000 / config.data.preferences['default-fps']
+        self.frame_length = int(1000 / config.data.preferences['default-fps'])
         self.frame_width = config.data.preferences['frameselector-width']
 
         # List of TimestampRepresentation widgets.

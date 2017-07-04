@@ -749,11 +749,11 @@ def center_on_mouse(w):
     # Let's try to center the window on the mouse as much as possible.
     width, height = w.get_size()
 
-    posx = max(r.x, x - width / 2)
+    posx = max(r.x, x - int(width / 2))
     if posx + width > r.x + r.width:
         posx = r.x + r.width - width
 
-    posy = max(r.y, y - height / 2)
+    posy = max(r.y, y - int(height / 2))
     if posy + height > r.y + r.height:
         posy = r.y + r.height - height
 

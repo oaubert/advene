@@ -332,6 +332,8 @@ class AdveneGUI(object):
         def open_history_file(rec):
             fname = rec.get_current_uri()
             fname = urllib.parse.unquote(fname)
+            if fname.startswith('file:///'):
+                fname = fname[7:]
             try:
                 self.set_busy_cursor(True)
                 self.controller.load_package (uri=fname)
@@ -1773,22 +1775,22 @@ class AdveneGUI(object):
         height = pane.get_allocation().height
         if paneid == 'fareast':
             need_adjust = (abs(width - pane.get_position()) < 200)
-            step = - (pane.get_position() - (width - 256)) / 8
+            step = - int((pane.get_position() - (width - 256)) / 8)
             condition = lambda p: (p < width - 256)
         elif paneid == 'south':
             need_adjust = (abs(height - pane.get_position()) < 200)
-            step = - (pane.get_position() - (height - 256)) / 8
+            step = - int((pane.get_position() - (height - 256)) / 8)
             condition = lambda p: (p < height - 256)
         elif paneid == 'west':
             # We should ideally also check for height adjustment (in
             # south pane), but the video player is generally always
             # visible anyway, so height should already be OK.
             need_adjust = (pane.get_position() < 200)
-            step = 256 / 8
+            step = int(256 / 8)
             condition = lambda p: (p > 256)
         elif paneid == 'east':
             need_adjust = (abs(width - pane.get_position()) < 200)
-            step = - (pane.get_position() - (width - 256)) / 8
+            step = - int((pane.get_position() - (width - 256)) / 8)
             condition = lambda p: (p < width - 256)
         else:
             need_adjust = False
@@ -3107,7 +3109,7 @@ class AdveneGUI(object):
             d = self.controller.cached_duration
             if d > 0 and d != self.gui.slider.get_adjustment ().get_upper():
                 self.gui.slider.set_range (0, d)
-                self.gui.slider.set_increments (d / 100, d / 10)
+                self.gui.slider.set_increments (int(d / 100), int(d / 10))
 
             if self.gui.slider.get_value() != pos:
                 self.gui.slider.set_value(pos)

@@ -56,7 +56,6 @@ import shutil
 import urllib.request, urllib.parse, urllib.error
 from advene.model.exception import AdveneException
 from advene.model.resources import Resources
-from advene.model.util.uri import normalize_filename
 import mimetypes
 
 import xml.etree.ElementTree as ET
@@ -96,7 +95,6 @@ class ZipPackage:
         self.file_ = None
 
         if uri:
-            uri = normalize_filename(uri)
             if os.path.exists(uri):
                 # It is a real filename
                 self.uri = uri

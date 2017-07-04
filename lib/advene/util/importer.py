@@ -1752,7 +1752,7 @@ class IRIDataImporter(GenericImporter):
         incr = 1.0 / n
         progress = .1
         self.progress(progress, _("Creating annotations"))
-        for c in range(0, n / size):
+        for c in range(0, int(n / size)):
             progress += incr
             if not self.progress(progress, ''):
                 break

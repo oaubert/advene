@@ -352,7 +352,7 @@ class TraceTimeline(AdhocView):
             if abs(self.canvasX-(alloc.width-20)) < 5:
                 # resize every 5 pixels
                 return
-            ratio = (alloc.width-20.0) / self.canvasX
+            ratio = (alloc.width - 20.0) / self.canvasX
             self.canvasX = alloc.width-20.0
             self.col_width = float(self.canvasX)/len(self.cols)-self.colspacing
             #redraw head_canvas
@@ -2387,7 +2387,7 @@ class DocGroup (CanvasGroup):
     def drawtimemarks(self):
         """Add begin and end time marks and 1-3 other
         """
-        nbmax = self.w / 10
+        nbmax = int(self.w / 10)
         if nbmax > 3:
             nbmax = 3
         #timestamp 0
@@ -2428,7 +2428,7 @@ class DocGroup (CanvasGroup):
                                         ))
         if nbmax <=0:
             return
-        sec = self.movielength / 1000
+        sec = int(self.movielength / 1000)
         if sec < nbmax:
             return
         #1-3 timestamps intermediaires
@@ -2508,7 +2508,7 @@ class DocGroup (CanvasGroup):
         @param color: the rgba color of the mark
         """
         offset = 3
-        x=self.rect.get_bounds().x1 + self.w * time / self.movielength
+        x=self.rect.get_bounds().x1 + int(self.w * time / self.movielength)
         x1 = x-offset
         x2 = x+offset
         y2=self.rect.get_bounds().y1
@@ -2549,7 +2549,7 @@ class DocGroup (CanvasGroup):
         @type offset: number
         @param offset: an offset to expand y bounds
         """
-        x=self.rect.get_bounds().x1 + self.w * time / self.movielength
+        x=self.rect.get_bounds().x1 + int(self.w * time / self.movielength)
         y1=self.rect.get_bounds().y1 - offset
         y2=self.rect.get_bounds().y2 + offset
         p = GooCanvas.Points ([(x, y1), (x, y2)])

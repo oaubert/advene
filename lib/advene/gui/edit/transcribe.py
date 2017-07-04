@@ -169,7 +169,7 @@ class TranscriptionEdit(AdhocView):
         if size == 0:
             # Get the default value from a temporary textview
             t=Gtk.TextView()
-            size=t.get_pango_context().get_font_description().get_size() / Pango.SCALE
+            size=int(t.get_pango_context().get_font_description().get_size() / Pango.SCALE)
             del t
         f=self.textview.get_pango_context().get_font_description()
         f.set_size(size * Pango.SCALE)

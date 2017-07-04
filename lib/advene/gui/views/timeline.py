@@ -252,7 +252,7 @@ class TimeLine(AdhocView):
         # How many units does a pixel represent ?
         # self.scale.get_value = unit by pixel
         # Unit = ms
-        self.scale = Gtk.Adjustment.new(value=((self.maximum - self.minimum) or 60 * 60 * 1000) / Gdk.get_default_root_window().get_width(),
+        self.scale = Gtk.Adjustment.new(value=int(((self.maximum - self.minimum) or 60 * 60 * 1000) / Gdk.get_default_root_window().get_width()),
                                         lower=5,
                                         upper=sys.maxsize,
                                         step_increment=20,
@@ -445,10 +445,10 @@ class TimeLine(AdhocView):
 
             r1 = b1.get_allocation()
             r2 = b2.get_allocation()
-            x_start = (r1.x + 3 * r1.width / 4) - x_offset
-            y_start  = (r1.y + r1.height / 4) - y_offset
-            x_end=(r2.x + r2.width / 4) - x_offset
-            y_end=(r2.y + 3 * r2.height / 4) - y_offset
+            x_start = int(r1.x + 3 * r1.width / 4) - x_offset
+            y_start  = int(r1.y + r1.height / 4) - y_offset
+            x_end = int(r2.x + r2.width / 4) - x_offset
+            y_end = int(r2.y + 3 * r2.height / 4) - y_offset
             context.set_source_rgb(0, 0, 0)
             context.set_line_width(1)
             context.move_to(x_start, y_start)
@@ -479,15 +479,15 @@ class TimeLine(AdhocView):
                 # but this should depend on the active gtk theme
                 color=self.get_element_color(r) or self.colors['white']
                 context.set_source_rgb(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0)
-                context.rectangle((x_start + x_end ) / 2,
-                                  (y_start + y_end ) / 2 - ext[3] - 2,
+                context.rectangle(int((x_start + x_end ) / 2),
+                                  int((y_start + y_end ) / 2 - ext[3] - 2),
                                   ext[2] + 2,
                                   ext[3] + 6)
                 context.fill()
 
                 context.set_source_rgb(0, 0, 0)
-                context.move_to((x_start + x_end ) / 2,
-                                (y_start + y_end ) / 2)
+                context.move_to(int((x_start + x_end ) / 2),
+                                int((y_start + y_end ) / 2))
                 context.show_text(t)
             context.stroke()
 
@@ -700,7 +700,7 @@ class TimeLine(AdhocView):
         """Scroll the view to center on the given position.
         """
         alloc = self.layout.get_allocation()
-        pos = self.unit2pixel(position, absolute=True) - (alloc.width / 2)
+        pos = self.unit2pixel(position, absolute=True) - int(alloc.width / 2)
         a = self.adjustment
         pos = helper.clamp(pos,
                            a.get_lower(),
@@ -762,7 +762,7 @@ class TimeLine(AdhocView):
 
     def snapshot_update_handler(self, context, parameters):
         pos=int(context.globals['position'])
-        epsilon=self.scale_layout.step / 2
+        epsilon=int(self.scale_layout.step / 2)
         # Note: we check here w.timestamp, which is the timestamp of
         # the displayed snapshot, instead of w.mark (which is the
         # timestamp of the widget), so that the most precise snapshot
@@ -1988,7 +1988,7 @@ class TimeLine(AdhocView):
                 self.quickview.set_text(_("Displaying %(count)d / %(total)d annotations...") % {
                         'count': min(i + count, length),
                         'total': length },
-                                        1.0 * (i+count) / length)
+                                        1.0 * (i + count) / length)
                 for a in annotations[i:i+count]:
                     self.create_annotation_widget(a)
                 counter[0] += count
@@ -2675,7 +2675,7 @@ class TimeLine(AdhocView):
         self.scale.set_value(1.3 * (end - begin) / self.layout.get_clip().width or 100)
 
         # Center on annotation
-        self.center_on_position( (begin + end) / 2 )
+        self.center_on_position( int((begin + end) / 2) )
         return True
 
     def limit_display(self, minimum=None, maximum=None):
@@ -3201,15 +3201,15 @@ class TimeLine(AdhocView):
             v=adj.get_value()
             if vertical:
                 pointer=y
-                ref=widget.get_allocation().height / 2
+                ref=int(widget.get_allocation().height / 2)
             else:
                 pointer=x
-                ref=widget.get_allocation().width / 2
+                ref=int(widget.get_allocation().width / 2)
             if pointer > ref:
                 # Try to scroll down
-                v += max(adj.get_step_increment(), adj.get_page_increment() / 3)
+                v += max(adj.get_step_increment(), int(adj.get_page_increment() / 3))
             else:
-                v -= max(adj.get_step_increment(), adj.get_page_increment() / 3)
+                v -= max(adj.get_step_increment(), int(adj.get_page_increment() / 3))
             adj.set_value(helper.clamp(v, 0, adj.get_upper() - adj.get_page_size()))
             return True
         sb=sw_legend.get_vscrollbar()

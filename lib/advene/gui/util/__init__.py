@@ -57,7 +57,7 @@ if not hasattr(Gtk.Menu, 'popup_at_pointer'):
 def image_new_from_pixbuf(pb, width=None):
     i=Gtk.Image()
     if width:
-        height = width * pb.get_height() / pb.get_width()
+        height = int(width * pb.get_height() / pb.get_width())
         p=pb.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
     else:
         p=pb
@@ -79,9 +79,9 @@ def png_to_pixbuf (png_data, width=None, height=None):
         pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
 
     if width and not height:
-        height = width * pixbuf.get_height() / pixbuf.get_width()
+        height = int(width * pixbuf.get_height() / pixbuf.get_width())
     if height and not width:
-        width = height * pixbuf.get_width() / pixbuf.get_height()
+        width = int(height * pixbuf.get_width() / pixbuf.get_height())
     if width and height:
         p=pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
         return p

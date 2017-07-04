@@ -151,7 +151,7 @@ class AccumulatorPopup(AdhocView):
         According to the hbox size and the max number of popups.
         """
         if self.size:
-            return self.contentbox.get_allocation().width / self.size
+            return int(self.contentbox.get_allocation().width / self.size)
         else:
             return 120
 

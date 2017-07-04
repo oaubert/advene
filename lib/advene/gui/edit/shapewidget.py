@@ -810,7 +810,7 @@ class Line(Rectangle):
         context.line_to(self.x2, self.y2)
         if self.arrow:
             theta=atan2( self.width, self.height )
-            ox=self.arrowwidth / 2 + 1
+            ox=int(self.arrowwidth / 2) + 1
             oy=self.arrowwidth
             context.stroke()
             context.new_path()
@@ -924,7 +924,7 @@ class Line(Rectangle):
                     'refX': '5',
                     'refY': '5',
                     'orient': 'auto',
-                    'markerWidth': str(self.arrowwidth / 2 + 1),
+                    'markerWidth': str(int(self.arrowwidth / 2) + 1),
                     'markerHeight': str(self.arrowwidth) })
             defs.append(marker)
             marker.append(ET.Element('polyline', {
@@ -1199,7 +1199,7 @@ class Circle(Rectangle):
         self.cx = int( (bounds[0][0] + bounds[1][0]) / 2)
         self.cy = int( (bounds[0][1] + bounds[1][1]) / 2)
         #self.r = int(sqrt( (self.width / 2) ** 2 + (self.height / 2) ** 2))
-        self.r = self.width / 2
+        self.r = int(self.width / 2)
 
     def render(self, context, invert=False):
         self.render_setup(context, invert)
@@ -1254,13 +1254,14 @@ class Ellipse(Rectangle):
 
         self.cx = int( (bounds[0][0] + bounds[1][0]) / 2)
         self.cy = int( (bounds[0][1] + bounds[1][1]) / 2)
-        self.rx = self.width / 2
-        self.ry = self.height / 2
+        self.rx = int(self.width / 2)
+        self.ry = int(self.height / 2)
 
     def render(self, context, invert=False):
         self.render_setup(context, invert)
         context.save()
-        context.translate(self.x + self.width / 2., self.y + self.height / 2.)
+        context.translate(self.x + self.width / 2.,
+                          self.y + self.height / 2.)
         if self.width and self.height:
             context.scale(self.width / 2., self.height / 2.)
         context.arc(0., 0., 1., 0., 2 * math.pi)

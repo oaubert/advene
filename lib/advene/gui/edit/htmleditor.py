@@ -402,7 +402,7 @@ class HTMLEditor(textview_class, HTMLParser):
                     width, height = attrwidth, attrheight
                 elif attrwidth:
                     # Only width is specified.
-                    height = int(attrwidth) * height / width
+                    height = int(int(attrwidth) * height / width)
                     width = int(attrwidth)
                 elif attrheight:
                     width = int(attrheight) * width / height

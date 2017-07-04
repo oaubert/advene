@@ -260,7 +260,7 @@ class VideoPlayer(AdhocView):
         self.offset_spin = Gtk.SpinButton.new(Gtk.Adjustment.new(self.offset,
                                                                  - 24 * 60 * 60 * 1000,
                                                                  24 * 60 * 60 * 1000,
-                                                                 1000 / config.data.preferences['default-fps'],
+                                                                 int(1000 / config.data.preferences['default-fps']),
                                                                  1000,
                                                                  500),
                                               1000, 0)

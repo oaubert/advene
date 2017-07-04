@@ -16,20 +16,12 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+logger = logging.getLogger(__name__)
 
-import os
-import re
-import sys
 import urllib.request, urllib.parse, urllib.error
 from urllib.request import urlopen
 import urllib.parse
-
-_fs_encoding = sys.getfilesystemencoding()
-# In some cases, sys.getfilesystemencoding returns None. And if the
-# system is misconfigured, it will return ANSI_X3.4-1968
-# (apparently). In these cases, fallback to a sensible default value
-if _fs_encoding in ('ascii', 'ANSI_X3.4-1968', None):
-    _fs_encoding='utf-8'
 
 urljoin = urllib.parse.urljoin
 
@@ -54,28 +46,3 @@ def no_fragment(uri):
 
 def open(uri):
     return urlopen(uri)
-
-def normalize_filename(name):
-    """Normalize filename for interaction with the filesystem.
-
-    This means :
-
-    - in win32, massage windows drive notation in a more URI-compatible syntax
-
-    - on systems where os.path.supports_unicode_filename (win32),
-    native fs API want to get unicode strings. On other ones, encode
-    pathnames with an apppropriate encoding (utf-8 usually).
-    """
-    if name.startswith('file:///'):
-        name = name[7:]
-
-    if re.match('|/', name) or re.match('[a-zA-Z]:', name):
-        # Windows drive: notation. Convert it from
-        # a more URI-compatible syntax
-        name=urllib.request.url2pathname(name)
-
-    if not isinstance(name, str):
-        # We should only have utf8 encoded strings internally
-        name = name.decode('utf-8')
-
-    return name

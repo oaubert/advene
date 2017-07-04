@@ -432,7 +432,7 @@ class Player:
             # be later) and its value aligned to a frame boundary
             for pos in sorted((max(20, t - 50),
                                max(20, t - 20),
-                               max(20, t / config.data.preferences['default-fps'] * config.data.preferences['default-fps']),
+                               max(20, int(t / config.data.preferences['default-fps']) * config.data.preferences['default-fps']),
                                max(20, t))):
                 self.snapshotter.enqueue(pos)
 

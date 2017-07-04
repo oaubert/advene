@@ -97,7 +97,7 @@ class DelakisShotDetectImporter(GenericImporter):
         for k, v in self.profiles[self.profile].items():
             setattr(sd, k, v)
         #Detect cut and dissolve
-        self.convert(sd.process(histos, 1000 / fps))
+        self.convert(sd.process(histos, int(1000 / fps)))
         return self.package
 
 # Code adapted from pimpy: http://pim.gforge.inria.fr/pimpy/

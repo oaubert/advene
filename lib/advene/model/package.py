@@ -22,6 +22,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import os
+from pathlib import Path
 import sys
 import urllib.request, urllib.parse, urllib.error
 from urllib.parse import urljoin
@@ -29,8 +30,6 @@ import re
 
 import xml.sax
 import xml.dom
-
-from .util.uri import normalize_filename
 
 from .util.auto_properties import auto_properties
 
@@ -75,7 +74,6 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
            Providing None for the source parameter creates a new Package.
         """
         self.meta_cache={}
-        uri = normalize_filename(uri)
         self.__uri = uri
         self.__importer = importer
         # Possible container
@@ -202,6 +200,9 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if not absolute and context is self:
             return ''
 
+        # Note: this is where the magic works on win32.
+        uri = Path(uri).absolute().as_uri()
+
         importer = self.__importer
         if importer is not None:
             uri = urljoin (importer.getUri (absolute, context), uri)
@@ -324,8 +325,6 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         """
         if name is None:
             name=self.__uri
-
-        name = normalize_filename(name)
 
         # handle .azp files.
         if name.lower().endswith('.azp') or name.endswith('/'):
