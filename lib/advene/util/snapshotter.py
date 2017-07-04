@@ -222,7 +222,11 @@ class Snapshotter(object):
         if uri:
             self.player.set_state(Gst.State.NULL)
             self.player.set_property('uri', uri)
-            self.active = True
+            uri = self.player.get_property('uri')
+            if uri and Gst.uri_is_valid(uri):
+                self.active = True
+            else:
+                self.active = False
             self.player.set_state(Gst.State.PAUSED)
 
     def on_bus_message(self, bus, message):
