@@ -529,9 +529,6 @@ def get_statistics(fname):
     if fname.lower().endswith('.azp'):
         # If the file is a .azp, then it may have a
         # META-INF/statistics.xml file. Use it.
-        # Encoding issues on win32:
-        if isinstance(fname, str):
-            fname=fname.encode(sys.getfilesystemencoding())
         try:
             z=zipfile.ZipFile(fname, 'r')
         except Exception as e:
@@ -540,14 +537,14 @@ def get_statistics(fname):
 
         # Check the validity of mimetype
         try:
-            typ = z.read('mimetype')
+            typ = z.read('mimetype').decode('utf-8')
         except KeyError:
-            raise AdveneException(_("File %s is not an Advene zip package.") % fname)
+            raise AdveneException(_("File %s is not an Advene zip package - no mimetype.") % fname)
         if typ != advene.model.zippackage.MIMETYPE:
-            raise AdveneException(_("File %s is not an Advene zip package.") % fname)
+            raise AdveneException(_("File %s is not an Advene zip package - wrong mimetype %s.") % (fname, typ))
 
         try:
-            st=z.read('META-INF/statistics.xml')
+            st=z.read('META-INF/statistics.xml').decode('utf-8')
         except KeyError:
             st=None
 
