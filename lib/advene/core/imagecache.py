@@ -194,9 +194,8 @@ class ImageCache(MutableMapping):
                 if not os.path.isdir(d):
                     os.mkdir (d)
                 filename=os.path.join(d, "%010d.png" % key)
-                f = open(filename, 'wb')
-                f.write (value)
-                f.close ()
+                with open(filename, 'wb') as f:
+                    f.write (value)
                 value=CachedString(filename)
                 value.contenttype='image/png'
             elif isinstance(value, (str, bytes)):
@@ -230,10 +229,6 @@ class ImageCache(MutableMapping):
 
         if valids:
             key = valids[0][0]
-#            print "Approximate key: %d (%d)" % valids[0]
-#            if len(valids) > 1:
-#                print "Imagecache: more than 1 valid snapshot for %d: %s" % (key,
-#                                                                              valids)
         else:
             self.init_value (key)
 
