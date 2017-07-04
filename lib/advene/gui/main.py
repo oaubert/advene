@@ -331,6 +331,7 @@ class AdveneGUI(object):
         self.gui.recent_menuitem.set_submenu(recent)
         def open_history_file(rec):
             fname = rec.get_current_uri()
+            fname = urllib.parse.unquote(fname)
             try:
                 self.set_busy_cursor(True)
                 self.controller.load_package (uri=fname)
