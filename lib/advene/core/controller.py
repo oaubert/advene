@@ -1226,13 +1226,13 @@ class AdveneController(object):
     def locate_mediafile(self, mediafile):
         """Locate the given media file.
         """
-        if not os.path.exists(mediafile.encode(sys.getfilesystemencoding(), 'ignore')):
+        if not os.path.exists(mediafile):
             # It is a file. It should exist. Else check for a similar
             # one in moviepath
             # UNIX/Windows interoperability: convert pathnames
             n=mediafile.replace('\\', os.sep).replace('/', os.sep)
 
-            name=str(os.path.basename(n))
+            name=os.path.basename(n)
             for d in config.data.path['moviepath'].split(os.pathsep):
                 if d == '_':
                     # Get package dirname
@@ -1241,14 +1241,14 @@ class AdveneController(object):
                     if d.startswith('file:'):
                         d=d.replace('file://', '')
                     d=urllib.request.url2pathname(d)
-                    d=str(os.path.dirname(d), sys.getfilesystemencoding())
+                    d=os.path.dirname(d)
                 if '~' in d:
                     # Expand userdir
                     d=str(os.path.expanduser(d), sys.getfilesystemencoding())
 
                 n=os.path.join(d, name)
                 # FIXME: if d is a URL, use appropriate method (urllib.??)
-                if os.path.exists(n.encode(sys.getfilesystemencoding(), 'ignore')):
+                if os.path.exists(n):
                     mediafile=n
                     self.log(_("Found matching video file in moviepath: %s") % n)
                     break

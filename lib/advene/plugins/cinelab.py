@@ -88,16 +88,11 @@ class CinelabImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def tempfile(self, *names):
-        """Return a tempfile name in the filesystem encoding.
-
-        Try to deal appropriately with filesystem encodings:
+        """Return a tempfile name.
 
         self._tempdir is a unicode string.
-
-        tempfile takes unicode parameters, and returns a path encoded
-        in sys.getfilesystemencoding()
         """
-        return os.path.join(self._tempdir, *names).encode(_fs_encoding)
+        return os.path.join(self._tempdir, *names)
 
     def extract(self, fname):
         """Extract the zip file to a temporary directory.
