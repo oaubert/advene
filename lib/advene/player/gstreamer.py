@@ -19,9 +19,6 @@
 """Gstreamer player interface.
 
 Based on gst >= 1.0 API.
-
-Use appsink to get data out of a pipeline:
-https://thomas.apestaart.org/thomas/trac/browser/tests/gst/crc/crc.py
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -37,18 +34,17 @@ import urllib.request, urllib.parse, urllib.error
 
 if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
-    fsenc = sys.getfilesystemencoding()
     ppath = os.getenv('GST_PLUGIN_PATH', "")
     if not ppath or not os.path.exists(ppath):
-        os.environ['GST_PLUGIN_PATH'] = os.path.join(config.data.path['advene'], 'gst', 'lib', 'gstreamer-0.10').encode(fsenc)
-        gstpath = str(os.getenv('PATH', ""), fsenc)
-        os.environ['PATH'] = os.pathsep.join( ( os.path.join(config.data.path['advene'], 'gst', 'bin'), gstpath) ).encode(fsenc)
+        os.environ['GST_PLUGIN_PATH'] = os.path.join(config.data.path['advene'], 'gst', 'lib', 'gstreamer-0.10')
+        gstpath = os.getenv('PATH', "")
+        os.environ['PATH'] = os.pathsep.join( ( os.path.join(config.data.path['advene'], 'gst', 'bin'), gstpath) )
     else:
         #even if gstpluginpath is defined, gst still may not be in path
-        gstpath = str(os.getenv('PATH', ""), fsenc)
+        gstpath = os.getenv('PATH', "")
         h,t = os.path.split(ppath)
         binpath,t = os.path.split(h)
-        os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) ).encode(fsenc)
+        os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) )
 
 try:
     import gi
