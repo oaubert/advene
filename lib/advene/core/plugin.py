@@ -22,7 +22,15 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from importlib.util import spec_from_file_location, module_from_spec
+try:
+    # Python >= 3.5
+    from importlib.util import spec_from_file_location, module_from_spec
+    import_method='new'
+except ImportError:
+    # Python 3.3/3.4
+    from importlib.machinery import SourceFileLoader
+    import_method='old'
+
 import os
 import inspect
 import zipfile
@@ -119,11 +127,13 @@ class Plugin(object):
                 logger.error("%s is not a python file", fullname)
                 raise PluginException("%s is not a plugin" % fullname)
 
-            f=open(fullname, 'r', encoding='utf-8')
-            self._spec = spec_from_file_location('_'.join( (prefix, name) ), fullname)
-            self._plugin = module_from_spec(self._spec)
-            f.close()
-            self._spec.loader.exec_module(self._plugin)
+            module_name = '_'.join((prefix, name))
+            if import_method == 'new':
+                self._spec = spec_from_file_location(module_name, fullname)
+                self._plugin = module_from_spec(self._spec)
+                self._spec.loader.exec_module(self._plugin)
+            else:
+                self._plugin = SourceFileLoader(module_name, fullname).load_module()
 
         # Is this really a plugin ?
         if not hasattr(self._plugin, 'name') or not hasattr(self._plugin, 'register'):
