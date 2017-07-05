@@ -104,6 +104,10 @@ class Config(object):
 
         self.debug=False
 
+        # Set this to True (through the evaluator) to launch
+        # post-mortem pdb upon exception
+        self.livedebug = False
+
         self.startup_time=time.time()
 
         self.config_file=''
