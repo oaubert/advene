@@ -1,12 +1,10 @@
-#!/usr/bin/python 
+#! /usr/bin/env python3
 
 import sys
 from distutils.core import setup
-from distutils.extension import Extension
+from distutils import log
+from setuptools import find_packages
 import os
-import string
-import re
-import sys
 
 # We define the main script name here (file in bin), since we have to change it for MacOS X
 SCRIPTNAME='advene'
@@ -17,9 +15,7 @@ def check_changelog(maindir, version):
     l=f.readline()
     f.close()
     if not l.startswith('advene (' + version + ')'):
-        print("The CHANGES.txt does not seem to match version " + version)
-        print(l)
-        print("Update either the CHANGES.txt or the lib/advene/core/version.py file")
+        log.error("The CHANGES.txt does not seem to match version %s\n%s\nUpdate either the CHANGES.txt or the lib/advene/core/version.py file", version, l)
         sys.exit(1)
     return True
 
@@ -76,20 +72,20 @@ if sys.platform == 'win32':
 	    "includes": "email.header,pango,pangocairo,cairo,atk,gtk,gio,pygst,gst,gtk.keysyms,gobject,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
 	    "excludes": [ "Tkconstants","Tkinter","tcl" ],
 	    "dll_excludes": ["libgstvideo-0.10.dll","libgstpbutils-0.10.dll","libgstinterfaces-0.10.dll","libgstdataprotocol-0.10.dll","libgstbase-0.10.dll","libgstnet-0.10.dll","libgstcontroller-0.10.dll","libgstaudio-0.10.dll","libgsttag-0.10.dll","libgstreamer-0.10.dll","libvlc.dll","libvlc-control.dll", "libglade-2.0-0.dll"],
-	    #         		 ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
+	    #         		 ["iconv.dll","intl.dll","libatk-1.0-0.dll",
 	    #                          "libgdk_pixbuf-2.0-0.dll","libgdk-win32-2.0-0.dll",
 	    #                          "libglib-2.0-0.dll","libgmodule-2.0-0.dll",
 	    #                          "libgobject-2.0-0.dll","libgthread-2.0-0.dll",
 	    #                          "libgtk-win32-2.0-0.dll","libpango-1.0-0.dll",
 	    #                          "libpangowin32-1.0-0.dll"],
-	    
+
          }
 	}
 elif sys.platform == 'darwin':
     import py2app
     SCRIPTNAME='advene_gui.py'
     platform_options['app'] = [ 'bin/%s' % SCRIPTNAME ]
-    platform_options['options'] = dict(py2app=dict( 
+    platform_options['options'] = dict(py2app=dict(
                     iconfile='mac/Advene.icns',
                     #includes=",".join( [ l.strip() for l in open('mac_includes.txt') ]),
                     includes="AppKit,_hashlib,hashlib,email.header,pango,cairo,ctypes,gtk,gtk.keysyms,atk,gobject,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be,cPickle,optparse,sets,pprint,cgi,webbrowser,sgmllib,zipfile,shutil,sched,imghdr,BaseHTTPServer,Cookie,ConfigParser,xmlrpclib,Queue,csv,filecmp," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
@@ -103,7 +99,7 @@ elif sys.platform == 'darwin':
                        CFBundleExecutable         = "Advene",
                        CFBundleIdentifier         = "com.oaubert.advene",
                    ),
-                 ) 
+                 )
                )
 
 def get_packages_list():
@@ -112,20 +108,11 @@ def get_packages_list():
     Return a list of packages (dot notation) suitable as packages parameter
     for distutils.
     """
-    l=[]
-    def ispackage(pl, dirname, fnames):
-        if 'linux' in sys.platform and ('cherrypy' in dirname or dirname.endswith('simpletal')):
-            # On linux (at least, Debian and Ubuntu), cherrypy and
-            # simpletal are packaged. So do not consider them in the
-            # packages list.
-            fnames[:]=[]
-        elif '__init__.py' in fnames:
-            l.append(dirname)
-    os.path.walk('lib', ispackage, l)
-    res=[ ".".join(name.split(os.path.sep)[1:]) for name in l ]
-    return res
+    if 'linux' in sys.platform:
+        return find_packages('lib', exclude=["cherrypy.*"])
+    else:
+        return find_packages('lib')
 
-                 
 def generate_data_dir(dir_, prefix="", postfix=""):
     """Return a structure suitable for datafiles from a directory.
 
@@ -137,15 +124,14 @@ def generate_data_dir(dir_, prefix="", postfix=""):
     """
     l = []
     installdir=prefix+dir_+postfix
-    def store(pl, dirname, fnames):
-	if dirname.find('.svn') < 0 and fnames:
+    for dirname, dnames, fnames in os.walk(dir_):
+        if fnames:
             if dirname.startswith(dir_):
                 installdirname=dirname.replace(dir_, installdir, 1)
-            pl.append((installdirname, [ absf
-                                         for absf in [ os.path.sep.join((dirname,f)) 
-                                                       for f in fnames  ]
-                                         if not os.path.isdir(absf) ]))
-    os.path.walk(dir_, store, l)
+            l.append((installdirname, [ absf
+                                        for absf in [ os.path.sep.join((dirname,f))
+                                                      for f in fnames  ]
+                                        if not os.path.isdir(absf) ]))
     return l
 
 def generate_data_files():
@@ -165,7 +151,7 @@ def generate_data_files():
     if os.path.isdir("locale"):
         r.extend(generate_data_dir("locale", prefix=prefix))
     else:
-        print("""**WARNING** You should generate the locales with "cd po; make mo".""")
+        log.warn("""**WARNING** You should generate the locales with "cd po; make mo".""")
     if sys.platform.startswith('linux'):
         # Install specific data files
         r.append( ( 'share/applications', [ 'debian/advene.desktop' ] ) )
@@ -214,11 +200,11 @@ setup (name = "advene",
 """,
 
        package_dir = {'': 'lib'},
-       
+
        packages = get_packages_list(),
 
        scripts = [ 'bin/%s' % SCRIPTNAME ],
-       
+
        data_files = generate_data_files(),
 
        classifiers = [
@@ -231,6 +217,6 @@ setup (name = "advene",
     'Operating System :: OS Independent',
     'Topic :: Multimedia :: Video :: Non-Linear Editor'
     ],
- 
+
     **platform_options
 )
