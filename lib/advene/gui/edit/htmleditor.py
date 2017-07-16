@@ -192,7 +192,7 @@ class HTMLEditor(textview_class, HTMLParser):
             while True:
                 # Remove marks
                 for m in it.get_marks():
-                    if hasattr(m, '_tag'):
+                    if hasattr(m, '_tag') and hasattr(m, '_endmark'):
                         try:
                             b.remove_tag_by_name(m._tag,
                                                  b.get_iter_at_mark(m),
@@ -205,7 +205,7 @@ class HTMLEditor(textview_class, HTMLParser):
                                 b.delete_mark(m._endmark)
                         except AttributeError:
                             logger.error("Exception for %s" % m._tag, exc_info=True)
-                    elif  hasattr(m, '_endtag'):
+                    elif  hasattr(m, '_endtag') and hasattr(m, 'startmark'):
                         b.remove_tag_by_name(m._endtag,
                                              b.get_iter_at_mark(m._startmark),
                                              b.get_iter_at_mark(m))
