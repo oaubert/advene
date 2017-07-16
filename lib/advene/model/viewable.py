@@ -34,12 +34,12 @@ class TypedUnicode(str):
         s.contenttype='text/plain'
         return s
 
-class TypedString(str):
-    """String with a mimetype attribute.
+class TypedBytes(bytes):
+    """Bytes with a mimetype attribute.
     """
     def __new__(cls, value=""):
-        s=str.__new__(cls, value)
-        s.contenttype='text/plain'
+        s=bytes.__new__(cls, value)
+        s.contenttype='application/binary'
         return s
 
 class Viewable(object, metaclass=auto_properties):
@@ -131,7 +131,7 @@ class Viewable(object, metaclass=auto_properties):
             if self.getMimetype().startswith('text'):
                 s=TypedUnicode(self.data)
             else:
-                s=TypedString(self.data)
+                s=TypedBytes(self.data)
             s.contenttype=self.getMimetype()
             return s
         elif view is None:
