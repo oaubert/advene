@@ -377,9 +377,8 @@ class WebsiteExporter(object):
             # FIXME: not robust wrt. multiple packages/videos
             if not os.path.isdir(self.imgdir):
                 helper.recursive_mkdir(self.imgdir)
-            f=open(os.path.join(self.imgdir, '%s.png' % t), 'wb')
-            f.write(str(self.controller.package.imagecache[t]))
-            f.close()
+            with open(os.path.join(self.imgdir, '%s.png' % t), 'wb') as f:
+                f.write(bytes(self.controller.package.imagecache[t]))
 
         # Copy overlays
         for (ident, tales) in used_overlays:
@@ -391,15 +390,14 @@ class WebsiteExporter(object):
             name=ident+tales.replace('/', '_')
             if not os.path.isdir(self.imgdir):
                 helper.recursive_mkdir(self.imgdir)
-            f=open(os.path.join(self.imgdir, 'overlay_%s.png' % name), 'wb')
-            if tales:
-                # There is a TALES expression
-                ctx=self.controller.build_context(here=a)
-                data=ctx.evaluateValue('here' + tales)
-            else:
-                data=a.content.data
-            f.write(str(self.controller.gui.overlay(self.controller.package.imagecache[a.fragment.begin], data)))
-            f.close()
+            with open(os.path.join(self.imgdir, 'overlay_%s.png' % name), 'wb') as f:
+                if tales:
+                    # There is a TALES expression
+                    ctx=self.controller.build_context(here=a)
+                    data=ctx.evaluateValue('here' + tales)
+                else:
+                    data=a.content.data
+                f.write(self.controller.gui.overlay(self.controller.package.imagecache[a.fragment.begin], data))
 
         # Copy resources
         for path in used_resources:
@@ -412,9 +410,11 @@ class WebsiteExporter(object):
             r=self.controller.package.resources
             for element in path.split('/'):
                 r=r[element]
-            output=open(dest, 'wb')
-            output.write(r.data)
-            output.close()
+            with open(dest, 'wb') as output:
+                data = r.data
+                if isinstance(data, str):
+                    data = data.encode('utf-8')
+                output.write(data)
 
     def website_export(self):
         main_step=1.0/self.max_depth
