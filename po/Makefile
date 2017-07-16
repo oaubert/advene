@@ -9,7 +9,7 @@ POTFILES: FORCE
 FORCE:
 
 pot: POTFILES
-	xgettext -d $(DOMAIN) -o $(DOMAIN).pot -f POTFILES
+	xgettext --from-code=utf-8 -d $(DOMAIN) -o $(DOMAIN).pot -f POTFILES
 
 update-po:
 	for po in *.po; do \

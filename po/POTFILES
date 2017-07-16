@@ -67,15 +67,14 @@
 ../lib/advene/plugins/anvil.py
 ../lib/advene/plugins/fcp.py
 ../lib/advene/plugins/tracebuilder.py
+../lib/advene/plugins/hpi.py
 ../lib/advene/plugins/goodshotdetector.py
-../lib/advene/plugins/webannotation_import.py
 ../lib/advene/plugins/montagerenderer.py
 ../lib/advene/plugins/transcriber.py
 ../lib/advene/plugins/tts.py
 ../lib/advene/plugins/soundenveloppe.py
 ../lib/advene/plugins/barcode.py
 ../lib/advene/plugins/dcp.py
-../lib/advene/plugins/nerd_plugin.py
 ../lib/advene/plugins/annotationgraph.py
 ../lib/advene/plugins/shotdetectapp.py
 ../lib/advene/plugins/mpeg7.py
