@@ -212,8 +212,8 @@ class Merger:
     def build_widget(self):
         vbox=Gtk.VBox()
 
-        vbox.pack_start(Gtk.Label(_("Merge elements from %s into %s") % (self.sourcepackage.uri,
-                                                                      self.destpackage.uri)),
+        vbox.pack_start(Gtk.Label(_("Merge elements from %(source)s into %(dest)s") % {'source': self.sourcepackage.uri,
+                                                                                       'dest': self.destpackage.uri}),
                                   False, False, 0)
 
         scroll_win = Gtk.ScrolledWindow ()

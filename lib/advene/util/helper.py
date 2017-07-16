@@ -29,7 +29,6 @@ try:
 except ImportError:
     from md5 import md5
 import os
-import sys
 import re
 import zipfile
 import urllib.request, urllib.parse, urllib.error
@@ -541,7 +540,8 @@ def get_statistics(fname):
         except KeyError:
             raise AdveneException(_("File %s is not an Advene zip package - no mimetype.") % fname)
         if typ != advene.model.zippackage.MIMETYPE:
-            raise AdveneException(_("File %s is not an Advene zip package - wrong mimetype %s.") % (fname, typ))
+            raise AdveneException(_("File %(fname)s is not an Advene zip package - wrong mimetype %(type)s.") % {'fname': fname,
+                                                                                                                 'type': typ})
 
         try:
             st=z.read('META-INF/statistics.xml').decode('utf-8')
