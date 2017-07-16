@@ -1311,9 +1311,12 @@ class Packages(Common):
                 except AttributeError:
                     pass
             try:
-                logger.debug("DPE object display")
+                logger.debug("DPE object display %s", type(objet))
                 res.append( self.start_html(mimetype=mimetype, mode=displaymode) )
-                res.append(objet)
+                if isinstance(objet, str):
+                    res.append(objet.encode('utf-8'))
+                else:
+                    res.append(objet)
             except AdveneException as e:
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error.</p>
