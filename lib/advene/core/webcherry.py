@@ -31,6 +31,8 @@ URL syntax
   (typically the C{advene} GUI).  In all cases, Webserver depends on
   AdveneController.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import advene.core.config as config
 import advene.core.version
@@ -157,7 +159,7 @@ class Common:
             self.no_cache ()
 
         res=[]
-        if mode == "navigation":
+        if mode == "navigation" and mimetype.startswith('text/'):
             res.append("""<html><head><title>%s</title><link rel="stylesheet" type="text/css" href="/data/advene.css" />""" % title)
             if head_section is not None:
                 res.append(head_section)
@@ -175,10 +177,10 @@ class Common:
             """) % { 'locationbar': self.location_bar (),
                      'path': cherrypy.request.path_info } )
 
-        if duplicate_title and mode == 'navigation':
-            res.append("<h1>%s</h1>\n" % title)
+            if duplicate_title:
+                res.append("<h1>%s</h1>\n" % title)
 
-        return "".join(res)
+        return res or b''
 
     def send_no_content(self):
         """Sends a No Content (204) response.
@@ -243,7 +245,7 @@ class Common:
         @return: the content-type if o is an image, else None
         @rtype: string
         """
-        res=imghdr.what (None, str(o))
+        res=imghdr.what (None, bytes(o))
         if res is not None:
             return "image/%s" % res
         else:
@@ -451,7 +453,7 @@ class Media(Common):
                 self.controller.queue_action(self.controller.update_snapshot, position)
         snapshot=i[position]
         cherrypy.response.headers['Content-type']=snapshot.contenttype
-        res.append (str(snapshot))
+        res.append (bytes(snapshot))
         return res
     snapshot.exposed=True
 
@@ -498,7 +500,7 @@ class Media(Common):
             path.extend(args[2:])
             path='/'.join(path)
             ctx=self.controller.build_context(here=a)
-            svg_data=str( ctx.evaluateValue(path) )
+            svg_data=ctx.evaluateValue(path)
         elif 'svg' in a.content.mimetype:
             # Overlay svg
             svg_data=a.content.data
@@ -511,7 +513,7 @@ class Media(Common):
         else:
             img=snapshot
         cherrypy.response.headers['Content-type']='image/png'
-        res.append (str(img))
+        res.append (img)
         return res
     overlay.exposed=True
 
@@ -1215,15 +1217,16 @@ class Packages(Common):
         if 'mode' in query:
             displaymode = query['mode']
             del (query['mode'])
-        if isinstance(objet, str) and self.image_type (objet) is not None:
+        if isinstance(objet, bytes) and self.image_type (objet) is not None:
             displaymode = 'image'
 
+        logger.debug("DPE: display mode %s", displaymode)
         if displaymode == 'image':
             # Return an image, so build the correct headers
             try:
                 mimetype=expr.contenttype
             except AttributeError:
-                mimetype=self.image_type(str(objet))
+                mimetype=self.image_type(objet)
             if 'imagecache' in expr and 'async-snapshot' in self.controller.player.player_capabilities:
                 # Probably an image from the imagecache. Check if it
                 # is initialized, else ask if possible for update.
@@ -1237,21 +1240,21 @@ class Packages(Common):
             cherrypy.response.headers['Content-type']=mimetype
             self.no_cache ()
 
-            res.append (str(objet))
-            return "".join(res)
+            res.append(objet)
+            return res
         elif displaymode == 'content':
             if hasattr(objet, 'mimetype'):
                 cherrypy.response.status=200
                 cherrypy.response.headers['Content-type']=objet.mimetype
                 self.no_cache ()
                 res.append (objet.data)
-                return "".join(res)
+                return res
             elif hasattr(objet, 'contenttype'):
                 cherrypy.response.status=200
                 cherrypy.response.headers['Content-type']=objet.contenttype
                 self.no_cache ()
-                res.append (objet)
-                return "".join(res)
+                res.append(objet)
+                return res
             else:
                 return self.send_error (404, _("Content mode not available on non-content data"))
 
@@ -1260,21 +1263,21 @@ class Packages(Common):
         if displaymode != "raw":
             displaymode = "navigation"
 
+        logger.debug("DPE display content %s", displaymode)
         # Display content
         if hasattr (objet, 'view') and callable (objet.view):
 
+            logger.debug("DPE callable view")
             context = self.controller.build_context(here=objet, alias=alias)
             context.pushLocals()
             context.setLocal('request', query)
             # FIXME: should be default view
             context.setLocal('view', objet)
             try:
-                v=objet.view (context=context)
-                res.append( self.start_html(mimetype=v.contenttype) )
-                if v.contenttype.startswith('text'):
-                    res.append (str(v).encode('utf-8'))
-                else:
-                    res.append(v)
+                v=objet.view(context=context)
+                #import pdb;pdb.set_trace()
+                res.append(self.start_html(mimetype=v.contenttype, mode=displaymode))
+                res.append(v)
             except simpletal.simpleTAL.TemplateParseException as e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
@@ -1283,7 +1286,7 @@ class Packages(Common):
                 <p>Error message: <em>%(message)s</em></p>""") % {
                         'tagname': cgi.escape(e.location),
                         'message': e.errorDescription} )
-                return "".join(res)
+                return res
             except simpleTALES.ContextContentException as e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
@@ -1291,13 +1294,13 @@ class Packages(Common):
                 <p>Error message: <em>%(error)s</em></p><pre>%(message)s</pre>""")
                                  % {'error': e.errorDescription,
                                     'message': str(e.args[0]).encode('utf-8')})
-                return "".join(res)
+                return res
             except AdveneException as e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error in the TALES expression.</p>
                 <pre>%s</pre>""") % cgi.escape(str(e.args[0]).encode('utf-8')))
-                return "".join(res)
+                return res
         else:
             mimetype=None
             try:
@@ -1308,11 +1311,9 @@ class Packages(Common):
                 except AttributeError:
                     pass
             try:
-                res.append( self.start_html(mimetype=mimetype) )
-                if mimetype and mimetype.startswith('text'):
-                    res.append (str(objet).encode('utf-8'))
-                else:
-                    res.append(str(objet))
+                logger.debug("DPE object display")
+                res.append( self.start_html(mimetype=mimetype, mode=displaymode) )
+                res.append(objet)
             except AdveneException as e:
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error.</p>
@@ -1381,7 +1382,7 @@ class Packages(Common):
                     'expression': tales ,
                     'uri': p.uri,
                     'value': cgi.escape(str(type(objet)))})
-        return "".join(res)
+        return res
 
     def default(self, *args, **query):
         """Access a specific package.
@@ -1448,6 +1449,7 @@ class Packages(Common):
         elif cherrypy.request.method != 'GET':
             return self.send_error(400, 'Unknown method: %s' % cherrypy.request.method)
 
+        logger.debug("Evaluating %s", tales)
         try:
             return self.display_package_element (p , tales, query)
         except simpletal.simpleTAL.TemplateParseException as e:
@@ -1479,7 +1481,7 @@ class Packages(Common):
                     'value': str(v),
                     'traceback': "\n".join(code.traceback.format_tb (tr)) })
 
-        return "".join(res)
+        return res
     default.exposed=True
 
     def handle_put_request(self, *args, **query):
@@ -2171,6 +2173,9 @@ class AdveneWebServer:
         self.urlbase = "http://localhost:%d/" % port
 
         app_config={
+            '/': {
+                 'tools.encode.on': True
+            },
             '/favicon.ico': {
                 'tools.staticfile.on': True,
                 'tools.staticfile.filename': config.data.advenefile( ( 'pixmaps', 'advene.ico' ) ),
