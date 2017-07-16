@@ -276,7 +276,7 @@ class HTMLEditor(textview_class, HTMLParser):
             except UnicodeDecodeError:
                 # Fallback to latin1.
                 txt=str(txt, 'latin1')
-        self.feed(txt.encode('utf-8'))
+        self.feed(txt)
         for k, v in self.__tags.items():
             if v:
                 logger.error("Unbalanced tag at end %s", k)
