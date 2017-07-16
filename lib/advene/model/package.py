@@ -326,6 +326,8 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if name is None:
             name=self.__uri
 
+        if name.startswith('file:///'):
+            name = name[7:]
         # handle .azp files.
         if name.lower().endswith('.azp') or name.endswith('/'):
             # AZP format
