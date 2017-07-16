@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 #
 # Advene: Annotate Digital Videos, Exchange on the NEt
 # Copyright (C) 2008-2017 Olivier Aubert <contact@olivieraubert>
@@ -23,10 +24,7 @@ logger = logging.getLogger(__name__)
 
 import os
 import time
-try:
-    import io
-except ImportError:
-    import io as StringIO
+import io
 import traceback
 import gi
 gi.require_version('Gtk', '3.0')
