@@ -4780,8 +4780,8 @@ class AdveneGUI(object):
 
         hb=Gtk.HBox()
         hb.pack_start(Gtk.Label(_("Maximum recursion depth")), False, False, 0)
-        adj=Gtk.Adjustment.new(3, 1, 9, 1)
-        max_depth=Gtk.SpinButton.new(adj)
+        adj=Gtk.Adjustment.new(3, 1, 9, 1, 1, 1)
+        max_depth=Gtk.SpinButton.new(adj, 1, 0)
         hb.pack_start(max_depth, False, True, 0)
         v.pack_start(hb, False, True, 0)
 
