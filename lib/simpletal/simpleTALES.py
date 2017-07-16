@@ -399,7 +399,7 @@ class Context:
 			return result
 		except Exception as e:
 			# An exception occured evaluating the template, return the exception as text
-			self.log.warn ("Exception occurred evaluating python path, exception: " + str (e))
+			self.log.warn ("Exception occurred evaluating python path %s, exception %s" % (expr, str (e)))
 			return "Exception: %s" % str (e)
 
 	def evaluatePath (self, expr):
