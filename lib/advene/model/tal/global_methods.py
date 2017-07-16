@@ -191,7 +191,7 @@ def meta(target, context):
             return key in self.__ns_dict
 
         def __getitem__(self, key):
-            if key in self:
+            if key in self.__ns_dict:
                 return MetaNameWrapper(self.__target, self.__ns_dict[key])
             else:
                 return None
