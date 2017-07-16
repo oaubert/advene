@@ -980,7 +980,7 @@ class TemplateCompiler:
 				# It's a TAL attribute
 				cmnd = self.tal_attribute_map [commandAttName]
 				if (cmnd == TAL_OMITTAG and TALElementNameSpace):
-					self.log.warning ("Supressing omit-tag command present on TAL or METAL element")
+					self.log.warn ("Supressing omit-tag command present on TAL or METAL element")
 				else:
 					foundCommandsArgs [cmnd] = value
 					foundTALAtts.append (cmnd)
@@ -1364,7 +1364,7 @@ class HTMLTemplateCompiler (TemplateCompiler, FixedHTMLParser.HTMLParser):
 	def handle_endtag (self, tag):
 		self.log.debug ("Recieved End Tag: " + tag)
 		if (tag.upper() in HTML_FORBIDDEN_ENDTAG):
-			self.log.warning ("HTML 4.01 forbids end tags for the %s element" % tag)
+			self.log.warn ("HTML 4.01 forbids end tags for the %s element" % tag)
 		else:
 			# Normal end tag
 			self.popTag ((tag, None))
@@ -1395,7 +1395,7 @@ class HTMLTemplateCompiler (TemplateCompiler, FixedHTMLParser.HTMLParser):
 		self.parseData ('<?%s>' % data)
 		
 	def report_unbalanced (self, tag):
-		self.log.warning ("End tag %s present with no corresponding open tag.")
+		self.log.warn ("End tag %s present with no corresponding open tag.")
 			
 	def getTemplate (self):
 		template = HTMLTemplate (self.commandList, self.macroMap, self.symbolLocationTable, minimizeBooleanAtts = self.minimizeBooleanAtts)

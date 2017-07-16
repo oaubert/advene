@@ -373,7 +373,7 @@ class Context:
 		
 	def evaluatePython (self, expr):
 		if (not self.allowPythonPath):
-			self.log.warning ("Parameter allowPythonPath is false.  NOT Evaluating python expression %s" % expr)
+			self.log.warn ("Parameter allowPythonPath is false.  NOT Evaluating python expression %s" % expr)
 			return self.false
 		#self.log.debug ("Evaluating python expression %s" % expr)
 		
@@ -399,7 +399,7 @@ class Context:
 			return result
 		except Exception as e:
 			# An exception occured evaluating the template, return the exception as text
-			self.log.warning ("Exception occurred evaluating python path, exception: " + str (e))
+			self.log.warn ("Exception occurred evaluating python path, exception: " + str (e))
 			return "Exception: %s" % str (e)
 
 	def evaluatePath (self, expr):
@@ -547,7 +547,7 @@ class Context:
 							skipCount = endPos - position - 1
 					except IndexError as e:
 						# Trailing $ sign - just suppress it
-						self.log.warning ("Trailing $ detected")
+						self.log.warn ("Trailing $ detected")
 						pass
 				else:
 					result += expr[position]
