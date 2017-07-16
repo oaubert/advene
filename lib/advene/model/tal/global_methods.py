@@ -24,6 +24,9 @@ order to prevent cyclic references.
 
 If called on an invalid target, the method should return None.
 """
+import logging
+logger = logging.getLogger(__name__)
+
 def absolute_url(target, context):
     """Return the absolute URL of the element.
     """
@@ -493,7 +496,7 @@ def sorted (target, context):
         l.sort()
     elif (hasattr(target, '__getslice__') and len(target) > 0 and hasattr(target[0], 'title')):
         l=list(target[:])
-        l.sort(key=lambda e: e.title)
+        l.sort(key=lambda e: e.title or e.id)
     else:
         l=target
     return l
