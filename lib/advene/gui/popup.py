@@ -430,6 +430,41 @@ class Menu:
         d.destroy()
         return True
 
+    def split_package_by_type(self, element):
+        title = self.controller.get_title(element)
+        count = len(element.annotations)
+        dial=Gtk.Dialog(_("Splitting package according to %s") % title,
+                        self.controller.gui.gui.win,
+                        Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT)
+        label = Gtk.Label(_("For each of the %(count)d annotations in %(atype)s, create a package named after the source package and the annotation content, copying only annotations contained in the reference annotation.") % { 'count': count,
+                                                                                                                                                                                                                                   'atype': title })
+        label.set_max_width_chars(50)
+        dial.vbox.pack_start(label, False, True, 0)
+        progress_bar=Gtk.ProgressBar()
+        progress_bar.set_text("")
+        progress_bar.set_show_text(True)
+        dial.vbox.pack_start(progress_bar, False, True, 0)
+
+        should_continue = True
+        def do_cancel(b):
+            nonlocal should_continue
+            should_continue = False
+            return True
+        cancel_button = dial.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        cancel_button.connect("clicked", do_cancel)
+        dial.show_all()
+
+        def progress_callback(name, filename, n, index):
+            nonlocal should_continue
+            progress_bar.set_text(_("Created %(name)s - %(n) annotations") % locals())
+            progress_bar.set_fraction( index / count )
+            while Gtk.events_pending():
+                Gtk.main_iteration()
+            return should_continue
+
+        self.controller.split_package_by_type(element, callback=progress_callback)
+        dial.destroy()
+
     def extract_fragment(self, m, ann):
         """Extract the fragment corresponding to an annotation.
         """
@@ -739,6 +774,7 @@ class Menu:
         add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % element.id))
         add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations, source='here/annotationTypes/%s/annotations' % element.id))
         add_item(_('Export to another format...'), lambda i: self.controller.gui.export_element(element))
+        add_item(_('Split according to annotations'), lambda i: self.split_package_by_type(element))
         for imp in [ i for i in advene.util.importer.IMPORTERS if hasattr(i, 'annotation_filter') ]:
             add_item(_("Apply %s..." % imp.name), self.filter_service, imp, element)
         if self.readonly:

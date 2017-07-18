@@ -70,6 +70,7 @@ from advene.model.view import View
 from advene.model.query import Query
 from advene.model.util.defaultdict import DefaultDict
 from advene.model.tal.context import AdveneTalesException
+from advene.util.merger import Differ
 from advene.util.website_export import WebsiteExporter
 
 import advene.model.tal.context
@@ -1557,6 +1558,52 @@ class AdveneController(object):
         self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations", batch=batch_id)
         self.notify('EditSessionEnd', element=d)
         return d
+
+    def split_package_by_type(self, atype, callback=None):
+        """Generate packages corresponding to annotations in the given annotation type.
+
+        @param atype: the annotation type used for splitting
+        @type atype: AnnotationType
+        @param callback: a callback method for progress report
+        @param callback: a function which will take as parameters (name, filename, annotation_count, index)
+        """
+        baseuri, extension = os.path.splitext(self.package.uri)
+        index = 1
+        for segment in atype.annotations:
+            # Create a new package
+            p = Package(uri="new_pkg", source=None)
+            p._idgenerator = advene.core.idgenerator.Generator(p)
+            differ = Differ(self.package, p, self)
+            # Copy its structure
+            for name, s, d, action in differ.diff_structure():
+                try:
+                    action(s, d)
+                except:
+                    logger.error("Error when splitting package (%s)", name, exc_info=True)
+            # Copy relevant annotations (contained in segment)
+            count = 0
+            for a in self.package.annotations:
+                if a.fragment in segment.fragment:
+                    differ.copy_annotation(a)
+                    count += 1
+            # Copy package metadata
+            differ.update_meta(self.package, p, 'advenetool', 'duration')
+            differ.update_meta(self.package, p, 'advenetool', 'mediafile')
+            differ.update_meta(self.package, p, 'advenetool', 'tag_colors')
+            differ.update_meta(self.package, p, 'dc', 'title')
+            differ.update_meta(self.package, p, 'dc', 'creator')
+            differ.update_meta(self.package, p, 'dc', 'description')
+            p.date = self.get_timestamp()
+
+            title = self.get_title(segment)
+            fname = "%s-split-%s%s" % (baseuri, helper.title2id(title), extension)
+            p.save(fname)
+            if callback:
+                if not callback(title, fname, count, index):
+                    # Action was cancelled
+                    return
+            index += 1
+            logger.info("Saving %s with %d annotations.", fname, count)
 
     def select_player(self, p):
         """Activate the given player.
