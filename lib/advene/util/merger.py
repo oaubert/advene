@@ -23,6 +23,7 @@ Merge packages
 import logging
 logger = logging.getLogger(__name__)
 
+import itertools
 import sys
 import os
 import filecmp
@@ -50,21 +51,19 @@ class Differ:
         self.translated_ids = {}
 
     def diff(self):
-        """Iterator returning a changelist.
+        """Iterator returning a changelist for all elements.
 
         Structure of returned elements:
         (action_name, source_element, dest_element, action)
         """
-        for m in (self.diff_schemas,
-                  self.diff_annotation_types,
-                  self.diff_relation_types,
-                  self.diff_annotations,
-                  self.diff_relations,
-                  self.diff_views,
-                  self.diff_queries,
-                  self.diff_resources):
-            for d in m():
-                yield d
+        return itertools.chain(self.diff_schemas(),
+                               self.diff_annotation_types(),
+                               self.diff_relation_types(),
+                               self.diff_annotations(),
+                               self.diff_relations(),
+                               self.diff_views(),
+                               self.diff_queries(),
+                               self.diff_resources())
 
     def check_meta(self, s, d, namespaceid, name):
         ns=config.data.namespace_prefix[namespaceid]
