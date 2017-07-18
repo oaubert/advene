@@ -116,7 +116,11 @@ class Content(modeled.Modeled,
         """Check if the data is textual, according to mimetype
         """
         mt = self.mimetype
-        return (mt.startswith('text') or 'x-advene' in mt or 'xml' in mt or 'javascript' in mt or mt in config.data.text_mimetypes)
+        return mt is not None and (mt.startswith('text')
+                                   or 'x-advene' in mt
+                                   or 'xml' in mt
+                                   or 'javascript' in mt
+                                   or mt in config.data.text_mimetypes)
 
     def getData(self):
         """Return the data associated to the Content"""
