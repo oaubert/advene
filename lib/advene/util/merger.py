@@ -65,6 +65,21 @@ class Differ:
                                self.diff_queries(),
                                self.diff_resources())
 
+    def diff_structure(self):
+        """Iterator returning a changelist for all structure elements
+
+        Excluding annotations/realtions.
+
+        Structure of returned elements:
+        (action_name, source_element, dest_element, action)
+        """
+        return itertools.chain(self.diff_schemas(),
+                               self.diff_annotation_types(),
+                               self.diff_relation_types(),
+                               self.diff_views(),
+                               self.diff_queries(),
+                               self.diff_resources())
+
     def check_meta(self, s, d, namespaceid, name):
         ns=config.data.namespace_prefix[namespaceid]
         if s.getMetaData(ns, name) != d.getMetaData(ns, name):
