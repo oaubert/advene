@@ -2718,8 +2718,8 @@ class AdveneGUI(object):
             try:
                 view=get_edit_popup(element, self.controller)
             except TypeError:
-                logger.error(_("Error: unable to find an edit popup for %(element)s") % {
-                    'element': str(element) }, exc_info=True)
+                logger.warn(_("Error: unable to find an edit popup for %(element)s") % {
+                    'element': str(element) })
                 view=None
             if view is not None and view.widget.get_parent() is not None:
                 # Widget is already displayed. Present it.
