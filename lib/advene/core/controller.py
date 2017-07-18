@@ -31,6 +31,7 @@ notifications and actions triggering.
 import logging
 logger = logging.getLogger(__name__)
 
+import datetime
 import sys
 import time
 import os
@@ -1592,7 +1593,7 @@ class AdveneController(object):
     def get_timestamp(self):
         """Return a formatted timestamp for the current date.
         """
-        return time.strftime("%Y-%m-%d")
+        return datetime.datetime.now().replace(microsecond=0).isoformat()
 
     def get_element_color(self, element, metadata='color'):
         """Return the color for the given element.
