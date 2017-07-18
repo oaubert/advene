@@ -2581,7 +2581,7 @@ class AdveneController(object):
             compiler.parseTemplate (filter.content.stream, 'utf-8')
             if filter.content.mimetype == 'text/plain':
                 # Convert HTML entities to their values
-                output = io.StringIO()
+                output = io.BytesIO()
             else:
                 output = stream
             try:
@@ -2589,7 +2589,7 @@ class AdveneController(object):
             except simpleTALES.ContextContentException as e:
                 self.log(_("Error when exporting: %s") % str(e))
             if filter.content.mimetype == 'text/plain':
-                stream.write(output.getvalue().replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&'))
+                stream.write(output.getvalue().replace(b'&lt;', b'<').replace(b'&gt;', b'>').replace(b'&amp;', b'&'))
         else:
             compiler = simpleTAL.XMLTemplateCompiler ()
             compiler.parseTemplate (filter.content.stream)
