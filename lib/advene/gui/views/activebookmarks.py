@@ -743,7 +743,7 @@ class ActiveBookmark(object):
                 end=None
             else:
                 end=int(e)
-            content=urllib.parse.unquote(c).decode('utf-8', 'ignore')
+            content=urllib.parse.unquote(c)
 
         self.annotation=annotation
         if annotation is not None:
