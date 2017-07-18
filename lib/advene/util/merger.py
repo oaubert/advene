@@ -394,6 +394,7 @@ class Differ:
             author=s.author or self.source.author,
             fragment=s.fragment.clone())
         el.date=s.date or self.controller.get_timestamp()
+        el.content.mimetype=s.content.mimetype
         el.content.data=s.content.data
         self.destination.annotations.append(el)
         return el
@@ -447,8 +448,8 @@ class Differ:
             author=s.author or self.source.author)
         el.data=s.date or self.controller.get_timestamp()
         el.title=s.title or id_
-        el.content.data=s.content.data
         el.content.mimetype=s.content.mimetype
+        el.content.data=s.content.data
         self.destination.queries.append(el)
         return el
 
@@ -471,8 +472,8 @@ class Differ:
             el.matchFilter['type']=s.matchFilter['type']
         # FIXME: ideally, we should try to fix translated_ids in
         # views. Or at least try to signal possible occurrences.
-        el.content.data=s.content.data
         el.content.mimetype=s.content.mimetype
+        el.content.data=s.content.data
         self.destination.views.append(el)
         return el
 
