@@ -19,6 +19,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import codecs
 from io import StringIO
 import urllib.request, urllib.parse, urllib.error
 try:
@@ -150,7 +151,7 @@ class Content(modeled.Modeled,
             self.delUri()
             if not self.isTextual():
                 encoding = 'base64'
-                data = data.encode(encoding)
+                data = codecs.encode(bytes(data, 'utf-8'), encoding)
             else:
                 encoding = 'utf-8'
                 if isinstance(data, bytes):
