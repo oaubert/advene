@@ -579,7 +579,7 @@ class EventAccumulator(AdhocView):
             entetestr = "%s : %s" % (ev_time, obj_evt.name)
         entete = Gtk.Label(label=entetestr.encode("UTF-8"))
         hb = Gtk.HBox()
-        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , False)
+        tr = TimestampRepresentation(obj_evt.movietime, None, self.controller, 50, 0, None , False)
         if tr is not None:
             hb.pack_start(tr, False, True, 0)
             hb.pack_start(Gtk.VSeparator(), False, False, 0)
@@ -634,7 +634,7 @@ class EventAccumulator(AdhocView):
         entete = Gtk.Label(label=entetestr.encode("UTF-8"))
         hb = Gtk.HBox()
         box = Gtk.EventBox()
-        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , False)
+        tr = TimestampRepresentation(obj_evt.movietime, None, self.controller, 50, 0, None , False)
         if tr is not None:
             hb.pack_start(tr, False, True, 0)
             hb.pack_start(Gtk.VSeparator(), False, False, 0)
@@ -679,7 +679,7 @@ class EventAccumulator(AdhocView):
         entete = Gtk.Label(label=entetestr.encode("UTF-8"))
         hb = Gtk.HBox()
         box = Gtk.EventBox()
-        tr = TimestampRepresentation(obj_evt.movietime, self.controller, 50, 0, None , False)
+        tr = TimestampRepresentation(obj_evt.movietime, None, self.controller, 50, 0, None , False)
         if tr is not None:
             hb.pack_start(tr, False, True, 0)
             hb.pack_start(Gtk.VSeparator(), False, False, 0)

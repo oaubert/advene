@@ -231,7 +231,7 @@ class AnnotationDisplay(AdhocView):
 
         fr = Gtk.Expander ()
         fr.set_label(_("Screenshot"))
-        self.label['image'] = TimestampRepresentation(-1, self.controller, width=config.data.preferences['drag-snapshot-width'], epsilon=config.data.preferences['bookmark-snapshot-precision'], visible_label=False)
+        self.label['image'] = TimestampRepresentation(-1, None, self.controller, width=config.data.preferences['drag-snapshot-width'], epsilon=config.data.preferences['bookmark-snapshot-precision'], visible_label=False)
         self.label['image'].add_events(Gdk.EventMask.POINTER_MOTION_MASK
                                        | Gdk.EventMask.LEAVE_NOTIFY_MASK)
         self.label['image'].connect('motion-notify-event', handle_motion)

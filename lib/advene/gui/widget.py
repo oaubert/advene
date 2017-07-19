@@ -782,7 +782,7 @@ class TimestampRepresentation(Gtk.Button):
     @ivar label: the label (timestamp) widget
     @type label: Gtk.Label
     """
-    def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None, visible_label=True, callback=None):
+    def __init__(self, value, media, controller, width=None, epsilon=None, comment_getter=None, visible_label=True, callback=None):
         """Instanciate a new TimestampRepresentation.
 
         @param value: the timestamp value
@@ -802,6 +802,9 @@ class TimestampRepresentation(Gtk.Button):
         """
         super(TimestampRepresentation, self).__init__()
         self._value=value
+        if media is None:
+            media = controller.package.media
+        self._media = media
         self.controller=controller
         self._width=width or config.data.preferences['bookmark-snapshot-width']
         if epsilon is None:
@@ -837,11 +840,11 @@ class TimestampRepresentation(Gtk.Button):
         enable_drag_source(self, self.get_value, self.controller)
 
         def enter_bookmark(widget, event):
-            self.controller.notify('BookmarkHighlight', timestamp=self.value, immediate=True)
+            self.controller.notify('BookmarkHighlight', timestamp=self.value, media=self._media, immediate=True)
             self.highlight=True
             return False
         def leave_bookmark(widget, event):
-            self.controller.notify('BookmarkUnhighlight', timestamp=self.value, immediate=True)
+            self.controller.notify('BookmarkUnhighlight', timestamp=self.value, media=self._media, immediate=True)
             self.highlight=False
             return False
         self.connect('enter-notify-event', enter_bookmark)
@@ -876,7 +879,8 @@ class TimestampRepresentation(Gtk.Button):
     text = property(get_text, set_text)
 
     def snapshot_update_cb(self, context, target):
-        if abs(context.globals['position'] - self._value) <= self.epsilon:
+        if (context.globals['media'] == self._media
+            and abs(context.globals['position'] - self._value) <= self.epsilon):
             # Update the representation
             self.refresh()
         return True
@@ -896,7 +900,7 @@ class TimestampRepresentation(Gtk.Button):
                 # None), then cancel the value setting.
                 return False
         if self.highlight:
-            self.controller.notify('BookmarkUnhighlight', timestamp=self._value, immediate=True)
+            self.controller.notify('BookmarkUnhighlight', timestamp=self._value, media=self._media, immediate=True)
             self.highlight=False
         self._value=v
         self.refresh()
@@ -979,7 +983,7 @@ class TimestampRepresentation(Gtk.Button):
         if ic.is_initialized(self.value, self.epsilon):
             # Invalidate current snapshot
             ic.invalidate(self.value, self.epsilon)
-            self.controller.notify('SnapshotUpdate', position=self.value)
+            self.controller.notify('SnapshotUpdate', position=self.value, media=self._media)
         # Ask for refresh
         self.controller.update_snapshot(self.value)
         self.refresh()

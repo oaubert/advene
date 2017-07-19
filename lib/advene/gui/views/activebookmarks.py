@@ -1139,14 +1139,14 @@ class ActiveBookmark(object):
         position is either 'begin' or 'end'.
         """
         if position == 'begin':
-            self.controller.notify('BookmarkUnhighlight', timestamp=self.begin, immediate=True)
+            self.controller.notify('BookmarkUnhighlight', timestamp=self.begin, media=self.controller.package.media, immediate=True)
             if self.end is None:
                 self.container.remove(self)
             else:
                 self.begin = self.end
                 self.end = None
         elif position == 'end':
-            self.controller.notify('BookmarkUnhighlight', timestamp=self.end, immediate=True)
+            self.controller.notify('BookmarkUnhighlight', timestamp=self.end, media=self.controller.package.media, immediate=True)
             self.end = None
 
     def timestamp_key_press(self, widget, event, source):

@@ -271,6 +271,8 @@ class SVGContentHandler (ContentHandler):
             self.view = ShapeEditor(background=i, icon_dir=config.data.advenefile('pixmaps'))
 
             def snapshot_update_cb(context, target):
+                if context.globals['media'] != self.parent.media:
+                    return True
                 frag = self.parent.fragment
                 pos = frag.begin + int(self.view.background_adj.get_value() * frag.duration)
                 if abs(context.globals['position'] - pos) <= 1000/config.data.preferences['default-fps']:

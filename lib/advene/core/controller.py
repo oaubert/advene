@@ -1024,7 +1024,8 @@ class AdveneController(object):
     def snapshot_taken(self, snap):
         if snap is not None and snap.height != 0:
             self.package.imagecache[snap.date] = helper.snapshot2png(snap)
-            self.notify('SnapshotUpdate', position=snap.date)
+            #logger.warn("sup %s %s", snap.date, snap.media)
+            self.notify('SnapshotUpdate', position=snap.date, media=snap.media)
 
     def update_snapshot (self, position=None):
         """Event handler used to take a snapshot for the given position.
@@ -1052,7 +1053,7 @@ class AdveneController(object):
                 return True
             if i is not None and i.height != 0:
                 self.package.imagecache[i.date] = helper.snapshot2png (i)
-                self.notify('SnapshotUpdate', position=i.date)
+                self.notify('SnapshotUpdate', position=i.date, media=i.media)
         else:
             # FIXME: do something useful (warning) ?
             pass

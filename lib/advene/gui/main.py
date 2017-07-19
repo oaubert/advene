@@ -4522,7 +4522,7 @@ class AdveneGUI(object):
         valid = self.controller.package.imagecache.valid_snapshots()
         self.controller.package.imagecache.reset()
         for t in valid:
-            self.controller.notify('SnapshotUpdate', position=t)
+            self.controller.notify('SnapshotUpdate', position=t, media=self.controller.package.media)
         return True
 
     def on_restart_player1_activate (self, button=None, data=None):

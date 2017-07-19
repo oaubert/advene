@@ -555,7 +555,7 @@ class TranscriptionEdit(AdhocView):
         b.begin_user_action()
         anchor=b.create_child_anchor(it)
         # Create the mark representation
-        child=TimestampRepresentation(timestamp, self.controller, width=self.options['snapshot-size'], visible_label=False)
+        child=TimestampRepresentation(timestamp, None, self.controller, width=self.options['snapshot-size'], visible_label=False)
         child.anchor=anchor
         child.connect('clicked', popup_goto)
         child.popup_menu=None

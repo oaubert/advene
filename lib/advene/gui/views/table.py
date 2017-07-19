@@ -231,14 +231,14 @@ class AnnotationTable(AdhocView):
             if self.mouseover_annotation != ann:
                 # Update
                 if self.mouseover_annotation is not None:
-                    self.controller.notify('BookmarkUnhighlight', timestamp=self.mouseover_annotation.fragment.begin, immediate=True)
-                self.controller.notify('BookmarkHighlight', timestamp=ann.fragment.begin, immediate=True)
+                    self.controller.notify('BookmarkUnhighlight', timestamp=self.mouseover_annotation.fragment.begin, media=self.mouseover_annotation.media, immediate=True)
+                self.controller.notify('BookmarkHighlight', timestamp=ann.fragment.begin, media=ann.media, immediate=True)
                 self.mouseover_annotation = ann
         return False
 
     def leave_notify_event_cb(self, tv, event):
         if self.mouseover_annotation is not None:
-            self.controller.notify('BookmarkUnhighlight', timestamp=self.mouseover_annotation.fragment.begin, immediate=True)
+            self.controller.notify('BookmarkUnhighlight', timestamp=self.mouseover_annotation.fragment.begin, media=self.mouseover_annotation.media, immediate=True)
             self.mouseover_annotation = None
         return False
 

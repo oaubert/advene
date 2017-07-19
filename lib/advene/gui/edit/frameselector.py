@@ -241,7 +241,10 @@ class FrameSelector(object):
         r = None
         for i in range(self.count):
 
-            r = TimestampRepresentation(0, self.controller, width=self.frame_width, visible_label=True,
+            r = TimestampRepresentation(0, None,
+                                        self.controller,
+                                        width=self.frame_width,
+                                        visible_label=True,
                                         epsilon=int(1000 / 2 / config.data.preferences['default-fps'] - 10)) 
             r.add_class("frameselector_frame")
             r.add_class("frameselector_frame_%s" % self.border_mode)

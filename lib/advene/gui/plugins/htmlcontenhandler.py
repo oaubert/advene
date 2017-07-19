@@ -118,7 +118,9 @@ class AnnotationPlaceholder:
         return "".join(data)
 
     def snapshot_updated(self, context, target):
-        if self.annotation is not None and abs(context.globals['position'] - self.annotation.fragment.begin) <= 20:
+        if (self.annotation is not None
+            and context.globals['media'] == self.annotation.media
+            and abs(context.globals['position'] - self.annotation.fragment.begin) <= 20):
             # Update the representation
             self.refresh()
         return True

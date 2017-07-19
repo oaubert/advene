@@ -761,6 +761,10 @@ class TimeLine(AdhocView):
         return True
 
     def snapshot_update_handler(self, context, parameters):
+        if context.globals['media'] != self.controller.package.media:
+            # Not the active package.
+            logger.warn("no current media %s %s", context.globals['media'], self.controller.package.media)
+            return True
         pos=int(context.globals['position'])
         epsilon=int(self.scale_layout.step / 2)
         # Note: we check here w.timestamp, which is the timestamp of
@@ -817,12 +821,16 @@ class TimeLine(AdhocView):
         return True
 
     def bookmark_highlight_handler(self, context, parameters):
+        if context.globals['media'] != self.controller.package.media:
+            return True
         position=int(context.globals['timestamp'])
         self.bookmarks_to_draw.append(position)
         self.update_bookmarks()
         return True
 
     def bookmark_unhighlight_handler(self, context, parameters):
+        if context.globals['media'] != self.controller.package.media:
+            return True
         position=int(context.globals['timestamp'])
         try:
             self.bookmarks_to_draw.remove(position)
