@@ -1218,6 +1218,14 @@ class AdveneController(object):
             return str(element.id)
         return cleanup(str(element))
 
+    def get_snapshot(self, annotation):
+        """Return the snapshot for a given annotation.
+        """
+        p = annotation.ownerPackage
+        if not p.imagecache.is_initialized(annotation.fragment.begin) and p is self.package:
+            self.update_snapshot(annotation.fragment.begin)
+        return p.imagecache[annotation.fragment.begin]
+
     def get_default_media (self, package=None):
         """Return the current media for the given package.
         """
