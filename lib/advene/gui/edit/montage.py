@@ -355,7 +355,12 @@ class Montage(AdhocView):
         return True
 
     def build_widget(self):
-        self.zoom_adjustment=Gtk.Adjustment.new(value=1.0, lower=0.01, upper=2.0)
+        self.zoom_adjustment=Gtk.Adjustment.new(value=1.0,
+                                                lower=0.01,
+                                                upper=2.0,
+                                                step_increment=.01,
+                                                page_increment=.1,
+                                                page_size=.1)
 
         def zoom_adj_change(adj):
             # Update the value of self.scale accordingly
