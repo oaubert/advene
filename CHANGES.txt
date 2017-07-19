@@ -1,3 +1,41 @@
+advene (3.3) unstable; urgency=medium
+
+  * Port to Python3! Expect some new interesting bugs...
+
+  * Internal
+
+  - Python3 port. This implies str/bytes and integer division issues.
+
+  - Python3 Cherrypy (for template interpretation) uses python3 HTML
+    parser which is now more strict (esp. TAL instructions are not
+    interpreted in <style> and <script> elements, since they are
+    data). This means that some view templates may need to be reworked.
+
+  - The standard logging API is used throughout all the code, and
+    everything is displayed in the log messages windows as well as saved
+    to a file.
+
+  * Shot validation view: improve shortcuts handling.
+
+  * Allow to customize generic player controls shortcut modifier (Control
+    by default) through Edit/Preferences/GUI. It allows to choose a
+    shortcut that does not conflict with other uses.
+
+  * Integrate concept detection code (courtesy of Christian Hentschel
+    <christian.hentschel@hpi.uni-potsdam.de>). The server code is
+    available as a Docker image.
+
+  * Allow to split a package using a reference annotation type. For every
+    reference annotation, a new package will be created with the
+    annotations that are in the same time range as the reference
+    annotation.
+
+  * Allow to search for text in annotations from all loaded packages (not
+    just the active one) by setting the corresponding option of the Search
+    button (top-right corner in the interface).
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Wed, 19 Jul 2017 20:44:13 +0200
+
 advene (3.1) unstable; urgency=medium
 
   * Bug fixes.
