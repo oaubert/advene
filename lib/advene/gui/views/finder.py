@@ -891,7 +891,7 @@ class Finder(AdhocView):
             clazz=CLASS2COLUMN.get(t, ModelColumn)
             # Create a new columnbrowser
             col=clazz(controller=self.controller,
-                      model=self.model,
+                      model=self.rootcolumn.model,
                       node=node,
                       callback=self.clicked_callback,
                       parent=columnbrowser)
