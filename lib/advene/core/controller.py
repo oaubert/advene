@@ -2587,7 +2587,7 @@ class AdveneController(object):
             try:
                 compiler.getTemplate ().expand (context=ctx, outputFile=output, outputEncoding='utf-8')
             except simpleTALES.ContextContentException as e:
-                self.log(_("Error when exporting: %s") % str(e))
+                logger.error(_("Error when exporting text template"), exc_info=True)
             if filter.content.mimetype == 'text/plain':
                 stream.write(output.getvalue().replace(b'&lt;', b'<').replace(b'&gt;', b'>').replace(b'&amp;', b'&'))
         else:
@@ -2596,7 +2596,7 @@ class AdveneController(object):
             try:
                 compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
             except simpleTALES.ContextContentException as e:
-                self.log(_("Error when exporting: %s") % str(e))
+                logger.error(_("Error when exporting XML template"), exc_info=True)
         stream.close()
         self.log(_("Data exported to %s") % filename)
         return True
