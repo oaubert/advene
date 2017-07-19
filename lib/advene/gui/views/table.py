@@ -48,7 +48,8 @@ COLUMN_BEGIN_FORMATTED=7
 COLUMN_END_FORMATTED=8
 COLUMN_PIXBUF=9
 COLUMN_COLOR=10
-COLUMN_CUSTOM_FIRST=11
+COLUMN_SOURCE_PACKAGE=11
+COLUMN_CUSTOM_FIRST=12
 
 name="Element tabular view plugin"
 
@@ -155,14 +156,12 @@ class AnnotationTable(AdhocView):
         else:
             def custom(a):
                 return tuple()
-        args = (object, str, str, str, int, int, str, str, str, GdkPixbuf.Pixbuf, str) + custom(None)
+        args = (object, str, str, str, int, int, str, str, str, GdkPixbuf.Pixbuf, str, str) + custom(None)
         l=Gtk.ListStore(*args)
         if not elements:
             return l
         for a in elements:
             if isinstance(a, Annotation):
-                if not self.controller.package.imagecache.is_initialized(a.fragment.begin):
-                    self.controller.update_snapshot(a.fragment.begin)
                 l.append( (a,
                            self.controller.get_title(a),
                            self.controller.get_title(a.type),
@@ -172,9 +171,10 @@ class AnnotationTable(AdhocView):
                            helper.format_time(a.fragment.duration),
                            helper.format_time(a.fragment.begin),
                            helper.format_time(a.fragment.end),
-                           png_to_pixbuf(self.controller.package.imagecache[a.fragment.begin],
+                           png_to_pixbuf(self.controller.get_snapshot(a),
                                          height=32),
-                           self.controller.get_element_color(a)
+                           self.controller.get_element_color(a),
+                           a.ownerPackage.getTitle()
                            ) + custom(a),
                           )
         return l
@@ -304,12 +304,14 @@ class AnnotationTable(AdhocView):
                 editable.set_completion(completion)
 
         for (name, label, col) in (
-            ('content', _("Content"), COLUMN_CONTENT),
-            ('type', _("Type"), COLUMN_TYPE),
-            ('begin', _("Begin"), COLUMN_BEGIN_FORMATTED),
-            ('end', _("End"), COLUMN_END_FORMATTED),
-            ('duration', _("Duration"), COLUMN_DURATION),
-            ('id', _("Id"), COLUMN_ID) ):
+                ('content', _("Content"), COLUMN_CONTENT),
+                ('type', _("Type"), COLUMN_TYPE),
+                ('begin', _("Begin"), COLUMN_BEGIN_FORMATTED),
+                ('end', _("End"), COLUMN_END_FORMATTED),
+                ('duration', _("Duration"), COLUMN_DURATION),
+                ('id', _("Id"), COLUMN_ID),
+                ('package', _("Package"), COLUMN_SOURCE_PACKAGE)
+        ):
             renderer = Gtk.CellRendererText()
             columns[name]=Gtk.TreeViewColumn(label, renderer, text=col)
             if name == 'content':
