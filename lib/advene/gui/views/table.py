@@ -83,15 +83,16 @@ class AnnotationTable(AdhocView):
             source=a['source']
 
         if elements is None and source:
-            c=self.controller.build_context()
-            try:
-                elements = c.evaluateValue(source)
-                self.source = source
-            except Exception as e:
-                self.log(_("Error in source evaluation %(source)s: %(error)s") % {
-                    'source': self.source,
-                    'error': str(e) })
-                elements = []
+            if source == 'global_annotations':
+                elements = self.controller.global_package.annotations
+            else:
+                c=self.controller.build_context()
+                try:
+                    elements = c.evaluateValue(source)
+                    self.source = source
+                except:
+                    logger.error(_("Error in source evaluation %s") % source, exc_info=True)
+                    elements = []
 
         self.elements = elements
         self.options={ 'confirm-time-update': True }
