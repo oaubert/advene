@@ -218,6 +218,9 @@ class Snapshotter(object):
 
         sink.props.notify=self.queue_notify
 
+    def get_uri(self):
+        return self.player.get_property('current-uri')
+
     def set_uri(self, uri):
         if uri:
             self.player.set_state(Gst.State.NULL)
@@ -324,14 +327,16 @@ class Snapshotter(object):
             self.should_clear = True
         return True
 
-    def queue_notify(self, buffer):
+    def queue_notify(self, struct):
         """Notification method.
 
         It processes the captured buffer and unlocks the
         snapshot_event to process further timestamps.
         """
         if self.notify is not None:
-            self.notify(buffer)
+            # Add media info to the structure
+            struct['media'] = self.get_uri().replace('file://', '')
+            self.notify(struct)
         # We are ready to process the next snapshot
         self.snapshot_ready.set()
         return True

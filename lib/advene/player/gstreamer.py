@@ -87,7 +87,7 @@ class StreamInformation:
 class Snapshot:
     def __init__(self, d=None):
         if d is not None:
-            for k in ('width', 'height', 'data', 'type', 'date'):
+            for k in ('width', 'height', 'data', 'type', 'date', 'media'):
                 try:
                     setattr(self, k, d[k])
                 except KeyError:
