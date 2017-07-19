@@ -35,6 +35,8 @@ from gi.repository import Gtk
 
 name="TALES browser view plugin"
 
+TREEPATH_FIRST=Gtk.TreePath.new_first()
+
 def register(controller):
     controller.register_viewclass(Browser)
 
@@ -63,10 +65,11 @@ class BrowserColumn:
 
     def get_focus(self):
         self.listview.grab_focus()
-        cursor=self.listview.get_cursor()[0]
-        if cursor == (0,):
+        cursor=self.listview.get_cursor().path
+        if cursor == TREEPATH_FIRST:
             # Initial selection. Directly put the cursor on the second element.
-            self.listview.set_cursor((1,))
+            cursor.next()
+            self.listview.set_cursor(cursor)
         return True
 
     def get_widget(self):
