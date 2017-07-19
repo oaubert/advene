@@ -121,26 +121,31 @@ class GlobalPackage(object):
     def __init__(self, controller):
         self.controller = controller
 
+    @property
     def annotations(self):
         for p in self.controller.packages.values():
             for a in p.annotations:
                 yield a
 
+    @property
     def relations(self):
         for p in self.controller.packages.values():
             for r in p.relations:
                 yield r
 
+    @property
     def annotationTypes(self):
         for p in self.controller.packages.values():
             for at in p.annotationTypes:
                 yield at
 
+    @property
     def relationTypes(self):
         for p in self.controller.packages.values():
             for rt in p.relationTypes:
                 yield rt
 
+    @property
     def schemas(self):
         for p in self.controller.packages.values():
             for s in p.schemas:
@@ -598,7 +603,8 @@ class AdveneController(object):
         """Return a list of TitledElements
         """
         return [ helper.TitledElement(expression, label)
-                 for (label, expression) in [ (_("All annotations"), "all_annotations") ] + [
+                 for (label, expression) in [ (_("Annotations in current package"), "all_annotations"),
+                                              (_("Annotations in all packages"), "global_annotations") ] + [
                 (_("Annotations of type %s") % self.get_title(at),
                  'here/annotationTypes/%s/annotations' % at.id) for at in self.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags'), (_("Ids"), 'ids') ]
                  ]
@@ -667,8 +673,12 @@ class AdveneController(object):
             else:
                 if source == 'all_annotations':
                     source = 'here/annotations'
-                c=self.build_context()
-                sourcedata=c.evaluateValue(source)
+                    sourcedata = p.annotations
+                elif source == 'global_annotations':
+                    sourcedata = self.global_package.annotations
+                else:
+                    c=self.build_context()
+                    sourcedata=c.evaluateValue(source)
 
             for w in mandatory:
                 w=normalize_case(w)
