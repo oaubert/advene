@@ -857,8 +857,8 @@ class Config(object):
         """
         try:
             import advene.core.version as version
-            return "Advene v. %s release %self" % (version.version,
-                                                   version.date)
+            return "Advene v. %s release %s" % (version.version,
+                                                version.date)
         except ImportError:
             return "Advene v. ??? (cannot get version number)"
 
