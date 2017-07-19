@@ -1380,7 +1380,7 @@ class AdveneGUI(object):
             return
         socket.setdefaulttimeout(timeout)
         try:
-            data=u.read()
+            data=u.read().decode('utf-8')
         except:
             data=""
         u.close()
