@@ -23,16 +23,15 @@ This widget allows to stack compact operation history to preview the trace.
 """
 
 from gi.repository import Gdk
+from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 import time
 
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-import advene.util.helper as helper
 import urllib.request, urllib.parse, urllib.error
 import advene.model.view
-from advene.gui.widget import TimestampRepresentation
 from advene.rules.elements import ECACatalog
 import advene.core.config as config
 from advene.model.schema import Schema, AnnotationType, RelationType
@@ -100,10 +99,10 @@ class TracePreview(AdhocView):
         btngt = Gtk.Button(_('Full trace'))
         btngt.set_tooltip_text(_('Open the trace timeline view fareast'))
         btngt.set_size_request(60, 20)
-        def open_trace(w):
+        def open_trace(widget):
             l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'tracetimeline' ]
             if not l:
-                a=self.controller.gui.open_adhoc_view(name='tracetimeline', destination='fareast')
+                self.controller.gui.open_adhoc_view(name='tracetimeline', destination='fareast')
         btnbar.pack_start(btngt, False, True, 0)
         btngt.connect('clicked', open_trace)
         mainbox.pack_start(btnbar, False, True, 0)
@@ -159,7 +158,7 @@ class TracePreview(AdhocView):
         if obj_evt is not None:
             vb=Gtk.VBox()
             self.last_obs_box = self.buildBox(obj_evt, level)
-            def zoom_in_timeline(w, event, obj_evt):
+            def zoom_in_timeline(widget, event, obj_evt):
                 if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
                     l=[ w for w in self.controller.gui.adhoc_views if w.view_id == 'tracetimeline' ]
                     if l:
