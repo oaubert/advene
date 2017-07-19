@@ -63,7 +63,7 @@ class TimeAdjustment:
 
         def image_button_clicked(button):
             event=Gtk.get_current_event()
-            if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+            if event.get_state().state & Gdk.ModifierType.CONTROL_MASK:
                 self.use_current_position(button)
                 return True
             else:
