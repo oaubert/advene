@@ -1224,8 +1224,7 @@ class AdveneController(object):
         if package is None:
             package=self.package
 
-        mediafile = package.getMetaData (config.data.namespace,
-                                         "mediafile")
+        mediafile = package.media
         if mediafile is None or mediafile == "":
             return ""
         m=self.dvd_regexp.match(mediafile)
@@ -1323,7 +1322,7 @@ class AdveneController(object):
         if m:
             title,chapter=m.group(1,2)
             uri="dvd@%s:%s" % (title, chapter)
-        package.setMetaData (config.data.namespace, "mediafile", uri)
+        package.setMedia(uri)
         if m:
             uri=self.player.dvd_uri(title, chapter)
         self.set_media(uri)

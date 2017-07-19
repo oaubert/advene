@@ -749,7 +749,7 @@ class EditPackagePopup (EditElementPopup):
     def notify(self, element):
         # Side effect of the notify method: we use it to update the
         # appropriate attributes of the package.
-        self.controller.set_default_media(element.getMetaData (config.data.namespace, "mediafile"),
+        self.controller.set_default_media(element.media,
                                           package=element)
         d=element.getMetaData (config.data.namespace, "duration")
         if d:

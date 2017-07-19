@@ -523,7 +523,7 @@ class TraceBuilder(Thread):
         ev_time = time.time()
         ev_activity_time = (time.time() - self.trace.start) * 1000
         ev_name = obj['event_name']
-        ev_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
+        ev_movie = self.controller.package.media
         ev_movie_time = self.controller.player.current_position_value
         if not ev_movie_time:
             ev_movie_time=0
@@ -667,7 +667,7 @@ class TraceBuilder(Thread):
         #op_params = obj['parameters']
         #for i in obj:
         #    print "%s : %s" % (i,obj[i])
-        op_movie = self.controller.package.getMetaData(config.data.namespace, "mediafile")
+        op_movie = self.controller.package.media
         op_movie_time = self.controller.player.current_position_value
         if not op_movie_time:
             op_movie_time=0

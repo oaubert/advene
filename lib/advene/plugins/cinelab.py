@@ -165,7 +165,7 @@ class CinelabImporter(GenericImporter):
         p.author = package_author
         p.date = package_created
         p.title = meta(root, 'dc:title')
-        p.setMetaData(ADVENE, 'mediafile', self.default_media)
+        p.setMedia(self.default_media)
 
         # Finalize
         self.progress(.3, _("Converting annotation types"))

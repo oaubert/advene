@@ -216,6 +216,9 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
     def getMedia(self):
         return self.getMetaData(config.data.namespace, 'mediafile') or ""
 
+    def setMedia(self, media):
+        return self.setMetaData(config.data.namespace, 'mediafile', media)
+
     def getImports (self):
         """Return a collection of this package's imports"""
         if self.__imports is None:

@@ -78,7 +78,7 @@ class MPEG7Importer(GenericImporter):
         if self.package is None:
             self.package=p
             # FIXME: should specify title
-            p.setMetaData (config.data.namespace, "mediafile", "dvd@1,1")
+            p.setMedia("dvd@1,1")
         self.defaulttype=at
         self.convert(self.iterator(root))
         self.progress(1.0)

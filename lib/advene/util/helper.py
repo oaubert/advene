@@ -202,7 +202,7 @@ def package2id (p):
     @return: the corresponding id
     @rtype: string
     """
-    mediafile = p.getMetaData (config.data.namespace, "mediafile")
+    mediafile = p.media
     if mediafile is not None and mediafile != "":
         return mediafile2id (mediafile)
     else:

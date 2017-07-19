@@ -853,9 +853,9 @@ class LsDVDImporter(GenericImporter):
             pass
         self.init_package(filename=filename)
         self.ensure_new_type('chapter', _("DVD Chapter"))
-        if not self.package.getMetaData(config.data.namespace, "mediafile"):
+        if not self.package.media:
             # We created a new package. Set the mediafile
-            p.setMetaData (config.data.namespace, "mediafile", "dvd@1,1")
+            p.setMedia("dvd@1,1")
         self.progress(0.1, _("Launching lsdvd..."))
         f=os.popen(self.command, "r")
         self.convert(self.iterator(f))
@@ -913,9 +913,9 @@ class ChaplinImporter(GenericImporter):
         f=os.popen(self.command, "r")
         self.init_package(filename=filename)
         self.ensure_new_type('chapter', _("DVD Chapter"))
-        if not self.package.getMetaData(config.data.namespace, "mediafile"):
+        if not self.package.media:
             # We created a new package. Set the mediafile
-            p.setMetaData (config.data.namespace, "mediafile", "dvd@1,1")
+            p.setMedia("dvd@1,1")
         self.convert(self.iterator(f))
         f.close()
         self.progress(1.0)
@@ -982,9 +982,8 @@ class XiImporter(GenericImporter):
                 logger.error("Erreur: many source files, not supported")
                 sys.exit(1)
 
-        if self.package.getMetaData(config.data.namespace, "mediafile") in (None, ""):
-            self.package.setMetaData (config.data.namespace,
-                                      "mediafile", filename)
+        if not self.package.media:
+            self.package.setMedia(filename)
 
         self.convert(self.iterator(xi))
         self.progress(1.0)
@@ -1552,7 +1551,7 @@ class CmmlImporter(GenericImporter):
                 src=i.getAttributeNS(xml.dom.EMPTY_NAMESPACE, 'src')
         except AttributeError:
             src=""
-        self.package.setMetaData (config.data.namespace, "mediafile", src)
+        self.package.setMedia(src)
 
         self.convert(self.iterator(cm))
 
@@ -1699,8 +1698,8 @@ class IRIImporter(GenericImporter):
         med=[ i for i in iri.body[0].medias[0].media  if i.id == 'video' ]
         if med:
             # Got a video file reference
-            if not self.package.getMetaData(config.data.namespace, "mediafile"):
-                self.package.setMetaData (config.data.namespace, "mediafile", med[0].video[0].src)
+            if not self.package.media:
+                self.package.setMedia(med[0].video[0].src)
 
         # Metadata extraction
         meta=dict([ (m.name, m.content) for m in iri.head[0].meta ])

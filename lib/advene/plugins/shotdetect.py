@@ -64,7 +64,7 @@ class ShotdetectImporter(GenericImporter):
         video=root.find('content/head/media')
         if video is not None:
             mediafile=video.attrib['src']
-            p.setMetaData(config.data.namespace, 'mediafile', mediafile)
+            p.setMedia(mediafile)
         self.convert(self.iterator(root))
         self.progress(1.0)
         return self.package

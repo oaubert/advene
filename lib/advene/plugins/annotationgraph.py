@@ -65,7 +65,7 @@ class AnnotationGraphImporter(GenericImporter):
         video=root.find('%s/%s' % (tag('Timeline'), tag('Signal')))
         if video is not None:
             mediafile=video.attrib[ET.QName(XLINKURI, 'href')]
-            p.setMetaData(config.data.namespace, 'mediafile', mediafile)
+            p.setMedia(mediafile)
         self.convert(self.iterator(root))
         self.progress(1.0)
         return self.package
