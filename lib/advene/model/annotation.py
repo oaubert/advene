@@ -144,6 +144,9 @@ class Annotation(modeled.Importable, content.WithContent,
         """Return the type URI - used to retrieve the viewable-type"""
         return self.getType().getUri(absolute)
 
+    def getMedia(self):
+        return self.getOwnerPackage().getMedia()
+
     def getType(self):
         """Return the type of this annotation"""
         if self._cached_type is None:

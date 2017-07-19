@@ -213,6 +213,9 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 
         return uri
 
+    def getMedia(self):
+        return self.getMetaData(config.data.namespace, 'mediafile') or ""
+
     def getImports (self):
         """Return a collection of this package's imports"""
         if self.__imports is None:
@@ -298,7 +301,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
     """
         # Note: we do not use urllib.quote, since it chokes on non-ASCII characters (unicode)
         out += """<statistics:title value="%s" />""" % ((self.title or '').replace('"', '%22') or "")
-        out += """<statistics:description value="%s" />""" % ((self.getMetaData(config.data.namespace_prefix['dc'], 'description') or "").replace('"', '%22') or "")
+        out += """<statistics:description value="%s" />""" % ((self.getMetaData(dcNS, 'description') or "").replace('"', '%22') or "")
         for n, l in ( ('schema', len(self.schemas)),
                       ('annotation', len(self.annotations)),
                       ('annotation_type', len(self.annotationTypes)),
