@@ -594,8 +594,11 @@ def transition_fix_ns(target, context):
 
     This method is used by the Advene1->Advene2 export filter.
     """
-    return target.replace("http://experience.univ-lyon1.fr/advene/ns/advenetool",
-                          "http://advene.org/ns/advene-application/2.0")
+    if isinstance(target, str):
+        return target.replace("http://experience.univ-lyon1.fr/advene/ns/advenetool",
+                              "http://advene.org/ns/advene-application/2.0")
+    else:
+        return str
 
 def transition_fix_date(target, context):
     """Reformat dates into iso8601 format.
