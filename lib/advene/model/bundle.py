@@ -148,7 +148,7 @@ class AbstractBundle (object):
     def get (self, id_, default=None):
         return self._dict.get (id_, default)
 
-    def __in__(self, key):
+    def __contains__(self, key):
         return key in self._dict
 
     def items (self):

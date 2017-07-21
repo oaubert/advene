@@ -114,7 +114,7 @@ def isa (target, context):
                 for k, v in values.items():
                     self[k]=v
 
-        def __in__(self, key):
+        def __contains__(self, key):
             return True
 
         def __getitem__ (self, key):
@@ -175,7 +175,7 @@ def meta(target, context):
             self.__target = target
             self.__namespace_uri = namespace_uri
 
-        def __in__(self, key):
+        def __contains__(self, key):
             return (self[key] is not None)
 
         def __getitem__(self, key):
@@ -187,7 +187,7 @@ def meta(target, context):
             options = context.globals['options']
             self.__ns_dict = options.get('namespace_prefix', {})
 
-        def __in__(self, key):
+        def __contains__(self, key):
             return key in self.__ns_dict
 
         def __getitem__(self, key):
@@ -235,7 +235,7 @@ def view(target, context):
         def __call__ (self):
             return self._target.view (context=self._context)
 
-        def __in__ (self, key):
+        def __contains__ (self, key):
             v = self._target._find_named_view (key, self._context)
             return v is not None
 
@@ -442,7 +442,7 @@ def query(target, context):
             else:
                 return None
 
-        def __in__(self, key):
+        def __contains__(self, key):
             return self._get_query_by_id(key)
 
         def __getitem__ (self, key):

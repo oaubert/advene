@@ -145,7 +145,7 @@ class Resources(metaclass=auto_properties):
     def children (self):
         return [ self[n] for n in list(self.keys()) ]
 
-    def __in__(self, key):
+    def __contains__(self, key):
         self.init_filenames()
         return (key in self.filenames)
 
