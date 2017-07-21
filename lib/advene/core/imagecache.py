@@ -127,6 +127,9 @@ class ImageCache(MutableMapping):
             # Accessing it will initialize its value
             self._dict[key]
 
+    def clear(self):
+        self._dict.clear()
+
     def __contains__(self, key):
         if key is None:
             return True
