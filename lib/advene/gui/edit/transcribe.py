@@ -977,15 +977,15 @@ class TranscriptionEdit(AdhocView):
         al=at.annotations
         al.sort(key=lambda a: a.fragment.begin)
 
-        last_time=None
+        last_time=-1
 
         for a in al:
             if a.fragment.begin > last_time:
                 it=b.get_iter_at_mark(b.get_insert())
-                mark=self.create_timestamp_mark(a.fragment.begin, it)
+                self.create_timestamp_mark(a.fragment.begin, it)
             b.insert_at_cursor(a.content.data)
             it=b.get_iter_at_mark(b.get_insert())
-            mark=self.create_timestamp_mark(a.fragment.end, it)
+            self.create_timestamp_mark(a.fragment.end, it)
             last_time = a.fragment.end
         return True
 
