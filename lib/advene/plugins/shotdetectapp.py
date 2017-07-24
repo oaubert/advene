@@ -21,11 +21,8 @@ name="ShotDetectApp importer"
 
 from gettext import gettext as _
 import os
-import sys
 import re
 import tempfile
-
-from gi.repository import GObject
 
 import advene.util.helper as helper
 
@@ -81,7 +78,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
             self.duration = self.controller.cached_duration
         # FIXME: else we could/should get it somehow
 
-        self.tempdir = str(tempfile.mkdtemp('', 'shotdetect'), sys.getfilesystemencoding())
+        self.tempdir = tempfile.mkdtemp('', 'shotdetect')
         self.temporary_resources.append(self.tempdir)
 
         self.ensure_new_type('shots', title=_("Detected shots"), schemaid='detected')
@@ -92,14 +89,9 @@ class ShotdetectAppImporter(ExternalAppImporter):
         Return the process arguments (the app_path, argv[0], will be
         prepended in async_process_file and should not be included here).
         """
-        if config.data.os == 'win32':
-            args = [ '-i', filename.encode('utf8', sys.getfilesystemencoding()),
-                     '-o', self.tempdir.encode('utf8', sys.getfilesystemencoding()),
-                     '-s', str(self.sensitivity) ]
-        else:
-            args = [ '-i', GObject.filename_from_utf8(filename.encode('utf8')),
-                     '-o', GObject.filename_from_utf8(self.tempdir.encode('utf8')),
-                     '-s', str(self.sensitivity) ]
+        args = [ '-i', filename,
+                 '-o', self.tempdir,
+                 '-s', str(self.sensitivity) ]
         return args
 
     def iterator(self):
@@ -119,6 +111,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
         begin = 0
         while True:
             l = self.process.stderr.readline()
+            l = l.decode('utf-8')
             if not l:
                 break
             ms = shot_re.findall(l)
