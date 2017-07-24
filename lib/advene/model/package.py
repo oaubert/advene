@@ -25,7 +25,7 @@ import os
 from pathlib import Path
 import sys
 import urllib.request, urllib.parse, urllib.error
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 import re
 
 import xml.sax
@@ -181,8 +181,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             return self
 
     def getUri(self, absolute=True, context=None):
-        """
-        Return the URI of the package.
+        """Return the URI of the package.
 
         Parameter if _absolute_ is _True_, the URI will be forced absolute.
         If not, and if _context_ is _None_, the URI will be resolved with
@@ -200,16 +199,17 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if not absolute and context is self:
             return ''
 
-        # Note: this is where the magic works on win32.
-        uri = Path(uri).absolute().as_uri()
-
+        elements = urlparse(uri)
+        if elements.scheme == 'file' or elements.scheme == '':
+            # This is a file. Keep only the local path.
+            # Note: this is where the magic works on win32.
+            if absolute:
+                uri = Path(elements.path).absolute().as_uri()
+            else:
+                uri = Path(elements.path).as_uri()
         importer = self.__importer
         if importer is not None:
             uri = urljoin (importer.getUri (absolute, context), uri)
-
-        if absolute:
-            base_uri = 'file:%s/' % urllib.request.pathname2url (os.getcwd ())
-            uri = urljoin(base_uri, uri)
 
         return uri
 
