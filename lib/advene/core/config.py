@@ -866,6 +866,20 @@ class Config(object):
                 git_version = subprocess.check_output(["git", "--git-dir=%s" % git_dir.as_posix(), "describe"]).strip().decode('utf-8')
             except:
                 pass
+            if git_version is None:
+                # Cannot call git. Let's try the manual approach...
+                try:
+                    with open(git_dir.joinpath("HEAD").as_posix(), "r") as f:
+                        head = f.read().strip()
+                    if head.startswith('ref: '):
+                        # Using a ref.
+                        with open(git_dir.joinpath(head[5:]).as_posix(), "r") as f:
+                            git_version = f.read().strip()
+                    else:
+                        # Not using a ref. Assume it is a sha1
+                        git_version = head
+                except:
+                    pass
         if git_version is not None:
             v = "Advene development version %s" % git_version
         else:
