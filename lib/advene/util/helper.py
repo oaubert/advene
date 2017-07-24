@@ -864,12 +864,12 @@ def title2content(new_title, original_content, representation):
 
             if original_content.mimetype == 'application/x-advene-structured':
                 reg = re.compile('^' + name + '=(.*?)$', re.MULTILINE)
-                if reg.search(original_content):
-                    r = reg.sub(name + '=' + new_title, original_content)
+                if reg.search(original_content.data):
+                    r = reg.sub(name + '=' + new_title, original_content.data)
                 else:
                     # The key is not present, add it
-                    if original_content:
-                        r = original_content + "\n%s=%s" % (name, new_title)
+                    if original_content.data:
+                        r = original_content.data + "\n%s=%s" % (name, new_title)
                     else:
                         r = "%s=%s" % (name, new_title)
             elif original_content.mimetype == 'application/json':
