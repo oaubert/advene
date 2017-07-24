@@ -1071,45 +1071,7 @@ class AdveneController(object):
             return True
         if self.gui and self.gui.open_url_embedded(url):
             return True
-        if config.data.os == 'win32' or config.data.os == 'darwin':
-            # webbrowser is not broken on win32 or Mac OS X
-            webbrowser.get().open(url)
-            return True
-        # webbrowser is broken on UNIX/Linux : if the browser
-        # does not exist, it does not always launch it in the
-        # background, so it can freeze the GUI.
-        web_browser = os.getenv("BROWSER", None)
-        if web_browser is None:
-            # Try to guess if we are running a Gnome/KDE desktop
-            if 'KDE_FULL_SESSION' in os.environ:
-                web_browser = 'kfmclient exec'
-            elif 'GNOME_DESKTOP_SESSION_ID' in os.environ:
-                web_browser = 'gnome-open'
-            else:
-                term_command = os.getenv("TERMCMD", "xterm")
-                browser_list = ('xdg-open', "firefox", "firebird", "epiphany", "galeon", "mozilla", "opera", "konqueror", "netscape", "dillo", ("links", "%s -e links" % term_command), ("w3m", "%s -e w3m" % term_command), ("lynx", "%s -e lynx" % term_command), "amaya", "gnome-open")
-                breaked = 0
-                for browser in browser_list:
-                    if type(browser) == str:
-                        browser_file = browser_cmd = browser
-                    elif type(browser) == tuple and len(browser) == 2:
-                        browser_file = browser[0]
-                        browser_cmd = browser[1]
-                    else:
-                        continue
-
-                    for directory in os.getenv("PATH", "").split(os.path.pathsep):
-                        if os.path.isdir(directory):
-                            browser_path = os.path.join(directory, browser_file)
-                            if os.path.isfile(browser_path) and os.access(browser_path, os.X_OK):
-                                web_browser = browser_cmd
-                                breaked = 1
-                                break
-                    if breaked:
-                        break
-        if web_browser is not None:
-            os.system("%s \"%s\" &" % (web_browser, url))
-
+        webbrowser.open(url)
         return True
 
     def get_url_for_alias (self, alias):
