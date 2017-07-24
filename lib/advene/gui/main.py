@@ -3802,11 +3802,12 @@ class AdveneGUI(object):
             try:
                 self.set_busy_cursor(True)
                 self.controller.load_package (uri=filename, alias=alias)
+                Gtk.RecentManager.get_default().add_item(filename)
             except (OSError, IOError) as e:
-                self.set_busy_cursor(False)
                 dialog.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
                         'filename': filename,
                         'error': str(e)}, Gtk.MessageType.ERROR)
+            self.set_busy_cursor(False)
         return True
 
     def on_save1_activate (self, button=None, package=None):
