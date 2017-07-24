@@ -57,7 +57,6 @@ Permitted dict operations are
 
 Note also that iter(b) iterates over its values (as for lists). Iterating over keys required the _iterkeys_ method.
 """
-
 import advene.model.util.uri
 
 import advene.model.modeled as modeled
@@ -147,9 +146,6 @@ class AbstractBundle (object):
 
     def get (self, id_, default=None):
         return self._dict.get (id_, default)
-
-    def __contains__(self, key):
-        return key in self._dict
 
     def items (self):
         return list(self._dict.items ())
