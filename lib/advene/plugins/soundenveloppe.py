@@ -96,11 +96,13 @@ class SoundEnveloppeImporter(GenericImporter):
 
     def on_bus_message(self, bus, message):
         def finalize():
-            pos = self.pipeline.query_position(Gst.Format.TIME)[0] / Gst.MSECOND
             GObject.idle_add(lambda: self.pipeline.set_state(Gst.State.NULL) and False)
             # Add last buffer data
-            if self.buffer and pos > self.first_item_time:
-                self.buffer_list.append((self.first_item_time, pos, list(self.buffer)))
+            if self.buffer:
+                # There is some data left.
+                self.buffer_list.append((self.first_item_time,
+                                         self.first_item_time + len(self.buffer) * self.interval,
+                                         list(self.buffer)))
             self.generate_normalized_annotations()
             self.end_callback()
             return True
