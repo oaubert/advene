@@ -39,6 +39,8 @@ import json
 from optparse import OptionParser
 import mimetypes
 import operator
+from pathlib import Path
+import subprocess
 import time
 import xml.dom
 
@@ -855,13 +857,25 @@ class Config(object):
     def get_version_string(self):
         """Return the version string.
         """
-        try:
-            import advene.core.version as version
-            return "Advene v. %s release %s" % (version.version,
-                                                version.date)
-        except ImportError:
-            return "Advene v. ??? (cannot get version number)"
-
+        git_version = None
+        git_dir = Path(__file__).parents[3].joinpath('.git')
+        if git_dir.is_dir():
+            # We are in a git tree. Let's get the version information
+            # from there if we can call git
+            try:
+                git_version = subprocess.check_output(["git", "--git-dir=%s" % git_dir.as_posix(), "describe"]).strip().decode('utf-8')
+            except:
+                pass
+        if git_version is not None:
+            v = "Advene development version %s" % git_version
+        else:
+            try:
+                import advene.core.version as version
+                v = "Advene v. %s release %s" % (version.version,
+                                                 version.date)
+            except ImportError:
+                v = "Advene v. ??? (cannot get version number)"
+        return v
     userid = property (fget=get_userid,
                        doc="Login name of the user")
 
