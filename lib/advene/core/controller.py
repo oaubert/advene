@@ -1586,8 +1586,7 @@ class AdveneController(object):
         @param callback: a function which will take as parameters (name, filename, annotation_count, index)
         """
         baseuri, extension = os.path.splitext(self.package.uri)
-        index = 1
-        for segment in atype.annotations:
+        for index, segment in enumerate(sorted(atype.annotations)):
             # Create a new package
             p = Package(uri="new_pkg", source=None)
             p._idgenerator = advene.core.idgenerator.Generator(p)
@@ -1614,13 +1613,12 @@ class AdveneController(object):
             p.date = self.get_timestamp()
 
             title = self.get_title(segment)
-            fname = "%s-split-%s%s" % (baseuri, helper.title2id(title), extension)
+            fname = "%s-split-%03d-%s%s" % (baseuri, index + 1, helper.title2id(title), extension)
             p.save(fname)
             if callback:
-                if not callback(title, fname, count, index):
+                if not callback(title, fname, count, index + 1):
                     # Action was cancelled
                     return
-            index += 1
             logger.info("Saving %s with %d annotations.", fname, count)
 
     def select_player(self, p):
