@@ -129,11 +129,11 @@ class ShotValidation(AdhocView):
     def handle_keypress(self, widget, event):
         if self.selector.handle_key_press(widget, event):
             return True
-        elif event.keyval == Gdk.KEY_Page_Down:
+        elif event.keyval == Gdk.KEY_Page_Down or event.keyval == Gdk.KEY_Down:
             # Next annotation
             self.set_index(self.index + 1)
             return True
-        elif event.keyval == Gdk.KEY_Page_Up:
+        elif event.keyval == Gdk.KEY_Page_Up or event.keyval == Gdk.KEY_Up:
             # Previous annotation
             self.set_index(self.index - 1)
             return True
