@@ -614,7 +614,7 @@ class TagWidget(GenericColorButtonWidget):
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         if targetType == config.data.target_type['tag']:
-            selection.set(selection.get_target(), 8, str(self.tag))
+            selection.set(selection.get_target(), 8, self.tag.encode('utf-8'))
         else:
             logger.warn("Unknown target type for drag: %d" % targetType)
         return True
