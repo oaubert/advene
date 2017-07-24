@@ -136,6 +136,17 @@ class Annotation(modeled.Importable, content.WithContent,
         return "Annotation %s:\"%s\"" % (self.getFragment(),
                                           self.getContent().getData())
 
+    def __lt__(self, other):
+        """Compare 2 annotations or 2 fragments
+        """
+        if type(self) == type(other):
+            return self.getFragment() < other.getFragment()
+        elif hasattr(other, 'getBegin'):
+            # Assume we are comparing to a fragment
+            return self.getFragment() < other
+        else:
+            raise TypeError("Invalid comparison")
+
     def __getFragmentElement(self):
         """Return the fragment element linked to this annotation"""
         return self._getChild(after=self._getMeta())
