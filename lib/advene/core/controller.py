@@ -1719,7 +1719,11 @@ class AdveneController(object):
             return
         else:
             t = time.time()
-            p = Package(uri=uri)
+            try:
+                p = Package (uri=uri)
+            except Exception:
+                logger.error("Cannot load package %s", uri, exc_info=True)
+                return
             dur = time.time() - t
             self.log("Loaded package in %f seconds" % dur)
             # Check if the imported package was found. Else it will
