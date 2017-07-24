@@ -1189,16 +1189,15 @@ class SubtitleImporter(GenericImporter):
             return 0
     can_handle=staticmethod(can_handle)
 
-    def srt_iterator(self, f, filesize):
-        if filesize == 0:
-            # Dummy value, but we will be sure not to divide by 0
-            filesize = 1
+    def srt_iterator(self, f):
         base=r'\d+:\d+:\d+[,\.:]\d+'
         pattern=re.compile('(' + base + ').+(' + base + ')')
         tc=None
         content=[]
-        for line in f:
-            if not self.progress(1.0 * f.tell() / filesize):
+        # 10000 lines should be a reasonable max.
+        max_lines = 10000
+        for index, line in enumerate(f):
+            if not self.progress(index / max_lines):
                 break
             line=line.rstrip()
             match=pattern.search(line)
@@ -1220,17 +1219,7 @@ class SubtitleImporter(GenericImporter):
                     yield d
             else:
                 if tc is not None:
-                    if self.encoding:
-                        data=str(line, self.encoding)
-                    else:
-                        # We will try utf8 first, then fallback on latin1
-                        try:
-                            data=str(line, 'utf8')
-                        except UnicodeDecodeError:
-                            # Fallback on latin1, which is very common, but may
-                            # sometimes fail
-                            data=str(line, 'latin1')
-                    content.append(data)
+                    content.append(line)
                     # else We could check line =~ /^\d+$/
         # End of for-loop: if there is a last item, convert it.
         if tc is not None:
@@ -1240,11 +1229,11 @@ class SubtitleImporter(GenericImporter):
             yield d
 
     def process_file(self, filename):
-        f=open(filename, 'rb')
+        f = open(filename, 'r', encoding=self.encoding or 'utf-8')
         p, at = self.init_package(filename=filename, annotationtypeid='subtitle')
         at.title = _("Subtitles from %s") % os.path.basename(filename)
         # FIXME: implement subtitle type detection
-        self.convert(self.srt_iterator(f, os.path.getsize(filename)))
+        self.convert(self.srt_iterator(f))
         f.close()
         self.progress(1.0)
         return self.package
