@@ -40,8 +40,8 @@ Gst.init(None)
 
 from threading import Event, Thread
 import queue
-from queue import PriorityQueue
 import heapq
+from urllib.parse import unquote
 
 import logging
 logger = logging.getLogger(__name__)
@@ -335,7 +335,7 @@ class Snapshotter(object):
         """
         if self.notify is not None:
             # Add media info to the structure
-            struct['media'] = self.get_uri().replace('file://', '')
+            struct['media'] = unquote(self.get_uri().replace('file://', ''))
             self.notify(struct)
         # We are ready to process the next snapshot
         self.snapshot_ready.set()
