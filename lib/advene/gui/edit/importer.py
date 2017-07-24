@@ -82,6 +82,8 @@ class AnnotationImporter(AdhocView):
             n = filename
         else:
             n=self.filename or self.fb.get_filename() or self.fb.get_uri()
+        if not n:
+            return
         if n.startswith('file://'):
             n = n.replace('file://', '')
         if not self.fb.get_filename():
