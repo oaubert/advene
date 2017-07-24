@@ -1233,7 +1233,10 @@ class SubtitleImporter(GenericImporter):
         p, at = self.init_package(filename=filename, annotationtypeid='subtitle')
         at.title = _("Subtitles from %s") % os.path.basename(filename)
         # FIXME: implement subtitle type detection
-        self.convert(self.srt_iterator(f))
+        try:
+           self.convert(self.srt_iterator(f))
+        except UnicodeDecodeError:
+           self.output_message = _("Cannot decode subtitle file. Try to specify an encoding (latin1 perhaps?).")
         f.close()
         self.progress(1.0)
         return self.package
