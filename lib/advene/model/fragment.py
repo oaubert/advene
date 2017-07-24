@@ -157,6 +157,12 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled, metaclass=auto_pro
             o = int(other)
             return self.getBegin() <= o and o <= self.getEnd()
 
+    def isOverlapping(self, other):
+        if type(self) == type(other):
+            return self.getBegin() in other or other.getBegin() in self
+        else:
+            raise TypeError("Invalid test")
+
     def isBounded(self):
         """ Return whether this fragment is bounded, i.e. represents a document
             element.
