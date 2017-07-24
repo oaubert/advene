@@ -1688,6 +1688,9 @@ class TimeLine(AdhocView):
             store.append([ c ])
         completion.set_model(store)
         completion.set_text_column(0)
+        completion.set_popup_single_match(False)
+        completion.set_inline_completion(True)
+        completion.set_minimum_key_length(2)
         e.set_completion(completion)
 
         def key_handler(widget, event, ann, cb, controller, close_eb):
@@ -1752,7 +1755,6 @@ class TimeLine(AdhocView):
         def grab_focus(widget, event=None, *p):
             widget.grab_focus()
             return False
-        e.connect('enter-notify-event', grab_focus)
 
         e.show()
 
