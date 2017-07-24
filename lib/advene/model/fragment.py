@@ -141,6 +141,14 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled, metaclass=auto_pro
         else:
             return False
 
+    def __lt__(self, other):
+        if type(self) == type(other):
+            return self.getBegin() < other.getBegin()
+        elif hasattr(other, 'fragment'):
+            return self.getBegin() < other.fragment.getBegin()
+        else:
+            raise TypeError("Invalid comparison")
+
     def __contains__(self, other):
         if type(self) == type(other):
             return self.getBegin() <= other.getBegin() \
