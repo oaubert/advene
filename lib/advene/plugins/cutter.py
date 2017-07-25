@@ -44,6 +44,7 @@ class CutterImporter(GenericImporter):
 
         self.threshold = -25
         self.channel = 'both'
+        self.min_silence_duration = 0
         self.channel_mapping = {
             'both': 0,
             'left': -1,
@@ -55,7 +56,9 @@ class CutterImporter(GenericImporter):
         self.optionparser.add_option("-c", "--channel",
                                      action="store", type="choice", dest="channel", choices=("both", "left", "right"), default=self.channel,
                                      help=_("Channel selection."))
-
+        self.optionparser.add_option("-s", "--silence-duration",
+                                     action="store", type="int", dest="min_silence_duration", default=self.min_silence_duration,
+                                     help=_("Length (in ms) of drop below threshold before silence is detected"))
         self.buffer = []
         self.last_above = None
 
@@ -72,7 +75,6 @@ class CutterImporter(GenericImporter):
 
     def on_bus_message(self, bus, message):
         def finalize():
-            pos = self.pipeline.query_position(Gst.Format.TIME)[0] / Gst.MSECOND
             GObject.idle_add(lambda: self.pipeline.set_state(Gst.State.NULL) and False)
             self.convert( {
                     'begin': begin,
@@ -121,7 +123,7 @@ class CutterImporter(GenericImporter):
         at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Sound segmentation with a threshold of %(threshold)d dB - channel: %(channel)s") % self.__dict__)
 
         # Build pipeline
-        self.pipeline = Gst.parse_launch('uridecodebin name=decoder ! audioconvert ! audiopanorama method=1 panorama=%d ! audioconvert ! cutter threshold-dB=%s ! progressreport silent=true update-freq=1 name=report ! fakesink' % (self.channel_mapping[self.channel], str(self.threshold)))
+        self.pipeline = Gst.parse_launch('uridecodebin name=decoder ! audioconvert ! audiopanorama method=1 panorama=%d ! audioconvert ! cutter threshold-dB=%s run-length=%d ! progressreport silent=true update-freq=1 name=report ! fakesink' % (self.channel_mapping[self.channel], str(self.threshold), self.min_silence_duration * Gst.MSECOND))
         self.decoder = self.pipeline.get_by_name('decoder')
         self.report = self.pipeline.get_by_name('report')
         bus = self.pipeline.get_bus()
