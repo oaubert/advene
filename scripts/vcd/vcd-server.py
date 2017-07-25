@@ -40,7 +40,17 @@ class RESTHandler(http.server.BaseHTTPRequestHandler):
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
-        json.dump({"status": 200, "message": "OK"}, s.wfile)
+        json.dump({"status": 200, "message": "OK", "data": {
+            "capabilities": {
+                "minimum_batch_size": NNN, # # of frames
+                "maximum_batch_size": NNN, # # of frames
+                "available_models": [ {
+                    "id": "concept_id",
+                    "label": "concept_label",
+                    "image_size": NNN # width/height for squared images
+                } ]
+            }
+        }}, s.wfile)
 
     def do_POST(s):
         print("POST")
@@ -83,14 +93,23 @@ class RESTHandler(http.server.BaseHTTPRequestHandler):
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
-        json.dump({"status": 200, "message": "OK", "data": [
-            {
-                'confidence': max(confidences[l]),
-                'timecode': random.randrange(post_data['begin'], post_data['end']),
-                'label': l,
-                'uri': 'http://concept.org/%s' % l
-            } for l in confidences
-        ]}, s.wfile)
+        json.dump({
+            "status": 200,
+            "message": "OK",
+            "data": {
+                'media_filename': 'repeat_from_query',
+                'media_uri': 'repeat from query',
+                'concepts': [
+                    {
+                        'annotationid': aid,
+                        'confidence': max(confidences[l]),
+                        'timecode': timestamp_in_ms,
+                        'label': l,
+                        'uri': 'http://concept.org/%s' % l
+                    } for l in confidences
+                ]
+            }
+        }, s.wfile)
 
 if __name__ == '__main__':
     server_class = http.server.HTTPServer
