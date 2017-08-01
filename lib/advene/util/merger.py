@@ -411,6 +411,7 @@ class Differ:
         el.date=s.date or self.controller.get_timestamp()
         el.content.mimetype=s.content.mimetype
         el.content.data=s.content.data
+        el.tags = s.tags
         self.destination.annotations.append(el)
         return el
 
@@ -446,6 +447,7 @@ class Differ:
             members=members)
         el.date=s.date or self.controller.get_timestamp()
         el.content.data=s.content.data
+        el.tags = s.tags
         self.destination.relations.append(el)
         #el.title=s.title or ''
         return el
