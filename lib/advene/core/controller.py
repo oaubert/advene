@@ -1547,7 +1547,7 @@ class AdveneController(object):
         @param callback: a callback method for progress report
         @param callback: a function which will take as parameters (name, filename, annotation_count, index)
         """
-        baseuri, extension = os.path.splitext(self.package.uri)
+        baseuri, extension = os.path.splitext(urllib.parse.unquote(self.package.uri))
         for index, segment in enumerate(sorted(atype.annotations)):
             # Create a new package
             p = Package(uri="new_pkg", source=None)
