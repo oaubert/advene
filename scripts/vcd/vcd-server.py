@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
+import logging
+logger = logging.getLogger(__name__)
+
 import http.server
 import json
-import random
 import urllib.parse
 import os
 
@@ -21,7 +23,7 @@ PORT_NUMBER = 9000
 CACHE_DIR = "/var/vcd/cache"
 
 model = ResNet50(weights='imagenet')
-target_size=(224,224)
+target_size = (224,224)
 top_n_preds = 3
 
 #create cachedir
@@ -30,30 +32,29 @@ if not os.path.exists(CACHE_DIR):
 
 class RESTHandler(http.server.BaseHTTPRequestHandler):
     def do_HEAD(s):
-        print("HEAD")
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
 
     def do_GET(s):
-        print("GET")
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
         json.dump({"status": 200, "message": "OK", "data": {
             "capabilities": {
-                "minimum_batch_size": NNN, # # of frames
-                "maximum_batch_size": NNN, # # of frames
-                "available_models": [ {
-                    "id": "concept_id",
-                    "label": "concept_label",
-                    "image_size": NNN # width/height for squared images
-                } ]
+                "minimum_batch_size": 1, # # of frames
+                "maximum_batch_size": 500, # # of frames
+                "available_models": [
+#                    {
+#                    "id": "concept_id",
+#                    "label": "concept_label",
+#                    "image_size": NNN # width/height for squared images
+#                }
+                ]
             }
         }}, s.wfile)
 
     def do_POST(s):
-        print("POST")
         length = int(s.headers['Content-Length'])
         body = s.rfile.read(length).decode('utf-8')
         if s.headers['Content-type'] == 'application/json':
@@ -97,6 +98,8 @@ class RESTHandler(http.server.BaseHTTPRequestHandler):
             "status": 200,
             "message": "OK",
             "data": {
+                # FIXME: JSON skeleton only, fix detection iself (cf
+                # dummy_server.py)
                 'media_filename': 'repeat_from_query',
                 'media_uri': 'repeat from query',
                 'concepts': [
@@ -114,7 +117,7 @@ class RESTHandler(http.server.BaseHTTPRequestHandler):
 if __name__ == '__main__':
     server_class = http.server.HTTPServer
     httpd = server_class((HOST_NAME, PORT_NUMBER), RESTHandler)
-    print("Starting dummy REST server on %s:%d" % (HOST_NAME, PORT_NUMBER))
+    logger.info("Starting dummy REST server on %s:%d", HOST_NAME, PORT_NUMBER)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

@@ -29,6 +29,7 @@ import json
 import requests
 
 import advene.core.config as config
+import advene.util.helper as helper
 from advene.util.importer import GenericImporter
 
 def register(controller=None):
@@ -128,7 +129,7 @@ class HPIImporter(GenericImporter):
             self.output_message = _("Cannot run concept extraction, %d screenshots are missing. Wait for extraction to complete.") % len(missing_screenshots)
             return
 
-        self.progress(.1, "Concept extraction")
+        self.progress(.1, "Sending request to server")
         if self.split_types:
             # Dict indexed by entity type name
             new_atypes = {}
@@ -157,62 +158,78 @@ class HPIImporter(GenericImporter):
                 logger.error("%s is not a valid relation type" % rtype_id)
         # Use a requests.session to use a KeepAlive connection to the server
         session = requests.session()
-        self.progress(.2, "Parsing results")
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        response = session.post(self.url, headers=headers, json={
+            "model": "model_id", # FIXME
+            'media_uri': self.package.uri,
+            'media_filename': self.controller.get_default_media(),
+            'minimum_confidence': minconf,
+            'annotations': [
+                { 'annotationid': a.id,
+                  'begin': a.fragment.begin,
+                  'end': a.fragment.end,
+                  'frames': [
+                      {
+                          'screenshot': base64.encodebytes(bytes(self.controller.package.imagecache.get(t))).decode('ascii'),
+                          'timecode': t
+                      } for t in (a.fragment.begin,
+                                  int((a.fragment.begin + a.fragment.end) / 2),
+                                  a.fragment.end)
+                  ]
+                }
+                for a in src_atype.annotations
+            ]
+        })
 
+        output = response.json()
+        if output.get('status') != 200:
+            # Not OK result. Display error message.
+            msg = _("Server error: %s") % output.get('message', _("Server transmission error."))
+            logger.error(msg)
+            self.output_message = msg
+            return
+        # FIXME: maybe check consistency with media_filename/media_uri?
+        concepts = output.get('data', {}).get('concepts', [])
         progress = .2
-        step = .8 / (len(src_atype.annotations) or 1)
-
-        for a in src_atype.annotations:
-            headers = {"Content-Type": "application/json", "Accept": "application/json"}
-            response = session.post(self.url, headers=headers, json={ 'annotationid': a.id,
-                                                                      'begin': a.fragment.begin,
-                                                                      'end': a.fragment.end,
-                                                                      'minimum_confidence': minconf,
-                                                                      'frames': [
-                                                                          {
-                                                                              'screenshot': base64.encodestring(str(self.controller.package.imagecache.get(t))),
-                                                                              'timecode': t
-                                                                          } for t in (a.fragment.begin,
-                                                                                      int((a.fragment.begin + a.fragment.end) / 2),
-                                                                                      a.fragment.end)
-                                                                      ]
-            })
-            output = response.json()
-            for item in output['data']:
-                # Should not happen, since we pass the parameter to the server
-                if item["confidence"] < minconf:
-                    continue
-                if self.detected_position:
-                    begin = item['timecode']
-                else:
-                    begin = a.fragment.begin
-                end = a.fragment.end
-                t = item.get('label')
-                if t and self.split_types:
-                    at = new_atypes.get(t)
-                    if at is None:
-                        # Not defined yet. Create a new one.
-                        at = self.ensure_new_type(t, title = _("%s concept" % t))
-                        at.mimetype = 'application/json'
-                        at.setMetaData(config.data.namespace, "representation",
-                                       'here/content/parsed/label')
-                        new_atypes[t] = at
-                        new_atype = at
-                an = (yield {
-                    'type': new_atype,
-                    'begin': begin,
-                    'end': end,
-                    'content': json.dumps(item)
-                })
-                if an is not None and self.create_relations:
-                    r = self.package.createRelation(
-                        ident='_'.join( ('r', a.id, an.id) ),
-                        type=rtype,
-                        author=config.data.get_userid(),
-                        date=self.timestamp,
-                        members=(a, an))
-                    r.title = "Relation between %s and %s" % (a.id, an.id)
-                    self.package.relations.append(r)
-                    self.update_statistics('relation')
-                self.progress(progress)
-                progress += step
+        step = .8 / (len(concepts) or 1)
+        self.progress(.2, _("Parsing %d results") % len(concepts))
+        for item in concepts:
+            # Should not happen, since we pass the parameter to the server
+            if item["confidence"] < minconf:
+                continue
+            a = self.package.get_element_by_id(item['annotationid'])
+            if self.detected_position:
+                begin = item['timecode']
+            else:
+                begin = a.fragment.begin
+            end = a.fragment.end
+            label = item.get('label')
+            label_id = helper.title2id(label)
+            if label and self.split_types:
+                new_atype = new_atypes.get(label_id)
+                if new_atype is None:
+                   # Not defined yet. Create a new one.
+                   new_atype = self.ensure_new_type(label_id, title = _("%s concept" % label))
+                   new_atype.mimetype = 'application/json'
+                   new_atype.setMetaData(config.data.namespace, "representation",
+                                         'here/content/parsed/label')
+                   new_atypes[label_id] = new_atype
+            an = yield {
+                'type': new_atype,
+                'begin': begin,
+                'end': end,
+                'content': json.dumps(item),
+                'send': True
+            }
+            if an is not None and self.create_relations:
+                r = self.package.createRelation(
+                    ident='_'.join( ('r', a.id, an.id) ),
+                    type=rtype,
+                    author=config.data.get_userid(),
+                    date=self.timestamp,
+                    members=(a, an))
+                r.title = "Relation between %s and %s" % (a.id, an.id)
+                self.package.relations.append(r)
+                self.update_statistics('relation')
+            self.progress(progress)
+            progress += step
