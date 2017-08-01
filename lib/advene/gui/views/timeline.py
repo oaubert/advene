@@ -3180,7 +3180,7 @@ class TimeLine(AdhocView):
 
         m.show_all()
         if popup:
-            m.popup(None, None, None, 0, Gtk.get_current_event_time())
+            m.popup_at_pointer(None)
         return m
 
     def get_packed_widget (self):
