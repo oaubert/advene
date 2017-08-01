@@ -229,13 +229,13 @@ class TagBag(AdhocView):
             try:
                 color=self.get_element_color(tag)
                 if color:
-                    d.colorsel.set_current_color(color)
+                    d.get_color_selection().set_current_color(color)
             except:
                 pass
 
             res=d.run()
             if res == Gtk.ResponseType.OK:
-                col=d.colorsel.get_current_color()
+                col=d.get_color_selection().get_current_color()
                 self.controller.package._tag_colors[tag]="#%04x%04x%04x" % (col.red, col.green, col.blue)
                 self.controller.notify('TagUpdate', tag=tag)
                 # The color setting of the widget is done in the callback for TagUpdate
