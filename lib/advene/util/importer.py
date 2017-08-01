@@ -296,7 +296,7 @@ class GenericImporter(object):
         except AttributeError:
             # The package does not have a _color_palette
             pass
-        at._fieldnames = set()
+        at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
         schema.annotationTypes.append(at)
         self.update_statistics('annotation-type')
         return at
