@@ -563,7 +563,7 @@ class Config(object):
 
         (self.options, self.args) = parser.parse_args()
         if self.options.version:
-            logger.info(self.get_version_string())
+            logger.warn(self.get_version_string())
             sys.exit(0)
         if self.options.info:
             logging.getLogger().setLevel(logging.INFO)
