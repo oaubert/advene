@@ -1562,7 +1562,7 @@ class AdveneController(object):
             # Copy relevant annotations (contained in segment)
             count = 0
             for a in self.package.annotations:
-                if a.fragment.isOverlapping(segment.fragment):
+                if segment.fragment.begin < a.fragment.end and segment.fragment.end > a.fragment.begin:
                     differ.copy_annotation(a)
                     count += 1
             # Copy package metadata
