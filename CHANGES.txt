@@ -15,11 +15,13 @@ advene (3.3) unstable; urgency=medium
     everything is displayed in the log messages windows as well as saved
     to a file.
 
-  * Shot validation view: improve shortcuts handling.
+  * Shot validation view: improve shortcuts handling and use Down/Up for
+    previous/next shot navigation.
 
   * Allow to customize generic player controls shortcut modifier (Control
     by default) through Edit/Preferences/GUI. It allows to choose a
-    shortcut that does not conflict with other uses.
+    shortcut that does not conflict with other uses, depending on the
+    OS/environment.
 
   * Integrate concept detection code (courtesy of Christian Hentschel
     <christian.hentschel@hpi.uni-potsdam.de>). The server code is
@@ -34,7 +36,9 @@ advene (3.3) unstable; urgency=medium
     just the active one) by setting the corresponding option of the Search
     button (top-right corner in the interface).
 
- -- Olivier Aubert <contact@olivieraubert.net>  Wed, 19 Jul 2017 20:44:13 +0200
+  * Audio segmentation extractor: add a minimum silence duration parameter.
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Wed, 02 Aug 2017 12:42:21 +0200
 
 advene (3.1) unstable; urgency=medium
 
