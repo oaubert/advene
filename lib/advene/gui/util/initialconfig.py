@@ -33,7 +33,7 @@ except locale.Error:
     pass
 gettext.bindtextdomain(APP, config.data.path['locale'])
 gettext.textdomain(APP)
-gettext.install(APP, localedir=config.data.path['locale'], str=True)
+gettext.install(APP, localedir=config.data.path['locale'])
 from gettext import gettext as _
 
 from gi.repository import Gtk
