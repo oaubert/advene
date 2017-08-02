@@ -1,0 +1,35 @@
+#! /bin/sh
+
+SYNTAX="$0 version_number"
+
+VERSION=${1:?$SYNTAX}
+errors=""
+
+cd "$(dirname $0)/.." || exit
+
+# Things to do/check upon release
+
+# Check translations
+# FIXME
+
+# Check that changelog is up-to-date
+if ! head -1 CHANGES.txt | grep -q "$VERSION"
+then
+    errors="${errors}Update CHANGES.txt\n"
+fi
+
+# Update core/version.py + date
+if ! grep -q "version='$VERSION'" lib/advene/core/version.py
+then
+    errors="${errors}Update version.py\n"
+fi
+
+if [ ! -z "$errors" ]
+then
+    echo "$errors"
+    exit 1
+fi
+
+echo "All checks ok for release. Tagging release/${VERSION}"
+# Tag -a release/N.N
+git tag -a "release/${VERSION}"
