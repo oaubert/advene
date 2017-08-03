@@ -1208,6 +1208,7 @@ class AdveneController(object):
         else:
             mediafile=self.locate_mediafile(mediafile)
 
+        package.setMedia(mediafile)
         return mediafile
 
     def locate_mediafile(self, mediafile):
