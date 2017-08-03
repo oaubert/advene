@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-01 19:21+0200\n"
+"POT-Creation-Date: 2017-08-03 12:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3340,7 +3340,7 @@ msgid "content"
 msgstr ""
 
 #: ../lib/advene/gui/views/table.py:476 ../lib/advene/gui/views/table.py:655
-#: ../lib/advene/core/controller.py:2583
+#: ../lib/advene/core/controller.py:2584
 #, python-format
 msgid "Data exported to %s"
 msgstr ""
@@ -7348,86 +7348,86 @@ msgstr ""
 msgid "Cannot open Advene URL %s: the webserver is not running."
 msgstr ""
 
-#: ../lib/advene/core/controller.py:1240
+#: ../lib/advene/core/controller.py:1241
 #, python-format
 msgid "Found matching video file in moviepath: %s"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:1279 ../lib/advene/core/controller.py:1281
+#: ../lib/advene/core/controller.py:1280 ../lib/advene/core/controller.py:1282
 msgid "Analysis of "
 msgstr ""
 
-#: ../lib/advene/core/controller.py:1480
+#: ../lib/advene/core/controller.py:1481
 msgid "Cannot split the annotation: the given position is outside."
 msgstr ""
 
-#: ../lib/advene/core/controller.py:1689
+#: ../lib/advene/core/controller.py:1690
 #, python-format
 msgid "Cannot find the template package %(filename)s: %(error)s"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:1736
+#: ../lib/advene/core/controller.py:1737
 #, python-format
 msgid "Cannot read the imported package %(uri)s: %(error)s"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:1971
+#: ../lib/advene/core/controller.py:1972
 msgid "Package URI has changed. Reloading package with new URI."
 msgstr ""
 
-#: ../lib/advene/core/controller.py:1989
+#: ../lib/advene/core/controller.py:1990
 msgid ""
 "Cannot load package: the following annotations do not have Millisecond "
 "fragments:"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2016
+#: ../lib/advene/core/controller.py:2017
 #, python-format
 msgid "Cannot handle master attribute, the package %s is not imported."
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2018
+#: ../lib/advene/core/controller.py:2019
 #, python-format
 msgid "Checking master package %s for not yet imported elements."
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2058
+#: ../lib/advene/core/controller.py:2059
 msgid "Standard summary"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2063
+#: ../lib/advene/core/controller.py:2064
 msgid "Default view"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2105
+#: ../lib/advene/core/controller.py:2106
 #, python-format
 msgid ""
 "Infinite loop in STBV %(name)s: the %(imp)s view is invoked multiple times."
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2191
+#: ../lib/advene/core/controller.py:2192
 msgid "Got exception when stopping player."
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2272
+#: ../lib/advene/core/controller.py:2273
 msgid "Video player problem"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2299
+#: ../lib/advene/core/controller.py:2300
 msgid "Unable to start the player."
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2506
+#: ../lib/advene/core/controller.py:2507
 #, python-format
 msgid "Comment on set of %d annotations"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2508
+#: ../lib/advene/core/controller.py:2509
 #, python-format
 msgid "Comment on %s"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2512
+#: ../lib/advene/core/controller.py:2513
 #, python-format
 msgid ""
 "<h1>Comment on %(title)s</h1>\n"
@@ -7439,21 +7439,21 @@ msgid ""
 "\"%(imgurl)s\" ></img></a></span>"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2522
+#: ../lib/advene/core/controller.py:2523
 #, python-format
 msgid "List of %s annotations"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2557
+#: ../lib/advene/core/controller.py:2558
 #, python-format
 msgid "Cannot export to %(filename)s: %(e)s"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2572
+#: ../lib/advene/core/controller.py:2573
 msgid "Error when exporting text template"
 msgstr ""
 
-#: ../lib/advene/core/controller.py:2581
+#: ../lib/advene/core/controller.py:2582
 msgid "Error when exporting XML template"
 msgstr ""
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.32\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-01 19:21+0200\n"
+"POT-Creation-Date: 2017-08-03 12:26+0200\n"
 "PO-Revision-Date: 2014-04-18 21:12-0700\n"
 "Last-Translator: Emmanuel Ayala Mexicano <emmanuelayalamexicano@gmail.com>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
@@ -3493,7 +3493,7 @@ msgid "content"
 msgstr "contenido"
 
 #: ../lib/advene/gui/views/table.py:476 ../lib/advene/gui/views/table.py:655
-#: ../lib/advene/core/controller.py:2583
+#: ../lib/advene/core/controller.py:2584
 #, python-format
 msgid "Data exported to %s"
 msgstr "Datos exportados a %s"
@@ -7847,36 +7847,36 @@ msgid "Cannot open Advene URL %s: the webserver is not running."
 msgstr ""
 "No se puede abrir el URL %s de Advene: el servidor web no está corriendo. "
 
-#: ../lib/advene/core/controller.py:1240
+#: ../lib/advene/core/controller.py:1241
 #, python-format
 msgid "Found matching video file in moviepath: %s"
 msgstr "Encontre video concordante en la ruta: %s"
 
-#: ../lib/advene/core/controller.py:1279 ../lib/advene/core/controller.py:1281
+#: ../lib/advene/core/controller.py:1280 ../lib/advene/core/controller.py:1282
 msgid "Analysis of "
 msgstr "Análisis de"
 
-#: ../lib/advene/core/controller.py:1480
+#: ../lib/advene/core/controller.py:1481
 msgid "Cannot split the annotation: the given position is outside."
 msgstr ""
 "No se puede dividir la anotación: la posición especificada se encuentra "
 "fuera. "
 
-#: ../lib/advene/core/controller.py:1689
+#: ../lib/advene/core/controller.py:1690
 #, python-format
 msgid "Cannot find the template package %(filename)s: %(error)s"
 msgstr "No se encuentra el paquete de plantilla %(filename)s: %(error)s"
 
-#: ../lib/advene/core/controller.py:1736
+#: ../lib/advene/core/controller.py:1737
 #, python-format
 msgid "Cannot read the imported package %(uri)s: %(error)s"
 msgstr "No se puede leer el paquete importado %(uri)s: %(error)s"
 
-#: ../lib/advene/core/controller.py:1971
+#: ../lib/advene/core/controller.py:1972
 msgid "Package URI has changed. Reloading package with new URI."
 msgstr "El paquete URI ha cambiado. Recargando el paquete con un nuevo URI"
 
-#: ../lib/advene/core/controller.py:1989
+#: ../lib/advene/core/controller.py:1990
 msgid ""
 "Cannot load package: the following annotations do not have Millisecond "
 "fragments:"
@@ -7884,59 +7884,59 @@ msgstr ""
 "No puedo cargar el paquete: las anotaciones siguientes no tienen fragmentos "
 "de milisegundos:"
 
-#: ../lib/advene/core/controller.py:2016
+#: ../lib/advene/core/controller.py:2017
 #, python-format
 msgid "Cannot handle master attribute, the package %s is not imported."
 msgstr ""
 "No se puede manejar el atributo maestro, el paquete %s no está importado. "
 
-#: ../lib/advene/core/controller.py:2018
+#: ../lib/advene/core/controller.py:2019
 #, python-format
 msgid "Checking master package %s for not yet imported elements."
 msgstr ""
 "Revisando el paquete maestro %s para los elementos que todavía no son "
 "importados. "
 
-#: ../lib/advene/core/controller.py:2058
+#: ../lib/advene/core/controller.py:2059
 msgid "Standard summary"
 msgstr "Resumen estándar."
 
-#: ../lib/advene/core/controller.py:2063
+#: ../lib/advene/core/controller.py:2064
 msgid "Default view"
 msgstr "Vista por omision"
 
-#: ../lib/advene/core/controller.py:2105
+#: ../lib/advene/core/controller.py:2106
 #, python-format
 msgid ""
 "Infinite loop in STBV %(name)s: the %(imp)s view is invoked multiple times."
 msgstr ""
 "Ciclo infinito en STBV %(name)s: la vista %(imp)s es invocada muchas veces. "
 
-#: ../lib/advene/core/controller.py:2191
+#: ../lib/advene/core/controller.py:2192
 #, fuzzy
 msgid "Got exception when stopping player."
 msgstr "Hubo excepcion %s cuando se detuvo el reproductor."
 
-#: ../lib/advene/core/controller.py:2272
+#: ../lib/advene/core/controller.py:2273
 #, fuzzy
 msgid "Video player problem"
 msgstr "Reproductor de video"
 
-#: ../lib/advene/core/controller.py:2299
+#: ../lib/advene/core/controller.py:2300
 msgid "Unable to start the player."
 msgstr "Incapaz de inicializar el reproductor."
 
-#: ../lib/advene/core/controller.py:2506
+#: ../lib/advene/core/controller.py:2507
 #, python-format
 msgid "Comment on set of %d annotations"
 msgstr "Comentarios sobre el conjunto de %d anotaciones"
 
-#: ../lib/advene/core/controller.py:2508
+#: ../lib/advene/core/controller.py:2509
 #, python-format
 msgid "Comment on %s"
 msgstr "Comentar en %s"
 
-#: ../lib/advene/core/controller.py:2512
+#: ../lib/advene/core/controller.py:2513
 #, python-format
 msgid ""
 "<h1>Comment on %(title)s</h1>\n"
@@ -7955,22 +7955,22 @@ msgstr ""
 "\"100\" tal:attributes=\"src package/annotations/%(id)s/snapshot_url\" src="
 "\"%(imgurl)s\" ></img></a></span>"
 
-#: ../lib/advene/core/controller.py:2522
+#: ../lib/advene/core/controller.py:2523
 #, python-format
 msgid "List of %s annotations"
 msgstr "Lista de %s anotaciones"
 
-#: ../lib/advene/core/controller.py:2557
+#: ../lib/advene/core/controller.py:2558
 #, python-format
 msgid "Cannot export to %(filename)s: %(e)s"
 msgstr "No se puede exportar a %(filename)s: %(e)s"
 
-#: ../lib/advene/core/controller.py:2572
+#: ../lib/advene/core/controller.py:2573
 #, fuzzy
 msgid "Error when exporting text template"
 msgstr "Error mientras se exportaba: %s"
 
-#: ../lib/advene/core/controller.py:2581
+#: ../lib/advene/core/controller.py:2582
 #, fuzzy
 msgid "Error when exporting XML template"
 msgstr "Error mientras se exportaba: %s"
