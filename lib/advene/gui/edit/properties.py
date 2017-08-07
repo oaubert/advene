@@ -669,10 +669,10 @@ class OptionParserGUI(EditWidget):
                 val = o.default
             # FIXME: should implement store_const, append, count? and (less likely) callback
             if o.action == 'store_true':
-                self.options[o.dest] = False
+                self.options[o.dest] = val
                 self.add_checkbox(name, o.dest, o.help)
             elif o.action == 'store_false':
-                self.options[o.dest] = True
+                self.options[o.dest] = not val
                 self.add_checkbox(name, o.dest, o.help)
             elif o.action == 'store':
                 if o.type in ('int', 'long'):
