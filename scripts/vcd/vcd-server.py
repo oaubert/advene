@@ -1,9 +1,12 @@
 #!/usr/bin/python
 
-import BaseHTTPServer
+import logging
+logger = logging.getLogger(__name__)
+
+import http.server
 import json
-import random
-import urlparse
+import urllib.parse
+import os
 
 from keras.applications.resnet50 import ResNet50
 from keras.preprocessing import image
@@ -17,35 +20,50 @@ import itertools
 HOST_NAME = ''
 PORT_NUMBER = 9000
 
+CACHE_DIR = "/var/vcd/cache"
+
 model = ResNet50(weights='imagenet')
-target_size=(224,224)
+target_size = (224,224)
 top_n_preds = 3
 
-class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+#create cachedir
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
+
+class RESTHandler(http.server.BaseHTTPRequestHandler):
     def do_HEAD(s):
-        print "HEAD"
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
 
     def do_GET(s):
-        print "GET"
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
-        json.dump({"status": 200, "message": "OK"}, s.wfile)
+        json.dump({"status": 200, "message": "OK", "data": {
+            "capabilities": {
+                "minimum_batch_size": 1, # # of frames
+                "maximum_batch_size": 500, # # of frames
+                "available_models": [
+#                    {
+#                    "id": "concept_id",
+#                    "label": "concept_label",
+#                    "image_size": NNN # width/height for squared images
+#                }
+                ]
+            }
+        }}, s.wfile)
 
     def do_POST(s):
-        print "POST"
         length = int(s.headers['Content-Length'])
         body = s.rfile.read(length).decode('utf-8')
         if s.headers['Content-type'] == 'application/json':
             post_data = json.loads(body)
         else:
-            post_data = urlparse.parse_qs(body)
-        
-        target_size 
-        batch_x = np.zeros((len(post_data['frames']),target_size[0],target_size[1],3), dtype=np.float32) 
+            post_data = urllib.parse.parse_qs(body)
+
+        target_size
+        batch_x = np.zeros((len(post_data['frames']),target_size[0],target_size[1],3), dtype=np.float32)
         for i,frame in enumerate(post_data['frames']):
             # Load image to PIL format
             img = Image.open(BytesIO(base64.b64decode(frame['screenshot'])))
@@ -76,19 +94,30 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
-        json.dump({"status": 200, "message": "OK", "data": [
-            {
-                'confidence': max(confidences[l]),
-                'timecode': random.randrange(post_data['begin'], post_data['end']),
-                'label': l,
-                'uri': 'http://concept.org/%s' % l
-            } for l in confidences
-        ]}, s.wfile)
+        json.dump({
+            "status": 200,
+            "message": "OK",
+            "data": {
+                # FIXME: JSON skeleton only, fix detection iself (cf
+                # dummy_server.py)
+                'media_filename': 'repeat_from_query',
+                'media_uri': 'repeat from query',
+                'concepts': [
+                    {
+                        'annotationid': aid,
+                        'confidence': max(confidences[l]),
+                        'timecode': timestamp_in_ms,
+                        'label': l,
+                        'uri': 'http://concept.org/%s' % l
+                    } for l in confidences
+                ]
+            }
+        }, s.wfile)
 
 if __name__ == '__main__':
-    server_class = BaseHTTPServer.HTTPServer
+    server_class = http.server.HTTPServer
     httpd = server_class((HOST_NAME, PORT_NUMBER), RESTHandler)
-    print "Starting dummy REST server on %s:%d" % (HOST_NAME, PORT_NUMBER)
+    logger.info("Starting dummy REST server on %s:%d", HOST_NAME, PORT_NUMBER)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
