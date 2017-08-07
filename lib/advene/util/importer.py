@@ -142,7 +142,7 @@ class GenericImporter(object):
             author=config.data.userid
         self.author=author
         self.controller=controller
-        self.timestamp=time.strftime("%Y-%m-%d")
+        self.timestamp=controller.get_timestamp()
         self.defaulttype=defaulttype
         self.callback=callback
         # Default offset in ms

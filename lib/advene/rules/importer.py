@@ -49,7 +49,7 @@ class EventHistoryImporter(GenericImporter):
                 type=schema.createAnnotationType(
                     ident=type_)
                 type.author=config.data.userid
-                type.date=time.strftime("%Y-%m-%d")
+                type.date=self.controller.get_timestamp()
                 type.title=type_
                 type.mimetype='application/x-advene-structured'
                 type.setMetaData(config.data.namespace, 'color', next(self.package._color_palette))
@@ -83,7 +83,7 @@ class EventHistoryImporter(GenericImporter):
             self.package._idgenerator.add(id_)
             schema=self.package.createSchema(ident=id_)
             schema.author=config.data.userid
-            schema.date=time.strftime("%Y-%m-%d")
+            schema.date=self.controller.get_timestamp()
             schema.title=title_
             self.package.schemas.append(schema)
         self.convert(self.iterator(filename))
