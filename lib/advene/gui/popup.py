@@ -775,7 +775,7 @@ class Menu:
         add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations, source='here/annotationTypes/%s/annotations' % element.id))
         add_item(_('Export to another format...'), lambda i: self.controller.gui.export_element(element))
         add_item(_('Split according to annotations'), lambda i: self.split_package_by_type(element))
-        for imp in [ i for i in advene.util.importer.IMPORTERS if hasattr(i, 'annotation_filter') ]:
+        for imp in ( i for i in advene.util.importer.IMPORTERS if i.annotation_filter ):
             add_item(_("Apply %s..." % imp.name), self.filter_service, imp, element)
         if self.readonly:
             return

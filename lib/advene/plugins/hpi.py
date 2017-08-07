@@ -50,10 +50,16 @@ class HPIImporter(GenericImporter):
 
     def __init__(self, author=None, package=None, defaulttype=None,
                  controller=None, callback=None, annotation_type=None):
-        GenericImporter.__init__(self, author, package, defaulttype,
-                                 controller, callback)
-
-        self.atype = annotation_type.id if annotation_type else self.controller.package.annotationTypes[0].id
+        GenericImporter.__init__(self,
+                                 author=author,
+                                 package=package,
+                                 defaulttype=defaulttype,
+                                 controller=controller,
+                                 callback=callback,
+                                 annotation_type=annotation_type)
+        if self.source_annotation_type is None:
+            self.source_annotation_type = self.controller.package.annotationTypes[0]
+        self.source_type_id = self.source_annotation_type.id
         self.model = "standard"
         self.confidence = 0.0
         self.detected_position = True
@@ -62,9 +68,9 @@ class HPIImporter(GenericImporter):
         self.url = "http://localhost:9000/"
 
         self.optionparser.add_option(
-            "-t", "--type", action="store", type="choice", dest="atype",
+            "-t", "--type", action="store", type="choice", dest="source_type_id",
             choices=[at.id for at in self.controller.package.annotationTypes],
-            default=self.atype,
+            default=self.source_type_id,
             help=_("Type of annotation to analyze"),
             )
         self.optionparser.add_option(
@@ -113,12 +119,12 @@ class HPIImporter(GenericImporter):
     def iterator(self):
         """I iterate over the created annotations.
         """
-        src_atype = self.controller.package.get_element_by_id(self.atype)
+        self.source_annotation_type = self.controller.package.get_element_by_id(self.source_type_id)
         minconf = self.confidence
 
         # Make sure that we have all appropriate screenshots
         missing_screenshots = []
-        for a in src_atype.annotations:
+        for a in self.source_annotation_type.annotations:
             for t in (a.fragment.begin,
                       int((a.fragment.begin + a.fragment.end) / 2),
                       a.fragment.end):
@@ -177,7 +183,7 @@ class HPIImporter(GenericImporter):
                                   a.fragment.end)
                   ]
                 }
-                for a in src_atype.annotations
+                for a in self.source_annotation_type.annotations
             ]
         })
 

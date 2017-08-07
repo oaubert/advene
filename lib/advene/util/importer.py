@@ -133,9 +133,16 @@ class GenericImporter(object):
     @type statistics: dict
     """
     name = _("Generic importer")
+    annotation_filter = False
 
-    def __init__(self, author=None, package=None, defaulttype=None, controller=None, callback=None):
+    def __init__(self, author=None, package=None, defaulttype=None, controller=None, callback=None, annotation_type=None):
         """Instanciate the importer.
+
+        Note: some importers can use an existing annotation type as
+        source element (for processing annotations, e.g. concept
+        extraction). In this case, the annotation_filter attribute
+        must be set to True, and an additional annotation_type
+        parameter is provided to __init__.
 
         @param author: author for imported/created elements
         @type author: string
@@ -147,6 +154,9 @@ class GenericImporter(object):
         @type controller: advene.core.controller
         @param callback: callback method for progress report
         @type callback: method
+
+        @param annotation_type: source annotation type (optional - for annotation filters)
+        @param annotation_type: advene.model.AnnotationType
         """
         self.package=package
         if author is None:
@@ -155,6 +165,7 @@ class GenericImporter(object):
         self.controller=controller
         self.timestamp=controller.get_timestamp()
         self.defaulttype=defaulttype
+        self.source_annotation_type=annotation_type
         self.callback=callback
         # Default offset in ms
         self.offset=0
