@@ -54,10 +54,10 @@ class HPIImporter(GenericImporter):
                                  controller, callback)
 
         self.atype = annotation_type.id if annotation_type else self.controller.package.annotationTypes[0].id
+        self.model = "standard"
         self.confidence = 0.0
         self.detected_position = True
         self.split_types = False
-        self.markup = False
         self.create_relations = False
         self.url = "http://localhost:9000/"
 
@@ -88,9 +88,9 @@ class HPIImporter(GenericImporter):
             help=_("Split by entity type"),
             )
         self.optionparser.add_option(
-            "-m", "--markup", action="store_true",
-            dest="markup", default=self.markup,
-            help=_("Store results as markup in the annotation text"),
+            "-m", "--model", action="store", type="string",
+            dest="model", default=self.model,
+            help=_("Model to be used for detection"),
             )
         self.optionparser.add_option(
             "-r", "--relations", action="store_true",
@@ -160,7 +160,7 @@ class HPIImporter(GenericImporter):
         session = requests.session()
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
         response = session.post(self.url, headers=headers, json={
-            "model": "model_id", # FIXME
+            "model": self.model,
             'media_uri': self.package.uri,
             'media_filename': self.controller.get_default_media(),
             'minimum_confidence': minconf,
