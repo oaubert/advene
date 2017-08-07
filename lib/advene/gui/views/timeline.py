@@ -107,8 +107,8 @@ class QuickviewBar(Gtk.HBox):
 class TimeLine(AdhocView):
     """Representation of a set of annotations placed on a timeline.
 
-    If l is None, then use controller.package.annotations (and handle
-    updates accordingly).
+    If elements is None, then use controller.package.annotations (and
+    handle updates accordingly).
 
     There are 2 adjustments used to adjust the display scale:
 
