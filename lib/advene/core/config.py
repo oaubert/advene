@@ -323,6 +323,8 @@ class Config(object):
             'apply-edited-elements-on-save': True,
             'frameselector-width': 140,
             'frameselector-count': 8,
+            # Cache settings for import filters
+            'filter-options': {}
             }
 
         # Player options
