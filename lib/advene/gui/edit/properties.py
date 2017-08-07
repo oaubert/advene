@@ -219,8 +219,8 @@ class EditWidget(Gtk.VBox):
     CHANGE_SPIN = 2
     CHANGE_CHECKBOX = 3
     CHANGE_TEXT = 4
-    CHANGE_FLOAT_SPIN = 2
-    CHANGE_ACCELERATOR = 5
+    CHANGE_FLOAT_SPIN = 5
+    CHANGE_ACCELERATOR = 6
 
     def __init__(self, set_config, get_config):
 
@@ -459,7 +459,7 @@ class EditWidget(Gtk.VBox):
         value = self.__get_config(property)
 
         adjustment = Gtk.Adjustment.new(value, low, up, 10 ** -digits, 1, 0)
-        spin_button = Gtk.SpinButton.new(adjustment, 1, digits)
+        spin_button = Gtk.SpinButton.new(adjustment, 10 ** -digits, digits)
         spin_button.set_numeric(True)
         spin_button.show()
 
@@ -703,6 +703,7 @@ def test():
     val = {
         'string': 'String',
         'option': 'fee',
+        'float': .42,
         'filename': '/tmp',
         }
     def set_config(name, value):
@@ -715,6 +716,7 @@ def test():
     ew.set_name("Test")
     ew.add_title("Main values")
     ew.add_entry("Name", "string", "Enter a valid name")
+    ew.add_float_spin("Float", "float", "Choose a float value", -1, 1, 2)
     ew.add_option("Option", 'option', "Choose the option", {"Fee": "fee",
                                                             "Fi": "fi",
                                                             "Fo": "fo",
@@ -723,11 +725,10 @@ def test():
 
     res=ew.popup()
     if res:
-        logger.info("Modified: %s" + str(val))
+        logger.info("Modified: %s", str(val))
     else:
         logger.info("Cancel")
 
-    Gtk.main()
-
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     test()
