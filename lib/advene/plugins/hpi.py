@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 from gettext import gettext as _
 
 import base64
+from collections import OrderedDict
 import json
 import requests
 
@@ -65,7 +66,32 @@ class HPIImporter(GenericImporter):
         self.detected_position = True
         self.split_types = False
         self.create_relations = False
-        self.url = "http://localhost:9000/"
+        self.url = config.data.preferences['filter-options'].get(type(self).__name__, {'url': "http://localhost:9000/"}).get('url')
+
+        self.server_options = {}
+        # Populate available models options from server
+        try:
+            r = requests.get(self.url)
+            if r.status_code == 200:
+                # OK. We should have some server options available as json
+                data = r.json()
+                caps = data.get('data', {}).get('capabilities', {})
+                for n in ('minimum_batch_size', 'maximum_batch_size', 'available_models'):
+                    self.server_options[n] = caps.get(n, None)
+                logger.warn("Got capabilities from VCD server - batch size in (%d, %d) - %d models: %s",
+                            self.server_options['minimum_batch_size'],
+                            self.server_options['maximum_batch_size'],
+                            len(self.server_options['available_models']),
+                            ", ".join(item['id'] for item in self.server_options['available_models']))
+        except requests.exceptions.RequestException:
+            pass
+        if 'available_models' in self.server_options:
+            self.available_models = OrderedDict((item['id'], item) for item in self.server_options['available_models'])
+        else:
+            self.available_models = OrderedDict()
+            self.available_models["standard"] = { 'id': "standard",
+                                                  'label': "Standard",
+                                                  'image_size': 224 }
 
         self.optionparser.add_option(
             "-t", "--type", action="store", type="choice", dest="source_type_id",
@@ -94,8 +120,8 @@ class HPIImporter(GenericImporter):
             help=_("Split by entity type"),
             )
         self.optionparser.add_option(
-            "-m", "--model", action="store", type="string",
-            dest="model", default=self.model,
+            "-m", "--model", action="store", type="choice",
+            dest="model", default=self.model, choices=list(self.available_models.keys()),
             help=_("Model to be used for detection"),
             )
         self.optionparser.add_option(

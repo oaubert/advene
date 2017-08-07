@@ -28,10 +28,15 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 "minimum_batch_size": 1, # # of frames
                 "maximum_batch_size": 500, # # of frames
                 "available_models": [ {
-#                    "id": "concept_id",
-#                    "label": "concept_label",
-#                    "image_size": NNN # width/height for squared images
-                } ]
+                    "id": "standard",
+                    "label": "Standard detection",
+                    "image_size": 224 # width/height for squared images
+                }, {
+                    "id": "dummy",
+                    "label": "Dummy detection",
+                    "image_size": 512 # width/height for squared images
+                }
+                ]
             }
         }}, s.wfile)
 
