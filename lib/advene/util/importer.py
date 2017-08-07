@@ -129,14 +129,25 @@ def get_importer(fname, **kw):
 
 class GenericImporter(object):
     """Generic importer class
-
     @ivar statistics: Dictionary holding the creation statistics
     @type statistics: dict
-    FIXME...
     """
     name = _("Generic importer")
 
     def __init__(self, author=None, package=None, defaulttype=None, controller=None, callback=None):
+        """Instanciate the importer.
+
+        @param author: author for imported/created elements
+        @type author: string
+        @param package: package where elements will be created
+        @type package: advene.model.Package
+        @param defaulttype: default annotation type for created annotations
+        @type defaulltype: advene.model.AnnotationType
+        @param controller: controller
+        @type controller: advene.core.controller
+        @param callback: callback method for progress report
+        @type callback: method
+        """
         self.package=package
         if author is None:
             author=config.data.userid
