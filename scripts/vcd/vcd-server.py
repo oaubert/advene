@@ -5,7 +5,12 @@ logger = logging.getLogger(__name__)
 
 import http.server
 import json
+<<<<<<< HEAD
 import urllib.parse
+=======
+import random
+import urlparse
+>>>>>>> 587bed661efba202305b9526239f65a1b6a79a96
 import os
 
 from keras.applications.resnet50 import ResNet50
@@ -30,7 +35,11 @@ top_n_preds = 3
 if not os.path.exists(CACHE_DIR):
     os.makedirs(CACHE_DIR)
 
+<<<<<<< HEAD
 class RESTHandler(http.server.BaseHTTPRequestHandler):
+=======
+class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+>>>>>>> 587bed661efba202305b9526239f65a1b6a79a96
     def do_HEAD(s):
         s.send_response(200)
         s.send_header("Content-type", "application/json")
