@@ -212,26 +212,35 @@ class GenericImporter(object):
             return True
 
     def set_options(self, options):
-       """Set importer options (attributes) according to the given options.
+        """Set importer options (attributes) according to the given options.
 
-       options may be either an option object from OptionParser (where
-       options are attributes of the object) or a dictionary.
-       """
-       if isinstance(options, dict):
-          for k, v in options.items():
-             if hasattr(self, k):
-                logger.info("Set option %s %s", k, v)
-                setattr(self, k, v)
-             else:
-                logger.info("Unknown option %s", k)
-       else:
-          for k in (n
-                    for n in dir(options)
-                    if not n.startswith('_')):
-             if hasattr(self, k):
-                setattr(self, k, getattr(options, k))
-             else:
-                logger.info("Unknown option %s", k)
+        options may be either an option object from OptionParser (where
+        options are attributes of the object) or a dictionary.
+        """
+        if isinstance(options, dict):
+            for k, v in options.items():
+                if hasattr(self, k):
+                    logger.info("Set option %s %s", k, v)
+                    setattr(self, k, v)
+                else:
+                    logger.info("Unknown option %s", k)
+        else:
+            for k in (n
+                      for n in dir(options)
+                      if not n.startswith('_')):
+                if hasattr(self, k):
+                    setattr(self, k, getattr(options, k))
+                else:
+                    logger.info("Unknown option %s", k)
+
+    def get_preferences(self):
+        """Get the plugin preferences as a dict.
+
+        The plugin prefs are stored in the Advene preferences and
+        persist across sessions. The plugin options are saved in it.
+
+        """
+        return config.data.preferences['filter-options'].setdefault(type(self).__name__, {})
 
     def process_options(self, source):
         (options, args) = self.optionparser.parse_args(args=source)
