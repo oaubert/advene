@@ -181,7 +181,6 @@ class AnnotationImporter(AdhocView):
             i = self.importer
             fname = self.filename
         i.set_options(self.optionform.options)
-        logger.warn(dict(self.optionsform.options))
         i.get_preferences().update(dict(self.optionform.options))
         i.package=self.controller.package
 
