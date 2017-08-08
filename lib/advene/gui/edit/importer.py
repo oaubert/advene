@@ -181,15 +181,8 @@ class AnnotationImporter(AdhocView):
             i = self.importer
             fname = self.filename
         i.set_options(self.optionform.options)
-        # We save options, except for the type option (which should be
-        # the source annotation type parameter), so that we do not
-        # override it afterwards.
-        saved_options = dict(self.optionform.options)
-        try:
-            del saved_options['type']
-        except KeyError:
-            pass
-        config.data.preferences['filter-options'][type(i).__name__] = dict(self.optionform.options)
+        logger.warn(dict(self.optionsform.options))
+        i.get_preferences().update(dict(self.optionform.options))
         i.package=self.controller.package
 
         reqs = i.check_requirements()
@@ -272,7 +265,7 @@ class AnnotationImporter(AdhocView):
             else:
                 i = ic(controller=self.controller)
             # Restore cached options if any
-            i.set_options(config.data.preferences['filter-options'].get(ic.__name__, {}))
+            i.set_options(i.get_preferences())
             self.optionform = OptionParserGUI(i.optionparser, i)
             self.options_frame.add(self.optionform)
         return True
