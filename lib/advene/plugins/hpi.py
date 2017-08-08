@@ -149,7 +149,6 @@ class HPIImporter(GenericImporter):
         requirements. If the list is empty, then all requirements are
         met.
         """
-        logger.warn("Check requirements")
         unmet_requirements = []
 
         # Check server connectivity

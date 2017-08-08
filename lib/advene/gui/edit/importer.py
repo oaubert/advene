@@ -194,7 +194,6 @@ class AnnotationImporter(AdhocView):
         i.package=self.controller.package
 
         reqs = i.check_requirements()
-        logger.warn("Checked reqs: %s", reqs)
         if reqs:
             # Not all requirements are met. Display some information.
             dialog.message_dialog(_("The filter is not ready.\n%s") % "\n".join(reqs), modal=True)
