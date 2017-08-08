@@ -219,6 +219,7 @@ class GenericImporter(object):
         """
         if isinstance(options, dict):
             for k, v in options.items():
+                k = k.replace('-', '_')
                 if hasattr(self, k):
                     logger.info("Set option %s %s", k, v)
                     setattr(self, k, v)
@@ -228,6 +229,7 @@ class GenericImporter(object):
             for k in (n
                       for n in dir(options)
                       if not n.startswith('_')):
+                k = k.replace('-', '_')
                 if hasattr(self, k):
                     setattr(self, k, getattr(options, k))
                 else:
