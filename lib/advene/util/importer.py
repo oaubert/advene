@@ -53,7 +53,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 import sys
-import time
 import re
 import os
 import optparse
@@ -73,15 +72,15 @@ import xml.dom
 import xml.etree.ElementTree as ET
 
 if __name__ != '__main__':
-   import advene.core.config as config
+    import advene.core.config as config
 
-   from advene.model.package import Package
-   from advene.model.annotation import Annotation
-   from advene.model.schema import AnnotationType, Schema
-   from advene.model.fragment import MillisecondFragment
+    from advene.model.package import Package
+    from advene.model.annotation import Annotation
+    from advene.model.schema import AnnotationType, Schema
+    from advene.model.fragment import MillisecondFragment
 
-   import advene.util.helper as helper
-   import advene.util.handyxml as handyxml
+    import advene.util.helper as helper
+    import advene.util.handyxml as handyxml
 
 IMPORTERS=[]
 
