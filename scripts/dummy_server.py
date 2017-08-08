@@ -29,12 +29,12 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 "minimum_batch_size": 1, # # of frames
                 "maximum_batch_size": 500, # # of frames
                 "available_models": [ {
-                    "id": "standard",
-                    "label": "Standard detection",
+                    "id": "standard", # id of the model
+                    "label": "Standard detection", # user-readable label for the model
                     "image_size": 224 # width/height for squared images
                 }, {
-                    "id": "dummy",
-                    "label": "Dummy detection",
+                    "id": "dummy", # id of the model
+                    "label": "Dummy detection", # user-readable label for the model
                     "image_size": 512 # width/height for squared images
                 }
                 ]
