@@ -299,9 +299,9 @@ class Snapshotter(object):
         """
         self.thread_running=True
         while True:
-            logger.debug("Waiting for event")
+            #logger.debug("Waiting for event")
             self.snapshot_ready.wait()
-            logger.debug("Getting timestamp")
+            #logger.debug("Getting timestamp")
             if self.should_clear:
                 # Clear the queue
                 self.should_clear = False
@@ -314,9 +314,9 @@ class Snapshotter(object):
                     except queue.Empty:
                         break
             (t, dummy) = self.timestamp_queue.get()
-            logger.debug("Clearing event")
+            #logger.debug("Clearing event")
             self.snapshot_ready.clear()
-            logger.debug("Snapshot %d", t)
+            #logger.debug("Snapshot %d", t)
             self.snapshot(t)
         return True
 
