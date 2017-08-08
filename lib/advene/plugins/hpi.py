@@ -61,12 +61,19 @@ class HPIImporter(GenericImporter):
         if self.source_type is None:
             self.source_type = self.controller.package.annotationTypes[0]
         self.source_type_id = self.source_type.id
+
+        if source_type is not None:
+            # A source_type was specified at instanciation. Update the
+            # preferences now since we will use this info to update
+            # the filter options.
+            self.get_preferences().update({'source_type_id': self.source_type_id})
+
         self.model = "standard"
         self.confidence = 0.0
         self.detected_position = True
         self.split_types = False
         self.create_relations = False
-        self.url = config.data.preferences['filter-options'].get(type(self).__name__, {'url': "http://localhost:9000/"}).get('url')
+        self.url = self.get_preferences().get('url', 'http://localhost:9000/')
 
         self.server_options = {}
         # Populate available models options from server
@@ -183,8 +190,8 @@ class HPIImporter(GenericImporter):
             new_atypes = {}
         else:
             new_atype = self.ensure_new_type(
-                "concept_%s" % self.atype,
-                title = _("Concepts for %s" % (self.atype)))
+                "concept_%s" % self.source_type_id,
+                title = _("Concepts for %s" % (self.source_type_id)))
             new_atype.mimetype = 'application/json'
             new_atype.setMetaData(config.data.namespace, "representation",
                                   'here/content/parsed/label')
