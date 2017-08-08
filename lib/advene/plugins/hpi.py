@@ -26,7 +26,9 @@ from gettext import gettext as _
 
 import base64
 from collections import OrderedDict
+from io import BytesIO
 import json
+from PIL import Image
 import requests
 
 import advene.core.config as config
@@ -211,6 +213,26 @@ class HPIImporter(GenericImporter):
                 self.update_statistics('relation-type')
             if not hasattr(rtype, 'getHackedMemberTypes'):
                 logger.error("%s is not a valid relation type" % rtype_id)
+
+        image_scale = self.available_models.get(self.model, {}).get('image_size')
+        if image_scale:
+            logger.warn("Scaling images to (%d, %d) as requested by %s", image_scale, image_scale, self.model)
+
+        def get_scaled_image(t):
+            """Return the image at the appropriate scale for the selected model.
+            """
+            original = bytes(self.controller.package.imagecache.get(t))
+            if image_scale:
+                im = Image.open(BytesIO(original))
+                im = im.resize((image_scale, image_scale))
+                buf = BytesIO()
+                im.save(buf, 'PNG')
+                scaled = buf.getvalue()
+                buf.close()
+            else:
+                scaled = original
+            return scaled
+
         # Use a requests.session to use a KeepAlive connection to the server
         session = requests.session()
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
@@ -225,7 +247,7 @@ class HPIImporter(GenericImporter):
                   'end': a.fragment.end,
                   'frames': [
                       {
-                          'screenshot': base64.encodebytes(bytes(self.controller.package.imagecache.get(t))).decode('ascii'),
+                          'screenshot': base64.encodebytes(get_scaled_image(t)).decode('ascii'),
                           'timecode': t
                       } for t in (a.fragment.begin,
                                   int((a.fragment.begin + a.fragment.end) / 2),
