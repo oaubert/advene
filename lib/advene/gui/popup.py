@@ -171,7 +171,7 @@ class Menu:
         return True
 
     def filter_service(self, widget, importer, annotationtype):
-        self.controller.gui.open_adhoc_view('importerview', message=_("Apply %s") % importer.name, display_unlikely=False, importerclass=importer, annotation_type=annotationtype)
+        self.controller.gui.open_adhoc_view('importerview', message=_("Apply %s") % importer.name, display_unlikely=False, importerclass=importer, source_type=annotationtype)
 
     def popup_get_offset(self):
         offset=dialog.entry_dialog(title='Enter an offset',

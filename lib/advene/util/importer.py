@@ -134,7 +134,7 @@ class GenericImporter(object):
     name = _("Generic importer")
     annotation_filter = False
 
-    def __init__(self, author=None, package=None, defaulttype=None, controller=None, callback=None, annotation_type=None):
+    def __init__(self, author=None, package=None, defaulttype=None, controller=None, callback=None, source_type=None):
         """Instanciate the importer.
 
         Note: some importers can use an existing annotation type as
@@ -154,8 +154,8 @@ class GenericImporter(object):
         @param callback: callback method for progress report
         @type callback: method
 
-        @param annotation_type: source annotation type (optional - for annotation filters)
-        @param annotation_type: advene.model.AnnotationType
+        @param source_type: source annotation type (optional - for annotation filters)
+        @param source_type: advene.model.AnnotationType
         """
         self.package=package
         if author is None:
@@ -164,7 +164,7 @@ class GenericImporter(object):
         self.controller=controller
         self.timestamp=controller.get_timestamp()
         self.defaulttype=defaulttype
-        self.source_annotation_type=annotation_type
+        self.source_type=source_type
         self.callback=callback
         # Default offset in ms
         self.offset=0
@@ -221,7 +221,7 @@ class GenericImporter(object):
             for k, v in options.items():
                 k = k.replace('-', '_')
                 if hasattr(self, k):
-                    logger.info("Set option %s %s", k, v)
+                    logger.debug("Set option %s %s", k, v)
                     setattr(self, k, v)
                 else:
                     logger.info("Unknown option %s", k)
@@ -231,6 +231,7 @@ class GenericImporter(object):
                       if not n.startswith('_')):
                 k = k.replace('-', '_')
                 if hasattr(self, k):
+                    logger.debug("Set option %s %s", k, v)
                     setattr(self, k, getattr(options, k))
                 else:
                     logger.info("Unknown option %s", k)

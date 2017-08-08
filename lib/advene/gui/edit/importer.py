@@ -49,7 +49,7 @@ class AnnotationImporter(AdhocView):
     view_name = _("Importer")
     view_id = 'importerview'
 
-    def __init__(self, controller=None, filename=None, message=None, display_unlikely=True, parameters=None, importerclass=None, annotation_type=None):
+    def __init__(self, controller=None, filename=None, message=None, display_unlikely=True, parameters=None, importerclass=None, source_type=None):
         super(AnnotationImporter, self).__init__(controller=controller)
         self.controller=controller
         self.parameters=parameters
@@ -71,8 +71,7 @@ class AnnotationImporter(AdhocView):
         self.main_thread_id = _thread.get_ident()
         self.importer = None
         if importerclass is not None:
-            self.importer = importerclass(controller=self.controller, callback=self.progress_callback, annotation_type=annotation_type)
-        self.annotation_type = annotation_type
+            self.importer = importerclass(controller=self.controller, callback=self.progress_callback, source_type=source_type)
         self.filename = filename
         self.widget=self.build_widget()
 

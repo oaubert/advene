@@ -50,17 +50,17 @@ class HPIImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def __init__(self, author=None, package=None, defaulttype=None,
-                 controller=None, callback=None, annotation_type=None):
+                 controller=None, callback=None, source_type=None):
         GenericImporter.__init__(self,
                                  author=author,
                                  package=package,
                                  defaulttype=defaulttype,
                                  controller=controller,
                                  callback=callback,
-                                 annotation_type=annotation_type)
-        if self.source_annotation_type is None:
-            self.source_annotation_type = self.controller.package.annotationTypes[0]
-        self.source_type_id = self.source_annotation_type.id
+                                 source_type=source_type)
+        if self.source_type is None:
+            self.source_type = self.controller.package.annotationTypes[0]
+        self.source_type_id = self.source_type.id
         self.model = "standard"
         self.confidence = 0.0
         self.detected_position = True
@@ -94,7 +94,7 @@ class HPIImporter(GenericImporter):
                                                   'image_size': 224 }
 
         self.optionparser.add_option(
-            "-t", "--type", action="store", type="choice", dest="source_type_id",
+            "-t", "--source-type-id", action="store", type="choice", dest="source_type_id",
             choices=[at.id for at in self.controller.package.annotationTypes],
             default=self.source_type_id,
             help=_("Type of annotation to analyze"),
@@ -159,7 +159,7 @@ class HPIImporter(GenericImporter):
 
         # Make sure that we have all appropriate screenshots
         missing_screenshots = []
-        for a in self.source_annotation_type.annotations:
+        for a in self.source_type.annotations:
             for t in (a.fragment.begin,
                       int((a.fragment.begin + a.fragment.end) / 2),
                       a.fragment.end):
@@ -168,13 +168,13 @@ class HPIImporter(GenericImporter):
                     missing_screenshots.append(t)
         if len(missing_screenshots) > 0:
             unmet_requirements.append(_("%d / %d screenshots are missing. Wait for extraction to complete.") % (len(missing_screenshots),
-                                                                                                                3 * len(self.source_annotation_type.annotations)))
+                                                                                                                3 * len(self.source_type.annotations)))
         return unmet_requirements
 
     def iterator(self):
         """I iterate over the created annotations.
         """
-        self.source_annotation_type = self.controller.package.get_element_by_id(self.source_type_id)
+        self.source_type = self.controller.package.get_element_by_id(self.source_type_id)
         minconf = self.confidence
 
         self.progress(.1, "Sending request to server")
@@ -225,7 +225,7 @@ class HPIImporter(GenericImporter):
                                   a.fragment.end)
                   ]
                 }
-                for a in self.source_annotation_type.annotations
+                for a in self.source_type.annotations
             ]
         })
 
