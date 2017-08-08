@@ -142,11 +142,21 @@ class HPIImporter(GenericImporter):
     def process_file(self, _filename):
         self.convert(self.iterator())
 
-    def iterator(self):
-        """I iterate over the created annotations.
+    def check_requirements(self):
+        """Check if external requirements for the importers are met.
+
+        It returns a list of strings describing the unmet
+        requirements. If the list is empty, then all requirements are
+        met.
         """
-        self.source_annotation_type = self.controller.package.get_element_by_id(self.source_type_id)
-        minconf = self.confidence
+        logger.warn("Check requirements")
+        unmet_requirements = []
+
+        # Check server connectivity
+        try:
+            requests.get(self.url)
+        except requests.exceptions.RequestException:
+            unmet_requirements.append(_("Cannot connect to VCD server. Check that it is running and accessible."))
 
         # Make sure that we have all appropriate screenshots
         missing_screenshots = []
@@ -158,8 +168,15 @@ class HPIImporter(GenericImporter):
                     self.controller.update_snapshot(t)
                     missing_screenshots.append(t)
         if len(missing_screenshots) > 0:
-            self.output_message = _("Cannot run concept extraction, %d screenshots are missing. Wait for extraction to complete.") % len(missing_screenshots)
-            return
+            unmet_requirements.append(_("%d / %d screenshots are missing. Wait for extraction to complete.") % (len(missing_screenshots),
+                                                                                                                3 * len(self.source_annotation_type.annotations)))
+        return unmet_requirements
+
+    def iterator(self):
+        """I iterate over the created annotations.
+        """
+        self.source_annotation_type = self.controller.package.get_element_by_id(self.source_type_id)
+        minconf = self.confidence
 
         self.progress(.1, "Sending request to server")
         if self.split_types:
