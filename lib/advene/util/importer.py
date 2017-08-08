@@ -402,6 +402,15 @@ class GenericImporter(object):
 
         return p, at
 
+    def check_requirements(self):
+        """Check if external requirements for the importers are met.
+
+        It returns a list of strings describing the unmet
+        requirements. If the list is empty, then all requirements are
+        met.
+        """
+        return []
+
     def convert(self, source):
         """Converts the source elements to annotations.
 

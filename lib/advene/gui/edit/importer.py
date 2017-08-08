@@ -18,6 +18,9 @@
 #
 """GUI to apply importers to files or internal data
 """
+import logging
+logger = logging.getLogger(__name__)
+
 import os
 import _thread
 from gi.repository import GObject
@@ -153,10 +156,6 @@ class AnnotationImporter(AdhocView):
             b.set_sensitive(False)
             return True
 
-        b.set_label(stop_label)
-        self.importers.set_sensitive(False)
-        self.fb.set_sensitive(False)
-
         if self.importer is None:
             ic = self.importers.get_current_element()
             fname = self.filename or self.fb.get_filename() or self.fb.get_uri()
@@ -193,6 +192,18 @@ class AnnotationImporter(AdhocView):
             pass
         config.data.preferences['filter-options'][type(i).__name__] = dict(self.optionform.options)
         i.package=self.controller.package
+
+        reqs = i.check_requirements()
+        logger.warn("Checked reqs: %s", reqs)
+        if reqs:
+            # Not all requirements are met. Display some information.
+            dialog.message_dialog(_("The filter is not ready.\n%s") % "\n".join(reqs), modal=True)
+            return True
+
+        # Update Start button to Stop and disable GUI elements
+        b.set_label(stop_label)
+        self.importers.set_sensitive(False)
+        self.fb.set_sensitive(False)
 
         if hasattr(i, 'async_process_file'):
             # Asynchronous version.
