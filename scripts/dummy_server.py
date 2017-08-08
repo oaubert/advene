@@ -4,6 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import BaseHTTPServer
+import itertools
 import json
 import random
 import urlparse
@@ -52,17 +53,22 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.end_headers()
 
         for a in post_data['annotations']:
+            logger.debug("Extracting for %s", a['annotationid'])
             # Emulate data extraction. 3 concepts max per annotation.
             concepts = []
             for _ in range(3):
+                # The pseudo-detection takes place here :-)
                 label = random.choice(CONCEPT_LIST)
+
                 concepts.append({
                     'annotationid': a['annotationid'],
                     'confidence': random.random(),
-                    # The following formula is here to make sure
-                    # that we have a valid range even if the
-                    # annotation bounds are invalid (begin == end
-                    # or begin > end)
+                    # The following formula is here to make sure that
+                    # we have a valid range even if the annotation
+                    # bounds are invalid (begin == end or begin >
+                    # end). In real code, it should be derived from
+                    # the first annotation thumbnail were the concept
+                    # is detected.
                     'timecode': random.randrange(a['begin'], a['begin'] + (max(a['end'] - a['begin'], 0) or 5000)),
                     'label': label,
                     'uri': 'http://concept.org/%s' % label
@@ -76,7 +82,7 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 'media_filename': post_data.get('media_filename', ''),
                 'media_uri': post_data.get('media_uri', ''),
                 'model': post_data.get('model', ''),
-                'concepts': [ a['concepts'] for a in post_data['annotations'] ]
+                'concepts': list(itertools.chain(c for a in post_data['annotations'] for c in a['concepts']))
             }
         }, s.wfile)
 
