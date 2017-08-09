@@ -65,7 +65,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level':'WARNING',
+            'level':'DEBUG',
             'class':'logging.StreamHandler',
             'formatter': 'simple'
         },
@@ -77,18 +77,20 @@ LOGGING = {
             'backupCount': 7,
         },
     },
+    'root': {
+        'handlers':['console', 'logfile'],
+        'level': 'INFO',
+    },
     'loggers': {
         'cherrypy.error': {
             'handlers': [ 'logfile' ],
             'propagate': False,
             'level': 'INFO',
-        '': {
-            'handlers':['console', 'logfile'],
-            'propagate': True,
-            'level':'INFO',
         },
     }
 }
+for m in os.environ.get('ADVENE_DEBUG', '').split(':'):
+    LOGGING['loggers'][m] = { 'level': 'DEBUG' }
 logging.config.dictConfig(LOGGING)
 # Do a forced rollover for the RotatingFileHandler
 for h in logging.root.handlers:
