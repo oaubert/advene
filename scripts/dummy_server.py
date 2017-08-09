@@ -48,6 +48,7 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             post_data = json.loads(body)
         else:
             post_data = urlparse.parse_qs(body)
+        logger.info("Got a POST request [%d annotations, %d bytes]", len(post_data['annotations']), length)
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
