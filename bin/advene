@@ -78,6 +78,10 @@ LOGGING = {
         },
     },
     'loggers': {
+        'cherrypy.error': {
+            'handlers': [ 'logfile' ],
+            'propagate': False,
+            'level': 'INFO',
         '': {
             'handlers':['console', 'logfile'],
             'propagate': True,
