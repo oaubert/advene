@@ -670,9 +670,9 @@ class AdveneGUI(object):
         self.updated_element(event, annotation)
         for v in self.adhoc_views:
             try:
-                v.update_annotation(annotation=annotation, event=event)
-            except AttributeError:
-                pass
+                m = getattr(v, 'update_annotation', None)
+                if m:
+                    m(annotation=annotation, event=event)
             except Exception:
                 logger.error(_("Exception in update_annotation"), exc_info=True)
         # Update the content indexer
@@ -698,9 +698,9 @@ class AdveneGUI(object):
         self.updated_element(event, relation)
         for v in self.adhoc_views:
             try:
-                v.update_relation(relation=relation, event=event)
-            except AttributeError:
-                pass
+                m = getattr(v, 'update_relation', None)
+                if m:
+                    m(relation=relation, event=event)
             except Exception:
                 logger.error(_("Exception in update_relation"), exc_info=True)
         # Refresh the edit popup for the members
@@ -720,9 +720,9 @@ class AdveneGUI(object):
         self.updated_element(event, view)
         for v in self.adhoc_views:
             try:
-                v.update_view(view=view, event=event)
-            except AttributeError:
-                pass
+                m = getattr(v, 'update_view', None)
+                if m:
+                    m(view=view, event=event)
             except Exception:
                 logger.error(_("Exception in update_view"), exc_info=True)
 
@@ -748,9 +748,10 @@ class AdveneGUI(object):
         self.updated_element(event, query)
         for v in self.adhoc_views:
             try:
+                m = getattr(v, 'update_query', None)
+                if m:
+                    m(query=query, event=event)
                 v.update_query(query=query, event=event)
-            except AttributeError:
-                pass
             except Exception:
                 logger.error(_("Exception in update_query"), exc_info=True)
         return True
@@ -768,9 +769,9 @@ class AdveneGUI(object):
 
         for v in self.adhoc_views:
             try:
-                v.update_resource(resource=resource, event=event)
-            except AttributeError:
-                pass
+                m = getattr(v, 'update_resource', None)
+                if m:
+                    m(resource=resource, event=event)
             except Exception:
                 logger.error(_("Exception in update_resource"), exc_info=True)
         return True
@@ -788,9 +789,9 @@ class AdveneGUI(object):
 
         for v in self.adhoc_views:
             try:
-                v.update_schema(schema=schema, event=event)
-            except AttributeError:
-                pass
+                m = getattr(v, 'update_schema', None)
+                if m:
+                    m(schema=schema, event=event)
             except Exception:
                 logger.error(_("Exception in update_schema"), exc_info=True)
         return True
@@ -808,9 +809,9 @@ class AdveneGUI(object):
         self.updated_element(event, at)
         for v in self.adhoc_views:
             try:
-                v.update_annotationtype(annotationtype=at, event=event)
-            except AttributeError:
-                pass
+                m = getattr(v, 'update_annotationtype', None)
+                if m:
+                    m(annotationtype=at, event=event)
             except Exception:
                 logger.error(_("Exception in update_annotationtype"), exc_info=True)
         # Update the current type menu
@@ -833,7 +834,9 @@ class AdveneGUI(object):
         self.updated_element(event, rt)
         for v in self.adhoc_views:
             try:
-                v.update_relationtype(relationtype=rt, event=event)
+                m = getattr(v, 'update_relationtype', None)
+                if m:
+                    m(relationtype=rt, event=event)
             except AttributeError:
                 pass
             except Exception:
