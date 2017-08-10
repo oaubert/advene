@@ -207,6 +207,35 @@ class DetailedTreeModel(object):
         children = self.nodeChildren(node)
         return (children is not None and children)
 
+    def update_element(self, e, created=False):
+        """Update an element.
+
+        This is called when a element has been modified or created.
+        """
+        parent=self.nodeParent(e)
+        try:
+            del (self.childrencache[parent])
+        except KeyError:
+            pass
+
+    def remove_element (self, e):
+        """Remove an element from the model.
+
+        Return its parent node, so that we can update representations.
+        """
+        parent=None
+        for p in self.childrencache:
+            if e in self.childrencache[p]:
+                parent=p
+                break
+        if parent is None:
+            # Could not find the element in the cache.
+            # It was not yet displayed
+            pass
+        else:
+            del self.childrencache[parent]
+        return parent
+
 class FinderColumn(object):
     """Abstract FinderColumn class.
     """
@@ -218,6 +247,7 @@ class FinderColumn(object):
         self.previous=parent
         self.next_column=None
         self.widget=Gtk.Frame()
+        self.in_update = False
         self.widget.add(self.build_widget())
         self.widget.connect('key-press-event', self.key_pressed_cb)
 
@@ -265,6 +295,7 @@ class FinderColumn(object):
     def close(self):
         """Close this column, and all following ones.
         """
+        logger.debug("Findercolumn.close")
         if self.next_column is not None:
             self.next_column.close()
         self.widget.destroy()
@@ -276,6 +307,7 @@ class FinderColumn(object):
     name=property(fget=get_name, doc="Displayed name for the element")
 
     def update(self, node=None):
+        logger.debug("FinderColumn.update %s", node)
         self.node=node
         return True
 
@@ -327,6 +359,8 @@ class ModelColumn(FinderColumn):
         return ls
 
     def update(self, node=None):
+        logger.debug("ModelColumn.update %s", node)
+        self.in_update = True
         self.node=node
         self.liststore.clear()
         if self.node is None:
@@ -334,6 +368,8 @@ class ModelColumn(FinderColumn):
         self.column.set_title(self.controller.get_title(node))
         for row in self.get_valid_members(node):
             self.liststore.append(row)
+        self.in_update = False
+        self.on_changed_selection(None, self.model)
 
         if self.next_column is not None:
             # There is a next column. Should we still display it ?
@@ -377,7 +413,7 @@ class ModelColumn(FinderColumn):
             store, it = selection.get_selected()
             if it is not None:
                 att = model.get_value (it, self.COLUMN_ELEMENT)
-        if att is not None and self.callback:
+        if not self.in_update and att is not None and self.callback:
             self.callback(self, att)
             return True
         return False
@@ -795,6 +831,7 @@ class Finder(AdhocView):
         return True
 
     def update_element(self, element=None, event=None):
+        logger.debug("update_element %s %s", event, element)
         if event.endswith('Create'):
             self.model.update_element(element, created=True)
             self.refresh()
@@ -802,21 +839,15 @@ class Finder(AdhocView):
             self.model.update_element(element, created=False)
             self.refresh()
         elif event.endswith('Delete'):
-            self.model.remove_element(element)
-            cb=self.rootcolumn.next_column
-            while cb is not None:
-                if [ r
-                     for r in cb.liststore
-                     if r.node == element ]:
-                    # The element is present in the list of
-                    # children. Remove the next column if necessary
-                    # and update the children list.
-                    cb.update(node=cb.node)
-                    if cb.next_column is not None and cb.next_column.node == element:
-                        cb.next_column.close()
-
-                cb=cb.next_column
-            #self.update_model(element.rootPackage)
+            parent = self.model.remove_element(element)
+            if parent is not None:
+                cb=self.rootcolumn.next_column
+                while cb is not None:
+                    if cb.node == parent:
+                        cb.update(node=cb.node)
+                        if cb.next_column is not None and cb.next_column.node == element:
+                            cb.next_column.close()
+                    cb=cb.next_column
         else:
             return "Unknown event %s" % event
         return
