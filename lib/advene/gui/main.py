@@ -1168,27 +1168,6 @@ class AdveneGUI(object):
 
         self.visual_id = None
 
-        def build_player_menu(menu):
-            if menu.get_children():
-                # The menu was previously populated, but the player may have changed.
-                # Clear it to update it.
-                menu.foreach(menu.remove)
-
-            # Populate the "Select player" menu
-            for ident, p in config.data.players.items():
-                def select_player(i, p):
-                    self.controller.select_player(p)
-                    return True
-                if self.controller.player.player_id == ident:
-                    ident="> %s" % ident
-                else:
-                    ident="   %s" % ident
-                i=Gtk.MenuItem(ident)
-                i.connect('activate', select_player, p)
-                menu.append(i)
-                i.show()
-            return True
-
         # Adhoc view toolbuttons signal handling
         def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
             if targetType == config.data.target_type['adhoc-view']:
@@ -1328,7 +1307,7 @@ class AdveneGUI(object):
 
         menu=Gtk.Menu()
         self.gui.select_player_menuitem.set_submenu(menu)
-        menu.connect('map', build_player_menu)
+        self.build_player_menu()
 
         defaults=config.data.advenefile( ('defaults', 'workspace.xml'), 'settings')
         if os.path.exists(defaults):
@@ -1852,6 +1831,7 @@ class AdveneGUI(object):
         except AttributeError:
             p.set_visual(self.drawable.get_id())
         self.update_control_toolbar(self.player_toolbar)
+        self.build_player_menu()
 
     def player_play_pause(self, event):
         p=self.controller.player
@@ -2128,6 +2108,28 @@ class AdveneGUI(object):
         # Call update_control_toolbar()
         self.update_control_toolbar(tb)
         return tb
+
+    def build_player_menu(self):
+        menu = self.gui.select_player_menuitem.get_submenu()
+        if menu.get_children():
+            # The menu was previously populated, but the player may have changed.
+            # Clear it to update it.
+            menu.foreach(menu.remove)
+
+        # Populate the "Select player" menu
+        for ident, p in config.data.players.items():
+            def select_player(i, p):
+                self.controller.select_player(p)
+                return True
+            if self.controller.player.player_id == ident:
+                ident="> %s" % ident
+            else:
+                ident="   %s" % ident
+            i=Gtk.MenuItem(ident)
+            i.connect('activate', select_player, p)
+            menu.append(i)
+            i.show()
+        return True
 
     def update_control_toolbar(self, tb=None):
         """Update player control toolbar.
