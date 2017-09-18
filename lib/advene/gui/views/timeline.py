@@ -193,6 +193,8 @@ class TimeLine(AdhocView):
         if ats:
             annotationtypes=ats
 
+        if not annotationtypes:
+            annotationtypes = list(self.controller.package.annotationTypes)
         self.list = elements
         if len(annotationtypes or []) != len(self.controller.package.annotationTypes):
             # Selected annotation types (else we would use all package's types)
