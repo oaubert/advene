@@ -662,6 +662,8 @@ class GenericTable(AdhocView):
 
         tree_view.connect('button-press-event', self.tree_view_button_cb)
         tree_view.connect('row-activated', self.row_activated_cb)
+        # Deactivate starting search by simply typing. Users have to use the search shortcut (Control-F)
+        tree_view.set_enable_search(False)
         #tree_view.set_search_column(COLUMN_CONTENT)
 
         def search_content(model, column, key, it):
