@@ -640,8 +640,12 @@ class TraceBuilder(Thread):
             #event related to the player
             if obj['position'] is None:
                 obj['position']=0
+            elif hasattr(obj['position'], 'value'):
+                obj['position'] = obj['position'].value
             if obj['position_before'] is None:
                 obj['position_before']=0
+            elif hasattr(obj['position_before'], 'value'):
+                obj['position_before'] = obj['position_before'].value
             ev_content=str(time.strftime("%H:%M:%S", time.gmtime(obj['position_before']/1000)))
             ev_content+= '\n'
             ev_content+=str(time.strftime("%H:%M:%S", time.gmtime(obj['position']/1000)))
