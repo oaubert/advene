@@ -28,13 +28,21 @@ import time
 
 import advene.core.config as config
 
+import gi
 from gi.repository import GObject
 GObject.threads_init()
 
+if config.data.os == 'linux':
+    from gi.repository import GdkX11
+elif config.data.os == 'win32':
+    gi.require_version('GdkWin32', '3.0')
+    from gi.repository import GdkWin32
+from gi.repository import Gdk
+
 try:
-    import gi
     gi.require_version('Gst', '1.0')
     from gi.repository import Gst
+    Gst.init(None)
 except ImportError:
     Gst=None
 
@@ -140,7 +148,7 @@ class Player:
             # Generate black image
             videosrc = 'videotestsrc pattern=2'
 
-        self.pipeline=Gst.parse_launch('%(videosrc)s name=videosrc ! video/x-raw-yuv,width=352,pixel-aspect-ratio=(fraction)1/1 ! queue ! tee name=tee ! ffmpegcolorspace ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s name=audiosrc ! audioconvert ! audiorate ! queue ! vorbisenc quality=0.5 ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
+        self.pipeline=Gst.parse_launch('%(videosrc)s name=videosrc ! video/x-raw,width=352,pixel-aspect-ratio=(fraction)1/1 ! queue ! tee name=tee ! videoconvert ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s name=audiosrc ! audioconvert ! audiorate ! queue ! vorbisenc quality=0.5 ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
         self.imagesink=self.pipeline.get_by_name('sink')
         self.videosrc=self.pipeline.get_by_name('videosrc')
         self.audiosrc=self.pipeline.get_by_name('audiosrc')
@@ -153,11 +161,30 @@ class Player:
             s = message.get_structure()
             if s is None:
                 return
-            if s.get_name() == 'prepare-xwindow-id' and self.xid is not None:
-                message.src.set_xwindow_id(self.xid)
-                if hasattr(message.src.props, 'force-aspect-ratio'):
-                    message.src.set_property("force-aspect-ratio", True)
+            logger.warn("Sync %s", s.get_name())
+            if s.get_name() == 'prepare-window-handle':
+                self.set_visual(self.xid, message.src)
+
+        def on_bus_message_error(bus, message):
+            s = message.get_structure()
+            if s is None:
+                return True
+            title, message = message.parse_error()
+            logger.error("%s: %s", title, message)
+            return True
+
+        def on_bus_message_warning(bus, message):
+            s = message.get_structure()
+            if s is None:
+                return True
+            title, message = message.parse_warning()
+            logger.warn("%s: %s", title, message)
+            return True
+
         bus.connect('sync-message::element', on_sync_message)
+        bus.add_signal_watch()
+        bus.connect('message::error', on_bus_message_error)
+        bus.connect('message::warning', on_bus_message_warning)
 
     def position2value(self, p):
         """Returns a position in ms.
@@ -176,7 +203,7 @@ class Player:
     def current_status(self):
         if self.player is None:
             return self.UndefinedStatus
-        st=self.player.get_state()[1]
+        st=self.player.get_state(100)[1]
         if st == Gst.State.PLAYING:
             return self.PlayingStatus
         elif st == Gst.State.PAUSED:
@@ -190,8 +217,8 @@ class Player:
         if self.player is None:
             return 0
         try:
-            pos, format = self.player.query_position(Gst.Format.TIME)
-        except:
+            pos = self.player.query_position(Gst.Format.TIME)[1]
+        except Exception:
             position = 0
         else:
             position = pos * 1.0 / Gst.MSECOND
@@ -359,14 +386,19 @@ class Player:
         self.stream_duration = s.length
         self.current_position_value = int(s.position)
 
-    def set_visual(self, xid):
+    def set_widget(self, widget):
+        self.set_visual( widget.get_id() )
+
+    def set_visual(self, xid, realsink=None):
+        if realsink is None:
+            realsink = self.imagesink
         self.xid = xid
-        if self.imagesink.implements_interface(Gst.interfaces.XOverlay):
-            realsink = self.autovideosink.get_by_interface(Gst.interfaces.XOverlay)
-            if realsink:
-                realsink.set_xwindow_id(self.xid)
-                if hasattr(realsink.props, 'force-aspect-ratio'):
-                    realsink.set_property('force-aspect-ratio', True)
+        if xid and hasattr(realsink, 'set_window_handle'):
+            logger.info("Reparent " + hex(xid))
+            Gdk.Display().get_default().sync()
+            realsink.set_window_handle(xid)
+        if hasattr(realsink.props, 'force-aspect-ratio'):
+            realsink.set_property('force-aspect-ratio', True)
         return True
 
     def restart_player(self):
