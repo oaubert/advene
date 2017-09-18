@@ -396,7 +396,7 @@ class TranscriptionView(AdhocView):
                                        text, *tags)
 
         l=list(self.model)
-        #l.sort(lambda a,b: cmp(a.fragment.begin, b.fragment.begin))
+        l.sort(key=lambda a: a.fragment.begin)
         for a in l:
             if self.options['display-time']:
                 insert_at_cursor_with_tags_by_name("[%s]" % helper.format_time(a.fragment.begin),

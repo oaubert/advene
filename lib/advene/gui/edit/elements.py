@@ -32,8 +32,10 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 from gi.repository import GObject
 from gi.repository import Pango
-import re
+
+import operator
 import os
+import re
 import struct
 
 try:
@@ -434,12 +436,13 @@ class EditAnnotationPopup (EditElementPopup):
         return True
 
     def goto(self, button=None, direction=1):
-        # FIXME: cmp usually returns -1, 0, 1 but its definition only
-        # states that the value is positive or negative. Thus this may
-        # not work in all cases.
+        if direction > 0:
+            compare = operator.gt
+        else:
+            compare = operator.lt
         l=[a
            for a in self.element.type.annotations
-           if cmp(a.fragment.begin, self.element.fragment.begin) == direction ]
+           if compare(a.fragment.begin, self.element.fragment.begin) ]
         l.sort(key=lambda a: a.fragment.begin, reverse=(direction == -1))
         if l:
             a=l[0]

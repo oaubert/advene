@@ -428,27 +428,6 @@ class ActiveBookmarks(AdhocView):
                 return True
             return False
 
-        def do_reorder(b, func):
-            self.bookmarks.sort(func)
-            self.refresh()
-            return True
-
-        def reorder(widget):
-            """Display a popup menu proposing various sort options.
-            """
-            m=Gtk.Menu()
-            for t, func in (
-                (_("Chronological order"), lambda a, b: cmp(a.begin, b.begin)),
-                (_("Completeness and chronological order"), lambda a, b: cmp(a.end_widget == a.dropbox,
-                                                                             b.end_widget == b.dropbox) or cmp(a.begin, b.begin))
-                ):
-                i=Gtk.MenuItem(t)
-                i.connect('activate', do_reorder, func)
-                m.append(i)
-            m.show_all()
-            m.popup(None, widget, None, 0, Gtk.get_current_event_time())
-            return True
-
         def do_complete(b, func):
             l=[ bo for bo in self.bookmarks if bo.annotation is None ]
             if isinstance(func, int):
@@ -558,7 +537,6 @@ class ActiveBookmarks(AdhocView):
             return True
 
         for (icon, tip, method) in (
-            (Gtk.STOCK_REDO, _("Reorder active bookmarks"), reorder),
             (Gtk.STOCK_CONVERT, _("Complete bookmarks into annotations"), complete),
             (Gtk.STOCK_SAVE, _("Save the current state"), self.save_view),
             (Gtk.STOCK_FULLSCREEN, _("Set the size of snaphots"), scale_snaphots_menu),

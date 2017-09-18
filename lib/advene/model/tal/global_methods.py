@@ -491,7 +491,7 @@ def sorted (target, context):
         isinstance(target, list) and len(target) > 0 and hasattr(target[0], 'fragment')):
         l=list(target[:])
         l.sort(key=lambda e: e.fragment.begin)
-    elif (hasattr(target, '__getslice__') and len(target) > 0 and hasattr(target[0], '__cmp__')):
+    elif (hasattr(target, '__getslice__') and len(target) > 0 and hasattr(target[0], '__lt__')):
         l=list(target[:])
         l.sort()
     elif (hasattr(target, '__getslice__') and len(target) > 0 and hasattr(target[0], 'title')):
