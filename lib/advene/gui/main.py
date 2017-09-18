@@ -3216,16 +3216,6 @@ class AdveneGUI(object):
                                               icon=Gtk.MessageType.QUESTION,
                                               callback=lambda: do_save(l))
                 self.last_auto_save=t
-
-        # Fix the webserver reaction time on win32
-        if config.data.os == 'win32':
-            if c.player.status in self.active_player_status:
-                i = config.data.play_interval
-            else:
-                i = config.data.noplay_interval
-            if sys.getcheckinterval() != i:
-                sys.setcheckinterval(i)
-
         return True
 
     def search_string(self, s):
