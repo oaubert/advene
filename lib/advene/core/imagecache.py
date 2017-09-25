@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 import advene.core.config as config
 import operator
 
-from collections.abc import MutableMapping
 from collections import defaultdict
 import os
 import re
@@ -65,7 +64,7 @@ class TypedString(bytes):
     def __bytes__(self):
         return self
 
-class ImageCache(MutableMapping):
+class ImageCache(object):
     """ImageCache class.
 
     It interacts with the player to return annotation snapshots. It approximates
