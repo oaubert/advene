@@ -27,15 +27,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 from collections import OrderedDict
-import sys
-import time
-import os
 import io
-import textwrap
-import re
-import urllib.request, urllib.error, urllib.parse
-import socket
+import locale
+import os
+import pprint
 import queue
+import re
+import socket
+import sys
+import textwrap
+import time
+import urllib.request, urllib.error, urllib.parse
 
 import advene.core.config as config
 import advene.core.version
@@ -51,10 +53,8 @@ from gi.repository import Pango
 if config.data.os == 'win32':
     gi.require_version('GdkWin32', '3.0')
     from gi.repository import GdkWin32
-import pprint
 
 #Gdk.set_show_events(True)
-import locale
 logger.info("Using localedir %s" % config.data.path['locale'])
 
 # Locale initialisation
