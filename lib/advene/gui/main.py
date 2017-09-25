@@ -54,7 +54,10 @@ if config.data.os == 'win32':
     gi.require_version('GdkWin32', '3.0')
     from gi.repository import GdkWin32
 
-#Gdk.set_show_events(True)
+if config.data.debug:
+    #Gdk.set_show_events(True)
+    from advene.util.debug import debug_slow_update_hook
+
 logger.info("Using localedir %s" % config.data.path['locale'])
 
 # Locale initialisation
@@ -3216,6 +3219,8 @@ class AdveneGUI(object):
                                               icon=Gtk.MessageType.QUESTION,
                                               callback=lambda: do_save(l))
                 self.last_auto_save=t
+        if config.data.debug:
+            debug_slow_update_hook(self.controller)
         return True
 
     def search_string(self, s):
