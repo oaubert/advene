@@ -36,7 +36,6 @@ class AdveneTalesException(AdveneException): pass
 class AdveneTalesPathException(AdveneTalesException): pass
 
 class DebugLogger:
-
         verbosity = 3
 
         def debug (self, *args):
@@ -53,6 +52,8 @@ class DebugLogger:
 
         def critical (self, *args):
             logger.error(args)
+
+debuglogger_singleton = DebugLogger()
 
 class NoCallVariable(simpleTALES.ContextVariable):
         """Not callable variable.
@@ -271,7 +272,7 @@ class AdveneContext(_advene_context):
         for dm_name in self.defaultMethods():
             self.addMethod(dm_name, global_methods.__dict__[dm_name])
         # FIXME: debug
-        self.log = DebugLogger()
+        self.log = debuglogger_singleton
 
     def addMethod (self, name, function):
         """Add a new method to this context."""
