@@ -783,7 +783,7 @@ class TimeLine(AdhocView):
             # Iterate only on the first one (if any)
             png=self.controller.package.imagecache.get(pos)
             w.set_from_pixbuf(png_to_pixbuf (png, height=self.scale_layout.height))
-            w.timestamp=png.timestamp
+            w.timestamp = png.timestamp
             break
         return True
 
@@ -3202,10 +3202,10 @@ class TimeLine(AdhocView):
 
         sw_legend = Gtk.ScrolledWindow ()
         sw_legend.set_name('sw_legend')
-        sw_legend.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
+        sw_legend.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
         sw_legend.set_placement(Gtk.CornerType.TOP_RIGHT)
-        sw_legend.add (self.legend)
-        content_pane.add1 (sw_legend)
+        sw_legend.add(self.legend)
+        content_pane.add1(sw_legend)
 
         # Vertical auto-scroll when DNDing
         def scroll_on_drag(widget, drag_context, x, y, timestamp, vertical=True):
