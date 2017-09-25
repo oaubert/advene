@@ -191,7 +191,6 @@ class ImageCache(MutableMapping):
         if key is None:
             return value
         if value != self.not_yet_available_image:
-            self._modified=True
             if self.autosync and self.name is not None:
                 d=os.path.join(config.data.path['imagecache'], self.name)
                 if not os.path.isdir(d):
@@ -202,6 +201,7 @@ class ImageCache(MutableMapping):
                 value=CachedString(filename)
                 value.contenttype='image/png'
             elif isinstance(value, (str, bytes)):
+                self._modified=True
                 value=TypedString(value)
                 value.timestamp=key
                 value.contenttype='image/png'
