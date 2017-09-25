@@ -47,7 +47,7 @@ class CachedString:
                 data=f.read()
             return data
         except (IOError, OSError):
-            return ''
+            return b''
 
     def __repr__(self):
         return "Cached content from " + self._filename
