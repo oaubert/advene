@@ -21,9 +21,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 from collections import Mapping, Container
-import objgraph
+import datetime
+try:
+    import objgraph
+except ImportError:
+    objgraph = None
 import resource
 from sys import getsizeof
+
+# We should use the logging API, but some packages (like objgraph)
+# take an open file as parameter, so let's accomodate this
+DEBUGFILENAME = '/tmp/advene-debug-%s.log' % datetime.datetime.now().isoformat()[:19]
+logger.warn("Logging additional debug information to %s" % DEBUGFILENAME)
+DEBUGFILE = open(DEBUGFILENAME, 'w')
+
+def debug_log(*args):
+    """Log information to a specific logfile.
+    """
+    DEBUGFILE.write("%s - %s\n" % (datetime.datetime.now().isoformat(),
+                                 " ".join(str(a) for a in args)))
 
 def deep_getsizeof(o, ids=None):
     """Find the memory footprint of a Python object
@@ -67,6 +83,7 @@ def log_global_memory_usage():
     global last_mem
     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     if mem != last_mem:
+        debug_log("Memory usage: %s" % mem)
         logger.warn("Memory usage: %s" % mem)
         last_mem = mem
 
@@ -75,7 +92,7 @@ def log_imagecache_size(controller):
     global last_imagecache_size
     size = deep_getsizeof(controller.package.imagecache)
     if size != last_imagecache_size:
-        logger.warn("Imagecache usage: %s" % size)
+        debug_log("Imagecache usage: %s" % size)
         last_imagecache_size = size
 
 def debug_slow_update_hook(controller):
@@ -86,4 +103,6 @@ def debug_slow_update_hook(controller):
     """
     log_global_memory_usage()
     log_imagecache_size(controller)
-    objgraph.show_growth()
+    if objgraph is not None:
+        debug_log("------------ Object growth ---------------")
+        objgraph.show_growth(shortnames=False, file=DEBUGFILE)
