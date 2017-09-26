@@ -1,0 +1,76 @@
+#! /usr/bin/env python3
+
+# Parse objgraph.show_growth output to display data in a graph.
+# The output can be fed directly to gnuplot:
+# parse_objgraph file.log | gnuplot -p -
+
+# The considered format for the input log file is that any line that
+# does not start with a timestamp is considered as a objgraph data
+# line.
+# Any line starting with a timestamp will be used as a clock reference.
+# The idea is to log the current date before each call to show_growth:
+#
+#
+#
+# 2017-09-25T17:32:07.665522 - ------------ Object growth ---------------
+# builtins.function                      19123    +19123
+# builtins.dict                          12501    +12501
+# builtins.tuple                         10409    +10409
+# builtins.builtin_function_or_method     4839     +4839
+#
+
+import re
+import sys
+import gzip
+
+timestamp_re = re.compile('^\d\d\d\d-\d\d-\d\d')
+# Dict indexed by object
+data = {}
+current_timestamp = None
+input_filename = sys.argv[1]
+if input_filename.endswith('.gz'):
+    open_function = gzip.open
+else:
+    open_function = open
+with open_function(sys.argv[1], 'rt') as f:
+    for l in f:
+        if timestamp_re.search(l):
+            current_timestamp = l[:19]
+            continue
+        # Not starting with 2017-: for the moment, it can only be
+        # show_growth output
+        (obj, absolute, relative) = l.strip().split()
+        data.setdefault(obj, []).append([current_timestamp, absolute])
+
+try:
+    outname = sys.argv[2]
+except IndexError:
+    outname = "-"
+if outname == "-":
+    outfile = sys.stdout
+else:
+    outfile = open(outname, 'w')
+
+series = []
+# Dump data for gnuplot
+for obj, values in data.items():
+    if len(values) < 7:
+        continue
+    name = obj.replace('.', '_')
+    series.append(name)
+    outfile.write("${} << EOD\n".format(name))
+    for (d, v) in values:
+        outfile.write("%s %s\n" % (d, v))
+    outfile.write("EOD\n\n")
+
+# Cf https://stackoverflow.com/questions/12818797/gnuplot-plotting-several-datasets-with-titles-from-one-file
+#plot $series for [IDX=1:{}] datafile index (IDX-1) using 2:3 with lines title columnheader(1)
+outfile.write("""
+set xdata time
+set timefmt "%Y-%m-%dT%H:%M:%S"
+set format x "%H:%M:%S"
+
+plot {}
+""".format(',\\\n'.join('${name} using 1:2 with lines title "{obj}"'.format(name=s, obj=s.replace('_', '.')) for s in series)))
+outfile.close()
+
