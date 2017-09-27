@@ -208,10 +208,7 @@ class AnnotationImporter(AdhocView):
                 i.process_file(fname)
             except Exception as e:
                 dialog.message_dialog(str(e.args), modal=False)
-                import sys
-                import code
-                e, v, tb = sys.exc_info()
-                code.traceback.print_exception (e, v, tb)
+                logger.exception("Error in processing import data")
             finally:
                 self.processing_ended()
         return True

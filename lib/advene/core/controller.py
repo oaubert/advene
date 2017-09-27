@@ -392,11 +392,7 @@ class AdveneController(object):
         for (method, args, kw) in ev:
             try:
                 method(*args, **kw)
-            except Exception as e:
-                import traceback
-                s=io.StringIO()
-                traceback.print_exc (file = s)
-                self.queue_action(self.log, _("Exception (traceback in console):") + str(e))
+            except Exception:
                 logger.error("Exception in process_queue", exc_info=True)
 
         return True

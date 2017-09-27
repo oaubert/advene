@@ -444,8 +444,8 @@ class AnnotationWidget(GenericColorButtonWidget):
                     scale = 1.0 * height / s.get_dimensions().height
                     context.set_matrix(cairo.Matrix( scale, 0, 0, scale, 0, 0 ))
                     s.render_cairo(context)
-                except Exception as e:
-                    logger.error("Error when rendering SVG timeline component %s", e, exc_info=True)
+                except Exception:
+                    logger.error("Error when rendering SVG timeline component %s", exc_info=True)
             return
 
         # Draw the border

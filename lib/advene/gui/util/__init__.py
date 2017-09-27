@@ -123,9 +123,9 @@ def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
             h = p.get_height()
             pixbuf=png_to_pixbuf (png_data).scale_simple(w, h, GdkPixbuf.InterpType.BILINEAR)
             p.composite(pixbuf, 0, 0, w, h, 0, 0, 1.0, 1.0, GdkPixbuf.InterpType.BILINEAR, 255)
-        except GObject.GError as e:
+        except GObject.GError:
             # The PNG data was invalid.
-            logger.error("Invalid image data %s", e)
+            logger.error("Invalid image data", exc_info=True)
             pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
     else:
         pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
