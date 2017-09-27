@@ -49,6 +49,9 @@ import operator
 
 import advene.core.config as config
 
+if config.data.debug:
+    from advene.util.debug import debug_log
+
 from gettext import gettext as _
 
 import advene.core.plugin
@@ -972,11 +975,11 @@ class AdveneController(object):
         will be triggered through queue_action in the application
         mainloop (main thread).
         """
-        if False:
-            logger.debug("Notify %s (%s): %s" % (
+        if config.data.debug:
+            debug_log("Notify %s (%s): %s" % (
                 event_name,
                 helper.format_time_reference(self.player.current_position_value),
-                str(kw)), exc_info=True)
+                str(kw)))
 
         # Set the package._modified state
         # This does not really belong here, but it is the more convenient and
