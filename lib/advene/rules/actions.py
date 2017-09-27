@@ -715,10 +715,10 @@ class DefaultActionsRepository:
             return True
         try:
             val=int(float(value))
-        except ValueError as e:
+        except ValueError:
             # Store it as a string.
             val=value
-        self.controller.package.state[name]=value
+        self.controller.package.state[name]=val
         return True
 
     def IncrState(self, context, parameters):
