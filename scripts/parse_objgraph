@@ -54,7 +54,7 @@ else:
 series = []
 # Dump data for gnuplot
 for obj, values in data.items():
-    if len(values) < 7:
+    if len(values) < 5:
         continue
     name = obj.replace('.', '_')
     series.append(name)
