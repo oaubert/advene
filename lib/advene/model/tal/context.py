@@ -157,7 +157,7 @@ class _advene_context (simpleTALES.Context):
                         val = self.globals[path]
                 else:
                         # If we can't find it then raise an exception
-                        raise simpleTALES.PATHNOTFOUNDEXCEPTION
+                        raise simpleTALES.PathNotFoundException() from None
 
                 # Advene hook: store the resolved_stack
                 resolved_stack = [ (path, val) ]
@@ -195,14 +195,13 @@ class _advene_context (simpleTALES.Context):
                                 val = getattr (temp, path)
                         else:
                                 try:
+                                        val = temp[path]
+                                except TypeError:
                                         try:
-                                                val = temp[path]
-                                        except TypeError:
                                                 val = temp[int(path)]
-                                except:
-                                        #self.log.debug ("Not found.")
-                                        raise simpleTALES.PATHNOTFOUNDEXCEPTION
-
+                                        except:
+                                                #self.log.debug ("Not found.")
+                                                raise simpleTALES.PathNotFoundException() from None
                         # Advene hook: stack resolution
                         resolved_stack.insert(0, (path, val) )
 
@@ -318,8 +317,8 @@ class AdveneContext(_advene_context):
         """
         try:
                 r = self.evaluate (expr)
-        except simpleTALES.PathNotFoundException as e:
+        except simpleTALES.PathNotFoundException:
                 raise AdveneTalesException(
                         'TALES expression %s returned None in context %s' %
-                        (e, self))
+                        (expr, self)) from None
         return r
