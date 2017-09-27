@@ -2568,7 +2568,7 @@ class AdveneController(object):
                 output = stream
             try:
                 compiler.getTemplate ().expand (context=ctx, outputFile=output, outputEncoding='utf-8')
-            except simpleTALES.ContextContentException as e:
+            except simpleTALES.ContextContentException:
                 logger.error(_("Error when exporting text template"), exc_info=True)
             if filter.content.mimetype == 'text/plain':
                 stream.write(output.getvalue().replace(b'&lt;', b'<').replace(b'&gt;', b'>').replace(b'&amp;', b'&'))
@@ -2577,7 +2577,7 @@ class AdveneController(object):
             compiler.parseTemplate (filter.content.stream)
             try:
                 compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
-            except simpleTALES.ContextContentException as e:
+            except simpleTALES.ContextContentException:
                 logger.error(_("Error when exporting XML template"), exc_info=True)
         stream.close()
         self.log(_("Data exported to %s") % filename)
@@ -2593,6 +2593,6 @@ if __name__ == '__main__':
     cont = AdveneController()
     try:
         cont.self_loop()
-    except Exception as e:
+    except Exception:
         logger.error("Got exception %s. Stopping services...", exc_info=True)
         cont.on_exit()
