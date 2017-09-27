@@ -105,4 +105,4 @@ def debug_slow_update_hook(controller):
     log_imagecache_size(controller)
     if objgraph is not None:
         debug_log("------------ Object growth ---------------")
-        objgraph.show_growth(shortnames=False, file=DEBUGFILE)
+        objgraph.show_growth(shortnames=False, limit=30, file=DEBUGFILE)
