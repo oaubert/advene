@@ -103,12 +103,12 @@ class TemplateCache:
 		except Exception as e:
 			self.cacheLock.release()
 			raise e
-			
+
 		self.cacheLock.release()
 		return template
 
 def tagAsText (tag,atts):
-	result = "<" + tag 
+	result = "<" + tag
 	for name,value in atts:
 		if (ESCAPED_TEXT_REGEX.search (value) is not None):
 			# We already have some escaped characters in here, so assume it's all valid

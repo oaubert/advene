@@ -195,7 +195,7 @@ class IteratorRepeatVariable (RepeatVariable):
 			self.iterStatus = 1
 			try:
 				self.curValue = next(self.sequence)
-			except StopIteration as e:
+			except StopIteration:
 				self.iterStatus = 2
 				raise IndexError ("Repeat Finished")
 		return self.curValue
@@ -205,7 +205,7 @@ class IteratorRepeatVariable (RepeatVariable):
 		self.position += 1
 		try:
 			self.curValue = next(self.sequence)
-		except StopIteration as e:
+		except StopIteration:
 			self.iterStatus = 2
 			raise IndexError ("Repeat Finished")
 
@@ -366,10 +366,10 @@ class Context:
 			else:
 				# Not specified - so it's a path
 				return self.evaluatePath (expr)
-		except PathNotFoundException as e:
+		except PathNotFoundException:
 			if (suppressException):
 				return None
-			raise e
+			raise
 
 	def evaluatePython (self, expr):
 		if (not self.allowPythonPath):
@@ -399,8 +399,8 @@ class Context:
 			return result
 		except Exception as e:
 			# An exception occured evaluating the template, return the exception as text
-			self.log.warn ("Exception occurred evaluating python path %s, exception %s" % (expr, str (e)))
-			return "Exception: %s" % str (e)
+			self.log.warn ("Exception occurred evaluating python path %s, exception %s" % (expr, str(e)))
+			return "Exception: %s" % str(e)
 
 	def evaluatePath (self, expr):
 		#self.log.debug ("Evaluating path expression %s" % expr)
@@ -410,7 +410,7 @@ class Context:
 				# Evaluate this path
 				try:
 					return self.evaluate (path.strip ())
-				except PathNotFoundException as e:
+				except PathNotFoundException:
 					# Path didn't exist, try the next one
 					pass
 			# No paths evaluated - raise exception.
@@ -428,7 +428,7 @@ class Context:
 		try:
 			result = self.traversePath (allPaths[0], canCall = 0)
 			return self.true
-		except PathNotFoundException as e:
+		except PathNotFoundException:
 			# Look at the rest of the paths.
 			pass
 
@@ -439,7 +439,7 @@ class Context:
 				# If this is part of a "exists: path1 | exists: path2" path then we need to look at the actual result.
 				if (pathResult):
 					return self.true
-			except PathNotFoundException as e:
+			except PathNotFoundException:
 				pass
 		# If we get this far then there are *no* paths that exist.
 		return self.false
@@ -450,7 +450,7 @@ class Context:
 		# The first path is for us
 		try:
 			return self.traversePath (allPaths[0], canCall = 0)
-		except PathNotFoundException as e:
+		except PathNotFoundException:
 			# Try the rest of the paths.
 			pass
 
@@ -458,7 +458,7 @@ class Context:
 			# Evaluate this path
 			try:
 				return self.evaluate (path.strip ())
-			except PathNotFoundException as e:
+			except PathNotFoundException:
 				pass
 		# No path evaluated - raise error
 		raise PATHNOTFOUNDEXCEPTION
@@ -469,7 +469,7 @@ class Context:
 		# Evaluate what I was passed
 		try:
 			pathResult = self.evaluate (expr)
-		except PathNotFoundException as e:
+		except PathNotFoundException:
 			# In SimpleTAL the result of "not: no/such/path" should be TRUE not FALSE.
 			return self.true
 
@@ -514,7 +514,7 @@ class Context:
 								# Evaluate the path - missing paths raise exceptions as normal.
 								try:
 									pathResult = self.evaluate (path)
-								except PathNotFoundException as e:
+								except PathNotFoundException:
 									# This part of the path didn't evaluate to anything - leave blank
 									pathResult = ''
 								if (pathResult is not None):
@@ -534,7 +534,7 @@ class Context:
 							# Evaluate the variable - missing paths raise exceptions as normal.
 							try:
 								pathResult = self.traversePath (path)
-							except PathNotFoundException as e:
+							except PathNotFoundException:
 								# This part of the path didn't evaluate to anything - leave blank
 								pathResult = ''
 							if (pathResult is not None):
@@ -545,7 +545,7 @@ class Context:
 									# Use Unicode in Context if you aren't using Ascii!
 									result += str (pathResult)
 							skipCount = endPos - position - 1
-					except IndexError as e:
+					except IndexError:
 						# Trailing $ sign - just suppress it
 						self.log.warn ("Trailing $ detected")
 						pass

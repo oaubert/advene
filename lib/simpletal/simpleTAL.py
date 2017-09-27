@@ -278,7 +278,7 @@ class TemplateInterpreter:
 				self.context.setLocal (args[0], self.repeatVariable.getCurrentValue())
 				self.programCounter += 1
 				return
-			except IndexError as e:
+			except IndexError:
 				# We have finished the repeat
 				self.repeatVariable = None
 				self.context.removeRepeat (args[0])
@@ -327,7 +327,7 @@ class TemplateInterpreter:
 
 		try:
 			curValue = self.repeatVariable.getCurrentValue()
-		except IndexError as e:
+		except IndexError:
 			# The iterator ran out of values before we started - treat as an empty list
 			self.outputTag = 0
 			self.repeatVariable = None
@@ -1445,7 +1445,7 @@ class XMLTemplateCompiler (TemplateCompiler, xml.sax.handler.ContentHandler, xml
 				if (SINGLETON_BYTES_XML_REGEX.match (xmlText)):
 					# This is a singleton!
 					self.singletonElement = 1
-		except xml.sax.SAXException as e:
+		except xml.sax.SAXException:
 			# Parser doesn't support this property
 			pass
 		# Convert attributes into a list of tuples
