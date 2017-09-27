@@ -779,9 +779,9 @@ class TimeLine(AdhocView):
                     if t[1] <= epsilon and t[1] < abs(t[0].timestamp - pos) ),
                  key=operator.itemgetter(1))
         for t in l:
-            w=t[0]
+            w = t[0]
             # Iterate only on the first one (if any)
-            png=self.controller.package.imagecache.get(pos)
+            png = self.controller.get_snapshot(position=pos)
             w.set_from_pixbuf(png_to_pixbuf (png, height=self.scale_layout.height))
             w.timestamp = png.timestamp
             break
@@ -2118,13 +2118,8 @@ class TimeLine(AdhocView):
         def display_image(widget, event, h, step):
             """Lazy-loading of images
             """
-            ic=self.controller.package.imagecache
-            png=ic.get(widget.mark, epsilon=step/2)
-            if (png == ic.not_yet_available_image
-                and 'async-snapshot' in self.controller.player.player_capabilities):
-                self.controller.update_snapshot(widget.mark)
-            else:
-                widget.timestamp=png.timestamp
+            png = self.controller.get_snapshot(position=widget.mark, precision=step/2)
+            widget.timestamp=png.timestamp
             widget.set_from_pixbuf(png_to_pixbuf (png, height=max(20, h)))
             if widget.expose_signal is not None:
                 widget.disconnect(widget.expose_signal)
