@@ -2039,7 +2039,7 @@ class EditAttributesForm (EditForm):
             try:
                 val = int(v)
             except ValueError:
-                raise ValueError (_('Expecting an integer.'))
+                raise ValueError (_('Expecting an integer.')) from None
         elif typ == 'advene':
             # We should not have writable Advene elements in attributes anyway
             pass
