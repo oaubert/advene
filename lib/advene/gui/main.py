@@ -2271,7 +2271,7 @@ class AdveneGUI(object):
         def do_save_as(fname, png_data, notify=False):
             try:
                 f = open(fname, 'wb')
-                f.write(str(png_data))
+                f.write(bytes(png_data))
                 f.close()
                 self.controller.log(_("Screenshot saved to %s") % fname)
                 if notify:
