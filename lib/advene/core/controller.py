@@ -1180,13 +1180,26 @@ class AdveneController(object):
             return str(element.id)
         return cleanup(str(element))
 
-    def get_snapshot(self, annotation):
-        """Return the snapshot for a given annotation.
+    def get_snapshot(self, annotation=None, position=None, media=None, precision=None):
+        """Return the snapshot for a given annotation or position/media.
+
+        If position is specified without a media, then the default
+        (current) media will be used.
         """
-        p = annotation.ownerPackage
-        if not p.imagecache.is_initialized(annotation.fragment.begin) and p is self.package:
-            self.update_snapshot(annotation.fragment.begin)
-        return p.imagecache[annotation.fragment.begin]
+        if annotation is not None:
+            pack = annotation.ownerPackage
+            position = annotation.fragment.begin
+        elif position is not None:
+            pack = None
+            if media is not None:
+                # FIXME: not efficient. Should be refactored when
+                # imagecache is better handled.
+                pack = next((p for p in self.package if p.getMedia() == media), None)
+            if pack is None:
+                pack = self.package
+        if not pack.imagecache.is_initialized(position) and pack == self.package and 'async-snapshot' in self.player.player_capabilities:
+            self.update_snapshot(position)
+        return pack.imagecache.get(position, precision)
 
     def get_default_media (self, package=None):
         """Return the current media for the given package.
