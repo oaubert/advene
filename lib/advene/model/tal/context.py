@@ -196,7 +196,7 @@ class _advene_context (simpleTALES.Context):
                         else:
                                 try:
                                         val = temp[path]
-                                except TypeError:
+                                except (TypeError, KeyError):
                                         try:
                                                 val = temp[int(path)]
                                         except:
@@ -315,10 +315,13 @@ class AdveneContext(_advene_context):
         will be used directly. If it is another instance, a new AdveneContext
         will be created with this instance as global symbol 'here'.
         """
+        r = None
         try:
                 r = self.evaluate (expr)
         except simpleTALES.PathNotFoundException:
                 raise AdveneTalesException(
                         'TALES expression %s returned None in context %s' %
                         (expr, self)) from None
+        except:
+                logger.error("Unhandled exception - please report", exc_info=True)
         return r
