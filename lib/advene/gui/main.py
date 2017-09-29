@@ -337,14 +337,7 @@ class AdveneGUI(object):
             fname = urllib.parse.unquote(fname)
             if fname.startswith('file:///'):
                 fname = fname[7:]
-            try:
-                self.set_busy_cursor(True)
-                self.controller.load_package (uri=fname)
-            except (OSError, IOError) as e:
-                self.set_busy_cursor(False)
-                dialog.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
-                        'filename': fname,
-                        'error': str(e)}, Gtk.MessageType.ERROR)
+            self.on_open1_activate(filename=fname)
             return True
         recent.connect('item-activated', open_history_file)
 
@@ -2276,7 +2269,7 @@ class AdveneGUI(object):
                 self.controller.log(_("Screenshot saved to %s") % fname)
                 if notify:
                     self.controller.queue_action(dialog.message_dialog, _("Screenshot saved in\n %s") % str(fname), modal=False)
-            except (IOError, OSError) as e:
+            except Exception as e:
                 self.controller.queue_action(dialog.message_dialog, _("Could not save screenshot:\n %s") % str(e), icon=Gtk.MessageType.ERROR, modal=False)
 
         if filename is None:
@@ -3765,19 +3758,21 @@ class AdveneGUI(object):
 
         return True
 
-    def on_open1_activate (self, button=None, data=None):
-        """Open a file selector to load a package."""
+    def on_open1_activate (self, button=None, data=None, filename=None):
+        """Open a file selector to load a package.
+"""
         if config.data.path['data']:
             d=config.data.path['data']
         else:
             d=None
 
-        filename, alias=dialog.get_filename(title=_("Load a package"),
-                                            action=Gtk.FileChooserAction.OPEN,
-                                            button=Gtk.STOCK_OPEN,
-                                            default_dir=d,
-                                            alias=True,
-                                            filter='advene')
+        if filename is None:
+            filename, alias=dialog.get_filename(title=_("Load a package"),
+                                                action=Gtk.FileChooserAction.OPEN,
+                                                button=Gtk.STOCK_OPEN,
+                                                default_dir=d,
+                                                alias=True,
+                                                filter='advene')
         if filename:
             name, ext = os.path.splitext(filename.lower())
             if ext in config.data.video_extensions:
