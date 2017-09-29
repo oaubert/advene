@@ -224,9 +224,9 @@ class ImageCache(object):
         if epsilon is None:
             epsilon=self.epsilon
         valids = [ (pos, abs(pos-key))
-                   for pos in self._dict
+                   for pos, val in self._dict.items()
                    if abs(pos - key) <= epsilon
-                   and self._dict.get(pos, self.not_yet_available_image) != self.not_yet_available_image ]
+                   and val != self.not_yet_available_image ]
         valids.sort(key=operator.itemgetter(1))
 
         if valids:
