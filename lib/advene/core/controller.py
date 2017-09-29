@@ -1633,6 +1633,25 @@ class AdveneController(object):
         """
         return datetime.datetime.now().replace(microsecond=0).isoformat()
 
+    def get_tag_color_for_element(self, element):
+        """Given an element, return a color based on tags set.
+        """
+        try:
+            tags = element.tags
+        except AttributeError:
+            return None
+        try:
+            d = element.rootPackage._tag_colors
+        except AttributeError:
+            return None
+        for t in tags:
+            try:
+                return d[t]
+            except KeyError:
+                pass
+        return None
+
+    STATIC_STRING_RE = re.compile('string:[^$]*')
     def get_element_color(self, element, metadata='color'):
         """Return the color for the given element.
 
@@ -1648,18 +1667,45 @@ class AdveneController(object):
         'color' metadata of the container (annotation-type for
         annotations, schema for types).
         """
+
+        def shortcut_evaluateValue(element, expr):
+            """Optimized version of evaluateValue
+
+            Common expressions (static strings, here/tag_color
+            expression) are evaluated without using the AdveneContext.
+            """
+            val = None
+
+            if not expr:
+                return None
+
+            if self.STATIC_STRING_RE.match(expr):
+                # Static value.
+                return expr[7:]
+
+            if expr == u'here/tag_color':
+                return self.get_tag_color_for_element(element)
+
+            if val is None:
+                # Previous shortcuts did not work. Go the slow way
+                # through a AdveneContext evaluation
+                logger.warn("unoptimized evaluation - %s", expr)
+                c = self.build_context(here=element)
+                try:
+                    val = c.evaluateValue(expr)
+                except Exception:
+                    logger.debug("Exception in color evaluation for %s", exc_info=True)
+                    val = None
+            return val
+
         # First try the 'color' metadata from the element itself.
-        color=None
+        color = None
         try:
-            col=element.getMetaData(config.data.namespace, metadata)
+            expr = element.getMetaData(config.data.namespace, metadata)
         except AttributeError:
             return None
-        if col:
-            c=self.build_context(here=element)
-            try:
-                color=c.evaluateValue(col)
-            except Exception:
-                color=None
+        if expr:
+            color = shortcut_evaluateValue(element, expr)
 
         if not color:
             # Not found in element. Try item_color from the container.
@@ -1670,16 +1716,12 @@ class AdveneController(object):
             else:
                 container=None
             if container:
-                col=container.getMetaData(config.data.namespace, 'item_color')
-                if col:
-                    c=self.build_context(here=element)
-                    try:
-                        color=c.evaluateValue(col)
-                    except Exception:
-                        color=None
+                expr = container.getMetaData(config.data.namespace, 'item_color')
+                if expr:
+                    color = shortcut_evaluateValue(element, expr)
                 if not color:
                     # Really not found. So use the container color.
-                    color=self.get_element_color(container)
+                    color = self.get_element_color(container)
         return color
 
     def load_package (self, uri=None, alias=None, activate=True):
