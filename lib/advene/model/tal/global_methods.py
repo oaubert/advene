@@ -541,20 +541,8 @@ def old_related(target, context):
 def tag_color(target, context):
     """Return a color matching one of the tags.
     """
-    try:
-        tags=target.tags
-    except AttributeError:
-        return None
-    try:
-        d=target.rootPackage._tag_colors
-    except AttributeError:
-        return None
-    for t in tags:
-        try:
-            return d[t]
-        except KeyError:
-            pass
-    return None
+    c=context.globals['options']['controller']
+    return c.get_tag_color_for_element(target)
 
 def representation(target, context):
     """Return a concise representation for the element.
