@@ -18,6 +18,8 @@
 #
 """Dialog building facilities.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
@@ -200,6 +202,9 @@ def message_dialog(label="", icon=Gtk.MessageType.INFO, modal=True, callback=Non
         button=Gtk.ButtonsType.YES_NO
     else:
         button=Gtk.ButtonsType.OK
+    if icon == Gtk.MessageType.ERROR:
+        # Log error message in main log with full traceback
+        logger.error(label, exc_info=True)
     if callback is not None:
         # Force non-modal behaviour when there is a callback
         modal=False
