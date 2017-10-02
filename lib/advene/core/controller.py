@@ -1689,7 +1689,7 @@ class AdveneController(object):
             if val is None:
                 # Previous shortcuts did not work. Go the slow way
                 # through a AdveneContext evaluation
-                logger.warn("unoptimized evaluation - %s", expr)
+                logger.debug("unoptimized evaluation - %s", expr)
                 c = self.build_context(here=element)
                 try:
                     val = c.evaluateValue(expr)
