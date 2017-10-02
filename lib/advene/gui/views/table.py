@@ -204,7 +204,7 @@ class AnnotationTable(AdhocView):
         if self.last_edited_path is not None:
             # We just edited an annotation. This update must come from
             # it, so let us try to set the cursor position at the next element.
-            path = next(self.last_edited_path)
+            path = self.last_edited_path.next()
             try:
                 self.model.get_iter(path)
             except (ValueError, TypeError):
