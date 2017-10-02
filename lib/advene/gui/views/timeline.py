@@ -943,6 +943,8 @@ class TimeLine(AdhocView):
             return True
 
         b = self.get_widget_for_annotation (annotation)
+        if not b:
+            return True
         if event == 'AnnotationEditEnd':
             self.update_button (b)
         elif event == 'AnnotationDelete':
