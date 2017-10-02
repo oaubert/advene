@@ -289,6 +289,10 @@ class AnnotationTable(AdhocView):
                 self.controller.notify('EditSessionEnd', element=a)
             return True
 
+        def validate_entry_on_focus_out(widget, event, cell, path):
+            cell.emit("edited", path, widget.get_text())
+            return True
+
         def entry_editing_started(cell, editable, path):
             if isinstance(editable, Gtk.Entry):
                 completion = Gtk.EntryCompletion()
@@ -303,6 +307,7 @@ class AnnotationTable(AdhocView):
                 completion.set_model(store)
                 completion.set_text_column(0)
                 editable.set_completion(completion)
+                editable.connect('focus-out-event', validate_entry_on_focus_out, cell, path)
 
         for (name, label, col) in (
                 ('content', _("Content"), COLUMN_CONTENT),
