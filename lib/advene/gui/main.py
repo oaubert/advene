@@ -36,6 +36,7 @@ import re
 import socket
 import sys
 import textwrap
+import threading
 import time
 import urllib.request, urllib.error, urllib.parse
 
@@ -232,6 +233,7 @@ class AdveneGUI(object):
         """Initializes the GUI and other attributes.
         """
         self.init_config()
+        self.main_thread = threading.currentThread()
         self.logbuffer = Gtk.TextBuffer()
         self.busy_cursor = Gdk.Cursor.new(Gdk.CursorType.WATCH)
 
@@ -2905,6 +2907,10 @@ class AdveneGUI(object):
         @param level: the error level
         @type level: int
         """
+        if threading.currentThread().ident != self.main_thread.ident:
+            GObject.timeout_add(0, self.log_message, msg, level)
+            return False
+
         # Do not clobber GUI log with Cherrypy log
         if 'cherrypy.error' in msg:
             return
@@ -2930,6 +2936,7 @@ class AdveneGUI(object):
 
         if 'gst-stream-error' in msg:
             dialog.message_dialog(_("Video player error: %s") % msg, modal=False, icon=Gtk.MessageType.ERROR)
+        return False
 
     def get_illustrated_text(self, text, position=None, vertical=False, height=40, color=None):
         """Return a HBox with the given text and a snapshot corresponding to position.
