@@ -3786,6 +3786,10 @@ class AdveneGUI(object):
                                                 default_dir=d,
                                                 alias=True,
                                                 filter='advene')
+        else:
+            name, ext = os.path.splitext(filename)
+            alias = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+
         if filename:
             name, ext = os.path.splitext(filename.lower())
             if ext in config.data.video_extensions:
