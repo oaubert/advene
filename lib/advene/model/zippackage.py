@@ -95,7 +95,7 @@ class ZipPackage:
         self.file_ = None
 
         if uri:
-            if os.path.exists(uri):
+            if os.path.exists(uri.replace('file://', '')):
                 # It is a real filename
                 self.uri = uri
                 self.file_ = uri
@@ -105,7 +105,7 @@ class ZipPackage:
                 # Use the same extension
                 self.uri = uri
                 (n, e) = os.path.splitext(uri)
-                logger.info("Making a local copy of %s", uri)
+                logger.warn("Making a local copy of %s", uri)
                 f, self.file_ = tempfile.mkstemp(e, 'adv')
                 os.write(f, u.read())
                 os.close(f)
@@ -204,6 +204,8 @@ class ZipPackage:
         """
         if fname is None:
             fname=self.file_
+
+        fname = fname.replace('file://', '')
 
         if os.path.isdir(fname):
             # Do not append the dir to tempdir_list, since we do not
