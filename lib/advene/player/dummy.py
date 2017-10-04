@@ -30,6 +30,8 @@ logger = logging.getLogger(__name__)
 
 from time import time
 
+import advene.core.config as config
+
 def register(controller):
     controller.register_player(Player)
     return True
@@ -129,9 +131,22 @@ class Player:
         self.videofile = item
         # Simulate a 30 minutes movie
         self.stream_duration = 30 * 60000
+        return self.get_video_info()
 
     def get_uri(self):
         return self.videofile
+
+    def get_video_info(self):
+        """Return information about the current video.
+        """
+        return {
+            'uri': self.get_uri(),
+            'framerate_denom': 1,
+            'framerate_num': config.data.preferences['default-fps'],
+            'width': 640,
+            'height': 480,
+            'duration': self.stream_duration,
+        }
 
     def snapshot(self):
         self.log("snapshot %s" % str(position))

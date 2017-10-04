@@ -1267,7 +1267,7 @@ class AdveneController(object):
         p = self.player
         if p.is_playing():
             p.stop()
-        p.set_uri(uri)
+        video_info = p.set_uri(uri)
         # Reset cached_duration so that it will be updated on play
         self.pending_duration_update = True
         self.notify("MediaChange", uri=uri)

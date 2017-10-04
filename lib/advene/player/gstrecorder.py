@@ -42,7 +42,9 @@ from gi.repository import Gdk
 
 try:
     gi.require_version('Gst', '1.0')
+    gi.require_version('GstPbutils', '1.0')
     from gi.repository import Gst
+    from gi.repository import GstPbutils
     Gst.init(None)
 except ImportError:
     Gst=None
@@ -226,9 +228,47 @@ class Player:
         else:
             self.videofile = item
         self.build_pipeline()
+        return self.get_video_info()
 
     def get_uri(self):
         return self.player.get_property('current-uri') or self.player.get_property('uri') or ""
+
+    def get_video_info(self):
+        """Return information about the current video.
+        """
+        uri = self.get_uri()
+        d = GstPbutils.Discoverer()
+        try:
+            info = d.discover_uri(uri)
+        except:
+            logger.error("Cannot find video info", exc_info=True)
+            info = None
+        default = {
+            'uri': uri,
+            'framerate_denom': 1,
+            'framerate_num': config.data.preferences['default-fps'],
+            'width': 640,
+            'height': 480,
+            'duration': 0,
+        }
+        if info is None:
+            # Return default data.
+            logger.warn("Could not find information about video, using absurd defaults.")
+            return default
+        if not info.get_video_streams():
+            # Could be an audio file.
+            default['duration'] = info.get_duration()
+            return default
+
+        stream = info.get_video_streams()[0]
+        return {
+            'uri': uri,
+            'framerate_denom': stream.get_framerate_denom(),
+            'framerate_num': stream.get_framerate_num(),
+            'width': stream.get_width(),
+            'height': stream.get_height(),
+            'duration': info.get_duration(),
+        }
 
     def snapshot(self, position):
         return None
