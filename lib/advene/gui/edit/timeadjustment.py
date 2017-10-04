@@ -231,7 +231,7 @@ class TimeAdjustment:
         return False
 
     def play_from_here(self, button):
-        self.controller.update_status("set", self.value)
+        self.controller.update_status("seek", self.value)
         return True
 
     def use_current_position(self, button):
@@ -287,5 +287,5 @@ class TimeAdjustment:
         self.value=v
         self.update_display()
         if self.sync_video:
-            self.controller.move_position(self.value, relative=False)
+            self.controller.update_status("seek", self.value)
         return True

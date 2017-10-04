@@ -98,7 +98,7 @@ class LogWindow(AdhocView):
         return True
 
     def goto_position(self, button=None, position=None):
-        self.controller.update_status("set", position)
+        self.controller.update_status("seek", position)
         return True
 
     def goto_url(self, button=None, url=None):

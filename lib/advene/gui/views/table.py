@@ -515,7 +515,7 @@ class AnnotationTable(AdhocView):
             # Space or Control-return: goto annotation
             ann = self.get_selected_node ()
             if ann is not None:
-                self.controller.update_status (status="set", position=ann.fragment.begin)
+                self.controller.update_status (status="seek", position=ann.fragment.begin)
                 self.controller.gui.set_current_annotation(ann)
                 return True
         elif event.keyval == Gdk.KEY_less and event.get_state() & Gdk.ModifierType.CONTROL_MASK:

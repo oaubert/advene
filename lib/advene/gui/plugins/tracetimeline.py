@@ -874,12 +874,7 @@ class TraceTimeline(AdhocView):
         @type time: number
         @param time: the timestamp we want to reach
         """
-        c=self.controller
-        pos = c.create_position (value=time,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-        c.update_status (status="set", position=pos)
-        return
+        self.controller.update_status("seek", time)
 
     def canvas_release(self, w, ev):
         """Manage the release of mouse buttons on the canvas
@@ -2569,9 +2564,5 @@ class DocGroup (CanvasGroup):
         """Move in the movie if docgroup clicked
         """
         if ev.button == 1:
-            c=self.controller
-            pos = c.create_position (value=self.movielength * (ev.x-self.x)/self.w,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
+            self.controller.update_status ("seek", self.movielength * (ev.x-self.x)/self.w)
 

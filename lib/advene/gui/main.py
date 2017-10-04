@@ -938,7 +938,7 @@ class AdveneGUI(object):
         """
         t = self.input_time_dialog()
         if t is not None:
-            self.controller.update_status ("set", self.controller.create_position(t))
+            self.controller.update_status("seek", t)
         return True
 
     def input_time_dialog(self, *p):
@@ -1598,13 +1598,13 @@ class AdveneGUI(object):
                     def action_loop(context, target):
                         if (self.player_toolbar.buttons['loop'].get_active()
                             and context.globals['annotation'] == self.current_annotation):
-                            self.controller.update_status('set', self.current_annotation.fragment.begin)
+                            self.controller.update_status('seek', self.current_annotation.fragment.begin)
                         return True
 
                     def reg():
                         # If we are already in the current annotation, do not goto it
                         if not self.controller.player.current_position_value in self.current_annotation.fragment:
-                            self.controller.update_status('set', self.current_annotation.fragment.begin)
+                            self.controller.update_status('seek', self.current_annotation.fragment.begin)
                         self.annotation_loop_rule=self.controller.event_handler.internal_rule (event="AnnotationEnd",
                                                                                                method=action_loop)
                         return True
@@ -1833,7 +1833,7 @@ class AdveneGUI(object):
 
     def player_play_pause(self, event):
         p=self.controller.player
-        if p.status == p.PlayingStatus or p.status == p.PauseStatus:
+        if p.is_playing():
             self.controller.update_status('pause')
         else:
             self.controller.update_status('start')
@@ -1843,45 +1843,42 @@ class AdveneGUI(object):
             i='second-time-increment'
         else:
             i='time-increment'
-        self.controller.move_position (config.data.preferences[i], notify=False)
+        self.controller.update_status("seek_relative", config.data.preferences[i], notify=False)
 
     def player_rewind(self, event):
         if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
             i='second-time-increment'
         else:
             i='time-increment'
-        self.controller.move_position (-config.data.preferences[i], notify=False)
+        self.controller.update_status("seek_relative", -config.data.preferences[i], notify=False)
 
     def player_forward_frame(self, event):
         if config.data.preferences['custom-updown-keys'] or event.get_state() & Gdk.ModifierType.SHIFT_MASK:
-            self.controller.move_position(+config.data.preferences['third-time-increment'], notify=False)
+            self.controller.update_status("seek_relative", +config.data.preferences['third-time-increment'], notify=False)
         else:
             self.controller.move_frame(+1)
 
     def player_rewind_frame(self, event):
         if config.data.preferences['custom-updown-keys'] or event.get_state() & Gdk.ModifierType.SHIFT_MASK:
-            self.controller.move_position(-config.data.preferences['third-time-increment'], notify=False)
+            self.controller.update_status("seek_relative", -config.data.preferences['third-time-increment'], notify=False)
         else:
             self.controller.move_frame(-1)
 
     def player_create_bookmark(self, event):
         p=self.controller.player
-        if p.status in (p.PlayingStatus, p.PauseStatus):
+        if p.is_playing():
             self.create_bookmark(p.current_position_value,
                                  insert_after_current=(event.get_state() & Gdk.ModifierType.SHIFT_MASK))
 
     def player_home(self, event):
-        self.controller.update_status ("set", self.controller.create_position (0))
+        self.controller.update_status("seek", 0)
 
     def player_end(self, event):
         c=self.controller
-        pos = c.create_position (value = -config.data.preferences['time-increment'],
-                                 key = c.player.MediaTime,
-                                 origin = c.player.ModuloPosition)
-        c.update_status ("set", pos)
+        c.update_status("seek_relative", -config.data.preferences['time-increment'])
 
     def player_set_fraction(self, f):
-        self.controller.update_status("set", self.controller.create_position(int(self.controller.cached_duration * f)))
+        self.controller.update_status("seek", self.controller.cached_duration * f)
 
     def function_key(self, event):
         if Gdk.KEY_F1 <= event.keyval <= Gdk.KEY_F12:
@@ -2083,12 +2080,30 @@ class AdveneGUI(object):
         tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         tb_list = [
-            ('playpause', _("Play/Pause [Control-Tab / Control-Space]"), Gtk.STOCK_MEDIA_PLAY, self.on_b_play_clicked),
-            ('rewind', _("Rewind (%.02f s) [Control-Left]") % (config.data.preferences['time-increment'] / 1000.0), Gtk.STOCK_MEDIA_REWIND, lambda i: self.controller.move_position (-config.data.preferences['time-increment'])),
-            ('forward', _("Forward (%.02f s) [Control-Right]" % (config.data.preferences['time-increment'] / 1000.0)), Gtk.STOCK_MEDIA_FORWARD, lambda i: self.controller.move_position (config.data.preferences['time-increment'])),
-            ('previous_frame', _("Previous frame [Control-Down]"), Gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_frame(-1)),
-            ('next_frame', _("Next frame [Control-Up]"), Gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_frame(+1)),
-            ('fullscreen', _("Fullscreen"), Gtk.STOCK_FULLSCREEN, lambda i: self.controller.player.fullscreen(self.connect_fullscreen_handlers) ),
+            ('playpause',
+             _("Play/Pause [Control-Tab / Control-Space]"),
+             Gtk.STOCK_MEDIA_PLAY,
+             self.on_b_play_clicked),
+            ('rewind',
+             _("Rewind (%.02f s) [Control-Left]") % (config.data.preferences['time-increment'] / 1000.0),
+             Gtk.STOCK_MEDIA_REWIND,
+             lambda i: self.controller.update_status("seek_relative", -config.data.preferences['time-increment'])),
+            ('forward',
+             _("Forward (%.02f s) [Control-Right]" % (config.data.preferences['time-increment'] / 1000.0)),
+             Gtk.STOCK_MEDIA_FORWARD,
+             lambda i: self.controller.update_status("seek_relative", config.data.preferences['time-increment'])),
+            ('previous_frame',
+             _("Previous frame [Control-Down]"),
+             Gtk.STOCK_MEDIA_PREVIOUS,
+             lambda i: self.controller.move_frame(-1)),
+            ('next_frame',
+             _("Next frame [Control-Up]"),
+             Gtk.STOCK_MEDIA_NEXT,
+             lambda i: self.controller.move_frame(+1)),
+            ('fullscreen',
+             _("Fullscreen"),
+             Gtk.STOCK_FULLSCREEN,
+             lambda i: self.controller.player.fullscreen(self.connect_fullscreen_handlers) ),
             ]
 
         tb.buttons = {}
@@ -3092,18 +3107,9 @@ class AdveneGUI(object):
         #Gtk.threads_enter()
         try:
             pos=self.controller.update()
-        except p.InternalException:
-            # FIXME: something sensible to do here ?
-            logger.error("Internal exception on video player")
-            #Gtk.threads_leave()
-            return True
         except:
-            # Catch-all exception, in order to keep the mainloop
-            # runnning
-            #Gtk.threads_leave()
-            logger.error(_("Got exception. Trying to continue."), exc_info=True)
+            logger.exception("Internal exception on video player")
             return True
-        #Gtk.threads_leave()
 
         if self.slider_move:
             # FIXME: we could have a cache of key images (i.e. 50 equidistant
@@ -3181,7 +3187,7 @@ class AdveneGUI(object):
         if self.gui.win.get_title().endswith('(*)') ^ c.package._modified:
             self.update_window_title()
         self.toolbuttons['undo'].set_sensitive(bool(c.undomanager.history))
-        is_playing = (c.player.status in (c.player.PlayingStatus, c.player.PauseStatus))
+        is_playing = c.player.is_playing()
         self.toolbuttons['create_text_annotation'].set_sensitive(is_playing)
         self.toolbuttons['create_svg_annotation'].set_sensitive(is_playing)
         for l in ('rewind', 'forward', 'previous_frame', 'next_frame', 'loop'):
@@ -3644,7 +3650,7 @@ class AdveneGUI(object):
     # Callbacks function. Skeletons can be generated by glade2py
     def on_create_text_annotation(self, win=None, event=None):
         c = self.controller
-        if c.player.status in (c.player.PlayingStatus, c.player.PauseStatus):
+        if c.player.is_playing():
             # Find out the appropriate type
             at = self.controller.package.get_element_by_id('annotation')
             if not at:
@@ -3670,7 +3676,7 @@ class AdveneGUI(object):
     def on_create_svg_annotation(self, win=None, event=None):
         c = self.controller
         self.controller.update_snapshot(c.player.current_position_value)
-        if c.player.status in (c.player.PlayingStatus, c.player.PauseStatus):
+        if c.player.is_playing():
             # Find out the appropriate type
             at = self.controller.package.get_element_by_id('svgannotation')
             if not at:
@@ -4087,21 +4093,16 @@ class AdveneGUI(object):
         """View mediainformation."""
         self.controller.position_update ()
         p=self.controller.player
-        if p.is_active() and p.playlist_get_list():
-            self.controller.log("%(status)s %(filename)s %(position)s / %(duration)s (cached %(cached)s) - %(positionms)dms / %(durationms)dms (cached %(cachedms)dms)" % {
-                    'filename': str(p.playlist_get_list ()[0]),
-                    'status': self.statustext.get(p.status, _("Unknown")),
-                    'position': helper.format_time(p.current_position_value),
-                    'positionms': p.current_position_value,
-                    'duration': helper.format_time_reference(p.stream_duration),
-                    'durationms': p.stream_duration,
-                    'cached': helper.format_time_reference(self.controller.cached_duration),
-                    'cachedms': self.controller.cached_duration
-                    })
-        else:
-            self.controller.log(_("Player not active - cached duration   : %(duration)s (%(durationms)d ms)") % {
-                    'duration': helper.format_time_reference(self.controller.cached_duration),
-                    'durationms': self.controller.cached_duration })
+        self.controller.log("%(status)s %(filename)s %(position)s / %(duration)s (cached %(cached)s) - %(positionms)dms / %(durationms)dms (cached %(cachedms)dms)" % {
+            'filename': p.get_uri(),
+            'status': self.statustext.get(p.status, _("Unknown")),
+            'position': helper.format_time(p.current_position_value),
+            'positionms': p.current_position_value,
+            'duration': helper.format_time_reference(p.stream_duration),
+            'durationms': p.stream_duration,
+            'cached': helper.format_time_reference(self.controller.cached_duration),
+            'cachedms': self.controller.cached_duration
+        })
         return True
 
     def on_about1_activate (self, button=None, data=None):
@@ -4124,7 +4125,7 @@ class AdveneGUI(object):
 
     def on_b_play_clicked (self, button=None, data=None):
         p = self.controller.player
-        if not p.playlist_get_list() and not 'record' in p.player_capabilities:
+        if not p.get_uri() and not 'record' in p.player_capabilities:
             # No movie file is defined yet. Propose to choose one.
             self.on_b_addfile_clicked()
             return True
@@ -4538,9 +4539,7 @@ class AdveneGUI(object):
         return
 
     def on_slider_button_release_event (self, button=None, event=None):
-        if self.controller.player.playlist_get_list():
-            p = self.controller.create_position (value = int(self.gui.slider.get_value ()))
-            self.controller.update_status('set', p)
+        self.controller.update_status('seek', int(self.gui.slider.get_value ()))
         self.slider_move = False
         return
 

@@ -19,6 +19,7 @@
 """Widget used to select the DVD chapter in Advene.
 """
 
+from gi.repository import Gdk
 from gi.repository import Gtk
 import re
 
@@ -61,23 +62,6 @@ class DVDSelect:
         #return "dvdsimple:///dev/dvd@%d:%d" % (self.get_title(),
         #                                       self.get_chapter())
 
-    def preview(self, button=None):
-        if not hasattr(self, 'oldplaylist'):
-            self.oldplaylist=self.controller.player.playlist_get_list()
-            self.controller.player.playlist_clear()
-            mediafile=self.get_url()
-            self.controller.player.playlist_add_item(mediafile)
-            self.controller.player.update_status("start")
-            button.set_label(_("Stop"))
-        else:
-            self.controller.player.update_status("stop")
-            self.controller.player.playlist_clear()
-            for i in self.oldplaylist:
-                self.controller.player.playlist_add_item(i)
-            del self.oldplaylist
-            button.set_label(_("Preview"))
-        return True
-
     def get_widget(self):
         return self.widget
 
@@ -104,10 +88,6 @@ class DVDSelect:
         hbox.pack_start(sp, False, True, 0)
         self.chapterwidget=sp
         vbox.add(hbox)
-
-        b=Gtk.Button(_("Preview"))
-        b.connect('clicked', self.preview)
-        vbox.add(b)
 
         vbox.show_all()
         return vbox

@@ -28,7 +28,6 @@ from gettext import gettext as _
 import advene.core.config as config
 from advene.util.helper import format_time
 import os
-import sys
 import time
 import urllib.request, urllib.parse, urllib.error
 
@@ -50,8 +49,10 @@ try:
     import gi
     gi.require_version('Gst', '1.0')
     gi.require_version('GstVideo', '1.0')
+    gi.require_version('GstPbutils', '1.0')
     from gi.repository import GObject, Gst
     from gi.repository import GstVideo
+    from gi.repository import GstPbutils
     if config.data.os == 'linux':
         from gi.repository import GdkX11
     elif config.data.os == 'win32':
@@ -93,47 +94,13 @@ class Snapshot:
                 except KeyError:
                     setattr(self, k, None)
 
-class Position:
-    def __init__(self, value=0):
-        self.value=value
-        # See Player attributes below...
-        self.origin=0
-        self.key=2
-
-    def __str__(self):
-        return "Position " + str(self.value)
-
-class PositionKeyNotSupported(Exception):
-    pass
-
-class PositionOrigin(Exception):
-    pass
-
-class InvalidPosition(Exception):
-    pass
-
-class PlaylistException(Exception):
-    pass
-
-class InternalException(Exception):
-    pass
-
 # Placeholder
 class Caption:
     pass
 
 class Player:
     player_id='gstreamer'
-    player_capabilities=[ 'seek', 'pause', 'caption', 'frame-by-frame', 'async-snapshot', 'set-rate' ]
-
-    # Class attributes
-    AbsolutePosition=0
-    RelativePosition=1
-    ModuloPosition=2
-
-    ByteCount=0
-    SampleCount=1
-    MediaTime=2
+    player_capabilities=[ 'seek', 'pause', 'caption', 'frame-by-frame', 'async-snapshot', 'set-rate', 'svg' ]
 
     # Status
     PlayingStatus=0
@@ -142,19 +109,12 @@ class Player:
     EndStatus=3
     UndefinedStatus=4
 
-    PositionKeyNotSupported=Exception("Position key not supported")
-    PositionOriginNotSupported=Exception("Position origin not supported")
-    InvalidPosition=Exception("Invalid position")
-    PlaylistException=Exception("Playlist error")
-    InternalException=Exception("Internal player error")
-
     def __init__(self):
-
         self.xid = None
         self.mute_volume=None
         self.rate = 1.0
         # fullscreen gtk.Window
-        self.fullscreen_window=None
+        self.fullscreen_window = None
 
         # Fullscreen timestamp display - cache data
         self.last_timestamp = 0
@@ -188,19 +148,16 @@ class Player:
         self.overlay.begin=-1
         self.overlay.end=-1
 
-        self.videofile=None
-        self.status=Player.UndefinedStatus
+        self.videofile = None
+        self.status = Player.UndefinedStatus
         self.current_position_value = 0
         self.stream_duration = 0
-        self.relative_position=self.create_position(0,
-                                                    origin=self.RelativePosition)
-
         self.position_update()
 
     def log (self, msg):
         """Display a message.
         """
-        logger.warn("gstreamer: %s", msg)
+        logger.warn(msg)
 
     def build_pipeline(self):
         sink='xvimagesink'
@@ -256,7 +213,7 @@ class Player:
             for src, dst in zip(elements, elements[1:]):
                 src.link(dst)
 
-        self.log("gstreamer: using " + sink)
+        self.log("using " + sink)
 
         # Note: it is crucial to make ghostpad an attribute, so that
         # it is not garbage-collected at the end of the build_pipeline
@@ -279,20 +236,6 @@ class Player:
         bus.add_signal_watch()
         bus.connect('message::error', self.on_bus_message_error)
         bus.connect('message::warning', self.on_bus_message_warning)
-
-    def position2value(self, p):
-        """Returns a position in ms.
-        """
-        if isinstance(p, Position):
-            v=p.value
-            if p.key != self.MediaTime:
-                self.log("unsupported key " + p.key)
-                return 0
-            if p.origin != self.AbsolutePosition:
-                v += self.current_position()
-        else:
-            v=p
-        return int(v)
 
     def current_status(self):
         st = self.player.get_state(100)[1]
@@ -320,23 +263,79 @@ class Player:
         # resindvd does not allow to specify it in the URI
         return "dvd://"
 
+    def set_uri(self, item):
+        self.videofile = item
+        if config.data.os == 'win32':
+            #item is a str, os.path needs to work with unicode obj to accept unicode path
+            item = os.path.abspath(str(item))
+            if os.path.exists(item):
+                item="file://" + urllib.parse.quote(item)
+        elif os.path.exists(item):
+            item="file://" + urllib.parse.quote(os.path.abspath(item))
+        self.player.set_property('uri', item)
+        if self.snapshotter:
+            self.snapshotter.set_uri(item)
+        if self.fullres_snapshotter:
+            self.fullres_snapshotter.set_uri(item)
+        return self.get_video_info()
+
+    def get_uri(self):
+        return self.player.get_property('current-uri') or self.player.get_property('uri') or ""
+
+    def get_video_info(self):
+        """Return information about the current video.
+        """
+        uri = self.get_uri()
+        d = GstPbutils.Discoverer()
+        try:
+            info = d.discover_uri(uri)
+        except:
+            logger.error("Cannot find video info", exc_info=True)
+            info = None
+        default = {
+            'uri': uri,
+            'framerate_denom': 1,
+            'framerate_num': config.data.preferences['default-fps'],
+            'width': 640,
+            'height': 480,
+            'duration': 0,
+        }
+        if info is None:
+            # Return default data.
+            logger.warn("Could not find information about video, using absurd defaults.")
+            return default
+        if not info.get_video_streams():
+            # Could be an audio file.
+            default['duration'] = info.get_duration()
+            return default
+
+        stream = info.get_video_streams()[0]
+        return {
+            'uri': uri,
+            'framerate_denom': stream.get_framerate_denom(),
+            'framerate_num': stream.get_framerate_num(),
+            'width': stream.get_width(),
+            'height': stream.get_height(),
+            'duration': info.get_duration(),
+        }
+
     def check_uri(self):
-        uri = self.player.get_property('current-uri') or self.player.get_property('uri')
+        uri = self.get_uri()
         if uri and Gst.uri_is_valid(uri):
             return True
         else:
             self.log("Invalid URI " + str(uri))
             return False
 
-    def get_media_position(self, origin, key):
+    def get_position(self):
         return self.current_position()
 
-    def set_media_position(self, position):
+    def set_position(self, position):
         if not self.check_uri():
             return
         if self.current_status() == self.UndefinedStatus:
             self.player.set_state(Gst.State.PAUSED)
-        p = int(self.position2value(position) * Gst.MSECOND)
+        p = int(position) * Gst.MSECOND
         res = self.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE, p)
         if not res:
             logger.warn(_("Problem when seeking into media"))
@@ -345,7 +344,7 @@ class Player:
         if not self.check_uri():
             return
         if position != 0:
-            self.set_media_position(position)
+            self.set_position(position)
         self.player.set_state(Gst.State.PLAYING)
 
     def pause(self, position=0):
@@ -367,34 +366,9 @@ class Player:
     def exit(self):
         self.player.set_state(Gst.State.NULL)
 
-    def playlist_add_item(self, item):
-        self.videofile=item
-        if config.data.os == 'win32':
-            #item is a str, os.path needs to work with unicode obj to accept unicode path
-            item = os.path.abspath(str(item))
-            if os.path.exists(item):
-                item="file://" + urllib.parse.quote(item)
-        elif os.path.exists(item):
-            item="file://" + urllib.parse.quote(os.path.abspath(item))
-        self.player.set_property('uri', item)
-        if self.snapshotter:
-            self.snapshotter.set_uri(item)
-        if self.fullres_snapshotter:
-            self.fullres_snapshotter.set_uri(item)
-
-    def playlist_clear(self):
-        self.videofile=None
-        self.player.set_property('uri', '')
-
-    def playlist_get_list(self):
-        if self.videofile:
-            return [ self.videofile ]
-        else:
-            return [ ]
-
     def fullres_snapshot_taken(self, data):
         if self.fullres_snapshot_callback:
-            s=Snapshot(data)
+            s = Snapshot(data)
             self.fullres_snapshot_callback(snapshot=s)
             self.fullres_snapshot_callback = None
 
@@ -418,33 +392,15 @@ class Player:
 
     def snapshot_taken(self, data):
         if self.snapshot_notify:
-            s=Snapshot(data)
+            s = Snapshot(data)
             self.snapshot_notify(s)
 
     def async_snapshot(self, position):
-        t = int(self.position2value(position))
+        t = int(position)
         if self.snapshotter:
             if not self.snapshotter.thread_running:
                 self.snapshotter.start()
-            # We enqueue 4 timestamps: the original timestamp, its
-            # value minus 50 and 20ms (the async snapshotter goes to the
-            # specified position then takes the video buffer which may then
-            # be later) and its value aligned to a frame boundary
-            for pos in sorted((max(20, t - 50),
-                               max(20, t - 20),
-                               max(20, int(t / config.data.preferences['default-fps']) * config.data.preferences['default-fps']),
-                               max(20, t))):
-                self.snapshotter.enqueue(pos)
-
-    def snapshot(self, position):
-        if not self.check_uri():
-            return None
-        # Return None in all cases.
-        return None
-
-    def all_snapshots(self):
-        self.log("all_snapshots %s")
-        return [ None ]
+            self.snapshotter.enqueue(t)
 
     def display_text (self, message, begin, end):
         if not self.check_uri():
@@ -453,8 +409,8 @@ class Player:
             if self.imageoverlay is None:
                 self.log("Cannot overlay SVG")
                 return True
-            self.overlay.begin=self.position2value(begin)
-            self.overlay.end=self.position2value(end)
+            self.overlay.begin=begin
+            self.overlay.end=end
             self.overlay.data=message
             self.imageoverlay.props.data=message
             return True
@@ -462,18 +418,14 @@ class Player:
         if not self.captioner:
             self.log("Cannot caption " + str(message))
             return
-        self.caption.begin=self.position2value(begin)
-        self.caption.end=self.position2value(end)
+        self.caption.begin=begin
+        self.caption.end=end
         self.caption.text=message
         self.captioner.props.text=message
 
     def get_stream_information(self):
-        s=StreamInformation()
-        if self.videofile:
-            s.url=''
-        else:
-            s.url=self.videofile
-
+        s = StreamInformation()
+        s.uri = self.get_uri()
         try:
             dur = self.player.query_duration(Gst.Format.TIME)[1]
         except:
@@ -502,21 +454,6 @@ class Player:
         v = v * 4.0 / 100
         self.player.set_property('volume', v)
 
-    # Helper methods
-    def create_position (self, value=0, key=None, origin=None):
-        """Create a Position.
-        """
-        if key is None:
-            key=self.MediaTime
-        if origin is None:
-            origin=self.AbsolutePosition
-
-        p=Position()
-        p.value = value
-        p.origin = origin
-        p.key = key
-        return p
-
     def update_status (self, status=None, position=None):
         """Update the player status.
 
@@ -525,34 +462,35 @@ class Player:
            - C{pause}
            - C{resume}
            - C{stop}
-           - C{set}
+           - C{seek}
+           - C{seek_relative}
 
         If no status is given, it only updates the value of self.status
 
-        If C{position} is None, it will be considered as zero for the
-        "start" action, and as the current relative position for other
-        actions.
+        If C{position} is None, it will be considered as the current
+        position.
 
         @param status: the new status
         @type status: string
         @param position: the position
-        @type position: long
-        """
-        logger.debug("gst - update_status %s %s ", status, str(position))
-        if position is None:
-            position=0
-        else:
-            position=self.position2value(position)
+        @type position: int
 
-        if status == "start" or status == "set":
+        """
+        logger.debug("update_status %s %s ", status, str(position))
+        if position is None:
+            position = 0
+
+        if status == "start" or status == "seek" or status == "seek_relative":
             self.position_update()
+            if status == "seek_relative":
+                position = self.current_position() + position
             if status == "start":
                 if self.status == self.PauseStatus:
-                    self.resume (position)
+                    self.resume(position)
                 elif self.status != self.PlayingStatus:
                     self.start(position)
                     time.sleep(0.005)
-            self.set_media_position(position)
+            self.set_position(position)
         else:
             if status == "pause":
                 self.position_update()
@@ -570,8 +508,11 @@ class Player:
                 self.log("******* Error : unknown status %s in gstreamer player" % status)
         self.position_update ()
 
-    def is_active(self):
-        return True
+    def is_playing(self):
+        """Is the player in Playing or Paused status?
+        """
+        s = self.get_stream_information ()
+        return s.status == self.PlayingStatus or s.status == self.PauseStatus
 
     def check_player(self):
         self.log("check player")
@@ -630,20 +571,20 @@ class Player:
         # For win32, see
         # http://stackoverflow.com/questions/25823541/get-the-window-handle-in-pygi
         self.set_visual( widget.get_id() )
-        #self.set_visual( None )
 
     def restart_player(self):
-        # FIXME: destroy the previous player
+        # FIXME: properly destroy the previous player
         self.player.set_state(Gst.State.READY)
         # Rebuild the pipeline
         self.build_pipeline()
         if self.videofile is not None:
-            self.playlist_add_item(self.videofile)
+            self.set_uri(self.videofile)
         self.position_update()
         return True
 
     def on_sync_message(self, bus, message):
         s = message.get_structure()
+        logger.debug("sync message %s", s)
         if s is None:
             return True
         if s.get_name() == 'prepare-window-handle':
@@ -684,7 +625,6 @@ class Player:
     def set_rate(self, rate=1.0):
         if not self.check_uri():
             return
-        self.rate = rate
         try:
             p = self.player.query_position(Gst.Format.TIME)[1]
         except Gst.QueryError:
@@ -698,18 +638,13 @@ class Player:
             res = self.player.send_event(event)
             if not res:
                 self.log("Could not set rate")
+            else:
+                self.rate = rate
         else:
             self.log("Cannot build set_rate event")
 
     def get_rate(self):
         return self.rate
-
-    def disp(self, e, indent="  "):
-        l=[str(e)]
-        if hasattr(e, 'elements'):
-            i=indent+"  "
-            l.extend( [ self.disp(c, i) for c in e.elements() ])
-        return ("\n"+indent).join(l)
 
     def is_fullscreen(self):
         return self.fullscreen_window and self.fullscreen_window.is_active()
@@ -744,7 +679,7 @@ class Player:
 
             # Use black background
             css_provider = Gtk.CssProvider()
-            css_provider.load_from_data("#fullscreen_player { color:#fff; background-color: #000; }")
+            css_provider.load_from_data(b"#fullscreen_player { color:#fff; background-color: #000; }")
             context = Gtk.StyleContext()
             context.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 

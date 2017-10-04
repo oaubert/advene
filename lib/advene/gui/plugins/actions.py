@@ -447,7 +447,7 @@ class DefaultGUIActions:
         Displays a popup with a message and a new possible position.
         """
         def handle_response(button, position, widget):
-            self.controller.update_status("set", position)
+            self.controller.update_status("seek", position)
             self.gui.popupwidget.undisplay(widget)
             return True
 
@@ -481,7 +481,7 @@ class DefaultGUIActions:
         def generate (context, parameters):
             """Display a popup with 'size' choices."""
             def handle_response(button, position, widget):
-                self.controller.update_status("set", int(position))
+                self.controller.update_status("seek", int(position))
                 self.gui.popupwidget.undisplay(widget)
                 return True
 
@@ -545,7 +545,7 @@ class DefaultGUIActions:
         Displays a popup proposing to navigate to related outgoing annotations.
         """
         def handle_response(button, position, widget):
-            self.controller.update_status("set", position)
+            self.controller.update_status("seek", position)
             self.gui.popupwidget.undisplay(widget)
             return True
 

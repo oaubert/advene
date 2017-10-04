@@ -462,7 +462,7 @@ class HTMLContentHandler (ContentHandler):
             pos=re.findall('/media/play/(\d+)', link)
             if pos:
                 # A position was specified. Directly use it.
-                self.controller.update_status('set', int(pos[0]))
+                self.controller.update_status('seek', int(pos[0]))
             else:
                 self.controller.open_url(link)
         return True
@@ -640,7 +640,7 @@ class HTMLContentHandler (ContentHandler):
             return True
 
         def goto_position(i, pos):
-            self.controller.update_status('set', pos)
+            self.controller.update_status('seek', pos)
             return True
 
         def select_presentation(i, ap, modes):
@@ -722,7 +722,7 @@ class HTMLContentHandler (ContentHandler):
                 if isinstance(p, AnnotationPlaceholder):
                     a=ctx[-1]._placeholder.annotation
                     if a is not None:
-                        self.controller.update_status('set', a.fragment.begin)
+                        self.controller.update_status('seek', a.fragment.begin)
                 return False
 
             l=[ m for m in ctx if m._tag == 'a' ]

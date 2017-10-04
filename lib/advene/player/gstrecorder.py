@@ -18,11 +18,12 @@
 #
 """Gstreamer recorder interface.
 
-Based on gst >= 1.0 API.
+Using gstreamer 1.0 API.
 """
 import logging
 logger = logging.getLogger(__name__)
 
+import math
 import tempfile
 import time
 
@@ -63,31 +64,6 @@ class StreamInformation:
         self.position=0
         self.length=0
 
-class Position:
-    def __init__(self, value=0):
-        self.value=value
-        # See Player attributes below...
-        self.origin=0
-        self.key=2
-
-    def __str__(self):
-        return "Position " + str(self.value)
-
-class PositionKeyNotSupported(Exception):
-    pass
-
-class PositionOrigin(Exception):
-    pass
-
-class InvalidPosition(Exception):
-    pass
-
-class PlaylistException(Exception):
-    pass
-
-class InternalException(Exception):
-    pass
-
 # Placeholder
 class Caption:
     pass
@@ -96,15 +72,6 @@ class Player:
     player_id='gstrecorder'
     player_capabilities=[ 'record' ]
 
-    # Class attributes
-    AbsolutePosition=0
-    RelativePosition=1
-    ModuloPosition=2
-
-    ByteCount=0
-    SampleCount=1
-    MediaTime=2
-
     # Status
     PlayingStatus=0
     PauseStatus=1
@@ -112,25 +79,17 @@ class Player:
     EndStatus=3
     UndefinedStatus=4
 
-    PositionKeyNotSupported=Exception("Position key not supported")
-    PositionOriginNotSupported=Exception("Position origin not supported")
-    InvalidPosition=Exception("Invalid position")
-    PlaylistException=Exception("Playlist error")
-    InternalException=Exception("Internal player error")
-
     def __init__(self):
         self.mute_volume=None
 
         self.player=None
         self.pipeline=None
-        self.videofile=time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
+        self.videofile = time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
         self.build_pipeline()
 
         self.status=Player.UndefinedStatus
         self.current_position_value = 0
-        self.stream_duration = 0 # 60 * 60 * 1000
-        self.relative_position=self.create_position(0,
-                                                    origin=self.RelativePosition)
+        self.stream_duration = 0
         self.position_update()
 
     def build_pipeline(self):
@@ -161,7 +120,7 @@ class Player:
             s = message.get_structure()
             if s is None:
                 return
-            logger.warn("Sync %s", s.get_name())
+            logger.debug("sync message %s", s.get_name())
             if s.get_name() == 'prepare-window-handle':
                 self.set_visual(self.xid, message.src)
 
@@ -186,24 +145,10 @@ class Player:
         bus.connect('message::error', on_bus_message_error)
         bus.connect('message::warning', on_bus_message_warning)
 
-    def position2value(self, p):
-        """Returns a position in ms.
-        """
-        if isinstance(p, Position):
-            v=p.value
-            if p.key != self.MediaTime:
-                logger.error("gstrecorder: unsupported key %s", p.key)
-                return 0
-            if p.origin != self.AbsolutePosition:
-                v += self.current_position()
-        else:
-            v=p
-        return int(v)
-
     def current_status(self):
         if self.player is None:
             return self.UndefinedStatus
-        st=self.player.get_state(100)[1]
+        st = self.player.get_state(100)[1]
         if st == Gst.State.PLAYING:
             return self.PlayingStatus
         elif st == Gst.State.PAUSED:
@@ -233,10 +178,10 @@ class Player:
     def log(self, *p):
         logger.warn("gstrecorder: %s", str(p))
 
-    def get_media_position(self, origin, key):
+    def get_position(self, origin, key):
         return self.current_position()
 
-    def set_media_position(self, position):
+    def set_position(self, position):
         # No navigation
         return
 
@@ -244,7 +189,7 @@ class Player:
         if self.current_status() == self.PlayingStatus:
             # Already started
             return
-        self.videofile=time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
+        self.videofile = time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
         self.build_pipeline()
         if self.player is None:
             return
@@ -259,7 +204,7 @@ class Player:
         return
 
     def stop(self, position=None):
-        self.stream_duration=self.current_position
+        self.stream_duration = self.current_position
         if self.player is None:
             return
         self.player.set_state(Gst.State.NULL)
@@ -269,50 +214,37 @@ class Player:
             return
         self.player.set_state(Gst.State.NULL)
 
-    def playlist_add_item(self, item):
+    def set_uri(self, item):
         if item is None:
-            self.videofile=tempfile.mktemp('.ogg', 'record_')
+            self.videofile = tempfile.mktemp('.ogg', 'record_')
         elif os.path.exists(item):
             # tempfile.mktemp should not be used for security reasons.
             # But the probability of a tempfile attack against Advene
             # is rather low at the time of writing this comment.
-            self.videofile=tempfile.mktemp('.ogg', 'record_')
+            self.videofile = tempfile.mktemp('.ogg', 'record_')
             logger.warn("%s already exists. We will not overwrite, so using %s instead ", item, self.videofile)
         else:
-            self.videofile=item
+            self.videofile = item
         self.build_pipeline()
 
-    def playlist_clear(self):
-        self.videofile=None
-
-    def playlist_get_list(self):
-        if self.videofile is None:
-            return [ ]
-        else:
-            return [ self.videofile  ]
+    def get_uri(self):
+        return self.player.get_property('current-uri') or self.player.get_property('uri') or ""
 
     def snapshot(self, position):
         return None
-
-    def all_snapshots(self):
-        self.log("all_snapshots %s")
-        return [ None ]
 
     def display_text (self, message, begin, end):
         self.log("Display text", message)
 
     def get_stream_information(self):
         s=StreamInformation()
-        if self.videofile:
-            s.url=''
-        else:
-            s.url=self.videofile
+        s.url = self.get_uri()
 
-        s.position=self.current_position()
+        s.position = self.current_position()
         # Round length to the nearest second. This way, the timeline
         # should correctly update.
-        s.length=s.position / 1000 * 1000
-        s.status=self.current_status()
+        s.length = math.ceil(s.position / 1000) * 1000
+        s.status = self.current_status()
         return s
 
     def sound_get_volume(self):
@@ -326,21 +258,6 @@ class Player:
     def sound_set_volume(self, v):
         return 50
 
-    # Helper methods
-    def create_position (self, value=0, key=None, origin=None):
-        """Create a Position.
-        """
-        if key is None:
-            key=self.MediaTime
-        if origin is None:
-            origin=self.AbsolutePosition
-
-        p=Position()
-        p.value = value
-        p.origin = origin
-        p.key = key
-        return p
-
     def update_status (self, status=None, position=None):
         """Update the player status.
 
@@ -349,18 +266,18 @@ class Player:
            - C{pause}
            - C{resume}
            - C{stop}
-           - C{set}
+           - C{seek}
+           - C{seek_relative}
 
         If no status is given, it only updates the value of self.status
 
-        If C{position} is None, it will be considered as zero for the
-        "start" action, and as the current relative position for other
-        actions.
+        If C{position} is None, it will be considered as the current
+        position.
 
         @param status: the new status
         @type status: string
         @param position: the position
-        @type position: long
+        @type position: int
         """
         logger.debug("update_status %s %s", status, str(position))
 
@@ -373,8 +290,11 @@ class Player:
             self.stop ()
         self.position_update ()
 
-    def is_active(self):
-        return True
+    def is_playing(self):
+        """Is the player in Playing or Paused status?
+        """
+        s = self.get_stream_information ()
+        return s.status == self.PlayingStatus or s.status == self.PauseStatus
 
     def check_player(self):
         logger.debug("check player")
@@ -406,7 +326,7 @@ class Player:
         self.player.set_state(Gst.State.READY)
         # Rebuilt the pipeline
         self.build_pipeline()
-        self.playlist_add_item(self.videofile)
+        self.set_uri(self.videofile)
         self.position_update()
         return True
 
@@ -435,4 +355,3 @@ class Player:
     def fullscreen(self, *p):
         # Not implemented
         return
-

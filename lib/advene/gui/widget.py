@@ -275,7 +275,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             if self.no_image_pixbuf is None:
                 self.no_image_pixbuf=png_to_pixbuf(ImageCache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
             if not t == w._current:
-                if isinstance(t, int) or isinstance(t, int):
+                if isinstance(t, int):
                     if cache.is_initialized(t, epsilon=precision):
                         begin.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=precision), width=config.data.preferences['drag-snapshot-width']))
                     elif begin.get_pixbuf() != self.no_image_pixbuf:
@@ -341,10 +341,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         elif event.keyval == Gdk.KEY_space:
             # Play the annotation
             c=self.controller
-            pos = c.create_position (value=annotation.fragment.begin,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.queue_action(c.update_status, status="set", position=pos)
+            c.queue_action(c.update_status, status="seek", position=annotation.fragment.begin)
             c.gui.set_current_annotation(annotation)
             return True
         elif event.keyval == Gdk.KEY_Delete or event.keyval == Gdk.KEY_BackSpace:
@@ -915,7 +912,7 @@ class TimestampRepresentation(Gtk.Button):
         # We have to check for is_initialized before doing the
         # update_status, since the snapshot may be updated by the update_status
         do_refresh=not cache.is_initialized(self._value, epsilon=self.epsilon)
-        self.controller.update_status("set", self._value)
+        self.controller.update_status("seek", self._value)
         if do_refresh:
             # The image was invalidated (or not initialized). Use
             # a timer to update it after some time.
@@ -1006,10 +1003,7 @@ class TimestampRepresentation(Gtk.Button):
 
         def goto(it, t):
             c=self.controller
-            pos = c.create_position (value=t,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
+            c.update_status(status="seek", position=t)
             return True
 
         def save_as(it):
@@ -1031,7 +1025,7 @@ class TimestampRepresentation(Gtk.Button):
         if self.callback is not None:
             item = Gtk.MenuItem(_("Use current player position"))
             item.connect('activate', lambda i: self.set_value(p.current_position_value))
-            if p.status != p.PauseStatus and p.status != p.PlayingStatus:
+            if p.is_playing():
                 item.set_sensitive(False)
             menu.append(item)
 

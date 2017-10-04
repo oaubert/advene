@@ -58,11 +58,8 @@ class Menu:
         return self.controller.get_title(element, max_size=40)
 
     def goto_annotation (self, widget, ann):
-        c=self.controller
-        pos = c.create_position (value=ann.fragment.begin,
-                                 key=c.player.MediaTime,
-                                 origin=c.player.AbsolutePosition)
-        c.update_status (status="set", position=pos)
+        c = self.controller
+        c.update_status(status="seek", position=ann.fragment.begin)
         c.gui.set_current_annotation(ann)
         return True
 

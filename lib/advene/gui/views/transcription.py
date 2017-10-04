@@ -286,10 +286,6 @@ class TranscriptionView(AdhocView):
             tb.insert(b, -1)
         mainbox.pack_start(tb, False, True, 0)
 
-        #if self.controller.gui:
-        #    self.player_toolbar=self.controller.gui.get_player_control_toolbar()
-        #    mainbox.pack_start(self.player_toolbar, False, True, 0)
-
         sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.set_resize_mode(Gtk.ResizeMode.PARENT)
@@ -444,10 +440,7 @@ class TranscriptionView(AdhocView):
 
     def play_annotation(self, a):
         c=self.controller
-        pos = c.create_position (value=a.fragment.begin,
-                                 key=c.player.MediaTime,
-                                 origin=c.player.AbsolutePosition)
-        c.update_status (status="set", position=pos)
+        c.update_status("seek", a.fragment.begin)
         c.gui.set_current_annotation(a)
         return True
 

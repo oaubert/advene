@@ -52,7 +52,6 @@ apply_export_filter
 
 * Player handling
 move_frame
-move_position
 position_update
 player_delayed_scrub
 restart_player

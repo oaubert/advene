@@ -373,11 +373,7 @@ class DefaultActionsRepository:
                 position = position.begin
             else:
                 position=int(position)
-        c=self.controller
-        pos = c.create_position (value=position,
-                                 key=c.player.MediaTime,
-                                 origin=c.player.AbsolutePosition)
-        self.controller.update_status ("set", pos)
+        self.controller.update_status ("seek", position)
         return True
 
     def PlayerGoto_predefined(self, controller):
@@ -430,21 +426,19 @@ class DefaultActionsRepository:
         message=self.parse_parameter(context, parameters, 'message', "Default caption.")
         duration=self.parse_parameter(context, parameters, 'duration', None)
 
-        begin = self.controller.player.relative_position
+        begin = self.controller.player.current_position_value
         if duration is not None:
             duration=int(duration)
         else:
             duration=config.data.player_preferences['default_caption_duration']
 
         c=self.controller
-        end = c.create_position (value=duration,
-                                 key=c.player.MediaTime,
-                                 origin=c.player.RelativePosition)
+        end = begin + duration
         if c.gui and c.gui.captionview:
             c.gui.captionview.display_text(message,
                                            duration)
         else:
-            c.player.display_text (message, begin, end)
+            c.player.display_text(message, begin, end)
         return True
 
     def DisplayMarker (self, context, parameters):
@@ -485,19 +479,16 @@ class DefaultActionsRepository:
         message="""<svg version='1' width="800" height="600" preserveAspectRatio='xMinYMin meet' viewBox='0 0 800 600'>%s</svg>""" % code
 
         c=self.controller
-        begin = c.player.relative_position
+        begin = c.player.current_position_value
         if duration is not None:
             duration=int(duration)
         else:
             duration=config.data.player_preferences['default_caption_duration']
-        end = c.create_position (value=duration,
-                                 key=c.player.MediaTime,
-                                 origin=c.player.RelativePosition)
         if c.gui and c.gui.captionview:
             c.gui.captionview.display_text(message,
                                            duration)
         else:
-            c.player.display_text (message, begin, end)
+            c.player.display_text (message, begin, begin + duration)
         return True
 
     def AnnotationCaption (self, context, parameters):
@@ -508,16 +499,11 @@ class DefaultActionsRepository:
 
         if annotation is not None:
             c=self.controller
-            begin = c.player.relative_position
-            duration=annotation.fragment.end - c.player.current_position_value
-            end = c.create_position (value=duration,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.RelativePosition)
-            #begin = c.create_position (value=annotation.fragment.begin)
-            #end = c.create_position (value=annotation.fragment.end)
+            begin = c.player.current_position_value
+            end = annotation.fragment.end
             if c.gui and c.gui.captionview:
                 c.gui.captionview.display_text(message,
-                                               duration)
+                                               end - begin)
             else:
                 c.player.display_text (message, begin, end)
         return True

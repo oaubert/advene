@@ -1614,11 +1614,7 @@ class TimeLine(AdhocView):
             self.locked_icon.show()
             self.controller.gui.set_current_annotation(annotation)
             # Goto annotation
-            c=self.controller
-            pos = c.create_position (value=annotation.fragment.begin,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            self.controller.update_status (status="set", position=pos)
+            self.controller.update_status("seek", annotation.fragment.begin)
             if self.loop_toggle_button.get_active():
                 self.controller.gui.loop_on_annotation_gui(annotation)
             return True
@@ -1809,10 +1805,7 @@ class TimeLine(AdhocView):
             else:
                 position=annotation.fragment.begin
             c=self.controller
-            pos = c.create_position (value=position,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
+            c.update_status (status="seek", position=positiona)
             c.gui.set_current_annotation(annotation)
             return True
         elif event.keyval == Gdk.KEY_Return:
@@ -2076,10 +2069,10 @@ class TimeLine(AdhocView):
             pos = self.current_position
         p = self.controller.player
         if (self.options['autoscroll'] == 1
-            and (p.status == p.PlayingStatus or p.status == p.PauseStatus)):
+            and p.is_playing()):
             self.center_on_position(pos)
         elif (self.options['autoscroll'] == 2
-            and (p.status == p.PlayingStatus or p.status == p.PauseStatus)):
+            and p.is_playing()):
             p=self.unit2pixel(pos, absolute=True)
             begin=self.adjustment.get_value()
             end=begin + self.adjustment.get_page_size()
@@ -2245,11 +2238,7 @@ class TimeLine(AdhocView):
             # Note: x is here relative to the visible portion of the window. Thus we must
             # add self.adjustment.get_value
             position=self.pixel2unit(self.adjustment.get_value() + x, absolute=True)
-            c=self.controller
-            pos = c.create_position (value=position,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
+            self.controller.update_status (status="seek", position=position)
             return True
         return False
 
@@ -2334,11 +2323,7 @@ class TimeLine(AdhocView):
             self.context_cb (timel=self, position=self.pixel2unit(x, absolute=True), height=y)
             return True
         elif event.button == 1:
-            c=self.controller
-            pos = c.create_position (value=self.pixel2unit(x, absolute=True),
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
+            self.controller.update_status(status="seek", position=self.pixel2unit(x, absolute=True))
             return True
         return False
 
@@ -2395,11 +2380,7 @@ class TimeLine(AdhocView):
 
             if event.type == Gdk.EventType._2BUTTON_PRESS:
                 # Double click in the layout: in all cases, goto the position
-                c=self.controller
-                pos = c.create_position (value=self.pixel2unit(x, absolute=True),
-                                         key=c.player.MediaTime,
-                                         origin=c.player.AbsolutePosition)
-                c.update_status (status="set", position=pos)
+                self.controller.update_status(status="seek", position=self.pixel2unit(x, absolute=True))
             else:
                 # Store x, y coordinates, to be able to decide upon button release.
                 self.layout_selection=[ [x, y], [None, None] ]
@@ -2580,11 +2561,7 @@ class TimeLine(AdhocView):
         menu = Gtk.Menu()
 
         def popup_goto (win, position):
-            c=self.controller
-            pos = c.create_position (value=position,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            self.controller.update_status (status="set", position=pos)
+            self.controller.update_status(status="seek", position=position)
             return True
 
         def create_annotation(win, position):
@@ -2893,7 +2870,7 @@ class TimeLine(AdhocView):
                 l.sort(key=lambda a: a.fragment.begin, reverse=True)
             if l:
                 a=l[0]
-                self.controller.update_status("set", position=a.fragment.begin)
+                self.controller.update_status("seek", position=a.fragment.begin)
                 self.set_annotation(a)
             return True
 
@@ -2924,8 +2901,7 @@ class TimeLine(AdhocView):
                         self.controller.notify('AnnotationDelete', annotation=an)
                     return True
 
-                if (self.controller.player.status != self.controller.player.PlayingStatus
-                    and self.controller.player.status != self.controller.player.PauseStatus):
+                if self.controller.player.is_playing():
                     return True
                 # Create a new annotation
                 el=self.controller.create_annotation(position=int(self.controller.player.current_position_value),
@@ -3505,8 +3481,7 @@ class TimeLine(AdhocView):
         tb.insert(i, -1)
 
         def center_on_current_position(*p):
-            if (self.controller.player.status == self.controller.player.PlayingStatus
-                or self.controller.player.status == self.controller.player.PauseStatus):
+            if self.controller.player.is_playing():
                 self.center_on_position(self.current_position)
             return True
 

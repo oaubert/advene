@@ -566,7 +566,7 @@ class AdveneController(object):
                        for an in self.future_begins
                        if an[0].type == t ]
                 if l and l[0][1] > a.fragment.end:
-                    self.queue_action(self.update_status, 'set', l[0][1])
+                    self.queue_action(self.update_status, 'seek', l[0][1])
                 else:
                     # No next annotation. Return to the start
                     if self.restricted_annotations:
@@ -582,7 +582,7 @@ class AdveneController(object):
             self.restricted_rule=self.event_handler.internal_rule(event="AnnotationEnd",
                                                                   method=restricted_play)
             p=self.player
-            if p.status == p.PauseStatus or p.status == p.PlayingStatus:
+            if p.is_playing():
                 if [ a for a in self.active_annotations if a.type == at ]:
                     # We are in an annotation of the right type. Do
                     # not move the player, just play from here.
@@ -957,15 +957,6 @@ class AdveneController(object):
         self.notify('AnnotationCreate', annotation=el)
         return el
 
-    def create_position (self, value=0, key=None, origin=None):
-        """Create a new player-specific position.
-        """
-        if key is None:
-            key=self.player.MediaTime
-        if origin is None:
-            origin=self.player.AbsolutePosition
-        return self.player.create_position(value=value, key=key, origin=origin)
-
     def notify (self, event_name, *param, **kw):
         """Notify the occurence of an event.
 
@@ -1046,9 +1037,9 @@ class AdveneController(object):
 
             # FIXME: only 0-relative position for the moment
             try:
-                i = self.player.snapshot (self.player.relative_position)
-            except self.player.InternalException:
-                logger.error("Exception in snapshot", exc_info=True)
+                i = self.player.snapshot()
+            except:
+                logger.exception("Exception in snapshot", exc_info=True)
                 return True
             if i is not None and i.height != 0:
                 self.package.imagecache[i.date] = helper.snapshot2png (i)
@@ -1273,12 +1264,10 @@ class AdveneController(object):
     def set_media(self, uri=None):
         """Set the current media in the video player.
         """
-        p=self.player
-        if p.status == p.PlayingStatus or p.status == p.PauseStatus:
-            p.stop(0)
-        p.playlist_clear()
-        if uri is not None:
-            p.playlist_add_item (uri)
+        p = self.player
+        if p.is_playing():
+            p.stop()
+        p.set_uri(uri)
         # Reset cached_duration so that it will be updated on play
         self.pending_duration_update = True
         self.notify("MediaChange", uri=uri)
@@ -1311,7 +1300,7 @@ class AdveneController(object):
             uri=self.player.dvd_uri(title, chapter)
         self.set_media(uri)
         # Reset the imagecache
-        self.package.imagecache=ImageCache()
+        self.package.imagecache=ImageCache(uri)
         if uri is not None and uri != "":
             id_ = helper.mediafile2id (uri)
             self.package.imagecache.load (id_)
@@ -1606,9 +1595,9 @@ class AdveneController(object):
             # The old player was a recorder. Chances are that we
             # recorded something. In this case, set the default_media
             # to the recorded file path.
-            l=self.player.playlist_get_list()
-            if l and not self.get_default_media():
-                self.set_default_media(l[0])
+            uri = self.player.get_uri()
+            if uri and not self.get_default_media():
+                self.set_default_media(uri)
 
         # Start the new one
         self.player=p()
@@ -1617,15 +1606,13 @@ class AdveneController(object):
             config.data.player['plugin']=p.player_id
         self.notify('PlayerChange', player=p)
         mediafile = self.get_default_media()
-        if mediafile != "":
-            self.set_media(mediafile)
+        self.set_media(mediafile)
 
     def restart_player (self):
         """Restart the media player."""
         self.player.restart_player ()
         mediafile = self.get_default_media()
-        if mediafile != "":
-            self.set_media(mediafile)
+        self.set_media(mediafile)
         self.notify('PlayerChange', player=self.player)
 
     def get_timestamp(self):
@@ -1931,13 +1918,9 @@ class AdveneController(object):
             self.pending_duration_update = True
 
         mediafile = self.get_default_media()
-        if mediafile is not None and mediafile != "":
-            if self.player.is_active():
-                if mediafile not in self.player.playlist_get_list ():
-                    # Update the player playlist
-                    self.set_media(mediafile)
-        else:
-            self.set_media(None)
+        if mediafile != self.player.get_uri():
+            # Update the player info
+            self.set_media(mediafile)
 
         # Activate the default STBV
         default_stbv = self.package.getMetaData (config.data.namespace, "default_stbv")
@@ -2013,9 +1996,9 @@ class AdveneController(object):
         if p == self.package:
             # Set if necessary the mediafile metadata
             if self.get_default_media() == "":
-                pl = self.player.playlist_get_list()
-                if pl and pl[0]:
-                    self.set_default_media(pl[0])
+                uri = self.player.get_uri()
+                if uri:
+                    self.set_default_media(uri)
 
         p.save(name=name)
         p._modified = False
@@ -2255,25 +2238,8 @@ class AdveneController(object):
         p=self.player
         if p.status == p.PlayingStatus:
             self.update_status('pause')
-        self.move_position (int(1000 * number_of_frames / config.data.preferences['default-fps']), notify=False)
+        self.update_status("seek_relative", int(1000 * number_of_frames / config.data.preferences['default-fps']), notify=False)
         return True
-
-    def move_position (self, value, relative=True, notify=True):
-        """Helper method : fast forward or rewind by value milliseconds.
-
-        @param value: the offset in milliseconds
-        @type value: int
-        """
-        if relative:
-            self.update_status ("set", self.create_position (value=value,
-                                                             key=self.player.MediaTime,
-                                                             origin=self.player.RelativePosition),
-                                notify=notify)
-        else:
-            self.update_status ("set", self.create_position (value=value,
-                                                             key=self.player.MediaTime,
-                                                             origin=self.player.AbsolutePosition),
-                                notify=notify)
 
     def update_status (self, status=None, position=None, notify=True):
         """Update the player status.
@@ -2290,7 +2256,7 @@ class AdveneController(object):
             position = position.fragment.begin
         position_before=self.player.current_position_value
         logger.debug("update status: %s %s", status, position)
-        if (status == 'set' or status == 'start' or status == 'stop'):
+        if (status == 'seek' or status == 'start' or status == 'stop'):
             if position != position_before:
                 self.reset_annotation_lists()
             if notify:
@@ -2303,23 +2269,11 @@ class AdveneController(object):
             # to be taken *before* moving
             self.update_snapshot(position_before)
         try:
-            if self.player.playlist_get_list() or 'record' in self.player.player_capabilities:
-                self.player.update_status (status, position)
+            if self.player.get_uri() or 'record' in self.player.player_capabilities:
+                self.player.update_status(status, position)
                 for p in self.slave_players:
                     p.update_status(status, position)
                 # Update the destination screenshot
-                if hasattr(position, 'value'):
-                    # It is a player.Position. Do a simple conversion
-                    # (which will fail in many cases)
-                    if position.origin == self.player.RelativePosition:
-                        position = self.player.current_position_value + position.value
-                    elif position.origin == self.player.ModuloPosition:
-                        if self.player.stream_duration:
-                            position = (self.player.current_position_value + position.value) % self.player.stream_duration
-                        else:
-                            position = self.player.current_position_value + position.value
-                    else:
-                        position=position.value
                 self.update_snapshot(position)
         except Exception:
             # FIXME: we should catch more specific exceptions and
@@ -2346,8 +2300,8 @@ class AdveneController(object):
         """
         try:
             self.player.position_update ()
-        except self.player.InternalException:
-            # The server is down. Restart it.
+        except:
+            # The player is down. Restart it.
             logger.info("Restarting player...", exc_info=True)
             self.player_restarted += 1
             if self.player_restarted > 5:
@@ -2361,7 +2315,7 @@ class AdveneController(object):
         """
         p=self.player
         if p.status == p.PauseStatus and 'frame-by-frame' in p.player_capabilities:
-            self.update_status("set", pos, notify=True)
+            self.update_status("seek", pos, notify=True)
         return False
 
     def player_delayed_scrub(self, pos):
@@ -2492,7 +2446,7 @@ class AdveneController(object):
             self.future_begins, self.future_ends, self.active_annotations = self.generate_sorted_lists(pos)
             #logger.debug("New lists %s %s", [a.id for a in self.active_annotations], [t[0].id for t in self.future_begins ])
 
-        if self.future_begins and (p.status == p.PlayingStatus or p.status == p.PauseStatus):
+        if self.future_begins and p.is_playing():
             a, b, e = self.future_begins[0]
             #logger.debug("Future begin %s %d %d", a.id, b, pos)
             while b <= pos:
@@ -2508,7 +2462,7 @@ class AdveneController(object):
                 else:
                     break
 
-        if self.future_ends and (p.status == p.PlayingStatus or p.status == p.PauseStatus):
+        if self.future_ends and p.is_playing():
             a, b, e = self.future_ends[0]
             while e <= pos:
                 try:

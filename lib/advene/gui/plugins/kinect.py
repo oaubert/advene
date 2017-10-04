@@ -104,7 +104,7 @@ class KinectController(AdhocView):
             seek =0
         if seek:
             self.action.set_text("Seek %d" % seek)
-            self.controller.queue_action(self.controller.move_position, seek)
+            self.controller.queue_action(self.controller.update_status, "seek_relative", seek)
 
     def handle_mode_selection(self, fx):
         if fx < .3:

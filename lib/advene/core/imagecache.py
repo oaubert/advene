@@ -89,9 +89,11 @@ class ImageCache(object):
     not_yet_available_image.contenttype='image/png'
     not_yet_available_image.timestamp=-1
 
-    def __init__ (self, name=None, epsilon=35):
+    def __init__ (self, uri=None, name=None, epsilon=35):
         """Initialize the Imagecache
 
+        @param uri: URI of the media file
+        @type uri: string
         @param name: id of a previously saved ImageCache.
         @type name: string
         @param epsilon: value of the precision
@@ -106,6 +108,7 @@ class ImageCache(object):
         self._modified=False
 
         self.name=None
+
         # If autosync, then data will automatically be stored on disk
         # (provided that self.name is properly initialized)
         self.autosync=False

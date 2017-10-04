@@ -137,7 +137,7 @@ class BrlEngine:
                     bookmark=v.bookmarks[index]
                 except IndexError:
                     return
-            self.controller.move_position(bookmark.begin, relative=False)
+            self.controller.update_status("seek", bookmark.begin)
             v.set_current_bookmark(bookmark)
             self.brldisplay(bookmark.content)
             return
@@ -161,7 +161,7 @@ class BrlEngine:
                    for an in self.controller.future_begins
                    if an[0].type == self.currenttype ]
                 if l:
-                    self.controller.queue_action(self.controller.update_status, 'set', l[0][1])
+                    self.controller.queue_action(self.controller.update_status, 'seek', l[0][1])
         elif k == brlapi.KEY_SYM_LEFT or k == ALVA_LPAD_LEFT or k == ALVA_MPAD_BUTTON1:
             if self.currenttype == 'scroll':
                 if self.char_index >= 0:
@@ -177,7 +177,7 @@ class BrlEngine:
                 l=[ an for an in self.currenttype.annotations if an.fragment.end < pos ]
                 l.sort(key=lambda a: a.fragment.begin, reverse=True)
                 if l:
-                    self.controller.queue_action(self.controller.update_status, 'set', l[0].fragment.begin)
+                    self.controller.queue_action(self.controller.update_status, 'seek', l[0].fragment.begin)
         elif k == brlapi.KEY_SYM_UP or k == brlapi.KEY_SYM_DOWN or k == ALVA_LPAD_UP or k == ALVA_LPAD_DOWN:
             types=list( self.controller.package.annotationTypes )
             types.sort(key=lambda at: at.title or at.id)

@@ -262,7 +262,6 @@ class Common:
         if self.controller.player == None:
             res.append(_("""<h1>No available mediaplayer</h1>"""))
         else:
-            l = self.controller.player.playlist_get_list ()
             self.controller.update_status ()
             res.append(_("""
             <h1>Current STBV: %(currentstbv)s</h1>
@@ -270,30 +269,27 @@ class Common:
             <h1>Player status</h1>
             <table border="1">
             <tr>
+            <td>Current media</td><td>%(uri)s</td>
             <td>Current position</td><td>%(position)s</td>
             <td>Duration</td><td>%(duration)s</td>
             <td>Player status</td><td>%(status)s</td>
             </tr>
             </table>
             """) % {
-                    'currentstbv': str(self.controller.current_stbv),
-                    'position': helper.format_time(self.controller.player.current_position_value),
-                    'duration': helper.format_time(self.controller.player.stream_duration),
-                    'status': repr(self.controller.player.status)
-                    })
+                'uri': self.controller.player.get_uri() or _("No media file"),
+                'currentstbv': str(self.controller.current_stbv),
+                'position': helper.format_time(self.controller.player.current_position_value),
+                'duration': helper.format_time(self.controller.player.stream_duration),
+                'status': repr(self.controller.player.status)
+            })
 
-            if len(l) == 0:
-                res.append (_("""<h1>No playlist</h1>"""))
-            else:
-                res.append (_("""<h1>Current playlist</h1>
-                <ul>%s</ul>""") % ("\n<li>".join ([ str(i) for i in l ])))
-                res.append (_("""
-                <form action="/media/play" method="GET">
-                Starting pos: <input type="text" name="position" value="0">
-                <input type="submit" value="Play">
-                </form>
-                <a href="/media/stop">Stop</a> | <a href="/media/pause">Pause</a><br>
-                """))
+            res.append (_("""
+            <form action="/media/play" method="GET">
+            Starting pos: <input type="text" name="position" value="0">
+            <input type="submit" value="Play">
+            </form>
+            <a href="/media/stop">Stop</a> | <a href="/media/pause">Pause</a><br>
+            """))
             res.append (_("""<hr />
             <form action="/media/load" method="GET">
             Add a new file (<em>dvd</em> to play a DVD):
@@ -398,7 +394,7 @@ class Media(Common):
                 name=self.controller.player.dvd_uri(1, 1)
             self.controller.queue_action(self.controller.set_media, name)
             res.append(_("File added"))
-            res.append(_("""<p><strong>%s has been added to the playlist</strong></p>""") % name)
+            res.append(_("""<p><strong>%s has been loaded.</strong></p>""") % name)
             res.append(self.display_media_status ())
         return "".join(res)
     load.exposed=True
@@ -531,7 +527,7 @@ class Media(Common):
         if 'filename' in params:
             c.queue_action(c.set_media, params['filename'])
 
-        if not c.player.playlist_get_list():
+        if not c.player.get_uri():
             return self.send_no_content()
 
         if begin is None:
@@ -539,10 +535,7 @@ class Media(Common):
                 begin=params['position']
             except KeyError:
                 begin=0
-        pos=c.create_position (value=int(begin),
-                               key=c.player.MediaTime,
-                               origin=c.player.AbsolutePosition)
-        c.queue_action( c.update_status, "start", pos )
+        c.queue_action(c.update_status, "start", int(begin))
         return self.send_no_content()
     play.exposed=True
 
@@ -586,11 +579,7 @@ class Media(Common):
         """Return the currently playing movie file.
         """
         cherrypy.response.headers['Content-type']='text/plain'
-        l=self.controller.player.playlist_get_list()
-        if l:
-            return l[0]
-        else:
-            return 'N/C'
+        return self.controller.player.get_uri() or 'N/C'
     current.exposed=True
 
     def stbv(self, *args, **query):

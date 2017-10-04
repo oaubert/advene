@@ -93,7 +93,7 @@ class VideoPlayer(AdhocView):
         """
         if self.player is None:
             return True
-        s=self.player.get_stream_information()
+        s = self.player.get_stream_information()
         ps=self.controller.player.status
         if s.status != ps:
             # Update status
@@ -108,7 +108,7 @@ class VideoPlayer(AdhocView):
         if ( (ps == self.player.PauseStatus or ps == self.player.PlayingStatus)
              and self.controller.player.current_position_value > 0
              and abs( int(s.position) + self.offset - self.controller.player.current_position_value ) > 80 ):
-            self.player.update_status("set", self.controller.player.current_position_value + self.offset)
+            self.player.update_status("seek", self.controller.player.current_position_value + self.offset)
         return True
 
     def get_save_arguments(self):
@@ -139,8 +139,7 @@ class VideoPlayer(AdhocView):
         if self.player is None:
             return True
         self.uri = self.controller.locate_mediafile(fname)
-        self.player.playlist_clear()
-        self.player.playlist_add_item(self.uri)
+        self.player.set_uri(self.uri)
         self.label.set_text(os.path.basename(self.uri))
 
     def reparent_prepare(self):
@@ -175,12 +174,9 @@ class VideoPlayer(AdhocView):
     def update_status(self, status, position=None):
         """Wrapper for update_status to handle offsets.
         """
-        if self.player is None:
+        if self.player is None or position is None:
             return
-        if hasattr(position, 'value'):
-            position.value = position.value + self.offset
-        elif position is not None:
-            position = position + self.offset
+        position = position + self.offset
         self.player.update_status(status, position)
 
     def drag_received_cb(self, widget, context, x, y, selection, targetType, time):
@@ -206,7 +202,10 @@ class VideoPlayer(AdhocView):
         d=Gtk.Socket()
         w.add(d)
         w.show_all()
-        self.player.set_visual(d.get_id())
+        try:
+            self.player.set_widget(d)
+        except AttributeError:
+            self.player.set_visual(d.get_id())
         return w
 
     def build_widget(self):

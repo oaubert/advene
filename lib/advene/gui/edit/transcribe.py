@@ -410,8 +410,7 @@ class TranscriptionEdit(AdhocView):
             logger.error("Error in get_iter_at_location")
             return False
 
-        p=self.controller.player
-        if (p.status == p.PlayingStatus or p.status == p.PauseStatus):
+        if self.controller.player.is_playing():
             self.insert_timestamp_mark(it=it)
             return True
         return False
@@ -448,11 +447,7 @@ class TranscriptionEdit(AdhocView):
         """
         timestamp=button.value
         def popup_goto (win, position):
-            c=self.controller
-            pos = c.create_position (value=position,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
+            self.controller.update_status(status="seek", position=position)
             return True
 
         def popup_edit(i, button):
@@ -544,11 +539,7 @@ class TranscriptionEdit(AdhocView):
 
     def create_timestamp_mark(self, timestamp, it):
         def popup_goto (b):
-            c=self.controller
-            pos = c.create_position (value=b.value,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
+            self.controller.update_status(status="seek", position=b.value)
             return True
 
         b=self.textview.get_buffer()
@@ -666,34 +657,21 @@ class TranscriptionEdit(AdhocView):
         c=self.controller
         if self.current_mark is None:
             if self.marks:
-                pos = c.create_position (value=self.marks[0].value,
-                                         key=c.player.MediaTime,
-                                         origin=c.player.AbsolutePosition)
-                c.update_status (status="set", position=pos)
+                c.update_status(status="seek", position=self.marks[0].value)
         else:
             i=self.marks.index(self.current_mark) - 1
             m=self.marks[i]
-            pos = c.create_position (value=m.value,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
+            c.update_status(status="seek", position=m.value)
         return True
 
     def goto_next_mark(self):
-        c=self.controller
         if self.current_mark is None:
             if self.marks:
-                pos = c.create_position (value=self.marks[-1].value,
-                                         key=c.player.MediaTime,
-                                         origin=c.player.AbsolutePosition)
-                c.update_status (status="set", position=pos)
+                self.controller.update_status(status="seek", position=self.marks[-1].value)
         else:
             i=(self.marks.index(self.current_mark) + 1) % len(self.marks)
             m=self.marks[i]
-            pos = c.create_position (value=m.value,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
+            self.controller.update_status(status="seek", position=m.value)
         return True
 
     def update_position(self, pos):
@@ -853,9 +831,9 @@ class TranscriptionEdit(AdhocView):
         else:
             # Use current movie filename as basename
             default_name='transcribe.txt'
-            l=self.controller.player.playlist_get_list()
-            if l:
-                default_name=os.path.splitext(os.path.basename(l[0]))[0] + ".txt"
+            uri = self.controller.player.get_uri()
+            if uri:
+                default_name=os.path.splitext(os.path.basename(uri))[0] + ".txt"
             fname=dialog.get_filename(title= ("Save transcription to..."),
                                                action=Gtk.FileChooserAction.SAVE,
                                                button=Gtk.STOCK_SAVE,
@@ -1237,7 +1215,7 @@ class TranscriptionEdit(AdhocView):
         if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             if event.keyval == Gdk.KEY_Return:
                 # Insert current timestamp mark
-                if p.status == p.PlayingStatus or p.status == p.PauseStatus:
+                if p.is_playing():
                     if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                         # If Shift is held, pause/resume the video
                         c.update_status("pause")
