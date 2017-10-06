@@ -135,10 +135,9 @@ class FrameSelector(object):
     def refresh_snapshots(self):
         """Update non-initialized snapshots.
         """
-        ic=self.controller.package.imagecache
-        for c in self.frames:
-            if not ic.is_initialized(c.value):
-                self.controller.update_snapshot(c.value)
+        for f in self.frames:
+            if not f.valid_screenshot:
+                self.controller.update_snapshot(f.value, force=True)
         return True
 
     def handle_scroll_event(self, widget, event):
@@ -245,7 +244,7 @@ class FrameSelector(object):
                                         self.controller,
                                         width=self.frame_width,
                                         visible_label=True,
-                                        epsilon=int(1000 / 2 / config.data.preferences['default-fps'] - 10)) 
+                                        precision=0)
             r.add_class("frameselector_frame")
             r.add_class("frameselector_frame_%s" % self.border_mode)
             self.frames.append(r)

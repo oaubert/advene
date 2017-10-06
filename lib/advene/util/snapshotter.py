@@ -79,6 +79,7 @@ class NotifySink(GstBase.BaseSink):
         self._notify=None
 
     def do_preroll(self, buffer):
+        logger.debug("do_preroll %s", self._notify)
         if self._notify is not None:
             self._notify(self.buffer_as_struct(buffer))
         return Gst.FlowReturn.OK
@@ -222,6 +223,7 @@ class Snapshotter(object):
         return self.player.get_property('current-uri')
 
     def set_uri(self, uri):
+        logger.debug("set_uri %s", uri)
         if uri:
             self.player.set_state(Gst.State.NULL)
             self.player.set_property('uri', uri)
@@ -231,13 +233,16 @@ class Snapshotter(object):
             else:
                 self.active = False
             self.player.set_state(Gst.State.PAUSED)
+            self.enqueue(0)
+        else:
+            self.active = False
+            self.player.set_state(Gst.State.NULL)
 
     def on_bus_message(self, bus, message):
         s = message.get_structure()
         if s is None:
             return
-        if s.get_name() != 'missing-plugin':
-            logger.debug("Bus message::", s.get_name())
+        logger.debug("Bus message::", s.get_name())
 
     def on_bus_message_error(self, bus, message):
         s = message.get_structure()
@@ -277,10 +282,13 @@ class Snapshotter(object):
         """Set movie time to a specific time.
         """
         p = int(t * Gst.MSECOND)
+        logger.debug("Seeking to %d", t)
         self.player.set_state(Gst.State.PAUSED)
         res = self.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE, p)
         if not res:
-            logger.warn("snapshotter: error when sending event %s", res)
+            logger.debug("Snapshotter error when sending event for %d %s. ", t, res)
+            # Enqueue again
+            self.enqueue(t)
         return True
 
     def enqueue(self, *l):
@@ -290,6 +298,7 @@ class Snapshotter(object):
             return
         for t in l:
             self.timestamp_queue.put_nowait( (t, t) )
+        logger.debug("----- enqueued elements %s (%d total)", l, self.timestamp_queue.qsize())
         self.snapshot_ready.set()
 
     def process_queue(self):
@@ -299,9 +308,7 @@ class Snapshotter(object):
         """
         self.thread_running=True
         while True:
-            #logger.debug("Waiting for event")
             self.snapshot_ready.wait()
-            #logger.debug("Getting timestamp")
             if self.should_clear:
                 # Clear the queue
                 self.should_clear = False
@@ -314,9 +321,7 @@ class Snapshotter(object):
                     except queue.Empty:
                         break
             (t, dummy) = self.timestamp_queue.get()
-            #logger.debug("Clearing event")
             self.snapshot_ready.clear()
-            #logger.debug("Snapshot %d", t)
             self.snapshot(t)
         return True
 

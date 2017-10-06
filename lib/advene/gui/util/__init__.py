@@ -88,11 +88,11 @@ def png_to_pixbuf (png_data, width=None, height=None):
     else:
         return pixbuf
 
-def image_from_position(controller, position=None, width=None, height=None, epsilon=None):
+def image_from_position(controller, position=None, media=None, width=None, height=None, precision=None):
     i=Gtk.Image()
     if position is None:
-        position=controller.player.current_position_value
-    pb=png_to_pixbuf (controller.package.imagecache.get(position, epsilon), width=width, height=height)
+        position = controller.player.current_position_value
+    pb = png_to_pixbuf(controller.get_snapshot(position=position, media=media, precision=precision), width=width, height=height)
     i.set_from_pixbuf(pb)
     return i
 
@@ -353,10 +353,8 @@ def contextual_drag_begin(widget, context, element, controller):
         l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (color, t.replace('<', '&lt;')))
         return l
 
-    cache=controller.package.imagecache
-
     if isinstance(element, int):
-        begin=image_new_from_pixbuf(png_to_pixbuf (cache.get(element, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
+        begin = image_new_from_pixbuf(png_to_pixbuf(controller.get_snapshot(position=element, precision=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
         begin.get_style_context().add_class('advene_drag_icon')
 
         l=Gtk.Label()
@@ -370,12 +368,12 @@ def contextual_drag_begin(widget, context, element, controller):
         # Pictures HBox
         h=Gtk.HBox()
         h.get_style_context().add_class('advene_drag_icon')
-        begin=image_new_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
+        begin = image_new_from_pixbuf(png_to_pixbuf(controller.get_snapshot(annotation=element), width=config.data.preferences['drag-snapshot-width']))
         begin.get_style_context().add_class('advene_drag_icon')
         h.pack_start(begin, False, True, 0)
         # Padding
         h.pack_start(Gtk.HBox(), True, True, 0)
-        end=image_new_from_pixbuf(png_to_pixbuf (cache.get(element.fragment.end), width=config.data.preferences['drag-snapshot-width']))
+        end = image_new_from_pixbuf(png_to_pixbuf(controller.get_snapshot(annotation=element, position=element.fragment.end), width=config.data.preferences['drag-snapshot-width']))
         end.get_style_context().add_class('advene_drag_icon')
         h.pack_start(end, False, True, 0)
         v.pack_start(h, False, True, 0)

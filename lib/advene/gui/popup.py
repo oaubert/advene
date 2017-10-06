@@ -633,6 +633,7 @@ class Menu:
         item = Gtk.MenuItem()
         item.add(image_from_position(self.controller,
                                      position=element.fragment.begin,
+                                     media=element.media,
                                      height=60))
         item.connect('activate', self.goto_annotation, element)
         menu.append(item)

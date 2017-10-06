@@ -121,7 +121,7 @@ class TimeAdjustment:
                                            None,
                                            self.controller,
                                            width,
-                                           epsilon=1000/config.data.preferences['default-fps'],
+                                           precision=1000/config.data.preferences['default-fps'],
                                            visible_label=False,
                                            callback=self.set_value)
         self.image.connect('button-press-event', image_button_press)

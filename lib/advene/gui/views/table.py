@@ -127,7 +127,7 @@ class AnnotationTable(AdhocView):
     def update_snapshot(self, context, parameters):
         pos = int(context.globals['position'])
         media = context.globals['media']
-        eps = self.controller.package.imagecache.epsilon
+        eps = self.controller.package.imagecache.precision
         for r in self.widget.treeview.get_model():
             if (r[COLUMN_ELEMENT].media == media
                 and abs(r[COLUMN_BEGIN] - pos) <= eps):
@@ -172,7 +172,7 @@ class AnnotationTable(AdhocView):
                            helper.format_time(a.fragment.duration),
                            helper.format_time(a.fragment.begin),
                            helper.format_time(a.fragment.end),
-                           png_to_pixbuf(self.controller.get_snapshot(a),
+                           png_to_pixbuf(self.controller.get_snapshot(annotation=a),
                                          height=32),
                            self.controller.get_element_color(a),
                            a.ownerPackage.getTitle()

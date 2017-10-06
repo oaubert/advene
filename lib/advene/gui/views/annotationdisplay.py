@@ -217,21 +217,21 @@ class AnnotationDisplay(AdhocView):
         def handle_motion(widget, event):
             if isinstance(self.annotation, Annotation):
                 i = self.label['image']
-                i.epsilon = int(self.annotation.fragment.duration / widget.get_allocation().width)
-                v = self.annotation.fragment.begin + i.epsilon * 20 * int(event.x / 20)
+                i.precision = int(self.annotation.fragment.duration / widget.get_allocation().width)
+                v = self.annotation.fragment.begin + i.precision * 20 * int(event.x / 20)
                 i.set_value(v)
             return True
 
         def handle_leave(widget, event):
             if isinstance(self.annotation, Annotation):
                 i = self.label['image']
-                i.epsilon = config.data.preferences['bookmark-snapshot-precision']
+                i.precision = config.data.preferences['bookmark-snapshot-precision']
                 i.set_value(self.annotation.fragment.begin)
             return True
 
         fr = Gtk.Expander ()
         fr.set_label(_("Screenshot"))
-        self.label['image'] = TimestampRepresentation(-1, None, self.controller, width=config.data.preferences['drag-snapshot-width'], epsilon=config.data.preferences['bookmark-snapshot-precision'], visible_label=False)
+        self.label['image'] = TimestampRepresentation(-1, None, self.controller, width=config.data.preferences['drag-snapshot-width'], precision=config.data.preferences['bookmark-snapshot-precision'], visible_label=False)
         self.label['image'].add_events(Gdk.EventMask.POINTER_MOTION_MASK
                                        | Gdk.EventMask.LEAVE_NOTIFY_MASK)
         self.label['image'].connect('motion-notify-event', handle_motion)

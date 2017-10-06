@@ -768,7 +768,7 @@ class TimeLine(AdhocView):
             logger.warn("no current media %s %s", context.globals['media'], self.controller.package.media)
             return True
         pos=int(context.globals['position'])
-        epsilon=int(self.scale_layout.step / 2)
+        precision=int(self.scale_layout.step / 2)
         # Note: we check here w.timestamp, which is the timestamp of
         # the displayed snapshot, instead of w.mark (which is the
         # timestamp of the widget), so that the most precise snapshot
@@ -776,14 +776,17 @@ class TimeLine(AdhocView):
         l=sorted( ( t
                     for t in ( (w, abs(w.mark - pos)) for w in self.scale_layout.get_children()
                                if isinstance(w, Gtk.Image) )
-                    if t[1] <= epsilon and t[1] < abs(t[0].timestamp - pos) ),
+                    if t[1] <= precision and t[1] < abs(t[0].timestamp - pos) ),
                  key=operator.itemgetter(1))
+        l = list(l)
         for t in l:
             w = t[0]
             # Iterate only on the first one (if any)
-            png = self.controller.get_snapshot(position=pos)
-            w.set_from_pixbuf(png_to_pixbuf (png, height=self.scale_layout.height))
+            png = self.controller.get_snapshot(position=pos, media=self.controller.package.media)
+            logger.debug("updating screenshot %d timestamp %d -> %d", pos, w.timestamp, png.timestamp)
+            w.set_from_pixbuf(png_to_pixbuf(png, height=self.scale_layout.height))
             w.timestamp = png.timestamp
+            w.valid_screenshot = not png.is_default
             break
         return True
 
@@ -2116,6 +2119,7 @@ class TimeLine(AdhocView):
             png = self.controller.get_snapshot(position=widget.mark, precision=step/2)
             widget.timestamp=png.timestamp
             widget.set_from_pixbuf(png_to_pixbuf (png, height=max(20, h)))
+            widget.valid_screenshot = not png.is_default
             if widget.expose_signal is not None:
                 widget.disconnect(widget.expose_signal)
                 widget.expose_signal = None
@@ -2143,13 +2147,15 @@ class TimeLine(AdhocView):
             u2p=self.unit2pixel
             while t <= self.maximum:
                 # Draw screenshots
-                i=Gtk.Image()
-                i.mark = t
+                i = Gtk.Image()
+                # Use round_timestamp so that timestamps will exactly
+                # match positions notified with SnasphotUpdate
+                i.mark = self.controller.round_timestamp(t)
                 i.expose_signal=i.connect('draw', display_image, height, step)
                 i.pos = 20
-                # Real timestamp of the snapshot. If < 0 (and a
-                # large value, since it is after used to get best
-                # approximation through abs(pos - i.timestamp)),
+                # Timestamp of the snapshot currently used. If < 0
+                # (and a large value, since it is after used to get
+                # best approximation through abs(pos - i.timestamp)),
                 # the snapshot is the uninitialized one.
                 i.timestamp=-self.controller.cached_duration
                 i.show()

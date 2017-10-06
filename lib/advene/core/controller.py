@@ -221,6 +221,9 @@ class AdveneController(object):
         self.aliases = {}
         self.current_alias = None
 
+        # Imagecache indexed by media
+        self.imagecache = {}
+
         # Unknown arguments (neither a package nor a video file)
         self.unknown_args = []
 
@@ -1011,44 +1014,6 @@ class AdveneController(object):
             v=0
         return v
 
-    def snapshot_taken(self, snap):
-        if snap is not None and snap.height != 0:
-            self.package.imagecache[snap.date] = helper.snapshot2png(snap)
-            #logger.warn("sup %s %s", snap.date, snap.media)
-            self.notify('SnapshotUpdate', position=snap.date, media=snap.media)
-
-    def update_snapshot (self, position=None):
-        """Event handler used to take a snapshot for the given position.
-
-        @return: a boolean (~desactivation)
-        """
-        if (config.data.player['snapshot']
-            and not self.package.imagecache.is_initialized (position)):
-
-            # Check if the player has async_snapshot capability.
-            async=getattr(self.player, 'async_snapshot', None)
-            if async is not None:
-                if position is None:
-                    position = self.player.current_position_value
-                if self.player.snapshot_notify is None:
-                    self.player.snapshot_notify=self.snapshot_taken
-                async(position or 0)
-                return True
-
-            # FIXME: only 0-relative position for the moment
-            try:
-                i = self.player.snapshot()
-            except:
-                logger.exception("Exception in snapshot", exc_info=True)
-                return True
-            if i is not None and i.height != 0:
-                self.package.imagecache[i.date] = helper.snapshot2png (i)
-                self.notify('SnapshotUpdate', position=i.date, media=i.media)
-        else:
-            # FIXME: do something useful (warning) ?
-            pass
-        return True
-
     def open_url(self, url):
         """Open an URL in the most appropriate browser.
 
@@ -1171,32 +1136,94 @@ class AdveneController(object):
             return str(element.id)
         return cleanup(str(element))
 
-    def get_snapshot(self, annotation=None, position=None, media=None, precision=None):
-        """Return the snapshot for a given annotation or position/media.
+    def snapshot_taken(self, snap):
+        """Callback for async-snapshot.
+
+        Keep this method as an instance method so that it is not garbage collected.
+        """
+        if snap is not None and snap.height != 0:
+            ic = self.imagecache[snap.media]
+            t = ic.round_timestamp(snap.date)
+            ic[t] = helper.snapshot2png(snap)
+            self.notify('SnapshotUpdate', position=t, media=snap.media)
+
+    def update_snapshot (self, position=None, media=None, force=False):
+        """Event handler used to take a snapshot for the given position.
+
+        @return: a boolean (~desactivation)
+       """
+        if not config.data.player['snapshot'] or position < 0:
+            return True
+
+        if media is None:
+            media == self.package.getMedia()
+
+        if position is None:
+            position = self.player.current_position_value
+
+        # Refresh not forced, check before that it is needed.
+        if not force and not self.get_snapshot(position=position, media=media, auto_update=False).is_default:
+            return True
+
+        # Check if the player has async_snapshot capability.
+        if 'async-snapshot' in self.player.player_capabilities:
+            logger.debug("Calling async_snapshot %d", position)
+            self.player.async_snapshot(position, self.snapshot_taken)
+            return True
+        elif 'snapshot' in self.player.player_capabilities:
+            # only 0-relative position for the moment
+            try:
+                i = self.player.snapshot(position)
+            except:
+                logger.exception("Exception in snapshot", exc_info=True)
+                return True
+            if i is not None and i.height != 0:
+                self.imagecache[i.media][i.date] = helper.snapshot2png(i)
+                self.notify('SnapshotUpdate', position=self.imagecache.round_timestamp(i.date), media=i.media)
+        else:
+            logger.warn("Player does not support snapshotting.")
+        return True
+
+    def round_timestamp(self, t, media=None):
+        if media is None:
+            ic = self.package.imagecache
+        else:
+            ic = self.imagecache[media]
+        return ic.round_timestamp(t)
+
+    def get_snapshot(self, position=None, annotation=None, media=None, precision=None, auto_update=True):
+        """Return the snapshot for a given position or annotation.
 
         If position is specified without a media, then the default
         (current) media will be used.
         """
-        if annotation is not None:
-            pack = annotation.ownerPackage
+        # Determine appropriate imagecache:
+        # In any case, fallback on current imagecache if nothing is specified
+        if media:
+            # Media explicitly defined by the user
+            imagecache = self.imagecache.get(media, self.package.imagecache)
+        elif annotation is not None:
+            # Media implicitly defined by the annotation
+            media = annotation.ownerPackage.getMedia()
+            imagecache = annotation.ownerPackage.imagecache
+        else:
+            media = self.package.getMedia()
+            imagecache = self.package.imagecache
+
+        # Use annotation begin only if position was not explictly defined
+        if position is None and annotation is not None:
             position = annotation.fragment.begin
-        elif position is not None:
-            pack = None
-            if media is not None:
-                # FIXME: not efficient. Should be refactored when
-                # imagecache is better handled.
-                pack = next((p for p in self.package if p.getMedia() == media), None)
-            if pack is None:
-                pack = self.package
-        if not pack.imagecache.is_initialized(position) and pack == self.package and 'async-snapshot' in self.player.player_capabilities:
-            self.update_snapshot(position)
-        return pack.imagecache.get(position, precision)
+
+        snapshot = imagecache.get(position, precision=precision)
+        if auto_update and position >= 0 and snapshot.is_default and media == self.get_default_media():
+            self.update_snapshot(position, media=media, force=True)
+        return snapshot
 
     def get_default_media (self, package=None):
         """Return the current media for the given package.
         """
         if package is None:
-            package=self.package
+            package = self.package
 
         mediafile = package.media
         if mediafile is None or mediafile == "":
@@ -1261,17 +1288,6 @@ class AdveneController(object):
             tags.update(e.tags)
         return tags
 
-    def set_media(self, uri=None):
-        """Set the current media in the video player.
-        """
-        p = self.player
-        if p.is_playing():
-            p.stop()
-        video_info = p.set_uri(uri)
-        # Reset cached_duration so that it will be updated on play
-        self.pending_duration_update = True
-        self.notify("MediaChange", uri=uri)
-
     def update_package_title(self):
         """Generate a default package title if none was set.
         """
@@ -1286,26 +1302,51 @@ class AdveneController(object):
         else:
             return False
 
+    def set_media(self, uri=None):
+        """Set the current media in the video player.
+        """
+        p = self.player
+        if p.is_playing():
+            p.stop()
+        video_info = p.set_uri(uri)
+        # Reset cached_duration so that it will be updated on play
+        self.pending_duration_update = True
+        self.notify("MediaChange", uri=uri)
+        return video_info
+
     def set_default_media (self, uri, package=None):
         """Set the default media for the package.
         """
         if package is None:
-            package=self.package
-        m=self.dvd_regexp.match(uri)
+            package = self.package
+        m = self.dvd_regexp.match(uri)
         if m:
-            title,chapter=m.group(1,2)
+            title,chapter = m.group(1,2)
             uri="dvd@%s:%s" % (title, chapter)
         package.setMedia(uri)
         if m:
-            uri=self.player.dvd_uri(title, chapter)
-        self.set_media(uri)
+            uri = self.player.dvd_uri(title, chapter)
+        video_info = self.set_media(uri)
+        try:
+            framerate = video_info.get('framerate_denom', 0) / video_info.get('framerate_num', 1)
+        except ZeroDivisionError:
+            framerate = 0
+        if framerate == 0:
+            framerate = 1 / config.data.prefix['default-fps']
+            logger.warn("Cannot determine video FPS. Using default value %.02f", framerate)
         # Reset the imagecache
-        self.package.imagecache=ImageCache(uri)
-        if uri is not None and uri != "":
-            id_ = helper.mediafile2id (uri)
-            self.package.imagecache.load (id_)
-            # Update package title and description if necessary
-            self.update_package_title()
+        if uri not in self.imagecache:
+            self.imagecache[uri] = ImageCache(uri, framerate=framerate)
+            id_ = helper.mediafile2id(uri)
+            self.imagecache[uri].load(id_)
+        package.imagecache = self.imagecache[uri]
+
+        # Store video info in the ImageCache
+        video_info['framerate'] = framerate
+        package.imagecache.video_info = video_info
+
+        # Update package title and description if necessary
+        self.update_package_title()
 
     def delete_element (self, el, immediate_notify=False, batch=None, undone=False):
         """Delete an element from its package.
@@ -1791,7 +1832,8 @@ class AdveneController(object):
         # letting the user specify a valid alias.
         alias = re.sub('[^a-zA-Z0-9_]', '_', alias)
 
-        self.package.imagecache=ImageCache()
+        # This will initialize the package imagecache
+        self.set_default_media(self.package.getMedia(), self.package)
         self.package._idgenerator = advene.core.idgenerator.Generator(self.package)
         self.package._modified = False
 
@@ -2041,10 +2083,9 @@ class AdveneController(object):
             # Load the imagecache
             id_ = helper.mediafile2id (mediafile)
             p.imagecache.load (id_)
-            # Populate the missing keys
+            # Populate imagecache for defined annotations
             for a in p.annotations:
-                p.imagecache.init_value (a.fragment.begin)
-                p.imagecache.init_value (a.fragment.end)
+                self.get_snapshot(annotation=a)
 
         # Handle 'auto-import' meta-attribute
         master_uri=p.getMetaData(config.data.namespace, 'auto-import')

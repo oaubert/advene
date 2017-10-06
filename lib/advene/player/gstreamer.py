@@ -286,12 +286,6 @@ class Player:
         """Return information about the current video.
         """
         uri = self.get_uri()
-        d = GstPbutils.Discoverer()
-        try:
-            info = d.discover_uri(uri)
-        except:
-            logger.error("Cannot find video info", exc_info=True)
-            info = None
         default = {
             'uri': uri,
             'framerate_denom': 1,
@@ -300,6 +294,15 @@ class Player:
             'height': 480,
             'duration': 0,
         }
+        if not uri:
+            return default
+
+        d = GstPbutils.Discoverer()
+        try:
+            info = d.discover_uri(uri)
+        except:
+            logger.error("Cannot find video info", exc_info=True)
+            info = None
         if info is None:
             # Return default data.
             logger.warn("Could not find information about video, using absurd defaults.")
@@ -391,16 +394,21 @@ class Player:
         self.fullres_snapshotter.enqueue(position)
 
     def snapshot_taken(self, data):
+        s = Snapshot(data)
+        logger.debug("-------------------------------- snapshot taken %d %s", s.date, self.snapshot_taken)
         if self.snapshot_notify:
-            s = Snapshot(data)
             self.snapshot_notify(s)
 
-    def async_snapshot(self, position):
+    def async_snapshot(self, position, notify=None):
         t = int(position)
+        if notify is not None and self.snapshot_notify is None:
+            self.snapshot_notify = notify
         if self.snapshotter:
             if not self.snapshotter.thread_running:
                 self.snapshotter.start()
             self.snapshotter.enqueue(t)
+        else:
+            logger.error("snapshotter not present")
 
     def display_text (self, message, begin, end):
         if not self.check_uri():

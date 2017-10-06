@@ -310,7 +310,7 @@ class BookmarkWidget(object):
         return True
 
     def build_widget(self):
-        self.image=TimestampRepresentation(self.value, None, self.controller, comment_getter=lambda: self.comment, width=self.width, epsilon=config.data.preferences['bookmark-snapshot-precision'])
+        self.image=TimestampRepresentation(self.value, None, self.controller, comment_getter=lambda: self.comment, width=self.width, precision=config.data.preferences['bookmark-snapshot-precision'])
 
         self.image.connect('clicked', self.image.goto_and_refresh)
 

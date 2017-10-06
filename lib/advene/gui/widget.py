@@ -49,7 +49,6 @@ except ImportError:
 
 # Advene part
 import advene.core.config as config
-from advene.core.imagecache import ImageCache
 
 from advene.gui.util import png_to_pixbuf, enable_drag_source, name2color
 import advene.util.helper as helper
@@ -268,25 +267,28 @@ class AnnotationWidget(GenericColorButtonWidget):
 
         def set_cursor(wid, t=None, precision=None):
             if t is None:
-                t=self.annotation
+                t = self.annotation
             if precision is None:
-                precision=config.data.preferences['bookmark-snapshot-precision']
-            cache=self.controller.package.imagecache
+                precision = config.data.preferences['bookmark-snapshot-precision']
             if self.no_image_pixbuf is None:
-                self.no_image_pixbuf=png_to_pixbuf(ImageCache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
+                self.no_image_pixbuf = png_to_pixbuf(self.controller.get_snapshot(position=-1), width=config.data.preferences['drag-snapshot-width'])
             if not t == w._current:
                 if isinstance(t, int):
-                    if cache.is_initialized(t, epsilon=precision):
-                        begin.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=precision), width=config.data.preferences['drag-snapshot-width']))
-                    elif begin.get_pixbuf() != self.no_image_pixbuf:
-                        begin.set_from_pixbuf(self.no_image_pixbuf)
+                    snap = self.controller.get_snapshot(position=t, annotation=self.annotation, precision=precision)
+                    if snap.is_default:
+                        pixbuf = self.no_image_pixbuf
+                    else:
+                        pixbuf = png_to_pixbuf(snap, width=config.data.preferences['drag-snapshot-width'])
+                    begin.set_from_pixbuf(pixbuf)
                     end.hide()
                     padding.hide()
                     l.set_text(helper.format_time(t))
                 elif isinstance(t, Annotation):
                     # It can be an annotation
-                    begin.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
-                    end.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.end), width=config.data.preferences['drag-snapshot-width']))
+                    begin.set_from_pixbuf(png_to_pixbuf(self.controller.get_snapshot(annotation=t),
+                                                        width=config.data.preferences['drag-snapshot-width']))
+                    end.set_from_pixbuf(png_to_pixbuf(self.controller.get_snapshot(annotation=t), position=t.fragment.end),
+                                        width=config.data.preferences['drag-snapshot-width'])
                     end.show()
                     padding.show()
                     if widgets:
@@ -779,7 +781,7 @@ class TimestampRepresentation(Gtk.Button):
     @ivar label: the label (timestamp) widget
     @type label: Gtk.Label
     """
-    def __init__(self, value, media, controller, width=None, epsilon=None, comment_getter=None, visible_label=True, callback=None):
+    def __init__(self, value, media, controller, width=None, precision=None, comment_getter=None, visible_label=True, callback=None):
         """Instanciate a new TimestampRepresentation.
 
         @param value: the timestamp value
@@ -788,8 +790,8 @@ class TimestampRepresentation(Gtk.Button):
         @type controller: advene.core.Controller
         @param width: the snapshot width
         @type width: int
-        @param epsilon: the precision (for snapshot display)
-        @type epsilon: int (ms)
+        @param precision: the precision (for snapshot display)
+        @type precision: int (ms)
         @param comment_getter: method returning the associated comment
         @type comment_getter: method
         @param visible_label: should the timestamp label be displayed?
@@ -798,15 +800,16 @@ class TimestampRepresentation(Gtk.Button):
         @type callback: method. If it returns False, then the modification will be cancelled
         """
         super(TimestampRepresentation, self).__init__()
-        self._value=value
+        self._value = value
+        self._rounded_value = controller.round_timestamp(value)
         if media is None:
             media = controller.package.media
         self._media = media
         self.controller=controller
         self._width=width or config.data.preferences['bookmark-snapshot-width']
-        if epsilon is None:
-            epsilon=config.data.preferences['bookmark-snapshot-precision']
-        self.epsilon=epsilon
+        if precision is None:
+            precision=config.data.preferences['bookmark-snapshot-precision']
+        self.precision=precision
         self.visible_label=visible_label
         # comment_getter is a method which returns the comment
         # associated to this timestamp
@@ -821,6 +824,7 @@ class TimestampRepresentation(Gtk.Button):
 
         box=Gtk.VBox()
         self.image=Gtk.Image()
+        self.valid_screenshot = False
         self.label=Gtk.Label()
         box.pack_start(self.image, False, True, 0)
         box.pack_start(self.label, False, True, 0)
@@ -848,7 +852,7 @@ class TimestampRepresentation(Gtk.Button):
         self.connect('leave-notify-event', leave_bookmark)
 
         self._rules=[]
-        # React to UpdateSnapshot events
+        # React to SnapshotUpdate events
         self._rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
                                                                         method=self.snapshot_update_cb))
         self.connect('destroy', self.remove_rules)
@@ -877,7 +881,7 @@ class TimestampRepresentation(Gtk.Button):
 
     def snapshot_update_cb(self, context, target):
         if (context.globals['media'] == self._media
-            and abs(context.globals['position'] - self._value) <= self.epsilon):
+            and abs(context.globals['position'] - self._rounded_value) <= self.precision):
             # Update the representation
             self.refresh()
         return True
@@ -899,7 +903,8 @@ class TimestampRepresentation(Gtk.Button):
         if self.highlight:
             self.controller.notify('BookmarkUnhighlight', timestamp=self._value, media=self._media, immediate=True)
             self.highlight=False
-        self._value=v
+        self._value = v
+        self._rounded_value = self.controller.round_timestamp(v)
         self.refresh()
     value=property(get_value, set_value, doc="Timestamp value")
 
@@ -908,20 +913,15 @@ class TimestampRepresentation(Gtk.Button):
         """
         if self._value is None:
             return True
-        cache=self.controller.package.imagecache
-        # We have to check for is_initialized before doing the
-        # update_status, since the snapshot may be updated by the update_status
-        do_refresh=not cache.is_initialized(self._value, epsilon=self.epsilon)
         self.controller.update_status("seek", self._value)
-        if do_refresh:
-            # The image was invalidated (or not initialized). Use
-            # a timer to update it after some time.
+        if not self.valid_screenshot:
+            # The image is not (yet) available. Use a timer to update
+            # it after some time.
             def refresh_timeout():
-                if cache.is_initialized(self._value, epsilon=self.epsilon):
-                    # The image was updated. Refresh the display.
-                    self.refresh()
+                # The image was maybe updated. Refresh the display.
+                self.refresh()
                 return False
-            GObject.timeout_add (100, refresh_timeout)
+            GObject.timeout_add (300, refresh_timeout)
         return True
 
     def _button_press_handler(self, widget, event):
@@ -944,10 +944,8 @@ class TimestampRepresentation(Gtk.Button):
             self.image.hide()
             self.set_size_request(6, 12)
         else:
-            ic=self.controller.package.imagecache
-            png = ic.get(v, epsilon=self.epsilon)
-            if png == ic.not_yet_available_image and 'async-snapshot' in self.controller.player.player_capabilities:
-                self.controller.queue_action(self.controller.update_snapshot, v)
+            png = self.controller.get_snapshot(v, media=self._media, precision=self.precision)
+            self.valid_screenshot = not png.is_default
             self.image.set_from_pixbuf(png_to_pixbuf(bytes(png), width=self.width))
             self.set_size_request(-1, -1)
             self.image.show()
@@ -976,13 +974,8 @@ class TimestampRepresentation(Gtk.Button):
     def refresh_snapshot(self, *p):
         """Refresh the snapshot image.
         """
-        ic=self.controller.package.imagecache
-        if ic.is_initialized(self.value, self.epsilon):
-            # Invalidate current snapshot
-            ic.invalidate(self.value, self.epsilon)
-            self.controller.notify('SnapshotUpdate', position=self.value, media=self._media)
         # Ask for refresh
-        self.controller.update_snapshot(self.value)
+        self.controller.update_snapshot(self.value, media=self._media, force=True)
         self.refresh()
         return True
 

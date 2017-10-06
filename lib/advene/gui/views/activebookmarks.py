@@ -1317,23 +1317,27 @@ class ActiveBookmark(object):
 
             def set_cursor(wid, t=None, precision=None):
                 if t is None:
-                    t=self.annotation or self.begin
-                cache=self.controller.package.imagecache
+                    t = self.annotation or self.begin
+
                 if self.no_image_pixbuf is None:
-                    self.no_image_pixbuf=png_to_pixbuf(cache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
+                    self.no_image_pixbuf = png_to_pixbuf(self.controller.get_snapshot(-1), width=config.data.preferences['drag-snapshot-width'])
                 if not t == w._current:
                     if isinstance(t, int):
-                        if cache.is_initialized(t, epsilon=config.data.preferences['bookmark-snapshot-precision']):
-                            begin.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
-                        elif begin.get_pixbuf() != self.no_image_pixbuf:
-                            begin.set_from_pixbuf(self.no_image_pixbuf)
+                        snap = self.controller.get_snapshot(position=t, annotation=self.annotation, precision=config.data.preferences['bookmark-snapshot-precision'])
+                        if snap.is_default:
+                            pixbuf = self.no_image_pixbuf
+                        else:
+                            pixbuf = png_to_pixbuf(snap, width=config.data.preferences['drag-snapshot-width'])
                         end.hide()
                         padding.hide()
                         l.set_text(helper.format_time(t))
                     elif isinstance(t, Annotation):
                         # It can be an annotation
-                        begin.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
-                        end.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.end), width=config.data.preferences['drag-snapshot-width']))
+                        begin.set_from_pixbuf(png_to_pixbuf(self.controller.get_snapshot(annotation=t),
+                                                            width=config.data.preferences['drag-snapshot-width']))
+                        end.set_from_pixbuf(png_to_pixbuf(self.controller.get_snapshot(annotation=t,
+                                                                                       position=t.fragment.end),
+                                                          width=config.data.preferences['drag-snapshot-width']))
                         end.show()
                         padding.show()
                         l.set_text(self.controller.get_title(t))

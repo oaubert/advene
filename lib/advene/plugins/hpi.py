@@ -172,8 +172,8 @@ class HPIImporter(GenericImporter):
             for t in (a.fragment.begin,
                       int((a.fragment.begin + a.fragment.end) / 2),
                       a.fragment.end):
-                if not self.controller.package.imagecache.is_initialized(t):
-                    self.controller.update_snapshot(t)
+                s = self.controller.get_snapshot(annotation=a, position=t)
+                if s.is_default:
                     missing_screenshots.append(t)
         if len(missing_screenshots) > 0:
             unmet_requirements.append(_("%d / %d screenshots are missing. Wait for extraction to complete.") % (len(missing_screenshots),

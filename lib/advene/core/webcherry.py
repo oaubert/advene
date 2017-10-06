@@ -413,7 +413,7 @@ class Media(Common):
             return "".join(res)
         alias = args[0]
         try:
-            i = self.controller.packages[alias].imagecache
+            p = self.controller.packages[alias]
         except KeyError:
             return self.send_error(400, _("Unknown package alias"))
 
@@ -430,10 +430,10 @@ class Media(Common):
                 res.append (_("""<p><a href="/media/snapshot/%s?mode=inline">Display with inline images</a></p>""") % alias)
             res.append ("<ul>")
 
-            k = list(i.keys ())
+            k = list(p.imagecache.keys())
             k.sort ()
             for position in k:
-                if i.is_initialized (position):
+                if position in p.imagecache:
                     m = _("Done")
                 else:
                     m = _("Pending")
@@ -443,11 +443,7 @@ class Media(Common):
             res.append ("</ul>")
             return "".join(res)
 
-        if not i.is_initialized (position):
-            self.no_cache ()
-            if 'async-snapshot' in self.controller.player.player_capabilities:
-                self.controller.queue_action(self.controller.update_snapshot, position)
-        snapshot=i[position]
+        snapshot = self.controller.get_snapshot(position, media=p.media)
         cherrypy.response.headers['Content-type']=snapshot.contenttype
         res.append (bytes(snapshot))
         return res

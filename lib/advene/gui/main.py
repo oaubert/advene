@@ -4880,20 +4880,16 @@ class AdveneGUI(object):
         return True
 
     def update_annotation_screenshots(self, *p):
-        """Update screenshot for annotations bounds.
+        """Update screenshot for annotations
 
         This requires that the player has the async-snapshot capability.
         """
         if not 'async-snapshot' in self.controller.player.player_capabilities:
             dialog.message_dialog(_("This video player is not able to grab specific screenshots"))
             return True
-        missing = set()
-        ic=self.controller.package.imagecache
-        for a in self.controller.package.annotations:
-            if not ic.is_initialized(a.fragment.begin):
-                missing.add(a.fragment.begin)
-            if not ic.is_initialized(a.fragment.end):
-                missing.add(a.fragment.end)
+        missing = set(a.fragment.begin
+                      for a in self.controller.package.annotations
+                      if self.controller.get_snapshot(a).is_default)
         if missing:
             dialog.message_dialog(_("Updating %d snapshots") % len(missing), modal=False)
             logger.info("Updating %d missing snapshots: %s" % (len(missing), ", ".join(helper.format_time_reference(t) for t in sorted(missing))))

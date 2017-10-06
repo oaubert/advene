@@ -98,8 +98,10 @@ class ZoneContentHandler (ContentHandler):
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
             # We are editing the content of an annotation. Use its snapshot as background.
-            i=image_from_position(self.controller, self.parent.fragment.begin, height=160,
-                                  epsilon=1000/config.data.preferences['default-fps'])
+            i = image_from_position(self.controller,
+                                    position=self.parent.fragment.begin,
+                                    media=self.parent.media,
+                                    height=160)
             self.view = ShapeDrawer(callback=self.callback, background=i.get_pixbuf())
         else:
             self.view = ShapeDrawer(callback=self.callback)
@@ -257,8 +259,14 @@ class SVGContentHandler (ContentHandler):
         return False
 
     def set_begin(self, t):
-        self.view.set_background(image_from_position(self.controller, t,
-                                                     epsilon=1000/config.data.preferences['default-fps']))
+        try:
+            media = self.parent.media
+        except AttributeError:
+            media = None
+
+        self.view.set_background(image_from_position(self.controller,
+                                                     position=t,
+                                                     media=media))
         return True
 
     def get_view (self, compact=False):
@@ -266,8 +274,9 @@ class SVGContentHandler (ContentHandler):
         vbox=Gtk.VBox()
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
-            i = image_from_position(self.controller, self.parent.fragment.begin,
-                                    epsilon=1000/config.data.preferences['default-fps'])
+            i = image_from_position(self.controller,
+                                    position=self.parent.fragment.begin,
+                                    media=self.parent.media)
             self.view = ShapeEditor(background=i, icon_dir=config.data.advenefile('pixmaps'))
 
             def snapshot_update_cb(context, target):
@@ -277,7 +286,9 @@ class SVGContentHandler (ContentHandler):
                 pos = frag.begin + int(self.view.background_adj.get_value() * frag.duration)
                 if abs(context.globals['position'] - pos) <= 1000/config.data.preferences['default-fps']:
                     # Refresh image
-                    i=image_from_position(self.controller, pos, epsilon=1000/config.data.preferences['default-fps'])
+                    i = image_from_position(self.controller,
+                                            position=pos,
+                                            media=self.parent.media)
                     self.view.set_background(i)
                 return True
             self.rules.append(self.controller.event_handler.internal_rule (event='SnapshotUpdate',
@@ -334,8 +345,8 @@ class SVGContentHandler (ContentHandler):
             pos = frag.begin + int(adj.get_value() * frag.duration)
             self.controller.update_snapshot(pos)
             i = image_from_position(self.controller,
-                                    pos,
-                                    epsilon=1000/config.data.preferences['default-fps'])
+                                    position=pos,
+                                    media=self.parent.media)
             self.view.set_background(i)
             return True
 
