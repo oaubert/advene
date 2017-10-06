@@ -26,6 +26,7 @@ import advene.core.config as config
 import operator
 
 from collections import defaultdict
+import math
 import os
 import re
 
@@ -33,19 +34,22 @@ class CachedString:
     """String cached in a file.
     """
     def __init__(self, filename):
-        self._filename=filename
-        self.contenttype='text/plain'
-        ts=re.findall('(\d+).png$', filename)
+        self._filename = filename
+        self.contenttype = 'text/plain'
+        self.is_default = False
+        ts = re.findall('(\d+).png$', filename)
         if ts:
-            self.timestamp=int(ts[0])
+            self.timestamp = int(ts[0])
         else:
-            self.timestamp=-1
+            self.timestamp = -1
+
+    def size(self):
+        return os.path.getsize(self._filename)
 
     def __bytes__(self):
         try:
             with open(self._filename, 'rb') as f:
-                data=f.read()
-            return data
+                return f.read()
         except (IOError, OSError):
             return b''
 
@@ -56,10 +60,14 @@ class TypedString(bytes):
     """String with a mimetype and a timestamp attribute.
     """
     def __new__(cls, value=b""):
-        s=bytes.__new__(cls, value)
-        s.contenttype='text/plain'
-        s.timestamp=-1
+        s = bytes.__new__(cls, value)
+        s.contenttype = 'text/plain'
+        s.timestamp = -1
+        s.is_default = False
         return s
+
+    def size(self):
+        return len(self)
 
     def __bytes__(self):
         return self
@@ -68,12 +76,12 @@ class ImageCache(object):
     """ImageCache class.
 
     It interacts with the player to return annotation snapshots. It approximates
-    key values to a given precision (20 by default).
+    key values to a given precision (20ms by default).
 
     @ivar not_yet_available_image: the image returned for not-yet-captured images
     @type not_yet_available_image: PNG data
-    @ivar epsilon: the precision for key values
-    @type epsilon: integer
+    @ivar precision: the precision for key values
+    @type precision: integer
     @ivar _modified: the modified status of the cache
     @type _modified: boolean
     @ivar name: id of the ImageCache (used when saving)
@@ -83,64 +91,87 @@ class ImageCache(object):
     """
     # The content of the not_yet_available_file file. We could use
     # CachedString but as it is frequently used, let us keep it in memory.
-    f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
-    not_yet_available_image = TypedString(f.read(10000))
-    f.close()
-    not_yet_available_image.contenttype='image/png'
-    not_yet_available_image.timestamp=-1
+    with open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb') as f:
+        not_yet_available_image = TypedString(f.read(10000))
+    not_yet_available_image.contenttype = 'image/png'
+    not_yet_available_image.timestamp = -1
+    not_yet_available_image.is_default = True
 
-    def __init__ (self, uri=None, name=None, epsilon=35):
+    def __init__ (self, uri=None, name=None, precision=20, framerate=None):
         """Initialize the Imagecache
 
         @param uri: URI of the media file
         @type uri: string
         @param name: id of a previously saved ImageCache.
         @type name: string
-        @param epsilon: value of the precision
-        @type epsilon: integer
+        @param precision: value of the precision
+        @type precision: integer
         """
         # It is a dictionary whose keys are the positions
-        # (in ms) and values the snapshot in PNG format.
+        # (in ms) and values the snapshot in PNG format. We store only
         # value = self.not_yet_available_image if the image has
         # not yet been updated.
+        self.uri = uri
+
         self._dict = defaultdict(lambda: self.not_yet_available_image)
 
         self._modified=False
 
         self.name=None
 
+        if framerate is None:
+            framerate = 1 / config.data.prefix['default-fps']
+            logger.warn("No framerate given. Using default value %.02f", framerate)
+        self.framerate = framerate
+
         # If autosync, then data will automatically be stored on disk
         # (provided that self.name is properly initialized)
         self.autosync=False
 
-        self.epsilon = epsilon
+        self.precision = precision
         if name is not None:
             self.load (name)
 
-    def init_value (self, key):
-        """Initialize a key if needed.
+    def round_timestamp(self, t_in_ms):
+        """Round the given timestamp to the appropriate value based on framerate.
 
-        @param key: the tested key
-        @type key: long
+        We assume a constant frame rate encoding. So
+        math.ceil(t/1000/framerate) returns the frame number (starting
+        at 1). We multiply it by framerate again to get the time of
+        the end of the frame. We substract .1 framerate to ask the
+        player to get just before the end of the frame.
+
+        Since we deal with ms, return an integer.
+        """
+        return int(self.framerate * (1000 * math.ceil(t_in_ms / 1000 / self.framerate) - 0.1))
+
+    def approximate (self, key, precision=None):
+        """Return an approximate key value for key.
+
+        If there is an existing key no further than precision, then return it.
+        Else, initialize data for key and return key.
         """
         if key is None:
-            return
-        if key not in self._dict:
-            # Accessing it will initialize its value
-            self._dict[key]
+            return None
+        key = self.round_timestamp(key)
+        if key in self._dict or precision == 0:
+            return key
+
+        if precision is None:
+            precision = self.precision
+        best = min( ((pos, abs(pos - key))
+                     for pos in self._dict.keys()
+                     if abs(pos - key) <= precision),
+                    key=operator.itemgetter(1),
+                    default=(key, 0) )
+        #logger.debug("approximate %d (%d) -> %d", key, precision or 0, best[0])
+        return best[0]
 
     def clear(self):
         self._dict.clear()
 
     def __contains__(self, key):
-        if key is None:
-            return True
-        try:
-            self.approximate(key)
-            return True
-        except ValueError:
-            return False
-        return False
+        return self.round_timestamp(key) in self._dict
 
     def __getitem__ (self, key):
         """Return a snapshot for the image corresponding to the position pos.
@@ -152,14 +183,12 @@ class ImageCache(object):
         @return: an image
         @rtype: PNG data
         """
-        if key is None:
+        if key is None or key < 0:
             return self.not_yet_available_image
-        key = self.approximate(key)
-        return self._dict[key]
-
+        return self._dict.get(self.round_timestamp(key), self.not_yet_available_image)
 
     def __delitem__(self, key):
-        self._dict.__delitem(key)
+        self._dict.__delitem__(key)
 
     def __iter__(self):
         return self._dict.__iter__()
@@ -167,8 +196,8 @@ class ImageCache(object):
     def __len__(self):
         return self._dict.__len__()
 
-    def get(self, key, epsilon=None):
-        """Return a snapshot for the image corresponding to the position pos.
+    def get(self, key, precision=None):
+        """Return a snapshot for the image corresponding to the position pos with a given precision.
 
         The snapshot can be ImageCache.not_yet_available_image.
 
@@ -177,10 +206,13 @@ class ImageCache(object):
         @return: an image
         @rtype: PNG data
         """
-        if key is None:
+        if key is None or key < 0:
             return self.not_yet_available_image
-        key = self.approximate(key, epsilon)
-        return self._dict[key]
+        if precision:
+            key = self.approximate(key, precision)
+        else:
+            key = self.round_timestamp(key)
+        return self._dict.get(key, self.not_yet_available_image)
 
     def __setitem__ (self, key, value):
         """Set the snapshot for the image corresponding to the position key.
@@ -192,54 +224,28 @@ class ImageCache(object):
         """
         if key is None:
             return value
+        key = self.round_timestamp(key)
         if value != self.not_yet_available_image:
             if self.autosync and self.name is not None:
-                d=os.path.join(config.data.path['imagecache'], self.name)
+                d = os.path.join(config.data.path['imagecache'], self.name)
                 if not os.path.isdir(d):
                     os.mkdir (d)
-                filename=os.path.join(d, "%010d.png" % key)
+                filename = os.path.join(d, "%010d.png" % key)
                 with open(filename, 'wb') as f:
                     f.write (value)
-                value=CachedString(filename)
-                value.contenttype='image/png'
+                value = CachedString(filename)
+                value.contenttype = 'image/png'
             elif isinstance(value, (str, bytes)):
-                self._modified=True
-                value=TypedString(value)
-                value.timestamp=key
-                value.contenttype='image/png'
+                self._modified = True
+                value = TypedString(value)
+                value.timestamp = key
+                value.contenttype = 'image/png'
             self._dict[key] = value
             return value
         else:
             return self.not_yet_available_image
 
-    def approximate (self, key, epsilon=None):
-        """Return an approximate key value for key.
-
-        If there is an existing key no further than self.epsilon, then return it.
-        Else, initialize data for key and return key.
-        """
-        if key is None:
-            return None
-        key=int(key)
-        if self._dict.get(key, self.not_yet_available_image) != self.not_yet_available_image:
-            return key
-
-        if epsilon is None:
-            epsilon=self.epsilon
-        valids = [ (pos, abs(pos-key))
-                   for pos, val in self._dict.items()
-                   if abs(pos - key) <= epsilon
-                   and val != self.not_yet_available_image ]
-        valids.sort(key=operator.itemgetter(1))
-
-        if valids:
-            key = valids[0][0]
-        else:
-            self.init_value (key)
-
-        return key
-
-    def invalidate(self, key, epsilon=None):
+    def invalidate(self, key, precision=None):
         """Invalidate the given key.
 
         This method is used when the player has some trouble getting
@@ -247,40 +253,16 @@ class ImageCache(object):
         """
         if key is None:
             return
-        if epsilon is None:
-            epsilon=self.epsilon
-        key = self.approximate(key, epsilon)
-        self._dict[key] = self.not_yet_available_image
+        key = self.round_timestamp(key)
+        del self._dict[key]
         return key
-
-    def missing_snapshots (self):
-        """Return a list of positions of missing snapshots.
-
-        @return: a list of keys
-        """
-        return [ pos
-                 for pos in self._dict
-                 if self._dict.get(pos) == self.not_yet_available_image ]
 
     def valid_snapshots (self):
         """Return the list of positions of valid snapshots.
 
         @return: a list of keys
         """
-        return [ pos
-                 for pos in self._dict
-                 if self._dict.get(pos) != self.not_yet_available_image ]
-
-    def is_initialized (self, key, epsilon=None):
-        """Return True if the given key is initialized.
-
-        @return: True if the given key is initialized.
-        @rtype: boolean
-        """
-        if key is None:
-            return False
-        key = self.approximate(key, epsilon)
-        return self._dict[key] != self.not_yet_available_image
+        return list(self._dict.keys())
 
     def save (self, name):
         """Save the content of the cache under a specified name (id).
