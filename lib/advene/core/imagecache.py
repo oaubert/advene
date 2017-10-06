@@ -353,19 +353,46 @@ class ImageCache(object):
                     self._dict[i] = s
         self._modified=False
 
+    def stats(self):
+        memory_size = 0
+        memory_count = 0
+        disk_size = 0
+        disk_count = 0
+        for s in self._dict.values():
+            if isinstance(s, TypedString):
+                memory_count += 1
+                memory_size += s.size()
+            elif isinstance(s, CachedString):
+                disk_count += 1
+                disk_size += s.size()
+
+        stats = {
+            'count': len(self._dict),
+            'memory_count': memory_count,
+            'memory_size': memory_size,
+            'memory_size_mb': memory_size / 1024 / 1024,
+            'disk_count': disk_count,
+            'disk_size': disk_size,
+            'disk_size_mb': disk_size / 1024 / 1024,
+        }
+        return stats
+
+    def stats_repr(self):
+        return "%(count)d values. Memory: %(memory_count)d (%(memory_size_mb).02f MB) - Disk: %(disk_count)d (%(disk_size_mb).02f MB)" % self.stats()
+
     def reset(self):
         """Reset imagecache.
         """
         for pos in self._dict:
             self._dict[pos] = self.not_yet_available_image
 
-    def ids (self):
+    def ids(self):
         """Return the list of currents ids.
         """
         return [ str(k) for k in self._dict ]
 
-    def __str__ (self):
+    def __str__(self):
         return "ImageCache object (%d images)" % len(self._dict)
 
-    def __repr__ (self):
+    def __repr__(self):
         return "ImageCache object (%d images)" % len(self._dict)
