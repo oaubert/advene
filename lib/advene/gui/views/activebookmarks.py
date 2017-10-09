@@ -1328,6 +1328,7 @@ class ActiveBookmark(object):
                             pixbuf = self.no_image_pixbuf
                         else:
                             pixbuf = png_to_pixbuf(snap, width=config.data.preferences['drag-snapshot-width'])
+                        begin.set_from_pixbuf(pixbuf)
                         end.hide()
                         padding.hide()
                         l.set_text(helper.format_time(t))
