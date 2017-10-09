@@ -309,7 +309,7 @@ class Player:
             return default
         if not info.get_video_streams():
             # Could be an audio file.
-            default['duration'] = info.get_duration()
+            default['duration'] = info.get_duration() / Gst.MSECOND
             return default
 
         stream = info.get_video_streams()[0]
@@ -319,7 +319,7 @@ class Player:
             'framerate_num': stream.get_framerate_num(),
             'width': stream.get_width(),
             'height': stream.get_height(),
-            'duration': info.get_duration(),
+            'duration': info.get_duration() / Gst.MSECOND,
         }
 
     def check_uri(self):
