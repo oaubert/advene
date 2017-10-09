@@ -303,13 +303,13 @@ class AdveneGUI(object):
                     ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)")),
                     ( _("Evaluator") + " [Ctrl-e]", self.on_evaluator2_activate, _("Open python evaluator window") ),
                     ( _("Webserver log"), self.on_webserver_log1_activate, "" ),
-                    #( _("_MediaInformation"), self.on_view_mediainformation_activate, _("Display information about the media") ),
                     ), "" ),
             (_("_Player"), (
                     ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code") ),
                     ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
                     ( _("Reset ImageCache"), self.on_reset_imagecache_activate, _("Reset the ImageCache") ),
                     ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
+                    ( _("Display _Media information"), self.on_view_mediainformation_activate, _("Display information about the current media") ),
                     ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds") ),
                     ( _("_Select player"), None, _("Select the player plugin") ),
                     ), "" ),
@@ -4098,19 +4098,30 @@ class AdveneGUI(object):
         return True
 
     def on_view_mediainformation_activate (self, button=None, data=None):
-        """View mediainformation."""
+        """View mediainformation.
+        """
         self.controller.position_update ()
-        p=self.controller.player
-        self.controller.log("%(status)s %(filename)s %(position)s / %(duration)s (cached %(cached)s) - %(positionms)dms / %(durationms)dms (cached %(cachedms)dms)" % {
-            'filename': p.get_uri(),
-            'status': self.statustext.get(p.status, _("Unknown")),
-            'position': helper.format_time(p.current_position_value),
-            'positionms': p.current_position_value,
-            'duration': helper.format_time_reference(p.stream_duration),
-            'durationms': p.stream_duration,
-            'cached': helper.format_time_reference(self.controller.cached_duration),
-            'cachedms': self.controller.cached_duration
-        })
+        p = self.controller.player
+        ic = self.controller.package.imagecache
+        info = ic.video_info
+        info['duration_formatted'] = helper.format_time_reference(info['duration'])
+        info['position_formatted'] = helper.format_time_reference(p.current_position_value)
+        info['cached_duration_formatted'] = helper.format_time_reference(self.controller.cached_duration)
+        info['position'] =  p.current_position_value
+        info['imagecache'] = ic.stats_repr()
+        msg = _("""Media information
+
+URI: %(uri)s
+Framerate: %(framerate_denom)d / %(framerate_num)d (%(framerate).02f )
+Duration: %(duration_formatted)s (%(duration)d ms) (cached: %(cached_duration_formatted)s)
+Current position: %(position_formatted)s (%(position)d ms)
+
+Original image size: %(width)d x %(height)d
+
+Image cache information: %(imagecache)s
+""") % info
+        self.popupwidget.display_message(msg, timeout=30000, title=_("Information"))
+        logger.info(msg)
         return True
 
     def on_about1_activate (self, button=None, data=None):
