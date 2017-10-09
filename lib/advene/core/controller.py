@@ -1181,7 +1181,7 @@ class AdveneController(object):
                 self.imagecache[i.media][i.date] = helper.snapshot2png(i)
                 self.notify('SnapshotUpdate', position=self.imagecache.round_timestamp(i.date), media=i.media)
         else:
-            logger.warn("Player does not support snapshotting.")
+            logger.debug("Player does not support snapshotting.")
         return True
 
     def round_timestamp(self, t, media=None):
