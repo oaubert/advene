@@ -46,7 +46,7 @@ from advene.gui.util import decode_drop_parameters
 from advene.gui.views.annotationdisplay import AnnotationDisplay
 import advene.util.helper as helper
 from advene.gui.util import dialog, name2color, get_small_stock_button, get_pixmap_button, get_pixmap_toolbutton
-from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget, GenericColorButtonWidget
+from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget
 
 name="Timeline view plugin"
 
@@ -207,8 +207,6 @@ class TimeLine(AdhocView):
         # __init__. This is used to avoid a double initialization.
         self.package_from_init = None
 
-        self.current_marker = None
-        self.current_marker_scale = None
         self.layout = Gtk.Layout ()
 
         self.minimum = minimum
@@ -312,8 +310,8 @@ class TimeLine(AdhocView):
 
         self.layout.connect('size-allocate', self.layout_resize_event)
         self.layout.connect('draw', self.draw_background)
-        self.layout.connect_after('draw', self.draw_relation_lines)
-        self.scale_layout.connect_after('draw', self.draw_bookmarks)
+        self.layout.connect_after('draw', self.overlay_layout)
+        self.scale_layout.connect_after('draw', self.overlay_scale_layout)
 
         # The layout can receive drops
         self.layout.connect('drag-data-received', self.layout_drag_received)
@@ -341,7 +339,6 @@ class TimeLine(AdhocView):
 
         # Dictionary holding the vertical position for each type
         self.layer_position = {}
-        self.draw_current_mark()
         self.widget = self.get_full_widget()
 
         # Set default parameters (zoom) and refresh the legend widget
@@ -427,7 +424,50 @@ class TimeLine(AdhocView):
     def update_relation_lines(self):
         self.layout.queue_draw()
 
-    def draw_relation_lines(self, layout, context):
+    def draw_time_cursor(self, layout, context):
+        """Draw the time cursor in the given layout.
+
+        It will be used with both self.layout and self.scale_layout
+        """
+        p = self.controller.player
+        if not p.is_playing():
+            return
+
+        # Visible bounds
+        a = self.adjustment
+        begin = int(a.get_value())
+        end = int(a.get_value() + a.get_page_size())
+
+        w, h = layout.get_size()
+
+        if p.status == p.PlayingStatus:
+            context.set_source_rgba(1.0, 0, 0, .5)
+        else:
+            # Pause status
+            context.set_source_rgba(0, 0, 1.0, .5)
+        context.set_line_width(6)
+
+        x = self.unit2pixel(p.current_position_value, absolute=True)
+        # There is a clipping area applied to the context which
+        # restricts drawing to the visible area. We have to use
+        # coordinates relative to the visible area to draw the
+        # marks
+        if x >= begin or x <= end:
+            context.move_to(x - begin, 0)
+            context.line_to(x - begin, h)
+            context.stroke()
+
+    def overlay_scale_layout(self, layout, context):
+        """Overlay information over scale layout.
+        """
+        self.draw_time_cursor(layout, context)
+        if self.bookmarks_to_draw:
+            self.draw_bookmarks(layout, context)
+
+    def overlay_layout(self, layout, context):
+        """Overlay information over main layout.
+        """
+        self.draw_time_cursor(layout, context)
         if self.bookmarks_to_draw:
             self.draw_bookmarks(layout, context)
         if self.options['display-all-relations']:
@@ -628,7 +668,6 @@ class TimeLine(AdhocView):
         self.update_layer_position()
 
         self.draw_marks()
-        self.draw_current_mark()
 
         def finalize_callback():
             self.update_legend_widget(self.legend)
@@ -2028,45 +2067,6 @@ class TimeLine(AdhocView):
             update_layout_size()
             callback()
 
-    def draw_current_mark (self):
-        u2p = self.unit2pixel
-
-        red=Gdk.color_parse('red2')
-        a = GenericColorButtonWidget('layout_current_mark', container=self)
-        a.default_size=(1, max(list(self.layer_position.values()) or (0,)) + self.button_height)
-        a.local_color=red
-        a.alpha=.5
-        self.current_marker = a
-        a.mark = self.current_position
-        a.pos = 0
-        self.layout.put(a, u2p(a.mark, absolute=True), a.pos)
-        a.show ()
-
-        a = GenericColorButtonWidget('scale_layout_current_mark', container=self)
-        a.default_size=(1, self.button_height)
-        a.local_color=red
-        a.alpha=.5
-        self.current_marker_scale = a
-        a.mark = self.current_position
-        a.pos = 0
-        self.scale_layout.put (a, u2p(a.mark, absolute=True), a.pos)
-        a.show ()
-
-    def update_current_mark (self, pos=None):
-        u2p = self.unit2pixel
-        if pos is None:
-            pos = self.current_position
-        else:
-            self.current_position = pos
-        p=u2p(pos, absolute=True)
-        a = self.current_marker
-        a.mark = pos
-        self.layout.move (a, p, a.pos)
-
-        a = self.current_marker_scale
-        a.mark = pos
-        self.scale_layout.move (a, p, a.pos)
-
     def update_position (self, pos):
         if pos is None:
             pos = self.current_position
@@ -2081,13 +2081,15 @@ class TimeLine(AdhocView):
             end=begin + self.adjustment.get_page_size()
             if p > end or p < begin:
                 self.center_on_position(pos)
-        self.update_current_mark (pos)
+        self.layout.queue_draw()
+        self.scale_layout.queue_draw()
         return True
 
     def position_reset(self):
         # The position was reset. Deactive active annotations.
         self.deactivate_all()
-        self.update_current_mark(self.minimum)
+        self.layout.queue_draw()
+        self.scale_layout.queue_draw()
         return True
 
     def update_scale_height(self, *p):
@@ -2787,12 +2789,9 @@ class TimeLine(AdhocView):
             self.old_scale_value = self.scale.get_value()
             # Reposition all buttons
             self.layout.foreach(move_widget)
-            self.layout.remove(self.current_marker)
             # Redraw marks
             self.scale_layout.foreach(self.scale_layout.remove)
             self.draw_marks ()
-            # Redraw current mark
-            self.draw_current_mark ()
             return True
         return False
 
@@ -3347,7 +3346,6 @@ class TimeLine(AdhocView):
         self.controller.gui.register_view (a)
         a.set_master_view(self)
         a.widget.show_all()
-
         return self.inspector_pane
 
     def get_toolbar(self):
