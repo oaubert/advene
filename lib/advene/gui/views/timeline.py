@@ -822,7 +822,6 @@ class TimeLine(AdhocView):
             w = t[0]
             # Iterate only on the first one (if any)
             png = self.controller.get_snapshot(position=pos, media=self.controller.package.media)
-            logger.debug("updating screenshot %d timestamp %d -> %d", pos, w.timestamp, png.timestamp)
             w.set_from_pixbuf(png_to_pixbuf(png, height=self.scale_layout.height))
             w.timestamp = png.timestamp
             w.valid_screenshot = not png.is_default
@@ -850,10 +849,9 @@ class TimeLine(AdhocView):
                                                         method=self.duration_update_handler),
                 controller.event_handler.internal_rule (event="MediaChange",
                                                         method=self.media_change_handler),
+                controller.event_handler.internal_rule (event="SnapshotUpdate",
+                                                        method=self.snapshot_update_handler),
                 ))
-        if 'async-snapshot' in self.controller.player.player_capabilities:
-            self.registered_rules.append( controller.event_handler.internal_rule (event="SnapshotUpdate",
-                                                                                  method=self.snapshot_update_handler))
 
     def type_restricted_handler(self, context, parameters):
         """Update the display when playing is restricted to a type.
