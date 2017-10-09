@@ -50,7 +50,7 @@ class FrameSelector(object):
 
         # Number of displayed timestamps
         self.count = config.data.preferences['frameselector-count']
-        self.frame_length = int(1000 / config.data.preferences['default-fps'])
+        self.frame_length = self.controller.frame2time(1)
         self.frame_width = config.data.preferences['frameselector-width']
 
         # List of TimestampRepresentation widgets.
@@ -64,6 +64,7 @@ class FrameSelector(object):
         It is the timestamp displayed in the label, and corresponds
         most of the time to the original timestamp (before adjustment).
         """
+        timestamp = self.controller.round_timestamp(timestamp)
         self.timestamp = timestamp
         self.selected_value = timestamp
         self.update_timestamp(timestamp)

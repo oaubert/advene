@@ -4432,7 +4432,7 @@ class AdveneGUI(object):
             fps.append(d)
             fps.sort()
         ew.add_option(_("Default FPS"), 'default-fps',
-                      _("Default FPS (frame-per-second) value, when entering or displaying timestamps with frame numbers."), OrderedDict( (str(f), f) for f in fps))
+                      _("Default FPS (frame-per-second) value, when the information cannot be read from the media."), OrderedDict( (str(f), f) for f in fps))
         ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-left/right or forward/rewind buttons (in ms)."), 1, 300000)
         ew.add_spin(_("Second time increment"), "second-time-increment", _("Skip duration, when using control-shift-left/right (in ms)."), 1, 300000)
         ew.add_spin(_("Third time increment"), "third-time-increment", _("Skip duration, when using control-shift-up/down (in ms)."), 1, 300000)

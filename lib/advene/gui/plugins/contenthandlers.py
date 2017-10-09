@@ -283,8 +283,8 @@ class SVGContentHandler (ContentHandler):
                 if context.globals['media'] != self.parent.media:
                     return True
                 frag = self.parent.fragment
-                pos = frag.begin + int(self.view.background_adj.get_value() * frag.duration)
-                if abs(context.globals['position'] - pos) <= 1000/config.data.preferences['default-fps']:
+                pos = self.controller.round_timestamp(frag.begin + int(self.view.background_adj.get_value() * frag.duration))
+                if context.globals['position'] == pos:
                     # Refresh image
                     i = image_from_position(self.controller,
                                             position=pos,
@@ -342,7 +342,7 @@ class SVGContentHandler (ContentHandler):
 
         def update_background(adj):
             frag = self.parent.fragment
-            pos = frag.begin + int(adj.get_value() * frag.duration)
+            pos = self.controller.round_timestamp(frag.begin + int(adj.get_value() * frag.duration))
             self.controller.update_snapshot(pos)
             i = image_from_position(self.controller,
                                     position=pos,

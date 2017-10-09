@@ -1185,11 +1185,24 @@ class AdveneController(object):
         return True
 
     def round_timestamp(self, t, media=None):
+        """Round the given timestamp to the appropriate time wrt. framerate.
+        """
         if media is None:
             ic = self.package.imagecache
         else:
             ic = self.imagecache[media]
         return ic.round_timestamp(t)
+
+    def frame2time(self, n, media=None):
+        """Convert a frame number to a time in ms.
+
+        based on the current video framerate.
+        """
+        if media is None:
+            ic = self.package.imagecache
+        else:
+            ic = self.imagecache[media]
+        return int(n * 1000 * ic.video_info['framerate'])
 
     def get_snapshot(self, position=None, annotation=None, media=None, precision=None, auto_update=True):
         """Return the snapshot for a given position or annotation.
@@ -2279,7 +2292,7 @@ class AdveneController(object):
         p=self.player
         if p.status == p.PlayingStatus:
             self.update_status('pause')
-        self.update_status("seek_relative", int(1000 * number_of_frames / config.data.preferences['default-fps']), notify=False)
+        self.update_status("seek_relative", self.frame2time(number_of_frames), notify=False)
         return True
 
     def update_status (self, status=None, position=None, notify=True):
