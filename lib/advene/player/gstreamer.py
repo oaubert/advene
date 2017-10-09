@@ -80,7 +80,7 @@ def register(controller):
 
 class StreamInformation:
     def __init__(self):
-        self.streamstatus=None
+        self.status=None
         self.url=""
         self.position=0
         self.length=0
