@@ -38,14 +38,20 @@ def register(controller):
 
 class StreamInformation:
     def __init__(self):
-        self.streamstatus=None
+        self.status=None
         self.url=""
         self.position=0
         self.length=0
 
+def debug(f):
+    def wrapper(*param, **kwd):
+        logger.debug("%s %s %s", f.__name__, " ".join(str(p) for p in param), " ".join("%s=%s" % (k, str(v)) for (k, v) in kwd.items()))
+        return f(*param, **kwd)
+    return wrapper
+
 class Player:
     player_id='dummy'
-    player_capabilities=[ 'seek', 'pause', 'caption', 'svg', 'frame-by-frame', 'async-snapshot', 'set-rate', 'svg' ]
+    player_capabilities=[ 'seek', 'pause', 'caption', 'svg', 'frame-by-frame', 'set-rate', 'svg' ]
 
     # Status
     PlayingStatus=0
@@ -77,29 +83,33 @@ class Player:
         return "dvd@%s:%s" % (str(title),
                               str(chapter))
 
+    def is_playing(self):
+        """Is the player in Playing or Paused status?
+        """
+        s = self.get_stream_information ()
+        return s.status == self.PlayingStatus or s.status == self.PauseStatus
+
     def log(self, *m):
         logger.warn(" ".join(str(i) for i in m))
 
     def get_position(self, origin=None, key=None):
-        self.log("get_media_position")
         return self.current_position()
 
+    @debug
     def set_position(self, position=0):
-        position = self.position2value(position)
-        self.log("set_position %s" % str(position))
         self.basetime = time() * 1000 - position
         if self.pausetime is not None:
             self.pausetime = time() * 1000 - self.basetime
         return
 
+    @debug
     def start(self, position = 0):
-        self.log("start %s" % str(position))
         self.status = Player.PlayingStatus
         self.basetime = time() * 1000 - position
         self.pausetime = None
 
+    @debug
     def pause(self, position=0):
-        self.log("pause %s" % str(position))
         if self.status == Player.PlayingStatus:
             self.pausetime = time() * 1000 - self.basetime
             self.status = Player.PauseStatus
@@ -108,8 +118,8 @@ class Player:
             self.basetime = time() * 1000 - (self.pausetime or 0)
             self.pausetime = None
 
+    @debug
     def resume(self, position=0):
-        self.log("resume %s" % str(position))
         if self.status == Player.PlayingStatus:
             self.pausetime = time() * 1000 - self.basetime
             self.status = Player.PauseStatus
@@ -118,15 +128,17 @@ class Player:
             self.basetime = time() * 1000 - (self.pausetime or 0)
             self.pausetime = None
 
+    @debug
     def stop(self, position=0):
-        self.log("stop %s" % str(position))
         self.status = Player.UndefinedStatus
         self.basetime = None
         self.pausetime = None
 
+    @debug
     def exit(self):
         self.log("exit")
 
+    @debug
     def set_uri(self, item):
         self.videofile = item
         # Simulate a 30 minutes movie
@@ -136,6 +148,7 @@ class Player:
     def get_uri(self):
         return self.videofile
 
+    @debug
     def get_video_info(self):
         """Return information about the current video.
         """
@@ -148,28 +161,30 @@ class Player:
             'duration': self.stream_duration,
         }
 
+    @debug
     def snapshot(self):
-        self.log("snapshot %s" % str(position))
         return None
 
+    @debug
     def display_text (self, message, begin, end):
-        self.log("display_text %s" % str(message))
+        pass
 
     def get_stream_information(self):
         s = StreamInformation()
         s.url = self.get_uri()
         s.length = self.stream_duration
         s.position = self.get_position()
-        s.streamstatus = self.status
+        s.status = self.status
         return s
 
     def sound_get_volume(self):
         return self.volume
 
+    @debug
     def sound_set_volume(self, v):
-        self.log("sound_set_volume %s" % str(v))
         self.volume = v
 
+    @debug
     def update_status (self, status=None, position=None):
         """Update the player status.
 
@@ -191,17 +206,16 @@ class Player:
         @param position: the position
         @type position: int
         """
-        self.log("update_status %s" % status)
-
         if position is None:
             position = 0
 
-        if status == "start" or status == "set":
+        if status == "start" or status == "seek" or status == "seek_relative":
             self.position_update()
+            if status == "seek_relative":
+                position = self.current_position() + position
             if self.status in (self.EndStatus, self.UndefinedStatus):
                 self.start(position)
-            else:
-                self.set_position(position)
+            self.set_position(position)
         else:
             if status == "pause":
                 self.position_update()
@@ -219,16 +233,17 @@ class Player:
                 self.log("******* Error : unknown status %s")
         self.position_update ()
 
+    @debug
     def check_player(self):
-        self.log("check player")
         return True
 
     def position_update(self):
         s = self.get_stream_information ()
-        self.status = s.streamstatus
+        self.status = s.status
         self.stream_duration = s.length
         self.current_position_value = s.position
 
+    @debug
     def set_visual(self, xid):
         """Set the window id for the video output.
 
@@ -237,15 +252,16 @@ class Player:
         return True
 
     def restart_player(self):
-        self.log("restart player")
         return True
 
+    @debug
     def sound_mute(self):
         if self.mute_volume is None:
             self.mute_volume=self.sound_get_volume()
             self.sound_set_volume(0)
         return
 
+    @debug
     def sound_unmute(self):
         if self.mute_volume is not None:
             self.sound_set_volume(self.mute_volume)
