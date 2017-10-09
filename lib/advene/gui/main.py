@@ -57,7 +57,11 @@ if config.data.os == 'win32':
 
 if config.data.debug:
     #Gdk.set_show_events(True)
-    from advene.util.debug import debug_slow_update_hook
+    try:
+        from advene.util.debug import debug_slow_update_hook
+    except:
+        logger.debug("No debug_slow_update_hook function in advene.util.debug")
+        debug_slow_update_hook = None
 
 logger.info("Using localedir %s" % config.data.path['locale'])
 
@@ -3225,7 +3229,7 @@ class AdveneGUI(object):
                                               icon=Gtk.MessageType.QUESTION,
                                               callback=lambda: do_save(l))
                 self.last_auto_save=t
-        if config.data.debug:
+        if config.data.debug and debug_slow_update_hook:
             debug_slow_update_hook(self.controller)
         return True
 
