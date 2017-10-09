@@ -57,6 +57,7 @@ class FrameSelector(object):
         # It is initialized in build_widget()
         self.frames = []
         self.widget = self.build_widget()
+        self.refresh_snapshots()
 
     def set_timestamp(self, timestamp):
         """Set the reference timestamp.
