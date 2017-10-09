@@ -715,10 +715,8 @@ class TimeLine(AdhocView):
         if self.bookmarks_to_draw:
             self.bookmarks_to_draw = []
 
-    def debug_cb (self, widget, data=None):
-        logger.debug("Debug event.")
-        if data is not None:
-            logger.debug("Data: %s", data)
+    def debug_cb(self, *p):
+        logger.debug(" ".join(str(i) for i in p))
         return False
 
     def get_widget_for_annotation (self, annotation):
