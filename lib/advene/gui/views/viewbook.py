@@ -394,7 +394,7 @@ class ViewBook(AdhocView):
                 (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='%s/annotations/sorted' % talespath, destination=self.location, label=title)),
                 (_("in a timeline"), lambda i: self.controller.gui.open_adhoc_view('timeline', elements=at.annotations, annotationtypes=[ at ], destination=self.location, label=title)),
                 (_("as a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=at.annotations, destination=self.location, label=title)),
-                (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=at.annotations, source='%s/annotations' % talespath, destination=self.location, label=title)),
+                (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', source='%s/annotations' % talespath, destination=self.location, label=title)),
                 (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location, label=_("Query %s") % title)),
                 (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location, label=_("Browsing %s") % title)),
                 ):

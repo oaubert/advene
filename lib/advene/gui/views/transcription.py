@@ -81,7 +81,7 @@ class TranscriptionView(AdhocView):
         if source is None and 'source' in a:
             source=a['source']
 
-        if source is None and elements is None:
+        if not source and not elements is None:
             # Use whole package
             source="here/annotations"
 
@@ -139,18 +139,10 @@ class TranscriptionView(AdhocView):
         return self.options, arguments
 
     def regenerate_model(self):
-        if self.source is None:
+        if not self.source:
             self.model=self.elements[:]
-            return
-        c=self.controller.build_context()
-        try:
-            self.model=c.evaluateValue(self.source)
-        except Exception as e:
-            self.log(_("Error in source evaluation %(source)s: %(error)s") % {
-                    'source': self.source,
-                    'error': str(e) })
-            self.model=[]
-        return
+        else:
+            self.model = self.get_elements_from_source(self.source)
 
     def edit_options(self, button):
         user_defined=object()

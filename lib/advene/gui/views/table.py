@@ -74,7 +74,6 @@ class AnnotationTable(AdhocView):
             (_("Export as CSV"), self.csv_export),
             )
         self.controller=controller
-        self.source = source
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
@@ -82,17 +81,9 @@ class AnnotationTable(AdhocView):
         if source is None and 'source' in a:
             source=a['source']
 
+        self.source = source
         if elements is None and source:
-            if source == 'global_annotations':
-                elements = self.controller.global_package.annotations
-            else:
-                c=self.controller.build_context()
-                try:
-                    elements = c.evaluateValue(source)
-                    self.source = source
-                except:
-                    logger.error(_("Error in source evaluation %s") % source, exc_info=True)
-                    elements = []
+            elements = self.get_elements_from_source(source)
 
         self.elements = elements
         self.options={ 'confirm-time-update': True }
@@ -119,10 +110,17 @@ class AnnotationTable(AdhocView):
         return self.options, arguments
 
     def update_annotation(self, annotation=None, event=None):
-        if self.elements and annotation in self.elements:
+        if self.source:
+            # Re-evaluate source parameter, in case the annotation was
+            # created.
+            elements = self.get_elements_from_source(self.source)
+        else:
+            elements = self.elements
+
+        if elements and annotation in elements:
             if event.endswith('Delete'):
-                self.elements.remove(annotation)
-            self.set_elements(self.elements)
+                elements.remove(annotation)
+            self.set_elements(elements)
 
     def update_snapshot(self, context, parameters):
         pos = int(context.globals['position'])

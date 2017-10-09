@@ -270,6 +270,19 @@ class AdhocView(object):
         stream.close()
         return True
 
+    def get_elements_from_source(self, source):
+        if source == 'global_annotations':
+            elements = self.controller.global_package.annotations
+        else:
+            c = self.controller.build_context()
+            try:
+                elements = c.evaluateValue(source)
+                self.source = source
+            except:
+                logger.error(_("Error in source evaluation %s") % source, exc_info=True)
+                elements = []
+        return elements
+
     def get_save_arguments(self):
         """Method called when saving a parametered view.
 
