@@ -1804,11 +1804,11 @@ class TimeLine(AdhocView):
                 # callback from layout handle the key
                 return False
             if f > .5:
-                position=annotation.fragment.end
+                position = annotation.fragment.end
             else:
-                position=annotation.fragment.begin
+                position = annotation.fragment.begin
             c=self.controller
-            c.update_status (status="seek", position=positiona)
+            c.update_status(status="seek", position=position)
             c.gui.set_current_annotation(annotation)
             return True
         elif event.keyval == Gdk.KEY_Return:
