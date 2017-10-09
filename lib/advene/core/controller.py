@@ -1152,14 +1152,14 @@ class AdveneController(object):
 
         @return: a boolean (~desactivation)
        """
+        if position is None:
+            position = self.player.current_position_value
+
         if not config.data.player['snapshot'] or position < 0:
             return True
 
         if media is None:
             media == self.package.getMedia()
-
-        if position is None:
-            position = self.player.current_position_value
 
         # Refresh not forced, check before that it is needed.
         if not force and not self.get_snapshot(position=position, media=media, auto_update=False).is_default:
