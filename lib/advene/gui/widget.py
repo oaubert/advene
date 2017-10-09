@@ -287,8 +287,8 @@ class AnnotationWidget(GenericColorButtonWidget):
                     # It can be an annotation
                     begin.set_from_pixbuf(png_to_pixbuf(self.controller.get_snapshot(annotation=t),
                                                         width=config.data.preferences['drag-snapshot-width']))
-                    end.set_from_pixbuf(png_to_pixbuf(self.controller.get_snapshot(annotation=t), position=t.fragment.end),
-                                        width=config.data.preferences['drag-snapshot-width'])
+                    end.set_from_pixbuf(png_to_pixbuf(self.controller.get_snapshot(annotation=t, position=t.fragment.end),
+                                                      width=config.data.preferences['drag-snapshot-width']))
                     end.show()
                     padding.show()
                     if widgets:
