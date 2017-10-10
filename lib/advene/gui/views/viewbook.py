@@ -466,12 +466,28 @@ class ViewBook(AdhocView):
             logger.error("Unknown drag target received %s", targetType)
         return False
 
+    def on_key_press_event(self, widget, event):
+        """Keypress handling.
+        """
+        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+            # The Control-key is held. Special actions :
+            if event.keyval == Gdk.KEY_Page_Up:
+                # Popup the evaluator window
+                self.widget.prev_page()
+                return True
+            elif event.keyval == Gdk.KEY_Page_Down:
+                # Popup the evaluator window
+                self.widget.next_page()
+                return True
+        return False
+
     def build_widget(self):
         notebook=Gtk.Notebook()
         notebook.set_tab_pos(Gtk.PositionType.TOP)
         notebook.popup_disable()
         notebook.set_scrollable(True)
 
+        notebook.connect('key-press-event', self.on_key_press_event)
         notebook.connect('drag-data-received', self.drag_received)
         notebook.drag_dest_set(Gtk.DestDefaults.MOTION |
                                Gtk.DestDefaults.HIGHLIGHT |
