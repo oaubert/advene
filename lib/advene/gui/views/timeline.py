@@ -2714,12 +2714,13 @@ class TimeLine(AdhocView):
             return True
 
         fraction = self.fraction_adj.get_value()
-        logger.debug("fraction_event %f width %d forced %d", fraction, w, forced_window_width)
-
         v = (self.maximum - self.minimum) / float(w) * fraction
+
+        logger.debug("fraction_event %f width %d forced %d -> 1 pixel = %d ms", fraction, w, forced_window_width, v)
+
         # New width in pixel
-        if v < 5 or (self.maximum - self.minimum) / v > 65535:
-            self.log(_("Cannot zoom more"))
+        if v < 2 or (self.maximum - self.minimum) / v > GObject.G_MAXINT:
+            self.log(_("Cannot zoom more %f") % v)
             return True
 
         self.scale.set_value(v)
