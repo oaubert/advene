@@ -2788,7 +2788,10 @@ class TimeLine(AdhocView):
             # Redraw marks
             self.scale_layout.foreach(self.scale_layout.remove)
             self.draw_marks ()
-            return True
+            # Notify the layout (and its children) that size has
+            # changed.
+            self.layout.queue_resize()
+            self.scale_layout.queue_resize()
         return False
 
     def resize_legend_widget(self, layout):
