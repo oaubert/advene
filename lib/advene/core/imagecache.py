@@ -143,7 +143,7 @@ class ImageCache(object):
 
         Since we deal with ms, return an integer.
         """
-        return int(self.framerate * (1000 * math.ceil(t_in_ms / 1000 / self.framerate) - 0.1))
+        return int(self.framerate * (1000 * math.ceil(t_in_ms / 1000 / self.framerate) - 0.5))
 
     def approximate (self, key, precision=None):
         """Return an approximate key value for key.
