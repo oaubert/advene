@@ -604,9 +604,10 @@ class TimeLine(AdhocView):
         return True
 
     def update_min_max(self):
+        logger.debug("update min max %d %d", self.minimum, self.maximum)
         oldmax = self.maximum
-        self.minimum=0
-        self.maximum=0
+        self.minimum = 0
+        self.maximum = 0
         duration = self.controller.cached_duration
         if duration <= 0:
             duration = self.bounds()[1]
@@ -643,11 +644,11 @@ class TimeLine(AdhocView):
         if package is None:
             package = self.controller.package
 
-        self.update_min_max()
         if partial_update:
             pos=self.get_middle_position()
         else:
             # It is not just an update, do a full redraw
+            self.update_min_max()
             if self.list is not None:
                 # We specified a list of annotations. Display only the
                 # annotation types for annotations present in the set
