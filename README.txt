@@ -65,7 +65,7 @@ used as tutorials to go through the Advene features.
 
 A user manual is also available at:
 
-http://advene.org/wiki/index.php/Main_Page
+http://advene.org/wiki/
 
 Copyright Information
 =====================
