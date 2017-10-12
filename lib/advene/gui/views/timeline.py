@@ -674,6 +674,9 @@ class TimeLine(AdhocView):
             self.update_legend_widget(self.legend)
             self.legend.show_all()
             self.update_lock.release()
+            # Hackish fix for a refresh issue of the scale layout upon
+            # first invocation.
+            GObject.timeout_add(100, self.scale_layout.queue_resize)
 
         self.populate(finalize_callback)
 
