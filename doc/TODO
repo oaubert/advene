@@ -3,7 +3,6 @@
 * Notebook: tab names hidden if content too large vertically
 
 * finder: handle DND of annotation type annotation type and other types
-* finder: update schemas content list on annotation type creation
 * finder: does not work correctly with empty packages (cf exporter)
 * Model: check dc: and xlink: prefixes in _impl.py code that uses uris for namespaces??
 
@@ -37,10 +36,6 @@ https://docs.google.com/spreadsheets/d/1HavJQRPpMuq-N0GoN1wJR-9KEGXpKy3-NEPpZZkU
 
 * example SVG + lien -> json
 
-* Update default-fps value when data is available from player
-
-* feature extraction: check against filename encoding
-
 * pymecavideo: see opencv example
 
 * finder: in Static view/dynamic view columns, add a "+" item
@@ -51,27 +46,13 @@ https://docs.google.com/spreadsheets/d/1HavJQRPpMuq-N0GoN1wJR-9KEGXpKy3-NEPpZZkU
 
 * gst spectrum videoanalyse
 
-* display clock cursor for lengthy actions (timeline update)
-
-* snapshotter: bug for NY_1.mov (look for "silver beach")
-
 * Implement a "security" option to disable/enable on demand python: expressions in TAL
 
-* Optional feature: automatically pause when  creating an annotation ?
+* Optional feature: automatically pause when creating an annotation ?
 
 * Undo: implement Redo
 
-* Undo: history stack display
-
-* Cut Adjustment: use image *before* the cut (like in FCP)
-
-* Annotation bound adjust: open as adhoc-view
-
 * Default caption dynamic view: make non-admin (remove _)
-
-* MacOSX: use Cmd modifier equiv. as control
-
-* Import youtube annotations ( was http://www.google.com/reviews/y/read2?video_id=YOUR_VIDEO_ID_HERE )
 
 * gstreamer pipeline (videomixer) to generate 1-pixel-column sum-up of video:
 gst-launch -e filesrc location=/data/video/Bataille.avi ! decodebin ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=320,pixel-aspect-ratio=\(fraction\)1/1 ! videocrop left=158 right=160 ! progressreport update-freq=1 ! pngenc snapshot=false ! multifilesink location=%05d.png
@@ -79,19 +60,11 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * montage: video export
 
-* transcribe: allow search/replace
-
-* quick edit: integrate EntryCompletion on attributes
-
-* add PyDiscoverer interface, to get movie details ASAP
-
 * trace replay mode of video navigation (replay video based on navigation events) -> trace player with controlled video player
 
 * Customizable shortcuts
 
 * Save current workspace: display option in Save dialog
-
-* Ldt ZIP importer
 
 * Screen overlay interface: define a grid with sensitive areas + event
    -> need to implement player.get_dimensions() method
@@ -102,25 +75,12 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * table view: keyword occurrences + stats
 
-* gstrecorder: option to specify wether to record from webcam
-   (autovideosrc) or from screen (ximagesrc/dshowvideosrc...) or
-   audio-only
-
-* content.parsed: define/use a PATH syntax for accessing XML elements
-   (better than handyxml)
-
 * propose template when transmuting from any (esp.text/plain) to SVG
-
-* controller.update_status: accept annotation as parameter, to allow
-   more precise notification
 
 * gstreamer: multiple video syntax: path;path -> videobox
 
 * gui.edit.rules: SimpleQuery edition will fail since TALESEntry does
    not handle multiple sources
-
-* Fix autocompletion of attribute names for annotations (should
-   record key=value strings)
 
 * Shortcut for edit element validation
 
@@ -128,17 +88,10 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * Utilisation npt:/
 
-* transcribe: use textbuffer.get_modified/set_modified
-
 * gui.main: simple click on Adhocview icon -> share code with viewbook
    (menu New/open existing).
 
-* EditElementPopup: if destination != popup, add scrolledwidget around
-   widget
-
-* timeline: fix continous scrolling. Set zoom 96%, 0h59 in Nosferatu
-
-* tabular adhoc view, with customizable columns and options to export as HTML
+* table adhoc view: customizable columns and options to export as HTML
 
 * HTMLeditor: implement basic css parsing (cf python-cssutils)
 
@@ -150,17 +103,9 @@ montage -tile x1 -mode Concatenate 0*g final.png
 * Import dialog: use a standard fileselector with a import-filter list
 
 * When DND rule in STBV editing, use the current edited rule and not
-   the saved one -> hard
-
-* Revamp player API (player.position, player.duration, ...)
-
-* Bug in Advene2 export -> resources
+  the saved one -> hard
 
 * Template: in _package_view, propose to Open adhoc views
-
-* Imagemap/SVG
-
-* improve search results navigation (cf PA post on May 2 2008)
 
 * Montage: double-click -> goto annotation
 
@@ -175,21 +120,11 @@ montage -tile x1 -mode Concatenate 0*g final.png
  * create new type. On view rename -> set new type title
  * create/fusion/delete annotations when modifying timestamps
 
-* make all simple selections (annotation, timestamp, etc) able to get
-   multiline data to represent element list
-
-* Selection: extend-to-next ?
-
 * Global timeline with frame to represent "overview + detail" (p174)
 
 * Dynamic queries/filters (p.178)
 
 * Data brushing p.181 -> selection in a view, highlight in others
-
-* timeline: memorize zoom level and position when changing package
-   (needs a timeline.zoom_level[package_uri] structure)
-
-* allow to change mimetype when editing resource
 
 * shapewidget: complete support for <image> element. How to deal with
    images as resources ?
@@ -209,8 +144,6 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * AdveneTypes a la XSD
 
-* gtk locale in win32
-
 * transcription: option to display timestamp marks and allow to modify
 
 * Montage: extend with 2nd video (cf bout-a-bout) ?
@@ -219,19 +152,9 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 * annotation highlight: other representation (red thick border ?)
 
-* editaccumulator: distinguish incomplete annotations (missing entidtime)
-
-* Convert event names from strings to objects (faster comparison?)
-
 * Allow to lock workspace modifications (to propose a read-only version)
 
-* interactive result: allow to DND the icon for new visualisations
-   (timeline...) [hard because of the transmission of the parameters
-   in DND and anyway buttons are now in a toolbar, which prevents DND]
-
 * slave view: record master view id in options when saving
-
-* highlight: blink (wait for gtk.Transition in 2.12?)
 
 * zippackage: implement a 'serialize'/'freeze' method, to save the data to the temp. directory (w/o overwriting the .azp package). This would allow regular backups of the data.
 
@@ -241,9 +164,9 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 ** Deactivate autoscroll when moving in the timeline
 
-** timeline: reimplement with a proper canvas (goocanvas?)
+** timeline: reimplement with a proper canvas
 
-** Make relation lines clickable (cf goocanvas)
+** Make relation lines clickable
 
 ** timeline: allow view-local tags/color to allow to define a specific color for various annotations for a given timeline (display a point of view, specific to the view)
 
@@ -272,8 +195,6 @@ position of current marks in the video (with small lines) [cf linkmap
 ** Tag cloud view
 
 * Players
-
-** write a flashplayer plugin using ctypes + gnash/swfdec - or https://launchpad.net/pyswfdec/
 
 ** video plugin: ffmpeg
 
