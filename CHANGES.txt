@@ -8,6 +8,10 @@ advene (3.4) unstable; urgency=medium
 
   * Import/export filter options are preserved between invocations.
 
+  * Timeline: selection can be extended to all annotations (of the same
+    type or all annotations) in the same time range as the selected
+    annotations.
+
   * Various bugfixes
 
  -- Olivier Aubert <contact@olivieraubert.net>  Thu, 12 Oct 2017 12:06:44 +0200
