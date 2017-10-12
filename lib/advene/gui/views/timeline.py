@@ -3133,6 +3133,22 @@ class TimeLine(AdhocView):
                                                    label=_("<b>Statistics about current selection</b>\n\n"))
             return True
 
+        def select_range(m, sel, same_type=True):
+            """Select annotations in the same range
+            """
+            begin=min( [ w.annotation.fragment.begin for w in sel ] )
+            end=max( [ w.annotation.fragment.end for w in sel ] )
+            current = set(w.annotation for w in sel)
+            if same_type:
+                source = sel[0].annotation.type.annotations
+            else:
+                source = sel[0].annotation.ownerPackage.annotations
+            for a in source:
+                if (a.fragment.begin >= begin
+                    and a.fragment.end <= end
+                    and a not in current):
+                    self.activate_annotation(a)
+
         m=Gtk.Menu()
         l=self.get_selected_annotation_widgets()
         n=len(l)
@@ -3162,6 +3178,14 @@ class TimeLine(AdhocView):
                 i=Gtk.MenuItem(label)
                 i.connect('activate', action, l)
                 m.append(i)
+
+        if n >= 2:
+            i = Gtk.MenuItem(_('Select all annotations of the same type in this time range'))
+            i.connect('activate', select_range, l, True)
+            m.insert(i, 3)
+            i = Gtk.MenuItem(_('Select all annotations in this time range'))
+            i.connect('activate', select_range, l, False)
+            m.insert(i, 3)
 
         m.show_all()
         if popup:
