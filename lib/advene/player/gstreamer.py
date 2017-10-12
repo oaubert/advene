@@ -557,7 +557,7 @@ class Player:
 
     def reparent(self, xid):
         # See https://bugzilla.gnome.org/show_bug.cgi?id=599885
-        #gtk.gdk.threads_enter()
+        Gdk.threads_enter()
         if xid:
             self.log("Reparent " + hex(xid))
 
@@ -566,7 +566,7 @@ class Player:
             self.imagesink.set_window_handle(xid)
         self.imagesink.set_property('force-aspect-ratio', True)
         self.imagesink.expose()
-        #gtk.gdk.threads_leave()
+        Gdk.threads_leave()
 
     def set_visual(self, xid):
         if not xid:
