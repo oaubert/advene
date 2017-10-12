@@ -789,6 +789,7 @@ class TimeLine(AdhocView):
                 if not self.update_lock.locked():
                     # There is a race possibility here. Let's assume
                     # that it will be rare enough...
+                    self.update_min_max()
                     self.refresh()
                     return False
                 else:
