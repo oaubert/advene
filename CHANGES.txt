@@ -1,3 +1,17 @@
+advene (3.4) unstable; urgency=medium
+
+  * A huge memory leak affecting 3.3 (due to python3 migration) has been
+    fixed.
+
+  * Imagecache refactoring - it now uses actual framerate information from
+    the video file to determine the best screenshot for a given timestamp.
+
+  * Import/export filter options are preserved between invocations.
+
+  * Various bugfixes
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Thu, 12 Oct 2017 12:06:44 +0200
+
 advene (3.3) unstable; urgency=medium
 
   * Port to Python3! Expect some new interesting bugs...
