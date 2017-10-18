@@ -117,9 +117,7 @@ class AnnotationTable(AdhocView):
         else:
             elements = self.elements
 
-        if elements and annotation in elements:
-            if event.endswith('Delete'):
-                elements.remove(annotation)
+        if elements is not None and (annotation in elements or event.endswith('Delete')):
             self.set_elements(elements)
 
     def update_snapshot(self, context, parameters):
