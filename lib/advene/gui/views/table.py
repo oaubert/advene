@@ -208,7 +208,6 @@ class AnnotationTable(AdhocView):
             self.widget.treeview.set_cursor(path,
                                             self.columns['content'],
                                             True)
-            self.widget.treeview.grab_focus()
             self.last_edited_path = None
 
     def motion_notify_event_cb(self, tv, event):
