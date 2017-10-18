@@ -254,7 +254,8 @@ class AnnotationTable(AdhocView):
         tree_view.connect('row-activated', self.row_activated_cb)
         tree_view.connect('motion-notify-event', self.motion_notify_event_cb)
         tree_view.connect('leave-notify-event', self.leave_notify_event_cb)
-        #tree_view.set_search_column(COLUMN_CONTENT)
+        # Deactivate starting search by simply typing. Users have to use the search shortcut (Control-F)
+        tree_view.set_enable_search(False)
 
         def search_content(model, column, key, it):
             if key in model.get_value(it, COLUMN_CONTENT):
