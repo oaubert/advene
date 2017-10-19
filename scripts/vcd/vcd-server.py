@@ -76,7 +76,6 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         body = s.rfile.read(length).decode('utf-8')
         if s.headers['Content-type'] == 'application/json':
             post_data = json.loads(body)
-            logger.debug(body)
         else:
             post_data = urlparse.parse_qs(body)
 
@@ -95,6 +94,7 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
         
         target_size = (dict([(m["id"],m['image_size']) for m in models]))[modelid]
+        concepts = []
         for annotation in post_data['annotations']:
             aid = annotation['annotationid']
             begin = annotation['begin']
@@ -129,15 +129,16 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     confidences[t[1]] = [float(t[2])]
 
-            concepts = [
+            concepts.extend([
             {
                 'annotationid': aid,
                 'confidence': max(confidences[l]),
-                'timecode': random.randrange(annotation['begin'], annotation['end']), #timestamp_in_ms,
+                #FIXME: set correct timecode - set timecode of frame with max confidence?
+                'timecode': annotation['begin'], #timestamp_in_ms,
                 'label': l,
                 'uri': 'http://concept.org/%s' % l
-            } for l in confidences
-            ]
+            } for l in confidences]
+            )
 
         s.send_response(200)
         s.send_header("Content-type", "application/json")
