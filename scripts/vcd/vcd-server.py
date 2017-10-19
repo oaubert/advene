@@ -108,7 +108,6 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 img.save(os.path.join(CACHE_DIR,'{0}.png'.format(frame['timecode'])))
                 if img.mode != 'RGB':
                     img = img.convert('RGB')
-                # ResNet50 expects images at 224x224 scale:
                 hw_tuple = (target_size, target_size)
                 if img.size != hw_tuple:
                     logger.warn("Scaling image to model size - this should be done in advene!")
@@ -128,7 +127,8 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     confidences[t[1]].append(float(t[2]))
                 else:
                     confidences[t[1]] = [float(t[2])]
-
+            logger.debug(confidences)
+            
             concepts.extend([
             {
                 'annotationid': aid,
@@ -140,6 +140,7 @@ class RESTHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             } for l in confidences]
             )
 
+        logger.debug(concepts)
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
