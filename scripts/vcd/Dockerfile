@@ -12,5 +12,5 @@ ADD vcd-server.py /vcd-server.py
 VOLUME [ "/root/.keras/" ]
 VOLUME [ "/var/vcd/cache" ]
 
-ENTRYPOINT [ "python3" , "/vcd-server.py"]
+CMD [ "python3" , "/vcd-server.py"]
 
