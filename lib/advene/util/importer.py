@@ -442,7 +442,11 @@ class GenericImporter(object):
         """
         if self.package is None:
             self.package, self.defaulttype=self.init_package(annotationtypeid='imported', schemaid='imported-schema')
-        for d in source:
+        try:
+            d = source.send(None)
+        except StopIteration:
+            return
+        while True:
             try:
                 begin=helper.parse_time(d['begin'])
             except KeyError:
@@ -493,26 +497,24 @@ class GenericImporter(object):
             except KeyError:
                 timestamp=self.timestamp
 
-            a=self.create_annotation (type_=type_,
-                                      begin=begin,
-                                      end=end,
-                                      data=content,
-                                      ident=ident,
-                                      author=author,
-                                      title=title,
-                                      timestamp=timestamp)
+            a = self.create_annotation(type_=type_,
+                                       begin=begin,
+                                       end=end,
+                                       data=content,
+                                       ident=ident,
+                                       author=author,
+                                       title=title,
+                                       timestamp=timestamp)
             self.package._modified = True
             if 'complete' in d:
                 a.complete=d['complete']
             if 'notify' in d and d['notify'] and self.controller is not None:
                 logger.debug("Notifying %s", a)
                 self.controller.notify('AnnotationCreate', annotation=a)
-            if 'send' in d:
-                # We are expected to return a value in the yield call
-                try:
-                    source.send(a)
-                except StopIteration:
-                    pass
+            try:
+                d = source.send(a)
+            except StopIteration:
+                break
 
 class ExternalAppImporter(GenericImporter):
     """External application importer.
