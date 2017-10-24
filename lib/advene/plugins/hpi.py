@@ -183,6 +183,7 @@ class HPIImporter(GenericImporter):
     def iterator(self):
         """I iterate over the created annotations.
         """
+        logger.warn("Importing using %s model", self.model)
         self.source_type = self.controller.package.get_element_by_id(self.source_type_id)
         minconf = self.confidence
 
@@ -270,6 +271,7 @@ class HPIImporter(GenericImporter):
         progress = .2
         step = .8 / (len(concepts) or 1)
         self.progress(.2, _("Parsing %d results") % len(concepts))
+        logger.warn(_("Parsing %d results (level %f)") % (len(concepts), self.confidence))
         for item in concepts:
             # Should not happen, since we pass the parameter to the server
             if item["confidence"] < minconf:
@@ -296,7 +298,6 @@ class HPIImporter(GenericImporter):
                 'begin': begin,
                 'end': end,
                 'content': json.dumps(item),
-                'send': True
             }
             if an is not None and self.create_relations:
                 r = self.package.createRelation(
