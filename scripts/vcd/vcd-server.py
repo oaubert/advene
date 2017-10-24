@@ -156,7 +156,7 @@ class RESTHandler(http.server.BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    server_class = http.server..HTTPServer
+    server_class = http.server.HTTPServer
     httpd = server_class((HOST_NAME, PORT_NUMBER), RESTHandler)
     logger.info("Starting dummy REST server on %s:%d", HOST_NAME, PORT_NUMBER)
     try:
