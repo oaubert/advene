@@ -274,12 +274,6 @@ class TimeLine(AdhocView):
         # Coordinates of the selected region.
         self.layout_selection=[ [None, None], [None, None] ]
 
-        # Session-set variable: if we get a horizontal scroll signal,
-        # then we know that the device pointer for the session is able
-        # to do both (vertical and horizontal), and we can act
-        # accordingly.
-        self.can_do_horizontal_scroll = False
-
         self.layout.add_events( Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.BUTTON1_MOTION_MASK )
         self.scale_layout = Gtk.Layout()
         self.scale_layout.height=0
@@ -2736,42 +2730,43 @@ class TimeLine(AdhocView):
     def layout_scroll_cb(self, widget=None, event=None):
         """Handle mouse scrollwheel events.
         """
-        if event.direction == Gdk.ScrollDirection.RIGHT or event.direction == Gdk.ScrollDirection.LEFT:
-            self.can_do_horizontal_scroll = True
+        mx, my = event.get_scroll_deltas()[1:]
+        if event.direction == Gdk.ScrollDirection.UP:
+            my = +1
+        elif event.direction == Gdk.ScrollDirection.DOWN:
+            my = -1
 
-        zoom=event.get_state() & Gdk.ModifierType.CONTROL_MASK
+        zoom = event.get_state() & Gdk.ModifierType.CONTROL_MASK
         if zoom:
             # Control+scroll: zoom in/out
             a = self.fraction_adj
             incr = a.get_page_increment()
             # Memorize mouse position (in units)
             # Get x, y (relative to the layout allocation)
-            x,y=widget.get_pointer()
+            x, y = widget.get_pointer()
             mouse_position=self.pixel2unit(event.x, absolute=True)
-        else:
-            # Plain scroll: scroll the timeline
-            if (self.can_do_horizontal_scroll
-                and (event.direction == Gdk.ScrollDirection.UP
-                     or event.direction == Gdk.ScrollDirection.DOWN)):
-                # Vertical scroll with a device that knows how to do horizontal. Let's scroll vertically
-                a = self.vadjustment
-                incr = a.get_step_increment()
-            else:
-                a = self.adjustment
-                incr = a.get_step_increment()
-
-        if event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.RIGHT:
-            a.set_value(helper.clamp(a.get_value() + incr,
+            a.set_value(helper.clamp(a.get_value() + my * incr,
                                      a.get_lower(),
                                      a.get_upper() - a.get_page_size()))
-        elif event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
-            a.set_value(helper.clamp(a.get_value() - incr,
-                                     a.get_lower(),
-                                     a.get_upper() - a.get_page_size()))
-
-        # Try to preserve the mouse position when zooming
-        if zoom:
+            # Try to preserve the mouse position when zooming
             self.adjustment.set_value(self.unit2pixel(mouse_position, absolute=True) - x)
+            return True
+
+        # Not a zoom, let's scroll the layout
+        if (event.direction in (Gdk.ScrollDirection.RIGHT, Gdk.ScrollDirection.LEFT)
+            or (event.direction == Gdk.ScrollDirection.SMOOTH and (mx != 0 or abs(my) != 1))):
+            # Horizontal scrolling can be handled natively by the layout
+            return False
+        if event.direction == Gdk.ScrollDirection.SMOOTH:
+            # We have to switch mx/my since mx == 0 and my == [+-]1
+            mx, my = my, mx
+
+        a = self.adjustment
+        incr = a.get_step_increment()
+        a.set_value(helper.clamp(a.get_value() + mx * incr,
+                                 a.get_lower(),
+                                 a.get_upper() - a.get_page_size()))
+
         return True
 
     def redraw_event(self, widget=None, data=None):
