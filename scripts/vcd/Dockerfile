@@ -1,15 +1,16 @@
 FROM ubuntu:17.04
 
-RUN apt-get update && apt-get install -y python \
-    python-pip \
-    python-pil \
-    python-h5py
+RUN apt-get update && apt-get install -y python3 \
+    python3-pip \
+    python3-pil \
+    python3-h5py
 
-RUN pip install keras==2.0.5 tensorflow==1.2.0rc2
+RUN pip3 install keras==2.0.8 tensorflow==1.3.0
 
 ADD vcd-server.py /vcd-server.py
 
 VOLUME [ "/root/.keras/" ]
 VOLUME [ "/var/vcd/cache" ]
 
-ENTRYPOINT [ "python" , "/vcd-server.py"]
+ENTRYPOINT [ "python3" , "/vcd-server.py"]
+
