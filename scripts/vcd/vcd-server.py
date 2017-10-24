@@ -62,13 +62,14 @@ class RESTHandler(http.server.BaseHTTPRequestHandler):
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
-        json.dump({"status": 200, "message": "OK", "data": {
+        response = json.dumps({"status": 200, "message": "OK", "data": {
             "capabilities": {
                 "minimum_batch_size": 1, # # of frames
                 "maximum_batch_size": 500, # # of frames
                 "available_models": models
             }
-        }}, s.wfile)
+        }})
+        s.wfile.write(response.encode())
 
     def do_POST(s):
         length = int(s.headers['Content-Length'])
@@ -143,7 +144,7 @@ class RESTHandler(http.server.BaseHTTPRequestHandler):
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
-        json.dump({
+        response=json.dumps({
             "status": 200,
             "message": "OK",
             "data": {
@@ -151,7 +152,8 @@ class RESTHandler(http.server.BaseHTTPRequestHandler):
                 'media_uri': post_data["media_uri"],
                 'concepts': concepts
             }
-        }, s.wfile)
+        })
+        s.wfile.write(response.encode())
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
