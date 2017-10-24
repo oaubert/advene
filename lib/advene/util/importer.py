@@ -231,8 +231,9 @@ class GenericImporter(object):
                       if not n.startswith('_')):
                 k = k.replace('-', '_')
                 if hasattr(self, k):
+                    v = getattr(options, k)
                     logger.debug("Set option %s %s", k, v)
-                    setattr(self, k, getattr(options, k))
+                    setattr(self, k, v)
                 else:
                     logger.info("Unknown option %s", k)
 
