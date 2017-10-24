@@ -979,7 +979,7 @@ class AdveneGUI(object):
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l=Gtk.Label(label=title)
+        l=Gtk.Label(label=title + "\nLeave the first field empty to unconditionnaly replace all contents.\nYou can use special characters \\n or \\t.")
         l.set_line_wrap(True)
         l.show()
         d.vbox.pack_start(l, False, True, 0)
@@ -988,13 +988,13 @@ class AdveneGUI(object):
         hb.pack_start(Gtk.Label(_("Find word") + " "), False, False, 0)
         search_entry=Gtk.Entry()
         search_entry.set_text(default_search or "")
-        hb.pack_start(search_entry, False, True, 0)
+        hb.pack_start(search_entry, True, True, 0)
         d.vbox.pack_start(hb, False, True, 0)
 
         hb=Gtk.HBox()
         hb.pack_start(Gtk.Label(_("Replace by") + " "), False, False, 0)
         replace_entry=Gtk.Entry()
-        hb.pack_start(replace_entry, False, True, 0)
+        hb.pack_start(replace_entry, True, True, 0)
         d.vbox.pack_start(hb, False, True, 0)
 
         d.connect('key-press-event', dialog.dialog_keypressed_cb)
@@ -1002,16 +1002,19 @@ class AdveneGUI(object):
         dialog.center_on_mouse(d)
         res=d.run()
         if res == Gtk.ResponseType.OK:
-            search=search_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
-            replace=replace_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            search = search_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            replace = replace_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
             count=0
             batch_id=object()
             for a in elements:
                 if not isinstance(a, (Annotation, Relation, View)):
                     continue
-                if search in a.content.data:
+                if search == "" or search in a.content.data:
                     self.controller.notify('EditSessionStart', element=a, immediate=True)
-                    a.content.data = a.content.data.replace(search, replace)
+                    if search:
+                        a.content.data = a.content.data.replace(search, replace)
+                    else:
+                        a.content.data = replace
                     if isinstance(a, Annotation):
                         self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
                     elif isinstance(a, Relation):
