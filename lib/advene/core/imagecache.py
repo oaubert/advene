@@ -349,6 +349,7 @@ class ImageCache(object):
                 disk_size += s.size()
 
         stats = {
+            'name': self.name or "",
             'count': len(self._dict),
             'memory_count': memory_count,
             'memory_size': memory_size,
@@ -360,7 +361,7 @@ class ImageCache(object):
         return stats
 
     def stats_repr(self):
-        return "%(count)d values. Memory: %(memory_count)d (%(memory_size_mb).02f MB) - Disk: %(disk_count)d (%(disk_size_mb).02f MB)" % self.stats()
+        return "%(count)d values. Memory: %(memory_count)d (%(memory_size_mb).02f MB) - Disk [%(name)s]: %(disk_count)d (%(disk_size_mb).02f MB)" % self.stats()
 
     def reset(self):
         """Reset imagecache.
