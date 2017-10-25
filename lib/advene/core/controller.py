@@ -1142,10 +1142,19 @@ class AdveneController(object):
         Keep this method as an instance method so that it is not garbage collected.
         """
         if snap is not None and snap.height != 0:
-            ic = self.imagecache[snap.media]
+            ic = self.imagecache.get(snap.media)
+            if ic is None:
+                logger.error("Cannot find %s media in imagecache (keys: %s).", snap.media, list(self.imagecache.keys()))
+                return
             t = ic.round_timestamp(snap.date)
             ic[t] = helper.snapshot2png(snap)
             self.notify('SnapshotUpdate', position=t, media=snap.media)
+            if t >= self.cached_duration - 2000 * ic.framerate:
+                # Also store this same data for the very last frame,
+                # which cannot be fetched normally.
+                snap.date = self.cached_duration - 1000 * ic.framerate
+                ic[ic.round_timestamp(snap.date)] = helper.snapshot2png(snap)
+                self.notify('SnapshotUpdate', position=t, media=snap.media)
 
     def update_snapshot (self, position=None, media=None, force=False):
         """Event handler used to take a snapshot for the given position.
@@ -1155,11 +1164,15 @@ class AdveneController(object):
         if position is None:
             position = self.player.current_position_value
 
-        if not config.data.player['snapshot'] or position < 0:
-            return True
-
         if media is None:
             media == self.package.getMedia()
+
+        ic = self.imagecache.get(media, self.package.imagecache)
+        if position >= self.cached_duration - 1000 * ic.framerate:
+            position = self.round_timestamp(self.cached_duration - 1000 * ic.framerate - 10)
+
+        if not config.data.player['snapshot'] or position < 0:
+            return True
 
         # Refresh not forced, check before that it is needed.
         if not force and not self.get_snapshot(position=position, media=media, auto_update=False).is_default:
@@ -1178,7 +1191,11 @@ class AdveneController(object):
                 logger.exception("Exception in snapshot", exc_info=True)
                 return True
             if i is not None and i.height != 0:
-                self.imagecache[i.media][i.date] = helper.snapshot2png(i)
+                ic = self.imagecache.get(i.media)
+                if ic is None:
+                    logger.error("Cannot find %s media in imagecache (keys: %s).", i.media, list(self.imagecache.keys()))
+                    return
+                ic[i.date] = helper.snapshot2png(i)
                 self.notify('SnapshotUpdate', position=self.imagecache.round_timestamp(i.date), media=i.media)
         else:
             logger.debug("Player does not support snapshotting.")
@@ -1187,10 +1204,12 @@ class AdveneController(object):
     def round_timestamp(self, t, media=None):
         """Round the given timestamp to the appropriate time wrt. framerate.
         """
-        if media is None:
-            ic = self.package.imagecache
-        else:
-            ic = self.imagecache[media]
+        ic = self.imagecache.get(media, self.package.imagecache)
+        if (t >= self.cached_duration - 1000 * ic.framerate):
+            # Fetching the very last frame seems to cause issues for
+            # many/all movies. Cap the value to the previous one.
+            t = self.cached_duration - 1000 * ic.framerate - 1
+
         return ic.round_timestamp(t)
 
     def frame2time(self, n, media=None):
@@ -1198,10 +1217,7 @@ class AdveneController(object):
 
         based on the current video framerate.
         """
-        if media is None:
-            ic = self.package.imagecache
-        else:
-            ic = self.imagecache[media]
+        ic = self.imagecache.get(media, self.package.imagecache)
         return int(n * 1000 * ic.video_info['framerate'])
 
     def get_snapshot(self, position=None, annotation=None, media=None, precision=None, auto_update=True):
@@ -1227,6 +1243,7 @@ class AdveneController(object):
         if position is None and annotation is not None:
             position = annotation.fragment.begin
 
+        position = self.round_timestamp(position, media)
         snapshot = imagecache.get(position, precision=precision)
         if auto_update and position >= 0 and snapshot.is_default and media == self.get_default_media():
             self.update_snapshot(position, media=media, force=True)
