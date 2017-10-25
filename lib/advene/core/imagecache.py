@@ -143,7 +143,10 @@ class ImageCache(object):
 
         Since we deal with ms, return an integer.
         """
-        return int(1000 * self.framerate * max(0, math.ceil(t_in_ms / 1000 / self.framerate) - 0.5))
+        if t_in_ms == 0:
+            return int(500 * self.framerate)
+        else:
+            return int(1000 * self.framerate * max(0, math.ceil(t_in_ms / 1000 / self.framerate) - 0.5))
 
     def approximate (self, key, precision=None):
         """Return an approximate key value for key.
@@ -212,6 +215,7 @@ class ImageCache(object):
             key = self.approximate(key, precision)
         else:
             key = self.round_timestamp(key)
+        logger.debug("Getting key %d", key)
         return self._dict.get(key, self.not_yet_available_image)
 
     def __setitem__ (self, key, value):
