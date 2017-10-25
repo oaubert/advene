@@ -20,6 +20,8 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import collections
+import itertools
 import json
 import time
 import io
@@ -624,8 +626,18 @@ def get_annotations_statistics(annotations, format='text'):
         'median': median(a.fragment.duration for a in annotations),
         'total': total_duration
     }
+    # Determine distinct values. We split fields against commas
+    distinct_values = collections.Counter(itertools.chain.from_iterable(a.content.data.split(',') for a in annotations))
+    res['distinct_values_count'] = distinct_values_count = len(distinct_values)
+    if distinct_values_count < 20:
+        res['distinct_values'] = distinct_values
+        res['distinct_values_repr'] = "\n".join("\t%s: %s" % (k.replace('\n', '\\n'), distinct_values[k]) for k in sorted(distinct_values.keys()))
+    else:
+        res['distinct_values'] = set()
+        res['distinct_values_repr'] = ""
+
     if format == 'text':
-        for k in res:
+        for k in ('min', 'max', 'mean', 'median', 'total'):
             res[k] = format_time(res[k])
         res['count'] = format_element_name('annotation', len(annotations))
         return """Count: %(count)s
@@ -633,7 +645,11 @@ Min duration: %(min)s
 Max duration: %(max)s
 Mean duration: %(mean)s
 Median duration: %(median)s
-Total duration: %(total)s""" % res
+Total duration: %(total)s
+
+%(distinct_values_count)d distinct values.
+%(distinct_values_repr)s
+""" % res
     else:
         return res
 
