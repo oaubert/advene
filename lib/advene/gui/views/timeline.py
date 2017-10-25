@@ -2011,6 +2011,9 @@ class TimeLine(AdhocView):
         else:
             l = self.list
 
+        # Filter out non displayed annotations
+        l = [ a for a in l if a.type in self.layer_position ]
+
         # Use a list so that the counter variable can be modified in
         # the closure.
         counter = [ 0 ]
