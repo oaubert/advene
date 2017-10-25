@@ -167,14 +167,13 @@ class HPIImporter(GenericImporter):
             unmet_requirements.append(_("Cannot connect to VCD server. Check that it is running and accessible."))
 
         # Make sure that we have all appropriate screenshots
-        missing_screenshots = []
+        missing_screenshots = set()
         for a in self.source_type.annotations:
             for t in (a.fragment.begin,
                       int((a.fragment.begin + a.fragment.end) / 2),
                       a.fragment.end):
-                s = self.controller.get_snapshot(annotation=a, position=t)
-                if s.is_default:
-                    missing_screenshots.append(t)
+                if self.controller.get_snapshot(annotation=a, position=t).is_default:
+                    missing_screenshots.add(t)
         if len(missing_screenshots) > 0:
             unmet_requirements.append(_("%d / %d screenshots are missing. Wait for extraction to complete.") % (len(missing_screenshots),
                                                                                                                 3 * len(self.source_type.annotations)))
