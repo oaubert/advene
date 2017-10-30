@@ -83,7 +83,11 @@ class SoundEnveloppeImporter(GenericImporter):
 
     def generate_normalized_annotations(self):
         n = 1.0 * len(self.buffer_list)
-        factor = 100.0 / (self.max - self.min)
+        if self.max - self.min == 0:
+            # Constant value. We will then generate a single 0 value
+            factor = 0
+        else:
+            factor = 100.0 / (self.max - self.min)
         m = self.min
         self.progress(0, _("Generating annotations"))
         for i, tup in enumerate(self.buffer_list):
