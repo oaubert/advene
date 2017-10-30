@@ -442,8 +442,17 @@ class GenericImporter(object):
         """
         if self.package is None:
             self.package, self.defaulttype=self.init_package(annotationtypeid='imported', schemaid='imported-schema')
+        if not hasattr(source, '__next__'):
+            # It is not an iterator, so it may be another iterable
+            # (most probably a list). Replace it by an iterator to
+            # access its contents.
+            source = iter(source)
+
         try:
-            d = source.send(None)
+            if hasattr(source, 'send'):
+                d = source.send(None)
+            else:
+                d = next(source)
         except StopIteration:
             return
         while True:
@@ -512,7 +521,10 @@ class GenericImporter(object):
                 logger.debug("Notifying %s", a)
                 self.controller.notify('AnnotationCreate', annotation=a)
             try:
-                d = source.send(a)
+                if hasattr(source, 'send'):
+                    d = source.send(None)
+                else:
+                    d = next(source)
             except StopIteration:
                 break
 
