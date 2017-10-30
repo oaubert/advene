@@ -27,6 +27,7 @@ from gettext import gettext as _
 
 from advene.gui.views import AdhocView
 from advene.gui.edit.frameselector import FrameSelector
+import advene.util.helper as helper
 
 name="Shot validation view plugin"
 
@@ -54,6 +55,16 @@ class ShotValidation(AdhocView):
 
         self.annotationtype=annotationtype
         self.widget = self.build_widget()
+        self.reparent_done()
+
+    def reparent_done(self):
+        def handle_draw(*p):
+            self.selector.fit_width()
+            if self.expose_signal:
+                self.widget.disconnect(self.expose_signal)
+                self.expose_signal = None
+            return False
+        self.expose_signal = self.widget.connect_after('draw', handle_draw)
 
     def set_annotationtype(self, at):
         self._annotationtype=at
@@ -171,6 +182,7 @@ class ShotValidation(AdhocView):
             return True
 
         if new != annotation.fragment.begin:
+            logger.debug("Updating annotation begin from %s to %s", helper.format_time(annotation.fragment.begin), helper.format_time_reference(new))
             self.controller.notify('EditSessionStart', element=annotation, immediate=True)
             annotation.fragment.begin = new
             self.controller.notify('AnnotationEditEnd', annotation=annotation, batch=batch)
@@ -252,9 +264,14 @@ class ShotValidation(AdhocView):
         b.connect("clicked", self.goto_current)
         hb.add(b)
 
-        b=Gtk.Button(_("Refresh snapshots"))
+        b=Gtk.Button(_("Refresh"))
         b.set_tooltip_text(_("Refresh missing snapshots"))
         b.connect("clicked", lambda b: self.selector.refresh_snapshots())
+        hb.add(b)
+
+        b=Gtk.Button(_("Fit"))
+        b.set_tooltip_text(_("Resize snapshots to fit current window"))
+        b.connect("clicked", lambda b: self.selector.fit_width())
         hb.add(b)
 
         b=Gtk.Button(_("Undo"))
@@ -264,7 +281,7 @@ class ShotValidation(AdhocView):
         b.set_sensitive(False)
         self.undo_button = b
 
-        b=Gtk.Button(_("Merge with previous"))
+        b=Gtk.Button(_("Merge"))
         b.set_tooltip_text(_("Merge with previous annotation, i.e. remove this bound."))
         b.connect("clicked", self.merge)
         hb.add(b)

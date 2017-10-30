@@ -213,6 +213,14 @@ class FrameSelector(object):
         d.destroy()
         return timestamp
 
+    def fit_width(self):
+        """Resize Selector to match current widget width.
+        """
+        win = self.widget.get_window()
+        new_width = win.get_width() / self.count - 28
+        for f in self.frames:
+            f.set_width(new_width)
+
     def select_time(self, button=None):
         """General callback.
 
