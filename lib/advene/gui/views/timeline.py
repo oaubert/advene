@@ -956,10 +956,7 @@ class TimeLine(AdhocView):
 
     def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
-        if self.list is None:
-            l=self.controller.package.annotations
-        else:
-            l=self.list
+        l = self.get_annotations()
         if event == 'AnnotationActivate' and annotation in l:
             self.activate_annotation(annotation)
             if self.options['autoscroll'] == 3:
@@ -1998,6 +1995,16 @@ class TimeLine(AdhocView):
         b.show_all()
         return b
 
+    def get_annotations(self):
+        if self.list is None:
+            l = self.controller.package.annotations
+        else:
+            l = self.list
+
+        # Filter out non displayed annotations
+        l = [ a for a in l if a.type in self.annotationtypes ]
+        return l
+
     def populate (self, callback=None):
         """Populate the annotations widget.
 
@@ -2006,13 +2013,7 @@ class TimeLine(AdhocView):
         widgets creation.
         """
         u2p = self.unit2pixel
-        if self.list is None:
-            l = self.controller.package.annotations
-        else:
-            l = self.list
-
-        # Filter out non displayed annotations
-        l = [ a for a in l if a.type in self.layer_position ]
+        l = self.get_annotations()
 
         # Use a list so that the counter variable can be modified in
         # the closure.
@@ -2195,10 +2196,7 @@ class TimeLine(AdhocView):
         """
         minimum=sys.maxsize
         maximum=0
-        if self.list is None:
-            l=self.controller.package.annotations
-        else:
-            l=self.list
+        l = self.get_annotations()
         for a in l:
             if a.fragment.begin < minimum:
                 minimum = a.fragment.begin
