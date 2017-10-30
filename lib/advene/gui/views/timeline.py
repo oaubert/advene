@@ -53,6 +53,13 @@ name="Timeline view plugin"
 def register(controller):
     controller.register_viewclass(TimeLine)
 
+# The timeline component is not efficient enough to display too many
+# annotations. Set a reasonable threshold here: above this number of
+# annotations to display, and if no selection of annotation types is
+# proposed, the timeline will start empty and ask the user to select
+# the annotation types to actually display.
+ANNOTATION_COUNT_LIMIT = 2000
+
 class QuickviewBar(Gtk.HBox):
     def __init__(self, controller=None):
         GObject.GObject.__init__(self)
@@ -193,19 +200,24 @@ class TimeLine(AdhocView):
         if ats:
             annotationtypes=ats
 
+        self.should_display_type_selection_popup = False
+        self.edit_type_selection_popup = None
+
         if not annotationtypes:
-            annotationtypes = list(self.controller.package.annotationTypes)
-        self.list = elements
+            # Selecting whole package. Check if there are no too many to display.
+            if not elements and len(self.controller.package.annotations) > ANNOTATION_COUNT_LIMIT:
+                self.should_display_type_selection_popup = True
+                annotationtypes = []
+            else:
+                # Display all annotation types
+                annotationtypes = list(self.controller.package.annotationTypes)
         if len(annotationtypes or []) != len(self.controller.package.annotationTypes):
             # Selected annotation types (else we would use all package's types)
             self.annotationtypes_selection = annotationtypes
         else:
             self.annotationtypes_selection = None
         self.annotationtypes = annotationtypes
-
-        # package used when the update_model has been called from
-        # __init__. This is used to avoid a double initialization.
-        self.package_from_init = None
+        self.list = None
 
         self.layout = Gtk.Layout ()
 
@@ -358,7 +370,7 @@ class TimeLine(AdhocView):
             if self.expose_signal:
                 self.widget.disconnect(self.expose_signal)
                 self.expose_signal = None
-            self.update_model(from_init=True)
+            self.update_model(from_init=True, elements=elements)
             logger.debug("set zoom value default zoom: %f width: %d", default_zoom, self.layout.get_clip().width)
             self.fraction_adj.set_value(default_zoom)
             return False
@@ -383,6 +395,12 @@ class TimeLine(AdhocView):
         arguments.append( ('zoom', self.fraction_adj.get_value()) )
         self.options['inspector-width'] = self.get_inspector_size()
         return self.options, arguments
+
+    def close(self, *p):
+        if self.edit_type_selection_popup  is not None:
+            self.edit_type_selection_popup.destroy()
+        super().close()
+        return True
 
     def get_inspector_size(self):
         return self.inspector_pane.get_clip().width - self.inspector_pane.get_position()
@@ -623,14 +641,22 @@ class TimeLine(AdhocView):
             # Reset to display whole timeline
             self.scale.set_value( (self.maximum - self.minimum) / float(self.layout.get_clip().width or 100) )
 
-    def update_model(self, package=None, partial_update=False, from_init=False):
+    def update_model(self, package=None, partial_update=False, from_init=False, elements=None):
         """Update the whole model.
+
+        This method is called by the main Advene GUI when a new
+        package is activated. It is also used internally when some
+        view settings have been modified (and in this case,
+        partial_update should be True).
 
         @param package: the package
         @type package: Package
         @param partial_update: it is only an update for the existing package, we do not need to rebuild everything
         @param partial_update: boolean
+        @param elements: list of annotations to display
+        @type elements: list
         """
+        logger.debug("update_model package=%s partial_update=%s from_init=%s", package, partial_update, from_init, stack_info=True)
         if not self.update_lock.acquire(False) or self.layout.get_window() is None:
             # An update is already ongoing or the layout is not realized yet
             return
@@ -639,20 +665,37 @@ class TimeLine(AdhocView):
             package = self.controller.package
 
         if partial_update:
-            pos=self.get_middle_position()
+            pos = self.get_middle_position()
         else:
-            # It is not just an update, do a full redraw
+            # It is not just an update, do a full redraw.
+
+            # If selected annotation types were leftovers from a previous package:
+            if self.annotationtypes_selection and self.annotationtypes_selection[0].ownerPackage != package:
+                self.annotationtypes_selection = []
+
+            # If the type selection display dialog was open, close it.
+            if self.edit_type_selection_popup  is not None:
+                self.edit_type_selection_popup.destroy()
+                self.edit_type_selection_popup = None
+
             self.update_min_max()
-            if self.list is not None:
+            if elements is not None:
+                self.list = [ e
+                              for e in elements
+                              if e.ownerPackage == package ]
                 # We specified a list of annotations. Display only the
                 # annotation types for annotations present in the set
                 self.annotationtypes = list(set([ a.type for a in self.list ]))
-            elif self.annotationtypes_selection is not None:
+            elif self.annotationtypes_selection:
                 self.annotationtypes = self.annotationtypes_selection
             else:
-                # We display the whole package, so display also
-                # empty annotation types
-                self.annotationtypes = list(self.controller.package.annotationTypes)
+                # We display the whole package, so display also empty annotation types
+                if len(package.annotations) > ANNOTATION_COUNT_LIMIT:
+                    self.should_display_type_selection_popup = True
+                    self.annotationtypes = []
+                else:
+                    # Display all annotation types
+                    self.annotationtypes = list(package.annotationTypes)
 
         # Clear the layouts
         self.layout.foreach(self.layout.remove)
@@ -676,7 +719,13 @@ class TimeLine(AdhocView):
 
         if partial_update:
             self.set_middle_position(pos)
-        #self.layout.show_all()
+
+        if self.should_display_type_selection_popup:
+            def ask_for_types():
+                self.should_display_type_selection_popup = False
+                self.edit_annotation_types(source=None, message=_("There are too many annotations to display everything. Please select a subset of annotation types."))
+                return False
+            GObject.timeout_add(200, ask_for_types)
         return
 
     def set_autoscroll_mode(self, v):
@@ -699,7 +748,7 @@ class TimeLine(AdhocView):
             h += self.button_height + s
 
     def refresh(self, *p):
-        self.update_model(self.controller.package, partial_update=True)
+        self.update_model(self.controller.package, partial_update=False)
         return True
 
     def set_annotation(self, a=None, force=False):
@@ -3543,8 +3592,12 @@ class TimeLine(AdhocView):
         tb.show_all()
         return tb
 
-    def edit_annotation_types(self, *p):
-        l=self.annotationtypes
+    def edit_annotation_types(self, source=None, message=None):
+        if self.edit_type_selection_popup is not None:
+            # Do not display twice.
+            self.edit_type_selection_popup.present()
+            return
+        l = self.annotationtypes
         notselected = [ at
                         for at in self.controller.package.annotationTypes
                         if at not in l ]
@@ -3643,27 +3696,33 @@ class TimeLine(AdhocView):
         # The widget is built. Put it in the dialog.
         d = Gtk.Dialog(title=_('Displayed annotation types'),
                        parent=self.controller.gui.gui.win,
-                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT | Gtk.DialogFlags.MODAL,
+                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                        buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
+        self.edit_type_selection_popup = d
 
+        if message is not None:
+            label = Gtk.Label(message)
+            d.vbox.pack_start(label, True, True, 0)
+            label.show()
         d.vbox.pack_start(hbox, True, True, 0)
         hbox.set_size_request(600, 400)
         d.connect('key-press-event', dialog.dialog_keypressed_cb)
 
         d.show()
         dialog.center_on_mouse(d)
-        res=d.run()
-        if res == Gtk.ResponseType.OK:
-            self.annotationtypes = [ at[1] for at in selected_store ]
-            self.annotationtypes_selection = self.annotationtypes
-            if len(self.annotationtypes) == len(self.controller.package.annotationTypes):
-                # All types selected
-                self.annotationtypes_selection = None
-            self.package_from_init = None
-            self.update_model(partial_update=True)
-        d.destroy()
 
+        def handle_response(widget, response):
+            if response == Gtk.ResponseType.OK:
+                self.annotationtypes = [ at[1] for at in selected_store ]
+                self.annotationtypes_selection = self.annotationtypes
+                if len(self.annotationtypes) == len(self.controller.package.annotationTypes):
+                    # All types selected
+                    self.annotationtypes_selection = None
+                self.update_model(partial_update=True)
+            self.edit_type_selection_popup = None
+            widget.destroy()
+        d.connect("response", handle_response)
         return True
 
     def edit_preferences(self, *p):
