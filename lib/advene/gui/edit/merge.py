@@ -51,6 +51,7 @@ class TreeViewMerger:
     COLUMN_ACTION=1
     COLUMN_ELEMENT_NAME=2
     COLUMN_APPLY=3
+    COLUMN_ELEMENT_TYPE=4
 
     def __init__(self, controller=None, differ=None):
         self.controller=controller
@@ -66,6 +67,7 @@ class TreeViewMerger:
             GObject.TYPE_STRING,
             GObject.TYPE_STRING,
             GObject.TYPE_BOOLEAN,
+            GObject.TYPE_STRING,
             )
 
         for l in self.differ.diff():
@@ -77,8 +79,18 @@ class TreeViewMerger:
                                "%s %s (%s)" % (helper.get_type(s),
                                                self.controller.get_title(s),
                                                getattr(s, 'id', str(s))),
-                               True ])
+                               True,
+                               self.controller.get_title(s.type) if hasattr(s, 'type') else helper.get_type(s)
+            ])
         return store
+
+    def toggle_selection(self):
+        """Toggle all elements from the current selection.
+        """
+        def toggle_row(model, path, iter, data=None):
+            model.set_value(iter, self.COLUMN_APPLY, not model.get_value(iter, self.COLUMN_APPLY))
+        self.widget.get_selection().selected_foreach(toggle_row)
+        return True
 
     def build_widget(self):
         def show_diff(item, l):
@@ -172,13 +184,17 @@ class TreeViewMerger:
             return retval
 
 
-        treeview=Gtk.TreeView(model=self.store)
+        treeview = Gtk.TreeView(model=self.store)
+        treeview.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
+        treeview.set_headers_clickable(True)
+        treeview.set_enable_search(False)
         treeview.connect('button-press-event', tree_view_button_cb)
 
         renderer = Gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
         column = Gtk.TreeViewColumn(_('Merge?'), renderer,
                                     active=self.COLUMN_APPLY)
+        column.set_sort_column_id(self.COLUMN_APPLY)
 
         def toggled_cb(renderer, path, model, column):
             model[path][column] = not model[path][column]
@@ -191,12 +207,22 @@ class TreeViewMerger:
         column = Gtk.TreeViewColumn(_('Action'), renderer,
                                     text=self.COLUMN_ACTION)
         column.set_resizable(True)
+        column.set_sort_column_id(self.COLUMN_ACTION)
         treeview.append_column(column)
 
         renderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(_('Element'), renderer,
                                     text=self.COLUMN_ELEMENT_NAME)
         column.set_resizable(True)
+        column.set_max_width(300)
+        column.set_sort_column_id(self.COLUMN_ELEMENT_NAME)
+        treeview.append_column(column)
+
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('Type'), renderer,
+                                    text=self.COLUMN_ELEMENT_TYPE)
+        column.set_resizable(True)
+        column.set_sort_column_id(self.COLUMN_ELEMENT_TYPE)
         treeview.append_column(column)
 
         return treeview
@@ -262,14 +288,20 @@ class Merger:
                 l[self.mergerview.COLUMN_APPLY] = False
             return True
 
+        def toggle_selection(b):
+            self.mergerview.toggle_selection()
+            return True
 
         b = Gtk.Button(_("All"))
         b.connect('clicked', select_all)
         self.buttonbox.add (b)
 
-
         b = Gtk.Button(_('None'))
         b.connect('clicked', unselect_all)
+        self.buttonbox.add (b)
+
+        b = Gtk.Button(_('Selection'))
+        b.connect('clicked', toggle_selection)
         self.buttonbox.add (b)
 
         b = Gtk.Button(stock=Gtk.STOCK_OK)
