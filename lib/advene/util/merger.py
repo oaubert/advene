@@ -127,15 +127,11 @@ class Differ:
                 c=self.check_meta(s, d, 'dc', 'description')
                 if c:
                     yield c
-                c=self.check_meta(s, d, 'advenetool', 'representation')
-                if c:
-                    yield c
-                c=self.check_meta(s, d, 'advenetool', 'color')
-                if c:
-                    yield c
-                c=self.check_meta(s, d, 'advenetool', 'item_color')
-                if c:
-                    yield c
+
+                for meta in ('color', 'item_color', 'representation', 'completions'):
+                    c=self.check_meta(s, d, config.data.namespace, meta)
+                    if c:
+                        yield c
             else:
                 yield ('new', s, None, lambda s, d: self.copy_annotation_type(s, True) )
 
@@ -153,12 +149,10 @@ class Differ:
                 c=self.check_meta(s, d, 'dc', 'description')
                 if c:
                     yield c
-                c=self.check_meta(s, d, 'advenetool', 'color')
-                if c:
-                    yield c
-                c=self.check_meta(s, d, 'advenetool', 'item_color')
-                if c:
-                    yield c
+                for meta in ('color', 'item_color', 'representation', 'completions'):
+                    c=self.check_meta(s, d, config.data.namespace, meta)
+                    if c:
+                        yield c
                 if s.hackedMemberTypes != d.hackedMemberTypes:
                     yield ('update_member_types', s, d, lambda s, d: d.setHackedMemberTypes( s.hackedMemberTypes ))
             else:
@@ -324,7 +318,7 @@ class Differ:
         el.date=s.date or self.controller.get_timestamp()
         el.title=s.title or id_
         el.mimetype=s.mimetype
-        for n in ('color', 'item_color'):
+        for n in ('color', 'item_color', 'representation', 'completions'):
             el.setMetaData(config.data.namespace, n, (s.getMetaData(config.data.namespace, n) or ''))
         sch.annotationTypes.append(el)
         return el
