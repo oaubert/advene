@@ -392,11 +392,11 @@ class Differ:
         self.translated_ids[s.id]=id_
 
         # Find parent, and create it if necessary
-        at=helper.get_id(self.destination.annotationTypes, s.type.id)
+        at=helper.get_id(self.destination.annotationTypes, self.translated_ids.get(s.type.id, s.type.id))
         if not at:
             # The annotation type does not exist. Create it.
             at=self.copy_annotation_type(helper.get_id(self.source.annotationTypes,
-                                                       s.type.id))
+                                                       s.type.id), generate_id=generate_id)
         el=self.destination.createAnnotation(
             ident=id_,
             type=at,
@@ -417,11 +417,11 @@ class Differ:
         self.destination._idgenerator.add(id_)
         self.translated_ids[s.id]=id_
 
-        rt=helper.get_id(self.destination.relationTypes, s.type.id)
+        rt=helper.get_id(self.destination.relationTypes, self.translated_ids.get(s.type.id, s.type.id))
         if not rt:
             # The annotation type does not exist. Create it.
             rt=self.copy_relation_type(helper.get_id(self.source.relationTypes,
-                                                     s.type.id))
+                                                     s.type.id), generate_id=generate_id)
         # Ensure that annotations exist
         members=[]
         for sa in s.members:
