@@ -33,7 +33,6 @@ import advene.core.config as config
 import advene.gui.popup
 from advene.gui.util import dialog
 from advene.model.package import Package
-from advene.gui.edit.merge import Merger
 from advene.gui.edit.properties import OptionParserGUI
 
 from advene.gui.views import AdhocView
@@ -164,12 +163,11 @@ class AnnotationImporter(AdhocView):
             if ic == dummy_advene_importer:
                 # Invoke the package merge functionality.
                 try:
-                    source=Package(uri=fname)
+                    source = Package(uri=fname)
                 except Exception as e:
                     self.log("Cannot load %s file: %s" % (fname, str(e)))
                     return True
-                m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
-                m.popup()
+                self.controller.gui.open_adhoc_view('packageimporter', sourcepackage=source, destpackage=self.controller.package)
                 self.close()
                 return True
 

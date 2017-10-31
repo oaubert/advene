@@ -273,6 +273,7 @@ class AdveneGUI(object):
                     ( _("_Process video"), self.on_process_video_activate, _("Import data from video processing algorithms")),
                     ( "", None, "" ),
                     ( _("Merge package"), self.on_merge_package_activate, _("Merge elements from another package") ),
+                    ( _("Import package"), self.on_import_package_activate, _("Import elements from another package") ),
                     ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters") ),
                     ( "", None, "" ),
                     ( _("_Export..."), self.on_export_activate, _("Export data to another format") ),
@@ -4691,6 +4692,28 @@ Image cache information: %(imagecache)s
             return True
         m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
         m.popup()
+        return True
+
+    def on_import_package_activate(self, button=None, data=None):
+        if config.data.path['data']:
+            d=config.data.path['data']
+        else:
+            d=None
+        filename = dialog.get_filename(title=_("Select the package to import"),
+                                       action=Gtk.FileChooserAction.OPEN,
+                                       button=Gtk.STOCK_OPEN,
+                                       default_dir=d,
+                                       filter='advene')
+        if not filename:
+            return True
+        try:
+            source = Package(uri=filename)
+        except Exception as e:
+            msg = "Cannot load %s file: %s" % (filename, str(e))
+            logger.error(msg, exc_info=True)
+            dialog.message_dialog(msg, icon=Gtk.MessageType.ERROR)
+            return True
+        self.open_adhoc_view('packageimporter', sourcepackage=source, destpackage=self.controller.package)
         return True
 
     def on_save_workspace_as_package_view1_activate (self, button=None, data=None):
