@@ -808,6 +808,11 @@ class AdveneGUI(object):
         if at.ownerPackage != self.controller.package:
             return True
 
+        # Update the content indexer
+        if event.endswith('Create'):
+            self.controller.package._indexer.element_update(at)
+            if not hasattr(at, '_fieldnames'):
+                at._fieldnames = set()
         self.updated_element(event, at)
         for v in self.adhoc_views:
             try:
@@ -818,9 +823,6 @@ class AdveneGUI(object):
                 logger.error(_("Exception in update_annotationtype"), exc_info=True)
         # Update the current type menu
         self.update_gui()
-        # Update the content indexer
-        if event.endswith('Create'):
-            self.controller.package._indexer.element_update(at)
         return True
 
     def relationtype_lifecycle(self, context, parameters):
