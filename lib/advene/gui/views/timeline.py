@@ -1022,7 +1022,8 @@ class TimeLine(AdhocView):
                 b.grab_focus()
                 return True
             b=self.create_annotation_widget(annotation)
-            b.grab_focus()
+            if b is not None:
+                b.grab_focus()
             return True
 
         b = self.get_widget_for_annotation (annotation)
@@ -2979,7 +2980,11 @@ class TimeLine(AdhocView):
         for t in self.annotationtypes:
             b=AnnotationTypeWidget(annotationtype=t, container=self)
             b.set_tooltip_text(_("From schema %s") % self.controller.get_title(t.schema))
-            layout.put (b, 20, self.layer_position[t])
+            y_position = self.layer_position.get(t)
+            if y_position is None:
+                logger.error("Type %s not in layer_position (%s)", t.id, list(self.layer_position.keys()))
+                continue
+            layout.put (b, 20, y_position)
             b.update_widget()
             b.show_all()
             b.connect('key-press-event', annotationtype_keypress_handler, t)
@@ -3025,7 +3030,7 @@ class TimeLine(AdhocView):
             # The button can generate drags (to change annotation type order)
             enable_drag_source(b, t, self.controller)
 
-            height=max (height, self.layer_position[t] + 3 * self.button_height)
+            height=max (height, y_position + 3 * self.button_height)
 
             def set_playing(b, v):
                 if v:
@@ -3042,7 +3047,7 @@ class TimeLine(AdhocView):
             p.annotationtype=t
             p.set_size_request(20, self.button_height)
             p.set_tooltip_text(_('Restrict playing to this annotation-type'))
-            layout.put (p, 0, self.layer_position[t])
+            layout.put (p, 0, y_position)
 
             # At the right of the annotation type : prev/next buttons
             nav=Gtk.Arrow(Gtk.ArrowType.LEFT, Gtk.ShadowType.IN)
@@ -3054,7 +3059,7 @@ class TimeLine(AdhocView):
             eb.add(nav)
             eb.prev=True
             # Put it in an arbitrary location. It will be moved by resize_legend_widget
-            layout.put (eb, 102, self.layer_position[t])
+            layout.put (eb, 102, y_position)
 
             nav=Gtk.Arrow(Gtk.ArrowType.RIGHT, Gtk.ShadowType.IN)
             nav.set_size_request(16, self.button_height)
@@ -3065,7 +3070,7 @@ class TimeLine(AdhocView):
             eb.add(nav)
             eb.next=True
             # Put it in an arbitrary location. It will be moved by resize_legend_widget
-            layout.put (eb, 112, self.layer_position[t])
+            layout.put (eb, 112, y_position)
 
         # Add the 'New type' button at the end
         b=Gtk.Button()
