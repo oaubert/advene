@@ -95,14 +95,11 @@ old_excepthook = sys.excepthook
 def _advene_excepthook(type, value, tracebk, thread=None):
     """This function will replace sys.excepthook.
     """
-    import traceback
-    tracebk = tracebk.tb_next
-    tb = "".join(traceback.format_exception(type, value, tracebk))
-    logger.error(tb)
+    sys.last_type, sys.last_value, sys.last_traceback = type, value, tracebk
+    logger.error("General exception %s %s %s", type, value, tracebk, exc_info=True)
     if config.data.livedebug:
-        sys.last_type, sys.last_value, sys.last_traceback = type, value, tracebk
         import pdb
-        pdb.pm()
+        pdb.post_mortem(tracebk.tb_next or tracebk)
     # Use standard method also
     old_excepthook(type, value, tracebk)
 sys.excepthook = _advene_excepthook
