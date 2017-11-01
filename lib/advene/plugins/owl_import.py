@@ -40,6 +40,22 @@ def register(controller=None):
     return True
 
 class OWLImporter(GenericImporter):
+    """Convert an OWL schema into an Advene structure.
+
+    Many assumptions are made here about the ontology structure:
+
+    - the imported graph should define a single owl:Ontology, which
+      defines the basic namespace AO.
+
+    - the ontology defines elements of type AO:AnnotationLevel, which
+      are converted into Advene schemas.
+
+    - every AO:AnnotationLevel AO:hasAnnotationType: subjects which
+      are converted into Advene annotation types.
+
+    - every AO:AnnotationType AO:hasPredefinedValue which are used to
+      populate the completions field for the annotation type
+    """
     name = _("OWL (schema) importer")
 
     def can_handle(fname):
@@ -67,20 +83,32 @@ class OWLImporter(GenericImporter):
     def iterator(self, graph):
         """Iterate through the loaded OWL.
         """
-        AO = rdflib.Namespace('http://ada.filmontology.org/ontology/')
-        AR = rdflib.Namespace('http://ada.filmontology.org/resource/')
+        progress=0.01
+        self.progress(progress, "Starting conversion")
+        RDF = rdflib.RDF
+        OWL = rdflib.OWL
+
+        # Determine the ontology namespace (since it is versioned)
+        ontology = list(graph.subjects(RDF.type, OWL.Ontology))
+        if len(ontology) != 1:
+            logger.error(_("Cannot find a unique ontology in the OWL file."))
+            return
+        ontology = ontology[0]
+        AO = rdflib.Namespace(ontology)
+        AR = rdflib.Namespace(ontology.replace('/ontology/', '/resource/'))
         PREFIX = """PREFIX owl: <http://www.w3.org/2002/07/owl#>
-        PREFIX ar: <http://ada.filmontology.org/resource/>
-        PREFIX ao: <http://ada.filmontology.org/ontology/>
+        PREFIX ar: <{AR}>
+        PREFIX ao: <{AO}>
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        """
+        """.format(**locals())
+
         def get_label(graph, subject, default=""):
             """Return a label for the object.
 
             Using preferably @en labels
             """
-            labels = graph.preferredLabel(s, lang='en')
+            labels = graph.preferredLabel(subject, lang='en')
             if labels:
                 # We have at least 1 @en label. Return it.
                 return labels[0][1]
@@ -97,15 +125,14 @@ class OWLImporter(GenericImporter):
             else:
                 return default
 
-        progress=0.01
-        self.progress(progress, "Starting conversion")
-        RDF = rdflib.RDF
         schemas = list(graph.subjects(RDF.type, AO.AnnotationLevel))
+        if not schemas:
+            logger.error(_("Cannot find a valid schema in the OWL file."))
+            return
         incr=0.98 / len(schemas)
         for s in schemas:
             progress += incr
             # Create the schema
-            # FIXME: there is no label neither description at the moment.
             schema_id = s.rpartition('/')[-1]
             title = get_label(graph, s, schema_id)
             description = get_comment(graph, s)
@@ -118,7 +145,7 @@ class OWLImporter(GenericImporter):
                 description = get_comment(graph, atnode)
                 at = self.create_annotation_type(schema, at_id, title=label, description=description)
                 values = [ str(t[0])
-                           for t in graph.query(PREFIX + "SELECT ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . }" % str(atnode)) ]
+                           for t in graph.query(PREFIX + """SELECT ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" )}""" % str(atnode)) ]
                 if values:
                     at.setMetaData(config.data.namespace, "completions", ",".join(values))
         self.progress(1.0)
@@ -131,6 +158,7 @@ class OWLImporter(GenericImporter):
 
 if __name__ == "__main__":
     import sys
+    from advene.core.controller import AdveneController
     if rdflib is None:
         logger.error("Cannot import required rdflib module")
         sys.exit(1)
@@ -141,7 +169,8 @@ if __name__ == "__main__":
     fname=sys.argv[1]
     pname=sys.argv[2]
 
-    i = OWLImporter()
+    c = AdveneController()
+    i = OWLImporter(controller=c)
 
     i.process_options(sys.argv[1:])
     logger.info("Converting %s to %s using %s", fname, pname, i.name)
