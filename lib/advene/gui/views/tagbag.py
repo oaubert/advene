@@ -98,9 +98,8 @@ class TagBag(AdhocView):
             return True
 
         # Is there an associated color ?
-        try:
-            col=self.controller.package._tag_colors[tag]
-        except KeyError:
+        col = self.controller.package._tag_colors(tag, None)
+        if col is None:
             return True
 
         l=[ b for b in self.mainbox.get_children() if b.tag == tag ]
@@ -149,7 +148,6 @@ class TagBag(AdhocView):
         dialog.center_on_mouse(d)
 
         res=d.run()
-        ret=None
         if res == Gtk.ResponseType.OK:
             try:
                 tag=tagname.get_text()
