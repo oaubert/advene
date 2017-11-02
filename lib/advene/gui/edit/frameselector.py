@@ -53,6 +53,9 @@ class FrameSelector(object):
         self.frame_length = self.controller.frame2time(1)
         self.frame_width = config.data.preferences['frameselector-width']
 
+        # Last recorded width for the component.
+        self.last_width = 0
+
         # List of TimestampRepresentation widgets.
         # It is initialized in build_widget()
         self.frames = []
@@ -217,7 +220,8 @@ class FrameSelector(object):
         """Resize Selector to match current widget width.
         """
         win = self.widget.get_window()
-        new_width = win.get_width() / self.count - 28
+        self.last_width = win.get_width()
+        new_width = self.last_width / self.count - 28
         for f in self.frames:
             f.set_width(new_width)
 
@@ -231,6 +235,14 @@ class FrameSelector(object):
         if self.callback is not None:
             self.callback(self.selected_value)
         return True
+
+    def check_size(self, *p):
+        win = self.widget.get_window()
+        width = win.get_width()
+        if abs(width - self.last_width) > 30:
+            # Update width
+            self.fit_width()
+        return False
 
     def build_widget(self):
         vb=Gtk.VBox()
@@ -271,6 +283,7 @@ class FrameSelector(object):
 
             hb.pack_start(r, False, True, 0)
 
+        hb.connect("draw", self.check_size)
         eb = Gtk.EventBox()
         ar = Gtk.Arrow(Gtk.ArrowType.RIGHT, Gtk.ShadowType.IN)
         ar.set_tooltip_text(_("Click to see more frames or scroll with the mouse wheel"))

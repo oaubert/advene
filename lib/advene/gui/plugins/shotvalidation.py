@@ -57,15 +57,6 @@ class ShotValidation(AdhocView):
         self.widget = self.build_widget()
         self.reparent_done()
 
-    def reparent_done(self):
-        def handle_draw(*p):
-            self.selector.fit_width()
-            if self.expose_signal:
-                self.widget.disconnect(self.expose_signal)
-                self.expose_signal = None
-            return False
-        self.expose_signal = self.widget.connect_after('draw', handle_draw)
-
     def set_annotationtype(self, at):
         self._annotationtype=at
         if self._annotationtype is not None:
@@ -267,11 +258,6 @@ class ShotValidation(AdhocView):
         b=Gtk.Button(_("Refresh"))
         b.set_tooltip_text(_("Refresh missing snapshots"))
         b.connect("clicked", lambda b: self.selector.refresh_snapshots())
-        hb.add(b)
-
-        b=Gtk.Button(_("Fit"))
-        b.set_tooltip_text(_("Resize snapshots to fit current window"))
-        b.connect("clicked", lambda b: self.selector.fit_width())
         hb.add(b)
 
         b=Gtk.Button(_("Undo"))

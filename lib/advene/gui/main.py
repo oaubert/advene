@@ -1506,8 +1506,6 @@ class AdveneGUI(object):
             self.drawable.modify_bg (state, black)
 
         self.drawable.add_events(Gdk.EventType.BUTTON_PRESS)
-        self.drawable.connect_object('button-press-event', self.debug_cb, self.drawable)
-
         self.player_toolbar = self.get_player_control_toolbar()
         self.playpause_button = self.player_toolbar.buttons['playpause']
 
@@ -2203,11 +2201,8 @@ class AdveneGUI(object):
         self.player_toolbar.buttons['loop'].set_active(True)
         return True
 
-    def debug_cb(self, window, event, *p):
-        logger.debug("Got event %s (%d, %d) in window %s" % (str(event),
-                                                             event.x,
-                                                             event.y,
-                                                             str(window)))
+    def debug_cb(self, *p):
+        logger.warn(" / ".join(str(i) for i in p))
         return False
 
     def init_window_size(self, window, name):
