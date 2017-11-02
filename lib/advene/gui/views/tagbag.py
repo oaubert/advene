@@ -214,10 +214,6 @@ class TagBag(AdhocView):
         def remove(widget, tag):
             if tag in self.tags:
                 self.tags.remove(tag)
-                try:
-                    del self.controller.package._tag_colors[tag]
-                except KeyError:
-                    pass
                 self.controller.notify('TagUpdate', tag=tag)
                 self.refresh()
             return True
