@@ -421,9 +421,9 @@ element_label = {
 
 def get_type(el):
     try:
-        t=element_label[type(el)]
+        t = element_label[type(el)]
     except:
-        t=str(type(el))
+        t = type(el).__name__
     return t
 
 def get_valid_members (el):
