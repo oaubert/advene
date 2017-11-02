@@ -775,6 +775,9 @@ class MetadataColumn(FinderColumn):
 
 Description:
 %(description)s
+
+Annotation statistics:
+%(statistics)s
 """) % {
         'title': el.title,
         'schema': helper.format_element_name('schema', len(el.schemas)),
@@ -784,10 +787,17 @@ Description:
         'relation_type': helper.format_element_name('relation_type', len(el.relationTypes)),
         'query': helper.format_element_name('query', len(el.queries)),
         'view': helper.format_element_name('view', len(el.views)),
-        'description': el.getMetaData(config.data.namespace_prefix['dc'], 'description')
+        'description': el.getMetaData(config.data.namespace_prefix['dc'], 'description'),
+        'statistics': helper.get_annotations_statistics(el.annotations)
         })
+        elif isinstance(el, AnnotationType):
+            info.set_text(_("""%(type)s %(title)s\n%(statistics)s""") % ({
+                "type": helper.get_type(el),
+                "title": self.controller.get_title(el),
+                "statistics": helper.get_annotations_statistics(el.annotations)
+            }))
         else:
-            info.set_text(_("""%(type)s %(title)s""") % ({"type": type(el),
+            info.set_text(_("""%(type)s %(title)s""") % ({"type": helper.get_type(el),
                                                           "title": self.controller.get_title(el)}))
 
         frame = Gtk.Expander.new(_("Metadata"))
@@ -799,7 +809,7 @@ Description:
         sw.add(info)
         vbox.add(sw)
         frame.add(self.view)
-        vbox.add(frame)
+        vbox.pack_start(frame, False, False, 0)
         vbox.show_all()
         return vbox
 CLASS2COLUMN[Metadata] = MetadataColumn
