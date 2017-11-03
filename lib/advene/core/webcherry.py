@@ -180,7 +180,7 @@ class Common:
             if duplicate_title:
                 res.append("<h1>%s</h1>\n" % title)
 
-        return res or b''
+        return "".join(res) or b''
 
     def send_no_content(self):
         """Sends a No Content (204) response.
