@@ -25,11 +25,13 @@ from gettext import gettext as _
 
 from gi.repository import Gtk
 
-import advene.core.config as config
+from advene.model.annotation import Annotation, Relation
+
 from advene.gui.views import AdhocView
 import advene.gui.popup
 import advene.util.helper as helper
-from advene.gui.util import enable_drag_source, name2color
+from advene.gui.util import enable_drag_source
+from advene.gui.widget import AnnotationRepresentation, RelationRepresentation
 
 name="EditionHistory view plugin"
 
@@ -72,19 +74,12 @@ class EditionHistory(AdhocView):
                                (self.edited, g.last_edited) ):
             w.foreach(w.remove)
             for e in reversed(elements):
-                b=Gtk.Button("\n".join((helper.get_type(e), self.controller.get_title(e))), use_underline=False)
-                b.set_alignment(0, 0)
-                colorname=self.controller.get_element_color(e)
-                if colorname:
-                    if config.data.os == 'win32':
-                        text=b.get_label()
-                        b.foreach(b.remove)
-                        l=Gtk.Label()
-                        l.set_markup('<span background="%s">%s</span>' % (colorname, text))
-                        l.show()
-                        b.add(l)
-                    else:
-                        style = b.modify_bg(Gtk.StateType.NORMAL, name2color(colorname))
+                if isinstance(e, Annotation):
+                    b = AnnotationRepresentation(e, self.controller)
+                elif isinstance(e, Relation):
+                    b = RelationRepresentation(e, self.controller)
+                else:
+                    b = Gtk.Button("\n".join((helper.get_type(e), self.controller.get_title(e))), use_underline=False)
                 b.connect('clicked', (lambda i, el: self.controller.gui.edit_element(el)),
                           e)
                 content=getattr(e, 'content', None)
