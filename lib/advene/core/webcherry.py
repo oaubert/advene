@@ -505,7 +505,7 @@ class Media(Common):
         else:
             img=snapshot
         cherrypy.response.headers['Content-type']='image/png'
-        res.append (img)
+        res.append (bytes(img))
         return res
     overlay.exposed=True
 
@@ -1212,20 +1212,11 @@ class Packages(Common):
                 mimetype=expr.contenttype
             except AttributeError:
                 mimetype=self.image_type(objet)
-            if 'imagecache' in expr and 'async-snapshot' in self.controller.player.player_capabilities:
-                # Probably an image from the imagecache. Check if it
-                # is initialized, else ask if possible for update.
-                t=getattr(objet, 'timestamp', None)
-                if t is not None and t < 0:
-                    # Non-initialized snapshot. Ask for update.
-                    ts=re.findall('imagecache/(\d+)', expr)
-                    if ts:
-                        self.controller.queue_action(self.controller.update_snapshot, int(ts[0]))
             cherrypy.response.status=200
             cherrypy.response.headers['Content-type']=mimetype
             self.no_cache ()
 
-            res.append(objet)
+            res.append(bytes(objet))
             return res
         elif displaymode == 'content':
             if hasattr(objet, 'mimetype'):
@@ -1301,7 +1292,7 @@ class Packages(Common):
                 if isinstance(objet, str):
                     res.append(objet.encode('utf-8'))
                 else:
-                    res.append(objet)
+                    res.append(bytes(objet))
             except AdveneException as e:
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error.</p>
