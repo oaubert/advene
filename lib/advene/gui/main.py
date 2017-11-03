@@ -3185,7 +3185,7 @@ class AdveneGUI(object):
                         continue
                     if n.startswith('file://'):
                         n = n[7:]
-                    n = n + '.backup' + e
+                    n = urllib.parse.unquote(n + '.backup' + e)
                     p.save(name=n)
             return True
 
