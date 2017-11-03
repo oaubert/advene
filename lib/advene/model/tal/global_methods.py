@@ -487,12 +487,19 @@ def sorted (target, context):
     sorted according to their positions, or to any list of comparable
     items.
     """
+    from advene.model.annotation import Annotation
+    from advene.model.fragment import AbstractNbeFragment
+
     if hasattr(target, 'viewableType') and target.viewableType == 'annotation-list' or (
         isinstance(target, list) and len(target) > 0 and hasattr(target[0], 'fragment')):
         l=list(target[:])
         l.sort(key=lambda e: e.fragment.begin)
-    elif (hasattr(target, '__getslice__') and len(target) > 0 and hasattr(target[0], '__lt__')):
-        l=list(target[:])
+    elif hasattr(target, '__getslice__') and len(target) > 0 and (isinstance(target[0], Annotation)
+                                                                  or isinstance(target[0], AbstractNbeFragment)
+                                                                  or isinstance(target[0], int)
+                                                                  or isinstance(target[0], float)
+                                                                  or isinstance(target[0], str)):
+        l = list(target[:])
         l.sort()
     elif (hasattr(target, '__getslice__') and len(target) > 0 and hasattr(target[0], 'title')):
         l=list(target[:])
