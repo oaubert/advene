@@ -268,13 +268,21 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
     el = context._element
     # FIXME: think about the generalisation of the notion of container
     # selection (for timestamp lists for instance)
+    widgets = None
     try:
-        widgets = widget.container.get_selected_annotation_widgets()
-        if not widget in widgets:
-            widgets = None
-    except (AttributeError, RuntimeError):
-        logger.error("Cannot get_selected_annotation_widgets", exc_info=True)
-        widgets=None
+        c = widget.container
+    except  (AttributeError, RuntimeError):
+        # No container. Note that getattr(widget, 'container', None)
+        # would anyway raise a RuntimeError (container is some kind of
+        # reserved in gtk).
+        c = None
+    if c:
+        try:
+            widgets = c.get_selected_annotation_widgets()
+            if not widget in widgets:
+                widgets = None
+        except AttributeError:
+            logger.error("Cannot get_selected_annotation_widgets", exc_info=True)
 
     d={ typ['annotation']: Annotation,
         typ['annotation-type']: AnnotationType,
