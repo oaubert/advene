@@ -355,9 +355,9 @@ class AdveneController(object):
                 # register did not have a return clause (and thus
                 # return None)
                 if p.register(controller=self) is False:
-                    self.log("Could not register " + p.name)
+                    logger.error("Could not register " + p.name)
                 else:
-                    self.log("Registering " + p.name)
+                    logger.info("Registering " + p.name)
             except AttributeError:
                 logger.error("AttributeError in %s/%s", directory, p.name, exc_info=True)
                 pass
@@ -427,7 +427,7 @@ class AdveneController(object):
         if self.gui:
             self.gui.register_view(view)
         else:
-            self.log(_("No available GUI"))
+            logger.error(_("No available GUI"))
 
     # Register methods for user-defined plugins
     def register_content_handler(self, handler):
@@ -446,7 +446,7 @@ class AdveneController(object):
         if self.event_handler:
             self.event_handler.register_action(action)
         else:
-            self.log(_("No available event handler"))
+            logger.error(_("No available event handler"))
 
     def register_viewclass(self, viewclass, name=None):
         """Register an adhoc view.
@@ -454,7 +454,7 @@ class AdveneController(object):
         if self.gui:
             self.gui.register_viewclass(viewclass, name)
         else:
-            self.log(_("No available gui"))
+            logger.error(_("No available gui"))
 
     def register_importer(self, imp):
         """Register an importer.
@@ -470,7 +470,7 @@ class AdveneController(object):
         """Register a generic feature.
         """
         if name in self.generic_features:
-            self.log(_("Warning: redefining an existing feature %s") % name)
+            logger.warn(_("Warning: redefining an existing feature %s") % name)
         self.generic_features[name] = feature_class
 
     def register_slave_player(self, p):
@@ -797,7 +797,7 @@ class AdveneController(object):
             pid=l.rstrip().split()[-1]
             processes.append(pid)
         f.close()
-        self.log(_("Cannot start the webserver\nThe following processes seem to use the %(port)s port: %(processes)s") % { 'port': pat,
+        logger.warn(_("Cannot start the webserver\nThe following processes seem to use the %(port)s port: %(processes)s") % { 'port': pat,
                                                                                                                            'processes':  processes})
 
     @property
@@ -846,23 +846,23 @@ class AdveneController(object):
                 alias = re.sub('[^a-zA-Z0-9_]', '_', alias)
                 try:
                     self.load_package (uri=uri, alias=alias)
-                    self.log(_("Loaded %(uri)s as %(alias)s") % {'uri': uri, 'alias': alias})
+                    logger.info(_("Loaded %(uri)s as %(alias)s") % {'uri': uri, 'alias': alias})
                 except Exception as e:
-                    self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
+                    logger.error(_("Cannot load package from file %(uri)s: %(error)s") % {
                             'uri': uri,
-                            'error': str(e)})
+                            'error': str(e)}, exc_info=True)
             else:
                 name, ext = os.path.splitext(uri)
                 if ext.lower() in ('.xml', '.azp', '.apl'):
                     alias = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
                     try:
                         self.load_package (uri=uri, alias=alias)
-                        self.log(_("Loaded %(uri)s as %(alias)s") % {
+                        logger.info(_("Loaded %(uri)s as %(alias)s") % {
                                 'uri': uri, 'alias':  alias})
                     except Exception as e:
-                        self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
+                        logger.error(_("Cannot load package from file %(uri)s: %(error)s") % {
                                 'uri': uri,
-                                'error': str(e)})
+                                'error': str(e)}, exc_info=True)
                 elif ('dvd' in name
                       or ext.lower() in config.data.video_extensions):
                     # Try to load the file as a video file
@@ -899,7 +899,7 @@ class AdveneController(object):
             except socket.error:
                 if config.data.os != 'win32':
                     self.busy_port_info()
-                self.log(_("Deactivating web server"))
+                logger.info(_("Deactivating web server"))
                 self.server = None
         return True
 
@@ -1006,8 +1006,8 @@ class AdveneController(object):
         """
         try:
             v=self.player.sound_get_volume()
-        except Exception as e:
-            self.log(_("Cannot get audio volume: %s") % str(e))
+        except Exception:
+            logger.error(_("Cannot get audio volume"), exc_info=True)
             v=0
         return v
 
@@ -1019,7 +1019,7 @@ class AdveneController(object):
         if (url.startswith(self.get_urlbase()) and
                            (self.server is None or not self.server.is_running())):
             # Cannot open a local URL: the webserver is not active
-            self.log(_("Cannot open Advene URL %s: the webserver is not running.") % url)
+            logger.error(_("Cannot open Advene URL %s: the webserver is not running.") % url)
             return True
         if self.gui and self.gui.open_url_embedded(url):
             return True
@@ -1295,7 +1295,7 @@ class AdveneController(object):
                 # FIXME: if d is a URL, use appropriate method (urllib.??)
                 if os.path.exists(n):
                     mediafile=n
-                    self.log(_("Found matching video file in moviepath: %s") % n)
+                    logger.info(_("Found matching video file in moviepath: %s") % n)
                     break
         else:
             # Path exists. It may be a relative path, so convert it to
@@ -1497,8 +1497,8 @@ class AdveneController(object):
             elif annotation.type.mimetype == 'application/x-advene-structured':
                 an.content.data = annotation.content.data
             else:
-                self.log("Cannot convert %s to %s" % (annotation.type.mimetype,
-                                                      an.type.mimetype))
+                logger.warn("Cannot convert %s to %s" % (annotation.type.mimetype,
+                                                          an.type.mimetype))
                 an.content.data = annotation.content.data
         elif an.type.mimetype == 'image/svg+xml':
             # Use a template for text->SVG conversion.
@@ -1507,7 +1507,7 @@ class AdveneController(object):
   <text fill="green" name="Content" stroke="green" style="stroke-width:1; font-family: sans-serif; font-size: 22" x="8" y="290">%s</text>
 </svg:svg>""" % self.get_title(annotation)
         else:
-            self.log("Do not know how to convert %s to %s" % (annotation.type.mimetype,
+            logger.warn("Do not know how to convert %s to %s" % (annotation.type.mimetype,
                                                               an.type.mimetype))
             an.content.data = annotation.content.data
         an.setDate(self.get_timestamp())
@@ -1547,7 +1547,7 @@ class AdveneController(object):
         """
         if (position <= annotation.fragment.begin
             or position >= annotation.fragment.end):
-            self.log(_("Cannot split the annotation: the given position is outside."))
+            logger.warn(_("Cannot split the annotation: the given position is outside."))
             return annotation
 
         # Create the new one
@@ -1795,10 +1795,10 @@ class AdveneController(object):
             try:
                 self.package = Package (uri="new_pkg",
                                         source=config.data.advenefile(config.data.templatefilename))
-            except Exception as e:
-                self.log(_("Cannot find the template package %(filename)s: %(error)s")
-                         % {'filename': config.data.advenefile(config.data.templatefilename),
-                            'error': str(e)})
+            except Exception:
+                logger.error(_("Cannot find the template package %(filename)s")
+                             % {'filename': config.data.advenefile(config.data.templatefilename)}, exc_info=True)
+
                 alias='new_pkg'
                 self.package = Package (alias, source=None)
             self.package.author = config.data.userid
@@ -1835,7 +1835,7 @@ class AdveneController(object):
                 logger.error("Cannot load package %s", uri, exc_info=True)
                 return
             dur = time.time() - t
-            self.log("Loaded package in %f seconds" % dur)
+            logger.info("Loaded package in %f seconds" % dur)
             # Check if the imported package was found. Else it will
             # fail when accessing elements...
             imp = []
@@ -2003,7 +2003,7 @@ class AdveneController(object):
     def reset(self):
         """Reset all packages.
         """
-        self.log("FIXME: reset not implemented yet")
+        logger.error("FIXME: reset not implemented yet")
         #FIXME: remove all packages from self.packages
         # and
         # recreate a template package
@@ -2075,7 +2075,7 @@ class AdveneController(object):
         self.notify ("PackageSave", package=p)
         if old_uri != name:
             # Reload the package with the new name
-            self.log(_("Package URI has changed. Reloading package with new URI."))
+            logger.info(_("Package URI has changed. Reloading package with new URI."))
             self.load_package(uri=name)
             # FIXME: we keep here the old and the new package.
             # Maybe we could autoclose the old package
@@ -2093,8 +2093,7 @@ class AdveneController(object):
              if not isinstance (a.fragment, MillisecondFragment)]
         if l:
             self.package = None
-            self.log (_("Cannot load package: the following annotations do not have Millisecond fragments:"))
-            self.log (", ".join(l))
+            logger.error(_("Cannot load package: the following annotations do not have Millisecond fragments: %s"), ", ".join(l))
             return True
 
         # Cache common fieldnames for structured content
@@ -2119,9 +2118,9 @@ class AdveneController(object):
         if master_uri:
             i=[ pk for pk in p.imports if pk.getUri(absolute=False) == master_uri ]
             if not i:
-                self.log(_("Cannot handle master attribute, the package %s is not imported.") % master_uri)
+                logger.warn(_("Cannot handle master attribute, the package %s is not imported.") % master_uri)
             else:
-                self.log(_("Checking master package %s for not yet imported elements.") % master_uri)
+                logger.info(_("Checking master package %s for not yet imported elements.") % master_uri)
                 self.handle_auto_import(p, i[0].package)
 
         return True
@@ -2208,8 +2207,8 @@ class AdveneController(object):
                     if v in parsed_views:
                         # Already parsed view. In order to avoid an
                         # infinite loop, ignore it.
-                        self.log(_("Infinite loop in STBV %(name)s: the %(imp)s view is invoked multiple times.") % { 'name': self.get_title(view),
-                                                                                                                      'imp': self.get_title(v) })
+                        logger.warn(_("Infinite loop in STBV %(name)s: the %(imp)s view is invoked multiple times.") % { 'name': self.get_title(view),
+                                                                                                                         'imp': self.get_title(v) })
                     else:
                         rs.from_xml(v.content.stream,
                                     catalog=self.event_handler.catalog,
@@ -2255,7 +2254,7 @@ class AdveneController(object):
             message=context.evaluateValue(parameters['message'])
         else:
             message="No message..."
-        self.log (message)
+        self.log(message)
         return True
 
     def on_exit (self, *p, **kw):
@@ -2630,11 +2629,10 @@ class AdveneController(object):
         ctx=self.build_context(here=element)
         try:
             stream=open(filename, 'wb')
-        except Exception as e:
-            self.log(_("Cannot export to %(filename)s: %(e)s") % locals())
+        except Exception:
+            logger.error(_("Cannot export to %(filename)s"), exc_info=True)
             return True
 
-        kw = {}
         if filter.content.mimetype is None or filter.content.mimetype.startswith('text/'):
             compiler = simpleTAL.HTMLTemplateCompiler ()
             compiler.parseTemplate (filter.content.stream, 'utf-8')
@@ -2657,7 +2655,7 @@ class AdveneController(object):
             except simpleTALES.ContextContentException:
                 logger.error(_("Error when exporting XML template"), exc_info=True)
         stream.close()
-        self.log(_("Data exported to %s") % filename)
+        logger.info(_("Data exported to %s") % filename)
         return True
 
     def website_export(self, destination='/tmp/n', views=None, max_depth=3, progress_callback=None, video_url=None):
