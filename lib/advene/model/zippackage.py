@@ -82,7 +82,7 @@ class ZipPackage:
         for d in ZipPackage.tempdir_list:
             # FIXME: there should be a way to determine wether it
             # is still used or not.
-            logger.info("Cleaning up %s", d)
+            logger.debug("Cleaning up %s", d)
             if os.path.isdir(d):
                 shutil.rmtree(d, ignore_errors=True)
 
