@@ -153,8 +153,6 @@ if not os.path.exists(config.data.path['resources']):
                     f.close()
 
 if config.data.os == 'win32':
-    import winreg
-
     # win32 platform, add the "lib" folder to the system path
     os.environ['PATH'] += os.path.pathsep + "lib"
     # add pixbufloader dir in environment
@@ -210,6 +208,7 @@ Aborting.""", config.data.path[d])
                                                              v.title,
                                                              v.getMetaData(config.data.namespace, 'extension'))
                                for v in c.get_export_filters()))
+        c.on_exit()
         sys.exit(0)
     elif filter is not None:
         # A filter has been specified.
@@ -219,15 +218,20 @@ Aborting.""", config.data.path[d])
         l = [v for v in c.get_export_filters() if v.id == filter]
         if not l:
             logging.error("Export filter %s is not defined", filter)
+            c.on_exit()
             sys.exit(1)
         ext = l[0].getMetaData(config.data.namespace, 'extension')
         for f in config.data.args:
             # A filename was provided. Strip the extension.
             output = ".".join((os.path.splitext(f)[0], ext))
+            if os.path.exists(output):
+                logger.error("Output file %s already exists. Remove it before proceeding.", output)
+                continue
             logging.warn("Converting %s into %s", f, output)
             c.load_package(f)
             # FIXME: could trigger events?
-            c.apply_export_filter(l[0], output)
+            c.apply_export_filter(c.package, l[0], output)
+        c.on_exit()
         sys.exit(0)
 
     # First time configuration
@@ -248,14 +252,13 @@ Aborting.""", config.data.path[d])
     except Exception as e:
         logging.warn("Got exception. Stopping services...", exc_info=True)
 
-        from gi.repository import Gtk
         if logfile is not None:
             d = Gtk.MessageDialog(None,
                                   Gtk.DialogFlags.MODAL,
                                   Gtk.MessageType.ERROR,
                                   Gtk.ButtonsType.OK,
-                                  _("An error occurred."))
-            d.format_secondary_text(_("You can inform the Advene developers by sending the file\n %s\n to support@advene.org, along with a description of how the bug occurred.") % logfile)
+                                  "An error occurred.")
+            d.format_secondary_text("You can inform the Advene developers by sending the file\n %s\n to support@advene.org, along with a description of how the bug occurred." % logfile)
 
             def q(*p):
                 Gtk.main_quit()
