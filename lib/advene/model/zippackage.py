@@ -105,7 +105,7 @@ class ZipPackage:
                 # Use the same extension
                 self.uri = uri
                 (n, e) = os.path.splitext(uri)
-                logger.warn("Making a local copy of %s", uri)
+                logger.info("Making a local copy of %s", uri)
                 f, self.file_ = tempfile.mkstemp(e, 'adv')
                 os.write(f, u.read())
                 os.close(f)
