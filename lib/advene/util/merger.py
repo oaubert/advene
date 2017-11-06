@@ -56,7 +56,8 @@ class Differ:
         Structure of returned elements:
         (action_name, source_element, dest_element, action)
         """
-        return itertools.chain(self.diff_schemas(),
+        return itertools.chain(self.diff_meta(),
+                               self.diff_schemas(),
                                self.diff_annotation_types(),
                                self.diff_relation_types(),
                                self.diff_annotations(),
@@ -80,22 +81,33 @@ class Differ:
                                self.diff_queries(),
                                self.diff_resources())
 
-    def check_meta(self, s, d, namespaceid, name):
-        ns=config.data.namespace_prefix[namespaceid]
-        if s.getMetaData(ns, name) != d.getMetaData(ns, name):
+    def check_meta(self, s, d, namespace, name):
+        if s.getMetaData(namespace, name) != d.getMetaData(namespace, name):
             return ('update_meta_%s' % name,
                     s, d,
-                    lambda s, d: self.update_meta(s, d, namespaceid, name) )
+                    lambda s, d: self.update_meta(s, d, namespace, name) )
         else:
             return None
 
-    def update_meta(self, s, d, namespaceid, name):
+    def update_meta(self, s, d, namespace, name):
         """Update the meta attribute name from the given namespace.
         """
-        ns=config.data.namespace_prefix[namespaceid]
-        d.setMetaData(ns, name,
-                      s.getMetaData(ns, name))
+        d.setMetaData(namespace, name, s.getMetaData(namespace, name))
 
+
+    def diff_meta(self, s=None, d=None):
+        """Compares metadata for elements.
+
+        If s is None, compare the package metadata. Else,
+        compare the element metadata.
+        """
+        if s is None and d is None:
+            s = self.source
+            d = self.destination
+        for (namespace, name, value) in s.listMetaData():
+            c = self.check_meta(s, d, namespace, name)
+            if c:
+                yield c
 
     def diff_schemas(self):
         for s in self.source.schemas:
@@ -106,8 +118,7 @@ class Differ:
                 # Present. Check if it was modified
                 if s.title != d.title:
                     yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
-                c=self.check_meta(s, d, 'dc', 'description')
-                if c:
+                for c in self.diff_meta(s, d):
                     yield c
             else:
                 # Same id, but different type. Generate a new type
@@ -124,14 +135,8 @@ class Differ:
                     yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
                 if s.mimetype != d.mimetype:
                     yield ('update_mimetype', s, d, lambda s, d: d.setMimetype(s.mimetype) )
-                c=self.check_meta(s, d, 'dc', 'description')
-                if c:
+                for c in self.diff_meta(s, d):
                     yield c
-
-                for meta in ('color', 'item_color', 'representation', 'completions'):
-                    c=self.check_meta(s, d, config.data.namespace, meta)
-                    if c:
-                        yield c
             else:
                 yield ('new', s, None, lambda s, d: self.copy_annotation_type(s, True) )
 
@@ -146,13 +151,8 @@ class Differ:
                     yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
                 if s.mimetype != d.mimetype:
                     yield ('update_mimetype', s, d, lambda s, d: d.setMimetype(s.mimetype) )
-                c=self.check_meta(s, d, 'dc', 'description')
-                if c:
+                for c in self.diff_meta(s, d):
                     yield c
-                for meta in ('color', 'item_color', 'representation', 'completions'):
-                    c=self.check_meta(s, d, config.data.namespace, meta)
-                    if c:
-                        yield c
                 if s.hackedMemberTypes != d.hackedMemberTypes:
                     yield ('update_member_types', s, d, lambda s, d: d.setHackedMemberTypes( s.hackedMemberTypes ))
             else:
@@ -184,6 +184,8 @@ class Differ:
                     yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
                 if s.tags != d.tags:
                     yield ('update_tags', s, d, lambda s, d: d.setTags( s.tags ))
+                for c in self.diff_meta(s, d):
+                    yield c
             else:
                 yield ('new', s, None, lambda s, d: self.copy_annotation(s, True) )
 
@@ -213,6 +215,8 @@ class Differ:
                     yield ('update_members', s, d, self.update_members)
                 if s.tags != d.tags:
                     yield ('update_tags', s, d, lambda s, d: d.setTags( s.tags ))
+                for c in self.diff_meta(s, d):
+                    yield c
             else:
                 yield ('new', s, None, lambda s, d: self.copy_relation(s, True) )
 
@@ -232,6 +236,8 @@ class Differ:
                     yield ('update_mimetype', s, d, lambda s, d: d.content.setMimetype(s.content.mimetype) )
                 if s.content.data != d.content.data:
                     yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
+                for c in self.diff_meta(s, d):
+                    yield c
             else:
                 yield ('new', s, None, lambda s, d: self.copy_view(s, True) )
 
@@ -248,6 +254,8 @@ class Differ:
                     yield ('update_mimetype', s, d, lambda s, d: d.setMimetype(s.mimetype) )
                 if s.content.data != d.content.data:
                     yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
+                for c in self.diff_meta(s, d):
+                    yield c
             else:
                 yield ('new', s, None, lambda s, d: self.copy_query(s, True) )
 
@@ -296,6 +304,8 @@ class Differ:
         el.author=s.author or self.source.author
         el.date=s.date or self.controller.get_timestamp()
         el.title=s.title or id_
+        for (namespace, name, value) in s.listMetaData():
+            el.setMetaData(namespace, name, value)
         self.destination.schemas.append(el)
         return el
 
@@ -318,8 +328,8 @@ class Differ:
         el.date=s.date or self.controller.get_timestamp()
         el.title=s.title or id_
         el.mimetype=s.mimetype
-        for n in ('color', 'item_color', 'representation', 'completions'):
-            el.setMetaData(config.data.namespace, n, (s.getMetaData(config.data.namespace, n) or ''))
+        for (namespace, name, value) in s.listMetaData():
+            el.setMetaData(namespace, name, value)
         sch.annotationTypes.append(el)
         return el
 
@@ -343,7 +353,8 @@ class Differ:
         el.title=s.title or id_
         el.mimetype=s.mimetype
         sch.relationTypes.append(el)
-        el.setMetaData(config.data.namespace, 'color', s.getMetaData(config.data.namespace, 'color'))
+        for (namespace, name, value) in s.listMetaData():
+            el.setMetaData(namespace, name, value)
         # Handle membertypes, ensure that annotation types are defined
         for m in s.hackedMemberTypes:
             if m == '':
@@ -406,6 +417,8 @@ class Differ:
         el.content.mimetype=s.content.mimetype
         el.content.data=s.content.data
         el.tags = s.tags
+        for (namespace, name, value) in s.listMetaData():
+            el.setMetaData(namespace, name, value)
         self.destination.annotations.append(el)
         return el
 
@@ -443,6 +456,8 @@ class Differ:
         el.content.data=s.content.data
         el.tags = s.tags
         self.destination.relations.append(el)
+        for (namespace, name, value) in s.listMetaData():
+            el.setMetaData(namespace, name, value)
         #el.title=s.title or ''
         return el
 
@@ -461,6 +476,8 @@ class Differ:
         el.title=s.title or id_
         el.content.mimetype=s.content.mimetype
         el.content.data=s.content.data
+        for (namespace, name, value) in s.listMetaData():
+            el.setMetaData(namespace, name, value)
         self.destination.queries.append(el)
         return el
 
@@ -485,6 +502,8 @@ class Differ:
         # views. Or at least try to signal possible occurrences.
         el.content.mimetype=s.content.mimetype
         el.content.data=s.content.data
+        for (namespace, name, value) in s.listMetaData():
+            el.setMetaData(namespace, name, value)
         self.destination.views.append(el)
         return el
 
