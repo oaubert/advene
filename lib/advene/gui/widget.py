@@ -374,16 +374,6 @@ class AnnotationWidget(GenericColorButtonWidget):
     def draw(self, context, width, height):
         """Draw the widget in the cache pixmap.
         """
-        # c.move_to(0, 0)
-        # c.rel_line_to(0, bheight)
-        # c.rel_line_to(bwidth, 0)
-        # c.rel_line_to(0, -bheight)
-        # if bwidth > 12:
-        #     c.rel_line_to(-4, 0)
-        #     c.rel_line_to(0, 4)
-        #     c.rel_line_to(-(bwidth-8), 0)
-        #     c.rel_line_to(0, -4)
-        #     c.close_path()
         try:
             context.rectangle(0, 0, width, height)
         except MemoryError:
@@ -398,6 +388,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         else:
             color=self.container.get_element_color(self.annotation)
 
+        # color should be a Gdk.Color
         if color is not None:
             rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, self.alpha)
         else:
@@ -440,8 +431,9 @@ class AnnotationWidget(GenericColorButtonWidget):
             if self.annotation.content.data:
                 try:
                     s = Rsvg.Handle.new_from_data(self.annotation.content.data.encode('utf-8'))
+                    # Resize to fit widget height
                     scale = 1.0 * height / s.get_dimensions().height
-                    context.set_matrix(cairo.Matrix( scale, 0, 0, scale, 0, 0 ))
+                    context.transform(cairo.Matrix(scale, 0, 0, scale, 0, 0))
                     s.render_cairo(context)
                 except Exception:
                     logger.error("Error when rendering SVG timeline component %s", exc_info=True)
