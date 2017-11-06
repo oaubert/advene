@@ -903,9 +903,8 @@ class TimeLine(AdhocView):
         """Update the display when playing is restricted to a type.
         """
         at=context.globals['annotationtype']
-        for w in self.legend.get_children():
-            if hasattr(w, 'set_playing'):
-                w.set_playing(w.annotationtype == at)
+        for w in self.annotationtype_widgets.values():
+            w.set_playing(w.annotationtype == at)
         return True
 
     def bookmark_highlight_handler(self, context, parameters):
@@ -2842,51 +2841,13 @@ class TimeLine(AdhocView):
             self.scale_layout.queue_resize()
         return False
 
-    def resize_legend_widget(self, layout):
-        width=120
-        for c in layout.get_children():
-            if not isinstance(c, AnnotationTypeWidget):
-                continue
-            width=max(width, c.width or 5)
-
-        def resize(b, w):
-            if isinstance(b, AnnotationTypeWidget):
-                b.width=w
-                b.update_widget()
-            return True
-
-        def move_nav(b, w):
-            """Move next and prev navigation buttons.
-            """
-            y=layout.child_get_property(b, 'y')
-            if hasattr(b, 'next'):
-                layout.move(b, w + 32 , y)
-            elif hasattr(b, 'prev'):
-                layout.move(b, w + 20, y)
-            return True
-
-        # Resize all buttons to fit the largest
-        if width > 10:
-            layout.foreach(resize, width)
-            # Reposition the next, prev buttons
-            layout.foreach(move_nav, width)
-
-        if layout.get_parent() is not None:
-            p = layout.get_parent().get_parent()
-            if p is not None:
-                p.set_position (width + 60)
-
     def restrict_playing(self, at, widget=None):
         """Restrict playing to the given annotation-type.
 
         Widget should be the annotation-type widget for at.
         """
         if widget is None:
-            l=[ w
-                for w in self.legend.get_children()
-                if isinstance(w, AnnotationTypeWidget) and w.annotationtype == at ]
-            if l:
-                widget=l[0]
+            widget = self.annotationtype_widgets.get(at, None)
         # Restrict playing to this annotation-type
         if widget is not None and widget.playing:
             # toggle the playing state
@@ -2977,40 +2938,71 @@ class TimeLine(AdhocView):
                 return True
             return False
 
+        self.annotationtype_widgets = {}
         for t in self.annotationtypes:
-            b=AnnotationTypeWidget(annotationtype=t, container=self)
+            hbox = Gtk.HBox()
+
+            # At the right of the annotation type : prev/next buttons
+            nav=Gtk.Arrow(Gtk.ArrowType.LEFT, Gtk.ShadowType.IN)
+            nav.set_size_request(12, self.button_height)
+            nav.annotationtype=t
+            nav.set_tooltip_text(_('Goto previous annotation'))
+            eb=Gtk.EventBox()
+            eb.connect('button-press-event', navigate, 'prev', t)
+            eb.add(nav)
+            eb.prev=True
+            hbox.pack_start(eb, False, False, 0)
+
+            nav=Gtk.Arrow(Gtk.ArrowType.RIGHT, Gtk.ShadowType.IN)
+            nav.set_size_request(12, self.button_height)
+            nav.annotationtype=t
+            nav.set_tooltip_text(_('Goto next annotation'))
+            eb=Gtk.EventBox()
+            eb.connect('button-press-event', navigate, 'next', t)
+            eb.add(nav)
+            eb.next=True
+            hbox.pack_start(eb, False, False, 0)
+
+            b = AnnotationTypeWidget(annotationtype=t, container=self)
+            self.annotationtype_widgets[t] = b
             b.set_tooltip_text(_("From schema %s") % self.controller.get_title(t.schema))
             y_position = self.layer_position.get(t)
             if y_position is None:
                 logger.error("Type %s not in layer_position (%s)", t.id, list(self.layer_position.keys()))
                 continue
-            layout.put (b, 20, y_position)
             b.update_widget()
-            b.show_all()
             b.connect('key-press-event', annotationtype_keypress_handler, t)
             b.connect('button-press-event', annotationtype_buttonpress_handler, t)
 
+            def set_playing(b, v):
+                if v:
+                    f='noplay.png'
+                else:
+                    f='play.png'
+                b.get_children()[0].set_from_file(config.data.advenefile( ( 'pixmaps', f) ))
+                return True
+
+            # At the left of the annotation type : restrict_playing button
+            p = get_pixmap_button('play.png', restrict_playing, t, b)
+            p.get_style_context().add_class('restrict_playing_button')
+            p.set_playing = set_playing.__get__(p)
+            p.annotationtype=t
+            p.set_size_request(20, self.button_height)
+            p.set_tooltip_text(_('Restrict playing to this annotation-type'))
+
+            hbox.pack_start(p, False, False, 0)
+            hbox.pack_start(b, False, False, 0)
+
             def focus_in(button, event):
-                for w in layout.get_children():
-                    if isinstance(w, AnnotationTypeWidget) and w.annotationtype.schema == button.annotationtype.schema:
+                for w in self.annotationtype_widgets.values():
+                    if w.annotationtype.schema == button.annotationtype.schema:
                         w.set_highlight(True)
                 self.set_annotation(button.annotationtype)
-
-                a=self.legend.get_vadjustment()
-                y=self.legend.child_get_property(button, 'y')
-                if y < a.get_value():
-                    pos=max(a.get_lower(), y)
-                elif y > a.get_value() + a.get_page_size():
-                    pos=min(a.get_upper() - a.get_page_size(), y)
-                else:
-                    pos=None
-                if pos is not None:
-                    a.set_value(pos)
                 return False
 
             def focus_out(button, event):
-                for w in layout.get_children():
-                    if isinstance(w, AnnotationTypeWidget) and w.highlight:
+                for w in self.annotationtype_widgets.values():
+                    if w.highlight:
                         w.set_highlight(False)
                 return False
 
@@ -3032,45 +3024,7 @@ class TimeLine(AdhocView):
 
             height=max (height, y_position + 3 * self.button_height)
 
-            def set_playing(b, v):
-                if v:
-                    f='noplay.png'
-                else:
-                    f='play.png'
-                b.get_children()[0].set_from_file(config.data.advenefile( ( 'pixmaps', f) ))
-                return True
-
-            # At the left of the annotation type : restrict_playing button
-            p=get_pixmap_button('play.png', restrict_playing, t, b)
-            p.get_style_context().add_class('restrict_playing_button')
-            p.set_playing = set_playing.__get__(p)
-            p.annotationtype=t
-            p.set_size_request(20, self.button_height)
-            p.set_tooltip_text(_('Restrict playing to this annotation-type'))
-            layout.put (p, 0, y_position)
-
-            # At the right of the annotation type : prev/next buttons
-            nav=Gtk.Arrow(Gtk.ArrowType.LEFT, Gtk.ShadowType.IN)
-            nav.set_size_request(16, self.button_height)
-            nav.annotationtype=t
-            nav.set_tooltip_text(_('Goto previous annotation'))
-            eb=Gtk.EventBox()
-            eb.connect('button-press-event', navigate, 'prev', t)
-            eb.add(nav)
-            eb.prev=True
-            # Put it in an arbitrary location. It will be moved by resize_legend_widget
-            layout.put (eb, 102, y_position)
-
-            nav=Gtk.Arrow(Gtk.ArrowType.RIGHT, Gtk.ShadowType.IN)
-            nav.set_size_request(16, self.button_height)
-            nav.annotationtype=t
-            nav.set_tooltip_text(_('Goto next annotation'))
-            eb=Gtk.EventBox()
-            eb.connect('button-press-event', navigate, 'next', t)
-            eb.add(nav)
-            eb.next=True
-            # Put it in an arbitrary location. It will be moved by resize_legend_widget
-            layout.put (eb, 112, y_position)
+            layout.put(hbox, 0, y_position)
 
         # Add the 'New type' button at the end
         b=Gtk.Button()
@@ -3096,7 +3050,6 @@ class TimeLine(AdhocView):
         # Set a default size. We will resize it anyway.
         layout.set_size(200, height)
         layout.show()
-        self.resize_legend_widget(layout)
         return
 
     def get_full_widget(self):
