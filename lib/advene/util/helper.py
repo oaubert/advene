@@ -627,13 +627,14 @@ def get_annotations_statistics(annotations, format='text'):
         'total': total_duration
     }
     # Determine distinct values. We split fields against commas
-    distinct_values = collections.Counter(itertools.chain.from_iterable(a.content.data.split(',') for a in annotations))
+    # FIXME: this should be a specific content-type (application/x-advene-keywords)
+    distinct_values = collections.Counter(itertools.chain.from_iterable(re.split('\s*,\s*', a.content.data) for a in annotations))
     res['distinct_values_count'] = distinct_values_count = len(distinct_values)
     if distinct_values_count < 20:
         res['distinct_values'] = distinct_values
         res['distinct_values_repr'] = "\n".join("\t%s: %s" % (k.replace('\n', '\\n'), distinct_values[k]) for k in sorted(distinct_values.keys()))
     else:
-        res['distinct_values'] = set()
+        res['distinct_values'] = []
         res['distinct_values_repr'] = ""
 
     if format == 'text':
