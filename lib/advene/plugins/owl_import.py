@@ -137,6 +137,7 @@ class OWLImporter(GenericImporter):
             title = get_label(graph, s, schema_id)
             description = get_comment(graph, s)
             schema = self.create_schema(schema_id, title=title, description=description)
+            schema.setMetaData(config.data.namespace, "source_uri", str(s))
             if not self.progress(progress, "Creating schema %s" % schema.title):
                 break
             for atnode in graph.objects(s, AO.term('hasAnnotationType')):
@@ -144,6 +145,7 @@ class OWLImporter(GenericImporter):
                 label = get_label(graph, atnode, at_id)
                 description = get_comment(graph, atnode)
                 at = self.create_annotation_type(schema, at_id, title=label, description=description)
+                at.setMetaData(config.data.namespace, "source_uri", str(atnode))
                 values = [ str(t[0])
                            for t in graph.query(PREFIX + """SELECT ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" )}""" % str(atnode)) ]
                 if values:
