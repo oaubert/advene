@@ -489,9 +489,9 @@ class Rule(EtreeMixin):
             if catalog.is_event(name):
                 self.event=Event(name)
             else:
-                raise Exception("Undefined Event name: %s" % name)
+                logger.warn("Undefined Event name: %s" % name)
         elif len(eventnodes) == 0:
-            raise Exception("No event associated to rule %s" % self.name)
+            logger.warn("No event associated to rule %s" % self.name)
         else:
             raise Exception("Multiple events are associated to rule %s" % self.name)
 
