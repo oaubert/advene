@@ -456,7 +456,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             slant=cairo.FONT_SLANT_ITALIC
         else:
             slant=cairo.FONT_SLANT_NORMAL
-        context.select_font_face("Helvetica",
+        context.select_font_face("sans-serif",
                                  slant, cairo.FONT_WEIGHT_NORMAL)
         context.set_font_size(config.data.preferences['timeline']['font-size'])
 
