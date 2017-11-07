@@ -569,7 +569,7 @@ class Text(Rectangle):
 
     def render(self, context, invert=False):
         self.render_setup(context, invert)
-        context.select_font_face("Helvetica", cairo.FONT_SLANT_NORMAL,
+        context.select_font_face("sans-serif", cairo.FONT_SLANT_NORMAL,
                                  cairo.FONT_WEIGHT_NORMAL)
         context.set_font_size(self.textsize)
 
