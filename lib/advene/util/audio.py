@@ -19,13 +19,14 @@
 import logging
 logger = logging.getLogger(__name__)
 
-import advene.core.config as config
-
-import subprocess
-import signal
 import os
-import sys
+import signal
+import subprocess
 import urllib.request, urllib.parse, urllib.error
+
+import advene.core.config as config
+import advene.util.helper as helper
+
 
 if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
@@ -51,6 +52,8 @@ except ImportError:
     Gst=None
 
 import advene.core.config as config
+
+APLAY = helper.find_in_path('aplay')
 
 def subprocess_setup():
     # Python installs a SIGPIPE handler by default. This is usually not what
@@ -85,7 +88,7 @@ class SoundPlayer:
 
         It ignore the volume and balance parameters.
         """
-        pid=subprocess.Popen( [ '/usr/bin/aplay', '-q', fname ], preexec_fn=subprocess_setup)
+        subprocess.Popen( [ APLAY, '-q', fname ], preexec_fn=subprocess_setup)
         signal.signal(signal.SIGCHLD, self.handle_sigchld)
         return True
 
@@ -131,6 +134,6 @@ class SoundPlayer:
     elif config.data.os == 'darwin':
         play=macosx_play
     else:
-        if not os.path.exists('/usr/bin/aplay'):
-            logger.warn("Error: aplay is not installed. Advene will be unable to play sounds.")
+        if not APLAY:
+            logger.error("Error: cannot find aplay. Advene will be unable to play sounds.")
         play=linux_play
