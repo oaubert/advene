@@ -2075,10 +2075,7 @@ class ShapeEditor(object):
             w.set_transient_for(tb.get_toplevel())
             w.set_type_hint(Gdk.WindowTypeHint.TOOLBAR)
             w.set_modal(True)
-            w.resize(20, 150)
-            alloc = tb.get_allocation()
-            p = tb.get_toplevel().get_position()
-            w.move(alloc.x + p[0], alloc.y + p[1])
+            w.move(*tb.translate_coordinates(tb.get_toplevel(), 0, 0))
             w.show_all()
             def button_press_event(wid, event):
                 wid.destroy()
@@ -2127,10 +2124,7 @@ class ShapeEditor(object):
             w.set_type_hint(Gdk.WindowTypeHint.TOOLBAR)
             w.set_modal(True)
             bar.show_all()
-            w.resize(20, 200)
-            alloc = tb.get_allocation()
-            p = tb.get_toplevel().get_position()
-            w.move(alloc.x + p[0], alloc.y + p[1])
+            w.move(*tb.translate_coordinates(tb.get_toplevel(), 0, 0))
             w.show_all()
             def button_press_event(wid, event):
                 wid.destroy()
