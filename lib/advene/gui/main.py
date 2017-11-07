@@ -1415,12 +1415,12 @@ class AdveneGUI(object):
             gtk_color=name2color(colname)
         except:
             gtk_color=None
-        d=Gtk.ColorSelectionDialog(_("Choose a color"))
+        d = Gtk.ColorSelectionDialog(_("Choose a color"), parent=self.gui.win)
         if gtk_color:
-            d.colorsel.set_current_color(gtk_color)
+            d.get_color_selection().set_current_color(gtk_color)
         res=d.run()
         if res == Gtk.ResponseType.OK:
-            col=d.colorsel.get_current_color()
+            col=d.get_color_selection().get_current_color()
             element.setMetaData(config.data.namespace, 'color', "string:#%04x%04x%04x" % (col.red,
                                                                                            col.green,
                                                                                            col.blue))
