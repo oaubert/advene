@@ -93,18 +93,12 @@ class SoundPlayer:
         return True
 
     def win32_play(self, fname, volume=100, balance=0):
-        """Play the given file. Requires pySoundPlayer.exe.
+        """Play the given file.
 
         It ignore the volume and balance parameters.
         """
-        pathsp = os.path.sep.join((config.data.path['advene'],'pySoundPlayer.exe'))
-        if not os.path.exists(pathsp):
-            pathsp = os.path.sep.join((config.data.path['advene'],'Win32SoundPlayer','pySoundPlayer.exe'))
-        if os.path.exists(pathsp):
-            pid=subprocess.Popen( [ pathsp, fname ] )
-            #no SIGCHLD handler for win32
-        else:
-            logger.error("pySoundPlayer.exe can not be found. Advene will be unable to play sounds.")
+        import winsound
+        winsound.PlaySound(fname, winsound.SND_FILENAME)
         return True
 
     def macosx_play(self, fname, volume=100, balance=0):
@@ -127,11 +121,12 @@ class SoundPlayer:
 
     if Gst is not None:
         play = gst_play
-        logger.warn("Using gstreamer to play sounds")
+        logger.info("Using gstreamer to play sounds")
     elif config.data.os == 'win32':
         play=win32_play
-        logger.warn("Using win32_player to play sounds (may not be present)")
+        logger.info("Using winsound to play sounds")
     elif config.data.os == 'darwin':
+        logger.info("Using AppKit to play sounds")
         play=macosx_play
     else:
         if not APLAY:
