@@ -1688,8 +1688,6 @@ class AdveneGUI(object):
         # time_label width is constant and does not constantly modify
         # the slider available width.
         self.time_label.modify_font(Pango.FontDescription("courier 10"))
-        if config.data.os == 'darwin':
-            self.time_label.set_size_request(90, -1)
         self.time_label.set_time(None)
         eb.add(self.time_label)
 

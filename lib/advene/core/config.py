@@ -593,22 +593,13 @@ class Config(object):
         if len(h) > self.preferences['history-size-limit']:
             self.preferences['history']=h[-self.preferences['history-size-limit']:]
 
-        if self.os == 'darwin':
-            # Force display-caption disabling on darwin.
-            self.preferences['display-caption']=False
-            if not 'forced-svg' in self.player:
-                # Disable by default svg rendering, until we have
-                # found a solution to the performance issue
-                self.player['svg']=False
-                self.player['forced-svg']=True
-        else:
-            # Force once svg to True, to ensure that most people will
-            # have SVG enabled. If they choose to disable it
-            # beforehand through Edit/Preferences, the setting will be
-            # respected.
-            if not 'forced-svg' in self.player:
-                self.player['svg']=True
-                self.player['forced-svg']=True
+        # Force once svg to True, to ensure that most people will
+        # have SVG enabled. If they choose to disable it
+        # beforehand through Edit/Preferences, the setting will be
+        # respected.
+        if not 'forced-svg' in self.player:
+            self.player['svg']=True
+            self.player['forced-svg']=True
         return True
 
     def win32_specific_config(self):

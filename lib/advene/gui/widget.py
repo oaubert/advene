@@ -492,9 +492,6 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         GenericColorButtonWidget.__init__(self, element=annotationtype, container=container)
         self.connect('key-press-event', self.keypress, self.annotationtype)
         self.connect('enter-notify-event', lambda b, e: b.grab_focus() and True)
-        # drag_set_icon_cursor does not work on native Gtk on MacOS X
-        if not (config.data.os == 'darwin' and not os.environ.get('DISPLAY')):
-            self.connect('drag-begin', self._drag_begin)
 
     def set_highlight(self, b):
         self.highlight=b
@@ -586,9 +583,6 @@ class TagWidget(GenericColorButtonWidget):
         self.tag=tag
         self.width=60
         GenericColorButtonWidget.__init__(self, element=tag, container=container)
-        # drag_set_icon_cursor does not work on native Gtk on MacOS X
-        if not (config.data.os == 'darwin' and not os.environ.get('DISPLAY')):
-            self.connect('drag-begin', self._drag_begin)
         self.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
                              config.data.get_target_types('tag'),
                              Gdk.DragAction.LINK)

@@ -339,13 +339,6 @@ def contextual_drag_begin(widget, context, element, controller):
         if widget._drag_begin(widget, context):
             return False
 
-    # set_icon_widget does not work on native Gtk on MacOS X
-    #if config.data.os == 'darwin' and not os.environ.get('DISPLAY'):
-    #    return False
-    # set_icon_widget is broken ATM in recent gtk on win32.
-    #elif config.data.os == 'win32':
-    #    return False
-
     w=Gtk.Window(Gtk.WindowType.POPUP)
     w.set_decorated(False)
     w.get_style_context().add_class('advene_drag_icon')
