@@ -175,6 +175,7 @@ class PackageImporter(AdhocView):
                         # Since we copied the annotation type before, copy_annotation should use the translated name
                         new_a = differ.copy_annotation(a, generate_id=True)
                         self.controller.notify('AnnotationCreate', annotation=new_a, immediate=True, batch=batch_id)
+            self.close()
             return True
 
         def select_all(b):
