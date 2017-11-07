@@ -55,7 +55,6 @@ class ShotValidation(AdhocView):
 
         self.annotationtype=annotationtype
         self.widget = self.build_widget()
-        self.reparent_done()
 
     def set_annotationtype(self, at):
         self._annotationtype=at
