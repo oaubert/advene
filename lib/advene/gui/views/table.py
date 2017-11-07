@@ -479,10 +479,7 @@ class AnnotationTable(AdhocView):
     def row_activated_cb(self, widget, path, view_column):
         """Edit the element on Return or double click
         """
-        ann = self.get_selected_node ()
-        if ann is not None:
-            self.controller.gui.edit_element(ann)
-            return True
+        widget.set_cursor(path, self.columns['content'], True)
         return False
 
     def set_time(self, attr):
@@ -507,12 +504,18 @@ class AnnotationTable(AdhocView):
 
 
     def tree_view_key_cb(self, widget=None, event=None):
-        if event.keyval == Gdk.KEY_space or (event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK):
-            # Space or Control-return: goto annotation
+        if event.keyval == Gdk.KEY_space:
+            # Space: goto annotation
             ann = self.get_selected_node ()
             if ann is not None:
                 self.controller.update_status (status="seek", position=ann.fragment.begin)
                 self.controller.gui.set_current_annotation(ann)
+                return True
+        elif event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+            # Control-return: edit annotation
+            ann = self.get_selected_node ()
+            if ann is not None:
+                self.controller.gui.edit_element(ann)
                 return True
         elif event.keyval == Gdk.KEY_less and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Control-< : set begin time
