@@ -4612,7 +4612,7 @@ Image cache information: %(imagecache)s
             os.system('open "%s"' % d)
         else:
             # Linux is more problematic...
-            for p in ('kfmclient', 'gnome-open', 'xdg-open'):
+            for p in ('xdg-open', 'gnome-open', 'kfmclient'):
                 prg = helper.find_in_path(p)
                 if prg is not None:
                     if p == 'kfmclient':
