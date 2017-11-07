@@ -34,6 +34,7 @@ from gettext import gettext as _
 
 from gi.repository import Gtk
 from gi.repository import GObject
+from gi.repository import Pango
 
 from advene.gui.util import dialog
 from advene.gui.views import AdhocView
@@ -133,9 +134,10 @@ class PackageImporter(AdhocView):
 
 
 
-        vbox.pack_start(Gtk.Label(_("Import annotations from %(source)s into %(dest)s") % {'source': self.sourcepackage.uri,
-                                                                                           'dest': self.destpackage.uri}),
-                                  False, False, 0)
+        label = Gtk.Label(_("Import annotations from %(source)s into %(dest)s") % {'source': self.sourcepackage.uri,
+                                                                                   'dest': self.destpackage.uri})
+        label.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
+        vbox.pack_start(label, False, False, 0)
 
         hbox = Gtk.HBox()
         self.suffix_entry = Gtk.Entry()
