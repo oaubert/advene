@@ -161,6 +161,8 @@ class PackageImporter(AdhocView):
                 dialog.message_dialog(_("The suffix cannot be empty."), icon=Gtk.MessageType.ERROR)
                 return True
 
+            annotation_count = 0
+            type_count = 0
             # Let's use differ methods to copy elements
             differ = Differ(source=self.sourcepackage, destination=self.destpackage, controller=self.controller)
             batch_id=object()
@@ -168,13 +170,16 @@ class PackageImporter(AdhocView):
                 if l[self.mergerview.COLUMN_APPLY]:
                     source_at = l[self.mergerview.COLUMN_ELEMENT]
                     logger.debug("Copying %s (%d annotations)", source_at.title, len(source_at.annotations))
+                    type_count += 1
                     dest_at = differ.copy_annotation_type(source_at, generate_id=True)
                     dest_at.title = "%s %s" % (dest_at.title, suffix)
                     self.controller.notify('AnnotationTypeCreate', annotationtype=dest_at, immediate=True, batch=batch_id)
                     for a in source_at.annotations:
+                        annotation_count += 1
                         # Since we copied the annotation type before, copy_annotation should use the translated name
                         new_a = differ.copy_annotation(a, generate_id=True)
                         self.controller.notify('AnnotationCreate', annotation=new_a, immediate=True, batch=batch_id)
+            logger.info(_("Copied %d annotations from %d types"), annotation_count, type_count)
             self.close()
             return True
 
