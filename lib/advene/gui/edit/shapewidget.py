@@ -1382,11 +1382,13 @@ class ShapeDrawer:
     @type widget: Gtk.Widget
 
     """
-    def __init__(self, callback=None, background=None):
+    def __init__(self, callback=None, background=None, default_size=None):
         """
         @param callback: the callback method
         @param background: an optional background image
         @type background: GdkPixbuf.Pixbuf
+        @param default_size: default size if it cannot be determined from background
+        @type default_size: (w, h) tuple
         """
         self.callback = callback or self.default_callback
 
@@ -1426,11 +1428,22 @@ class ShapeDrawer:
                                | Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.POINTER_MOTION_HINT_MASK | Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK )
 
         self.background=None
-        # FIXME: Hardcoded dimensions are bad.
-        self.canvaswidth=320
-        self.canvasheight=200
         if background:
-            self.set_background(background, reset_dimensions=True)
+            self.canvaswidth = background.get_width()
+            self.canvasheight = background.get_height()
+            if self.canvaswidth < 200 or self.canvasheight < 200:
+                self.canvaswidth = 2 * self.canvaswidth
+                self.canvasheight = 2 * self.canvasheight
+            self.set_background(background)
+        else:
+            if default_size is not None:
+                self.canvaswidth = default_size[0]
+                self.canvasheight = default_size[1]
+            else:
+                # Use hardcoded values as last fallback
+                self.canvaswidth = 320
+                self.canvasheight = 200
+        logger.debug("ShapeDrawer.set_size_request (%d, %d)", self.canvaswidth, self.canvasheight)
         self.widget.set_size_request(self.canvaswidth, self.canvasheight)
 
     def default_callback(self, shape):
@@ -1443,6 +1456,7 @@ class ShapeDrawer:
         """
         w = pixbuf.get_width()
         h = pixbuf.get_height()
+        logger.debug("set_background (%d, %d) Canvas: (%d, %d)", w, h, self.canvaswidth, self.canvasheight)
         if w != self.canvaswidth or h != self.canvasheight:
             # Mismatching dimensions. Do something.
             if reset_dimensions:
@@ -1454,7 +1468,7 @@ class ShapeDrawer:
                 self.widget.set_size_request(self.canvaswidth, self.canvasheight)
             else:
                 # Resize background pixbuf
-                pixbuf=pixbuf.scale_simple(self.canvaswidth, self.canvasheight, GdkPixbuf.InterpType.BILINEAR)
+                pixbuf = pixbuf.scale_simple(self.canvaswidth, self.canvasheight, GdkPixbuf.InterpType.BILINEAR)
         self.background = pixbuf
         self.plot()
 
@@ -1883,10 +1897,10 @@ class ShapeEditor(object):
 
     This component provides an example of using ShapeWidget.
     """
-    def __init__(self, background=None, icon_dir=None):
+    def __init__(self, background=None, icon_dir=None, default_size=None):
         if isinstance(background, Gtk.Image):
             background = background.get_pixbuf()
-        self.drawer = ShapeDrawer(background=background)
+        self.drawer = ShapeDrawer(background=background, default_size=default_size)
         self.shapes = [ Rectangle, Ellipse, Line, Text, Path ]
 
         self.colors = COLORS
