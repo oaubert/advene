@@ -780,7 +780,12 @@ class TimeLine(AdhocView):
 
     def get_widget_for_annotation (self, annotation):
         return self.annotation_widgets.get(annotation)
-        return None
+
+    def delete_annotation_widget(self, annotation):
+        w = self.annotation_widgets.get(annotation)
+        if w is not None:
+            w.destroy()
+            del self.annotation_widgets[w]
 
     def scroll_to_annotation(self, annotation):
         """Scroll the view to put the annotation in the middle.
@@ -1015,10 +1020,10 @@ class TimeLine(AdhocView):
             if self.options['autoscroll'] == 3:
                 self.scroll_to_annotation(annotation)
             return True
-        if event == 'AnnotationDeactivate' and annotation in l:
+        elif event == 'AnnotationDeactivate' and annotation in l:
             self.desactivate_annotation(annotation)
             return True
-        if event == 'AnnotationCreate' and annotation in l:
+        elif event == 'AnnotationCreate' and annotation in l:
             b=self.get_widget_for_annotation(annotation)
             if b is not None:
                 # It was already created (for instance by the code
@@ -1029,15 +1034,12 @@ class TimeLine(AdhocView):
             if b is not None:
                 b.grab_focus()
             return True
-
-        b = self.get_widget_for_annotation(annotation)
-        logger.warn("update_annotation %s %s", event, annotation)
-        if not b:
-            return True
-        if event == 'AnnotationEditEnd':
-            self.update_button (b)
+        elif event == 'AnnotationEditEnd':
+            b = self.get_widget_for_annotation(annotation)
+            if b is not None:
+                self.update_button (b)
         elif event == 'AnnotationDelete':
-            b.destroy()
+            self.delete_annotation_widget(annotation)
         else:
             logger.warn("Unknown event %s" % event)
         return True
