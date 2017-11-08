@@ -76,6 +76,7 @@ class QuickviewBar(Gtk.HBox):
         self.pack_start(self.end, False, True, 0)
 
     def set_text(self, s, progress=0):
+        logger.debug("quickview.set_text %s", s)
         self.begin.set_text("")
         self.end.set_text("")
         self.content.set_text(s)
@@ -218,6 +219,11 @@ class TimeLine(AdhocView):
             self.annotationtypes_selection = None
         self.annotationtypes = annotationtypes
         self.list = None
+
+        # Dictionaries holding a correspondance between an element and its representation.
+        # It assumes that there is at more 1 representation for each element.
+        self.annotationtype_widgets = {}
+        self.annotation_widgets = {}
 
         self.layout = Gtk.Layout ()
 
@@ -737,15 +743,22 @@ class TimeLine(AdhocView):
         self.autoscroll_choice.set_active(v)
         return True
 
-    def update_layer_position(self):
+    def update_layer_position(self, new_at=None):
         """Update the layer_position attribute
 
+        If new_at is specify, then just add the new_at annotation type
+        at the end of the legend.
         """
         s = config.data.preferences['timeline']['interline-height']
         h = 0
-        for at in self.annotationtypes:
-            self.layer_position[at] = h
-            h += self.button_height + s
+        if new_at:
+            # Only adding a new annotation type. Add it at the end.
+            p = max(self.layer_position.values())
+            self.layer_position[new_at] = p + self.button_height + s
+        else:
+            for at in self.annotationtypes:
+                self.layer_position[at] = h
+                h += self.button_height + s
 
     def refresh(self, *p):
         self.update_model(self.controller.package, partial_update=False)
@@ -767,13 +780,8 @@ class TimeLine(AdhocView):
         return False
 
     def get_widget_for_annotation (self, annotation):
-        bs = [ b
-               for b in self.layout.get_children()
-               if hasattr (b, 'annotation') and b.annotation == annotation ]
-        if bs:
-            return bs[0]
-        else:
-            return None
+        return self.annotation_widgets.get(annotation)
+        return None
 
     def scroll_to_annotation(self, annotation):
         """Scroll the view to put the annotation in the middle.
@@ -928,11 +936,9 @@ class TimeLine(AdhocView):
 
     def tag_update(self, context, parameters):
         tag=context.evaluateValue('tag')
-        bs = [ b
-               for b in self.layout.get_children()
-               if hasattr (b, 'annotation') and tag in b.annotation.tags ]
-        for b in bs:
-            self.update_button(b)
+        for b in self.annotation_widgets.values():
+            if tag in b.annotation.tags:
+                self.update_button(b)
         return True
 
     def unregister_callback (self, controller=None):
@@ -1025,15 +1031,14 @@ class TimeLine(AdhocView):
                 b.grab_focus()
             return True
 
-        b = self.get_widget_for_annotation (annotation)
+        b = self.get_widget_for_annotation(annotation)
+        logger.warn("update_annotation %s %s", event, annotation)
         if not b:
             return True
         if event == 'AnnotationEditEnd':
             self.update_button (b)
         elif event == 'AnnotationDelete':
             b.destroy()
-        elif event == 'AnnotationCreate':
-            pass
         else:
             logger.warn("Unknown event %s" % event)
         return True
@@ -1041,17 +1046,20 @@ class TimeLine(AdhocView):
     def update_annotationtype(self, annotationtype=None, event=None):
         """Update an annotationtype's representation.
         """
+        logger.debug("update_annotationtype %s %s", event, annotationtype.id)
         if event == 'AnnotationTypeCreate':
             self.annotationtypes.append(annotationtype)
-            self.update_model(partial_update=True)
+            self.update_layer_position(new_at=annotationtype)
+            self.update_legend_widget(self.legend)
+            # Populate with new annotations
+            self.populate(annotations=annotationtype.annotations)
         elif event == 'AnnotationTypeEditEnd':
-            self.legend.foreach(self.legend.remove)
             self.update_legend_widget(self.legend)
             self.legend.show_all()
             # Update also its annotations, since representation or
             # color may have changed
-            for b in self.layout.get_children():
-                if hasattr (b, 'annotation') and b.annotation.type == annotationtype:
+            for b in self.annotation_widgets.values():
+                if b.annotation.type == annotationtype:
                     self.update_button (b)
         elif event == 'AnnotationTypeDelete':
             try:
@@ -1914,7 +1922,15 @@ class TimeLine(AdhocView):
         if annotation.fragment.begin > self.maximum or annotation.fragment.end < self.minimum:
             # Not displayed
             return None
+        if config.data.livedebug:
+            logger.debug("create_annotation_widget for %s", annotation.id, stack_info=True)
+        b = self.get_widget_for_annotation(annotation)
+        if b is not None:
+            logger.warn("There is already 1 representation for annotation %s", annotation.id)
+            return b
+
         b = AnnotationWidget(annotation=annotation, container=self)
+        self.annotation_widgets[annotation] = b
         # Put at a default position.
         self.layout.put(b, 0, 0)
         b.show()
@@ -2050,7 +2066,7 @@ class TimeLine(AdhocView):
         l = [ a for a in l if a.type in self.annotationtypes ]
         return l
 
-    def populate (self, callback=None):
+    def populate (self, callback=None, annotations=None):
         """Populate the annotations widget.
 
         Since we do it asynchronously in the idle loop, the callback
@@ -2058,7 +2074,10 @@ class TimeLine(AdhocView):
         widgets creation.
         """
         u2p = self.unit2pixel
-        l = self.get_annotations()
+        l = annotations
+        if l is None:
+            l = self.get_annotations()
+        logger.debug("populate %d annotations", len(l), stack_info=True)
 
         # Use a list so that the counter variable can be modified in
         # the closure.
@@ -2866,6 +2885,9 @@ class TimeLine(AdhocView):
 
         Its content may have changed.
         """
+        # Clear the legend
+        self.legend.foreach(self.legend.remove)
+
         height=0
 
         def navigate(b, event, direction, typ):
@@ -3049,7 +3071,7 @@ class TimeLine(AdhocView):
 
         # Set a default size. We will resize it anyway.
         layout.set_size(200, height)
-        layout.show()
+        layout.show_all()
         return
 
     def get_full_widget(self):
