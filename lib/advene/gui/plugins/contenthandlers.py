@@ -284,7 +284,10 @@ class SVGContentHandler (ContentHandler):
             i = image_from_position(self.controller,
                                     position=self.parent.fragment.begin,
                                     media=self.parent.media)
-            self.view = ShapeEditor(background=i, icon_dir=config.data.advenefile('pixmaps'))
+            vi = self.controller.package.imagecache.video_info
+            self.view = ShapeEditor(background=i,
+                                    icon_dir=config.data.advenefile('pixmaps'),
+                                    default_size=(vi.get('width', 320), vi.get('height', 200)))
 
             def snapshot_update_cb(context, target):
                 if context.globals['media'] != self.parent.media:
