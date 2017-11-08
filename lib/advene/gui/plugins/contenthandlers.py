@@ -211,6 +211,13 @@ class SVGContentHandler (ContentHandler):
             self.sourceview.content_set(self.element.data)
         return True
 
+    def get_background_position(self):
+        """Return the background position, considering the background slider value.
+        """
+        frag = self.parent.fragment
+        pos = self.controller.round_timestamp(frag.begin + int(self.view.background_adj.get_value() * frag.duration))
+        return pos
+
     def drawer_drag_received(self, widget, context, x, y, selection, targetType, time):
         here=None
         url=None
@@ -282,8 +289,7 @@ class SVGContentHandler (ContentHandler):
             def snapshot_update_cb(context, target):
                 if context.globals['media'] != self.parent.media:
                     return True
-                frag = self.parent.fragment
-                pos = self.controller.round_timestamp(frag.begin + int(self.view.background_adj.get_value() * frag.duration))
+                pos = self.get_background_position()
                 if context.globals['position'] == pos:
                     # Refresh image
                     i = image_from_position(self.controller,
@@ -341,9 +347,7 @@ class SVGContentHandler (ContentHandler):
         self.view.toolbar.insert(b, 0)
 
         def update_background(adj):
-            frag = self.parent.fragment
-            pos = self.controller.round_timestamp(frag.begin + int(adj.get_value() * frag.duration))
-            self.controller.update_snapshot(pos)
+            pos = self.get_background_position()
             i = image_from_position(self.controller,
                                     position=pos,
                                     media=self.parent.media)
