@@ -705,9 +705,8 @@ class TimeLine(AdhocView):
 
         # Clear the layouts
         self.layout.foreach(self.layout.remove)
+        self.annotation_widgets = {}
         self.scale_layout.foreach(self.scale_layout.remove)
-        self.legend.foreach(self.legend.remove)
-
         self.layer_position.clear()
         self.update_layer_position()
 
