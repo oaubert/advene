@@ -1579,6 +1579,14 @@ class ShapeDrawer:
                 return o[0], c
         return None, None
 
+    def is_editing(self):
+        return self.feedback_shape is not None
+
+    def cancel_editing(self):
+        self.feedback_shape = None
+        self.mode = ""
+        self.plot()
+
     def add_menuitem(self, menu=None, item=None, action=None, *param, **kw):
         if item is None or item == "":
             i = Gtk.SeparatorMenuItem()
@@ -1928,7 +1936,10 @@ class ShapeEditor(object):
 
     def key_press_event(self, widget, event):
         cl = self.key_mapping.get(event.keyval, None)
-        if isinstance(cl, type) and issubclass(cl, Shape):
+        if event.keyval == Gdk.KEY_Escape and self.drawer.is_editing():
+            self.drawer.cancel_editing()
+            return True
+        elif isinstance(cl, type) and issubclass(cl, Shape):
             # Select the appropriate shape
             self.shape_icon.set_shape(cl)
             self.drawer.shape_class = cl
