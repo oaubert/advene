@@ -749,10 +749,11 @@ class TextImporter(GenericImporter):
         stored_begin = 0
         stored_data = None
         index = 1
-        for l in f:
-            if not self.progress(f.tell() / filesize):
+        while True:
+            l = f.readline()
+            if not l or not self.progress(f.tell() / filesize):
                 break
-            l = str(l.strip(), self.encoding)
+            l = l.strip()
             data = whitespace_re.split(l, 2)
 
             if not data:
