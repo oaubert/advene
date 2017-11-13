@@ -20,7 +20,6 @@
 import logging
 logger = logging.getLogger(__name__)
 
-import os
 from gettext import gettext as _
 from gi.repository import Gdk
 from gi.repository import Gtk
