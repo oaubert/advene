@@ -304,6 +304,7 @@ class Shape(object):
                 else:
                     v=float(v) * context.dimensions[dimindex] / context.svg_dimensions[dimindex]
             res[n]=int(v)
+        logger.debug("xml2coords %s -> %s", attrib, res)
         return res
     xml2coords=staticmethod(xml2coords)
 
@@ -1535,11 +1536,15 @@ class ShapeDrawer:
 
     def configure_cb(self, drawingarea, event=None):
         allocation = drawingarea.get_allocation()
-        self.surface = drawingarea.get_window().create_similar_surface(cairo.CONTENT_COLOR,
-                                                                       allocation.width,
-                                                                       allocation.height)
-        self.plot()
-        return True
+        logger.debug("ShapeDrawer.configure_cb (%d,%d)", allocation.width, allocation.height)
+        if self.surface is None and allocation.width != 1:
+            self.surface = drawingarea.get_window().create_similar_surface(cairo.CONTENT_COLOR,
+                                                                           allocation.width,
+                                                                           allocation.height)
+            self.plot()
+            return True
+        else:
+            return False
 
     def draw_cb(self, drawingarea, context):
         context.set_source_surface(self.surface, 0, 0)
@@ -2036,7 +2041,7 @@ class ShapeEditor(object):
 
         vbox.add(hbox)
 
-        hbox.pack_start(self.drawer.widget, True, True, 0)
+        hbox.pack_start(self.drawer.widget, False, False, 16)
         self.drawer.widget.connect('key-press-event', self.key_press_event)
 
         self.treeview = Gtk.TreeView(self.drawer.objects)
