@@ -91,6 +91,8 @@ LOGGING = {
 }
 for m in os.environ.get('ADVENE_DEBUG', '').split(':'):
     LOGGING['loggers'][m] = { 'level': 'DEBUG' }
+    LOGGING['loggers'][m.replace('.', '_')] = { 'level': 'DEBUG' }
+
 logging.config.dictConfig(LOGGING)
 # Do a forced rollover for the RotatingFileHandler
 for h in logging.root.handlers:
