@@ -785,7 +785,7 @@ class TimeLine(AdhocView):
         w = self.annotation_widgets.get(annotation)
         if w is not None:
             w.destroy()
-            del self.annotation_widgets[w]
+            del self.annotation_widgets[annotation]
 
     def scroll_to_annotation(self, annotation):
         """Scroll the view to put the annotation in the middle.
