@@ -193,13 +193,14 @@ class Player:
         self.imagesink.set_property('force-aspect-ratio', True)
 
         elements=[]
+        if self.imageoverlay is not None:
+            # FIXME: Issue: rsvgoverlay.fit_to_frame expects that the
+            # dimensions of the input buffers match the aspect ratio
+            # of the original video, which is currently not the case.
+            elements.append(Gst.ElementFactory.make('queue', None))
+            elements.append(self.imageoverlay)
         if self.captioner is not None:
             elements.append(self.captioner)
-        if self.imageoverlay is not None:
-            elements.append(Gst.ElementFactory.make('queue', None))
-            elements.append(Gst.ElementFactory.make('videoconvert', None))
-            elements.append(self.imageoverlay)
-            elements.append(Gst.ElementFactory.make('videoconvert', None))
 
         if sink == 'xvimagesink':
             # Imagesink accepts both rgb/yuv and is able to do scaling itself.
