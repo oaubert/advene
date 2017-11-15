@@ -739,7 +739,7 @@ class Player:
         return "../" * p1.count(sep) + p2
 
     def dump_bin(self, bin, depth=0, recurse=-1, showcaps=True):
-        return [ l  for e in reversed(list(bin)) for l in self.dump_element(e, depth, recurse - 1) ]
+        return [ l  for e in reversed(list(bin.iterate_elements())) for l in self.dump_element(e, depth, recurse - 1) ]
 
     def dump_element(self, e, depth=0, recurse=-1, showcaps=True):
         ret=[]
@@ -754,13 +754,13 @@ class Player:
             ret.append( '%s%s (No factory)' % (indentstr, path) )
 
         # print info about each pad
-        for p in e.pads():
+        for p in e.pads:
             name = p.get_name()
 
             # negotiated capabilities
             caps = p.get_current_caps()
             if caps: capsname = caps.get_structure(0).get_name()
-            elif showcaps: capsname = '; '.join(s.to_string() for s in set(p.get_caps()))
+            elif showcaps: capsname = '; '.join(s.to_string() for s in set(p.get_current_caps() or []))
             else: capsname = None
 
             # flags
