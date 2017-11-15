@@ -1791,8 +1791,8 @@ class ShapeDrawer:
                 'version': '1',
                 'preserveAspectRatio': "xMinYMin meet" ,
                 'viewBox': '0 0 %d %d' % size,
-                'width': "%dpt" % size[0],
-                'height': "%dpt" % size[1],
+                'width': "%d" % size[0],
+                'height': "%d" % size[1],
                 'xmlns:xlink': "http://www.w3.org/1999/xlink",
                 # The following xmlns declaration is needed for a
                 # correct rendering in firefox
@@ -1833,12 +1833,12 @@ class ShapeDrawer:
         if m:
             val=int(m.group(1))
             unit=m.group(2)
-            if unit in ('px', 'pt'):
+            if unit in ('px', 'pt', ''):
                 return val
             elif unit == '%':
                 return int(val * 100.0 / self.dimensions[dimindex])
             else:
-                logger.warn('SVG: Unspecified unit for %s', s)
+                logger.warn('SVG: Unknown unit for %s', s)
                 return val
         logger.warn('Unhandled SVG dimension format for %s', s)
         return 0
