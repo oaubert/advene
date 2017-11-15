@@ -1531,6 +1531,8 @@ class AdveneController(object):
         Return False if the edition could not be done.
         Return True if the edition was successful.
         """
+        if not config.data.preferences['completion-quick-fill']:
+            return False
         comps = annotation.ownerPackage._indexer.get_completions("", context=annotation, predefined_only=True)
         try:
             val = comps[index]

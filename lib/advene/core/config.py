@@ -310,6 +310,8 @@ class Config(object):
             'completion-mode': True,
             # Complete with predefined terms only if they are defined
             'completion-predefined-only': False,
+            # Quick entry of predefined values through 1-9 shortcuts
+            'completion-quick-fill': False,
             'text-abbreviations': '',
             # Automatically start the player when loading a media file
             # (either directly or through a package)

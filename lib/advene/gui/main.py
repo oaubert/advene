@@ -4290,7 +4290,8 @@ Image cache information: %(imagecache)s
                         'tts-language', 'tts-encoding', 'tts-engine',
                         'record-actions', 'popup-destination',
                         'timestamp-format', 'default-fps',
-                        'abbreviation-mode', 'text-abbreviations', 'completion-mode', 'completion-predefined-only',
+                        'abbreviation-mode', 'text-abbreviations',
+                        'completion-mode', 'completion-predefined-only', 'completion-quick-fill',
                         'prefer-wysiwyg',
                         'player-shortcuts-in-edit-windows', 'player-shortcuts-modifier',
                         'apply-edited-elements-on-save',
@@ -4460,6 +4461,7 @@ Image cache information: %(imagecache)s
         ew.add_title(_("Text content"))
         ew.add_checkbox(_("Completion mode"), 'completion-mode', _("Enable dynamic completion mode"))
         ew.add_checkbox(_("Predefined terms only"), 'completion-predefined-only', _("If completion is enabled, complete only with predefined terms."))
+        ew.add_checkbox(_("Quick fill"), 'completion-quick-fill', _("For types with predefined completions, use a numeric (1-9) shortcut to fill the annotation with the corresponding completion."))
         ew.add_checkbox(_("Abbreviation mode"), 'abbreviation-mode', _("Enable abbreviation mode"))
         ew.add_text(_("Abbreviations"), 'text-abbreviations', _("Text abbreviations. 1 entry per line. Each line consists of the abbreviation followed by its replacement."))
 
