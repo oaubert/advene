@@ -187,9 +187,10 @@ class Player:
                 self.imageoverlay=Gst.ElementFactory.make(svgelement, 'overlay')
                 self.imageoverlay.props.fit_to_frame = True
             except:
-                pass
+                logger.error("Gstreamer SVG overlay element is not available", exc_info=True)
 
         self.imagesink = Gst.ElementFactory.make(sink, 'sink')
+        self.imagesink.set_property('force-aspect-ratio', True)
 
         elements=[]
         if self.captioner is not None:
@@ -225,6 +226,7 @@ class Player:
         self.video_sink.add_pad(self._video_ghostpad)
 
         self.player.props.video_sink=self.video_sink
+        self.player.props.force_aspect_ratio = True
 
         self.audio_sink = Gst.parse_launch('scaletempo name=scaletempo ! audioconvert ! audioresample ! autoaudiosink')
         self.audio_sink.add_pad(Gst.GhostPad.new('sink', self.audio_sink.get_child_by_name('scaletempo').get_static_pad('sink')))
