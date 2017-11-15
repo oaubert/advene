@@ -206,7 +206,7 @@ class AnnotationTable(AdhocView):
             except (ValueError, TypeError):
                 path = self.last_edited_path
             self.widget.treeview.set_cursor(path,
-                                            self.columns['content'],
+                                            self.columns['id'],
                                             True)
             self.last_edited_path = None
 
@@ -525,6 +525,26 @@ class AnnotationTable(AdhocView):
             # Control-> : set end time
             self.set_time('end')
             return True
+        elif event.keyval in (Gdk.KEY_1,
+                              Gdk.KEY_2,
+                              Gdk.KEY_3,
+                              Gdk.KEY_4,
+                              Gdk.KEY_5,
+                              Gdk.KEY_6,
+                              Gdk.KEY_7,
+                              Gdk.KEY_8,
+                              Gdk.KEY_9):
+            ann, path = self.get_selected_node(with_path=True)
+            if  ann.type.getMetaData(config.data.namespace, "completions"):
+                # Shortcut for 1 key edition
+                index = event.keyval - 48 - 1
+                ret = self.controller.quick_completion_fill_annotation(ann, index)
+                if ret:
+                    self.last_edited_path = path
+                # Gtk.TreePath.new_from_string(path_string)
+                return ret
+            return False
+
         return False
 
     def tree_view_button_cb(self, widget=None, event=None):

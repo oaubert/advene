@@ -706,8 +706,7 @@ class TimeLine(AdhocView):
         # Clear the layouts
         self.layout.foreach(self.layout.remove)
         self.annotation_widgets = {}
-        self.scale_layout.foreach(self.scale_layout.remove)
-        self.layer_position.clear()
+
         self.update_layer_position()
 
         self.draw_marks()
@@ -755,6 +754,7 @@ class TimeLine(AdhocView):
             p = max(self.layer_position.values())
             self.layer_position[new_at] = p + self.button_height + s
         else:
+            self.layer_position.clear()
             for at in self.annotationtypes:
                 self.layer_position[at] = h
                 h += self.button_height + s
@@ -1900,6 +1900,20 @@ class TimeLine(AdhocView):
             # Quick edit
             self.quick_edit(annotation, button=widget)
             return True
+        elif (event.keyval in (Gdk.KEY_1,
+                               Gdk.KEY_2,
+                               Gdk.KEY_3,
+                               Gdk.KEY_4,
+                               Gdk.KEY_5,
+                               Gdk.KEY_6,
+                               Gdk.KEY_7,
+                               Gdk.KEY_8,
+                               Gdk.KEY_9)
+              and annotation.type.getMetaData(config.data.namespace, "completions")):
+            # Shortcut for 1 key edition
+            index = event.keyval - 48 - 1
+            return self.controller.quick_completion_fill_annotation(annotation, index)
+
         return False
 
     def deactivate_all(self):

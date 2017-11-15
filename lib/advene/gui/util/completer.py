@@ -386,7 +386,7 @@ class Indexer:
             self.index[atid]=s
         return True
 
-    def get_completions(self, prefix, context=None):
+    def get_completions(self, prefix, context=None, predefined_only=False):
         """Return the list of possible completions.
 
         element is used as contextual information to refine the
@@ -402,7 +402,7 @@ class Indexer:
             # FIXME: maybe add ids (annotation-types, relations-types, views)
         elif isinstance(context, Annotation):
             s = []
-            if config.data.preferences['completion-predefined-only']:
+            if predefined_only or config.data.preferences['completion-predefined-only']:
                 terms = context.type.getMetaData(config.data.namespace, "completions")
                 if terms:
                     s = self.get_words(terms)

@@ -1524,6 +1524,30 @@ class AdveneController(object):
 
         return an
 
+    def quick_completion_fill_annotation(self, annotation, index):
+        """Quickly edit an annotation by using a completion at the given index.
+
+        Index is a number, usually between 0 and 9
+        Return False if the edition could not be done.
+        Return True if the edition was successful.
+        """
+        comps = annotation.ownerPackage._indexer.get_completions("", context=annotation, predefined_only=True)
+        try:
+            val = comps[index]
+            new_content = helper.title2content(val,
+                                               annotation.content,
+                                               annotation.type.getMetaData(config.data.namespace, "representation"))
+            if new_content is None:
+                logger.error("Cannot update annotation content - too complex representation")
+                return False
+            self.notify('EditSessionStart', element=annotation, immediate=True)
+            annotation.content.data = new_content
+            self.notify('AnnotationEditEnd', annotation=annotation)
+            self.notify('EditSessionEnd', element=annotation)
+        except IndexError:
+            return False
+        return True
+
     def duplicate_annotation(self, annotation):
         """Duplicate an annotation.
         """
