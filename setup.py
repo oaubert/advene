@@ -11,9 +11,8 @@ SCRIPTNAME='advene'
 
 def check_changelog(maindir, version):
     """Check that the changelog for maindir matches the given version."""
-    f=open(os.path.join( maindir, "CHANGES.txt" ), 'r', encoding='utf-8')
-    l=f.readline()
-    f.close()
+    with open(os.path.join( maindir, "CHANGES.txt" ), 'r') as f:
+        l=f.readline()
     if not l.startswith('advene (' + version + ')'):
         log.error("The CHANGES.txt does not seem to match version %s\n%s\nUpdate either the CHANGES.txt or the lib/advene/core/version.py file", version, l)
         sys.exit(1)
