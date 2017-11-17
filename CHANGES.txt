@@ -1,3 +1,47 @@
+advene (3.5) unstable; urgency=medium
+
+  * In Search/Replace dialog for annotations, leaving the search field
+    empty will replace the whole content for all annotations (mainly
+    useful when invoked on a specific type).
+
+  * Information about distinct annotation values is displayed in
+    annotation statistics (accessible in the inspector of the timeline, or
+    through the finder).
+
+  * Merge view:
+    * add a "Type" column to enable element sorting
+    * add a "Selection" button to toggle the selected state on a whole selection
+
+  * New feature: package import (menu File/Import package). It proposes to
+    import selected types and their annotations from another package
+    (without overwriting existing ones). This may be more convenient to
+    integrate work from different annotators.
+
+  * Table view: search-as-you type is disabled, and new shortcuts are
+    used: Return edits the content of the current row in place,
+    Control-Return opens the edit component for the current annotation,
+    and Space plays the player at the annotation position.
+
+  * Timeline view: if more than 2000 annotations are to be displayed, do
+    not display all annotation types by default. Instead, open the dialog
+    so that the user selects the desired annotation types.
+
+  * Quick completion fill: in both Timeline and Table view, a new edition
+    mode is available. If the appropriate option is checked (in
+    Edit/Preferences/Text-related), then pressing a numerical key between
+    1 and 9 will set the content of the currently active annotation to the
+    nth predefined keyword for the given type. In the timeline view, if
+    the cursor is over an annotation type, then pressing a 1-9 key will
+    create a new annotation at the current player time, with the content
+    of the nth predefined keyword.
+
+  * Shot validation: snapshots are scaled according to the available
+    space.
+
+  * The PlayerSet event has been renamed to PlayerSeek
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Fri, 17 Nov 2017 21:01:17 +0100
+
 advene (3.4) unstable; urgency=medium
 
   * A huge memory leak affecting 3.3 (due to python3 migration) has been

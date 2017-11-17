@@ -19,6 +19,6 @@
 """Versioning information.
 """
 
-version='3.4'
-date='20171012'
+version='3.5'
+date='20171117'
 major,minor=[ int(s) for s in version.split('.') ]
