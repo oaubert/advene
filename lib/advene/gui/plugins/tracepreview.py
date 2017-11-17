@@ -75,7 +75,7 @@ class TracePreview(AdhocView):
             'ElementEditCancel': _('Canceling edition'),
             'EditSessionEnd': _('Canceling edition'),
             'ElementEditEnd': _('Ending edition'),
-            'PlayerSet': _('Moving to'),
+            'PlayerSeek': _('Moving to'),
         }
         self.options = {
             'max_size': 8,
@@ -201,7 +201,7 @@ class TracePreview(AdhocView):
                     # content should be of the form pos_bef \n pos
                     #but if it is an old trace, we only got pos
                     poss = txt.split('\n')
-                    if len(poss)>1 and obj_evt.name.find('PlayerSet')>=0:
+                    if len(poss)>1 and obj_evt.name.find('PlayerSeek')>=0:
                         txt=poss[1]
                     else:
                         txt=poss[0]
@@ -324,7 +324,7 @@ class TracePreview(AdhocView):
                     # content should be of the form pos_bef \n pos
                     #but if it is an old trace, we only got pos
                     poss = txt.split('\n')
-                    if len(poss)>1 and obj_evt.name.find('PlayerSet')>=0:
+                    if len(poss)>1 and obj_evt.name.find('PlayerSeek')>=0:
                         txt=poss[1]
                     else:
                         txt=poss[0]

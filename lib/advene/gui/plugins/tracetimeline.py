@@ -68,7 +68,7 @@ INCOMPLETE_OPERATIONS_NAMES = {
             'ElementEditCancel': _('Canceling edition'),
             'EditSessionEnd': _('Canceling edition'),
             'ElementEditEnd': _('Ending edition'),
-            'PlayerSet': _('Moving to'),
+            'PlayerSeek': _('Moving to'),
         }
 
 TYPE_ABREVIATION=DefaultDict(default='U')
@@ -2160,7 +2160,7 @@ class Inspector (Gtk.VBox):
         entetestr = "%s : %s" % (ev_time, n)
         if obj_evt.concerned_object['id']:
             entetestr = entetestr + ' (%s)' % obj_evt.concerned_object['id']
-        elif obj_evt.name=='PlayerSet':
+        elif obj_evt.name=='PlayerSeek':
             # destination time to add
             poss = obj_evt.content.split('\n')
             if len(poss)>1:
@@ -2249,7 +2249,7 @@ class Inspector (Gtk.VBox):
                 # content should be of the form pos_bef \n pos
                 #but if it is an old trace, we only got pos
                 poss = txt.split('\n')
-                if len(poss)>1 and te.find('PlayerSet')>=0:
+                if len(poss)>1 and te.find('PlayerSeek')>=0:
                     txt=poss[1]
                 else:
                     txt=poss[0]

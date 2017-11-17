@@ -69,7 +69,7 @@ class EventAccumulator(AdhocView):
         }
         # ECACatalog event_names et set(())
         self.events_names= ['DurationUpdate','AnnotationBegin','AnnotationEnd','BookmarkHighlight','BookmarkUnhighlight','PackageLoad','PopupDisplay','MediaChange','PackageActivate','PackageSave','ApplicationStart','SnapshotUpdate']
-        self.operations_names = ['AnnotationCreate','AnnotationEditEnd','AnnotationDelete','RelationCreate','AnnotationMerge','AnnotationMove','PlayerStart','PlayerStop','PlayerPause','PlayerResume','PlayerSet','ViewActivation','AnnotationTypeCreate','RelationTypeCreate','RelationTypeDelete','AnnotationTypeDelete','AnnotationTypeEditEnd','RelationTypeEditEnd','ViewCreate','ViewEditEnd']
+        self.operations_names = ['AnnotationCreate','AnnotationEditEnd','AnnotationDelete','RelationCreate','AnnotationMerge','AnnotationMove','PlayerStart','PlayerStop','PlayerPause','PlayerResume','PlayerSeek','ViewActivation','AnnotationTypeCreate','RelationTypeCreate','RelationTypeDelete','AnnotationTypeDelete','AnnotationTypeEditEnd','RelationTypeEditEnd','ViewCreate','ViewEditEnd']
         self.incomplete_operations_names = {
             'EditSessionStart': _('Beginning edition'),
             'ElementEditBegin': _('Beginning edition'),

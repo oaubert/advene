@@ -1154,7 +1154,7 @@ class AdveneGUI(object):
             ( ('RelationTypeCreate', 'RelationTypeEditEnd',
                'RelationTypeDelete'),
               self.relationtype_lifecycle),
-            ("PlayerSet", self.updated_position_cb),
+            ("PlayerSeek", self.updated_position_cb),
             ("PlayerStop", self.player_stop_cb),
             ("PlayerChange", self.updated_player_cb),
             ("ViewActivation", self.on_view_activation),

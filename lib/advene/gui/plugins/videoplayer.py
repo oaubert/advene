@@ -79,7 +79,7 @@ class VideoPlayer(AdhocView):
                          'PlayerStop',
                          'PlayerPause',
                          'PlayerResume',
-                         'PlayerSet',
+                         'PlayerSeek',
                          )
             )
 

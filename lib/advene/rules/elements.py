@@ -1022,7 +1022,7 @@ class ECACatalog:
         'PlayerStop':             _("Player stop"),
         'PlayerPause':            _("Player pause"),
         'PlayerResume':           _("Player resume"),
-        'PlayerSet':              _("Going to a given position"),
+        'PlayerSeek':             _("Play a given position"),
         'PackageLoad':            _("Loading a new package"),
         'PackageActivate':        _("Activating a package"),
         'PackageSave':            _("Saving the package"),

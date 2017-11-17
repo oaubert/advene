@@ -296,7 +296,8 @@ class AdveneController(object):
             'resume': 'PlayerResume',
             'start':  'PlayerStart',
             'stop':   'PlayerStop',
-            'set':    'PlayerSet',
+            'seek':    'PlayerSeek',
+            'seek_relative':    'PlayerSeek',
             }
         self.event_handler.register_action(RegisteredAction(
                 name="Message",
