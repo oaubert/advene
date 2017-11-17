@@ -2964,6 +2964,32 @@ class TimeLine(AdhocView):
             elif event.keyval == Gdk.KEY_space:
                 self.restrict_playing(at, widget)
                 return True
+            elif (event.keyval in (Gdk.KEY_1,
+                                   Gdk.KEY_2,
+                                   Gdk.KEY_3,
+                                   Gdk.KEY_4,
+                                   Gdk.KEY_5,
+                                   Gdk.KEY_6,
+                                   Gdk.KEY_7,
+                                   Gdk.KEY_8,
+                                   Gdk.KEY_9)
+                  and widget.annotationtype.getMetaData(config.data.namespace, "completions")
+                  and config.data.preferences['completion-quick-fill']):
+                index = event.keyval - 48 - 1
+                comps = widget.annotationtype.ownerPackage._indexer.get_completions("", context=widget.annotationtype, predefined_only=True)
+                try:
+                    comps[index]
+                except IndexError:
+                    return False
+                # Create a new annotation
+                el = self.controller.create_annotation(position=int(self.controller.player.current_position_value),
+                                                       type=widget.annotationtype)
+                if el is not None:
+                    b=self.create_annotation_widget(el)
+                    b.show()
+                    # Shortcut for 1 key edition
+                    return self.controller.quick_completion_fill_annotation(el, index)
+
             return False
 
         def annotationtype_buttonpress_handler(widget, event, t):
