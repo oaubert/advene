@@ -154,7 +154,7 @@ def generate_data_files():
         log.warn("""**WARNING** You should generate the locales with "cd po; make mo".""")
     if sys.platform.startswith('linux'):
         # Install specific data files
-        r.append( ( 'share/applications', [ 'debian/advene.desktop' ] ) )
+        r.append( ( 'share/applications', [ 'share/advene.desktop' ] ) )
     return r
 
 myname = "Olivier Aubert"
