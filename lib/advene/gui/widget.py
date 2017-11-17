@@ -560,7 +560,7 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
 
         # Draw the text
         context.set_source_rgba(0, 0, 0, 1)
-        context.select_font_face("Helvetica",
+        context.select_font_face("sans-serif",
                                  cairo.FONT_SLANT_ITALIC, cairo.FONT_WEIGHT_NORMAL)
         context.set_font_size(config.data.preferences['timeline']['font-size'])
 
@@ -646,7 +646,7 @@ class TagWidget(GenericColorButtonWidget):
         context.stroke()
 
         # Draw the text
-        context.select_font_face("Helvetica",
+        context.select_font_face("sans-serif",
                                  cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 
         context.move_to(2, int(height * 0.7))

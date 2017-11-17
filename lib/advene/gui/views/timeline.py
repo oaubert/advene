@@ -529,7 +529,7 @@ class TimeLine(AdhocView):
                     else:
                         t = r.content.data
             if t:
-                context.select_font_face("Helvetica",
+                context.select_font_face("sans-serif",
                                          cairo.FONT_SLANT_NORMAL,
                                          cairo.FONT_WEIGHT_NORMAL)
                 context.set_font_size(config.data.preferences['timeline']['font-size'])
