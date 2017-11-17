@@ -1,0 +1,101 @@
+#! /usr/bin/env python3
+
+#
+# Advene: Annotate Digital Videos, Exchange on the NEt
+# Copyright (C) 2008-2017 Olivier Aubert <contact@olivieraubert.net>
+#
+# This file is part of Advene.
+#
+# Advene is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# Advene is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+import logging
+logger = logging.getLogger(__name__)
+
+import json
+import os
+import re
+import sys
+
+try:
+    import advene.core.config as config
+except ImportError:
+    # Try to set path
+    (maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
+    if subdir == 'scripts':
+        # Chances are that we were in a development tree...
+        libpath = os.path.join(maindir, "lib")
+        sys.path.insert(0, libpath)
+        import advene.core.config as config
+        config.data.fix_paths(maindir)
+
+from advene.model.package import Package
+import advene.util.helper as helper
+
+def get_stats(uri):
+    logger.info('Parsing %s', uri)
+    try:
+        p = Package(uri)
+        al = p.annotations
+    except:
+        logger.error("Cannot parse %s", uri, exc_info=True)
+        return {}
+    s = {
+        'uri': uri,
+        'title': p.title,
+        'meta': dict(("%s#%s" % (ns, n), v) for (ns, n, v) in p.listMetaData()),
+        'media': p.getMedia(),
+        'stats': helper.get_annotations_statistics(al, format='raw'),
+        'annotation_count': len(al),
+        'annotationtype_count': len(p.annotationTypes),
+        'schema_count': len(p.schemas),
+        'annotationtypes': [ { 'id': at.id,
+                               'title': at.title,
+                               'package_uri': uri,
+                               'schema': at.schema.title,
+                               'schema_id': at.schema.id,
+                               'stats':  helper.get_annotations_statistics(at.annotations, format='raw'),
+                               'meta': dict( ("%s#%s" % (ns, n), v) for (ns, n, v) in at.listMetaData()),
+        }
+                             for at in p.annotationTypes ]
+    }
+    for at in s['annotationtypes']:
+        comp = at['meta'].get('%s#completions' % config.data.namespace, '')
+        if ',' in comp:
+            # Comma-separated list
+            comp = re.split('\s*,\s*', comp)
+        else:
+            # Consider a space-separated list
+            comp = comp.split()
+        at['completions'] = comp
+    return s
+
+def process_files_or_directories(l, outfile=None):
+    data = []
+    for d in l:
+        if os.path.isdir(d):
+            for root, dirs, files in os.walk(d):
+                for name in files:
+                    if not (name.endswith('.azp') or name.endswith('.xml')):
+                        continue
+                    uri = os.path.join(root, name)
+                    data.append(get_stats(uri))
+        else:
+            data.append(get_stats(d))
+
+    json.dump(data, outfile or sys.stdout, indent=2)
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    process_files_or_directories(sys.argv[1:])
