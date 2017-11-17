@@ -7,6 +7,7 @@
 ../lib/advene/gui/plugins/htmlcontenhandler.py
 ../lib/advene/gui/plugins/tracetimeline.py
 ../lib/advene/gui/plugins/logmessages.py
+../lib/advene/gui/plugins/packageimporter.py
 ../lib/advene/gui/plugins/actions.py
 ../lib/advene/gui/plugins/kinect.py
 ../lib/advene/gui/plugins/contenthandlers.py
