@@ -5,7 +5,7 @@ SYNTAX="$0 version_number"
 VERSION=${1:?$SYNTAX}
 errors=""
 
-cd "$(dirname $0)/.." || exit
+cd $(dirname "$0")/.. || exit
 
 # Things to do/check upon release
 
@@ -16,6 +16,11 @@ cd "$(dirname $0)/.." || exit
 if ! head -1 CHANGES.txt | grep -q "$VERSION"
 then
     errors="${errors}Update CHANGES.txt\n"
+fi
+
+if grep -Eq '^\s+--\s*$' CHANGES.txt
+then
+    errors="${errors}Finalize CHANGES.txt entry.\n"
 fi
 
 # Update core/version.py + date
