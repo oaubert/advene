@@ -19,7 +19,6 @@
 """Transcription view.
 """
 
-import itertools
 from gi.repository import Gtk
 
 from gettext import gettext as _
@@ -27,29 +26,39 @@ from gettext import gettext as _
 from advene.gui.views import AdhocView
 from advene.gui.views.table import AnnotationTable
 import advene.gui.views.table
+import advene.util.helper as helper
 
 name="Checker view plugin"
 
 def register(controller):
     controller.register_viewclass(CheckerView)
 
-class CheckerView(AdhocView):
-    view_name = _("Checker")
-    view_id = 'checker'
-    tooltip = _("Check various package properties")
+class FeatureChecker(object):
+    """API for feature checking.
+    """
+    name = "Abstract FeatureChecker"
+    def __init__(self, controller=None):
+        self.controller = controller
+        self.widget = self.build_widget()
 
-    def __init__ (self, controller=None, parameters=None):
-        super(CheckerView, self).__init__(controller=controller)
-        self.close_on_package_load = False
-        self.contextual_actions = ()
-        self.controller=controller
-        self.options = {
-            }
+    def build_widget(self):
+        return Gtk.Label("Abstract checker")
 
-        opt, arg = self.load_parameters(parameters)
-        self.options.update(opt)
-        self.widget=self.build_widget()
-        self.update_model()
+    def update_model(self):
+        return True
+
+class OverlappingChecker(FeatureChecker):
+    name = "Overlapping"
+    def build_widget(self):
+        self.table = AnnotationTable(controller=self.controller)
+        # Set colors
+        self.table.columns['begin'].add_attribute(self.table.columns['begin'].get_cells()[0],
+                                             'cell-background',
+                                             advene.gui.views.table.COLUMN_CUSTOM_FIRST)
+        self.table.columns['end'].add_attribute(self.table.columns['end'].get_cells()[0],
+                                           'cell-background',
+                                           advene.gui.views.table.COLUMN_CUSTOM_FIRST + 1)
+        return self.table.widget
 
     def overlapping_annotations(self):
         """Return a list of overlapping annotations for each annotation type.
@@ -80,8 +89,65 @@ class CheckerView(AdhocView):
             if b in ends:
                 end = "#ff6666"
             return (begin, end)
-        self.overlap_table.set_elements(overlap, custom_data)
-        self.overlap_table.model.set_sort_column_id(advene.gui.views.table.COLUMN_TYPE, Gtk.SortType.ASCENDING)
+        self.table.set_elements(overlap, custom_data)
+        self.table.model.set_sort_column_id(advene.gui.views.table.COLUMN_TYPE, Gtk.SortType.ASCENDING)
+
+class CompletionChecker(FeatureChecker):
+    name = "Completions"
+    def build_widget(self):
+        self.table = AnnotationTable(controller=self.controller)
+        # Hijack Content column
+        self.table.columns['content'].add_attribute(self.table.columns['content'].get_cells()[0],
+                                                    'text',
+                                                    advene.gui.views.table.COLUMN_CUSTOM_FIRST)
+        self.table.columns['content'].props.title = _("Undef. keywords")
+        return self.table.widget
+
+    def update_model(self):
+        # Dictionary indexed by annotation, where values are the
+        # keyword diff
+        diff_dict = {}
+        def custom_data(a):
+            if a is None:
+                return (str, )
+            else:
+                return (diff_dict.get(a, ""), )
+
+        for at in self.controller.package.annotationTypes:
+            completions = set(helper.get_type_predefined_completions(at))
+            if completions:
+                # There are completions. Check for every annotation if
+                # they use a keyword not predefined.
+                for a in at.annotations:
+                    kws = set(helper.get_keyword_list(self.controller.get_title(a)))
+                    diff = kws - completions
+                    if diff:
+                        # There are used keywords that are not completions
+                        diff_dict[a] = ",".join(diff)
+        self.table.set_elements(list(diff_dict.keys()), custom_data)
+        self.table.model.set_sort_column_id(advene.gui.views.table.COLUMN_TYPE, Gtk.SortType.ASCENDING)
+
+class CheckerView(AdhocView):
+    view_name = _("Checker")
+    view_id = 'checker'
+    tooltip = _("Check various package properties")
+
+    def __init__ (self, controller=None, parameters=None):
+        super(CheckerView, self).__init__(controller=controller)
+        self.close_on_package_load = False
+        self.contextual_actions = ()
+        self.controller=controller
+        self.options = {
+            }
+
+        opt, arg = self.load_parameters(parameters)
+        self.options.update(opt)
+        self.widget=self.build_widget()
+        self.update_model()
+
+    def update_model(self):
+        for checker in self.checkers:
+            checker.update_model()
 
     def build_widget(self):
         mainbox = Gtk.VBox()
@@ -93,18 +159,11 @@ class CheckerView(AdhocView):
         notebook.popup_disable()
         mainbox.add(notebook)
 
-        table=AnnotationTable(controller=self.controller)
-        self.overlap_table = table
-
-        # Set colors
-        table.columns['begin'].add_attribute(table.columns['begin'].get_cells()[0],
-                                             'cell-background',
-                                             advene.gui.views.table.COLUMN_CUSTOM_FIRST)
-        table.columns['end'].add_attribute(table.columns['end'].get_cells()[0],
-                                           'cell-background',
-                                           advene.gui.views.table.COLUMN_CUSTOM_FIRST + 1)
-
-        notebook.append_page(table.widget, Gtk.Label(label=_("Overlapping")))
+        self.checkers = []
+        for checkerclass in (OverlappingChecker, CompletionChecker):
+            checker = checkerclass(self.controller)
+            self.checkers.append(checker)
+            notebook.append_page(checker.widget, Gtk.Label(label=checker.name))
 
         return mainbox
 

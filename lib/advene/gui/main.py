@@ -1237,7 +1237,7 @@ class AdveneGUI(object):
 
         # Populate the View submenu
         menu = self.gui.adhoc_view_menuitem.get_submenu()
-        it = Gtk.MenuItem(_("_All available views"))
+        it = Gtk.MenuItem(_("_All available views"), use_underline=True)
         menu.prepend(it)
         it.show()
         m = Gtk.Menu()
@@ -1265,6 +1265,7 @@ class AdveneGUI(object):
 
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
             ('browser', _('TALES explorer'), 'browser.png'),
+            ('checker', _('Constraint checker'), 'checker.png'),
             ('montage', _("Dynamic montage"), 'montage.png'),
             ('videoplayer', _("Video player"), 'videoplayer.png'),
             ('', '', ''),
