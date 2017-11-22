@@ -1909,7 +1909,10 @@ class TimeLine(AdhocView):
                                Gdk.KEY_7,
                                Gdk.KEY_8,
                                Gdk.KEY_9)
-              and annotation.type.getMetaData(config.data.namespace, "completions")):
+              and config.data.preferences['completion-quick-fill']):
+            comps = helper.get_type_predefined_completions(annotation.type)
+            if not comps:
+                return False
             # Shortcut for 1 key edition
             index = event.keyval - 48 - 1
             return self.controller.quick_completion_fill_annotation(annotation, index)
@@ -2973,10 +2976,11 @@ class TimeLine(AdhocView):
                                    Gdk.KEY_7,
                                    Gdk.KEY_8,
                                    Gdk.KEY_9)
-                  and widget.annotationtype.getMetaData(config.data.namespace, "completions")
                   and config.data.preferences['completion-quick-fill']):
+                comps = helper.get_type_predefined_completions(widget.annotationtype)
+                if not comps:
+                    return False
                 index = event.keyval - 48 - 1
-                comps = widget.annotationtype.ownerPackage._indexer.get_completions("", context=widget.annotationtype, predefined_only=True)
                 try:
                     comps[index]
                 except IndexError:

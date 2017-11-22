@@ -34,6 +34,7 @@ from advene.model.annotation import Annotation
 from advene.model.schema import AnnotationType, RelationType
 from advene.model.query import Query
 from advene.model.view import View
+import advene.util.helper as helper
 
 class Completer:
     def __init__(self, textview=None, controller=None, element=None, indexer=None):
@@ -327,16 +328,12 @@ class Indexer:
             'views': set(),
             }
         self.regexp=re.compile(r'[^\w\d_]+', re.UNICODE)
-        self.alt_regexp = re.compile(r'\s*,\s*', re.UNICODE)
         self.size_limit = 4
 
     def get_words(self, s):
         """Return the list of indexable words from the given string.
         """
-        if ',' in s:
-            regexp = self.alt_regexp
-        else:
-            regexp = self.regexp
+        regexp = self.regexp
         return [ w for w in regexp.split(s) if len(w) >= self.size_limit ]
 
     def initialize(self):
@@ -353,10 +350,7 @@ class Indexer:
         for at in self.package.annotationTypes:
             s=self.index.get(at.id, set())
 
-            words=at.getMetaData(config.data.namespace, "completions")
-            if words is not None:
-                s.update(self.get_words(words.strip()))
-
+            s.update(helper.get_type_predefined_completions(at))
             for a in at.annotations:
                 s.update(self.get_words(a.content.data))
 
@@ -375,11 +369,7 @@ class Indexer:
             s=self.index.get(atid, set())
         elif isinstance(element, (AnnotationType, RelationType, Query)):
             self.index['views'].add(element.id)
-            words=element.getMetaData(config.data.namespace, "completions")
-            if words is not None:
-                self.index.get(element.id, set()).update(self.get_words(words.strip()))
-            return True
-        else:
+            self.index.get(element.id, set()).update(helper.get_type_predefined_completions(element))
             return True
         s.update(self.get_words(element.content.data))
         if atid:
@@ -403,9 +393,7 @@ class Indexer:
         elif isinstance(context, Annotation):
             s = []
             if predefined_only or config.data.preferences['completion-predefined-only']:
-                terms = context.type.getMetaData(config.data.namespace, "completions")
-                if terms:
-                    s = self.get_words(terms)
+                s = helper.get_type_predefined_completions(context.type)
             if not s:
                 # No predefined completion anyway
                 s = self.index.get(context.type.id, [])

@@ -136,7 +136,7 @@ class AnnotationTable(AdhocView):
 
         If a selection is active, return only selected elements.
         """
-        selection = self.widget.treeview.get_selection ()
+        selection = self.widget.treeview.get_selection()
         r=selection.count_selected_rows()
         if r == 0 or r == 1:
             selection.select_all()
@@ -535,7 +535,7 @@ class AnnotationTable(AdhocView):
                               Gdk.KEY_8,
                               Gdk.KEY_9):
             ann, path = self.get_selected_node(with_path=True)
-            if  ann.type.getMetaData(config.data.namespace, "completions"):
+            if  helper.get_type_predefined_completions(ann.type):
                 # Shortcut for 1 key edition
                 index = event.keyval - 48 - 1
                 ret = self.controller.quick_completion_fill_annotation(ann, index)

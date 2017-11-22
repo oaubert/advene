@@ -426,6 +426,25 @@ def get_type(el):
         t = type(el).__name__
     return t
 
+SPACE_REGEXP = re.compile(r'[^\w\d_]+', re.UNICODE)
+COMMA_REGEXP = re.compile(r'\s*,\s*', re.UNICODE)
+COMPLETION_SIZE_LIMIT = 3
+def get_keyword_list(s):
+    """Return the keywords defined in the given string.
+    """
+    if not s:
+        return []
+    regexp = SPACE_REGEXP
+    if ',' in s:
+        regexp = COMMA_REGEXP
+    return [ w for w in regexp.split(s) if len(w) >= COMPLETION_SIZE_LIMIT ]
+
+def get_type_predefined_completions(at):
+    """Return the predefined completions for the given annotation type
+    """
+    s = at.getMetaData(config.data.namespace, "completions")
+    return get_keyword_list(s)
+
 def get_valid_members (el):
     """Return a list of strings, valid members for the object el in TALES.
 
