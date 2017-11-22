@@ -142,10 +142,14 @@ class CheckerView(AdhocView):
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
-        self.widget=self.build_widget()
+        self.widget = self.build_widget()
+        self.update_annotation = self.update_model
+        self.update_relation = self.update_model
+        self.update_annotationtype = self.update_model
+        self.update_relationtype = self.update_model
         self.update_model()
 
-    def update_model(self):
+    def update_model(self, **kw):
         for checker in self.checkers:
             checker.update_model()
 
