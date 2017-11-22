@@ -380,10 +380,12 @@ class Evaluator:
             modname = m.group(2)
             symname = m.group(3)
             alias = m.group(5) or symname or modname
+            logger.debug("import %s", m.groups())
             if modname and symname:
                 modname = '.'.join((modname, symname))
             self.clear_output()
             try:
+                logger.debug("actually importing %s or %s as %s", modname, symname, alias)
                 mod = __import__(modname or symname)
                 self.globals_[alias]=mod
                 self.log("Successfully imported %s as %s" % (modname or symname, alias))
