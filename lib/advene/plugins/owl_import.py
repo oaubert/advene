@@ -25,6 +25,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
+import json
 import os
 
 import advene.core.config as config
@@ -144,7 +145,7 @@ class OWLImporter(GenericImporter):
                 at_id = atnode.rpartition('/')[-1]
                 label = get_label(graph, atnode, at_id)
                 description = get_comment(graph, atnode)
-                at = self.create_annotation_type(schema, at_id, title=label, description=description)
+                at = self.create_annotation_type(schema, at_id, title=label, description=description, mimetype="application/x-advene-keyword-list")
                 at.setMetaData(config.data.namespace, "source_uri", str(atnode))
 
                 # Set color
@@ -153,13 +154,27 @@ class OWLImporter(GenericImporter):
                     if len(colors) > 1:
                         logger.warn("Multiple colors defined for %s. Using first one.", at_id)
                     color = colors[0]
-                    at.setMetaData(config.data.namespace, "color", color)
+                    at.setMetaData(config.data.namespace, "color", "string:%s" % color)
 
                 # Set completions
-                values = [ str(t[0])
-                           for t in graph.query(PREFIX + """SELECT ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" )}""" % str(atnode)) ]
+                values = [ (t[0], str(t[1]))
+                           for t in graph.query(PREFIX + """SELECT ?x ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" )}""" % str(atnode)) ]
                 if values:
-                    at.setMetaData(config.data.namespace, "completions", ",".join(values))
+                    at.setMetaData(config.data.namespace, "completions", ",".join(v[1] for v in values))
+
+                # Additional value metadata
+                metadata = {}
+                for v in values:
+                    value_metadata = {
+                        'uri': str(v[0]),
+                    }
+                    numeric_values = list(graph.objects(v[0], AO.annotationNumericValue))
+                    if numeric_values:
+                        if len(numeric_values) > 1:
+                            logger.warn("Multiple numeric values defined for %s. Using first one.", v[1])
+                        value_metadata['numeric_value'] = numeric_values[0].value
+                    metadata[v[1]] = value_metadata
+                at.setMetaData(config.data.namespace, "value-metadata", json.dumps(metadata))
         self.progress(1.0)
         # Hack: we have an empty iterator (no annotations here), but
         # if the yield instruction is not present in the method code,
