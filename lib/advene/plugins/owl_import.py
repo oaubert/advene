@@ -126,6 +126,11 @@ class OWLImporter(GenericImporter):
             else:
                 return default
 
+        # Dictionary holding a mapping between old ids and new ids. It
+        # will be stored as package-level metadata, in order to be
+        # easily removed once migration is effective.
+        old_id_mapping = {}
+
         schemas = list(graph.subjects(RDF.type, AO.AnnotationLevel))
         if not schemas:
             logger.error(_("Cannot find a valid schema in the OWL file."))
@@ -147,6 +152,11 @@ class OWLImporter(GenericImporter):
                 description = get_comment(graph, atnode)
                 at = self.create_annotation_type(schema, at_id, title=label, description=description, mimetype="application/x-advene-keyword-list")
                 at.setMetaData(config.data.namespace, "source_uri", str(atnode))
+
+                # Store old advene id
+                old_ids = list(graph.objects(atnode, AO.oldAdveneIdentifier))
+                for i in old_ids:
+                    old_id_mapping[i] = at_id
 
                 # Set color
                 colors = list(graph.objects(atnode, AO.adveneColorCode))
@@ -176,6 +186,7 @@ class OWLImporter(GenericImporter):
                     metadata[v[1]] = value_metadata
                 at.setMetaData(config.data.namespace, "value-metadata", json.dumps(metadata))
         self.progress(1.0)
+        self.package.setMetaData(config.data.namespace, "old_id_mapping", json.dumps(old_id_mapping))
         # Hack: we have an empty iterator (no annotations here), but
         # if the yield instruction is not present in the method code,
         # it will not be considered as an iterator. So the following 2
