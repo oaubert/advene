@@ -146,6 +146,16 @@ class OWLImporter(GenericImporter):
                 description = get_comment(graph, atnode)
                 at = self.create_annotation_type(schema, at_id, title=label, description=description)
                 at.setMetaData(config.data.namespace, "source_uri", str(atnode))
+
+                # Set color
+                colors = list(graph.objects(atnode, AO.adveneColorCode))
+                if colors:
+                    if len(colors) > 1:
+                        logger.warn("Multiple colors defined for %s. Using first one.", at_id)
+                    color = colors[0]
+                    at.setMetaData(config.data.namespace, "color", color)
+
+                # Set completions
                 values = [ str(t[0])
                            for t in graph.query(PREFIX + """SELECT ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" )}""" % str(atnode)) ]
                 if values:
