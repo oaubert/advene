@@ -1889,12 +1889,12 @@ Available filters:
         sys.exit(0)
 
     if filtername == 'auto':
-        i = get_importer(params[0])
+        i = get_importer(params[0], controller=c)
     else:
         i = None
         cl = [ f for f in controller.advene.util.importer.IMPORTERS if f.name.startswith(filtername) ]
         if len(cl) == 1:
-            i = cl[0]()
+            i = cl[0](controller=c)
         elif len(cl) > 1:
             logger.error("Too many possibilities:\n%s", "\n".join(f.name for f in cl))
             sys.exit(1)
