@@ -544,5 +544,6 @@ if __name__ == "__main__":
     diff=differ.diff()
     for name, s, d, action in diff:
         logger.info("%s %s %s", name, str(s).encode('utf-8'), str(d).encode('utf-8'))
-        #action(s, d)
-    #dest.save('foo.xml')
+        action(s, d)
+    dest.save('/tmp/merge.xml')
+    logger.info("Saved merged package as /tmp/merge.xml")
