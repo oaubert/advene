@@ -21,15 +21,9 @@ logger = logging.getLogger(__name__)
 
 import codecs
 from io import StringIO
+import json
+import re
 import urllib.request, urllib.parse, urllib.error
-try:
-    # In python2.6 stdlib
-    import json
-except ImportError:
-    try:
-        import simplejson as json
-    except ImportError:
-        json = None
 
 import advene.core.config as config
 import advene.model.modeled as modeled
@@ -95,6 +89,63 @@ class StructuredContent(dict,object):
         return "\n".join( ("%s=%s" % (k, quote(v)))
                           for (k, v) in self.items()
                           if not k.startswith('_') )
+
+COMMA_REGEXP = re.compile(r'\s*,\s*', re.UNICODE)
+class KeywordList(dict,object):
+    """Dict-like object representing a keyword list.
+
+    They are stored as a comma-separated list of keywords. The parent
+    type MAY have a value-metadata dict that holds metadata about each
+    keyword.
+
+    Dict keys are the keywords. Values are the associated metadata
+    (themselves dicts).
+
+    It provides methods for parsing from/unparsing to Advene
+    x-advene-keyword-list
+
+    FIXME: this should be optimized, since it always parses type
+    metadata to make it available. A lazy-loading method would be
+    preferable (posisbly just implementing __getitem__) so that we do
+    not parse metadata when not necessary (i.e. most of the time)
+
+    FIXME: implement add_metadata(kw, key, value) / delete_metadata(kw, key)
+    """
+    def __init__(self, *p, **kw):
+        if p and isinstance(p[0], str):
+            # Initialize with a content.
+            self.parse(p[0], kw.get('metadata', '{}'))
+        else:
+            dict.__init__(self, *p, **kw)
+
+    def parse(self, data, metadata):
+        """Parse a data string.
+        """
+        try:
+            metadata = json.loads(metadata)
+        except ValueError:
+            logger.warning("Cannot parse metadata %s", metadata)
+            metadata = {}
+        self.clear()
+        self['_all'] = data
+        for kw in COMMA_REGEXP.split(data):
+            if kw:
+                self[kw] = metadata.get(kw, {})
+
+    def unparse(self):
+        """Return the encoded version of the dictionary.
+
+        Note that it does not handle metadata.
+        """
+        def quote(v):
+            """Poor man's urllib.quote.
+
+            It should preserve the readability of the content while
+            being compatible with RFC2396 when decoding.
+            """
+            return v.replace('\n', '%0A').replace('=', '%3D').replace('%', '%25')
+
+        return ",".join(k for k in self.keys() if not k.startswith('_'))
 
 class Content(modeled.Modeled,
               viewable.Viewable.withClass('content', 'getMimetype'), metaclass=auto_properties):
@@ -266,6 +317,16 @@ class Content(modeled.Modeled,
 
         It returns a dict with key/values.
 
+        Keywords
+        ========
+
+        Data is represented as a comma-separated list of
+        keywords. Optional metadata may be specified at the type
+        level.
+
+        It return a dict with key/values (where keys are the keywords
+        themselves, and values are dicts holding metadata)
+
         XML data
         ========
 
@@ -278,6 +339,7 @@ class Content(modeled.Modeled,
         It returns the structure corresponding to the JSON data.
 
         @return: a data structure
+
         """
         # FIXME: the right way to implement this would be to subclass the Content
         # into SimpleStructuredContent, XMLContent...
@@ -290,6 +352,9 @@ class Content(modeled.Modeled,
                                'text/x-advene-structured',
                                'application/x-advene-zone' ) ):
             return StructuredContent(self.data)
+        elif self.mimetype == 'application/x-advene-keyword-list':
+            # Return a dictionary?
+            return KeywordList(self.data, metadata=self.type.getMetaData(config.data.namespace, 'value-metadata'))
         elif self.mimetype == 'application/json':
             if json is not None:
                 try:

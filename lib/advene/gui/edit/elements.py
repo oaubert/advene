@@ -1010,11 +1010,19 @@ class EditAnnotationTypePopup (EditElementPopup):
                          element=self.element, name='completions',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Space-separated list of words used for content completion"),
+                         tooltip=_("Comma-separated list of words used for content completion"),
                          sizegroup=sg)
         self.register_form(f)
         abox.pack_start(f.get_view(), False, False, 0)
 
+        f = EditMetaForm(title=_("Value metadata"),
+                         element=self.element, name='value_metadata',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable,
+                         tooltip=_("Additional value metadata"),
+                         sizegroup=sg)
+        self.register_form(f)
+        abox.pack_start(f.get_view(), False, False, 0)
 
         vbox.pack_start(self.expandable(abox, label=_("Advanced"), expanded=False), False, False, 0)
 
