@@ -2954,7 +2954,7 @@ class AdveneGUI(object):
         buf.insert_at_cursor (mes)
 
         if 'gst-stream-error' in msg:
-            dialog.message_dialog(_("Video player error: %s") % msg, modal=False, icon=Gtk.MessageType.ERROR)
+            dialog.message_dialog(_("Video player error: %s") % msg, modal=False, icon=Gtk.MessageType.WARNING)
         return False
 
     def get_illustrated_text(self, text, position=None, vertical=False, height=40, color=None):
