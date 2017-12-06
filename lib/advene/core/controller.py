@@ -1253,20 +1253,23 @@ class AdveneController(object):
         if package is None:
             package = self.package
 
-        mediafile = package.media
+        original_mediafile = mediafile = package.media
+
         if mediafile is None or mediafile == "":
             return ""
-        m=self.dvd_regexp.match(mediafile)
+        m = self.dvd_regexp.match(mediafile)
         if m:
-            title,chapter=m.group(1, 2)
-            mediafile=self.player.dvd_uri(title, chapter)
+            title, chapter = m.group(1, 2)
+            mediafile = self.player.dvd_uri(title, chapter)
         elif mediafile.startswith('http:'):
             # FIXME: check for the existence of the file
             pass
         else:
-            mediafile=self.locate_mediafile(mediafile)
+            mediafile = self.locate_mediafile(mediafile)
 
         package.setMedia(mediafile)
+        if mediafile != original_mediafile and original_mediafile in self.imagecache:
+            self.imagecache[mediafile] = self.imagecache[original_mediafile]
         return mediafile
 
     def locate_mediafile(self, mediafile):
