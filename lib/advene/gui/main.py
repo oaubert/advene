@@ -3802,8 +3802,12 @@ class AdveneGUI(object):
                 return True
             if not ext in ('.xml', '.azp', '.apl'):
                 # Does not look like a valid package
-                if not dialog.message_dialog(_("The file %s does not look like a valid Advene package. It should have a .azp or .xml extension. Try to open anyway?") % filename,
-                                      icon=Gtk.MessageType.QUESTION):
+                answer = dialog.yes_no_cancel_popup(_("Unrecognized package extension"), _("The file %s does not look like a valid Advene package. It should have a .azp or .xml extension. Do you want to try to import it instead of opening it as a package?") % filename)
+                if answer == Gtk.ResponseType.YES:
+                    # Try to import
+                    self.open_adhoc_view('importerview', filename=filename)
+                    return True
+                elif answer == Gtk.ResponseType.CANCEL:
                     return True
             if ext == '.apl':
                 modif=[ (a, p)
