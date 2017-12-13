@@ -1539,19 +1539,31 @@ class AdveneController(object):
             return False
         comps = annotation.ownerPackage._indexer.get_completions("", context=annotation, predefined_only=True)
         try:
-            val = comps[index]
-            new_content = helper.title2content(val,
+            kw = comps[index]
+        except IndexError:
+            logger.warn("Cannot find completion at index %d", index)
+            return False
+
+        if annotation.type.mimetype == 'application/x-advene-keyword-list':
+            # Keyword list: toggle items
+            keywords = annotation.content.parsed()
+            if kw in keywords:
+                keywords.remove(kw)
+            else:
+                keywords.add(kw)
+            new_content = keywords.unparse()
+        else:
+            new_content = helper.title2content(kw,
                                                annotation.content,
                                                annotation.type.getMetaData(config.data.namespace, "representation"))
             if new_content is None:
                 logger.error("Cannot update annotation content - too complex representation")
                 return False
-            self.notify('EditSessionStart', element=annotation, immediate=True)
-            annotation.content.data = new_content
-            self.notify('AnnotationEditEnd', annotation=annotation)
-            self.notify('EditSessionEnd', element=annotation)
-        except IndexError:
-            return False
+
+        self.notify('EditSessionStart', element=annotation, immediate=True)
+        annotation.content.data = new_content
+        self.notify('AnnotationEditEnd', annotation=annotation)
+        self.notify('EditSessionEnd', element=annotation)
         return True
 
     def duplicate_annotation(self, annotation):
