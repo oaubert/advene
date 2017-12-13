@@ -194,9 +194,9 @@ class Completer:
         # Get the selected completion string.
         completion_string = self.model[path[0]][0]
 
-        word, begin, end=self.get_word_before_cursor()
-        complete=completion_string.replace(word.encode('utf8'), '')
-        b=self.textview.get_buffer()
+        word, begin, end = self.get_word_before_cursor()
+        complete = completion_string.replace(word, '')
+        b = self.textview.get_buffer()
         b.begin_user_action()
         b.insert_at_cursor(complete)
         b.end_user_action()
