@@ -91,61 +91,91 @@ class StructuredContent(dict,object):
                           if not k.startswith('_') )
 
 COMMA_REGEXP = re.compile(r'\s*,\s*', re.UNICODE)
-class KeywordList(dict,object):
-    """Dict-like object representing a keyword list.
+COMMENT_REGEXP = re.compile(r'\[(.*?)\]', re.UNICODE)
+class KeywordList(object):
+    """Set-like object representing a keyword list.
 
     They are stored as a comma-separated list of keywords. The parent
     type MAY have a value-metadata dict that holds metadata about each
     keyword.
 
-    Dict keys are the keywords. Values are the associated metadata
-    (themselves dicts).
+    KeywordList implements array-like features (__contains__).
+    The .get(keyword) returns metadata (as dict) about the keyword.
+
+    Comments may be specified between brackets. There may be multiple
+    comments, but in case of modification through the API, they will
+    all be merged into a single one, placed at the end.
 
     It provides methods for parsing from/unparsing to Advene
     x-advene-keyword-list
-
-    FIXME: this should be optimized, since it always parses type
-    metadata to make it available. A lazy-loading method would be
-    preferable (posisbly just implementing __getitem__) so that we do
-    not parse metadata when not necessary (i.e. most of the time)
-
-    FIXME: implement add_metadata(kw, key, value) / delete_metadata(kw, key)
     """
-    def __init__(self, *p, **kw):
-        if p and isinstance(p[0], str):
-            # Initialize with a content.
-            self.parse(p[0], kw.get('metadata', '{}'))
-        else:
-            dict.__init__(self, *p, **kw)
+    def __init__(self, data=None, parent=None, **kw):
+        # Initialize with a content.
+        self._values, self._comment = self.parse(data)
+        self._parent = type
 
-    def parse(self, data, metadata):
+    def get(self, kw):
+        """Return metadata about the keyword
+        """
+        metadata = {}
+        meta_str = self._parent.getMetaData(config.data.namespace, 'value-metadata')
+        if meta_str:
+            try:
+                metadata = json.loads(meta_str)
+            except ValueError:
+                logger.warning("Cannot parse metadata %s", metadata)
+        return metadata.get(kw, {})
+
+    def parse(self, data=None):
         """Parse a data string.
         """
+        val = []
+        comment = ""
+        if not data:
+            return val, comment
+        comment = "".join(COMMENT_REGEXP.findall(data))
+        # Strip all comments
+        data, count = COMMENT_REGEXP.subn('', data)
+        # Split values
+        val = COMMA_REGEXP.split(data)
+        return val, comment
+
+    def add(self, kw):
+        """Add a keyword to the list.
+        """
+        self._values.append(kw)
+        return self._values
+
+    def remove(self, kw):
+        """Remove a keyword from the list.
+        """
         try:
-            metadata = json.loads(metadata)
-        except ValueError:
-            logger.warning("Cannot parse metadata %s", metadata)
-            metadata = {}
-        self.clear()
-        self['_all'] = data
-        for kw in COMMA_REGEXP.split(data):
-            if kw:
-                self[kw] = metadata.get(kw, {})
+            self._values.remove(kw)
+        except:
+            pass
+        return self._values
+
+    def __contains__(self, kw):
+        return kw in self._values
+
+    def __iter__(self):
+        return iter(self._values)
+
+    def __getitem__(self, i):
+        return self._values[i]
+
+    def __str__(self):
+        return self.unparse()
 
     def unparse(self):
-        """Return the encoded version of the dictionary.
+        """Return the encoded version of the set
 
         Note that it does not handle metadata.
         """
-        def quote(v):
-            """Poor man's urllib.quote.
-
-            It should preserve the readability of the content while
-            being compatible with RFC2396 when decoding.
-            """
-            return v.replace('\n', '%0A').replace('=', '%3D').replace('%', '%25')
-
-        return ",".join(k for k in self.keys() if not k.startswith('_'))
+        res = ",".join(self._values)
+        if self._comment:
+            res = "%s [%s]" % (res, self._comment)
+        return res
 
 class Content(modeled.Modeled,
               viewable.Viewable.withClass('content', 'getMimetype'), metaclass=auto_properties):
@@ -354,7 +384,7 @@ class Content(modeled.Modeled,
             return StructuredContent(self.data)
         elif self.mimetype == 'application/x-advene-keyword-list':
             # Return a dictionary?
-            return KeywordList(self.data, metadata=self.type.getMetaData(config.data.namespace, 'value-metadata'))
+            return KeywordList(self.data, parent=self._getParent().getType())
         elif self.mimetype == 'application/json':
             if json is not None:
                 try:
