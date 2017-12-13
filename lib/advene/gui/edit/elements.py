@@ -915,6 +915,16 @@ class EditSchemaPopup (EditElementPopup):
             self.register_form(f)
             vbox.pack_start(f.get_view(), False, False, 0)
 
+        if self.element.getMetaData(config.data.namespace, "ontology_uri"):
+            f = EditMetaForm(title=_("Ontology URI"),
+                             element=self.element, name='ontology_uri',
+                             namespaceid='advenetool', controller=self.controller,
+                             editable=editable,
+                             tooltip=_("Ontology URI"),
+                             sizegroup=sg)
+            self.register_form(f)
+            vbox.pack_start(f.get_view(), False, False, 0)
+
         return vbox
 
 class EditAnnotationTypePopup (EditElementPopup):
@@ -1024,6 +1034,16 @@ class EditAnnotationTypePopup (EditElementPopup):
         self.register_form(f)
         abox.pack_start(f.get_view(), False, False, 0)
 
+        if self.element.getMetaData(config.data.namespace, "ontology_uri"):
+            f = EditMetaForm(title=_("Ontology URI"),
+                             element=self.element, name='ontology_uri',
+                             namespaceid='advenetool', controller=self.controller,
+                             editable=editable,
+                             tooltip=_("Ontology URI"),
+                             sizegroup=sg)
+            self.register_form(f)
+            abox.pack_start(f.get_view(), False, False, 0)
+
         vbox.pack_start(self.expandable(abox, label=_("Advanced"), expanded=False), False, False, 0)
 
         return vbox
@@ -1105,6 +1125,16 @@ class EditRelationTypePopup (EditElementPopup):
                          sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), False, False, 0)
+
+        if self.element.getMetaData(config.data.namespace, "ontology_uri"):
+            f = EditMetaForm(title=_("Ontology URI"),
+                             element=self.element, name='ontology_uri',
+                             namespaceid='advenetool', controller=self.controller,
+                             editable=editable,
+                             tooltip=_("Ontology URI"),
+                             sizegroup=sg)
+            self.register_form(f)
+            vbox.pack_start(f.get_view(), False, False, 0)
 
         return vbox
 
