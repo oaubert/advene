@@ -143,7 +143,7 @@ class OWLImporter(GenericImporter):
             title = get_label(graph, s, schema_id)
             description = get_comment(graph, s)
             schema = self.create_schema(schema_id, title=title, description=description)
-            schema.setMetaData(config.data.namespace, "source_uri", str(s))
+            schema.setMetaData(config.data.namespace, "ontology_uri", str(s))
             if not self.progress(progress, "Creating schema %s" % schema.title):
                 break
             for atnode in graph.objects(s, AO.term('hasAnnotationType')):
@@ -151,7 +151,7 @@ class OWLImporter(GenericImporter):
                 label = get_label(graph, atnode, at_id)
                 description = get_comment(graph, atnode)
                 at = self.create_annotation_type(schema, at_id, title=label, description=description, mimetype="application/x-advene-keyword-list")
-                at.setMetaData(config.data.namespace, "source_uri", str(atnode))
+                at.setMetaData(config.data.namespace, "ontology_uri", str(atnode))
 
                 # Store old advene id
                 old_ids = list(graph.objects(atnode, AO.oldAdveneIdentifier))
@@ -176,7 +176,7 @@ class OWLImporter(GenericImporter):
                 metadata = {}
                 for v in values:
                     value_metadata = {
-                        'uri': str(v[0]),
+                        'ontology_uri': str(v[0]),
                     }
                     numeric_values = list(graph.objects(v[0], AO.annotationNumericValue))
                     if numeric_values:
@@ -184,9 +184,10 @@ class OWLImporter(GenericImporter):
                             logger.warn("Multiple numeric values defined for %s. Using first one.", v[1])
                         value_metadata['numeric_value'] = numeric_values[0].value
                     metadata[v[1]] = value_metadata
-                at.setMetaData(config.data.namespace, "value-metadata", json.dumps(metadata))
+                at.setMetaData(config.data.namespace, "value_metadata", json.dumps(metadata))
         self.progress(1.0)
         self.package.setMetaData(config.data.namespace, "old_id_mapping", json.dumps(old_id_mapping))
+        self.package.setMetaData(config.data.namespace, "ontology_uri", str(AO))
         # Hack: we have an empty iterator (no annotations here), but
         # if the yield instruction is not present in the method code,
         # it will not be considered as an iterator. So the following 2
