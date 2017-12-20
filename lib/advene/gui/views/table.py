@@ -642,7 +642,7 @@ class GenericTable(AdhocView):
             l.append( (e,
                        self.controller.get_title(e),
                        helper.get_type(e),
-                       e.id) )
+                       getattr(e, 'id', str(e))) )
         return l
 
     def csv_export(self, name=None):
