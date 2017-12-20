@@ -210,6 +210,7 @@ class TimeLine(AdhocView):
             self.default_range = (minimum, maximum)
         # update_timeline_range needs this attribute to be defined
         self.layout = Gtk.Layout ()
+        self.list = None
         self.update_timeline_range()
         if default_position is None:
             default_position = self.minimum
@@ -231,7 +232,6 @@ class TimeLine(AdhocView):
         else:
             self.annotationtypes_selection = None
         self.annotationtypes = annotationtypes
-        self.list = None
 
         # Dictionaries holding a correspondance between an element and its representation.
         # It assumes that there is at more 1 representation for each element.
