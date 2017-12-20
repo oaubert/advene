@@ -469,7 +469,10 @@ def get_drawable():
         # Do not kill the widget if the application exits
         return True
 
-    if config.data.os == 'win32' or os.environ.get('WAYLAND_DISPLAY'):
+    if hasattr(Gtk, 'Socket'):
+        drawable = Gtk.Socket()
+        drawable.connect('plug-removed', handle_remove)
+    else:
         drawable = Gtk.DrawingArea()
         def get_id(widget):
             w = widget.get_window()
@@ -484,7 +487,4 @@ def get_drawable():
         # Define the get_id method on the drawable, so that it can
         # be used by the player plugin code.
         drawable.get_id = get_id.__get__(drawable)
-    else:
-        drawable = Gtk.Socket()
-        drawable.connect('plug-removed', handle_remove)
     return drawable
