@@ -136,8 +136,8 @@ class TimeLine(AdhocView):
     tooltip = _("Display annotations on a timeline")
 
     def __init__ (self, elements=None,
-                  minimum=0,
-                  maximum=0,
+                  minimum=None,
+                  maximum=None,
                   controller=None,
                   annotationtypes=None,
                   parameters=None):
@@ -201,6 +201,19 @@ class TimeLine(AdhocView):
         if ats:
             annotationtypes=ats
 
+
+        # If the default range was specified, either through method
+        # parameters or serialized parameters, memorize it. Else, we
+        # will update the range based on movie duration.
+        self.default_range = None
+        if minimum is not None and maximum is not None:
+            self.default_range = (minimum, maximum)
+        # update_timeline_range needs this attribute to be defined
+        self.layout = Gtk.Layout ()
+        self.update_timeline_range()
+        if default_position is None:
+            default_position = self.minimum
+
         self.should_display_type_selection_popup = False
         self.edit_type_selection_popup = None
 
@@ -224,16 +237,6 @@ class TimeLine(AdhocView):
         # It assumes that there is at more 1 representation for each element.
         self.annotationtype_widgets = {}
         self.annotation_widgets = {}
-
-        self.layout = Gtk.Layout ()
-
-        self.minimum = minimum
-        self.maximum = maximum
-        if not self.maximum:
-            self.update_min_max()
-
-        if default_position is None:
-            default_position=self.minimum
 
         self.colors = {
             'active': name2color('#fdfd4b'),
@@ -364,7 +367,7 @@ class TimeLine(AdhocView):
             self.set_inspector_size(inspector_width)
 
             # Check if display is limited
-            if self.minimum > 0 and self.maximum < self.controller.package.cached_duration:
+            if self.default_range is not None:
                 self.limit_navtools.show()
 
             self.update_adjustment ()
@@ -395,8 +398,9 @@ class TimeLine(AdhocView):
             arguments.extend([ ('annotation-type', at.id) for at in self.annotationtypes_selection ])
         if self.list:
             arguments.extend([ ('element', el.id) for el in self.list ])
-        arguments.append( ('minimum', self.minimum ) )
-        arguments.append( ('maximum', self.maximum ) )
+        if self.default_range is not None:
+            arguments.append( ('minimum', self.default_range[0] ) )
+            arguments.append( ('maximum', self.default_range[1] ) )
         arguments.append( ('position', self.pixel2unit(self.adjustment.get_value(), absolute=True) ) )
         arguments.append( ('zoom', self.fraction_adj.get_value()) )
         self.options['inspector-width'] = self.get_inspector_size()
@@ -621,16 +625,31 @@ class TimeLine(AdhocView):
         d.connect('response', handle_response)
         return True
 
-    def update_min_max(self):
-        logger.debug("update min max %d %d", self.minimum, self.maximum)
-        oldmax = self.maximum
-        self.minimum = 0
-        self.maximum = 0
-        duration = self.controller.cached_duration
-        if duration <= 0:
-            duration = self.bounds()[1]
-        if duration:
-            self.maximum = int(duration)
+    def update_timeline_range(self):
+        """Initialize minimum and maximum values.
+
+        If a self.default_range is specified, use it, else use media
+        duration as maximum.
+
+        In both cases, do various sanity checks.
+        """
+        logger.debug("update min max. Default range: %s", self.default_range)
+        try:
+            oldmax = self.maximum
+        except AttributeError:
+            # View instanciation, the attribute does not exist
+            oldmax = -1
+
+        if self.default_range is not None:
+            self.minimum, self.maximum = self.default_range
+        else:
+            self.minimum = 0
+            self.maximum = 0
+            duration = self.controller.cached_duration
+            if duration <= 0:
+                duration = self.bounds()[1]
+            if duration:
+                self.maximum = int(duration)
 
         if not self.maximum:
             # self.maximum == 0, so try to compute it
@@ -662,7 +681,7 @@ class TimeLine(AdhocView):
         @param elements: list of annotations to display
         @type elements: list
         """
-        logger.debug("update_model package=%s partial_update=%s from_init=%s", package, partial_update, from_init, stack_info=True)
+        logger.debug("update_model package=%s partial_update=%s from_init=%s", package, partial_update, from_init, stack_info=False)
         if not self.update_lock.acquire(False) or self.layout.get_window() is None:
             # An update is already ongoing or the layout is not realized yet
             return
@@ -684,7 +703,7 @@ class TimeLine(AdhocView):
                 self.edit_type_selection_popup.destroy()
                 self.edit_type_selection_popup = None
 
-            self.update_min_max()
+            self.update_timeline_range()
             if elements is not None:
                 self.list = [ e
                               for e in elements
@@ -836,7 +855,7 @@ class TimeLine(AdhocView):
         We should check the update_lock and if it is held, delay the
         call to update_model intended to update the timeline duration.
         """
-        if self.maximum != int(context.globals['duration']):
+        if self.maximum != int(context.globals['duration']) and not self.default_range:
             # Need a refresh.  It can happen while an update_model is
             # already taking place. In this case, we have to wait
             # until the update_model is done before doing our own update.
@@ -844,7 +863,7 @@ class TimeLine(AdhocView):
                 if not self.update_lock.locked():
                     # There is a race possibility here. Let's assume
                     # that it will be rare enough...
-                    self.update_min_max()
+                    self.update_timeline_range()
                     self.refresh()
                     return False
                 else:
@@ -1936,7 +1955,7 @@ class TimeLine(AdhocView):
             # Not displayed
             return None
         if config.data.livedebug:
-            logger.debug("create_annotation_widget for %s", annotation.id, stack_info=True)
+            logger.debug("create_annotation_widget for %s", annotation.id, stack_info=False)
         b = self.get_widget_for_annotation(annotation)
         if b is not None:
             logger.warn("There is already 1 representation for annotation %s", annotation.id)
@@ -2090,7 +2109,7 @@ class TimeLine(AdhocView):
         l = annotations
         if l is None:
             l = self.get_annotations()
-        logger.debug("populate %d annotations", len(l), stack_info=True)
+        logger.debug("populate %d annotations", len(l), stack_info=False)
 
         # Use a list so that the counter variable can be modified in
         # the closure.
@@ -2754,22 +2773,16 @@ class TimeLine(AdhocView):
             minimum=self.pixel2unit(self.adjustment.get_value(), absolute=True)
             maximum=self.pixel2unit(self.adjustment.get_value() + self.adjustment.get_page_size(), absolute=True)
         # Cannot do the assignment immediately, since unit2pixel uses self.minimum
-        self.minimum = minimum
-        self.maximum = maximum
+        self.default_range = (minimum, maximum)
+        self.update_timeline_range()
         self.update_model(partial_update=True)
         self.fraction_adj.set_value(1.0)
         self.limit_navtools.show()
         return True
 
     def unlimit_display(self, *p):
-        self.minimum=0
-        self.maximum=self.controller.cached_duration
-        if not self.maximum:
-            # self.maximum == 0, so try to compute it
-            self.maximum = self.bounds()[1]
-        if not self.maximum:
-            # Not valid data either. Use a default value.
-            self.maximum=42000
+        self.default_range = None
+        self.update_timeline_range()
         self.update_model(partial_update=True)
         self.fraction_adj.set_value(1.0)
         self.limit_navtools.hide()
