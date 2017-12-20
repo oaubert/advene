@@ -2546,8 +2546,21 @@ class AdveneGUI(object):
         """
         if workspace.tag != 'workspace':
             raise Exception('Invalid XML element for workspace: ' + workspace.tag)
-        layout=None
-        # Open adhoc views
+
+        # First pass to set layout.
+        if not preserve_layout:
+            for node in workspace:
+                if node.tag == 'layout':
+                    layout=node
+                    w=self.gui.win
+                    w.move(int(layout.attrib['x']), int(layout.attrib['y']))
+                    w.resize(min(int(layout.attrib['width']), Gdk.Screen.width()),
+                             min(int(layout.attrib['height']), Gdk.Screen.height()))
+                    for pane in layout:
+                        if pane.tag == 'pane' and pane.attrib['id'] in self.pane:
+                            self.pane[pane.attrib['id']].set_position(int(pane.attrib['position']))
+
+        # Second pass to open adhoc views
         for node in workspace:
             if node.tag == ET.QName(config.data.namespace, 'adhoc'):
                 # It is a adhoc-view definition
@@ -2559,17 +2572,6 @@ class AdveneGUI(object):
                     # Restore popup windows positions
                     v.get_window().move(int(node.attrib['x']), int(node.attrib['y']))
                     v.get_window().resize(int(node.attrib['width']), int(node.attrib['height']))
-            elif node.tag == 'layout':
-                layout=node
-        # Restore layout
-        if layout is not None and not preserve_layout:
-            w=self.gui.win
-            w.move(int(layout.attrib['x']), int(layout.attrib['y']))
-            w.resize(min(int(layout.attrib['width']), Gdk.Screen.width()),
-                     min(int(layout.attrib['height']), Gdk.Screen.height()))
-            for pane in layout:
-                if pane.tag == 'pane' and pane.attrib['id'] in self.pane:
-                    self.pane[pane.attrib['id']].set_position(int(pane.attrib['position']))
 
     def workspace_save(self, viewid=None):
         """Save the workspace in the given viewid.
