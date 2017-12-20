@@ -148,6 +148,17 @@ class OntologyURIChecker(FeatureChecker):
         invalid.extend(el for el in self.controller.package.annotationTypes if not check_element(el))
         self.table.set_elements(invalid)
 
+class DurationChecker(FeatureChecker):
+    name = "Duration"
+    description = _("This table presents the annotations that have a null duration.")
+    def build_widget(self):
+        self.table = AnnotationTable(controller=self.controller)
+        return self.table.widget
+
+    def update_model(self):
+        self.table.set_elements([ a for a in self.controller.package.annotations
+                                  if not a.fragment.duration ])
+
 class CheckerView(AdhocView):
     view_name = _("Checker")
     view_id = 'checker'
@@ -185,7 +196,7 @@ class CheckerView(AdhocView):
         mainbox.add(notebook)
 
         self.checkers = []
-        for checkerclass in (OverlappingChecker, CompletionChecker, OntologyURIChecker):
+        for checkerclass in (OverlappingChecker, CompletionChecker, OntologyURIChecker, DurationChecker):
             checker = checkerclass(self.controller)
             self.checkers.append(checker)
             vbox = Gtk.VBox()
