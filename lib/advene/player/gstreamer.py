@@ -27,6 +27,8 @@ from gettext import gettext as _
 
 import advene.core.config as config
 from advene.util.helper import format_time
+from advene.gui.util import get_drawable
+
 import os
 import time
 import urllib.request, urllib.parse, urllib.error
@@ -113,8 +115,9 @@ class Player:
         self.xid = None
         self.mute_volume=None
         self.rate = 1.0
-        # fullscreen gtk.Window
+        # fullscreen Gtk.Window
         self.fullscreen_window = None
+        self.fullscreen_drawable = None
 
         # Fullscreen timestamp display - cache data
         self.last_timestamp = 0
@@ -190,9 +193,14 @@ class Player:
                 logger.error("Gstreamer SVG overlay element is not available", exc_info=True)
 
         self.imagesink = Gst.ElementFactory.make(sink, 'sink')
-        self.imagesink.set_property('force-aspect-ratio', True)
+        try:
+            self.imagesink.set_property('force-aspect-ratio', True)
+        except TypeError:
+            logger.warn("Cannot set force-aspect-ratio on video sink")
 
         elements=[]
+        elements.append(Gst.ElementFactory.make('videoconvert', None))
+        elements.append(Gst.ElementFactory.make('videoscale', None))
         if self.imageoverlay is not None:
             # FIXME: Issue: rsvgoverlay.fit_to_frame expects that the
             # dimensions of the input buffers match the aspect ratio
@@ -202,12 +210,8 @@ class Player:
         if self.captioner is not None:
             elements.append(self.captioner)
 
-        if sink == 'xvimagesink':
-            # Imagesink accepts both rgb/yuv and is able to do scaling itself.
-            elements.append( self.imagesink )
-        else:
-            csp=Gst.ElementFactory.make('videoconvert', None)
-            elements.extend( (csp, self.imagesink) )
+        csp=Gst.ElementFactory.make('videoconvert', None)
+        elements.extend( (csp, self.imagesink) )
 
         for el in elements:
             self.video_sink.add(el)
@@ -224,6 +228,7 @@ class Player:
         # Idem for elements
         self._video_elements = elements
 
+        logger.debug("Using video sink pipeline %s", self._video_elements)
         self.video_sink.add_pad(self._video_ghostpad)
 
         self.player.props.video_sink=self.video_sink
@@ -559,8 +564,8 @@ class Player:
                 self.last_timestamp_update = t
 
     def reparent(self, xid):
+        logger.debug("Reparent %s", xid)
         # See https://bugzilla.gnome.org/show_bug.cgi?id=599885
-        Gdk.threads_enter()
         if xid:
             self.log("Reparent " + hex(xid))
 
@@ -569,7 +574,6 @@ class Player:
             self.imagesink.set_window_handle(xid)
         self.imagesink.set_property('force-aspect-ratio', True)
         self.imagesink.expose()
-        Gdk.threads_leave()
 
     def set_visual(self, xid):
         if not xid:
@@ -661,7 +665,6 @@ class Player:
         return self.fullscreen_window and self.fullscreen_window.is_active()
 
     def fullscreen(self, connect=None):
-
         def keypress(widget, event):
             if event.keyval == Gdk.KEY_Escape:
                 self.unfullscreen()
@@ -675,18 +678,21 @@ class Player:
             return False
 
         if self.fullscreen_window is None:
-            self.fullscreen_window=Gtk.Window()
+            self.fullscreen_window = Gtk.Window()
             self.fullscreen_window.set_name("fullscreen_player")
-            self.fullscreen_window.add_events(Gdk.EventMask.BUTTON_PRESS_MASK |
-                                              Gdk.EventMask.BUTTON_RELEASE_MASK |
-                                              Gdk.EventMask.KEY_PRESS_MASK |
-                                              Gdk.EventMask.KEY_RELEASE_MASK |
-                                              Gdk.EventMask.SCROLL_MASK)
             self.fullscreen_window.connect('key-press-event', keypress)
             self.fullscreen_window.connect('button-press-event', buttonpress)
             self.fullscreen_window.connect('destroy', self.unfullscreen)
+            self.fullscreen_drawable = get_drawable()
+            self.fullscreen_drawable.add_events(Gdk.EventMask.BUTTON_PRESS_MASK |
+                                                Gdk.EventMask.BUTTON_RELEASE_MASK |
+                                                Gdk.EventMask.KEY_PRESS_MASK |
+                                                Gdk.EventMask.KEY_RELEASE_MASK |
+                                                Gdk.EventMask.SCROLL_MASK)
+            self.fullscreen_window.add(self.fullscreen_drawable)
+            self.fullscreen_window.show_all()
             if connect is not None:
-                connect(self.fullscreen_window)
+                connect(self.fullscreen_drawable)
 
             # Use black background
             css_provider = Gtk.CssProvider()
@@ -694,24 +700,13 @@ class Player:
             context = Gtk.StyleContext()
             context.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-        if config.data.os == 'darwin':
-            # Get geometry of the first monitor
-            r = Gdk.screen_get_default().get_monitor_geometry(0)
-            self.fullscreen_window.set_decorated(False)
-            self.fullscreen_window.set_size_request(r.width, r.height)
-            #self.fullscreen_window.move(r.x, r.y)
-            self.fullscreen_window.move(0, 0)
-            self.fullscreen_window.show()
-        else:
-            self.fullscreen_window.show()
-            self.fullscreen_window.get_window().fullscreen()
-
+        self.fullscreen_window.show_all()
+        self.fullscreen_window.get_window().fullscreen()
         self.fullscreen_window.grab_focus()
 
-        if config.data.os == 'win32':
-            self.reparent(GdkWin32.Win32Window.get_handle(self.fullscreen_window.get_window()))
-        else:
-            self.reparent(self.fullscreen_window.get_window().get_xid())
+        # Do not use set_visual/set_widget so that the player does not
+        # update self.xid and keep it as a reference
+        self.reparent(self.fullscreen_drawable.get_id())
 
     def unfullscreen(self, *p):
         self.reparent(self.xid)
@@ -723,6 +718,7 @@ class Player:
         else:
             # It has been destroyed
             self.fullscreen_window = None
+            self.fullscreen_drawable = None
         return True
 
     # relpath, dump_bin and dump_element implementation based on Daniel Lenski <dlenski@gmail.com>
