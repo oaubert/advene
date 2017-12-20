@@ -2087,9 +2087,9 @@ class AdveneController(object):
         else:
             p=self.packages[alias]
 
+        old_uri = urllib.parse.unquote(p.uri)
         if name is None:
-            name=urllib.parse.unquote(p.uri)
-        old_uri = p.uri
+            name = old_uri
 
         # Handle tag_colors
         # Parse tag_colors attribute.
