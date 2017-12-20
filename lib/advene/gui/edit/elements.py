@@ -1851,6 +1851,10 @@ class EditFragmentForm(EditForm):
         return hbox
 
 class EditGenericForm(EditForm):
+    """Generic edit form
+
+    type is either 'mimetype', 'color' or 'boolean'.
+    """
     def __init__(self, title=None, getter=None, setter=None,
                  controller=None, editable=True, tooltip=None, type=None, elements=None,
                  focus=False, sizegroup=None):
@@ -1905,6 +1909,10 @@ class EditGenericForm(EditForm):
             self.entry=dialog.list_selector_widget(members=l,
                                                    preselect=v,
                                                    entry=self.editable)
+        elif self.type == 'boolean':
+            self.entry = Gtk.CheckButton()
+            self.entry.set_active(v)
+
         elif self.elements:
             self.entry=dialog.list_selector_widget(members=self.elements,
                                                    preselect=v,
@@ -1970,7 +1978,9 @@ class EditGenericForm(EditForm):
         v=self.getter()
         if v is None:
             v=""
-        if hasattr(self.entry, 'set_current_element'):
+        if self.type == 'boolean':
+            self.entry.set_active(v)
+        elif hasattr(self.entry, 'set_current_element'):
             self.entry.set_current_element(v)
         else:
             self.entry.set_text(v)
@@ -1978,7 +1988,9 @@ class EditGenericForm(EditForm):
     def update_element(self):
         if not self.editable:
             return False
-        if hasattr(self.entry, 'get_current_element'):
+        if self.type == 'boolean':
+            v = self.entry.get_active()
+        elif hasattr(self.entry, 'get_current_element'):
             v=self.entry.get_current_element()
         else:
             v=self.entry.get_text()
