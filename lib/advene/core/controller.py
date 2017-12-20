@@ -1355,6 +1355,8 @@ class AdveneController(object):
             title,chapter = m.group(1,2)
             uri="dvd@%s:%s" % (title, chapter)
         package.setMedia(uri)
+        if not package.getMetaData(config.data.namespace, "media_uri"):
+            package.setMetaData(config.data.namespace, "media_uri", uri)
         if m:
             uri = self.player.dvd_uri(title, chapter)
         video_info = self.set_media(uri)
