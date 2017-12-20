@@ -23,8 +23,9 @@ from gi.repository import Gtk
 
 from gettext import gettext as _
 
+import advene.core.config as config
 from advene.gui.views import AdhocView
-from advene.gui.views.table import AnnotationTable
+from advene.gui.views.table import AnnotationTable, GenericTable
 import advene.gui.views.table
 import advene.util.helper as helper
 
@@ -49,6 +50,7 @@ class FeatureChecker(object):
 
 class OverlappingChecker(FeatureChecker):
     name = "Overlapping"
+    description = _("This table presents for each type annotations that are overlapping.")
     def build_widget(self):
         self.table = AnnotationTable(controller=self.controller)
         # Set colors
@@ -94,6 +96,7 @@ class OverlappingChecker(FeatureChecker):
 
 class CompletionChecker(FeatureChecker):
     name = "Completions"
+    description = _("For every annotation type that has predefined keywords, this table displays the annotations that contain unspecified keywords.")
     def build_widget(self):
         self.table = AnnotationTable(controller=self.controller)
         # Hijack Content column
@@ -126,6 +129,24 @@ class CompletionChecker(FeatureChecker):
                         diff_dict[a] = ",".join(diff)
         self.table.set_elements(list(diff_dict.keys()), custom_data)
         self.table.model.set_sort_column_id(advene.gui.views.table.COLUMN_TYPE, Gtk.SortType.ASCENDING)
+
+class OntologyURIChecker(FeatureChecker):
+    name = "Ontology URI"
+    description = _("This table presents elements (package, schemas, annotation types) that do not have the ontology_uri reference metadata.")
+    def build_widget(self):
+        self.table = GenericTable(controller=self.controller)
+        return self.table.widget
+
+    def update_model(self):
+        def check_element(el):
+            return el.getMetaData(config.data.namespace, "ontology_uri")
+
+        invalid = []
+        if not check_element(self.controller.package):
+            invalid.append(self.controller.package)
+        invalid.extend(el for el in self.controller.package.schemas if not check_element(el))
+        invalid.extend(el for el in self.controller.package.annotationTypes if not check_element(el))
+        self.table.set_elements(invalid)
 
 class CheckerView(AdhocView):
     view_name = _("Checker")
@@ -164,10 +185,15 @@ class CheckerView(AdhocView):
         mainbox.add(notebook)
 
         self.checkers = []
-        for checkerclass in (OverlappingChecker, CompletionChecker):
+        for checkerclass in (OverlappingChecker, CompletionChecker, OntologyURIChecker):
             checker = checkerclass(self.controller)
             self.checkers.append(checker)
-            notebook.append_page(checker.widget, Gtk.Label(label=checker.name))
+            vbox = Gtk.VBox()
+            description = Gtk.Label.new(checker.description)
+            description.set_line_wrap(True)
+            vbox.pack_start(description, False, False, 0)
+            vbox.add(checker.widget)
+            notebook.append_page(vbox, Gtk.Label(label=checker.name))
 
         return mainbox
 
