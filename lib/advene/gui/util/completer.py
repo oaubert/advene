@@ -16,14 +16,16 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Autocomplete feature for Gtk.TextView
+"""Autocomplete feature for Gtk.TextView or Gtk.Entry
 
-This code is inspired and adapted from the Scribes project
+This code is inspired and heavily adapted from the Scribes project
 (http://scribes.sf.net/) - GPLv2
 """
 import logging
 logger = logging.getLogger(__name__)
 
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import Gdk
 import re
@@ -38,32 +40,36 @@ import advene.util.helper as helper
 
 class Completer:
     def __init__(self, textview=None, controller=None, element=None, indexer=None):
-        self.textview=textview
-        self.controller=controller
+        self.textview = textview
+        self.controller = controller
         if indexer is None:
             indexer = Indexer()
-        self.indexer=indexer
+        self.indexer = indexer
         # If defined, element is the element being edited, which
         # allows to do a more precise completion search
-        self.element=element
+        self.element = element
 
 
-        self.is_visible=False
-        self.word_list=None
+        self.is_visible = False
+        self.word_list = None
 
-        self.widget=self.build_widget()
+        self.widget = self.build_widget()
         self.connect()
 
     def connect(self):
         """Register the various callbacks for completion.
         """
+        logger.debug("Connecting completer to %s" , self.textview)
         self.textview.connect('key-press-event', self.key_press_event_cb)
         self.textview.connect('focus-out-event', self.hide_completion_window)
-        self.textview.get_buffer().connect('delete-range', self.hide_completion_window)
-        self.textview.get_buffer().connect_after('insert-text', self.insert_text_cb)
         self.textview.connect('paste-clipboard', self.hide_completion_window)
         self.textview.connect_after('paste-clipboard', self.hide_completion_window)
-        #self.textview.connect('button-press-event', self.__button_press_event_cb)
+        if isinstance(self.textview, Gtk.TextView):
+            self.textview.get_buffer().connect('delete-range', self.hide_completion_window)
+            self.textview.get_buffer().connect_after('insert-text', self.insert_text_cb)
+        else:
+            self.textview.connect('delete-text', self.hide_completion_window)
+            self.textview.connect_after('insert-text', self.insert_text_cb)
         return True
 
     def insert_text_cb(self, textbuffer, iterator, text, length):
@@ -107,7 +113,7 @@ class Completer:
         self.is_visible=True
 
     def get_cursor_rectangle(self):
-        b=self.textview.get_buffer()
+        b = self.textview.get_buffer()
         cursor_iterator=b.get_iter_at_mark(b.get_insert())
         rectangle = self.textview.get_iter_location(cursor_iterator)
         return rectangle
@@ -123,7 +129,7 @@ class Completer:
     def get_cursor_size(self):
         """Get the cursor's size.
         """
-        rectangle=self.get_cursor_rectangle()
+        rectangle = self.get_cursor_rectangle()
         return rectangle.width, rectangle.height
 
     def position_window(self, width, height):
@@ -135,23 +141,27 @@ class Completer:
         @param height: The completion window's height.
         @type height: An Integer object.
         """
-        # Get the cursor's coordinate and size.
-        cursor_x, cursor_y = self.get_cursor_textview_coordinates()
-        cursor_height = self.get_cursor_size()[1]
-        # Get the text editor's textview coordinate and size.
-        window = self.textview.get_window(Gtk.TextWindowType.TEXT)
-        origin = window.get_origin()
-        # Note: do not use origin.x/origin.y since it does not work on win32
-        window_x, window_y = origin[1], origin[2]
+        if isinstance(self.textview, Gtk.Entry):
+            allocation = self.textview.get_allocation()
+            origin = self.textview.get_window().get_origin()
+            position_x, position_y = (origin.x + allocation.x, origin.y + allocation.y + allocation.height)
+        else:
+            # Textview
+            # Get the cursor's coordinate and size.
+            cursor_x, cursor_y = self.get_cursor_textview_coordinates()
+            cursor_height = self.get_cursor_size()[1]
+            # Get the text editor's textview coordinate and size.
+            window = self.textview.get_window(Gtk.TextWindowType.TEXT)
+            origin = window.get_origin()
 
-        # Determine where to position the completion window.
-        position_x = window_x + cursor_x
-        position_y = window_y + cursor_y + cursor_height
+            # Determine where to position the completion window.
+            position_x = origin.x + cursor_x
+            position_y = origin.y + cursor_y + cursor_height
 
         if position_x + width > Gdk.Screen.width():
-            position_x = window_x + cursor_x - width
+            position_x = origin.x + cursor_x - width
         if position_y + height > Gdk.Screen.height():
-            position_y = window_y + cursor_y - height
+            position_y = origin.y + cursor_y - height
 
         #if not_(self.__signals_are_blocked):
         x, y = self.widget.get_position()
@@ -159,6 +169,7 @@ class Completer:
         if position_y != y:
             position_x = x
 
+        logger.debug("Position completion window %d %d", position_x, position_y)
         if position_x != x or position_y != y:
             # Set the window's new position.
             self.widget.move(position_x, position_y)
@@ -178,11 +189,35 @@ class Completer:
             self.treeview.get_selection().select_path(0)
 
     def get_word_before_cursor(self):
-        b=self.textview.get_buffer()
-        cursor_position=b.get_iter_at_mark(b.get_insert())
-        word_start=cursor_position.copy()
-        word_start.backward_word_start()
-        return word_start.get_text(cursor_position), word_start, cursor_position
+        """Return the word to complete with its position (word_start, cursor_position)
+
+        If the component is a TextView/GtkSource, return the position
+        as Gtk.TextIter.
+
+        If the component is a Gtk.Entry, return the position as int
+        (cursor position)
+        """
+        if isinstance(self.textview, Gtk.Entry):
+            cursor_position = self.textview.props.cursor_position
+            text = self.textview.get_text()[:cursor_position]
+            rx = re.compile(r'(.*?)([\w\d_]+)$', re.UNICODE)
+            # Find the last word
+            match = rx.search(text)
+            if match:
+                word = match.group(2)
+                word_start = cursor_position - len(word)
+            else:
+                word = ""
+                word_start = cursor_position
+        else:
+            # Gtk.TextView or GtkSource.View
+            b = self.textview.get_buffer()
+            cursor_position = b.get_iter_at_mark(b.get_insert())
+            word_start=cursor_position.copy()
+            word_start.backward_word_start()
+            word = word_start.get_text(cursor_position)
+        logger.debug("get_word_before_cursor %s %s %s", word, word_start, cursor_position)
+        return word, word_start, cursor_position
 
     def insert_word_completion(self, path):
         """Insert item selected in the completion window into the text editor's
@@ -196,10 +231,16 @@ class Completer:
 
         word, begin, end = self.get_word_before_cursor()
         complete = completion_string.replace(word, '')
-        b = self.textview.get_buffer()
-        b.begin_user_action()
-        b.insert_at_cursor(complete)
-        b.end_user_action()
+        logger.debug("insert_word_completion %s to %s", completion_string, word)
+
+        if isinstance(self.textview, Gtk.Entry):
+            self.textview.insert_text(complete, end)
+            self.textview.set_position(end + len(complete))
+        else:
+            b = self.textview.get_buffer()
+            b.begin_user_action()
+            b.insert_at_cursor(complete)
+            b.end_user_action()
         return
 
     def check_completion(self):
@@ -209,6 +250,7 @@ class Completer:
                 return False
             matches=sorted(self.indexer.get_completions(word, context=self.element),
                            key=len)
+            logger.debug("check_completion %s %s", word, matches)
             if matches:
                 self.populate_model(matches)
                 self.show_completion_window()
@@ -225,6 +267,7 @@ class Completer:
         This function allows the "Up" and "Down" arrow keys to work in
         the word completion window.
         """
+        logger.debug("key_press_event %s", event.keyval)
         if not self.is_visible:
             return False
 
@@ -402,6 +445,9 @@ class Indexer:
             args = context.get_bounds() + (False, )
             s=set(self.get_words(str(context.get_slice(*args).replace('\xef\xbf\xbc', ' '))))
             s.update(self.index['views'])
+        elif isinstance(context, Gtk.Entry):
+            s = set(self.get_words(context.get_text()))
+            s.update(self.index['views'])
         else:
             s=self.index['views']
 
@@ -409,7 +455,7 @@ class Indexer:
         return res
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     import sys
     window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
     window.set_default_size (600, 400)
@@ -425,19 +471,31 @@ if __name__ == "__main__":
     window.connect('destroy', lambda e: Gtk.main_quit())
     window.set_title ('test')
 
+    indexer = Indexer()
+
+    vbox = Gtk.VBox()
+
+    gi.require_version('GtkSource', '3.0')
     from gi.repository import GtkSource
-    t=GtkSource.View(GtkSource.Buffer())
+    t = GtkSource.View.new_with_buffer(GtkSource.Buffer())
     #t=Gtk.TextView()
     if sys.argv[1:]:
         logger.info("loading %s", sys.argv[1])
         t.get_buffer().set_text(open(sys.argv[1], encoding='utf-8').read())
-
-    i=Indexer()
     compl=Completer(textview=t,
                     controller=None,
                     element=t.get_buffer(),
-                    indexer=i)
+                    indexer=indexer)
+    vbox.add(t)
 
-    window.add (t)
+    e = Gtk.Entry()
+    compl=Completer(textview=e,
+                    controller=None,
+                    element=e,
+                    indexer=indexer)
+
+    vbox.pack_start(e, False, False, 0)
+
+    window.add(vbox)
     window.show_all()
     Gtk.main ()
