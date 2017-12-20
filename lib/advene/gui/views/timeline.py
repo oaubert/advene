@@ -2739,7 +2739,9 @@ class TimeLine(AdhocView):
         # Deactivate autoscroll...
         self.set_autoscroll_mode(0)
 
-        self.scale.set_value(1.3 * (end - begin) / self.layout.get_clip().width or 100)
+        new_scale = 1.3 * (end - begin) / self.layout.get_clip().width or 100
+        logger.debug("zoom on region %d %d: %f -> %f", begin, end, self.scale.get_value(), new_scale)
+        self.scale.set_value(new_scale)
 
         # Center on annotation
         self.center_on_position( int((begin + end) / 2) )
