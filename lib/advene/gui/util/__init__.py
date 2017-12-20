@@ -23,16 +23,22 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
+import advene.core.config as config
+
+import gi
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 from gi.repository import GObject
+if config.data.os == 'win32':
+    gi.require_version('GdkWin32', '3.0')
+    from gi.repository import GdkWin32
 
+import io
+import os
 import urllib.parse
 import urllib.request, urllib.parse, urllib.error
-import io
 
-import advene.core.config as config
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
@@ -453,3 +459,32 @@ def gdk2intrgb(color):
 
 def get_clipboard():
     return Gtk.Clipboard.get(Gdk.Atom.intern("CLIPBOARD", True))
+
+def get_drawable():
+    """Return an appropriate drawable
+
+    Gtk.Socket where possible, else fallback to Gtk.DrawingArea
+    """
+    def handle_remove(socket):
+        # Do not kill the widget if the application exits
+        return True
+
+    if config.data.os == 'win32' or os.environ.get('WAYLAND_DISPLAY'):
+        drawable = Gtk.DrawingArea()
+        def get_id(widget):
+            w = widget.get_window()
+            if hasattr(w, 'get_xid'):
+                ret = w.get_xid()
+            elif hasattr(GdkWin32.Win32Window, 'get_handle'):
+                ret = GdkWin32.Win32Window.get_handle(widget.get_window())
+            else:
+                logger.error("Cannot embed player on win32 - missing API")
+                ret = None
+            return ret
+        # Define the get_id method on the drawable, so that it can
+        # be used by the player plugin code.
+        drawable.get_id = get_id.__get__(drawable)
+    else:
+        drawable = Gtk.Socket()
+        drawable.connect('plug-removed', handle_remove)
+    return drawable

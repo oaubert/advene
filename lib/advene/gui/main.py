@@ -51,9 +51,6 @@ from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 from gi.repository import Pango
-if config.data.os == 'win32':
-    gi.require_version('GdkWin32', '3.0')
-    from gi.repository import GdkWin32
 
 if config.data.debug:
     #Gdk.set_show_events(True)
@@ -96,7 +93,7 @@ import advene.util.importer
 from advene.gui.util.completer import Indexer, Completer
 
 # GUI elements
-from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color, predefined_content_mimetypes
+from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color, predefined_content_mimetypes, get_drawable
 from advene.gui.util.playpausebutton import PlayPauseButton
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
@@ -1465,25 +1462,7 @@ class AdveneGUI(object):
         # south, fareast)
         self.pane={}
 
-        def handle_remove(socket):
-            # Do not kill the widget if the application exits
-            return True
-
-        # Video player socket
-        if config.data.os == 'win32':
-            self.drawable = Gtk.DrawingArea()
-            def get_id(widget):
-                if hasattr(GdkWin32.Win32Window, 'get_handle'):
-                    return GdkWin32.Win32Window.get_handle(widget.get_window())
-                else:
-                    logger.error("Cannot embed player on win32 - missing API")
-                    return None
-            # Define the get_id method on the drawable, so that it can
-            # be used by the player plugin code.
-            self.drawable.get_id = get_id.__get__(self.drawable)
-        else:
-            self.drawable=Gtk.Socket()
-            self.drawable.connect('plug-removed', handle_remove)
+        self.drawable = get_drawable()
 
         def register_drawable(drawable):
             # The player is initialized. We can register the drawable id

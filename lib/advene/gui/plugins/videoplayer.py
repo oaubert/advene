@@ -26,7 +26,7 @@ import os
 import advene.core.config as config
 from advene.gui.views import AdhocView
 import advene.gui.util.dialog as dialog
-from advene.gui.util import get_pixmap_button, enable_drag_source, decode_drop_parameters
+from advene.gui.util import get_pixmap_button, enable_drag_source, decode_drop_parameters, get_drawable
 
 name="Videoplayer view plugin"
 
@@ -198,8 +198,8 @@ class VideoPlayer(AdhocView):
         """
         if self.player is None:
             return None
-        w=Gtk.Window()
-        d=Gtk.Socket()
+        w = Gtk.Window()
+        d = get_drawable()
         w.add(d)
         w.show_all()
         try:
@@ -215,13 +215,9 @@ class VideoPlayer(AdhocView):
 
         self.player.sound_mute()
 
-        self.drawable=Gtk.Socket()
-        def handle_remove(socket):
-            # Do not kill the widget if the application exits
-            return True
-        self.drawable.connect('plug-removed', handle_remove)
+        self.drawable = get_drawable()
 
-        black=Gdk.Color(0, 0, 0)
+        black = Gdk.Color(0, 0, 0)
         for state in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
                       Gtk.StateType.SELECTED, Gtk.StateType.INSENSITIVE,
                       Gtk.StateType.PRELIGHT):
