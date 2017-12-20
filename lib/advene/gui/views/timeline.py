@@ -42,10 +42,10 @@ from advene.gui.views import AdhocView
 import advene.gui.edit.elements
 from advene.gui.util import png_to_pixbuf, enable_drag_source
 from advene.gui.util import decode_drop_parameters
-
-from advene.gui.views.annotationdisplay import AnnotationDisplay
+from advene.gui.util.completer import Completer
 import advene.util.helper as helper
 from advene.gui.util import dialog, name2color, get_small_stock_button, get_pixmap_button, get_pixmap_toolbutton
+from advene.gui.views.annotationdisplay import AnnotationDisplay
 from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget
 
 name="Timeline view plugin"
@@ -1768,22 +1768,17 @@ class TimeLine(AdhocView):
             button.grab_focus()
             return True
 
-        e=Gtk.Entry()
+        e = Gtk.Entry()
         # get_title will either return the content data, or the computed representation
         e.set_text(self.controller.get_title(annotation))
         e.set_activates_default(True)
 
-        completion = Gtk.EntryCompletion()
-        # Build the completion list
-        store = Gtk.ListStore(str)
-        for c in self.controller.package._indexer.get_completions("", context=annotation):
-            store.append([ c ])
-        completion.set_model(store)
-        completion.set_text_column(0)
-        completion.set_popup_single_match(False)
-        completion.set_inline_completion(True)
-        completion.set_minimum_key_length(2)
-        e.set_completion(completion)
+        # Use custom completer instead of Gtk.EntryCompletion in order
+        # to get custom behaviour
+        e._completer = Completer(textview=e,
+                                 controller=self.controller,
+                                 element=annotation,
+                                 indexer=annotation.rootPackage._indexer)
 
         def key_handler(widget, event, ann, cb, controller, close_eb):
             if event.keyval == Gdk.KEY_Return:

@@ -36,6 +36,7 @@ import advene.gui.popup
 
 import advene.util.helper as helper
 from advene.gui.util import dialog, png_to_pixbuf, contextual_drag_begin, contextual_drag_end
+from advene.gui.util.completer import Completer
 
 COLUMN_ELEMENT=0
 COLUMN_CONTENT=1
@@ -291,19 +292,14 @@ class AnnotationTable(AdhocView):
 
         def entry_editing_started(cell, editable, path):
             if isinstance(editable, Gtk.Entry):
-                completion = Gtk.EntryCompletion()
                 it = self.model.get_iter_from_string(path)
                 if not it:
                     return
                 el = self.model.get_value(it, COLUMN_ELEMENT)
-                # Build the completion list
-                store = Gtk.ListStore(str)
-                for c in self.controller.package._indexer.get_completions("", context=el):
-                    store.append([ c ])
-                completion.set_model(store)
-                completion.set_text_column(0)
-                editable.set_completion(completion)
-                editable.connect('focus-out-event', validate_entry_on_focus_out, cell, path)
+                editable._completer = Completer(textview=editable,
+                                                controller=self.controller,
+                                                element=el,
+                                                indexer=el.rootPackage._indexer)
 
         for (name, label, col) in (
                 ('content', _("Content"), COLUMN_CONTENT),
