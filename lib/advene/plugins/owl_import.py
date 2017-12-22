@@ -150,7 +150,7 @@ class OWLImporter(GenericImporter):
                 at_id = atnode.rpartition('/')[-1]
                 label = get_label(graph, atnode, at_id)
                 description = get_comment(graph, atnode)
-                at = self.create_annotation_type(schema, at_id, title=label, description=description, mimetype="application/x-advene-keyword-list")
+                at = self.create_annotation_type(schema, at_id, title=label, description=description, mimetype="text/x-advene-keyword-list")
                 at.setMetaData(config.data.namespace, "ontology_uri", str(atnode))
 
                 # Store old advene id

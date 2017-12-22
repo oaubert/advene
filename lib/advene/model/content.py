@@ -382,7 +382,7 @@ class Content(modeled.Modeled,
                                'text/x-advene-structured',
                                'application/x-advene-zone' ) ):
             return StructuredContent(self.data)
-        elif self.mimetype == 'application/x-advene-keyword-list':
+        elif self.mimetype == 'text/x-advene-keyword-list':
             # Return a dictionary?
             return KeywordList(self.data, parent=self._getParent().getType())
         elif self.mimetype == 'application/json':

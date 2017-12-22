@@ -1546,7 +1546,7 @@ class AdveneController(object):
             logger.warn("Cannot find completion at index %d", index)
             return False
 
-        if annotation.type.mimetype == 'application/x-advene-keyword-list':
+        if annotation.type.mimetype == 'text/x-advene-keyword-list':
             # Keyword list: toggle items
             keywords = annotation.content.parsed()
             if kw in keywords:

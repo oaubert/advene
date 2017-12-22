@@ -387,8 +387,7 @@ class Config(object):
 
         # MIMEtypes that can be edited by the TextContentHandler
         self.text_mimetypes = (
-            'application/x-advene-keyword-list',
-            'application/x-advene-structured',
+            'text/x-advene-keyword-list',
             'application/x-advene-sparql-query',
             'application/x-javascript',
             'application/javascript',

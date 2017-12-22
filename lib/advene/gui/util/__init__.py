@@ -50,8 +50,7 @@ predefined_content_mimetypes=[
     ('text/plain', _("Plain text content")),
     ('application/json', _("JSON content")),
     ('application/x-advene-structured', _("Simple-structured content")),
-    ('application/x-advene-structured', _("Simple-structured content")),
-    ('application/x-advene-keyword-lst', _("Keyword list")),
+    ('text/x-advene-keyword-list', _("Keyword list")),
     ('application/x-advene-values', _("List of numeric values")),
     ('image/svg+xml', _("SVG graphics content")),
     ]
