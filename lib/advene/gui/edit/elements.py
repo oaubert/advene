@@ -1496,7 +1496,7 @@ class TextContentHandler (ContentHandler):
         if fname is not None:
             try:
                 with open(fname, 'r', encoding='utf-8') as f:
-                    lines="".join(f.readlines())
+                    data = "".join(f.readlines())
                     self.content_set(data)
                     self.fname=fname
             except IOError as e:
