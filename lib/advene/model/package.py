@@ -219,6 +219,16 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
     def setMedia(self, media):
         return self.setMetaData(config.data.namespace, 'mediafile', media)
 
+    def isTemplate(self, value=None):
+        """Set or return wether the package is a template package.
+
+        If a boolean parameter is given, then set the value. In any
+        case, return the value.
+        """
+        if value is not None:
+            self.setMetaData(config.data.namespace, 'is_template', value)
+        return self.getMetaData(config.data.namespace, 'is_template') or False
+
     def getImports (self):
         """Return a collection of this package's imports"""
         if self.__imports is None:
