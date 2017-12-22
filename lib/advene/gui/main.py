@@ -4223,42 +4223,7 @@ Image cache information: %(imagecache)s
         return True
 
     def on_package_properties1_activate (self, button=None, data=None):
-        cache={
-            'author': self.controller.package.author,
-            'date': self.controller.package.date,
-            'media': self.controller.get_default_media() or "",
-            'duration': str(self.controller.package.cached_duration),
-            'title': self.controller.package.title or ""
-            }
-        def reset_duration(b, entry):
-            v=int(self.controller.player.stream_duration)
-            entry.set_text(str(v))
-            return True
-
-        ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
-        ew.set_name(_("Package properties"))
-        ew.add_entry(_("Author"), "author", _("Author name"))
-        ew.add_entry(_("Date"), "date", _("Package creation date"))
-        ew.add_entry(_("Title"), "title", _("Package title"))
-        ew.add_file_selector(_("Associated media"), 'media', _("Select a movie file"))
-        ew.add_entry_button(_("Duration"), "duration", _("Media duration in ms"), _("Reset"), reset_duration)
-
-        res=ew.popup()
-
-        if res:
-            self.controller.package.author = cache['author']
-            self.controller.package.date = cache['date']
-            self.controller.package.title = cache['title']
-            self.update_window_title()
-            self.controller.set_default_media(cache['media'])
-            try:
-                d=int(cache['duration'])
-                if d != self.controller.package.cached_duration:
-                    self.controller.package.cached_duration = d
-                    self.controller.notify('DurationUpdate', duration=d)
-            except ValueError:
-                logger.error("Cannot convert duration", exc_info=True)
-                pass
+        self.open_adhoc_view('edit', element=self.controller.package)
         return True
 
     def on_preferences1_activate (self, button=None, data=None):
