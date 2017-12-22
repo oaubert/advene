@@ -832,8 +832,6 @@ class Finder(AdhocView):
         self.controller=controller
 
         self.model=DetailedTreeModel(controller=controller, package=self.package)
-        # 640 / 3
-        self.column_width=210
         self.rootcolumn=None
         self.widget=self.build_widget()
 
@@ -844,6 +842,14 @@ class Finder(AdhocView):
             c=c.next_column
             c.update(c.node)
         return True
+
+    @property
+    def column_width(self):
+        try:
+            return self.widget.get_allocation().width / 3
+        except AttributeError:
+            # Fallback value, esp. at initialisation
+            return 210
 
     def update_element(self, element=None, event=None):
         logger.debug("update_element %s %s", event, element)
