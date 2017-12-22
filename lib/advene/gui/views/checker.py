@@ -24,18 +24,25 @@ from gi.repository import Gtk
 from gettext import gettext as _
 
 import advene.core.config as config
+import advene.gui.util.dialog as dialog
 from advene.gui.views import AdhocView
 from advene.gui.views.table import AnnotationTable, GenericTable
 import advene.gui.views.table
 import advene.util.helper as helper
 
+
 name="Checker view plugin"
 
-CHECKERS = []
+CHECKERS = {}
 def register_checker(checker):
     """Register a checker
     """
-    CHECKERS.append(checker)
+    CHECKERS[checker.__name__] = checker
+
+def get_checker(name):
+    """Return the checker corresponding to name.
+    """
+    return CHECKERS.get(name)
 
 def register(controller):
     controller.register_viewclass(CheckerView)
@@ -180,7 +187,12 @@ class CheckerView(AdhocView):
         self.contextual_actions = ()
         self.controller=controller
         self.options = {
+            # Comma-separated list of active checker classnames
+            'active_checkers': ""
             }
+        self.contextual_actions = (
+            (_("Select active checkers"), self.select_active_checkers),
+            )
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
@@ -191,22 +203,60 @@ class CheckerView(AdhocView):
         self.update_relationtype = self.update_model
         self.update_model()
 
+    def select_active_checkers(self):
+        active = self.options.get('active_checkers')
+        if active:
+            active = [ name.strip() for name in active.split(',') ]
+        else:
+            active = list(CHECKERS.keys())
+
+        d = Gtk.Dialog(title=_("Active checkers"),
+                       parent=self.widget.get_toplevel(),
+                       flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                       buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                                 Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
+
+        d.vbox.pack_start(Gtk.Label(_("Please specify the active checkers.")), False, False, 0)
+        for name in CHECKERS:
+            b = Gtk.CheckButton(name, use_underline=False)
+            b._element = name
+            b.set_active(name in active)
+            d.vbox.pack_start(b, False, True, 0)
+        d.vbox.show_all()
+        d.connect('key-press-event', dialog.dialog_keypressed_cb)
+        d.show()
+        dialog.center_on_mouse(d)
+        res=d.run()
+        if res == Gtk.ResponseType.OK:
+            elements=[ but._element
+                       for but in d.vbox.get_children()
+                       if hasattr(but, 'get_active') and but.get_active() ]
+            self.options['active_checkers'] = ",".join(elements)
+            self.build_checkers()
+            self.update_model()
+        d.close()
+        return True
+
     def update_model(self, **kw):
         for checker in self.checkers:
             checker.update_model()
 
-    def build_widget(self):
-        mainbox = Gtk.VBox()
+    def active_checkers(self):
+        active = self.options.get('active_checkers')
+        if active:
+            return [ c
+                     for c in [ get_checker(name.strip()) for name in active.split(',') ]
+                     if c is not None ]
+        else:
+            return CHECKERS.values()
 
-        mainbox.pack_start(Gtk.Label(_("List of possible issues in the current package")), False, False, 0)
-
-        notebook=Gtk.Notebook()
-        notebook.set_tab_pos(Gtk.PositionType.TOP)
-        notebook.popup_disable()
-        mainbox.add(notebook)
-
+    def build_checkers(self):
+        # Clear notebook if there are already checkers
+        for i in range(self.notebook.get_n_pages(), 0, -1):
+            self.notebook.remove_page(i - 1)
         self.checkers = []
-        for checkerclass in CHECKERS:
+
+        for checkerclass in self.active_checkers():
             checker = checkerclass(self.controller)
             self.checkers.append(checker)
             vbox = Gtk.VBox()
@@ -214,8 +264,20 @@ class CheckerView(AdhocView):
             description.set_line_wrap(True)
             vbox.pack_start(description, False, False, 0)
             vbox.add(checker.widget)
-            notebook.append_page(vbox, Gtk.Label(label=checker.name))
+            self.notebook.append_page(vbox, Gtk.Label(label=checker.name))
+        self.notebook.show_all()
 
+    def build_widget(self):
+        mainbox = Gtk.VBox()
+
+        mainbox.pack_start(Gtk.Label(_("List of possible issues in the current package")), False, False, 0)
+
+        self.notebook=Gtk.Notebook()
+        self.notebook.set_tab_pos(Gtk.PositionType.TOP)
+        self.notebook.popup_disable()
+        mainbox.add(self.notebook)
+
+        self.build_checkers()
         return mainbox
 
     def update_annotation (self, annotation=None, event=None):
