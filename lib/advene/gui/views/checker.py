@@ -31,6 +31,12 @@ import advene.util.helper as helper
 
 name="Checker view plugin"
 
+CHECKERS = []
+def register_checker(checker):
+    """Register a checker
+    """
+    CHECKERS.append(checker)
+
 def register(controller):
     controller.register_viewclass(CheckerView)
 
@@ -48,6 +54,7 @@ class FeatureChecker(object):
     def update_model(self):
         return True
 
+@register_checker
 class OverlappingChecker(FeatureChecker):
     name = "Overlapping"
     description = _("This table presents for each type annotations that are overlapping.")
@@ -94,6 +101,7 @@ class OverlappingChecker(FeatureChecker):
         self.table.set_elements(overlap, custom_data)
         self.table.model.set_sort_column_id(advene.gui.views.table.COLUMN_TYPE, Gtk.SortType.ASCENDING)
 
+@register_checker
 class CompletionChecker(FeatureChecker):
     name = "Completions"
     description = _("For every annotation type that has predefined keywords, this table displays the annotations that contain unspecified keywords.")
@@ -130,6 +138,7 @@ class CompletionChecker(FeatureChecker):
         self.table.set_elements(list(diff_dict.keys()), custom_data)
         self.table.model.set_sort_column_id(advene.gui.views.table.COLUMN_TYPE, Gtk.SortType.ASCENDING)
 
+@register_checker
 class OntologyURIChecker(FeatureChecker):
     name = "Ontology URI"
     description = _("This table presents elements (package, schemas, annotation types) that do not have the ontology_uri reference metadata.")
@@ -148,6 +157,7 @@ class OntologyURIChecker(FeatureChecker):
         invalid.extend(el for el in self.controller.package.annotationTypes if not check_element(el))
         self.table.set_elements(invalid)
 
+@register_checker
 class DurationChecker(FeatureChecker):
     name = "Duration"
     description = _("This table presents the annotations that have a null duration.")
@@ -196,7 +206,7 @@ class CheckerView(AdhocView):
         mainbox.add(notebook)
 
         self.checkers = []
-        for checkerclass in (OverlappingChecker, CompletionChecker, OntologyURIChecker, DurationChecker):
+        for checkerclass in CHECKERS:
             checker = checkerclass(self.controller)
             self.checkers.append(checker)
             vbox = Gtk.VBox()
