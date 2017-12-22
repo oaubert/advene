@@ -39,21 +39,20 @@ select the X11 video output in Edit/Preferences/Video Player.
 
 If you want to run Advene from sources on win32, you should install in this order (note the version numbers) :
 
-- Python3 v. 3.4 (it could be a later version, but check that the PyGobject bindings support it): http://python.org/
+- Python3 v. 3.5 or later (it could be a later version, but check that the PyGobject bindings support it): http://python.org/
 
 - win32process from http://pywin32.sf.net/
 
-- Python bindings for gtk/gstreamer and underlying libs from
-https://wiki.gnome.org/Projects/PyGObject/OldIndex enabling support
-for:
-  - gdk-pixbuf
-  - git2-glib
-  - goocanvas
-  - gstreamer and all gst-* packages
-  - gtk
-  - gtksourceview
-  - pango
-  - webkitgtk
+- Python bindings for gtk/gstreamer and underlying libs.  There was an
+all-in-one installer at
+https://wiki.gnome.org/Projects/PyGObject/OldIndex but it is
+outdated. You should use http://www.msys2.org/ to install Gtk,
+Gstreamer and other libs. See the information on the [Quodlibet
+website](https://github.com/quodlibet/quodlibet/tree/master/win_installer)
+for more details: it is also a python/gtk3/gstreamer application, you
+can use its [bootstrap
+script](https://github.com/quodlibet/quodlibet/blob/master/win_installer/bootstrap.sh)
+for setting up the build environment.
 
 - Cherrypy and requests: use pip (in the Scripts/ directory of the python directory)
 
