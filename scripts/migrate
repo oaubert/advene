@@ -42,6 +42,7 @@ Then save the resulting package with the original name plus
 """
 import json
 import os
+import re
 import sys
 
 try:
@@ -90,18 +91,49 @@ if __name__ == '__main__':
         for name, s, d, action in diff:
             action(s, d)
 
+        def alpha(s):
+            return re.sub('[^a-zA-Z]', '', s.strip()).lower()
+
         # Get the oldAdveneIdentifiers mapping
         old_id_mapping = template.getMetaData(config.data.namespace, "old_id_mapping")
         if old_id_mapping:
             #logging.info("old_id_mapping %s", old_id_mapping)
             old_id_mapping = json.loads(old_id_mapping)
+            # Mapping with only alphabetic characters
+            transformed_mapping = dict( (alpha(k), v)
+                                        for (k, v) in old_id_mapping.items())
 
+        def matching_type(at):
+            """Return the new annotation type matching at, None if there is none.
+            """
+            if at.id in old_id_mapping:
+                # Simple case: we can match ids
+                #logger.debug("Direct mapping")
+                return old_id_mapping[at.id]
+            # Check on the title
+            t = alpha(at.title)
+            if t in transformed_mapping:
+                #logger.debug("Title mapping %s", t)
+                return transformed_mapping[t]
+            # Last try: there could be suffixes, so try to remove it.
+            t = alpha("".join(at.title.split()[:-1]))
+            if t in transformed_mapping:
+                #logger.debug("Stripped title mapping %s", t)
+                return transformed_mapping[t]
+            logger.debug("Cannot find mapping for %s (%s)", at.title, t)
+            return None
+
+        total_annotations = 0
+        total_types = 0
         # Migrate data to new types when they can be determined
         for at in old_types:
-            if at.id in old_id_mapping:
+            new_at = matching_type(at)
+            if new_at is not None:
+                new_at = p.get_element_by_id(new_at)
                 # Migrate old annotations
-                new_at = p.get_element_by_id(old_id_mapping[at.id])
-                logging.info("Migration %d annotations from %s to %s", len(at.annotations), at.id, new_at.id)
+                logging.info("Migrating %d annotations from %s (%s) to %s", len(at.annotations), at.id, at.title, new_at.id)
+                total_types += 1
+                total_annotations += len(at.annotations)
                 for a in at.annotations:
                     new = p.createAnnotation(type = new_at,
                                              ident=p._idgenerator.get_id(Annotation),
@@ -113,9 +145,14 @@ if __name__ == '__main__':
                     p.annotations.remove(a)
                 # There should be no more annotations in the type. Remove it.
                 at.schema.annotationTypes.remove(at)
+                old_types.remove(at)
 
         # Save package
         (path, ext) = os.path.splitext(source)
         new_name = "".join((path, '_migrated', ext))
+        logger.info("Converted %d annotations from %d types. There remain %d annotations in %d unconverted old types",
+                    total_annotations, total_types,
+                    sum(len(at.annotations) for a in old_types),
+                    len(old_types))
         logger.info("Saving migrated package to %s", new_name)
         p.save(new_name)
