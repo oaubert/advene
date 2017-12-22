@@ -21,8 +21,9 @@
 This module provides generic edit forms for the various Advene
 elements (Annotation, Relation, AnnotationType, RelationType, Schema,
 View, Package).
-
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import advene.core.config as config
 from gettext import gettext as _
@@ -802,6 +803,15 @@ class EditPackagePopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(f.get_view(), False, False, 0)
 
+        f = EditMetaForm(title=_("Duration"),
+                         element=self.element, name='duration',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable,
+                         tooltip=_("Media duration in ms"),
+                         sizegroup=sg)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), False, False, 0)
+
         f = EditMetaForm(title=_("Default dynamic view"),
                          element=self.element, name='default_stbv',
                          namespaceid='advenetool', controller=self.controller,
@@ -829,20 +839,20 @@ class EditPackagePopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(f.get_view(), False, False, 0)
 
-        f = EditMetaForm(title=_("Cached duration"),
-                         element=self.element, name='duration',
-                         namespaceid='advenetool', controller=self.controller,
-                         editable=editable,
-                         tooltip=_("Cached duration in ms"),
-                         sizegroup=sg)
-        self.register_form(f)
-        vbox.pack_start(f.get_view(), False, False, 0)
-
         f = EditMetaForm(title=_("Mediafile"),
                          element=self.element, name='mediafile',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
                          tooltip=_("Location of associated media file"),
+                         sizegroup=sg)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), False, False, 0)
+
+        f = EditMetaForm(title=_("Template package"),
+                         element=self.element, name='is_template',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable, type='boolean',
+                         tooltip=_("Check to indicate that this is a template package, which should not contain annotation/relation data or saved workspace."),
                          sizegroup=sg)
         self.register_form(f)
         vbox.pack_start(f.get_view(), False, False, 0)
@@ -1216,13 +1226,13 @@ class EditForm(object):
         """
         raise Exception ("This method should be implemented in subclasses.")
 
-    def metadata_get_method(self, element, data, namespaceid='advenetool'):
+    def metadata_get_method(self, element, data, namespaceid='advenetool', type=None):
         namespace = config.data.namespace_prefix[namespaceid]
         def get_method():
             expr=element.getMetaData(namespace, data)
             if expr is None:
                 expr=""
-            if re.match('^\s+$', expr):
+            elif re.match('^\s+$', expr):
                 # The field can contain just a newline or whitespaces, which will be then ignored
                 #try:
                 #    i=element.id
@@ -1230,15 +1240,21 @@ class EditForm(object):
                 #    i=str(element)
                 #print "Messed up metadata for %s (%s)" % (i, expr)
                 expr=""
+            if type == 'boolean':
+                # Deserialize true/false as boolean. Handle both
+                # lowercase and capitalized versions.
+                expr = (expr.lower() == 'true')
             return expr
         return get_method
 
-    def metadata_set_method(self, element, data, namespaceid='advenetool'):
+    def metadata_set_method(self, element, data, namespaceid='advenetool', type=None):
         namespace = config.data.namespace_prefix[namespaceid]
         def set_method(value):
             if value is None or value == "":
                 value=""
-            if re.match('^\s+', value):
+            elif type == 'boolean':
+                value = str(bool(value)).lower()
+            elif re.match('^\s+', value):
                 #try:
                 #    i=element.id
                 #except AttributeError:
@@ -1988,6 +2004,7 @@ class EditGenericForm(EditForm):
     def update_element(self):
         if not self.editable:
             return False
+        logger.debug("update_element for %s", self.title)
         if self.type == 'boolean':
             v = self.entry.get_active()
         elif hasattr(self.entry, 'get_current_element'):
@@ -2003,8 +2020,8 @@ class EditMetaForm(EditGenericForm):
                  editable=True, tooltip=None, type=None,
                  elements=None,
                  focus=False, sizegroup=None):
-        getter=self.metadata_get_method(element, name, namespaceid)
-        setter=self.metadata_set_method(element, name, namespaceid)
+        getter=self.metadata_get_method(element, name, namespaceid, type=type)
+        setter=self.metadata_set_method(element, name, namespaceid, type=type)
         super(EditMetaForm, self).__init__(title=title,
                                            getter=getter,
                                            setter=setter,
