@@ -799,17 +799,22 @@ Annotation statistics:
         else:
             info.set_text(_("""%(type)s %(title)s""") % ({"type": helper.get_type(el),
                                                           "title": self.controller.get_title(el)}))
+        sw.add(info)
+
+        edit_button = Gtk.Button(_("Edit"))
+        edit_button.connect('clicked', lambda w: self.controller.gui.edit_element(el))
 
         frame = Gtk.Expander.new(_("Metadata"))
         frame.set_expanded(False)
         self.view = EditWidget(self.node.set_config, self.node.get_config)
         for p in self.node.list_keys():
             self.view.add_entry(p, p, "")
-
-        sw.add(info)
-        vbox.add(sw)
         frame.add(self.view)
-        vbox.pack_start(frame, False, False, 0)
+
+        vbox.add(sw)
+        if not isinstance(el, (VirtualNode, AbstractBundle)):
+            vbox.pack_start(edit_button, False, False, 0)
+            vbox.pack_start(frame, False, False, 0)
         vbox.show_all()
         return vbox
 CLASS2COLUMN[Metadata] = MetadataColumn
