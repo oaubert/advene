@@ -1625,10 +1625,10 @@ class TextContentHandler (ContentHandler):
 
         # Hook the completer component
         if hasattr(self.parent.rootPackage, '_indexer'):
-            completer=Completer(textview=self.view,
-                                controller=self.controller,
-                                element=self.parent,
-                                indexer=self.parent.rootPackage._indexer)
+            self.view._completer=Completer(textview=self.view,
+                                           controller=self.controller,
+                                           element=self.parent,
+                                           indexer=self.parent.rootPackage._indexer)
 
         scroll_win = Gtk.ScrolledWindow ()
         scroll_win.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
