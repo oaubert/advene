@@ -1923,6 +1923,7 @@ class TimeLine(AdhocView):
                                Gdk.KEY_7,
                                Gdk.KEY_8,
                                Gdk.KEY_9)
+              and event.get_state() == 0
               and config.data.preferences['completion-quick-fill']):
             comps = helper.get_type_predefined_completions(annotation.type)
             if not comps:
@@ -2307,7 +2308,7 @@ class TimeLine(AdhocView):
         if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
             return True
 
-        if event.keyval >= 49 and event.keyval <= 57:
+        if event.keyval >= 49 and event.keyval <= 57 and (event.get_state() & Gdk.ModifierType.CONTROL_MASK):
             # 1-9 keys set the zoom factor
             pos=self.get_middle_position()
             self.fraction_adj.set_value(1.0/pow(2, event.keyval-49))
@@ -2986,6 +2987,7 @@ class TimeLine(AdhocView):
                                    Gdk.KEY_7,
                                    Gdk.KEY_8,
                                    Gdk.KEY_9)
+                  and event.get_state() == 0
                   and config.data.preferences['completion-quick-fill']):
                 comps = helper.get_type_predefined_completions(widget.annotationtype)
                 if not comps:
