@@ -136,15 +136,16 @@ class Completer:
         """Position the completion window in the text editor's buffer.
 
         @param width: The completion window's width.
-        @type width: An Integer object.
-
+        @type width: int
         @param height: The completion window's height.
-        @type height: An Integer object.
+        @type height: int
         """
         if isinstance(self.textview, Gtk.Entry):
             allocation = self.textview.get_allocation()
             origin = self.textview.get_window().get_origin()
             position_x, position_y = (origin.x + allocation.x, origin.y + allocation.y + allocation.height)
+            cursor_x = 0
+            cursor_y = 0
         else:
             # Textview
             # Get the cursor's coordinate and size.
@@ -230,8 +231,8 @@ class Completer:
         completion_string = self.model[path[0]][0]
 
         word, begin, end = self.get_word_before_cursor()
-        complete = completion_string.replace(word, '')
-        logger.debug("insert_word_completion %s to %s", completion_string, word)
+        complete = completion_string.replace(word, '', 1)
+        logger.debug("insert_word_completion %s -> %s to %s (%s, %s)", completion_string, complete, word, begin, end)
 
         if isinstance(self.textview, Gtk.Entry):
             self.textview.insert_text(complete, end)
