@@ -594,7 +594,7 @@ def get_filename(title=_("Open a file"),
          _("Advene files (.xml, .azp, .apl)"),
          ('*.xml', '*.azp', '*.apl')),
         ('session', _("Advene session (.apl)"), ( '*.apl', ) ),
-        ('audio', _("Audio files"), ('*.wav', '*.mp3', '*.ogg')),
+        ('audio', _("Audio files"), ('*.wav', '*.mp3', '*.ogg', '*.aac', '*.m4a', '*.opus')),
         ('video', _("Video files"), [ "*%s" % e for e in config.data.video_extensions ])
         ):
         filters[name]=Gtk.FileFilter()
