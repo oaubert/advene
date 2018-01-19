@@ -3635,23 +3635,35 @@ class TimeLine(AdhocView):
                         for at in self.controller.package.annotationTypes
                         if at not in l ]
         selected_store, it = dialog.generate_list_model(
-            [ (at, self.controller.get_title(at)) for at in l ])
+            [ (at, self.controller.get_title(at), self.controller.get_title(at.schema), len(at.annotations)) for at in l ],
+            custom_fields=[ str, int ])
         notselected_store, it = dialog.generate_list_model(
-            [ (at, self.controller.get_title(at)) for at in notselected ])
+            [ (at, self.controller.get_title(at), self.controller.get_title(at.schema), len(at.annotations)) for at in notselected ],
+            custom_fields=[ str, int ])
 
         hbox = Gtk.HBox()
         selectedtree = Gtk.TreeView(model=selected_store)
-        cell = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(_('Displayed'), cell, text=0)
-        selectedtree.append_column(column)
+        for (label, index) in ((_('Displayed'), 0),
+                               (_('Schema'), 2),
+                               (_('Ann. count'), 3)):
+            cell = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(label, cell, text=index)
+            column.set_sort_column_id(index)
+            selectedtree.append_column(column)
 
         selectedtree.set_reorderable(True)
         selectedtree.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
 
         notselectedtree = Gtk.TreeView(model=notselected_store)
-        cell = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(_('Not displayed'), cell, text=0)
-        notselectedtree.append_column(column)
+        for (label, index) in ((_('Displayed'), 0),
+                               (_('Schema'), 2),
+                               (_('Ann. count'), 3)):
+            cell = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(label, cell, text=index)
+            column.set_sort_column_id(index)
+            notselectedtree.append_column(column)
+
+        notselectedtree.set_reorderable(True)
         notselectedtree.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
 
         actions = Gtk.VBox()
