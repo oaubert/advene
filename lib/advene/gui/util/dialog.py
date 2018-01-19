@@ -721,7 +721,7 @@ class CategorizedSelector:
             submenu[self.category_getter(e)].append(i)
             i.connect('activate', lambda menuitem, element: self.update_element(element), e)
         m.show_all()
-        m.popup(None, None, None, 0, Gtk.get_current_event_time())
+        m.popup(None, None, None, None, 0, Gtk.get_current_event_time())
         return m
 
     def get_button(self):
