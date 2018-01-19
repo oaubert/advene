@@ -59,29 +59,49 @@ def dialog_keypressed_cb(widget=None, event=None):
         return True
     return False
 
-def generate_list_model(elements, active_element=None):
+def generate_list_model(elements, active_element=None, custom_fields=None):
     """Create a TreeModel matching the elements list.
 
-    Element 0 is the label.
-    Element 1 is the element
-    Element 2 is the color (optional)
+    element[0] is the label.
+    element[1] is the element
 
-    @param elements: a list of couples (element, label) or tuples (element, label, color)
+    The rest of the element tuple are custom data, that will be
+    considered as string if custom_fields is not specified. Else
+    custom_fields is a list that should contain the types of custom
+    data.
+
+    @param elements: a list of couples (element, label) or tuples (element, label, *param)
     @param active_element: the element that should be preselected
+
     """
-    store=Gtk.ListStore(str, object, str)
+    if custom_fields is not None:
+        store = Gtk.ListStore(str, object, *custom_fields)
+    elif elements:
+        first = elements[0]
+        if len(first) == 1:
+            # No 2 elements. Build the label
+            elements = [ (el, str(el)) for el in elements ]
+            first = elements[0]
+
+        if len(first) == 2:
+            # Only 2 elements
+            store = Gtk.ListStore(str, object, str)
+        else:
+            store = Gtk.ListStore(str, object, *([str] * (len(first) - 2)))
+    else:
+        # If no element, generate a 3 column store, for backwards
+        # compatibility
+        store = Gtk.ListStore(str, object, str)
+
     active_iter=None
     if elements:
-        if len(elements[0]) == 3:
-            for element, label, color in elements:
-                i=store.append( ( label, element, color ) )
-                if element == active_element:
-                    active_iter=i
-        else:
-            for element, label in elements:
-                i=store.append( ( label, element, None ) )
-                if element == active_element:
-                    active_iter=i
+        for item in elements:
+            if len(item) > 2:
+                i = store.append( (item[1], item[0], *item[2:]) )
+            else:
+                i = store.append( (item[1], item[0], None) )
+            if item[0] == active_element:
+                active_iter=i
     return store, active_iter
 
 def list_selector_widget(members=None,
