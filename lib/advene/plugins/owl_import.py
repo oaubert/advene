@@ -107,8 +107,12 @@ class OWLImporter(GenericImporter):
         def get_label(graph, subject, default=""):
             """Return a label for the object.
 
+            First try ao:prefixedLabel, then label@en
             Using preferably @en labels
             """
+            labels = list(graph.objects(subject, AO.prefixedLabel))
+            if labels:
+                return labels[0]
             labels = graph.preferredLabel(subject, lang='en')
             if labels:
                 # We have at least 1 @en label. Return it.
