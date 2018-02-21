@@ -135,7 +135,7 @@ class OWLImporter(GenericImporter):
         # easily removed once migration is effective.
         old_id_mapping = {}
 
-        schemas = list(graph.subjects(RDF.type, AO.AnnotationLevel))
+        schemas = [ s[0] for s in graph.query(PREFIX + """SELECT ?schema WHERE { ?schema rdf:type ao:AnnotationLevel . OPTIONAL { ?schema ao:sequentialNumber ?number } . BIND ( COALESCE( ?number, 0 ) as ?number ) } ORDER BY xsd:integer(?number)""") ]
         if not schemas:
             logger.error(_("Cannot find a valid schema in the OWL file."))
             return
@@ -150,7 +150,8 @@ class OWLImporter(GenericImporter):
             schema.setMetaData(config.data.namespace, "ontology_uri", str(s))
             if not self.progress(progress, "Creating schema %s" % schema.title):
                 break
-            for atnode in graph.objects(s, AO.term('hasAnnotationType')):
+            atnodes = [ at[0] for at in graph.query(PREFIX + """SELECT ?at WHERE { <%s> ao:hasAnnotationType ?at . OPTIONAL { ?at ao:sequentialNumber ?number } . BIND ( COALESCE( ?number, 0 ) as ?number )} ORDER BY xsd:integer(?number)""" % str(s)) ]
+            for atnode in atnodes:
                 at_id = atnode.rpartition('/')[-1]
                 label = get_label(graph, atnode, at_id)
                 description = get_comment(graph, atnode)
@@ -172,7 +173,7 @@ class OWLImporter(GenericImporter):
 
                 # Set completions
                 values = [ (t[0], str(t[1]))
-                           for t in graph.query(PREFIX + """SELECT ?x ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" )}""" % str(atnode)) ]
+                           for t in graph.query(PREFIX + """SELECT ?x ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" ) OPTIONAL { ?x ao:sequentialNumber ?number } . BIND ( COALESCE( ?number, 0 ) as ?number ) } ORDER BY xsd:integer(?number)""" % str(atnode)) ]
                 if values:
                     at.setMetaData(config.data.namespace, "completions", ",".join(v[1] for v in values))
 
