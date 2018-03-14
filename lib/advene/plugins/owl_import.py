@@ -155,8 +155,18 @@ class OWLImporter(GenericImporter):
                 at_id = atnode.rpartition('/')[-1]
                 label = get_label(graph, atnode, at_id)
                 description = get_comment(graph, atnode)
-                at = self.create_annotation_type(schema, at_id, title=label, description=description, mimetype="text/x-advene-keyword-list")
+                # Set completions
+                values = [ (t[0], str(t[1]))
+                           for t in graph.query(PREFIX + """SELECT ?x ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" ) OPTIONAL { ?x ao:sequentialNumber ?number } . BIND ( COALESCE( ?number, 0 ) as ?number ) } ORDER BY xsd:integer(?number)""" % str(atnode)) ]
+                if values:
+                    mimetype = "text/x-advene-keyword-list"
+                else:
+                    mimetype = "text/plain"
+                at = self.create_annotation_type(schema, at_id, title=label, description=description, mimetype=mimetype)
                 at.setMetaData(config.data.namespace, "ontology_uri", str(atnode))
+
+                if values:
+                    at.setMetaData(config.data.namespace, "completions", ",".join(v[1] for v in values))
 
                 # Store old advene id
                 old_ids = list(graph.objects(atnode, AO.oldAdveneIdentifier))
@@ -170,12 +180,6 @@ class OWLImporter(GenericImporter):
                         logger.warn("Multiple colors defined for %s. Using first one.", at_id)
                     color = colors[0]
                     at.setMetaData(config.data.namespace, "color", "string:%s" % color)
-
-                # Set completions
-                values = [ (t[0], str(t[1]))
-                           for t in graph.query(PREFIX + """SELECT ?x ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" ) OPTIONAL { ?x ao:sequentialNumber ?number } . BIND ( COALESCE( ?number, 0 ) as ?number ) } ORDER BY xsd:integer(?number)""" % str(atnode)) ]
-                if values:
-                    at.setMetaData(config.data.namespace, "completions", ",".join(v[1] for v in values))
 
                 # Additional value metadata
                 metadata = {}
