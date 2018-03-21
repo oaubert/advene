@@ -20,6 +20,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import codecs
+from collections import OrderedDict
 from io import StringIO
 import json
 import re
@@ -112,13 +113,13 @@ class KeywordList(object):
     def __init__(self, data=None, parent=None, **kw):
         # Initialize with a content.
         self._values, self._comment = self.parse(data)
-        self._parent = type
+        self._parent = parent
 
     def get(self, kw):
         """Return metadata about the keyword
         """
         metadata = {}
-        meta_str = self._parent.getMetaData(config.data.namespace, 'value-metadata')
+        meta_str = self._parent.getMetaData(config.data.namespace, 'value_metadata')
         if meta_str:
             try:
                 metadata = json.loads(meta_str)
@@ -155,6 +156,9 @@ class KeywordList(object):
             pass
         return self._values
 
+    def get_comment(self):
+        return self._comment
+
     def __contains__(self, kw):
         return kw in self._values
 
@@ -166,6 +170,17 @@ class KeywordList(object):
 
     def __str__(self):
         return self.unparse()
+
+    def as_dict(self):
+        """Return the keyword list as an ordered dict.
+
+        The keys are the list items, the values are fetched from
+        metadata_value from the type.
+        """
+        res = OrderedDict()
+        for kw in self._values:
+            res[kw] = self.get(kw)
+        return res
 
     def unparse(self):
         """Return the encoded version of the set
