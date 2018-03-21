@@ -657,6 +657,16 @@ class EditViewPopup (EditElementPopup):
                                          expanded=False), False, False, 0)
 
         if config.data.preferences['expert-mode']:
+            advanced = Gtk.VBox()
+            # extension
+            f = EditMetaForm(title=_("Extension"),
+                             element=self.element, name='extension',
+                             namespaceid='advenetool', controller=self.controller,
+                             editable=editable,
+                             tooltip=_("Filename extension"))
+            self.register_form(f)
+            advanced.pack_start(f.get_view(), False, False, 0)
+
             # matchFilter
             f = self.make_registered_form (element=self.element.matchFilter,
                                            fields=('class', 'type'),
@@ -665,7 +675,9 @@ class EditViewPopup (EditElementPopup):
                                            labels={'class': _('Class'),
                                                    'type':  _('Type')}
                                            )
-            vbox.pack_start (self.expandable(f.get_view (), _("Match Filter"), expanded=False),
+            advanced.pack_start(f.get_view(), False, False, 0)
+
+            vbox.pack_start (self.expandable(advanced, _("Advanced"), expanded=False),
                              False, False, 0)
 
         # Tags (not tags in view)
