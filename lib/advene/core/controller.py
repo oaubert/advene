@@ -1683,6 +1683,8 @@ class AdveneController(object):
             differ.update_meta(self.package, p, 'advenetool', 'duration')
             differ.update_meta(self.package, p, 'advenetool', 'mediafile')
             differ.update_meta(self.package, p, 'advenetool', 'tag_colors')
+            differ.update_meta(self.package, p, 'advenetool', 'ontology_uri')
+            differ.update_meta(self.package, p, 'advenetool', 'media_uri')
             differ.update_meta(self.package, p, 'dc', 'title')
             differ.update_meta(self.package, p, 'dc', 'creator')
             differ.update_meta(self.package, p, 'dc', 'description')
