@@ -673,6 +673,18 @@ Total duration: %(total)s
     else:
         return res
 
+def get_schema_statistics(schema):
+    """Return some stats about the schema.
+    """
+    return """{annotationtype_count} with {annotation_count}
+    {relationtype_count} with {relation_count}
+    """.format(
+        annotationtype_count=format_element_name('annotation_type', len(schema.annotationTypes)),
+        relationtype_count=format_element_name('relation_type', len(schema.relationTypes)),
+        annotation_count=format_element_name('annotation', sum(len(at.annotations) for at in schema.annotationTypes)),
+        relation_count=format_element_name('relation', sum(len(rt.relations) for rt in schema.relationTypes))
+    )
+
 element_declinations={
     'schema': (_('schema'), _('schemas')),
     'annotation': (_('annotation'), _('annotations')),

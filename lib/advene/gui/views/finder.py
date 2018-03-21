@@ -796,6 +796,12 @@ Annotation statistics:
                 "title": self.controller.get_title(el),
                 "statistics": helper.get_annotations_statistics(el.annotations)
             }))
+        elif isinstance(el, Schema):
+            info.set_text(_("""%(type)s %(title)s\n%(statistics)s""") % ({
+                "type": helper.get_type(el),
+                "title": self.controller.get_title(el),
+                "statistics": helper.get_schema_statistics(el)
+            }))
         else:
             info.set_text(_("""%(type)s %(title)s""") % ({"type": helper.get_type(el),
                                                           "title": self.controller.get_title(el)}))
