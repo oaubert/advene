@@ -782,6 +782,7 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
     &quot;startIndex&quot;: 0,
     &quot;items&quot;: [
          &lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot; &gt;
+         &lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;python:a.content.mimetype != 'application/x-advene-values'&quot; &gt;
          {
             &quot;@context&quot;: &quot;http://www.w3.org/ns/anno.jsonld&quot;,
             &quot;id&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/uri/json&quot;&gt;annotation_uri&lt;/span&gt;,
@@ -807,7 +808,7 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
             },
             &lt;/span&gt;
             &quot;target&quot;: {
-                &quot;source&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/meta/advenetool/mediafile/urlquote&quot;&gt;movie&lt;/span&gt;&quot;,
+                &quot;source&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/meta/advenetool/media_uri | package/meta/advenetool/mediafile/urlquote&quot;&gt;movie&lt;/span&gt;&quot;,
                 &quot;selector&quot;: {
                     &quot;type&quot;: &quot;FragmentSelector&quot;,
                     &quot;conformsTo&quot;: &quot;http://www.w3.org/TR/media-frags/&quot;,
@@ -815,6 +816,7 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
                 }
             }
         }&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/a/end&quot;&gt;,&lt;/span&gt;
+        &lt;/span&gt;
         &lt;/span&gt;
      ]
   }
