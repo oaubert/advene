@@ -860,14 +860,24 @@ class EditPackagePopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(f.get_view(), False, False, 0)
 
-        f = EditMetaForm(title=_("Template package"),
-                         element=self.element, name='is_template',
-                         namespaceid='advenetool', controller=self.controller,
-                         editable=editable, type='boolean',
-                         tooltip=_("Check to indicate that this is a template package, which should not contain annotation/relation data or saved workspace."),
-                         sizegroup=sg)
-        self.register_form(f)
-        vbox.pack_start(f.get_view(), False, False, 0)
+        if config.data.preferences['expert-mode']:
+            f = EditMetaForm(title=_("Media URI"),
+                             element=self.element, name='media_uri',
+                             namespaceid='advenetool', controller=self.controller,
+                             editable=editable,
+                             tooltip=_("Mediafile URI"),
+                             sizegroup=sg)
+            self.register_form(f)
+            vbox.pack_start(f.get_view(), False, False, 0)
+
+            f = EditMetaForm(title=_("Template package"),
+                             element=self.element, name='is_template',
+                             namespaceid='advenetool', controller=self.controller,
+                             editable=editable, type='boolean',
+                             tooltip=_("Check to indicate that this is a template package, which should not contain annotation/relation data or saved workspace."),
+                             sizegroup=sg)
+            self.register_form(f)
+            vbox.pack_start(f.get_view(), False, False, 0)
 
         return vbox
 
