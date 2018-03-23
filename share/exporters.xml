@@ -768,14 +768,16 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
   }
 }
 </content></view><view dc:creator="oaubert" dc:date="2017-12-22T11:08:56" id="AdA_RDF_Export_View" viewable-class="package"><meta><extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">json</extension><title xmlns="http://purl.org/dc/elements/1.1/">AdA RDF Export View</title></meta><content encoding="utf-8" mime-type="text/html">{
-  &quot;@context&quot;: [ 
-       &quot;http://www.w3.org/ns/anno.jsonld&quot;,
-        { &quot;ao&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;here/meta/advenetool/ontology_uri/json&quot;&gt;container_title&lt;/span&gt; } 
-        ],
+  &quot;@context&quot;: [ &quot;http://www.w3.org/ns/anno.jsonld&quot;,
+                              &quot;http://www.w3.org/ns/ldp.jsonld&quot;,
+                              {
+                                     &quot;ar&quot;: &quot;http://ada.filmontology.org/resource/2018/02/&quot;,
+                                     &quot;ao&quot;: &quot;http://ada.filmontology.org/ontology/2018/02/&quot;
+                               }
+    ],
   &quot;id&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;here/uri&quot;&gt;container_uri&lt;/span&gt;&quot;,
   &quot;type&quot;: &quot;AnnotationCollection&quot;,
   &quot;label&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;here/representation/json&quot;&gt;container_title&lt;/span&gt;,
-  &quot;total&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;here/annotations/length&quot;&gt;annotation_count&lt;/span&gt;,
   &quot;first&quot;: {
     &quot;id&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;here/uri&quot;&gt;container_uri&lt;/span&gt;/page1&quot;,
     &quot;type&quot;: &quot;AnnotationPage&quot;,
@@ -784,23 +786,21 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
          &lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot; &gt;
          &lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;python:a.content.mimetype != 'application/x-advene-values'&quot; &gt;
          {
-            &quot;@context&quot;: &quot;http://www.w3.org/ns/anno.jsonld&quot;,
-            &quot;id&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/uri/json&quot;&gt;annotation_uri&lt;/span&gt;,
-            &quot;type&quot;: &quot;Annotation&quot;,
+            &quot;@id&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/uri/json&quot;&gt;annotation_uri&lt;/span&gt;,
+            &quot;@type&quot;: &quot;Annotation&quot;,
             &quot;created&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/date/json&quot;&gt;created&lt;/span&gt;,
             &quot;creator&quot;: {
-                &quot;id&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/author/json&quot;&gt;author&lt;/span&gt;,
-                &quot;type&quot;: &quot;Person&quot;,
+                &quot;@id&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/author/json&quot;&gt;author&lt;/span&gt;,
+                &quot;@type&quot;: &quot;Person&quot;,
                 &quot;nick&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/author/json&quot;&gt;author&lt;/span&gt;
             },
             &quot;body&quot;: {
-                &quot;type&quot;: &quot;Text&quot;,
-                &quot;value&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/content/data/json&quot;&gt;annotation_data&lt;/span&gt;,
-                &quot;type&quot;: &quot;text/plain&quot;
+                &quot;@type&quot;: &quot;Text&quot;,
+                &quot;value&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/content/data/json&quot;&gt;annotation_data&lt;/span&gt;
             },
          &lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;python:a.content.mimetype=='text/x-advene-keyword-list'&quot; &gt;
             &quot;body&quot;: {
-                &quot;type&quot;: &quot;ao:PredefinedValuesAnnotationType&quot;,
+                &quot;@type&quot;: &quot;ao:PredefinedValuesAnnotationType&quot;,
                  &quot;ao:annotationType&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/type/meta/advenetool/ontology_uri/json&quot;&gt;type&lt;/span&gt;,
                  &lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;item python:list(a.content.parsed().as_dict().items())&quot;&gt;
                  &quot;ao:annotationValue&quot;: &lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;item/1/ontology_uri/json | item/0/json&quot;&gt;annotation_data&lt;/span&gt;&lt;span tal:omit-tag=&quot;&quot; tal:condition=&quot;not:repeat/item/end&quot;&gt;,&lt;/span&gt;
@@ -810,7 +810,7 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
             &quot;target&quot;: {
                 &quot;source&quot;: &quot;&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;package/meta/advenetool/media_uri | package/meta/advenetool/mediafile/urlquote&quot;&gt;movie&lt;/span&gt;&quot;,
                 &quot;selector&quot;: {
-                    &quot;type&quot;: &quot;FragmentSelector&quot;,
+                    &quot;@type&quot;: &quot;FragmentSelector&quot;,
                     &quot;conformsTo&quot;: &quot;http://www.w3.org/TR/media-frags/&quot;,
                     &quot;value&quot;: &quot;t=&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/fragment/begin/formatted&quot;&gt;begin&lt;/span&gt;,&lt;span tal:omit-tag=&quot;&quot; tal:replace=&quot;a/fragment/end/formatted&quot;&gt;end&lt;/span&gt;&quot;
                 }
