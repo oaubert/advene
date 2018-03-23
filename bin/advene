@@ -227,7 +227,7 @@ Aborting.""", config.data.path[d])
             # A filename was provided. Strip the extension.
             output = ".".join((os.path.splitext(f)[0], ext))
             if os.path.exists(output):
-                logger.error("Output file %s already exists. Remove it before proceeding.", output)
+                logging.error("Output file %s already exists. Remove it before proceeding.", output)
                 continue
             logging.warn("Converting %s into %s", f, output)
             c.load_package(f)
