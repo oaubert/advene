@@ -354,6 +354,7 @@ class TimeLine(AdhocView):
 
         # Dictionary holding the vertical position for each type
         self.layer_position = {}
+        self.layer_height = {}
         self.widget = self.get_full_widget()
 
         # Set default parameters (zoom) and refresh the legend widget
@@ -722,6 +723,11 @@ class TimeLine(AdhocView):
                     # Display all annotation types
                     self.annotationtypes = list(package.annotationTypes)
 
+        self.layer_height = {}
+        for at in self.annotationtypes:
+            if at.mimetype == 'application/x-advene-values':
+                self.layer_height[at] = 3 * self.button_height
+
         # Clear the layouts
         self.layout.foreach(self.layout.remove)
         self.annotation_widgets = {}
@@ -770,13 +776,13 @@ class TimeLine(AdhocView):
         h = 0
         if new_at:
             # Only adding a new annotation type. Add it at the end.
-            p = max(self.layer_position.values())
-            self.layer_position[new_at] = p + self.button_height + s
+            prev_at, p = max(self.layer_position.items(), key=lambda i: i[1])
+            self.layer_position[new_at] = p + self.get_element_height(prev_at) + s
         else:
             self.layer_position.clear()
             for at in self.annotationtypes:
                 self.layer_position[at] = h
-                h += self.button_height + s
+                h += self.get_element_height(at) + s
 
     def refresh(self, *p):
         self.update_model(self.controller.package, partial_update=False)
@@ -799,6 +805,11 @@ class TimeLine(AdhocView):
 
     def get_widget_for_annotation (self, annotation):
         return self.annotation_widgets.get(annotation)
+
+    def get_element_height(self, element):
+        if isinstance(element, Annotation):
+            element = element.type
+        return self.layer_height.get(element, self.button_height)
 
     def delete_annotation_widget(self, annotation):
         w = self.annotation_widgets.get(annotation)
@@ -1678,10 +1689,10 @@ class TimeLine(AdhocView):
 
             f=[ at
                 for (at, p) in self.layer_position.items()
-                if (y - s >= p and y - s <= p + self.button_height) ]
+                if (y - s >= p and y - s <= p + self.get_element_height(at)) ]
             t=[ at
                 for (at, p) in self.layer_position.items()
-                if (y + s >= p and y + s <= p + self.button_height) ]
+                if (y + s >= p and y + s <= p + self.get_element_height(at)) ]
             if f and t and f[0] != source and t[0] != source:
                 if source in self.annotationtypes:
                     self.annotationtypes.remove(source)
@@ -2352,7 +2363,7 @@ class TimeLine(AdhocView):
         y += widget.get_parent().get_vscrollbar().get_adjustment().get_value()
         drop_types=[ at
                      for (at, p) in self.layer_position.items()
-                     if (y >= p and y <= p + self.button_height + config.data.preferences['timeline']['interline-height']) ]
+                     if (y >= p and y <= p + self.get_element_height(at) + config.data.preferences['timeline']['interline-height']) ]
 
         if targetType == config.data.target_type['annotation']:
             sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
@@ -2464,7 +2475,7 @@ class TimeLine(AdhocView):
                 # Control-click: create annotation + edit it
                 ats=[ at
                       for (at, pos) in self.layer_position.items()
-                      if (y >= pos and y <= pos + self.button_height) ]
+                      if (y >= pos and y <= pos + self.get_element_height(at)) ]
                 if not ats:
                     at = None
                 else:
@@ -2546,7 +2557,7 @@ class TimeLine(AdhocView):
                     # No selected annotations. Propose to create a new one.
                     a=[ at
                         for (at, pos) in self.layer_position.items()
-                        if (y1 >= pos and y1 <= pos + self.button_height) ]
+                        if (y1 >= pos and y1 <= pos + self.get_element_height(at)) ]
                     at = None
                     if a:
                         at = a[0]
@@ -2670,7 +2681,7 @@ class TimeLine(AdhocView):
             at=None
             h=int(height)
             for a, p in self.layer_position.items():
-                if h >= p and h < p + self.button_height:
+                if h >= p and h < p + self.get_element_height(a):
                     at=a
                     break
             if at is None:
@@ -3023,7 +3034,7 @@ class TimeLine(AdhocView):
 
             # At the right of the annotation type : prev/next buttons
             nav=Gtk.Arrow(Gtk.ArrowType.LEFT, Gtk.ShadowType.IN)
-            nav.set_size_request(12, self.button_height)
+            nav.set_size_request(12, self.get_element_height(t))
             nav.annotationtype=t
             nav.set_tooltip_text(_('Goto previous annotation'))
             eb=Gtk.EventBox()
@@ -3033,7 +3044,7 @@ class TimeLine(AdhocView):
             hbox.pack_start(eb, False, False, 0)
 
             nav=Gtk.Arrow(Gtk.ArrowType.RIGHT, Gtk.ShadowType.IN)
-            nav.set_size_request(12, self.button_height)
+            nav.set_size_request(12, self.get_element_height(t))
             nav.annotationtype=t
             nav.set_tooltip_text(_('Goto next annotation'))
             eb=Gtk.EventBox()
@@ -3066,7 +3077,7 @@ class TimeLine(AdhocView):
             p.get_style_context().add_class('restrict_playing_button')
             p.set_playing = set_playing.__get__(p)
             p.annotationtype=t
-            p.set_size_request(20, self.button_height)
+            p.set_size_request(20, self.get_element_height(t))
             p.set_tooltip_text(_('Restrict playing to this annotation-type'))
 
             hbox.pack_start(p, False, False, 0)
