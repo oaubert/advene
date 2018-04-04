@@ -71,7 +71,7 @@ class TreeViewMerger:
             )
 
         for l in self.differ.diff():
-            name, s, d, action=l
+            name, s, d, action, value = l
             # Note: s and d are normally Advene elements, except for
             # resources for which we have the path.
             store.append(row=[ l,
@@ -93,56 +93,64 @@ class TreeViewMerger:
         return True
 
     def build_widget(self):
+        self.diff_textview = None
         def show_diff(item, l):
-            name, s, d, action = l
+            name, s, d, action, value = l
 
             diff=difflib.Differ()
 
-            w=Gtk.Window()
-            w.set_title(_("Difference between original and merged elements"))
+            if self.diff_textview is None:
+                w = Gtk.Window()
+                w.set_title(_("Difference between original and merged elements"))
+                v = Gtk.VBox()
+                sw = Gtk.ScrolledWindow()
+                sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+                v.add(sw)
 
-            v=Gtk.VBox()
+                tv = Gtk.TextView()
+                self.diff_textview = tv
+                tv.set_wrap_mode (Gtk.WrapMode.CHAR)
+                f = Pango.FontDescription("courier 12")
+                tv.modify_font(f)
 
-            sw = Gtk.ScrolledWindow()
-            sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-            v.add(sw)
+                buf = self.diff_textview.get_buffer()
+                self.minustag = buf.create_tag("minus", background="lightsalmon")
+                self.plustag = buf.create_tag("plus", background="palegreen1")
 
-            tv=Gtk.TextView()
-            f=Pango.FontDescription("courier 12")
-            tv.modify_font(f)
+                sw.add(tv)
 
-            b=tv.get_buffer()
+                hb = Gtk.HButtonBox()
+                b = Gtk.Button(stock=Gtk.STOCK_CLOSE)
+                b.connect('clicked', lambda b: w.destroy())
+                def reset_textview(*p):
+                    self.diff_textview = None
+                    return True
+                w.connect('destroy', reset_textview)
+                hb.add(b)
 
+                v.pack_start(hb, False, True, 0)
+                w.add(v)
 
-            minustag=b.create_tag("minus", background="lightsalmon")
-            plustag=b.create_tag("plus", background="palegreen1")
+                w.show_all()
+                w.resize(800, 600)
 
-            for l in diff.compare(d.content.data.splitlines(1),
-                                  s.content.data.splitlines(1)):
+            b = self.diff_textview.get_buffer()
+            b.delete(*b.get_bounds())
+
+            for l in diff.compare((value(d) or "").splitlines(1),
+                                  (value(s) or "").splitlines(1)):
                 if l.startswith('-'):
-                    b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), l, minustag)
+                    b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), l, self.minustag)
                 elif l.startswith('+'):
-                    b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), l, plustag)
+                    b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), l, self.plustag)
                 else:
                     b.insert_at_cursor(l)
-            sw.add(tv)
-
-            hb=Gtk.HButtonBox()
-            b=Gtk.Button(stock=Gtk.STOCK_CLOSE)
-            b.connect('clicked', lambda b: w.destroy())
-            hb.add(b)
-
-            v.pack_start(hb, False, True, 0)
-            w.add(v)
-
-            w.show_all()
-            w.resize(800, 600)
             return True
 
         def build_popup_menu(l):
             menu=Gtk.Menu()
 
-            name, s, d, action = l
+            name, s, d, action, value = l
 
             if name != 'new':
                 i=Gtk.MenuItem(_("Current element"))
@@ -150,15 +158,14 @@ class TreeViewMerger:
                 i.set_submenu(m.menu)
                 menu.append(i)
 
-            i=Gtk.MenuItem(_("Updated element"))
+            i = Gtk.MenuItem(_("Updated element"))
             m = advene.gui.popup.Menu(s, controller=self.controller, readonly=True)
             i.set_submenu(m.menu)
             menu.append(i)
 
-            if name == 'update_content':
-                i=Gtk.MenuItem(_("Show diff"))
-                i.connect('activate', show_diff, l)
-                menu.append(i)
+            i = Gtk.MenuItem(_("Show diff"))
+            i.connect('activate', show_diff, l)
+            menu.append(i)
 
             menu.show_all()
             return menu
@@ -189,6 +196,12 @@ class TreeViewMerger:
         treeview.set_headers_clickable(True)
         treeview.set_enable_search(False)
         treeview.connect('button-press-event', tree_view_button_cb)
+        def row_activated(treeview, path, column):
+            model = treeview.get_model()
+            l = model.get_value(model.get_iter(path), self.COLUMN_ELEMENT)
+            show_diff(l, l)
+            return True
+        treeview.connect('row-activated', row_activated)
 
         renderer = Gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
@@ -269,7 +282,7 @@ class Merger:
             m=self.mergerview.store
             for l in m:
                 if l[self.mergerview.COLUMN_APPLY]:
-                    name, s, d, action = l[self.mergerview.COLUMN_ELEMENT]
+                    name, s, d, action, value = l[self.mergerview.COLUMN_ELEMENT]
                     action(s, d)
             self.destpackage._modified = True
             self.controller.notify('PackageActivate', package=self.destpackage)

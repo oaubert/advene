@@ -1668,7 +1668,7 @@ class AdveneController(object):
             p._idgenerator = advene.core.idgenerator.Generator(p)
             differ = Differ(self.package, p, self)
             # Copy its structure
-            for name, s, d, action in differ.diff_structure():
+            for name, s, d, action, value in differ.diff_structure():
                 try:
                     action(s, d)
                 except:
