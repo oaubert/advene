@@ -202,6 +202,21 @@ class TimeLine(AdhocView):
             annotationtypes=ats
 
 
+        if not annotationtypes:
+            # Selecting whole package. Check if there are no too many to display.
+            if not elements and len(self.controller.package.annotations) > ANNOTATION_COUNT_LIMIT:
+                self.should_display_type_selection_popup = True
+                annotationtypes = []
+            else:
+                # Display all annotation types
+                annotationtypes = list(self.controller.package.annotationTypes)
+        if len(annotationtypes or []) != len(self.controller.package.annotationTypes):
+            # Selected annotation types (else we would use all package's types)
+            self.annotationtypes_selection = annotationtypes
+        else:
+            self.annotationtypes_selection = None
+        self.annotationtypes = annotationtypes
+
         # If the default range was specified, either through method
         # parameters or serialized parameters, memorize it. Else, we
         # will update the range based on movie duration.
@@ -217,21 +232,6 @@ class TimeLine(AdhocView):
 
         self.should_display_type_selection_popup = False
         self.edit_type_selection_popup = None
-
-        if not annotationtypes:
-            # Selecting whole package. Check if there are no too many to display.
-            if not elements and len(self.controller.package.annotations) > ANNOTATION_COUNT_LIMIT:
-                self.should_display_type_selection_popup = True
-                annotationtypes = []
-            else:
-                # Display all annotation types
-                annotationtypes = list(self.controller.package.annotationTypes)
-        if len(annotationtypes or []) != len(self.controller.package.annotationTypes):
-            # Selected annotation types (else we would use all package's types)
-            self.annotationtypes_selection = annotationtypes
-        else:
-            self.annotationtypes_selection = None
-        self.annotationtypes = annotationtypes
 
         # Dictionaries holding a correspondance between an element and its representation.
         # It assumes that there is at more 1 representation for each element.
