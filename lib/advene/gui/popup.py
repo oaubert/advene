@@ -453,7 +453,7 @@ class Menu:
 
         def progress_callback(name, filename, n, index):
             nonlocal should_continue
-            progress_bar.set_text(_("Created %(name)s - %(n) annotations") % locals())
+            progress_bar.set_text(_("Created %(name)s - %(n)d annotations") % locals())
             progress_bar.set_fraction( index / count )
             while Gtk.events_pending():
                 Gtk.main_iteration()
