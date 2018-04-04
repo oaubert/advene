@@ -23,13 +23,15 @@ Merge packages
 import logging
 logger = logging.getLogger(__name__)
 
+import argparse
+
+
+
+
 import itertools
-import sys
 import os
 import filecmp
 import shutil
-
-import advene.core.config as config
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
@@ -606,23 +608,58 @@ class Differ:
                 return
         shutil.copyfile(source_name, destination_name)
 
+def merge_package(sourcename, destname, outputname, debug=False, dry_run=False, include=None, exclude=None):
+    logger.warn("Merging %s into %s, producing %s", sourcename, destname, outputname)
+
+    # Methods applied to destination elements to check if we want
+    # really to execute the action. If the method returns False, then
+    # the action is not applied.
+    filters = {
+        'all': lambda e: True,
+        'package': lambda e: isinstance(e, Package),
+        'except_default_workspace': lambda e: e.id != '_default_workspace'
+    }
+    if exclude is None:
+        # Reasonable default settings.
+        exclude = {
+            'update_meta_is_template': 'all',
+            'update_meta_media_uri': 'all',
+            'update_meta_mediafile': 'all',
+            'update_meta_duration': 'all',
+            'update_meta_default_utbv': 'all',
+            'update_meta_default_stbv': 'all',
+            'update_meta_title': 'package',
+            'update_meta_description': 'package',
+            'update_content': 'except_default_workspace'
+        }
+
+    source = Package(uri=sourcename)
+    dest = Package(uri=destname)
+
+    differ = Differ(source, dest)
+    diff = differ.diff()
+    if debug:
+        import pdb; pdb.set_trace()
+    for name, s, d, action, value in diff:
+        if name in exclude and filters[exclude[name]](d):
+            continue
+        logger.info("%s %s : %s -> %s", name, getattr(s, 'id', str(s)),
+                    str(value(d or ""))[:100], str(value(s or ""))[:100])
+        if not dry_run:
+            action(s, d)
+    dest.save(outputname)
+    logger.info("Saved merged package as %s", outputname)
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    if len(sys.argv) < 3:
-        logger.error("Should provide 2 package names")
-        sys.exit(1)
+    parser = argparse.ArgumentParser("Package merger")
+    parser.add_argument('-d', '--debug', action="store_true")
+    parser.add_argument('-n', '--dry-run', action="store_true")
+    parser.add_argument('--include', action="store")
+    parser.add_argument('--exclude', action="store")
+    parser.add_argument('package_to_merge_from')
+    parser.add_argument('package_to_merge_into')
+    parser.add_argument('output_package', nargs='?', default='/tmp/merged.xml')
+    args = parser.parse_args()
 
-    sourcename=sys.argv[1]
-    destname=sys.argv[2]
-
-    logger.warn("Merging %s into %s", sourcename, destname)
-    source=Package(uri=sourcename)
-    dest=Package(uri=destname)
-
-    differ=Differ(source, dest)
-    diff=differ.diff()
-    for name, s, d, action in diff:
-        logger.info("%s %s %s", name, str(s).encode('utf-8'), str(d).encode('utf-8'))
-        action(s, d)
-    dest.save('/tmp/merge.xml')
-    logger.info("Saved merged package as /tmp/merge.xml")
+    merge_package(args.package_to_merge_from, args.package_to_merge_into, args.output_package, debug=args.debug, dry_run=args.dry_run)
