@@ -36,7 +36,7 @@ import sys
 import os
 import pickle
 import json
-from optparse import OptionParser
+from argparse import ArgumentParser
 import mimetypes
 import operator
 from pathlib import Path
@@ -516,57 +516,60 @@ class Config(object):
     def parse_options(self):
         """Parse command-line options.
         """
-        parser=OptionParser(usage="""Advene - annotate digital videos, exchange on the Net.
-    %prog [options] [file.azp|file.xml|alias=uri]""")
+        parser = ArgumentParser("Advene - annotate digital videos, exchange on the Net.")
+        # %prog [options] [file.azp|file.xml|alias=uri]""")
 
-        parser.add_option("-d", "--debug", dest="debug", action="store_true",
-                          help="Display debugging messages.")
+        parser.add_argument("-d", "--debug", action="store_true",
+                            help="Display debugging messages.")
 
-        parser.add_option("-i", "--info", dest="info", action="store_true",
-                          help="Display info messages.")
+        parser.add_argument("-i", "--info", action="store_true",
+                            help="Display info messages.")
 
-        parser.add_option("-v", "--version", dest="version", action="store_true",
-                          help="Display version number and exit.")
+        parser.add_argument("-v", "--version", action="store_true",
+                            help="Display version number and exit.")
 
-        parser.add_option("-s", "--settings-dir", dest="settings", action="store",
-                          type="string", default=None, metavar="SETTINGSDIR",
-                          help="Alternate configuration directory (default: ~/.config/advene).")
+        parser.add_argument("-s", "--settings-dir", dest="settings", action="store",
+                            default=None, metavar="SETTINGSDIR",
+                            help="Alternate configuration directory (default: ~/.config/advene).")
 
-        parser.add_option("-u", "--user-id", dest="userid", action="store",
-                          type="string", default=None, metavar="LOGIN-NAME",
-                          help="User name (used to set the author field of elements).")
+        parser.add_argument("-u", "--user-id", dest="userid", action="store",
+                            default=None, metavar="LOGIN-NAME",
+                            help="User name (used to set the author field of elements).")
 
-        parser.add_option("", "--no-embedded",
-                          dest="embedded", action="store_false", default=True,
-                          help="Do not embed the video player.")
+        parser.add_argument("-n", "--dry-run", dest="dry_run", action="store_true")
 
-        parser.add_option("-p", "--player",
-                          dest="player",
-                          action="store",
-                          type="choice",
-                          # FIXME: we should register player plugins
-                          # and use introspection, but plugin loading
-                          # happens later.
-                          choices=("dummy", "vlcctypes", "gstreamer", "gstrecorder"),
-                          default=None,
-                          help="Video player selection")
+        parser.add_argument("--no-embedded",
+                            dest="embedded", action="store_false", default=True,
+                            help="Do not embed the video player.")
 
-        parser.add_option("-w", "--webserver-port", dest="port", action="store",
-                          type="int", default=None, metavar="PORT_NUMBER",
-                          help="Webserver port number (default 1234).")
+        parser.add_argument("-p", "--player",
+                            dest="player",
+                            action="store",
+                            # FIXME: we should register player plugins
+                            # and use introspection, but plugin loading
+                            # happens later.
+                            choices=("dummy", "vlcctypes", "gstreamer", "gstrecorder"),
+                            default=None,
+                            help="Video player selection")
 
-        parser.add_option("-m", "--webserver-mode", dest="mode", action="store",
-                          type="int", default=None, metavar="WEBSERVER_MODE",
+        parser.add_argument("-w", "--webserver-port", dest="port", action="store",
+                            type=int, default=None, metavar="PORT_NUMBER",
+                            help="Webserver port number (default 1234).")
+
+        parser.add_argument("-m", "--webserver-mode", dest="mode", action="store",
+                          type=int, default=None, metavar="WEBSERVER_MODE",
                           help="0: deactivated ; 1: threaded mode.")
 
-        parser.add_option("-f", "--filter",
-                          dest="filter",
-                          action="store",
-                          type="string",
-                          default=None,
-                          help="Export filter. If specified, input files will be automatically converted. Use 'help' to get a list of valid export filters.")
+        parser.add_argument("-f", "--filter",
+                            dest="filter",
+                            action="store",
+                            default=None,
+                            help="Export filter. If specified, input files will be automatically converted. Use 'help' to get a list of valid export filters.")
 
-        (self.options, self.args) = parser.parse_args()
+        parser.add_argument("positional_args",
+                            nargs="*")
+        self.options = parser.parse_args()
+        self.args = self.options.positional_args
         if self.options.version:
             logger.warn(self.get_version_string())
             sys.exit(0)
