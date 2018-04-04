@@ -1680,17 +1680,17 @@ class AdveneController(object):
                     differ.copy_annotation(a)
                     count += 1
             # Copy package metadata
-            differ.update_meta(self.package, p, 'advenetool', 'duration')
-            differ.update_meta(self.package, p, 'advenetool', 'mediafile')
-            differ.update_meta(self.package, p, 'advenetool', 'tag_colors')
-            differ.update_meta(self.package, p, 'advenetool', 'ontology_uri')
-            differ.update_meta(self.package, p, 'advenetool', 'media_uri')
-            differ.update_meta(self.package, p, 'dc', 'title')
-            differ.update_meta(self.package, p, 'dc', 'creator')
-            differ.update_meta(self.package, p, 'dc', 'description')
+            differ.update_meta(self.package, p, config.data.namespace, 'duration')
+            differ.update_meta(self.package, p, config.data.namespace, 'mediafile')
+            differ.update_meta(self.package, p, config.data.namespace, 'tag_colors')
+            differ.update_meta(self.package, p, config.data.namespace, 'ontology_uri')
+            differ.update_meta(self.package, p, config.data.namespace, 'media_uri')
+            differ.update_meta(self.package, p, config.data.namespace_prefix['dc'], 'creator')
+            differ.update_meta(self.package, p, config.data.namespace_prefix['dc'], 'description')
             p.date = self.get_timestamp()
 
             title = self.get_title(segment)
+            p.setMetaData(config.data.namespace_prefix['dc'], 'title', title)
             fname = "%s-split-%03d-%s%s" % (baseuri, index + 1, helper.title2id(title), extension)
             p.save(fname)
             if callback:
