@@ -269,7 +269,7 @@ class AdveneGUI(object):
                     ( _("_Import File"), self.on_import_file1_activate, _("Import data from an external source") ),
                     ( _("_Process video"), self.on_process_video_activate, _("Import data from video processing algorithms")),
                     ( "", None, "" ),
-                    ( _("Merge package"), self.on_merge_package_activate, _("Merge elements from another package") ),
+                    ( _("_Merge package"), self.on_merge_package_activate, _("Merge elements from another package") ),
                     ( _("Import package"), self.on_import_package_activate, _("Import elements from another package") ),
                     ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters") ),
                     ( "", None, "" ),
