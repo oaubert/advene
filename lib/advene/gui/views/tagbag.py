@@ -84,6 +84,9 @@ class TagBag(AdhocView):
         self.widget=self.build_widget()
         self.refresh()
 
+    def get_element_height(self, element):
+        return self.button_height
+
     def clear(self, *p):
         del self.tags[:]
         self.refresh()

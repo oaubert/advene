@@ -369,7 +369,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         Method to be implemented by subclasses
         """
         return (self.container.unit2pixel(self.annotation.fragment.duration),
-                self.container.button_height)
+                self.container.get_element_height(self.annotation))
 
     def draw(self, context, width, height):
         """Draw the widget in the cache pixmap.
@@ -515,7 +515,7 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         Method to be implemented by subclasses
         """
         w=self.width or 120
-        return (w, self.container.button_height)
+        return (w, self.container.get_element_height(self.annotationtype))
 
     def draw(self, context, width, height):
         """Draw the widget in the cache pixmap.
@@ -573,7 +573,7 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
             ext=context.text_extents(title)
             if ext[2] != self.width:
                 self.width=int(ext[2]) + 5
-                self.reset_surface_size(self.width, self.container.button_height)
+                self.reset_surface_size(self.width, self.container.get_element_height(self.annotationtype))
 GObject.type_register(AnnotationTypeWidget)
 
 class TagWidget(GenericColorButtonWidget):
@@ -623,7 +623,7 @@ class TagWidget(GenericColorButtonWidget):
         Method to be implemented by subclasses
         """
         w=self.width or 50
-        return (w, self.container.button_height)
+        return (w, self.container.get_element_height(self.tag))
 
     def draw(self, context, width, height):
         """Draw the widget in the cache pixmap.
@@ -656,7 +656,7 @@ class TagWidget(GenericColorButtonWidget):
         ext=context.text_extents(self.tag)
         w=int(ext[2]) + 5
         if self.width != w:
-            self.reset_surface_size(self.width, self.container.button_height)
+            self.reset_surface_size(self.width, self.container.get_element_height(self.tag))
             logger.debug("Resetting width %d", self.width)
 GObject.type_register(TagWidget)
 
@@ -665,7 +665,7 @@ class TimestampMarkWidget(GenericColorButtonWidget):
     """
     def __init__(self, container=None):
         GenericColorButtonWidget.__init__(self, container=container)
-        self.default_size=(8, self.container.button_height)
+        self.default_size=(8, self.container.get_element_height(self))
 
     def draw(self, context, width, height):
         """Draw the widget in the cache pixmap.

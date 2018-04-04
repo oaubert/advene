@@ -137,6 +137,9 @@ class TranscriptionEdit(AdhocView):
             if n == 'text':
                 self.load_transcription(buffer=v)
 
+    def get_element_height(self, element):
+        return self.button_height
+
     def get_save_arguments(self):
         arguments = [ ('text', "".join(self.generate_transcription())) ]
         return self.options, arguments

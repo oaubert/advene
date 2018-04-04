@@ -119,6 +119,9 @@ class Montage(AdhocView):
                 self.insert(a)
         self.refresh()
 
+    def get_element_height(self, element):
+        return self.button_height
+
     def set_master_view(self, master):
         def master_value_changed(sc):
             self.scale.set_value(sc.get_value())
