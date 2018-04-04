@@ -3026,7 +3026,7 @@ class AdveneGUI(object):
         """
         return CreateElementPopup(*p, **kw)
 
-    def popup_evaluator(self, *p, **kw):
+    def popup_evaluator(self, localsdict=None):
         p=self.controller.package
         try:
             a=p.annotations[-1]
@@ -3051,15 +3051,17 @@ class AdveneGUI(object):
                                                    p.views, p.queries) for el in l )
             __dict__ = property(_get_dict)
 
+        if localsdict is None:
+            localsdict = {'package': p,
+                          'p': p,
+                          'P': PackageWrapper(),
+                          'a': a,
+                          'at': at,
+                          'c': self.controller,
+                          'g': self,
+                          'pp': pprint.pformat }
         ev=Evaluator(globals_=globals(),
-                     locals_={'package': p,
-                              'p': p,
-                              'P': PackageWrapper(),
-                              'a': a,
-                              'at': at,
-                              'c': self.controller,
-                              'g': self,
-                              'pp': pprint.pformat },
+                     locals_=localsdict,
                      historyfile=config.data.advenefile('evaluator.log', 'settings')
                      )
         ev.locals_['self']=ev
