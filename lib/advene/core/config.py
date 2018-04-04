@@ -67,7 +67,8 @@ class Config(object):
     """Configuration information, platform specific.
 
     It is possible to override the configuration variables in a config
-    file ($HOME/.advene/advene.ini on Linux/MacOSX,
+    file ($HOME/.config/advene/advene.ini on Linux,
+    $HOME/Library/Preferences/Advene/advene.ini on MacOSX,
     UserDir/advene/advene.ini on Windows) with a python syntax
     (I{warning}, it is evaluated so harmful instructions in it can do
     damage).
@@ -207,7 +208,7 @@ class Config(object):
 
         # Generic options
         # They are automatically saved across sessions
-        # in ~/.advene/advene.prefs
+        # in ~/.config/advene/advene.prefs
         self.preferences = {
             # Various sizes of windows.
             'windowsize': { 'main': (800, 600),
@@ -529,7 +530,7 @@ class Config(object):
 
         parser.add_option("-s", "--settings-dir", dest="settings", action="store",
                           type="string", default=None, metavar="SETTINGSDIR",
-                          help="Alternate configuration directory (default: ~/.advene).")
+                          help="Alternate configuration directory (default: ~/.config/advene).")
 
         parser.add_option("-u", "--user-id", dest="userid", action="store",
                           type="string", default=None, metavar="LOGIN-NAME",
