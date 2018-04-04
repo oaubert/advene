@@ -25,6 +25,8 @@ from gi.repository import Pango
 
 from gettext import gettext as _
 
+import advene.core.config as config
+
 import advene.gui.popup
 import advene.util.helper as helper
 from advene.util.merger import Differ
@@ -166,6 +168,17 @@ class TreeViewMerger:
             i = Gtk.MenuItem(_("Show diff"))
             i.connect('activate', show_diff, l)
             menu.append(i)
+
+            if config.data.preferences['expert-mode']:
+                i = Gtk.MenuItem(_("Show _Evaluator"))
+                i.connect('activate', lambda e: self.controller.gui.popup_evaluator(localsdict={
+                    'name': name,
+                    's': s,
+                    'd': d,
+                    'action': action,
+                    'value': value
+                }))
+                menu.append(i)
 
             menu.show_all()
             return menu
