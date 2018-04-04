@@ -85,7 +85,8 @@ class Differ:
         if s.getMetaData(namespace, name) != d.getMetaData(namespace, name):
             return ('update_meta_%s' % name,
                     s, d,
-                    lambda s, d: self.update_meta(s, d, namespace, name) )
+                    lambda s, d: self.update_meta(s, d, namespace, name),
+                    lambda e: e.getMetaData(namespace, name))
         else:
             return None
 
@@ -113,151 +114,225 @@ class Differ:
         for s in self.source.schemas:
             d=self.destination.get_element_by_id(s.id)
             if d is None:
-                yield ('new', s, None, lambda s, d: self.copy_schema(s) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_schema(s),
+                       lambda e: str(e) )
             elif isinstance(d, type(s)):
                 # Present. Check if it was modified
                 if s.title != d.title:
-                    yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
+                    yield ('update_title', s, d,
+                           lambda s, d: d.setTitle(s.title),
+                           lambda e: e.title)
                 for c in self.diff_meta(s, d):
                     yield c
             else:
                 # Same id, but different type. Generate a new type
-                yield ('new', s, None, lambda s, d: self.copy_schema(s, True) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_schema(s, True),
+                       lambda e: str(e))
 
     def diff_annotation_types(self):
         for s in self.source.annotationTypes:
             d=self.destination.get_element_by_id(s.id)
             if d is None:
-                yield ('new', s, None, lambda s, d: self.copy_annotation_type(s) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_annotation_type(s),
+                       lambda e: str(e))
             elif isinstance(d, type(s)):
                 # Present. Check if it was modified
                 if s.title != d.title:
-                    yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
+                    yield ('update_title', s, d,
+                           lambda s, d: d.setTitle(s.title),
+                           lambda e: e.title)
                 if s.mimetype != d.mimetype:
-                    yield ('update_mimetype', s, d, lambda s, d: d.setMimetype(s.mimetype) )
+                    yield ('update_mimetype', s, d,
+                           lambda s, d: d.setMimetype(s.mimetype),
+                           lambda e: e.mimetype)
                 for c in self.diff_meta(s, d):
                     yield c
             else:
-                yield ('new', s, None, lambda s, d: self.copy_annotation_type(s, True) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_annotation_type(s, True),
+                       lambda e: str(e))
 
     def diff_relation_types(self):
         for s in self.source.relationTypes:
             d=self.destination.get_element_by_id(s.id)
             if d is None:
-                yield ('new', s, None, lambda s, d: self.copy_relation_type(s) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_relation_type(s),
+                       lambda e: str(e))
             elif isinstance(d, type(s)):
                 # Present. Check if it was modified
                 if s.title != d.title:
-                    yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
+                    yield ('update_title', s, d,
+                           lambda s, d: d.setTitle(s.title),
+                           lambda e: e.title)
                 if s.mimetype != d.mimetype:
-                    yield ('update_mimetype', s, d, lambda s, d: d.setMimetype(s.mimetype) )
+                    yield ('update_mimetype', s, d,
+                           lambda s, d: d.setMimetype(s.mimetype),
+                           lambda e: e.mimetype)
                 for c in self.diff_meta(s, d):
                     yield c
                 if s.hackedMemberTypes != d.hackedMemberTypes:
-                    yield ('update_member_types', s, d, lambda s, d: d.setHackedMemberTypes( s.hackedMemberTypes ))
+                    yield ('update_member_types', s, d,
+                           lambda s, d: d.setHackedMemberTypes( s.hackedMemberTypes ),
+                           lambda e: str(e.hackedMemberTypes))
             else:
-                yield ('new', s, None, lambda s, d: self.copy_relation_type(s, True) )
-
+                yield ('new', s, None,
+                       lambda s, d: self.copy_relation_type(s, True),
+                       lambda e: str(e))
 
     def diff_annotations(self):
         for s in self.source.annotations:
             d=self.destination.get_element_by_id(s.id)
             if d is None:
-                yield ('new', s, None, lambda s, d: self.copy_annotation(s) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_annotation(s),
+                       lambda e: str(e))
             elif isinstance(d, type(s)):
                 # check type and author/date. If different, it is very
                 # likely that it is in fact a new annotation, with
                 # duplicate id.
                 if s.type.id != d.type.id:
-                    yield ('new_annotation', s, d, lambda s, d: self.copy_annotation(s, True))
+                    yield ('new_annotation', s, d,
+                           lambda s, d: self.copy_annotation(s, True),
+                           lambda e: str(e))
                     continue
                 if s.author != d.author and s.date != d.date:
                     # New annotation.
-                    yield ('new_annotation', s, d, lambda s, d: self.copy_annotation(s, True))
+                    yield ('new_annotation', s, d,
+                           lambda s, d: self.copy_annotation(s, True),
+                           lambda e: str(e))
                     continue
                 # Present. Check if it was modified
                 if s.fragment.begin != d.fragment.begin:
-                    yield ('update_begin', s, d, lambda s, d: d.fragment.setBegin(s.fragment.begin))
+                    yield ('update_begin', s, d,
+                           lambda s, d: d.fragment.setBegin(s.fragment.begin),
+                           lambda e: e.fragment.begin)
                 if s.fragment.end != d.fragment.end:
-                    yield ('update_end', s, d, lambda s, d: d.fragment.setEnd(s.fragment.end))
+                    yield ('update_end', s, d,
+                           lambda s, d: d.fragment.setEnd(s.fragment.end),
+                           lambda e: e.fragment.end)
                 if s.content.data != d.content.data:
-                    yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
+                    yield ('update_content', s, d,
+                           lambda s, d: d.content.setData(s.content.data),
+                           lambda e: e.content.data)
                 if s.tags != d.tags:
-                    yield ('update_tags', s, d, lambda s, d: d.setTags( s.tags ))
+                    yield ('update_tags', s, d,
+                           lambda s, d: d.setTags( s.tags ),
+                           lambda e: e.tags)
                 for c in self.diff_meta(s, d):
                     yield c
             else:
-                yield ('new', s, None, lambda s, d: self.copy_annotation(s, True) )
-
+                yield ('new', s, None,
+                       lambda s, d: self.copy_annotation(s, True),
+                       lambda e: str(e))
 
     def diff_relations(self):
         for s in self.source.relations:
             d=self.destination.get_element_by_id(s.id)
             if d is None:
-                yield ('new', s, None, lambda s, d: self.copy_relation(s) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_relation(s),
+                       lambda e: str(e))
             elif isinstance(d, type(s)):
                 # check author/date. If different, it is very
                 # likely that it is in fact a new relation, with
                 # duplicate id.
                 if s.type.id != d.type.id:
-                    yield ('new_relation', s, d, lambda s, d: self.copy_relation(s, True))
+                    yield ('new_relation', s, d,
+                           lambda s, d: self.copy_relation(s, True),
+                           lambda e: str(e))
                     continue
                 if s.author != d.author and s.date != d.date:
                     # New relation.
-                    yield ('new_relation', s, d, lambda s, d: self.copy_relation(s, True))
+                    yield ('new_relation', s, d,
+                           lambda s, d: self.copy_relation(s, True),
+                           lambda e: str(e))
                     continue
                 # Present. Check if it was modified
                 if s.content.data != d.content.data:
-                    yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
+                    yield ('update_content', s, d,
+                           lambda s, d: d.content.setData(s.content.data),
+                           lambda e: e.content.data)
                 sm=[ a.id for a in s.members ]
                 dm=[ a.id for a in d.members ]
                 if sm != dm:
-                    yield ('update_members', s, d, self.update_members)
+                    yield ('update_members', s, d,
+                           self.update_members,
+                           lambda e: e.members)
                 if s.tags != d.tags:
-                    yield ('update_tags', s, d, lambda s, d: d.setTags( s.tags ))
+                    yield ('update_tags', s, d,
+                           lambda s, d: d.setTags( s.tags ),
+                           lambda e: e.tags)
                 for c in self.diff_meta(s, d):
                     yield c
             else:
-                yield ('new', s, None, lambda s, d: self.copy_relation(s, True) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_relation(s, True),
+                       lambda e: str(e))
 
     def diff_views(self):
         for s in self.source.views:
             d=self.destination.get_element_by_id(s.id)
             if d is None:
-                yield ('new', s, None, lambda s, d: self.copy_view(s) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_view(s),
+                       lambda e: str(e))
             elif isinstance(d, type(s)):
                 # Present. Check if it was modified
                 if s.title != d.title:
-                    yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
+                    yield ('update_title', s, d,
+                           lambda s, d: d.setTitle(s.title),
+                           lambda e: e.title)
                 if (s.matchFilter['class'] != d.matchFilter['class']
                     or s.matchFilter.get('type', None) != d.matchFilter.get('type', None)):
-                    yield ('update_matchfilter', s, d, lambda s, d: d.matchFilter.update(s.matchFilter) )
+                    yield ('update_matchfilter', s, d,
+                           lambda s, d: d.matchFilter.update(s.matchFilter),
+                           lambda e: e.matchFilter)
                 if s.content.mimetype != d.content.mimetype:
-                    yield ('update_mimetype', s, d, lambda s, d: d.content.setMimetype(s.content.mimetype) )
+                    yield ('update_mimetype', s, d,
+                           lambda s, d: d.content.setMimetype(s.content.mimetype),
+                           lambda e: e.content.mimetype)
                 if s.content.data != d.content.data:
-                    yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
+                    yield ('update_content', s, d,
+                           lambda s, d: d.content.setData(s.content.data),
+                           lambda e: e.content.data)
                 for c in self.diff_meta(s, d):
                     yield c
             else:
-                yield ('new', s, None, lambda s, d: self.copy_view(s, True) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_view(s, True),
+                       lambda e: str(e))
 
     def diff_queries(self):
         for s in self.source.queries:
             d=self.destination.get_element_by_id(s.id)
             if d is None:
-                yield ('new', s, None, lambda s, d: self.copy_query(s) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_query(s),
+                       lambda e: str(e))
             elif isinstance(d, type(s)):
                 # Present. Check if it was modified
                 if s.title != d.title:
-                    yield ('update_title', s, d, lambda s, d: d.setTitle(s.title) )
+                    yield ('update_title', s, d,
+                           lambda s, d: d.setTitle(s.title),
+                           lambda e: e.title)
                 if s.content.mimetype != d.content.mimetype:
-                    yield ('update_mimetype', s, d, lambda s, d: d.setMimetype(s.mimetype) )
+                    yield ('update_mimetype', s, d,
+                           lambda s, d: d.setMimetype(s.mimetype),
+                           lambda e: e.mimetype)
                 if s.content.data != d.content.data:
-                    yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
+                    yield ('update_content', s, d,
+                           lambda s, d: d.content.setData(s.content.data),
+                           lambda e: e.content.data)
                 for c in self.diff_meta(s, d):
                     yield c
             else:
-                yield ('new', s, None, lambda s, d: self.copy_query(s, True) )
+                yield ('new', s, None,
+                       lambda s, d: self.copy_query(s, True),
+                       lambda e: str(e))
 
     def diff_resources(self):
         if self.source.resources is None or self.destination.resources is None:
@@ -278,11 +353,15 @@ class Differ:
             for n in dc.left_only:
                 yield ('create_resource',
                        relative_path(sdir, dc.left, n),
-                       relative_path(ddir, dc.right, n), self.create_resource)
+                       relative_path(ddir, dc.right, n),
+                       self.create_resource,
+                       lambda e: str(e))
             for n in dc.diff_files:
                 yield ('update_resource',
                        relative_path(sdir, dc.left, n),
-                       relative_path(ddir, dc.right, n), self.update_resource)
+                       relative_path(ddir, dc.right, n),
+                       self.update_resource,
+                       lambda e: str(e))
 
         for t in handle_dircmp(d):
             yield t
