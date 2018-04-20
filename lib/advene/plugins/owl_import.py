@@ -19,7 +19,7 @@
 
 # OWL importer
 
-name="OWL importer"
+name="AdA OWL importer"
 
 import logging
 logger = logging.getLogger(__name__)
@@ -37,11 +37,11 @@ except ImportError:
 
 def register(controller=None):
     if rdflib is not None:
-        controller.register_importer(OWLImporter)
+        controller.register_importer(AdAOWLImporter)
     return True
 
-class OWLImporter(GenericImporter):
-    """Convert an OWL schema into an Advene structure.
+class AdAOWLImporter(GenericImporter):
+    """Convert an AdA OWL schema into an Advene structure.
 
     Many assumptions are made here about the ontology structure:
 
@@ -166,7 +166,13 @@ class OWLImporter(GenericImporter):
                 at.setMetaData(config.data.namespace, "ontology_uri", str(atnode))
 
                 if values:
-                    at.setMetaData(config.data.namespace, "completions", ",".join(v[1] for v in values))
+                    # Check for EvolvingAnnotationType and ContrastingAnnotationType to insert [TO] and [VS] predefined keywords
+                    values_list = [ v[1] for v in values ]
+                    if (atnode, RDF.type, AO.ContrastingAnnotationType) in graph:
+                        values_list.insert(0, '[VS]')
+                    if (atnode, RDF.type, AO.EvolvingAnnotationType) in graph:
+                        values_list.insert(0, '[TO]')
+                    at.setMetaData(config.data.namespace, "completions", ",".join(values_list))
 
                 # Store old advene id
                 old_ids = list(graph.objects(atnode, AO.oldAdveneIdentifier))
@@ -218,7 +224,7 @@ if __name__ == "__main__":
     pname=sys.argv[2]
 
     c = AdveneController()
-    i = OWLImporter(controller=c)
+    i = AdAOWLImporter(controller=c)
 
     i.process_options(sys.argv[1:])
     logger.info("Converting %s to %s using %s", fname, pname, i.name)
