@@ -158,9 +158,12 @@ class AdAOWLImporter(GenericImporter):
                 # Set completions
                 values = [ (t[0], str(t[1]))
                            for t in graph.query(PREFIX + """SELECT ?x ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" ) OPTIONAL { ?x ao:sequentialNumber ?number } . BIND ( COALESCE( ?number, 0 ) as ?number ) } ORDER BY xsd:integer(?number)""" % str(atnode)) ]
-                if values:
+                if (atnode, RDF.type, AO.PredefinedValuesAnnotationType) in graph or values:
                     mimetype = "text/x-advene-keyword-list"
+                elif (atnode, RDF.type, AO.NumericValuesAnnotationType) in graph:
+                    mimetype = "text/x-advene-values"
                 else:
+                    # Default is text/plain anyway
                     mimetype = "text/plain"
                 at = self.create_annotation_type(schema, at_id, title=label, description=description, mimetype=mimetype)
                 at.setMetaData(config.data.namespace, "ontology_uri", str(atnode))
