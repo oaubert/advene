@@ -92,7 +92,7 @@ class StructuredContent(dict,object):
                           if not k.startswith('_') )
 
 COMMA_REGEXP = re.compile(r'\s*,\s*', re.UNICODE)
-COMMENT_REGEXP = re.compile(r'\[(.*?)\]', re.UNICODE)
+COMMENT_REGEXP = re.compile(r'\((.*?)\)', re.UNICODE)
 class KeywordList(object):
     """Set-like object representing a keyword list.
 
@@ -103,7 +103,7 @@ class KeywordList(object):
     KeywordList implements array-like features (__contains__).
     The .get(keyword) returns metadata (as dict) about the keyword.
 
-    Comments may be specified between brackets. There may be multiple
+    Comments may be specified between parentheses. There may be multiple
     comments, but in case of modification through the API, they will
     all be merged into a single one, placed at the end.
 
