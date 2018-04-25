@@ -2309,29 +2309,6 @@ class AdveneGUI(object):
         return True
 
     def export_element(self, element):
-        def generate_default_filename(filter, filename=None):
-            """Generate a filename for the given filter.
-            """
-            if not filename:
-                # Get the current package title.
-                if isinstance(element, Package):
-                    filename=self.controller.package.title
-                    if not filename or filename == 'Template package':
-                        # Use a better name
-                        filename=os.path.splitext(os.path.basename(self.controller.package.uri))[0]
-                    filename=helper.title2id(filename)
-                else:
-                    filename=helper.title2id(element.title or element.id)
-            else:
-                # A filename was provided. Strip the extension.
-                filename=os.path.splitext(filename)[0]
-            # Add a pertinent extension
-            if filter is None:
-                return filename
-            ext=filter.getMetaData(config.data.namespace, 'extension')
-            if not ext:
-                ext = helper.title2id(filter.id)
-            return '.'.join( (filename, ext) )
 
         if isinstance(element, Package):
             title=_("Export package data")
@@ -2345,31 +2322,31 @@ class AdveneGUI(object):
                                    buttons=( Gtk.STOCK_CONVERT, Gtk.ResponseType.OK,
                                              Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
         def update_extension(sel):
-            filter=sel.get_current_element()
-            f=generate_default_filename(filter, os.path.basename(fs.get_filename() or ""))
+            exportfilter = sel.get_current_element()(self.controller, element)
+            f = exportfilter.get_filename(os.path.basename(fs.get_filename() or ""), element)
             fs.set_current_name(f)
             return True
         def valid_always(v):
             return True
         def valid_for_package(v):
-            return v.matchFilter['class'] in ('package', '*')
+            return v.is_valid_for('package')
         def valid_for_annotation_type(v):
-            return v.matchFilter['class'] in ('annotation-type', '*')
+            return v.is_valid_for('annotation-type')
         valid_filter=valid_always
         if isinstance(element, Package):
             valid_filter=valid_for_package
         elif isinstance(element, AnnotationType):
             valid_filter=valid_for_annotation_type
-        exporters=dialog.list_selector_widget( [ (v, v.title) for v in self.controller.get_export_filters()
-                                                 if valid_filter(v) ],
-                                               callback=update_extension )
+        exporters = dialog.list_selector_widget( [ (e, e.get_name()) for e in self.controller.get_export_filters()
+                                                   if valid_filter(e) ],
+                                                 callback=update_extension )
         hb=Gtk.HBox()
         hb.pack_start(Gtk.Label(_("Export format")), False, False, 0)
         hb.pack_start(exporters, True, True, 0)
         fs.set_extra_widget(hb)
 
         fs.show_all()
-        fs.set_current_name(generate_default_filename(exporters.get_current_element()))
+        update_extension(exporters)
         self.fs=fs
         res=fs.run()
 

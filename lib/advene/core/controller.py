@@ -41,7 +41,6 @@ import re
 import webbrowser
 import urllib.request, urllib.parse, urllib.error
 from urllib.parse import urljoin
-import io
 from gi.repository import GObject
 import shlex
 import itertools
@@ -80,10 +79,9 @@ import advene.model.tal.context
 
 import advene.util.helper as helper
 import advene.util.importer
+from advene.util.exporter import get_exporters, register_exporter
 import xml.etree.ElementTree as ET
 from advene.util.audio import SoundPlayer
-
-from simpletal import simpleTAL, simpleTALES
 
 if config.data.webserver['mode']:
     from advene.core.webcherry import AdveneWebServer
@@ -461,6 +459,11 @@ class AdveneController(object):
         """Register an importer.
         """
         advene.util.importer.register(imp)
+
+    def register_exporter(self, imp):
+        """Register an exporter.
+        """
+        register_exporter(imp)
 
     def register_player(self, imp):
         """Register a video player plugin.
@@ -2664,44 +2667,13 @@ class AdveneController(object):
         return v
 
     def get_export_filters(self):
-        exporter_package=Package(uri=config.data.advenefile('exporters.xml'))
-        return sorted( ( v
-                         for v in exporter_package.views
-                         if v.id != 'index' ), key=lambda v: v.title )
+        return get_exporters()
 
-    def apply_export_filter(self, element, filter, filename):
+    def apply_export_filter(self, element, exportfilter, filename):
         """Apply the given export filename to the element and output the result to filename.
         """
-        ctx=self.build_context(here=element)
-        try:
-            stream=open(filename, 'wb')
-        except Exception:
-            logger.error(_("Cannot export to %(filename)s"), exc_info=True)
-            return True
-
-        if filter.content.mimetype is None or filter.content.mimetype.startswith('text/'):
-            compiler = simpleTAL.HTMLTemplateCompiler ()
-            compiler.parseTemplate (filter.content.stream, 'utf-8')
-            if filter.content.mimetype == 'text/plain':
-                # Convert HTML entities to their values
-                output = io.BytesIO()
-            else:
-                output = stream
-            try:
-                compiler.getTemplate ().expand (context=ctx, outputFile=output, outputEncoding='utf-8')
-            except simpleTALES.ContextContentException:
-                logger.error(_("Error when exporting text template"), exc_info=True)
-            if filter.content.mimetype == 'text/plain':
-                stream.write(output.getvalue().replace(b'&lt;', b'<').replace(b'&gt;', b'>').replace(b'&amp;', b'&'))
-        else:
-            compiler = simpleTAL.XMLTemplateCompiler ()
-            compiler.parseTemplate (filter.content.stream)
-            try:
-                compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
-            except simpleTALES.ContextContentException:
-                logger.error(_("Error when exporting XML template"), exc_info=True)
-        stream.close()
-        logger.info(_("Data exported to %s") % filename)
+        f = exportfilter(controller=self, source=element)
+        f.export(filename)
         return True
 
     def website_export(self, destination='/tmp/n', views=None, max_depth=3, progress_callback=None, video_url=None):
