@@ -24,14 +24,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 import argparse
-
-
-
-
 import itertools
 import os
 import filecmp
 import shutil
+import sys
+
+if __name__ == '__main__':
+    saved_args = sys.argv[1:]
+    sys.argv = [ sys.argv[0] ]
 
 from advene.core.idgenerator import Generator
 from advene.model.package import Package
@@ -662,6 +663,6 @@ if __name__ == "__main__":
     parser.add_argument('package_to_merge_from')
     parser.add_argument('package_to_merge_into')
     parser.add_argument('output_package', nargs='?', default='/tmp/merged.xml')
-    args = parser.parse_args()
+    args = parser.parse_args(saved_args)
 
     merge_package(args.package_to_merge_from, args.package_to_merge_into, args.output_package, debug=args.debug, dry_run=args.dry_run)
