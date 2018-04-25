@@ -33,6 +33,7 @@ import os
 import filecmp
 import shutil
 
+from advene.core.idgenerator import Generator
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
@@ -635,6 +636,7 @@ def merge_package(sourcename, destname, outputname, debug=False, dry_run=False, 
 
     source = Package(uri=sourcename)
     dest = Package(uri=destname)
+    dest._idgenerator = Generator(dest)
 
     differ = Differ(source, dest)
     diff = differ.diff()
