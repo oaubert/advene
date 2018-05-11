@@ -84,7 +84,14 @@ import xml.etree.ElementTree as ET
 from advene.util.audio import SoundPlayer
 
 if config.data.webserver['mode']:
-    from advene.core.webcherry import AdveneWebServer
+    try:
+        from advene.core.webcherry import AdveneWebServer
+    except ImportError:
+        logger.warning("webcherry is not available. Disabling web server.")
+        # Disable web server. Do not simply update
+        # config.data.webserver, else the disabled setting would be
+        # saved.
+        AdveneWebServer = None
 
 import threading
 GObject.threads_init()
@@ -894,7 +901,7 @@ class AdveneController(object):
 
         self.player.check_player()
 
-        if config.data.webserver['mode']:
+        if config.data.webserver['mode'] and AdveneWebServer is not None:
             try:
                 self.server = AdveneWebServer(controller=self, port=config.data.webserver['port'])
                 serverthread = threading.Thread (target=self.server.start)
