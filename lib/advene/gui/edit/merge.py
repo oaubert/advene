@@ -18,6 +18,7 @@
 #
 """GUI to merge packages.
 """
+from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GObject
 import difflib
@@ -173,6 +174,11 @@ class TreeViewMerger:
                         retval = True
             return retval
 
+        def key_pressed(widget, event):
+            if event.keyval == Gdk.KEY_space:
+                self.toggle_selection()
+                return True
+            return False
 
         treeview = Gtk.TreeView(model=self.store)
         treeview.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
@@ -185,6 +191,7 @@ class TreeViewMerger:
             show_diff(l, l)
             return True
         treeview.connect('row-activated', row_activated)
+        treeview.connect('key-press-event', key_pressed)
 
         renderer = Gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
