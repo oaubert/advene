@@ -551,6 +551,12 @@ def tag_color(target, context):
     c=context.globals['options']['controller']
     return c.get_tag_color_for_element(target)
 
+def value_color(target, context):
+    """Return a color matching the value metadata.
+    """
+    c=context.globals['options']['controller']
+    return c.get_tag_color_for_element(target)
+
 def representation(target, context):
     """Return a concise representation for the element.
     """

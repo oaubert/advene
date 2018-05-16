@@ -32,6 +32,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import datetime
+import json
 import sys
 import time
 import os
@@ -1761,6 +1762,34 @@ class AdveneController(object):
             except KeyError:
                 pass
         return None
+
+    def get_value_color_for_element(self, element):
+        """Given an annotation, return a color based on its value.
+        """
+        if not isinstance(element, Annotation):
+            return None
+        meta = element.type.getMetaData(config.data.namespace, "value_metadata")
+        if not meta:
+            return None
+        if element.content.mimetype == 'text/x-advene-keyword-list':
+            try:
+                data = element.content.parsed()
+                # data is a KeywordList. Return the metadata associated to the first keyword.
+                return data.get(data[0])
+            except IndexError:
+                return None
+        else:
+            # FIXME: maybe we should check representation?
+            val = element.content.data
+        metadata_str = meta.get(val)
+        if not metadata_str:
+            return None
+        try:
+            metadata = json.loads(metadata_str)
+        except ValueError:
+            logger.warning("Cannot parse metadata %s", metadata)
+            return None
+        return metadata.get(val, {}).get('color', None)
 
     STATIC_STRING_RE = re.compile('string:[^$]*')
     def get_element_color(self, element, metadata='color'):
