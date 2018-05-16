@@ -611,7 +611,13 @@ class Differ:
         shutil.copyfile(source_name, destination_name)
 
 def merge_package(sourcename, destname, outputname, debug=False, dry_run=False, include=None, exclude=None):
-    logger.info("Merging %s into a%s, producing %s", sourcename, destname, outputname)
+    """Merge package sourcename into destname, producing outputname.
+
+    If include is specified, then it is a list of the only action names that should be merged.
+
+    If exclude is specified, then it is a list of the action names that should not be merged.
+    """
+    logger.info("Merging %s into %s, producing %s", sourcename, destname, outputname)
 
     # Methods applied to destination elements to check if we want
     # really to execute the action. If the method returns False, then
@@ -644,6 +650,8 @@ def merge_package(sourcename, destname, outputname, debug=False, dry_run=False, 
     if debug:
         import pdb; pdb.set_trace()
     for name, s, d, action, value in diff:
+        if include and not name in include:
+            continue
         if name in exclude and filters[exclude[name]](d):
             continue
         logger.info("%s %s : %s -> %s", name, getattr(s, 'id', str(s)),
@@ -659,11 +667,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Package merger")
     parser.add_argument('-d', '--debug', action="store_true")
     parser.add_argument('-n', '--dry-run', action="store_true")
-    parser.add_argument('--include', action="store")
-    parser.add_argument('--exclude', action="store")
-    parser.add_argument('package_to_merge_from')
+    parser.add_argument('--include', action="store", default="")
+    parser.add_argument('--exclude', action="store", default="")
+    parser.add_argument('template_package')
     parser.add_argument('package_to_merge_into')
     parser.add_argument('output_package', nargs='?', default='/tmp/merged.xml')
     args = parser.parse_args(saved_args)
 
-    merge_package(args.package_to_merge_from, args.package_to_merge_into, args.output_package, debug=args.debug, dry_run=args.dry_run)
+    include = args.include.split(':') if args.include else []
+    exclude = args.exclude.split(':') if args.exclude else []
+
+    merge_package(args.template_package, args.package_to_merge_into, args.output_package, debug=args.debug, dry_run=args.dry_run, include=include, exclude=exclude)
+
