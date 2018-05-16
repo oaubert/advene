@@ -428,7 +428,7 @@ def get_type(el):
 
 SPACE_REGEXP = re.compile(r'[^\w\d_]+', re.UNICODE)
 COMMA_REGEXP = re.compile(r'\s*,\s*', re.UNICODE)
-COMPLETION_SIZE_LIMIT = 3
+COMPLETION_SIZE_LIMIT = 1
 def get_keyword_list(s):
     """Return the keywords defined in the given string.
     """
