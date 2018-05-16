@@ -58,8 +58,15 @@ class TreeViewMerger:
     def __init__(self, controller=None, differ=None):
         self.controller=controller
         self.differ=differ
+        self.diff_textview = None
         self.store=self.build_liststore()
         self.widget=self.build_widget()
+
+    def set_diff_textview(self, tv):
+        self.diff_textview = tv
+        buf = tv.get_buffer()
+        self.minustag = buf.create_tag("minus", background="lightsalmon")
+        self.plustag = buf.create_tag("plus", background="palegreen1")
 
     def build_liststore(self):
         # Store reference to the element, string representation (title and id)
@@ -95,47 +102,10 @@ class TreeViewMerger:
         return True
 
     def build_widget(self):
-        self.diff_textview = None
         def show_diff(item, l):
             name, s, d, action, value = l
 
-            diff=difflib.Differ()
-
-            if self.diff_textview is None:
-                w = Gtk.Window()
-                w.set_title(_("Difference between original and merged elements"))
-                v = Gtk.VBox()
-                sw = Gtk.ScrolledWindow()
-                sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-                v.add(sw)
-
-                tv = Gtk.TextView()
-                self.diff_textview = tv
-                tv.set_wrap_mode (Gtk.WrapMode.CHAR)
-                f = Pango.FontDescription("courier 12")
-                tv.modify_font(f)
-
-                buf = self.diff_textview.get_buffer()
-                self.minustag = buf.create_tag("minus", background="lightsalmon")
-                self.plustag = buf.create_tag("plus", background="palegreen1")
-
-                sw.add(tv)
-
-                hb = Gtk.HButtonBox()
-                b = Gtk.Button(stock=Gtk.STOCK_CLOSE)
-                b.connect('clicked', lambda b: w.destroy())
-                def reset_textview(*p):
-                    self.diff_textview = None
-                    return True
-                w.connect('destroy', reset_textview)
-                hb.add(b)
-
-                v.pack_start(hb, False, True, 0)
-                w.add(v)
-
-                w.show_all()
-                w.resize(800, 600)
-
+            diff = difflib.Differ()
             b = self.diff_textview.get_buffer()
             b.delete(*b.get_bounds())
 
@@ -268,12 +238,26 @@ class Merger:
                                                                                        'dest': self.destpackage.uri}),
                                   False, False, 0)
 
-        scroll_win = Gtk.ScrolledWindow ()
-        scroll_win.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        vbox.add(scroll_win)
+        def scrolled(widget):
+            scroll_win = Gtk.ScrolledWindow ()
+            scroll_win.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+            scroll_win.add(widget)
+            return scroll_win
 
-        self.mergerview=TreeViewMerger(controller=self.controller, differ=self.differ)
-        scroll_win.add(self.mergerview.widget)
+        self.mergerview = TreeViewMerger(controller=self.controller, differ=self.differ)
+
+        # Textview for displaying diff info
+        tv = Gtk.TextView()
+        self.mergerview.set_diff_textview(tv)
+        tv.set_wrap_mode(Gtk.WrapMode.CHAR)
+        f = Pango.FontDescription("courier 12")
+        tv.modify_font(f)
+
+        content_paned = Gtk.Paned()
+        content_paned.add1(scrolled(self.mergerview.widget))
+        content_paned.add2(scrolled(tv))
+        vbox.add(content_paned)
+        content_paned.set_position(600)
 
         return vbox
 
