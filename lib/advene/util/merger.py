@@ -611,7 +611,7 @@ class Differ:
         shutil.copyfile(source_name, destination_name)
 
 def merge_package(sourcename, destname, outputname, debug=False, dry_run=False, include=None, exclude=None):
-    logger.warn("Merging %s into %s, producing %s", sourcename, destname, outputname)
+    logger.info("Merging %s into a%s, producing %s", sourcename, destname, outputname)
 
     # Methods applied to destination elements to check if we want
     # really to execute the action. If the method returns False, then
@@ -650,8 +650,9 @@ def merge_package(sourcename, destname, outputname, debug=False, dry_run=False, 
                     str(value(d or ""))[:100], str(value(s or ""))[:100])
         if not dry_run:
             action(s, d)
-    dest.save(outputname)
-    logger.info("Saved merged package as %s", outputname)
+    if not dry_run:
+        dest.save(outputname)
+        logger.info("Saved merged package as %s", outputname)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
