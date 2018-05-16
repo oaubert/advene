@@ -214,23 +214,31 @@ class AdAOWLImporter(GenericImporter):
         yield None
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     import sys
     from advene.core.controller import AdveneController
     if rdflib is None:
         logger.error("Cannot import required rdflib module")
         sys.exit(1)
-    if len(sys.argv) < 3:
-        logger.error("Should provide a file name and a package name")
+    if len(sys.argv) < 4:
+        logger.error("Usage: %s (base_package.azp|\"\") owl_file.owl output_package.azp")
         sys.exit(1)
 
-    fname=sys.argv[1]
-    pname=sys.argv[2]
+    base_package = sys.argv[1]
+    owl_file = sys.argv[2]
+    output_package = sys.argv[3]
 
     c = AdveneController()
-    i = AdAOWLImporter(controller=c)
+    if base_package:
+        c.load_package(base_package)
+        package = c.package
+    else:
+        package = None
 
-    i.process_options(sys.argv[1:])
-    logger.info("Converting %s to %s using %s", fname, pname, i.name)
-    p=i.process_file(fname)
-    p.save(pname)
+    i = AdAOWLImporter(controller=c, package=package)
+
+    i.process_options(sys.argv[3:])
+    logger.info("Importing %s into %s to produce %s", owl_file, base_package, output_package)
+    p = i.process_file(owl_file)
+    p.save(output_package)
     logger.info(i.statistics_formatted())
