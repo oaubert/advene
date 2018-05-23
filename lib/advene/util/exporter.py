@@ -75,7 +75,7 @@ class GenericExporter(object):
         @type controller: advene.core.controller
         """
         self.controller = controller
-        self.source = self.set_source(source)
+        self.set_source(source)
 
         # Optional output message that can be set by the exporter to
         # provide feedback to the user
@@ -172,7 +172,7 @@ class GenericExporter(object):
 
         Return a status message.
         """
-        pass
+        return ""
 
 class TemplateExporter(GenericExporter):
     """Template exporter.
