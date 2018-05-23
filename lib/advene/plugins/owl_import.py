@@ -161,7 +161,7 @@ class AdAOWLImporter(GenericImporter):
                 if (atnode, RDF.type, AO.PredefinedValuesAnnotationType) in graph or values:
                     mimetype = "text/x-advene-keyword-list"
                 elif (atnode, RDF.type, AO.NumericValuesAnnotationType) in graph:
-                    mimetype = "text/x-advene-values"
+                    mimetype = "application/x-advene-values"
                 else:
                     # Default is text/plain anyway
                     mimetype = "text/plain"
