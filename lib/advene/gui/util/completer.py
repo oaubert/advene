@@ -99,8 +99,11 @@ class Completer:
     def show_completion_window(self, *p):
         req = self.treeview.size_request()
         width, height = req.width, req.height
+        width = max(width, 180)
+
         width += 24
         height += 24
+
         self.widget.resize(width, height)
         self.widget.set_property("width-request", width)
         self.widget.set_property("height-request", height)
