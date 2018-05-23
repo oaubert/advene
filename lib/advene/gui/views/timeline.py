@@ -1878,7 +1878,7 @@ class TimeLine(AdhocView):
         # Put the entry on the layout
         al=button.get_allocation()
         if al.x == -1 and al.y == -1:
-            # We have just create the annotation widget. Its child
+            # We have just created the annotation widget. Its child
             # properties wrt. layout are not yet updated. Simply
             # compute them again.
             button.get_parent().put(e, self.unit2pixel(annotation.fragment.begin, absolute=True), self.layer_position[annotation.type])
@@ -1934,7 +1934,7 @@ class TimeLine(AdhocView):
                                Gdk.KEY_7,
                                Gdk.KEY_8,
                                Gdk.KEY_9)
-              and event.get_state() == 0
+              and event.get_state() & Gdk.ModifierType.MODIFIER_MASK == 0
               and config.data.preferences['completion-quick-fill']):
             comps = helper.get_type_predefined_completions(annotation.type)
             if not comps:
@@ -2998,7 +2998,7 @@ class TimeLine(AdhocView):
                                    Gdk.KEY_7,
                                    Gdk.KEY_8,
                                    Gdk.KEY_9)
-                  and event.get_state() == 0
+                  and event.get_state() & Gdk.ModifierType.MODIFIER_MASK == 0
                   and config.data.preferences['completion-quick-fill']):
                 comps = helper.get_type_predefined_completions(widget.annotationtype)
                 if not comps:
