@@ -206,9 +206,9 @@ Aborting.""", config.data.path[d])
         c = advene.core.controller.AdveneController()
         c.init()
         logging.warn("Available export filters:\n%s",
-                     "\n".join("%s\t: %s (.%s extension)" % (v.id,
-                                                             v.title,
-                                                             v.getMetaData(config.data.namespace, 'extension'))
+                     "\n".join("%s\t: %s (.%s extension)" % (v.get_id(),
+                                                             v.name,
+                                                             v.extension)
                                for v in c.get_export_filters()))
         c.on_exit()
         sys.exit(0)
@@ -217,12 +217,13 @@ Aborting.""", config.data.path[d])
         import advene.core.controller
         c = advene.core.controller.AdveneController()
         c.init()
-        l = [v for v in c.get_export_filters() if v.id == filter]
+        l = [ v for v in c.get_export_filters() if v.get_id() == filter ]
         if not l:
             logging.error("Export filter %s is not defined", filter)
             c.on_exit()
             sys.exit(1)
-        ext = l[0].getMetaData(config.data.namespace, 'extension')
+        l = l[0]
+        ext = l.extension
         for f in config.data.args:
             # A filename was provided. Strip the extension.
             output = ".".join((os.path.splitext(f)[0], ext))
@@ -232,7 +233,7 @@ Aborting.""", config.data.path[d])
             logging.warn("Converting %s into %s", f, output)
             c.load_package(f)
             # FIXME: could trigger events?
-            c.apply_export_filter(c.package, l[0], output)
+            c.apply_export_filter(c.package, l, output)
         c.on_exit()
         sys.exit(0)
 
