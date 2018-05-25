@@ -91,6 +91,10 @@ class GenericExporter(object):
 
 
     @classmethod
+    def get_id(cls):
+        return cls.__name__
+
+    @classmethod
     def get_name(cls):
         """Return exporter name.
         """
