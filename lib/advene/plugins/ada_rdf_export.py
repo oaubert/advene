@@ -39,6 +39,10 @@ def register(controller=None):
     controller.register_exporter(AdARDFExporter)
     return True
 
+# Evolving/ContrastingAnnotationType markers
+TO_KW = '[TO]'
+VS_KW = '[VS]'
+
 class AdARDFExporter(GenericExporter):
     name = _("AdA RDF exporter")
     extension = 'rdf'
@@ -58,13 +62,13 @@ class AdARDFExporter(GenericExporter):
         RDFS = rdflib.RDFS
         XSD = rdflib.XSD
 
-        # FIXME: do some validity checks: presence of ontology_uri / media_uri metadata
-
         # Works in source is a package or a type
         package = self.source.ownerPackage
 
         # Get the namespace from the package metdata
         ontology = package.getMetaData(config.data.namespace, "ontology_uri")
+        if not ontology:
+            return _("Cannot find the ontology URI. It should be defined as package metadata.")
         AO = rdflib.Namespace(ontology)
         #AR = rdflib.Namespace(ontology.replace('/ontology/', '/resource/'))
         AS = rdflib.Namespace("http://www.w3.org/ns/activitystreams#")
@@ -104,12 +108,54 @@ class AdARDFExporter(GenericExporter):
             body = BNode()
             g.add((anode, OA.body, body))
 
+            type_uri = a.type.getMetaData(config.data.namespace, "ontology_uri")
+            if not type_uri:
+                logger.warn(_("Cannot determine ontology URI for type %s"), self.controller.get_title(a.type))
+                type_uri = a.type.id
+            g.add((body, AO.annotationType, URIRef(type_uri)))
+
+            # Build body according to content type
             if a.content.mimetype == 'text/x-advene-keyword-list':
                 g.add((body, RDF.type, AO.PredefinedValuesAnnotationType))
-                g.add((body, AO.annotationType, URIRef(a.type.getMetaData(config.data.namespace, "ontology_uri"))))
-                for v in a.content.parsed():
-                    # FIXME: handle [TO] and [VS] values
-                    g.add((body, AO.annotationValue, Literal(v)))
+                keywords = a.content.parsed()
+                keywords_list = list(keywords)
+
+                def add_keyword_to_graph(kw, type_=AO.annotationValue):
+                    uri = keywords.get(kw, 'ontology_uri')
+                    val = URIRef(uri) if uri else Literal(kw)
+                    g.add( (body, type_, val) )
+
+                prev = None
+                while keywords_list:
+                    current = keywords_list.pop(0)
+                    if current in (TO_KW, VS_KW):
+                        if prev is None:
+                            logger.error("Syntax error: %s keyword should have a value before." % current)
+                            prev = None
+                        elif not keywords_list:
+                            logger.error("Syntax error: %s keyword should have a value after." % current)
+                            prev = None
+                        else:
+                            if current == TO_KW:
+                                add_keyword_to_graph(prev, AO.fromAnnotationValue)
+                                current = keywords_list.pop(0)
+                                add_keyword_to_graph(current, AO.toAnnotationValue)
+                                prev = current # or None?
+                            elif current == VS_KW:
+                                # FIXME: how to properly encode contrasting values? Copying TO code for the moment
+                                add_keyword_to_graph(prev, AO.fromAnnotationValue)
+                                current = keywords_list.pop(0)
+                                add_keyword_to_graph(current, AO.toAnnotationValue)
+                                prev = current # or None?
+                            else:
+                                logger.error("This should never happen.")
+                    else:
+                        if prev is not None:
+                            add_keyword_to_graph(prev)
+                        prev = current
+                # Last item
+                if prev is not None:
+                    add_keyword_to_graph(prev)
             else:
                 g.add((body, RDF.type, OA.Text))
                 g.add((body, OA.value, Literal(a.content.data)))
@@ -131,3 +177,5 @@ class AdARDFExporter(GenericExporter):
         g.add((page, AS.items, pageItems))
         g.add((page, AS.startIndex, Literal(0, datatype=XSD.nonNegativeInteger)))
         g.serialize(destination=filename, format='turtle')
+        return ""
+
