@@ -35,7 +35,6 @@ if config.data.os == 'win32':
     from gi.repository import GdkWin32
 
 import io
-import os
 import urllib.parse
 import urllib.request, urllib.parse, urllib.error
 
@@ -44,6 +43,13 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.query import Query
 import advene.util.helper as helper
+
+MODIFIER_MASK = (Gdk.ModifierType.SHIFT_MASK
+                 | Gdk.ModifierType.CONTROL_MASK
+                 | Gdk.ModifierType.MOD1_MASK
+                 | Gdk.ModifierType.SUPER_MASK
+                 | Gdk.ModifierType.HYPER_MASK
+                 | Gdk.ModifierType.META_MASK)
 
 # Predefined MIMEtype for annotation contents
 predefined_content_mimetypes=[

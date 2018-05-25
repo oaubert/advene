@@ -41,7 +41,7 @@ from advene.model.annotation import Annotation, Relation
 from advene.gui.views import AdhocView
 import advene.gui.edit.elements
 from advene.gui.util import png_to_pixbuf, enable_drag_source
-from advene.gui.util import decode_drop_parameters
+from advene.gui.util import decode_drop_parameters, MODIFIER_MASK
 from advene.gui.util.completer import Completer
 import advene.util.helper as helper
 from advene.gui.util import dialog, name2color, get_small_stock_button, get_pixmap_button, get_pixmap_toolbutton
@@ -1934,7 +1934,7 @@ class TimeLine(AdhocView):
                                Gdk.KEY_7,
                                Gdk.KEY_8,
                                Gdk.KEY_9)
-              and event.get_state() & Gdk.ModifierType.MODIFIER_MASK == 0
+              and event.get_state() & MODIFIER_MASK == 0
               and config.data.preferences['completion-quick-fill']):
             comps = helper.get_type_predefined_completions(annotation.type)
             if not comps:
@@ -2998,7 +2998,7 @@ class TimeLine(AdhocView):
                                    Gdk.KEY_7,
                                    Gdk.KEY_8,
                                    Gdk.KEY_9)
-                  and event.get_state() & Gdk.ModifierType.MODIFIER_MASK == 0
+                  and event.get_state() & MODIFIER_MASK == 0
                   and config.data.preferences['completion-quick-fill']):
                 comps = helper.get_type_predefined_completions(widget.annotationtype)
                 if not comps:

@@ -124,7 +124,12 @@ class KeyGrabber(Gtk.Button):
         self.popup.destroy()
 
     def on_key_press_event(self, widget, event):
-        mods = event.get_state() & Gdk.ModifierType.MODIFIER_MASK
+        mods = event.get_state() & (Gdk.ModifierType.SHIFT_MASK
+                                    | Gdk.ModifierType.CONTROL_MASK
+                                    | Gdk.ModifierType.MOD1_MASK
+                                    | Gdk.ModifierType.SUPER_MASK
+                                    | Gdk.ModifierType.HYPER_MASK
+                                    | Gdk.ModifierType.META_MASK)
 
         if event.keyval in (Gdk.KEY_Escape, Gdk.KEY_Return) and not mods:
             if event.keyval == Gdk.KEY_Escape:
