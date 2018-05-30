@@ -115,8 +115,19 @@ class KeywordList(object):
         self._values, self._comment = self.parse(data)
         self._parent = parent
 
-    def get(self, kw):
-        """Return metadata about the keyword
+    def get(self, kw=None, key=None, default=None):
+        """Return metadata about the keyword.
+
+        If kw is not specified, return the value_metadata for all
+        keywords.
+
+        If key is not specified, return the whole value_metadata
+        object for kw.
+
+        Else return the value corresponding to key from the
+        kw value_metadata.
+
+        In case of error or missing value, return default.
         """
         metadata = {}
         meta_str = self._parent.getMetaData(config.data.namespace, 'value_metadata')
@@ -125,7 +136,14 @@ class KeywordList(object):
                 metadata = json.loads(meta_str)
             except ValueError:
                 logger.warning("Cannot parse metadata %s", metadata)
-        return metadata.get(kw, {})
+                return None
+        if kw is None:
+            return metadata
+        else:
+            if key is None:
+                return metadata.get(kw, {})
+            else:
+                return metadata.get(kw, {}).get(key, default)
 
     def parse(self, data=None):
         """Parse a data string.
