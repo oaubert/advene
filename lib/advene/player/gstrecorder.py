@@ -84,7 +84,6 @@ class Player:
     def __init__(self):
         self.mute_volume=None
 
-        self.player=None
         self.pipeline=None
         self.videofile = time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
         self.build_pipeline()
@@ -95,13 +94,14 @@ class Player:
         self.position_update()
 
     def build_pipeline(self):
-        if self.videofile is None:
+        if not self.videofile:
+            logger.error("Undefined videofile")
             return
         videofile=self.videofile
         if config.data.player['audio-record-device'] not in ('default', ''):
-            audiosrc = 'alsasrc device=' + config.data.player['audio-record-device']
+            audiosrc = 'pulsesrc device=' + config.data.player['audio-record-device']
         else:
-            audiosrc = 'alsasrc'
+            audiosrc = 'autoaudiosrc'
         videosrc='autovideosrc'
         videosink='autovideosink'
 
@@ -109,11 +109,12 @@ class Player:
             # Generate black image
             videosrc = 'videotestsrc pattern=2'
 
-        self.pipeline=Gst.parse_launch('%(videosrc)s name=videosrc ! video/x-raw,width=352,pixel-aspect-ratio=(fraction)1/1 ! queue ! tee name=tee ! videoconvert ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s name=audiosrc ! audioconvert ! audiorate ! queue ! vorbisenc quality=0.5 ! mux.  tee. ! queue ! %(videosink)s name=sink sync=false' % locals())
-        self.imagesink=self.pipeline.get_by_name('sink')
-        self.videosrc=self.pipeline.get_by_name('videosrc')
-        self.audiosrc=self.pipeline.get_by_name('audiosrc')
-        self.player=self.pipeline
+        pipeline_def = '%(videosrc)s name=videosrc ! tee name=tee ! queue ! videoconvert ! video/x-raw,width=352,pixel-aspect-ratio=(fraction)1/1 ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s name=audiosrc ! audioconvert ! audiorate ! queue ! vorbisenc quality=0.5 ! mux.  tee. ! queue ! videoconvert ! %(videosink)s name=sink sync=false' % locals()
+        logger.debug("Launching pipeline %s", pipeline_def)
+        self.pipeline = Gst.parse_launch(pipeline_def)
+        self.imagesink = self.pipeline.get_by_name('sink')
+        self.videosrc = self.pipeline.get_by_name('videosrc')
+        self.audiosrc = self.pipeline.get_by_name('audiosrc')
 
         # Asynchronous XOverlay support.
         bus = self.pipeline.get_bus()
@@ -148,9 +149,9 @@ class Player:
         bus.connect('message::warning', on_bus_message_warning)
 
     def current_status(self):
-        if self.player is None:
+        if self.pipeline is None:
             return self.UndefinedStatus
-        st = self.player.get_state(100)[1]
+        st = self.pipeline.get_state(100)[1]
         if st == Gst.State.PLAYING:
             return self.PlayingStatus
         elif st == Gst.State.PAUSED:
@@ -161,10 +162,10 @@ class Player:
     def current_position(self):
         """Returns the current position in ms.
         """
-        if self.player is None:
+        if self.pipeline is None:
             return 0
         try:
-            pos = self.player.query_position(Gst.Format.TIME)[1]
+            pos = self.pipeline.query_position(Gst.Format.TIME)[1]
         except Exception:
             position = 0
         else:
@@ -188,14 +189,15 @@ class Player:
         return
 
     def start(self, position=None):
+        logger.debug("start")
         if self.current_status() == self.PlayingStatus:
             # Already started
             return
         self.videofile = time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
         self.build_pipeline()
-        if self.player is None:
+        if self.pipeline is None:
             return
-        self.player.set_state(Gst.State.PLAYING)
+        self.pipeline.set_state(Gst.State.PLAYING)
 
     def pause(self, position=None):
         # Ignore
@@ -207,17 +209,18 @@ class Player:
 
     def stop(self, position=None):
         self.stream_duration = self.current_position
-        if self.player is None:
+        if self.pipeline is None:
             return
-        self.player.set_state(Gst.State.NULL)
+        self.pipeline.set_state(Gst.State.NULL)
 
     def exit(self):
-        if self.player is None:
+        if self.pipeline is None:
             return
-        self.player.set_state(Gst.State.NULL)
+        self.pipeline.set_state(Gst.State.NULL)
 
     def set_uri(self, item):
-        if item is None:
+        logger.debug("set_uri %s", item)
+        if not item:
             self.videofile = tempfile.mktemp('.ogg', 'record_')
         elif os.path.exists(item):
             # tempfile.mktemp should not be used for security reasons.
@@ -231,17 +234,20 @@ class Player:
         return self.get_video_info()
 
     def get_uri(self):
-        return self.player.get_property('current-uri') or self.player.get_property('uri') or ""
+        return self.videofile
 
     def get_video_info(self):
         """Return information about the current video.
         """
         uri = self.get_uri()
+        if not Gst.uri_is_valid(uri):
+            # Let's try to interpret it as a filename
+            uri = Gst.filename_to_uri(uri)
         d = GstPbutils.Discoverer()
         try:
             info = d.discover_uri(uri)
-        except:
-            logger.error("Cannot find video info", exc_info=True)
+        except Exception as e:
+            logger.error("Cannot find video info: %s", e.message)
             info = None
         default = {
             'uri': uri,
@@ -363,8 +369,8 @@ class Player:
 
     def restart_player(self):
         # FIXME: destroy the previous player
-        self.player.set_state(Gst.State.READY)
-        # Rebuilt the pipeline
+        self.pipeline.set_state(Gst.State.READY)
+        # Rebuild the pipeline
         self.build_pipeline()
         self.set_uri(self.videofile)
         self.position_update()
