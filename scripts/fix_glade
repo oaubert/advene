@@ -1,9 +1,0 @@
-#! /bin/sh
-
-if [ -z "$1" ]
-then
-    echo "Syntaxe: $0 file.glade"
-else
-# Fixes the directories for pixmaps
-    perl -pi -e 's!"pixbuf">!"pixbuf">pixmaps/!;' -e 's!"icon">!"icon">pixmaps/!;' $1
-fi
