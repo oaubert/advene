@@ -48,6 +48,14 @@ class AdARDFExporter(GenericExporter):
     extension = 'rdf'
 
     # FIXME: add format option (turtle, n3, json-ld, xml...)
+    def __init__(self, controller=None, source=None):
+        super().__init__(controller=controller, source=source)
+        self.format = "n3"
+        self.optionparser.add_option("-f", "--format",
+                                     action="store", type="choice", dest="format",
+                                     choices=("n3", "json-ld", "ttl", "xml"),
+                                     default=self.format,
+                                     help=_("File format for output"))
 
     @classmethod
     def is_valid_for(cls, expr):
@@ -56,6 +64,12 @@ class AdARDFExporter(GenericExporter):
         expr is either "package" or "annotation-type" or "annotation-container".
         """
         return expr in ('package', 'annotation-type', 'annotation-container')
+
+    def get_filename(self, basename=None, source=None):
+        """Return a filename with the appropriate extension.
+        """
+        self.extension = self.format
+        return super().get_filename(basename, source)
 
     def export(self, filename):
         RDF = rdflib.RDF
@@ -176,6 +190,7 @@ class AdARDFExporter(GenericExporter):
         g.add((page, RDF.type, AS.OrderedCollectionPage))
         g.add((page, AS.items, pageItems))
         g.add((page, AS.startIndex, Literal(0, datatype=XSD.nonNegativeInteger)))
-        g.serialize(destination=filename, format='turtle')
+        g.serialize(destination=filename, format=self.format)
+        logger.info(_("Wrote %d triples to %s"), len(g), filename)
         return ""
 
