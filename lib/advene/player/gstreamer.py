@@ -347,8 +347,14 @@ class Player:
         if self.current_status() == self.UndefinedStatus:
             self.player.set_state(Gst.State.PAUSED)
         p = int(position) * Gst.MSECOND
-        res = self.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE, p)
-        if not res:
+        event = Gst.Event.new_seek(self.rate, Gst.Format.TIME,
+                                   Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE,
+                                   Gst.SeekType.SET, int(p),
+                                   Gst.SeekType.NONE, 0)
+        res = None
+        if event:
+            res = self.player.send_event(event)
+        if not res or not event:
             logger.warn(_("Problem when seeking into media"))
 
     def start(self, position=0):
