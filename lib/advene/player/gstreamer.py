@@ -308,8 +308,8 @@ class Player:
         d = GstPbutils.Discoverer()
         try:
             info = d.discover_uri(uri)
-        except:
-            logger.error("Cannot find video info", exc_info=True)
+        except Exception as e:
+            logger.error("Cannot find video info: %s", e.message)
             info = None
         if info is None:
             # Return default data.
