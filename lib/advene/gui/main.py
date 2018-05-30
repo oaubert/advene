@@ -2351,9 +2351,11 @@ class AdveneGUI(object):
         res=fs.run()
 
         if res == Gtk.ResponseType.OK:
-            self.controller.apply_export_filter(element,
-                                                exporters.get_current_element(),
-                                                fs.get_filename())
+            out = self.controller.apply_export_filter(element,
+                                                      exporters.get_current_element(),
+                                                      fs.get_filename())
+            if out:
+                dialog.message_dialog(out)
         fs.destroy()
         return True
 

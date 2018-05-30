@@ -2707,10 +2707,12 @@ class AdveneController(object):
 
     def apply_export_filter(self, element, exportfilter, filename):
         """Apply the given export filename to the element and output the result to filename.
+
+        Returns the output message from the filter.
         """
         f = exportfilter(controller=self, source=element)
-        f.export(filename)
-        return True
+        out = f.export(filename)
+        return out
 
     def website_export(self, destination='/tmp/n', views=None, max_depth=3, progress_callback=None, video_url=None):
         exporter=WebsiteExporter(self, destination, views, max_depth, progress_callback, video_url)
