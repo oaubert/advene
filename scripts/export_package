@@ -1,0 +1,5 @@
+#! /bin/sh
+
+PACKAGEDIR=$(dirname $0)/../lib
+export PYTHONPATH=${PACKAGEDIR}
+exec python3 ${PACKAGEDIR}/advene/util/exporter.py $@

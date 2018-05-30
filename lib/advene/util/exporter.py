@@ -28,13 +28,14 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-import argparse
+import optparse
 import io
 import os
 from simpletal import simpleTAL, simpleTALES
 
-import advene.core.config as config
-from advene.model.package import Package
+if __name__ != '__main__':
+    import advene.core.config as config
+    from advene.model.package import Package
 
 EXPORTERS = []
 
@@ -84,7 +85,7 @@ class GenericExporter(object):
         # The convention for OptionParser is to have the "dest"
         # attribute of the same name as the Exporter attribute
         # (e.g. here offset)
-        self.optionparser = argparse.ArgumentParser(epilog=self.name)
+        self.optionparser = optparse.OptionParser(epilog=self.name)
         #self.optionparser.add_argument("-o", "--offset",
         #                               action="store", type=int, dest="offset", default=0,
         #                               help=_("Specify the offset in ms"))
@@ -248,4 +249,81 @@ def init_templateexporters():
         })
         register_exporter(klass)
 
-init_templateexporters()
+if __name__ != "__main__":
+    init_templateexporters()
+
+if __name__ == "__main__":
+    import io
+    import sys
+    import tempfile
+
+    logging.basicConfig(level=logging.DEBUG)
+    USAGE = "%prog filter_name input_file [options] output_file"
+    if sys.argv[1:]:
+        filtername = sys.argv[1]
+    else:
+        filtername = None
+    params = sys.argv[2:]
+    sys.argv[2:] = []
+
+    import advene
+    import advene.core.config as config
+    import advene.core.controller as controller
+    from advene.model.package import Package
+
+    init_templateexporters()
+    log = io.StringIO()
+    saved, sys.stdout = sys.stdout, log
+    # Load plugins
+    c = controller.AdveneController()
+    try:
+        app_plugins = c.load_plugins(os.path.join(os.path.dirname(advene.__file__), 'plugins'),
+                                     prefix="advene_app_plugins")
+    except OSError:
+        pass
+
+    try:
+        user_plugins = c.load_plugins(config.data.advenefile('plugins', 'settings'),
+                                      prefix="advene_user_plugins")
+    except OSError:
+        pass
+    sys.stdout = saved
+
+    if filtername is None or len(params) == 0:
+        logger.error("""Syntax: %s
+
+Available filters:
+  * %s
+        """ % (USAGE.replace('%prog', sys.argv[0]),
+               "\n  * ".join(i.get_id() for i in c.get_export_filters())))
+        sys.exit(0)
+
+    e = None
+    cl = [ f for f in c.get_export_filters() if f.get_id().startswith(filtername) ]
+    if len(cl) == 1:
+        e = cl[0](controller=c)
+    elif len(cl) > 1:
+        logger.error("Too many possibilities:\n%s", "\n".join(f.get_id() for f in cl))
+        sys.exit(1)
+
+    if e is None:
+        logger.error("No matching exporter for %s", filtername)
+        sys.exit(1)
+
+    e.optionparser.set_usage(USAGE)
+    args = e.process_options(params)
+    if not args:
+        e.optionparser.print_help()
+        sys.exit(0)
+    inputfile = args[0]
+    try:
+        outputfile = args[1]
+    except IndexError:
+        outputfile = ""
+
+    c.load_package(inputfile)
+    e.set_source(c.package)
+
+    logger.info("Converting %s to %s using %s", inputfile, outputfile, e.name)
+    p = e.export(e.get_filename(outputfile))
+    sys.exit(0)
