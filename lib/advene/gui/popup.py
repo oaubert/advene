@@ -430,37 +430,17 @@ class Menu:
     def split_package_by_type(self, element):
         title = self.controller.get_title(element)
         count = len(element.annotations)
-        dial=Gtk.Dialog(_("Splitting package according to %s") % title,
-                        self.controller.gui.gui.win,
-                        Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT)
-        label = Gtk.Label(_("For each of the %(count)d annotations in %(atype)s, create a package named after the source package and the annotation content, copying only annotations contained in the reference annotation.") % { 'count': count,
-                                                                                                                                                                                                                                   'atype': title })
-        label.set_max_width_chars(50)
-        dial.vbox.pack_start(label, False, True, 0)
-        progress_bar=Gtk.ProgressBar()
-        progress_bar.set_text("")
-        progress_bar.set_show_text(True)
-        dial.vbox.pack_start(progress_bar, False, True, 0)
 
-        should_continue = True
-        def do_cancel(b):
-            nonlocal should_continue
-            should_continue = False
-            return True
-        cancel_button = dial.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
-        cancel_button.connect("clicked", do_cancel)
-        dial.show_all()
+        def runner_method(callback=None):
+            def progress_callback(name, filename, n, index):
+                return callback(index /  count, _("Created %(name)s - %(n)d annotations") % locals())
+            self.controller.split_package_by_type(element, callback=progress_callback)
 
-        def progress_callback(name, filename, n, index):
-            nonlocal should_continue
-            progress_bar.set_text(_("Created %(name)s - %(n)d annotations") % locals())
-            progress_bar.set_fraction( index / count )
-            while Gtk.events_pending():
-                Gtk.main_iteration()
-            return should_continue
-
-        self.controller.split_package_by_type(element, callback=progress_callback)
-        dial.destroy()
+        dialog.progress_dialog(title=_("Splitting package according to %s") % title,
+                               label=_("For each of the %(count)d annotations in %(atype)s, create a package named after the source package and the annotation content, copying only annotations contained in the reference annotation.") % { 'count': count,
+                                                                                                                                                                                                                                              'atype': title },
+                               controller=self.controller,
+                               runner=runner_method)
 
     def extract_fragment(self, m, ann):
         """Extract the fragment corresponding to an annotation.

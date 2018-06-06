@@ -264,6 +264,41 @@ def message_dialog(label="", icon=Gtk.MessageType.INFO, modal=True, callback=Non
         dialog.connect('response', handle_response)
         return True
 
+def progress_dialog(title="Progress",
+                    label=None,
+                    runner=None,
+                    controller=None):
+    if label is None:
+        label = title
+    dial = Gtk.Dialog(title,
+                    controller.gui.gui.win,
+                    Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT)
+    label = Gtk.Label(label)
+    label.set_max_width_chars(50)
+    dial.vbox.pack_start(label, False, True, 0)
+    progress_bar = Gtk.ProgressBar()
+    progress_bar.set_text("")
+    progress_bar.set_show_text(True)
+    dial.vbox.pack_start(progress_bar, False, True, 0)
+
+    dial.should_continue = True
+    def do_cancel(b):
+        dial.should_continue = False
+        return True
+    cancel_button = dial.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+    cancel_button.connect("clicked", do_cancel)
+    dial.show_all()
+
+    def progress_callback(progress, label):
+        progress_bar.set_text(label)
+        progress_bar.set_fraction(progress)
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+        return dial.should_continue
+
+    runner(callback=progress_callback)
+    dial.destroy()
+
 def yes_no_cancel_popup(title=None,
                         text=None):
     """Build a Yes-No-Cancel popup window.
