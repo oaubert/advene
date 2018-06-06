@@ -162,7 +162,7 @@ class GenericImporter(object):
             author=config.data.userid
         self.author=author
         self.controller=controller
-        self.timestamp=controller.get_timestamp()
+        self.timestamp=helper.get_timestamp()
         self.defaulttype=defaulttype
         self.source_type=source_type
         self.callback=callback
@@ -1866,6 +1866,7 @@ if __name__ == "__main__":
     saved, sys.stdout = sys.stdout, log
     # Load plugins
     c = controller.AdveneController()
+    c.load_package()
     try:
         app_plugins = c.load_plugins(os.path.join(os.path.dirname(advene.__file__), 'plugins'),
                                      prefix="advene_app_plugins")
@@ -1889,12 +1890,12 @@ Available filters:
         sys.exit(0)
 
     if filtername == 'auto':
-        i = get_importer(params[0], controller=c)
+        i = get_importer(params[0], package=c.package, controller=c)
     else:
         i = None
         cl = [ f for f in controller.advene.util.importer.IMPORTERS if f.name.startswith(filtername) ]
         if len(cl) == 1:
-            i = cl[0](controller=c)
+            i = cl[0](package=c.package, controller=c)
         elif len(cl) > 1:
             logger.error("Too many possibilities:\n%s", "\n".join(f.name for f in cl))
             sys.exit(1)
