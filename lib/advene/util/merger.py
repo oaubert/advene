@@ -23,10 +23,12 @@ Merge packages
 import logging
 logger = logging.getLogger(__name__)
 
+from gettext import gettext as _
+
 import argparse
+import filecmp
 import itertools
 import os
-import filecmp
 import shutil
 import sys
 
@@ -610,7 +612,7 @@ class Differ:
                 return
         shutil.copyfile(source_name, destination_name)
 
-def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=False, include=None, exclude=None):
+def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=False, include=None, exclude=None, callback=None):
     """Merge packages to_be_merged into refname, producing outputname.
 
     refname can be either a package or a package URI/path.
@@ -620,8 +622,14 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
     If exclude is specified, then it is a list of the action names that should not be merged.
 
     If outputname is None, then the result is not saved.
+
+    callback is a method with signature (progress_percent,
+    message). If it returns False, the merge is canceled.
     """
-    logger.info("Merging %s into %s, producing %s", to_be_merged, refname, outputname)
+    if callback is None:
+        callback = lambda n, l: logger.info(l)
+
+    logger.info(_("Merging %s into %s, producing %s") % (to_be_merged, refname, outputname))
 
     # Methods applied to destination elements to check if we want
     # really to execute the action. If the method returns False, then
@@ -653,8 +661,12 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
     else:
         dest = Package(uri=refname)
 
+    todo = []
+    incr = 1. / len(to_be_merged)
+    progress = 0
     for sourcename in to_be_merged:
-        logger.info("Processing %s", sourcename)
+        if callback(progress, _("Processing %s") % sourcename) is False:
+            break
         # Reset id generator
         dest._idgenerator = Generator(dest)
         source = Package(uri=sourcename)
@@ -667,13 +679,17 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
                 continue
             if name in exclude and filters[exclude[name]](d):
                 continue
-            logger.info("%s %s : %s -> %s", name, getattr(s, 'id', str(s)),
-                        str(value(d or ""))[:100], str(value(s or ""))[:100])
+            if callback(progress, "%s %s : %s -> %s" % (name, getattr(s, 'id', str(s)),
+                                                        str(value(d or ""))[:100], str(value(s or ""))[:100])) is False:
+                break
+            todo.append((source, name, s, d, action))
             if not dry_run:
                 action(s, d)
+        progress += incr
     if outputname is not None and not dry_run:
         dest.save(outputname)
-        logger.info("Saved merged package as %s", outputname)
+        callback(progress, _("Saved merged package as %s") % outputname)
+    return todo
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

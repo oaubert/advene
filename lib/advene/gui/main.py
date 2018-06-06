@@ -4628,16 +4628,25 @@ Image cache information: %(imagecache)s
             return True
         else:
             # Multiple package merging. No interface yet.
-            if not dialog.message_dialog(_("Please confirm the merge of %d packages. No item selection can be made.") % len(filenames),
+            if not dialog.message_dialog(_("Please confirm the merge of %d packages.") % len(filenames),
                                          icon=Gtk.MessageType.QUESTION):
                 return True
-            advene.util.merger.merge_package(self.controller.package, filenames, exclude={})
-            dur = self.controller.package.getMetaData(config.data.namespace, "duration")
-            if dur != self.controller.cached_duration:
-                # It may well have been updated
-                self.controller.cached_duration = dur
-                self.controller.notify('DurationUpdate', duration=dur)
-            self.controller.notify('PackageActivate', package=self.controller.package)
+
+            def runner_method(callback=None):
+                def callback_wrapper(prg, label):
+                    logger.info(label)
+                    return callback(prg, label)
+                advene.util.merger.merge_package(self.controller.package, filenames, exclude={}, callback=callback_wrapper)
+                dur = self.controller.package.getMetaData(config.data.namespace, "duration")
+                if dur != self.controller.cached_duration:
+                    # It may well have been updated
+                    self.controller.cached_duration = dur
+                    self.controller.notify('DurationUpdate', duration=dur)
+                self.controller.notify('PackageActivate', package=self.controller.package)
+
+            dialog.progress_dialog(title=_("Merging %d packages") % len(filenames),
+                                   runner=runner_method,
+                                   controller=self.controller)
             return True
 
     def on_import_package_activate(self, button=None, data=None):
