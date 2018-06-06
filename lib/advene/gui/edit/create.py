@@ -153,7 +153,7 @@ class CreateElementPopup(object):
         return d
 
     def get_date(self):
-        return self.controller.get_timestamp()
+        return helper.get_timestamp()
 
     def is_valid_id(self, i):
         if self.type_ == ResourceData:

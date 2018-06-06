@@ -385,7 +385,7 @@ class Differ:
 
         el=self.destination.createSchema(ident=id_)
         el.author=s.author or self.source.author
-        el.date=s.date or self.controller.get_timestamp()
+        el.date=s.date or helper.get_timestamp()
         el.title=s.title or id_
         for (namespace, name, value) in s.listMetaData():
             el.setMetaData(namespace, name, value)
@@ -408,7 +408,7 @@ class Differ:
             sch=self.copy_schema(sch)
         el=sch.createAnnotationType(ident=id_)
         el.author=s.author or self.source.author
-        el.date=s.date or self.controller.get_timestamp()
+        el.date=s.date or helper.get_timestamp()
         el.title=s.title or id_
         el.mimetype=s.mimetype
         for (namespace, name, value) in s.listMetaData():
@@ -432,7 +432,7 @@ class Differ:
             sch=self.copy_schema(sch)
         el=sch.createRelationType(ident=id_)
         el.author=s.author or self.source.author
-        el.date=s.date or self.controller.get_timestamp()
+        el.date=s.date or helper.get_timestamp()
         el.title=s.title or id_
         el.mimetype=s.mimetype
         sch.relationTypes.append(el)
@@ -496,7 +496,7 @@ class Differ:
             type=at,
             author=s.author or self.source.author,
             fragment=s.fragment.clone())
-        el.date=s.date or self.controller.get_timestamp()
+        el.date=s.date or helper.get_timestamp()
         el.content.mimetype=s.content.mimetype
         el.content.data=s.content.data
         el.tags = s.tags
@@ -535,7 +535,7 @@ class Differ:
             type=rt,
             author=s.author or self.source.author,
             members=members)
-        el.date=s.date or self.controller.get_timestamp()
+        el.date=s.date or helper.get_timestamp()
         el.content.data=s.content.data
         el.tags = s.tags
         self.destination.relations.append(el)
@@ -555,7 +555,7 @@ class Differ:
         el=self.destination.createQuery(
             ident=id_,
             author=s.author or self.source.author)
-        el.data=s.date or self.controller.get_timestamp()
+        el.data=s.date or helper.get_timestamp()
         el.title=s.title or id_
         el.content.mimetype=s.content.mimetype
         el.content.data=s.content.data
@@ -576,7 +576,7 @@ class Differ:
             ident=id_,
             clazz=s.viewableClass,
             author=s.author or self.source.author)
-        el.date=s.date or self.controller.get_timestamp()
+        el.date=s.date or helper.get_timestamp()
         el.title=s.title or id_
         el.matchFilter['class']=s.matchFilter['class']
         if 'type' in s.matchFilter:

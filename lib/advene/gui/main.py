@@ -2021,7 +2021,7 @@ class AdveneGUI(object):
                             ident = 'default_annotation_type'
                         at = sc.createAnnotationType(ident=ident)
                         at.author = config.data.userid
-                        at.date = self.controller.get_timestamp()
+                        at.date = helper.get_timestamp()
                         at.title = _("Default annotation type")
                         at.mimetype = 'text/plain'
                         at.setMetaData(config.data.namespace, 'color', next(self.controller.package._color_palette))
@@ -2566,7 +2566,7 @@ class AdveneGUI(object):
             create=False
         v.title=title
         v.author=config.data.userid
-        v.date=self.controller.get_timestamp()
+        v.date=helper.get_timestamp()
 
         workspace=self.workspace_serialize()
         stream=io.StringIO()
@@ -3356,7 +3356,7 @@ class AdveneGUI(object):
                         # Create the schema
                         sc=self.controller.package.createSchema(ident=scid)
                         sc.author=config.data.userid
-                        sc.date=self.controller.get_timestamp()
+                        sc.date=helper.get_timestamp()
                         sc.title=sctitle
                         self.controller.package.schemas.append(sc)
                         self.controller.notify('SchemaCreate', schema=sc)
@@ -3370,7 +3370,7 @@ class AdveneGUI(object):
                 # Create the type
                 at=sc.createAnnotationType(ident=atid)
                 at.author=config.data.userid
-                at.date=self.controller.get_timestamp()
+                at.date=helper.get_timestamp()
                 at.title=attitle
                 at.mimetype=mimetype_selector.get_current_element()
                 at.setMetaData(config.data.namespace, 'color', next(self.controller.package._color_palette))
@@ -3446,7 +3446,7 @@ class AdveneGUI(object):
                     # Create the schema
                     sc=self.controller.package.createSchema(ident=scid)
                     sc.author=config.data.userid
-                    sc.date=self.controller.get_timestamp()
+                    sc.date=helper.get_timestamp()
                     sc.title=sctitle
                     self.controller.package.schemas.append(sc)
                     self.controller.notify('SchemaCreate', schema=sc)
@@ -3624,7 +3624,7 @@ class AdveneGUI(object):
                 sc = self.controller.package.schemas[0]
                 at = sc.createAnnotationType(ident='annotation')
                 at.author = config.data.userid
-                at.date = self.controller.get_timestamp()
+                at.date = helper.get_timestamp()
                 at.title = _("Text annotation")
                 at.mimetype = "text/plain"
                 at.setMetaData(config.data.namespace, 'color', next(self.controller.package._color_palette))
@@ -3650,7 +3650,7 @@ class AdveneGUI(object):
                 sc = self.controller.package.schemas[0]
                 at = sc.createAnnotationType(ident='svgannotation')
                 at.author = config.data.userid
-                at.date = self.controller.get_timestamp()
+                at.date = helper.get_timestamp()
                 at.title = _("Graphical annotation")
                 at.mimetype = "image/svg+xml"
                 at.setMetaData(config.data.namespace, 'color', next(self.controller.package._color_palette))
@@ -4690,7 +4690,7 @@ Image cache information: %(imagecache)s
             create=False
         v.title=title
         v.author=config.data.userid
-        v.date=self.controller.get_timestamp()
+        v.date=helper.get_timestamp()
 
         workspace=self.workspace_serialize()
         stream=io.StringIO()

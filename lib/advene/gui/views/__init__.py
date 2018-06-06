@@ -323,7 +323,7 @@ class AdhocView(object):
                 self.controller.notify('EditSessionStart', element=v, immediate=True)
             v.title=title
             v.author=config.data.userid
-            v.date=self.controller.get_timestamp()
+            v.date=helper.get_timestamp()
 
             self.save_parameters(v.content, options, arguments)
             if create:
@@ -354,7 +354,7 @@ class AdhocView(object):
         v=self.controller.package.createView(
             ident=ident,
             author=config.data.userid,
-            date=self.controller.get_timestamp(),
+            date=helper.get_timestamp(),
             clazz='*',
             content_mimetype="text/html",
             )

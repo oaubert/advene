@@ -21,6 +21,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import collections
+import datetime
 import itertools
 import json
 import time
@@ -714,6 +715,11 @@ def format_element_name(name, count=None):
         return _("%(count)d %(plural)s") % {
             'count': count,
             'plural': element_declinations[name][1]}
+
+def get_timestamp():
+    """Return a formatted timestamp for the current date.
+    """
+    return datetime.datetime.now().replace(microsecond=0).isoformat()
 
 def get_id(source, id_):
     """Return the element whose id is id_ in source.

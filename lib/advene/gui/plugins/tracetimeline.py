@@ -825,7 +825,7 @@ class TraceTimeline(AdhocView):
                 ident=obj_group.cobj['id'],
                 type=t,
                 author=config.data.userid,
-                date=self.controller.get_timestamp(),
+                date=helper.get_timestamp(),
                 fragment=MillisecondFragment(begin=b,
                                              duration=d))
             an.content.data = urllib.parse.unquote(cont.encode('utf-8'))

@@ -19,7 +19,7 @@
 
 from advene.util.importer import GenericImporter, register
 import advene.core.config as config
-import time
+import advene.util.helper as helper
 
 from gettext import gettext as _
 
@@ -49,7 +49,7 @@ class EventHistoryImporter(GenericImporter):
                 type=schema.createAnnotationType(
                     ident=type_)
                 type.author=config.data.userid
-                type.date=self.controller.get_timestamp()
+                type.date=helper.get_timestamp()
                 type.title=type_
                 type.mimetype='application/x-advene-structured'
                 type.setMetaData(config.data.namespace, 'color', next(self.package._color_palette))
@@ -83,7 +83,7 @@ class EventHistoryImporter(GenericImporter):
             self.package._idgenerator.add(id_)
             schema=self.package.createSchema(ident=id_)
             schema.author=config.data.userid
-            schema.date=self.controller.get_timestamp()
+            schema.date=helper.get_timestamp()
             schema.title=title_
             self.package.schemas.append(schema)
         self.convert(self.iterator(filename))

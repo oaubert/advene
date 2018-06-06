@@ -1079,7 +1079,7 @@ class TranscriptionEdit(AdhocView):
                     s=schema_selection.get_current_element()
                     at=s.createAnnotationType(ident=id_)
                     at.author=config.data.userid
-                    at.date=self.controller.get_timestamp()
+                    at.date=helper.get_timestamp()
                     at.title=new_type_title
                     at.mimetype='text/plain'
                     at.setMetaData(config.data.namespace, 'color', next(s.rootPackage._color_palette))

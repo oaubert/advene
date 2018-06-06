@@ -96,7 +96,7 @@ class InteractiveQuery(AdhocView):
             # Create the query
             el=self.controller.package.createQuery(ident='_interactive')
             el.author=config.data.userid
-            el.date=self.controller.get_timestamp()
+            el.date=helper.get_timestamp()
             el.title=_("Interactive query")
 
             # Create a basic query
@@ -151,7 +151,7 @@ class InteractiveQuery(AdhocView):
             # Create the query
             q=self.controller.package.createQuery(ident=i)
             q.author=config.data.userid
-            q.date=self.controller.get_timestamp()
+            q.date=helper.get_timestamp()
             self.controller.package.queries.append(q)
 
         q.title=t
@@ -310,7 +310,7 @@ class InteractiveResult(AdhocView):
             # Create the query
             q=self.controller.package.createQuery(ident=i)
             q.author=config.data.userid
-            q.date=self.controller.get_timestamp()
+            q.date=helper.get_timestamp()
             self.controller.package.queries.append(q)
 
         q.title=t

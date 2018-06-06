@@ -1014,7 +1014,7 @@ class ActiveBookmark(object):
                             return True
                         at=schema.createAnnotationType(ident='active_bookmark')
                         at.author=config.data.userid
-                        at.date=self.controller.get_timestamp()
+                        at.date=helper.get_timestamp()
                         at.title=_("Active bookmark")
                         at.mimetype='text/plain'
                         at.setMetaData(config.data.namespace, 'color', next(self.controller.package._color_palette))
@@ -1027,7 +1027,7 @@ class ActiveBookmark(object):
                     ident=id_,
                     type=at,
                     author=config.data.userid,
-                    date=self.controller.get_timestamp(),
+                    date=helper.get_timestamp(),
                     fragment=MillisecondFragment(begin=int(self.begin),
                                                  end=int(self.end)))
                 el.content.data=self.content

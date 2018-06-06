@@ -1861,7 +1861,7 @@ class Packages(Common):
                 update_arg('class', 'clazz', 'package')
                 update_arg('author', 'author', config.data.userid)
                 kw['content_data']=data
-                kw['date']=self.controller.get_timestamp()
+                kw['date']=helper.get_timestamp()
                 try:
                     v = objet.createView(**kw)
                     objet.views.append(v)

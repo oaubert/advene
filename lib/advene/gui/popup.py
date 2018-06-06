@@ -731,7 +731,7 @@ class Menu:
         v=p.createView(
             ident=ident,
             author=config.data.userid,
-            date=self.controller.get_timestamp(),
+            date=helper.get_timestamp(),
             clazz='package',
             content_mimetype='application/x-advene-ruleset'
             )
@@ -799,7 +799,7 @@ class Menu:
         v = p.createView(
             ident=ident,
             author=config.data.userid,
-            date=self.controller.get_timestamp(),
+            date=helper.get_timestamp(),
             clazz='package',
             content_mimetype='application/x-advene-ruleset'
             )
