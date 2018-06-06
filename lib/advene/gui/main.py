@@ -4631,8 +4631,13 @@ Image cache information: %(imagecache)s
             if not dialog.message_dialog(_("Please confirm the merge of %d packages. No item selection can be made.") % len(filenames),
                                          icon=Gtk.MessageType.QUESTION):
                 return True
-            advene.util.merger.merge_package(self.controller.package, filenames)
-            self.controller.notify('PackageActivate', package=self.controller.package, exclude={})
+            advene.util.merger.merge_package(self.controller.package, filenames, exclude={})
+            dur = self.controller.package.getMetaData(config.data.namespace, "duration")
+            if dur != self.controller.cached_duration:
+                # It may well have been updated
+                self.controller.cached_duration = dur
+                self.controller.notify('DurationUpdate', duration=dur)
+            self.controller.notify('PackageActivate', package=self.controller.package)
             return True
 
     def on_import_package_activate(self, button=None, data=None):
