@@ -610,12 +610,16 @@ class Differ:
                 return
         shutil.copyfile(source_name, destination_name)
 
-def merge_package(refname, to_be_merged, outputname, debug=False, dry_run=False, include=None, exclude=None):
+def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=False, include=None, exclude=None):
     """Merge packages to_be_merged into refname, producing outputname.
+
+    refname can be either a package or a package URI/path.
 
     If include is specified, then it is a list of the only action names that should be merged.
 
     If exclude is specified, then it is a list of the action names that should not be merged.
+
+    If outputname is None, then the result is not saved.
     """
     logger.info("Merging %s into %s, producing %s", to_be_merged, refname, outputname)
 
@@ -644,7 +648,10 @@ def merge_package(refname, to_be_merged, outputname, debug=False, dry_run=False,
     if isinstance(to_be_merged, Package):
         to_be_merged = [ to_be_merged ]
 
-    dest = Package(uri=refname)
+    if isinstance(refname, Package):
+        dest = refname
+    else:
+        dest = Package(uri=refname)
 
     for sourcename in to_be_merged:
         logger.info("Processing %s", sourcename)
@@ -664,7 +671,7 @@ def merge_package(refname, to_be_merged, outputname, debug=False, dry_run=False,
                         str(value(d or ""))[:100], str(value(s or ""))[:100])
             if not dry_run:
                 action(s, d)
-    if not dry_run:
+    if outputname is not None and not dry_run:
         dest.save(outputname)
         logger.info("Saved merged package as %s", outputname)
 
