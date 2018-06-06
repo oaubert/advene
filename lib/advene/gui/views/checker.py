@@ -58,7 +58,7 @@ class FeatureChecker(object):
     def build_widget(self):
         return Gtk.Label("Abstract checker")
 
-    def update_model(self):
+    def update_model(self, package=None):
         return True
 
 @register_checker
@@ -92,7 +92,7 @@ class OverlappingChecker(FeatureChecker):
                     begins.add(b)
         return begins, ends
 
-    def update_model(self):
+    def update_model(self, package=None):
         begins, ends = self.overlapping_annotations()
         overlap = list(begins.union(ends))
 
@@ -121,7 +121,7 @@ class CompletionChecker(FeatureChecker):
         self.table.columns['content'].props.title = _("Undef. keywords")
         return self.table.widget
 
-    def update_model(self):
+    def update_model(self, package=None):
         # Dictionary indexed by annotation, where values are the
         # keyword diff
         diff_dict = {}
@@ -153,7 +153,7 @@ class OntologyURIChecker(FeatureChecker):
         self.table = GenericTable(controller=self.controller)
         return self.table.widget
 
-    def update_model(self):
+    def update_model(self, package=None):
         def check_element(el):
             return el.getMetaData(config.data.namespace, "ontology_uri")
 
@@ -172,7 +172,7 @@ class DurationChecker(FeatureChecker):
         self.table = AnnotationTable(controller=self.controller)
         return self.table.widget
 
-    def update_model(self):
+    def update_model(self, package=None):
         self.table.set_elements([ a for a in self.controller.package.annotations
                                   if not a.fragment.duration ])
 
