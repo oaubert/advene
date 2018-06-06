@@ -45,7 +45,7 @@ class FeatureDetectImporter(GenericImporter):
     def __init__(self, *p, **kw):
         super(FeatureDetectImporter, self).__init__(*p, **kw)
 
-        self.threshold = 10
+        self.neighbors = 5
         self.scale = 2
         classifiers = [ n.replace('.xml', '') for n in os.listdir(config.data.advenefile('haars')) ]
         self.classifier = classifiers[0]
@@ -53,9 +53,12 @@ class FeatureDetectImporter(GenericImporter):
         # Detect that a shape has moved
         self.motion_threshold = 10
 
-        self.optionparser.add_option("-t", "--threshold",
-                                     action="store", type="int", dest="threshold", default=self.threshold,
-                                     help=_("Sensitivity level."))
+        self.optionparser.add_option("-n", "--min-neighbors",
+                                     action="store", type="int", dest="neighbors", default=self.neighbors,
+                                     help=_("Min neighbors."))
+        self.optionparser.add_option("-m", "--motion-threshold",
+                                     action="store", type="int", dest="motion_threshold", default=self.motion_threshold,
+                                     help=_("Motion threshold."))
         self.optionparser.add_option("-s", "--scale",
                                      action="store", type="int", dest="scale", default=self.scale,
                                      help=_("Scale. Original image size will be divided by this factor, in order to speed up detection."))
@@ -94,6 +97,7 @@ class FeatureDetectImporter(GenericImporter):
         if not video.isOpened():
             return
 
+        framecount = video.get(cv2.CAP_PROP_FRAME_COUNT)
         pos = 0
         # Take the first frame to get width/height
         ret, frame = video.read()
@@ -117,7 +121,7 @@ class FeatureDetectImporter(GenericImporter):
 
             gray = cv2.cvtColor(cv2.resize(frame, (scaled_width, scaled_height)), cv2.COLOR_RGB2GRAY)
 
-            objects = cascade.detectMultiScale(gray, 1.2, 2) # scale_factor=1.2, min_neighbors=2
+            objects = cascade.detectMultiScale(gray, 1.2, self.neighbors) # scale_factor=1.2, min_neighbors=2
 
             def distance(v1, v2):
                 d = max( abs(a - b)
@@ -157,7 +161,7 @@ class FeatureDetectImporter(GenericImporter):
                     }
                 start_pos = None
 
-            if not self.progress(video.get(cv2.CAP_PROP_POS_AVI_RATIO),
+            if not self.progress(video.get(cv2.CAP_PROP_POS_FRAMES) / framecount,
                                  _("Detected %(count)d feature(s) until %(time)s") % { 'count': count,
                                                                                        'time': helper.format_time(pos) }):
                 break
