@@ -24,20 +24,18 @@ logger = logging.getLogger(__name__)
 from gettext import gettext as _
 
 import os
-import sys
-import operator
 
 try:
-    import cv
+    import cv2
 except ImportError:
-    cv = None
+    cv2 = None
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
 import advene.util.helper as helper
 
 def register(controller=None):
-    if cv:
+    if cv2:
         controller.register_importer(FeatureDetectImporter)
     return True
 
@@ -53,7 +51,7 @@ class FeatureDetectImporter(GenericImporter):
         self.classifier = classifiers[0]
 
         # Detect that a shape has moved
-        self.motion_threshold = 5
+        self.motion_threshold = 10
 
         self.optionparser.add_option("-t", "--threshold",
                                      action="store", type="int", dest="threshold", default=self.threshold,
@@ -82,7 +80,7 @@ class FeatureDetectImporter(GenericImporter):
         at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Detected %s") % self.classifier)
 
         self.progress(0, _("Detection started"))
-        video = cv.CreateFileCapture(str(filename).encode(sys.getfilesystemencoding()))
+        video = cv2.VideoCapture(str(filename))
 
         if not video:
             raise "Cannot read video file:"
@@ -93,67 +91,54 @@ class FeatureDetectImporter(GenericImporter):
         def svg_rect(x, y , w, h):
             return
 
+        if not video.isOpened():
+            return
+
+        pos = 0
         # Take the first frame to get width/height
-        pos = cv.GetCaptureProperty(video, cv.CV_CAP_PROP_POS_MSEC)
-        frame = cv.QueryFrame(video)
-        width, height = cv.GetSize(frame)
+        ret, frame = video.read()
+        width, height, depth = frame.shape
         scaled_width, scaled_height = int(width / self.scale), int(height / self.scale)
         logger.warn("Video dimensions %dx%d - scaled to %dx%d", width, height, scaled_width, scaled_height)
 
-        # create storage for grayscale version
-        largegrayscale = cv.CreateImage( (width, height), 8, 1)
-        grayscale = cv.CreateImage( (scaled_width, scaled_height), 8, 1)
-
-        # create storage
-        storage = cv.CreateMemStorage(128)
-        cascade = cv.Load(config.data.advenefile( ('haars', self.classifier + '.xml') ))
+        cascade = cv2.CascadeClassifier(config.data.advenefile( ('haars', self.classifier + '.xml') ))
         count = 0
 
         svg_template = """<svg xmlns='http://www.w3.org/2000/svg' version='1' viewBox="0 0 %(scaled_width)d %(scaled_height)d" x='0' y='0' width='%(scaled_width)d' height='%(scaled_height)d'>%%s</svg>""" % locals()
         def objects2svg(objs, threshold=-1):
             """Convert a object-list into SVG.
-
-            Only objects above threshold will be generated.
             """
             return svg_template % "\n".join("""<rect style="fill:none;stroke:green;stroke-width:4;" width="%(w)d" height="%(h)s" x="%(x)s" y="%(y)s"></rect>""" % locals()
-                                            for ((x, y, w, h), n) in objs
-                                            if n > threshold )
-        threshold_getter = operator.itemgetter(1)
+                                            for (x, y, w, h) in objs)
 
         start_pos = None
 
-        while frame :
-            cv.CvtColor(frame, largegrayscale, cv.CV_RGB2GRAY)
-            cv.Resize(largegrayscale, grayscale, cv.CV_INTER_LINEAR)
+        while ret:
 
-            # equalize histogram
-            cv.EqualizeHist(grayscale, grayscale)
+            gray = cv2.cvtColor(cv2.resize(frame, (scaled_width, scaled_height)), cv2.COLOR_RGB2GRAY)
 
-            # detect objects
-            objects = cv.HaarDetectObjects(image=grayscale,
-                                         cascade=cascade,
-                                         storage=storage,
-                                         scale_factor=1.2,
-                                         min_neighbors=2,
-                                         flags=cv.CV_HAAR_DO_CANNY_PRUNING)
+            objects = cascade.detectMultiScale(gray, 1.2, 2) # scale_factor=1.2, min_neighbors=2
 
-            # We start a new annotation if the threshold is reached,
-            # but we do not end if if we get below the threshold.
-            if objects:
+            def distance(v1, v2):
+                d = max( abs(a - b)
+                         for obj, sto in zip(objects, stored_objects)
+                         for a, b in zip(obj, sto) )
+                logger.debug("distance %d", d)
+                return d
+
+            if len(objects):
                 logger.debug("Detected object %s", objects)
                 # Detected face.
                 if start_pos is None:
                     # Only create a new annotation if above threshold
-                    if max(threshold_getter(o) for o in objects) > self.threshold:
-                        stored_objects = objects[:]
-                        start_pos = pos
-                        count += 1
+                    stored_objects = objects[:]
+                    start_pos = pos
+                    count += 1
                 else:
                     # A detection already occurred. Check if it not too different.
                     if (len(objects) != len(stored_objects)
-                        or max( abs(a - b)
-                                for obj, sto in zip(objects, stored_objects)
-                                for a, b in zip(obj[0], sto[0]) ) > self.motion_threshold):
+                        or distance(objects, stored_objects) > self.motion_threshold):
+                        logger.debug("------------------------------------ generate annotation ---------------------")
                         yield {
                             'begin': start_pos,
                             'end': pos,
@@ -164,19 +149,21 @@ class FeatureDetectImporter(GenericImporter):
                         count += 1
             elif start_pos is not None:
                  #End of feature(s)
+                logger.debug("------------------------------------ generate annotation ---------------------")
                 yield {
                     'begin': start_pos,
                     'end': pos,
                     'content': objects2svg(stored_objects),
                     }
                 start_pos = None
-            if not self.progress(cv.GetCaptureProperty(video,
-                                                       cv.CV_CAP_PROP_POS_AVI_RATIO),
+
+            if not self.progress(video.get(cv2.CAP_PROP_POS_AVI_RATIO),
                                  _("Detected %(count)d feature(s) until %(time)s") % { 'count': count,
                                                                                        'time': helper.format_time(pos) }):
                 break
-            pos = cv.GetCaptureProperty(video, cv.CV_CAP_PROP_POS_MSEC)
-            frame = cv.QueryFrame(video)
+
+            pos = video.get(cv2.CAP_PROP_POS_MSEC)
+            ret, frame = video.read()
 
         # Last frame
         if start_pos is not None:
