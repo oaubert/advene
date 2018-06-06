@@ -24,7 +24,7 @@ import advene.model.viewable as viewable
 import advene.model.util.mimetype
 
 from advene.model.bundle import ImportBundle
-from advene.model.constants import *
+from advene.model.constants import adveneNS, xlinkNS
 
 from advene.model.util.auto_properties import auto_properties
 
