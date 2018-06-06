@@ -533,7 +533,7 @@ class Differ:
         el=self.destination.createRelation(
             ident=id_,
             type=rt,
-            author=s.author or self.source.author,
+            author=s.author or self.source.author or "unknown",
             members=members)
         el.date=s.date or helper.get_timestamp()
         el.content.data=s.content.data
@@ -610,14 +610,14 @@ class Differ:
                 return
         shutil.copyfile(source_name, destination_name)
 
-def merge_package(sourcename, destname, outputname, debug=False, dry_run=False, include=None, exclude=None):
-    """Merge package sourcename into destname, producing outputname.
+def merge_package(refname, to_be_merged, outputname, debug=False, dry_run=False, include=None, exclude=None):
+    """Merge packages to_be_merged into refname, producing outputname.
 
     If include is specified, then it is a list of the only action names that should be merged.
 
     If exclude is specified, then it is a list of the action names that should not be merged.
     """
-    logger.info("Merging %s into %s, producing %s", sourcename, destname, outputname)
+    logger.info("Merging %s into %s, producing %s", to_be_merged, refname, outputname)
 
     # Methods applied to destination elements to check if we want
     # really to execute the action. If the method returns False, then
@@ -641,23 +641,29 @@ def merge_package(sourcename, destname, outputname, debug=False, dry_run=False, 
             'update_content': 'except_default_workspace'
         }
 
-    source = Package(uri=sourcename)
-    dest = Package(uri=destname)
-    dest._idgenerator = Generator(dest)
+    if isinstance(to_be_merged, Package):
+        to_be_merged = [ to_be_merged ]
 
-    differ = Differ(source, dest)
-    diff = differ.diff()
-    if debug:
-        import pdb; pdb.set_trace()
-    for name, s, d, action, value in diff:
-        if include and not name in include:
-            continue
-        if name in exclude and filters[exclude[name]](d):
-            continue
-        logger.info("%s %s : %s -> %s", name, getattr(s, 'id', str(s)),
-                    str(value(d or ""))[:100], str(value(s or ""))[:100])
-        if not dry_run:
-            action(s, d)
+    dest = Package(uri=refname)
+
+    for sourcename in to_be_merged:
+        logger.info("Processing %s", sourcename)
+        # Reset id generator
+        dest._idgenerator = Generator(dest)
+        source = Package(uri=sourcename)
+        differ = Differ(source, dest)
+        diff = differ.diff()
+        if debug:
+            import pdb; pdb.set_trace()
+        for name, s, d, action, value in diff:
+            if include and not name in include:
+                continue
+            if name in exclude and filters[exclude[name]](d):
+                continue
+            logger.info("%s %s : %s -> %s", name, getattr(s, 'id', str(s)),
+                        str(value(d or ""))[:100], str(value(s or ""))[:100])
+            if not dry_run:
+                action(s, d)
     if not dry_run:
         dest.save(outputname)
         logger.info("Saved merged package as %s", outputname)
@@ -667,15 +673,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Package merger")
     parser.add_argument('-d', '--debug', action="store_true")
     parser.add_argument('-n', '--dry-run', action="store_true")
+    parser.add_argument('-o', '--output-package', default="/tmp/merged.xml")
     parser.add_argument('--include', action="store", default="")
     parser.add_argument('--exclude', action="store", default="")
-    parser.add_argument('template_package')
-    parser.add_argument('package_to_merge_into')
-    parser.add_argument('output_package', nargs='?', default='/tmp/merged.xml')
+    parser.add_argument('reference_package')
+    parser.add_argument('other_packages', nargs='*', default='/tmp/merged.xml')
     args = parser.parse_args(saved_args)
 
     include = args.include.split(':') if args.include else []
     exclude = args.exclude.split(':') if args.exclude else []
 
-    merge_package(args.template_package, args.package_to_merge_into, args.output_package, debug=args.debug, dry_run=args.dry_run, include=include, exclude=exclude)
+    merge_package(args.reference_package, args.other_packages, args.output_package, debug=args.debug, dry_run=args.dry_run, include=include, exclude=exclude)
 
