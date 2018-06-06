@@ -520,7 +520,8 @@ def get_filename(title=_("Open a file"),
                  default_dir=None,
                  default_file=None,
                  alias=False,
-                 filter=None):
+                 filter=None,
+                 multiple=False):
     """Get a filename.
 
     @param title: the dialog title
@@ -535,7 +536,10 @@ def get_filename(title=_("Open a file"),
     @type alias: boolean
     @param filter: the filename filter ('any', 'advene', 'session', 'video')
     @type filter: string
-    @return: if alias, a tuple (filename, alias), else the filename
+    @param multiple: allow multiple file selection
+    @type multiple: boolean
+
+    @return: if multiple, a list of filenames, else if alias, a tuple (filename, alias), else the filename
     """
     preview_box = Gtk.VBox()
 
@@ -604,6 +608,7 @@ def get_filename(title=_("Open a file"),
                                        Gtk.STOCK_CANCEL,
                                        Gtk.ResponseType.CANCEL ))
     fs.set_preview_widget(preview_box)
+    fs.set_select_multiple(multiple)
 
     # filter may be: 'any', 'advene', 'session', 'video'
     filters={}
@@ -639,8 +644,11 @@ def get_filename(title=_("Open a file"),
     filename=None
     al=None
     if res == Gtk.ResponseType.OK:
-        filename=fs.get_filename()
-        if alias:
+        if multiple:
+            filename = fs.get_filenames()
+        else:
+            filename = fs.get_filename()
+        if alias and not multiple:
             al=alias_entry.get_text()
             if not al:
                 # It may not have been updated, if the user typed the
