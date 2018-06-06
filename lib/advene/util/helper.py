@@ -28,7 +28,7 @@ import time
 import io
 import inspect
 try:
-    from hashlib import md5
+    from hashlib import md5, sha256
 except ImportError:
     from md5 import md5
 import os
@@ -191,6 +191,20 @@ def mediafile2id (mediafile):
     """
     m=md5(mediafile.encode('utf-8'))
     return m.hexdigest()
+
+def mediafile_checksum(mediafile):
+    """Return the SHA256 checksum of the given mediafile.
+
+    @param mediafile: the name of the mediafile
+    @type mediafile: string
+    @return: the checksum
+    @rtype: string
+    """
+    h = sha256()
+    with open(mediafile, 'rb', buffering=0) as f:
+        for b in iter(lambda : f.read(128*1024), b''):
+            h.update(b)
+    return h.hexdigest()
 
 def package2id (p):
     """Return the id of the package's mediafile.
