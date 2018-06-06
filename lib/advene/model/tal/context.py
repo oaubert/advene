@@ -20,7 +20,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 import copy
-import sys
 
 from io import StringIO
 
@@ -296,15 +295,10 @@ class AdveneContext(_advene_context):
             view_source = StringIO (str(view_source))
 
         kw = {}
-        if mimetype is None or mimetype.startswith('text/'):
-            compiler = simpleTAL.HTMLTemplateCompiler ()
-            compiler.log = self.log
-            compiler.parseTemplate (view_source, 'utf-8')
-        else:
-            compiler = simpleTAL.XMLTemplateCompiler ()
-            compiler.log = self.log
-            compiler.parseTemplate (view_source)
-            kw["suppressXMLDeclaration"] = 1
+        compiler = simpleTAL.XMLTemplateCompiler ()
+        compiler.log = self.log
+        compiler.parseTemplate (view_source)
+        kw["suppressXMLDeclaration"] = 1
         compiler.getTemplate ().expand (context=self, outputFile=stream, outputEncoding='utf-8', **kw)
 
         return stream
