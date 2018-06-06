@@ -248,6 +248,11 @@ class RelationType(AbstractType,
         return [ a for a in self.getRootPackage ().getRelations ()
                    if a.getType() == self ]
 
+    def getAnnotations (self):
+        """Return a set of annotations that are part of relations of this type.
+        """
+        return set(a for r in self.getRelations() for a in r.members)
+
     def getHackedMemberTypes (self):
         """
         Return a tuple of the member type's URIs
