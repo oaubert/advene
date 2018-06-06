@@ -91,6 +91,7 @@ import xml.etree.ElementTree as ET
 
 import advene.util.importer
 from advene.gui.util.completer import Indexer, Completer
+import advene.util.merger
 
 # GUI elements
 from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color, predefined_content_mimetypes, get_drawable
@@ -4603,23 +4604,36 @@ Image cache information: %(imagecache)s
             d=config.data.path['data']
         else:
             d=None
-        filename=dialog.get_filename(title=_("Select the package to merge"),
-                                              action=Gtk.FileChooserAction.OPEN,
-                                              button=Gtk.STOCK_OPEN,
-                                              default_dir=d,
-                                              filter='advene')
-        if not filename:
+        filenames = dialog.get_filename(title=_("Select the package to merge"),
+                                        action=Gtk.FileChooserAction.OPEN,
+                                        button=Gtk.STOCK_OPEN,
+                                        default_dir=d,
+                                        multiple=True,
+                                        filter='advene')
+        if not filenames:
             return True
-        try:
-            source=Package(uri=filename)
-        except Exception as e:
-            msg = "Cannot load %s file: %s" % (filename, str(e))
-            self.log(msg)
-            dialog.message_dialog(msg, icon=Gtk.MessageType.ERROR)
+
+        if len(filenames) == 1:
+            filename = filenames[0]
+            # Single package - offer interface
+            try:
+                source=Package(uri=filename)
+            except Exception as e:
+                msg = "Cannot load %s file: %s" % (filename, str(e))
+                self.log(msg)
+                dialog.message_dialog(msg, icon=Gtk.MessageType.ERROR)
+                return True
+            m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
+            m.popup()
             return True
-        m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
-        m.popup()
-        return True
+        else:
+            # Multiple package merging. No interface yet.
+            if not dialog.message_dialog(_("Please confirm the merge of %d packages. No item selection can be made.") % len(filenames),
+                                         icon=Gtk.MessageType.QUESTION):
+                return True
+            advene.util.merger.merge_package(self.controller.package, filenames)
+            self.controller.notify('PackageActivate', package=self.controller.package, exclude={})
+            return True
 
     def on_import_package_activate(self, button=None, data=None):
         if config.data.path['data']:
