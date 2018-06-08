@@ -277,7 +277,7 @@ class AnnotationImporter(AdhocView):
         self.fb = Gtk.FileChooserButton(_("Choose the file to import"))
         self.fb.set_local_only(False)
         self.fb.set_action(Gtk.FileChooserAction.OPEN)
-        self.fb.set_current_folder(config.data.path['data'])
+        self.fb.set_current_folder(str(config.data.path['data']))
         self.fb.connect('file-set', updated_filename)
 
         line.pack_start(self.fb, True, True, 0)

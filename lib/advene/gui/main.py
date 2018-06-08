@@ -30,6 +30,7 @@ from collections import OrderedDict
 import io
 import locale
 import os
+from pathlib import Path
 import pprint
 import queue
 import re
@@ -613,7 +614,7 @@ class AdveneGUI(object):
         # Load advene.css file
         css_provider = Gtk.CssProvider()
         css_provider.connect('parsing-error', log_error)
-        css_provider.load_from_path(config.data.advenefile('advene.css'))
+        css_provider.load_from_path(str(config.data.advenefile('advene.css')))
         context = Gtk.StyleContext()
         context.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
@@ -3742,7 +3743,7 @@ class AdveneGUI(object):
         """Open a file selector to load a package.
 """
         if config.data.path['data']:
-            d=config.data.path['data']
+            d=str(config.data.path['data'])
         else:
             d=None
 
@@ -3832,7 +3833,7 @@ class AdveneGUI(object):
             package=self.controller.package
         self.controller.update_package_title()
         if config.data.path['data']:
-            d=config.data.path['data']
+            d=str(config.data.path['data'])
         else:
             d=None
         filename=dialog.get_filename(title=_("Save the package %s") % self.controller.get_title(package),
@@ -3886,7 +3887,7 @@ class AdveneGUI(object):
         """Save the current session.
         """
         if config.data.path['data']:
-            d=config.data.path['data']
+            d=str(config.data.path['data'])
         else:
             d=None
         filename=dialog.get_filename(title=_("Save the session in..."),
@@ -4129,7 +4130,7 @@ Image cache information: %(imagecache)s
 
     def on_b_addfile_clicked (self, button=None, data=None):
         """Open a movie file"""
-        mp=[ d for d in config.data.path['moviepath'].split(os.path.pathsep) if d != '_' ]
+        mp=[ d for d in str(config.data.path['moviepath']).split(os.path.pathsep) if d != '_' ]
         if mp:
             default=mp[0]
         else:
@@ -4233,7 +4234,7 @@ Image cache information: %(imagecache)s
         # Direct options needing a restart to be taken into account.
         restart_needed_options = ('tts-engine', 'language', 'timestamp-format', 'expert-mode')
 
-        path_options=('data', 'plugins', 'advene', 'imagecache', 'moviepath', 'shotdetect')
+        path_options=('data', 'advene', 'imagecache', 'moviepath', 'shotdetect')
         cache={
             'font-size': config.data.preferences['timeline']['font-size'],
             'button-height': config.data.preferences['timeline']['button-height'],
@@ -4245,7 +4246,7 @@ Image cache information: %(imagecache)s
             cache['player-' + k] = config.data.player[k]
 
         for k in path_options:
-            cache[k] = config.data.path[k]
+            cache[k] = str(config.data.path[k])
         for k in direct_options:
             cache[k] = config.data.preferences[k]
         cache['package-auto-save-interval']=cache['package-auto-save-interval']/1000
@@ -4257,7 +4258,6 @@ Image cache information: %(imagecache)s
         ew.add_dir_selector(_("Data"), "data", _("Standard directory for data files"))
         ew.add_dir_selector(_("Movie path"), "moviepath", _("List of directories (separated by %s) to search for movie files (_ means package directory)") % os.path.pathsep)
         ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
-        ew.add_dir_selector(_("Player"), "plugins", _("Directory of the video player"))
         ew.add_file_selector(_("Shotdetect"), "shotdetect", _("Shotdetect application"))
 
         ew.add_title(_("GUI"))
@@ -4437,9 +4437,9 @@ Image cache information: %(imagecache)s
                 config.data.preferences['timeline'][k] = cache[k]
             for k in path_options:
                 if cache[k] != config.data.path[k]:
-                    config.data.path[k]=cache[k]
+                    config.data.path[k] = Path(cache[k])
                     # Store in auto-saved preferences
-                    config.data.preferences['path'][k]=cache[k]
+                    config.data.preferences['path'][k] = Path(cache[k])
                     if k == 'plugins':
                         player_need_restart = True
 
@@ -4520,19 +4520,19 @@ Image cache information: %(imagecache)s
         return False
 
     def on_help1_activate (self, button=None, data=None):
-        self.controller.open_url ('http://www.advene.org/wiki/index.php/AdveneUserGuide')
+        self.controller.open_url ('https://www.advene.org/wiki/AdveneUserGuide')
         return True
 
     def on_support1_activate (self, button=None, data=None):
-        self.controller.open_url ('http://github.com/oaubert/advene/')
+        self.controller.open_url ('https://github.com/oaubert/advene/')
         return True
 
     def on_helpshortcuts_activate (self, button=None, data=None):
-        helpfile=os.path.join( config.data.path['web'], 'shortcuts.html' )
-        if os.access(helpfile, os.R_OK):
-            self.controller.open_url ('file:///' + helpfile)
+        helpfile = Path(config.data.advenefile('shortcuts.html', 'web'))
+        if helpfile.is_file():
+            self.controller.open_url(helpfile.as_uri())
         else:
-            self.controller.open_url ('http://www.advene.org/wiki/index.php/AdveneShortcuts')
+            self.controller.open_url('https://www.advene.org/wiki/AdveneShortcuts')
         return True
 
     def on_advene_log_display(self, button=None, data=None):
@@ -4601,7 +4601,7 @@ Image cache information: %(imagecache)s
 
     def on_merge_package_activate(self, button=None, data=None):
         if config.data.path['data']:
-            d=config.data.path['data']
+            d=str(config.data.path['data'])
         else:
             d=None
         filenames = dialog.get_filename(title=_("Select the package to merge"),
@@ -4651,7 +4651,7 @@ Image cache information: %(imagecache)s
 
     def on_import_package_activate(self, button=None, data=None):
         if config.data.path['data']:
-            d=config.data.path['data']
+            d=str(config.data.path['data'])
         else:
             d=None
         filename = dialog.get_filename(title=_("Select the package to import"),

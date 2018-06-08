@@ -37,9 +37,9 @@ if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
     ppath = os.getenv('GST_PLUGIN_PATH', "")
     if not ppath or not os.path.exists(ppath):
-        os.environ['GST_PLUGIN_PATH'] = os.path.join(config.data.path['advene'], 'gst', 'lib', 'gstreamer-0.10')
+        os.environ['GST_PLUGIN_PATH'] = str(config.data.path['advene'] / 'gst' / 'lib' / 'gstreamer-0.10')
         gstpath = os.getenv('PATH', "")
-        os.environ['PATH'] = os.pathsep.join( ( os.path.join(config.data.path['advene'], 'gst', 'bin'), gstpath) )
+        os.environ['PATH'] = os.pathsep.join((config.data.path['advene'] / 'gst' / 'bin'), gstpath)
     else:
         #even if gstpluginpath is defined, gst still may not be in path
         gstpath = os.getenv('PATH', "")

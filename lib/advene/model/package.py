@@ -74,7 +74,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
            Providing None for the source parameter creates a new Package.
         """
         self.meta_cache={}
-        self.__uri = uri
+        self.__uri = str(uri)
         self.__importer = importer
         # Possible container
         self.__zip = None

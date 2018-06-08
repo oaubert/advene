@@ -120,7 +120,7 @@ class VideoPlayer(AdhocView):
         return self.options, arguments
 
     def select_file(self, *p):
-        mp=[ d for d in config.data.path['moviepath'].split(os.path.pathsep) if d != '_' ]
+        mp=[ d for d in str(config.data.path['moviepath']).split(os.path.pathsep) if d != '_' ]
         if mp:
             default=mp[0]
         else:

@@ -31,20 +31,21 @@ notifications and actions triggering.
 import logging
 logger = logging.getLogger(__name__)
 
+import cgi
+from gi.repository import GObject
+import itertools
 import json
+import operator
+import os
+from pathlib import Path
+import re
+import socket
+import shlex
 import sys
 import time
-import os
-import cgi
-import socket
-import re
-import webbrowser
-import urllib.request, urllib.parse, urllib.error
 from urllib.parse import urljoin
-from gi.repository import GObject
-import shlex
-import itertools
-import operator
+import urllib.request, urllib.parse, urllib.error
+import webbrowser
 
 import advene.core.config as config
 
@@ -1285,38 +1286,31 @@ class AdveneController(object):
     def locate_mediafile(self, mediafile):
         """Locate the given media file.
         """
-        if not os.path.exists(mediafile):
-            # It is a file. It should exist. Else check for a similar
-            # one in moviepath
-            # UNIX/Windows interoperability: convert pathnames
-            n=mediafile.replace('\\', os.sep).replace('/', os.sep)
-
-            name=os.path.basename(n)
-            for d in config.data.path['moviepath'].split(os.pathsep):
+        mediafile = Path(mediafile)
+        if not mediafile.exists():
+            name = mediafile.name
+            for d in str(config.data.path['moviepath']).split(os.pathsep):
                 if d == '_':
                     # Get package dirname
-                    d=self.package.uri
+                    d = self.package.uri
                     # And convert it to a pathname (for Windows)
                     if d.startswith('file:'):
-                        d=d.replace('file://', '')
-                    d=urllib.request.url2pathname(d)
-                    d=os.path.dirname(d)
+                        d = d.replace('file://', '')
+                    d = Path(urllib.request.url2pathname(d))
+                    d = d.parent
                 if '~' in d:
                     # Expand userdir
-                    d=str(os.path.expanduser(d), sys.getfilesystemencoding())
+                    d = Path(d).expanduser
+                d = Path(d)
 
-                n=os.path.join(d, name)
+                n = d / name
                 # FIXME: if d is a URL, use appropriate method (urllib.??)
-                if os.path.exists(n):
-                    mediafile=n
+                if n.exists():
+                    mediafile = n
                     logger.info(_("Found matching video file in moviepath: %s") % n)
                     break
-        else:
-            # Path exists. It may be a relative path, so convert it to
-            # absolute path.
-            mediafile=os.path.abspath(mediafile)
 
-        return mediafile
+        return str(mediafile.absolute())
 
     def get_defined_tags(self, p=None):
         """Return the set of existing tags.

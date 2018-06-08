@@ -46,7 +46,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
 
     def __init__(self, *p, **kw):
         super(ShotdetectAppImporter, self).__init__(*p, **kw)
-        self.app_path = config.data.path['shotdetect']
+        self.app_path = str(config.data.path['shotdetect'])
         # Duration of the processed movie (used to correctly compute progress value)
         self.duration = 0
         self.sensitivity = 60

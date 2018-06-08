@@ -356,7 +356,7 @@ class Importer:
 
     def add_package(self, button=None):
         if config.data.path['data']:
-            d=config.data.path['data']
+            d=str(config.data.path['data'])
         else:
             d=None
         filename, alias=dialog.get_filename(title=_("Choose the package to import, and its alias"),

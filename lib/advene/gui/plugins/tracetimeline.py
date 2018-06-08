@@ -455,7 +455,7 @@ class TraceTimeline(AdhocView):
             fname=dialog.get_filename(title=_("Open a trace file"),
                                    action=Gtk.FileChooserAction.OPEN,
                                    button=Gtk.STOCK_OPEN,
-                                   default_dir=config.data.path['settings'],
+                                   default_dir=str(config.data.path['settings']),
                                    filter='any')
             if not fname:
                 return True

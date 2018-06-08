@@ -23,6 +23,7 @@ import advene.core.config as config
 
 import gettext
 import locale
+from pathlib import Path
 
 APP='advene'
 # Locale initialisation
@@ -31,9 +32,9 @@ try:
 except locale.Error:
     print("Error in locale initialization. Interface translation may be incorrect.")
     pass
-gettext.bindtextdomain(APP, config.data.path['locale'])
+gettext.bindtextdomain(APP, str(config.data.path['locale']))
 gettext.textdomain(APP)
-gettext.install(APP, localedir=config.data.path['locale'])
+gettext.install(APP, localedir=str(config.data.path['locale']))
 from gettext import gettext as _
 
 from gi.repository import Gtk
@@ -48,7 +49,7 @@ class Config:
         for k in ('language', 'update-check'):
             self.options[k]=config.data.preferences[k]
         for k in ('data', 'imagecache', 'moviepath'):
-            self.options[k]=config.data.path[k]
+            self.options[k]=str(config.data.path[k])
         # Remove the possible _ from moviepath, it is handled through a checkbox
         mp=self.options['moviepath'].split(os.path.pathsep)
         if '_' in mp:
@@ -72,7 +73,7 @@ class Config:
             if self.options['movie-in-package-dir']:
                 self.options['moviepath']=os.path.pathsep.join( ('_', self.options['moviepath'] ) )
             for k in ('data', 'imagecache', 'moviepath'):
-                config.data.path[k]=self.options[k]
+                config.data.path[k]=Path(self.options[k])
             config.data.save_preferences()
         Gtk.main_quit()
         return

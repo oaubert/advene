@@ -37,7 +37,7 @@ class CachedString:
         self._filename = filename
         self.contenttype = 'text/plain'
         self.is_default = False
-        ts = re.findall('(\d+).png$', filename)
+        ts = re.findall('(\d+).png$', str(filename))
         if ts:
             self.timestamp = int(ts[0])
         else:
@@ -268,7 +268,7 @@ class ImageCache(object):
         """
         return list(self._dict.keys())
 
-    def save (self, name):
+    def save(self, name):
         """Save the content of the cache under a specified name (id).
 
         The method creates a directory in some other directory
@@ -279,29 +279,29 @@ class ImageCache(object):
         @return: the created directory
         @rtype: string
         """
-        directory=config.data.path['imagecache']
-        if not os.path.isdir (directory):
-            if os.path.exists (directory):
+        directory = config.data.path['imagecache']
+        if not directory.is_dir():
+            if directory.exists():
                 # File exists, but is not a directory.
                 raise Exception("Fatal error: %s should be a directory" % directory)
             else:
-                os.mkdir (directory)
+                directory.mkdir(parents=True)
 
-        d = os.path.join (directory, name)
+        d = directory / name
 
-        if not os.path.isdir (d):
-            if os.path.exists (d):
+        if not d.is_dir():
+            if d.exists():
                 # File exists, but is not a directory.
                 raise Exception("Fatal error: %s should be a directory" % d)
             else:
-                os.mkdir (d)
+                d.mkdir()
 
         for k, i in self._dict.items():
             if i == self.not_yet_available_image:
                 continue
             if isinstance(i, CachedString):
                 continue
-            f = open(os.path.join (d, "%010d.png" % k), 'wb')
+            f = open(d / "%010d.png" % k, 'wb')
             f.write (i)
             f.close ()
 
@@ -314,29 +314,28 @@ class ImageCache(object):
         @param name: the name of the origin imagecache directory.
         @type name: string
         """
-        d = os.path.join (config.data.path['imagecache'], name)
+        d = config.data.path['imagecache'] / name
 
-        if not os.path.isdir (d):
+        if not d.is_dir():
             # The cache directory does not exist
             return
         else:
             self.name=name
-            for name in os.listdir (d):
-                (n, ext) = os.path.splitext(name)
+            for filename in d.glob('*.png'):
+                n = filename.stem
                 # We must do some checks, in case there are non-well
                 # formatted filenames in the directory
-                if ext.lower() == '.png':
-                    try:
-                        n=n.lstrip('0')
-                        if n == '':
-                            n=0
-                        i=int(n)
-                    except ValueError:
-                        logger.error("Invalid filename in imagecache: %s", name)
-                        continue
-                    s=CachedString(os.path.join (d, name))
-                    s.contenttype='image/png'
-                    self._dict[i] = s
+                try:
+                    n = n.lstrip('0')
+                    if n == '':
+                        n = 0
+                    i = int(n)
+                except ValueError:
+                    logger.error("Invalid filename in imagecache: %s", filename)
+                    continue
+                s = CachedString(d / filename)
+                s.contenttype = 'image/png'
+                self._dict[i] = s
         self._modified=False
 
     def stats(self):

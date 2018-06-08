@@ -840,7 +840,7 @@ class TranscriptionEdit(AdhocView):
             fname=dialog.get_filename(title= ("Save transcription to..."),
                                                action=Gtk.FileChooserAction.SAVE,
                                                button=Gtk.STOCK_SAVE,
-                                               default_dir=config.data.path['data'],
+                                               default_dir=str(config.data.path['data']),
                                                default_file=default_name
                                                )
         if fname is not None:
@@ -869,7 +869,7 @@ class TranscriptionEdit(AdhocView):
                                                   icon=Gtk.MessageType.QUESTION):
                 return True
         fname=dialog.get_filename(title=_("Select transcription file to load"),
-                                           default_dir=config.data.path['data'])
+                                           default_dir=str(config.data.path['data']))
         if fname is not None:
             self.load_transcription(filename=fname)
         return True
@@ -1278,13 +1278,14 @@ if __name__ == "__main__":
     controller=DummyController()
     controller.gui=None
 
+    from pathlib import Path
     import advene.player.dummy
     player=advene.player.dummy.Player()
     controller.player=player
     controller.player.status=controller.player.PlayingStatus
 
     #controller.package = Package (uri=sys.argv[1])
-    config.data.path['resources']='/usr/local/src/advene-project/share'
+    config.data.path['resources']= Path('/usr/local/src/advene-project/share')
     controller.package = Package (uri="new_pkg",
                             source=config.data.advenefile(config.data.templatefilename))
 

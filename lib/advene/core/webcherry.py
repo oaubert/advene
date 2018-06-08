@@ -970,13 +970,12 @@ class Admin(Common):
         res=[ self.start_html (_("Available files"), duplicate_title=True, mode='navigation') ]
         res.append ("<ul>")
 
-        l=[ os.path.join(config.data.path['data'], n)
-            for n in os.listdir(config.data.path['data'])
-            if n.lower().endswith('.xml') or n.lower().endswith('.azp') ]
+        l=[ n
+            for n in config.data.path['data'].glob('*.*')
+            if n.suffix.lower().endswith('.xml') or n.suffix.lower().endswith('.azp') ]
         l.sort(key=lambda a: a.lower())
         for uri in l:
-            name, ext = os.path.splitext(uri)
-            alias = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+            alias = re.sub('[^a-zA-Z0-9_]', '_', uri.stem)
             res.append ("""
             <li><a href="/admin/load?alias=%(alias)s&uri=%(uri)s">%(uri)s</a></li>
             """ % {'alias':alias, 'uri':uri})
@@ -2157,11 +2156,11 @@ class AdveneWebServer:
             },
             '/favicon.ico': {
                 'tools.staticfile.on': True,
-                'tools.staticfile.filename': config.data.advenefile( ( 'pixmaps', 'advene.ico' ) ),
+                'tools.staticfile.filename': str(config.data.advenefile( ( 'pixmaps', 'advene.ico' ) )),
                 },
             '/data': {
                 'tools.staticdir.on': True,
-                'tools.staticdir.dir': config.data.path['web'],
+                'tools.staticdir.dir': str(config.data.path['web'])
                 },
             }
         cherrypy.tree.mount(Root(controller), config=app_config)

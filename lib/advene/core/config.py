@@ -58,10 +58,16 @@ def find_in_path(name):
     Return None if name cannot be found.
     """
     for d in os.environ['PATH'].split(os.path.pathsep):
-        fullname=os.path.join(d, name)
-        if os.path.exists(fullname):
+        fullname = Path(d) / name
+        if fullname.exists():
             return fullname
     return None
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Path):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
 
 class Config(object):
     """Configuration information, platform specific.
@@ -75,12 +81,9 @@ class Config(object):
 
     Example advene.ini file::
 
-      config.data.path['plugins']='/usr/local/src/vlc-0.8.5'
-      config.data.path['data']='/home/foo/advene/examples'
+      config.data.path['data']=Path('/home/foo/advene/examples')
 
     @ivar path: dictionary holding path values. The keys are:
-      - vlc : path to the VLC binary
-      - plugins : path to the VLC plugins
       - advene : path to the Advene modules
       - resources : path to the Advene resources (glade, template, ...)
       - data : default path to the Advene data files
@@ -122,74 +125,65 @@ class Config(object):
             self.os='linux'
         else:
             logger.warning("Warning: undefined platform: %s", os.sys.platform)
-            self.os=os.sys.platform
+            self.os = os.sys.platform
 
         if self.os == 'win32':
+            prgdir = Path(os.environ.get('PROGRAMFILES', 'c:/Program Files'))
+            advenedir = prgdir / 'Advene'
             self.path = {
-                # VLC binary path
-                'vlc': 'c:\\Program Files\\Advene',
-                # VLC additional plugins path
-                'plugins': 'c:\\Program Files\\Advene\\vlcplugins',
                 # Advene modules path
-                'advene': 'c:\\Program Files\\Advene',
+                'advene': advenedir,
                 # Advene resources (.glade, template, ...) path
-                'resources': 'c:\\Program Files\\Advene\\share',
+                'resources': advenedir / 'share',
                 # Advene data files default path
-                'data': self.get_homedir(),
+                'data': Path.home(),
                 # Imagecache save directory
-                'imagecache': os.getenv('TEMP') or 'c:\\',
+                'imagecache': Path(os.getenv('TEMP', 'c:/')),
                 # Web data files
-                'web': 'c:\\Program Files\\Advene\\share\\web',
+                'web': advenedir / 'share' / 'web',
                 # Movie files search path. _ is the
                 # current package path
                 'moviepath': '_',
-                'locale': 'c:\\Program Files\\Advene\\locale',
-                'shotdetect': 'c:\\Program Files\\Advene\\share\\shotdetect.exe',
+                'locale': advenedir / 'locale',
+                'shotdetect': advenedir / 'share' / 'shotdetect.exe'
                 }
         elif self.os == 'darwin':
+            advenedir = Path('/Applications/Advene.app')
             self.path = {
-                # VLC binary path
-                'vlc': '/Applications/VLC.app',
-                # VLC additional plugins path
-                'plugins': '/Applications/VLC.app',
                 # Advene modules path
-                'advene': '/Applications/Advene.app',
+                'advene': advenedir,
                 # Advene resources (.glade, template, ...) path FIXME
-                'resources': '/Applications/Advene.app/share',
+                'resources': advenedir / 'share',
                 # Advene data files default path
-                'data': os.path.join( self.get_homedir(), "Documents" ),
+                'data': Path.home() / "Documents",
                 # Imagecache save directory
-                'imagecache': '/tmp',
+                'imagecache': Path('/tmp'),
                 # Web data files FIXME
-                'web': '/Applications/Advene.app/share/advene/web',
+                'web': advenedir / 'share' / 'web',
                 # Movie files search path. _ is the
                 # current package path
-                'moviepath': '_:%s' % os.path.join( self.get_homedir(), 'Movies' ),
+                'moviepath': '_:%s' % (Path.home() / 'Movies'),
                 # Locale dir FIXME
-                'locale': '/Applications/Advene.app/locale',
-                'shotdetect': '/Applications/Advene.app/Contents/Resources/share/shotdetect',
+                'locale': advenedir / 'locale',
+                'shotdetect': advenedir / 'Contents' / 'Resources' / 'share' / 'shotdetect',
                 }
         else:
             self.path = {
-                # VLC binary path
-                'vlc': '/usr/bin',
-                # VLC additional plugins path
-                'plugins': '/usr/lib/vlc',
                 # Advene modules path
-                'advene': '/usr/lib/advene',
+                'advene': Path('/usr/lib/advene'),
                 # Advene resources (.glade, template, ...) path
-                'resources': '/usr/share/advene',
+                'resources': Path('/usr/share/advene'),
                 # Advene data files default path
-                'data': self.get_homedir(),
+                'data': Path.home(),
                 # Imagecache save directory
-                'imagecache': '/tmp',
+                'imagecache': Path('/tmp'),
                 # Web data files
-                'web': '/usr/share/advene/web',
+                'web': Path('/usr/share/advene/web'),
                 # Movie files search path. _ is the
                 # current package path
                 'moviepath': '_',
-                'locale': '/usr/share/locale',
-                'shotdetect': 'shotdetect',
+                'locale': Path('/usr/share/locale'),
+                'shotdetect': Path('shotdetect'),
                 }
 
         self.path['settings'] = self.get_settings_dir()
@@ -506,8 +500,8 @@ class Config(object):
     def check_settings_directory(self):
         """Check if the settings directory is present, and create it if necessary.
         """
-        if not os.path.isdir(self.path['settings']):
-            os.makedirs(self.path['settings'])
+        if not self.path['settings'].is_dir():
+            self.path['settings'].mkdir(parents=True)
             self.first_run=True
         else:
             self.first_run=False
@@ -619,16 +613,16 @@ class Config(object):
         self.play_interval=57
 
         self.player['dvd-device']='E:'
-        advenehome=self.get_registry_value('software\\advene','path')
+        advenehome = self.get_registry_value('software\\advene','path')
         if advenehome is None:
             logger.warning("Cannot get the Advene location from registry")
             return
+        advenehome = Path(advenehome)
         logger.info("Setting Advene paths from %s", advenehome)
         self.path['advene'] = advenehome
-        self.path['locale'] = os.path.sep.join( (advenehome, 'locale') )
-        self.path['plugins'] = os.path.sep.join( (advenehome, 'vlcplugins') )
-        self.path['resources'] = os.path.sep.join( (advenehome, 'share') )
-        self.path['web'] = os.path.sep.join( (advenehome, 'share', 'web') )
+        self.path['locale'] = advenehome / 'locale'
+        self.path['resources'] = advenehome / 'share'
+        self.path['web'] = advenehome / 'share' / 'web'
 
     def darwin_specific_config(self):
         """MacOS X specific tweaks.
@@ -699,22 +693,7 @@ class Config(object):
     def get_homedir(self):
         """Return the user's homedir.
         """
-        h=None
-        if self.os == 'win32' and 'USERPROFILE' in os.environ:
-            return os.environ['USERPROFILE']
-        try:
-            h=os.path.expanduser('~')
-        except:
-            # FIXME: find the appropriate exception to catch (on win32?)
-            if 'HOME' in os.environ:
-                h=os.environ['HOME']
-            elif 'HOMEPATH' in os.environ:
-                # Fallback for Windows
-                h=os.path.join(os.environ['HOMEDRIVE'],
-                               os.environ['HOMEPATH'])
-            else:
-                raise Exception ('Unable to find homedir')
-        return h
+        return Path.home()
 
     def get_settings_dir(self):
         """Return the directory used to store Advene settings.
@@ -722,21 +701,24 @@ class Config(object):
         if self.options.settings is not None:
             return self.options.settings
 
-        if self.os == 'win32':
-            dirname = 'advene'
-        elif self.os == 'darwin':
-            dirname = os.path.join( 'Library', 'Preferences', 'Advene' )
-        else:
-            dirname = '.config/advene'
+        h = Path.home()
 
-        return os.path.join( self.get_homedir(), dirname )
+        if self.os == 'win32':
+            dirname = h / 'advene'
+        elif self.os == 'darwin':
+            dirname = h / 'Library' / 'Preferences' / 'Advene',
+        else:
+            dirname = h / '.config' / 'advene'
+
+        return dirname
 
     def read_preferences(self):
         """Update self.preferences from the preferences file.
         """
-        prefs=self.read_preferences_file(d=self.preferences, name='advene')
+        prefs = self.read_preferences_file(d=self.preferences, name='advene')
         if prefs and 'path' in prefs:
-            self.path.update(prefs['path'])
+            for k, v in prefs['path'].items():
+                self.path[k] = Path(v)
         self.read_preferences_file(d=self.player, name='player')
         return True
 
@@ -777,12 +759,12 @@ class Config(object):
         Save as json.
         """
         if d is None:
-            d=self.preferences
-        preffile=self.advenefile(name+'.json', 'settings')
-        dp=os.path.dirname(preffile)
-        if not os.path.isdir(dp):
+            d = self.preferences
+        preffile = Path(self.advenefile(name+'.json', 'settings'))
+        dp = preffile.parent
+        if not dp.is_dir():
             try:
-                os.makedirs(dp)
+                dp.mkdir(parents=True)
             except OSError as e:
                 logger.error("Error: %s", str(e))
                 return False
@@ -791,7 +773,7 @@ class Config(object):
         except IOError:
             return False
         try:
-            json.dump(d, f, indent=2)
+            json.dump(d, f, indent=2, cls=JSONEncoder)
         except EOFError:
             logger.error("Cannot save prefs file", exc_info=True)
             return False
@@ -800,7 +782,7 @@ class Config(object):
     def read_config_file (self):
         """Read the configuration file (advene.ini).
         """
-        conffile=self.advenefile('advene.ini', 'settings')
+        conffile = self.advenefile('advene.ini', 'settings')
 
         try:
             fd=open(conffile, "r", encoding='utf-8')
@@ -839,7 +821,7 @@ class Config(object):
         return id_
 
     def advenefile(self, filename, category='resources'):
-        """Return an absolute pathname for the given file.
+        """Return an absolute path for the given file.
 
         @param filename: a filename or a path to a file (tuple)
         @type filename: string or tuple
@@ -850,8 +832,8 @@ class Config(object):
         @rtype: string
         """
         if isinstance(filename, list) or isinstance(filename, tuple):
-            filename=os.sep.join(filename)
-        return os.path.join ( self.path[category], filename )
+            filename  = Path(*filename)
+        return str(self.path[category] / filename)
 
     def get_version_string(self):
         """Return the version string.
@@ -904,29 +886,28 @@ class Config(object):
     def fix_paths(self, maindir):
         """Adjust paths according to the given main directory.
         """
+        maindir = Path(maindir)
         # We override any modification that could have been made in
         # .advenerc. Rationale: if the .advenerc was really correct, it
         # would have set the correct paths in the first place.
         logger.info("Overriding 'resources', 'locale', 'advene' and 'web' config paths")
-        self.path['resources']=os.path.sep.join((maindir, 'share'))
-        self.path['locale']=os.path.sep.join( (maindir, 'locale') )
-        self.path['web']=os.path.sep.join((maindir, 'share', 'web'))
-        self.path['advene']=maindir
+        self.path['resources'] = maindir / 'share'
+        self.path['locale'] = maindir / 'locale'
+        self.path['web'] = maindir  / 'share' / 'web'
+        self.path['advene'] = maindir
 
-        if not os.path.exists(self.path['shotdetect']):
+        if not self.path['shotdetect'].exists():
             if self.os == 'win32':
                 sdname='shotdetect.exe'
             else:
                 sdname='shotdetect'
-            sd=find_in_path(sdname)
+            sd = find_in_path(sdname)
             if sd is not None:
-                self.path['shotdetect']=sd
+                self.path['shotdetect'] = sd
             else:
-                sd=self.advenefile(sdname, 'resources')
+                sd = Path(self.advenefile(sdname, 'resources'))
                 if os.path.exists(sd):
-                    self.path['shotdetect']=sd
-
-        #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlcplugins') )
+                    self.path['shotdetect'] = sd
 
 data = Config ()
 data.check_settings_directory()
