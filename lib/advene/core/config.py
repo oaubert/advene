@@ -820,7 +820,7 @@ class Config(object):
                 break
         return id_
 
-    def advenefile(self, filename, category='resources'):
+    def advenefile(self, filename, category='resources', as_uri=False):
         """Return an absolute path for the given file.
 
         @param filename: a filename or a path to a file (tuple)
@@ -833,7 +833,11 @@ class Config(object):
         """
         if isinstance(filename, list) or isinstance(filename, tuple):
             filename  = Path(*filename)
-        return str(self.path[category] / filename)
+        f = self.path[category] / filename
+        if as_uri:
+            return f.as_uri()
+        else:
+            return str(f)
 
     def get_version_string(self):
         """Return the version string.
