@@ -202,11 +202,17 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         elements = urlparse(uri)
         if elements.scheme == 'file' or elements.scheme == '':
             # This is a file. Keep only the local path.
-            # Note: this is where the magic works on win32.
+
+            # win32 hack: there is a bug in pathlib:
+            # urlparse(Path(path).as_uri()) does not return path
+            # (c:/...) but /c:/...
+            path = elements.path
+            if re.search('^/[A-Za-z]:', path):
+                path = path[1:]
             if absolute:
-                uri = Path(elements.path).absolute().as_uri()
+                uri = Path(path).absolute().as_uri()
             else:
-                uri = Path(elements.path).as_uri()
+                uri = Path(path).as_uri()
         importer = self.__importer
         if importer is not None:
             uri = urljoin (importer.getUri (absolute, context), uri)
