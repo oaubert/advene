@@ -238,7 +238,7 @@ class TemplateExporter(GenericExporter):
         return _("Data exported to %s") % filename
 
 def init_templateexporters():
-    exporter_package = Package(uri=config.data.advenefile('exporters.xml'))
+    exporter_package = Package(uri=config.data.advenefile('exporters.xml', as_uri=True))
     for v in exporter_package.views:
         if v.id == 'index':
             continue
