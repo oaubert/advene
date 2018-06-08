@@ -619,12 +619,16 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
 
     If include is specified, then it is a list of the only action names that should be merged.
 
-    If exclude is specified, then it is a list of the action names that should not be merged.
+    If exclude is specified, then it is a dict of the action names
+    that should not be merged.  keys describe actions
+    (update_meta_title...), value can be: all (excluding all elements), package
+    (for package only)
 
     If outputname is None, then the result is not saved.
 
     callback is a method with signature (progress_percent,
     message). If it returns False, the merge is canceled.
+
     """
     if callback is None:
         callback = lambda n, l: logger.info(l)
@@ -704,7 +708,11 @@ if __name__ == "__main__":
     args = parser.parse_args(saved_args)
 
     include = args.include.split(':') if args.include else []
-    exclude = args.exclude.split(':') if args.exclude else []
+    exclude = None
+    # Syntax: key1=value1:key2=value2... with optional value
+    if args.exclude:
+        exclude = dict( (l.split('=', 1) if '=' in l else (l, 'all'))
+                        for l in args.exclude.split(':'))
 
     merge_package(args.reference_package, args.other_packages, args.output_package, debug=args.debug, dry_run=args.dry_run, include=include, exclude=exclude)
 
