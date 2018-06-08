@@ -1298,7 +1298,7 @@ class AdveneController(object):
                         d = d.replace('file://', '')
                     d = Path(urllib.request.url2pathname(d))
                     d = d.parent
-                if '~' in d:
+                elif '~' in d:
                     # Expand userdir
                     d = Path(d).expanduser
                 d = Path(d)
