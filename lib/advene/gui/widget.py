@@ -29,7 +29,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 import struct
-import os
 
 from gettext import gettext as _
 
