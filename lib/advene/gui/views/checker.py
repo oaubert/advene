@@ -237,7 +237,7 @@ class CheckerView(AdhocView):
         d.close()
         return True
 
-    def update_model(self, **kw):
+    def update_model(self, *p, **kw):
         for checker in self.checkers:
             checker.update_model()
 
