@@ -1120,7 +1120,7 @@ class AdveneGUI(object):
             uri=context.globals['uri']
             if not uri:
                 msg=_("No media association is defined in the package. Please use the 'File/Associate a video file' menu item to associate a media file.")
-            elif not os.path.exists(uri) and not uri.startswith('http:') and not uri.startswith('dvd'):
+            elif not os.path.exists(helper.uri2path(uri)) and not helper.is_uri(uri):
                 msg=_("The associated media %s could not be found. Please use the 'File/Associate a video file' menu item to associate a media file.") % uri
             else:
                 msg=_("You are now working with the following video:\n%s") % uri
