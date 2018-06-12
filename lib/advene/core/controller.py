@@ -1278,6 +1278,7 @@ class AdveneController(object):
         else:
             mediafile = self.locate_mediafile(mediafile)
 
+        mediafile = helper.path2uri(mediafile)
         package.setMedia(mediafile)
         if mediafile != original_mediafile and original_mediafile in self.imagecache:
             self.imagecache[mediafile] = self.imagecache[original_mediafile]
@@ -1286,26 +1287,24 @@ class AdveneController(object):
     def locate_mediafile(self, mediafile):
         """Locate the given media file.
         """
-        mediafile = Path(mediafile)
+        if helper.is_uri(mediafile):
+            return mediafile
+
+        mediafile = Path(helper.uri2path(mediafile))
         if not mediafile.exists():
             name = mediafile.name
             for d in str(config.data.path['moviepath']).split(os.pathsep):
                 if d == '_':
                     # Get package dirname
-                    d = self.package.uri
-                    # And convert it to a pathname (for Windows)
-                    if d.startswith('file:'):
-                        d = d.replace('file://', '')
-                    d = Path(urllib.request.url2pathname(d))
+                    d = Path(helper.uri2path(str(self.package.uri)))
                     d = d.parent
                 elif '~' in d:
                     # Expand userdir
-                    d = Path(d).expanduser
+                    d = Path(d).expanduser()
                 d = Path(d)
 
                 n = d / name
-                # FIXME: if d is a URL, use appropriate method (urllib.??)
-                if n.exists():
+                if n.is_file():
                     mediafile = n
                     logger.info(_("Found matching video file in moviepath: %s") % n)
                     break
@@ -1343,6 +1342,7 @@ class AdveneController(object):
         p = self.player
         if p.is_playing():
             p.stop()
+        uri = helper.path2uri(uri)
         video_info = p.set_uri(uri)
         # Reset cached_duration so that it will be updated on play
         self.pending_duration_update = True
@@ -1352,15 +1352,17 @@ class AdveneController(object):
     def set_default_media (self, uri, package=None):
         """Set the default media for the package.
         """
+        uri = helper.path2uri(uri)
         if package is None:
             package = self.package
         m = self.dvd_regexp.match(uri)
         if m:
             title,chapter = m.group(1,2)
             uri="dvd@%s:%s" % (title, chapter)
-        package.setMedia(uri)
-        if not package.getMetaData(config.data.namespace, "media_uri"):
-            package.setMetaData(config.data.namespace, "media_uri", uri)
+        if uri:
+            package.setMedia(uri)
+            if not package.getMetaData(config.data.namespace, "media_uri"):
+                package.setMetaData(config.data.namespace, "media_uri", uri)
         if m:
             uri = self.player.dvd_uri(title, chapter)
         video_info = self.set_media(uri)

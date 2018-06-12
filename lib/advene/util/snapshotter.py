@@ -340,7 +340,7 @@ class Snapshotter(object):
         """
         if self.notify is not None:
             # Add media info to the structure
-            struct['media'] = unquote(self.get_uri().replace('file://', ''))
+            struct['media'] = self.get_uri()
             self.notify(struct)
         # We are ready to process the next snapshot
         self.snapshot_ready.set()

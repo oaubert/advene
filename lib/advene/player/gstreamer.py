@@ -26,12 +26,11 @@ logger = logging.getLogger(__name__)
 from gettext import gettext as _
 
 import advene.core.config as config
-from advene.util.helper import format_time
+from advene.util.helper import format_time, path2uri
 from advene.gui.util import get_drawable
 
 import os
 import time
-import urllib.request, urllib.parse, urllib.error
 
 if config.data.os == 'win32':
     #try to determine if gstreamer is already installed
@@ -273,13 +272,7 @@ class Player:
 
     def set_uri(self, item):
         self.videofile = item
-        if config.data.os == 'win32':
-            #item is a str, os.path needs to work with unicode obj to accept unicode path
-            item = os.path.abspath(str(item))
-            if os.path.exists(item):
-                item="file://" + urllib.parse.quote(item)
-        elif os.path.exists(item):
-            item="file://" + urllib.parse.quote(os.path.abspath(item))
+        item = path2uri(item)
         self.player.set_property('uri', item)
         if self.snapshotter:
             self.snapshotter.set_uri(item)

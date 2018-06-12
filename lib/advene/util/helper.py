@@ -24,6 +24,7 @@ import collections
 import datetime
 import itertools
 import json
+from pathlib import Path
 import time
 import io
 import inspect
@@ -34,7 +35,9 @@ except ImportError:
 import os
 import re
 import zipfile
-import urllib.request, urllib.parse, urllib.error
+from urllib.parse import urlparse, unquote
+from urllib.request import urlopen
+import urllib.error
 import unicodedata
 
 import advene.core.config as config
@@ -792,17 +795,17 @@ def get_video_stream_from_website(url):
     if  'dailymotion' in url:
         if '/get/' in url:
             return url
-        u=urllib.request.urlopen(url)
+        u=urlopen(url)
         data=[ l for l in u.readlines() if '.addVariable' in l and 'flv' in l ]
         u.close()
         if data:
             addr=re.findall('\"(http.+?)\"', data[0])
             if addr:
-                stream=urllib.parse.unquote(addr[0])
+                stream=unquote(addr[0])
     elif 'youtube.com' in url:
         if '/get_video' in url:
             return url
-        u=urllib.request.urlopen(url)
+        u=urlopen(url)
         data=[ l for l in u.readlines() if 'player2.swf' in l ]
         u.close()
         if data:
@@ -812,13 +815,13 @@ def get_video_stream_from_website(url):
     elif 'video.google.com' in url:
         if '/videodownload' in url:
             return url
-        u=urllib.request.urlopen(url)
+        u=urlopen(url)
         data=[ l for l in u.readlines() if '.gvp' in l ]
         u.close()
         if data:
             addr=re.findall('http://.+?.gvp\?docid=.\d+', data[0])
             if addr:
-                u=urllib.request.urlopen(addr[0])
+                u=urlopen(addr[0])
                 data=[ l for l in u.readlines() if 'url:' in l ]
                 u.close()
                 if data:
@@ -877,10 +880,8 @@ def indent(elem, level=0):
             elem.tail = i
 
 def recursive_mkdir(d):
-    parent=os.path.dirname(d)
-    if not os.path.exists(parent):
-        recursive_mkdir(parent)
-    os.mkdir(d)
+    d = Path(d)
+    d.mkdir(parents=True)
 
 def find_in_path(name):
     """Return the fullpath of the filename name if found in $PATH
@@ -951,3 +952,38 @@ def clamp(x, minimum, maximum):
     """Clamp given value between minimum and maximum.
     """
     return max(minimum, min(x, maximum))
+
+def path2uri(p):
+    if p == "":
+        return p
+    u = urlparse(p)
+    if u.scheme == 'file' and u.netloc == "":
+        if re.search('^/[A-Za-z]:', u.path):
+            p = u.path[1:]
+        else:
+            p = u.path
+    elif len(u.scheme) > 2:
+        # We already have a URI
+        return p
+    return Path(p).absolute().as_uri()
+
+def uri2path(uri):
+    if uri == "":
+        return uri
+    u = urlparse(uri)
+    if u.scheme == 'file' and u.netloc == "":
+        if re.search('^/[A-Za-z]:', u.path):
+            return u.path[1:]
+        else:
+            return u.path
+    elif len(u.scheme) == "1" and config.data.os == "win32":
+        # We probably have a windows path
+        return uri
+    else:
+        logger.warn("No local path for %s", uri)
+        return ""
+
+def is_uri(uri):
+    u = urlparse(uri)
+    return len(u.scheme) > 1 and u.scheme != 'file'
+
