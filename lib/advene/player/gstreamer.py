@@ -29,6 +29,7 @@ import advene.core.config as config
 from advene.util.helper import format_time, path2uri
 from advene.gui.util import get_drawable
 
+import ctypes
 import os
 import time
 
@@ -582,9 +583,22 @@ class Player:
         return True
 
     def set_widget(self, widget):
-        # For win32, see
-        # http://stackoverflow.com/questions/25823541/get-the-window-handle-in-pygi
-        self.set_visual( widget.get_id() )
+        handle = None
+        if sys.platform == "win32":
+            # From
+            # http://stackoverflow.com/questions/25823541/get-the-window-handle-in-pygi
+            if not widget.ensure_native():
+                logger.error("Cannot embed video player - it requires a native window")
+                return
+            ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
+            ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
+            drawingarea_gpointer = ctypes.pythonapi.PyCapsule_GetPointer(widget.__gpointer__, None)
+            gdkdll = ctypes.CDLL("libgdk-3-0.dll")
+            handle = gdkdll.gdk_win32_window_get_handle(drawingarea_gpointer)
+        else:
+            handle = widget.get_id()
+
+        self.set_visual(handle)
 
     def restart_player(self):
         # FIXME: properly destroy the previous player
