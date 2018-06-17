@@ -4889,7 +4889,7 @@ Image cache information: %(imagecache)s
             return True
         missing = set(a.fragment.begin
                       for a in self.controller.package.annotations
-                      if self.controller.get_snapshot(a).is_default)
+                      if self.controller.get_snapshot(annotation=a).is_default)
         if missing:
             dialog.message_dialog(_("Updating %d snapshots") % len(missing), modal=False)
             logger.info("Updating %d missing snapshots: %s" % (len(missing), ", ".join(helper.format_time_reference(t) for t in sorted(missing))))
