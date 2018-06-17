@@ -1319,7 +1319,7 @@ class ActiveBookmark(object):
                     t = self.annotation or self.begin
 
                 if self.no_image_pixbuf is None:
-                    self.no_image_pixbuf = png_to_pixbuf(self.controller.get_snapshot(-1), width=config.data.preferences['drag-snapshot-width'])
+                    self.no_image_pixbuf = png_to_pixbuf(self.controller.get_snapshot(position=-1), width=config.data.preferences['drag-snapshot-width'])
                 if not t == w._current:
                     if isinstance(t, int):
                         snap = self.controller.get_snapshot(position=t, annotation=self.annotation, precision=config.data.preferences['bookmark-snapshot-precision'])

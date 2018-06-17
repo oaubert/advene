@@ -929,7 +929,7 @@ class TimestampRepresentation(Gtk.Button):
             self.image.hide()
             self.set_size_request(6, 12)
         else:
-            png = self.controller.get_snapshot(v, media=self._media, precision=self.precision)
+            png = self.controller.get_snapshot(position=v, media=self._media, precision=self.precision)
             self.valid_screenshot = not png.is_default
             self.image.set_from_pixbuf(png_to_pixbuf(bytes(png), width=self.width))
             self.set_size_request(-1, -1)
