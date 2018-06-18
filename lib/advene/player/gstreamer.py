@@ -584,7 +584,7 @@ class Player:
 
     def set_widget(self, widget):
         handle = None
-        if sys.platform == "win32":
+        if config.data.os == "win32":
             # From
             # http://stackoverflow.com/questions/25823541/get-the-window-handle-in-pygi
             if not widget.ensure_native():
