@@ -41,7 +41,6 @@ Gst.init(None)
 from threading import Event, Thread
 import queue
 import heapq
-from urllib.parse import unquote
 
 import logging
 logger = logging.getLogger(__name__)
