@@ -85,13 +85,12 @@ class Config(object):
 
     @ivar path: dictionary holding path values. The keys are:
       - advene : path to the Advene modules
-      - resources : path to the Advene resources (glade, template, ...)
+      - resources : path to the Advene resources (template, ...)
       - data : default path to the Advene data files
 
     @ivar namespace: the XML namespace for Advene extensions.
 
     @ivar templatefilename: the filename for the XML template file
-    @ivar gladefilename: the filename for the Glade XML file
 
     @ivar preferences: the GUI preferences
     @type preferences: dict
@@ -133,7 +132,7 @@ class Config(object):
             self.path = {
                 # Advene modules path
                 'advene': advenedir,
-                # Advene resources (.glade, template, ...) path
+                # Advene resources (template, ...) path
                 'resources': advenedir / 'share',
                 # Advene data files default path
                 'data': Path.home(),
@@ -152,7 +151,7 @@ class Config(object):
             self.path = {
                 # Advene modules path
                 'advene': advenedir,
-                # Advene resources (.glade, template, ...) path FIXME
+                # Advene resources (template, ...) path FIXME
                 'resources': advenedir / 'share',
                 # Advene data files default path
                 'data': Path.home() / "Documents",
@@ -171,7 +170,7 @@ class Config(object):
             self.path = {
                 # Advene modules path
                 'advene': Path('/usr/lib/advene'),
-                # Advene resources (.glade, template, ...) path
+                # Advene resources (template, ...) path
                 'resources': Path('/usr/share/advene'),
                 # Advene data files default path
                 'data': Path.home(),
@@ -198,7 +197,6 @@ class Config(object):
 
         # These files are stored in the resources directory
         self.templatefilename = "template.azp"
-        self.gladefilename = "advene.glade"
 
         # Generic options
         # They are automatically saved across sessions
@@ -607,10 +605,6 @@ class Config(object):
         """
         if self.os != 'win32':
             return
-
-        # Trying to get around win32's problems with threads...
-        self.noplay_interval=10
-        self.play_interval=57
 
         self.player['dvd-device']='E:'
         advenehome = self.get_registry_value('software\\advene','path')
