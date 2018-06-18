@@ -1287,7 +1287,7 @@ class AdveneController(object):
     def locate_mediafile(self, mediafile):
         """Locate the given media file.
         """
-        if helper.is_uri(mediafile):
+        if helper.media_is_valid(mediafile):
             return mediafile
 
         mediafile = Path(helper.uri2path(mediafile))
