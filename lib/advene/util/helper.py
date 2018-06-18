@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 import collections
 import datetime
+import functools
 import itertools
 import json
 from pathlib import Path
@@ -34,6 +35,7 @@ except ImportError:
     from md5 import md5
 import os
 import re
+import urllib.request
 import zipfile
 from urllib.parse import urlparse, unquote
 from urllib.request import urlopen
@@ -137,6 +139,17 @@ class TypedString(bytes):
         s=bytes.__new__(cls, value)
         s.contenttype='text/plain'
         return s
+
+def memoize(obj):
+    cache = obj.cache = {}
+
+    @functools.wraps(obj)
+    def memoizer(*args, **kwargs):
+        key = str(args) + str(kwargs)
+        if key not in cache:
+            cache[key] = obj(*args, **kwargs)
+        return cache[key]
+    return memoizer
 
 def snapshot2png (image, output=None):
     """Convert a VLC RGBPicture to PNG.
@@ -984,3 +997,14 @@ def is_uri(uri):
     u = urlparse(uri)
     return len(u.scheme) > 1 and u.scheme != 'file'
 
+@memoize
+def media_is_valid(uri):
+    """Checks that the uri is valid
+    """
+    request = urllib.request.Request(uri)
+    request.get_method = lambda: 'HEAD'
+    try:
+        urllib.request.urlopen(request)
+        return True
+    except urllib.request.HTTPError:
+        return False
