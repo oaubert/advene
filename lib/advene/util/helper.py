@@ -957,15 +957,12 @@ def path2uri(p):
     if p == "":
         return p
     u = urlparse(p)
-    if u.scheme == 'file' and u.netloc == "":
-        if re.search('^/[A-Za-z]:', u.path):
-            p = u.path[1:]
-        else:
-            p = u.path
-    elif len(u.scheme) > 2:
+    if len(u.scheme) > 2:
         # We already have a URI
-        return p
-    return Path(p).absolute().as_uri()
+        ret = p
+    else:
+        ret = Path(p).absolute().as_uri()
+    return ret
 
 def uri2path(uri):
     if uri == "":
