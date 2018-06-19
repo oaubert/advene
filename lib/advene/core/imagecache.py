@@ -301,7 +301,7 @@ class ImageCache(object):
                 continue
             if isinstance(i, CachedString):
                 continue
-            f = open(d / "%010d.png" % k, 'wb')
+            f = open(d / ("%010d.png" % k), 'wb')
             f.write (i)
             f.close ()
 
