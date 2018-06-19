@@ -39,7 +39,8 @@ import sys
 import textwrap
 import threading
 import time
-import urllib.request, urllib.error, urllib.parse
+from urllib.parse import unquote
+import urllib.request, urllib.error
 
 import advene.core.config as config
 import advene.core.version
@@ -340,7 +341,7 @@ class AdveneGUI(object):
         self.gui.recent_menuitem.set_submenu(recent)
         def open_history_file(rec):
             fname = rec.get_current_uri()
-            fname = urllib.parse.unquote(fname)
+            fname = unquote(fname)
             if fname.startswith('file:///'):
                 fname = fname[7:]
             self.on_open1_activate(filename=fname)
@@ -2866,7 +2867,7 @@ class AdveneGUI(object):
 
     def update_window_title(self):
         # Update the main window title
-        t=" - ".join((_("Advene"), str(os.path.basename(self.controller.package.uri)), self.controller.get_title(self.controller.package)))
+        t=" - ".join((_("Advene"), unquote(str(os.path.basename(self.controller.package.uri))), self.controller.get_title(self.controller.package)))
         if self.controller.package._modified:
             t += " (*)"
             self.toolbuttons['save'].set_sensitive(True)
@@ -3148,7 +3149,7 @@ class AdveneGUI(object):
                         continue
                     if n.startswith('file://'):
                         n = n[7:]
-                    n = urllib.parse.unquote(n + '.backup' + e)
+                    n = unquote(n + '.backup' + e)
                     p.save(name=n)
             return True
 
@@ -4438,7 +4439,7 @@ Image cache information: %(imagecache)s
             for k in ('font-size', 'button-height', 'interline-height'):
                 config.data.preferences['timeline'][k] = cache[k]
             for k in path_options:
-                if cache[k] != config.data.path[k]:
+                if cache[k] != str(config.data.path[k]):
                     config.data.path[k] = Path(cache[k])
                     # Store in auto-saved preferences
                     config.data.preferences['path'][k] = Path(cache[k])
