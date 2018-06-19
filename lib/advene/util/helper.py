@@ -1008,3 +1008,6 @@ def media_is_valid(uri):
         return True
     except urllib.request.HTTPError:
         return False
+    except urllib.error.URLError:
+        return False
+
