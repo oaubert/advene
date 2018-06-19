@@ -1268,16 +1268,15 @@ class AdveneController(object):
 
         if mediafile is None or mediafile == "":
             return ""
-        m = self.dvd_regexp.match(mediafile)
-        if m:
-            title, chapter = m.group(1, 2)
-            mediafile = self.player.dvd_uri(title, chapter)
-        elif mediafile.startswith('http:'):
-            # FIXME: check for the existence of the file
-            pass
-        else:
-            mediafile = self.locate_mediafile(mediafile)
+        elif not helper.media_is_valid(mediafile):
+            m = self.dvd_regexp.match(mediafile)
+            if m:
+                title, chapter = m.group(1, 2)
+                mediafile = self.player.dvd_uri(title, chapter)
+            else:
+                mediafile = self.locate_mediafile(mediafile)
 
+        # We should have a valid mediafile.
         mediafile = helper.path2uri(mediafile)
         package.setMedia(mediafile)
         if mediafile != original_mediafile and original_mediafile in self.imagecache:
