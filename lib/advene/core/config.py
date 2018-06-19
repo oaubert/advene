@@ -48,9 +48,9 @@ APP='advene'
 
 def init_gettext():
     import gettext
-    gettext.bindtextdomain(APP, data.path['locale'])
+    gettext.bindtextdomain(APP, str(data.path['locale']))
     gettext.textdomain(APP)
-    gettext.install(APP, localedir=data.path['locale'])
+    gettext.install(APP, localedir=str(data.path['locale']))
 
 def find_in_path(name):
     """Return the fullpath of the filename name if found in $PATH
