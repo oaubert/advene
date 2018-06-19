@@ -983,9 +983,9 @@ def uri2path(uri):
     u = urlparse(uri)
     if u.scheme == 'file' and u.netloc == "":
         if re.search('^/[A-Za-z]:', u.path):
-            return u.path[1:]
+            return unquote(u.path[1:])
         else:
-            return u.path
+            return unquote(u.path)
     elif len(u.scheme) == "1" and config.data.os == "win32":
         # We probably have a windows path
         return uri
