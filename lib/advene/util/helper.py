@@ -967,7 +967,7 @@ def clamp(x, minimum, maximum):
     return max(minimum, min(x, maximum))
 
 def path2uri(p):
-    if p == "":
+    if p == "" or p is None:
         return p
     u = urlparse(p)
     if len(u.scheme) > 2:
