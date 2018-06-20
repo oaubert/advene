@@ -1003,7 +1003,11 @@ def is_uri(uri):
 def media_is_valid(uri):
     """Checks that the uri is valid
     """
-    request = urllib.request.Request(uri)
+    try:
+        request = urllib.request.Request(uri)
+    except ValueError:
+        # It may be a local path. Check that it exists.
+        return Path(uri).exists()
     request.get_method = lambda: 'HEAD'
     try:
         urllib.request.urlopen(request)
@@ -1012,6 +1016,3 @@ def media_is_valid(uri):
         return False
     except urllib.error.URLError:
         return False
-    except ValueError:
-        # It may be a local path. Check that it exists.
-        return Path(uri).exists()
