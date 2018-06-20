@@ -40,7 +40,7 @@ from advene.model.schema import AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.gui.views import AdhocView
 import advene.gui.edit.elements
-from advene.gui.util import png_to_pixbuf, enable_drag_source
+from advene.gui.util import png_to_pixbuf, enable_drag_source, window_to_png
 from advene.gui.util import decode_drop_parameters, MODIFIER_MASK
 from advene.gui.util.completer import Completer
 import advene.util.helper as helper
@@ -149,6 +149,7 @@ class TimeLine(AdhocView):
             (_("Save default options"), self.save_default_options),
             (_("Limit display to current area"), self.limit_display),
             (_("Display whole movie"), self.unlimit_display),
+            (_("Capture whole screenshot"), self.whole_screenshot),
             )
         self.options = {
             'highlight': False,
@@ -2798,6 +2799,15 @@ class TimeLine(AdhocView):
         self.update_model(partial_update=True)
         self.fraction_adj.set_value(1.0)
         self.limit_navtools.hide()
+        return True
+
+    def whole_screenshot(self, *p):
+        fname = dialog.get_filename(title=_("Specify a destination filename for the screenshot"),
+                                    action=Gtk.FileChooserAction.SAVE,
+                                    button=Gtk.STOCK_SAVE,
+                                    default_file="timeline.png")
+        if fname:
+            window_to_png(self.layout, fname)
         return True
 
     def fraction_event (self, widget=None, forced_window_width=0, *p):

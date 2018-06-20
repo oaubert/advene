@@ -25,6 +25,7 @@ from gettext import gettext as _
 
 import advene.core.config as config
 
+import cairo
 import gi
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
@@ -493,3 +494,49 @@ def get_drawable():
         # be used by the player plugin code.
         drawable.get_id = get_id.__get__(drawable)
     return drawable
+
+def window_to_png(widget, output="/tmp/win.png"):
+    """Dump the content of a window to a png file.
+    """
+    def get_window(wid):
+        try:
+            return wid.get_bin_window()
+        except:
+            return wid.get_window()
+
+    # Get current size
+    win = get_window(widget)
+    w = win.get_width()
+    h = win.get_height()
+
+    # Reparent the window
+    temp = Gtk.Window()
+    old = widget.get_parent()
+    old.remove(widget)
+    temp.add(widget)
+    temp.set_size_request(w, h)
+
+    handler = None
+
+    def after_draw(win, e):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
+        cr = cairo.Context(surface)
+        Gdk.cairo_set_source_window(cr, get_window(widget), 0, 0)
+        cr.paint()
+        surface.write_to_png(output)
+        logger.warn("Screenshot captured to %s", output)
+
+        widget.disconnect(handler)
+        # Reparent back
+        temp.remove(widget)
+        old.add(widget)
+        temp.destroy()
+        return False
+
+    handler = widget.connect_after("draw", after_draw)
+
+    temp.show_all()
+    temp.queue_draw()
+
+
+
