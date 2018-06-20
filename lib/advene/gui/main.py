@@ -342,8 +342,6 @@ class AdveneGUI(object):
         def open_history_file(rec):
             fname = rec.get_current_uri()
             fname = unquote(fname)
-            if fname.startswith('file:///'):
-                fname = fname[7:]
             self.on_open1_activate(filename=fname)
             return True
         recent.connect('item-activated', open_history_file)
@@ -3761,6 +3759,7 @@ class AdveneGUI(object):
 
         if filename:
             name, ext = os.path.splitext(filename.lower())
+            filename = helper.path2uri(filename)
             if ext in config.data.video_extensions:
                 self.log(_("A video file was selected. Pretend that the user selected 'Select a video file'..."))
                 self.controller.set_default_media(filename)
