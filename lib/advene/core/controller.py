@@ -1871,7 +1871,7 @@ class AdveneController(object):
         @param alias: the name of the package (ignored in the GUI, always "advene")
         @type alias: string
         """
-        uri = path2uri(uri)
+        uri = helper.path2uri(uri)
         if uri is None or uri == "":
             try:
                 self.package = Package (uri="new_pkg",
