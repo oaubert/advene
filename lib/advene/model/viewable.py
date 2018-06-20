@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 import io
+import traceback
 
 import advene.model.modeled as modeled
 import advene.model.tal.context
@@ -151,13 +152,25 @@ class Viewable(object, metaclass=auto_properties):
         context.pushLocals()
         context.setLocal('here', self)
         context.setLocal('view', view)
-        context.interpret(view_source, mimetype, result)
-        context.popLocals ()
+        try:
+            context.interpret(view_source, mimetype, result)
+            context.popLocals ()
+        except Exception as e:
+            title = "Error in view interpretation: %s" % str(e)
+            if 'html' in mimetype:
+                result.write("<h1>%s</h1><pre>" % title)
+                traceback.print_exc(file=result)
+                result.write("</pre>")
+            else:
+                result.write(title)
+                result.write("\n\n")
+                traceback.print_exc(file=result)
+
         v = result.getvalue()
         if isinstance(v, bytes):
             v = v.decode('utf-8')
-        s=TypedUnicode(v)
-        s.contenttype=view.getContent().getMimetype()
+        s = TypedUnicode(v)
+        s.contenttype = view.getContent().getMimetype()
         return s
 
     def findDefaultView(self):
