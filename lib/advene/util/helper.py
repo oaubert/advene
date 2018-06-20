@@ -1012,4 +1012,6 @@ def media_is_valid(uri):
         return False
     except urllib.error.URLError:
         return False
-
+    except ValueError:
+        # It may be a local path. Check that it exists.
+        return Path(uri).exists()
