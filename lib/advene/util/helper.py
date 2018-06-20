@@ -980,6 +980,8 @@ def path2uri(p):
 def uri2path(uri):
     if uri == "":
         return uri
+    if config.data.os == 'win32':
+        uri = uri.replace('\\', '/')
     u = urlparse(uri)
     if u.scheme == 'file' and u.netloc == "":
         if re.search('^/[A-Za-z]:', u.path):
