@@ -1,3 +1,39 @@
+advene (3.6) unstable; urgency=medium
+
+  * New "Keyword list" annotation type
+    (text/x-advene-keyword-list). It defines a dedicated syntax for
+    annotation content.  A KeywordList annotation stores a list of
+    keywords, separated by a comma. An optional comment can be added
+    between parentheses.
+
+    Metadata (color, URI, etc) can be associated to keywords at the type level.
+
+    Using KeywordList annotations impacts the behaviour of the quickfill
+    entry system: when on an annotation, pressing 1 to 9 key will *toggle*
+    the nth predefined keyword in the annotation content. This allows to
+    quickly input a list of keywords.
+
+  * New CompletionChecker checks for non-predefined keywords in annotation
+    contents
+
+  * Basic schema statistics are displayed in the Finder view
+
+  * Improve package merge interface. It now allows to merge multiple
+    packages in a single action.
+
+  * New command-line scripts merge_package and export_package
+
+  * Timeline: line height can now vary (they are now larger for numeric
+    values types). A static image of the whole timeline can be exported
+    (right click on the tab to get the timeline menu).
+
+  * New generic exporter API. It allows to define python-based exporters
+    through plugins.
+
+  * New rdflib-based AdA RDF exporter, with multiple output formats.
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Wed, 27 Jun 2018 10:38:29 +0200
+
 advene (3.5) unstable; urgency=medium
 
   * In Search/Replace dialog for annotations, leaving the search field
