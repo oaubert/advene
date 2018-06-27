@@ -71,6 +71,7 @@
 ../lib/advene/plugins/fcp.py
 ../lib/advene/plugins/hpi.py
 ../lib/advene/plugins/goodshotdetector.py
+../lib/advene/plugins/webannotation_import.py
 ../lib/advene/plugins/montagerenderer.py
 ../lib/advene/plugins/transcriber.py
 ../lib/advene/plugins/tts.py
@@ -89,3 +90,4 @@
 ../lib/advene/util/website_export.py
 ../lib/advene/util/exporter.py
 ../lib/advene/util/importer.py
+../lib/advene/util/merger.py
