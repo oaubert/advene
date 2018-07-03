@@ -904,7 +904,7 @@ class Config(object):
                 self.path['shotdetect'] = sd
             else:
                 sd = Path(self.advenefile(sdname, 'resources'))
-                if os.path.exists(sd):
+                if sd.exists():
                     self.path['shotdetect'] = sd
 
 data = Config ()
