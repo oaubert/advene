@@ -763,7 +763,7 @@ class Config(object):
                 logger.error("Error: %s", str(e))
                 return False
         try:
-            f = open(preffile, "w", encoding='utf-8')
+            f = open(str(preffile), "w", encoding='utf-8')
         except IOError:
             return False
         try:
