@@ -247,7 +247,7 @@ def message_dialog(label="", icon=Gtk.MessageType.INFO, modal=True, callback=Non
     center_on_mouse(dialog)
 
     if modal:
-        res=dialog.run()
+        res = dialog.run()
         dialog.destroy()
         if icon == Gtk.MessageType.QUESTION:
             return (res == Gtk.ResponseType.YES or res == Gtk.ResponseType.OK)
@@ -289,7 +289,7 @@ def progress_dialog(title="Progress",
     cancel_button.connect("clicked", do_cancel)
     dial.show_all()
 
-    def progress_callback(progress, label):
+    def progress_callback(progress=0, label=""):
         progress_bar.set_text(label)
         progress_bar.set_fraction(progress)
         while Gtk.events_pending():
