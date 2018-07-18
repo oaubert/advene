@@ -208,7 +208,7 @@ def mediafile2id (mediafile):
     m=md5(mediafile.encode('utf-8'))
     return m.hexdigest()
 
-def mediafile_checksum(mediafile):
+def mediafile_checksum(mediafile, callback=None):
     """Return the SHA256 checksum of the given mediafile.
 
     @param mediafile: the name of the mediafile
@@ -216,10 +216,20 @@ def mediafile_checksum(mediafile):
     @return: the checksum
     @rtype: string
     """
+    try:
+        size = os.path.getsize(mediafile)
+    except FileNotFoundError:
+        logger.error("Cannot get size of file %s", mediafile)
+        return None
+
+    if callback:
+        callback(0, _("Computing checksum for %s") % mediafile)
     h = sha256()
     with open(mediafile, 'rb', buffering=0) as f:
         for b in iter(lambda : f.read(128*1024), b''):
             h.update(b)
+            if callback and callback(progress=f.tell() / size) is False:
+                    return None
     return h.hexdigest()
 
 def package2id (p):
