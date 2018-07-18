@@ -307,6 +307,7 @@ class AdveneGUI(object):
                     ), "" ),
             (_("_Player"), (
                     ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code") ),
+                    ( _("Verify video _Checksum"), self.verify_video_checksum, _("Verify the video checksum, if available.") ),
                     ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
                     ( _("Reset ImageCache"), self.on_reset_imagecache_activate, _("Reset the ImageCache") ),
                     ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
@@ -944,6 +945,42 @@ class AdveneGUI(object):
         t = self.input_time_dialog()
         if t is not None:
             self.controller.update_status("seek", t)
+        return True
+
+    def verify_video_checksum(self, *p):
+        name = helper.uri2path(self.controller.get_default_media())
+        if not name:
+            dialog.message_dialog(_("The video does not seem to be a local resource. Cannot verify its checksum."),
+                                  icon=Gtk.MessageType.ERROR)
+            return True
+
+        stored = self.controller.package.getMetaData(config.data.namespace, "media_checksum")
+
+        def do_verify(callback):
+            computed = helper.mediafile_checksum(name, callback)
+            if computed is None:
+                dialog.message_dialog(_("Checksum was cancelled."))
+                return True
+            logger.warn("Checksum: stored %s - computed %s" % (stored, computed))
+            if stored:
+                if stored != computed:
+                    if dialog.message_dialog(_("The %s checksum does not match the information that was stored in the package. You should check that the file is appropriate. Do you want to update the stored checksum?") % name,
+                                          icon=Gtk.MessageType.QUESTION):
+                        self.controller.package.setMetaData(config.data.namespace, "media_checksum", str(computed))
+                        return True
+                else:
+                    dialog.message_dialog(_("The %s checksum matches the stored checksum.") % name)
+                    return True
+            else:
+                    if dialog.message_dialog(_("No checksum was stored in the package. Do you want to store this information?"),
+                                             icon=Gtk.MessageType.QUESTION):
+                        self.controller.package.setMetaData(config.data.namespace, "media_checksum", str(computed))
+                        return True
+
+        dialog.progress_dialog(title=_("Computing video checksum"),
+                               label=_("Computing checksum"),
+                               controller=self.controller,
+                               runner=do_verify)
         return True
 
     def input_time_dialog(self, *p):
