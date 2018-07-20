@@ -29,6 +29,9 @@ except ImportError:
 
 from gettext import gettext as _
 
+import logging
+logger = logging.getLogger(__name__)
+
 name = 'montagerenderer'
 
 def register(controller):
