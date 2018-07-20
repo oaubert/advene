@@ -30,9 +30,11 @@ logger = logging.getLogger(__name__)
 # - Handle list item insertion
 
 from gi.repository import GObject
+from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GdkPixbuf
 from gi.repository import Pango
+
 import sys
 import urllib.request, urllib.error, urllib.parse
 import socket
