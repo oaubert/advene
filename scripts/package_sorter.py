@@ -67,7 +67,7 @@ def sort_time(source):
         if f is not None:
             a._begin = long(f.attrib['begin'])
         else:
-            print "Error: cannot find begin time for ", a.attrib['id']
+            print("Error: cannot find begin time for ", a.attrib['id'])
             a._begin = 0
     an.sort(key=operator.itemgetter('_begin'))
     
@@ -131,7 +131,7 @@ for e in source:
     elif e.tag == tag('annotations'):
         dest.append(sort_time(e))
     else:
-        print "Unknown tag", e.tag
+        print("Unknown tag", e.tag)
 
 tree=ElementTree(dest)
 tree.write(open(sys.argv[2], 'w'), encoding='utf-8')
