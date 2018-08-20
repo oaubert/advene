@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
+from collections import namedtuple
+
 import rdflib
 from rdflib import URIRef, BNode, Literal
 from rdflib.collection import Collection
@@ -42,6 +44,72 @@ def register(controller=None):
 # Evolving/ContrastingAnnotationType markers
 TO_KW = '[TO]'
 VS_KW = '[VS]'
+
+def keywords_to_struct(keywords):
+    """Generator that outputs typed values from keyword lists.
+
+    type is either predefined, contrasting or evolving.
+    """
+    if not keywords:
+        return
+    TypedValues = namedtuple('TypedValue', ['type', 'values'])
+    prev = None
+    need_value = False
+    while keywords:
+        current = keywords.pop(0)
+        if current in (TO_KW, VS_KW):
+            if need_value:
+                logger.error("Syntax error: expecting a value, not %s keyword." % current)
+                prev = None
+                need_value = False
+            if prev is None:
+                logger.error("Syntax error: %s keyword should have a value before." % current)
+                prev = None
+                need_value = False
+            elif not keywords:
+                logger.error("Syntax error: %s keyword should have a value after." % current)
+                prev = None
+                need_value = False
+            else:
+                need_value = True
+                if current == TO_KW:
+                    if prev.type == "predefined":
+                        # We may have accumulated predefined
+                        # values. Keep the last one, but yield the
+                        # other.
+                        if len(prev.values) > 1:
+                            yield TypedValues(type="predefined", values=prev.values[:-1])
+                        prev = TypedValues(type="evolving", values=prev.values[-1:])
+                    elif prev.type != "evolving":
+                        logger.error("Syntax error: mixed contrasting/evolving values in %s" % current)
+                        prev = None
+                        need_value = False
+                elif current == VS_KW:
+                    if prev.type == "predefined":
+                        # We may have accumulated predefined
+                        # values. Keep the last one, but yield the
+                        # other.
+                        if len(prev.values) > 1:
+                            yield TypedValues(type="predefined", values=prev.values[:-1])
+                        prev = TypedValues(type="contrasting", values=prev.values[-1:])
+                    elif prev.type != "contrasting":
+                        logger.error("Syntax error: mixed contrasting/evolving values in %s" % current)
+                        prev = None
+                        need_value = False
+                else:
+                    logger.error("This should never happen.")
+        else:
+            if prev:
+                if need_value or prev.type == "predefined":
+                    prev = TypedValues(type=prev.type, values=prev.values + [current])
+                else:
+                    # Change of sequence type.
+                    yield prev
+                    prev = TypedValues(type="predefined", values=[ current ])
+            else:
+                prev = TypedValues(type="predefined", values=[ current ])
+            need_value = False
+    yield prev
 
 class AdARDFExporter(GenericExporter):
     name = _("AdA RDF exporter")
@@ -88,6 +156,8 @@ class AdARDFExporter(GenericExporter):
         g.bind('ao', AO)
         g.bind('oa', OA)
         g.bind('activitystreams', AS)
+        g.bind('dc', DC)
+        g.bind('dcterms', DCTERMS)
 
         collection = BNode()
         page = URIRef("page1")
@@ -107,63 +177,60 @@ class AdARDFExporter(GenericExporter):
             itemcollection.append(anode)
             g.add((anode, RDF.type, OA.Annotation))
             g.add((anode, DCTERMS.created, Literal(a.date, datatype=XSD.dateTime)))
-            # We use DC instead of DCTERMS so that we can simply put the string value
-            g.add((anode, DC.creator, a.author))
+            # We use DC instead of DCTERMS so that we can simply put the string value as a literal
+            g.add((anode, DC.creator, Literal(a.author)))
 
-            body = BNode()
-            g.add((anode, OA.hasBody, body))
+            def new_body(btype=None):
+                """Create a new body node
+                """
+                body = BNode()
+                g.add((anode, OA.hasBody, body))
 
-            type_uri = a.type.getMetaData(config.data.namespace, "ontology_uri")
-            if not type_uri:
-                logger.warn(_("Cannot determine ontology URI for type %s"), self.controller.get_title(a.type))
-                type_uri = a.type.id
-            g.add((body, AO.annotationType, URIRef(type_uri)))
+                type_uri = a.type.getMetaData(config.data.namespace, "ontology_uri")
+                if not type_uri:
+                    logger.warn(_("Cannot determine ontology URI for type %s"), self.controller.get_title(a.type))
+                    type_uri = a.type.id
+                g.add((body, AO.annotationType, URIRef(type_uri)))
+                if btype is not None:
+                    g.add((body, RDF.type, btype))
+                return body
 
+            value_type_mapping = {
+                "evolving": AO.EvolvingValuesAnnotationType,
+                "contrasting": AO.ContrastingValuesAnnotationType,
+                "predefined": AO.PredefinedValuesAnnotationType
+            }
             # Build body according to content type
             if a.content.mimetype == 'text/x-advene-keyword-list':
-                g.add((body, RDF.type, AO.PredefinedValuesAnnotationType))
                 keywords = a.content.parsed()
-                if keywords.get_comment():
-                    g.add( (body, RDFS.comment, keywords.get_comment()) )
-                keywords_list = list(keywords)
 
-                def add_keyword_to_graph(kw, type_=AO.annotationValue):
+                def get_keyword_uri(kw):
                     uri = keywords.get(kw, 'ontology_uri')
                     val = URIRef(uri) if uri else Literal(kw)
-                    g.add( (body, type_, val) )
+                    return val
 
-                prev = None
-                while keywords_list:
-                    current = keywords_list.pop(0)
-                    if current in (TO_KW, VS_KW):
-                        if prev is None:
-                            logger.error("Syntax error: %s keyword should have a value before." % current)
-                            prev = None
-                        elif not keywords_list:
-                            logger.error("Syntax error: %s keyword should have a value after." % current)
-                            prev = None
-                        else:
-                            if current == TO_KW:
-                                add_keyword_to_graph(prev, AO.fromAnnotationValue)
-                                current = keywords_list.pop(0)
-                                add_keyword_to_graph(current, AO.toAnnotationValue)
-                                prev = current # or None?
-                            elif current == VS_KW:
-                                # FIXME: how to properly encode contrasting values? Copying TO code for the moment
-                                add_keyword_to_graph(prev, AO.fromAnnotationValue)
-                                current = keywords_list.pop(0)
-                                add_keyword_to_graph(current, AO.toAnnotationValue)
-                                prev = current # or None?
-                            else:
-                                logger.error("This should never happen.")
+                for typedvalues in keywords_to_struct(list(keywords)):
+                    if typedvalues is None:
+                        logger.warn("Empty typedvalues for %s", keywords)
+                        continue
+                    body = new_body(value_type_mapping[typedvalues.type])
+
+                    if typedvalues.type == "predefined":
+                        for kw in typedvalues.values:
+                            g.add( (body, AO.annotationValue, get_keyword_uri(kw)) )
                     else:
-                        if prev is not None:
-                            add_keyword_to_graph(prev)
-                        prev = current
-                # Last item
-                if prev is not None:
-                    add_keyword_to_graph(prev)
+                        # Generate a sequence for contrasting/evolving values.
+                        seq = BNode()
+                        g.add( (seq, RDF.type, RDF.Seq) )
+                        Collection(g, seq, [ get_keyword_uri(kw) for kw in typedvalues.values ])
+                        g.add( (body, AO.annotationValueSequence, seq) )
+
+                # Attach comment to the last body
+                if keywords.get_comment():
+                    g.add( (body, RDFS.comment, Literal(keywords.get_comment())) )
+
             else:
+                body = new_body()
                 g.add((body, RDF.type, OA.Text))
                 g.add((body, RDF.value, Literal(a.content.data)))
 
@@ -186,4 +253,19 @@ class AdARDFExporter(GenericExporter):
         g.serialize(destination=filename, format=self.format)
         logger.info(_("Wrote %d triples to %s"), len(g), filename)
         return ""
+
+if __name__ == "__main__":
+    # Let's do some tests. This will be moved to unit tests later on.
+    samples = {
+        "a1": 1,
+        "a1,a2": 1,
+        "a1,[TO],a2": 1,
+        "a1,[VS],a2": 1,
+        "a1,[TO],a2,[TO],a3": 1,
+        "a1,[TO],a2,[TO],a3,a4": 2,
+        "a1,[TO],a2,[VS],a3": 1, # Expecting syntax error
+        "a1,a2,[TO],a3,a4,[VS],a5": 3
+    }
+    for s in samples.keys():
+        print(s, "\n", list(keywords_to_struct(s.split(","))), "\n\n")
 
