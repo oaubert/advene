@@ -26,10 +26,10 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-from functools import lru_cache
 import rdflib
 from rdflib import URIRef, BNode, Literal
 from rdflib.collection import Collection
+from rdflib.namespace import RDF, RDFS, XSD, DC, DCTERMS
 
 import advene.core.config as config
 import advene.util.helper as helper
@@ -72,10 +72,6 @@ class AdARDFExporter(GenericExporter):
         return super().get_filename(basename, source)
 
     def export(self, filename):
-        RDF = rdflib.RDF
-        RDFS = rdflib.RDFS
-        XSD = rdflib.XSD
-
         # Works in source is a package or a type
         package = self.source.ownerPackage
 
@@ -100,27 +96,22 @@ class AdARDFExporter(GenericExporter):
         g.add((collection, AS.totalItems, Literal(len(self.source.annotations), datatype=XSD.nonNegativeInteger)))
         g.add((collection, AS.first, page))
 
-        @lru_cache(maxsize=None)
-        def get_user_node(username):
-            unode = URIRef(username)
-            g.add((unode, RDF.type, OA.Person))
-            g.add((unode, OA.nick, Literal(username)))
-            return unode
-
         pageItems = BNode()
         g.add((page, AS.items, pageItems))
 
         itemcollection = Collection(g, pageItems)
 
         for a in self.source.annotations:
+            # FIXME: generate custom URI
             anode = URIRef(a.uri)
             itemcollection.append(anode)
             g.add((anode, RDF.type, OA.Annotation))
-            g.add((anode, OA.created, Literal(a.date, datatype=XSD.dateTime)))
-            g.add((anode, OA.creator, get_user_node(a.author)))
+            g.add((anode, DCTERMS.created, Literal(a.date, datatype=XSD.dateTime)))
+            # We use DC instead of DCTERMS so that we can simply put the string value
+            g.add((anode, DC.creator, a.author))
 
             body = BNode()
-            g.add((anode, OA.body, body))
+            g.add((anode, OA.hasBody, body))
 
             type_uri = a.type.getMetaData(config.data.namespace, "ontology_uri")
             if not type_uri:
@@ -132,6 +123,8 @@ class AdARDFExporter(GenericExporter):
             if a.content.mimetype == 'text/x-advene-keyword-list':
                 g.add((body, RDF.type, AO.PredefinedValuesAnnotationType))
                 keywords = a.content.parsed()
+                if keywords.get_comment():
+                    g.add( (body, RDFS.comment, keywords.get_comment()) )
                 keywords_list = list(keywords)
 
                 def add_keyword_to_graph(kw, type_=AO.annotationValue):
@@ -172,20 +165,20 @@ class AdARDFExporter(GenericExporter):
                     add_keyword_to_graph(prev)
             else:
                 g.add((body, RDF.type, OA.Text))
-                g.add((body, OA.value, Literal(a.content.data)))
+                g.add((body, RDF.value, Literal(a.content.data)))
 
             target = BNode()
-            g.add((anode, OA.target, target))
+            g.add((anode, OA.hasTarget, target))
 
-            g.add((target, OA.source, URIRef(package.getMetaData(config.data.namespace, "media_uri") or package.mediafile)))
+            g.add((target, OA.hasSource, URIRef(package.getMetaData(config.data.namespace, "media_uri") or package.mediafile)))
 
             selector = BNode()
-            g.add((target, OA.selector, selector))
+            g.add((target, OA.hasSelector, selector))
 
             g.add((selector, RDF.type, OA.FragmentSelector))
-            g.add((selector, OA.conformsTo, URIRef("http://www.w3.org/TR/media-frags/")))
-            g.add((selector, OA.value, Literal("t={},{}".format(helper.format_time_reference(a.fragment.begin),
-                                                                  helper.format_time_reference(a.fragment.end)))))
+            g.add((selector, DCTERMS.conformsTo, URIRef("http://www.w3.org/TR/media-frags/")))
+            g.add((selector, RDF.value, Literal("t={},{}".format(helper.format_time_reference(a.fragment.begin),
+                                                                 helper.format_time_reference(a.fragment.end)))))
 
         g.add((page, RDF.type, AS.OrderedCollectionPage))
         g.add((page, AS.items, pageItems))
