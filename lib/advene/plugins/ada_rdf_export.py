@@ -143,6 +143,8 @@ class AdARDFExporter(GenericExporter):
         # Works in source is a package or a type
         package = self.source.ownerPackage
 
+        media_uri = package.getMetaData(config.data.namespace, "media_uri") or package.mediafile or package.uri
+
         # Get the namespace from the package metdata
         ontology = package.getMetaData(config.data.namespace, "ontology_uri")
         if not ontology:
@@ -171,9 +173,11 @@ class AdARDFExporter(GenericExporter):
 
         itemcollection = Collection(g, pageItems)
 
+        def get_annotation_uri(a):
+            return "%s/%s" % (media_uri, a.id)
+
         for a in self.source.annotations:
-            # FIXME: generate custom URI
-            anode = URIRef(a.uri)
+            anode = URIRef(get_annotation_uri(a))
             itemcollection.append(anode)
             g.add((anode, RDF.type, OA.Annotation))
             g.add((anode, DCTERMS.created, Literal(a.date, datatype=XSD.dateTime)))
@@ -237,7 +241,7 @@ class AdARDFExporter(GenericExporter):
             target = BNode()
             g.add((anode, OA.hasTarget, target))
 
-            g.add((target, OA.hasSource, URIRef(package.getMetaData(config.data.namespace, "media_uri") or package.mediafile)))
+            g.add((target, OA.hasSource, URIRef(media_uri)))
 
             selector = BNode()
             g.add((target, OA.hasSelector, selector))
