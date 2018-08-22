@@ -225,7 +225,6 @@ class AdARDFExporter(GenericExporter):
                     else:
                         # Generate a sequence for contrasting/evolving values.
                         seq = BNode()
-                        g.add( (seq, RDF.type, RDF.Seq) )
                         Collection(g, seq, [ get_keyword_uri(kw) for kw in typedvalues.values ])
                         g.add( (body, AO.annotationValueSequence, seq) )
 
