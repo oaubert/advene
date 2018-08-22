@@ -235,7 +235,7 @@ class AdARDFExporter(GenericExporter):
 
             else:
                 body = new_body()
-                g.add((body, RDF.type, OA.Text))
+                g.add((body, RDF.type, OA.TextualBody))
                 g.add((body, RDF.value, Literal(a.content.data)))
 
             target = BNode()
