@@ -2389,11 +2389,18 @@ class AdveneGUI(object):
         res=fs.run()
 
         if res == Gtk.ResponseType.OK:
-            out = self.controller.apply_export_filter(element,
-                                                      exporters.get_current_element(),
-                                                      fs.get_filename())
-            if out:
-                dialog.message_dialog(out)
+            filename = fs.get_filename()
+            if os.path.exists(filename):
+                if not dialog.message_dialog(_("%s already exists. Do you want to overwrite it?") % filename,
+                                             icon=Gtk.MessageType.QUESTION):
+                    filename = None
+
+            if filename is not None:
+                out = self.controller.apply_export_filter(element,
+                                                          exporters.get_current_element(),
+                                                          filename)
+                if out:
+                    dialog.message_dialog(out)
         fs.destroy()
         return True
 
