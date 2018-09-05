@@ -19,6 +19,9 @@
 
 name="ShotDetectApp importer"
 
+import logging
+logger = logging.getLogger(__name__)
+
 from gettext import gettext as _
 import os
 import re
@@ -73,11 +76,11 @@ class ShotdetectAppImporter(ExternalAppImporter):
         them to self.temporary_resources so that they are cleaned up
         in the end.
         """
-        if filename == self.controller.get_default_media():
+        logger.debug("Checking duration %s %s", filename, self.controller.get_default_media())
         if helper.path2uri(filename) == helper.path2uri(self.controller.get_default_media()):
             # We know the duration
             self.duration = self.controller.cached_duration
-        # FIXME: else we could/should get it somehow
+        # FIXME: else we should get it somehow through GstDiscoverer
 
         self.tempdir = tempfile.mkdtemp('', 'shotdetect')
         self.temporary_resources.append(self.tempdir)
@@ -115,6 +118,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
             l = l.decode('utf-8')
             if not l:
                 break
+            logger.debug("Read line %s", l)
             ms = shot_re.findall(l)
             if ms:
                 ts = 0
@@ -126,6 +130,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
                         ts = int(float(m.group(1)) * 10 ** int(m.group(2)))
                 if ts == 0:
                     continue
+                logger.debug("Decoded %d timestamp", ts)
                 yield {
                     'content': str(num),
                     'begin': begin,
