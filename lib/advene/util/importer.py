@@ -207,7 +207,7 @@ class GenericImporter(object):
         should take this information into account and cleanly exit.
         """
         if self.callback:
-            return self.callback(min(value, 1.0), label)
+            return self.callback(value if value is None else min(value, 1.0), label)
         else:
             return True
 
