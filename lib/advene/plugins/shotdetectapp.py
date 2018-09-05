@@ -74,6 +74,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
         in the end.
         """
         if filename == self.controller.get_default_media():
+        if helper.path2uri(filename) == helper.path2uri(self.controller.get_default_media()):
             # We know the duration
             self.duration = self.controller.cached_duration
         # FIXME: else we could/should get it somehow
