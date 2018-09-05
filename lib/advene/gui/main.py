@@ -2361,7 +2361,9 @@ class AdveneGUI(object):
                                              Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
         def update_extension(sel):
             exportfilter = sel.get_current_element()(self.controller, element)
-            f = exportfilter.get_filename(os.path.basename(fs.get_filename() or ""), element)
+            f = exportfilter.get_filename(basename=(os.path.basename(fs.get_filename() or "")
+                                                    or unquote(str(os.path.basename(self.controller.package.uri)))),
+                                          source=element)
             fs.set_current_name(f)
             return True
         def valid_always(v):
