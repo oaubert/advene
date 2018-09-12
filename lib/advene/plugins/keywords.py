@@ -24,14 +24,21 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-import nltk
+try:
+    import nltk
+except ImportError:
+    nltk = None
+
 import operator
 import string
 
 from advene.util.importer import GenericImporter
 
 def register(controller=None):
-    controller.register_importer(KeywordImporter)
+    if nltk is None:
+        logger.warn("nltk module is not available. Keyword extract plugin is disabled.")
+    else:
+        controller.register_importer(KeywordImporter)
     return True
 
 
