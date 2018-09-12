@@ -26,6 +26,11 @@ from xml.etree.ElementTree import parse, Element, ElementTree, QName
 import string
 import operator
 
+try:
+    long        # Python 2
+except NameError:
+    long = int  # Python 3
+
 def tag(name):
     """Return the namespaced tag.
     """
