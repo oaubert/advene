@@ -28,17 +28,23 @@ from gettext import gettext as _
 
 from collections import namedtuple
 
-import rdflib
-from rdflib import URIRef, BNode, Literal
-from rdflib.collection import Collection
-from rdflib.namespace import RDF, RDFS, XSD, DC, DCTERMS
+try:
+    import rdflib
+    from rdflib import URIRef, BNode, Literal
+    from rdflib.collection import Collection
+    from rdflib.namespace import RDF, RDFS, XSD, DC, DCTERMS
+except ImportError:
+    rdflib = None
 
 import advene.core.config as config
 import advene.util.helper as helper
 from advene.util.exporter import GenericExporter
 
 def register(controller=None):
-    controller.register_exporter(AdARDFExporter)
+    if rdflib is None:
+        logger.warn("rdflib module is not available. AdARDFExporter plugin is disabled.")
+    else:
+        controller.register_exporter(AdARDFExporter)
     return True
 
 # Evolving/ContrastingAnnotationType markers
@@ -176,7 +182,17 @@ class AdARDFExporter(GenericExporter):
         def get_annotation_uri(a):
             return "%s/%s" % (media_uri, a.id)
 
+        not_part_of_ontology = set()
         for a in self.source.annotations:
+            # First check if it is part of the ontology schema
+            type_uri = a.type.getMetaData(config.data.namespace, "ontology_uri")
+            if not type_uri:
+                # Report only once by type
+                if a.type not in not_part_of_ontology:
+                    logger.warn(_("Cannot determine ontology URI for type %s"), self.controller.get_title(a.type))
+                    not_part_of_ontology.add(a.type)
+                # Just ignore this annotation
+                continue
             anode = URIRef(get_annotation_uri(a))
             itemcollection.append(anode)
             g.add((anode, RDF.type, OA.Annotation))
@@ -190,10 +206,6 @@ class AdARDFExporter(GenericExporter):
                 body = BNode()
                 g.add((anode, OA.hasBody, body))
 
-                type_uri = a.type.getMetaData(config.data.namespace, "ontology_uri")
-                if not type_uri:
-                    logger.warn(_("Cannot determine ontology URI for type %s"), self.controller.get_title(a.type))
-                    type_uri = a.type.id
                 g.add((body, AO.annotationType, URIRef(type_uri)))
                 if btype is not None:
                     g.add((body, RDF.type, btype))
