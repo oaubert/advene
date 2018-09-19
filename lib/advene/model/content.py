@@ -156,7 +156,7 @@ class KeywordList(object):
         # Strip all comments
         data, count = COMMENT_REGEXP.subn('', data)
         # Split values
-        val = COMMA_REGEXP.split(data)
+        val = [ k.strip() for k in COMMA_REGEXP.split(data) ]
         return val, comment
 
     def add(self, kw):
