@@ -94,6 +94,9 @@ def register(imp):
     """
     if hasattr(imp, 'can_handle'):
         IMPORTERS.append(imp)
+        return imp
+    else:
+        return None
 
 def get_valid_importers(fname):
     """Return two lists of importers (valid importers, not valid ones) for fname.
@@ -654,6 +657,7 @@ class ExternalAppImporter(GenericImporter):
         """
         yield {}
 
+@register
 class TextImporter(GenericImporter):
     """Text importer.
 
@@ -860,8 +864,7 @@ class TextImporter(GenericImporter):
         f.close()
         return self.package
 
-register(TextImporter)
-
+@register
 class LsDVDImporter(GenericImporter):
     """lsdvd importer.
     """
@@ -921,8 +924,7 @@ class LsDVDImporter(GenericImporter):
         self.progress(1.0)
         return self.package
 
-register(LsDVDImporter)
-
+@register
 class ChaplinImporter(GenericImporter):
     """Chaplin importer.
     """
@@ -979,8 +981,7 @@ class ChaplinImporter(GenericImporter):
         self.progress(1.0)
         return self.package
 
-register(ChaplinImporter)
-
+@register
 class XiImporter(GenericImporter):
     """Xi importer.
     """
@@ -1047,8 +1048,7 @@ class XiImporter(GenericImporter):
         self.progress(1.0)
         return self.package
 
-register(XiImporter)
-
+@register
 class ElanImporter(GenericImporter):
     """Elan importer.
     """
@@ -1224,8 +1224,7 @@ class ElanImporter(GenericImporter):
         self.progress(1.0)
         return self.package
 
-register(ElanImporter)
-
+@register
 class SubtitleImporter(GenericImporter):
     """Subtitle importer.
 
@@ -1299,8 +1298,7 @@ class SubtitleImporter(GenericImporter):
         self.progress(1.0)
         return self.package
 
-register(SubtitleImporter)
-
+@register
 class PraatImporter(GenericImporter):
     """PRAAT importer.
 
@@ -1387,8 +1385,7 @@ class PraatImporter(GenericImporter):
         self.progress(1.0)
         return self.package
 
-register(PraatImporter)
-
+@register
 class CmmlImporter(GenericImporter):
     """CMML importer.
 
@@ -1609,9 +1606,7 @@ class CmmlImporter(GenericImporter):
 
         return self.package
 
-register(CmmlImporter)
-
-
+@register
 class IRIImporter(GenericImporter):
     """IRI importer.
     """
@@ -1769,8 +1764,8 @@ class IRIImporter(GenericImporter):
 
         self.progress(1.0)
         return self.package
-register(IRIImporter)
 
+@register
 class IRIDataImporter(GenericImporter):
     """IRIData importer.
     """
