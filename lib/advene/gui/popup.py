@@ -311,6 +311,10 @@ class Menu:
         if hasattr(element, 'id') or isinstance(element, Package):
             title.set_submenu(self.common_submenu(element))
 
+        if hasattr(element, 'type') and config.data.preferences['expert-mode']:
+            title = add_item(_("Type %s") % self.get_title(element.type))
+            title.set_submenu(self.common_submenu(element.type))
+
         add_item("")
 
         try:
