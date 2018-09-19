@@ -137,7 +137,7 @@ class CompletionChecker(FeatureChecker):
                 # There are completions. Check for every annotation if
                 # they use a keyword not predefined.
                 for a in at.annotations:
-                    kws = set(helper.get_keyword_list(self.controller.get_title(a)))
+                    kws = set(a.content.parsed())
                     diff = kws - completions
                     if diff:
                         # There are used keywords that are not completions
