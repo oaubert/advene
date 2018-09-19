@@ -180,6 +180,8 @@ class GenericExporter(object):
     def export(self, filename=None):
         """Export the source to the specified filename.
 
+        filename may be a file-like object or a pathname.
+
         Return a status message if filename is specified.
         Return the exported object in native form if filename is not specified.
         """
@@ -296,9 +298,8 @@ class FlatJsonExporter(GenericExporter):
         if filename is None:
             return data
         else:
-            with open(filename, 'w') as fd:
+            with (filename if isinstance(filename, io.TextIOBase) else open(filename, 'w')) as fd:
                 json.dump(data, fd, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4, cls=CustomJSONEncoder)
-
             return ""
 
 def init_templateexporters():
