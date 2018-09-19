@@ -16,8 +16,10 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Transcription view.
+"""Checker view.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from gi.repository import Gtk
 
@@ -26,7 +28,7 @@ from gettext import gettext as _
 import advene.core.config as config
 import advene.gui.util.dialog as dialog
 from advene.gui.views import AdhocView
-from advene.gui.views.table import AnnotationTable, GenericTable
+from advene.gui.views.table import AnnotationTable, GenericTable, COLUMN_CUSTOM_FIRST
 import advene.gui.views.table
 import advene.util.helper as helper
 
@@ -113,12 +115,13 @@ class CompletionChecker(FeatureChecker):
     name = "Completions"
     description = _("For every annotation type that has predefined keywords, this table displays the annotations that contain unspecified keywords.")
     def build_widget(self):
-        self.table = AnnotationTable(controller=self.controller)
+        self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, ))
         # Hijack Content column
-        self.table.columns['content'].add_attribute(self.table.columns['content'].get_cells()[0],
-                                                    'text',
-                                                    advene.gui.views.table.COLUMN_CUSTOM_FIRST)
-        self.table.columns['content'].props.title = _("Undef. keywords")
+        column = self.table.columns['content']
+        cell = column.get_cells()[0]
+        column.clear_attributes(cell)
+        column.add_attribute(cell, 'text', COLUMN_CUSTOM_FIRST)
+        column.props.title = _("Undef. keywords")
         return self.table.widget
 
     def update_model(self, package=None):
