@@ -30,12 +30,14 @@ from gettext import gettext as _
 
 import optparse
 import io
+import json
 import os
 from simpletal import simpleTAL, simpleTALES
 
 if __name__ != '__main__':
     import advene.core.config as config
     from advene.model.package import Package
+    from advene.model.content import KeywordList
 
 EXPORTERS = []
 
@@ -44,6 +46,9 @@ def register_exporter(imp):
     """
     if hasattr(imp, 'name'):
         EXPORTERS.append(imp)
+        return imp
+    else:
+        return None
 
 def get_exporters():
     """Return the list of exporters.
@@ -172,12 +177,13 @@ class GenericExporter(object):
         self.set_options(options)
         return args
 
-    def export(self, filename):
+    def export(self, filename=None):
         """Export the source to the specified filename.
 
-        Return a status message.
+        Return a status message if filename is specified.
+        Return the exported object in native form if filename is not specified.
         """
-        return ""
+        return "Generic export"
 
 class TemplateExporter(GenericExporter):
     """Template exporter.
@@ -205,13 +211,17 @@ class TemplateExporter(GenericExporter):
             return is_valid_for_annotationtype
         return True
 
-    def export(self, filename):
+    def export(self, filename=None):
         ctx = self.controller.build_context(here=self.source)
-        try:
-            stream = open(filename, 'wb')
-        except Exception:
-            logger.error(_("Cannot export to %(filename)s"), exc_info=True)
-            return True
+        if filename is None:
+            # No filename is provided. Return string.
+            stream = io.BytesIO()
+        else:
+            try:
+                stream = open(filename, 'wb')
+            except Exception:
+                logger.error(_("Cannot export to %(filename)s"), exc_info=True)
+                return True
 
         if self.templateview.content.mimetype is None or self.templateview.content.mimetype.startswith('text/'):
             compiler = simpleTAL.HTMLTemplateCompiler ()
@@ -235,7 +245,61 @@ class TemplateExporter(GenericExporter):
             except simpleTALES.ContextContentException:
                 logger.error(_("Error when exporting XML template"), exc_info=True)
         stream.close()
-        return _("Data exported to %s") % filename
+        if filename is None:
+            return stream.getvalue()
+        else:
+            return _("Data exported to %s") % filename
+
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, KeywordList):
+            return list(o)
+        return json.JSONEncoder.default(self, o)
+
+@register_exporter
+class FlatJsonExporter(GenericExporter):
+    """Flat json exporter.
+    """
+    name = _("Flat JSON exporter")
+    extension = 'json'
+
+    @classmethod
+    def is_valid_for(cls, expr):
+        """Is the template valid for different types of sources.
+
+        expr is either "package" or "annotation-type" or "annotation-container".
+        """
+        return expr in ('package', 'annotation-type', 'annotation-container')
+
+    def export(self, filename=None):
+        # Works if source is a package or a type
+        package = self.source.ownerPackage
+        media_uri = package.getMetaData(config.data.namespace, "media_uri") or package.mediafile or package.uri
+
+        def flat_json(a):
+            return {
+                "id": a.id,
+                "title": self.controller.get_title(a),
+                "creator": a.author,
+                "type": a.type.id,
+                "type_title": self.controller.get_title(a.type),
+                "media": media_uri,
+                "begin": a.fragment.begin,
+                "end": a.fragment.end,
+                "color": self.controller.get_element_color(a),
+                "content": a.content.data,
+                "parsed": a.content.parsed()
+            }
+
+        data = { 'annotations': [ flat_json(a)
+                                  for a in self.source.annotations ] }
+        if filename is None:
+            return data
+        else:
+            with open(filename, 'w') as fd:
+                json.dump(data, fd, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4, cls=CustomJSONEncoder)
+
+            return ""
 
 def init_templateexporters():
     exporter_package = Package(uri=config.data.advenefile('exporters.xml', as_uri=True))
