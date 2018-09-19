@@ -180,6 +180,8 @@ class Viewable(object, metaclass=auto_properties):
         for pkg in self.__get_access_path():
             found = None
             for view in pkg.getViews():
+                if 'text/' not in view.getContent().getMimetype():
+                    continue
                 if view.match(self) \
                        and (found is None or view.isMoreSpecificThan(found)):
                     found = view
