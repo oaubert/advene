@@ -1204,7 +1204,7 @@ class Packages(Common):
         if isinstance(objet, bytes) and self.image_type (objet) is not None:
             displaymode = 'image'
 
-        logger.debug("DPE: display mode %s", displaymode)
+        logger.debug("Displaying %s in %s mode", objet, displaymode)
         if displaymode == 'image':
             # Return an image, so build the correct headers
             try:
@@ -1268,13 +1268,13 @@ class Packages(Common):
                 res.append(_("""<p>An invalid character is in the Context:</p>
                 <p>Error message: <em>%(error)s</em></p><pre>%(message)s</pre>""")
                                  % {'error': e.errorDescription,
-                                    'message': str(e.args[0]).encode('utf-8')})
+                                    'message': e.args[0]})
                 return res
             except AdveneException as e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error in the TALES expression.</p>
-                <pre>%s</pre>""") % cgi.escape(str(e.args[0]).encode('utf-8')))
+                <pre>%s</pre>""") % cgi.escape(e.args[0]))
                 return res
         else:
             mimetype=None
@@ -1288,10 +1288,14 @@ class Packages(Common):
             try:
                 logger.debug("DPE object display %s", type(objet))
                 res.append( self.start_html(mimetype=mimetype, mode=displaymode) )
+                #import pdb; pdb.set_trace()
                 if isinstance(objet, str):
                     res.append(objet.encode('utf-8'))
                 else:
-                    res.append(bytes(objet))
+                    try:
+                        res.append(bytes(objet))
+                    except TypeError:
+                        res.append(bytes(str(objet), 'utf-8'))
             except AdveneException as e:
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error.</p>
