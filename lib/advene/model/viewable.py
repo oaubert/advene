@@ -156,7 +156,7 @@ class Viewable(object, metaclass=auto_properties):
             context.interpret(view_source, mimetype, result)
             context.popLocals ()
         except Exception as e:
-            title = "Error in view interpretation: %s" % str(e)
+            title = "Error in view %s interpretation: %s" % (view.id, str(e))
             if 'html' in mimetype:
                 result.write("<h1>%s</h1><pre>" % title)
                 traceback.print_exc(file=result)
