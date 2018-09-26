@@ -182,7 +182,7 @@ class Viewable(object, metaclass=auto_properties):
             for view in pkg.getViews():
                 if 'text/' not in view.getContent().getMimetype():
                     continue
-                if '_index' in view.getId():
+                if view.match(self) and '_index' in view.getId():
                     return view
                 if view.match(self) \
                        and (found is None or view.isMoreSpecificThan(found)):
