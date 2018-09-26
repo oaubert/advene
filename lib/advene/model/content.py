@@ -189,6 +189,9 @@ class KeywordList(object):
     def __str__(self):
         return self.unparse()
 
+    def __bytes__(self):
+        return self.unparse().encode('utf-8')
+
     def as_dict(self):
         """Return the keyword list as an ordered dict.
 
@@ -198,6 +201,15 @@ class KeywordList(object):
         res = OrderedDict()
         for kw in self._values:
             res[kw] = self.get(kw)
+        return res
+
+    def as_values(self):
+        """Return the keyword list indexed by value name.
+        """
+        res = dict()
+        for k in self._values:
+            for name, value in self.get(k).items():
+                res.setdefault(name, []).append(value)
         return res
 
     def unparse(self):
