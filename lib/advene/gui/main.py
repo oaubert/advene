@@ -753,7 +753,6 @@ class AdveneGUI(object):
                 m = getattr(v, 'update_query', None)
                 if m:
                     m(query=query, event=event)
-                v.update_query(query=query, event=event)
             except Exception:
                 logger.error(_("Exception in update_query"), exc_info=True)
         return True
