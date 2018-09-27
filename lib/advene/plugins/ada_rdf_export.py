@@ -265,9 +265,12 @@ class AdARDFExporter(GenericExporter):
         g.add((page, RDF.type, AS.OrderedCollectionPage))
         g.add((page, AS.items, pageItems))
         g.add((page, AS.startIndex, Literal(0, datatype=XSD.nonNegativeInteger)))
-        g.serialize(destination=filename, format=self.format)
-        logger.info(_("Wrote %d triples to %s"), len(g), filename)
-        return ""
+        if filename is None:
+            return g
+        else:
+            g.serialize(destination=filename, format=self.format)
+            logger.info(_("Wrote %d triples to %s"), len(g), filename)
+            return ""
 
 if __name__ == "__main__":
     # Let's do some tests. This will be moved to unit tests later on.
