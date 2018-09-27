@@ -19,6 +19,9 @@
 """Identifier generator module."""
 
 import re
+import uuid
+
+import advene.core.config as config
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
@@ -99,12 +102,15 @@ class Generator:
     def get_id(self, elementtype):
         """Return a not-yet used id.
         """
-        prefix=self.prefix[elementtype]
-        index=self.last_used[prefix] + 1
-        self.last_used[prefix]=index
-        id_ = prefix + str(index)
-        # Do not append yet.
-        #self.existing.append(id_)
+        if config.data.preferences['use-uuid']:
+            id_ = str(uuid.uuid1())
+        else:
+            prefix=self.prefix[elementtype]
+            index=self.last_used[prefix] + 1
+            self.last_used[prefix]=index
+            id_ = prefix + str(index)
+            # Do not append yet.
+            #self.existing.append(id_)
         return id_
 
     def new_from_title(self, title):
