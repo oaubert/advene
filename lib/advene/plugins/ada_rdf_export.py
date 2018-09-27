@@ -217,7 +217,7 @@ class AdARDFExporter(GenericExporter):
                 "predefined": AO.PredefinedValuesAnnotationType
             }
             # Build body according to content type
-            if a.content.mimetype == 'text/x-advene-keyword-list':
+            if a.type.mimetype == 'text/x-advene-keyword-list':
                 keywords = a.content.parsed()
 
                 def get_keyword_uri(kw):
