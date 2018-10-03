@@ -76,6 +76,7 @@
 ../lib/advene/plugins/transcriber.py
 ../lib/advene/plugins/tts.py
 ../lib/advene/plugins/soundenveloppe.py
+../lib/advene/plugins/keywords.py
 ../lib/advene/plugins/dcp.py
 ../lib/advene/plugins/annotationgraph.py
 ../lib/advene/plugins/shotdetectapp.py
