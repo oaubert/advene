@@ -3741,6 +3741,25 @@ class AdveneGUI(object):
             elif event.keyval == Gdk.KEY_z:
                 self.undo()
                 return True
+            elif event.keyval == Gdk.KEY_w:
+                nb = win.get_focus().get_ancestor(Gtk.Notebook)
+                if nb:
+                    nb.remove_page(nb.get_current_page())
+                return True
+            elif event.keyval == Gdk.KEY_Page_Up:
+                nb = win.get_focus().get_ancestor(Gtk.Notebook)
+                if nb:
+                    p = nb.get_current_page()
+                    if p > 0:
+                        nb.set_current_page(p - 1)
+                return True
+            elif event.keyval == Gdk.KEY_Page_Down:
+                nb = win.get_focus().get_ancestor(Gtk.Notebook)
+                if nb:
+                    p = nb.get_current_page()
+                    if p < nb.get_n_pages() - 1:
+                        nb.set_current_page(p + 1)
+                return True
         return False
 
     def on_new1_activate (self, button=None, data=None):
@@ -4275,7 +4294,7 @@ Image cache information: %(imagecache)s
                         'completion-mode', 'completion-predefined-only', 'completion-quick-fill',
                         'prefer-wysiwyg',
                         'player-shortcuts-in-edit-windows', 'player-shortcuts-modifier',
-                        'apply-edited-elements-on-save',
+                        'apply-edited-elements-on-save', 'use-uuid',
                         'frameselector-count', 'frameselector-width',
         )
         # Direct options needing a restart to be taken into account.
@@ -4339,6 +4358,7 @@ Image cache information: %(imagecache)s
         ew.add_spin(_("Frameselector count"), 'frameselector-count', _("Number of frames displayed in frameselector."), 3, 25)
 
         ew.add_title(_("General"))
+        ew.add_checkbox(_("Use UUIDs"), 'use-uuid', _("Use UUIDs for identifying elements instead of more readable shortnames"))
         ew.add_checkbox(_("Weekly update check"), 'update-check', _("Weekly check for updates on the Advene website"))
         ew.add_option(_("On exit,"), 'imagecache-save-on-exit',
                       _("How to handle screenshots on exit"), OrderedDict((
