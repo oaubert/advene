@@ -328,9 +328,7 @@ if __name__ != "__main__":
     init_templateexporters()
 
 if __name__ == "__main__":
-    import io
     import sys
-    import tempfile
 
     logging.basicConfig(level=logging.DEBUG)
     USAGE = "%prog filter_name input_file [options] output_file"
