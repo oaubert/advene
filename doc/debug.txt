@@ -1,0 +1,30 @@
+# Debugging
+
+Advene uses the standard python `logging` module for logging
+purposes. The default level is INFO. To activate DEBUG messages for
+specific modules, use the ADVENE_DEBUG environment variable which
+holds a colon-separated list of module names for which to activate
+debug messages. Every module is designated either by its dotted named
+(e.g. advene.core.controller) or (if it is loaded through the plugin
+framework) with undescore separators (e.g. advene_gui_views_timeline).
+
+For instance, to debug the timeline view as well as the controller, you can use
+
+ADVENE_DEBUG=advene.core.controller:advene_gui_views_timeline ./bin/advene
+
+The "-d" option activates some specific code paths. Among other
+things, it loads the advene.util.debug module.
+
+## Pdb invocation
+
+You can set (through the python evaluator) the config.data.livedebug
+variable to True (it is False by default). This will cause pdb to be
+invoked upon exceptions, allowing to inspect the stack.
+
+# Profiling
+
+python3 -m cProfile  -o /tmp/foo.profile -s time python_script_to_profile
+~/.local/bin/pyprof2calltree -i /tmp/foo.profile -o /tmp/foo.kcachegrind
+kcachegrind /tmp/foo.kcachegrind
+
+~/.local/bin/snakeviz /tmp/foo.profile
