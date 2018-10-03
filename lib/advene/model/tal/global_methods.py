@@ -629,3 +629,48 @@ def json(target, context):
         # json is standard in 2.6. For python <= 2.5, hope that simplejson is installed.
         from simplejson import dumps
     return dumps(target, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4)
+
+def export(target, context):
+    """Apply an export filter to the target.
+    """
+    from advene.util.exporter import get_exporter
+
+    class ExporterWrapper(object):
+        """Return a wrapper around an element (target)
+
+         It is a dictionnary, returning a callable running
+           get_exporter(exportername).export(target) on __getitem__
+
+        The reason why all returned objects are callable is to prevent view
+        evaluation when not needed (e.g., in expressions like
+        here/view/foo/absolute_url)
+        """
+
+        def __init__ (self, target, context):
+            self._target = target
+            self._context = context
+
+        def __contains__ (self, key):
+            v = get_exporter(key)
+            return v is not None
+
+        def __getitem__ (self, key):
+            def render ():
+                return self._context.globals['options']['controller'].apply_export_filter(self._target,
+                                                                                          get_exporter(key))
+            return render
+
+        def ids (self):
+            """Returns the ids of valid exporters
+            """
+            return list(get_exporter().keys())
+
+        def keys (self):
+            """Returns the ids of valid exporters
+            """
+            return list(get_exporter().keys())
+
+        def __str__(self):
+            return "export global method. Use /keys to see what filters are available."
+
+    return context.wrap_nocall(ExporterWrapper(target, context))
