@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 #
 # Advene: Annotate Digital Videos, Exchange on the NEt
-# Copyright (C) 2008-2017 Olivier Aubert <contact@olivieraubert>
+# Copyright (C) 2008-2017 Olivier Aubert <contact@olivieraubert.net>
 #
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
