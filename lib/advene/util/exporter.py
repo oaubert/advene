@@ -296,7 +296,7 @@ class FlatJsonExporter(GenericExporter):
                 "begin": a.fragment.begin,
                 "end": a.fragment.end,
                 "color": self.controller.get_element_color(a),
-                "content_type": a.content.type,
+                "content_type": a.content.mimetype,
                 "content": a.content.data,
                 "parsed": a.content.parsed()
             }
