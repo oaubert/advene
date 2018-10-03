@@ -1,0 +1,39 @@
+#! /bin/bash -v
+
+ADVENEDIR=$(realpath -e $(dirname "$0")/..)
+DEBDIR=$(realpath -e ${ADVENEDIR}/../advene.debian)
+
+cd $ADVENEDIR
+VER=$(git describe --tags | sed -e 's!/!-!g; s!-!_!g')
+
+TMPDIR=/tmp/advene-${VER}
+TMPDEBDIR=/tmp/advene.debian
+
+# Build archive
+rm -rf $TMPDIR
+git clone $ADVENEDIR $TMPDIR
+
+cd $TMPDIR || exit 1
+make archive
+
+/bin/rm -rf $TMPDEBDIR
+git clone $DEBDIR $TMPDEBDIR
+cd $TMPDEBDIR || exit 1
+
+# Update all branches
+git checkout -b upstream origin/upstream || exit 1
+git checkout -b pristine-tar origin/pristine-tar || exit 1
+
+git checkout master || exit 1
+
+# Clean untracked files
+git clean -df || exit 1
+
+gbp import-orig --upstream-version ${VER} ${TMPDIR}.tgz || exit 1
+gbp dch -a --commit --snapshot --commit --new-version ${VER}-1 || exit 1
+
+# To test package build
+gbp buildpackage
+
+# Once it is ok
+# gbp tag --ignore-new
