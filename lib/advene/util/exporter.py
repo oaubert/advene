@@ -253,10 +253,12 @@ class TemplateExporter(GenericExporter):
                 compiler.getTemplate().expand(context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
             except simpleTALES.ContextContentException:
                 logger.error(_("Error when exporting XML template"), exc_info=True)
-        stream.close()
         if filename is None:
-            return stream.getvalue()
+            value = stream.getvalue()
+            stream.close()
+            return value
         else:
+            stream.close()
             return _("Data exported to %s") % filename
 
 class CustomJSONEncoder(json.JSONEncoder):
