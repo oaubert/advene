@@ -50,10 +50,13 @@ def register_exporter(imp):
     else:
         return None
 
-def get_exporters():
+def get_exporter(name=None):
     """Return the list of exporters.
     """
-    return EXPORTERS
+    if name is None:
+        return EXPORTERS
+    else:
+        return EXPORTERS.get(name)
 
 class GenericExporter(object):
     """Generic exporter class
@@ -257,50 +260,6 @@ class CustomJSONEncoder(json.JSONEncoder):
         if isinstance(o, KeywordList):
             return list(o)
         return json.JSONEncoder.default(self, o)
-
-@register_exporter
-class FlatJsonExporter(GenericExporter):
-    """Flat json exporter.
-    """
-    name = _("Flat JSON exporter")
-    extension = 'json'
-
-    @classmethod
-    def is_valid_for(cls, expr):
-        """Is the template valid for different types of sources.
-
-        expr is either "package" or "annotation-type" or "annotation-container".
-        """
-        return expr in ('package', 'annotation-type', 'annotation-container')
-
-    def export(self, filename=None):
-        # Works if source is a package or a type
-        package = self.source.ownerPackage
-        media_uri = package.getMetaData(config.data.namespace, "media_uri") or package.mediafile or package.uri
-
-        def flat_json(a):
-            return {
-                "id": a.id,
-                "title": self.controller.get_title(a),
-                "creator": a.author,
-                "type": a.type.id,
-                "type_title": self.controller.get_title(a.type),
-                "media": media_uri,
-                "begin": a.fragment.begin,
-                "end": a.fragment.end,
-                "color": self.controller.get_element_color(a),
-                "content": a.content.data,
-                "parsed": a.content.parsed()
-            }
-
-        data = { 'annotations': [ flat_json(a)
-                                  for a in self.source.annotations ] }
-        if filename is None:
-            return data
-        else:
-            with (filename if isinstance(filename, io.TextIOBase) else open(filename, 'w')) as fd:
-                json.dump(data, fd, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4, cls=CustomJSONEncoder)
-            return ""
 
 @register_exporter
 class FlatJsonExporter(GenericExporter):
