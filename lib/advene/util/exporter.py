@@ -39,14 +39,18 @@ if __name__ != '__main__':
     from advene.model.package import Package
     from advene.model.content import KeywordList
 
-EXPORTERS = []
+EXPORTERS = {}
 
-def register_exporter(imp):
-    """Register an importer
+def register_exporter(exp):
+    """Register an exporter
     """
-    if hasattr(imp, 'name'):
-        EXPORTERS.append(imp)
-        return imp
+    if hasattr(exp, 'name'):
+        ident = exp.get_id()
+        logging.warn("registering exporter %s", ident)
+        if ident in EXPORTERS:
+            logger.warn("Overriding existing exporter with name %s", ident)
+        EXPORTERS[ident] = exp
+        return exp
     else:
         return None
 

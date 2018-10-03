@@ -81,7 +81,7 @@ import advene.model.tal.context
 
 import advene.util.helper as helper
 import advene.util.importer
-from advene.util.exporter import get_exporters, register_exporter
+from advene.util.exporter import get_exporter, register_exporter
 import xml.etree.ElementTree as ET
 from advene.util.audio import SoundPlayer
 
@@ -2699,9 +2699,9 @@ class AdveneController(object):
         return v
 
     def get_export_filters(self):
-        return get_exporters()
+        return get_exporter().values()
 
-    def apply_export_filter(self, element, exportfilter, filename):
+    def apply_export_filter(self, element, exportfilter, filename=None):
         """Apply the given export filename to the element and output the result to filename.
 
         Returns the output message from the filter.
