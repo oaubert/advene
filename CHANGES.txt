@@ -28,11 +28,17 @@ advene (3.6) unstable; urgency=medium
     (right click on the tab to get the timeline menu).
 
   * New generic exporter API. It allows to define python-based exporters
-    through plugins.
+    through plugins. It defines a default JsonFlatExporter.
 
-  * New rdflib-based AdA RDF exporter, with multiple output formats.
+  * New keyword extraction plugin (right click on an annotation type to test it).
 
- -- Olivier Aubert <contact@olivieraubert.net>  Wed, 27 Jun 2018 10:38:29 +0200
+  * New rdflib-based AdARDFexporter, with multiple output formats. This
+    plugin uses specific metadat from AdA project, but can be used as a
+    reference implementation for other similar needs.
+
+  * New /export global method.
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Wed, 03 Oct 2018 16:22:58 +0200
 
 advene (3.5) unstable; urgency=medium
 
