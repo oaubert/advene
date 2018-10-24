@@ -206,7 +206,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             # win32 hack: there is a bug in pathlib:
             # urlparse(Path(path).as_uri()) does not return path
             # (c:/...) but /c:/...
-            path = elements.path
+            path = urllib.parse.unquote(elements.path)
             if re.search('^/[A-Za-z]:', path):
                 path = path[1:]
             if absolute:
