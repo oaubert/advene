@@ -21,7 +21,7 @@ import re
 
 import advene.core.config as config
 from advene.gui.views.browser import Browser
-import advene.util.helper
+from advene.util.tools import is_valid_tales
 from advene.gui.util import dialog
 
 re_tales=re.compile('^\$\{([^}]+)\}\s*$')
@@ -120,7 +120,7 @@ class TALESEntry:
         """
         if expr is None:
             expr=self.combo.get_current_element()
-        return advene.util.helper.is_valid_tales(self.text2tales(expr))
+        return is_valid_tales(self.text2tales(expr))
 
     def build_widget(self):
         hbox=Gtk.HBox()
