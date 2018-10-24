@@ -54,6 +54,7 @@ import os
 import tempfile
 import shutil
 import urllib.request, urllib.parse, urllib.error
+from advene.util.tools import uri2path, is_uri
 from advene.model.exception import AdveneException
 from advene.model.resources import Resources
 import mimetypes
@@ -95,10 +96,10 @@ class ZipPackage:
         self.file_ = None
 
         if uri:
-            if os.path.exists(uri.replace('file://', '')):
+            if not is_uri(uri):
                 # It is a real filename
                 self.uri = uri
-                self.file_ = uri
+                self.file_ = uri2path(uri)
             else:
                 u = urllib.request.urlopen(uri)
 
