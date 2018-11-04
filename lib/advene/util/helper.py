@@ -25,6 +25,7 @@ import itertools
 import time
 import io
 import inspect
+import json
 import re
 import zipfile
 
@@ -289,11 +290,24 @@ def get_type(el):
         t = type(el).__name__
     return t
 
-def get_type_predefined_completions(at):
+def get_type_predefined_completions(at, sort_key=None):
     """Return the predefined completions for the given annotation type
+
+    If sort_key is defined, then sort values against the metadata value
+    indexed by key defined in sort.
     """
     s = at.getMetaData(config.data.namespace, "completions")
-    return get_keyword_list(s)
+    res = get_keyword_list(s)
+
+    if sort_key is not None:
+        metadata = None
+        try:
+            metadata = json.loads(at.getMetaData(config.data.namespace, 'value_metadata') or 'null')
+        except ValueError:
+            logger.warning("Cannot parse metadata %s", metadata)
+        if metadata is not None:
+            res.sort(key=lambda k: metadata.get(k, {}).get(sort_key, 0))
+    return res
 
 def get_valid_members (el):
     """Return a list of strings, valid members for the object el in TALES.
