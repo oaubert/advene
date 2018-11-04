@@ -413,21 +413,21 @@ class AnnotationTable(AdhocView):
         els=[ model[p][COLUMN_ELEMENT] for p in paths ]
 
         if targetType == config.data.target_type['annotation']:
-            selection.set(selection.get_target(), 8, "\n".join( e.uri.encode('utf8')
-                                                          for e in els
-                                                          if isinstance(e, Annotation) ))
+            selection.set(selection.get_target(), 8, "\n".join( e.uri
+                                                                for e in els
+                                                                if isinstance(e, Annotation) ).encode('utf8'))
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            selection.set(selection.get_target(), 8, "\n".join( e.type.uri.encode('utf8')
+            selection.set(selection.get_target(), 8, "\n".join( e.type.uri
                                                           for e in els
-                                                          if isinstance(e, Annotation) ))
+                                                          if isinstance(e, Annotation) ).encode('utf8'))
             return True
         elif (targetType == config.data.target_type['text-plain']
               or targetType == config.data.target_type['TEXT']
               or targetType == config.data.target_type['STRING']):
-            selection.set(selection.get_target(), 8, "\n".join(e.content.data.encode('utf8')
-                                                          for e in els
-                                                          if isinstance(e, Annotation) ))
+            selection.set(selection.get_target(), 8, "\n".join(e.content.data
+                                                               for e in els
+                                                               if isinstance(e, Annotation) ).encode('utf8'))
         else:
             logger.warn("Unknown target type for drag: %d" % targetType)
         return True
