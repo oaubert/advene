@@ -116,11 +116,7 @@ class CompletionChecker(FeatureChecker):
     description = _("For every annotation type that has predefined keywords, this table displays the annotations that contain unspecified keywords.")
     def build_widget(self):
         self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, ))
-        # Hijack Content column
-        column = self.table.columns['content']
-        cell = column.get_cells()[0]
-        column.clear_attributes(cell)
-        column.add_attribute(cell, 'text', COLUMN_CUSTOM_FIRST)
+        column = self.table.columns['custom0']
         column.props.title = _("Undef. keywords")
         return self.table.widget
 
