@@ -93,7 +93,7 @@ class AnnotationTable(AdhocView):
         self.last_edited_path = None
 
         self.model = self.build_model(elements, custom_data)
-        self.widget = self.build_widget()
+        self.widget = self.build_widget(custom_data)
 
         self.registered_rules.append( controller.event_handler.internal_rule (event="SnapshotUpdate",
                                                                               method=self.update_snapshot)
@@ -241,7 +241,7 @@ class AnnotationTable(AdhocView):
             self.mouseover_annotation = None
         return False
 
-    def build_widget(self):
+    def build_widget(self, custom_data=None):
         tree_view = Gtk.TreeView(self.model)
 
         select = tree_view.get_selection()
@@ -301,8 +301,15 @@ class AnnotationTable(AdhocView):
                                                 element=el,
                                                 indexer=el.rootPackage._indexer)
 
+        custom_cols = []
+        if custom_data is not None:
+            custom_cols = [ ('custom%d' % i,
+                             "Custom %d" % i,
+                             COLUMN_CUSTOM_FIRST + i)
+                            for i in range(len(custom_data(None))) ]
         for (name, label, col) in (
                 ('content', _("Content"), COLUMN_CONTENT),
+                *custom_cols,
                 ('type', _("Type"), COLUMN_TYPE),
                 ('begin', _("Begin"), COLUMN_BEGIN_FORMATTED),
                 ('end', _("End"), COLUMN_END_FORMATTED),
@@ -407,6 +414,11 @@ class AnnotationTable(AdhocView):
 
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.get_target(), 8, "\n".join( e.uri.encode('utf8')
+                                                          for e in els
+                                                          if isinstance(e, Annotation) ))
+            return True
+        elif targetType == config.data.target_type['annotation-type']:
+            selection.set(selection.get_target(), 8, "\n".join( e.type.uri.encode('utf8')
                                                           for e in els
                                                           if isinstance(e, Annotation) ))
             return True
