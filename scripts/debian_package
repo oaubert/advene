@@ -4,7 +4,7 @@ ADVENEDIR=$(realpath -e $(dirname "$0")/..)
 DEBDIR=$(realpath -e ${ADVENEDIR}/../advene.debian)
 
 cd $ADVENEDIR
-VER=$(git describe --tags | sed -e 's!/!-!g; s!-!_!g')
+VER=$(git describe --tags | sed -e 's!/!-!g; s!-!_!g; s!release_!!')
 
 TMPDIR=/tmp/advene-${VER}
 TMPDEBDIR=/tmp/advene.debian
@@ -30,10 +30,10 @@ git checkout master || exit 1
 git clean -df || exit 1
 
 gbp import-orig --upstream-version ${VER} ${TMPDIR}.tgz || exit 1
-gbp dch -a --commit --snapshot --commit --new-version ${VER}-1 || exit 1
+gbp dch -a --commit --new-version ${VER}-1 || exit 1
 
 # To test package build
 gbp buildpackage
 
 # Once it is ok
-# gbp tag --ignore-new
+gbp tag --ignore-new
