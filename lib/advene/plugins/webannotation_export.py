@@ -104,9 +104,11 @@ class WebAnnotationExporter(GenericExporter):
                 "id": "/".join((self.source.uri, "page1")),
                 "type": "AnnotationPage",
                 "startIndex": 0,
-                "items": [ self.annotation_jsonld(a, media_uri)
-                           for a in self.source.annotations ] }
+                "items": [ json
+                           for json in ( self.annotation_jsonld(a, media_uri) for a in self.source.annotations )
+                           if json is not None ]}
         }
+        data["totalItems"] = len(data['first']['items'])
 
         if filename is None:
             return data
