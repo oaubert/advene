@@ -52,9 +52,12 @@ class WebAnnotationExporter(GenericExporter):
         """
         return expr in ('package', 'annotation-type', 'annotation-container')
 
+    def annotation_uri(self, a, media_uri):
+        return a.uri
+
     def annotation_jsonld(self, a, media_uri):
         return {
-            "@id": a.uri,
+            "@id": self.annotation_uri(a, media_uri),
             "@type": "Annotation",
             "advene:type": a.type.id,
             "advene:type_title": self.controller.get_title(a.type),
