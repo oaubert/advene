@@ -1612,6 +1612,7 @@ class TextContentHandler (ContentHandler):
             textview.set_editable (self.editable)
             textview.set_wrap_mode (Gtk.WrapMode.CHAR)
             textview.set_auto_indent(True)
+            textview.set_show_line_numbers(True)
             b.begin_not_undoable_action()
             b.set_text(self.element.data)
             b.end_not_undoable_action()
