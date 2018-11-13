@@ -43,6 +43,7 @@ class WebAnnotationExporter(GenericExporter):
     """
     name = _("WebAnnotation exporter")
     extension = 'jsonld'
+    mimetype = "application/json"
 
     @classmethod
     def is_valid_for(cls, expr):
@@ -85,6 +86,9 @@ class WebAnnotationExporter(GenericExporter):
             }
         }
 
+    def serialize(self, data, textstream):
+        json.dump(data, textstream, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4, cls=CustomJSONEncoder)
+
     def export(self, filename=None):
         # Works if source is a package or a type
         package = self.source.ownerPackage
@@ -110,9 +114,4 @@ class WebAnnotationExporter(GenericExporter):
         }
         data["totalItems"] = len(data['first']['items'])
 
-        if filename is None:
-            return data
-        else:
-            with (filename if isinstance(filename, io.TextIOBase) else open(filename, 'w')) as fd:
-                json.dump(data, fd, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4, cls=CustomJSONEncoder)
-            return ""
+        return self.output(data, filename)

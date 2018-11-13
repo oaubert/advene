@@ -27,11 +27,9 @@ logger = logging.getLogger(__name__)
 from gettext import gettext as _
 
 from collections import namedtuple
-import io
-import json
 
 import advene.core.config as config
-from advene.plugins.webannotation_export import WebAnnotationExporter, CustomJSONEncoder
+from advene.plugins.webannotation_export import WebAnnotationExporter
 
 def register(controller=None):
     controller.register_exporter(AdARDFExporter)
@@ -195,12 +193,7 @@ class AdARDFExporter(WebAnnotationExporter):
             "ao": ontology,
         })
 
-        if filename is None:
-            return data
-        else:
-            with (filename if isinstance(filename, io.TextIOBase) else open(filename, 'w')) as fd:
-                json.dump(data, fd, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4, cls=CustomJSONEncoder)
-            return ""
+        return self.output(data, filename)
 
 if __name__ == "__main__":
     # Let's do some tests. This will be moved to unit tests later on.
