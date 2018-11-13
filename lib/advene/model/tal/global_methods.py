@@ -634,6 +634,8 @@ def export(target, context):
     """Apply an export filter to the target.
     """
     from advene.util.exporter import get_exporter
+    from advene.util.tools import TypedUnicode
+    import io
 
     class ExporterWrapper(object):
         """Return a wrapper around an element (target)
@@ -656,8 +658,13 @@ def export(target, context):
 
         def __getitem__ (self, key):
             def render ():
-                return self._context.globals['options']['controller'].apply_export_filter(self._target,
-                                                                                          get_exporter(key))
+                ex = get_exporter(key)
+                with io.StringIO() as buf:
+                    self._context.globals['options']['controller'].apply_export_filter(self._target, ex, filename=buf)
+                    res = TypedUnicode(buf.getvalue())
+                res.contenttype = ex.mimetype
+                return res
+
             return render
 
         def ids (self):
