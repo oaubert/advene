@@ -67,6 +67,7 @@ class GenericExporter(object):
     """
     name = _("Generic exporter")
     extension = ".txt"
+    mimetype = "text/plain"
 
     def __init__(self, controller=None, source=None):
         """Instanciate the exporter.
@@ -184,13 +185,41 @@ class GenericExporter(object):
         self.set_options(options)
         return args
 
+    def serialize(self, data, textstream):
+        """Serialize the data to the given textstream.
+
+        This can be customized by exporters, depending on the nature of the data.
+        """
+        textstream.write(str(data, 'utf-8'))
+
+    def output(self, data, filename):
+        """Output data to the specified filename.
+
+        This method either returns the data, or outputs it to the
+        filename/file-like parameter.
+        """
+        if filename is None:
+            return data
+        elif isinstance(filename, io.TextIOBase):
+            self.serialize(data, filename)
+            return ""
+        elif isinstance(filename, io.BytesIOBase):
+            with io.StringIO() as buf:
+                self.serialize(data, buf)
+                filename.write(buf.encode('utf-8'))
+            return ""
+        else:
+            with open(filename, 'w') as fd:
+                self.serialize(data, fd)
+            return ""
+
     def export(self, filename=None):
         """Export the source to the specified filename.
 
-        filename may be a file-like object or a pathname.
+        filename may be a file-like object or a pathname, or None.
 
         Return a status message if filename is specified.
-        Return the exported object in native form if filename is not specified.
+        Return the exported object in native form if filename is None.
         """
         return "Generic export"
 
@@ -225,6 +254,11 @@ class TemplateExporter(GenericExporter):
         if filename is None:
             # No filename is provided. Return string.
             stream = io.BytesIO()
+        elif isinstance(filename, io.TextIOBase):
+            # Use an intermediary BytesIO
+            stream = io.BytesIO()
+        elif isinstance(filename, io.BytesIOBase):
+            stream = filename
         else:
             try:
                 stream = open(filename, 'wb')
@@ -257,6 +291,12 @@ class TemplateExporter(GenericExporter):
             value = stream.getvalue()
             stream.close()
             return value
+        elif isinstance(filename, io.TextIOBase):
+            # Enforce UTF-8
+            filename.write(stream.getvalue().encode('utf-8'))
+        elif isinstance(filename, io.BytesIOBase):
+            # Nothing to do: it is the responsibility of the caller to close the stream
+            pass
         else:
             stream.close()
             return _("Data exported to %s") % filename
@@ -273,6 +313,7 @@ class FlatJsonExporter(GenericExporter):
     """
     name = _("Flat JSON exporter")
     extension = 'json'
+    mimetype = "application/json"
 
     @classmethod
     def is_valid_for(cls, expr):
@@ -281,6 +322,9 @@ class FlatJsonExporter(GenericExporter):
         expr is either "package" or "annotation-type" or "annotation-container".
         """
         return expr in ('package', 'annotation-type', 'annotation-container')
+
+    def serialize(self, data, textstream):
+        json.dump(data, textstream, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4, cls=CustomJSONEncoder)
 
     def export(self, filename=None):
         # Works if source is a package or a type
@@ -303,14 +347,10 @@ class FlatJsonExporter(GenericExporter):
                 "parsed": a.content.parsed()
             }
 
-        data = { 'annotations': [ flat_json(a)
+        data = { "annotations": [ flat_json(a)
                                   for a in self.source.annotations ] }
-        if filename is None:
-            return data
-        else:
-            with (filename if isinstance(filename, io.TextIOBase) else open(filename, 'w')) as fd:
-                json.dump(data, fd, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4, cls=CustomJSONEncoder)
-            return ""
+
+        return self.output(data, filename)
 
 def init_templateexporters():
     exporter_package = Package(uri=config.data.advenefile('exporters.xml', as_uri=True))
@@ -320,7 +360,8 @@ def init_templateexporters():
         klass = type("{}Exporter".format(v.id), (TemplateExporter,), {
             'name': v.title,
             'templateview': v,
-            'extension': v.getMetaData(config.data.namespace, 'extension') or v.id
+            'extension': v.getMetaData(config.data.namespace, 'extension') or v.id,
+            'mimetype': v.content.mimetype
         })
         register_exporter(klass)
 
