@@ -43,6 +43,7 @@ import advene.model.view as view
 import advene.model.viewable as viewable
 from advene.model.zippackage import ZipPackage
 from advene.util.expat import PyExpat
+from advene.util.tools import uri2path, path2uri, is_uri
 
 from advene.model.bundle import StandardXmlBundle, ImportBundle, InverseDictBundle, SumBundle
 from advene.model.constants import adveneNS, xmlNS, xmlnsNS, xlinkNS, dcNS
@@ -199,16 +200,9 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if not absolute and context is self:
             return ''
 
-        elements = urlparse(uri)
-        if elements.scheme == 'file' or elements.scheme == '':
+        if is_uri(uri):
             # This is a file. Keep only the local path.
-
-            # win32 hack: there is a bug in pathlib:
-            # urlparse(Path(path).as_uri()) does not return path
-            # (c:/...) but /c:/...
-            path = urllib.parse.unquote(elements.path)
-            if re.search('^/[A-Za-z]:', path):
-                path = path[1:]
+            path = uri2path(uri)
             if absolute:
                 uri = Path(path).absolute().as_uri()
             else:
@@ -348,8 +342,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if name is None:
             name=self.__uri
 
-        if name.startswith('file:///'):
-            name = name[7:]
+        name = uri2path(name)
         # handle .azp files.
         if name.lower().endswith('.azp') or name.endswith('/'):
             # AZP format
