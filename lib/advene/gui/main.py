@@ -1133,10 +1133,6 @@ class AdveneGUI(object):
         """
         if args is None:
             args=[]
-        try:
-            Gdk.threads_init ()
-        except RuntimeError:
-            logger.warning("*** WARNING*** : Gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
         self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
@@ -1390,9 +1386,7 @@ class AdveneGUI(object):
         self.controller.notify ("ApplicationStart")
         if config.data.debug:
             self.controller._state=self.controller.event_handler.dump()
-        Gdk.threads_enter()
         Gtk.main ()
-        Gdk.threads_leave()
         self.controller.notify ("ApplicationEnd")
 
     def check_for_update(self, *p):

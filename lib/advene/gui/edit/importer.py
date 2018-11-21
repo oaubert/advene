@@ -217,11 +217,10 @@ class AnnotationImporter(AdhocView):
         Ensure that we execute all Gtk operations in the mainloop.
         """
         def idle_func():
-            Gdk.threads_enter()
             try:
                 func(*args, **kw)
-            finally:
-                Gdk.threads_leave()
+            except:
+                logger.error("Error in importer")
             return False
         GObject.idle_add(idle_func)
 
