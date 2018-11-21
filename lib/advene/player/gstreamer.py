@@ -186,6 +186,7 @@ class Player:
             self.imagesink.set_property('force-aspect-ratio', True)
         except TypeError:
             logger.warn("Cannot set force-aspect-ratio on video sink")
+        self.real_imagesink = self.imagesink
 
         elements=[]
         elements.append(Gst.ElementFactory.make('videoconvert', None))
@@ -557,17 +558,22 @@ class Player:
                 self.last_timestamp = s.position
                 self.last_timestamp_update = t
 
-    def reparent(self, xid):
+    def reparent(self, xid, sink=None):
+        if sink is None:
+            sink = self.real_imagesink
+        else:
+            self.real_imagesink = sink
         logger.debug("Reparent %s", xid)
         # See https://bugzilla.gnome.org/show_bug.cgi?id=599885
         if xid:
             self.log("Reparent " + hex(xid))
-
             Gdk.Display().get_default().sync()
-
-            self.imagesink.set_window_handle(xid)
-        self.imagesink.set_property('force-aspect-ratio', True)
-        self.imagesink.expose()
+            try:
+                sink.set_window_handle(xid)
+                sink.set_property('force-aspect-ratio', True)
+                sink.expose()
+            except AttributeError:
+                logger.warn("cannot set video output widget")
 
     def set_visual(self, xid):
         if not xid:
@@ -609,8 +615,10 @@ class Player:
         logger.debug("sync message %s", s)
         if s is None:
             return True
-        if s.get_name() == 'prepare-window-handle':
-            self.reparent(self.xid)
+        if GstVideo.is_video_overlay_prepare_window_handle_message(message):
+            imagesink = message.src
+            imagesink.set_property("force-aspect-ratio", True)
+            self.reparent(self.xid, imagesink)
         return True
 
     def on_bus_message_error(self, bus, message):
