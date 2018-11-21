@@ -4402,13 +4402,15 @@ Image cache information: %(imagecache)s
         options={_("Standard"): 'default' }
         if config.data.os == 'win32':
             ew.add_entry(_("DVD drive"), 'player-dvd-device', _("Drive letter for the DVD"))
-            options[_("GDI")] = 'wingdi'
-            options[_("Direct X")] = 'directx'
+            options[_("Direct3D")] = 'd3d'
+            options[_("OpenGL")] = 'gl'
+            options[_("Gtk")] = 'gtk'
         else:
             ew.add_entry(_("DVD device"), 'player-dvd-device', _("Device for the DVD"))
             options[_("X11")] = 'x11'
             options[_("XVideo")] = 'xvideo'
             options[_("GL")] = 'gl'
+            options[_("Gtk")] = 'gtk'
 
         ew.add_option(_("Video output"), "player-vout", _("Video output module"), options)
 

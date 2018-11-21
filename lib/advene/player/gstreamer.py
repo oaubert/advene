@@ -33,20 +33,6 @@ import ctypes
 import os
 import time
 
-if config.data.os == 'win32':
-    #try to determine if gstreamer is already installed
-    ppath = os.getenv('GST_PLUGIN_PATH', "")
-    if not ppath or not os.path.exists(ppath):
-        os.environ['GST_PLUGIN_PATH'] = str(config.data.path['advene'] / 'gst' / 'lib' / 'gstreamer-0.10')
-        gstpath = os.getenv('PATH', "")
-        os.environ['PATH'] = os.pathsep.join(( str(config.data.path['advene'] / 'gst' / 'bin'), gstpath))
-    else:
-        #even if gstpluginpath is defined, gst still may not be in path
-        gstpath = os.getenv('PATH', "")
-        h,t = os.path.split(ppath)
-        binpath,t = os.path.split(h)
-        os.environ['PATH'] = os.pathsep.join( (os.path.join( binpath, 'bin'), gstpath) )
-
 try:
     import gi
     gi.require_version('Gst', '1.0')
@@ -163,13 +149,17 @@ class Player:
         logger.warn(msg)
 
     def build_pipeline(self):
-        sink='xvimagesink'
+        sink='autovideosink'
         if config.data.player['vout'] == 'x11':
             sink='ximagesink'
-        elif config.data.player['vout'] == 'gl':
-            sink='glimagesink'
-        if config.data.os == 'win32':
+        elif config.data.player['vout'] == 'xvideo':
+            sink='xvimagesink'
+        elif config.data.player['vout'] == 'gtk':
+            sink='gtksink'
+        elif config.data.player['vout'] == 'd3d':
             sink='d3dvideosink'
+        elif config.data.player['vout'] == 'gl':
+            sink='glimagesinkelement'
 
         self.player = Gst.ElementFactory.make("playbin", "player")
 
@@ -180,7 +170,6 @@ class Player:
             self.captioner=Gst.ElementFactory.make('textoverlay', 'captioner')
             # FIXME: move to config.data
             self.captioner.props.font_desc='Sans 24'
-            #self.caption.props.text="Foobar"
         except:
             self.captioner=None
 
@@ -210,8 +199,13 @@ class Player:
         if self.captioner is not None:
             elements.append(self.captioner)
 
-        csp=Gst.ElementFactory.make('videoconvert', None)
-        elements.extend( (csp, self.imagesink) )
+        if sink == 'glimagesinkelement':
+            upload = Gst.ElementFactory.make('glupload', None)
+            csp=Gst.ElementFactory.make('glcolorconvert', None)
+            elements.extend( (upload, csp, self.imagesink) )
+        else:
+            csp=Gst.ElementFactory.make('videoconvert', None)
+            elements.extend( (csp, self.imagesink) )
 
         for el in elements:
             self.video_sink.add(el)
