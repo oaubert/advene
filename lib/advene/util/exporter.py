@@ -203,7 +203,7 @@ class GenericExporter(object):
         elif isinstance(filename, io.TextIOBase):
             self.serialize(data, filename)
             return ""
-        elif isinstance(filename, io.BytesIOBase):
+        elif isinstance(filename, io.BytesIO):
             with io.StringIO() as buf:
                 self.serialize(data, buf)
                 filename.write(buf.encode('utf-8'))
