@@ -459,6 +459,8 @@ def uri2path(uri):
         return uri
     if sys.platform == 'win32':
         uri = uri.replace('\\', '/')
+        if re.search('^[A-Za-z]:', uri):
+            uri = 'file:///' + uri
     u = urlparse(uri)
     if (u.scheme == 'file' and u.netloc == ""
         or u.scheme == ''):
