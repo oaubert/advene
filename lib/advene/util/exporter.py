@@ -195,6 +195,10 @@ class GenericExporter(object):
     def output(self, data, filename):
         """Output data to the specified filename.
 
+        We assume here to have text-based data, utf-8 encoded. If the
+        export filter is supposed to output binary data, then the
+        output method should be customized.
+
         This method either returns the data, or outputs it to the
         filename/file-like parameter.
         """
@@ -209,7 +213,7 @@ class GenericExporter(object):
                 filename.write(buf.encode('utf-8'))
             return ""
         else:
-            with open(filename, 'w') as fd:
+            with open(filename, 'wt', encoding='utf-8') as fd:
                 self.serialize(data, fd)
             return ""
 
