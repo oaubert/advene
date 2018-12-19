@@ -38,7 +38,7 @@ import time
 if subdir == 'bin' and os.path.exists(os.path.join(maindir, "setup.py")):
     # Chances are that we were in a development tree...
     libpath = os.path.join(maindir, "lib")
-    logging.warn("You seem to have a development tree at:\n%s." % libpath)
+    logging.warning("You seem to have a development tree at:\n%s." % libpath)
     sys.path.insert(0, libpath)
 
     import advene.core.config as config
@@ -105,7 +105,7 @@ if config.data.preferences['language']:
     # A non-empty value overrides the system default
     os.environ['LANG'] = config.data.preferences['language']
 
-logging.warn("%s run at %s on %s", config.data.version_string, time.strftime("%d/%m/%y %H:%M:%S %Z"), sys.platform)
+logging.warning("%s run at %s on %s", config.data.version_string, time.strftime("%d/%m/%y %H:%M:%S %Z"), sys.platform)
 
 if config.data.os in ('linux', ) and 'DISPLAY' not in os.environ:
     logging.error("The DISPLAY environment variable is not set. Cannot continue.")
@@ -117,13 +117,13 @@ if not config.data.path['resources'].exists():
     if (maindir / 'share' / 'web').exists():
         # There is a 'share/web' directory at the same level as the executable
         # This can mean that we are in a pyinstaller version
-        logging.warn("Seemingly running from a pyinstaller version in\n%s", maindir)
+        logging.warning("Seemingly running from a pyinstaller version in\n%s", maindir)
         config.data.fix_paths(maindir)
     else:
         # We can possibly be in a MacOSX .app bundle
         d = Path(sys.argv[0]).absolute().parent
         if d.name == 'Resources':
-            logging.warn("Seemingly running from a .app bundle")
+            logging.warning("Seemingly running from a .app bundle")
 
             # We will put pangorc, Pango.modules and gdk-pixbuf.loaders files in a directory of the user preferences.
             userconf = config.data.advenefile('_config', 'settings')
@@ -178,7 +178,7 @@ if config.data.os == 'win32':
             raise ImportError("Couldn't find GTK DLLs.")
         os.environ['PATH'] += os.path.pathsep + path.encode('utf8')
         os.environ['PATH'] += os.path.pathsep + os.path.join(path, 'bin').encode('utf8')
-        logging.warn("Using GTK DLLs at %s", path)
+        logging.warning("Using GTK DLLs at %s", path)
         try:
             import gi
             from gi.repository import Gtk
@@ -205,7 +205,7 @@ Aborting.""", config.data.path[d])
         import advene.core.controller
         c = advene.core.controller.AdveneController()
         c.init()
-        logging.warn("Available export filters:\n%s",
+        logging.warning("Available export filters:\n%s",
                      "\n".join("%s\t: %s (.%s extension)" % (v.get_id(),
                                                              v.name,
                                                              v.extension)
@@ -230,7 +230,7 @@ Aborting.""", config.data.path[d])
             if os.path.exists(output):
                 logging.error("Output file %s already exists. Remove it before proceeding.", output)
                 continue
-            logging.warn("Converting %s into %s", f, output)
+            logging.warning("Converting %s into %s", f, output)
             c.load_package(f)
             # FIXME: could trigger events?
             c.apply_export_filter(c.package, l, output)
@@ -252,8 +252,8 @@ Aborting.""", config.data.path[d])
         # prof.runcall(gui.main, config.data.args)
         # prof.close()
         gui.main(config.data.args)
-    except Exception as e:
-        logging.warn("Got exception. Stopping services...", exc_info=True)
+    except Exception:
+        logging.warning("Got exception. Stopping services...", exc_info=True)
 
         if logfile is not None:
             d = Gtk.MessageDialog(None,
