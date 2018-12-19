@@ -154,19 +154,28 @@ class AdARDFExporter(WebAnnotationExporter):
                 uri = keywords.get(kw, 'ontology_uri')
                 return uri
 
-            for typedvalues in keywords_to_struct(list(keywords)):
-                if typedvalues is None:
-                    logger.warn("Empty typedvalues for %s", keywords)
-                    continue
-                body = new_body(value_type_mapping[typedvalues.type])
-                if typedvalues.type == "predefined":
-                    # FIXME: how to generate multiple annotationValues here?
-                    body['ao:annotationValue'] = [ get_keyword_uri(kw) for kw in typedvalues.values ]
-                else:
-                    # Generate a sequence for contrasting/evolving values.
-                    body['ao:annotationValue'] = [ get_keyword_uri(kw) for kw in typedvalues.values ]
-            else:
-                body = new_body("predefined")
+            keyword_struct = list(keywords_to_struct(list(keywords)))
+            body = None
+            if len(keyword_struct) == 1:
+                # Found 1 mapping
+                typedvalues = keyword_struct[0]
+                if typedvalues is not None:
+                    body = new_body(value_type_mapping[typedvalues.type])
+                    if typedvalues.type == "predefined":
+                        # FIXME: how to generate multiple annotationValues here?
+                        # Let's fallback to a sequence for the moment
+                        body['ao:annotationValue'] = [ get_keyword_uri(kw) for kw in typedvalues.values ]
+                    else:
+                        # Generate a sequence for contrasting/evolving values.
+                        body['ao:annotationValue'] = [ get_keyword_uri(kw) for kw in typedvalues.values ]
+
+            if body is None:
+                # Could not parse correctly.
+                msg = "Could not parse keywords %s for annotation %s" % (keywords, a.uri)
+                logger.warn(msg)
+                body = new_body(btype="oa:TextualBody")
+                body['value'] = a.content.data
+                body['advene:ERROR'] = msg
 
             # Attach comment to the last body
             if keywords.get_comment():
