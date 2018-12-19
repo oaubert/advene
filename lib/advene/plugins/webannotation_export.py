@@ -28,30 +28,19 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-import io
-import json
-
 import advene.core.config as config
-from advene.util.exporter import GenericExporter, CustomJSONEncoder
+from advene.util.exporter import FlatJsonExporter
 
 def register(controller=None):
     controller.register_exporter(WebAnnotationExporter)
     return True
 
-class WebAnnotationExporter(GenericExporter):
+class WebAnnotationExporter(FlatJsonExporter):
     """WebAnnotation exporter.
     """
     name = _("WebAnnotation exporter")
     extension = 'jsonld'
     mimetype = "application/json"
-
-    @classmethod
-    def is_valid_for(cls, expr):
-        """Is the template valid for different types of sources.
-
-        expr is either "package" or "annotation-type" or "annotation-container".
-        """
-        return expr in ('package', 'annotation-type', 'annotation-container')
 
     def annotation_uri(self, a, media_uri):
         return a.uri
@@ -85,9 +74,6 @@ class WebAnnotationExporter(GenericExporter):
                 }
             }
         }
-
-    def serialize(self, data, textstream):
-        json.dump(data, textstream, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4, cls=CustomJSONEncoder)
 
     def export(self, filename=None):
         # Works if source is a package or a type
