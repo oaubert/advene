@@ -4680,7 +4680,7 @@ Image cache information: %(imagecache)s
             filename = filenames[0]
             # Single package - offer interface
             try:
-                source=Package(uri=filename)
+                source=Package(uri=helper.path2uri(filename))
             except Exception as e:
                 msg = "Cannot load %s file: %s" % (filename, str(e))
                 self.log(msg)
