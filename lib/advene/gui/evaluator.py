@@ -664,7 +664,7 @@ class Evaluator:
     def popup(self, embedded=True):
         """Popup the application window.
         """
-        window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
+        window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         window.connect('key-press-event', self.key_pressed_cb)
         window.set_title ("Python evaluation")
 
@@ -675,13 +675,13 @@ class Evaluator:
 
         if embedded:
             # Add the Close button to the toolbar
-            b=Gtk.ToolButton("window-close")
+            b=Gtk.ToolButton(stock_id="window-close")
             b.connect('clicked', self.close)
             self.toolbar.insert(b, -1)
             self.control_shortcuts[Gdk.KEY_w] = self.close
         else:
             # Add the Quit button to the toolbar
-            b=Gtk.ToolButton("window-quit")
+            b=Gtk.ToolButton(stock_id="window-quit")
             b.connect('clicked', lambda b: window.destroy())
             self.toolbar.insert(b, -1)
             window.connect('destroy', lambda e: Gtk.main_quit())
@@ -808,7 +808,7 @@ class Evaluator:
             (Gtk.STOCK_REMOVE, "Remove a bookmark", self.remove_bookmark),
             (Gtk.STOCK_INDEX, "Display bookmarks (C-Space)", self.display_bookmarks),
             ):
-            b=Gtk.ToolButton(icon)
+            b=Gtk.ToolButton(stock_id=icon)
             b.connect('clicked', action)
             b.set_tooltip_text(tip)
             tb.insert(b, -1)
@@ -866,9 +866,10 @@ class Evaluator:
 def center_on_mouse(w):
     """Center the given Gtk.Window on the mouse position.
     """
-    root=w.get_toplevel().get_root_window()
-    (screen, x, y, mod) = root.get_display().get_pointer()
-    r = screen.get_monitor_geometry(screen.get_monitor_at_point(x, y))
+    screen = w.get_window().get_screen()
+    display = screen.get_display()
+    (s, x, y) = display.get_default_seat().get_pointer().get_position()
+    r = display.get_monitor_at_point(x, y).get_geometry()
 
     # Let's try to center the window on the mouse as much as possible.
     width, height = w.get_size()
