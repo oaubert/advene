@@ -584,6 +584,20 @@ class Player:
 
     def set_widget(self, widget):
         handle = None
+
+        if config.data.player['vout'] == 'gtk':
+            # Special case: we use a gtk sink, so we get a Gtk widget
+            # and not the XOverlay API
+            # FIXME: this makes it not easily
+            # switchable, since we replace the embedding widget by our
+            # own. An API should be designed for this.
+            logger.warn("Embedding gtk video output %s", self.imagesink)
+            parent = widget.get_parent()
+            parent.remove(widget)
+            parent.add(self.imagesink.props.widget)
+            parent.show_all()
+            return
+
         if config.data.os == "win32":
             # From
             # http://stackoverflow.com/questions/25823541/get-the-window-handle-in-pygi
