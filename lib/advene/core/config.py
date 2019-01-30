@@ -609,6 +609,7 @@ class Config(object):
             return
 
         self.player['dvd-device']='E:'
+        self.player['vout'] = 'gtk'
         advenehome = self.get_registry_value('software\\advene','path')
         if advenehome is None:
             logger.warning("Cannot get the Advene location from registry")
