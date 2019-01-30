@@ -32,7 +32,7 @@ import re
 
 import advene.core.config as config
 
-from advene.model.annotation import Annotation
+from advene.model.annotation import Annotation, Relation
 from advene.model.schema import AnnotationType, RelationType
 from advene.model.query import Query
 from advene.model.view import View
@@ -411,13 +411,18 @@ class Indexer:
             s=self.index['views']
             atid=None
             s.add(element.id)
-        elif isinstance(element, Annotation):
+        elif isinstance(element, (Annotation, Relation)):
             atid=element.type.id
             s=self.index.get(atid, set())
         elif isinstance(element, (AnnotationType, RelationType, Query)):
             self.index['views'].add(element.id)
             self.index.get(element.id, set()).update(helper.get_type_predefined_completions(element))
             return True
+        else:
+            # Should not happen.
+            logger.error("Should not happen for %s", element)
+            s = set()
+            atid = None
         s.update(self.get_words(element.content.data))
         if atid:
             self.index[atid]=s
