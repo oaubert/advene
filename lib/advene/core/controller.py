@@ -1691,6 +1691,7 @@ class AdveneController(object):
             differ.update_meta(self.package, p, config.data.namespace, 'tag_colors')
             differ.update_meta(self.package, p, config.data.namespace, 'ontology_uri')
             differ.update_meta(self.package, p, config.data.namespace, 'media_uri')
+            differ.update_meta(self.package, p, config.data.namespace, 'media_checksum')
             differ.update_meta(self.package, p, config.data.namespace_prefix['dc'], 'creator')
             differ.update_meta(self.package, p, config.data.namespace_prefix['dc'], 'description')
             p.date = self.get_timestamp()
