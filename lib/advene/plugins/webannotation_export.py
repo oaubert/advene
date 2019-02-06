@@ -84,7 +84,13 @@ class WebAnnotationExporter(FlatJsonExporter):
             "@context": [ "http://www.w3.org/ns/anno.jsonld",
                           "http://www.w3.org/ns/ldp.jsonld",
                           {
-                              "advene": "http://www.advene.org/ns/webannotation.jsonld/"
+                              "advene": "http://www.advene.org/ns/webannotation.jsonld/",
+                              # Ideally, we should use a random URI
+                              # here (because without more
+                              # information, we cannot know the actual
+                              # URI of this local symbol) but it would
+                              # render the export unstable.
+                              "local": "http://www.advene.org/ns/_local/"
                           }
             ],
             "id": self.source.uri,
