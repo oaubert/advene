@@ -200,6 +200,9 @@ class AdARDFExporter(WebAnnotationExporter):
             return _("Cannot find the ontology URI. It should be defined as package metadata.")
         data['@context'].append({
             "ao": ontology,
+            "ao:annotationType": { "@type": "@id" },
+            "ao:annotationValue": { "@type": "@id" },
+            "ao:annotationValueSequence": { "@type": "@id" }
         })
 
         return self.output(data, filename)
