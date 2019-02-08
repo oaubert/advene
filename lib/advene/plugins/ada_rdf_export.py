@@ -155,37 +155,39 @@ class AdARDFExporter(WebAnnotationExporter):
                 return uri
 
             keyword_struct = list(keywords_to_struct(list(keywords)))
-            body = None
-            if len(keyword_struct) == 1:
-                # Found 1 mapping
-                typedvalues = keyword_struct[0]
+            bodies = []
+            for typedvalues in keyword_struct:
                 if typedvalues is not None:
                     body = new_body(value_type_mapping[typedvalues.type])
                     if typedvalues.type == "predefined":
-                        # FIXME: how to generate multiple annotationValues here?
-                        # Let's fallback to a sequence for the moment
                         body['ao:annotationValue'] = [ get_keyword_uri(kw) for kw in typedvalues.values ]
                     else:
                         # Generate a sequence for contrasting/evolving values.
                         body['ao:annotationValueSequence'] = { "@list": [ get_keyword_uri(kw) for kw in typedvalues.values ] }
+                    bodies.append(body)
 
-            if body is None:
+            if not bodies:
                 # Could not parse correctly.
                 msg = "Could not parse keywords %s for annotation %s" % (keywords, a.uri)
                 logger.warn(msg)
                 body = new_body(btype="oa:TextualBody")
                 body['value'] = a.content.data
                 body['advene:ERROR'] = msg
+                bodies = [ body ]
 
             # Attach comment to the last body
             if keywords.get_comment():
-                body['rdf:comment'] = keywords.get_comment()
+                bodies[-1]['rdf:comment'] = keywords.get_comment()
 
         else:
             body = new_body(btype="oa:TextualBody")
             body['value'] = a.content.data
+            bodies = [ body ]
 
-        data['body'] = body
+        if len(bodies) == 1:
+            data['body'] = bodies[0]
+        else:
+            data['body'] = bodies
 
         return data
 
