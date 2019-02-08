@@ -144,7 +144,7 @@ class AdARDFExporter(WebAnnotationExporter):
                 "ao:annotationType": type_uri
             }
             if btype is not None:
-                body['rdf:type'] = btype
+                body['@type'] = btype
             return body
 
         if a.type.mimetype == 'text/x-advene-keyword-list':
