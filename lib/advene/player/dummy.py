@@ -244,6 +244,10 @@ class Player:
         self.current_position_value = s.position
 
     @debug
+    def set_widget(self, drawable, container):
+        return True
+
+    @debug
     def set_visual(self, xid):
         """Set the window id for the video output.
 

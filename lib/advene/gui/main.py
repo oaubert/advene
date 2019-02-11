@@ -1494,22 +1494,6 @@ class AdveneGUI(object):
         self.pane={}
 
         self.drawable = get_drawable()
-
-        def register_drawable(drawable):
-            # The player is initialized. We can register the drawable id
-            try:
-                if not config.data.player['embedded']:
-                    raise Exception()
-                try:
-                    self.controller.player.set_widget(self.drawable)
-                except AttributeError:
-                    self.visual_id = self.drawable.get_id()
-                    self.controller.player.set_visual(self.visual_id)
-            except Exception:
-                logger.error("Cannot embed video player", exc_info=True)
-            return True
-        self.drawable.connect_after('realize', register_drawable)
-
         black=Gdk.Color(0, 0, 0)
         for state in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
                       Gtk.StateType.SELECTED, Gtk.StateType.INSENSITIVE,
@@ -1670,11 +1654,26 @@ class AdveneGUI(object):
         eb=Gtk.EventBox()
         eb.set_above_child(True)
         eb.set_visible_window(True)
-        eb.add(self.drawable)
+        container = Gtk.VBox()
+        container.add(self.drawable)
+        eb.add(container)
         v.pack_start(eb, True, True, 0)
         eb.connect('scroll-event', self.on_slider_scroll_event)
         eb.connect('button-press-event', self.on_video_button_press_event)
         eb.connect('key-press-event', self.on_win_key_press_event)
+
+
+        def register_drawable(drawable, container):
+            # The player is initialized. We can register the drawable id
+            try:
+                if not config.data.player['embedded']:
+                    raise Exception()
+                self.controller.player.set_widget(self.drawable, container)
+            except Exception:
+                logger.error("Cannot embed video player", exc_info=True)
+            return True
+        self.drawable_container = container
+        self.drawable.connect_after('realize', register_drawable, container)
 
         if config.data.preferences['display-scroller']:
             self.scroller=ScrollerView(controller=self.controller)
@@ -1841,10 +1840,7 @@ class AdveneGUI(object):
         self.update_player_labels()
         p=self.controller.player
         # The player is initialized. We can register the drawable id
-        try:
-            p.set_widget(self.drawable)
-        except AttributeError:
-            p.set_visual(self.drawable.get_id())
+        p.set_widget(self.drawable, self.drawable_container)
         self.update_control_toolbar(self.player_toolbar)
         self.build_player_menu()
 

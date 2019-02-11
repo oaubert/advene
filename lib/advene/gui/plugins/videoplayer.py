@@ -166,9 +166,9 @@ class VideoPlayer(AdhocView):
         super(VideoPlayer, self).close()
         return True
 
-    def register_drawable(self, drawable):
+    def register_drawable(self, drawable, container):
         if self.drawable.get_parent_window() is not None:
-            self.player.set_widget(self.drawable)
+            self.player.set_widget(self.drawable, container)
         return False
 
     def update_status(self, status, position=None):
@@ -199,13 +199,12 @@ class VideoPlayer(AdhocView):
         if self.player is None:
             return None
         w = Gtk.Window()
+        vbox = Gtk.VBox()
         d = get_drawable()
-        w.add(d)
+        w.add(vbox)
+        vbox.add(d)
         w.show_all()
-        try:
-            self.player.set_widget(d)
-        except AttributeError:
-            self.player.set_visual(d.get_id())
+        self.player.set_widget(d, vbox)
         return w
 
     def build_widget(self):

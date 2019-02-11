@@ -23,6 +23,7 @@ Using gstreamer 1.0 API.
 import logging
 logger = logging.getLogger(__name__)
 
+import ctypes
 import math
 import tempfile
 import time
@@ -352,8 +353,36 @@ class Player:
         self.stream_duration = s.length
         self.current_position_value = int(s.position)
 
-    def set_widget(self, widget):
-        self.set_visual( widget.get_id() )
+    def set_widget(self, widget, container):
+        handle = None
+
+        if config.data.player['vout'] == 'gtk':
+            # Special case: we use a gtk sink, so we get a Gtk widget
+            # and not the XOverlay API
+            try:
+                container.pack_start(self.imagesink.props.widget, True, True, 0)
+                self.imagesink.props.widget.show()
+                widget.hide()
+            except:
+                logger.exception("Embedding error")
+            return
+
+        if config.data.os == "win32":
+            # From
+            # http://stackoverflow.com/questions/25823541/get-the-window-handle-in-pygi
+            if not widget.ensure_native():
+                logger.error("Cannot embed video player - it requires a native window")
+                return
+            ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
+            ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
+            drawingarea_gpointer = ctypes.pythonapi.PyCapsule_GetPointer(widget.__gpointer__, None)
+            gdkdll = ctypes.CDLL("libgdk-3-0.dll")
+            handle = gdkdll.gdk_win32_window_get_handle(drawingarea_gpointer)
+        else:
+            handle = widget.get_id()
+
+        widget.show()
+        self.set_visual(handle)
 
     def set_visual(self, xid, realsink=None):
         if realsink is None:

@@ -582,20 +582,18 @@ class Player:
         self.reparent(xid)
         return True
 
-    def set_widget(self, widget):
+    def set_widget(self, widget, container):
         handle = None
 
         if config.data.player['vout'] == 'gtk':
             # Special case: we use a gtk sink, so we get a Gtk widget
             # and not the XOverlay API
-            # FIXME: this makes it not easily
-            # switchable, since we replace the embedding widget by our
-            # own. An API should be designed for this.
-            logger.warn("Embedding gtk video output %s", self.imagesink)
-            parent = widget.get_parent()
-            parent.remove(widget)
-            parent.add(self.imagesink.props.widget)
-            parent.show_all()
+            try:
+                container.pack_start(self.imagesink.props.widget, True, True, 0)
+                self.imagesink.props.widget.show()
+                widget.hide()
+            except:
+                logger.exception("Embedding error")
             return
 
         if config.data.os == "win32":
@@ -612,6 +610,7 @@ class Player:
         else:
             handle = widget.get_id()
 
+        widget.show()
         self.set_visual(handle)
 
     def restart_player(self):
