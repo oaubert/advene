@@ -179,6 +179,11 @@ class AdARDFExporter(WebAnnotationExporter):
             if keywords.get_comment():
                 bodies[-1]['rdf:comment'] = keywords.get_comment()
 
+            # Add textual body
+            body = new_body(btype="oa:TextualBody")
+            body['value'] = self.controller.get_representation(a)
+            bodies.append(body)
+
         else:
             body = new_body(btype="oa:TextualBody")
             body['value'] = a.content.data
