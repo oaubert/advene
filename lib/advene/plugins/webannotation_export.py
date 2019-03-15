@@ -84,7 +84,7 @@ class WebAnnotationExporter(FlatJsonExporter):
             "@context": [ "http://www.w3.org/ns/anno.jsonld",
                           "http://www.w3.org/ns/ldp.jsonld",
                           {
-                              "advene": "http://www.advene.org/ns/webannotation.jsonld/",
+                              "advene": "http://www.advene.org/ns/webannotation/",
                               # Ideally, we should use a random URI
                               # here (because without more
                               # information, we cannot know the actual
