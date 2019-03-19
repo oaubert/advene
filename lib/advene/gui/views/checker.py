@@ -175,6 +175,18 @@ class DurationChecker(FeatureChecker):
         self.table.set_elements([ a for a in self.controller.package.annotations
                                   if not a.fragment.duration ])
 
+@register_checker
+class EmptyContentChecker(FeatureChecker):
+    name = "EmptyContent"
+    description = _("This table presents the annotations that have an empty content.")
+    def build_widget(self):
+        self.table = AnnotationTable(controller=self.controller)
+        return self.table.widget
+
+    def update_model(self, package=None):
+        self.table.set_elements([ a for a in self.controller.package.annotations
+                                  if not a.content.data ])
+
 class CheckerView(AdhocView):
     view_name = _("Checker")
     view_id = 'checker'
