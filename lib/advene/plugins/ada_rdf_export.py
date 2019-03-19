@@ -181,7 +181,7 @@ class AdARDFExporter(WebAnnotationExporter):
 
             # Add textual body
             body = new_body(btype="oa:TextualBody")
-            body['value'] = self.controller.get_representation(a)
+            body['value'] = self.controller.get_title(a)
             bodies.append(body)
 
         else:
