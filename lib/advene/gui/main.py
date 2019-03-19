@@ -492,11 +492,16 @@ class AdveneGUI(object):
                              Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
 
             d.vbox.pack_start(Gtk.Label(_("Please specify the lists of elements to be searched.")), False, False, 0)
+            sw = Gtk.ScrolledWindow ()
+            sw.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+            typelist = Gtk.VBox()
             for el in self.controller.defined_quicksearch_sources:
                 b=Gtk.CheckButton(el.title, use_underline=False)
                 b._element = el
                 b.set_active(el.value in config.data.preferences['quicksearch-sources'])
-                d.vbox.pack_start(b, False, True, 0)
+                typelist.pack_start(b, False, True, 0)
+            sw.add(typelist)
+            d.vbox.pack_start(sw, True, True, 1)
             d.vbox.show_all()
             d.connect('key-press-event', dialog.dialog_keypressed_cb)
             d.show()
