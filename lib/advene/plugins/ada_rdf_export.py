@@ -160,7 +160,16 @@ class AdARDFExporter(WebAnnotationExporter):
                 if typedvalues is not None:
                     body = new_body(value_type_mapping[typedvalues.type])
                     if typedvalues.type == "predefined":
-                        body['ao:annotationValue'] = [ get_keyword_uri(kw) for kw in typedvalues.values ]
+                        if len(typedvalues.values) == 1:
+                            # Single value. Let's try to get its numeric value
+                            kw = typedvalues.values[0]
+                            body['ao:annotationValue'] = get_keyword_uri(kw)
+                            num_value = keywords.get(kw, 'numeric_value')
+                            if num_value is not None:
+                                body['ao:annotationNumericValue'] = num_value 
+                        else:
+                            # Multiple values
+                            body['ao:annotationValue'] = [ get_keyword_uri(kw) for kw in typedvalues.values ]
                     else:
                         # Generate a sequence for contrasting/evolving values.
                         body['ao:annotationValueSequence'] = { "@list": [ get_keyword_uri(kw) for kw in typedvalues.values ] }
