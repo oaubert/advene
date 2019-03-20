@@ -113,7 +113,6 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
         self.draw(cr, w, h)
         Gdk.cairo_set_source_pixbuf(cr, pixbuf, 0, 0)
         cr.paint()
-        # FIXME3: use drag_source_set_icon_pixbuf
         widget.drag_source_set_icon_pixbuf(pixbuf)
         def set_cursor(wid, t=None, precision=None):
             try:
