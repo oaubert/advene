@@ -510,7 +510,7 @@ class AdveneGUI(object):
             if res == Gtk.ResponseType.OK:
                 # Update quicksearch-sources
                 elements=[ but._element
-                           for but in d.vbox.get_children()
+                           for but in typelist.get_children()
                            if hasattr(but, 'get_active') and but.get_active() ]
                 config.data.preferences['quicksearch-sources']=[ el.value for el in elements ]
                 # Update tooltip
