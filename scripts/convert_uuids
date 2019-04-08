@@ -26,23 +26,60 @@ logger = logging.getLogger(__name__)
 
 """Convert annotation ids to uuids
 """
-import os
+import shutil
 import sys
 import uuid
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import parse, QName
+import zipfile
 
-try:
-    import advene.core.config as config
-except ImportError:
-    # Try to set path
-    (maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
-    if subdir == 'scripts':
-        # Chances are that we were in a development tree...
-        libpath = os.path.join(maindir, "lib")
-        sys.path.insert(0, libpath)
-        import advene.core.config as config
-        config.data.fix_paths(maindir)
+# Deal directly with storage format
 
-from advene.model.package import Package
+# Namespace handling
+ns='http://experience.univ-lyon1.fr/advene/ns'
+ET._namespace_map[ns]=''
+ET._namespace_map['http://purl.org/dc/elements/1.1/']='dc'
+ET._namespace_map['http://experience.univ-lyon1.fr/advene/ns/advenetool']='advenetool'
+ET._namespace_map["http://www.w3.org/1999/xlink"] = 'xlink'
+
+HREF = '{http://www.w3.org/1999/xlink}href'
+
+def tag(name, shortname=None):
+    """Return the namespaced tag.
+    """
+    return '{%s}%s' % (ns, name)
+
+# Hack into elementtree to generate a readable (namespace-prefix-wise)
+# Advene package
+def my_fixtag(tag, namespaces):
+    # given a decorated tag (of the form {uri}tag), return prefixed
+    # tag and namespace declaration, if any
+    if isinstance(tag, QName):
+        tag = tag.text
+    namespace_uri, tag = str(tag[1:]).split("}", 1)
+    prefix = namespaces.get(namespace_uri)
+    if prefix is None:
+        prefix = ET._namespace_map.get(namespace_uri)
+        if prefix is None:
+            prefix = "ns%d" % len(namespaces)
+        namespaces[namespace_uri] = prefix
+        if prefix == "xml":
+            xmlns = None
+        elif prefix == '':
+            # Empty prefix from _namespace_map, assume it is the
+            # default
+            xmlns = ('xmlns', namespace_uri)
+        else:
+            xmlns = ("xmlns:%s" % prefix, namespace_uri)
+    else:
+        xmlns = None
+    if prefix == '':
+        return tag, xmlns
+    else:
+        return "%s:%s" % (prefix, tag), xmlns
+
+# Hook into elementtree
+ET.fixtag = my_fixtag
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
@@ -54,10 +91,38 @@ if __name__ == '__main__':
         logger.error(SYNTAX)
         sys.exit(1)
 
-    source = Package(source_file)
+    # Copy source to destination
+    shutil.copy(source_file, dest_file)
 
-    for a in source.annotations:
-        a.id = str(uuid.uuid1())
+    # Read from dest_file
+    with zipfile.ZipFile(source_file, 'r') as z:
+        # Parse content.xml
+        tree = parse(z.open('content.xml', 'r'))
 
-    logger.info("Convert %s into %s", source_file, dest_file)
-    source.save(dest_file)
+    root = tree.getroot()
+
+    mapping = {}
+    for a in root.find(tag('annotations')).findall(tag('annotation')):
+        ident = mapping[a.attrib['id']] = str(uuid.uuid1())
+        a.attrib['id'] = ident
+
+    # Fix relations
+    for r in root.find(tag('annotations')).findall(tag('relation')):
+        ident = mapping[r.attrib['id']] = str(uuid.uuid1())
+        r.attrib['id'] = ident
+        for m in r.find(tag('members')).findall(tag('member')):
+            aid = m.attrib[HREF].lstrip('#')
+            m.attrib[HREF] = '#' + mapping[aid]
+
+    # write to dest_file
+    with zipfile.ZipFile(source_file, 'r') as zin:
+        with zipfile.ZipFile(dest_file, 'w') as zout:
+            # Dump content.xml
+            with zout.open('content.xml', 'w') as f:
+                tree.write(f, encoding='utf-8')
+            # Copy all other files
+            for item in zin.infolist():
+                if item.filename != 'content.xml':
+                    buf = zin.read(item.filename)
+                    zout.writestr(item, buf)
+    logging.info("Converted ids from %s to %s", source_file, dest_file)
