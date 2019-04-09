@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
     # write to dest_file
     with zipfile.ZipFile(source_file, 'r') as zin:
-        with zipfile.ZipFile(dest_file, 'w') as zout:
+        with zipfile.ZipFile(dest_file, 'w', compression=zipfile.ZIP_DEFLATED) as zout:
             # Dump content.xml
             with zout.open('content.xml', 'w') as f:
                 tree.write(f, encoding='utf-8')
