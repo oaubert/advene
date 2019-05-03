@@ -320,8 +320,8 @@ class Config(object):
             'frameselector-count': 8,
             # Cache settings for import filters
             'filter-options': {},
-            # Use UUIDs for element ids. Default is to generate readable ids.
-            'use-uuid': False
+            # Use UUIDs for element ids. If false, generate readable ids.
+            'use-uuid': True
             }
 
         # Player options
