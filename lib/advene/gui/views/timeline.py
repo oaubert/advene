@@ -409,6 +409,8 @@ class TimeLine(AdhocView):
         return self.options, arguments
 
     def close(self, *p):
+        # In case there was a edit selection popup pending
+        self.should_display_type_selection_popup = False
         if self.edit_type_selection_popup  is not None:
             self.edit_type_selection_popup.destroy()
         super().close()
@@ -686,7 +688,7 @@ class TimeLine(AdhocView):
         if not self.update_lock.acquire(False) or self.layout.get_window() is None:
             # An update is already ongoing or the layout is not realized yet
             return
-        logger.debug("update_model package=%s partial_update=%s from_init=%s", package, partial_update, from_init, stack_info=False)
+        logger.debug("update_model widget=%s package=%s partial_update=%s from_init=%s", self, package, partial_update, from_init, stack_info=False)
 
         if package is None:
             package = self.controller.package
@@ -752,10 +754,11 @@ class TimeLine(AdhocView):
 
         if self.should_display_type_selection_popup:
             def ask_for_types():
-                self.should_display_type_selection_popup = False
-                self.edit_annotation_types(source=None, message=_("There are too many annotations to display everything. Please select a subset of annotation types."))
+                if self.should_display_type_selection_popup:
+                    self.should_display_type_selection_popup = False
+                    self.edit_annotation_types(source=None, message=_("There are too many annotations to display everything. Please select a subset of annotation types."))
                 return False
-            GObject.timeout_add(200, ask_for_types)
+            GObject.timeout_add(500, ask_for_types)
         return
 
     def set_autoscroll_mode(self, v):
