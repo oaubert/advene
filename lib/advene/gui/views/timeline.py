@@ -683,10 +683,10 @@ class TimeLine(AdhocView):
         @param elements: list of annotations to display
         @type elements: list
         """
-        logger.debug("update_model package=%s partial_update=%s from_init=%s", package, partial_update, from_init, stack_info=False)
         if not self.update_lock.acquire(False) or self.layout.get_window() is None:
             # An update is already ongoing or the layout is not realized yet
             return
+        logger.debug("update_model package=%s partial_update=%s from_init=%s", package, partial_update, from_init, stack_info=False)
 
         if package is None:
             package = self.controller.package
@@ -695,7 +695,6 @@ class TimeLine(AdhocView):
             pos = self.get_middle_position()
         else:
             # It is not just an update, do a full redraw.
-
             # If selected annotation types were leftovers from a previous package:
             if self.annotationtypes_selection and self.annotationtypes_selection[0].ownerPackage != package:
                 self.annotationtypes_selection = []
@@ -718,6 +717,7 @@ class TimeLine(AdhocView):
             else:
                 # We display the whole package, so display also empty annotation types
                 if len(package.annotations) > ANNOTATION_COUNT_LIMIT:
+                    logger.debug("type selection - update-model %s", self.annotationtypes_selection)
                     self.should_display_type_selection_popup = True
                     self.annotationtypes = []
                 else:
@@ -738,7 +738,7 @@ class TimeLine(AdhocView):
         self.draw_marks()
 
         def finalize_callback():
-            self.update_legend_widget(self.legend)
+            self.update_legend_widget()
             self.legend.show_all()
             self.update_lock.release()
             # Hackish fix for a refresh issue of the scale layout upon
@@ -1082,11 +1082,11 @@ class TimeLine(AdhocView):
         if event == 'AnnotationTypeCreate':
             self.annotationtypes.append(annotationtype)
             self.update_layer_position(new_at=annotationtype)
-            self.update_legend_widget(self.legend)
+            self.update_legend_widget()
             # Populate with new annotations
             self.populate(annotations=annotationtype.annotations)
         elif event == 'AnnotationTypeEditEnd':
-            self.update_legend_widget(self.legend)
+            self.update_legend_widget()
             self.legend.show_all()
             # Update also its annotations, since representation or
             # color may have changed
@@ -2930,13 +2930,16 @@ class TimeLine(AdhocView):
                 self.controller.restrict_playing(at, annotations=[ a for a in self.list if a.type == at ])
         return True
 
-    def update_legend_widget(self, layout):
+    def update_legend_widget(self, layout=None):
         """Update the legend widget.
 
         Its content may have changed.
         """
+        logger.debug("update_legend_widget %s", len(self.annotationtypes))
+        if layout is None:
+            layout = self.legend
         # Clear the legend
-        self.legend.foreach(self.legend.remove)
+        layout.foreach(layout.remove)
 
         height=0
 
@@ -3122,8 +3125,9 @@ class TimeLine(AdhocView):
             # The button can generate drags (to change annotation type order)
             enable_drag_source(b, t, self.controller)
 
-            height=max (height, y_position + 3 * self.button_height)
+            height = max(height, y_position + 3 * self.button_height)
 
+            hbox.show_all()
             layout.put(hbox, 0, y_position)
 
         # Add the 'New type' button at the end
@@ -3311,6 +3315,7 @@ class TimeLine(AdhocView):
         sw_legend.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
         sw_legend.set_placement(Gtk.CornerType.TOP_RIGHT)
         sw_legend.add(self.legend)
+        sw_legend.show_all()
         content_pane.add1(sw_legend)
 
         # Vertical auto-scroll when DNDing
@@ -3785,6 +3790,7 @@ class TimeLine(AdhocView):
                 if len(self.annotationtypes) == len(self.controller.package.annotationTypes):
                     # All types selected
                     self.annotationtypes_selection = None
+                self.update_legend_widget()
                 self.update_model(partial_update=True)
             self.edit_type_selection_popup = None
             widget.destroy()
