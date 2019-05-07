@@ -593,23 +593,22 @@ class Evaluator:
         if inspect.ismethod(res):
             res=res.__func__
         args=None
-        if inspect.isfunction(res):
+        if inspect.isfunction(res) or inspect.isbuiltin(res):
             # Complete with getargspec
-            (args, varargs, varkw, defaults)=inspect.getargspec(res)
-            if args and args[0] == 'self':
-                args.pop(0)
-                if defaults:
-                    n=len(defaults)
-                    cp=args[:-n]
-                    cp.extend("=".join( (k, repr(v)) ) for (k, v) in zip(args[-n:], defaults))
+            spec = inspect.getfullargspec(res)
+            args = spec.args
+            if spec.args and spec.args[0] == 'self':
+                spec.args.pop(0)
+                if spec.defaults:
+                    n = len(spec.defaults)
+                    cp = args[:-n]
+                    cp.extend("=".join( (k, repr(v)) ) for (k, v) in zip(spec.args[-n:], spec.defaults))
                     args=cp
-            if varargs:
-                args.append("*" + varargs)
-            if varkw:
-                args.append("**" + varkw)
-        #elif inspect.isbuiltin(res) and res.__doc__:
-        # isbuiltin does not work
-        elif isinstance(res, collections.Callable) and res.__doc__:
+            if spec.varargs:
+                args.append("*" + spec.varargs)
+            if spec.varkw:
+                args.append("**" + spec.varkw)
+        elif res.__doc__:
             # Extract parameters from docstring
             args=re.findall('\((.*?)\)', res.__doc__.splitlines()[0])
 
