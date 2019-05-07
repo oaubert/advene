@@ -31,7 +31,7 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 from gi.repository import Gdk
 from gi.repository import Gtk
-from gi.repository import GObject
+from gi.repository import GLib
 import re
 import builtins
 import inspect
@@ -710,7 +710,7 @@ class Evaluator:
         def undisplay():
             self.statusbar.pop(cid)
             return False
-        GObject.timeout_add(4000, undisplay)
+        GLib.timeout_add(4000, undisplay)
 
     def key_pressed_cb(self, win, event):
         """Handle key press event.
