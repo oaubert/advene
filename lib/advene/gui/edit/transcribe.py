@@ -414,7 +414,7 @@ class TranscriptionEdit(AdhocView):
             return False
 
         if self.controller.player.is_playing():
-            self.insert_timestamp_mark(it=it)
+            self.insert_timestamp_mark(it=it.iter)
             return True
         return False
 
@@ -1247,7 +1247,7 @@ class TranscriptionEdit(AdhocView):
                         t=p.current_position_value
                     else:
                         t=p.current_position_value - self.options['delay']
-                    m, i=self.find_preceding_mark(it)
+                    m, i = self.find_preceding_mark(it)
                     if m is not None and m.value >= t:
                         pass
                     else:
