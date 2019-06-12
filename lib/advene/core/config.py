@@ -390,6 +390,7 @@ class Config(object):
             'application/x-advene-workspace-view',
             'application/x-advene-quicksearch',
             'application/x-advene-values',
+            'application/x-advene-structured',
             'application/json',
             )
 
