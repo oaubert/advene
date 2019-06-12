@@ -1186,16 +1186,30 @@ class TimeLine(AdhocView):
         return f
 
     def create_relation(self, source, dest, rt):
-        """Create the reation of type rt between source and dest.
+        """Create the relation of type rt between source and dest.
         """
-        # Get the id from the idgenerator
-        p=self.controller.package
-        id_=self.controller.package._idgenerator.get_id(Relation)
-        relation=p.createRelation(ident=id_,
-                                 members=(source, dest),
-                                 type=rt)
-        p.relations.append(relation)
-        self.controller.notify("RelationCreate", relation=relation)
+        p = self.controller.package
+
+        # If source or dest is part of a selection, then consider the whole.
+        sel = [ w.annotation for w in self.get_selected_annotation_widgets() ]
+        if source in sel:
+            sources = sel
+        else:
+            sources = [ source ]
+        if dest in sel:
+            dests = sel
+        else:
+            dests = [ dest ]
+
+        for s in sources:
+            for d in dests:
+                # Get the id from the idgenerator
+                id_ = self.controller.package._idgenerator.get_id(Relation)
+                relation = p.createRelation(ident=id_,
+                                            members=(s, d),
+                                            type=rt)
+                p.relations.append(relation)
+                self.controller.notify("RelationCreate", relation=relation)
         return True
 
     def create_annotation_type(self, *p):
