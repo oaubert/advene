@@ -97,7 +97,7 @@ class Completer:
         self.is_visible=False
 
     def show_completion_window(self, *p):
-        req = self.treeview.size_request()
+        req = self.treeview.get_preferred_size().natural_size
         width, height = req.width, req.height
         width = max(width, 180)
 
@@ -145,7 +145,8 @@ class Completer:
         """
         if isinstance(self.textview, Gtk.Entry):
             allocation = self.textview.get_allocation()
-            origin = self.textview.get_window().get_origin()
+            window = self.textview.get_window()
+            origin = window.get_origin()
             position_x, position_y = (origin.x + allocation.x, origin.y + allocation.y + allocation.height)
             cursor_x = 0
             cursor_y = 0
@@ -162,9 +163,15 @@ class Completer:
             position_x = origin.x + cursor_x
             position_y = origin.y + cursor_y + cursor_height
 
-        if position_x + width > Gdk.Screen.width():
+        monitor = self.textview.get_display().get_monitor_at_window(window)
+        geometry = monitor.get_geometry()
+        scale_factor = monitor.get_scale_factor()
+        screen_width = scale_factor * geometry.width
+        screen_height = scale_factor * geometry.height
+
+        if position_x + width > screen_width:
             position_x = origin.x + cursor_x - width
-        if position_y + height > Gdk.Screen.height():
+        if position_y + height > screen_height:
             position_y = origin.y + cursor_y - height
 
         #if not_(self.__signals_are_blocked):
