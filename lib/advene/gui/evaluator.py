@@ -35,7 +35,6 @@ from gi.repository import GLib
 import re
 import builtins
 import inspect
-import collections
 
 class Evaluator:
     """Evaluator window. Shortcuts:
@@ -443,14 +442,14 @@ class Evaluator:
                         obj, attr = m.group(1, 2)
                         try:
                             o=eval(obj, self.globals_, self.locals_)
-                        except Exception as e:
+                        except Exception:
                             self.log('\n\n[Unable to store data in %s.%s]'
                                      % (obj, attr))
                             return True
                         setattr(o, attr, res)
                         self.log('\n\n[Value stored in %s]' % symbol)
 
-        except Exception as e:
+        except Exception:
             f=io.StringIO()
             traceback.print_exc(file=f)
             self.clear_output()
