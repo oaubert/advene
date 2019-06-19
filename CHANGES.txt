@@ -1,3 +1,21 @@
+advene (3.7) unstable; urgency=medium
+
+  * Various bug fixes
+
+  * Implement WebAnnotationExporter (JSON-LD format). The current loaded package
+    can be exported through
+    http://localhost:1234/packages/advene/export/WebAnnotationExporter
+
+  * New content checker for empty contents
+
+  * Timeline view: create multiple relations by DNDing from/to a selection
+
+  * Note taking view:
+    - add the ability to specify custom prefix/suffix texts for timestamp marks
+    - allow to disable mark insertion on single/double click
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Wed, 19 Jun 2019 18:08:17 +0200
+
 advene (3.6) unstable; urgency=medium
 
   * New "Keyword list" annotation type
