@@ -33,6 +33,7 @@ import advene.core.config as config
 from advene.gui.edit.properties import EditWidget
 
 import advene.util.helper as helper
+from advene.util.tools import unescape_string
 
 from gettext import gettext as _
 
@@ -184,7 +185,7 @@ class TranscriptionView(AdhocView):
             self.options.update(cache)
             # Process special characters
             for c in ('representation', 'separator'):
-                self.options[c]=self.options[c].replace('\\n', '\n').replace('\\t', '\t')
+                self.options[c]=unescape_string(self.options[c])
             self.generate_buffer_content()
         return True
 

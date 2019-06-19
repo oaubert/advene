@@ -24,6 +24,7 @@ from advene.rules.elements import RegisteredAction
 
 import advene.model.tal.context
 import advene.util.helper as helper
+from advene.util.tools import unescape_string
 import textwrap
 from gi.repository import Gtk
 
@@ -256,8 +257,8 @@ class DefaultGUIActions:
 
         The parameters should have a 'message' key.
         """
-        message=self.parse_parameter(context, parameters, 'message', _("No message..."))
-        message=message.replace('\\n', '\n')
+        message = self.parse_parameter(context, parameters, 'message', _("No message..."))
+        message = unescape_string(message)
         self.gui.log (message)
         return True
 
@@ -338,7 +339,7 @@ class DefaultGUIActions:
         Displays a popup with an informational message.
         """
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
-        message=str(message).replace('\\n', '\n')
+        message=unescape_string(str(message))
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         duration=self.parse_parameter(context, parameters, 'duration', None)
@@ -356,7 +357,7 @@ class DefaultGUIActions:
         Displays a popup to ask for a text string.
         """
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
-        message=str(message).replace('\\n', '\n')
+        message=unescape_string(str(message))
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         destination=self.parse_parameter(context, parameters, 'destination', None)
@@ -417,11 +418,11 @@ class DefaultGUIActions:
             return True
 
         description=self.parse_parameter(context, parameters, 'description', _("Follow a link"))
-        description=description.replace('\\n', '\n')
+        description=unescape_string(description)
         description=textwrap.fill(description, config.data.preferences['gui']['popup-textwidth'])
 
         message=self.parse_parameter(context, parameters, 'message', _("Click to open the URL"))
-        message=str(message).replace('\\n', '\n')
+        message=unescape_string(str(message))
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         url=self.parse_parameter(context, parameters, 'url', 'string:http://advene.org/')
@@ -452,11 +453,11 @@ class DefaultGUIActions:
             return True
 
         description=self.parse_parameter(context, parameters, 'description', _("Make a choice"))
-        description=description.replace('\\n', '\n')
+        description=unescape_string(description)
         description=textwrap.fill(description, config.data.preferences['gui']['popup-textwidth'])
 
         message=self.parse_parameter(context, parameters, 'message', _("Click to go to another position"))
-        message=str(message).replace('\\n', '\n')
+        message=unescape_string(str(message))
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         position=self.parse_parameter(context, parameters, 'position', 0)
@@ -489,7 +490,7 @@ class DefaultGUIActions:
 
             description=self.parse_parameter(context,
                                              parameters, 'description', _("Make a choice"))
-            description=description.replace('\\n', '\n')
+            description=unescape_string(description)
             description=textwrap.fill(description,
                                       config.data.preferences['gui']['popup-textwidth'])
 
@@ -498,7 +499,7 @@ class DefaultGUIActions:
             for i in range(1, size+1):
                 message=self.parse_parameter(context, parameters,
                                              'message%d' % i, _("Choice %d") % i)
-                message=message.replace('\\n', '\n')
+                message=unescape_string(message)
                 message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
                 position=self.parse_parameter(context, parameters, 'position%d' % i, 0)
@@ -557,7 +558,7 @@ class DefaultGUIActions:
             return True
 
         message=self.parse_parameter(context, parameters, 'message', _("Choose the related annotation you want to visualise."))
-        message=message.replace('\\n', '\n')
+        message=unescape_string(message)
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         vbox=Gtk.VBox()

@@ -80,6 +80,7 @@ from advene.util.website_export import WebsiteExporter
 import advene.model.tal.context
 
 import advene.util.helper as helper
+from advene.util.tools import unescape_string
 import advene.util.importer
 from advene.util.exporter import get_exporter, register_exporter
 import xml.etree.ElementTree as ET
@@ -655,7 +656,7 @@ class AdveneController(object):
         # Replace standard \n/\t escape, because \ are parsed by shlex
         searched=searched.replace('\\n', '%n').replace('\\t', '%t')
         try:
-            words=[ w.replace('%n', "\n").replace('%t', "\t") for w in shlex.split(searched) ]
+            words=[ unescape_string(w) for w in shlex.split(searched) ]
         except ValueError:
             # Unbalanced quote. Just do a split along whitespace, the
             # user may be looking for a string with a quote and not

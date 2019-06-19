@@ -89,6 +89,7 @@ import advene.model.tal.context
 
 import advene.core.mediacontrol
 import advene.util.helper as helper
+from advene.util.tools import unescape_string
 import xml.etree.ElementTree as ET
 
 import advene.util.importer
@@ -1044,8 +1045,8 @@ class AdveneGUI(object):
         dialog.center_on_mouse(d)
         res=d.run()
         if res == Gtk.ResponseType.OK:
-            search = search_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
-            replace = replace_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            search = unescape_string(search_entry.get_text())
+            replace = unescape_string(replace_entry.get_text())
             count=0
             batch_id=object()
             for a in elements:

@@ -195,6 +195,14 @@ def title2id(t):
         res.append(c)
     return "".join(res)
 
+def unescape_string(s):
+    """Unescape special characters.
+
+    \n or %n for newline
+    \t or %t for tab
+    """
+    return s.replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+
 def unaccent(t):
     """Remove accents from a string.
     """
