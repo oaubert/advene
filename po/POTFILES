@@ -57,6 +57,7 @@
 ../lib/advene/core/webcherry.py
 ../lib/advene/core/controller.py
 ../lib/advene/plugins/featuredetect.py
+../lib/advene/plugins/webannotation_export.py
 ../lib/advene/plugins/dominantcolor.py
 ../lib/advene/plugins/ted.py
 ../lib/advene/plugins/cutter.py
@@ -83,11 +84,13 @@
 ../lib/advene/plugins/mpeg7.py
 ../lib/advene/plugins/cinelab.py
 ../lib/advene/plugins/owl_import.py
+../lib/advene/plugins/ada_rdflib_export.py
 ../lib/advene/player/gstreamer.py
 ../lib/advene/rules/actions.py
 ../lib/advene/rules/importer.py
 ../lib/advene/rules/elements.py
 ../lib/advene/util/helper.py
+../lib/advene/util/tools.py
 ../lib/advene/util/website_export.py
 ../lib/advene/util/exporter.py
 ../lib/advene/util/importer.py
