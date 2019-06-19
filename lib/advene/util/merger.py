@@ -633,7 +633,9 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
     if callback is None:
         callback = lambda n, l: logger.info(l)
 
-    logger.info(_("Merging %s into %s, producing %s") % (to_be_merged, refname, outputname))
+    logger.info(_("Merging %(sources)s into %(reference)s, producing %(output)s") % { "source": to_be_merged,
+                                                                                      "references": refname,
+                                                                                      "output": outputname })
 
     # Methods applied to destination elements to check if we want
     # really to execute the action. If the method returns False, then

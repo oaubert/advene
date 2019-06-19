@@ -175,8 +175,8 @@ class HPIImporter(GenericImporter):
                 if self.controller.get_snapshot(annotation=a, position=t).is_default:
                     missing_screenshots.add(t)
         if len(missing_screenshots) > 0:
-            unmet_requirements.append(_("%d / %d screenshots are missing. Wait for extraction to complete.") % (len(missing_screenshots),
-                                                                                                                3 * len(self.source_type.annotations)))
+            unmet_requirements.append(_("%(count)d / %(total)d screenshots are missing. Wait for extraction to complete.") % { "count": len(missing_screenshots),
+                                                                                                                               "total": 3 * len(self.source_type.annotations) })
         return unmet_requirements
 
     def iterator(self):
@@ -270,7 +270,8 @@ class HPIImporter(GenericImporter):
         progress = .2
         step = .8 / (len(concepts) or 1)
         self.progress(.2, _("Parsing %d results") % len(concepts))
-        logger.warn(_("Parsing %d results (level %f)") % (len(concepts), self.confidence))
+        logger.warn(_("Parsing %(count)d results (level %(confidence)f)") % { "count": len(concepts),
+                                                                              "confidence": self.confidence })
         for item in concepts:
             # Should not happen, since we pass the parameter to the server
             if item["confidence"] < minconf:

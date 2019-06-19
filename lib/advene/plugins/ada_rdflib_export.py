@@ -268,7 +268,8 @@ class AdArdflibExporter(GenericExporter):
             return g
         else:
             g.serialize(destination=filename, format=self.format)
-            logger.info(_("Wrote %d triples to %s"), len(g), filename)
+            logger.info(_("Wrote %(count)d triples to %(filename)s") % { "count": len(g),
+                                                                         "filename": filename })
             return ""
 
 if __name__ == "__main__":
