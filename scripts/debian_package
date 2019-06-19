@@ -37,3 +37,6 @@ gbp buildpackage
 
 # Once it is ok
 gbp tag --ignore-new
+
+# When tmp build is validated: use gbp push first from /tmp dir to
+# master dir, then from master dir to origin
