@@ -102,6 +102,7 @@ class TranscriptionEdit(AdhocView):
             'delay': config.data.reaction_time,
             # Marks will be automatically inserted it no keypress occurred in the 3 previous seconds.
             'automatic-mark-insertion-delay': 1500,
+            'insert-on-double-click': True,
             'insert-on-single-click': False,
             'autoscroll': True,
             'autoinsert': True,
@@ -150,7 +151,8 @@ class TranscriptionEdit(AdhocView):
         ew=EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
         ew.add_checkbox(_("Timestamp"), "timestamp", _("Click inserts timestamp marks"))
-        ew.add_checkbox(_("Insert on single-click"), 'insert-on-single-click', _("A single click will insert the mark (else a double click is needed)"))
+        ew.add_checkbox(_("Insert on double-click"), 'insert-on-double-click', _("A double click inserts the mark"))
+        ew.add_checkbox(_("Insert on single-click"), 'insert-on-single-click', _("A single click inserts the mark"))
         ew.add_checkbox(_("Play on scroll"), "play-on-scroll", _("Play the new position upon timestamp modification"))
         ew.add_checkbox(_("Generate empty annotations"), "empty-annotations", _("If checked, generate annotations for empty text"))
         ew.add_spin(_("Reaction time"), "delay", _("Reaction time (substracted from current player time, except when paused.)"), -5000, 5000)
@@ -395,8 +397,10 @@ class TranscriptionEdit(AdhocView):
 
         if self.options['insert-on-single-click']:
             t=Gdk.EventType.BUTTON_PRESS
-        else:
+        elif self.options['insert-on-double-click']:
             t=Gdk.EventType._2BUTTON_PRESS
+        else:
+            return False
         if not (event.button == 1 and event.type == t):
             return False
         textwin=textview.get_window(Gtk.TextWindowType.TEXT)
