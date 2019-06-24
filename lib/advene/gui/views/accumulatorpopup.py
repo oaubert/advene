@@ -101,9 +101,9 @@ class AccumulatorPopup(AdhocView):
             # Remove the last one
             self.undisplay(self.widgets[0][0])
         if timeout is not None and timeout != 0:
-            hidetime=time.time() * 1000 + int(timeout)
+            hidetime = time.time() * 1000 + int(timeout)
         else:
-            hidetime=None
+            hidetime = -1
 
         # Build a titled frame around the widget
         f=Gtk.Frame()
@@ -128,7 +128,7 @@ class AccumulatorPopup(AdhocView):
 
         self.lock.acquire()
         self.widgets.append( (widget, hidetime, f) )
-        if hidetime:
+        if hidetime >= 0:
             self.controller.register_usertime_action( hidetime,
                                                       lambda c, time: self.undisplay(widget))
         self.widgets.sort(key=operator.itemgetter(1))
