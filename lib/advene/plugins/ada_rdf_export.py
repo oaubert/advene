@@ -148,6 +148,9 @@ class AdARDFExporter(WebAnnotationExporter):
             return body
 
         if a.type.mimetype == 'text/x-advene-keyword-list':
+            if (a.content.mimetype != a.type.mimetype
+                and a.content.mimetype == 'text/plain'):
+                a.content.mimetype = a.type.mimetype
             keywords = a.content.parsed()
 
             def get_keyword_uri(kw):
@@ -166,7 +169,7 @@ class AdARDFExporter(WebAnnotationExporter):
                             body['ao:annotationValue'] = get_keyword_uri(kw)
                             num_value = keywords.get(kw, 'numeric_value')
                             if num_value is not None:
-                                body['ao:annotationNumericValue'] = num_value 
+                                body['ao:annotationNumericValue'] = num_value
                         else:
                             # Multiple values
                             body['ao:annotationValue'] = [ get_keyword_uri(kw) for kw in typedvalues.values ]
@@ -237,4 +240,3 @@ if __name__ == "__main__":
     }
     for s in samples.keys():
         print(s, "\n", list(keywords_to_struct(s.split(","))), "\n\n")
-
