@@ -176,6 +176,25 @@ class DurationChecker(FeatureChecker):
                                   if not a.fragment.duration ])
 
 @register_checker
+class TypeChecker(FeatureChecker):
+    name = "Type"
+    description = _("This table presents annotation whose content types does not match their type's content-type")
+    def build_widget(self):
+        self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, str))
+        self.table.columns['custom0'].props.title = 'content mimetype'
+        self.table.columns['custom1'].props.title = 'type mimetype'
+        return self.table.widget
+
+    def update_model(self, package=None):
+        def custom_data(a):
+            if a is None:
+                return (str, str)
+            else:
+                return (a.content.mimetype, a.type.mimetype)
+        self.table.set_elements([ a for a in self.controller.package.annotations
+                                  if a.content.mimetype != a.type.mimetype ], custom_data)
+
+@register_checker
 class EmptyContentChecker(FeatureChecker):
     name = "EmptyContent"
     description = _("This table presents the annotations that have an empty content.")
