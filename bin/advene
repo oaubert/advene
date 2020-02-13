@@ -107,10 +107,6 @@ if config.data.preferences['language']:
 
 logging.warning("%s run at %s on %s", config.data.version_string, time.strftime("%d/%m/%y %H:%M:%S %Z"), sys.platform)
 
-if config.data.os in ('linux', ) and 'DISPLAY' not in os.environ:
-    logging.error("The DISPLAY environment variable is not set. Cannot continue.")
-    sys.exit(1)
-
 # Maybe we are running from a pyinstaller version
 if not config.data.path['resources'].exists():
     maindir = Path(sys.executable).absolute().parent
@@ -242,6 +238,10 @@ Aborting.""", config.data.path[d])
         import advene.gui.util.initialconfig
         c = advene.gui.util.initialconfig.Config()
         c.main()
+
+    if config.data.os in ('linux', ) and 'DISPLAY' not in os.environ:
+        logging.error("The DISPLAY environment variable is not set. Cannot continue.")
+        sys.exit(1)
 
     import advene.gui.main
     gui = advene.gui.main.AdveneGUI()
