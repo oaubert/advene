@@ -652,7 +652,7 @@ class HTMLEditor(textview_class, HTMLParser):
                 txt=txt.lstrip()
             if tag in self.__block:
                 txt=txt.rstrip()
-            txt=txt.replace('\n', '<br>\n')
+            txt=txt.replace('\n', '<br/>\n')
             self._last_endtag=None
             fd.write(txt)
 
@@ -742,7 +742,7 @@ class HTMLEditor(textview_class, HTMLParser):
         self.dump_html(s)
         res=s.getvalue()
         s.close()
-        return res
+        return f'<div>{res}</div>'
 
     def _find_enclosing_marks(self, tagname, begin, end):
         """Return the iterators and marks corresponding to tagname in the begin-end selection.

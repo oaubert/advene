@@ -93,7 +93,7 @@ class AnnotationPlaceholder:
             'content': self.controller.get_title(self.annotation),
             'urlbase': self.controller.get_urlbase().rstrip('/'),
             }
-        data=[ """<span class="advene:annotation" advene:annotation="%s" advene:presentation="%s">""" % (self.annotation.id, ':'.join(self.presentation)) ]
+        data=[ """<div class="advene:annotation" advene:annotation="%s" advene:presentation="%s">""" % (self.annotation.id, ':'.join(self.presentation)) ]
 
         if 'link' in self.presentation:
             data.append("""<a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href="%(href)s">""" % d)
@@ -107,13 +107,13 @@ class AnnotationPlaceholder:
                 data.append("""<img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img>""" % d)
         elif 'timestamp' in self.presentation:
             # timestamp without snapshot or overlay
-            data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
+            data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br/>""" % d)
         elif 'content' in self.presentation:
             data.append("""<span tal:content="package/annotations/%(id)s/representation">%(content)s</span>""" % d)
         if 'link' in self.presentation:
             data.append('</a>')
 
-        data.append('</span>')
+        data.append('</div>')
 
         return "".join(data)
 
@@ -280,7 +280,7 @@ class AnnotationTypePlaceholder:
             'content': self.controller.get_title(self.annotationtype),
             'urlbase': self.controller.get_urlbase().rstrip('/'),
             }
-        data=[ """<span class="advene:annotationtype" advene:annotationtype="%s" advene:presentation="%s">""" % (self.annotationtype.id, ':'.join(self.presentation)) ]
+        data=[ """<div class="advene:annotationtype" advene:annotationtype="%s" advene:presentation="%s">""" % (self.annotationtype.id, ':'.join(self.presentation)) ]
 
         if 'list' in self.presentation:
             data.append("<ul>")
@@ -316,7 +316,7 @@ class AnnotationTypePlaceholder:
             data.append("""<span class="transcript" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted" tal:attributes="annotation-id a/id">
 <a title="Click to play the movie" tal:attributes="href a/player_url" tal:content="a/content/data"></a></span>""" % d)
 
-        data.append('</span>')
+        data.append('</div>')
         return "".join(data)
 
     def annotationtype_updated(self, context, target):
@@ -534,7 +534,7 @@ class HTMLContentHandler (ContentHandler):
                     i.connect('activate', (lambda it, ann, data: self.insert_annotation_content(data, ann, focus=True)), source, choice)
                     m.append(i)
                 m.show_all()
-                m.popup(None, None, None, 0, Gtk.get_current_event_time())
+                m.popup_at_pointer(None)
             return True
         elif targetType == config.data.target_type['annotation-type']:
             for uri in str(selection.get_data(), 'utf8').split('\n'):
@@ -552,7 +552,7 @@ class HTMLContentHandler (ContentHandler):
                     i.connect('activate', (lambda it, at, data: self.insert_annotationtype_content(data, at, focus=True)), source, choice)
                     m.append(i)
                 m.show_all()
-                m.popup(None, None, None, 0, Gtk.get_current_event_time())
+                m.popup_at_pointer(None)
             return True
         elif targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.get_data())
@@ -777,7 +777,7 @@ class HTMLContentHandler (ContentHandler):
                 i.connect('activate', lambda w, level: self.editor.apply_html_tag('h%d' % level), h)
                 m.append(i)
             m.show_all()
-            m.popup(None, i, None, 1, Gtk.get_current_event_time())
+            m.popup_at_pointer(None)
             return True
 
         tb=Gtk.Toolbar()
