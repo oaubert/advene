@@ -75,7 +75,7 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype'), metaclass
             mode = 'w'
         else:
             mode = 'wb'
-        with open(self.file_, mode, encoding='utf-8') as f:
+        with open(self.file_, mode) as f:
             f.write(data)
 
     def getMimetype(self):
@@ -196,7 +196,7 @@ class Resources(metaclass=auto_properties):
                 mode = 'w'
             else:
                 mode = 'wb'
-            with open(fname, mode, encoding='utf-8') as f:
+            with open(fname, mode) as f:
                 # Some content
                 f.write(item)
 
