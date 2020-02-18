@@ -76,7 +76,7 @@ class SoundPlayer:
 
         def eos_cb(b, m):
             if m.src == pipe:
-                pipe.set_state(Gst.State_NULL)
+                pipe.set_state(Gst.State.NULL)
 
         bus.connect('message::eos', eos_cb)
         pipe.set_state(Gst.State.PLAYING)
