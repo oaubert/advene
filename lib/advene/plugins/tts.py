@@ -23,7 +23,6 @@ from gettext import gettext as _
 import subprocess
 import os
 import signal
-import sys
 
 import advene.core.config as config
 from advene.rules.elements import RegisteredAction
@@ -347,8 +346,13 @@ class CustomTTSEngine(TTSEngine):
             self.close()
             self.language=lang
         try:
+            if config.data.os == 'win32':
+                import win32process
+                kw = { 'creationflags': win32process.CREATE_NO_WINDOW }
+            else:
+                kw = { 'preexec_fn': subprocess_setup }
             if self.prg_process is None:
-                self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, creationflags = CREATE_NO_WINDOW)
+                self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, **kw)
             self.prg_process.stdin.write((sentence + "\n").encode(config.data.preferences['tts-encoding'], 'ignore'))
         except OSError as e:
             self.controller.log("TTS Error: ", str(e.message).encode('utf8'))
@@ -388,8 +392,12 @@ class CustomArgTTSEngine(TTSEngine):
             self.close()
             self.language=lang
         try:
-            fse = sys.getfilesystemencoding()
-            subprocess.Popen(str(" ".join([self.prg_path, '-v', self.language, '"%s"' % (sentence.replace('\n',' ').replace('"', '') + "\n")])).encode(config.data.preferences['tts-encoding'], 'ignore'), creationflags = CREATE_NO_WINDOW)
+            if config.data.os == 'win32':
+                import win32process
+                kw = { 'creationflags': win32process.CREATE_NO_WINDOW }
+            else:
+                kw = { 'preexec_fn': subprocess_setup }
+            subprocess.Popen(str(" ".join([self.prg_path, '-v', self.language, '"%s"' % (sentence.replace('\n',' ').replace('"', '') + "\n")])).encode(config.data.preferences['tts-encoding'], 'ignore'), **kw)
         except OSError as e:
             try:
                 m = str(e.message)
