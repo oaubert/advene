@@ -69,6 +69,9 @@ class MontageRenderer(object):
             self.progress_cb(None)
 
     def duration_querier(self):
+        if self.pipeline is None:
+            self.progress_cb(None)
+            return True
         pos = self.pipeline.query_position(Gst.Format.TIME)[1] / self.total_duration
         if self.progress_cb:
             self.progress_cb(pos)
