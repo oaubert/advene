@@ -1077,11 +1077,6 @@ class AdveneGUI(object):
         if MontageRenderer is None:
             dialog.message_dialog(_("The video extracting feature is not available."))
             return True
-        if title is None:
-            title = _("Video export")
-        if label is None:
-            label = _("Exporting video montage/fragment to %%(filename)s")
-
         duration = helper.format_time(sum(a.fragment.duration for a in elements))
         filename = dialog.get_filename(title=_("Destination filename (duration: %s)") % duration,
                                        action=Gtk.FileChooserAction.SAVE,
@@ -1090,6 +1085,12 @@ class AdveneGUI(object):
                                        filter='video')
         if filename is None:
             return
+        if title is None:
+            title = _("Exporting to %s") % filename
+        if label is None:
+            label = _("Exporting %(duration)s video to\n%(filename)s") % { 'filename': filename,
+                                                                          'duration': duration }
+
         m = MontageRenderer(self.controller, elements)
 
         w = Gtk.Window()
