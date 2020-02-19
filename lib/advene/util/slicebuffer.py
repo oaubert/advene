@@ -138,8 +138,15 @@ if __name__ == '__main__':
     mainloop = gobject.MainLoop()
 
     files = [ a for a in sys.argv[1:] if not '=' in a ]
-    params = [ a for a in sys.argv[1:] if '=' in a ]
+    params = {}
+    for p in [ a for a in sys.argv[1:] if '=' in a ]:
+        name, value = p.split('=')
+        params[name] = value
 
+    # Possible parameters:
+    # width=pixel_width
+    # slicewidth=NNN
+    # offset=column_number
     if files:
         player=gst.element_factory_make('playbin')
         player.props.uri = 'file://' + files[0]
@@ -151,7 +158,7 @@ if __name__ == '__main__':
             gst.element_factory_make('slicebuffer', 'slicer'),
             gst.element_factory_make('capsfilter', 'capsfilter'),
             gst.element_factory_make('ffmpegcolorspace'),
-            gst.element_factory_make('xvimagesink'),
+            gst.element_factory_make('xvimagesink', 'videosink'),
             ]
         bin.add(*elements)
         gst.element_link_many(*elements)
@@ -159,13 +166,15 @@ if __name__ == '__main__':
 
         slicer = bin.get_by_name('slicer')
         capsfilter = bin.get_by_name('capsfilter')
-        for p in params:
-            name, value = p.split('=')
+        for name, value in params.iteritems():
             if name == 'width':
                 caps = gst.caps_from_string('video/x-raw-rgb,%s' % p)
                 capsfilter.set_property('caps', caps)
             else:
-                slicer.set_property(name, int(value))
+                if name in ('slicewidth', 'offset'):
+                    slicer.set_property(name, int(value))
+        videosink = bin.get_by_name('videosink')
+        videosink.set_property('sync', False)
         player.props.video_sink=bin
     else:
         player = gst.parse_launch('autovideosrc ! ffmpegcolorspace ! videoscale ! slicebuffer %s ! ffmpegcolorspace ! xvimagesink' % " ".join(params))
@@ -176,7 +185,7 @@ if __name__ == '__main__':
 
 
     def on_msg(bus, msg):
-        s = msg.get_structure()
+        s = msg.structure
         if s is None:
             return True
         if s.has_field('gerror'):
@@ -191,6 +200,14 @@ if __name__ == '__main__':
 
     logger.info("PLAYING")
     pipe.set_state (gst.STATE_PLAYING)
+
+    # Increase playing rate
+    if params['rate']:
+        event = gst.event_new_seek(int(params['rate']), gst.FORMAT_TIME,
+                                   gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
+                                   gst.SEEK_TYPE_SET, 0,
+                                   gst.SEEK_TYPE_NONE, 0)
+        res = pipe.send_event(event)
 
     try:
         mainloop.run()
