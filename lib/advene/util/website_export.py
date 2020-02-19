@@ -205,7 +205,7 @@ class WebsiteExporter(object):
 
             l=url.replace(self.controller.get_urlbase(), '')
 
-            if l.startswith('http:'):
+            if l.startswith('http:') or l.startswith('https:'):
                 # It is an external url
                 self.url_translation[url]=url
                 continue
