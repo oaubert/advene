@@ -313,8 +313,8 @@ class AnnotationTypePlaceholder:
 
 </table>""" % d)
         elif 'transcription' in self.presentation:
-            data.append("""<span class="transcript" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted" tal:attributes="annotation-id a/id">
-<a title="Click to play the movie" tal:attributes="href a/player_url" tal:content="a/content/data"></a></span>""" % d)
+            data.append("""<div class="transcript" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted" tal:attributes="annotation-id a/id">
+<a title="Click to play the movie" tal:attributes="href a/player_url" tal:content="a/content/data"></a></div>""" % d)
 
         data.append('</div>')
         return "".join(data)
