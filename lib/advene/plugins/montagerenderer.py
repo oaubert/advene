@@ -30,21 +30,25 @@ logger = logging.getLogger(__name__)
 from gettext import gettext as _
 
 import gi
-gi.require_version('GES', '1.0')
 gi.require_version('Gst', '1.0')
-gi.require_version('GstPbutils', '1.0')
 from gi.repository import GLib
 from gi.repository import Gst
-from gi.repository import GstPbutils
-from gi.repository import GES
-Gst.init([])
-GES.init()
+try:
+    gi.require_version('GstPbutils', '1.0')
+    gi.require_version('GES', '1.0')
+    from gi.repository import GstPbutils
+    from gi.repository import GES
+    Gst.init([])
+    GES.init()
+except ValueError:
+    GES = None
 
 import advene.core.config as config
 import advene.util.helper as helper
 
 def register(controller=None):
-    controller.register_generic_feature(shortname, MontageRenderer)
+    if GES is not None:
+        controller.register_generic_feature(shortname, MontageRenderer)
     return True
 
 class MontageRenderer(object):
