@@ -3253,6 +3253,11 @@ class TimeLine(AdhocView):
                                                    label=_("<b>Statistics about current selection</b>\n\n"))
             return True
 
+        def extract_video(m, sel):
+            self.controller.gui.render_montage_dialog(sorted([w.annotation for w in sel]),
+                                                      basename="selection.webm")
+            return True
+
         def select_range(m, sel, same_type=True):
             """Select annotations in the same range
             """
@@ -3294,6 +3299,7 @@ class TimeLine(AdhocView):
                 (_('Edit selected annotations'), self.selection_edit),
                 (_('Merge annotations'), self.selection_merge),
                 (_('Display statistics'), display_stats),
+                (_('Extract video'), extract_video),
                 ):
                 i=Gtk.MenuItem(label)
                 i.connect('activate', action, l)
