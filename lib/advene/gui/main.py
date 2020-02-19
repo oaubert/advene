@@ -1082,7 +1082,8 @@ class AdveneGUI(object):
         if label is None:
             label = _("Exporting video montage/fragment to %%(filename)s")
 
-        filename = dialog.get_filename(title=_("Please choose a destination filename"),
+        duration = helper.format_time(sum(a.fragment.duration for a in elements))
+        filename = dialog.get_filename(title=_("Destination filename (duration: %s)") % duration,
                                        action=Gtk.FileChooserAction.SAVE,
                                        button=Gtk.STOCK_SAVE,
                                        default_file = basename,
