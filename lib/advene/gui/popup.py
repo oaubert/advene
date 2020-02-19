@@ -446,16 +446,20 @@ class Menu:
                                controller=self.controller,
                                runner=runner_method)
 
-    def extract_fragment(self, m, ann):
-        """Extract the fragment corresponding to an annotation.
+    def extract_montage(self, m, elements):
+        """Extract the montage corresponding to annotation list
         """
-        title = self.controller.get_title(ann)
-        begin = helper.format_time(ann.fragment.begin)
-        end = helper.format_time(ann.fragment.end)
-        self.controller.gui.render_montage_dialog([ ann ],
-                                                  basename = ann.id + "-" + helper.title2id(title) + ".ogv",
-                                                  title = _("Extracting %s") % title,
-                                                  label = _("Exporting annotation %(title)s\nfrom %(begin)s to %(end)s\nto %%(filename)s") % locals())
+        ann = elements[0]
+        if len(elements) == 1:
+            basename = ann.id + "-" + helper.title2id(self.controller.get_title(ann)) + ".webm"
+        else:
+            atypes = set(a.type for a in elements)
+            if len(atypes) == 1:
+                # Single type - use its title for basename
+                basename = helper.title2id(ann.type) + '.webm'
+            else:
+                basename = 'montage.webm'
+        self.controller.gui.render_montage_dialog(elements, basename = basename)
         return True
 
     def common_submenu(self, element):
@@ -531,7 +535,7 @@ class Menu:
         menu.append(item)
         add_item(_("Save snapshot..."), save_snapshot, element)
         if 'montagerenderer' in self.controller.generic_features:
-            add_item(_("Extract video fragment"), self.extract_fragment, element)
+            add_item(_("Extract video fragment"), self.extract_montage, [ element ])
 
         def build_submenu(submenu, el, items):
             """Build the submenu for the given element.
@@ -756,6 +760,8 @@ class Menu:
         add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % element.id))
         add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations, source='here/annotationTypes/%s/annotations' % element.id))
         add_item(_('Export to another format...'), lambda i: self.controller.gui.export_element(element))
+        if 'montagerenderer' in self.controller.generic_features:
+            add_item(_("Extract video montage"), self.extract_montage, sorted(element.annotations))
         add_item(_('Split according to annotations'), lambda i: self.split_package_by_type(element))
         for imp in ( i for i in advene.util.importer.IMPORTERS if i.annotation_filter ):
             add_item(_("Apply %s..." % imp.name), self.filter_service, imp, element)
