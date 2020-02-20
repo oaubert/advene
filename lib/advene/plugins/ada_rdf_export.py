@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 from gettext import gettext as _
 
 from collections import namedtuple
+from urllib.parse import quote
 
 import advene.core.config as config
 from advene.plugins.webannotation_export import WebAnnotationExporter
@@ -155,6 +156,9 @@ class AdARDFExporter(WebAnnotationExporter):
 
             def get_keyword_uri(kw):
                 uri = keywords.get(kw, 'ontology_uri')
+                if uri is None:
+                    # Generate a dummy URI
+                    return f"http://www.advene.org/ns/_local/keyword/{quote(kw.replace(' ', '_'))}"
                 return uri
 
             keyword_struct = list(keywords_to_struct(list(keywords)))
