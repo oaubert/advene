@@ -1279,11 +1279,11 @@ class AdveneController(object):
                 mediafile = self.locate_mediafile(mediafile)
 
         # We should have a valid mediafile.
-        mediafile = helper.path2uri(mediafile)
-        package.setMedia(mediafile)
-        if mediafile != original_mediafile and original_mediafile in self.imagecache:
-            self.imagecache[mediafile] = self.imagecache[original_mediafile]
-        return mediafile
+        mediauri = helper.path2uri(mediafile)
+        package.setMedia(mediauri)
+        if mediauri != original_mediafile and original_mediafile in self.imagecache:
+            self.imagecache[mediauri] = self.imagecache[original_mediafile]
+        return mediauri
 
     def locate_mediafile(self, mediafile):
         """Locate the given media file.
