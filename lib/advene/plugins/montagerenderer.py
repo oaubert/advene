@@ -86,8 +86,7 @@ class MontageRenderer(object):
         self.progress_cb = progress_callback
 
         # FIXME: considering single-video for the moment
-        package = self.elements[0].ownerPackage
-        media_uri = package.getMetaData(config.data.namespace, "media_uri") or package.mediafile
+        media_uri = self.controller.get_default_media()
         media_uri = helper.path2uri(media_uri)
 
         logger.warning("Extracting clips from %s", media_uri)
