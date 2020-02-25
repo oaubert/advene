@@ -78,7 +78,7 @@ class WebAnnotationExporter(FlatJsonExporter):
     def export(self, filename=None):
         # Works if source is a package or a type
         package = self.source.ownerPackage
-        media_uri = package.getMetaData(config.data.namespace, "media_uri") or package.mediafile or "media_uri"
+        media_uri = package.getMetaData(config.data.namespace, "media_uri") or self.controller.get_default_media()
 
         data = {
             "@context": [ "http://www.w3.org/ns/anno.jsonld",

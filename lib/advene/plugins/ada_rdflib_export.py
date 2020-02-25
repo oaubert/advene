@@ -148,7 +148,7 @@ class AdArdflibExporter(GenericExporter):
         # Works in source is a package or a type
         package = self.source.ownerPackage
 
-        media_uri = package.getMetaData(config.data.namespace, "media_uri") or package.mediafile or package.uri
+        media_uri = package.getMetaData(config.data.namespace, "media_uri") or self.controller.get_default_media()
 
         # Get the namespace from the package metdata
         ontology = package.getMetaData(config.data.namespace, "ontology_uri")

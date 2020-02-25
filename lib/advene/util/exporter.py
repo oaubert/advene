@@ -333,7 +333,7 @@ class FlatJsonExporter(GenericExporter):
     def export(self, filename=None):
         # Works if source is a package or a type
         package = self.source.ownerPackage
-        media_uri = package.getMetaData(config.data.namespace, "media_uri") or package.mediafile or package.uri
+        media_uri = package.getMetaData(config.data.namespace, "media_uri") or self.controller.get_default_media()
 
         def flat_json(a):
             return {
