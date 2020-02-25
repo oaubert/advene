@@ -261,7 +261,7 @@ class TemplateExporter(GenericExporter):
         elif isinstance(filename, io.TextIOBase):
             # Use an intermediary BytesIO
             stream = io.BytesIO()
-        elif isinstance(filename, io.BytesIOBase):
+        elif isinstance(filename, io.BytesIO):
             stream = filename
         else:
             try:
@@ -298,7 +298,7 @@ class TemplateExporter(GenericExporter):
         elif isinstance(filename, io.TextIOBase):
             # Enforce UTF-8
             filename.write(stream.getvalue().encode('utf-8'))
-        elif isinstance(filename, io.BytesIOBase):
+        elif isinstance(filename, io.BytesIO):
             # Nothing to do: it is the responsibility of the caller to close the stream
             pass
         else:
