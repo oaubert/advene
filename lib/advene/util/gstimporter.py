@@ -104,7 +104,7 @@ class GstImporter(GenericImporter):
     def progress_message(self, progress, message):
         """Return a meaningful progress message
         """
-        return "Processed %d%% of the video"
+        return "Processed %d%% of the video - %s" % (100 * progress, message)
 
     #def process_frame(self, frame):
     #    """Frame process method
