@@ -2179,6 +2179,16 @@ class AdveneController(object):
             logger.error(_("Cannot load package: the following annotations do not have Millisecond fragments: %s"), ", ".join(l))
             return True
 
+        # Fix annotation content mimetype if it is different from its
+        # type mimetype.  This can happen when package schema is
+        # updated (importing a new template package for instance).
+        for a in p.annotations:
+            if (a.content.mimetype != a.type.mimetype and
+                # Do it only for compatible types
+                (a.content.mimetype.startswith('text/') and a.type.mimetype.startswith('text/'))):
+                logger.warning("Fixing %s mimetype to match its type", a.id)
+                a.content.mimetype = a.type.mimetype
+
         # Cache common fieldnames for structured content
         for at in p.annotationTypes:
             if at.mimetype.endswith('/x-advene-structured'):
