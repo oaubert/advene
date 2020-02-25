@@ -33,6 +33,33 @@ from advene.util.importer import GenericImporter
 from advene.util.tools import path2uri
 
 class GstImporter(GenericImporter):
+    """GstImporter - Gstreamer importer
+
+    This plugin implements a generic API for importing data from
+    Gstreamer pipelines. The imported data can be obtained either from
+    gstreamer elements' messages, or from the frames themselves.
+
+    The principle is to define your own processing pipeline, as a
+    parse_launch string, without specifying either source or sink
+    (which are setup by the plugin). You return this string by
+    overriding the setup_importer() method.
+
+    You can then either override `do_process_message` to get messages
+    from elements (and generate data from them), or implement the
+    `process_frame` method, which will then be called with the
+    processed frame (which can be anything - video, audio... -
+    depending on your pipeline) as parameter (python dict).
+
+    The `do_finalize` method can be defined to implement any necessary
+    postprocessing/cleanup. Since the `process_frame` should not take
+    too much time to execute, it is a good idea to buffer annotation
+    data, and call the `.convert` method only in the `do_finalize`
+    method.
+
+    You can see examples of usage in the `plugins.soundenveloppe`
+    plugin (for audio, using Gstreamer message metadata) and
+    `plugins.dominantcolor` (for video, using frame data).
+    """
     name = _("GStreamer generic importer")
 
     def __init__(self, *p, **kw):

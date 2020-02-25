@@ -16,8 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""
-Import external data.
+"""Import external data.
 =====================
 
 Provides a generic framework to import/convert external data.
@@ -43,10 +42,24 @@ The general idea is:
 
   - Conversion:
   Call
+
   ``im.process_file(filename)``
+
   which will return the package containing the converted annotations
 
+  OR
+
+  Use
+
+  ``im.async_process_file(filename, callback)``
+
+  which is an asynchronous version of the importer, which will return
+  immediately. When the import is complete, the callback function
+  passed as parameter will be invoked. Produced package can then be
+  accessed as ``ìm.package``
+
 im.statistics hold a dictionary containing the creation statistics.
+
 """
 
 import logging
