@@ -700,13 +700,17 @@ Available filters:
                "\n  * ".join(i.name for i in controller.advene.util.importer.IMPORTERS)))
         sys.exit(0)
 
+    def progress(value, label):
+        print('\rProgress %.0f%% - %s' % (value, label), end='', flush=True)
+        return True
+
     if filtername == 'auto':
-        i = get_importer(params[0], package=c.package, controller=c)
+        i = get_importer(params[0], package=c.package, controller=c, callback=progress)
     else:
         i = None
         cl = [ f for f in controller.advene.util.importer.IMPORTERS if f.name.startswith(filtername) ]
         if len(cl) == 1:
-            i = cl[0](package=c.package, controller=c)
+            i = cl[0](package=c.package, controller=c, callback=progress)
         elif len(cl) > 1:
             logger.error("Too many possibilities:\n%s", "\n".join(f.name for f in cl))
             sys.exit(1)
@@ -727,10 +731,32 @@ Available filters:
         outputfile = ''
     # (for .sub conversion for instance, --fps, --offset)
     logger.info("Converting %s to %s using %s", inputfile, outputfile, i.name)
-    p = i.process_file(inputfile)
-    if outputfile:
-        p.save(outputfile)
+
+    def json_serialize(p):
+        from advene.util.exporter import FlatJsonExporter
+        e = FlatJsonExporter(controller=c)
+        e.set_source(p)
+        e.export('-')
+    if hasattr(i, 'async_process_file'):
+        # async mode
+
+        from gi.repository import GLib
+        mainloop = GLib.MainLoop()
+        def end_callback():
+            if outputfile:
+                logger.info("Saving package to %s", outputfile)
+                i.package.save(outputfile)
+            else:
+                json_serialize(i.package)
+            mainloop.quit()
+            return True
+        i.async_process_file(inputfile, end_callback)
+        mainloop.run()
     else:
-        p.serialize()
-    logger.info(i.statistics_formatted())
+        p = i.process_file(inputfile)
+        if outputfile:
+            p.save(outputfile)
+        else:
+            json_serialize(p)
+        logger.info(i.statistics_formatted())
     sys.exit(0)
