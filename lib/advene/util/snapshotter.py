@@ -29,7 +29,6 @@ snapshotter.py file://uri/to/movie/file.avi 1200 2400 4600
 
 This will capture snapshots for the given timestamps (in ms) and save them into /tmp.
 """
-import sys
 
 import gi
 gi.require_version('Gst', '1.0')
@@ -38,9 +37,11 @@ from gi.repository import GObject, GLib, GstBase, Gst
 GObject.threads_init()
 Gst.init(None)
 
-from threading import Event, Thread
-import queue
 import heapq
+import queue
+import struct
+import sys
+from threading import Event, Thread
 
 import logging
 logger = logging.getLogger(__name__)
@@ -104,14 +105,9 @@ class NotifySink(GstBase.BaseSink):
             pos = self.query_position(Gst.Format.TIME)[1]
             res = {
                 'data': bytes(mapinfo.data),
-                'type': 'PNG',
                 'date': pos / Gst.MSECOND,
                 'pts': buffer.pts / Gst.MSECOND,
-                # Hardcoded size values. They are not used
-                # by the application, since they are
-                # encoded in the PNG file anyway.
-                'width': 160,
-                'height': 100 }
+            }
         buffer.unmap(mapinfo)
         return res
 
@@ -331,7 +327,7 @@ class Snapshotter(object):
             self.should_clear = True
         return True
 
-    def queue_notify(self, struct):
+    def queue_notify(self, frame):
         """Notification method.
 
         It processes the captured buffer and unlocks the
@@ -339,8 +335,16 @@ class Snapshotter(object):
         """
         if self.notify is not None:
             # Add media info to the structure
-            struct['media'] = self.get_uri()
-            self.notify(struct)
+            data = frame['data']
+            if data[:8] == b'\x89PNG\r\n\x1a\n'and data[12:16] == b'IHDR':
+                w, h = struct.unpack('>LL', data[16:24])
+                frame['media'] = self.get_uri()
+                frame['type'] = 'PNG'
+                frame['width'] = int(w)
+                frame['height'] = int(h)
+                self.notify(frame)
+            else:
+                logger.error("Invalid PNG data in snapshot output", data)
         # We are ready to process the next snapshot
         self.snapshot_ready.set()
         return True
