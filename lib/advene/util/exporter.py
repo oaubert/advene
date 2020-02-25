@@ -33,6 +33,7 @@ import io
 import json
 import os
 from simpletal import simpleTAL, simpleTALES
+import sys
 
 if __name__ != '__main__':
     import advene.core.config as config
@@ -212,6 +213,10 @@ class GenericExporter(object):
                 self.serialize(data, buf)
                 filename.write(buf.encode('utf-8'))
             return ""
+        elif filename == '-':
+            # Export to stdout
+            self.serialize(data, sys.stdout)
+            return ""
         else:
             with open(filename, 'wt', encoding='utf-8') as fd:
                 self.serialize(data, fd)
@@ -373,8 +378,6 @@ if __name__ != "__main__":
     init_templateexporters()
 
 if __name__ == "__main__":
-    import sys
-
     logging.basicConfig(level=logging.DEBUG)
     USAGE = "%prog filter_name input_file [options] output_file"
     if sys.argv[1:]:
