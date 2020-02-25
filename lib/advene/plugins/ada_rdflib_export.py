@@ -42,7 +42,7 @@ from advene.util.exporter import GenericExporter
 
 def register(controller=None):
     if rdflib is None:
-        logger.warn("rdflib module is not available. AdARDFExporter plugin is disabled.")
+        logger.warning("rdflib module is not available. AdARDFExporter plugin is disabled.")
     else:
         controller.register_exporter(AdArdflibExporter)
     return True
@@ -188,7 +188,7 @@ class AdArdflibExporter(GenericExporter):
             if not type_uri:
                 # Report only once by type
                 if a.type not in not_part_of_ontology:
-                    logger.warn(_("Cannot determine ontology URI for type %s"), self.controller.get_title(a.type))
+                    logger.warning(_("Cannot determine ontology URI for type %s"), self.controller.get_title(a.type))
                     not_part_of_ontology.add(a.type)
                 # Just ignore this annotation
                 continue
@@ -226,7 +226,7 @@ class AdArdflibExporter(GenericExporter):
 
                 for typedvalues in keywords_to_struct(list(keywords)):
                     if typedvalues is None:
-                        logger.warn("Empty typedvalues for %s", keywords)
+                        logger.warning("Empty typedvalues for %s", keywords)
                         continue
                     body = new_body(value_type_mapping[typedvalues.type])
 

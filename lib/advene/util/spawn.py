@@ -82,14 +82,14 @@ class ProcessLauncher:
         try:
             signal.signal(signal.SIGCHLD, self.sigchld)
         except ValueError:
-            logger.warn("Strange ValueError", exc_info=True)
+            logger.warning("Strange ValueError", exc_info=True)
             # FIXME: we should investigate this rather than ignore it.
             pass
         return True
 
     def sigchld(self, sig, stack_frame):
         (pid, status)=os.wait()
-        logger.warn("Caught child %d", pid)
+        logger.warning("Caught child %d", pid)
         return True
 
     def start (self, args=None):

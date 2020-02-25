@@ -379,7 +379,7 @@ def import_element(package, element, controller, notify=True):
         if notify:
             controller.notify("QueryCreate", query=q)
     else:
-        logger.warn("Import element of class %s not supported yet." % element.viewableClass)
+        logger.warning("Import element of class %s not supported yet." % element.viewableClass)
 
 def unimport_element(package, element, controller, notify=True):
     p=package
@@ -404,7 +404,7 @@ def unimport_element(package, element, controller, notify=True):
         if notify:
             controller.notify("QueryDelete", query=element)
     else:
-        logger.warn("%s Not supported yet.", element.viewableClass)
+        logger.warning("%s Not supported yet.", element.viewableClass)
 
 def get_statistics(fname):
     """Return formatted statistics about the package.

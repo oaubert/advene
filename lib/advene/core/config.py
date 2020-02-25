@@ -566,7 +566,7 @@ class Config(object):
         self.options = parser.parse_args()
         self.args = self.options.positional_args
         if self.options.version:
-            logger.warn(self.get_version_string())
+            logger.warning(self.get_version_string())
             sys.exit(0)
         if self.options.info:
             logging.getLogger().setLevel(logging.INFO)

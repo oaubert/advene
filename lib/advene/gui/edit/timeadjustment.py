@@ -213,7 +213,7 @@ class TimeAdjustment:
             v=int(float(data['timestamp']))
             self.set_value(v)
         else:
-            logger.warn("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d" % targetType)
         return True
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
@@ -239,7 +239,7 @@ class TimeAdjustment:
 
     def update_snapshot(self, button):
         # FIXME: to implement
-        logger.warn("Not implemented yet.")
+        logger.warning("Not implemented yet.")
         pass
 
     def convert_entered_value(self, *p):

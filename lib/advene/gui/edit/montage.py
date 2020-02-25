@@ -283,7 +283,7 @@ class Montage(AdhocView):
                 self.refresh()
                 return True
             else:
-                logger.warn("Unknown target type for drag: %d" % targetType)
+                logger.warning("Unknown target type for drag: %d" % targetType)
             return False
 
         b = Gtk.Button()
@@ -393,7 +393,7 @@ class Montage(AdhocView):
                         self.refresh()
                 return True
             else:
-                logger.warn("Unknown target type for drop: %d" % targetType)
+                logger.warning("Unknown target type for drop: %d" % targetType)
             return False
 
         self.zoom_adjustment.connect('value-changed', zoom_adj_change)
@@ -527,7 +527,7 @@ class Montage(AdhocView):
                 self.refresh()
                 return True
             else:
-                logger.warn("Unknown target type for drag: %d" % targetType)
+                logger.warning("Unknown target type for drag: %d" % targetType)
             return False
         v.drag_dest_set(Gtk.DestDefaults.MOTION |
                                    Gtk.DestDefaults.HIGHLIGHT |

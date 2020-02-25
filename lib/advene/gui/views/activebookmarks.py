@@ -640,7 +640,7 @@ class ActiveBookmarks(AdhocView):
                 self.refresh()
                 return True
             else:
-                logger.warn("Unknown target type for drop: %d" % targetType)
+                logger.warning("Unknown target type for drop: %d" % targetType)
                 return False
 
         self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |

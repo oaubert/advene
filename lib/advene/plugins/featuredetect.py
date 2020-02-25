@@ -103,7 +103,7 @@ class FeatureDetectImporter(GenericImporter):
         ret, frame = video.read()
         width, height, depth = frame.shape
         scaled_width, scaled_height = int(width / self.scale), int(height / self.scale)
-        logger.warn("Video dimensions %dx%d - scaled to %dx%d", width, height, scaled_width, scaled_height)
+        logger.warning("Video dimensions %dx%d - scaled to %dx%d", width, height, scaled_width, scaled_height)
 
         cascade = cv2.CascadeClassifier(config.data.advenefile( ('haars', self.classifier + '.xml') ))
         count = 0

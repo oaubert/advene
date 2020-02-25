@@ -161,4 +161,4 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     l = PluginCollection('plugins')
     for p in l:
-        logger.warn("%s : %s", p, ",".join([ str(c) for c in p._classes ]))
+        logger.warning("%s : %s", p, ",".join([ str(c) for c in p._classes ]))

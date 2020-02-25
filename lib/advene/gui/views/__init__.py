@@ -132,7 +132,7 @@ class AdhocView(object):
         if self.controller:
             self.controller.log(m, level)
         else:
-            logger.warn(m)
+            logger.warning(m)
 
     def set_label(self, label):
         self._label=label
@@ -528,7 +528,7 @@ class AdhocViewParametersParser:
             # File-like object
             self.parse_file(source)
         else:
-            logger.warn("Do not know what to do with %s", source)
+            logger.warning("Do not know what to do with %s", source)
 
     def parse_file(self, fd):
         tree=ET.parse(fd)
@@ -551,4 +551,4 @@ class AdhocViewParametersParser:
                 value=urllib.parse.unquote(e.attrib['value'])
                 self.arguments.append( (name, value) )
             else:
-                logger.warn("Unknown tag %s in AdhocViewParametersParser %s", e.tag)
+                logger.warning("Unknown tag %s in AdhocViewParametersParser %s", e.tag)

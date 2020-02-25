@@ -43,7 +43,7 @@ class RelationView:
         return True
 
     def activate(self, button):
-        logger.warn("Relation %s activated %s", self.relation.id)
+        logger.warning("Relation %s activated %s", self.relation.id)
         if self.controller:
             self.controller.notify("RelationActivate", relation=self.relation)
         return True
@@ -89,7 +89,7 @@ class RelationsBox:
         return vbox
 
     def debug_cb (self, widget, data=None):
-        logger.warn("Debug event: %s", data or "No data")
+        logger.warning("Debug event: %s", data or "No data")
         return True
 
     def get_widget_for_relation (self, relation):
@@ -166,14 +166,14 @@ class RelationsBox:
             elif event == 'RelationDelete':
                 b.destroy()
             else:
-                logger.warn("Unknown event %s", event)
+                logger.warning("Unknown event %s", event)
         return True
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.get_target(), 8, widget.annotation.uri.encode('utf8'))
         else:
-            logger.warn("Unknown target type for drag: %d" % targetType)
+            logger.warning("Unknown target type for drag: %d" % targetType)
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
@@ -197,5 +197,5 @@ class RelationsBox:
             #     # FIXME...
             #     rel=self.package.createRelation(chosen_relation, members=(source, dest))
         else:
-            logger.warn("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d" % targetType)
         return True

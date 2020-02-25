@@ -480,7 +480,7 @@ def uri2path(uri):
         # We probably have a windows path
         return uri
     else:
-        logger.warn("No local path for %s", uri)
+        logger.warning("No local path for %s", uri)
         return ""
 
 def is_uri(uri):

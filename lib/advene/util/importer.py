@@ -128,10 +128,10 @@ def get_importer(fname, **kw):
     valid, invalid=get_valid_importers(fname)
     i=None
     if len(valid) == 0:
-        logger.warn("No valid importer")
+        logger.warning("No valid importer")
     else:
         if len(valid) > 1:
-            logger.warn("Multiple importers: %s. Using first one.", str(valid))
+            logger.warning("Multiple importers: %s. Using first one.", str(valid))
         i=valid[0](**kw)
     return i
 
@@ -290,7 +290,7 @@ class GenericImporter(object):
         if self.controller is not None:
             self.controller.log(*p)
         else:
-            logger.warn(" ".join(p))
+            logger.warning(" ".join(p))
 
     def update_statistics(self, elementtype):
         self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
@@ -619,7 +619,7 @@ class ExternalAppImporter(GenericImporter):
            try:
               self.process.terminate()
            except:
-              logger.warn("Cannot terminate application", exc_info=True)
+              logger.warning("Cannot terminate application", exc_info=True)
         self.process = None
 
         for r in self.temporary_resources:

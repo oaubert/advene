@@ -186,7 +186,7 @@ class AdAOWLImporter(GenericImporter):
                 colors = list(graph.objects(atnode, AO.adveneColorCode))
                 if colors:
                     if len(colors) > 1:
-                        logger.warn("Multiple colors defined for %s. Using first one.", at_id)
+                        logger.warning("Multiple colors defined for %s. Using first one.", at_id)
                     color = colors[0]
                     at.setMetaData(config.data.namespace, "color", "string:%s" % color)
 
@@ -199,7 +199,7 @@ class AdAOWLImporter(GenericImporter):
                     numeric_values = list(graph.objects(v[0], AO.annotationNumericValue))
                     if numeric_values:
                         if len(numeric_values) > 1:
-                            logger.warn("Multiple numeric values defined for %s. Using first one.", v[1])
+                            logger.warning("Multiple numeric values defined for %s. Using first one.", v[1])
                         value_metadata['numeric_value'] = numeric_values[0].value
                     metadata[v[1]] = value_metadata
                 at.setMetaData(config.data.namespace, "value_metadata", json.dumps(metadata))

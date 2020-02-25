@@ -36,7 +36,7 @@ from advene.util.importer import GenericImporter
 
 def register(controller=None):
     if nltk is None:
-        logger.warn("nltk module is not available. Keyword extract plugin is disabled.")
+        logger.warning("nltk module is not available. Keyword extract plugin is disabled.")
     else:
         controller.register_importer(KeywordImporter)
     return True
@@ -86,7 +86,7 @@ class KeywordImporter(GenericImporter):
         """I iterate over the created annotations.
         """
         rake = RakeKeywordExtractor()
-        logger.warn("Detection keywords")
+        logger.warning("Detection keywords")
         self.source_type = self.controller.package.get_element_by_id(self.source_type_id)
         minconf = self.confidence
 

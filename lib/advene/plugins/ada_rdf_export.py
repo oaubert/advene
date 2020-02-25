@@ -123,7 +123,7 @@ class AdARDFExporter(WebAnnotationExporter):
         if not type_uri:
             # Report only once by type
             if a.type not in self.not_part_of_ontology:
-                logger.warn(_("Cannot determine ontology URI for type %s"), self.controller.get_title(a.type))
+                logger.warning(_("Cannot determine ontology URI for type %s"), self.controller.get_title(a.type))
                 self.not_part_of_ontology.add(a.type)
             # Just ignore this annotation
             return None
@@ -185,7 +185,7 @@ class AdARDFExporter(WebAnnotationExporter):
             if not bodies:
                 # Could not parse correctly.
                 msg = "Could not parse keywords %s for annotation %s" % (keywords, a.uri)
-                logger.warn(msg)
+                logger.warning(msg)
                 body = new_body(btype="oa:TextualBody")
                 body['value'] = a.content.data
                 body['advene:ERROR'] = msg

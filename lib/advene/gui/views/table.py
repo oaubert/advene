@@ -429,7 +429,7 @@ class AnnotationTable(AdhocView):
                                                                for e in els
                                                                if isinstance(e, Annotation) ).encode('utf8'))
         else:
-            logger.warn("Unknown target type for drag: %d" % targetType)
+            logger.warning("Unknown target type for drag: %d" % targetType)
         return True
 
     def get_selected_nodes(self, with_path=False):

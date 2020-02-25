@@ -32,7 +32,7 @@ from sys import getsizeof
 # We should use the logging API, but some packages (like objgraph)
 # take an open file as parameter, so let's accomodate this
 DEBUGFILENAME = '/tmp/advene-debug-%s.log' % datetime.datetime.now().isoformat()[:19]
-logger.warn("Logging additional debug information to %s" % DEBUGFILENAME)
+logger.warning("Logging additional debug information to %s" % DEBUGFILENAME)
 DEBUGFILE = open(DEBUGFILENAME, 'w')
 
 def debug_log(*args):
@@ -84,7 +84,7 @@ def log_global_memory_usage():
     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     if mem != last_mem:
         debug_log("Memory usage: %s" % mem)
-        logger.warn("Memory usage: %s" % mem)
+        logger.warning("Memory usage: %s" % mem)
         last_mem = mem
 
 last_imagecache_size = None

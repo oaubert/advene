@@ -75,7 +75,7 @@ class AnnotationPlaceholder:
             aid=attr['advene:annotation']
             self.annotation=self.controller.package.get_element_by_id(aid)
             if self.annotation is None:
-                logger.warn("Problem: non-existent annotation %s", aid)
+                logger.warning("Problem: non-existent annotation %s", aid)
             self.refresh()
             return self.pixbuf, self.process_enclosed_tags
         return None, None
@@ -264,7 +264,7 @@ class AnnotationTypePlaceholder:
             aid=attr['advene:annotationtype']
             self.annotationtype = self.controller.package.get_element_by_id(aid)
             if self.annotationtype is None:
-                logger.warn("Problem: non-existent annotation type %s", aid)
+                logger.warning("Problem: non-existent annotation type %s", aid)
             self.refresh()
             return self.pixbuf, self.process_enclosed_tags
         return None, None
@@ -561,7 +561,7 @@ class HTMLContentHandler (ContentHandler):
             self.editor.get_buffer().insert_at_cursor(helper.format_time(t))
             return True
         else:
-            logger.warn("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d" % targetType)
         return False
 
     def class_parser(self, tag, attr):
@@ -701,7 +701,7 @@ class HTMLContentHandler (ContentHandler):
                                                   int(event.y))
         it=textview.get_iter_at_location(x, y)
         if it is None:
-            logger.warn("Error in get_iter_at_location")
+            logger.warning("Error in get_iter_at_location")
             return False
         ctx=self.editor.get_current_context(it.iter)
         if not ctx:

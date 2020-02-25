@@ -896,7 +896,7 @@ class TimeLine(AdhocView):
     def snapshot_update_handler(self, context, parameters):
         if context.globals['media'] != self.controller.package.media:
             # Not the active package.
-            logger.warn("no current media %s %s", context.globals['media'], self.controller.package.media)
+            logger.warning("no current media %s %s", context.globals['media'], self.controller.package.media)
             return True
         pos=int(context.globals['position'])
         precision=int(self.scale_layout.step / 2)
@@ -1075,7 +1075,7 @@ class TimeLine(AdhocView):
         elif event == 'AnnotationDelete':
             self.delete_annotation_widget(annotation)
         else:
-            logger.warn("Unknown event %s" % event)
+            logger.warning("Unknown event %s" % event)
         return True
 
     def update_annotationtype(self, annotationtype=None, event=None):
@@ -1164,7 +1164,7 @@ class TimeLine(AdhocView):
             for k in ('begin', 'end'):
                 new[k]=getattr(dest.fragment, k)
         else:
-            logger.warn("Unknown drag mode: %s" % mode)
+            logger.warning("Unknown drag mode: %s" % mode)
 
 
         if new['begin'] < new['end']:
@@ -1327,7 +1327,7 @@ class TimeLine(AdhocView):
             self.controller.notify('AnnotationEditEnd', annotation=a)
             self.controller.notify('EditSessionEnd', element=a)
         else:
-            logger.warn("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d" % targetType)
         return True
 
     def move_or_copy_annotations(self, sources, dest, position=None, action=Gdk.DragAction.ASK):
@@ -1671,7 +1671,7 @@ class TimeLine(AdhocView):
             # Create an annotation with the timestamp as begin
             self.controller.create_annotation(begin, widget.annotationtype, content=content)
         else:
-            logger.warn("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d" % targetType)
         return True
 
     def new_annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
@@ -1988,7 +1988,7 @@ class TimeLine(AdhocView):
             logger.debug("create_annotation_widget for %s", annotation.id, stack_info=False)
         b = self.get_widget_for_annotation(annotation)
         if b is not None:
-            logger.warn("There is already 1 representation for annotation %s", annotation.id)
+            logger.warning("There is already 1 representation for annotation %s", annotation.id)
             return b
 
         b = AnnotationWidget(annotation=annotation, container=self)
@@ -2434,7 +2434,7 @@ class TimeLine(AdhocView):
                 # Create an annotation of type typ with the timestamp as begin
                 self.controller.create_annotation(begin, typ, content=content)
         else:
-            logger.warn("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d" % targetType)
         return False
 
     def scale_layout_button_press_cb(self, widget=None, event=None):
@@ -3538,7 +3538,7 @@ class TimeLine(AdhocView):
                     self.annotationtypes_selection = self.annotationtypes
                     self.update_model(partial_update=True)
             else:
-                logger.warn('Unknown target type for drop: %d' % targetType)
+                logger.warning('Unknown target type for drop: %d' % targetType)
             return True
 
         b=Gtk.ToolButton(stock_id=Gtk.STOCK_SELECT_COLOR)
@@ -3732,7 +3732,7 @@ class TimeLine(AdhocView):
                 path=r.get_path()
                 if path is None:
                     # Should not happen...
-                    logger.warn('Strange state in selection transfer...')
+                    logger.warning('Strange state in selection transfer...')
                     continue
                 it=store.get_iter(path)
                 # Add el to dest

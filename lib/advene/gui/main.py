@@ -966,7 +966,7 @@ class AdveneGUI(object):
             if computed is None:
                 dialog.message_dialog(_("Checksum was cancelled."))
                 return True
-            logger.warn("Checksum: stored %s - computed %s" % (stored, computed))
+            logger.warning("Checksum: stored %s - computed %s" % (stored, computed))
             if stored:
                 if stored != computed:
                     if dialog.message_dialog(_("The %s checksum does not match the information that was stored in the package. You should check that the file is appropriate. Do you want to update the stored checksum?") % name,
@@ -2215,7 +2215,7 @@ class AdveneGUI(object):
         return True
 
     def debug_cb(self, *p):
-        logger.warn(" / ".join(str(i) for i in p))
+        logger.warning(" / ".join(str(i) for i in p))
         return False
 
     def init_window_size(self, window, name):
@@ -2744,7 +2744,7 @@ class AdveneGUI(object):
             try:
                 view=get_edit_popup(element, self.controller)
             except TypeError:
-                logger.warn(_("Error: unable to find an edit popup for %(element)s") % {
+                logger.warning(_("Error: unable to find an edit popup for %(element)s") % {
                     'element': str(element) })
                 view=None
             if view is not None and view.widget.get_parent() is not None:

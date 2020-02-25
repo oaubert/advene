@@ -211,7 +211,7 @@ class EditRuleSet(EditGeneric):
             return True
 
         else:
-            logger.warn("Unknown target type for drag: %d" % targetType)
+            logger.warning("Unknown target type for drag: %d" % targetType)
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
@@ -231,7 +231,7 @@ class EditRuleSet(EditGeneric):
             rule.name = name
             self.add_rule(rule)
         else:
-            logger.warn("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d" % targetType)
         return True
 
 
@@ -451,7 +451,7 @@ class EditRule(EditGeneric):
         if targetType == config.data.target_type['rule']:
             selection.set(selection.get_target(), 8, self.model.xml_repr().encode('utf8'))
         else:
-            logger.warn("Unknown target type for drag: %d" % targetType)
+            logger.warning("Unknown target type for drag: %d" % targetType)
         return True
 
     def invalid_items(self):

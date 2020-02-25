@@ -270,7 +270,7 @@ class HTMLEditor(textview_class, HTMLParser):
             l=re.findall('http-equiv.+content-type.+charset=([\w\d-]+)', txt)
             if l:
                 charset=l[0]
-                logger.warn("Detected %s charset")
+                logger.warning("Detected %s charset")
             else:
                 charset='utf-8'
             try:

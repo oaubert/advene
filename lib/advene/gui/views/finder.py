@@ -110,7 +110,7 @@ class DetailedTreeModel(object):
         self.virtual['adhoc']   = VirtualNode(_("Adhoc views"),   package)
 
     def nodeParent (self, node):
-        #logger.warn("nodeparent %s", node)
+        #logger.warning("nodeparent %s", node)
         if isinstance (node, Annotation):
             parent = node.type
         elif isinstance (node, Relation):
@@ -146,7 +146,7 @@ class DetailedTreeModel(object):
         return parent
 
     def nodeChildren (self, node):
-        #logger.warn("nodechildren %s %s", type(node), node)
+        #logger.warning("nodechildren %s %s", type(node), node)
         children = []
         if isinstance (node, Annotation):
             children = []
@@ -580,7 +580,7 @@ class ViewColumn(FinderColumn):
                 url=c.evaluateValue('here/view/%s/absolute_url' % self.element.id)
                 self.controller.open_url(url)
             except:
-                logger.warn("Cannot open static view: error when trying to get its url", exc_info=True)
+                logger.warning("Cannot open static view: error when trying to get its url", exc_info=True)
         elif t == 'dynamic':
             self.controller.activate_stbv(self.element)
         elif t == 'adhoc':
@@ -619,7 +619,7 @@ class ViewColumn(FinderColumn):
                             } ).encode('utf8'))
                 return True
             else:
-                logger.warn("Unknown target type for drag: %d" % targetType)
+                logger.warning("Unknown target type for drag: %d" % targetType)
             return True
 
         b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,

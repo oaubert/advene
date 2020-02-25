@@ -98,7 +98,7 @@ class GstImporter(GenericImporter):
         if s is None:
             return True
         title, message = message.parse_warning()
-        logger.warn("%s: %s", title, message)
+        logger.warning("%s: %s", title, message)
         return True
 
     def do_process_message(self, message):

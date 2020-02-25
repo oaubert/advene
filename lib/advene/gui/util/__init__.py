@@ -341,7 +341,7 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
     elif targetType in (typ['text-plain'], typ['STRING']):
         selection.set(selection.get_target(), 8, controller.get_title(el).encode('utf8'))
     else:
-        logger.warn("Unknown target type for drag: %d" % targetType)
+        logger.warning("Unknown target type for drag: %d" % targetType)
     return True
 
 def contextual_drag_begin(widget, context, element, controller):
@@ -524,7 +524,7 @@ def window_to_png(widget, output="/tmp/win.png"):
         Gdk.cairo_set_source_window(cr, get_window(widget), 0, 0)
         cr.paint()
         surface.write_to_png(output)
-        logger.warn("Screenshot captured to %s", output)
+        logger.warning("Screenshot captured to %s", output)
 
         widget.disconnect(handler)
         # Reparent back

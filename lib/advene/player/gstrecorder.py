@@ -141,7 +141,7 @@ class Player:
             if s is None:
                 return True
             title, message = message.parse_warning()
-            logger.warn("%s: %s", title, message)
+            logger.warning("%s: %s", title, message)
             return True
 
         bus.connect('sync-message::element', on_sync_message)
@@ -180,7 +180,7 @@ class Player:
         return True
 
     def log(self, *p):
-        logger.warn("gstrecorder: %s", str(p))
+        logger.warning("gstrecorder: %s", str(p))
 
     def get_position(self, origin, key):
         return self.current_position()
@@ -228,7 +228,7 @@ class Player:
             # But the probability of a tempfile attack against Advene
             # is rather low at the time of writing this comment.
             self.videofile = tempfile.mktemp('.ogg', 'record_')
-            logger.warn("%s already exists. We will not overwrite, so using %s instead ", item, self.videofile)
+            logger.warning("%s already exists. We will not overwrite, so using %s instead ", item, self.videofile)
         else:
             self.videofile = item
         self.build_pipeline()
@@ -260,7 +260,7 @@ class Player:
         }
         if info is None:
             # Return default data.
-            logger.warn("Could not find information about video, using absurd defaults.")
+            logger.warning("Could not find information about video, using absurd defaults.")
             return default
         if not info.get_video_streams():
             # Could be an audio file.

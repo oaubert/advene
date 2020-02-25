@@ -625,7 +625,7 @@ class TranscriptionView(AdhocView):
             enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
             b.apply_tag_by_name(tagname, beginiter, enditer)
         else:
-            logger.warn("No mark for annotation %s", a.id)
+            logger.warning("No mark for annotation %s", a.id)
 
     def untag_annotation(self, a, tagname):
         b=self.textview.get_buffer()
@@ -635,7 +635,7 @@ class TranscriptionView(AdhocView):
             enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
             b.remove_tag_by_name(tagname, beginiter, enditer)
         else:
-            logger.warn("No mark for annotation %s", a.id)
+            logger.warning("No mark for annotation %s", a.id)
 
     def activate_annotation(self, a):
         if self.options['autoscroll']:

@@ -146,7 +146,7 @@ class FrameSelector(object):
         return True
 
     def handle_scroll_event(self, widget, event):
-        logger.warn("scroll %d", event.direction)
+        logger.warning("scroll %d", event.direction)
         if event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
             offset=-1
         elif event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.RIGHT:

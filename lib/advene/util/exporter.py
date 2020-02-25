@@ -49,7 +49,7 @@ def register_exporter(exp):
         ident = exp.get_id()
         logger.debug("registering exporter %s", ident)
         if ident in EXPORTERS:
-            logger.warn("Overriding existing exporter with name %s", ident)
+            logger.warning("Overriding existing exporter with name %s", ident)
         EXPORTERS[ident] = exp
         return exp
     else:

@@ -170,7 +170,7 @@ class EditAccumulator(AccumulatorPopup):
             for source in sources:
                 self.edit(source)
         else:
-            logger.warn("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d" % targetType)
         return True
 
     def build_widget(self):

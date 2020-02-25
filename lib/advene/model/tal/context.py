@@ -44,7 +44,7 @@ class DebugLogger:
             logger.info(args)
 
         def warn (self, *args):
-            logger.warn(args)
+            logger.warning(args)
 
         def error (self, *args):
             logger.error(args)

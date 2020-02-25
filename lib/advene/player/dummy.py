@@ -90,7 +90,7 @@ class Player:
         return s.status == self.PlayingStatus or s.status == self.PauseStatus
 
     def log(self, *m):
-        logger.warn(" ".join(str(i) for i in m))
+        logger.warning(" ".join(str(i) for i in m))
 
     def get_position(self, origin=None, key=None):
         return self.current_position()

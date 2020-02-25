@@ -1450,7 +1450,7 @@ class ShapeDrawer:
     def default_callback(self, shape):
         """Default callback.
         """
-        logger.warn("Created shape %s", str(shape))
+        logger.warning("Created shape %s", str(shape))
 
     def set_background(self, pixbuf, reset_dimensions=False):
         """Set a new background pixbuf.
@@ -1463,7 +1463,7 @@ class ShapeDrawer:
             if reset_dimensions:
                 # FIXME: if we have objects, we should scale them...
                 if self.objects:
-                    logger.warn("Resizing SVG editor with existing objects... Strange things will happen")
+                    logger.warning("Resizing SVG editor with existing objects... Strange things will happen")
                 self.canvaswidth = w
                 self.canvasheight = h
                 self.widget.set_size_request(self.canvaswidth, self.canvasheight)
@@ -1838,9 +1838,9 @@ class ShapeDrawer:
             elif unit == '%':
                 return int(val * 100.0 / self.dimensions[dimindex])
             else:
-                logger.warn('SVG: Unknown unit for %s', s)
+                logger.warning('SVG: Unknown unit for %s', s)
                 return val
-        logger.warn('Unhandled SVG dimension format for %s', s)
+        logger.warning('Unhandled SVG dimension format for %s', s)
         return 0
 
     def parse_svg(self, et, current_path=''):
@@ -1869,7 +1869,7 @@ class ShapeDrawer:
                             # http url, download the file
                             (fname, header)=urllib.request.urlretrieve(o.uri)
                             i=Gtk.Image()
-                            logger.warn("Loaded background from %s copy in %s", o.uri, fname)
+                            logger.warning("Loaded background from %s copy in %s", o.uri, fname)
                             i.set_from_file(fname)
                         else:
                             # Consider it as local.
@@ -1886,7 +1886,7 @@ class ShapeDrawer:
                                                  True, 8, o.width, o.height)
                                 p.fill(0xdeadbeaf)
                                 i.set_from_pixbuf(p)
-                            logger.warn("Loaded background from %s", uri)
+                            logger.warning("Loaded background from %s", uri)
                         p=i.get_pixbuf()
                         # We insert the background at the beginning of
                         # the object stack, so that other shapes are

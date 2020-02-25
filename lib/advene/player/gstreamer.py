@@ -146,7 +146,7 @@ class Player:
     def log (self, msg):
         """Display a message.
         """
-        logger.warn(msg)
+        logger.warning(msg)
 
     def build_pipeline(self):
         sink='autovideosink'
@@ -185,7 +185,7 @@ class Player:
         try:
             self.imagesink.set_property('force-aspect-ratio', True)
         except TypeError:
-            logger.warn("Cannot set force-aspect-ratio on video sink")
+            logger.warning("Cannot set force-aspect-ratio on video sink")
         self.real_imagesink = self.imagesink
 
         elements=[]
@@ -302,7 +302,7 @@ class Player:
             info = None
         if info is None:
             # Return default data.
-            logger.warn("Could not find information about video, using absurd defaults.")
+            logger.warning("Could not find information about video, using absurd defaults.")
             return default
         if not info.get_video_streams():
             # Could be an audio file.
@@ -344,7 +344,7 @@ class Player:
         if event:
             res = self.player.send_event(event)
         if not res or not event:
-            logger.warn(_("Problem when seeking into media"))
+            logger.warning(_("Problem when seeking into media"))
 
     def start(self, position=0):
         if not self.check_uri():
@@ -573,7 +573,7 @@ class Player:
                 sink.set_property('force-aspect-ratio', True)
                 sink.expose()
             except AttributeError:
-                logger.warn("cannot set video output widget")
+                logger.warning("cannot set video output widget")
 
     def set_visual(self, xid):
         if not xid:
@@ -647,7 +647,7 @@ class Player:
         if s is None:
             return True
         title, message = message.parse_warning()
-        logger.warn("%s: %s", title, message)
+        logger.warning("%s: %s", title, message)
         return True
 
     def sound_mute(self):

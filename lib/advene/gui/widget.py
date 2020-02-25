@@ -135,7 +135,7 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
         if height is None:
             height = w.get_height()
         if width <= 0:
-            logger.warn("Error: width %d <= 0 for %s", width, self.element.id)
+            logger.warning("Error: width %d <= 0 for %s", width, self.element.id)
             width=5
         self.set_size_request(width, height)
         #self.get_window().lower()
@@ -599,7 +599,7 @@ class TagWidget(GenericColorButtonWidget):
         if targetType == config.data.target_type['tag']:
             selection.set(selection.get_target(), 8, self.tag.encode('utf-8'))
         else:
-            logger.warn("Unknown target type for drag: %d" % targetType)
+            logger.warning("Unknown target type for drag: %d" % targetType)
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):

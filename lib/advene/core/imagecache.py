@@ -121,7 +121,7 @@ class ImageCache(object):
 
         if framerate is None:
             framerate = 1 / config.data.prefix['default-fps']
-            logger.warn("No framerate given. Using default value %.02f", framerate)
+            logger.warning("No framerate given. Using default value %.02f", framerate)
         self.framerate = framerate
 
         # If autosync, then data will automatically be stored on disk

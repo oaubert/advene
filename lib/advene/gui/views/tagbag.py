@@ -294,7 +294,7 @@ class TagBag(AdhocView):
                         self.tags.append(tag)
                 self.refresh()
             else:
-                logger.warn("Unknown target type for mainbox drop: %d" % targetType)
+                logger.warning("Unknown target type for mainbox drop: %d" % targetType)
             return True
 
         self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |
@@ -311,7 +311,7 @@ class TagBag(AdhocView):
                     self.tags.remove(tag)
                 self.refresh()
             else:
-                logger.warn("Unknown target type for remove drop: %d" % targetType)
+                logger.warning("Unknown target type for remove drop: %d" % targetType)
             return True
 
 

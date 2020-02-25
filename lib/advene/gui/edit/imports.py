@@ -269,7 +269,7 @@ class TreeViewImporter:
                 elif element.viewableClass in ('annotation-type',
                                                'relation-type'):
                     # We should import the parent schema
-                    logger.warn("Annotation types and relation types are not directly importable.\nImport their schema instead.")
+                    logger.warning("Annotation types and relation types are not directly importable.\nImport their schema instead.")
                 else:
                     helper.import_element(self.controller.package,
                                           element,
@@ -279,7 +279,7 @@ class TreeViewImporter:
                 # FIXME: does not seem to work yet
                 if self.is_imported(element):
                     # It was previously imported. Unimport it
-                    logger.warn("Removing %s", model[path][self.COLUMN_LABEL])
+                    logger.warning("Removing %s", model[path][self.COLUMN_LABEL])
                     helper.unimport_element(self.controller.package,
                                             element,
                                             self.controller)
@@ -300,10 +300,10 @@ class TreeViewImporter:
                 elif element.viewableClass in ('annotation-type',
                                                'relation-type'):
                     # We should import the parent schema
-                    logger.warn("Annotation types and relation types are not directly importable.\nImport their schema instead.")
+                    logger.warning("Annotation types and relation types are not directly importable.\nImport their schema instead.")
                 else:
                     # Package
-                    logger.warn("Whole package import not implement yet - FIXME")
+                    logger.warning("Whole package import not implement yet - FIXME")
         return False
 
     def build_widget(self):

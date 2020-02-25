@@ -87,7 +87,7 @@ class HPIImporter(GenericImporter):
                 caps = data.get('data', {}).get('capabilities', {})
                 for n in ('minimum_batch_size', 'maximum_batch_size', 'available_models'):
                     self.server_options[n] = caps.get(n, None)
-                logger.warn("Got capabilities from VCD server - batch size in (%d, %d) - %d models: %s",
+                logger.warning("Got capabilities from VCD server - batch size in (%d, %d) - %d models: %s",
                             self.server_options['minimum_batch_size'],
                             self.server_options['maximum_batch_size'],
                             len(self.server_options['available_models']),
@@ -182,7 +182,7 @@ class HPIImporter(GenericImporter):
     def iterator(self):
         """I iterate over the created annotations.
         """
-        logger.warn("Importing using %s model", self.model)
+        logger.warning("Importing using %s model", self.model)
         self.source_type = self.controller.package.get_element_by_id(self.source_type_id)
         minconf = self.confidence
 
@@ -216,7 +216,7 @@ class HPIImporter(GenericImporter):
 
         image_scale = self.available_models.get(self.model, {}).get('image_size')
         if image_scale:
-            logger.warn("Scaling images to (%d, %d) as requested by %s", image_scale, image_scale, self.model)
+            logger.warning("Scaling images to (%d, %d) as requested by %s", image_scale, image_scale, self.model)
 
         def get_scaled_image(t):
             """Return the image at the appropriate scale for the selected model.
@@ -270,7 +270,7 @@ class HPIImporter(GenericImporter):
         progress = .2
         step = .8 / (len(concepts) or 1)
         self.progress(.2, _("Parsing %d results") % len(concepts))
-        logger.warn(_("Parsing %(count)d results (level %(confidence)f)") % { "count": len(concepts),
+        logger.warning(_("Parsing %(count)d results (level %(confidence)f)") % { "count": len(concepts),
                                                                               "confidence": self.confidence })
         for item in concepts:
             # Should not happen, since we pass the parameter to the server

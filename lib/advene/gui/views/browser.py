@@ -373,7 +373,7 @@ class Browser(AdhocView):
 
         vbox.show_all()
         def debug(*p):
-            logger.warn("browser debug %s", str(p), exc_info=True)
+            logger.warning("browser debug %s", str(p), exc_info=True)
             return True
 
         #vbox.connect('destroy', debug)

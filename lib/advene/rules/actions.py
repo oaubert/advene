@@ -342,7 +342,7 @@ class DefaultActionsRepository:
         This method is overriden in the GUI by self.log
         """
         message=self.parse_parameter(context, parameters, 'message', "An event occurred.")
-        logger.warn("** Message ** %s", message)
+        logger.warning("** Message ** %s", message)
         return True
 
     def PlayerStart (self, context, parameters):

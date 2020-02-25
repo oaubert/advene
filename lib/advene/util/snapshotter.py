@@ -53,7 +53,7 @@ except ImportError:
 
 def debug(f):
     def wrap(*args):
-        logger.warn("%s %s", f.__name__, args)
+        logger.warning("%s %s", f.__name__, args)
         return f(*args)
     return wrap
 
@@ -109,7 +109,7 @@ class NotifySink(GstBase.BaseSink):
     def buffer_as_struct(self, buffer):
         (res, mapinfo) = buffer.map(Gst.MapFlags.READ)
         if not res:
-            logger.warn("Error in converting buffer")
+            logger.warning("Error in converting buffer")
             res = None
         else:
             pos = self.query_position(Gst.Format.TIME)[1]
@@ -262,7 +262,7 @@ class Snapshotter(object):
         if s is None:
             return True
         title, message = message.parse_warning()
-        logger.warn("%s: %s", title, message)
+        logger.warning("%s: %s", title, message)
         return True
 
     def simple_notify(self, struct):
@@ -271,7 +271,7 @@ class Snapshotter(object):
         Used for debugging.
         """
         if struct is None:
-            logger.warn("Snapshotter: invalid struct")
+            logger.warning("Snapshotter: invalid struct")
             return True
         logger.info("Timecode %010d - pts %010d" % (struct['date'],
                                                     struct['pts']))
@@ -395,7 +395,7 @@ if __name__ == '__main__':
         loop.run()
     else:
         if Evaluator is None:
-            logger.warn("Missing evaluator module.\nFetch it from the repository")
+            logger.warning("Missing evaluator module.\nFetch it from the repository")
             sys.exit(0)
 
         # Adding the following lines breaks the code, with a warning:

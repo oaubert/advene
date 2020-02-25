@@ -484,7 +484,7 @@ class AdveneController(object):
         """Register a generic feature.
         """
         if name in self.generic_features:
-            logger.warn(_("Warning: redefining an existing feature %s") % name)
+            logger.warning(_("Warning: redefining an existing feature %s") % name)
         self.generic_features[name] = feature_class
 
     def register_slave_player(self, p):
@@ -811,7 +811,7 @@ class AdveneController(object):
             pid=l.rstrip().split()[-1]
             processes.append(pid)
         f.close()
-        logger.warn(_("Cannot start the webserver\nThe following processes seem to use the %(port)s port: %(processes)s") % { 'port': pat,
+        logger.warning(_("Cannot start the webserver\nThe following processes seem to use the %(port)s port: %(processes)s") % { 'port': pat,
                                                                                                                            'processes':  processes})
 
     @property
@@ -1373,7 +1373,7 @@ class AdveneController(object):
             framerate = 0
         if framerate == 0:
             framerate = 1 / config.data.prefix['default-fps']
-            logger.warn("Cannot determine video FPS. Using default value %.02f", framerate)
+            logger.warning("Cannot determine video FPS. Using default value %.02f", framerate)
         # Reset the imagecache
         if uri not in self.imagecache:
             self.imagecache[uri] = ImageCache(uri, framerate=framerate)
@@ -1510,7 +1510,7 @@ class AdveneController(object):
             elif annotation.type.mimetype == 'application/x-advene-structured':
                 an.content.data = annotation.content.data
             else:
-                logger.warn("Cannot convert %s to %s" % (annotation.type.mimetype,
+                logger.warning("Cannot convert %s to %s" % (annotation.type.mimetype,
                                                           an.type.mimetype))
                 an.content.data = annotation.content.data
         elif an.type.mimetype == 'image/svg+xml':
@@ -1520,7 +1520,7 @@ class AdveneController(object):
   <text fill="green" name="Content" stroke="green" style="stroke-width:1; font-family: sans-serif; font-size: 22" x="8" y="290">%s</text>
 </svg:svg>""" % self.get_title(annotation)
         else:
-            logger.warn("Do not know how to convert %s to %s" % (annotation.type.mimetype,
+            logger.warning("Do not know how to convert %s to %s" % (annotation.type.mimetype,
                                                               an.type.mimetype))
             an.content.data = annotation.content.data
         an.setDate(self.get_timestamp())
@@ -1550,7 +1550,7 @@ class AdveneController(object):
         try:
             kw = comps[index]
         except IndexError:
-            logger.warn("Cannot find completion at index %d", index)
+            logger.warning("Cannot find completion at index %d", index)
             return False
 
         if annotation.type.mimetype == 'text/x-advene-keyword-list':
@@ -1598,7 +1598,7 @@ class AdveneController(object):
         """
         if (position <= annotation.fragment.begin
             or position >= annotation.fragment.end):
-            logger.warn(_("Cannot split the annotation: the given position is outside."))
+            logger.warning(_("Cannot split the annotation: the given position is outside."))
             return annotation
 
         # Create the new one
@@ -2201,7 +2201,7 @@ class AdveneController(object):
         if master_uri:
             i=[ pk for pk in p.imports if pk.getUri(absolute=False) == master_uri ]
             if not i:
-                logger.warn(_("Cannot handle master attribute, the package %s is not imported.") % master_uri)
+                logger.warning(_("Cannot handle master attribute, the package %s is not imported.") % master_uri)
             else:
                 logger.info(_("Checking master package %s for not yet imported elements.") % master_uri)
                 self.handle_auto_import(p, i[0].package)
@@ -2290,7 +2290,7 @@ class AdveneController(object):
                     if v in parsed_views:
                         # Already parsed view. In order to avoid an
                         # infinite loop, ignore it.
-                        logger.warn(_("Infinite loop in STBV %(name)s: the %(imp)s view is invoked multiple times.") % { 'name': self.get_title(view),
+                        logger.warning(_("Infinite loop in STBV %(name)s: the %(imp)s view is invoked multiple times.") % { 'name': self.get_title(view),
                                                                                                                          'imp': self.get_title(v) })
                     else:
                         rs.from_xml(v.content.stream,

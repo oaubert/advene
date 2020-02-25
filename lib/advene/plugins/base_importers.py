@@ -652,7 +652,7 @@ class SubtitleImporter(GenericImporter):
                 # Convert it and reset the data
                 if tc is None:
                     if content:
-                        logger.warn("Strange error: no timestamp was found for content %s", "".join(content))
+                        logger.warning("Strange error: no timestamp was found for content %s", "".join(content))
                         content = []
                 else:
                     d={'begin': tc[0],

@@ -219,7 +219,7 @@ class Bookmarks(AdhocView):
                     self.refresh()
                 return True
             else:
-                logger.warn("Unknown target type for drop: %d" % targetType)
+                logger.warning("Unknown target type for drop: %d" % targetType)
             return False
 
         b=get_small_stock_button(Gtk.STOCK_DELETE)
@@ -275,7 +275,7 @@ class Bookmarks(AdhocView):
                 self.append(position, comment=comment)
                 return True
             else:
-                logger.warn("Unknown target type for drop: %d" % targetType)
+                logger.warning("Unknown target type for drop: %d" % targetType)
             return False
 
         self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |

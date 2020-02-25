@@ -325,7 +325,7 @@ class ECAEngine:
             # Ignore the error if the rule was already removed.
             # but display a warning anyway (it should not happen)
             try:
-                logger.warn("Trying to remove non-existant rule %s from %s ruleset", str(rule), type_)
+                logger.warning("Trying to remove non-existant rule %s from %s ruleset", str(rule), type_)
             except AttributeError:
                 logger.error("********** ATTRIBUTE ERROR for rule %s **********", hex(id(rule)))
             pass
