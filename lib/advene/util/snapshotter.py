@@ -70,29 +70,39 @@ class NotifySink(GstBase.BaseSink):
         )
 
     __gproperties__ = {
-        'notify': ( GObject.TYPE_PYOBJECT, 'notify', 'The notify method', GObject.ParamFlags.READWRITE ),
+        'notify': ( GObject.TYPE_PYOBJECT, 'notify', 'The notify method called upon render', GObject.ParamFlags.READWRITE ),
+        'preroll': ( GObject.TYPE_PYOBJECT, 'preroll', 'The notify method called upon preroll', GObject.ParamFlags.READWRITE ),
         }
 
     def __init__(self):
         GstBase.BaseSink.__init__(self)
         self.set_sync(False)
-        self._notify=None
+        self._notify = None
+        self._preroll = None
 
-    def do_preroll(self, buffer):
-        logger.debug("do_preroll %s", self._notify)
+    def do_render(self, buffer):
         if self._notify is not None:
             self._notify(self.buffer_as_struct(buffer))
+        return Gst.FlowReturn.OK
+
+    def do_preroll(self, buffer):
+        if self._preroll is not None:
+            self._preroll(self.buffer_as_struct(buffer))
         return Gst.FlowReturn.OK
 
     def do_set_property(self, key, value):
         if key.name == 'notify':
             self._notify=value
+        elif key.name == 'preroll':
+            self._preroll=value
         else:
             logger.info("No property %s" % key.name)
 
     def do_get_property(self, key):
         if key.name == 'notify':
             return self._notify
+        elif key.name == 'preroll':
+            return self._preroll
         else:
             logger.info("No property %s" % key.name)
 
@@ -212,7 +222,7 @@ class Snapshotter(object):
         bus.connect('message::error', self.on_bus_message_error)
         bus.connect('message::warning', self.on_bus_message_warning)
 
-        sink.props.notify=self.queue_notify
+        sink.props.preroll = self.queue_notify
 
     def get_uri(self):
         return self.player.get_property('current-uri')
