@@ -714,7 +714,7 @@ Available filters:
         sys.exit(0)
 
     def progress(value, label):
-        print('\rProgress %.0f%% - %s' % (value, label), end='', flush=True)
+        print('\rProgress %02d%% - %s' % (int(100 * value), label), end='', flush=True)
         return True
 
     if filtername == 'auto':
