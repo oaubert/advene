@@ -177,5 +177,9 @@ class GstImporter(GenericImporter):
 
         self.decoder.props.uri = path2uri(filename)
         self.progress(.1, _("Starting processing"))
+
+        if hasattr(self, 'pipeline_postprocess'):
+            self.pipeline_postprocess(self.pipeline)
+
         self.pipeline.set_state(Gst.State.PLAYING)
         return self.package
