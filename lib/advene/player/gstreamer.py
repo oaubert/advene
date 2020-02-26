@@ -258,7 +258,7 @@ class Player:
             logger.error("Current position exception", exc_info=True)
             position = 0
         else:
-            position = pos * 1.0 / Gst.MSECOND
+            position = pos / Gst.MSECOND
         return position
 
     def dvd_uri(self, title=None, chapter=None):
@@ -442,7 +442,7 @@ class Player:
         except:
             duration = 0
         else:
-            duration = dur * 1.0 / Gst.MSECOND
+            duration = dur / Gst.MSECOND
 
         s.length=duration
         s.position=self.current_position()
