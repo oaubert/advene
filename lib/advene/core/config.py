@@ -702,9 +702,9 @@ class Config(object):
         h = Path.home()
 
         if self.os == 'win32':
-            dirname = h / 'advene'
+            dirname = h / 'advene3'
         elif self.os == 'darwin':
-            dirname = h / 'Library' / 'Preferences' / 'Advene',
+            dirname = h / 'Library' / 'Preferences' / 'Advene3',
         else:
             dirname = h / '.config' / 'advene'
 
