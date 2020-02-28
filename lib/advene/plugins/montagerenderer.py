@@ -43,7 +43,6 @@ try:
 except ValueError:
     GES = None
 
-import advene.core.config as config
 import advene.util.helper as helper
 
 def register(controller=None):
