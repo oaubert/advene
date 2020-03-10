@@ -46,7 +46,7 @@ if subdir == 'bin' and os.path.exists(os.path.join(maindir, "setup.py")):
 else:
     try:
         import advene.core.config as config
-    except ImportError as e:
+    except ImportError:
         logging.error("""Cannot guess a valid directory.
         Please check your installation or set the PYTHONPATH environment variable.""", exc_info=True)
         sys.exit(1)
