@@ -115,8 +115,8 @@ class AbstractBundle (object):
         return SumBundle (self, other)
 
     def __contains__ (self, v):
-        return (v is self._dict.get(v.getUri (absolute=True), None)
-             or v in self._dict)
+        return ((hasattr(v, 'getUri') and self._dict.get(v.getUri(absolute=True), None))
+                 or v in self._dict)
 
     def __getitem__ (self, index):
         if isinstance (index, (int, slice)):
