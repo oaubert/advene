@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 import os
 import _thread
 from gi.repository import GObject
-from gi.repository import Gdk
 from gi.repository import Gtk
 
 from gettext import gettext as _
@@ -72,11 +71,15 @@ class AnnotationImporter(AdhocView):
         if importerclass is not None:
             self.importer = importerclass(controller=self.controller, callback=self.progress_callback, source_type=source_type)
         self.filename = filename
-        self.widget=self.build_widget()
+        self.widget = self.build_widget()
 
         if filename:
             self.fb.set_filename(filename)
             self.update_importers(filename=filename)
+        else:
+            # Open file selection dialog
+            button = self.fb.get_children()[0]
+            GObject.timeout_add (300, lambda: button.activate() and False)
 
     def update_importers(self, filename=None):
         if filename is not None:
