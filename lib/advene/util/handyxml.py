@@ -3,7 +3,8 @@
     Ned Batchelder, http://nedbatchelder.com
 """
 
-import os.path, sys, types
+import os.path
+import sys
 
 from xml.dom import EMPTY_NAMESPACE
 from xml.dom import Node
@@ -73,7 +74,7 @@ class HandyXmlWrapper:
                 # Save the attribute, since this could be a hasattr
                 # that will be followed by getattr
                 els = list(map(HandyXmlWrapper, els))
-                if type(self.node) == types.InstanceType:
+                if isinstance(self.node, object):
                     setattr(self.node, attr, els)
                 return els
 
