@@ -69,7 +69,9 @@ class VIANImporter(GenericImporter):
         self.progress(progress, "Starting conversion")
 
         self.package.setMedia(vian['movie_descriptor']['movie_path'])
-        self.package.setMetaData (config.data.namespace, "duration", str(vian['movie_descriptor']['duration']))
+        duration = vian['movie_descriptor']['duration']
+        self.package.setMetaData(config.data.namespace, "duration", str(duration))
+        self.controller.notify('DurationUpdate', duration=duration)
 
         incr = 0.05
         ntypes = len(vian['segmentation']) + len(vian['experiments'])
