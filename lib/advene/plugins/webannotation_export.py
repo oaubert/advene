@@ -61,7 +61,8 @@ class WebAnnotationExporter(FlatJsonExporter):
             "body": {
                 "@type": "Text",
                 "advene:mimetype": a.content.mimetype,
-                "value": a.content.data
+                "value": a.content.data,
+                "advene:representation": self.controller.get_title(a),
             },
             "target": {
                 "source": media_uri,
