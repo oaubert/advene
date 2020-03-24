@@ -710,7 +710,7 @@ filter_name can be "auto" for autodetection.
 Available filters:
   * %s
         """ % (USAGE.replace('%prog', sys.argv[0]),
-               "\n  * ".join(i.name for i in controller.advene.util.importer.IMPORTERS)))
+               "\n  * ".join(sorted(i.name for i in controller.advene.util.importer.IMPORTERS))))
         sys.exit(0)
 
     def progress(value, label):
