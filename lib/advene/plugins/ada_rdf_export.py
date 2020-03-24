@@ -182,22 +182,22 @@ class AdARDFExporter(WebAnnotationExporter):
                         body['ao:annotationValueSequence'] = { "@list": [ get_keyword_uri(kw) for kw in typedvalues.values ] }
                     bodies.append(body)
 
+            error = None
             if not bodies:
                 # Could not parse correctly.
-                msg = "Could not parse keywords %s for annotation %s" % (keywords, a.uri)
-                logger.warning(msg)
-                body = new_body(btype="oa:TextualBody")
-                body['value'] = a.content.data
-                body['advene:ERROR'] = msg
-                bodies = [ body ]
+                error = "Could not parse keywords %s for annotation %s" % (keywords, a.uri)
+                logger.warning(error)
+                bodies = [ ]
 
             # Attach comment to the last body
-            if keywords.get_comment():
+            if keywords.get_comment() and bodies:
                 bodies[-1]['rdf:comment'] = keywords.get_comment()
 
             # Add textual body
             body = new_body(btype="oa:TextualBody")
             body['value'] = self.controller.get_title(a)
+            if error:
+                body['advene:ERROR'] = error
             bodies.append(body)
 
         else:
