@@ -17,12 +17,8 @@ cd $TMPDIR || exit 1
 make archive
 
 /bin/rm -rf $TMPDEBDIR
-git clone $DEBDIR $TMPDEBDIR
+gbp clone $DEBDIR $TMPDEBDIR
 cd $TMPDEBDIR || exit 1
-
-# Update all branches
-git checkout -b upstream origin/upstream || exit 1
-git checkout -b pristine-tar origin/pristine-tar || exit 1
 
 git checkout master || exit 1
 
