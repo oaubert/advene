@@ -63,6 +63,8 @@
 ../lib/advene/plugins/cutter.py
 ../lib/advene/plugins/ttl.py
 ../lib/advene/plugins/shotdetect.py
+../lib/advene/plugins/iiif_export.py
+../lib/advene/plugins/elan_importer.py
 ../lib/advene/plugins/pocketsphinx.py
 ../lib/advene/plugins/brltty.py
 ../lib/advene/plugins/transcript.py
@@ -70,6 +72,7 @@
 ../lib/advene/plugins/aeidon_import.py
 ../lib/advene/plugins/anvil.py
 ../lib/advene/plugins/fcp.py
+../lib/advene/plugins/vian_import.py
 ../lib/advene/plugins/hpi.py
 ../lib/advene/plugins/goodshotdetector.py
 ../lib/advene/plugins/webannotation_import.py
@@ -78,6 +81,8 @@
 ../lib/advene/plugins/tts.py
 ../lib/advene/plugins/soundenveloppe.py
 ../lib/advene/plugins/keywords.py
+../lib/advene/plugins/scenechange.py
+../lib/advene/plugins/base_importers.py
 ../lib/advene/plugins/dcp.py
 ../lib/advene/plugins/annotationgraph.py
 ../lib/advene/plugins/shotdetectapp.py
@@ -85,10 +90,12 @@
 ../lib/advene/plugins/cinelab.py
 ../lib/advene/plugins/owl_import.py
 ../lib/advene/plugins/ada_rdflib_export.py
+../lib/advene/plugins/zbar.py
 ../lib/advene/player/gstreamer.py
 ../lib/advene/rules/actions.py
 ../lib/advene/rules/importer.py
 ../lib/advene/rules/elements.py
+../lib/advene/util/gstimporter.py
 ../lib/advene/util/helper.py
 ../lib/advene/util/tools.py
 ../lib/advene/util/website_export.py
