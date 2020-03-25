@@ -65,18 +65,18 @@ im.statistics hold a dictionary containing the creation statistics.
 import logging
 logger = logging.getLogger(__name__)
 
-import sys
+import json
 import os
 import optparse
+import shutil
+import signal
+import subprocess
+import sys
+import threading
 
 from gettext import gettext as _
 
 from gi.repository import GObject
-
-import shutil
-import subprocess
-import signal
-import threading
 
 if __name__ != '__main__':
     import advene.core.config as config
@@ -475,14 +475,14 @@ class GenericImporter(object):
                 end=begin + helper.parse_time(d['duration'])
             else:
                 raise Exception("end or duration is missing")
-            try:
-                content=d['content']
-            except KeyError:
-                content="Default content"
-            try:
-                ident=d['id']
-            except KeyError:
-                ident=None
+            content = d.get('content', "Default content")
+            if not isinstance(content, str):
+                content = json.dumps(content)
+            ident = d.get('id', None)
+            author = d.get('author', self.author)
+            title = d.get('title', content[:20])
+            timestamp = d.get('timestamp', self.timestamp)
+
             try:
                 type_=d['type']
                 if isinstance(type_, str):
@@ -502,18 +502,6 @@ class GenericImporter(object):
                         type_ = self.package.annotationTypes[0]
                     else:
                         raise Exception("No type")
-            try:
-                author=d['author']
-            except KeyError:
-                author=self.author
-            try:
-                title=d['title']
-            except KeyError:
-                title=(content or '')[:20]
-            try:
-                timestamp=d['timestamp']
-            except KeyError:
-                timestamp=self.timestamp
 
             a = self.create_annotation(type_=type_,
                                        begin=begin,
