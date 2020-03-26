@@ -686,7 +686,7 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
             if name in exclude and filters[exclude[name]](d):
                 continue
             if callback(progress, "%s %s : %s -> %s" % (name, getattr(s, 'id', str(s)),
-                                                        str(value(d or ""))[:100], str(value(s or ""))[:100])) is False:
+                                                        str(value(d or ""))[:100].replace('\n', '\\n'), str(value(s or ""))[:100].replace('\n', '\\n'))) is False:
                 break
             todo.append((source, name, s, d, action))
             if not dry_run:
