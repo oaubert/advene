@@ -643,7 +643,7 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
     filters = {
         'all': lambda e: True,
         'package': lambda e: isinstance(e, Package),
-        'except_default_workspace': lambda e: e.id != '_default_workspace'
+        'except_default_workspace': lambda e: e.id == '_default_workspace'
     }
     if exclude is None:
         # Reasonable default settings.
