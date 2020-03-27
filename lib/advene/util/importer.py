@@ -492,7 +492,7 @@ class GenericImporter(object):
                     type_ = self.package.get_element_by_id(type_id)
                     if type_ is None:
                         # Not existing, create it.
-                        type_ = self.ensure_new_type(type_id)
+                        type_ = self.ensure_new_type(type_id, title=type_id)
                     elif not isinstance(type_, AnnotationType):
                         raise Exception("Error during import: the specified type id %s is not an annotation type" % type_id)
             except KeyError:
