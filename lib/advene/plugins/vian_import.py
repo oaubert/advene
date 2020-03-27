@@ -150,7 +150,7 @@ class VIANImporter(GenericImporter):
             self.progress(progress, f"Converting experiment {expe['name']}")
             new_atype = self.ensure_new_type(
                 expe['unique_id'],
-                title = expe['name'])
+                title = f"Experiment {expe['name']}")
             new_atype.mimetype = 'text/x-advene-keyword-list'
 
             # Again, VIAN keywords are composites of a VocabularyWord and a ClassificationObject
@@ -177,6 +177,15 @@ class VIANImporter(GenericImporter):
                         classification_obj = all_classification_objects[cl_obj['unique_id']]
                     )
 
+            new_atype.setMetaData(config.data.namespace, "value_metadata", json.dumps(dict(
+                (data['voc_word']['word'], {
+                    "uid": data['id'],
+                    "voc_word": data['voc_word'],
+                })
+                for kwuid, data in experiment_keywords.items())))
+            new_atype.setMetaData(config.data.namespace, "completions", ",".join(kw['voc_word']['word']
+                                                                                 for kw in experiment_keywords.values()))
+
             for result in expe['classification_results']:
                 target = annotation_cache.get(result['target'])
                 keyword = experiment_keywords.get(result['keyword'])
@@ -190,8 +199,7 @@ class VIANImporter(GenericImporter):
                         "type": new_atype,
                         "begin": target['begin'],
                         "end": target['end'],
-                        # FIXME: how to dereference keyword information?
-                        "content": keyword,
+                        "content": keyword['voc_word']['word'],
                     }
 
         # Extract the HDF5-stored analyses results.
@@ -221,6 +229,7 @@ class VIANImporter(GenericImporter):
                     begin = target['begin'],
                     end = target['end'],
                     content = an['vian_analysis_type'],
+                    type = an['vian_analysis_type'],
                     vian_analysis_type = an['vian_analysis_type'],
                     hdf5_dataset = hdf5_dataset,
                     hdf5_index = hdf5_index
