@@ -228,11 +228,12 @@ class VIANImporter(GenericImporter):
                     id = an['unique_id'],
                     begin = target['begin'],
                     end = target['end'],
-                    content = an['vian_analysis_type'],
                     type = an['vian_analysis_type'],
                     vian_analysis_type = an['vian_analysis_type'],
                     hdf5_dataset = hdf5_dataset,
-                    hdf5_index = hdf5_index
+                    hdf5_index = hdf5_index,
+                    # Use HDF5 URI syntax from https://github.com/taurus-org/h5file-scheme
+                    uri = f'h5file:{os.path.abspath(hdf5_path)}::{hdf5_dataset}/{hdf5_index}'
                 )
 
                 # Semantic segmentations have the vian_analysis_type SemanticSegmentationAnalysis
@@ -243,6 +244,7 @@ class VIANImporter(GenericImporter):
                     # A mask of labels referencing corresponding to
                     # ClassificationObject.semantic_segmentation_labels.labels.label
                     analysis['mask'] = hdf5_file[hdf5_dataset][hdf5_index]
+                    analysis['content'] = analysis['uri']
 
                 else:
                     # if the classification object is not -1, a semantic segmentation has been used with this
@@ -253,6 +255,7 @@ class VIANImporter(GenericImporter):
                     else:
                         cl_obj = None
                     analysis['classification_object'] = cl_obj
+                    analysis['content'] = cl_obj
 
                     # Extract the color features
                     if an['vian_analysis_type'] == "ColorFeatureAnalysis":
@@ -261,6 +264,9 @@ class VIANImporter(GenericImporter):
 
                         analysis['lab'] = hdf5_file[hdf5_dataset][hdf5_index][:3]
                         analysis['rgb'] = hdf5_file[hdf5_dataset][hdf5_index][3:6][::-1]
+
+                        analysis['content'] = analysis['rgb'].tolist()
+                        analysis['mimetype'] = 'application/json'
 
                     elif an['vian_analysis_type'] == "ColorPaletteAnalysis":
                         # See feature vector memory layout here
@@ -275,12 +281,15 @@ class VIANImporter(GenericImporter):
                                 color_rgb = total_palette[j,2:5][::-1].tolist(),
                                 relative_size = (total_palette[j,5].astype(np.float32) / total_num_pixel).tolist()
                             ))
+                        analysis['content'] = analysis['palette']
+                        analysis['mimetype'] = 'application/json'
 
                     elif an['vian_analysis_type'] == "ColorHistogramAnalysis":
                         # See feature vector memory layout here
                         # https://www.vian.app/static/manual/dev_guide/analyses/color_features.html#module-core.analysis.histogram_analysis
                         analysis['color_histogram'] = hdf5_file[hdf5_dataset][hdf5_index]
-
+                        analysis['content'] = analysis['color_histogram'].tolist()
+                        analysis['mimetype'] = 'application/json'
                 yield analysis
 
         self.progress(1.0)
