@@ -29,6 +29,7 @@ from gettext import gettext as _
 import re
 import xml.dom
 
+import advene.core.config as config
 import advene.util.handyxml as handyxml
 from advene.util.importer import GenericImporter
 
@@ -186,12 +187,20 @@ class ElanImporter(GenericImporter):
             raise Exception('Cannot process non-millisecond fragments')
 
         self.progress(0.1, _("Processing time slots"))
+        duration = 0
         for a in elan.TIME_ORDER[0].TIME_SLOT:
             try:
-                self.anchors[a.TIME_SLOT_ID] = int(a.TIME_VALUE)
+                d = self.anchors[a.TIME_SLOT_ID] = int(a.TIME_VALUE)
+                duration = max(duration, d)
             except AttributeError:
                 # FIXME: should not silently ignore error
                 self.anchors[a.TIME_SLOT_ID] = 0
+
+        # If duration is not yet set in Advene (starting from a
+        # template), use max timestamp
+        if self.controller.get_cached_duration() == 0:
+            self.controller.package.setMetaData(config.data.namespace, "duration", str(duration))
+            self.controller.notify('DurationUpdate', duration=duration)
 
         # Process types
         #for lt in elan.LINGUISTIC_TYPE:
