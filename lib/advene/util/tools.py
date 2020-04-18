@@ -173,27 +173,33 @@ normalized_re=re.compile(r'LATIN (SMALL|CAPITAL) LETTER (\w)')
 valid_re=re.compile(r'[a-zA-Z0-9_]')
 extended_valid_re=re.compile(r'[ -@a-zA-Z0-9_]')
 
+def unaccent(t):
+    """Remove accents from a string.
+    """
+    t = str(t)
+    res = []
+    for c in t:
+        if not extended_valid_re.match(c):
+            # Try to normalize
+            m = normalized_re.search(unicodedata.name(c, ' '))
+            if m:
+                c = m.group(2)
+                if m.group(1) == 'SMALL':
+                    c = c.lower()
+            else:
+                c = ' '
+        res.append(c)
+    return "".join(res)
+
 def title2id(t):
     """Convert a unicode title to a valid id.
 
     It will replace spaces by underscores, accented chars by their
-    accented equivalent, and other characters by -
+    unaccented equivalent, and other characters by -
     """
-    t=str(t)
-    (text, count)=re.subn(r'\s', '_', t)
-    res=[]
-    for c in text:
-        if not valid_re.match(c):
-            # Try to normalize
-            m=normalized_re.search(unicodedata.name(c))
-            if m:
-                c=m.group(2)
-                if m.group(1) == 'SMALL':
-                    c=c.lower()
-            else:
-                c='_'
-        res.append(c)
-    return "".join(res)
+    (text, count) = re.subn(r'\s', '_', unaccent(t))
+    (text, count) = re.subn(r'[^\w]', '-', text)
+    return text
 
 def unescape_string(s):
     """Unescape special characters.
@@ -202,24 +208,6 @@ def unescape_string(s):
     \t or %t for tab
     """
     return s.replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
-
-def unaccent(t):
-    """Remove accents from a string.
-    """
-    t=str(t)
-    res=[]
-    for c in t:
-        if not extended_valid_re.match(c):
-            # Try to normalize
-            m=normalized_re.search(unicodedata.name(c, ' '))
-            if m:
-                c=m.group(2)
-                if m.group(1) == 'SMALL':
-                    c=c.lower()
-            else:
-                c=' '
-        res.append(c)
-    return "".join(res)
 
 SPACE_REGEXP = re.compile(r'[^\w\d_]+', re.UNICODE)
 COMMA_REGEXP = re.compile(r'\s*,\s*', re.UNICODE)
