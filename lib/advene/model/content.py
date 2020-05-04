@@ -183,6 +183,9 @@ class KeywordList(object):
     def __iter__(self):
         return iter(self._values)
 
+    def __len__(self):
+        return len(self._values)
+
     def __getitem__(self, i):
         return self._values[i]
 
