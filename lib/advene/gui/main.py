@@ -3534,7 +3534,7 @@ class AdveneGUI(object):
                         try:
                             p.imagecache.save (helper.mediafile2id (media))
                         except OSError as e:
-                            self.log(_("Cannot save imagecache for %(media)s: %(e)s") % locals())
+                            self.log(_("Cannot save imagecache for %(media)s: %(e)s") % { "media": media, "e": e })
                     elif response == Gtk.ResponseType.NO:
                         p.imagecache._modified=False
                         pass
@@ -3543,7 +3543,8 @@ class AdveneGUI(object):
                     try:
                         p.imagecache.save (helper.mediafile2id (media))
                     except OSError as e:
-                        self.log(_("Cannot save imagecache for %(media)s: %(e)s") % locals())
+                        self.log(_("Cannot save imagecache for %(media)s: %(e)s") % { "media": media, "e": e })
+
 
         if self.controller.on_exit():
             # Memorize application window size/position
