@@ -29,22 +29,38 @@ from gettext import gettext as _
 from collections import namedtuple
 from urllib.parse import quote
 
+from gi.repository import Gtk
+
 import advene.core.config as config
+import advene.util.helper as helper
 from advene.plugins.webannotation_export import WebAnnotationExporter
+from advene.gui.views.table import COLUMN_TYPE
+from advene.gui.views.checker import FeatureChecker, register_checker, AnnotationTable
 
 def register(controller=None):
     controller.register_exporter(AdARDFExporter)
+    # We also register a checker component that checks the keyword
+    # syntax, in GUI mode
+
+    # FIXME: we depend on gui.views.checker which is loaded as a
+    # plugin, so it may not be available at plugin load time
     return True
 
 # Evolving/ContrastingAnnotationType markers
 TO_KW = '[TO]'
 VS_KW = '[VS]'
 
-def keywords_to_struct(keywords):
+def keywords_to_struct(keywords, on_error=None):
     """Generator that outputs typed values from keyword lists.
 
+    on_error allows to get error messages as callbacks
     type is either predefined, contrasting or evolving.
     """
+    def report_error(msg):
+        logger.error(msg)
+        if on_error is not None:
+            on_error(msg)
+
     if not keywords:
         return
     TypedValues = namedtuple('TypedValue', ['type', 'values'])
@@ -54,15 +70,15 @@ def keywords_to_struct(keywords):
         current = keywords.pop(0)
         if current in (TO_KW, VS_KW):
             if need_value:
-                logger.error("Syntax error: expecting a value, not %s keyword." % current)
+                report_error("Syntax error: expecting a value, not %s keyword." % current)
                 prev = None
                 need_value = False
             if prev is None:
-                logger.error("Syntax error: %s keyword should have a value before." % current)
+                report_error("Syntax error: %s keyword should have a value before." % current)
                 prev = None
                 need_value = False
             elif not keywords:
-                logger.error("Syntax error: %s keyword should have a value after." % current)
+                report_error("Syntax error: %s keyword should have a value after." % current)
                 prev = None
                 need_value = False
             else:
@@ -76,7 +92,7 @@ def keywords_to_struct(keywords):
                             yield TypedValues(type="predefined", values=prev.values[:-1])
                         prev = TypedValues(type="evolving", values=prev.values[-1:])
                     elif prev.type != "evolving":
-                        logger.error("Syntax error: mixed contrasting/evolving values in %s" % current)
+                        report_error("Syntax error: mixed contrasting/evolving values in %s" % current)
                         prev = None
                         need_value = False
                 elif current == VS_KW:
@@ -88,11 +104,11 @@ def keywords_to_struct(keywords):
                             yield TypedValues(type="predefined", values=prev.values[:-1])
                         prev = TypedValues(type="contrasting", values=prev.values[-1:])
                     elif prev.type != "contrasting":
-                        logger.error("Syntax error: mixed contrasting/evolving values in %s" % current)
+                        report_error("Syntax error: mixed contrasting/evolving values in %s" % current)
                         prev = None
                         need_value = False
                 else:
-                    logger.error("This should never happen.")
+                    report_error("This should never happen.")
         else:
             if prev:
                 if need_value or prev.type == "predefined":
@@ -229,6 +245,55 @@ class AdARDFExporter(WebAnnotationExporter):
         })
 
         return self.output(data, filename)
+
+@register_checker
+class AdAChecker(FeatureChecker):
+    name = "AdA syntax"
+    description = _("For every annotation type that has predefined keywords, this table displays the annotations that contain unspecified keywords or invalid syntax. Update is not real-time, you need to manually update the view with the button below.")
+    def build_widget(self):
+        self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, ))
+        column = self.table.columns['custom0']
+        column.props.title = _("Undef. keywords")
+        self.widget = Gtk.VBox()
+        b = Gtk.Button("Update")
+        b.connect('clicked', lambda i: self.update_view())
+        self.widget.pack_start(b, False, False, 0)
+        self.widget.pack_start(self.table.widget, False, False, 0)
+        return self.widget
+
+    def update_model(self, package=None):
+        # Do not update information live, it is too costly.
+        pass
+
+    def update_view(self):
+        # Dict of errors indexed by annotation
+        errors = {}
+        def custom_data(a):
+            if a is None:
+                return (str, )
+            else:
+                return ("\n".join(errors.get(a, [])), )
+
+        for at in self.controller.package.annotationTypes:
+            completions = set(helper.get_type_predefined_completions(at))
+            if completions:
+                # There are completions. Check for every annotation if
+                # they use a keyword not predefined.
+                for a in at.annotations:
+                    def add_error(msg):
+                        errors.setdefault(a, []).append(msg)
+
+                    keywords = a.content.parsed()
+                    if len(keywords) == 0 and keywords.get_comment() == "" and len(a.content.data) > 0:
+                        # There seems to be a content, but we could find no keyword and no comment.
+                        add_error("Unparsable content")
+                        continue
+                    # Parse keywords to detect syntax errors
+                    for s in keywords_to_struct(list(keywords), add_error):
+                        pass
+
+        self.table.set_elements(list(errors.keys()), custom_data)
+        self.table.model.set_sort_column_id(COLUMN_TYPE, Gtk.SortType.ASCENDING)
 
 if __name__ == "__main__":
     # Let's do some tests. This will be moved to unit tests later on.
