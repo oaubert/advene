@@ -67,7 +67,8 @@ class SceneChangeImporter(GstImporter):
         pad.set_event_function(event_handler)
 
     def setup_importer(self, filename):
-        at = self.ensure_new_type('scenechange', title=_("Scene change"))
-        at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Scene change"))
+        at = self.ensure_new_type('scenechange',
+                                  title=_("Scene change"),
+                                  description = _("Scene change"))
 
         return "videoconvert ! videoscale ! scenechange"

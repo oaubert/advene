@@ -90,8 +90,8 @@ class KeywordImporter(GenericImporter):
         self.source_type = self.controller.package.get_element_by_id(self.source_type_id)
         minconf = self.confidence
 
-        new_atype = self.ensure_new_type("%s_keywords" % self.source_type.id)
-        new_atype.mimetype = "text/x-advene-keyword-list"
+        new_atype = self.ensure_new_type("%s_keywords" % self.source_type.id,
+                                         mimetype = "text/x-advene-keyword-list")
         self.progress(.1, "Sending request to server")
         for a in self.source_type.annotations:
             keywords = rake.extract(a.content.data)

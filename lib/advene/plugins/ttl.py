@@ -55,9 +55,7 @@ class TTLImporter(GenericImporter):
         if self.package is None:
             self.init_package(filename=filename, schemaid='traces', annotationtypeid=None)
         self.model = None
-        at = self.ensure_new_type('trace')
-        at.mimetype='application/x-advene-structured'
-        at.title='Trace'
+        at = self.ensure_new_type('trace', title='Trace', mimetype='application/x-advene-structured')
         at.setMetaData(config.data.namespace, "representation", "here/content/parsed/type")
         self.convert(self.iterator(f))
         self.progress(1.0)

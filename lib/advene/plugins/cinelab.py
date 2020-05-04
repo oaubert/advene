@@ -184,9 +184,9 @@ class CinelabImporter(GenericImporter):
             at = self.package.get_element_by_id(node.attrib['id'])
             if at is None:
                 # Not yet created
-                at = self.ensure_new_type(node.attrib['id'])
-            at.title = meta(node, 'dc:title')
-            at.setMetaData(DC, 'description', meta(node, 'dc:description'))
+                at = self.ensure_new_type(node.attrib['id'],
+                                          title = meta(node, 'dc:title'),
+                                          description = meta(node, 'dc:description'))
             color = meta(node, 'cinelab:color')
             if color:
                 at.setMetaData(ADVENE, 'color', 'string:' + color)

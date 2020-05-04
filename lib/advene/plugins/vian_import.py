@@ -88,13 +88,11 @@ class VIANImporter(GenericImporter):
             progress += incr
 
             self.progress(progress, f"Converting segmentation {segmentation['name']}")
-            new_atype = self.ensure_new_type(
-                segmentation['unique_id'],
-                title = segmentation['name'])
-            # FIXME: should get it from first segment?
-            new_atype.mimetype = 'text/plain'
-            new_atype.setMetaData(config.data.namespace, "description",
-                                  segmentation['notes'])
+            new_atype = self.ensure_new_type(segmentation['unique_id'],
+                                             title = segmentation['name'],
+                                             # FIXME: should get it from first segment?
+                                             mimetype = 'text/plain',
+                                             description = segmentation['notes'])
 
             for segment in segmentation['segments']:
                 an = {
@@ -109,9 +107,8 @@ class VIANImporter(GenericImporter):
                 yield an
 
         # We also have to collect the screenshots to map to the classification
-        new_atype = self.ensure_new_type(
-            'screenshot',
-            title='Screenshot')
+        new_atype = self.ensure_new_type('screenshot',
+                                         title='Screenshot')
         for scr in vian['screenshots']:
             annotation_cache[scr['unique_id']] = {
                 "type": new_atype,
@@ -148,10 +145,9 @@ class VIANImporter(GenericImporter):
             progress += incr
 
             self.progress(progress, f"Converting experiment {expe['name']}")
-            new_atype = self.ensure_new_type(
-                expe['unique_id'],
-                title = f"Experiment {expe['name']}")
-            new_atype.mimetype = 'text/x-advene-keyword-list'
+            new_atype = self.ensure_new_type(expe['unique_id'],
+                                             title = f"Experiment {expe['name']}",
+                                             mimetype = 'text/x-advene-keyword-list')
 
             # Again, VIAN keywords are composites of a VocabularyWord and a ClassificationObject
             # We now collect the classification objects from this experiment, an store them globally

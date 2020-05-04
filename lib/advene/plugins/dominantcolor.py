@@ -91,8 +91,9 @@ class DominantColorImporter(GstImporter):
         return True
 
     def setup_importer(self, filename):
-        at = self.ensure_new_type('dominant_color', title=_("Dominant color"))
-        at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Dominant color"))
+        at = self.ensure_new_type('dominant_color',
+                                  title=_("Dominant color"),
+                                  description=_("Dominant color"))
         at.setMetaData(config.data.namespace, "item_color", "here/content/data")
 
         return "videoconvert ! videoscale ! video/x-raw,width=80 ! frei0r-filter-pixeliz0r block-height=1 block_width=1 ! videoscale ! video/x-raw,format=ARGB,width=1"

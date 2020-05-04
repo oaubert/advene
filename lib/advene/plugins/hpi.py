@@ -191,10 +191,9 @@ class HPIImporter(GenericImporter):
             # Dict indexed by entity type name
             new_atypes = {}
         else:
-            new_atype = self.ensure_new_type(
-                "concept_%s" % self.source_type_id,
-                title = _("Concepts for %s" % (self.source_type_id)))
-            new_atype.mimetype = 'application/json'
+            new_atype = self.ensure_new_type("concept_%s" % self.source_type_id,
+                                             title = _("Concepts for %s" % (self.source_type_id)),
+                                             mimetype = 'application/json')
             new_atype.setMetaData(config.data.namespace, "representation",
                                   'here/content/parsed/label')
         if self.create_relations:
@@ -288,8 +287,9 @@ class HPIImporter(GenericImporter):
                 new_atype = new_atypes.get(label_id)
                 if new_atype is None:
                    # Not defined yet. Create a new one.
-                   new_atype = self.ensure_new_type(label_id, title = _("%s concept" % label))
-                   new_atype.mimetype = 'application/json'
+                   new_atype = self.ensure_new_type(label_id,
+                                                    title = _("%s concept" % label),
+                                                    mimetype = 'application/json')
                    new_atype.setMetaData(config.data.namespace, "representation",
                                          'here/content/parsed/label')
                    new_atypes[label_id] = new_atype

@@ -153,9 +153,9 @@ class PocketSphinxImporter(GenericImporter):
     def async_process_file(self, filename, end_callback=None):
         self.end_callback = end_callback
 
-        at = self.ensure_new_type('speech', title=_("Speech"))
-        at.mimetype = 'text/plain'
-        at.setMetaData(config.data.namespace_prefix['dc'], "description", _("Recognized speech"))
+        at = self.ensure_new_type('speech', title=_("Speech"),
+                                  mimetype='text/plain',
+                                  description=_("Recognized speech"))
 
         if self.use_default_model:
             args = ""
