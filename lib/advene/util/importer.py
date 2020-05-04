@@ -295,7 +295,7 @@ class GenericImporter(object):
     def update_statistics(self, elementtype):
         self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
 
-    def ensure_new_type(self, prefix="at_converted", title="Converted data", schemaid=None):
+    def ensure_new_type(self, prefix="at_converted", title="Converted data", schemaid=None, mimetype=None, description=None):
         """Create a new type.
         """
         l=[ at.id for at in self.package.annotationTypes ]
@@ -316,7 +316,7 @@ class GenericImporter(object):
         s = self.create_schema(id_=schemaid, title=schemaid)
         if not isinstance(s, Schema):
             raise Exception("Error during conversion: %s is not a schema" % schemaid)
-        self.defaulttype=self.create_annotation_type(s, atid, title=title)
+        self.defaulttype = self.create_annotation_type(s, atid, title=title, mimetype=mimetype, description=description)
         return self.defaulttype
 
     def create_annotation_type (self, schema, id_, author=None, date=None, title=None,
@@ -445,6 +445,7 @@ class GenericImporter(object):
         The following keys are optional:
           - id
           - type (can be an annotation-type instance or a type-id)
+          - mimetype (used when specifying a type-id)
           - notify: if True, then each annotation creation will generate a AnnotationCreate signal
           - complete: boolean. Used to mark the completeness of the annotation.
           - send: yield should return the created annotation
@@ -492,7 +493,7 @@ class GenericImporter(object):
                     type_ = self.package.get_element_by_id(type_id)
                     if type_ is None:
                         # Not existing, create it.
-                        type_ = self.ensure_new_type(type_id, title=type_id)
+                        type_ = self.ensure_new_type(type_id, title=type_id, mimetype=d.get('mimetype', None))
                     elif not isinstance(type_, AnnotationType):
                         raise Exception("Error during import: the specified type id %s is not an annotation type" % type_id)
             except KeyError:
