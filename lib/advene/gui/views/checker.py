@@ -28,12 +28,10 @@ from gettext import gettext as _
 import advene.core.config as config
 import advene.gui.util.dialog as dialog
 from advene.gui.views import AdhocView
-from advene.gui.views.table import AnnotationTable, GenericTable, COLUMN_CUSTOM_FIRST
+from advene.gui.views.table import AnnotationTable, GenericTable
 import advene.gui.views.table
 import advene.util.helper as helper
 
-
-name="Checker view plugin"
 
 CHECKERS = {}
 def register_checker(checker):
@@ -45,9 +43,6 @@ def get_checker(name):
     """Return the checker corresponding to name.
     """
     return CHECKERS.get(name)
-
-def register(controller):
-    controller.register_viewclass(CheckerView)
 
 class FeatureChecker(object):
     """API for feature checking.

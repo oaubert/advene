@@ -102,6 +102,7 @@ from advene.gui.util.playpausebutton import PlayPauseButton
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
 from advene.gui.views import AdhocViewParametersParser
+import advene.gui.views.checker
 import advene.gui.views.timeline
 import advene.gui.views.table
 import advene.gui.views.logwindow
@@ -482,6 +483,8 @@ class AdveneGUI(object):
                 self.gui_plugins.extend(l)
             except OSError:
                 logger.error("OSerror while trying to load %s plugins" % n)
+        # Explicitly register checker view (which is no longer a plugin)
+        self.register_viewclass(advene.gui.views.checker.CheckerView)
 
         def update_quicksearch_sources(mi):
             """Display a dialog allowing to edit quicksearch-sources setting.
