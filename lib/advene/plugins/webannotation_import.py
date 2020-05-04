@@ -106,7 +106,8 @@ class WebAnnotationImporter(GenericImporter):
         step = 1.0 / len(items)
         self.progress(progress, "Starting conversion")
         for i in items:
-            if i.get('@type') != 'Annotation':
+            if not (i.get('@type') == 'Annotation'
+                    or i.get('type') == 'Annotation'):
                 logger.debug("Not an annotation")
                 continue
             # Check that it is a media annotation
