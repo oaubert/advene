@@ -253,12 +253,12 @@ class AdAChecker(FeatureChecker):
     def build_widget(self):
         self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, ))
         column = self.table.columns['custom0']
-        column.props.title = _("Undef. keywords")
+        column.props.title = _("Error")
         self.widget = Gtk.VBox()
         b = Gtk.Button("Update")
         b.connect('clicked', lambda i: self.update_view())
         self.widget.pack_start(b, False, False, 0)
-        self.widget.pack_start(self.table.widget, False, False, 0)
+        self.widget.pack_start(self.table.widget, True, True, 0)
         return self.widget
 
     def update_model(self, package=None):
