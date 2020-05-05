@@ -337,7 +337,7 @@ class AnnotationTable(AdhocView):
                                       COLUMN_COLOR)
 
         # Resizable columns: content, type
-        for name in ('content', 'type', 'snapshot'):
+        for name in ('content', 'type', 'snapshot', *[ c[0] for c in custom_cols ]):
             columns[name].set_sizing(Gtk.TreeViewColumnSizing.FIXED)
             columns[name].set_resizable(True)
             columns[name].set_min_width(40)
