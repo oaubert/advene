@@ -31,7 +31,6 @@ notifications and actions triggering.
 import logging
 logger = logging.getLogger(__name__)
 
-import cgi
 from gi.repository import GObject
 import itertools
 import json
@@ -43,7 +42,7 @@ import socket
 import shlex
 import sys
 import time
-from urllib.parse import urljoin
+from urllib.parse import urljoin, parse_qsl
 from urllib.request import urlopen
 import urllib.parse, urllib.error
 import webbrowser
@@ -1966,7 +1965,7 @@ class AdveneController(object):
         # Parse tag_colors attribute
         cols = self.package.getMetaData (config.data.namespace, "tag_colors")
         if cols:
-            d = dict(cgi.parse_qsl(cols))
+            d = dict(parse_qsl(cols))
         else:
             d={}
         self.package._tag_colors=d
