@@ -31,8 +31,8 @@ import re
 engine=None
 try:
     import gi
-    gi.require_version('WebKit', '3.0')
-    from gi.repository import WebKit
+    gi.require_version('WebKit2', '4.0')
+    from gi.repository import WebKit2
     engine='webkit'
 except ImportError:
     pass
@@ -56,11 +56,31 @@ class webkit_wrapper:
         return True
 
     def set_url(self, url):
-        self.component.open(url)
+        self.component.load_uri(url)
         return True
 
+    def on_load_changed(self, view, event):
+        if event == WebKit2.LoadEvent.STARTED:
+            self.notify(label=f"Loading  {view.get_title() or ''} - {view.get_uri()}")
+        elif event == WebKit2.LoadEvent.FINISHED:
+            self.notify(label=f"Loaded {view.get_title() or ''}",
+                        url=view.get_uri())
+        else:
+            self.notify(label="Loading...  {:0.1f}%"
+                        .format(view.get_estimated_load_progress()))
+
+    def on_load_failed(self, view, event, url, error):
+        self.notify(label=f"Error loading {url} - {error}")
+
+    def on_mouse_target_changed(self, view, hit_test, mods):
+        if hit_test.context_is_link():
+            self.notify(label=hit_test.get_link_uri())
+
     def build_widget(self):
-        w = WebKit.WebView()
+        w = WebKit2.WebView()
+        w.connect('load-changed', self.on_load_changed)
+        w.connect('load-failed', self.on_load_failed)
+        w.connect('mouse-target-changed', self.on_mouse_target_changed)
 
         def update_location(url):
             l=urllib.parse.urlparse(url)
@@ -78,75 +98,7 @@ class webkit_wrapper:
                 self.notify(label=c.get_link_message())
             return False
 
-        def _loading_start_cb(view, frame):
-            self.notify(label="Loading  %s - %s" % (frame.get_title(),
-                                                        frame.get_uri()))
-
-        def _loading_stop_cb(view, frame):
-            update_location(frame.get_uri() or "")
-            pass
-
-        def _loading_progress_cb(view, progress):
-            self.notify(label=_("%s%% loaded") % progress)
-
-        def _title_changed_cb(widget, frame, title):
-            self.notify(label=_("Title %s") % title)
-
-        def _hover_link_cb(view, title, url):
-
-            if not (view and url):
-                url=''
-            self.notify(label=url)
-
-        def _statusbar_text_changed_cb(view, text):
-            #if text:
-            self.notify(label=text)
-
-        def _icon_loaded_cb(self, *p):
-            logger.info("icon loaded")
-
-        def _selection_changed_cb(self):
-            logger.info("selection changed")
-
-        def _navigation_requested_cb(view, frame, networkRequest):
-            return 1
-
-        def _javascript_console_message_cb(view, message, line, sourceid):
-            pass
-
-        def _javascript_script_alert_cb(view, frame, message):
-            pass
-
-        def _javascript_script_confirm_cb(view, frame, message, isConfirmed):
-            pass
-
-        def _javascript_script_prompt_cb(view, frame,
-                                         message, default, text):
-            pass
-
-        w.connect('load-started', _loading_start_cb)
-        w.connect('load-progress-changed', _loading_progress_cb)
-        w.connect('load-finished', _loading_stop_cb)
-        w.connect("title-changed", _title_changed_cb)
-        w.connect("hovering-over-link", _hover_link_cb)
-        w.connect("status-bar-text-changed",
-                              _statusbar_text_changed_cb)
-        w.connect("icon-loaded", _icon_loaded_cb)
-        w.connect("selection-changed", _selection_changed_cb)
-        #w.connect("set-scroll-adjustments",
-        #                      _set_scroll_adjustments_cb)
-        #w.connect("populate-popup", _populate_popup)
-
-        w.connect("console-message",
-                              _javascript_console_message_cb)
-        w.connect("script-alert",
-                              _javascript_script_alert_cb)
-        w.connect("script-confirm",
-                              _javascript_script_confirm_cb)
-        w.connect("script-prompt",
-                              _javascript_script_prompt_cb)
-
-        self.component=w
+        self.component = w
         s=Gtk.ScrolledWindow()
         s.add(w)
 
