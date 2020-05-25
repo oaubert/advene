@@ -74,7 +74,8 @@ class SoundEnveloppeImporter(GstImporter):
         self.min = sys.maxsize
         self.max = -sys.maxsize
         self.first_item_time = 0
-        self.lastval = 0
+        # initial value (in dB).
+        self.lastval = self.lower_db_limit
 
     def generate_normalized_annotations(self):
         n = 1.0 * len(self.buffer_list)
@@ -112,11 +113,13 @@ class SoundEnveloppeImporter(GstImporter):
             v = val[0]
             if len(val) > 1:
                 if self.channel == 'right':
-                    val = val[1]
+                    v = val[1]
                 elif self.channel == 'both':
-                    val = (val[0] + val[1]) / 2
-            if isinf(v) or isnan(v) or v < self.lower_db_limit:
+                    v = (val[0] + val[1]) / 2
+            if isinf(v) or isnan(v):
                 v = self.lastval
+            if v < self.lower_db_limit:
+                v = self.lower_db_limit
             if v < self.min:
                 self.min = v
             elif v > self.max:
