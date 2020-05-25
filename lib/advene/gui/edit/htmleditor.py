@@ -424,6 +424,7 @@ class HTMLEditor(textview_class, HTMLParser):
             pixbuf=GdkPixbuf.Pixbuf.new_from_xpm_data(broken_xpm)
         pixbuf._tag=tag
         pixbuf._attr=attr
+        pixbuf._alt=alt
         self.insert_pixbuf(pixbuf)
 
     def register_class_parser(self, p):
@@ -555,10 +556,6 @@ class HTMLEditor(textview_class, HTMLParser):
         i=b.get_start_iter()
         textstart=i.copy()
 
-        # We add an index for every startmark, so that we can close
-        # the corresponding endmarks with the right order
-        index=0
-
         self._last_endtag=None
 
         def output_text(fr, to, tag):
@@ -633,10 +630,6 @@ class HTMLEditor(textview_class, HTMLParser):
         b=self.__tb
         i=b.get_start_iter()
         textstart=i.copy()
-
-        # We add an index for every startmark, so that we can close
-        # the corresponding endmarks with the right order
-        index=0
 
         self._last_endtag=None
 
