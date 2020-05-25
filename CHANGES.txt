@@ -1,3 +1,28 @@
+advene (3.8) unstable; urgency=medium
+
+  * Settings directory is now called "Advene3" on Windows and MacOSX, to
+    avoid confusion with previous versions of Advene. It was already
+    different on Linux. Your preferences will be reset.
+
+  * Video fragments can be extracted from annotations, annotation types or video montages.
+
+  * New checker comparing annotation content-types to their type's content-type.
+
+  * New GstImporter generic API, facilitating the definition of
+    video-processing plugins based on Gstreamer.
+
+  * New VIAN importer.
+
+  * New WebAnnotation importer.
+
+  * New shot detection algorithm based on Gstreamer's scenechange. It is
+    called "Scene change detection". The ShotDetect based algorithm is
+    still available.
+
+  * Update the HTML component to WebKit2 to be compatible with Ubuntu20
+
+ --
+
 advene (3.7) unstable; urgency=medium
 
   * Various bug fixes
