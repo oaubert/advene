@@ -373,8 +373,11 @@ class AnnotationWidget(GenericColorButtonWidget):
         return (self.container.unit2pixel(self.annotation.fragment.duration),
                 self.container.get_element_height(self.annotation))
 
-    def draw(self, context, width, height):
+    def draw(self, context, width, height, renderer=None):
         """Draw the widget in the cache pixmap.
+
+        renderer can be either 'svg' (for svg content), 'bar' for
+        numeric values, 'wave' for waveforms
         """
         try:
             context.rectangle(0, 0, width, height)
@@ -398,9 +401,21 @@ class AnnotationWidget(GenericColorButtonWidget):
         context.set_source_rgba(*rgba)
         context.fill_preserve()
 
+        if renderer is None:
+            # Set default renderer
+            if self.annotation.content.mimetype == 'application/x-advene-values':
+                if self.annotation.type.id.startswith('sound') or self.annotation.type.id == 'Volume':
+                    renderer = 'wave'
+                else:
+                    renderer = 'bar'
+            elif self.annotation.content.mimetype == 'image/svg+xml' and Rsvg is not None:
+                renderer = 'svg'
+            else:
+                renderer = 'text'
+
         # FIXME: if we have other specific renderings for different
         # mimetypes, we will have to implement a plugin system
-        if self.annotation.content.mimetype == 'application/x-advene-values':
+        if renderer in ('bar', 'wave'):
             # Finalize the rectangle
             context.stroke()
             if width < 1:
@@ -411,23 +426,39 @@ class AnnotationWidget(GenericColorButtonWidget):
             l=[ (1 - v / 100.0) for v in self.annotation.content.parsed() ]
             s=len(l)
             if not s:
+                # Nothing to draw
                 return
+
             if width < s:
                 # There are more samples than available pixels. Downsample the data
+                # FIXME: downsample by picking values or take the mean?
                 l=l[::int(s/width)+1]
                 s=len(l)
-            w=1.0 * width / s
+
+            w = 1.0 * width / s
             c = 0
             context.set_source_rgba(0, 0, 0, .5)
-            context.move_to(0, height)
-            for v in l:
-                context.line_to(int(c), int(height * v))
-                c += w
-                context.line_to(int(c), int(height * v))
-            context.line_to(int(c), height)
+
+            if renderer == 'wave':
+                context.set_line_width(w + 1)
+                c = w / 2
+                for v in l:
+                    context.move_to(int(c), int(height * (0.5 - v / 2)))
+                    context.line_to(int(c), int(height * (0.5 + v / 2)))
+                    c += w
+                context.stroke()
+            else:
+                # bar normally
+                context.move_to(0, height)
+                for v in l:
+                    context.line_to(int(c), int(height * v))
+                    c += w
+                    context.line_to(int(c), int(height * v))
+                context.line_to(int(c), height)
+
             context.fill()
             return
-        elif self.annotation.content.mimetype == 'image/svg+xml' and Rsvg is not None:
+        elif renderer == 'svg':
             if width < 6:
                 return
             if self.annotation.content.data:
@@ -440,36 +471,38 @@ class AnnotationWidget(GenericColorButtonWidget):
                 except Exception:
                     logger.error("Error when rendering SVG timeline component for %s", self.annotation.id, exc_info=True)
             return
-
-        # Draw the border
-        context.set_source_rgba(0, 0, 0, self.alpha)
-        if self.is_focus():
-            context.set_line_width(4)
         else:
-            context.set_line_width(1)
-        context.stroke()
+            # Generic text rendering
 
-        # Do not draw text if the widget is too small anyway
-        if width < 10:
-            return
+            # Draw the border
+            context.set_source_rgba(0, 0, 0, self.alpha)
+            if self.is_focus():
+                context.set_line_width(4)
+            else:
+                context.set_line_width(1)
+            context.stroke()
 
-        # Draw the text
-        if self.annotation.relations:
-            slant=cairo.FONT_SLANT_ITALIC
-        else:
-            slant=cairo.FONT_SLANT_NORMAL
-        context.select_font_face("sans-serif",
-                                 slant, cairo.FONT_WEIGHT_NORMAL)
-        context.set_font_size(config.data.preferences['timeline']['font-size'])
+            # Do not draw text if the widget is too small anyway
+            if width < 10:
+                return
 
-        context.move_to(2, int(height * 0.7))
+            # Draw the text
+            if self.annotation.relations:
+                slant=cairo.FONT_SLANT_ITALIC
+            else:
+                slant=cairo.FONT_SLANT_NORMAL
+            context.select_font_face("sans-serif",
+                                     slant, cairo.FONT_WEIGHT_NORMAL)
+            context.set_font_size(config.data.preferences['timeline']['font-size'])
 
-        context.set_source_rgba(0, 0, 0, self.alpha)
-        title=str(self.controller.get_title(self.annotation))
-        try:
-            context.show_text(title)
-        except MemoryError:
-            logger.error("MemoryError while rendering title for annotation %s", self.annotation.id, exc_info=True)
+            context.move_to(2, int(height * 0.7))
+
+            context.set_source_rgba(0, 0, 0, self.alpha)
+            title=str(self.controller.get_title(self.annotation))
+            try:
+                context.show_text(title)
+            except MemoryError:
+                logger.error("MemoryError while rendering title for annotation %s", self.annotation.id, exc_info=True)
 
         if self._fraction_marker is not None:
             x=int(self._fraction_marker * width)
