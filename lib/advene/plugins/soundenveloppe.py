@@ -121,9 +121,9 @@ class SoundEnveloppeImporter(GstImporter):
         return True
 
     def setup_importer(self, filename):
-        at = self.ensure_new_type('sound_enveloppe',
-                                  title=_("Sound enveloppe"),
-                                  mimetype = 'application/x-advene-values',
-                                  description = _("Sound enveloppe"))
+        self.ensure_new_type('sound_enveloppe',
+                             title=_("Sound enveloppe"),
+                             mimetype = 'application/x-advene-values',
+                             description = _("Sound enveloppe"))
 
         return "audioconvert ! level name=level interval=%s" % str(self.interval * Gst.MSECOND)
