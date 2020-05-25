@@ -150,7 +150,7 @@ class HTMLEditor(textview_class, HTMLParser):
          __tags as a list of tags in the text and present their
          positions so we can allocate the formatting.
         """
-        textview_class.__init__(*cnf, **kw)
+        textview_class.__init__(self, *cnf, **kw)
         HTMLParser.__init__(self)
         if GtkSource is not None:
             self.set_buffer(GtkSource.Buffer())
