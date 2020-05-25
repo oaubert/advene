@@ -46,6 +46,7 @@ class SoundEnveloppeImporter(GstImporter):
         # Max. number of samples in an annotation
         self.count = 1000
         self.channel = 'both'
+        self.value = 'peak'
 
         # Lower bound for db values, to avoid a too large value range
         self.lower_db_limit = -80
@@ -60,6 +61,12 @@ class SoundEnveloppeImporter(GstImporter):
         self.optionparser.add_option("-c", "--channel",
                                      action="store", type="choice", dest="channel", choices=("both", "left", "right"), default=self.channel,
                                      help=_("Channel selection."))
+        self.optionparser.add_option("-v", "--value",
+                                     action="store", type="choice", dest="value", choices=("rms", "peak"), default=self.channel,
+                                     help=_("Value to consider (peak or RMS)."))
+        self.optionparser.add_option("-l", "--lower-db-limit",
+                                     action="store", type="int", dest="lower_db_limit", default=self.lower_db_limit,
+                                     help=_("Lower dB limit"))
 
         ## Internal data structures
         self.buffer = []
@@ -100,13 +107,14 @@ class SoundEnveloppeImporter(GstImporter):
         if message.get_name() == 'level':
             if not self.buffer:
                 self.first_item_time = message['stream-time'] / Gst.MSECOND
-            rms = message['rms']
-            v = rms[0]
-            if len(rms) > 1:
+
+            val = message[self.value]
+            v = val[0]
+            if len(val) > 1:
                 if self.channel == 'right':
-                    v = rms[1]
+                    val = val[1]
                 elif self.channel == 'both':
-                    v = (rms[0] + rms[1]) / 2
+                    val = (val[0] + val[1]) / 2
             if isinf(v) or isnan(v) or v < self.lower_db_limit:
                 v = self.lastval
             if v < self.min:
