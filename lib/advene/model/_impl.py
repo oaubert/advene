@@ -426,15 +426,18 @@ class Ided:
     def _set_id (element, value):
         element.setAttributeNS(None, "id", str(value))
 
+
+class __dummy:
+    def __init__(self, uri):
+        self.__uri = uri
+
+    def getUri(self, absolute=True, context=None):
+        return self.__uri
+
+
 class Uried(Ided):
     """An implementation for the id property interpreted as a URI fragment.
     """
-
-    class __dummy:
-        def __init__(self, uri):
-            self.__uri = uri
-        def getUri(self, absolute=True, context=None):
-            return self.__uri
 
     def __init__(self, base_uri="", parent=None):
         """The constructor of URIed takes either a base_uri parameter
