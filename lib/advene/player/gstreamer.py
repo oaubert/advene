@@ -393,7 +393,7 @@ class Player:
             self.fullres_snapshotter.set_uri(self.player.get_property('uri'))
         self.fullres_snapshot_callback = callback
         if not self.fullres_snapshotter.thread_running:
-                self.fullres_snapshotter.start()
+            self.fullres_snapshotter.start()
         self.fullres_snapshotter.enqueue(position)
 
     def snapshot_taken(self, data):
@@ -491,7 +491,7 @@ class Player:
         if position is None:
             position = 0
 
-        if status == "start" or status == "seek" or status == "seek_relative":
+        if status in ("start", "seek", "seek_relative"):
             self.position_update()
             if status == "seek_relative":
                 position = self.current_position() + position
@@ -513,7 +513,7 @@ class Player:
                 self.resume (position)
             elif status == "stop":
                 self.stop (position)
-            elif status == "" or status == None:
+            elif status == "" or status is None:
                 pass
             else:
                 self.log("******* Error : unknown status %s in gstreamer player" % status)
@@ -663,7 +663,7 @@ class Player:
         return
 
     def sound_is_muted(self):
-        return (self.mute_volume is not None)
+        return self.mute_volume is not None
 
     def set_rate(self, rate=1.0):
         if not self.check_uri():
@@ -765,8 +765,8 @@ class Player:
         # number of seps in p1 is # of ..'s needed
         return "../" * p1.count(sep) + p2
 
-    def dump_bin(self, bin, depth=0, recurse=-1, showcaps=True):
-        return [ l  for e in reversed(list(bin.iterate_elements())) for l in self.dump_element(e, depth, recurse - 1) ]
+    def dump_bin(self, gbin, depth=0, recurse=-1, showcaps=True):
+        return [ l  for e in reversed(list(gbin.iterate_elements())) for l in self.dump_element(e, depth, recurse - 1) ]
 
     def dump_element(self, e, depth=0, recurse=-1, showcaps=True):
         ret=[]
@@ -786,36 +786,48 @@ class Player:
 
             # negotiated capabilities
             caps = p.get_current_caps()
-            if caps: capsname = caps.get_structure(0).get_name()
-            elif showcaps: capsname = '; '.join(s.to_string() for s in set(p.get_current_caps() or []))
-            else: capsname = None
+            if caps:
+                capsname = caps.get_structure(0).get_name()
+            elif showcaps:
+                capsname = '; '.join(s.to_string() for s in set(p.get_current_caps() or []))
+            else:
+                capsname = None
 
             # flags
             flags = []
-            if not p.is_active(): flags.append('INACTIVE')
-            if p.is_blocked(): flags.append('BLOCKED')
+            if not p.is_active():
+                flags.append('INACTIVE')
+            if p.is_blocked():
+                flags.append('BLOCKED')
 
             # direction
-            direc = (p.get_direction() is Gst.PadDirection.SRC) and "=>" or "<="
+            direc = "=>" if p.get_direction() is Gst.PadDirection.SRC else "<="
 
             # peer
             peer = p.get_peer()
-            if peer: peerpath = self.relpath(path, peer.get_path_string())
-            else: peerpath = None
+            if peer:
+                peerpath = self.relpath(path, peer.get_path_string())
+            else:
+                peerpath = None
 
             # ghost target
             if isinstance(p, Gst.GhostPad):
                 target = p.get_target()
-                if target: ghostpath = target.get_path_string()
-                else: ghostpath = None
+                if target:
+                    ghostpath = target.get_path_string()
+                else:
+                    ghostpath = None
             else:
                 ghostpath = None
 
             line=[ indentstr, "    " ]
-            if flags: line.append( ','.join(flags) )
+            if flags:
+                line.append( ','.join(flags) )
             line.append(".%s" % name)
-            if capsname: line.append( '[%s]' % capsname )
-            if ghostpath: line.append( "ghosts %s" % self.relpath(path, ghostpath) )
+            if capsname:
+                line.append( '[%s]' % capsname )
+            if ghostpath:
+                line.append( "ghosts %s" % self.relpath(path, ghostpath) )
             line.append( "%s %s" % (direc, peerpath) )
 
             #if peerpath and peerpath.find('proxy')!=-1: print peer
@@ -826,4 +838,3 @@ class Player:
 
     def str_element(self, element):
         return "\n".join(self.dump_element(element))
-

@@ -24,7 +24,7 @@ from advene.gui.views.browser import Browser
 from advene.util.tools import is_valid_tales
 from advene.gui.util import dialog
 
-re_tales=re.compile('^\$\{([^}]+)\}\s*$')
+re_tales=re.compile(r'^\$\{([^}]+)\}\s*$')
 
 class TALESEntry:
     """TALES expression entry widget.
@@ -160,4 +160,3 @@ class TALESEntry:
                           callback=callback)
         browser.popup()
         return True
-

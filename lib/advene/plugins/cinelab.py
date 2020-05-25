@@ -75,6 +75,7 @@ def register(controller=None):
 class CinelabImporter(GenericImporter):
     name = _("Cinelab importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -85,7 +86,6 @@ class CinelabImporter(GenericImporter):
         elif fname.endswith('.xml') or fname.endswith('.zip'):
             return 30
         return 0
-    can_handle=staticmethod(can_handle)
 
     def tempfile(self, *names):
         """Return a tempfile name.
@@ -111,9 +111,9 @@ class CinelabImporter(GenericImporter):
         try:
             typ = z.read('mimetype')
         except KeyError:
-            raise AdveneException(_("File %s is not an Advene2 zip package.") % self.file_)
+            raise AdveneException(_("File %s is not an Advene2 zip package.") % fname)
         if typ != MIMETYPE:
-            raise AdveneException(_("File %s is not an Advene2 zip package.") % self.file_)
+            raise AdveneException(_("File %s is not an Advene2 zip package.") % fname)
 
         # The file is an advene2 zip package. We can extract its contents
         # to a temporary directory

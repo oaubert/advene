@@ -380,9 +380,9 @@ class AnnotationTypePlaceholder:
 
     def build_pixbuf(self):
         pixbuf = self.render_text(_("Rendering type %(type)s as %(presentation)s") % {
-                'type': self.controller.get_title(self.annotationtype),
-                'presentation': self.presentation[0],
-                })
+            'type': self.controller.get_title(self.annotationtype),
+            'presentation': self.presentation[0],
+        })
         pixbuf.as_html=self.as_html
         pixbuf._placeholder=self
         pixbuf._tag='span'
@@ -391,16 +391,15 @@ class AnnotationTypePlaceholder:
 
 class HTMLContentHandler (ContentHandler):
     """Create a HTML edit form for the given element."""
+    @staticmethod
     def can_handle(mimetype):
         res=0
         if mimetype == 'text/html':
             res=90
         return res
-    can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, parent=None, **kw):
-        self.element = element
-        self.controller=controller
+        super().__init__(element, controller)
         self.parent=parent
         self.editable = True
         self.fname=None
@@ -459,7 +458,7 @@ class HTMLContentHandler (ContentHandler):
 
     def open_link(self, link=None):
         if link:
-            pos=re.findall('/media/play/(\d+)', link)
+            pos=re.findall(r'/media/play/(\d+)', link)
             if pos:
                 # A position was specified. Directly use it.
                 self.controller.update_status('seek', int(pos[0]))
@@ -524,11 +523,11 @@ class HTMLContentHandler (ContentHandler):
                     return True
                 m=Gtk.Menu()
                 for (title, choice) in (
-                    (_("Snapshot only"), ['link', 'snapshot', ]),
-                    (_("Overlayed snapshot only"), ['link', 'overlay', ]),
-                    (_("Timestamp only"), ['link', 'timestamp', ]),
-                    (_("Snapshot+timestamp"), ['link', 'snapshot', 'timestamp']),
-                    (_("Annotation content"), ['link', 'content']),
+                        (_("Snapshot only"), ['link', 'snapshot', ]),
+                        (_("Overlayed snapshot only"), ['link', 'overlay', ]),
+                        (_("Timestamp only"), ['link', 'timestamp', ]),
+                        (_("Snapshot+timestamp"), ['link', 'snapshot', 'timestamp']),
+                        (_("Annotation content"), ['link', 'content']),
                     ):
                     i=Gtk.MenuItem(title)
                     i.connect('activate', (lambda it, ann, data: self.insert_annotation_content(data, ann, focus=True)), source, choice)
@@ -543,11 +542,11 @@ class HTMLContentHandler (ContentHandler):
                     return True
                 m=Gtk.Menu()
                 for (title, choice) in (
-                    (_("as a list"), [ 'list' ]),
-                    (_("as a grid"), [ 'grid' ]),
-                    (_("as a table"), [ 'table' ]),
-                    (_("as a transcription"), ['transcription' ]),
-                    ):
+                        (_("as a list"), [ 'list' ]),
+                        (_("as a grid"), [ 'grid' ]),
+                        (_("as a table"), [ 'table' ]),
+                        (_("as a transcription"), ['transcription' ]),
+                ):
                     i=Gtk.MenuItem(title)
                     i.connect('activate', (lambda it, at, data: self.insert_annotationtype_content(data, at, focus=True)), source, choice)
                     m.append(i)
@@ -561,7 +560,7 @@ class HTMLContentHandler (ContentHandler):
             self.editor.get_buffer().insert_at_cursor(helper.format_time(t))
             return True
         else:
-            logger.warning("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d", targetType)
         return False
 
     def class_parser(self, tag, attr):
@@ -620,7 +619,7 @@ class HTMLContentHandler (ContentHandler):
             png_data=str(p.imagecache[a.fragment.begin])
             return self.controller.gui.overlay(png_data, svg_data)
 
-        m=re.search('/packages/(.+?)/imagecache/(\d+)', url)
+        m=re.search(r'/packages/(.+?)/imagecache/(\d+)', url)
         if m:
             alias, timestamp = m.groups()
             p=self.controller.packages.get(alias)
@@ -784,16 +783,16 @@ class HTMLContentHandler (ContentHandler):
         vbox.toolbar=tb
         tb.set_style(Gtk.ToolbarStyle.ICONS)
         for (icon, tooltip, action) in (
-            (Gtk.STOCK_BOLD, _("Bold"), lambda i: self.editor.apply_html_tag('b')),
-            (Gtk.STOCK_ITALIC, _("Italic"), lambda i: self.editor.apply_html_tag('i')),
-            ("title_icon.png", _("Header"), display_header_menu),
-            (None, None, None),
-            (Gtk.STOCK_COPY, _("Copy"), sel_copy),
-            (Gtk.STOCK_CUT, _("Cut"), sel_cut),
-            (Gtk.STOCK_PASTE, _("Paste"), sel_paste),
-            (None, None, None),
-            (Gtk.STOCK_REFRESH, _("Refresh"), refresh),
-            ):
+                (Gtk.STOCK_BOLD, _("Bold"), lambda i: self.editor.apply_html_tag('b')),
+                (Gtk.STOCK_ITALIC, _("Italic"), lambda i: self.editor.apply_html_tag('i')),
+                ("title_icon.png", _("Header"), display_header_menu),
+                (None, None, None),
+                (Gtk.STOCK_COPY, _("Copy"), sel_copy),
+                (Gtk.STOCK_CUT, _("Cut"), sel_cut),
+                (Gtk.STOCK_PASTE, _("Paste"), sel_paste),
+                (None, None, None),
+                (Gtk.STOCK_REFRESH, _("Refresh"), refresh),
+        ):
             if not config.data.preferences['expert-mode'] and icon == Gtk.STOCK_REFRESH:
                 continue
             if not icon:

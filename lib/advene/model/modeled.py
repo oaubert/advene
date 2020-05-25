@@ -16,6 +16,8 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+"""An implementation for objects being _views_ of a DOM element.
+"""
 import xml.dom
 
 from .util.uri import urljoin, no_fragment
@@ -28,7 +30,7 @@ from .exception import AdveneException
 
 from .util.auto_properties import auto_properties
 
-class Modeled(object, metaclass=auto_properties):
+class Modeled(metaclass=auto_properties):
     """An implementation for objects being _views_ of a DOM element.
 
        This DOM element is called the _model_ of the object.
@@ -70,7 +72,8 @@ class Modeled(object, metaclass=auto_properties):
         r = []
         for e in self.__model.childNodes:
             if e.nodeType == ELEMENT_NODE:
-                if start == -1: start = i
+                if start == -1:
+                    start = i
             else:
                 r = r + source[start:i]
                 start = -1
@@ -112,15 +115,17 @@ class Modeled(object, metaclass=auto_properties):
             return list_[index]
         return None
 
+    @staticmethod
     def __match(element, matcher):
         if isinstance(matcher, xml.dom.Node):
             return element == matcher
         else:
             return matcher[0] == element.namespaceURI \
                and matcher[1] == element.localName
-    __match = staticmethod(__match)
 
     def getOwnerPackage(self):
+        """Return owner package for element.
+        """
         return self._getParent().getOwnerPackage()
 
     def getRootPackage(self):
@@ -162,8 +167,8 @@ class Importable(Modeled, _impl.Ided, metaclass=auto_properties):
             imports = parent.getOwnerPackage().getImports()
             if pkg_uri not in imports:
                 raise AdveneException(
-                         "Tried to use element from non imported package: %s" %
-                         pkg_uri)
+                    "Tried to use element from non imported package: %s" %
+                    pkg_uri)
             pkg = imports.get(pkg_uri).getPackage()
             self.__access_path.append(pkg)
 
@@ -276,6 +281,7 @@ class Factory:
             raise AdveneException('Can not copy %s in this implementation of DOM' % modeled)
         return e1.cloneNode (deep=True, newOwner=e1.ownerDocument)
 
+    @staticmethod
     def of (theClass):
         class_name = theClass.__name__
         class concreteFactory (Factory):
@@ -297,7 +303,7 @@ class Factory:
                 """
                 if not isinstance (instance, theClass):
                     raise AdveneException("%s is not an instance of %s" %
-                                            (instance, theClass.__name__))
+                                          (instance, theClass.__name__))
                 e = self._make_import_element (instance)
                 return theClass (parent=self, element=e)
 
@@ -308,7 +314,7 @@ class Factory:
                 # TODO: implement default id
                 if not isinstance (instance, theClass):
                     raise AdveneException("%s is not an instance of %s" %
-                                            (instance, theClass.__name__))
+                                          (instance, theClass.__name__))
                 e = self._make_copy_element (instance)
                 e.setAttributeNS (None, 'id', id)
                 return theClass (parent=self, element=e)
@@ -328,5 +334,3 @@ class Factory:
         del concreteFactory._copy
 
         return concreteFactory
-
-    of = staticmethod(of)

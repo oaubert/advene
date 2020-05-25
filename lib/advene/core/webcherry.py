@@ -41,7 +41,7 @@ import sys
 import os
 import re
 import urllib.request, urllib.parse, urllib.error
-import cgi
+import html
 import socket
 import imghdr
 
@@ -56,13 +56,12 @@ from advene.model.fragment import MillisecondFragment
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.resources import Resources
-
 from advene.model.exception import AdveneException
+import advene.util.helper as helper
 
 import simpletal.simpleTAL
 import simpletal.simpleTALES as simpleTALES
 
-import advene.util.helper as helper
 
 DEBUG=True
 class Common:
@@ -259,7 +258,7 @@ class Common:
         status of the media player.
         """
         res=[]
-        if self.controller.player == None:
+        if self.controller.player is None:
             res.append(_("""<h1>No available mediaplayer</h1>"""))
         else:
             self.controller.update_status ()
@@ -595,7 +594,7 @@ class Media(Common):
                 self.activate_stbvid(stbvid)
             except Exception as e:
                 return self.send_error(400, _("Cannot activate stbvid %(stbvid)s: %(error)s") % { 'stbvid': stbvid,
-                                                                                           'error': str(e) })
+                                                                                                  'error': str(e) })
             return self.send_redirect("/application/")
 
     stbv.exposed=True
@@ -685,9 +684,9 @@ class Application(Common):
         c=self.controller
         res.append(_("""<p>Current stbv: %s</p>""") % c.get_title(c.current_stbv))
         res.append(_("""<p>You can activate the following STBV:</p><ul>%s</ul>""")
-                         % "\n".join( [ """<li><a href="/application/stbv/%s">%s</a> (<a href="/media/play/0?stbv=%s">%s</a>)</li>""" %
-                                        (s.id, c.get_title(s), s.id, _("Activate and play"))
-                                        for s in c.get_stbv_list() ] ) )
+                   % "\n".join( [ """<li><a href="/application/stbv/%s">%s</a> (<a href="/media/play/0?stbv=%s">%s</a>)</li>""" %
+                                  (s.id, c.get_title(s), s.id, _("Activate and play"))
+                                  for s in c.get_stbv_list() ] ) )
         return "".join(res)
 
     def index(self):
@@ -695,7 +694,7 @@ class Application(Common):
             self.start_html (_('Application information'), mode='navigation'),
             self.current_stbv(),
             self.current_adhoc() )
-            )
+        )
     index.exposed=True
 
     def stbv(self, *args, **query):
@@ -1008,8 +1007,8 @@ class Admin(Common):
                 ))
         except Exception as e:
             return self.send_error(501, _("""<p>Cannot load package %(alias)s : %(error)s</p>""" % {
-                        'alias': alias,
-                        'error': str(e) }))
+                'alias': alias,
+                'error': str(e) }))
     load.exposed=True
 
     def delete(self, alias):
@@ -1023,8 +1022,8 @@ class Admin(Common):
                 ))
         except Exception as e:
             return self.send_error(501, _("""<p>Cannot delete package %(alias)s : %(error)s</p>""" % {
-                        'alias': alias,
-                        'error': str(e) }
+                'alias': alias,
+                'error': str(e) }
                                           ))
     delete.exposed = True
 
@@ -1041,12 +1040,12 @@ class Admin(Common):
             return "".join((
                 self.start_html (_("Package %s saved") % alias, duplicate_title=True, mode='navigation'),
                 _("""<p>Go to the <a href="/packages/%(alias)s">%(alias)s</a> package, or to the <a href="/packages">package list</a>.""") % { 'alias': alias }
-                ))
+            ))
         except Exception as e:
             return self.send_error(501, _("""<p>Cannot save package %(alias)s : %(error)s</p>""" % {
-                        'alias': alias,
-                        'error': str(e) }
-                                          ))
+                'alias': alias,
+                'error': str(e) }
+            ))
     save.exposed=True
 
     def reset(self):
@@ -1200,7 +1199,7 @@ class Packages(Common):
         # header).
         if 'mode' in query:
             displaymode = query['mode']
-            del (query['mode'])
+            del query['mode']
         if isinstance(objet, bytes) and self.image_type (objet) is not None:
             displaymode = 'image'
 
@@ -1259,22 +1258,22 @@ class Packages(Common):
                 res.append(_("""<p>There was an error in the template code.</p>
                 <p>Tag name: <strong>%(tagname)s</strong></p>
                 <p>Error message: <em>%(message)s</em></p>""") % {
-                        'tagname': cgi.escape(e.location),
-                        'message': e.errorDescription} )
+                    'tagname': html.escape(e.location),
+                    'message': e.errorDescription} )
                 return res
             except simpleTALES.ContextContentException as e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>An invalid character is in the Context:</p>
                 <p>Error message: <em>%(error)s</em></p><pre>%(message)s</pre>""")
-                                 % {'error': e.errorDescription,
-                                    'message': e.args[0]})
+                           % {'error': e.errorDescription,
+                              'message': e.args[0]})
                 return res
             except AdveneException as e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error in the TALES expression.</p>
-                <pre>%s</pre>""") % cgi.escape(e.args[0]))
+                <pre>%s</pre>""") % html.escape(e.args[0]))
                 return res
         else:
             mimetype=None
@@ -1299,14 +1298,14 @@ class Packages(Common):
             except AdveneException as e:
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error.</p>
-                <pre>%s</pre>""") % cgi.escape(str(e.args[0]).encode('utf-8')))
+                <pre>%s</pre>""") % html.escape(str(e.args[0]).encode('utf-8')))
             except simpletal.simpleTAL.TemplateParseException as e:
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error in the template code.</p>
                 <p>Tag name: <strong>%(tagname)s</strong></p>
                 <p>Error message: <em>%(message)s</em></p>""") % {
-                            'tagname': cgi.escape(e.location),
-                            'message': e.errorDescription})
+                    'tagname': html.escape(e.location),
+                    'message': e.errorDescription})
 
         # Generating navigation footer
         if displaymode == 'navigation' and 'html' in cherrypy.response.headers['Content-type']:
@@ -1331,8 +1330,8 @@ class Packages(Common):
             Next level :
             <select name="path" onchange="submit()">
             """) % {
-                    'location': self.location_bar (),
-                    'levelup': levelup})
+                'location': self.location_bar (),
+                'levelup': levelup})
 
             if hasattr (objet, 'view'):
                 res.append ("<option selected>view</option>")
@@ -1361,9 +1360,9 @@ class Packages(Common):
             res.append (_("""<hr>
             <p>Evaluating expression "<strong>%(expression)s</strong>" on package %(uri)s returns %(value)s</p>
             """) % {
-                    'expression': tales ,
-                    'uri': p.uri,
-                    'value': cgi.escape(str(type(objet)))})
+                'expression': tales ,
+                'uri': p.uri,
+                'value': html.escape(str(type(objet)))})
         return res
 
     def default(self, *args, **query):
@@ -1406,14 +1405,14 @@ class Packages(Common):
             else:
                 # If the submit was done automatically on "path" modification,
                 # the view field will exist but be empty, so delete it
-                del(query['view'])
+                del query['view']
 
         if 'path' in query:
             # Append the given path to the current URL
             p="/".join( (cherrypy.url(), query['path']) )
             if query['path'].find ('..') != -1:
                 p = os.path.normpath (p)
-            del(query['path'])
+            del query['path']
             if len(query) == 0:
                 location = p
             else:
@@ -1440,13 +1439,13 @@ class Packages(Common):
             res.append(_("""<p>There was an error in the template code.</p>
             <p>Tag name: <strong>%(tagname)s</strong></p>
             <p>Error message: <em>%(message)s</em></p>""") % {
-                        'tagname': cgi.escape(e.location),
-                        'message': e.errorDescription })
+                'tagname': html.escape(e.location),
+                'message': e.errorDescription })
         except AdveneException as e:
             res=[ self.start_html(_("Error")) ]
             res.append(_("<h1>Error</h1>"))
             res.append(_("""<p>There was an error in the expression.</p>
-            <pre>%s</pre>""") % cgi.escape(str(e.args[0]).encode('utf-8')))
+            <pre>%s</pre>""") % html.escape(str(e.args[0]).encode('utf-8')))
         except:
             # FIXME: should use standard Cherrypy error handling.
             t, v, tr = sys.exc_info()
@@ -1457,11 +1456,11 @@ class Packages(Common):
             %(type)s
             %(value)s
             %(traceback)s</pre>""") % {
-                    'expr': tales,
-                    'package': pkgid,
-                    'type': str(tales),
-                    'value': str(v),
-                    'traceback': "\n".join(code.traceback.format_tb (tr)) })
+                'expr': tales,
+                'package': pkgid,
+                'type': str(tales),
+                'value': str(v),
+                'traceback': "\n".join(code.traceback.format_tb (tr)) })
 
         return res
     default.exposed=True
@@ -1512,7 +1511,7 @@ class Packages(Common):
         """
         if len(args) < 2:
             return self.send_error(501, _("<h1>Error</h1>") +
-                            _("<p>Cannot set the value : invalid path</p>"))
+                                   _("<p>Cannot set the value : invalid path</p>"))
 
         alias=args[0]
 
@@ -1575,8 +1574,8 @@ class Packages(Common):
                         parent=r
                     else:
                         return self.send_error(501, (_("<h1>Error</h1><p>When creating resource %(path)s, the resource folder %(folder)s could not be created.</p>") % {
-                                    'path': '/'.join(path),
-                                    'folder': subpath[-1] }).encode('utf-8'))
+                            'path': '/'.join(path),
+                            'folder': subpath[-1] }).encode('utf-8'))
             # We can create the resource in the parent ResourceFolder
             parent[attribute]=data
             el=parent[attribute]
@@ -1704,12 +1703,12 @@ class Packages(Common):
            <input type="submit" name="submit" />
            </form>
         """
-        if not 'action' in query or not ('data' in query or 'datapath' in query or 'datafile' in query):
+        if 'action' not in query or not ('data' in query or 'datapath' in query or 'datafile' in query):
             return self.send_error(500, _("<p>Invalid request</p>."))
 
         if not args:
             return self.send_error(501, _("<h1>Error</h1>") +
-                            _("<p>Cannot set the value : invalid path</p>"))
+                                   _("<p>Cannot set the value : invalid path</p>"))
 
         alias=args[0]
 
@@ -1777,7 +1776,7 @@ class Packages(Common):
                 %(value)s
                 </pre>
                 """) % { 'path': "/".join([tales, attribute]),
-                         'value': cgi.escape(data) })
+                         'value': html.escape(data) })
                         return "".join(res)
             else:
                 # Fallback mode : maybe we were in a dict, and
@@ -1794,7 +1793,7 @@ class Packages(Common):
                     %(value)s
                     </pre>
                     """) % { 'path': "%s[%s]" % (tales, attribute),
-                             'value': cgi.escape(data) })
+                             'value': html.escape(data) })
                     return "".join(res)
                 except TypeError:
                     # Not a dict...
@@ -1827,9 +1826,7 @@ class Packages(Common):
                             if isinstance(r, Resources):
                                 parent=r
                             else:
-                                return self.send_error(501, (_("<h1>Error</h1><p>When creating resource %(path)s, the resource folder %(folder)s could not be created.</p>") % {
-                                            'path': '/'.join(path),
-                                            'folder': subpath[-1] }).encode('utf-8'))
+                                return self.send_error(501, (_("<h1>Error</h1><p>When creating resource %(path)s, the resource folder %(folder)s could not be created.</p>") % { 'path': '/'.join(path), 'folder': subpath[-1] }).encode('utf-8'))
                     parent[attribute]=data
                     el=parent[attribute]
                     self.controller.notify('ResourceCreate',
@@ -1871,8 +1868,8 @@ class Packages(Common):
                 except Exception as e:
                     return self.send_error(500,
                                            _("<p>Error while creating view %(id)s</p><pre>%(error)s</pre>") % {
-                            'id': kw['ident'],
-                            'error': str(e).encode('utf-8') })
+                                               'id': kw['ident'],
+                                               'error': str(e).encode('utf-8') })
 
                 if 'redirect' in query and query['redirect']:
                     return self.send_redirect(query['redirect'])
@@ -1913,8 +1910,8 @@ class Packages(Common):
 
                 try:
                     relation=objet.createRelation(ident=id_,
-                                                    members=(m1, m2),
-                                                    type=rt)
+                                                  members=(m1, m2),
+                                                  type=rt)
                     objet._idgenerator.add(id_)
                     relation.content.data=data
                     objet.relations.append(relation)
@@ -1956,11 +1953,11 @@ class Packages(Common):
                     %(errortype)s
                     %(value)s
                     %(traceback)s</pre>""") % {
-                            'type': query['annotationtype'],
-                            'errortype': str(t),
-                            'value': str(v),
-                            'traceback': "\n".join(code.traceback.format_tb (tr))
-                            })
+                        'type': query['annotationtype'],
+                        'errortype': str(t),
+                        'value': str(v),
+                        'traceback': "\n".join(code.traceback.format_tb (tr))
+                    })
 
                 if 'redirect' in query and query['redirect']:
                     return self.send_redirect(query['redirect'])
@@ -1969,7 +1966,7 @@ class Packages(Common):
                 return self.send_error(500, _("Error: Cannot create an object of type %s.") % (query['type']))
 
         else:
-            return self.send_error(500, _("Error: Cannot perform the action <em>%(action)s</em> on <code>%(object)s</code></p>") % { 'action': query['action'], 'object': cgi.escape(str(objet)) })
+            return self.send_error(500, _("Error: Cannot perform the action <em>%(action)s</em> on <code>%(object)s</code></p>") % { 'action': query['action'], 'object': html.escape(str(objet)) })
 
 class Action(Common):
     """Handles the X{/action}  requests.
@@ -1992,15 +1989,15 @@ class Action(Common):
             if a.parameters:
                 # There are parameters. Display a link to the form.
                 res.append(_("""<li>%(name)s: %(value)s""")
-                                 % {'name': name,
-                                    'value': d[name]})
+                           % {'name': name,
+                              'value': d[name]})
                 res.append(a.as_html("/action/%s" % name))
             else:
                 # No parameter, we can directly link the action
                 res.append("""<li><a href="%s">%s</a>: %s"""
-                                 % ("/action/%s" % name,
-                                    name,
-                                    d[name]))
+                           % ("/action/%s" % name,
+                              name,
+                              d[name]))
             res.append("</li>\n")
         res.append("</ul>")
         return "".join(res)
@@ -2013,9 +2010,9 @@ class Action(Common):
             ra=catalog.get_action(action)
         except KeyError:
             return "".join((
-                    self.start_html (_('Error'), duplicate_title=True),
-                    _("""<p>Unknown action</p><pre>Action: %s</pre>""") % action
-                    ))
+                self.start_html (_('Error'), duplicate_title=True),
+                _("""<p>Unknown action</p><pre>Action: %s</pre>""") % action
+            ))
 
         # Check for missing parameters
         missing=[ p for p in ra.parameters if not p in query ]
@@ -2044,7 +2041,7 @@ class Root(Common):
       - C{/application} : control the application
     """
     def __init__(self, controller=None):
-        self.controller=controller
+        super().__init__(controller)
         self.admin=Admin(controller)
         self.admin.access=Access(controller)
         self.action=Action(controller)
@@ -2065,10 +2062,10 @@ class Root(Common):
         """
         res=[ self.start_html (_("Advene webserver"), duplicate_title=True, mode='navigation') ]
         res.append(_("""<p>Welcome on the <a href="http://advene.org/">Advene</a> webserver run by %(userid)s on %(serveraddress)s.</p>""") %
-                         {
-                'userid': config.data.userid,
-                'serveraddress': cherrypy.request.base,
-                })
+                   {
+                       'userid': config.data.userid,
+                       'serveraddress': cherrypy.request.base,
+                   })
 
         if len(self.controller.packages) == 0:
             res.append(_(""" <p>No package is loaded. You can access the <a href="/admin">server administration page</a>.<p>"""))
@@ -2156,7 +2153,7 @@ class AdveneWebServer:
 
         app_config={
             '/': {
-                 'tools.encode.on': True
+                'tools.encode.on': True
             },
             '/favicon.ico': {
                 'tools.staticfile.on': True,
@@ -2193,4 +2190,3 @@ class AdveneWebServer:
 
     def is_running(self):
         return cherrypy.engine.state == cherrypy.engine.states.STARTED
-

@@ -97,7 +97,7 @@ class KinectController(AdhocView):
         elif fx > .6:
             seek = config.data.preferences['time-increment']
         elif fx < .2:
-             seek = -config.data.preferences['second-time-increment']
+            seek = -config.data.preferences['second-time-increment']
         elif fx < .4:
             seek = -config.data.preferences['time-increment']
         else:

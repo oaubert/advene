@@ -33,6 +33,7 @@ def register(controller=None):
 class TranscriptImporter(GenericImporter):
     name = _("Youtube XML importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -41,7 +42,6 @@ class TranscriptImporter(GenericImporter):
         if fname.endswith('.xml'):
             return 80
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
         tree = ET.parse(filename)

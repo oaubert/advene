@@ -66,6 +66,7 @@ class FeatureDetectImporter(GenericImporter):
                                      action="store", type="choice", dest="classifier", choices=classifiers, default=self.classifier,
                                      help=_("Classifier"))
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -75,7 +76,6 @@ class FeatureDetectImporter(GenericImporter):
         if ext in config.data.video_extensions:
             return 80
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename):
         at = self.ensure_new_type('feature',

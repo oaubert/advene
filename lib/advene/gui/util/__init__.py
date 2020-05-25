@@ -38,7 +38,6 @@ if config.data.os == 'win32':
     from gi.repository import GdkWin32
 
 import io
-import urllib.parse
 import urllib.request, urllib.parse, urllib.error
 
 from advene.model.schema import Schema, AnnotationType, RelationType
@@ -336,14 +335,14 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
             selection.set(selection.get_target(), 8, encode_drop_parameters(timestamp=el))
         elif isinstance(el, Annotation):
             selection.set(selection.get_target(), 8, encode_drop_parameters(timestamp=el.fragment.begin,
-                                                                      comment=controller.get_title(el)))
+                                                                            comment=controller.get_title(el)))
         else:
             logger.error("Inconsistent DND target %s", targetType)
         return True
     elif targetType in (typ['text-plain'], typ['STRING']):
         selection.set(selection.get_target(), 8, controller.get_title(el).encode('utf8'))
     else:
-        logger.warning("Unknown target type for drag: %d" % targetType)
+        logger.warning("Unknown target type for drag: %d", targetType)
     return True
 
 def contextual_drag_begin(widget, context, element, controller):
@@ -402,15 +401,15 @@ def contextual_drag_begin(widget, context, element, controller):
         w.set_size_request(int(2.5 * config.data.preferences['drag-snapshot-width']), -1)
     elif isinstance(element, AnnotationType):
         l=get_coloured_label(_("Annotation Type %(title)s:\n%(count)s") % {
-                'title': controller.get_title(element),
-                'count': helper.format_element_name('annotation', len(element.annotations)),
-                }, controller.get_element_color(element))
+            'title': controller.get_title(element),
+            'count': helper.format_element_name('annotation', len(element.annotations)),
+        }, controller.get_element_color(element))
         v.pack_start(l, False, True, 0)
     elif isinstance(element, RelationType):
         l=get_coloured_label(_("Relation Type %(title)s:\n%(count)s") % {
-                'title': controller.get_title(element),
-                'count': helper.format_element_name('relation', len(element.relations)),
-                }, controller.get_element_color(element))
+            'title': controller.get_title(element),
+            'count': helper.format_element_name('relation', len(element.relations)),
+        }, controller.get_element_color(element))
         v.pack_start(l, False, True, 0)
     else:
         l=get_coloured_label("%s %s" % (helper.get_type(element),
@@ -539,6 +538,3 @@ def window_to_png(widget, output="/tmp/win.png"):
 
     temp.show_all()
     temp.queue_draw()
-
-
-

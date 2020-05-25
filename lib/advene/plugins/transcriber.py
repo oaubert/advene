@@ -51,6 +51,7 @@ class TrsImporter(GenericImporter):
         self.speakers = {
             '': ""}
 
+    @staticmethod
     def can_handle(fname):
         if fname.endswith('.trs'):
             return 100
@@ -58,7 +59,6 @@ class TrsImporter(GenericImporter):
             return 50
         else:
             return 0
-    can_handle=staticmethod(can_handle)
 
     def iterator(self, trs):
         # Parse  information
@@ -79,7 +79,7 @@ class TrsImporter(GenericImporter):
             'begin': None,
             'end': None,
             'content': None
-            }
+        }
         for e in Episode:
             try:
                 s_begin = None
@@ -187,7 +187,7 @@ class TrsImporter(GenericImporter):
                                         'begin': seg_time,
                                         'end': None,
                                         'content': "%s" % text
-                                       }
+                                    }
 
                                     text = elem.tail.replace("\n","")
 
@@ -301,4 +301,3 @@ class TrsImporter(GenericImporter):
         self.progress(1.0)
 
         return self.package
-

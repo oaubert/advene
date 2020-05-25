@@ -22,7 +22,7 @@ class MimeTypeException (Exception):
 class MimeTypeValueError (MimeTypeException, ValueError):
     pass
 
-class MimeType (object):
+class MimeType:
     """
     TODO
     """
@@ -32,10 +32,10 @@ class MimeType (object):
         (the second member is not checked for validity)
         """
         try:
-            type, subtype = str(value).split ('/')
+            type_, subtype = str(value).split ('/')
         except ValueError:
             raise MimeTypeValueError ("%s has to few or too many /'s" % value)
-        self.setType (type)
+        self.setType (type_)
         self.setSubtype (subtype)
 
     def __repr__ (self):
@@ -73,9 +73,9 @@ class MimeType (object):
     def getType (self):
         return self.__type
 
-    def setType (self, type):
-        self.checkType (type, exception=True)
-        self.__type = type
+    def setType (self, type_):
+        self.checkType (type_, exception=True)
+        self.__type = type_
 
     type = property (getType, setType)
 
@@ -110,27 +110,22 @@ class MimeType (object):
             )
         )
 
-
-
+    @staticmethod
     def checkType (type, exception=False):
-        r = (
-          type in ('*',
-                   'text',
-                   'multipart',
-                   'application',
-                   'message',
-                   'image',
-                   'audio',
-                   'video',)
-          or (
-              (type.startswith ('x-') or type.startswith ('X-'))
-              and MimeType._check_token (type[2:], exception)
-          )
+        r = (type in ('*',
+                      'text',
+                      'multipart',
+                      'application',
+                      'message',
+                      'image',
+                      'audio',
+                      'video',)
+             or ((type.startswith ('x-') or type.startswith ('X-'))
+                 and MimeType._check_token (type[2:], exception))
         )
         if not r and exception:
             raise MimeTypeValueError ("%s is not a valid type" % type)
         return r
-    checkType = staticmethod(checkType)
 
     def checkSubtype (self, subtype, exception=False):
         type = self.__type
@@ -141,6 +136,7 @@ class MimeType (object):
                                       (type, subtype))
         return r
 
+    @staticmethod
     def _check_token (token, exception=False):
         r = True
         for c in token:
@@ -150,4 +146,3 @@ class MimeType (object):
         if not r and exception:
             raise MimeTypeValueError ("%s is an invalid token" % token)
         return r
-    _check_token = staticmethod(_check_token)

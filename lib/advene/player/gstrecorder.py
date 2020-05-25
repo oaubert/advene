@@ -389,7 +389,7 @@ class Player:
             realsink = self.imagesink
         self.xid = xid
         if xid and hasattr(realsink, 'set_window_handle'):
-            logger.info("Reparent " + hex(xid))
+            logger.info("Reparent %s", hex(xid))
             Gdk.Display().get_default().sync()
             realsink.set_window_handle(xid)
         if hasattr(realsink.props, 'force-aspect-ratio'):
@@ -418,7 +418,7 @@ class Player:
         return
 
     def sound_is_muted(self):
-        return (self.mute_volume is not None)
+        return self.mute_volume is not None
 
     def disp(self, e, indent="  "):
         l=[str(e)]

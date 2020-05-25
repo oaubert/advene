@@ -127,11 +127,11 @@ class ViewBook(AdhocView):
                     submenu=Gtk.Menu()
 
                     for (label, destination) in (
-                        (_("...in its own window"), 'popup'),
-                        (_("...embedded east of the video"), 'east'),
-                        (_("...embedded west of the video"), 'west'),
-                        (_("...embedded south of the video"), 'south'),
-                        (_("...embedded at the right of the window"), 'fareast')):
+                            (_("...in its own window"), 'popup'),
+                            (_("...embedded east of the video"), 'east'),
+                            (_("...embedded west of the video"), 'west'),
+                            (_("...embedded south of the video"), 'south'),
+                            (_("...embedded at the right of the window"), 'fareast')):
                         if destination == self.location:
                             continue
                         item = Gtk.MenuItem(label)
@@ -286,7 +286,7 @@ class ViewBook(AdhocView):
                             if v.content.mimetype == 'application/x-advene-adhoc-view'
                             and ET.parse(v.content.stream).getroot().attrib['id'] == name ]
 
-                if name == 'transcription' or name == 'table':
+                if name in ('transcription', 'table'):
                     menu=Gtk.Menu()
                     i=Gtk.MenuItem(_("Open a new %s for...") % _(name))
                     menu.append(i)
@@ -389,14 +389,14 @@ class ViewBook(AdhocView):
             talespath = 'here/annotationTypes/%s' % at.id
             menu.append(i)
             for label, action in (
-                (_("to edit it"), lambda i :self.controller.gui.open_adhoc_view('edit', element=at, destination=self.location)),
-                (_("to create a new static view"), lambda i: create_and_open_view([ at ])),
-                (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='%s/annotations/sorted' % talespath, destination=self.location, label=title)),
-                (_("in a timeline"), lambda i: self.controller.gui.open_adhoc_view('timeline', elements=at.annotations, annotationtypes=[ at ], destination=self.location, label=title)),
-                (_("as a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=at.annotations, destination=self.location, label=title)),
-                (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', source='%s/annotations' % talespath, destination=self.location, label=title)),
-                (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location, label=_("Query %s") % title)),
-                (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location, label=_("Browsing %s") % title)),
+                    (_("to edit it"), lambda i :self.controller.gui.open_adhoc_view('edit', element=at, destination=self.location)),
+                    (_("to create a new static view"), lambda i: create_and_open_view([ at ])),
+                    (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='%s/annotations/sorted' % talespath, destination=self.location, label=title)),
+                    (_("in a timeline"), lambda i: self.controller.gui.open_adhoc_view('timeline', elements=at.annotations, annotationtypes=[ at ], destination=self.location, label=title)),
+                    (_("as a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=at.annotations, destination=self.location, label=title)),
+                    (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', source='%s/annotations' % talespath, destination=self.location, label=title)),
+                    (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location, label=_("Query %s") % title)),
+                    (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location, label=_("Browsing %s") % title)),
                 ):
                 i=Gtk.MenuItem("    " + label, use_underline=False)
                 i.connect('activate', action)
@@ -415,12 +415,12 @@ class ViewBook(AdhocView):
                 i=Gtk.MenuItem(_("Use annotation %s :") % title, use_underline=False)
                 menu.append(i)
                 for label, action in (
-                    (_("to edit it"), lambda i: edit_annotation(a)),
-                    (_("to create a new static view"), lambda i: create_and_open_view(sources)),
-                    (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
-                    (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
-                    (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
-                    (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin ], destination=self.location)),
+                        (_("to edit it"), lambda i: edit_annotation(a)),
+                        (_("to create a new static view"), lambda i: create_and_open_view(sources)),
+                        (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
+                        (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
+                        (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
+                        (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin ], destination=self.location)),
                     ):
                     i=Gtk.MenuItem("    " + label, use_underline=False)
                     i.connect('activate', action)
@@ -446,11 +446,11 @@ class ViewBook(AdhocView):
                 i=Gtk.MenuItem(_("Use annotations:"), use_underline=False)
                 menu.append(i)
                 for label, action in (
-                    (_("to edit them"), lambda i: edit_selection(sources)),
-                    (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=sources, destination=self.location)),
-                    (_("to create a new static view"), lambda i: create_and_open_view(sources)),
-                    (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin for a in sources ], destination=self.location)),
-                    ):
+                        (_("to edit them"), lambda i: edit_selection(sources)),
+                        (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=sources, destination=self.location)),
+                        (_("to create a new static view"), lambda i: create_and_open_view(sources)),
+                        (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin for a in sources ], destination=self.location)),
+                ):
                     i=Gtk.MenuItem("    " + label, use_underline=False)
                     i.connect('activate', action)
                     menu.append(i)

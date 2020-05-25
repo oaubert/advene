@@ -26,7 +26,6 @@ from gettext import gettext as _
 
 import re
 import csv
-import itertools
 
 import advene.core.config as config
 import advene.util.helper as helper
@@ -36,7 +35,7 @@ def register(controller=None):
     controller.register_importer(DCPImporter)
     return True
 
-timestamp_re = re.compile('(\d\d):(\d\d):(\d\d):(\d\d)')
+timestamp_re = re.compile(r'(\d\d):(\d\d):(\d\d):(\d\d)')
 
 # Column -> (type, attr) mapping.
 #
@@ -66,6 +65,7 @@ type_mapping = {
 class DCPImporter(GenericImporter):
     name = _("DCP importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -76,7 +76,6 @@ class DCPImporter(GenericImporter):
         elif fname.endswith('.tsv') or fname.endswith('.txt') or fname.endswith('.csv'):
             return 70
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
         if self.package is None:
@@ -165,4 +164,3 @@ class DCPImporter(GenericImporter):
                     'type': at,
                     }
         self.progress(1.0)
-

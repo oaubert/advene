@@ -16,7 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-class ChoiceTree (object):
+class ChoiceTree:
     """
     An arc-labeled tree where each node is uniquely described by a sequence of
     all arc labels joining the root to that node.
@@ -106,7 +106,7 @@ class ChoiceTree (object):
         if instance is None:
             children = self.children
             if children is None:
-                return tuple(((), None))
+                return ((), None)
             else:
                 # this ChoiceTree is not empty, so at least one subtree must
                 # have a value
@@ -168,4 +168,3 @@ class ChoiceTree (object):
         the given =seq=,  and return its instance.
         """
         return self.getMostSpecific (seq)[1]
-

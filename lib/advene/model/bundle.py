@@ -55,7 +55,8 @@ Permitted dict operations are
  - b[k]
 
 
-Note also that iter(b) iterates over its values (as for lists). Iterating over keys required the _iterkeys_ method.
+Note also that iter(b) iterates over its values (as for lists).
+Iterating over keys required the _iterkeys_ method.
 """
 import advene.model.util.uri
 
@@ -67,7 +68,7 @@ from advene.model.exception import AdveneException
 
 from gettext import gettext as _
 
-class AbstractBundle (object):
+class AbstractBundle:
     """
     Base class of all Bundles.
 
@@ -116,7 +117,7 @@ class AbstractBundle (object):
 
     def __contains__ (self, v):
         return ((hasattr(v, 'getUri') and self._dict.get(v.getUri(absolute=True), None))
-                 or v in self._dict)
+                or v in self._dict)
 
     def __getitem__ (self, index):
         if isinstance (index, (int, slice)):
@@ -197,9 +198,7 @@ class ListBundle (AbstractBundle):
     def __init__ (self, the_list):
         super(ListBundle, self).__init__ ()
         self._list = the_list[:]
-        self._dict = dict (
-          [ (i.getUri (absolute=True), i) for i in the_list ]
-        )
+        self._dict = { i.getUri(absolute=True): i for i in the_list }
 
 class SumBundle (AbstractBundle):
     """
@@ -277,7 +276,7 @@ class WritableBundle (AbstractBundle):
         assert self._assert_add_item (item)
 
         length = len(self)
-        if not (-length <= index <= length):
+        if not -length <= index <= length:
             raise IndexError(index, self._list)
 
         self._list.insert(index, item)
@@ -392,12 +391,12 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
     # Viewable specific implementation
     #
 
+    @staticmethod
     def getViewableTypeGetterName ():
         """
         Override the name of the method to get ViewableType
         """
         return '_getViewableType'
-    getViewableTypeGetterName = staticmethod (getViewableTypeGetterName)
 
     #
     # overridden methods
@@ -439,8 +438,8 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
 
     def _assert_add_item (self, item):
         assert ( item._getParent ().getRootPackage ()
-             is  self._getParent ().getRootPackage () ), \
-             "item has wrong parent %s" % item._getParent()
+                 is  self._getParent ().getRootPackage () ), \
+                 "item has wrong parent %s" % item._getParent()
         return super (AbstractXmlBundle, self)._assert_add_item (item)
 
 
@@ -605,13 +604,11 @@ class InverseDictBundle (StandardXmlBundle):
 
     def insert (self, index, item):
         super (InverseDictBundle, self).insert (index, item)
-        self.__inverse_dict[self.__inverse_key (item)] = item.getUri (
-                                                                  absolute=True)
+        self.__inverse_dict[self.__inverse_key (item)] = item.getUri (absolute=True)
 
     def _make_item (self, parent=None, element=None):
         item = super (InverseDictBundle, self)._make_item (parent=parent, element=element)
-        self.__inverse_dict[self.__inverse_key (item)] = item.getUri (
-                                                                  absolute=True)
+        self.__inverse_dict[self.__inverse_key (item)] = item.getUri (absolute=True)
         return item
 
     def getInverseDict (self):

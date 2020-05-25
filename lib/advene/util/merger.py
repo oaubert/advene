@@ -717,4 +717,3 @@ if __name__ == "__main__":
                         for l in args.exclude.split(':'))
 
     merge_package(args.reference_package, args.other_packages, args.output_package, debug=args.debug, dry_run=args.dry_run, include=include, exclude=exclude)
-

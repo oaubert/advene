@@ -324,7 +324,7 @@ class Evaluator:
         for c in ('.', '(', ' '):
             while expr.endswith(c):
                 expr=expr[:-1]
-        m=re.match('(\w+)=(.+)', expr)
+        m=re.match(r'(\w+)=(.+)', expr)
         if m is not None:
             expr=m.group(2)
         try:
@@ -374,7 +374,7 @@ class Evaluator:
         silent_mode = expr.startswith('@')
         expr = expr.lstrip('@')
 
-        m=re.match('(from\s+(\S+)\s+)?import\s+(\S+)(\s+as\s+(\S+))?', expr)
+        m=re.match(r'(from\s+(\S+)\s+)?import\s+(\S+)(\s+as\s+(\S+))?', expr)
         if m is not None:
             modname = m.group(2)
             symname = m.group(3)
@@ -399,7 +399,7 @@ class Evaluator:
         # Handle variable assignment only for restricted forms of
         # variable names (so that we do not mistake named parameters
         # in function calls)
-        m=re.match('([\[\]\'\"\w\.-]+?)=(.+)', expr)
+        m=re.match(r'([\[\]\'\"\w\.-]+?)=(.+)', expr)
         if m is not None:
             symbol=m.group(1)
             expr=m.group(2)
@@ -423,7 +423,7 @@ class Evaluator:
                     self.log('\n\n[Value stored in %s]' % symbol)
                     self.locals_[symbol]=res
                 else:
-                    m=re.match('(.+?)\[["\']([^\[\]]+)["\']\]$', symbol)
+                    m=re.match(r'(.+?)\[["\']([^\[\]]+)["\']\]$', symbol)
                     if m:
                         obj, attr = m.group(1, 2)
                         try:
@@ -437,7 +437,7 @@ class Evaluator:
                         self.log('\n\n[Value stored in %s]' % symbol)
                         return True
 
-                    m=re.match('(.+)\.(\w+)$', symbol)
+                    m=re.match(r'(.+)\.(\w+)$', symbol)
                     if m:
                         obj, attr = m.group(1, 2)
                         try:
@@ -514,7 +514,7 @@ class Evaluator:
                 attr=expr
             else:
                 # Maybe we have the beginning of an attribute.
-                m=re.match('^(.+?)\.(\w*)$', expr)
+                m=re.match(r'^(.+?)\.(\w*)$', expr)
                 if m:
                     expr=m.group(1)
                     attr=m.group(2)
@@ -533,7 +533,7 @@ class Evaluator:
                         completion=[ a for a in completion if not a.startswith('_') ]
                 else:
                     # Dict completion
-                    m=re.match('^(.+)\[[\'"]([^\]]*)', expr)
+                    m=re.match(r'^(.+)\[[\'"]([^\]]*)', expr)
                     if m is not None:
                         obj, key=m.group(1, 2)
                         attr=key
@@ -582,7 +582,7 @@ class Evaluator:
         """
         expr = self.get_selection_or_cursor().lstrip('@')
 
-        m=re.match('.+[=\(\[\s](.+?)$', expr)
+        m=re.match(r'.+[=\(\[\s](.+?)$', expr)
         if m:
             expr=m.group(1)
         try:
@@ -609,7 +609,7 @@ class Evaluator:
                 args.append("**" + spec.varkw)
         elif res.__doc__:
             # Extract parameters from docstring
-            args=re.findall('\((.*?)\)', res.__doc__.splitlines()[0])
+            args=re.findall(r'\((.*?)\)', res.__doc__.splitlines()[0])
 
         if args is not None:
             b = self.source.get_buffer()
@@ -738,7 +738,7 @@ class Evaluator:
         """Add the current expression as a bookmark.
         """
         ex=self.get_expression()
-        if not re.match('^\s*$', ex) and not ex in self.bookmarks:
+        if not re.match(r'^\s*$', ex) and not ex in self.bookmarks:
             self.bookmarks.append(ex)
             self.save_data(self.bookmarks, self.bookmarkfile)
             self.status_message("Bookmark saved")
@@ -798,13 +798,13 @@ class Evaluator:
         tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         for (icon, tip, action) in (
-            (Gtk.STOCK_SAVE, "Save output window (C-s)", self.save_output_cb),
-            (Gtk.STOCK_CLEAR, "Clear output window", self.clear_output),
-            (Gtk.STOCK_DELETE, "Clear expression (C-l)", self.clear_expression),
-            (Gtk.STOCK_EXECUTE, "Evaluate expression (C-Return)", self.evaluate_expression),
-            (Gtk.STOCK_ADD, "Add a bookmark (C-b)", self.add_bookmark),
-            (Gtk.STOCK_REMOVE, "Remove a bookmark", self.remove_bookmark),
-            (Gtk.STOCK_INDEX, "Display bookmarks (C-Space)", self.display_bookmarks),
+                (Gtk.STOCK_SAVE, "Save output window (C-s)", self.save_output_cb),
+                (Gtk.STOCK_CLEAR, "Clear output window", self.clear_output),
+                (Gtk.STOCK_DELETE, "Clear expression (C-l)", self.clear_expression),
+                (Gtk.STOCK_EXECUTE, "Evaluate expression (C-Return)", self.evaluate_expression),
+                (Gtk.STOCK_ADD, "Add a bookmark (C-b)", self.add_bookmark),
+                (Gtk.STOCK_REMOVE, "Remove a bookmark", self.remove_bookmark),
+                (Gtk.STOCK_INDEX, "Display bookmarks (C-Space)", self.display_bookmarks),
             ):
             b=Gtk.ToolButton(stock_id=icon)
             b.connect('clicked', action)

@@ -73,6 +73,7 @@ class ZipPackage:
     # Global method for cleaning up
     tempdir_list = []
 
+    @staticmethod
     def cleanup():
         """Remove the temp. directories used during the session.
 
@@ -86,8 +87,6 @@ class ZipPackage:
             logger.debug("Cleaning up %s", d)
             if os.path.isdir(d):
                 shutil.rmtree(d, ignore_errors=True)
-
-    cleanup = staticmethod(cleanup)
 
     def __init__(self, uri=None):
         self.uri = None
@@ -308,19 +307,19 @@ class ZipPackage:
         """
         root=ET.Element(ET.QName(MANIFEST, 'manifest'))
         ET.SubElement(root, ET.QName(MANIFEST, 'file-entry'),  {
-                ET.QName(MANIFEST, 'full-path'): '/',
-                ET.QName(MANIFEST, 'media-type'): MIMETYPE,
-                })
+            ET.QName(MANIFEST, 'full-path'): '/',
+            ET.QName(MANIFEST, 'media-type'): MIMETYPE,
+        })
         for f in manifest:
-            if f == 'mimetype' or f == 'META-INF/manifest.xml':
+            if f in ('mimetype', 'META-INF/manifest.xml'):
                 continue
             (mimetype, encoding) = mimetypes.guess_type(f)
             if mimetype is None:
                 mimetype = 'text/plain'
             ET.SubElement(root, ET.QName(MANIFEST, 'file-entry'),  {
-                    ET.QName(MANIFEST, 'full-path'): str(f),
-                    ET.QName(MANIFEST, 'media-type'): str(mimetype),
-                    })
+                ET.QName(MANIFEST, 'full-path'): str(f),
+                ET.QName(MANIFEST, 'media-type'): str(mimetype),
+            })
         return root
 
     def manifest_to_list(self, name):

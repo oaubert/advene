@@ -170,7 +170,7 @@ class EditAccumulator(AccumulatorPopup):
             for source in sources:
                 self.edit(source)
         else:
-            logger.warning("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d", targetType)
         return True
 
     def build_widget(self):
@@ -179,8 +179,8 @@ class EditAccumulator(AccumulatorPopup):
         # The widget can receive drops from annotations
         mainbox.connect('drag-data-received', self.drag_received)
         mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |
-                                  Gtk.DestDefaults.HIGHLIGHT |
-                                  Gtk.DestDefaults.ALL,
-                                  config.data.get_target_types('annotation'), Gdk.DragAction.LINK)
+                              Gtk.DestDefaults.HIGHLIGHT |
+                              Gtk.DestDefaults.ALL,
+                              config.data.get_target_types('annotation'), Gdk.DragAction.LINK)
 
         return mainbox

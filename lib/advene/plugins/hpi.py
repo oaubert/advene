@@ -43,13 +43,12 @@ class HPIImporter(GenericImporter):
     name = _("HPI concept extraction")
     annotation_filter = True
 
+    @staticmethod
     def can_handle(fname):
-        """Return a score between 0 and 100.
-
-        100 is for the best match (specific extension), 0 is for no match at all.
-        """
-        return 80
-    can_handle=staticmethod(can_handle)
+        if 'http' in fname:
+            return 100
+        else:
+            return 0
 
     def __init__(self, author=None, package=None, defaulttype=None,
                  controller=None, callback=None, source_type=None):
@@ -88,10 +87,10 @@ class HPIImporter(GenericImporter):
                 for n in ('minimum_batch_size', 'maximum_batch_size', 'available_models'):
                     self.server_options[n] = caps.get(n, None)
                 logger.warning("Got capabilities from VCD server - batch size in (%d, %d) - %d models: %s",
-                            self.server_options['minimum_batch_size'],
-                            self.server_options['maximum_batch_size'],
-                            len(self.server_options['available_models']),
-                            ", ".join(item['id'] for item in self.server_options['available_models']))
+                               self.server_options['minimum_batch_size'],
+                               self.server_options['maximum_batch_size'],
+                               len(self.server_options['available_models']),
+                               ", ".join(item['id'] for item in self.server_options['available_models']))
         except requests.exceptions.RequestException:
             pass
         if 'available_models' in self.server_options:
@@ -138,15 +137,6 @@ class HPIImporter(GenericImporter):
             dest="create_relations", default=self.create_relations,
             help=_("Create relations between the original annotations and the new ones"),
             )
-
-    @staticmethod
-    def can_handle(fname):
-        """
-        """
-        if 'http' in fname:
-            return 100
-        else:
-            return 0
 
     def process_file(self, _filename):
         self.convert(self.iterator())
@@ -211,7 +201,7 @@ class HPIImporter(GenericImporter):
                 schema.relationTypes.append(rtype)
                 self.update_statistics('relation-type')
             if not hasattr(rtype, 'getHackedMemberTypes'):
-                logger.error("%s is not a valid relation type" % rtype_id)
+                logger.error("%s is not a valid relation type", rtype_id)
 
         image_scale = self.available_models.get(self.model, {}).get('image_size')
         if image_scale:
@@ -270,7 +260,7 @@ class HPIImporter(GenericImporter):
         step = .8 / (len(concepts) or 1)
         self.progress(.2, _("Parsing %d results") % len(concepts))
         logger.warning(_("Parsing %(count)d results (level %(confidence)f)") % { "count": len(concepts),
-                                                                              "confidence": self.confidence })
+                                                                                 "confidence": self.confidence })
         for item in concepts:
             # Should not happen, since we pass the parameter to the server
             if item["confidence"] < minconf:
@@ -286,13 +276,13 @@ class HPIImporter(GenericImporter):
             if label and self.split_types:
                 new_atype = new_atypes.get(label_id)
                 if new_atype is None:
-                   # Not defined yet. Create a new one.
-                   new_atype = self.ensure_new_type(label_id,
-                                                    title = _("%s concept" % label),
-                                                    mimetype = 'application/json')
-                   new_atype.setMetaData(config.data.namespace, "representation",
-                                         'here/content/parsed/label')
-                   new_atypes[label_id] = new_atype
+                    # Not defined yet. Create a new one.
+                    new_atype = self.ensure_new_type(label_id,
+                                                     title = _("%s concept" % label),
+                                                     mimetype = 'application/json')
+                    new_atype.setMetaData(config.data.namespace, "representation",
+                                          'here/content/parsed/label')
+                    new_atypes[label_id] = new_atype
             an = yield {
                 'type': new_atype,
                 'begin': begin,

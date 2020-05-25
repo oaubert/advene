@@ -43,7 +43,7 @@ class RelationView:
         return True
 
     def activate(self, button):
-        logger.warning("Relation %s activated %s", self.relation.id)
+        logger.warning("Relation %s activated", self.relation.id)
         if self.controller:
             self.controller.notify("RelationActivate", relation=self.relation)
         return True
@@ -151,18 +151,10 @@ class RelationsBox:
 
     def update_relation (self, element=None, event=None):
         """Update a relation's representation."""
-        if event == 'RelationCreate':
-            # If it does not exist yet, we should create it if it is now in self.list
-            if element in self.list:
-                v=RelationView(relation=element, controller=self.controller)
-                self.relationviews.append(v)
-                self.widget.pack_start(v.get_widget(), False, False, 0)
-            return True
-
         bs = self.get_widget_for_relation (element)
         for b in bs:
             if event == 'RelationEditEnd':
-                self.update_button (b)
+                b.refresh()
             elif event == 'RelationDelete':
                 b.destroy()
             else:
@@ -173,15 +165,16 @@ class RelationsBox:
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.get_target(), 8, widget.annotation.uri.encode('utf8'))
         else:
-            logger.warning("Unknown target type for drag: %d" % targetType)
+            logger.warning("Unknown target type for drag: %d", targetType)
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
             source=self.package.annotations.get(str(selection.get_data(), 'utf8').split('\n')[0])
             dest=widget.annotation
-            self.create_relation_popup(source, dest)
+            logger.warning("Should create a relation between %s and %s", source, dest)
             # FIXME: TODO
+            # self.create_relation_popup(source, dest)
             # Find matching relation (we need to know the package...)
             # source=self.package.annotations.get(source_id)
             # dest=self.package.annotations.get(widget.annotation.id)
@@ -197,5 +190,5 @@ class RelationsBox:
             #     # FIXME...
             #     rel=self.package.createRelation(chosen_relation, members=(source, dest))
         else:
-            logger.warning("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d", targetType)
         return True

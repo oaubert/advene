@@ -49,6 +49,8 @@ class VideoPlayer(AdhocView):
         self.controller = controller
         self.registered_rules = []
 
+        self.player = None
+
         # Offset in ms
         self.offset = 0
         self.uri = uri
@@ -105,7 +107,7 @@ class VideoPlayer(AdhocView):
                 self.player.update_status("stop")
 
         # Synchronize time
-        if ( (ps == self.player.PauseStatus or ps == self.player.PlayingStatus)
+        if ( ps in (self.player.PauseStatus, self.player.PlayingStatus)
              and self.controller.player.current_position_value > 0
              and abs( int(s.position) + self.offset - self.controller.player.current_position_value ) > 80 ):
             self.player.update_status("seek", self.controller.player.current_position_value + self.offset)

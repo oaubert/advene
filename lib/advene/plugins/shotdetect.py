@@ -37,6 +37,7 @@ def register(controller=None):
 class ShotdetectImporter(GenericImporter):
     name = _("Shotdetect XML importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -47,7 +48,6 @@ class ShotdetectImporter(GenericImporter):
         elif fname.endswith('.xml'):
             return 80
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
         tree=ET.parse(filename)

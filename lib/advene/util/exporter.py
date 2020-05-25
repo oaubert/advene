@@ -63,7 +63,7 @@ def get_exporter(name=None):
     else:
         return EXPORTERS.get(name)
 
-class GenericExporter(object):
+class GenericExporter:
     """Generic exporter class
     """
     name = _("Generic exporter")

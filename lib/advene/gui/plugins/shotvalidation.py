@@ -45,6 +45,7 @@ class ShotValidation(AdhocView):
         self.contextual_actions = ()
         self.controller=controller
         self._annotationtype=None
+        self.annotations = []
 
         self.current_index = Gtk.Adjustment.new(10, 1, 1000, 1, 1, 1)
         self.options={}
@@ -162,13 +163,13 @@ class ShotValidation(AdhocView):
             if new > annotation.fragment.begin and new < annotation.fragment.end:
                 self.controller.split_annotation(annotation, new)
                 self.message(_("Split annotation #%(current)d into #%(current)d and #%(next)d") % {
-                        'current': i + 1,
-                        'next': i + 2
-                        })
+                    'current': i + 1,
+                    'next': i + 2
+                })
             else:
                 self.message(_("Cannot split annotation #%(current)d: out of bounds.") % {
-                        'current': i + 1,
-                        })
+                    'current': i + 1,
+                })
             return True
 
         if new != annotation.fragment.begin:
@@ -188,7 +189,7 @@ class ShotValidation(AdhocView):
                 self.controller.notify('AnnotationEditEnd', annotation=annotation, batch=batch)
                 self.controller.notify('EditSessionEnd', element=annotation)
             self.message(_("Changed cut between #%(first)d and %(second)d") % { 'first': i + 1,
-                                                                                  'second': i + 2 })
+                                                                                'second': i + 2 })
         else:
             self.message(_("Changed begin time for first annotation"))
         self.set_index(i + 1)
@@ -293,4 +294,3 @@ class ShotValidation(AdhocView):
         # window
         GObject.timeout_add(2000, lambda: self.next_button.grab_focus())
         return vbox
-

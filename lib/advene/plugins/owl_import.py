@@ -59,6 +59,7 @@ class AdAOWLImporter(GenericImporter):
     """
     name = _("OWL (schema) importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -68,7 +69,6 @@ class AdAOWLImporter(GenericImporter):
         if ext in [ '.owl' ]:
             return 90
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
         graph = rdflib.Graph()

@@ -23,14 +23,15 @@ It depends on a Controller instance to be able to interact with the video player
 import logging
 logger = logging.getLogger(__name__)
 
-import advene.core.config as config
+from gettext import gettext as _
 
 from gi.repository import Gdk
 from gi.repository import Gtk
-import advene.util.helper as helper
-from advene.gui.widget import TimestampRepresentation
+
+import advene.core.config as config
 from advene.gui.util import encode_drop_parameters, decode_drop_parameters
-from gettext import gettext as _
+from advene.gui.widget import TimestampRepresentation
+import advene.util.helper as helper
 
 class TimeAdjustment:
     """TimeAdjustment widget.
@@ -213,7 +214,7 @@ class TimeAdjustment:
             v=int(float(data['timestamp']))
             self.set_value(v)
         else:
-            logger.warning("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d", targetType)
         return True
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):

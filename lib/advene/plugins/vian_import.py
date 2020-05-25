@@ -40,6 +40,7 @@ class VIANImporter(GenericImporter):
     """
     name = _("VIAN importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
         100 is for the best match (specific extension), 0 is for no match at all.
@@ -48,7 +49,6 @@ class VIANImporter(GenericImporter):
         if ext in [ '.eext' ]:
             return 90
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
         with open(filename, 'r') as f:
@@ -187,9 +187,9 @@ class VIANImporter(GenericImporter):
                 keyword = experiment_keywords.get(result['keyword'])
 
                 if target is None:
-                    logger.warn("Cannot find segment for %s", result['target'])
+                    logger.warning("Cannot find segment for %s", result['target'])
                 elif keyword is None:
-                    logger.warn("Cannot find keyword for %s", result['keyword'])
+                    logger.warning("Cannot find keyword for %s", result['keyword'])
                 else:
                     yield {
                         "type": new_atype,
@@ -214,7 +214,7 @@ class VIANImporter(GenericImporter):
                 # Find the annotation which this analysis has been computed on
                 target = annotation_cache.get(an['container'])
                 if target is None:
-                    logger.warn("Cannot find target for %s", an['container'])
+                    logger.warning("Cannot find target for %s", an['container'])
                     continue
 
                 hdf5_dataset = an['hdf5_location']['hdf5_dataset']

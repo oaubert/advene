@@ -92,8 +92,8 @@ def _findFile(filename):
     if 'cog' in sys.modules:
         searchPath += sys.modules['cog'].path
     # Search the directories on the path.
-    for dir in searchPath:
-        p = os.path.join(dir, filename)
+    for d in searchPath:
+        p = os.path.join(d, filename)
         if os.path.exists(p):
             ret = os.path.abspath(p)
     return ret

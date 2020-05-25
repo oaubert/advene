@@ -25,7 +25,7 @@ import os
 from pathlib import Path
 import sys
 import urllib.request, urllib.parse, urllib.error
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 import re
 
 import xml.sax
@@ -43,7 +43,7 @@ import advene.model.view as view
 import advene.model.viewable as viewable
 from advene.model.zippackage import ZipPackage
 from advene.util.expat import PyExpat
-from advene.util.tools import uri2path, path2uri, is_uri
+from advene.util.tools import uri2path, is_uri
 
 from advene.model.bundle import StandardXmlBundle, ImportBundle, InverseDictBundle, SumBundle
 from advene.model.constants import adveneNS, xmlNS, xmlnsNS, xlinkNS, dcNS
@@ -56,13 +56,12 @@ from advene.model.exception import AdveneException
 _get_from_uri = object()
 
 class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
-             _impl.Authored, _impl.Dated, _impl.Titled,
-             annotation.AnnotationFactory,
-             annotation.RelationFactory,
-             schema.SchemaFactory,
-             query.QueryFactory,
-             view.ViewFactory, metaclass=auto_properties
-             ):
+              _impl.Authored, _impl.Dated, _impl.Titled,
+              annotation.AnnotationFactory,
+              annotation.RelationFactory,
+              schema.SchemaFactory,
+              query.QueryFactory,
+              view.ViewFactory, metaclass=auto_properties):
 
     """A package is the container of all the elements of an annotation
     (schemas, types, annotations, relations, views, queries). It
@@ -112,7 +111,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                     source=urllib.request.pathname2url(source)
                 source_uri = urljoin (
                     'file:%s/' % urllib.request.pathname2url (os.getcwd ()),
-                     str(source)
+                    str(source)
                 )
 
                 if source_uri.lower().endswith('.azp') or source_uri.endswith('/'):
@@ -391,11 +390,13 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 class Import(modeled.Modeled, _impl.Aliased, metaclass=auto_properties):
     """Import represents the different imported elements"""
 
-    def getNamespaceUri(): return adveneNS
-    getNamespaceUri = staticmethod(getNamespaceUri)
+    @staticmethod
+    def getNamespaceUri():
+        return adveneNS
 
-    def getLocalName(): return "import"
-    getLocalName = staticmethod(getLocalName)
+    @staticmethod
+    def getLocalName():
+        return "import"
 
     __loaded_package = None
 
@@ -452,11 +453,11 @@ class Import(modeled.Modeled, _impl.Aliased, metaclass=auto_properties):
             r.append(i.getAttributeNS(xlinkNS, 'href'))
         return tuple(r)
 
-    def setSources(self, list):
+    def setSources(self, list_):
         """Set the sources of imported elements"""
         for i in self._getModelChildren():
             self._getModel().removeChild(i)
-        for i in list:
+        for i in list_:
             e = self._getDocument().createElementNS(adveneNS, 'source')
             e.setAttributeNS(xlinkNS, 'xlink:href', i)
             self._getModel().appendChild(e)
@@ -493,6 +494,7 @@ class StatisticsHandler(xml.sax.handler.ContentHandler):
     """Parse a statistics.xml file.
     """
     def __init__(self):
+        super().__init__()
         # Data will contain parsed elements:
         # title, description, view, schema...
         self.data={}

@@ -16,7 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import time
+import uuid
 
 import advene.model._impl as _impl
 import advene.model.modeled as modeled
@@ -46,21 +46,20 @@ class Query(modeled.Importable, viewable.Viewable.withClass('query'),
                                         parent.getQueries.__func__)
 
             if ident is None:
-                # FIXME: cf thread
-                # Weird use of hash() -- will this work?
-                # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = "q" + str(id(self)) + str(time.clock()).replace('.','')
+                ident = str(uuid.uuid1())
             self.setId(ident)
             if author is not None:
                 self.setAuthor(author)
 
     # dom dependant methods
 
-    def getNamespaceUri(): return adveneNS
-    getNamespaceUri = staticmethod(getNamespaceUri)
+    @staticmethod
+    def getNamespaceUri():
+        return adveneNS
 
-    def getLocalName(): return "query"
-    getLocalName = staticmethod(getLocalName)
+    @staticmethod
+    def getLocalName():
+        return "query"
 
     def __str__(self):
         """Return a nice string representation of the element"""

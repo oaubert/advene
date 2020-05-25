@@ -21,8 +21,6 @@
 
 from gi.repository import Gtk
 
-import advene.core.config as config
-
 class PlayPauseButton(Gtk.ToolButton):
     def __init__(self, *p, **kw):
         super(PlayPauseButton, self).__init__(*p, **kw)

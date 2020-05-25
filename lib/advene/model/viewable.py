@@ -43,7 +43,7 @@ class TypedBytes(bytes):
         s.contenttype='application/binary'
         return s
 
-class Viewable(object, metaclass=auto_properties):
+class Viewable(metaclass=auto_properties):
     """
     A viewable is an object on which advene Views can be applied. A viewable has
     a viewable-class (boldly corresponding to its python class), and can have a
@@ -63,6 +63,7 @@ class Viewable(object, metaclass=auto_properties):
 
     __subclasses = {}
 
+    @staticmethod
     def withClass(viewable_class, viewable_type_getter_name=None):
         """
         Make or retrieve (if already created) a subclass of Viewable with
@@ -72,9 +73,9 @@ class Viewable(object, metaclass=auto_properties):
             class ViewableWithClass(Viewable):
                 # getViewableClass is a static method,
                 # so a class inheriting Viewable knows its viewable class
+                @staticmethod
                 def getViewableClass():
                     return viewable_class
-                getViewableClass = staticmethod(getViewableClass)
 
                 # we can not rely on metaclass 'auto_property' fot this one,
                 # because properties need instance methods,
@@ -83,10 +84,9 @@ class Viewable(object, metaclass=auto_properties):
                     return viewable_class
                 viewableClass = property(_get_viewable_class)
 
+                @staticmethod
                 def getViewableTypeGetterName():
                     return viewable_type_getter_name
-                getViewableTypeGetterName = \
-                                         staticmethod(getViewableTypeGetterName)
 
                 def getViewableType(self):
                     getter_name =self.getViewableTypeGetterName()
@@ -97,8 +97,8 @@ class Viewable(object, metaclass=auto_properties):
             Viewable.__subclasses[viewable_class] = ViewableWithClass
         return Viewable.__subclasses[viewable_class]
 
-    withClass = staticmethod(withClass)
 
+    @staticmethod
     def getAllClasses():
         """
         Return all the declared viewable classes
@@ -107,8 +107,6 @@ class Viewable(object, metaclass=auto_properties):
         for subcls in list(Viewable.__subclasses.values()):
             r.append(subcls.getViewableClass())
         return tuple(r)
-
-    getAllClasses = staticmethod(getAllClasses)
 
     def view(self, view_id=None, context=None):
         """
@@ -175,7 +173,8 @@ class Viewable(object, metaclass=auto_properties):
 
     def findDefaultView(self):
         v = self.getDefaultView()
-        if v: return v
+        if v:
+            return v
 
         for pkg in self.__get_access_path():
             found = None
@@ -194,9 +193,9 @@ class Viewable(object, metaclass=auto_properties):
     def _find_named_view (self, view_id, context):
         res=None
         try:
-            path =('view/ownerPackage/views/%s | '
-                  +'here/ownerPackage/views/%s') % (view_id, view_id)
-            res=context.evaluateValue (path)
+            path = ('view/ownerPackage/views/%s | '
+                    + 'here/ownerPackage/views/%s') % (view_id, view_id)
+            res = context.evaluateValue (path)
         except AdveneException:
             pass
         return res
@@ -208,8 +207,9 @@ class Viewable(object, metaclass=auto_properties):
 
         Note that such IDs may not work in every context in TALES.
         """
-        return [ v.getId () for v in self.getRootPackage ().getViews ()
-                            if v.match (self)]
+        return [ v.getId ()
+                 for v in self.getRootPackage ().getViews ()
+                 if v.match (self) ]
 
     def getDefaultView(self):
         if isinstance(self, modeled.Modeled) \
@@ -230,7 +230,7 @@ class Viewable(object, metaclass=auto_properties):
                         self._getModel().setAttributeNS(None, 'default-view', id_)
                         return
                 raise AdveneException("%s not in owner package of %s" %
-                                                                   (value,self))
+                                      (value, self))
             else:
                 self._getModel().delAttributeNS(None, 'default-view')
         else:

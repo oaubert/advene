@@ -65,6 +65,7 @@ class GstImporter(GenericImporter):
     def __init__(self, *p, **kw):
         super(GstImporter, self).__init__(*p, **kw)
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -74,7 +75,6 @@ class GstImporter(GenericImporter):
         if ext in config.data.video_extensions:
             return 80
         return 0
-    can_handle=staticmethod(can_handle)
 
     def finalize(self):
         # Data finalization (EOS or user break):

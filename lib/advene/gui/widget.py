@@ -60,7 +60,7 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
     """ Widget emulating a color button widget
     """
     def __init__(self, element=None, container=None):
-        GObject.GObject.__init__(self)
+        super().__init__()
         self.set_can_focus(True)
         self.element=element
 
@@ -269,14 +269,18 @@ class AnnotationWidget(GenericColorButtonWidget):
             if precision is None:
                 precision = config.data.preferences['bookmark-snapshot-precision']
             if self.no_image_pixbuf is None:
-                self.no_image_pixbuf = png_to_pixbuf(self.controller.get_snapshot(position=-1), width=config.data.preferences['drag-snapshot-width'])
+                self.no_image_pixbuf = png_to_pixbuf(self.controller.get_snapshot(position=-1),
+                                                     width=config.data.preferences['drag-snapshot-width'])
             if not t == w._current:
                 if isinstance(t, int):
-                    snap = self.controller.get_snapshot(position=t, annotation=self.annotation, precision=precision)
+                    snap = self.controller.get_snapshot(position=t,
+                                                        annotation=self.annotation,
+                                                        precision=precision)
                     if snap.is_default:
                         pixbuf = self.no_image_pixbuf
                     else:
-                        pixbuf = png_to_pixbuf(snap, width=config.data.preferences['drag-snapshot-width'])
+                        pixbuf = png_to_pixbuf(snap,
+                                               width=config.data.preferences['drag-snapshot-width'])
                     begin.set_from_pixbuf(pixbuf)
                     end.hide()
                     padding.hide()
@@ -736,8 +740,8 @@ class RelationRepresentation(Gtk.Button):
     def refresh(self):
         l=self.get_children()[0]
         t='%s %s %s' % (self.arrow[self.direction],
-                         self.controller.get_title(self.relation),
-                         self.arrow[self.direction])
+                        self.controller.get_title(self.relation),
+                        self.arrow[self.direction])
         color=self.controller.get_element_color(self.relation)
         if color:
             l.set_markup('<span background="%s">%s</span>' % (color, t.replace('<', '&lt;')))
@@ -765,7 +769,9 @@ class TimestampRepresentation(Gtk.Button):
     @ivar label: the label (timestamp) widget
     @type label: Gtk.Label
     """
-    def __init__(self, value, media, controller, width=None, precision=None, comment_getter=None, visible_label=True, callback=None):
+    def __init__(self, value, media, controller, width=None,
+                 precision=None, comment_getter=None,
+                 visible_label=True, callback=None):
         """Instanciate a new TimestampRepresentation.
 
         @param value: the timestamp value
@@ -936,7 +942,8 @@ class TimestampRepresentation(Gtk.Button):
         ts=helper.format_time(self._value)
         self.label.set_markup(self._text % { 'timestamp': ts })
         self.label.get_style_context().add_class("timestamp_label")
-        if self.visible_label and self.label.get_child_requisition().width <= 1.2 * self.image.get_child_requisition().width:
+        if (self.visible_label
+            and self.label.get_child_requisition().width <= 1.2 * self.image.get_child_requisition().width):
             self.label.show()
         else:
             self.label.hide()

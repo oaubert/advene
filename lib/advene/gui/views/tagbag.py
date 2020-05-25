@@ -32,18 +32,17 @@ the presented list of tags.
 import logging
 logger = logging.getLogger(__name__)
 
+from gettext import gettext as _
+
+from gi.repository import Gdk
+from gi.repository import Gtk
+import re
+
 # Advene part
 import advene.core.config as config
 from advene.gui.views import AdhocView
 from advene.gui.edit.properties import EditWidget
 from advene.gui.util import dialog, get_small_stock_button, name2color
-
-from gettext import gettext as _
-
-import re
-from gi.repository import Gdk
-from gi.repository import Gtk
-
 from advene.gui.widget import TagWidget
 
 name="Tagbag view plugin"
@@ -162,9 +161,9 @@ class TagBag(AdhocView):
         d.destroy()
 
         if tag and not tag in self.tags:
-            if not re.match('^[\w\d_]+$', tag):
+            if not re.match(r'^[\w\d_]+$', tag):
                 dialog.message_dialog(_("The tag contains invalid characters"),
-                                               icon=Gtk.MessageType.ERROR)
+                                      icon=Gtk.MessageType.ERROR)
                 return True
             self.tags.append(tag)
             self.controller.package._tag_colors[tag]="#%04x%04x%04x" % (color.red, color.green, color.blue)
@@ -246,8 +245,8 @@ class TagBag(AdhocView):
             menu=Gtk.Menu()
 
             for label, action in (
-                (_("Set color"), set_color),
-                (_("Remove"), remove)
+                    (_("Set color"), set_color),
+                    (_("Remove"), remove)
                 ):
                 item = Gtk.MenuItem(label, use_underline=False)
                 item.connect('activate', action, t)
@@ -294,7 +293,7 @@ class TagBag(AdhocView):
                         self.tags.append(tag)
                 self.refresh()
             else:
-                logger.warning("Unknown target type for mainbox drop: %d" % targetType)
+                logger.warning("Unknown target type for mainbox drop: %d", targetType)
             return True
 
         self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |
@@ -311,7 +310,7 @@ class TagBag(AdhocView):
                     self.tags.remove(tag)
                 self.refresh()
             else:
-                logger.warning("Unknown target type for remove drop: %d" % targetType)
+                logger.warning("Unknown target type for remove drop: %d", targetType)
             return True
 
 
@@ -330,10 +329,10 @@ class TagBag(AdhocView):
         hb.pack_start(b, False, True, 0)
 
         for (stock, tip, method) in (
-            (Gtk.STOCK_SAVE, _("Save as adhoc view"), self.save_view),
-            (Gtk.STOCK_ADD, _("Add a new tag"), self.new_tag),
-            (Gtk.STOCK_INDEX, _("Display all defined tags"), self.all_tags),
-            ):
+                (Gtk.STOCK_SAVE, _("Save as adhoc view"), self.save_view),
+                (Gtk.STOCK_ADD, _("Add a new tag"), self.new_tag),
+                (Gtk.STOCK_INDEX, _("Display all defined tags"), self.all_tags),
+        ):
             b=get_small_stock_button(stock)
             b.set_tooltip_text(tip)
             b.connect('clicked', method)

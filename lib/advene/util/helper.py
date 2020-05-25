@@ -167,9 +167,9 @@ def format_time (val = 0):
 class InvalidTimestamp(Exception):
     pass
 
-small_time_regexp=re.compile('(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,f]?)(?P<ms>\d+)?$')
-time_regexp=re.compile('(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,:f]?)(?P<ms>\d+)?$')
-float_regexp = re.compile('(?P<s>\d*)\.(?P<ms>\d*)')
+small_time_regexp=re.compile(r'(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,f]?)(?P<ms>\d+)?$')
+time_regexp=re.compile(r'(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,:f]?)(?P<ms>\d+)?$')
+float_regexp = re.compile(r'(?P<s>\d*)\.(?P<ms>\d*)')
 def parse_time(s):
     """Convert a time string as long.
 
@@ -379,7 +379,7 @@ def import_element(package, element, controller, notify=True):
         if notify:
             controller.notify("QueryCreate", query=q)
     else:
-        logger.warning("Import element of class %s not supported yet." % element.viewableClass)
+        logger.warning("Import element of class %s not supported yet.", element.viewableClass)
 
 def unimport_element(package, element, controller, notify=True):
     p=package
@@ -499,7 +499,7 @@ def get_annotations_statistics(annotations, format='text'):
     }
     # Determine distinct values. We split fields against commas
     # FIXME: this should be a specific content-type (application/x-advene-keywords)
-    distinct_values = collections.Counter(itertools.chain.from_iterable(re.split('\s*,\s*', a.content.data) for a in annotations))
+    distinct_values = collections.Counter(itertools.chain.from_iterable(re.split(r'\s*,\s*', a.content.data) for a in annotations))
     res['distinct_values_count'] = distinct_values_count = len(distinct_values)
     if distinct_values_count < 20:
         res['distinct_values'] = distinct_values

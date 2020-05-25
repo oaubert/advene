@@ -32,14 +32,15 @@ def register(controller=None):
     controller.register_importer(TTLImporter)
     return True
 
-type_re = re.compile('\s+a\s+:(\w+)')
-prop_re = re.compile(':has(\w+)\s+(.+)')
-num_re = re.compile('^\d+$')
+type_re = re.compile(r'\s+a\s+:(\w+)')
+prop_re = re.compile(r':has(\w+)\s+(.+)')
+num_re = re.compile(r'^\d+$')
 
 default_duration = 1000
 class TTLImporter(GenericImporter):
     name = _("TurTLe (RDF) importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -48,7 +49,6 @@ class TTLImporter(GenericImporter):
         if fname.endswith('.ttl') or fname.endswith('.n3'):
             return 80
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
         f=open(filename, 'rb')
@@ -140,4 +140,3 @@ class TTLImporter(GenericImporter):
                     }
 
         self.progress(1.0)
-

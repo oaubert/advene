@@ -51,8 +51,6 @@ try:
 except ImportError:
     Gst=None
 
-import advene.core.config as config
-
 APLAY = helper.find_in_path('aplay')
 
 def subprocess_setup():

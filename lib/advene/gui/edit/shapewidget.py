@@ -51,7 +51,7 @@ import cairo
 import math
 import urllib.request, urllib.parse, urllib.error
 import re
-import types
+
 from math import atan2, cos, sin
 
 import xml.etree.ElementTree as ET
@@ -67,7 +67,7 @@ arrow_width_re=re.compile(r'#arrow(\d+)')
 
 defined_shape_classes=[]
 
-class Shape(object):
+class Shape:
     """The generic Shape class.
 
     @ivar name: the shape instance name
@@ -191,6 +191,7 @@ class Shape(object):
         return "%s {%s}" % (self.SHAPENAME,
                             ",".join("%s: %d" % (c[0], getattr(self, c[0])) for c in self.coords))
 
+    @classmethod
     def parse_svg(cls, element, context):
         """Parse a SVG representation.
 
@@ -227,7 +228,6 @@ class Shape(object):
         if hasattr(s, 'post_parse'):
             s.post_parse()
         return s
-    parse_svg=classmethod(parse_svg)
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
@@ -279,6 +279,7 @@ class Shape(object):
         s.copy_from(self, style)
         return s
 
+    @staticmethod
     def xml2coords(coords, attrib, context):
         """Converts coordinates in XML format to their appropriate value
 
@@ -306,7 +307,6 @@ class Shape(object):
             res[n]=int(v)
         logger.debug("xml2coords %s -> %s", attrib, res)
         return res
-    xml2coords=staticmethod(xml2coords)
 
     def coords2xml(self, relative, dimensions):
         """Converts coordinates to XML format
@@ -324,7 +324,7 @@ class Shape(object):
             for n, dimindex in self.coords:
                 res[n]="%.03f%%" % (getattr(self, n) * 100.0 / dimensions[dimindex])
         else:
-            res=dict( [ ( n, str(getattr(self, n)) ) for n, d in self.coords ] )
+            res = { n: str(getattr(self, n)) for n, d in self.coords }
         return res
 
     def edit_properties_widget(self):
@@ -494,9 +494,9 @@ class Rectangle(Shape):
     def render(self, context, invert=False):
         self.render_setup(context, invert)
         context.rectangle(self.x,
-                      self.y,
-                      self.width,
-                      self.height)
+                          self.y,
+                          self.width,
+                          self.height)
         if self.filled:
             context.fill()
         else:
@@ -543,10 +543,8 @@ class Rectangle(Shape):
 
     def __contains__(self, point):
         x, y = point
-        return ( x >= self.x
-                 and x <= self.x + self.width
-                 and y >= self.y
-                 and y <= self.y + self.height )
+        return ( self.x <= x <= self.x + self.width
+                 and self.y <= y <= self.y + self.height )
 
 class Text(Rectangle):
     """Text shape.
@@ -590,6 +588,7 @@ class Text(Rectangle):
     def control_point(self, point):
         return None
 
+    @classmethod
     def parse_svg(cls, element, context):
         """Parse a SVG representation.
 
@@ -618,7 +617,6 @@ class Text(Rectangle):
         if hasattr(s, 'post_parse'):
             s.post_parse()
         return s
-    parse_svg=classmethod(parse_svg)
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
@@ -645,10 +643,8 @@ class Text(Rectangle):
     def __contains__(self, point):
         # We cannot use the inherited method, since text is draw *above* x,y
         x, y = point
-        return ( x >= self.x
-                 and x <= self.x + self.width
-                 and y >= self.y - self.height
-                 and y <= self.y )
+        return ( self.x <= x <= self.x + self.width
+                 and self.y - self.height <= y <= self.y )
 
     def edit_properties_widget(self):
         """Build a widget to edit the shape properties.
@@ -708,6 +704,7 @@ class Image(Rectangle):
         # FIXME
         return
 
+    @classmethod
     def parse_svg(cls, element, context):
         """Parse a SVG representation.
 
@@ -730,7 +727,6 @@ class Image(Rectangle):
         if hasattr(s, 'post_parse'):
             s.post_parse()
         return s
-    parse_svg=classmethod(parse_svg)
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
@@ -857,15 +853,12 @@ class Line(Rectangle):
     def __contains__(self, point):
         x, y = point
         if (self.x2 - self.x1) == 0:
-            return (y > min(self.y1, self.y2)
-                 and y < max(self.y1, self.y2)
-                 and abs(x - self.x1) < self.tolerance )
+            return (min(self.y1, self.y2) < y < max(self.y1, self.y2)
+                    and abs(x - self.x1) < self.tolerance )
         a=1.0 * (self.y2 - self.y1) / (self.x2 - self.x1)
         b=self.y1 - a * self.x1
-        return ( x > min(self.x1, self.x2)
-                 and x < max(self.x1, self.x2)
-                 and y > min(self.y1, self.y2)
-                 and y < max(self.y1, self.y2)
+        return ( min(self.x1, self.x2) < x < max(self.x1, self.x2)
+                 and min(self.y1, self.y2) < y < max(self.y1, self.y2)
                  and abs(y - (a * x + b)) < self.tolerance )
 
     def edit_properties_widget(self):
@@ -920,17 +913,17 @@ class Line(Rectangle):
                 el=e
             defs=ET.Element('defs')
             marker=ET.Element('marker', {
-                    'id': "arrow%d" % self.arrowwidth,
-                    'viewBox': "0 0 10 10",
-                    'refX': '5',
-                    'refY': '5',
-                    'orient': 'auto',
-                    'markerWidth': str(int(self.arrowwidth / 2) + 1),
-                    'markerHeight': str(self.arrowwidth) })
+                'id': "arrow%d" % self.arrowwidth,
+                'viewBox': "0 0 10 10",
+                'refX': '5',
+                'refY': '5',
+                'orient': 'auto',
+                'markerWidth': str(int(self.arrowwidth / 2) + 1),
+                'markerHeight': str(self.arrowwidth) })
             defs.append(marker)
             marker.append(ET.Element('polyline', {
-                        'points': "0,0 10,5 0,10 1,5",
-                        'fill': self.color }))
+                'points': "0,0 10,5 0,10 1,5",
+                'fill': self.color }))
             el.attrib['marker-end']='url(#arrow%d)' % self.arrowwidth
             yield defs
             yield e
@@ -1085,17 +1078,14 @@ class Path(Shape):
         x, y = point
         for (x1, y1), (x2, y2) in self.pathlines:
             if (x2 - x1) == 0:
-                if (y > min(y1, y2)
-                    and y < max(y1, y2)
+                if (min(y1, y2) < y < max(y1, y2)
                     and abs(x - x1) < self.tolerance ):
                     return True
             else:
                 a = 1.0 * (y2 - y1) / (x2 - x1)
                 b = y1 - a * x1
-                if ( x > min(x1, x2)
-                     and x < max(x1, x2)
-                     and y > min(y1, y2)
-                     and y < max(y1, y2)
+                if ( min(x1, x2) < x < max(x1, x2)
+                     and min(y1, y2) < y < max(y1, y2)
                      and abs(y - (a * x + b)) < self.tolerance ):
                     return True
         return False
@@ -1152,29 +1142,28 @@ class Path(Shape):
             logger.error("SVG Path parsing error - invalid conversion", exc_info=True)
 
     def get_svg(self, relative=False, size=None):
-       """Return a SVG representation of the path
+        """Return a SVG representation of the path
 
-       <path d="M 10 10 L 90 90 L 90 110 L 12 120 Z" fill="transparent" stroke="black"/>
+        <path d="M 10 10 L 90 90 L 90 110 L 12 120 Z" fill="transparent" stroke="black"/>
 
-       Z is optional (used for closed paths).
-       """
-       e = next(super(Path, self).get_svg(relative, size))
-       if e.tag == 'a' or e.tag == ET.QName(SVGNS, 'a'):
-           # It is a link. Use the child.
-           el=e[0]
-       else:
-           el=e
-       if relative:
-           #res[n]="%.03f%%" % (getattr(self, n) * 100.0 / dimensions[dimindex])
-
-           # FIXME: path coords are always unitless, hence we cannot
-           # use % values here.  A solution could be to use a group
-           # with appropriate translation/scaling, but it will
-           # complicate the parsing code.
-           el.attrib['d'] = "M "  + " L ".join( "%d %d" %  (x, y) for x, y in self.path ) + (" Z" if self.closed else "")
-       else:
-           el.attrib['d'] = "M "  + " L ".join( "%d %d" %  (x, y) for x, y in self.path ) + (" Z" if self.closed else "")
-       yield e
+        Z is optional (used for closed paths).
+        """
+        e = next(super(Path, self).get_svg(relative, size))
+        if e.tag == 'a' or e.tag == ET.QName(SVGNS, 'a'):
+            # It is a link. Use the child.
+            el=e[0]
+        else:
+            el=e
+        if relative:
+            #res[n]="%.03f%%" % (getattr(self, n) * 100.0 / dimensions[dimindex])
+            # FIXME: path coords are always unitless, hence we cannot
+            # use % values here.  A solution could be to use a group
+            # with appropriate translation/scaling, but it will
+            # complicate the parsing code.
+            el.attrib['d'] = "M "  + " L ".join( "%d %d" %  (x, y) for x, y in self.path ) + (" Z" if self.closed else "")
+        else:
+            el.attrib['d'] = "M "  + " L ".join( "%d %d" %  (x, y) for x, y in self.path ) + (" Z" if self.closed else "")
+        yield e
 
 class Circle(Rectangle):
     """A Circle shape.
@@ -1305,6 +1294,7 @@ class Link(Shape):
     SHAPENAME=_("Link")
     SVGTAG='a'
 
+    @classmethod
     def parse_svg(cls, element, context):
         """Parse a SVG representation.
 
@@ -1333,7 +1323,6 @@ class Link(Shape):
         o.link_label=element.attrib.get('title', 'Link to ' + o.link)
         #o.svg_attrib=dict(element.attrib)
         return o
-    parse_svg=classmethod(parse_svg)
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
@@ -1788,16 +1777,16 @@ class ShapeDrawer:
         ET._namespace_map['http://www.w3.org/1999/xlink']='xlink'
         ET._namespace_map['http://www.w3.org/2000/svg']='svg'
         root=ET.Element(ET.QName(SVGNS, 'svg'), {
-                'version': '1',
-                'preserveAspectRatio': "xMinYMin meet" ,
-                'viewBox': '0 0 %d %d' % size,
-                'width': "%d" % size[0],
-                'height': "%d" % size[1],
-                'xmlns:xlink': "http://www.w3.org/1999/xlink",
-                # The following xmlns declaration is needed for a
-                # correct rendering in firefox
-                'xmlns': "http://www.w3.org/2000/svg",
-                })
+            'version': '1',
+            'preserveAspectRatio': "xMinYMin meet" ,
+            'viewBox': '0 0 %d %d' % size,
+            'width': "%d" % size[0],
+            'height': "%d" % size[1],
+            'xmlns:xlink': "http://www.w3.org/1999/xlink",
+            # The following xmlns declaration is needed for a
+            # correct rendering in firefox
+            'xmlns': "http://www.w3.org/2000/svg",
+        })
         bg=[ o[0] for o in self.objects if isinstance(o, Image) and o.name == 'background' ]
         if bg:
             # There is a background. Put it first.
@@ -1829,7 +1818,7 @@ class ShapeDrawer:
         dimindex is the index of the unit in the .dimensions tuple: 0
         for width, 1 for height.
         """
-        m=re.match('(\d+)(\w*)', s)
+        m=re.match(r'(\d+)(\w*)', s)
         if m:
             val=int(m.group(1))
             unit=m.group(2)
@@ -1883,7 +1872,7 @@ class ShapeDrawer:
                             i.set_from_file(uri)
                             if i.get_storage_type() != Gtk.ImageType.PIXBUF:
                                 p=GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB,
-                                                 True, 8, o.width, o.height)
+                                                   True, 8, o.width, o.height)
                                 p.fill(0xdeadbeaf)
                                 i.set_from_pixbuf(p)
                             logger.warning("Loaded background from %s", uri)
@@ -1905,7 +1894,7 @@ class ShapeDrawer:
         self.plot()
         return True
 
-class ShapeEditor(object):
+class ShapeEditor:
     """Shape Editor component.
 
     This component provides an example of using ShapeWidget.

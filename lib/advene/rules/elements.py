@@ -52,7 +52,7 @@ def tag(name, old=False):
     else:
         return str(ET.QName(config.data.namespace, name))
 
-class EtreeMixin(object):
+class EtreeMixin:
     """This class defines helper methods for conversion to/from ElementTree.
 
     The mixed-in class should implement to_etree() and from_etree(element, **kw) methods.
@@ -233,7 +233,7 @@ class Condition:
                     rv=right
                 else:
                     raise Exception(_("Unknown type for overlaps comparison"))
-                return (lv.begin in rv or rv.begin in lv)
+                return lv.begin in rv or rv.begin in lv
             elif self.operator == 'during':
                 if isinstance(left, Annotation):
                     lv=left.fragment
@@ -294,8 +294,8 @@ class Condition:
         @return: an ET.Element
         """
         condnode=ET.Element(tag('condition'), {
-                'operator': self.operator,
-                'lhs': self.lhs })
+            'operator': self.operator,
+            'lhs': self.lhs })
         if self.operator in self.binary_operators:
             condnode.attrib['rhs']=self.rhs
         return condnode
@@ -396,8 +396,8 @@ class Action:
         node=ET.Element(tag('action'), { 'name': self.name })
         for pname, pvalue in self.parameters.items():
             paramnode=ET.Element(tag('param'), {
-                    'name': pname,
-                    'value': pvalue })
+                'name': pname,
+                'value': pvalue })
             node.append(paramnode)
         return node
 
@@ -489,9 +489,9 @@ class Rule(EtreeMixin):
             if catalog.is_event(name):
                 self.event=Event(name)
             else:
-                logger.warning("Undefined Event name: %s" % name)
+                logger.warning("Undefined Event name: %s", name)
         elif len(eventnodes) == 0:
-            logger.warning("No event associated to rule %s" % self.name)
+            logger.warning("No event associated to rule %s", self.name)
         else:
             raise Exception("Multiple events are associated to rule %s" % self.name)
 
@@ -519,14 +519,14 @@ class Rule(EtreeMixin):
                     return True
 
                 catalog.register_action(RegisteredAction(
-                        name=name,
-                        method=unknown_action,
-                        description=_("Unknown action %s") % name,
-                        parameters=dict( (name, _("Unknown parameter %s") % name)
-                                         for (name, value) in param.items() ),
-                        defaults=dict(param),
-                        category='unknown',
-                        ))
+                    name=name,
+                    method=unknown_action,
+                    description=_("Unknown action %s") % name,
+                    parameters=dict( (name, _("Unknown parameter %s") % name)
+                                     for (name, value) in param.items() ),
+                    defaults=dict(param),
+                    category='unknown',
+                ))
                 catalog.action_categories['unknown']=_("Unknown actions")
 
             action=Action(registeredaction=catalog.get_action(name), catalog=catalog)
@@ -868,9 +868,9 @@ class Quicksearch(EtreeMixin):
         for source in self.sources:
             qnode.append(ET.Element(tag('source'), { 'value': source } ))
 
-        qnode.append(ET.Element(tag('searched'),
-                     { 'value':
-                       urllib.parse.quote(str(self.searched).encode('utf-8'))} ))
+        qnode.append(ET.Element(tag('searched'), {
+            'value': urllib.parse.quote(str(self.searched).encode('utf-8'))
+        }))
 
         qnode.append(ET.Element('case_sensitive'),
                      { 'value': str(int(self.case_sensitive)) })
@@ -1074,16 +1074,16 @@ class ECACatalog:
                   'UserEvent']
 
     action_categories=OrderedDict((
-            ('player', _("Player control")),
-            ('sound', _("Audio enrichment")),
-            ('image', _("Image enrichment")),
-            ('external', _("External display control")),
-            ('popup', _("Popup")),
+        ('player', _("Player control")),
+        ('sound', _("Audio enrichment")),
+        ('image', _("Image enrichment")),
+        ('external', _("External display control")),
+        ('popup', _("Popup")),
 
-            ('state', _("State")),
-            ('gui', _("GUI actions")),
-            ('expert', _("Expert")),
-        ))
+        ('state', _("State")),
+        ('gui', _("GUI actions")),
+        ('expert', _("Expert")),
+    ))
 
     def __init__(self):
         # Dict of registered actions, indexed by name

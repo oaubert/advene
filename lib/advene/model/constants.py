@@ -26,4 +26,3 @@ xmlnsNS  = xml.dom.XMLNS_NAMESPACE
 
 TEXT_NODE = xml.dom.Node.TEXT_NODE
 ELEMENT_NODE = xml.dom.Node.ELEMENT_NODE
-

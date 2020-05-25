@@ -50,7 +50,7 @@ def register(controller=None):
         controller.register_generic_feature(shortname, MontageRenderer)
     return True
 
-class MontageRenderer(object):
+class MontageRenderer:
     """Video montage exporter.
     """
     name = _("Video montage exporter")
@@ -60,6 +60,7 @@ class MontageRenderer(object):
         self.elements = elements
         self.progress_cb = None
         self.pipeline = None
+        self.total_duration = 1
 
     def finalize(self):
         if self.pipeline is not None:
@@ -103,7 +104,7 @@ class MontageRenderer(object):
             duration = a.fragment.duration * Gst.MSECOND
             # GES.TrackType.UNKNOWN => add every kind of stream to the timeline
             clips.append(layer.add_asset(asset, start_on_timeline, start_position_asset,
-                                        duration, GES.TrackType.UNKNOWN))
+                                         duration, GES.TrackType.UNKNOWN))
             start_on_timeline += duration
 
         timeline.commit()

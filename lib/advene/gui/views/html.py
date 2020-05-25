@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 from gi.repository import Gtk
 import urllib.request, urllib.parse, urllib.error
-import urllib.parse
 import re
 
 engine=None
@@ -153,9 +152,9 @@ class HTMLView(AdhocView):
         tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         for icon, action in (
-            (Gtk.STOCK_GO_BACK, self.component.back),
-            (Gtk.STOCK_REFRESH, self.component.refresh),
-            (Gtk.STOCK_HOME, utbv_menu),
+                (Gtk.STOCK_GO_BACK, self.component.back),
+                (Gtk.STOCK_REFRESH, self.component.refresh),
+                (Gtk.STOCK_HOME, utbv_menu),
             ):
             b=Gtk.ToolButton(stock_id=icon)
             b.connect('clicked', action)

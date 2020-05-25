@@ -100,47 +100,46 @@ class HTMLEditor(textview_class, HTMLParser):
     # Formats and fonts applied to Tags
     # FIXME: we should parse at least a subset of CSS to get some things right
     __formats = {
-         'h1': { 'font': "sans bold 16",
-                 #'justification': Gtk.Justification.CENTER,
-                 'pixels-above-lines': 8,
-                 'pixels-below-lines': 4 },
-         'h2': { 'font': "sans bold 12",
-                 #'justification': Gtk.Justification.CENTER,
-                 'pixels-above-lines': 6,
-                 'pixels-below-lines': 3 },
-         'h3': { 'font': "sans bold italic 10",
-                 'pixels-above-lines': 4,
-                 'pixels-below-lines': 0 },
-         'dl': { 'font': "sans 10" },
-         'dd': { 'font': "sans 10",
-                 'left-margin': 10, 'right-margin': 10,
-                 'pixels-above-lines': 2,
-                 'pixels-below-lines': 2 },
-         'dt': { 'font': "sans bold 10",
-                 'pixels-above-lines': 3,
-                 'pixels-below-lines': 2,
-                 'left-margin': 48 },
-         'p': { 'font': "sans 10",
-                'pixels-above-lines': 4,
+        'h1': { 'font': "sans bold 16",
+                #'justification': Gtk.Justification.CENTER,
+                'pixels-above-lines': 8,
                 'pixels-below-lines': 4 },
-         'b': { 'font': "sans bold 10", },
-         'i': { 'font': "sans italic 10", },
-         'em': { 'font': "sans italic 10", },
-         'strong': { 'font': "sans bold italic 10" },
-         'code': { 'font': "monospace 10" },
-         'a': { 'font': "sans 10",
-                'underline': Pango.Underline.SINGLE,
-                'foreground': 'blue' },
-         'head': { 'invisible': True },
-         'table': {},
-         'br': {},
-         'img': {},
-         'li': { 'left-margin': 48 },
-         'ul': {},
-         'ol': {},
-         'tal': { 'background': 'violet',
-                  },
-         }
+        'h2': { 'font': "sans bold 12",
+                #'justification': Gtk.Justification.CENTER,
+                'pixels-above-lines': 6,
+                'pixels-below-lines': 3 },
+        'h3': { 'font': "sans bold italic 10",
+                'pixels-above-lines': 4,
+                'pixels-below-lines': 0 },
+        'dl': { 'font': "sans 10" },
+        'dd': { 'font': "sans 10",
+                'left-margin': 10, 'right-margin': 10,
+                'pixels-above-lines': 2,
+                'pixels-below-lines': 2 },
+        'dt': { 'font': "sans bold 10",
+                'pixels-above-lines': 3,
+                'pixels-below-lines': 2,
+                'left-margin': 48 },
+        'p': { 'font': "sans 10",
+               'pixels-above-lines': 4,
+               'pixels-below-lines': 4 },
+        'b': { 'font': "sans bold 10", },
+        'i': { 'font': "sans italic 10", },
+        'em': { 'font': "sans italic 10", },
+        'strong': { 'font': "sans bold italic 10" },
+        'code': { 'font': "monospace 10" },
+        'a': { 'font': "sans 10",
+               'underline': Pango.Underline.SINGLE,
+               'foreground': 'blue' },
+        'head': { 'invisible': True },
+        'table': {},
+        'br': {},
+        'img': {},
+        'li': { 'left-margin': 48 },
+        'ul': {},
+        'ol': {},
+        'tal': { 'background': 'violet', },
+    }
 
     def __init__(self, *cnf, **kw):
         """Initialisation of HTMLParser and TextView.
@@ -151,7 +150,7 @@ class HTMLEditor(textview_class, HTMLParser):
          __tags as a list of tags in the text and present their
          positions so we can allocate the formatting.
         """
-        GObject.GObject.__init__(self, *cnf, **kw)
+        textview_class.__init__(*cnf, **kw)
         HTMLParser.__init__(self)
         if GtkSource is not None:
             self.set_buffer(GtkSource.Buffer())
@@ -206,7 +205,7 @@ class HTMLEditor(textview_class, HTMLParser):
                                 # endmark)
                                 b.delete_mark(m._endmark)
                         except AttributeError:
-                            logger.error("Exception for %s" % m._tag, exc_info=True)
+                            logger.error("Exception for %s", m._tag, exc_info=True)
                     elif  hasattr(m, '_endtag') and hasattr(m, 'startmark'):
                         b.remove_tag_by_name(m._endtag,
                                              b.get_iter_at_mark(m._startmark),
@@ -267,7 +266,7 @@ class HTMLEditor(textview_class, HTMLParser):
         self.html_reset()
         if not isinstance(txt, str):
             # <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-            l=re.findall('http-equiv.+content-type.+charset=([\w\d-]+)', txt)
+            l=re.findall(r'http-equiv.+content-type.+charset=([\w\d-]+)', txt)
             if l:
                 charset=l[0]
                 logger.warning("Detected %s charset")
@@ -692,7 +691,7 @@ class HTMLEditor(textview_class, HTMLParser):
                         closing='>'
                     if m._attr:
                         fd.write("<%s %s%s" % (m._tag,
-                                              " ".join( '%s="%s"' % (k, v) for (k, v) in m._attr ),
+                                               " ".join( '%s="%s"' % (k, v) for (k, v) in m._attr ),
                                                closing))
                     else:
                         fd.write("<%s%s" % (m._tag, closing))
@@ -919,11 +918,11 @@ if __name__ == "__main__":
     ev.widget.add(p)
 
     for (icon, action) in (
-        (Gtk.STOCK_CONVERT, lambda i: t.dump_html()),
-        (Gtk.STOCK_REFRESH, lambda i: t.refresh()),
-        (Gtk.STOCK_BOLD, lambda i: t.apply_html_tag('b')),
-        (Gtk.STOCK_ITALIC, lambda i: t.apply_html_tag('i')),
-        ):
+            (Gtk.STOCK_CONVERT, lambda i: t.dump_html()),
+            (Gtk.STOCK_REFRESH, lambda i: t.refresh()),
+            (Gtk.STOCK_BOLD, lambda i: t.apply_html_tag('b')),
+            (Gtk.STOCK_ITALIC, lambda i: t.apply_html_tag('i')),
+    ):
         b=Gtk.ToolButton(icon)
         b.connect('clicked', action)
         ev.toolbar.insert(b, -1)

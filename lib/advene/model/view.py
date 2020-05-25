@@ -16,7 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import time
+import uuid
 
 from .util.uri import urljoin
 
@@ -29,7 +29,7 @@ from . import viewable
 
 from .exception import AdveneException, AdveneValueError
 
-from .constants import *
+from .constants import adveneNS
 
 
 class _match_filter_dict (dict, metaclass=auto_properties):
@@ -46,8 +46,8 @@ class _match_filter_dict (dict, metaclass=auto_properties):
     __classes_w_uri_types = ('annotation', 'relation')
     __classes_w_mime_types = ('content',)
     __classes_w_types = (__classes_w_uri_types
-                       + __classes_w_mime_types
-                       + ('list',))
+                         + __classes_w_mime_types
+                         + ('list',))
 
     def __init__ (self, view):
         sup = super (_match_filter_dict, self)
@@ -55,7 +55,7 @@ class _match_filter_dict (dict, metaclass=auto_properties):
         self.view = view
         setitem = sup.__setitem__
 
-        v_class = view._getModel ().getAttributeNS (None, 'viewable-class');
+        v_class = view._getModel ().getAttributeNS (None, 'viewable-class')
         setitem ('class', v_class)
 
         if v_class in self.__classes_w_types:
@@ -70,7 +70,8 @@ class _match_filter_dict (dict, metaclass=auto_properties):
     def __setitem__ (self, key, val):
 
         try:
-            if self[key] == val: return
+            if self[key] == val:
+                return
         except KeyError:
             pass
 
@@ -83,13 +84,14 @@ class _match_filter_dict (dict, metaclass=auto_properties):
                 super (_match_filter_dict, self).__setitem__ (key, val)
                 try:
                     del self['type']
-                except KeyError: pass
+                except KeyError:
+                    pass
 
         elif key == 'type':
             if not self['class'] in self.__classes_w_types:
                 raise AdveneValueError (
-                         'viewable-class %s does cannot have a viewable-type' %
-                         self['class'])
+                    'viewable-class %s does cannot have a viewable-type' %
+                    self['class'])
             self.view._getModel ().setAttributeNS (None, 'viewable-type', val)
             super (_match_filter_dict, self).__setitem__ (key, val)
 
@@ -99,7 +101,7 @@ class _match_filter_dict (dict, metaclass=auto_properties):
         self.__manage_values ()
 
     def __delitem__ (self, key):
-        if   key == 'class':
+        if key == 'class':
             raise AdveneException ('key "class" is mandatory in matchFilter')
         elif key == 'type':
             model = self.view._getModel ()
@@ -207,7 +209,7 @@ class View(modeled.Importable, content.WithContent,
 
             doc = parent._getDocument()
             element = doc.createElementNS(self.getNamespaceUri(),
-                                               self.getLocalName())
+                                          self.getLocalName())
             modeled.Importable.__init__(self, element, parent,
                                         parent.getViews.__func__)
 
@@ -220,17 +222,23 @@ class View(modeled.Importable, content.WithContent,
                 # FIXME: cf thread
                 # Weird use of hash() -- will this work?
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = "v" + str(id(self)) + str(time.clock()).replace('.','')
+                ident = str(uuid.uuid1())
             self.setId(ident)
 
-            if title is not None: self.setTitle(date)
-            if date is not None: self.setDate(date)
-            if author is not None: self.setAuthor(author)
-            if authorUrl is not None: self.setAuthorUrl(authorUrl)
-            if content_data is not None: self.getContent().setData(content_data)
+            if title is not None:
+                self.setTitle(date)
+            if date is not None:
+                self.setDate(date)
+            if author is not None:
+                self.setAuthor(author)
+            if authorUrl is not None:
+                self.setAuthorUrl(authorUrl)
+            if content_data is not None:
+                self.getContent().setData(content_data)
             #if content_stream is not None: #TODO
 
-            if content_mimetype is None: content_mimetype = 'text/html'
+            if content_mimetype is None:
+                content_mimetype = 'text/html'
             self.getContent().setMimetype(content_mimetype)
 
 
@@ -240,33 +248,35 @@ class View(modeled.Importable, content.WithContent,
         """Return a nice string representation of the element"""
         return "View <%s>" % self.getUri()
 
-    def getNamespaceUri(): return adveneNS
-    getNamespaceUri = staticmethod(getNamespaceUri)
+    @staticmethod
+    def getNamespaceUri():
+        return adveneNS
 
-    def getLocalName(): return "view"
-    getLocalName = staticmethod(getLocalName)
+    @staticmethod
+    def getLocalName():
+        return "view"
 
     def getMatchFilter(self):
         if not hasattr (self, '_match_filter'):
             self._match_filter = _match_filter_dict (self)
         return self._match_filter
 
-    def match(self, viewable):
+    def match(self, viewable_element):
         mf = self.getMatchFilter()
         v_class = mf['class']
         v_type = mf.get ('type', None)
-        if  v_class != '*' and v_class != viewable.getViewableClass():
+        if  v_class != '*' and v_class != viewable_element.getViewableClass():
             return False
         if v_class in ('annotation', 'relation', 'list'):
-            if v_type != '*' and v_type != viewable.getViewableType():
+            if v_type != '*' and v_type != viewable_element.getViewableType():
                 return False
         elif v_class == 'content':
             if v_type:
                 vt1, vt2 = v_type.split('/')
-                ct1, ct2 = viewable.getViewableType().split('/')
-                if vt1 != '*' and vt1 != ct1:
+                ct1, ct2 = viewable_element.getViewableType().split('/')
+                if vt1 not in ('*', ct1):
                     return False
-                if vt2 != '*' and vt2 != ct2:
+                if vt2 not in ('*', ct2):
                     return False
         return True
 
@@ -314,6 +324,3 @@ class ViewFactory (modeled.Factory.of (View)):
     FIXME
     """
     pass
-
-
-

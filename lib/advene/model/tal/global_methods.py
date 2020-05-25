@@ -170,18 +170,18 @@ def meta(target, context):
 
     import advene.model._impl
 
-    class MetaNameWrapper(object):
+    class MetaNameWrapper:
         def __init__(self, target, namespace_uri):
             self.__target = target
             self.__namespace_uri = namespace_uri
 
         def __contains__(self, key):
-            return (self[key] is not None)
+            return self[key] is not None
 
         def __getitem__(self, key):
             return self.__target.getMetaData(self.__namespace_uri, key)
 
-    class MetaNSWrapper(object):
+    class MetaNSWrapper:
         def __init__(self, target, context):
             self.__target = target
             options = context.globals['options']
@@ -212,7 +212,7 @@ def view(target, context):
     import advene.model.viewable
     import advene.model.exception
 
-    class ViewWrapper (object):
+    class ViewWrapper:
 
         """
         Return a wrapper around a viewable (target), having the two following
@@ -408,7 +408,7 @@ def query(target, context):
     """Apply a query on target.
 
     """
-    class QueryWrapper (object):
+    class QueryWrapper:
 
         """
         Return a wrapper around an element (target), having the  following
@@ -491,14 +491,14 @@ def sorted (target, context):
     from advene.model.fragment import AbstractNbeFragment
 
     if hasattr(target, 'viewableType') and target.viewableType == 'annotation-list' or (
-        isinstance(target, list) and len(target) > 0 and hasattr(target[0], 'fragment')):
+            isinstance(target, list) and len(target) > 0 and hasattr(target[0], 'fragment')):
         l=list(target[:])
         l.sort(key=lambda e: e.fragment.begin)
-    elif hasattr(target, '__getslice__') and len(target) > 0 and (isinstance(target[0], Annotation)
-                                                                  or isinstance(target[0], AbstractNbeFragment)
-                                                                  or isinstance(target[0], int)
-                                                                  or isinstance(target[0], float)
-                                                                  or isinstance(target[0], str)):
+    elif hasattr(target, '__getslice__') and len(target) > 0 and isinstance(target[0], (Annotation,
+                                                                                        AbstractNbeFragment,
+                                                                                        int,
+                                                                                        float,
+                                                                                        str)):
         l = list(target[:])
         l.sort()
     elif (hasattr(target, '__getslice__') and len(target) > 0 and hasattr(target[0], 'title')):
@@ -571,8 +571,7 @@ def color(target, context):
     from advene.model.schema import AnnotationType, RelationType
     import re
 
-    if (isinstance(target, Annotation) or isinstance(target, Relation)
-        or isinstance(target, AnnotationType) or isinstance(target, RelationType)):
+    if isinstance(target, (Annotation, Relation, AnnotationType, RelationType)):
         # The proper way would be
         # c=context.evaluateValue('options/controller')
         # but the following is a mediocre optimization
@@ -608,7 +607,7 @@ def transition_fix_date(target, context):
     """
     import re
     import datetime
-    m=re.search('(\d\d\d\d)-(\d\d?)-(\d\d)', target)
+    m=re.search(r'(\d\d\d\d)-(\d\d?)-(\d\d)', target)
     if m:
         return datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3))).isoformat()
     else:
@@ -637,7 +636,7 @@ def export(target, context):
     from advene.util.tools import TypedUnicode
     import io
 
-    class ExporterWrapper(object):
+    class ExporterWrapper:
         """Return a wrapper around an element (target)
 
          It is a dictionnary, returning a callable running

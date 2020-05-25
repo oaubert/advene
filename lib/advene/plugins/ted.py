@@ -64,12 +64,12 @@ class TEDImporter(GenericImporter):
         if self.package is None:
             self.package=p
 
-        offset=re.findall('introDuration\s*:\s*(\d+)', data)
+        offset=re.findall(r'introDuration\s*:\s*(\d+)', data)
         if offset:
             offset=int(offset[0])
         else:
             offset=0
-        m = re.findall('/talks/subtitles/id/(\d+)', data, re.MULTILINE)
+        m = re.findall(r'/talks/subtitles/id/(\d+)', data, re.MULTILINE)
         if m:
             ident=m[0]
         else:
@@ -85,7 +85,7 @@ class TEDImporter(GenericImporter):
             title=re.findall('<title>(.+?)</title>', data)
             if title:
                 self.package.title=title[0]
-            moviepath=re.findall('<media:content\s+url="(.+?)"', data)
+            moviepath=re.findall(r'<media:content\s+url="(.+?)"', data)
             if moviepath:
                 self.controller.set_default_media(moviepath[0])
         else:
@@ -93,7 +93,7 @@ class TEDImporter(GenericImporter):
             if title:
                 self.package.title=title[0]
             # Try to find a reference to a .mp4 file
-            movieurl=re.findall('(http://download.ted.com/.+?\.mp4)', data, re.MULTILINE)
+            movieurl=re.findall(r'(http://download.ted.com/.+?\.mp4)', data, re.MULTILINE)
             if movieurl:
                 self.controller.set_default_media(movieurl[0])
 
@@ -116,7 +116,7 @@ class TEDImporter(GenericImporter):
             'begin': 0,
             'end': offset,
             }
-        for timestamp, buf in re.findall('seekVideo.(\d+).+?>(.+?)</a>', data):
+        for timestamp, buf in re.findall(r'seekVideo.(\d+).+?>(.+?)</a>', data):
             t=int(timestamp) + offset
             if start is not None:
                 yield {
@@ -165,4 +165,3 @@ class TEDImporter(GenericImporter):
                     'begin': d['startTime'] + offset,
                     'duration': d['duration'],
                     }
-

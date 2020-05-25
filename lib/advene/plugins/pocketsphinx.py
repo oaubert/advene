@@ -34,7 +34,7 @@ import advene.util.helper as helper
 
 def register(controller=None):
     if (Gst.ElementFactory.find('vader')
-         and Gst.ElementFactory.find('pocketsphinx')):
+        and Gst.ElementFactory.find('pocketsphinx')):
         controller.register_importer(PocketSphinxImporter)
     else:
         controller.log(_("Cannot register speech recognition: Pocketsphinx plugins not found. See http://cmusphinx.sourceforge.net/wiki/gstreamer for details."))
@@ -87,6 +87,7 @@ class PocketSphinxImporter(GenericImporter):
         self.start_position = 0
         self.text = None
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -96,7 +97,6 @@ class PocketSphinxImporter(GenericImporter):
         if ext in config.data.video_extensions:
             return 80
         return 0
-    can_handle=staticmethod(can_handle)
 
     def on_vader_start(self, vader, pos):
         """Store start position.
@@ -123,10 +123,10 @@ class PocketSphinxImporter(GenericImporter):
         for i, tup in enumerate(self.buffer_list):
             self.progress(i / n)
             self.convert( [ {
-                        'begin': tup[0],
-                        'end': tup[1],
-                        'content': tup[2],
-                        } ])
+                'begin': tup[0],
+                'end': tup[1],
+                'content': tup[2],
+            } ])
 
     def on_bus_message(self, bus, message):
         def finalize():
@@ -142,7 +142,7 @@ class PocketSphinxImporter(GenericImporter):
         if message.type == Gst.MessageType.EOS:
             finalize()
         elif s:
-            logger.debug("MSG ", s.get_name(), s.to_string())
+            logger.debug("MSG %s %s", s.get_name(), s.to_string())
             if s.get_name() == 'progress' and self.progress is not None:
                 if not self.progress(s['percent-double'] / 100, _("%(count)d utterances until %(time)s") % {
                         'count': len(self.buffer_list),
@@ -153,9 +153,9 @@ class PocketSphinxImporter(GenericImporter):
     def async_process_file(self, filename, end_callback=None):
         self.end_callback = end_callback
 
-        at = self.ensure_new_type('speech', title=_("Speech"),
-                                  mimetype='text/plain',
-                                  description=_("Recognized speech"))
+        self.ensure_new_type('speech', title=_("Speech"),
+                             mimetype='text/plain',
+                             description=_("Recognized speech"))
 
         if self.use_default_model:
             args = ""
@@ -167,9 +167,9 @@ class PocketSphinxImporter(GenericImporter):
 
         # Build pipeline
         self.pipeline = Gst.parse_launch('uridecodebin name=decoder ! audioconvert ! audioresample ! progressreport silent=true update-freq=1 name=report  ! vader name=vader auto-threshold=false threshold=%(noise).9f run-length=%(silence)d ! pocketsphinx name=pocketsphinx %(pocketsphinxargs)s ! fakesink' % ( {
-                'noise': self.noise,
-                'silence': self.silence * Gst.MSECOND,
-                'pocketsphinxargs': args }))
+            'noise': self.noise,
+            'silence': self.silence * Gst.MSECOND,
+            'pocketsphinxargs': args }))
         self.decoder = self.pipeline.get_by_name('decoder')
 
         vader = self.pipeline.get_by_name("vader")

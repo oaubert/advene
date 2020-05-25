@@ -16,7 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import time
+import uuid
 
 from .util.uri import urljoin
 
@@ -39,11 +39,13 @@ class Annotation(modeled.Importable, content.WithContent,
                  viewable.Viewable.withClass('annotation','_get_type_uri'),
                  _impl.Authored, _impl.Dated, _impl.Uried, _impl.Tagged, metaclass=auto_properties):
 
-    def getNamespaceUri(): return adveneNS
-    getNamespaceUri = staticmethod(getNamespaceUri)
+    @staticmethod
+    def getNamespaceUri():
+        return adveneNS
 
-    def getLocalName(): return "annotation"
-    getLocalName = staticmethod(getLocalName)
+    @staticmethod
+    def getLocalName():
+        return "annotation"
 
     def __init__(self,                 # mode 1 & 2
                  parent,               # mode 1 & 2
@@ -118,23 +120,25 @@ class Annotation(modeled.Importable, content.WithContent,
             self.setFragment(fragment)
 
             if ident is None:
-                # FIXME: cf thread
-                # Weird use of hash() -- will this work?
-                # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = "a" + str(id(self)) + str(time.clock()).replace('.','')
+                ident = str(uuid.uuid1())
             self.setId(ident)
 
-            if date is not None: self.setDate(date)
-            if author is not None: self.setAuthor(author)
-            if authorUrl is not None: self.setAuthorUrl(authorUrl)
-            if context is not None: self.setContext(context)
-            if content_data is not None: self.getContent().setData(content_data)
+            if date is not None:
+                self.setDate(date)
+            if author is not None:
+                self.setAuthor(author)
+            if authorUrl is not None:
+                self.setAuthorUrl(authorUrl)
+            if context is not None:
+                self.setContext(context)
+            if content_data is not None:
+                self.getContent().setData(content_data)
             #if content_stream is not None: #TODO
 
     def __str__(self):
         """Return a nice string representation of the object."""
         return "Annotation %s:\"%s\"" % (self.getFragment(),
-                                          self.getContent().getData())
+                                         self.getContent().getData())
 
     def __lt__(self, other):
         """Compare 2 annotations or 2 fragments
@@ -233,18 +237,18 @@ class Annotation(modeled.Importable, content.WithContent,
                 return self._relations
             else:
                 return [
-                  r for r in self._relations if len (r.getMembers ()) == order
+                    r for r in self._relations if len (r.getMembers ()) == order
                 ]
         else:
             if order is None:
                 return [
-                  r for r in self._relations if r.getMembers ()[rank] is self
+                    r for r in self._relations if r.getMembers ()[rank] is self
                 ]
             else:
                 return [
-                  r for r in self._relations
-                  if r.getMembers ()[rank] is self
-                  and len (r.getMembers ()) == order
+                    r for r in self._relations
+                    if r.getMembers ()[rank] is self
+                    and len (r.getMembers ()) == order
                 ]
         # Cannot happen
         return []
@@ -404,7 +408,7 @@ class Relation(modeled.Importable, content.WithContent,
             # mode 2 initialization
             doc = parent._getDocument()
             element = doc.createElementNS(self.getNamespaceUri(),
-                                               self.getLocalName())
+                                          self.getLocalName())
             modeled.Importable.__init__(self, element, parent)
 
             e = doc.createElementNS(adveneNS, "members")
@@ -420,17 +424,19 @@ class Relation(modeled.Importable, content.WithContent,
                 m._relations.append (self)
 
             if ident is None:
-                # FIXME: cf thread
-                # Weird use of hash() -- will this work?
-                # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = "r" + str(id(self)) + str(time.clock()).replace('.','')
+                ident = str(uuid.uuid1())
             self.setId(ident)
 
-            if date is not None: self.setDate(date)
-            if author is not None: self.setAuthor(author)
-            if authorUrl is not None: self.setAuthorUrl(authorUrl)
-            if context is not None: self.setContext(context)
-            if content_data is not None: self.getContent().setData(content_data)
+            if date is not None:
+                self.setDate(date)
+            if author is not None:
+                self.setAuthor(author)
+            if authorUrl is not None:
+                self.setAuthorUrl(authorUrl)
+            if context is not None:
+                self.setContext(context)
+            if content_data is not None:
+                self.getContent().setData(content_data)
             #if content_stream is not None: #TODO
 
     def __str__(self):
@@ -438,11 +444,13 @@ class Relation(modeled.Importable, content.WithContent,
 
     # dom dependant methods
 
-    def getNamespaceUri(): return adveneNS
-    getNamespaceUri = staticmethod(getNamespaceUri)
+    @staticmethod
+    def getNamespaceUri():
+        return adveneNS
 
-    def getLocalName(): return "relation"
-    getLocalName = staticmethod(getLocalName)
+    @staticmethod
+    def getLocalName():
+        return "relation"
 
     def _get_type_uri(self, absolute=True):
         """Return the type URI - used to retrieve the viewable-type"""
@@ -475,7 +483,7 @@ class Relation(modeled.Importable, content.WithContent,
         if self.__members is None:
             e = self._getChild((adveneNS, "members"))
             self.__members = bundle.RefBundle(self, e, adveneNS, 'member',
-                                     self.getOwnerPackage (). getAnnotations ())
+                                              self.getOwnerPackage (). getAnnotations ())
         return self.__members
 
 

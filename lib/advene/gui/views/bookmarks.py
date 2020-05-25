@@ -219,7 +219,7 @@ class Bookmarks(AdhocView):
                     self.refresh()
                 return True
             else:
-                logger.warning("Unknown target type for drop: %d" % targetType)
+                logger.warning("Unknown target type for drop: %d", targetType)
             return False
 
         b=get_small_stock_button(Gtk.STOCK_DELETE)
@@ -241,9 +241,9 @@ class Bookmarks(AdhocView):
         tb=Gtk.Toolbar()
         tb.set_style(Gtk.ToolbarStyle.ICONS)
         for icon, action, tip in (
-            ('set-to-now.png', bookmark_current_time, _("Insert a bookmark for the current video time")),
-            (Gtk.STOCK_CONVERT, self.convert_to_annotations, _("Convert bookmarks to annotations")),
-            (Gtk.STOCK_SAVE, self.save_view, _("Save view")),
+                ('set-to-now.png', bookmark_current_time, _("Insert a bookmark for the current video time")),
+                (Gtk.STOCK_CONVERT, self.convert_to_annotations, _("Convert bookmarks to annotations")),
+                (Gtk.STOCK_SAVE, self.save_view, _("Save view")),
             ):
             if icon.endswith('.png'):
                 b=get_pixmap_toolbutton(icon)
@@ -275,20 +275,20 @@ class Bookmarks(AdhocView):
                 self.append(position, comment=comment)
                 return True
             else:
-                logger.warning("Unknown target type for drop: %d" % targetType)
+                logger.warning("Unknown target type for drop: %d", targetType)
             return False
 
         self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |
-                                  Gtk.DestDefaults.HIGHLIGHT |
-                                  Gtk.DestDefaults.ALL,
-                                  config.data.get_target_types('timestamp'), Gdk.DragAction.LINK | Gdk.DragAction.COPY)
+                                   Gtk.DestDefaults.HIGHLIGHT |
+                                   Gtk.DestDefaults.ALL,
+                                   config.data.get_target_types('timestamp'), Gdk.DragAction.LINK | Gdk.DragAction.COPY)
         self.mainbox.connect('drag-data-received', mainbox_drag_received)
 
         v.add(sw)
 
         return v
 
-class BookmarkWidget(object):
+class BookmarkWidget:
 
     default_comment=_("Comment here")
 

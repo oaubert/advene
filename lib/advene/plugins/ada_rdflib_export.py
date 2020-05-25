@@ -65,15 +65,15 @@ def keywords_to_struct(keywords):
         current = keywords.pop(0)
         if current in (TO_KW, VS_KW):
             if need_value:
-                logger.error("Syntax error: expecting a value, not %s keyword." % current)
+                logger.error("Syntax error: expecting a value, not %s keyword.", current)
                 prev = None
                 need_value = False
             if prev is None:
-                logger.error("Syntax error: %s keyword should have a value before." % current)
+                logger.error("Syntax error: %s keyword should have a value before.", current)
                 prev = None
                 need_value = False
             elif not keywords:
-                logger.error("Syntax error: %s keyword should have a value after." % current)
+                logger.error("Syntax error: %s keyword should have a value after.", current)
                 prev = None
                 need_value = False
             else:
@@ -87,7 +87,7 @@ def keywords_to_struct(keywords):
                             yield TypedValues(type="predefined", values=prev.values[:-1])
                         prev = TypedValues(type="evolving", values=prev.values[-1:])
                     elif prev.type != "evolving":
-                        logger.error("Syntax error: mixed contrasting/evolving values in %s" % current)
+                        logger.error("Syntax error: mixed contrasting/evolving values in %s", current)
                         prev = None
                         need_value = False
                 elif current == VS_KW:
@@ -99,7 +99,7 @@ def keywords_to_struct(keywords):
                             yield TypedValues(type="predefined", values=prev.values[:-1])
                         prev = TypedValues(type="contrasting", values=prev.values[-1:])
                     elif prev.type != "contrasting":
-                        logger.error("Syntax error: mixed contrasting/evolving values in %s" % current)
+                        logger.error("Syntax error: mixed contrasting/evolving values in %s", current)
                         prev = None
                         need_value = False
                 else:
@@ -268,8 +268,8 @@ class AdArdflibExporter(GenericExporter):
             return g
         else:
             g.serialize(destination=filename, format=self.format)
-            logger.info(_("Wrote %(count)d triples to %(filename)s") % { "count": len(g),
-                                                                         "filename": filename })
+            logger.info(_("Wrote %(count)d triples to %(filename)s"), { "count": len(g),
+                                                                        "filename": filename })
             return ""
 
 if __name__ == "__main__":
@@ -286,4 +286,3 @@ if __name__ == "__main__":
     }
     for s in samples.keys():
         print(s, "\n", list(keywords_to_struct(s.split(","))), "\n\n")
-

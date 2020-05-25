@@ -37,6 +37,7 @@ def register(controller=None):
 class AnvilImporter(GenericImporter):
     name = _("Anvil importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -47,7 +48,6 @@ class AnvilImporter(GenericImporter):
         elif fname.endswith('.xml'):
             return 30
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename):
         tree=ET.parse(filename)

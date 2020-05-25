@@ -84,10 +84,10 @@ class Config:
         ew.add_label(_("<span size='large'><b>Welcome in Advene</b>\nThis is the first time that you run Advene. Please answer some basic configuration questions. You will be able to modify these choices from the Advene interface, in the Edit/Preferences menu.</span>"))
         ew.add_option(_("Interface language"), 'language', _("Language used for the interface"),
                       {
-                "English": 'C',
-                "Francais": 'fr_FR',
-                _("System default"): '',
-                })
+                          "English": 'C',
+                          "Francais": 'fr_FR',
+                          _("System default"): '',
+                      })
         ew.add_checkbox(_("Weekly check for Advene updates on the Advene website"), 'update-check', _("Weekly check for updates on the Advene website"))
 
         ew.add_dir_selector(_("Preferred directory for data files"), "data", _("Preferred directory for storing data files (Advene packages)"))

@@ -26,7 +26,7 @@ except ImportError:
     pass
 
 
-class Locale (object):
+class Locale:
     """Class for representing and comparing locale settings.
     """
 
@@ -41,24 +41,21 @@ class Locale (object):
 
         self.__hash = hash (str (self))
 
+    @staticmethod
     def fromDomElement (elt):
         s = elt.getAttributeNS (xml.dom.XML_NAMESPACE,'lang')
         return Locale (s)
-    fromDomElement = staticmethod (fromDomElement)
 
+    @staticmethod
     def fromEnv ():
         return Locale (locale.getdefaultlocale ()[0])
-    fromEnv = staticmethod (fromEnv)
-
 
     def isMoreSpecificThat (self, other):
         if other.lang is None:
             return True
         else:
-            if self.lang == other.lang and other.country is None:
-                return True
-            else:
-                return False
+            return self.lang == other.lang and other.country is None
+
 
     def isMoreGeneralThat (self, other):
         return other.isMoreSpecificThat (self)
@@ -83,13 +80,10 @@ class Locale (object):
     def __repr__ (self):
         return "Locale('%s')" % str (self)
 
-    def __hash (self):
-        return self.__hash
-
 #nullLocale = Locale('')
 defaultLocale = Locale.fromEnv ()
 
-class LocaleChooser (object):
+class LocaleChooser:
     """
     A tree of element stored hierarchically with respect to their locale.
     The =getBestFit= method returns the best fit element with respect to the
@@ -121,7 +115,7 @@ class LocaleChooser (object):
         except KeyError:
             pass
         return (
-          exactMatch or
-          tree.getMostSpecificInstance (seq) or
-          tree.getAny ()
+            exactMatch or
+            tree.getMostSpecificInstance (seq) or
+            tree.getAny ()
         )

@@ -116,7 +116,7 @@ class TranscriptionView(AdhocView):
 
         # Try to determine a default representation
         try:
-            t=set([ an.type for an in self.model ])
+            t=set(an.type for an in self.model)
         except:
             t=[]
         if len(t) == 1:
@@ -266,12 +266,12 @@ class TranscriptionView(AdhocView):
         tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         for icon, action, tip in (
-            (Gtk.STOCK_SAVE, self.save_transcription, _("Save transcription to a text file")),
-            (Gtk.STOCK_APPLY, self.validate, _("Apply the modifications")),
-            (Gtk.STOCK_FIND, self.show_searchbox, _("Find text")),
-            (Gtk.STOCK_REDO, self.quick_options_toggle, _("Quickly switch display options")),
-            (Gtk.STOCK_REFRESH, self.refresh, _("Refresh the transcription")),
-            (Gtk.STOCK_PREFERENCES, self.edit_options, _("Edit preferences")),
+                (Gtk.STOCK_SAVE, self.save_transcription, _("Save transcription to a text file")),
+                (Gtk.STOCK_APPLY, self.validate, _("Apply the modifications")),
+                (Gtk.STOCK_FIND, self.show_searchbox, _("Find text")),
+                (Gtk.STOCK_REDO, self.quick_options_toggle, _("Quickly switch display options")),
+                (Gtk.STOCK_REFRESH, self.refresh, _("Refresh the transcription")),
+                (Gtk.STOCK_PREFERENCES, self.edit_options, _("Edit preferences")),
             ):
             b=Gtk.ToolButton(stock_id=icon)
             b.set_tooltip_text(tip)
@@ -389,7 +389,7 @@ class TranscriptionView(AdhocView):
         for a in l:
             if self.options['display-time']:
                 insert_at_cursor_with_tags_by_name("[%s]" % helper.format_time(a.fragment.begin),
-                                                     "bound")
+                                                   "bound")
 
             mark = b.create_mark("b_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
@@ -654,9 +654,9 @@ class TranscriptionView(AdhocView):
     def register_callback (self, controller=None):
         """Add the activate handler for annotations."""
         self.beginrule=controller.event_handler.internal_rule (event="AnnotationBegin",
-                                                method=self.activate_annotation_handler)
+                                                               method=self.activate_annotation_handler)
         self.endrule=controller.event_handler.internal_rule (event="AnnotationEnd",
-                                                method=self.desactivate_annotation_handler)
+                                                             method=self.desactivate_annotation_handler)
 
     def unregister_callback (self, controller=None):
         controller.event_handler.remove_rule(self.beginrule, type_="internal")
@@ -676,8 +676,8 @@ class TranscriptionView(AdhocView):
 
     def save_transcription(self, button=None):
         fname=dialog.get_filename(title= ("Save transcription to..."),
-                                           action=Gtk.FileChooserAction.SAVE,
-                                           button=Gtk.STOCK_SAVE)
+                                  action=Gtk.FileChooserAction.SAVE,
+                                  button=Gtk.STOCK_SAVE)
         if fname is not None:
             self.save_output(filename=fname)
             return True
@@ -691,8 +691,8 @@ class TranscriptionView(AdhocView):
             f=open(filename, "w", encoding='utf-8')
         except Exception as e:
             self.message(_("Cannot write to %(filename)s: %(error)s:") %
-                     {'filename': filename,
-                      'error': str(e)})
+                         {'filename': filename,
+                          'error': str(e)})
             return True
         f.write(out)
         f.close()

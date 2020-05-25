@@ -57,7 +57,7 @@ def register(controller):
 # Matching between element classes and the FinderColumn class
 CLASS2COLUMN={}
 
-class Metadata(object):
+class Metadata:
     """Virtual object describing an element Metadata.
     """
     def __init__(self, element, package, viewableType=None):
@@ -89,7 +89,7 @@ class VirtualNode:
         self.rootPackage=package
         self.viewableType=viewableType
 
-class DetailedTreeModel(object):
+class DetailedTreeModel:
     """Detailed Tree Model.
 
     In this model,
@@ -183,7 +183,7 @@ class DetailedTreeModel(object):
             children = []
         elif node == self.virtual['views']:
             children=[ self.virtual['static'], self.virtual['dynamic'], self.virtual['adhoc'], self.virtual['admin'] ]
-        elif node is []:
+        elif isinstance(node, list) and len(node) == 0:
             children = [ self.get_package() ]
         else:
             children = []
@@ -205,7 +205,7 @@ class DetailedTreeModel(object):
 
     def nodeHasChildren (self, node):
         children = self.nodeChildren(node)
-        return (children is not None and children)
+        return children is not None and children
 
     def update_element(self, e, created=False):
         """Update an element.
@@ -214,7 +214,7 @@ class DetailedTreeModel(object):
         """
         parent=self.nodeParent(e)
         try:
-            del (self.childrencache[parent])
+            del self.childrencache[parent]
         except KeyError:
             pass
 
@@ -236,7 +236,7 @@ class DetailedTreeModel(object):
             del self.childrencache[parent]
         return parent
 
-class FinderColumn(object):
+class FinderColumn:
     """Abstract FinderColumn class.
     """
     def __init__(self, controller=None, model=None, node=None, callback=None, parent=None):
@@ -439,8 +439,8 @@ class ModelColumn(FinderColumn):
             and self.drag_data[3] is not None):
             x, y = treeview.get_pointer()
             threshold = treeview.drag_check_threshold(
-                    self.drag_data[0], self.drag_data[1],
-                    int(x), int(y))
+                self.drag_data[0], self.drag_data[1],
+                int(x), int(y))
             if threshold:
                 # A drag was started. Setup the appropriate target.
                 element=self.drag_data[3]
@@ -549,8 +549,8 @@ class ViewColumn(FinderColumn):
         self.element = self.node
 
         self.label['title'].set_markup(_("View <b>%(title)s</b>\nId: %(id)s") % {
-                'title': self.controller.get_title(self.element).replace('<', '&lt;'),
-                'id': self.element.id })
+            'title': self.controller.get_title(self.element).replace('<', '&lt;'),
+            'id': self.element.id })
 
         t=helper.get_view_type(self.element)
         self.label['activate'].set_sensitive(True)
@@ -615,11 +615,11 @@ class ViewColumn(FinderColumn):
                     return False
                 selection.set(selection.get_target(), 8,
                               urllib.parse.urlencode( {
-                            'id': self.element.id,
-                            } ).encode('utf8'))
+                                  'id': self.element.id,
+                              } ).encode('utf8'))
                 return True
             else:
-                logger.warning("Unknown target type for drag: %d" % targetType)
+                logger.warning("Unknown target type for drag: %d", targetType)
             return True
 
         b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
@@ -644,9 +644,9 @@ class QueryColumn(FinderColumn):
         self.element=self.node
 
         self.label['title'].set_markup(_("%(type)s <b>%(title)s</b>\nId: %(id)s") % {
-                'type': helper.get_type(self.element),
-                'title': self.controller.get_title(self.element).replace('<', '&lt;'),
-                'id': self.element.id })
+            'type': helper.get_type(self.element),
+            'title': self.controller.get_title(self.element).replace('<', '&lt;'),
+            'id': self.element.id })
         # Reset the sensitive state on apply buttons
         for b in self.apply_buttons:
             b.set_sensitive(True)
@@ -684,9 +684,9 @@ class QueryColumn(FinderColumn):
 
         self.apply_buttons=[]
         for (expr, label) in (
-             ('package', _("the package")),
-             ('package/annotations', _("all annotations of the package")),
-             ('package/annotations/first', _("the first annotation of the package")),
+                ('package', _("the package")),
+                ('package/annotations', _("all annotations of the package")),
+                ('package/annotations/first', _("the first annotation of the package")),
             ):
             b=Gtk.Button(label, use_underline=False)
             b.connect('clicked', try_query, expr)
@@ -708,9 +708,9 @@ class ResourceColumn(FinderColumn):
         self.node=node
         self.element=self.node
         self.label['title'].set_markup(_("%(type)s <b>%(title)s</b>\nId: %(id)s") % {
-                'type': helper.get_type(self.element),
-                'title': self.controller.get_title(self.element).replace('<', '&lt;'),
-                'id': self.element.id })
+            'type': helper.get_type(self.element),
+            'title': self.controller.get_title(self.element).replace('<', '&lt;'),
+            'id': self.element.id })
         self.update_preview()
         return True
 

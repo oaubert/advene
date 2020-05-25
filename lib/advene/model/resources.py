@@ -104,7 +104,10 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype'), metaclass
 
     def getDataBase64(self):
         data = self.getData()
-        data = base64.encodestring(data)
+        if isinstance(data, str):
+            data = base64.encodebytes(data.encode('utf-8'))
+        else:
+            data = base64.encodebytes(data)
         return data
 
 class Resources(metaclass=auto_properties):
@@ -235,4 +238,3 @@ class Resources(metaclass=auto_properties):
                     yield c2
             else:
                 yield c
-

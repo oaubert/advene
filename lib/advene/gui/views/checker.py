@@ -44,7 +44,7 @@ def get_checker(name):
     """
     return CHECKERS.get(name)
 
-class FeatureChecker(object):
+class FeatureChecker:
     """API for feature checking.
     """
     name = "Abstract FeatureChecker"
@@ -66,11 +66,11 @@ class OverlappingChecker(FeatureChecker):
         self.table = AnnotationTable(controller=self.controller)
         # Set colors
         self.table.columns['begin'].add_attribute(self.table.columns['begin'].get_cells()[0],
-                                             'cell-background',
-                                             advene.gui.views.table.COLUMN_CUSTOM_FIRST)
+                                                  'cell-background',
+                                                  advene.gui.views.table.COLUMN_CUSTOM_FIRST)
         self.table.columns['end'].add_attribute(self.table.columns['end'].get_cells()[0],
-                                           'cell-background',
-                                           advene.gui.views.table.COLUMN_CUSTOM_FIRST + 1)
+                                                'cell-background',
+                                                advene.gui.views.table.COLUMN_CUSTOM_FIRST + 1)
         return self.table.widget
 
     def overlapping_annotations(self):
@@ -218,6 +218,7 @@ class CheckerView(AdhocView):
         self.contextual_actions = (
             (_("Select active checkers"), self.select_active_checkers),
             )
+        self.checkers = []
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)

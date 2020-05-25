@@ -41,7 +41,7 @@ class Popup(Gtk.Window):
     """
     def __init__(self, parent, text=None, child=None,
                  decorated=True, mouse=False, modal=True):
-        GObject.GObject.__init__(self, type=Gtk.WindowType.TOPLEVEL)
+        super().__init__(type=Gtk.WindowType.TOPLEVEL)
         self.set_type_hint(Gdk.WindowTypeHint.UTILITY)
         self.set_position(mouse and Gtk.WindowPosition.MOUSE or
                           Gtk.WindowPosition.CENTER_ALWAYS)
@@ -91,7 +91,7 @@ class KeyGrabber(Gtk.Button):
 
     def __init__ (self, parent=None, key=0, mods=0, label=None):
         '''Prepare widget'''
-        GObject.GObject.__init__(self)
+        super().__init__()
 
         self.main_window = parent
         self.key = key
@@ -139,7 +139,7 @@ class KeyGrabber(Gtk.Button):
             return
 
         key = Gdk.keyval_to_lower(event.keyval)
-        if (key == Gdk.KEY_ISO_Left_Tab):
+        if key == Gdk.KEY_ISO_Left_Tab:
             key = Gdk.KEY_Tab
 
         if Gtk.accelerator_valid(key, mods) or (key == Gdk.KEY_Tab and mods):
@@ -154,11 +154,11 @@ class KeyGrabber(Gtk.Button):
 
     def set_label(self, key=None, mods=None):
         if self.label:
-            if key != None and mods != None:
+            if key is not None and mods is not None:
                 self.emit("current-changed", key, mods)
             Gtk.Button.set_label(self, self.label)
             return
-        if key == None and mods == None:
+        if key is None and mods is None:
             key = self.key
             mods = self.mods
         label = Gtk.accelerator_name(key, mods)
@@ -167,7 +167,7 @@ class KeyGrabber(Gtk.Button):
         Gtk.Button.set_label(self, label)
 
 
-class EditNotebook(object):
+class EditNotebook:
     def __init__(self, set_config, get_config):
         self.__name = _("Properties")
         self._set_config = set_config
@@ -240,7 +240,7 @@ class EditWidget(Gtk.VBox):
         self.__lines = 0
 
 
-        GObject.GObject.__init__(self)
+        super().__init__()
         self.set_border_width(12)
         self.show()
 
@@ -256,10 +256,12 @@ class EditWidget(Gtk.VBox):
         self.__lines += 1
         self.__table.resize(self.__lines, 2)
 
-        if (indent): x, y = 12, 3
-        else: x, y = 0, 3
+        if indent:
+            x, y = 12, 3
+        else:
+            x, y = 0, 3
 
-        if (w2):
+        if w2:
             self.__table.attach(w1, 0, 1, self.__lines - 1, self.__lines,
                                 Gtk.AttachOptions.FILL, 0, x, y)
             self.__table.attach(w2, 1, 2, self.__lines - 1, self.__lines,
@@ -276,43 +278,45 @@ class EditWidget(Gtk.VBox):
     #
     def __on_change(self, src, *args):
 
-        property, mode = args[-2:]
+        property_name, mode = args[-2:]
         args = args[:-2]
         value = None
 
-        if (mode == self.CHANGE_ENTRY):
+        if mode == self.CHANGE_ENTRY:
             value = src.get_text()
 
-        elif (mode == self.CHANGE_OPTION):
+        elif mode == self.CHANGE_OPTION:
             value = src.get_model()[src.get_active()][1]
 
-        elif (mode == self.CHANGE_CHECKBOX):
+        elif mode == self.CHANGE_CHECKBOX:
             value = src.get_active()
 
-        elif (mode == self.CHANGE_SPIN):
+        elif mode == self.CHANGE_SPIN:
             value = src.get_value_as_int()
 
-        elif (mode == self.CHANGE_FLOAT_SPIN):
+        elif mode == self.CHANGE_FLOAT_SPIN:
             value = src.get_value()
 
-        elif (mode == self.CHANGE_TEXT):
+        elif mode == self.CHANGE_TEXT:
             value = src.get_text(*src.get_bounds() + ( False, ))
 
-        elif (mode == self.CHANGE_ACCELERATOR):
+        elif mode == self.CHANGE_ACCELERATOR:
             value = Gtk.accelerator_name(src.key, src.mods)
 
         else:
             logger.info("Unknown type %s", str(mode))
 
         if value is not None:
-            self.__set_config(property, value)
+            self.__set_config(property_name, value)
 
     #
     # Sets/returns the name of this configurator. That name will appear in the
     # notebook tab.
     #
-    def set_name(self, name): self.__name = name
-    def get_name(self): return self.__name
+    def set_name(self, name):
+        self.__name = name
+    def get_name(self):
+        return self.__name
 
     def add_label(self, label):
 
@@ -330,7 +334,7 @@ class EditWidget(Gtk.VBox):
 
         self.add_label("<b>" + label + "</b>")
 
-    def add_checkbox(self, label, property, help):
+    def add_checkbox(self, label, property_name, help):
 
         check = Gtk.CheckButton(label)
         check.show()
@@ -338,14 +342,14 @@ class EditWidget(Gtk.VBox):
         check.set_tooltip_text(help)
         self.__add_line(1, check)
 
-        value = self.__get_config(property)
+        value = self.__get_config(property_name)
         check.set_active(value)
-        check.connect('toggled', self.__on_change, property,
+        check.connect('toggled', self.__on_change, property_name,
                       self.CHANGE_CHECKBOX)
 
 
 
-    def add_entry(self, label, property, help, passwd = 0, entries=None):
+    def add_entry(self, label, property_name, help, passwd = 0, entries=None):
 
         lbl = Gtk.Label(label=label)
         lbl.show()
@@ -372,12 +376,12 @@ class EditWidget(Gtk.VBox):
             entry.set_visibility(False)
             entry.set_invisible_char('\u0222')
 
-        value = self.__get_config(property)
+        value = self.__get_config(property_name)
         entry.set_text(value)
-        entry.connect('changed', self.__on_change, property,
+        entry.connect('changed', self.__on_change, property_name,
                       self.CHANGE_ENTRY)
 
-    def add_entry_button(self, label, property, help, button_label, callback):
+    def add_entry_button(self, label, property_name, help, button_label, callback):
         """Text entry with an action button.
 
         The callback function has the following signature:
@@ -401,13 +405,13 @@ class EditWidget(Gtk.VBox):
         entry.set_tooltip_text(help)
         self.__add_line(1, align, hbox)
 
-        value = self.__get_config(property)
+        value = self.__get_config(property_name)
         entry.set_text(value)
-        entry.connect('changed', self.__on_change, property,
+        entry.connect('changed', self.__on_change, property_name,
                       self.CHANGE_ENTRY)
 
 
-    def add_text(self, label, property, help):
+    def add_text(self, label, property_name, help):
 
         lbl = Gtk.Label(label=label)
         lbl.show()
@@ -424,12 +428,12 @@ class EditWidget(Gtk.VBox):
         self.__add_line(1, align)
         self.__add_line(1, sw)
 
-        value = self.__get_config(property)
+        value = self.__get_config(property_name)
         entry.get_buffer().set_text(value)
-        entry.get_buffer().connect('changed', self.__on_change, property,
+        entry.get_buffer().connect('changed', self.__on_change, property_name,
                                    self.CHANGE_TEXT)
 
-    def add_spin(self, label, property, help, low, up):
+    def add_spin(self, label, property_name, help, low, up):
 
         lbl = Gtk.Label(label=label)
         lbl.show()
@@ -443,16 +447,16 @@ class EditWidget(Gtk.VBox):
         spin_button.set_numeric(True)
         spin_button.show()
 
-        value = self.__get_config(property)
+        value = self.__get_config(property_name)
 
         spin_button.set_tooltip_text(help)
         self.__add_line(1, align, spin_button)
 
         spin_button.set_value(value)
-        spin_button.connect('value-changed', self.__on_change, property,
+        spin_button.connect('value-changed', self.__on_change, property_name,
                             self.CHANGE_SPIN)
 
-    def add_float_spin(self, label, property, help, low, up, digits=2):
+    def add_float_spin(self, label, property_name, help, low, up, digits=2):
 
         lbl = Gtk.Label(label=label)
         lbl.show()
@@ -461,7 +465,7 @@ class EditWidget(Gtk.VBox):
         align.show()
         align.add(lbl)
 
-        value = self.__get_config(property)
+        value = self.__get_config(property_name)
 
         adjustment = Gtk.Adjustment.new(value, low, up, 10 ** -digits, 1, 0)
         spin_button = Gtk.SpinButton.new(adjustment, 10 ** -digits, digits)
@@ -473,10 +477,10 @@ class EditWidget(Gtk.VBox):
         self.__add_line(1, align, spin_button)
 
         spin_button.set_value(value)
-        spin_button.connect('value-changed', self.__on_change, property,
+        spin_button.connect('value-changed', self.__on_change, property_name,
                             self.CHANGE_FLOAT_SPIN)
 
-    def add_accelerator(self, label, property, help):
+    def add_accelerator(self, label, property_name, help):
 
         lbl = Gtk.Label(label=label)
         lbl.show()
@@ -485,19 +489,19 @@ class EditWidget(Gtk.VBox):
         align.show()
         align.add(lbl)
 
-        value = self.__get_config(property)
+        value = self.__get_config(property_name)
 
         key, mods = Gtk.accelerator_parse(value)
         grabber = KeyGrabber(parent=self.get_toplevel(),
                              key=key,
                              mods=mods)
-        grabber.connect('changed', self.__on_change, property, self.CHANGE_ACCELERATOR)
+        grabber.connect('changed', self.__on_change, property_name, self.CHANGE_ACCELERATOR)
 
         grabber.set_tooltip_text(help)
         grabber.show_all()
         self.__add_line(1, align, grabber)
 
-    def add_option(self, label, property, help, options):
+    def add_option(self, label, property_name, help, options):
 
         lbl = Gtk.Label(label=label)
         lbl.show()
@@ -506,7 +510,7 @@ class EditWidget(Gtk.VBox):
         align.show()
         align.add(lbl)
 
-        value = self.__get_config(property)
+        value = self.__get_config(property_name)
 
         store=Gtk.ListStore(str, object)
         active_iter=None
@@ -524,13 +528,13 @@ class EditWidget(Gtk.VBox):
         combo.add_attribute(cell, 'text', 0)
         combo.set_active_iter(active_iter)
 
-        combo.connect('changed', self.__on_change, property, self.CHANGE_OPTION)
+        combo.connect('changed', self.__on_change, property_name, self.CHANGE_OPTION)
 
         combo.set_tooltip_text(help)
         combo.show_all()
         self.__add_line(1, align, combo)
 
-    def add_file_selector(self, label, property, help):
+    def add_file_selector(self, label, property_name, help):
 
         def open_filedialog(self, default_file, entry):
             fs=Gtk.FileChooserDialog(title=_("Choose a file"),
@@ -565,19 +569,19 @@ class EditWidget(Gtk.VBox):
         btn.show()
         hbox.pack_end(btn, True, True, 4)
 
-        value = self.__get_config(property)
+        value = self.__get_config(property_name)
 
         btn.connect('clicked', open_filedialog, value, entry)
 
         entry.set_text(value)
-        entry.connect('changed', self.__on_change, property,
+        entry.connect('changed', self.__on_change, property_name,
                       self.CHANGE_ENTRY)
 
         entry.set_tooltip_text(help)
         btn.set_tooltip_text(help)
         self.__add_line(1, align, hbox)
 
-    def add_dir_selector(self, label, property, help):
+    def add_dir_selector(self, label, property_name, help):
 
         def open_filedialog(self, default_file, entry):
             fs=Gtk.FileChooserDialog(title=_("Choose a directory"),
@@ -612,12 +616,12 @@ class EditWidget(Gtk.VBox):
         btn.show()
         hbox.pack_end(btn, True, True, 4)
 
-        value = self.__get_config(property)
+        value = self.__get_config(property_name)
 
         btn.connect('clicked', open_filedialog, value, entry)
 
         entry.set_text(value)
-        entry.connect('changed', self.__on_change, property,
+        entry.connect('changed', self.__on_change, property_name,
                       self.CHANGE_ENTRY)
 
         entry.set_tooltip_text(help)

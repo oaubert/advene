@@ -62,6 +62,7 @@ class DelakisShotDetectImporter(GenericImporter):
                                      action="store", type="choice", dest="profile", choices=list(self.profiles.keys()), default=self.profile,
                                      help=_("Parameter profile: safe will detect less cuts, aggressive will detect more cuts (but more false ones too). default is a compromise."))
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -71,7 +72,6 @@ class DelakisShotDetectImporter(GenericImporter):
         if ext in config.data.video_extensions:
             return 80
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename):
         at = self.ensure_new_type('shot',
@@ -155,9 +155,9 @@ class ShotDetector:
 
         #detect low cut
         for f in numpy.flatnonzero(
-            (histo_dist < self.HIGH_CUT_THRESHOLD) &
-            (histo_dist >= self.SHOT_THRESHOLD)
-            ):
+                (histo_dist < self.HIGH_CUT_THRESHOLD) &
+                (histo_dist >= self.SHOT_THRESHOLD)
+        ):
             if self.__cut_detection(f, histo_dist):
                 cuts = numpy.append(cuts, f)
 
@@ -267,7 +267,7 @@ class HistogramExtractor:
             raise Exception("Could not open video file")
         histo = cv.cvCreateHist([256],cv.CV_HIST_ARRAY,[[0,256]], 1)
         frame = hg.cvQueryFrame(video)
-        frame_gray  = cv.cvCreateImage(cv.cvGetSize(frame), frame.depth, 1);
+        frame_gray  = cv.cvCreateImage(cv.cvGetSize(frame), frame.depth, 1)
         hists    = []
         nbframes = 0
 

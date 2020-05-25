@@ -203,13 +203,13 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
                 c()
         return super(EditElementPopup, self).close(*p)
 
+    @staticmethod
     def can_edit (el):
         """Return True if the class can edit the given element.
 
         Warning: it is a static method (no self argument), but the
         staticmethod declaration is handled in the metaclass."""
         return False
-    can_edit = staticmethod (can_edit)
 
     def make_widget (self, editable=True, compact=False):
         """Create the editing widget (and return it)."""
@@ -428,9 +428,9 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
         return f
 
 class EditAnnotationPopup (EditElementPopup):
+    @staticmethod
     def can_edit (el):
         return isinstance (el, Annotation)
-    can_edit = staticmethod (can_edit)
 
     def notify(self, element):
         self.controller.notify("AnnotationEditEnd", annotation=element)
@@ -543,9 +543,9 @@ class EditAnnotationPopup (EditElementPopup):
         return vbox
 
 class EditRelationPopup (EditElementPopup):
+    @staticmethod
     def can_edit (el):
         return isinstance (el, Relation)
-    can_edit = staticmethod (can_edit)
 
     def notify(self, element):
         self.controller.notify("RelationEditEnd", relation=element)
@@ -600,18 +600,15 @@ class EditRelationPopup (EditElementPopup):
         t = f.get_view()
         self.register_form(f)
         # If there is content, expand the content widget
-        if self.element.content.data:
-            exp=True
-        else:
-            exp=False
-        vbox.pack_start(self.expandable(t, _("Content"), expanded=exp), True, True, 0)
+        vbox.pack_start(self.expandable(t, _("Content"),
+                                        expanded=bool(self.element.content.data)), True, True, 0)
 
         return vbox
 
 class EditViewPopup (EditElementPopup):
+    @staticmethod
     def can_edit (el):
         return isinstance (el, View)
-    can_edit = staticmethod (can_edit)
 
     def notify(self, element):
         self.controller.notify("ViewEditEnd", view=element)
@@ -698,9 +695,9 @@ class EditViewPopup (EditElementPopup):
         return vbox
 
 class EditQueryPopup (EditElementPopup):
+    @staticmethod
     def can_edit (el):
         return isinstance (el, Query)
-    can_edit = staticmethod (can_edit)
 
     def notify(self, element):
         self.controller.notify("QueryEditEnd", query=element)
@@ -758,9 +755,9 @@ class EditQueryPopup (EditElementPopup):
         return vbox
 
 class EditPackagePopup (EditElementPopup):
+    @staticmethod
     def can_edit (el):
         return isinstance (el, Package)
-    can_edit = staticmethod (can_edit)
 
     def notify(self, element):
         # Side effect of the notify method: we use it to update the
@@ -882,9 +879,9 @@ class EditPackagePopup (EditElementPopup):
         return vbox
 
 class EditSchemaPopup (EditElementPopup):
+    @staticmethod
     def can_edit (el):
         return isinstance (el, Schema)
-    can_edit = staticmethod (can_edit)
 
     def notify(self, element):
         self.controller.notify("SchemaEditEnd", schema=element)
@@ -960,9 +957,9 @@ class EditSchemaPopup (EditElementPopup):
         return vbox
 
 class EditAnnotationTypePopup (EditElementPopup):
+    @staticmethod
     def can_edit (el):
         return isinstance (el, AnnotationType)
-    can_edit = staticmethod (can_edit)
 
     def notify(self, element):
         self.controller.notify("AnnotationTypeEditEnd", annotationtype=element)
@@ -1081,9 +1078,9 @@ class EditAnnotationTypePopup (EditElementPopup):
         return vbox
 
 class EditRelationTypePopup (EditElementPopup):
+    @staticmethod
     def can_edit (el):
         return isinstance (el, RelationType)
-    can_edit = staticmethod (can_edit)
 
     def notify(self, element):
         self.controller.notify("RelationTypeEditEnd", relationtype=element)
@@ -1171,9 +1168,9 @@ class EditRelationTypePopup (EditElementPopup):
         return vbox
 
 class EditResourcePopup (EditElementPopup):
+    @staticmethod
     def can_edit (el):
         return isinstance (el, ResourceData)
-    can_edit = staticmethod (can_edit)
 
     def notify(self, element):
         self.controller.notify("ResourceEditEnd", resource=element)
@@ -1205,7 +1202,7 @@ class EditResourcePopup (EditElementPopup):
 
         return vbox
 
-class EditForm(object):
+class EditForm:
     """Generic EditForm class.
 
     This class defines the method that an EditForm is expected to
@@ -1254,7 +1251,7 @@ class EditForm(object):
             expr=element.getMetaData(namespace, data)
             if expr is None:
                 expr=""
-            elif re.match('^\s+$', expr):
+            elif re.match(r'^\s+$', expr):
                 # The field can contain just a newline or whitespaces, which will be then ignored
                 #try:
                 #    i=element.id
@@ -1276,7 +1273,7 @@ class EditForm(object):
                 value=""
             elif type == 'boolean':
                 value = str(bool(value)).lower()
-            elif re.match('^\s+', value):
+            elif re.match(r'^\s+', value):
                 #try:
                 #    i=element.id
                 #except AttributeError:
@@ -1302,9 +1299,9 @@ class ContentHandler(EditForm):
 
     Generic content handlers return 50.
     """
+    @staticmethod
     def can_handle(mimetype):
         return 0
-    can_handle=staticmethod(can_handle)
 
     def __init__ (self, content, controller=None, **kw):
         self.element=content
@@ -1341,8 +1338,8 @@ class EditContentForm(EditForm):
         self.contentform.close()
         return True
 
-    def set_editable (self, bool):
-        self.editable = bool
+    def set_editable (self, bool_):
+        self.editable = bool_
 
     def get_focus(self):
         try:
@@ -1436,6 +1433,7 @@ class EditContentForm(EditForm):
 class TextContentHandler (ContentHandler):
     """Create a textview edit form for the given element.
     """
+    @staticmethod
     def can_handle(mimetype):
         res=0
         if 'text' in mimetype:
@@ -1445,11 +1443,9 @@ class TextContentHandler (ContentHandler):
         if mimetype == 'text/plain' or mimetype in config.data.text_mimetypes:
             res=80
         return res
-    can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, parent=None, **kw):
-        self.element = element
-        self.controller=controller
+        super().__init__(element, controller)
         self.parent=parent
         self.editable = True
         self.fname=None
@@ -1553,9 +1549,9 @@ class TextContentHandler (ContentHandler):
                 except AttributeError:
                     pass
             fname=dialog.get_filename(title=_("Save content to..."),
-                                               action=Gtk.FileChooserAction.SAVE,
-                                               button=Gtk.STOCK_SAVE,
-                                               default_file=default)
+                                      action=Gtk.FileChooserAction.SAVE,
+                                      button=Gtk.STOCK_SAVE,
+                                      default_file=default)
         if fname is not None:
             if os.path.exists(fname):
                 os.rename(fname, fname + '~')
@@ -1682,14 +1678,13 @@ class GenericContentHandler (ContentHandler):
 
     It allows to load/save the content to/from a file.
     """
+    @staticmethod
     def can_handle(mimetype):
         res=50
         return res
-    can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, parent=None, **kw):
-        self.element = element
-        self.controller=controller
+        super().__init__(element, controller)
         self.editable = True
         self.fname=None
         self.view = None
@@ -1779,9 +1774,9 @@ class GenericContentHandler (ContentHandler):
                 except AttributeError:
                     pass
             fname=dialog.get_filename(title=_("Save content to..."),
-                                               action=Gtk.FileChooserAction.SAVE,
-                                               button=Gtk.STOCK_SAVE,
-                                               default_file=default)
+                                      action=Gtk.FileChooserAction.SAVE,
+                                      button=Gtk.STOCK_SAVE,
+                                      default_file=default)
         if fname is not None:
             if os.path.exists(fname):
                 os.rename(fname, fname + '~')
@@ -1845,7 +1840,7 @@ class EditFragmentForm(EditForm):
     def check_validity(self):
         if self.begin.value >= self.end.value:
             dialog.message_dialog(_("Begin time is greater than end time"),
-                                           icon=Gtk.MessageType.ERROR)
+                                  icon=Gtk.MessageType.ERROR)
             return False
         else:
             return True
@@ -2342,9 +2337,9 @@ class EditElementListForm(EditForm):
 
     def insert_new(self, button=None, treeview=None):
         element=dialog.list_selector(title=_("Insert an element"),
-                                              text=_("Choose the element to insert."),
-                                              members=self.members,
-                                              controller=self.controller)
+                                     text=_("Choose the element to insert."),
+                                     members=self.members,
+                                     controller=self.controller)
         if element is not None:
             treeview.get_model().append( [element,
                                           self.get_representation(element) ])
@@ -2410,10 +2405,10 @@ class EditTagForm(EditForm):
 
     def check_validity(self):
         invalid=[ t for t in self.get_current_tags()
-                  if not re.match('^[\w\d_]+$', t) ]
+                  if not re.match(r'^[\w\d_]+$', t) ]
         if invalid:
             dialog.message_dialog(_("Some tags contain invalid characters: %s") % ", ".join(invalid),
-                                           icon=Gtk.MessageType.ERROR)
+                                  icon=Gtk.MessageType.ERROR)
             return False
         else:
             return True
@@ -2456,7 +2451,7 @@ class EditRelationsForm(EditForm):
         invalid=[]
         if invalid:
             dialog.message_dialog(_("Some tags contain invalid characters: %s") % ", ".join(invalid),
-                                           icon=Gtk.MessageType.ERROR)
+                                  icon=Gtk.MessageType.ERROR)
             return False
         else:
             return True

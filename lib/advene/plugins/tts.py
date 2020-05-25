@@ -74,16 +74,16 @@ def register(controller=None):
     engine = selected(controller)
 
     controller.register_action(RegisteredAction(
-            name="Pronounce",
-            method=engine.action_pronounce,
-            description=_("Pronounce a text"),
-            parameters={'message': _("String to pronounce.")},
-            defaults={'message': 'annotation/content/data'},
-            predefined={'message': (
-                    ( 'annotation/content/data', _("The annotation content") ),
-                    )},
-            category='sound',
-            ))
+        name="Pronounce",
+        method=engine.action_pronounce,
+        description=_("Pronounce a text"),
+        parameters={'message': _("String to pronounce.")},
+        defaults={'message': 'annotation/content/data'},
+        predefined={'message': (
+            ( 'annotation/content/data', _("The annotation content") ),
+        )},
+        category='sound',
+    ))
 
 class TTSEngine:
     """Generic TTSEngine.
@@ -93,11 +93,11 @@ class TTSEngine:
         self.gui=self.controller.gui
         self.language=None
 
+    @staticmethod
     def can_run():
         """Can this engine run ?
         """
         return True
-    can_run=staticmethod(can_run)
 
     def parse_parameter(self, context, parameters, name, default_value):
         """Helper method used in actions.
@@ -111,7 +111,7 @@ class TTSEngine:
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
                 self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
-                                                                                                                          'parametername': name})
+                                                                                                                           'parametername': name})
                 self.controller.log(str(e.message)[:160])
                 result=default_value
         else:
@@ -173,11 +173,11 @@ class FestivalTTSEngine(TTSEngine):
             self.festival_process.stdin.write("""(Parameter.set 'Audio_Method 'Audio_Command)\n""")
 
 
+    @staticmethod
     def can_run():
         """Can this engine run ?
         """
-        return (helper.find_in_path('festival') is not None)
-    can_run=staticmethod(can_run)
+        return helper.find_in_path('festival') is not None
 
     def pronounce (self, sentence):
         try:
@@ -192,11 +192,11 @@ ENGINES['festival'] = FestivalTTSEngine
 class MacOSXTTSEngine(TTSEngine):
     """MacOSX TTSEngine.
     """
+    @staticmethod
     def can_run():
         """Can this engine run ?
         """
-        return (config.data.os == 'darwin')
-    can_run=staticmethod(can_run)
+        return config.data.os == 'darwin'
 
     def pronounce (self, sentence):
         subprocess.call( [ '/usr/bin/say', sentence.encode(config.data.preferences['tts-encoding'], 'ignore') ] )
@@ -237,11 +237,13 @@ class EspeakTTSEngine(TTSEngine):
                 self.espeak_path='C:\\Program Files (x86)\\eSpeak\\command_line\\espeak.exe'
         self.espeak_process=None
 
+    @staticmethod
     def can_run():
         """Can this engine run ?
         """
-        return (os.path.isdir('c:\\Program Files\\eSpeak') or os.path.isdir('C:\\Program Files (x86)\\eSpeak') or helper.find_in_path('espeak') is not None)
-    can_run=staticmethod(can_run)
+        return (os.path.isdir('c:\\Program Files\\eSpeak')
+                or os.path.isdir('C:\\Program Files (x86)\\eSpeak')
+                or helper.find_in_path('espeak') is not None)
 
     def close(self):
         """Close the espeak process.
@@ -286,6 +288,7 @@ class SAPITTSEngine(TTSEngine):
         TTSEngine.__init__(self, controller=controller)
         self.sapi=None
 
+    @staticmethod
     def can_run():
         """Can this engine run ?
         """
@@ -295,7 +298,6 @@ class SAPITTSEngine(TTSEngine):
         except:
             voice = None
         return voice
-    can_run=staticmethod(can_run)
 
     def pronounce (self, sentence):
         if self.sapi is None:
@@ -322,11 +324,11 @@ class CustomTTSEngine(TTSEngine):
         self.prg_path=helper.find_in_path(CustomTTSEngine.prgname)
         self.prg_process=None
 
+    @staticmethod
     def can_run():
         """Can this engine run ?
         """
         return helper.find_in_path(CustomTTSEngine.prgname) is not None
-    can_run=staticmethod(can_run)
 
     def close(self):
         """Close the process.
@@ -375,11 +377,11 @@ class CustomArgTTSEngine(TTSEngine):
         self.language=None
         self.prg_path=helper.find_in_path(CustomArgTTSEngine.prgname)
 
+    @staticmethod
     def can_run():
         """Can this engine run ?
         """
         return helper.find_in_path(CustomArgTTSEngine.prgname) is not None
-    can_run=staticmethod(can_run)
 
     def close(self):
         """Close the process.
@@ -402,6 +404,6 @@ class CustomArgTTSEngine(TTSEngine):
             try:
                 m = str(e.message)
             except UnicodeDecodeError:
-                logger.error("TTS: Error decoding error message with standard encoding", m.encode('ascii', 'replace'))
+                logger.error("TTS: Error decoding error message with standard encoding %s", m.encode('ascii', 'replace'))
         return True
 ENGINES['customarg'] = CustomArgTTSEngine

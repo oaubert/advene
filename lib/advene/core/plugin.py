@@ -96,7 +96,7 @@ class PluginCollection(list):
         for name in p:
             yield zipname, name
 
-class Plugin(object):
+class Plugin:
     """A loaded Plugin.
 
     A Plugin *must* have a name attribute.

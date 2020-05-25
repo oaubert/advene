@@ -119,9 +119,10 @@ class TextImporter(GenericImporter):
                                      help=_("What timestamps are present in a line (only begin, both begin and end, or automatic recognition)"))
 
 
+    @staticmethod
     def can_handle(fname):
         ext = os.path.splitext(fname)[1].lower()
-        if ext == '.txt' or ext == '.log':
+        if ext in ('.txt', '.log'):
             return 100
         elif ext == '.gz':
             return 50
@@ -130,7 +131,6 @@ class TextImporter(GenericImporter):
         else:
             # It may handle any type of file ?
             return 1
-    can_handle=staticmethod(can_handle)
 
     def log(self, *p):
         self.controller.log(self.name + " error: " + " ".join(p))
@@ -140,7 +140,7 @@ class TextImporter(GenericImporter):
         # We cannot simply use string.split() since we want to be able
         # to specify the number of splits() while keeping the
         # flexibility of having any blank char as separator
-        whitespace_re = re.compile('\s+')
+        whitespace_re = re.compile(r'\s+')
         stored_begin = 0
         stored_data = None
         index = 1
@@ -271,12 +271,12 @@ class LsDVDImporter(GenericImporter):
         self.regexp="^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<duration>[0-9:]+)"
         self.encoding=encoding
 
+    @staticmethod
     def can_handle(fname):
         if 'dvd' in fname:
             return 100
         else:
             return 0
-    can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
         reg=re.compile(self.regexp)
@@ -327,12 +327,12 @@ class ChaplinImporter(GenericImporter):
         self.regexp="^\s*chapter\s*(?P<chapter>\d+)\s*begin:\s*.+(?P<begin>[0-9:])\s*$"
         self.encoding='latin1'
 
+    @staticmethod
     def can_handle(fname):
         if 'dvd' in fname:
             return 100
         else:
             return 0
-    can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
         reg=re.compile(self.regexp)
@@ -382,6 +382,7 @@ class XiImporter(GenericImporter):
         self.anchors={}
         self.signals={}
 
+    @staticmethod
     def can_handle(fname):
         if fname.endswith('.xi'):
             return 100
@@ -389,7 +390,6 @@ class XiImporter(GenericImporter):
             return 50
         else:
             return 0
-    can_handle=staticmethod(can_handle)
 
     def iterator(self, xi):
         for t in xi.Turn:
@@ -450,12 +450,12 @@ class SubtitleImporter(GenericImporter):
                                      action="store", type="string", dest="encoding", default=self.encoding,
                                      help=_("Specify the encoding of the input file (latin1, utf8...)"))
 
+    @staticmethod
     def can_handle(fname):
         if fname.lower().endswith('.srt') or fname.lower().endswith('.webvtt'):
             return 100
         else:
             return 0
-    can_handle=staticmethod(can_handle)
 
     def srt_iterator(self, f):
         base=r'\d+:\d+:\d+[,\.:]\d+'
@@ -502,9 +502,9 @@ class SubtitleImporter(GenericImporter):
         at.title = _("Subtitles from %s") % os.path.basename(filename)
         # FIXME: implement subtitle type detection
         try:
-           self.convert(self.srt_iterator(f))
+            self.convert(self.srt_iterator(f))
         except UnicodeDecodeError:
-           self.output_message = _("Cannot decode subtitle file. Try to specify an encoding (latin1 perhaps?).")
+            self.output_message = _("Cannot decode subtitle file. Try to specify an encoding (latin1 perhaps?).")
         f.close()
         self.progress(1.0)
         return self.package
@@ -520,12 +520,12 @@ class PraatImporter(GenericImporter):
         self.atypes={}
         self.schema=None
 
+    @staticmethod
     def can_handle(fname):
         if fname.endswith('.praat') or fname.endswith('.textgrid'):
             return 100
         else:
             return 0
-    can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
         l=f.readline()
@@ -533,9 +533,9 @@ class PraatImporter(GenericImporter):
             logger.error("Invalid PRAAT file")
             return
 
-        name_re=re.compile('^(\s+)name\s*=\s*"(.+)"')
-        boundary_re=re.compile('^(\s+)(xmin|xmax)\s*=\s*([\d\.]+)')
-        text_re=re.compile('^(\s+)text\s*=\s*"(.*)"')
+        name_re=re.compile(r'^(\s+)name\s*=\s*"(.+)"')
+        boundary_re=re.compile(r'^(\s+)(xmin|xmax)\s*=\s*([\d\.]+)')
+        text_re=re.compile(r'^(\s+)text\s*=\s*"(.*)"')
 
         current_type=None
         type_align=0
@@ -607,6 +607,7 @@ class CmmlImporter(GenericImporter):
         self.atypes={}
         self.schema=None
 
+    @staticmethod
     def can_handle(fname):
         if fname.endswith('.cmml'):
             return 100
@@ -614,14 +615,13 @@ class CmmlImporter(GenericImporter):
             return 50
         else:
             return 0
-    can_handle=staticmethod(can_handle)
 
     def npt2time(self, npt):
         """Convert a NPT timespec into a milliseconds time.
 
         Cf http://www.annodex.net/TR/draft-pfeiffer-temporal-fragments-03.html#anchor5
         """
-        if isinstance(npt, int) or isinstance(npt, int):
+        if isinstance(npt, (int, float)):
             return npt
 
         if npt.startswith('npt:'):
@@ -829,6 +829,7 @@ class IRIImporter(GenericImporter):
                                      action="store_true", dest="multiple_types", default=False,
                                      help=_("Generate one type per view"))
 
+    @staticmethod
     def can_handle(fname):
         if fname.endswith('.iri'):
             return 100
@@ -836,7 +837,6 @@ class IRIImporter(GenericImporter):
             return 60
         else:
             return 0
-    can_handle=staticmethod(can_handle)
 
     def iterator(self, iri):
         schema = None
@@ -884,11 +884,11 @@ class IRIImporter(GenericImporter):
                        'author': el.author or self.author,
                        'date': el.date,
                        'content': "title=%s\nabstract=%s\nsrc=%s" % (
-                            str(el.title).encode('utf-8').replace('\n', '\\n'),
-                            str(el.abstract).encode('utf-8').replace('\n', '\\n'),
-                            str(el.src).encode('utf-8').replace('\n', '\\n'),
-                            )
-                       }
+                           str(el.title).encode('utf-8').replace('\n', '\\n'),
+                           str(el.abstract).encode('utf-8').replace('\n', '\\n'),
+                           str(el.src).encode('utf-8').replace('\n', '\\n'),
+                       )
+                    }
                     yield d
                 # process "views" elements to add attributes
                 progress += incr
@@ -924,13 +924,13 @@ class IRIImporter(GenericImporter):
                             an=an[0]
                             if self.multiple_types:
                                 d={
-                                   'type': at,
-                                   'begin': an.fragment.begin,
-                                   'end': an.fragment.end,
-                                   'author': an.author,
-                                   'date': an.date,
-                                   'content': ref.type.encode('utf-8')
-                                   }
+                                    'type': at,
+                                    'begin': an.fragment.begin,
+                                    'end': an.fragment.end,
+                                    'author': an.author,
+                                    'date': an.date,
+                                    'content': ref.type.encode('utf-8')
+                                }
                                 yield d
                             else:
                                 an.content.data += '\n%s=%s' % (view.id,
@@ -955,7 +955,7 @@ class IRIImporter(GenericImporter):
                 self.package.setMedia(med[0].video[0].src)
 
         # Metadata extraction
-        meta=dict([ (m.name, m.content) for m in iri.head[0].meta ])
+        meta=dict((m.name, m.content) for m in iri.head[0].meta)
         try:
             self.package.title = meta['title']
         except KeyError:
@@ -981,19 +981,19 @@ class IRIDataImporter(GenericImporter):
     def __init__(self, **kw):
         super(IRIDataImporter, self).__init__(**kw)
 
+    @staticmethod
     def can_handle(fname):
         if fname.endswith('.xml'):
             return 60
         else:
             return 0
-    can_handle=staticmethod(can_handle)
 
     def iterator(self, soundroot):
         progress = .1
         self.progress(progress, _("Parsing sound values"))
         data=[ float(value.attrib['c1max'])
-            for value in soundroot
-            if value.tag == 'value' ]
+               for value in soundroot
+               if value.tag == 'value' ]
         m=max(data)
         # sample is the length of each sample in ms
         sample=int(float(soundroot.attrib['sampling']))
@@ -1038,4 +1038,3 @@ class IRIDataImporter(GenericImporter):
         self.convert(self.iterator(sound))
         self.progress(1.0)
         return self.package
-

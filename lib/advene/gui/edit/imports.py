@@ -114,8 +114,7 @@ class TreeViewImporter:
         except AttributeError:
             logger.error("Exception on %s", el.id, exc_info=True)
             return False
-        l=[ e.uri for e in source if e.isImported() ]
-        return (el.uri in l)
+        return any(e.uri == el.uri for e in source if e.isImported())
 
     def add_package(self, store, package=None, alias=None):
         """Add a package to the liststore.
@@ -182,9 +181,9 @@ class TreeViewImporter:
         annotationsrow=store.append(parent=packagerow,
                                     row=[p.annotations,
                                          _('Annotations'),
-                                   _('Annotations'),
-                                   False,
-                                   'list'])
+                                         _('Annotations'),
+                                         False,
+                                         'list'])
         for a in p.annotations:
             store.append(parent=annotationsrow,
                          row=[a,
@@ -195,10 +194,10 @@ class TreeViewImporter:
 
         relationsrow=store.append(parent=packagerow,
                                   row=[p.relations,
-                                     _('Relations'),
-                                     _('Relations'),
-                                   False,
-                                   'list'])
+                                       _('Relations'),
+                                       _('Relations'),
+                                       False,
+                                       'list'])
         for r in p.relations:
             store.append(parent=relationsrow,
                          row=[r,
@@ -211,8 +210,8 @@ class TreeViewImporter:
                                 row=[p.queries,
                                      _('Queries'),
                                      _('Queries'),
-                                   False,
-                                   'list'])
+                                     False,
+                                     'list'])
         for q in p.queries:
             store.append(parent=queriesrow,
                          row=[q,
@@ -360,11 +359,11 @@ class Importer:
         else:
             d=None
         filename, alias=dialog.get_filename(title=_("Choose the package to import, and its alias"),
-                                                     action=Gtk.FileChooserAction.OPEN,
-                                                     button=Gtk.STOCK_OPEN,
-                                                     default_dir=d,
-                                                     alias=True,
-                                                     filter='advene')
+                                            action=Gtk.FileChooserAction.OPEN,
+                                            button=Gtk.STOCK_OPEN,
+                                            default_dir=d,
+                                            alias=True,
+                                            filter='advene')
         if not filename:
             return True
 
@@ -453,4 +452,3 @@ if __name__ == "__main__":
     window.connect('destroy', lambda e: Gtk.main_quit())
 
     Gtk.main ()
-

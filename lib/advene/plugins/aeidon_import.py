@@ -49,6 +49,7 @@ def register(controller=None):
 class AeidonImporter(GenericImporter):
     name = _("Aeidon (subtitles) importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -58,7 +59,6 @@ class AeidonImporter(GenericImporter):
         if ext in [ f.extension for f in aeidon.formats ]:
             return 90
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
         project = aeidon.Project()

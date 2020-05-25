@@ -30,7 +30,6 @@ import time
 import sched
 import threading
 import copy
-import io
 
 import advene.rules.elements
 

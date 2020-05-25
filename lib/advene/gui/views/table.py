@@ -394,10 +394,10 @@ class AnnotationTable(AdhocView):
 
         tree_view.connect('drag-data-received', drag_received_cb)
         tree_view.drag_dest_set(Gtk.DestDefaults.MOTION |
-                        Gtk.DestDefaults.HIGHLIGHT |
-                        Gtk.DestDefaults.ALL,
-                        config.data.get_target_types('annotation', 'annotation-type'),
-                        Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
+                                Gtk.DestDefaults.HIGHLIGHT |
+                                Gtk.DestDefaults.ALL,
+                                config.data.get_target_types('annotation', 'annotation-type'),
+                                Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
 
         sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
@@ -419,17 +419,17 @@ class AnnotationTable(AdhocView):
             return True
         elif targetType == config.data.target_type['annotation-type']:
             selection.set(selection.get_target(), 8, "\n".join( e.type.uri
-                                                          for e in els
-                                                          if isinstance(e, Annotation) ).encode('utf8'))
+                                                                for e in els
+                                                                if isinstance(e, Annotation) ).encode('utf8'))
             return True
-        elif (targetType == config.data.target_type['text-plain']
-              or targetType == config.data.target_type['TEXT']
-              or targetType == config.data.target_type['STRING']):
+        elif targetType in (config.data.target_type['text-plain'],
+                            config.data.target_type['TEXT'],
+                            config.data.target_type['STRING']):
             selection.set(selection.get_target(), 8, "\n".join(e.content.data
                                                                for e in els
                                                                if isinstance(e, Annotation) ).encode('utf8'))
         else:
-            logger.warning("Unknown target type for drag: %d" % targetType)
+            logger.warning("Unknown target type for drag: %d", targetType)
         return True
 
     def get_selected_nodes(self, with_path=False):
@@ -459,9 +459,9 @@ class AnnotationTable(AdhocView):
     def csv_export(self, name=None):
         if name is None:
             name=dialog.get_filename(title=_("Export data to file..."),
-                                              default_file="advene_data.csv",
-                                              action=Gtk.FileChooserAction.SAVE,
-                                              button=Gtk.STOCK_SAVE)
+                                     default_file="advene_data.csv",
+                                     action=Gtk.FileChooserAction.SAVE,
+                                     button=Gtk.STOCK_SAVE)
         if name is None:
             return True
         try:
@@ -469,9 +469,9 @@ class AnnotationTable(AdhocView):
         except IOError as e:
             dialog.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
                                           % {
-                        'filename': name,
-                        'error': str(e),
-                        }), icon=Gtk.MessageType.ERROR)
+                                              'filename': name,
+                                              'error': str(e),
+                                          }), icon=Gtk.MessageType.ERROR)
         w=csv.writer(f)
         tv=self.widget.treeview
         store, paths=tv.get_selection().get_selected_rows()
@@ -660,9 +660,9 @@ class GenericTable(AdhocView):
     def csv_export(self, name=None):
         if name is None:
             name=dialog.get_filename(title=_("Export data to file..."),
-                                              default_file="advene_data.csv",
-                                              action=Gtk.FileChooserAction.SAVE,
-                                              button=Gtk.STOCK_SAVE)
+                                     default_file="advene_data.csv",
+                                     action=Gtk.FileChooserAction.SAVE,
+                                     button=Gtk.STOCK_SAVE)
         if name is None:
             return True
         try:
@@ -670,9 +670,9 @@ class GenericTable(AdhocView):
         except IOError as e:
             dialog.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
                                           % {
-                        'filename': name,
-                        'error': str(e),
-                        }),
+                                              'filename': name,
+                                              'error': str(e),
+                                          }),
                                   icon=Gtk.MessageType.ERROR)
         w=csv.writer(f)
         tv=self.widget.treeview
@@ -707,9 +707,9 @@ class GenericTable(AdhocView):
 
         columns={}
         for (name, label, col) in (
-            ('title', _("Title"), COLUMN_CONTENT),
-            ('type', _("Type"), COLUMN_TYPE),
-            ('id', _("Id"), COLUMN_ID) ):
+                ('title', _("Title"), COLUMN_CONTENT),
+                ('type', _("Type"), COLUMN_TYPE),
+                ('id', _("Id"), COLUMN_ID) ):
             columns[name]=Gtk.TreeViewColumn(label, Gtk.CellRendererText(), text=col)
             columns[name].set_reorderable(True)
             columns[name].set_sort_column_id(col)

@@ -250,7 +250,7 @@ def message_dialog(label="", icon=Gtk.MessageType.INFO, modal=True, callback=Non
         res = dialog.run()
         dialog.destroy()
         if icon == Gtk.MessageType.QUESTION:
-            return (res == Gtk.ResponseType.YES or res == Gtk.ResponseType.OK)
+            return res in (Gtk.ResponseType.YES, Gtk.ResponseType.OK)
         else:
             return True
     else:
@@ -271,8 +271,8 @@ def progress_dialog(title="Progress",
     if label is None:
         label = title
     dial = Gtk.Dialog(title,
-                    controller.gui.gui.win,
-                    Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT)
+                      controller.gui.gui.win,
+                      Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT)
     label = Gtk.Label(label)
     label.set_max_width_chars(50)
     dial.vbox.pack_start(label, False, True, 0)
@@ -649,13 +649,13 @@ def get_filename(title=_("Open a file"),
     filters={}
 
     for name, descr, exts in (
-        ('any', _("Any type of file"), ( '*', ) ),
-        ('advene',
-         _("Advene files (.xml, .azp, .apl)"),
-         ('*.xml', '*.azp', '*.apl')),
-        ('session', _("Advene session (.apl)"), ( '*.apl', ) ),
-        ('audio', _("Audio files"), ('*.wav', '*.mp3', '*.ogg', '*.aac', '*.m4a', '*.opus')),
-        ('video', _("Video files"), [ "*%s" % e for e in config.data.video_extensions ])
+            ('any', _("Any type of file"), ( '*', ) ),
+            ('advene',
+             _("Advene files (.xml, .azp, .apl)"),
+             ('*.xml', '*.azp', '*.apl')),
+            ('session', _("Advene session (.apl)"), ( '*.apl', ) ),
+            ('audio', _("Audio files"), ('*.wav', '*.mp3', '*.ogg', '*.aac', '*.m4a', '*.opus')),
+            ('video', _("Video files"), [ "*%s" % e for e in config.data.video_extensions ])
         ):
         filters[name]=Gtk.FileFilter()
         filters[name].set_name(descr)
@@ -698,9 +698,9 @@ def get_filename(title=_("Open a file"),
         return filename
 
 def get_dirname(title=_("Choose a directory"),
-                 action=Gtk.FileChooserAction.SELECT_FOLDER,
-                 button=Gtk.STOCK_OK,
-                 default_dir=None):
+                action=Gtk.FileChooserAction.SELECT_FOLDER,
+                button=Gtk.STOCK_OK,
+                default_dir=None):
     """Get a directory name.
 
     @param title: the dialog title

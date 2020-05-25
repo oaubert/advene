@@ -42,7 +42,7 @@ class DVDSelect:
             self.init(current)
 
     def init(self, current):
-        m = re.match("dvd\w*:.+@(\d+)[,:](\d+)", current)
+        m = re.match(r"dvd\w*:.+@(\d+)[,:](\d+)", current)
         if m is not None:
             (title, chapter) = m.groups()
             self.titlewidget.set_value(int(title))

@@ -160,7 +160,7 @@ class Montage(AdhocView):
             # Override the standard AnnotationWidget drag_sent behaviour.
             if targetType == config.data.target_type['uri-list']:
                 uri="advene:/adhoc/%d/%d" % (hash(self),
-                                                  hash(widget))
+                                             hash(widget))
                 selection.set(selection.get_target(), 8, uri.encode('utf8'))
                 return True
             return False
@@ -283,7 +283,7 @@ class Montage(AdhocView):
                 self.refresh()
                 return True
             else:
-                logger.warning("Unknown target type for drag: %d" % targetType)
+                logger.warning("Unknown target type for drag: %d", targetType)
             return False
 
         b = Gtk.Button()
@@ -393,7 +393,7 @@ class Montage(AdhocView):
                         self.refresh()
                 return True
             else:
-                logger.warning("Unknown target type for drop: %d" % targetType)
+                logger.warning("Unknown target type for drop: %d", targetType)
             return False
 
         self.zoom_adjustment.connect('value-changed', zoom_adj_change)
@@ -458,11 +458,9 @@ class Montage(AdhocView):
         tb.insert(b, -1)
 
         self.zoom_combobox=dialog.list_selector_widget(members=[
-                ( f, "%d%%" % int(100*f) )
-                for f in [
-                    (1.0 / pow(1.5, n)) for n in range(0, 10)
-                    ]
-                ],
+            ( f, "%d%%" % int(100*f) )
+            for f in [ (1.0 / pow(1.5, n)) for n in range(0, 10) ]
+        ],
                                                        entry=True,
                                                        callback=zoom_change)
         self.zoom_combobox.get_child().connect('activate', zoom_entry)
@@ -488,7 +486,7 @@ class Montage(AdhocView):
                 label=_("Highlight annotations")
                 b.highlight=True
             b.set_tooltip_text(label)
-            for a in set( [ w.annotation for w in self.contents ] ):
+            for a in set(w.annotation for w in self.contents):
                 self.controller.notify(event, annotation=a)
             return True
         i=Gtk.Image()
@@ -527,13 +525,13 @@ class Montage(AdhocView):
                 self.refresh()
                 return True
             else:
-                logger.warning("Unknown target type for drag: %d" % targetType)
+                logger.warning("Unknown target type for drag: %d", targetType)
             return False
         v.drag_dest_set(Gtk.DestDefaults.MOTION |
-                                   Gtk.DestDefaults.HIGHLIGHT |
-                                   Gtk.DestDefaults.ALL,
-                                   config.data.get_target_types('annotation', 'annotation-type'),
-                                   Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
+                        Gtk.DestDefaults.HIGHLIGHT |
+                        Gtk.DestDefaults.ALL,
+                        config.data.get_target_types('annotation', 'annotation-type'),
+                        Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
         v.connect('drag-data-received', mainbox_drag_received)
 
         sw=Gtk.ScrolledWindow()

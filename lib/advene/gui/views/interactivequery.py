@@ -185,7 +185,7 @@ class InteractiveQuery(AdhocView):
         except AdveneTalesException as e:
             # Display a dialog with the value
             dialog.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
-                icon=Gtk.MessageType.ERROR)
+                                  icon=Gtk.MessageType.ERROR)
             return True
 
         # Close the search window
@@ -415,8 +415,7 @@ class InteractiveResult(AdhocView):
         # Present choices to display the result
         if not self.result:
             v.add(Gtk.Label(label=_("Empty result")))
-        elif (isinstance(self.result, list) or isinstance(self.result, tuple)
-            or isinstance(self.result, AbstractBundle)):
+        elif isinstance(self.result, (list, tuple, AbstractBundle)):
             # Check if there are annotations
             l=[ a for a in self.result if isinstance(a, Annotation) ]
             cr=len(self.result)
@@ -466,25 +465,24 @@ class InteractiveResult(AdhocView):
 
                     gtable=GenericTable(controller=self.controller, elements=[ e
                                                                                for e in self.result
-                                                                               if not isinstance(e, Annotation) ]
-                                                                               )
+                                                                               if not isinstance(e, Annotation) ])
                     notebook.append_page(gtable.widget, Gtk.Label(label=_("Other elements")))
 
 
                 for (icon, tip, action) in (
-                    ('timeline.png' , _("Display annotations in timeline"), lambda b: self.open_in_timeline(l)),
-                    ('transcription.png', _("Display annotations as transcription"), lambda b:
+                        ('timeline.png' , _("Display annotations in timeline"), lambda b: self.open_in_timeline(l)),
+                        ('transcription.png', _("Display annotations as transcription"), lambda b:
                          self.controller.gui.open_adhoc_view('transcription',
                                                              label=self._label,
                                                              destination=self._destination,
                                                              elements=l)),
-                    ('highlight.png', _("Highlight annotations"), lambda b: toggle_highlight(b, l)),
-                    (Gtk.STOCK_CONVERT, _("Export table"), lambda b: table.csv_export()),
-                    (Gtk.STOCK_NEW, _("Create annotations from the result"), self.create_annotations),
-                    ('montage.png', _("Define a montage with the result"), self.create_montage),
-                    ('comment.png', _("Create a comment view with the result"), self.create_comment),
-                    (Gtk.STOCK_FIND_AND_REPLACE, _("Search and replace strings in the annotations content"), self.search_replace),
-                    ):
+                        ('highlight.png', _("Highlight annotations"), lambda b: toggle_highlight(b, l)),
+                        (Gtk.STOCK_CONVERT, _("Export table"), lambda b: table.csv_export()),
+                        (Gtk.STOCK_NEW, _("Create annotations from the result"), self.create_annotations),
+                        ('montage.png', _("Define a montage with the result"), self.create_montage),
+                        ('comment.png', _("Create a comment view with the result"), self.create_comment),
+                        (Gtk.STOCK_FIND_AND_REPLACE, _("Search and replace strings in the annotations content"), self.search_replace),
+                ):
                     if icon.endswith('.png'):
                         ti=get_pixmap_toolbutton(icon)
                     else:
@@ -546,15 +544,14 @@ class InteractiveResult(AdhocView):
             a=None
 
         ev=advene.gui.evaluator.Evaluator(globals_=globals(),
-                                       locals_={'package': p,
-                                                'result': l,
-                                                'p': p,
-                                                'a': a,
-                                                'c': self.controller,
-                                                'self': self,
-                                                'pp': pprint.pformat },
-                                       historyfile=config.data.advenefile('evaluator.log', 'settings')
-                                       )
+                                          locals_={'package': p,
+                                                   'result': l,
+                                                   'p': p,
+                                                   'a': a,
+                                                   'c': self.controller,
+                                                   'self': self,
+                                                   'pp': pprint.pformat },
+                                          historyfile=config.data.advenefile('evaluator.log', 'settings'))
         w=ev.popup(embedded=True)
 
         self.controller.gui.init_window_size(w, 'evaluator')
@@ -562,4 +559,3 @@ class InteractiveResult(AdhocView):
         w.set_title(_("Results of _interactive query"))
         ev.set_expression('result')
         return True
-

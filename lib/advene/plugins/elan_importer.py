@@ -48,7 +48,9 @@ class ElanImporter(GenericImporter):
         self.atypes={}
         self.schema=None
         self.relations=[]
+        self.forward_references = []
 
+    @staticmethod
     def can_handle(fname):
         if fname.endswith('.eaf'):
             return 100
@@ -58,7 +60,6 @@ class ElanImporter(GenericImporter):
             return 50
         else:
             return 0
-    can_handle=staticmethod(can_handle)
 
     def xml_to_text(self, element):
         l=[]
@@ -75,7 +76,6 @@ class ElanImporter(GenericImporter):
         valid_id_re = re.compile('[^a-zA-Z_0-9]')
         # List of tuples (annotation-id, related-annotation-uri) of
         # forward referenced annotations
-        self.forward_references = []
         progress=0.1
         incr=0.02
         for tier in elan.TIER:
@@ -215,4 +215,3 @@ class ElanImporter(GenericImporter):
         self.create_relations()
         self.progress(1.0)
         return self.package
-

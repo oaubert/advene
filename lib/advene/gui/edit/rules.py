@@ -85,7 +85,7 @@ class EditRuleSet(EditGeneric):
             for p in ra.parameters:
                 action.add_parameter(p, ra.defaults.get(p, ''))
             # Find the next rulename index
-            l=[ int(i) for i in re.findall(_('Rule')+'\s*(\d+)', ''.join(r.name for r in self.model)) ]
+            l=[ int(i) for i in re.findall(_('Rule')+r'\s*(\d+)', ''.join(r.name for r in self.model)) ]
             idx=max(l or [ 0 ] ) + 1
             rule=Rule(name=_("Rule") + str(idx),
                       event=event,
@@ -211,7 +211,7 @@ class EditRuleSet(EditGeneric):
             return True
 
         else:
-            logger.warning("Unknown target type for drag: %d" % targetType)
+            logger.warning("Unknown target type for drag: %d", targetType)
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
@@ -231,7 +231,7 @@ class EditRuleSet(EditGeneric):
             rule.name = name
             self.add_rule(rule)
         else:
-            logger.warning("Unknown target type for drop: %d" % targetType)
+            logger.warning("Unknown target type for drop: %d", targetType)
         return True
 
 
@@ -451,7 +451,7 @@ class EditRule(EditGeneric):
         if targetType == config.data.target_type['rule']:
             selection.set(selection.get_target(), 8, self.model.xml_repr().encode('utf8'))
         else:
-            logger.warning("Unknown target type for drag: %d" % targetType)
+            logger.warning("Unknown target type for drag: %d", targetType)
         return True
 
     def invalid_items(self):
@@ -764,26 +764,27 @@ class EditCondition(EditGeneric):
             predefined=[
                 ('annotation/type/id', _('The annotation type') ),
                 ('annotation/content/data', _('The annotation content') ),
-                ] + [
+            ] + [
                 ('annotation/content/parsed/%s' % p, _("The value of the %s attribute") % p)
                 for p in set(a for at in self.controller.package.annotationTypes for a in getattr(at, '_fieldnames', [])) ] + [
-                ('annotation/fragment', _('The annotation fragment') ),
-                ('annotation/fragment/begin', _('The annotation begin time') ),
-                ('annotation/fragment/end', _('The annotation end time') ),
-                ('annotation/fragment/duration', _('The annotation duration') ),
-                ('annotation/content/mimetype', _('The annotation MIME-type') ),
-                ('annotation/incomingRelations', _("The annotation's incoming relations") ),
-                ('annotation/outgoingRelations', _("The annotation's outgoing relations") ),
-                ] + [
+                        ('annotation/fragment', _('The annotation fragment') ),
+                        ('annotation/fragment/begin', _('The annotation begin time') ),
+                        ('annotation/fragment/end', _('The annotation end time') ),
+                        ('annotation/fragment/duration', _('The annotation duration') ),
+                        ('annotation/content/mimetype', _('The annotation MIME-type') ),
+                        ('annotation/incomingRelations', _("The annotation's incoming relations") ),
+                        ('annotation/outgoingRelations', _("The annotation's outgoing relations") ),
+            ] + [
                 ('annotation/typedRelatedIn/%s' % rt.id,
                  _("The %s-related incoming annotations") % self.controller.get_title(rt) )
                 for rt in self.controller.package.relationTypes
-                ] + [
+            ] + [
                 ('annotation/typedRelatedOut/%s' % rt.id,
                  _("The %s-related outgoing annotations") % self.controller.get_title(rt) )
-                for rt in self.controller.package.relationTypes  ]
+                for rt in self.controller.package.relationTypes
+            ]
         elif isinstance(self.parent, EditQuery):
-            predefined=[
+            predefined = [
                 ('element', _('The element')),
                 ('element/content/data', _("The element's content") ),
                 ('element/fragment', _('The element fragment') ),
@@ -797,7 +798,7 @@ class EditCondition(EditGeneric):
                 ('here/fragment', _('The context fragment') ),
                 ('here/annotations', _('The context annotations') ),
                 ('here/type/annotations', _('The annotations of the context type') ),
-                ]
+            ]
         self.lhs=TALESEntry(controller=self.controller, predefined=predefined)
         self.lhs.set_text(self.model.lhs or "")
         self.lhs.set_editable(self.editable)
@@ -885,7 +886,7 @@ class EditAction(EditGeneric):
             return False
         ra=self.catalog.get_action(self.current_name)
         self.model = Action(registeredaction=ra, catalog=self.catalog)
-        regexp=re.compile('^(\(.+\)|)$')
+        regexp=re.compile(r'^(\(.+\)|)$')
         for n, v in self.current_parameters.items():
             # We ignore parameters fields that are empty or that match '^\(.+\)$'
             if not regexp.match(v):

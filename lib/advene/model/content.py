@@ -40,7 +40,7 @@ import advene.model.util.uri
 from advene.model.util.auto_properties import auto_properties
 from advene.model.util.mimetype import MimeType
 
-class StructuredContent(dict,object):
+class StructuredContent(dict):
     """Dict-like object representing structured data.
 
     It provides methods for parsing from/unparsing to Advene
@@ -93,7 +93,7 @@ class StructuredContent(dict,object):
 
 COMMA_REGEXP = re.compile(r'\s*,\s*', re.UNICODE)
 COMMENT_REGEXP = re.compile(r'\((.*?)\)', re.UNICODE)
-class KeywordList(object):
+class KeywordList:
     """Set-like object representing a keyword list.
 
     They are stored as a comma-separated list of keywords. The parent
@@ -466,7 +466,7 @@ class Content(modeled.Modeled,
         # Last fallback:
         return self.data
 
-class WithContent(object, metaclass=auto_properties):
+class WithContent(metaclass=auto_properties):
     """An implementation for the 'content' property and related properties.
        Inheriting classes must have a _getModel method returning a DOM element
        (inheriting the modeled.Modeled class looks like a good idea).
@@ -505,7 +505,7 @@ class WithContent(object, metaclass=auto_properties):
 
 _content_plugin_registry = {}
 
-class ContentPlugin (object):
+class ContentPlugin:
     """
     TODO
     """
@@ -517,12 +517,12 @@ class ContentPlugin (object):
         """
         pass
 
+    @staticmethod
     def register (a_class, uri):
         assert issubclass(a_class, ContentPlugin)
         _content_plugin_registry[uri] = a_class
 
-    register = staticmethod (register)
-
+    @staticmethod
     def find_plugin (content):
         mimetype = MimeType(content.getMimetype())
         found = None
@@ -537,17 +537,14 @@ class ContentPlugin (object):
 
         return found(content)
 
-    find_plugin = staticmethod (find_plugin)
-
+    @staticmethod
     def withType (mimetype):
         assert MimeType (mimetype)
         class _content_plugin_class (ContentPlugin):
+            @staticmethod
             def getMimetype ():
                 return mimetype
-            getMimetype = staticmethod (getMimetype)
         return _content_plugin_class
-
-    withType = staticmethod (withType)
 
 
 class TestPlugin (ContentPlugin.withType ('text/*')):
@@ -555,6 +552,7 @@ class TestPlugin (ContentPlugin.withType ('text/*')):
     A 'proof of concept' test plugin.
     """
     def __init__ (self, content):
+        super().__init__(self, content)
         self.__content = content
 
     def hello(self):

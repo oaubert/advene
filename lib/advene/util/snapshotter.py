@@ -96,7 +96,7 @@ class NotifySink(GstBase.BaseSink):
         elif key.name == 'preroll':
             self._preroll=value
         else:
-            logger.info("No property %s" % key.name)
+            logger.info("No property %s", key.name)
 
     def do_get_property(self, key):
         if key.name == 'notify':
@@ -104,7 +104,7 @@ class NotifySink(GstBase.BaseSink):
         elif key.name == 'preroll':
             return self._preroll
         else:
-            logger.info("No property %s" % key.name)
+            logger.info("No property %s", key.name)
 
     def buffer_as_struct(self, buffer):
         (res, mapinfo) = buffer.map(Gst.MapFlags.READ)
@@ -152,7 +152,7 @@ class UniquePriorityQueue(queue.PriorityQueue):
         self.values.remove(item[1])
         return item
 
-class Snapshotter(object):
+class Snapshotter:
     """Snapshotter class.
 
     Basic idea: define a "notify" method, which will get a dict as
@@ -187,7 +187,7 @@ class Snapshotter(object):
 
         csp = Gst.ElementFactory.make('videoconvert')
         pngenc = Gst.ElementFactory.make('pngenc')
-        queue = Gst.ElementFactory.make('queue')
+        queue_ = Gst.ElementFactory.make('queue')
         sink = NotifySink()
 
         fakesink = Gst.ElementFactory.make('fakesink', 'audiosink')
@@ -198,9 +198,9 @@ class Snapshotter(object):
             filter_ = Gst.ElementFactory.make("capsfilter", "filter")
             filter_.set_property("caps", caps)
             scale=Gst.ElementFactory.make('videoscale')
-            l=(csp, scale, filter_, pngenc, queue, sink)
+            l=(csp, scale, filter_, pngenc, queue_, sink)
         else:
-            l=(csp, pngenc, queue, sink)
+            l=(csp, pngenc, queue_, sink)
 
         for el in l:
             self.videobin.add(el)
@@ -247,7 +247,7 @@ class Snapshotter(object):
         s = message.get_structure()
         if s is None:
             return
-        logger.debug("Bus message::", s.get_name())
+        logger.debug("Bus message::%s", s.get_name())
 
     def on_bus_message_error(self, bus, message):
         s = message.get_structure()
@@ -273,14 +273,13 @@ class Snapshotter(object):
         if struct is None:
             logger.warning("Snapshotter: invalid struct")
             return True
-        logger.info("Timecode %010d - pts %010d" % (struct['date'],
-                                                    struct['pts']))
+        logger.info("Timecode %010d - pts %010d", struct['date'], struct['pts'])
         t = struct['date']
         fname='/tmp/%010d.png' % t
         f=open(fname, 'wb')
         f.write(struct['data'])
         f.close()
-        logger.info("Snapshot written to" + fname)
+        logger.info("Snapshot written to %s", fname)
         return True
 
     def snapshot(self, t):
@@ -354,7 +353,7 @@ class Snapshotter(object):
                 frame['height'] = int(h)
                 self.notify(frame)
             else:
-                logger.error("Invalid PNG data in snapshot output", data)
+                logger.error("Invalid PNG data in snapshot output %s", data)
         # We are ready to process the next snapshot
         self.snapshot_ready.set()
         return True

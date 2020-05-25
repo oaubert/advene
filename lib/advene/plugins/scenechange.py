@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-import advene.core.config as config
 from advene.util.gstimporter import GstImporter
 
 import gi

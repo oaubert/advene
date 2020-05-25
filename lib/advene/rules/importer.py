@@ -31,9 +31,9 @@ class EventHistoryImporter(GenericImporter):
     def __init__(self, **kw):
         super(EventHistoryImporter, self).__init__(**kw)
 
+    @staticmethod
     def can_handle(fname):
         return fname == 'event_history'
-    can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
         start=f[0]['timestamp']
@@ -41,23 +41,22 @@ class EventHistoryImporter(GenericImporter):
         id_="Traces"
         schema=self.package.get_element_by_id(id_)
         for e in f:
-            type_ = e['event_name']
-            type = self.package.get_element_by_id(type_)
-            if (type is None):
+            typename = e['event_name']
+            type_ = self.package.get_element_by_id(typename)
+            if type_ is None:
                 #Annotation type creation
-                self.package._idgenerator.add(type_)
-                type=schema.createAnnotationType(
-                    ident=type_)
-                type.author=config.data.userid
-                type.date=helper.get_timestamp()
-                type.title=type_
-                type.mimetype='application/x-advene-structured'
-                type.setMetaData(config.data.namespace, 'color', next(self.package._color_palette))
-                type.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
-                schema.annotationTypes.append(type)
+                self.package._idgenerator.add(typename)
+                type_=schema.createAnnotationType(ident=typename)
+                type_.author=config.data.userid
+                type_.date=helper.get_timestamp()
+                type_.title=typename
+                type_.mimetype='application/x-advene-structured'
+                type_.setMetaData(config.data.namespace, 'color', next(self.package._color_palette))
+                type_.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+                schema.annotationTypes.append(type_)
 
             d={
-                'type': type,
+                'type': type_,
                 'begin': e['timestamp'] - start,
                 'duration': 50,
                 'timestamp': e['timestamp'],

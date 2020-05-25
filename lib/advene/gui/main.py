@@ -58,11 +58,11 @@ if config.data.debug:
     #Gdk.set_show_events(True)
     try:
         from advene.util.debug import debug_slow_update_hook
-    except:
+    except ImportError:
         logger.debug("No debug_slow_update_hook function in advene.util.debug")
         debug_slow_update_hook = None
 
-logger.info("Using localedir %s" % config.data.path['locale'])
+logger.info("Using localedir %s", config.data.path['locale'])
 
 # Locale initialisation
 try:
@@ -97,7 +97,9 @@ from advene.gui.util.completer import Indexer, Completer
 import advene.util.merger
 
 # GUI elements
-from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position, dialog, encode_drop_parameters, overlay_svg_as_png, name2color, predefined_content_mimetypes, get_drawable
+from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position,\
+    dialog, encode_drop_parameters, overlay_svg_as_png,\
+    name2color, predefined_content_mimetypes, get_drawable
 from advene.gui.util.playpausebutton import PlayPauseButton
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
@@ -211,7 +213,7 @@ class DummyGlade:
             menu.append(i)
         return menu
 
-class AdveneGUI(object):
+class AdveneGUI:
     """Main GUI class.
 
     Some entry points in the methods:
@@ -255,81 +257,81 @@ class AdveneGUI(object):
 
         menu_definition=(
             (_("_File"), (
-                    ( _("_New package"), self.on_new1_activate, _("Create a new package")),
-                    ( _("_Open package"), self.on_open1_activate, _("Open a package") ),
-                    ( _("Open recent"), None, _("Show recently opened packages") ),
-                    ( _("_Save package") + " [Ctrl-S]", self.on_save1_activate, _("Save the package") ),
-                    ( _("Save package as..."), self.on_save_as1_activate, _("Save the package as...") ),
-                    ( _("Close package"), self.on_close1_activate, _("Close the package") ),
-                    ( "", None, "" ),
-                    ( _("Save session"), self.on_save_session1_activate, _("Save the current session (list of opened packages)") ),
-                    ( _("Save workspace"), (
-                            ( _("...as package view"), self.on_save_workspace_as_package_view1_activate, "" ),
-                            ( _("...as standard workspace"), self.on_save_workspace_as_default1_activate, _("Use the current layout as standard workspace in the future") )), ""),
-                    ( "", None, "" ),
-                    ( _("Associate a video _File"), self.on_b_addfile_clicked, _("Associate a video file") ),
-                    ( _("Associate a _DVD"), self.on_b_selectdvd_clicked, _("Associate a chapter from a DVD") ),
-                    ( _("Associate a _Video stream"), self.on_select_a_video_stream1_activate, _("Enter a video stream address") ),
-                    ( "", None, "" ),
-                    ( _("_Import File"), self.on_import_file1_activate, _("Import data from an external source") ),
-                    ( _("_Process video"), self.on_process_video_activate, _("Import data from video processing algorithms")),
-                    ( "", None, "" ),
-                    ( _("_Merge packages"), self.on_merge_package_activate, _("Merge elements from other packages") ),
-                    ( _("Import package"), self.on_import_package_activate, _("Import elements from another package") ),
-                    ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters") ),
-                    ( "", None, "" ),
-                    ( _("_Export..."), self.on_export_activate, _("Export data to another format") ),
-                    ( _("_Website export..."), self.on_website_export_activate, _("Export views to a website") ),
-                    ( "", None, "" ),
-                    ( _("_Quit"), self.on_exit, "" ),
-                    ), "" ),
+                ( _("_New package"), self.on_new1_activate, _("Create a new package")),
+                ( _("_Open package"), self.on_open1_activate, _("Open a package") ),
+                ( _("Open recent"), None, _("Show recently opened packages") ),
+                ( _("_Save package") + " [Ctrl-S]", self.on_save1_activate, _("Save the package") ),
+                ( _("Save package as..."), self.on_save_as1_activate, _("Save the package as...") ),
+                ( _("Close package"), self.on_close1_activate, _("Close the package") ),
+                ( "", None, "" ),
+                ( _("Save session"), self.on_save_session1_activate, _("Save the current session (list of opened packages)") ),
+                ( _("Save workspace"), (
+                    ( _("...as package view"), self.on_save_workspace_as_package_view1_activate, "" ),
+                    ( _("...as standard workspace"), self.on_save_workspace_as_default1_activate, _("Use the current layout as standard workspace in the future") )), ""),
+                ( "", None, "" ),
+                ( _("Associate a video _File"), self.on_b_addfile_clicked, _("Associate a video file") ),
+                ( _("Associate a _DVD"), self.on_b_selectdvd_clicked, _("Associate a chapter from a DVD") ),
+                ( _("Associate a _Video stream"), self.on_select_a_video_stream1_activate, _("Enter a video stream address") ),
+                ( "", None, "" ),
+                ( _("_Import File"), self.on_import_file1_activate, _("Import data from an external source") ),
+                ( _("_Process video"), self.on_process_video_activate, _("Import data from video processing algorithms")),
+                ( "", None, "" ),
+                ( _("_Merge packages"), self.on_merge_package_activate, _("Merge elements from other packages") ),
+                ( _("Import package"), self.on_import_package_activate, _("Import elements from another package") ),
+                ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters") ),
+                ( "", None, "" ),
+                ( _("_Export..."), self.on_export_activate, _("Export data to another format") ),
+                ( _("_Website export..."), self.on_website_export_activate, _("Export views to a website") ),
+                ( "", None, "" ),
+                ( _("_Quit"), self.on_exit, "" ),
+            ), "" ),
             (_("_Edit"), (
-                    ( _("_Undo") + " [Ctrl-Z]", self.undo, "" ),
-                    ( _("_Find"), self.on_find1_activate, "" ),
-                    ( _("_Delete") + " [Del]", self.on_delete1_activate, "" ),
-                    ( _("Create"), (
-                            ( _("Schema"), self.on_create_schema_activate, "" ),
-                            ( _("View"), self.on_create_view_activate, "" ),
-                            ( _("Query"), self.on_create_query_activate, "" ),
-                            ( _("Annotation Type"), self.on_create_annotation_type_activate, "" ),
-                            ( _("Relation Type"), self.on_create_relation_type_activate, "" ),
-                            ), "" ),
-#                    ( _("Package _Imports"), self.on_package_imports1_activate, _("Edit imported element from other packages") ),
-#                    ( _("_Standard Ruleset"), self.on_edit_ruleset1_activate, _("Edit the standard rules") ),
-                    ( _("P_ackage properties"), self.on_package_properties1_activate, _("Edit package properties") ),
-                    ( _("P_references"), self.on_preferences1_activate, _("Interface preferences") ),
-                    ), "" ),
+                ( _("_Undo") + " [Ctrl-Z]", self.undo, "" ),
+                ( _("_Find"), self.on_find1_activate, "" ),
+                ( _("_Delete") + " [Del]", self.on_delete1_activate, "" ),
+                ( _("Create"), (
+                    ( _("Schema"), self.on_create_schema_activate, "" ),
+                    ( _("View"), self.on_create_view_activate, "" ),
+                    ( _("Query"), self.on_create_query_activate, "" ),
+                    ( _("Annotation Type"), self.on_create_annotation_type_activate, "" ),
+                    ( _("Relation Type"), self.on_create_relation_type_activate, "" ),
+                ), "" ),
+                #                    ( _("Package _Imports"), self.on_package_imports1_activate, _("Edit imported element from other packages") ),
+                #                    ( _("_Standard Ruleset"), self.on_edit_ruleset1_activate, _("Edit the standard rules") ),
+                ( _("P_ackage properties"), self.on_package_properties1_activate, _("Edit package properties") ),
+                ( _("P_references"), self.on_preferences1_activate, _("Interface preferences") ),
+            ), "" ),
             (_("_View"), (
-                    # Note: this will be populated from registered_adhoc_views
-                    ( _("_Start Web Browser"), self.on_adhoc_web_browser_activate, _("Start the web browser") ),
-                    ( "", None, "" ),
-                    ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)")),
-                    ( _("Evaluator") + " [Ctrl-e]", self.on_evaluator2_activate, _("Open python evaluator window") ),
-                    ( _("Webserver log"), self.on_webserver_log1_activate, "" ),
-                    ), "" ),
+                # Note: this will be populated from registered_adhoc_views
+                ( _("_Start Web Browser"), self.on_adhoc_web_browser_activate, _("Start the web browser") ),
+                ( "", None, "" ),
+                ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)")),
+                ( _("Evaluator") + " [Ctrl-e]", self.on_evaluator2_activate, _("Open python evaluator window") ),
+                ( _("Webserver log"), self.on_webserver_log1_activate, "" ),
+            ), "" ),
             (_("_Player"), (
-                    ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code") ),
-                    ( _("Verify video _Checksum"), self.verify_video_checksum, _("Verify the video checksum, if available.") ),
-                    ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
-                    ( _("Reset ImageCache"), self.on_reset_imagecache_activate, _("Reset the ImageCache") ),
-                    ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
-                    ( _("Display _Media information"), self.on_view_mediainformation_activate, _("Display information about the current media") ),
-                    ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds") ),
-                    ( _("_Select player"), None, _("Select the player plugin") ),
-                    ), "" ),
+                ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code") ),
+                ( _("Verify video _Checksum"), self.verify_video_checksum, _("Verify the video checksum, if available.") ),
+                ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
+                ( _("Reset ImageCache"), self.on_reset_imagecache_activate, _("Reset the ImageCache") ),
+                ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
+                ( _("Display _Media information"), self.on_view_mediainformation_activate, _("Display information about the current media") ),
+                ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds") ),
+                ( _("_Select player"), None, _("Select the player plugin") ),
+            ), "" ),
             (_("Packages"), (
-                    ( _("No package"), None, "" ),
-                    ), "" ),
+                ( _("No package"), None, "" ),
+            ), "" ),
             (_("_Help"), (
-                    ( _("Help"), self.on_help1_activate, "" ),
-                    ( _("Get support"), self.on_support1_activate, "" ),
-                    ( _("Check for updates"), self.check_for_update, "" ),
-                    ( _("Display shortcuts"), self.on_helpshortcuts_activate, "" ),
-                    ( _("Display logfile"), self.on_advene_log_display, _("Display log messages")),
-                    ( _("Open logfile folder"), self.on_advene_log_folder_display, _("Display logfile folder. It can help when sending the advene.log file by e-mail.")),
-                    ( _("_About"), self.on_about1_activate, "" ),
-                    ), "" ),
-            )
+                ( _("Help"), self.on_help1_activate, "" ),
+                ( _("Get support"), self.on_support1_activate, "" ),
+                ( _("Check for updates"), self.check_for_update, "" ),
+                ( _("Display shortcuts"), self.on_helpshortcuts_activate, "" ),
+                ( _("Display logfile"), self.on_advene_log_display, _("Display log messages")),
+                ( _("Open logfile folder"), self.on_advene_log_folder_display, _("Display logfile folder. It can help when sending the advene.log file by e-mail.")),
+                ( _("_About"), self.on_about1_activate, "" ),
+            ), "" ),
+        )
 
         self.gui = DummyGlade(menu_definition)
 
@@ -351,17 +353,17 @@ class AdveneGUI(object):
 
         self.toolbuttons = {}
         for (ident, stock, callback, tip) in (
-            ('open', Gtk.STOCK_OPEN, self.on_open1_activate, _("Open a package file")),
-            ('save', Gtk.STOCK_SAVE, self.on_save1_activate, _("Save the current package")),
-            ('save_as', Gtk.STOCK_SAVE_AS, self.on_save_as1_activate, _("Save the package with a new name")),
-            ('select_file', 'moviefile.png', self.on_b_addfile_clicked, _("Select movie file...")),
-            ('select_dvd', Gtk.STOCK_CDROM, self.on_b_selectdvd_clicked, _("Select DVD")),
-            (None, None, None, None),
-            ('undo', Gtk.STOCK_UNDO, self.undo, _("Undo")),
-            (None, None, None, None),
-            ('create_text_annotation', 'text_annotation.png', self.on_create_text_annotation, _("Create a text annotation")),
-            ('create_svg_annotation', 'svg_annotation.png', self.on_create_svg_annotation, _("Create a graphical annotation")),
-           ):
+                ('open', Gtk.STOCK_OPEN, self.on_open1_activate, _("Open a package file")),
+                ('save', Gtk.STOCK_SAVE, self.on_save1_activate, _("Save the current package")),
+                ('save_as', Gtk.STOCK_SAVE_AS, self.on_save_as1_activate, _("Save the package with a new name")),
+                ('select_file', 'moviefile.png', self.on_b_addfile_clicked, _("Select movie file...")),
+                ('select_dvd', Gtk.STOCK_CDROM, self.on_b_selectdvd_clicked, _("Select DVD")),
+                (None, None, None, None),
+                ('undo', Gtk.STOCK_UNDO, self.undo, _("Undo")),
+                (None, None, None, None),
+                ('create_text_annotation', 'text_annotation.png', self.on_create_text_annotation, _("Create a text annotation")),
+                ('create_svg_annotation', 'svg_annotation.png', self.on_create_svg_annotation, _("Create a graphical annotation")),
+        ):
             if stock is None:
                 b = Gtk.SeparatorToolItem()
             elif ident == 'open':
@@ -478,7 +480,7 @@ class AdveneGUI(object):
         for n in ('plugins', 'views', 'edit'):
             try:
                 l=self.controller.load_plugins(os.path.join(
-                        os.path.dirname(advene.__file__), 'gui', n),
+                    os.path.dirname(advene.__file__), 'gui', n),
                                                prefix="advene_gui_%s" % n)
                 self.gui_plugins.extend(l)
             except OSError:
@@ -490,10 +492,10 @@ class AdveneGUI(object):
             """Display a dialog allowing to edit quicksearch-sources setting.
             """
             d = Gtk.Dialog(title=_("Quicksearch lists"),
-                   parent=self.gui.win,
-                   flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                   buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
-                             Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
+                           parent=self.gui.win,
+                           flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                           buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                                     Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
 
             d.vbox.pack_start(Gtk.Label(_("Please specify the lists of elements to be searched.")), False, False, 0)
             sw = Gtk.ScrolledWindow ()
@@ -633,8 +635,8 @@ class AdveneGUI(object):
         """
         if not hasattr(self, '_icon_list'):
             l=[ GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile(
-                        ( 'pixmaps', 'icon_advene%d.png' % size ) ))
-                              for size in (16, 32, 48, 64, 128) ]
+                ( 'pixmaps', 'icon_advene%d.png' % size ) ))
+                for size in (16, 32, 48, 64, 128) ]
             self._icon_list=[ i for i in l if i is not None ]
         return self._icon_list
 
@@ -969,21 +971,21 @@ class AdveneGUI(object):
             if computed is None:
                 dialog.message_dialog(_("Checksum was cancelled."))
                 return True
-            logger.warning("Checksum: stored %s - computed %s" % (stored, computed))
+            logger.warning("Checksum: stored %s - computed %s", stored, computed)
             if stored:
                 if stored != computed:
                     if dialog.message_dialog(_("The %s checksum does not match the information that was stored in the package. You should check that the file is appropriate. Do you want to update the stored checksum?") % name,
-                                          icon=Gtk.MessageType.QUESTION):
+                                             icon=Gtk.MessageType.QUESTION):
                         self.controller.package.setMetaData(config.data.namespace, "media_checksum", str(computed))
                         return True
                 else:
                     dialog.message_dialog(_("The %s checksum matches the stored checksum.") % name)
                     return True
             else:
-                    if dialog.message_dialog(_("No checksum was stored in the package. Do you want to store this information?"),
-                                             icon=Gtk.MessageType.QUESTION):
-                        self.controller.package.setMetaData(config.data.namespace, "media_checksum", str(computed))
-                        return True
+                if dialog.message_dialog(_("No checksum was stored in the package. Do you want to store this information?"),
+                                         icon=Gtk.MessageType.QUESTION):
+                    self.controller.package.setMetaData(config.data.namespace, "media_checksum", str(computed))
+                    return True
 
         dialog.progress_dialog(title=_("Computing video checksum"),
                                label=_("Computing checksum"),
@@ -1000,7 +1002,11 @@ class AdveneGUI(object):
                        buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
 
-        ta=TimeAdjustment(value=self.gui.slider.get_value(), controller=self.controller, videosync=False, editable=True, compact=False)
+        ta=TimeAdjustment(value=self.gui.slider.get_value(),
+                          controller=self.controller,
+                          videosync=False,
+                          editable=True,
+                          compact=False)
         ta.entry.connect("activate", lambda w: d.response(Gtk.ResponseType.OK))
         d.vbox.pack_start(ta.widget, False, True, 0)
         d.show_all()
@@ -1092,7 +1098,7 @@ class AdveneGUI(object):
             title = _("Exporting to %s") % filename
         if label is None:
             label = _("Exporting %(duration)s video to\n%(filename)s") % { 'filename': filename,
-                                                                          'duration': duration }
+                                                                           'duration': duration }
 
         m = MontageRenderer(self.controller, elements)
 
@@ -1153,7 +1159,7 @@ class AdveneGUI(object):
         self.gui.application_space.add(self.visualisationwidget)
 
         def media_changed(context, parameters):
-            if config.data.preferences['player-autostart'] and not 'record' in self.controller.player.player_capabilities:
+            if config.data.preferences['player-autostart'] and not 'record' in self.controller.player.player_capabiolities:
                 self.controller.queue_action(self.controller.update_status, "start")
                 self.controller.queue_action(self.controller.update_status, "pause")
 
@@ -1170,40 +1176,40 @@ class AdveneGUI(object):
             return True
 
         for events, method in (
-            ("PackageLoad", self.manage_package_load),
-            ("PackageActivate", self.manage_package_activate),
-            ("PackageEditEnd", lambda e, c: self.update_window_title()),
-            ("PackageSave", self.manage_package_save),
-            ( ('AnnotationCreate', 'AnnotationEditEnd',
-               'AnnotationDelete', 'AnnotationActivate',
-               'AnnotationDeactivate'),
-              self.annotation_lifecycle ),
-            ( ('RelationCreate', 'RelationEditEnd',
-               'RelationDelete'),
-              self.relation_lifecycle ),
-            ( ('ViewCreate', 'ViewEditEnd', 'ViewDelete'),
-              self.view_lifecycle ),
-            ( ('QueryCreate', 'QueryEditEnd', 'QueryDelete'),
-              self.query_lifecycle),
-            ( ('ResourceCreate', 'ResourceEditEnd', 'ResourceDelete'),
-              self.resource_lifecycle),
-            ( ('SchemaCreate', 'SchemaEditEnd', 'SchemaDelete'),
-              self.schema_lifecycle),
-            ( ('AnnotationTypeCreate', 'AnnotationTypeEditEnd',
-               'AnnotationTypeDelete'),
-              self.annotationtype_lifecycle),
-            ( ('RelationTypeCreate', 'RelationTypeEditEnd',
-               'RelationTypeDelete'),
-              self.relationtype_lifecycle),
-            ("PlayerSeek", self.updated_position_cb),
-            ("PlayerStop", self.player_stop_cb),
-            ("PlayerChange", self.updated_player_cb),
-            ("ViewActivation", self.on_view_activation),
-            ( [ '%sDelete' % v for v in ('Annotation', 'Relation', 'View',
-                                         'AnnotationType', 'RelationType', 'Schema',
-                                         'Resource') ],
-              self.handle_element_delete),
-            ('MediaChange', media_changed),
+                ("PackageLoad", self.manage_package_load),
+                ("PackageActivate", self.manage_package_activate),
+                ("PackageEditEnd", lambda e, c: self.update_window_title()),
+                ("PackageSave", self.manage_package_save),
+                ( ('AnnotationCreate', 'AnnotationEditEnd',
+                   'AnnotationDelete', 'AnnotationActivate',
+                   'AnnotationDeactivate'),
+                  self.annotation_lifecycle ),
+                ( ('RelationCreate', 'RelationEditEnd',
+                   'RelationDelete'),
+                  self.relation_lifecycle ),
+                ( ('ViewCreate', 'ViewEditEnd', 'ViewDelete'),
+                  self.view_lifecycle ),
+                ( ('QueryCreate', 'QueryEditEnd', 'QueryDelete'),
+                  self.query_lifecycle),
+                ( ('ResourceCreate', 'ResourceEditEnd', 'ResourceDelete'),
+                  self.resource_lifecycle),
+                ( ('SchemaCreate', 'SchemaEditEnd', 'SchemaDelete'),
+                  self.schema_lifecycle),
+                ( ('AnnotationTypeCreate', 'AnnotationTypeEditEnd',
+                   'AnnotationTypeDelete'),
+                  self.annotationtype_lifecycle),
+                ( ('RelationTypeCreate', 'RelationTypeEditEnd',
+                   'RelationTypeDelete'),
+                  self.relationtype_lifecycle),
+                ("PlayerSeek", self.updated_position_cb),
+                ("PlayerStop", self.player_stop_cb),
+                ("PlayerChange", self.updated_player_cb),
+                ("ViewActivation", self.on_view_activation),
+                ( [ '%sDelete' % v for v in ('Annotation', 'Relation', 'View',
+                                             'AnnotationType', 'RelationType', 'Schema',
+                                             'Resource') ],
+                  self.handle_element_delete),
+                ('MediaChange', media_changed),
             ):
             if isinstance(events, str):
                 self.controller.event_handler.internal_rule (event=events,
@@ -1261,12 +1267,12 @@ class AdveneGUI(object):
             menu=Gtk.Menu()
 
             for (label, destination) in (
-                (_("Open this view..."), 'default'),
-                (_("...in its own window"), 'popup'),
-                (_("...embedded east of the video"), 'east'),
-                (_("...embedded west of the video"), 'west'),
-                (_("...embedded south of the video"), 'south'),
-                (_("...embedded at the right of the window"), 'fareast')):
+                    (_("Open this view..."), 'default'),
+                    (_("...in its own window"), 'popup'),
+                    (_("...embedded east of the video"), 'east'),
+                    (_("...embedded west of the video"), 'west'),
+                    (_("...embedded south of the video"), 'south'),
+                    (_("...embedded at the right of the window"), 'fareast')):
                 item = Gtk.MenuItem(label)
                 item.connect('activate', open_view, name, destination)
                 menu.append(item)
@@ -1294,29 +1300,29 @@ class AdveneGUI(object):
         hb=self.gui.adhoc_hbox
         item_index = 0
         for name, tip, pixmap in (
-            ('timeline', _('Timeline'), 'timeline.png'),
-            ('finder', _('Package finder'), 'finder.png'),
-            ('transcription', _('Transcription of annotations'), 'transcription.png'),
-            ('table', _('Annotation table'), 'table.png'),
+                ('timeline', _('Timeline'), 'timeline.png'),
+                ('finder', _('Package finder'), 'finder.png'),
+                ('transcription', _('Transcription of annotations'), 'transcription.png'),
+                ('table', _('Annotation table'), 'table.png'),
 
-            ('', '', ''),
-            ('transcribe', _('Note-taking editor'), 'transcribe.png'),
-            ('activebookmarks', _('Active bookmarks'), 'bookmarks.png'),
-            ('', '', ''),
+                ('', '', ''),
+                ('transcribe', _('Note-taking editor'), 'transcribe.png'),
+                ('activebookmarks', _('Active bookmarks'), 'bookmarks.png'),
+                ('', '', ''),
 
-            ('tagbag', _("Bag of tags"), 'tagbag.png'),
-            ('browser', _('TALES explorer'), 'browser.png'),
-            ('checker', _('Constraint checker'), 'checker.png'),
-            ('montage', _("Dynamic montage"), 'montage.png'),
-            ('videoplayer', _("Video player"), 'videoplayer.png'),
-            ('', '', ''),
+                ('tagbag', _("Bag of tags"), 'tagbag.png'),
+                ('browser', _('TALES explorer'), 'browser.png'),
+                ('checker', _('Constraint checker'), 'checker.png'),
+                ('montage', _("Dynamic montage"), 'montage.png'),
+                ('videoplayer', _("Video player"), 'videoplayer.png'),
+                ('', '', ''),
 
-            ('webbrowser', _('Open a comment view in the web browser'), 'web.png'),
-            ('comment', _("Create or open a comment view"), 'comment.png'),
-            ('', '', ''),
+                ('webbrowser', _('Open a comment view in the web browser'), 'web.png'),
+                ('comment', _("Create or open a comment view"), 'comment.png'),
+                ('', '', ''),
 
-            ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
-            ('editionhistory', _("Display edition history"), 'editionhistory.png'),
+                ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
+                ('editionhistory', _("Display edition history"), 'editionhistory.png'),
             ):
             if not name:
                 # Separator
@@ -1462,8 +1468,8 @@ class AdveneGUI(object):
         if res == Gtk.ResponseType.OK:
             col=d.get_color_selection().get_current_color()
             element.setMetaData(config.data.namespace, 'color', "string:#%04x%04x%04x" % (col.red,
-                                                                                           col.green,
-                                                                                           col.blue))
+                                                                                          col.green,
+                                                                                          col.blue))
             # Notify the change
             if isinstance(element, AnnotationType):
                 self.controller.notify('AnnotationTypeEditEnd', annotationtype=element)
@@ -2278,7 +2284,7 @@ class AdveneGUI(object):
         """Edit the element.
         """
         if self.edit_accumulator and (
-            isinstance(element, Annotation) or isinstance(element, Relation)):
+                isinstance(element, Annotation) or isinstance(element, Relation)):
             self.edit_accumulator.edit(element)
             return True
 
@@ -2447,8 +2453,8 @@ class AdveneGUI(object):
             return True
         l=[ helper.TitledElement(value=None, title=_("No active dynamic view")) ]
         l.extend( [ helper.TitledElement(value=i, title='%s %s %s' % (self.arrow_list[config.data.os],
-                                                                       self.controller.get_title(i),
-                                                                       self.arrow_list[config.data.os]))
+                                                                      self.controller.get_title(i),
+                                                                      self.arrow_list[config.data.os]))
                     for i in self.controller.get_stbv_list() ] )
         st, i = dialog.generate_list_model([ (i.value, i.title) for i in l ],
                                            active_element=self.controller.current_stbv)
@@ -2721,7 +2727,7 @@ class AdveneGUI(object):
                     if label is None:
                         label=self.controller.get_title(at)
             view = self.registered_adhoc_views[name](**kwargs)
-        elif name == 'webbrowser' or name == 'htmlview':
+        elif name in ('webbrowser', 'htmlview'):
             if destination is None and HTMLView._engine is not None:
                 # Embedded version.
                 view = HTMLView(controller=self.controller)
@@ -2835,12 +2841,12 @@ class AdveneGUI(object):
         """
         self.log (_("Package %(uri)s saved: %(annotations)s and %(relations)s.")
                   % {
-                'uri': self.controller.package.uri,
-                'annotations': helper.format_element_name('annotation',
-                                                          len(self.controller.package.annotations)),
-                'relations': helper.format_element_name('relation',
-                                                        len(self.controller.package.relations))
-                })
+                      'uri': self.controller.package.uri,
+                      'annotations': helper.format_element_name('annotation',
+                                                                len(self.controller.package.annotations)),
+                      'relations': helper.format_element_name('relation',
+                                                              len(self.controller.package.relations))
+                  })
         return True
 
     def manage_package_activate (self, context, parameters):
@@ -2874,12 +2880,12 @@ class AdveneGUI(object):
         p=context.evaluateValue('package')
         self.log (_("Package %(uri)s loaded: %(annotations)s and %(relations)s.")
                   % {
-                'uri': p.uri,
-                'annotations': helper.format_element_name('annotation',
-                                                          len(p.annotations)),
-                'relations': helper.format_element_name('relation',
-                                                        len(p.relations))
-                })
+                      'uri': p.uri,
+                      'annotations': helper.format_element_name('annotation',
+                                                                len(p.annotations)),
+                      'relations': helper.format_element_name('relation',
+                                                              len(p.relations))
+                  })
         if not p.uri.endswith('new_pkg'):
             Gtk.RecentManager.get_default().add_item(p.uri)
 
@@ -3063,7 +3069,7 @@ class AdveneGUI(object):
         except IndexError:
             at=None
 
-        class PackageWrapper(object):
+        class PackageWrapper:
             def __getattr__(self, name):
                 e = p.get_element_by_id(name)
                 if e is not None:
@@ -3226,7 +3232,7 @@ class AdveneGUI(object):
                     if c.tracers and config.data.preferences['record-actions']:
                         try:
                             fn = c.tracers[0].export()
-                            logger.info("trace exported to %s" % fn)
+                            logger.info("trace exported to %s", fn)
                         except Exception:
                             logger.error("error exporting trace", exc_info=True)
                     if config.data.preferences['package-auto-save'] == 'always':
@@ -3519,7 +3525,7 @@ class AdveneGUI(object):
             if p._modified:
                 t = self.controller.get_title(p)
                 response=dialog.yes_no_cancel_popup(title=_("Package %s modified") % t,
-                                                             text=_("The package %s has been modified but not saved.\nSave it now?") % t)
+                                                    text=_("The package %s has been modified but not saved.\nSave it now?") % t)
                 if response == Gtk.ResponseType.CANCEL:
                     return True
                 elif response == Gtk.ResponseType.YES:
@@ -3530,7 +3536,7 @@ class AdveneGUI(object):
                 if config.data.preferences['imagecache-save-on-exit'] == 'ask':
                     media=self.controller.get_default_media(package=p)
                     response=dialog.yes_no_cancel_popup(title=_("%s snapshots") % media,
-                                                             text=_("Do you want to save the snapshots for media %s?") % media)
+                                                        text=_("Do you want to save the snapshots for media %s?") % media)
                     if response == Gtk.ResponseType.CANCEL:
                         return True
                     elif response == Gtk.ResponseType.YES:
@@ -3780,7 +3786,7 @@ class AdveneGUI(object):
         p=self.controller.package
         if p._modified:
             response=dialog.yes_no_cancel_popup(title=_("Package modified"),
-                                         text=_("The package that you want to close has been modified but not saved.\nSave it now?"))
+                                                text=_("The package that you want to close has been modified but not saved.\nSave it now?"))
             if response == Gtk.ResponseType.CANCEL:
                 return True
             if response == Gtk.ResponseType.YES:
@@ -3845,8 +3851,8 @@ class AdveneGUI(object):
                         if p._modified ]
                 if modif:
                     if not dialog.message_dialog(
-                        _("You are trying to load a session file, but there are unsaved packages. Proceed anyway?"),
-                        icon=Gtk.MessageType.QUESTION):
+                            _("You are trying to load a session file, but there are unsaved packages. Proceed anyway?"),
+                            icon=Gtk.MessageType.QUESTION):
                         return True
 
             try:
@@ -3855,8 +3861,8 @@ class AdveneGUI(object):
                 Gtk.RecentManager.get_default().add_item(filename)
             except (OSError, IOError) as e:
                 dialog.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
-                        'filename': filename,
-                        'error': str(e)}, Gtk.MessageType.ERROR)
+                    'filename': filename,
+                    'error': str(e)}, Gtk.MessageType.ERROR)
             self.set_busy_cursor(False)
         return True
 
@@ -3890,7 +3896,7 @@ class AdveneGUI(object):
                 self.controller.save_package (alias=alias)
             except (OSError, IOError) as e:
                 dialog.message_dialog(_("Could not save the package: %s") % str(e),
-                                               Gtk.MessageType.ERROR)
+                                      Gtk.MessageType.ERROR)
         return True
 
     def on_save_as1_activate (self, button=None, package=None):
@@ -3903,10 +3909,10 @@ class AdveneGUI(object):
         else:
             d=None
         filename=dialog.get_filename(title=_("Save the package %s") % self.controller.get_title(package),
-                                              action=Gtk.FileChooserAction.SAVE,
-                                              button=Gtk.STOCK_SAVE,
-                                              default_dir=d,
-                                              filter='advene')
+                                     action=Gtk.FileChooserAction.SAVE,
+                                     button=Gtk.STOCK_SAVE,
+                                     default_dir=d,
+                                     filter='advene')
         if filename:
             (p, ext) = os.path.splitext(filename)
             if ext == '':
@@ -3916,7 +3922,7 @@ class AdveneGUI(object):
             if (package.resources and package.resources.children()
                 and ext.lower() != '.azp'):
                 ret=dialog.yes_no_cancel_popup(title=_("Invalid file extension"),
-                                                        text=_("Your package contains resources,\nthe filename (%s) should have a .azp extension.\nShould I put the correct extension?") % filename)
+                                               text=_("Your package contains resources,\nthe filename (%s) should have a .azp extension.\nShould I put the correct extension?") % filename)
                 if ret == Gtk.ResponseType.YES:
                     filename = p + '.azp'
                 elif ret == Gtk.ResponseType.NO:
@@ -3946,7 +3952,7 @@ class AdveneGUI(object):
                 self.controller.save_package(name=filename, alias=alias)
             except (OSError, IOError) as e:
                 dialog.message_dialog(_("Could not save the package: %s") % str(e),
-                                               Gtk.MessageType.ERROR)
+                                      Gtk.MessageType.ERROR)
         return True
 
     def on_save_session1_activate (self, button=None, data=None):
@@ -3957,10 +3963,10 @@ class AdveneGUI(object):
         else:
             d=None
         filename=dialog.get_filename(title=_("Save the session in..."),
-                                              action=Gtk.FileChooserAction.SAVE,
-                                              button=Gtk.STOCK_SAVE,
-                                              default_dir=d,
-                                              filter='session')
+                                     action=Gtk.FileChooserAction.SAVE,
+                                     button=Gtk.STOCK_SAVE,
+                                     default_dir=d,
+                                     filter='session')
         if filename:
             (p, ext) = os.path.splitext(filename)
             if ext == '':
@@ -3976,14 +3982,14 @@ class AdveneGUI(object):
         if (self.controller.get_default_media() is None
             or 'dvd' in self.controller.get_default_media()):
             if not dialog.message_dialog(
-                _("Do you confirm the creation of annotations matching the DVD chapters?"),
-                icon=Gtk.MessageType.QUESTION):
+                    _("Do you confirm the creation of annotations matching the DVD chapters?"),
+                    icon=Gtk.MessageType.QUESTION):
                 return True
             try:
                 i=advene.util.importer.get_importer('lsdvd', controller=self.controller)
             except Exception:
                 dialog.message_dialog(_("Cannot import DVD chapters. Did you install the lsdvd software?"),
-                                        icon=Gtk.MessageType.ERROR)
+                                      icon=Gtk.MessageType.ERROR)
                 return True
             i.package=self.controller.package
             i.process_file('lsdvd')
@@ -3991,7 +3997,7 @@ class AdveneGUI(object):
             self.controller.notify('PackageLoad', package=self.controller.package)
         else:
             dialog.message_dialog(_("The associated media is not a DVD."),
-                                           icon=Gtk.MessageType.ERROR)
+                                  icon=Gtk.MessageType.ERROR)
         return True
 
     def on_import_file1_activate (self, button=None, data=None):
@@ -4330,11 +4336,11 @@ Image cache information: %(imagecache)s
 
         ew.add_title(_("GUI"))
         ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"), OrderedDict((
-                (_("System default"), ''),
-                ("English", 'C'),
-                ("Esperanto", 'eo'),
-                ("Francais", 'fr_FR'),
-                )))
+            (_("System default"), ''),
+            ("English", 'C'),
+            ("Esperanto", 'eo'),
+            ("Francais", 'fr_FR'),
+        )))
         ew.add_checkbox(_("Record activity trace"), "record-actions", _("Record activity trace"))
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
         ew.add_checkbox(_("Prefer WYSIWYG"), "prefer-wysiwyg", _("Use WYSIWYG editors when possible (HTML, SVG)"))
@@ -4342,12 +4348,12 @@ Image cache information: %(imagecache)s
         ew.add_checkbox(_("Player control in edit popups"), 'player-shortcuts-in-edit-windows', _("Enable generic player controls in edit windows. This may be undesirable since it overloads some standard text-edition behaviours (esp. control-left/right)."))
         ew.add_option(_("Open popups"), 'popup-destination',
                       _("Where should we open adhoc views?"), OrderedDict((
-                (_("as a popup window"), 'popup'),
-                (_("embedded east of the video"), 'east'),
-                (_("embedded west of the video"), 'west'),
-                (_("embedded south of the video"), 'south'),
-                (_("embedded at the right of the window"), 'fareast'),
-                )))
+                          (_("as a popup window"), 'popup'),
+                          (_("embedded east of the video"), 'east'),
+                          (_("embedded west of the video"), 'west'),
+                          (_("embedded south of the video"), 'south'),
+                          (_("embedded at the right of the window"), 'fareast'),
+                      )))
 
         ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
                     -1, 20)
@@ -4364,34 +4370,34 @@ Image cache information: %(imagecache)s
         ew.add_checkbox(_("Weekly update check"), 'update-check', _("Weekly check for updates on the Advene website"))
         ew.add_option(_("On exit,"), 'imagecache-save-on-exit',
                       _("How to handle screenshots on exit"), OrderedDict((
-                (_("never save screenshots"), 'never'),
-                (_("always save screenshots"), 'always'),
-                (_("ask before saving screenshots"), 'ask'),
-                )))
+                          (_("never save screenshots"), 'never'),
+                          (_("always save screenshots"), 'always'),
+                          (_("ask before saving screenshots"), 'ask'),
+                      )))
         ew.add_option(_("Auto-save"), 'package-auto-save',
                       _("Data auto-save functionality"), OrderedDict((
-                (_("is desactivated"), 'never'),
-                (_("is done automatically"), 'always'),
-                (_("is done after confirmation"), 'ask'),
-                )))
+                          (_("is desactivated"), 'never'),
+                          (_("is done automatically"), 'always'),
+                          (_("is done after confirmation"), 'ask'),
+                      )))
         ew.add_spin(_("Auto-save interval (in s)"), 'package-auto-save-interval', _("Interval (in seconds) between package auto-saves"), 5, 60 * 60)
 
         ew.add_title(_("Workspace"))
 
         ew.add_option(_("On package saving,"), 'save-default-workspace',
                       _("Do you wish to save the default workspace with the package?"), OrderedDict((
-                (_("never save the current workspace"), 'never'),
-                (_("always save the current workspace"), 'always'),
-                (_("ask before saving the current workspace"), 'ask'),
-                )))
+                          (_("never save the current workspace"), 'never'),
+                          (_("always save the current workspace"), 'always'),
+                          (_("ask before saving the current workspace"), 'ask'),
+                      )))
         ew.add_checkbox(_("Auto-validation of edited elements"), 'apply-edited-elements-on-save', _("Automatically validate modified elements when saving the package."))
 
         ew.add_option(_("On package load,"), 'restore-default-workspace',
                       _("Do you wish to load the workspace saved with the package?"), OrderedDict((
-                (_("never load the saved workspace"), 'never'),
-                (_("always load the saved workspace"), 'always'),
-                (_("ask before loading the saved workspace"), 'ask'),
-                )))
+                          (_("never load the saved workspace"), 'never'),
+                          (_("always load the saved workspace"), 'always'),
+                          (_("ask before loading the saved workspace"), 'ask'),
+                      )))
 
         ew.add_title(_("Video Player"))
         ew.add_checkbox(_("Autostart"), 'player-autostart', _("Automatically start the player when loading a media file (either directly or through a package)"))
@@ -4433,14 +4439,14 @@ Image cache information: %(imagecache)s
 
         ew.add_title(_("Time-related"))
         ew.add_option(_("Time format"), 'timestamp-format', _("Format used to display timecodes"), OrderedDict( (
-                    ('HH:MM:SS.sss', '%H:%M:%.S'),
-                    ('HH:MM:SSfNN (frame number)', '%H:%M:%fS'),
-                    ('HH:MM:SS', '%H:%M:%S'),
-                    ('MM:SS.sss', '%M:%.S'),
-                    ('MM:SS', '%M:%S'),
-                    ('SS.sss', '%.S'),
-                    ('SS', '%S'),
-                    )) )
+            ('HH:MM:SS.sss', '%H:%M:%.S'),
+            ('HH:MM:SSfNN (frame number)', '%H:%M:%fS'),
+            ('HH:MM:SS', '%H:%M:%S'),
+            ('MM:SS.sss', '%M:%.S'),
+            ('MM:SS', '%M:%S'),
+            ('SS.sss', '%.S'),
+            ('SS', '%S'),
+        )) )
         fps = [ 10, 12, 24, 25, 40, 50, 60, 72 ]
         d = config.data.preferences['default-fps']
         if not d in fps:
@@ -4472,22 +4478,22 @@ Image cache information: %(imagecache)s
         ew.add_title(_("Text-To-Speech"))
         ew.add_option(_("TTS language"), 'tts-language',
                       _("What language settings should be used for text-to-speech"), OrderedDict((
-                (_("English"), 'en'),
-                (_("French"), 'fr'),
-                (_("Spanish"), 'es'),
+                          (_("English"), 'en'),
+                          (_("French"), 'fr'),
+                          (_("Spanish"), 'es'),
                 )))
         ew.add_entry(_("TTS Encoding"), 'tts-encoding',
-                      _("What encoding should be used to communicate with the TTS engine"), entries = [ 'utf8', 'utf16', 'latin1', 'cp1252' ] )
+                     _("What encoding should be used to communicate with the TTS engine"), entries = [ 'utf8', 'utf16', 'latin1', 'cp1252' ] )
         ew.add_option(_("TTS Engine"), 'tts-engine',
                       _("Which TTS engine should be used (modification requires restarting Advene to take into account)"), OrderedDict((
-                (_("Automatic"), 'auto'),
-                (_("eSpeak"), 'espeak'),
-                (_("Custom script with standard input"), 'custom'),
-                (_("Custom script with arguments"), 'customarg'),
-                (_("SAPI"), 'sapi'),
-                (_("MacOS X say"), 'macosx'),
-                (_("Generic (text output)"), 'generic'),
-                )))
+                          (_("Automatic"), 'auto'),
+                          (_("eSpeak"), 'espeak'),
+                          (_("Custom script with standard input"), 'custom'),
+                          (_("Custom script with arguments"), 'customarg'),
+                          (_("SAPI"), 'sapi'),
+                          (_("MacOS X say"), 'macosx'),
+                          (_("Generic (text output)"), 'generic'),
+                      )))
 
         res=ew.popup()
         if res:
@@ -4542,8 +4548,8 @@ Image cache information: %(imagecache)s
         try:
             d=self.controller.package.imagecache.save (id_)
             self.log(_("Imagecache saved to %s") % d)
-        except OSError as e:
-            self.log(_("Cannot save imagecache for %(media)s: %(e)s") % locals())
+        except OSError:
+            logger.error(_("Cannot save imagecache for %s"), media, exc_info=True)
         return True
 
     def on_reset_imagecache_activate (self, button=None, data=None):
@@ -4881,7 +4887,7 @@ Image cache information: %(imagecache)s
         w.should_continue = False
 
         def cb(val, msg):
-            if val > 0 and val <= 1.0:
+            if 0 <= val <= 1.0:
                 pb.set_fraction(val)
             if len(msg) > 80:
                 msg = msg[:36] + "(...)" + msg[-36:]
@@ -4961,7 +4967,9 @@ Image cache information: %(imagecache)s
                       if self.controller.get_snapshot(annotation=a).is_default)
         if missing:
             dialog.message_dialog(_("Updating %d snapshots") % len(missing), modal=False)
-            logger.info("Updating %d missing snapshots: %s" % (len(missing), ", ".join(helper.format_time_reference(t) for t in sorted(missing))))
+            logger.info("Updating %d missing snapshots: %s",
+                        len(missing),
+                        ", ".join(helper.format_time_reference(t) for t in sorted(missing)))
             for t in sorted(missing):
                 self.controller.player.async_snapshot(t)
         else:
@@ -4990,6 +4998,6 @@ if __name__ == '__main__':
     except Exception as e:
         e, v, tb = sys.exc_info()
         logger.error(config.data.version_string)
-        logger.error("Got exception %s. Stopping services..." % str(e))
+        logger.error("Got exception %s. Stopping services...", str(e))
         v.on_exit ()
         logger.error("*** Exception ***", exc_info=True)

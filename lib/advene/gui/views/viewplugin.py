@@ -205,4 +205,3 @@ class ViewPlugin(AdhocView):
         @type event: advene.rules.elements.Event
         """
         pass
-

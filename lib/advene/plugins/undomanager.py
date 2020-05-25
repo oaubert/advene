@@ -59,21 +59,21 @@ class UndoHistory:
         """Register to the appropriate events.
         """
         for (event, method) in (
-            ('EditSessionStart', self.element_edit_begin),
-            ('EditSessionEnd', self.element_edit_cancel),
-            ('ElementEditDestroy', self.element_edit_cancel),
+                ('EditSessionStart', self.element_edit_begin),
+                ('EditSessionEnd', self.element_edit_cancel),
+                ('ElementEditDestroy', self.element_edit_cancel),
 
-            ('AnnotationCreate', self.element_create),
-            ('AnnotationEditEnd', self.element_edit_end),
-            ('AnnotationDelete', self.element_delete),
+                ('AnnotationCreate', self.element_create),
+                ('AnnotationEditEnd', self.element_edit_end),
+                ('AnnotationDelete', self.element_delete),
 
-            ('ViewCreate', self.element_create),
-            ('ViewEditEnd', self.element_edit_end),
-            ('ViewDelete', self.element_delete),
+                ('ViewCreate', self.element_create),
+                ('ViewEditEnd', self.element_edit_end),
+                ('ViewDelete', self.element_delete),
 
-            ('QueryCreate', self.element_create),
-            ('QueryEditEnd', self.element_edit_end),
-            ('QueryDelete', self.element_delete),
+                ('QueryCreate', self.element_create),
+                ('QueryEditEnd', self.element_edit_end),
+                ('QueryDelete', self.element_delete),
 
             ):
             r=self.controller.event_handler.internal_rule(event=event, method=method)

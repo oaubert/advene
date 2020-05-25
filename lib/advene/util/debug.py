@@ -20,7 +20,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from collections import Mapping, Container
+from collections.abc import Mapping, Container
 import datetime
 try:
     import objgraph
@@ -32,14 +32,14 @@ from sys import getsizeof
 # We should use the logging API, but some packages (like objgraph)
 # take an open file as parameter, so let's accomodate this
 DEBUGFILENAME = '/tmp/advene-debug-%s.log' % datetime.datetime.now().isoformat()[:19]
-logger.warning("Logging additional debug information to %s" % DEBUGFILENAME)
+logger.warning("Logging additional debug information to %s", DEBUGFILENAME)
 DEBUGFILE = open(DEBUGFILENAME, 'w')
 
 def debug_log(*args):
     """Log information to a specific logfile.
     """
     DEBUGFILE.write("%s - %s\n" % (datetime.datetime.now().isoformat(),
-                                 " ".join(str(a) for a in args)))
+                                   " ".join(str(a) for a in args)))
 
 def deep_getsizeof(o, ids=None):
     """Find the memory footprint of a Python object
@@ -67,7 +67,7 @@ def deep_getsizeof(o, ids=None):
     r = getsizeof(o)
     ids.add(id(o))
 
-    if isinstance(o, str) or isinstance(o, bytes):
+    if isinstance(o, (str, bytes)):
         return r
 
     if isinstance(o, Mapping):
@@ -84,7 +84,7 @@ def log_global_memory_usage():
     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     if mem != last_mem:
         debug_log("Memory usage: %s" % mem)
-        logger.warning("Memory usage: %s" % mem)
+        logger.warning("Memory usage: %s", mem)
         last_mem = mem
 
 last_imagecache_size = None

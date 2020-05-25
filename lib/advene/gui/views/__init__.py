@@ -37,7 +37,7 @@ import advene.util.helper as helper
 
 import xml.etree.ElementTree as ET
 
-class AdhocView(object):
+class AdhocView:
     """Implementation of the generic parts of AdhocViews.
 
     For details about the API of adhoc views, see gui.views.viewplugin.
@@ -209,7 +209,7 @@ class AdhocView(object):
                     value=True
                 elif value == 'False':
                     value=False
-                elif isinstance(op, int) or isinstance(op, int):
+                elif isinstance(op, int):
                     value=int(value)
                 elif isinstance(op, float):
                     value=float(value)
@@ -279,7 +279,7 @@ class AdhocView(object):
                 elements = c.evaluateValue(source)
                 self.source = source
             except:
-                logger.error(_("Error in source evaluation %s") % source, exc_info=True)
+                logger.error(_("Error in source evaluation %s"), source, exc_info=True)
                 elements = []
         return elements
 
@@ -297,9 +297,9 @@ class AdhocView(object):
     def save_view(self, *p):
         title, ident=self.controller.package._idgenerator.new_from_title(self._label)
         title, ident=dialog.get_title_id(title=_("Saving %s" % self.view_name),
-                                                  element_title=title,
-                                                  element_id=ident,
-                                                  text=_("Enter a view name to save this parametered view"))
+                                         element_title=title,
+                                         element_id=ident,
+                                         text=_("Enter a view name to save this parametered view"))
         if ident is not None:
             if not re.match(r'^[a-zA-Z0-9_]+$', ident):
                 dialog.message_dialog(_("Error: the identifier %s contains invalid characters.") % ident)
@@ -343,9 +343,9 @@ class AdhocView(object):
         if ident is None:
             title, ident=self.controller.package._idgenerator.new_from_title("export " + self._label)
             title, ident=dialog.get_title_id(title=_("HTML export"),
-                                      text=_("Specify a name for the export view"),
-                                      element_title=title,
-                                      element_id=ident)
+                                             text=_("Specify a name for the export view"),
+                                             element_title=title,
+                                             element_id=ident)
             if ident is None:
                 return True
         if title is None:
@@ -395,10 +395,10 @@ class AdhocView(object):
 
         menu=Gtk.Menu()
         for (label, destination) in (
-            (_("...embedded east of the video"), 'east'),
-            (_("...embedded west of the video"), 'west'),
-            (_("...embedded south of the video"), 'south'),
-            (_("...embedded at the right of the window"), 'fareast')):
+                (_("...embedded east of the video"), 'east'),
+                (_("...embedded west of the video"), 'west'),
+                (_("...embedded south of the video"), 'south'),
+                (_("...embedded at the right of the window"), 'fareast')):
             item = Gtk.MenuItem(label, use_underline=False)
             item.connect('activate', relocate_view, self, destination)
             menu.append(item)
@@ -551,4 +551,4 @@ class AdhocViewParametersParser:
                 value=urllib.parse.unquote(e.attrib['value'])
                 self.arguments.append( (name, value) )
             else:
-                logger.warning("Unknown tag %s in AdhocViewParametersParser %s", e.tag)
+                logger.warning("Unknown tag %s in AdhocViewParametersParser", e.tag)

@@ -32,7 +32,7 @@ class AbstractFragment(viewable.Viewable.withClass('fragment')):
     # Static methods
     #
 
-    class filter(object):
+    class filter:
         """
         Return an iterator over all the _annotations_ having a fragment from this class.
         """
@@ -63,7 +63,7 @@ class AbstractFragment(viewable.Viewable.withClass('fragment')):
             """
             cls = self.__cls
             it = self.__iter
-            while (True):
+            while True:
                 a = next(it)
                 if isinstance (a.getFragment (), cls):
                     return a
@@ -86,7 +86,7 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled, metaclass=auto_pro
     #
 
     def __init__(self, element=None, parent=None,
-                       begin=None, end=None, duration=None):
+                 begin=None, end=None, duration=None):
         """Create a new ByteCount fragment, with a required begin
         value and facultative end or duration values"""
 
@@ -112,8 +112,8 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled, metaclass=auto_pro
     def __repr__(self):
         """Return a string representation of the object."""
         return "<%s.%s(%s,%s)>" % (self.__class__.__module__,
-                                  self.__class__.__name__,
-                                  self.getBegin (), self.getEnd ())
+                                   self.__class__.__name__,
+                                   self.getBegin (), self.getEnd ())
 
     def __str__(self):
         """Return a string representation of the NBE fragment"""
@@ -171,7 +171,7 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled, metaclass=auto_pro
             An unbounded fragment can be bounded to a DOM document
             (see x._bound).
         """
-        return (self._getDocument() is not None)
+        return self._getDocument() is not None
 
     def clone(self):
         """ Clone this fragment into a new unbounded fragment.
@@ -200,13 +200,13 @@ class ByteCountFragment(AbstractNbeFragment):
     # Static methods
     #
 
+    @staticmethod
     def getNamespaceUri():
         return adveneNS
-    getNamespaceUri = staticmethod(getNamespaceUri)
 
+    @staticmethod
     def getLocalName():
         return "bytecount-fragment"
-    getLocalName = staticmethod(getLocalName)
 
     #
     # Instance methods
@@ -225,13 +225,13 @@ class MillisecondFragment(AbstractNbeFragment):
     # Static methods
     #
 
+    @staticmethod
     def getNamespaceUri():
         return adveneNS
-    getNamespaceUri = staticmethod(getNamespaceUri)
 
+    @staticmethod
     def getLocalName():
         return "millisecond-fragment"
-    getLocalName = staticmethod(getLocalName)
 
     #
     # Instance methods
@@ -327,8 +327,9 @@ class _PseudoElement(dict):
     def __init__(self):
         dict.__init__({})
 
-    def _get_ownerDocument(self): return None
-    ownerDocument = property(_get_ownerDocument)
+    @property
+    def ownerDocument(self):
+        return None
 
     def getAttributeNS(self, namespaceURI, localName):
         return self[(namespaceURI, localName)]

@@ -152,7 +152,7 @@ class AnnotationType(AbstractType,
                 raise TypeError("incompatible parameter 'ident'")
             # mode 1 initialization
             AbstractType.__init__(self, parent, element,
-                            parent.getOwnerPackage().getAnnotationTypes.__func__)
+                                  parent.getOwnerPackage().getAnnotationTypes.__func__)
 
         else:
             # should be mode 2, checling parameter consistency
@@ -164,7 +164,7 @@ class AnnotationType(AbstractType,
             element = doc.createElementNS(self.getNamespaceUri(),
                                           self.getLocalName())
             AbstractType.__init__(self, parent, element,
-                            parent.getOwnerPackage().getAnnotationTypes.__func__)
+                                  parent.getOwnerPackage().getAnnotationTypes.__func__)
             self.setId(ident)
 
 
@@ -182,11 +182,13 @@ class AnnotationType(AbstractType,
 
     # dom dependant methods
 
-    def getNamespaceUri(): return adveneNS
-    getNamespaceUri = staticmethod(getNamespaceUri)
+    @staticmethod
+    def getNamespaceUri():
+        return adveneNS
 
-    def getLocalName(): return "annotation-type"
-    getLocalName = staticmethod(getLocalName)
+    @staticmethod
+    def getLocalName():
+        return "annotation-type"
 
     def getAnnotations (self):
         # FIXME: return an iterator instead of a full fledged list
@@ -216,7 +218,7 @@ class RelationType(AbstractType,
                 raise TypeError("incompatible parameter 'ident'")
             # mode 1 initialization
             AbstractType.__init__(self, parent, element,
-                            parent.getOwnerPackage().getRelationTypes.__func__)
+                                  parent.getOwnerPackage().getRelationTypes.__func__)
 
         else:
             # should be mode 2, checling parameter consistency
@@ -228,7 +230,7 @@ class RelationType(AbstractType,
             element = doc.createElementNS(self.getNamespaceUri(),
                                           self.getLocalName())
             AbstractType.__init__(self, parent, element,
-                            parent.getOwnerPackage().getRelationTypes.__func__)
+                                  parent.getOwnerPackage().getRelationTypes.__func__)
             self.setId(ident)
 
     def __str__(self):
@@ -237,16 +239,18 @@ class RelationType(AbstractType,
 
     # dom dependant methods
 
-    def getNamespaceUri(): return adveneNS
-    getNamespaceUri = staticmethod(getNamespaceUri)
+    @staticmethod
+    def getNamespaceUri():
+        return adveneNS
 
-    def getLocalName(): return "relation-type"
-    getLocalName = staticmethod(getLocalName)
+    @staticmethod
+    def getLocalName():
+        return "relation-type"
 
     def getRelations (self):
         # FIXME: return an iterator instead of a full fledged list
         return [ a for a in self.getRootPackage ().getRelations ()
-                   if a.getType() == self ]
+                 if a.getType() == self ]
 
     def getAnnotations (self):
         """Return a set of annotations that are part of relations of this type.
@@ -261,7 +265,9 @@ class RelationType(AbstractType,
         However, I do not have time to do better now, and Olivier needs it.
         Ideally, I should use a bundle here, but bundles do not accept multiple
         occurences of the same element, which can happen here.
-        So bundle.py should be improved, with a basic Bundle class behaving only like a list, and an advanced Bundle, behaving like both a list and a dict.
+        So bundle.py should be improved, with a basic Bundle class
+        behaving only like a list, and an advanced Bundle,
+        behaving like both a list and a dict.
         """
         e = self._getChild((adveneNS, "member-types"))
         if e is None:
@@ -373,11 +379,13 @@ class Schema(modeled.Importable,
 
     # dom dependant methods
 
-    def getNamespaceUri(): return adveneNS
-    getNamespaceUri = staticmethod(getNamespaceUri)
+    @staticmethod
+    def getNamespaceUri():
+        return adveneNS
 
-    def getLocalName(): return "schema"
-    getLocalName = staticmethod(getLocalName)
+    @staticmethod
+    def getLocalName():
+        return "schema"
 
     def getAnnotationTypes(self):
         """Return a collection of this schema's annotation types"""
@@ -404,6 +412,3 @@ class SchemaFactory (modeled.Factory.of (Schema)):
     FIXME
     """
     pass
-
-
-

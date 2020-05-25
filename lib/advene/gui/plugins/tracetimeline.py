@@ -2010,7 +2010,7 @@ class Inspector (Gtk.VBox):
     """Inspector component to display informations concerning items and actions in the timeline
     """
     def __init__ (self, controller=None):
-        GObject.GObject.__init__(self)
+        super().__init__()
         self.action=None
         self.item=None
         self.controller=controller

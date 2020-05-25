@@ -37,7 +37,7 @@ class CachedString:
         self._filename = filename
         self.contenttype = 'text/plain'
         self.is_default = False
-        ts = re.findall('(\d+).png$', str(filename))
+        ts = re.findall(r'(\d+).png$', str(filename))
         if ts:
             self.timestamp = int(ts[0])
         else:
@@ -72,7 +72,7 @@ class TypedString(bytes):
     def __bytes__(self):
         return self
 
-class ImageCache(object):
+class ImageCache:
     """ImageCache class.
 
     It interacts with the player to return annotation snapshots. It approximates

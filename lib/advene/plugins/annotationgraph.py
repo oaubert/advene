@@ -42,6 +42,7 @@ def tag(n):
 class AnnotationGraphImporter(GenericImporter):
     name = _("AnnotationGraph importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -52,7 +53,6 @@ class AnnotationGraphImporter(GenericImporter):
         elif fname.endswith('.xml'):
             return 30
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
         tree=ET.parse(filename)

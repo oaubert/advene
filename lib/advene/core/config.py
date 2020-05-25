@@ -69,7 +69,7 @@ class JSONEncoder(json.JSONEncoder):
             return str(o)
         return json.JSONEncoder.default(self, o)
 
-class Config(object):
+class Config:
     """Configuration information, platform specific.
 
     It is possible to override the configuration variables in a config
@@ -399,25 +399,25 @@ class Config(object):
         self.drag_type = {}
         self.target_entry = {}
         for name, typ, mime in (
-            ('text-plain',           0, 'text/plain'),
-            ('TEXT',                 1, 'TEXT'),
-            ('STRING',               2, 'UTF8_STRING'),
-            ('annotation',          42, None),
-            ('rule',                43, None),
-            ('view',                44, None),
-            ('schema',              45, None),
-            ('annotation-type',     46, None),
-            ('relation-type',       47, None),
-            ('relation',            48, None),
-            ('adhoc-view',          49, 'application/x-advene-adhoc-view'),
-            ('annotation-resize',   50, None),
-            ('timestamp',           51, 'application/x-advene-timestamp'),
-            ('tag',                 52, None),
-            ('color',               53, 'application/x-color'),
-            ('adhoc-view-instance', 54, 'application/x-advene-adhoc-view-instance'),
-            ('bookmark',            55, 'application/x-advene-bookmark'),
-            ('query',               56, None),
-            ('uri-list',            80, 'text/uri-list'),
+                ('text-plain',           0, 'text/plain'),
+                ('TEXT',                 1, 'TEXT'),
+                ('STRING',               2, 'UTF8_STRING'),
+                ('annotation',          42, None),
+                ('rule',                43, None),
+                ('view',                44, None),
+                ('schema',              45, None),
+                ('annotation-type',     46, None),
+                ('relation-type',       47, None),
+                ('relation',            48, None),
+                ('adhoc-view',          49, 'application/x-advene-adhoc-view'),
+                ('annotation-resize',   50, None),
+                ('timestamp',           51, 'application/x-advene-timestamp'),
+                ('tag',                 52, None),
+                ('color',               53, 'application/x-color'),
+                ('adhoc-view-instance', 54, 'application/x-advene-adhoc-view-instance'),
+                ('bookmark',            55, 'application/x-advene-bookmark'),
+                ('query',               56, None),
+                ('uri-list',            80, 'text/uri-list'),
             ):
             self.target_type[name] = typ
             if mime is None:
@@ -552,8 +552,8 @@ class Config(object):
                             help="Webserver port number (default 1234).")
 
         parser.add_argument("-m", "--webserver-mode", dest="mode", action="store",
-                          type=int, default=None, metavar="WEBSERVER_MODE",
-                          help="0: deactivated ; 1: threaded mode.")
+                            type=int, default=None, metavar="WEBSERVER_MODE",
+                            help="0: deactivated ; 1: threaded mode.")
 
         parser.add_argument("-f", "--filter",
                             dest="filter",
@@ -598,7 +598,7 @@ class Config(object):
         # have SVG enabled. If they choose to disable it
         # beforehand through Edit/Preferences, the setting will be
         # respected.
-        if not 'forced-svg' in self.player:
+        if 'forced-svg' not in self.player:
             self.player['svg']=True
             self.player['forced-svg']=True
         return True
@@ -704,7 +704,7 @@ class Config(object):
         if self.os == 'win32':
             dirname = h / 'advene3'
         elif self.os == 'darwin':
-            dirname = h / 'Library' / 'Preferences' / 'Advene3',
+            dirname = h / 'Library' / 'Preferences' / 'Advene3'
         else:
             dirname = h / '.config' / 'advene'
 
@@ -829,7 +829,7 @@ class Config(object):
         @return: an absolute pathname
         @rtype: string
         """
-        if isinstance(filename, list) or isinstance(filename, tuple):
+        if isinstance(filename, (list, tuple)):
             filename  = Path(*filename)
         f = self.path[category] / filename
         if as_uri:

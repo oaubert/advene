@@ -33,291 +33,271 @@ def register(controller=None):
     ac=DefaultActionsRepository(controller)
 
     controller.register_action(RegisteredAction(
-            name="Message",
-            method=ac.Message,
-            description=_("Display a message"),
-            parameters={'message': _("Message to display")},
-            defaults={'message': 'annotation/content/data'},
-            predefined={'message': (
-                    ( 'annotation/content/data', _("The annotation content") ),
+        name="Message",
+        method=ac.Message,
+        description=_("Display a message"),
+        parameters={'message': _("Message to display")},
+        defaults={'message': 'annotation/content/data'},
+        predefined={'message': (
+            ( 'annotation/content/data', _("The annotation content") ),
+        )},
+        category='gui',
+    ))
+    controller.register_action(RegisteredAction(
+        name="PlayerStart",
+        method=ac.PlayerStart,
+        description=_("Start the player"),
+        parameters={'position': _("Start position (in ms)")},
+        defaults={'position': 'string:0'},
+        predefined={'position': (
+            ( 'string:0', _("The movie start") ),
+            ( 'annotation/fragment/begin', _("The annotation begin") ),
+            ( 'annotation/fragment/end', _("The annotation end") ),
+        )},
+        category='player',
+    ))
+
+    controller.register_action(RegisteredAction(
+        name="PlayerGoto",
+        method=ac.PlayerGoto,
+        description=_("Go to the given position"),
+        parameters={'position': _("Goto position (in ms)")},
+        defaults={'position': 'annotation/fragment/begin'},
+        predefined=ac.PlayerGoto_predefined,
+        category='player',
+    ))
+
+    controller.register_action(RegisteredAction(
+        name="PlayerStop",
+        method=ac.PlayerStop,
+        description=_("Stop the player"),
+        category='player',
+    ))
+
+    controller.register_action(RegisteredAction(
+        name="PlayerPause",
+        method=ac.PlayerPause,
+        description=_("Pause the player"),
+        category='player',
+    ))
+
+    controller.register_action(RegisteredAction(
+        name="PlayerResume",
+        method=ac.PlayerResume,
+        description=_("Resume the player"),
+        category='player',
+    ))
+
+    controller.register_action(RegisteredAction(
+        name="Snapshot",
+        method=ac.Snapshot,
+        description=_("Take a snapshot"),
+        category='expert',
+    ))
+    controller.register_action(RegisteredAction(
+        name="Caption",
+        method=ac.Caption,
+        description=_("Display a caption"),
+        parameters={'message': _("Message to display"),
+                    'duration': _("Duration of the caption")},
+        defaults={'message': 'annotation/content/data',
+                  'duration': 'annotation/fragment/duration'},
+        predefined={'message': (
+            ( 'annotation/content/data', _("The annotation content") ),
+        ),
+                    'duration': (
+                        ( 'string:1000', _("1 second") ),
+                        ( 'annotation/fragment/duration',_("The annotation duration") )
                     )},
-            category='gui',
-            )
-                               )
+        category='image',
+    ))
     controller.register_action(RegisteredAction(
-            name="PlayerStart",
-            method=ac.PlayerStart,
-            description=_("Start the player"),
-            parameters={'position': _("Start position (in ms)")},
-            defaults={'position': 'string:0'},
-            predefined={'position': (
-                    ( 'string:0', _("The movie start") ),
-                    ( 'annotation/fragment/begin', _("The annotation begin") ),
-                    ( 'annotation/fragment/end', _("The annotation end") ),
+        name="AnnotationCaption",
+        method=ac.AnnotationCaption,
+        description=_("Caption the annotation"),
+        parameters={'message': _("Message to display")},
+        defaults={'message': 'annotation/content/data'},
+        predefined={'message': (
+            ( 'annotation/content/data', _("The annotation content") ),
+        )},
+        category='image',
+    ))
+    controller.register_action(RegisteredAction(
+        name="DisplayMarker",
+        method=ac.DisplayMarker,
+        description=_("Display a graphical shape"),
+        parameters={'shape': _("Shape (square, circle, triangle)"),
+                    'color': _("Color"),
+                    'x': _("x-position (percentage of screen)"),
+                    'y': _("y-position (percentage of screen)"),
+                    'size': _("Size (arbitrary units)"),
+                    'duration': _("Duration of the display in ms")},
+        defaults={'shape': 'string:circle',
+                  'color': 'string:red',
+                  'x': 'string:10',
+                  'y': 'string:10',
+                  'size': 'string:5',
+                  'duration': 'annotation/fragment/duration'},
+        predefined={'shape': (
+            ( 'string:square', _("A square") ),
+            ( 'string:circle', _("A circle") ),
+            ( 'string:triangle', _("A triangle") ),
+        ),
+                    'color': (
+                        ( 'string:white', _('White') ),
+                        ( 'string:black', _('Black') ),
+                        ( 'string:red', _('Red') ),
+                        ( 'string:green', _('Green') ),
+                        ( 'string:blue', _('Blue') ),
+                        ( 'string:yellow', _('Yellow') ),
+                    ),
+                    'x': (
+                        ( 'string:5', _('At the top of the screen') ),
+                        ( 'string:50', _('In the middle of the screen' ) ),
+                        ( 'string:95', _('At the bottom of the screen') ),
+                    ),
+                    'y': (
+                        ( 'string:5', _('At the left of the screen') ),
+                        ( 'string:50', _('In the middle of the screen') ),
+                    ),
+                    'size': (
+                        ( 'string:2', _("Small") ),
+                        ( 'string:4', _("Normal") ),
+                        ( 'string:10', _("Large") ),
+                    ),
+                    'duration': (
+                        ( 'string:1000', _("1 second") ),
+                        ( 'annotation/fragment/duration', _("The annotation duration") )
                     )},
-            category='player',
-            )
-                               )
+        category='image',
+    ))
+    controller.register_action(RegisteredAction(
+        name="AnnotationMute",
+        method=ac.AnnotationMute,
+        description=_("Zero the volume during the annotation"),
+        category='player',
+    ))
+    controller.register_action(RegisteredAction(
+        name="SoundOff",
+        method=ac.SoundOff,
+        description=_("Zero the volume"),
+        category='player',
+    ))
+    controller.register_action(RegisteredAction(
+        name="SoundOn",
+        method=ac.SoundOn,
+        description=_("Restore the volume"),
+        category='player',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="PlayerGoto",
-            method=ac.PlayerGoto,
-            description=_("Go to the given position"),
-            parameters={'position': _("Goto position (in ms)")},
-            defaults={'position': 'annotation/fragment/begin'},
-            predefined=ac.PlayerGoto_predefined,
-            category='player',
-            )
-                               )
+        name="ActivateSTBV",
+        method=ac.ActivateSTBV,
+        description=_("Activate a STBV"),
+        parameters={'viewid': _("STBV id")},
+        defaults={'viewid': 'string:stbv_id'},
+        predefined=ac.ActivateSTBV_predefined,
+        category='gui',
+    ))
     controller.register_action(RegisteredAction(
-            name="PlayerStop",
-            method=ac.PlayerStop,
-            description=_("Stop the player"),
-            category='player',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="PlayerPause",
-            method=ac.PlayerPause,
-            description=_("Pause the player"),
-            category='player',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="PlayerResume",
-            method=ac.PlayerResume,
-            description=_("Resume the player"),
-            category='player',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="Snapshot",
-            method=ac.Snapshot,
-            description=_("Take a snapshot"),
-            category='expert',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="Caption",
-            method=ac.Caption,
-            description=_("Display a caption"),
-            parameters={'message': _("Message to display"),
-                        'duration': _("Duration of the caption")},
-            defaults={'message': 'annotation/content/data',
-                      'duration': 'annotation/fragment/duration'},
-            predefined={'message': (
-                    ( 'annotation/content/data', _("The annotation content") ),
-                    ),
-                        'duration': (
-                    ( 'string:1000', _("1 second") ),
-                    ( 'annotation/fragment/duration',_("The annotation duration") )
-                    )},
-            category='image',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="AnnotationCaption",
-            method=ac.AnnotationCaption,
-            description=_("Caption the annotation"),
-            parameters={'message': _("Message to display")},
-            defaults={'message': 'annotation/content/data'},
-            predefined={'message': (
-                    ( 'annotation/content/data', _("The annotation content") ),
-                    )},
-            category='image',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="DisplayMarker",
-            method=ac.DisplayMarker,
-            description=_("Display a graphical shape"),
-            parameters={'shape': _("Shape (square, circle, triangle)"),
-                        'color': _("Color"),
-                        'x': _("x-position (percentage of screen)"),
-                        'y': _("y-position (percentage of screen)"),
-                        'size': _("Size (arbitrary units)"),
-                        'duration': _("Duration of the display in ms")},
-            defaults={'shape': 'string:circle',
-                      'color': 'string:red',
-                      'x': 'string:10',
-                      'y': 'string:10',
-                      'size': 'string:5',
-                      'duration': 'annotation/fragment/duration'},
-            predefined={'shape': (
-                    ( 'string:square', _("A square") ),
-                    ( 'string:circle', _("A circle") ),
-                    ( 'string:triangle', _("A triangle") ),
-                    ),
-                        'color': (
-                    ( 'string:white', _('White') ),
-                    ( 'string:black', _('Black') ),
-                    ( 'string:red', _('Red') ),
-                    ( 'string:green', _('Green') ),
-                    ( 'string:blue', _('Blue') ),
-                    ( 'string:yellow', _('Yellow') ),
-                    ),
-                        'x': (
-                    ( 'string:5', _('At the top of the screen') ),
-                    ( 'string:50', _('In the middle of the screen' ) ),
-                    ( 'string:95', _('At the bottom of the screen') ),
-                    ),
-                        'y': (
-                    ( 'string:5', _('At the left of the screen') ),
-                    ( 'string:50', _('In the middle of the screen') ),
-                    ),
-                        'size': (
-                    ( 'string:2', _("Small") ),
-                    ( 'string:4', _("Normal") ),
-                    ( 'string:10', _("Large") ),
-                    ),
-                        'duration': (
-                    ( 'string:1000', _("1 second") ),
-                    ( 'annotation/fragment/duration', _("The annotation duration") )
-                    )},
-            category='image',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="AnnotationMute",
-            method=ac.AnnotationMute,
-            description=_("Zero the volume during the annotation"),
-            category='player',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="SoundOff",
-            method=ac.SoundOff,
-            description=_("Zero the volume"),
-            category='player',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="SoundOn",
-            method=ac.SoundOn,
-            description=_("Restore the volume"),
-            category='player',
-            )
-                               )
+        name="SendUserEvent",
+        method=ac.SendUserEvent,
+        description=_("Send a user event"),
+        parameters={'identifier': _("Identifier"),
+                    'delay': _("Delay in ms before sending the event.")},
+        defaults={'identifier': 'string:name',
+                  'delay': 'string:2000'},
+        category='expert',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="ActivateSTBV",
-            method=ac.ActivateSTBV,
-            description=_("Activate a STBV"),
-            parameters={'viewid': _("STBV id")},
-            defaults={'viewid': 'string:stbv_id'},
-            predefined=ac.ActivateSTBV_predefined,
-            category='gui',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="SendUserEvent",
-            method=ac.SendUserEvent,
-            description=_("Send a user event"),
-            parameters={'identifier': _("Identifier"),
-                        'delay': _("Delay in ms before sending the event.")},
-            defaults={'identifier': 'string:name',
-                      'delay': 'string:2000'},
-            category='expert',
-            )
-                               )
+        name="OpenURL",
+        method=ac.OpenURL,
+        description=_("Open a URL in the web browser"),
+        parameters={'url': _("URL")},
+        defaults={'url': 'string:http://advene.org/'},
+        category='external',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="OpenURL",
-            method=ac.OpenURL,
-            description=_("Open a URL in the web browser"),
-            parameters={'url': _("URL")},
-            defaults={'url': 'string:http://advene.org/'},
-            category='external',
-            )
-                               )
+        name="OpenStaticView",
+        method=ac.OpenStaticView,
+        description=_("Open a static view"),
+        parameters={'viewid': _("View")},
+        defaults={'viewid': 'string:Specify a view here'},
+        predefined=ac.OpenStaticView_predefined,
+        category='gui',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="OpenStaticView",
-            method=ac.OpenStaticView,
-            description=_("Open a static view"),
-            parameters={'viewid': _("View")},
-            defaults={'viewid': 'string:Specify a view here'},
-            predefined=ac.OpenStaticView_predefined,
-            category='gui',
-            )
-                               )
+        name="SetVolume",
+        method=ac.SetVolume,
+        description=_("Set the audio volume"),
+        parameters={'volume': _("Volume level (from 0 to 100)")},
+        defaults={'volume': 'string:50'},
+        category='player',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="SetVolume",
-            method=ac.SetVolume,
-            description=_("Set the audio volume"),
-            parameters={'volume': _("Volume level (from 0 to 100)")},
-            defaults={'volume': 'string:50'},
-            category='player',
-            )
-                               )
+        name="SetRate",
+        method=ac.SetRate,
+        description=_("Set the playing rate"),
+        parameters={'rate': _("Rate (100: normal rate, 200: twice slower)")},
+        defaults={'rate': 'string:100'},
+        category='player',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="SetRate",
-            method=ac.SetRate,
-            description=_("Set the playing rate"),
-            parameters={'rate': _("Rate (100: normal rate, 200: twice slower)")},
-            defaults={'rate': 'string:100'},
-            category='player',
-            )
-                               )
+        name="PlaySoundClip",
+        method=ac.PlaySoundClip,
+        description=_("Play a sound resource"),
+        parameters={'clip': _("Clip id"),
+                    'volume': _("Volume (0..100)"),
+                    'balance': _("Left-right balance: -1 -> full left, 0 -> center, 1 -> full right") },
+        defaults={'clip': 'string:Please select a sound by clicking on the arrow. The soundclips are located in the soundclips/ resource folder.',
+                  'volume': 'string:100',
+                  'balance': 'string:0' },
+        predefined=ac.PlaySoundClip_predefined,
+        category='sound',
+    ))
+    controller.register_action(RegisteredAction(
+        name="PlaySound",
+        method=ac.PlaySound,
+        description=_("Play a sound file"),
+        parameters={'filename': _("Sound filename"),
+                    'volume': _("Volume (0..100)"),
+                    'balance': _("Left-right balance: -1 -> full left, 0 -> center, 1 -> full right") },
+        defaults={'filename': 'string:test.wav',
+                  'volume': 'string:100',
+                  'balance': 'string:0' },
+        category='sound',
+    ))
+    controller.register_action(RegisteredAction(
+        name="SetState",
+        method=ac.SetState,
+        description=_("Set a state variable"),
+        parameters={'name': _("State variable name"),
+                    'value': _("State value") },
+        defaults={'name': 'string:foo',
+                  'value': 'string:0' },
+        category='state',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="PlaySoundClip",
-            method=ac.PlaySoundClip,
-            description=_("Play a sound resource"),
-            parameters={'clip': _("Clip id"),
-                        'volume': _("Volume (0..100)"),
-                        'balance': _("Left-right balance: -1 -> full left, 0 -> center, 1 -> full right") },
-            defaults={'clip': 'string:Please select a sound by clicking on the arrow. The soundclips are located in the soundclips/ resource folder.',
-                      'volume': 'string:100',
-                      'balance': 'string:0' },
-            predefined=ac.PlaySoundClip_predefined,
-            category='sound',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="PlaySound",
-            method=ac.PlaySound,
-            description=_("Play a sound file"),
-            parameters={'filename': _("Sound filename"),
-                        'volume': _("Volume (0..100)"),
-                        'balance': _("Left-right balance: -1 -> full left, 0 -> center, 1 -> full right") },
-            defaults={'filename': 'string:test.wav',
-                      'volume': 'string:100',
-                      'balance': 'string:0' },
-            category='sound',
-            )
-                               )
-    controller.register_action(RegisteredAction(
-            name="SetState",
-            method=ac.SetState,
-            description=_("Set a state variable"),
-            parameters={'name': _("State variable name"),
-                        'value': _("State value") },
-            defaults={'name': 'string:foo',
-                      'value': 'string:0' },
-            category='state',
-            )
-                               )
+        name="IncrState",
+        method=ac.IncrState,
+        description=_("Increment a state variable"),
+        parameters={'name': _("State variable name")},
+        defaults={'name': 'string:foo'},
+        category='state',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="IncrState",
-            method=ac.IncrState,
-            description=_("Increment a state variable"),
-            parameters={'name': _("State variable name")},
-            defaults={'name': 'string:foo'},
-            category='state',
-            )
-                               )
-
-    controller.register_action(RegisteredAction(
-            name="ClearState",
-            method=ac.ClearState,
-            description=_("Clear all state variables"),
-            category='state',
-            )
-                               )
+        name="ClearState",
+        method=ac.ClearState,
+        description=_("Clear all state variables"),
+        category='state',
+    ))
 
 class DefaultActionsRepository:
     def __init__(self, controller=None):
@@ -639,7 +619,7 @@ class DefaultActionsRepository:
         The parameter is the name of a Resource that is stored in the
         'soundclips' resource folder in the package.
         """
-        if not ('soundclips' in self.controller.package.resources):
+        if 'soundclips' not in self.controller.package.resources:
             logger.error(_("No 'soundclips' resource folder in the package"))
             return True
         clip = self.parse_parameter(context, parameters, 'clip', None)
@@ -658,7 +638,7 @@ class DefaultActionsRepository:
     def PlaySoundClip_predefined(self, controller):
         """Return the predefined values.
         """
-        if not ('soundclips' in self.controller.package.resources):
+        if 'soundclips' not in self.controller.package.resources:
             predef = []
         else:
             predef = [ ('string:%s' % res.id, res.id)
@@ -724,4 +704,3 @@ class DefaultActionsRepository:
         for n in s:
             s[n]=0
         return True
-

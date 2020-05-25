@@ -135,7 +135,7 @@ def get_importer(fname, **kw):
         i=valid[0](**kw)
     return i
 
-class GenericImporter(object):
+class GenericImporter:
     """Generic importer class
     @ivar statistics: Dictionary holding the creation statistics
     @type statistics: dict
@@ -200,13 +200,13 @@ class GenericImporter(object):
                                      action="store", type="int", dest="offset", default=0,
                                      help=_("Specify the offset in ms"))
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
         100 is for the best match (specific extension), 0 is for no match at all.
         """
         return 0
-    can_handle=staticmethod(can_handle)
 
     def progress(self, value=None, label=None):
         """Display progress information and notify cancel.
@@ -605,10 +605,10 @@ class ExternalAppImporter(GenericImporter):
         """
         # Terminate the process if necessary
         if self.process:
-           try:
-              self.process.terminate()
-           except:
-              logger.warning("Cannot terminate application", exc_info=True)
+            try:
+                self.process.terminate()
+            except:
+                logger.warning("Cannot terminate application", exc_info=True)
         self.process = None
 
         for r in self.temporary_resources:

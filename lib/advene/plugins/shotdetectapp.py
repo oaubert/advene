@@ -58,6 +58,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
                                      action="store", type="int", dest="sensitivity", default=self.sensitivity,
                                      help=_("Sensitivity of the algorithm. It should typically be between 50 and 80. If too many shots are detected, try to increase its value."))
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -67,7 +68,6 @@ class ShotdetectAppImporter(ExternalAppImporter):
         if ext in config.data.video_extensions:
             return 80
         return 0
-    can_handle=staticmethod(can_handle)
 
     def app_setup(self, filename, end_callback):
         """Setup various attributes/parameters.
@@ -108,8 +108,8 @@ class ShotdetectAppImporter(ExternalAppImporter):
         This method should yield dictionaries containing data (see
         GenericImporter for details).
         """
-        shot_re=re.compile('Shot log\s+::\s+(.+)')
-        exp_re = re.compile('(\d*\.\d*)e\+(\d+)')
+        shot_re=re.compile(r'Shot log\s+::\s+(.+)')
+        exp_re = re.compile(r'(\d*\.\d*)e\+(\d+)')
 
         num = 1
         begin = 0
@@ -145,7 +145,7 @@ class ShotdetectAppImporter(ExternalAppImporter):
                 if not self.progress(prg, _("Detected shot #%(num)d at %(pos)s ") % {
                         'num': num,
                         'pos': helper.format_time_reference(ts)
-                        }):
+                }):
                     break
         # Generate last shot
         yield {

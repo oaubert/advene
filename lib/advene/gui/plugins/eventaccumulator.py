@@ -712,4 +712,3 @@ class EventAccumulator(AdhocView):
 #       des moyens d'actions depuis les events
 #       filtrage pre et post visu
 #       recherche dans la trace
-

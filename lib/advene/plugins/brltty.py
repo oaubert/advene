@@ -81,18 +81,18 @@ def register(controller=None):
 
     # Register the Braille action even if the API is not available.
     controller.register_action(RegisteredAction(
-            name="Braille",
-            method=method,
-            description=_("Display a message in Braille"),
-            parameters={'message': _("Message to display.")},
-            defaults={'message': 'annotation/content/data'},
-            predefined={'message': (
-                    ( 'annotation/content/data', _("The annotation content") ),
-                    )},
-            category='external',
-            ))
+        name="Braille",
+        method=method,
+        description=_("Display a message in Braille"),
+        parameters={'message': _("Message to display.")},
+        defaults={'message': 'annotation/content/data'},
+        predefined={'message': (
+            ( 'annotation/content/data', _("The annotation content") ),
+        )},
+        category='external',
+    ))
 
-class InputRequest(object):
+class InputRequest:
     def __init__(self, cursor):
         self.cursor=str(cursor)
 
@@ -147,7 +147,7 @@ class BrlEngine:
         if k is None:
             return True
         #command=self.brlconnection.expandKey(k)['command']
-        if k == brlapi.KEY_SYM_RIGHT or k == ALVA_LPAD_RIGHT or k == ALVA_MPAD_BUTTON4:
+        if k in (brlapi.KEY_SYM_RIGHT, ALVA_LPAD_RIGHT, ALVA_MPAD_BUTTON4):
             if self.currenttype == 'scroll':
                 i = self.char_index + self.brlconnection.displaySize[0]
                 if i <= len(self.current_message):
@@ -162,7 +162,7 @@ class BrlEngine:
                    if an[0].type == self.currenttype ]
                 if l:
                     self.controller.queue_action(self.controller.update_status, 'seek', l[0][1])
-        elif k == brlapi.KEY_SYM_LEFT or k == ALVA_LPAD_LEFT or k == ALVA_MPAD_BUTTON1:
+        elif k in(brlapi.KEY_SYM_LEFT, ALVA_LPAD_LEFT, ALVA_MPAD_BUTTON1):
             if self.currenttype == 'scroll':
                 if self.char_index >= 0:
                     i = self.char_index - self.brlconnection.displaySize[0]
@@ -178,7 +178,7 @@ class BrlEngine:
                 l.sort(key=lambda a: a.fragment.begin, reverse=True)
                 if l:
                     self.controller.queue_action(self.controller.update_status, 'seek', l[0].fragment.begin)
-        elif k == brlapi.KEY_SYM_UP or k == brlapi.KEY_SYM_DOWN or k == ALVA_LPAD_UP or k == ALVA_LPAD_DOWN:
+        elif k in (brlapi.KEY_SYM_UP, brlapi.KEY_SYM_DOWN, ALVA_LPAD_UP, ALVA_LPAD_DOWN):
             types=list( self.controller.package.annotationTypes )
             types.sort(key=lambda at: at.title or at.id)
             types.insert(0, 'scroll' )
@@ -186,15 +186,15 @@ class BrlEngine:
             try:
                 i=types.index(self.currenttype)
             except ValueError:
-                if k == brlapi.KEY_SYM_UP or k == ALVA_LPAD_UP:
+                if k in (brlapi.KEY_SYM_UP, ALVA_LPAD_UP):
                     # So that i-1 => last item
                     i=0
-                elif k == brlapi.KEY_SYM_DOWN or k == ALVA_LPAD_DOWN:
+                elif k in (brlapi.KEY_SYM_DOWN, ALVA_LPAD_DOWN):
                     # So that i+1 => first item
                     i=-1
-            if k == brlapi.KEY_SYM_UP or k == ALVA_LPAD_UP:
+            if k in (brlapi.KEY_SYM_UP, ALVA_LPAD_UP):
                 i = i - 1
-            elif k == brlapi.KEY_SYM_DOWN or k == ALVA_LPAD_DOWN:
+            elif k in (brlapi.KEY_SYM_DOWN, ALVA_LPAD_DOWN):
                 i = i + 1
             try:
                 self.currenttype = types[i]
@@ -209,10 +209,10 @@ class BrlEngine:
                 self.brldisplay('Nav. ' + (self.currenttype.title or self.currenttype.id))
             else:
                 self.brldisplay('Error in navigation mode')
-        elif k == brlapi.KEY_SYM_DELETE or k == ALVA_LPAD_RIGHTRIGHT:
+        elif k in (brlapi.KEY_SYM_DELETE, ALVA_LPAD_RIGHTRIGHT):
             # Play/pause
             self.controller.update_status("pause")
-        elif k == brlapi.KEY_SYM_INSERT or k == ALVA_LPAD_LEFTLEFT:
+        elif k in (brlapi.KEY_SYM_INSERT, ALVA_LPAD_LEFTLEFT):
             # Insert a bookmark
             self.controller.gui.create_bookmark(self.controller.player.current_position_value)
         else:
@@ -241,7 +241,7 @@ class BrlEngine:
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
                 self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
-                                                                                                                          'parametername': name})
+                                                                                                                           'parametername': name})
                 self.controller.log(str(e)[:160])
                 result=default_value
         else:

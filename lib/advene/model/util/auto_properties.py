@@ -16,14 +16,14 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-def lowerFirstChar(str):
-    first = str[0].lower()
-    rest = str[1:]
+def lowerFirstChar(s):
+    first = s[0].lower()
+    rest = s[1:]
     return first+rest
 
-def upperFirstChar(str):
-    first = str[0].upper()
-    rest = str[1:]
+def upperFirstChar(s):
+    first = s[0].upper()
+    rest = s[1:]
     return first+rest
 
 class auto_properties(type):
@@ -32,23 +32,22 @@ class auto_properties(type):
     If a "getFoo" or "setFoo" method is defined, then so will be the
     correponding property "foo".  """
 
-    def __init__(self, name, bases, dic):
-        cls=self
+    def __init__(cls, name, bases, dic):
         super(auto_properties, cls).__init__(name, bases, dic)
         props = {}
-        for name, f in dic.items():
+        for n, f in dic.items():
             try:
                 nb_args = (f.__code__.co_argcount
                            - len (f.__defaults__ or ()))
             except AttributeError:
                 continue
             propname = None
-            if name.startswith("get"):
+            if n.startswith("get"):
                 if nb_args == 1:
-                    propname=lowerFirstChar(name[3:])
-            if name.startswith("set"):
+                    propname=lowerFirstChar(n[3:])
+            if n.startswith("set"):
                 if nb_args == 2:
-                    propname=lowerFirstChar(name[3:])
+                    propname=lowerFirstChar(n[3:])
             if propname:
                 props[propname] = 1
 
@@ -60,18 +59,26 @@ class auto_properties(type):
 
 
 if __name__ == "__main__":
-    class Test(object, metaclass=auto_properties):
-        def getTheA(self): return self._a
+    class Test(metaclass=auto_properties):
+        def getTheA(self):
+            return self._a
 
-        def setTheB(self, v): self._b = v
+        def setTheB(self, v):
+            self._b = v
 
-        def getTheC(self): return self._c
-        def setTheC(self, v): self._c = v
+        def getTheC(self):
+            return self._c
+        def setTheC(self, v):
+            self._c = v
 
-        def getTheD(self): return self._d
-        def setTheD(self, v): self._d = v
-        def delTheD(self, v): del self._d
+        def getTheD(self):
+            return self._d
+        def setTheD(self, v):
+            self._d = v
+        def delTheD(self, v):
+            del self._d
 
-        def delTheE(self, e): del self._e
+        def delTheE(self, e):
+            del self._e
 
     t = Test()

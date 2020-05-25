@@ -30,7 +30,6 @@ from gettext import gettext as _
 import re
 import time
 
-import advene.core.config as config
 from advene.util.importer import GenericImporter
 import xml.etree.ElementTree as ET
 
@@ -45,9 +44,9 @@ def register(controller=None):
 # some samples.
 # Cf http://www-nlpir.nist.gov/projects/tv2005/master.shot.boundaries/time.elements
 # T00:00:00:0F14112000
-timepoint_regexp=re.compile('T(?P<h>\d+):(?P<m>\d+):(?P<s>\d+):(?P<ms>\d+)(F(?P<fraction>\d+))?')
+timepoint_regexp=re.compile(r'T(?P<h>\d+):(?P<m>\d+):(?P<s>\d+):(?P<ms>\d+)(F(?P<fraction>\d+))?')
 # PT00H00M27S11854080N14112000
-duration_regexp=re.compile('P?T(?P<h>\d+)H(?P<m>\d+)M(?P<s>\d+)S(?P<ms>\d+)(N(?P<fraction>\d+))?')
+duration_regexp=re.compile(r'P?T(?P<h>\d+)H(?P<m>\d+)M(?P<s>\d+)S(?P<ms>\d+)(N(?P<fraction>\d+))?')
 
 MPEG7URI='urn:mpeg:mpeg7:schema:2001'
 def tag(n):
@@ -56,6 +55,7 @@ def tag(n):
 class MPEG7Importer(GenericImporter):
     name = _("MPEG7 importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -66,7 +66,6 @@ class MPEG7Importer(GenericImporter):
         elif fname.endswith('.xml'):
             return 30
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename):
         tree=ET.parse(filename)

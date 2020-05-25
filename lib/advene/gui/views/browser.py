@@ -173,8 +173,8 @@ class Browser(AdhocView):
         super(Browser, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = [
-                    (_("Display result in table"), self.display_result),
-                    ]
+            (_("Display result in table"), self.display_result),
+        ]
 
         if element is None:
             element=controller.package
@@ -255,7 +255,7 @@ class Browser(AdhocView):
                 self._update_view(path, Exception(_("Expression returned None (there was an exception)")))
                 if config.data.preferences['expert-mode']:
                     self.log("Exception when evaluating %s :\n%s" % ("/".join(path),
-                                                                      str(e)))
+                                                                     str(e)))
             return True
 
         self._update_view(path, el)

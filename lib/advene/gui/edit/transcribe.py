@@ -94,7 +94,7 @@ class TranscriptionEdit(AdhocView):
         self.package=controller.package
 
         self.sourcefile=None
-        self.empty_re = re.compile('^\s*$')
+        self.empty_re = re.compile(r'^\s*$')
 
         self.options = {
             'timestamp': True, # _("If checked, click inserts timestamp marks"))
@@ -569,7 +569,7 @@ class TranscriptionEdit(AdhocView):
         b.end_user_action()
 
         def handle_scroll_event(button, event):
-            if not (event.get_state() & Gdk.ModifierType.CONTROL_MASK):
+            if not event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 return False
             if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 i='second-scroll-increment'
@@ -850,11 +850,11 @@ class TranscriptionEdit(AdhocView):
             if uri:
                 default_name=os.path.splitext(os.path.basename(uri))[0] + ".txt"
             fname=dialog.get_filename(title= ("Save transcription to..."),
-                                               action=Gtk.FileChooserAction.SAVE,
-                                               button=Gtk.STOCK_SAVE,
-                                               default_dir=str(config.data.path['data']),
-                                               default_file=default_name
-                                               )
+                                      action=Gtk.FileChooserAction.SAVE,
+                                      button=Gtk.STOCK_SAVE,
+                                      default_dir=str(config.data.path['data']),
+                                      default_file=default_name
+            )
         if fname is not None:
             self.save_transcription(filename=fname)
         return True
@@ -878,10 +878,10 @@ class TranscriptionEdit(AdhocView):
     def load_transcription_cb(self, button=None):
         if not self.buffer_is_empty():
             if not dialog.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
-                                                  icon=Gtk.MessageType.QUESTION):
+                                         icon=Gtk.MessageType.QUESTION):
                 return True
         fname=dialog.get_filename(title=_("Select transcription file to load"),
-                                           default_dir=str(config.data.path['data']))
+                                  default_dir=str(config.data.path['data']))
         if fname is not None:
             self.load_transcription(filename=fname)
         return True
@@ -912,7 +912,7 @@ class TranscriptionEdit(AdhocView):
         begin,end=b.get_bounds()
         b.delete(begin, end)
 
-        mark_re=re.compile('\[(I?)(\d+:\d+:\d+.?\d*)\]([^\[]*)')
+        mark_re=re.compile(r'\[(I?)(\d+:\d+:\d+.?\d*)\]([^\[]*)')
 
         # 0-mark at the beginning
         self.create_timestamp_mark(0, begin)
@@ -960,7 +960,7 @@ class TranscriptionEdit(AdhocView):
 
         if not self.buffer_is_empty():
             if not dialog.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
-                                                  icon=Gtk.MessageType.QUESTION):
+                                         icon=Gtk.MessageType.QUESTION):
                 return True
 
         b=self.textview.get_buffer()
@@ -1142,13 +1142,13 @@ class TranscriptionEdit(AdhocView):
 
         m=Gtk.Menu()
         for size, label in (
-            ( 8, _("Smallish")),
-            (16, _("Small")),
-            (32, _("Normal")),
-            (48, _("Large")),
-            (64, _("Larger")),
-            (128, _("Huge")),
-            ):
+                ( 8, _("Smallish")),
+                (16, _("Small")),
+                (32, _("Normal")),
+                (48, _("Large")),
+                (64, _("Larger")),
+                (128, _("Huge")),
+        ):
             i=Gtk.MenuItem(label)
             i.connect('activate', set_scale, size)
             m.append(i)
@@ -1299,7 +1299,7 @@ if __name__ == "__main__":
     #controller.package = Package (uri=sys.argv[1])
     config.data.path['resources']= Path('/usr/local/src/advene-project/share')
     controller.package = Package (uri="new_pkg",
-                            source=config.data.advenefile(config.data.templatefilename))
+                                  source=config.data.advenefile(config.data.templatefilename))
 
     transcription = TranscriptionEdit(controller=controller)
 
@@ -1308,4 +1308,3 @@ if __name__ == "__main__":
     window.connect('destroy', lambda e: Gtk.main_quit())
 
     Gtk.main ()
-

@@ -67,8 +67,8 @@ class ProcessLauncher:
         @return: the absolute path
         @rtype: string
         """
-        for dir in os.environ['PATH'].split(os.pathsep):
-            absolute = os.path.join (dir, self.program_name)
+        for d in os.environ['PATH'].split(os.pathsep):
+            absolute = os.path.join (d, self.program_name)
             if os.access (absolute, os.X_OK):
                 return absolute
         raise Exception("No %s in path" % program)

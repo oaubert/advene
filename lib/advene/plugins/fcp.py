@@ -34,6 +34,7 @@ def register(controller=None):
 class XMLFCPImporter(GenericImporter):
     name = _("Final Cut Pro XML importer")
 
+    @staticmethod
     def can_handle(fname):
         """Return a score between 0 and 100.
 
@@ -42,14 +43,13 @@ class XMLFCPImporter(GenericImporter):
         if fname.endswith('.xml'):
             return 80
         return 0
-    can_handle=staticmethod(can_handle)
 
     def process_file(self, filename, dest=None):
         tree=ET.parse(filename)
         root=tree.getroot()
 
         p, at = self.init_package(filename=dest,
-                                schemaid='fcp', annotationtypeid='fcp_subtitle')
+                                  schemaid='fcp', annotationtypeid='fcp_subtitle')
         at.mimetype='text/plain'
         at.title = "FCP Subtitle"
 

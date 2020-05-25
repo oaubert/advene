@@ -122,7 +122,7 @@ class MessageHandler(logging.Handler):
         if self.controller.gui:
             self.controller.gui.log_message(self.format(record))
 
-class GlobalPackage(object):
+class GlobalPackage:
     """Wrapper to access all packages loaded data.
     """
     def __init__(self, controller):
@@ -158,7 +158,7 @@ class GlobalPackage(object):
             for s in p.schemas:
                 yield s
 
-class AdveneController(object):
+class AdveneController:
     """AdveneController class.
 
     The main attributes for this class are:
@@ -236,7 +236,7 @@ class AdveneController(object):
             args = []
 
         # Regexp to recognize DVD URIs
-        self.dvd_regexp = re.compile("^dvd.*@(\d+):(\d+)")
+        self.dvd_regexp = re.compile(r"^dvd.*@(\d+):(\d+)")
 
         # List of active annotations
         self.active_annotations = []
@@ -307,13 +307,13 @@ class AdveneController(object):
             'seek_relative':    'PlayerSeek',
             }
         self.event_handler.register_action(RegisteredAction(
-                name="Message",
-                method=self.message_log,
-                description=_("Display a message"),
-                parameters={'message': _("String to display.")},
-                defaults={'message': 'annotation/content/data'},
-                category='gui',
-                ))
+            name="Message",
+            method=self.message_log,
+            description=_("Display a message"),
+            parameters={'message': _("String to display.")},
+            defaults={'message': 'annotation/content/data'},
+            category='gui',
+        ))
 
     def get_cached_duration(self):
         try:
@@ -363,9 +363,9 @@ class AdveneController(object):
                 # register did not have a return clause (and thus
                 # return None)
                 if p.register(controller=self) is False:
-                    logger.error("Could not register " + p.name)
+                    logger.error("Could not register %s", p.name)
                 else:
-                    logger.info("Registering " + p.name)
+                    logger.info("Registering %s", p.name)
             except AttributeError:
                 logger.error("AttributeError in %s/%s", directory, p.name, exc_info=True)
                 pass
@@ -483,7 +483,7 @@ class AdveneController(object):
         """Register a generic feature.
         """
         if name in self.generic_features:
-            logger.warning(_("Warning: redefining an existing feature %s") % name)
+            logger.warning(_("Warning: redefining an existing feature %s"), name)
         self.generic_features[name] = feature_class
 
     def register_slave_player(self, p):
@@ -617,9 +617,12 @@ class AdveneController(object):
         return [ helper.TitledElement(expression, label)
                  for (label, expression) in [ (_("Annotations in current package"), "all_annotations"),
                                               (_("Annotations in all packages"), "global_annotations") ] + [
-                (_("Annotations of type %s") % self.get_title(at),
-                 'here/annotationTypes/%s/annotations' % at.id) for at in self.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags'), (_("Ids"), 'ids') ]
-                 ]
+                                                  (_("Annotations of type %s") % self.get_title(at),
+                                                   'here/annotationTypes/%s/annotations' % at.id)
+                                                  for at in self.package.annotationTypes ] + [
+                                                          (_("Views"), 'here/views'), (_("Tags"), 'tags'), (_("Ids"), 'ids')
+                                                  ]
+        ]
 
     def search_string(self, searched=None, sources=None, case_sensitive=False):
         """Search a string in the given sources (TALES expressions).
@@ -782,13 +785,13 @@ class AdveneController(object):
             baseurl=self.get_default_url(root=True, alias=alias)
         c=advene.model.tal.context.AdveneContext(here,
                                                  options={
-                'package_url': baseurl,
-                'snapshot': self.package.imagecache,
-                'namespace_prefix': config.data.namespace_prefix,
-                'config': config.data.web,
-                'aliases': self.aliases,
-                'controller': self,
-                })
+                                                     'package_url': baseurl,
+                                                     'snapshot': self.package.imagecache,
+                                                     'namespace_prefix': config.data.namespace_prefix,
+                                                     'config': config.data.web,
+                                                     'aliases': self.aliases,
+                                                     'controller': self,
+                                                 })
         c.addGlobal('package', self.package)
         c.addGlobal('packages', self.packages)
         c.addGlobal('player', self.player)
@@ -811,7 +814,7 @@ class AdveneController(object):
             processes.append(pid)
         f.close()
         logger.warning(_("Cannot start the webserver\nThe following processes seem to use the %(port)s port: %(processes)s") % { 'port': pat,
-                                                                                                                           'processes':  processes})
+                                                                                                                                 'processes':  processes})
 
     @property
     def soundplayer(self):
@@ -862,8 +865,8 @@ class AdveneController(object):
                     logger.info(_("Loaded %(uri)s as %(alias)s") % {'uri': uri, 'alias': alias})
                 except Exception as e:
                     logger.error(_("Cannot load package from file %(uri)s: %(error)s") % {
-                            'uri': uri,
-                            'error': str(e)}, exc_info=True)
+                        'uri': uri,
+                        'error': str(e)}, exc_info=True)
             else:
                 name, ext = os.path.splitext(uri)
                 if ext.lower() in ('.xml', '.azp', '.apl'):
@@ -871,11 +874,11 @@ class AdveneController(object):
                     try:
                         self.load_package (uri=uri, alias=alias)
                         logger.info(_("Loaded %(uri)s as %(alias)s") % {
-                                'uri': uri, 'alias':  alias})
+                            'uri': uri, 'alias':  alias})
                     except Exception as e:
                         logger.error(_("Cannot load package from file %(uri)s: %(error)s") % {
-                                'uri': uri,
-                                'error': str(e)}, exc_info=True)
+                            'uri': uri,
+                            'error': str(e)}, exc_info=True)
                 elif ('dvd' in name
                       or ext.lower() in config.data.video_extensions):
                     # Try to load the file as a video file
@@ -1030,9 +1033,9 @@ class AdveneController(object):
         Cf http://cweiske.de/howto/launch/ for details.
         """
         if (url.startswith(self.get_urlbase()) and
-                           (self.server is None or not self.server.is_running())):
+            (self.server is None or not self.server.is_running())):
             # Cannot open a local URL: the webserver is not active
-            logger.error(_("Cannot open Advene URL %s: the webserver is not running.") % url)
+            logger.error(_("Cannot open Advene URL %s: the webserver is not running."), url)
             return True
         if self.gui and self.gui.open_url_embedded(url):
             return True
@@ -1107,7 +1110,7 @@ class AdveneController(object):
             return _("None")
         if isinstance(element, str):
             return trim_size(element)
-        if isinstance(element, Annotation) or isinstance(element, Relation):
+        if isinstance(element, (Annotation, Relation)):
             if representation is not None and representation != "":
                 c=self.build_context(here=element)
                 try:
@@ -1119,7 +1122,7 @@ class AdveneController(object):
                 return cleanup(r)
 
             expr=element.type.getMetaData(config.data.namespace, "representation")
-            if expr is None or expr == '' or re.match('^\s+', expr):
+            if expr is None or expr == '' or re.match(r'^\s+', expr):
                 r=element.content.data
                 if element.content.mimetype == 'image/svg+xml':
                     return "SVG graphics"
@@ -1175,7 +1178,7 @@ class AdveneController(object):
             position = self.player.current_position_value
 
         if media is None:
-            media == self.package.getMedia()
+            media = self.package.getMedia()
 
         ic = self.imagecache.get(media, self.package.imagecache)
         if position >= self.cached_duration - 1000 * ic.framerate:
@@ -1215,7 +1218,7 @@ class AdveneController(object):
         """Round the given timestamp to the appropriate time wrt. framerate.
         """
         ic = self.imagecache.get(media, self.package.imagecache)
-        if (t >= self.cached_duration - 1000 * ic.framerate):
+        if t >= self.cached_duration - 1000 * ic.framerate:
             # Fetching the very last frame seems to cause issues for
             # many/all movies. Cap the value to the previous one.
             t = self.cached_duration - 1000 * ic.framerate - 1
@@ -1306,7 +1309,7 @@ class AdveneController(object):
                 n = d / name
                 if n.is_file():
                     mediafile = n
-                    logger.info(_("Found matching video file in moviepath: %s") % n)
+                    logger.info(_("Found matching video file in moviepath: %s"), n)
                     break
 
         return str(mediafile.absolute())
@@ -1399,7 +1402,9 @@ class AdveneController(object):
             # modified during the loop
             self.notify('EditSessionStart', element=el, immediate=True, undone=undone)
             for r in el.relations[:]:
-                [ a.relations.remove(r) for a in r.members if r in a.relations ]
+                for a in r.members:
+                    if r in a.relations:
+                        a.relations.remove(r)
                 self.delete_element(r, immediate_notify=immediate_notify, batch=batch, undone=undone)
             p.annotations.remove(el)
             self.notify('AnnotationDelete', annotation=el, immediate=immediate_notify, batch=batch, undone=undone)
@@ -1434,12 +1439,12 @@ class AdveneController(object):
             self.notify('EditSessionStart', element=el, immediate=True, undone=undone)
             p.queries.remove(el)
             self.notify('QueryDelete', query=el, immediate=immediate_notify, batch=batch, undone=undone)
-        elif isinstance(el, Resources) or isinstance(el, ResourceData):
+        elif isinstance(el, (Resources, ResourceData)):
             if isinstance(el, Resources):
                 for c in el.children():
                     self.delete_element(c, immediate_notify=True, batch=batch, undone=undone)
             p=el.parent
-            del(p[el.id])
+            del p[el.id]
             self.notify('ResourceDelete', resource=el, immediate=immediate_notify, undone=undone)
         return True
 
@@ -1487,7 +1492,7 @@ class AdveneController(object):
             if annotation.type.mimetype == 'text/plain':
                 d={ 'name': annotation.content.data.replace('\n', '\\n') }
             elif annotation.type.mimetype == 'application/x-advene-structured':
-                r=re.compile('^(\w+)=(.*)')
+                r=re.compile(r'^(\w+)=(.*)')
                 d=dict([ (r.findall(l) or [ ('_error', l) ])[0] for l in annotation.content.data.split('\n') ])
                 name="Unknown"
                 for n in ('name', 'title', 'content'):
@@ -1509,8 +1514,7 @@ class AdveneController(object):
             elif annotation.type.mimetype == 'application/x-advene-structured':
                 an.content.data = annotation.content.data
             else:
-                logger.warning("Cannot convert %s to %s" % (annotation.type.mimetype,
-                                                          an.type.mimetype))
+                logger.warning("Cannot convert %s to %s", annotation.type.mimetype, an.type.mimetype)
                 an.content.data = annotation.content.data
         elif an.type.mimetype == 'image/svg+xml':
             # Use a template for text->SVG conversion.
@@ -1519,8 +1523,7 @@ class AdveneController(object):
   <text fill="green" name="Content" stroke="green" style="stroke-width:1; font-family: sans-serif; font-size: 22" x="8" y="290">%s</text>
 </svg:svg>""" % self.get_title(annotation)
         else:
-            logger.warning("Do not know how to convert %s to %s" % (annotation.type.mimetype,
-                                                              an.type.mimetype))
+            logger.warning("Do not know how to convert %s to %s", annotation.type.mimetype, an.type.mimetype)
             an.content.data = annotation.content.data
         an.setDate(self.get_timestamp())
 
@@ -1917,7 +1920,7 @@ class AdveneController(object):
                 logger.error("Cannot load package %s", uri, exc_info=True)
                 return
             dur = time.time() - t
-            logger.info("Loaded package in %f seconds" % dur)
+            logger.info("Loaded package in %f seconds", dur)
             # Check if the imported package was found. Else it will
             # fail when accessing elements...
             imp = []
@@ -1926,8 +1929,8 @@ class AdveneController(object):
                     imp.append(i.package)
                 except Exception as e:
                     raise Exception(_("Cannot read the imported package %(uri)s: %(error)s") % {
-                            'uri': i.uri,
-                            'error': str(e)})
+                        'uri': i.uri,
+                        'error': str(e)})
             self.package=p
 
         if alias is None:
@@ -2012,7 +2015,7 @@ class AdveneController(object):
             package=self.package
         alias=self.aliases[package]
         self.unregister_package(alias)
-        del(package)
+        del package
         return True
 
     def register_package (self, alias, package):
@@ -2038,8 +2041,8 @@ class AdveneController(object):
         """
         # FIXME: check if the unregistered package was the current one
         p = self.packages[alias]
-        del (self.aliases[p])
-        del (self.packages[alias])
+        del self.aliases[p]
+        del self.packages[alias]
         if self.package == p:
             l=[ a for a in self.packages.keys() if a != 'advene' ]
             # There should be at least 1 key
@@ -2103,7 +2106,7 @@ class AdveneController(object):
 
         root=ET.Element(tag('package-list'))
         for a, p in self.packages.items():
-            if a == 'advene' or a == 'new_pkg':
+            if a in ('advene', 'new_pkg'):
                 # Do not write the default or template package
                 continue
             n=ET.SubElement(root, tag('package'), uri=p.uri, alias=a)
@@ -2210,9 +2213,9 @@ class AdveneController(object):
         if master_uri:
             i=[ pk for pk in p.imports if pk.getUri(absolute=False) == master_uri ]
             if not i:
-                logger.warning(_("Cannot handle master attribute, the package %s is not imported.") % master_uri)
+                logger.warning(_("Cannot handle master attribute, the package %s is not imported."), master_uri)
             else:
-                logger.info(_("Checking master package %s for not yet imported elements.") % master_uri)
+                logger.info(_("Checking master package %s for not yet imported elements."), master_uri)
                 self.handle_auto_import(p, i[0].package)
 
         return True
@@ -2224,7 +2227,7 @@ class AdveneController(object):
             uris=[ e.uri for e in getattr(p, source) ]
             for e in getattr(i, source):
                 if not e.uri in uris:
-                    logger.info("Missing %s: importing it" % str(e))
+                    logger.info("Missing %s: importing it", str(e))
                     helper.import_element(p, e, self, notify=False)
         return True
 
@@ -2415,7 +2418,7 @@ class AdveneController(object):
             position = position.fragment.begin
         position_before=self.player.current_position_value
         logger.debug("update status: %s %s", status, position)
-        if (status == 'seek' or status == 'start' or status == 'stop'):
+        if status in ('seek', 'start', 'stop'):
             if position != position_before:
                 self.reset_annotation_lists()
             if notify:
@@ -2679,12 +2682,12 @@ class AdveneController(object):
                 ctx=self.build_context(element)
                 data.append(_("""<h1>Comment on %(title)s</h1>
 <span class="advene:annotation" advene:annotation="%(id)s" advene:presentation="link:snapshot"><a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href="%(href)s"><img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img></a></span>""") % {
-                    'title': self.get_title(element),
-                    'id': element.id,
-                    'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
-                    'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
-                    })
-            v.content.data="\n".join(data)
+    'title': self.get_title(element),
+    'id': element.id,
+    'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
+    'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
+})
+                v.content.data="\n".join(data)
         elif isinstance(elements[0], AnnotationType):
             at_title=self.get_title(elements[0])
             v.title=_("List of %s annotations") % at_title

@@ -33,21 +33,21 @@ import advene.util.helper as helper
 from advene.util.merger import Differ
 
 labels = {
- 'new': _("Create element"),
- 'new_annotation': _("Create annotation (duplicate id)"),
- 'new_relation': _("Create relation (duplicate id)"),
- 'update_meta_color': _("Update the color"),
- 'update_meta_representation': _("Update the representation"),
- 'update_meta_description': _("Update the description"),
- 'update_title': _("Update the title"),
- 'update_mimetype': _("Update the mimetype"),
- 'update_begin': _("Update the begin time"),
- 'update_end': _("Update the end time"),
- 'update_content': _("Update the content"),
- 'update_matchfilter': _("Update the matchFilter"),
- 'update_member_types': _("Update the member types"),
- 'update_tags': _("Update tags"),
- }
+    'new': _("Create element"),
+    'new_annotation': _("Create annotation (duplicate id)"),
+    'new_relation': _("Create relation (duplicate id)"),
+    'update_meta_color': _("Update the color"),
+    'update_meta_representation': _("Update the representation"),
+    'update_meta_description': _("Update the description"),
+    'update_title': _("Update the title"),
+    'update_mimetype': _("Update the mimetype"),
+    'update_begin': _("Update the begin time"),
+    'update_end': _("Update the end time"),
+    'update_content': _("Update the content"),
+    'update_matchfilter': _("Update the matchFilter"),
+    'update_member_types': _("Update the member types"),
+    'update_tags': _("Update tags"),
+}
 
 class TreeViewMerger:
     COLUMN_ELEMENT=0
@@ -90,15 +90,14 @@ class TreeViewMerger:
                                                self.controller.get_title(s),
                                                getattr(s, 'id', str(s))),
                                True,
-                               self.controller.get_title(s.type) if hasattr(s, 'type') else helper.get_type(s)
-            ])
+                               self.controller.get_title(s.type) if hasattr(s, 'type') else helper.get_type(s) ])
         return store
 
     def toggle_selection(self):
         """Toggle all elements from the current selection.
         """
-        def toggle_row(model, path, iter, data=None):
-            model.set_value(iter, self.COLUMN_APPLY, not model.get_value(iter, self.COLUMN_APPLY))
+        def toggle_row(model, path, it, data=None):
+            model.set_value(it, self.COLUMN_APPLY, not model.get_value(it, self.COLUMN_APPLY))
         self.widget.get_selection().selected_foreach(toggle_row)
         return True
 
@@ -243,7 +242,7 @@ class Merger:
 
         vbox.pack_start(Gtk.Label(_("Merge elements from %(source)s into %(dest)s") % {'source': self.sourcepackage.uri,
                                                                                        'dest': self.destpackage.uri}),
-                                  False, False, 0)
+                        False, False, 0)
 
         def scrolled(widget):
             scroll_win = Gtk.ScrolledWindow ()

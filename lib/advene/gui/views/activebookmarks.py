@@ -453,9 +453,9 @@ class ActiveBookmarks(AdhocView):
         def complete(widget):
             m=Gtk.Menu()
             for t, func in (
-                (_("User-specified duration"), 'user'),
-                (_("2s duration"), 2000),
-                (_("Complete coverage"), 'coverage'),
+                    (_("User-specified duration"), 'user'),
+                    (_("2s duration"), 2000),
+                    (_("Complete coverage"), 'coverage'),
                 ):
                 i=Gtk.MenuItem(t)
                 i.connect('activate', do_complete, func)
@@ -518,13 +518,13 @@ class ActiveBookmarks(AdhocView):
             m=Gtk.Menu()
             s=config.data.preferences['bookmark-snapshot-width']
             for size, label in (
-                (int(.5 * s), _("Smallish")),
-                (int(.8 * s), _("Small")),
-                (s, _("Normal")),
-                (int(1.2 * s), _("Large")),
-                (int(1.5 * s), _("Larger")),
-                (int(2 * s), _("Huge")),
-                ):
+                    (int(.5 * s), _("Smallish")),
+                    (int(.8 * s), _("Small")),
+                    (s, _("Normal")),
+                    (int(1.2 * s), _("Large")),
+                    (int(1.5 * s), _("Larger")),
+                    (int(2 * s), _("Huge")),
+            ):
                 i=Gtk.MenuItem(label)
                 i.connect('activate', set_scale, size)
                 m.append(i)
@@ -533,9 +533,9 @@ class ActiveBookmarks(AdhocView):
             return True
 
         for (icon, tip, method) in (
-            (Gtk.STOCK_CONVERT, _("Complete bookmarks into annotations"), complete),
-            (Gtk.STOCK_SAVE, _("Save the current state"), self.save_view),
-            (Gtk.STOCK_FULLSCREEN, _("Set the size of snaphots"), scale_snaphots_menu),
+                (Gtk.STOCK_CONVERT, _("Complete bookmarks into annotations"), complete),
+                (Gtk.STOCK_SAVE, _("Save the current state"), self.save_view),
+                (Gtk.STOCK_FULLSCREEN, _("Set the size of snaphots"), scale_snaphots_menu),
             ):
             b=get_small_stock_button(icon)
             b.set_tooltip_text(tip)
@@ -577,8 +577,7 @@ class ActiveBookmarks(AdhocView):
                 return True
             actions=drag_context.get_actions()
             is_in_view=Gtk.drag_get_source_widget(drag_context).is_ancestor(widget)
-            if (actions == Gdk.DragAction.MOVE
-                or actions == Gdk.DragAction.LINK):
+            if actions in (Gdk.DragAction.MOVE, Gdk.DragAction.LINK):
                 # Only 1 possible action. Use it.
                 Gdk.drag_status(drag_context, actions, timestamp)
             elif actions == Gdk.DragAction.COPY and is_in_view and config.data.drag_type['annotation'][0][0] in drag_context.list_targets():
@@ -640,7 +639,7 @@ class ActiveBookmarks(AdhocView):
                 self.refresh()
                 return True
             else:
-                logger.warning("Unknown target type for drop: %d" % targetType)
+                logger.warning("Unknown target type for drop: %d", targetType)
                 return False
 
         self.mainbox.drag_dest_set(Gtk.DestDefaults.MOTION |
@@ -687,7 +686,7 @@ class ActiveBookmarks(AdhocView):
         v.add(sw)
         return v
 
-class ActiveBookmark(object):
+class ActiveBookmark:
     """An ActiveBookmark can represent a simple bookmark (i.e. a single
     time, with an optional content) or a completed annotation.
 
@@ -737,10 +736,10 @@ class ActiveBookmark(object):
         self.dropbox.show()
         self.dropbox.set_no_show_all(True)
         self.dropbox.drag_dest_set(Gtk.DestDefaults.MOTION |
-                                            Gtk.DestDefaults.HIGHLIGHT |
-                                            Gtk.DestDefaults.ALL,
-                                            config.data.get_target_types('timestamp', 'annotation-type'),
-                                            Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
+                                   Gtk.DestDefaults.HIGHLIGHT |
+                                   Gtk.DestDefaults.ALL,
+                                   config.data.get_target_types('timestamp', 'annotation-type'),
+                                   Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         self.dropbox.connect('drag-data-received', self.begin_drag_received)
         self.dropbox.connect('drag-motion', self.bound_drag_motion)
 
@@ -802,8 +801,8 @@ class ActiveBookmark(object):
 
             def extend_end_image_menu(menu, element):
                 for (label, action) in (
-                    (_("Remove end timestamp"), lambda i: self.set_end(None)),
-                    ):
+                        (_("Remove end timestamp"), lambda i: self.set_end(None)),
+                ):
                     i=Gtk.MenuItem(label)
                     i.connect('activate', action)
                     menu.append(i)
@@ -874,9 +873,9 @@ class ActiveBookmark(object):
         # Force the correct default action.
         actions=drag_context.get_actions()
         is_in_view=Gtk.drag_get_source_widget(drag_context).is_ancestor(self.container.mainbox)
-        if (actions == Gdk.DragAction.MOVE
-            or actions == Gdk.DragAction.LINK
-            or actions == Gdk.DragAction.COPY):
+        if actions in (Gdk.DragAction.MOVE,
+                       Gdk.DragAction.LINK,
+                       Gdk.DragAction.COPY):
             # Only 1 possible action. Use it.
             Gdk.drag_status(drag_context, actions, timestamp)
         elif Gdk.DragAction.MOVE & actions and is_in_view:
@@ -1082,7 +1081,7 @@ class ActiveBookmark(object):
 
     def handle_scroll_event(self, button, event, get_value, set_value, check_value):
         # Handle scroll actions
-        if not (event.get_state() & Gdk.ModifierType.CONTROL_MASK):
+        if not event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             return False
         if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
             i='second-scroll-increment'
@@ -1105,7 +1104,7 @@ class ActiveBookmark(object):
 
         It checks the images, which are the source for DND.
         """
-        return (widget == self.begin_widget.image or  widget == self.end_widget.image)
+        return widget in (self.begin_widget.image, self.end_widget.image)
 
     def delete_timestamp(self, position):
         """Delete a timestamp.
@@ -1267,15 +1266,15 @@ class ActiveBookmark(object):
                 c=self.controller.build_context(here=self.annotation)
                 uri=c.evaluateValue('here/absolute_url')
                 selection.set(selection.get_target(), 8, uri.encode('utf8'))
-            elif (targetType == config.data.target_type['text-plain']
-                  or targetType == config.data.target_type['TEXT']
-                  or targetType == config.data.target_type['STRING']):
+            elif targetType in (config.data.target_type['text-plain'],
+                                config.data.target_type['TEXT'],
+                                config.data.target_type['STRING']):
                 # Put the timecode + content
                 selection.set(selection.get_target(), 8, ("%s : %s" % (helper.format_time(self.begin),
-                                                                 self.content)).encode('utf8'))
+                                                                       self.content)).encode('utf8'))
             elif targetType == config.data.target_type['timestamp']:
                 selection.set(selection.get_target(), 8, encode_drop_parameters(timestamp=self.begin,
-                                                                          comment=self.content))
+                                                                                comment=self.content))
             else:
                 return False
             return True

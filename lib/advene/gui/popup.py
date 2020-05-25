@@ -141,8 +141,8 @@ class Menu:
         if id_ != basename:
             while True:
                 id_ = dialog.entry_dialog(title=_("Select a valid identifier"),
-                                                   text=_("The filename %s contains invalid characters\nthat have been replaced.\nYou can modify this identifier if necessary:") % filename,
-                                                   default=id_)
+                                          text=_("The filename %s contains invalid characters\nthat have been replaced.\nYou can modify this identifier if necessary:") % filename,
+                                          default=id_)
                 if id_ is None:
                     # Edition cancelled
                     return True
@@ -245,7 +245,7 @@ class Menu:
 
     def delete_elements (self, widget, el, elements):
         batch_id=object()
-        if isinstance(el, AnnotationType) or isinstance(el, RelationType):
+        if isinstance(el, (AnnotationType, RelationType)):
             for e in elements:
                 self.controller.delete_element(e, batch=batch_id)
         return True
@@ -387,17 +387,17 @@ class Menu:
 
         res=d.run()
         if res == Gtk.ResponseType.OK:
-            re_number=re.compile('(\d+)')
-            re_struct=re.compile('^num=(\d+)$', re.MULTILINE)
+            re_number=re.compile(r'(\d+)')
+            re_struct=re.compile(r'^num=(\d+)$', re.MULTILINE)
             offset=s.get_value_as_int() - 1
             l=at.annotations
             l.sort(key=lambda a: a.fragment.begin)
             l=l[offset:]
             size=float(len(l))
             dial=Gtk.Dialog(_("Renumbering %d annotations") % size,
-                           self.controller.gui.gui.win,
-                           Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                           (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
+                            self.controller.gui.gui.win,
+                            Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
             prg=Gtk.ProgressBar()
             dial.vbox.pack_start(prg, False, True, 0)
             dial.show_all()
@@ -484,11 +484,11 @@ class Menu:
 
         if not self.readonly:
             # Common to deletable elements
-            if type(element) in (Annotation, Relation, View, Query,
-                                 Schema, AnnotationType, RelationType, ResourceData):
+            if isinstance(element, (Annotation, Relation, View, Query,
+                                    Schema, AnnotationType, RelationType, ResourceData)):
                 add_item(_("Delete"), self.delete_element, element)
 
-            if type(element) == Resources and type(element.parent) == Resources:
+            if isinstance(element, Resources) and isinstance(element.parent, Resources):
                 # Add Delete item to Resources except for the root resources (with parent = package)
                 add_item(_("Delete"), self.delete_element, element)
 
@@ -497,7 +497,7 @@ class Menu:
 
             ## Common to offsetable elements
             if (config.data.preferences['expert-mode']
-                and type(element) in (Annotation, Schema, AnnotationType, Package)):
+                and isinstance(element, (Annotation, Schema, AnnotationType, Package))):
                 add_item(_("Offset"), self.offset_element, element)
 
         submenu.show_all()
@@ -847,10 +847,10 @@ class Menu:
         sm=Gtk.Menu()
         m.set_submenu(sm)
         for (expr, label) in (
-             ('package', _('the package')),
-             ('package/annotations', _('all annotations of the package')),
-             ('package/annotations/first', _('the first annotation of the package')),
-            ):
+                ('package', _('the package')),
+                ('package/annotations', _('all annotations of the package')),
+                ('package/annotations/first', _('the first annotation of the package')),
+        ):
             i=Gtk.MenuItem(label)
             i.connect('activate', try_query, expr)
             sm.append(i)
@@ -887,4 +887,3 @@ class Menu:
         elif element.viewableType == 'schema-list':
             add_item(_('Create a new schema...'), self.create_element, Schema, element.rootPackage)
         return
-

@@ -57,7 +57,7 @@ def fourcc2rawcode (code):
     @return: the corresponding PIL code
     @rtype: string
     """
-    if code == 'PNG' or code == 'png':
+    if code in('PNG', 'png'):
         return 'PNG'
 
     if code == 'video/x-raw-rgb':
@@ -68,7 +68,7 @@ def fourcc2rawcode (code):
         'png ' : 'PNG',
         ' gnp' : 'PNG', # On PPC-MacOS X
         }
-    if isinstance(code, int) or isinstance(code, int):
+    if isinstance(code, int):
         fourcc = "%c%c%c%c" % (code & 0xff,
                                code >> 8 & 0xff,
                                code >> 16 & 0xff,
@@ -147,7 +147,7 @@ def mediafile_checksum(mediafile, callback=None):
         for b in iter(lambda : f.read(128*1024), b''):
             h.update(b)
             if callback and callback(progress=f.tell() / size) is False:
-                    return None
+                return None
     return h.hexdigest()
 
 def package2id (p):
@@ -320,7 +320,7 @@ def get_video_stream_from_website(url):
         data=[ l for l in u.readlines() if '.gvp' in l ]
         u.close()
         if data:
-            addr=re.findall('http://.+?.gvp\?docid=.\d+', data[0])
+            addr=re.findall(r'http://.+?.gvp\?docid=.\d+', data[0])
             if addr:
                 u=urlopen(addr[0])
                 data=[ l for l in u.readlines() if 'url:' in l ]
@@ -383,7 +383,7 @@ def find_in_path(name):
 def common_fieldnames(elements):
     """Extract common fieldnames from simple structured elements.
     """
-    regexp=re.compile('^(\w+)=.*')
+    regexp=re.compile(r'^(\w+)=.*')
     res=set()
     for e in elements:
         if e.content.mimetype == 'application/x-advene-structured':
@@ -405,7 +405,7 @@ def title2content(new_title, original_content, representation):
 
     @return the new content or None if the content could not be updated.
     """
-    assert(isinstance(new_title, str))
+    assert isinstance(new_title, str)
     r = None
     if representation is None or empty_representation.match(representation):
         r = new_title

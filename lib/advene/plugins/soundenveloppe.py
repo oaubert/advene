@@ -26,7 +26,6 @@ from gettext import gettext as _
 import sys
 from gi.repository import Gst
 
-import advene.core.config as config
 from advene.util.gstimporter import GstImporter
 
 from math import isinf, isnan
@@ -82,10 +81,10 @@ class SoundEnveloppeImporter(GstImporter):
         for i, tup in enumerate(self.buffer_list):
             self.progress(i / n)
             self.convert( [ {
-                        'begin': tup[0],
-                        'end': tup[1],
-                        'content': " ".join("%.02f" % (factor * (f - m)) for f in tup[2]),
-                        } ])
+                'begin': tup[0],
+                'end': tup[1],
+                'content': " ".join("%.02f" % (factor * (f - m)) for f in tup[2]),
+            } ])
 
     def do_finalize(self):
         # Add last buffer data
@@ -93,7 +92,7 @@ class SoundEnveloppeImporter(GstImporter):
             # There is some data left.
             self.buffer_list.append((self.first_item_time,
                                      self.first_item_time + len(self.buffer) * self.interval,
-                                         list(self.buffer)))
+                                     list(self.buffer)))
         self.generate_normalized_annotations()
         return True
 

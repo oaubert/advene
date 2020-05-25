@@ -32,7 +32,7 @@ from advene.model.constants import adveneNS, dcNS, xlinkNS, TEXT_NODE, ELEMENT_N
 #       (i.e. which can be inherited without further adaptation to the
 #        inheriting class)
 
-class Metaed(object):
+class Metaed:
     """An implementation for the meta element.
        Inheriting classes must have a _getModel method returning a DOM element,
        and a _getChild method as the one from modeled.Modeled
@@ -53,7 +53,8 @@ class Metaed(object):
 
     def _getMetaElement(self, namespace_uri, name, create=False):
         meta = self._getMeta(create)
-        if meta is None: return None
+        if meta is None:
+            return None
 
         for e in meta.childNodes:
             if e.nodeType is ELEMENT_NODE \
@@ -154,16 +155,19 @@ class Authored(Metaed):
             if n.nodeType==TEXT_NODE:
                 s += n.data
                 authorelt.removeChild (n)
-        if s: author = s.replace (s.strip (), author) # try to keep layout
+        if s:
+            author = s.replace (s.strip (), author) # try to keep layout
         return author
 
     def __setAuthorNode (self, author, authorUrl=None):
         attnode, eltnode = self.__prepareAuthorNodes ()
 
         if author is None:
-            assert authorUrl==None, "authorUrl without author is impossible"
-            if attnode: self._getModel ().removeAttributeNode (attnode)
-            if eltnode: self._getMeta ().removeChild (eltnode)
+            assert authorUrl is None, "authorUrl without author is impossible"
+            if attnode:
+                self._getModel ().removeAttributeNode (attnode)
+            if eltnode:
+                self._getMeta ().removeChild (eltnode)
 
         elif authorUrl is None:
             if eltnode is None:
@@ -206,7 +210,8 @@ class Authored(Metaed):
                 if n.nodeType==TEXT_NODE:
                     found = 1
                     s += n.data
-            if found: return s.strip()
+            if found:
+                return s.strip()
         return None
 
     def getAuthorUrl(self):
@@ -222,7 +227,8 @@ class Authored(Metaed):
         """Set the author.
            You would probably rather use the author property.
         """
-        if value or (self._getModel().parentNode and self._getModel().parentNode.nodeType==ELEMENT_NODE):
+        if value or (self._getModel().parentNode
+                     and self._getModel().parentNode.nodeType==ELEMENT_NODE):
             self.__setAuthorNode(value, self.getAuthorUrl())
         else:
             raise AttributeError("author is a required attribute here")
@@ -365,7 +371,7 @@ class Titled(Metaed):
            You would probably rather use the title property.
         """
         return ( self._getModel().getAttributeNS(dcNS, "title")
-              or self.getMetaData(dcNS, "title") )
+                 or self.getMetaData(dcNS, "title") )
 
     def setTitle(self, value):
         """Set the Title.
@@ -392,7 +398,7 @@ class Titled(Metaed):
     title = property(getTitle, setTitle, delTitle)
 
 
-class Ided(object):
+class Ided:
     """An implementation for the id property.
        Inheriting classes must have a _getModel method returning a DOM element
        (inheriting the modeled.Modeled class looks like a good idea).
@@ -416,9 +422,9 @@ class Ided(object):
 
     id = property(getId, setId)
 
+    @staticmethod
     def _set_id (element, value):
         element.setAttributeNS(None, "id", str(value))
-    _set_id = staticmethod (_set_id)
 
 class Uried(Ided):
     """An implementation for the id property interpreted as a URI fragment.
@@ -471,7 +477,7 @@ class Uried(Ided):
 
     uri = property(getUri)
 
-class Aliased(object):
+class Aliased:
     """An implementation for the 'alias' property.
        Inheriting classes must have a _getModel method returning a DOM element
        (inheriting the modeled.Modeled class looks like a good idea).
@@ -506,7 +512,7 @@ class Aliased(object):
 
     alias = property(getAlias, setAlias, delAlias)
 
-class Hrefed(object):
+class Hrefed:
     """An implementation for the 'href' property.
        Inheriting classes must have a _getModel method returning a DOM element
        (inheriting the modeled.Modeled class looks like a good idea).

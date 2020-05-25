@@ -32,15 +32,15 @@ import advene.core.config as config
 import advene.util.helper as helper
 
 fragment_re=re.compile('(.*)#(.+)')
-package_expression_re=re.compile('packages/(\w+)/(.*)')
+package_expression_re=re.compile(r'packages/(\w+)/(.*)')
 href_re=re.compile(r'''(xlink:href|href|src|about|resource)=['"](.+?)['"> ]''')
 snapshot_re=re.compile(r'/packages/[^/]+/imagecache/(\d+)')
 overlay_re=re.compile(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?')
-tales_re=re.compile('(\w+)/(.+)')
+tales_re=re.compile(r'(\w+)/(.+)')
 player_re=re.compile(r'/media/play(/|\?position=)(\d+)(/(\d+))?')
 overlay_replace_re=re.compile(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?')
 
-class WebsiteExporter(object):
+class WebsiteExporter:
     """Export a set of static views to a directory.
 
     The intent of this export is to be able to quickly publish a
@@ -488,7 +488,7 @@ class WebsiteExporter(object):
                     if os.path.isdir(dest):
                         shutil.rmtree(dest, True)
                     else:
-                        shutil.unlink(dest)
+                        os.unlink(dest)
                 shutil.copytree(path, dest)
             else:
                 # Copy file
@@ -539,9 +539,9 @@ class WebsiteExporter(object):
 </frameset>
 </html>
 """ % {
-                'title': self.controller.get_title(self.controller.package),
-                'index': default_href or name,
-                })
+    'title': self.controller.get_title(self.controller.package),
+    'index': default_href or name,
+})
         f.close()
 
         f=open(os.path.join(self.destination, "unconverted.html"), 'w', encoding='utf-8')
@@ -554,7 +554,7 @@ class WebsiteExporter(object):
 
         self.progress_callback(1.0, _("Export complete"))
 
-class VideoPlayer(object):
+class VideoPlayer:
     """Generic video player support.
 
     @ivar destination: the destination directory (must exist)
@@ -619,10 +619,6 @@ class VideoPlayer(object):
 class GoogleVideoPlayer(VideoPlayer):
     """Google video player support.
     """
-    def __init__(self, destination, video_url):
-        self.destination=destination
-        self.video_url=video_url
-
     @staticmethod
     def can_handle(video_url):
         """Static method indicating wether the class can handle the given video url.
@@ -636,8 +632,6 @@ class GoogleVideoPlayer(VideoPlayer):
         return '%s#%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(int(begin) / 1000)))
 
     def fix_link(self, link):
-        """
-        """
         if self.video_url in link:
             return "target='video_player'", link
         else:
@@ -659,10 +653,6 @@ class GoogleVideoPlayer(VideoPlayer):
 class YoutubeVideoPlayer(VideoPlayer):
     """Youtube video player support.
     """
-    def __init__(self, destination, video_url):
-        self.destination=destination
-        self.video_url=video_url
-
     @staticmethod
     def can_handle(video_url):
         """Static method indicating wether the class can handle the given video url.
@@ -676,8 +666,6 @@ class YoutubeVideoPlayer(VideoPlayer):
         return '%s#t=%s' % (self.video_url, time.strftime("%Hh%Mm%Ss", time.gmtime(int(begin) / 1000)))
 
     def fix_link(self, link):
-        """
-        """
         if self.video_url in link:
             return "target='video_player'", link
         else:
@@ -699,10 +687,6 @@ class YoutubeVideoPlayer(VideoPlayer):
 class HTML5VideoPlayer(VideoPlayer):
     """HTML5 video player support.
     """
-    def __init__(self, destination, video_url):
-        self.destination=destination
-        self.video_url=video_url
-
     @staticmethod
     def can_handle(video_url):
         """Static method indicating wether the class can handle the given video url.
@@ -719,8 +703,6 @@ class HTML5VideoPlayer(VideoPlayer):
             return '%s#t=%.03f' % (self.video_url, (float(begin) / 1000.0))
 
     def fix_link(self, link):
-        """
-        """
         if self.video_url in link:
             return "target='video_player'", link
         else:
@@ -748,7 +730,7 @@ class HTML5VideoPlayer(VideoPlayer):
         $(document).advene();
     });
 </script>
-''' % { 'video_url': str(self.video_url) }
+'''
         head_re = re.compile('<head>', re.IGNORECASE)
         if head_re.findall(content):
             content = head_re.sub('''<head>%s''' % jsinject, content)
@@ -780,4 +762,3 @@ class HTML5VideoPlayer(VideoPlayer):
         """Return a list of needed resources.
         """
         return [ ( config.data.advenefile('HTML5', 'web'), 'resources/HTML5' ) ]
-

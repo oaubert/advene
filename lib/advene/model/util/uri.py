@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 import urllib.request, urllib.parse, urllib.error
 from urllib.request import urlopen
-import urllib.parse
 
 urljoin = urllib.parse.urljoin
 
@@ -36,13 +35,17 @@ def pop(uri):
 
 def fragment(uri):
     sharp = uri.rfind('#')
-    if sharp>0: return uri[(sharp+1):]
-    else: return ''
+    if sharp > 0:
+        return uri[(sharp+1):]
+    else:
+        return ''
 
 def no_fragment(uri):
     sharp = uri.rfind('#')
-    if sharp>0: return uri[:sharp]
-    else: return uri
+    if sharp > 0:
+        return uri[:sharp]
+    else:
+        return uri
 
 def open(uri):
     return urlopen(uri)

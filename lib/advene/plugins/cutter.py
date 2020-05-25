@@ -25,7 +25,6 @@ from gettext import gettext as _
 
 from gi.repository import Gst
 
-import advene.core.config as config
 from advene.util.gstimporter import GstImporter
 
 def register(controller=None):

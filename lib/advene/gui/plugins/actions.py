@@ -33,194 +33,197 @@ name="Default GUI actions"
 def register(controller=None):
     #print "Registering default GUI actions"
 
-    ac=DefaultGUIActions(controller)
+    ac = DefaultGUIActions(controller)
 
     controller.register_action(RegisteredAction(
-            name="Message",
-            method=ac.action_message_log,
-            description=_("Display a message"),
-            parameters={'message': _("String to display.")},
-            defaults={'message': 'annotation/content/data'},
-            predefined={'message': (
-                    ( 'annotation/content/data', _("The annotation content") ),
+        name="Message",
+        method=ac.action_message_log,
+        description=_("Display a message"),
+        parameters={'message': _("String to display.")},
+        defaults={'message': 'annotation/content/data'},
+        predefined={'message': (
+            ( 'annotation/content/data', _("The annotation content") ),
+        )},
+        category='popup',
+    ))
+
+    controller.register_action(RegisteredAction(
+        name="Popup",
+        method=ac.action_popup,
+        description=_("Display a popup"),
+        parameters={'message': _("String to display."),
+                    'duration': _("Display duration in ms. Ignored if empty.")},
+        defaults={'message': 'annotation/content/data',
+                  'duration': 'annotation/fragment/duration'},
+        predefined={'message': (
+            ( 'annotation/content/data', _("The annotation content") ),
+        ),
+                    'duration': (
+                        ( 'string:1000', _("1 second") ),
+                        ( 'annotation/fragment/duration',_("The annotation duration") )
                     )},
-            category='popup',
-            ))
+        category='popup',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="Popup",
-            method=ac.action_popup,
-            description=_("Display a popup"),
-            parameters={'message': _("String to display."),
-                        'duration': _("Display duration in ms. Ignored if empty.")},
-            defaults={'message': 'annotation/content/data',
-                      'duration': 'annotation/fragment/duration'},
-            predefined={'message': (
-                    ( 'annotation/content/data', _("The annotation content") ),
+        name="Entry",
+        method=ac.action_entry,
+        description=_("Popup an entry box"),
+        parameters={'message': _("String to display."),
+                    'destination': _("Object where to store the answer (should have a content)"),
+                    'duration': _("Display duration in ms. Ignored if empty.")},
+        defaults={'message': 'annotation/content/data',
+                  'destination': 'annotation/related/first',
+                  'duration': 'annotation/fragment/duration'},
+        predefined=ac.action_entry_predefined,
+        category='popup',
+    ))
+
+    controller.register_action(RegisteredAction(
+        name="PopupGoto",
+        method=ac.action_popup_goto,
+        description=_("Display a popup to go to another position"),
+        parameters={'description': _("General description"),
+                    'message': _("String to display."),
+                    'position': _("New position"),
+                    'duration': _("Display duration in ms. Ignored if empty.")},
+        defaults={'description': 'annotation/content/data',
+                  'message': 'string:'+_('Go to related annotation'),
+                  'position': 'annotation/related/first/fragment/begin',
+                  'duration': 'annotation/fragment/duration'},
+        predefined=ac.action_popup_goto_predefined,
+        category='popup',
+    ))
+
+    controller.register_action(RegisteredAction(
+        name="PopupURL",
+        method=ac.action_popup_url,
+        description=_("Display a popup linking to an URL"),
+        parameters={'description': _("General description"),
+                    'message': _("String to display."),
+                    'url': _("URL"),
+                    'duration': _("Display duration in ms. Ignored if empty.")},
+        defaults={'description': 'annotation/content/data',
+                  'message': _('string:Display annotation in web browser'),
+                  'url': 'annotation/absolute_url',
+                  'duration': 'annotation/fragment/duration'},
+        predefined={'description': (
+            ('annotation/content/data', _("The annotation content")),
+        ),
+                    'message': (
+                        ('string:'+_('See the Advene website'), _('See the Advene website')),
+                        ('string:'+_('See the annotation'), _('See the annotation')),
                     ),
-                        'duration': (
-                    ( 'string:1000', _("1 second") ),
-                    ( 'annotation/fragment/duration',_("The annotation duration") )
+                    'url': (
+                        ('string:http://advene.org/', _("The Advene website")),
+                        ('annotation/absolute_url', _("The annotation URL")),
+                    ),
+                    'duration': (
+                        ( 'string:1000', _("1 second") ),
+                        ( 'annotation/fragment/duration',_("The annotation duration") )
                     )},
-            category='popup',
-            ))
+        category='gui',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="Entry",
-            method=ac.action_entry,
-            description=_("Popup an entry box"),
-            parameters={'message': _("String to display."),
-                        'destination': _("Object where to store the answer (should have a content)"),
-                        'duration': _("Display duration in ms. Ignored if empty.")},
-            defaults={'message': 'annotation/content/data',
-                      'destination': 'annotation/related/first',
-                      'duration': 'annotation/fragment/duration'},
-            predefined=ac.action_entry_predefined,
-            category='popup',
-            ))
+        name="OpenInterface",
+        method=ac.action_open_interface,
+        description=_("Open an interface view"),
+        parameters={'guiview': _("View name (timeline, tree, transcription, browser, webbrowser, transcribe)"),
+                    'destination': _("Destination: popup, south, east"),
+        },
+        defaults={'guiview': 'string:timeline',
+                  'destination': 'string:south',
+        },
+        predefined=ac.action_open_interface_predefined,
+        category='gui',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="PopupGoto",
-            method=ac.action_popup_goto,
-            description=_("Display a popup to go to another position"),
-            parameters={'description': _("General description"),
-                        'message': _("String to display."),
-                        'position': _("New position"),
-                        'duration': _("Display duration in ms. Ignored if empty.")},
-            defaults={'description': 'annotation/content/data',
-                      'message': 'string:'+_('Go to related annotation'),
-                      'position': 'annotation/related/first/fragment/begin',
-                      'duration': 'annotation/fragment/duration'},
-            predefined=ac.action_popup_goto_predefined,
-            category='popup',
-            ))
+        name="OpenView",
+        method=ac.action_open_view,
+        description=_("Open a saved view"),
+        parameters={'id': _("Identifier of the saved view"),
+        },
+        predefined=ac.action_open_view_predefined,
+        category='gui',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="PopupURL",
-            method=ac.action_popup_url,
-            description=_("Display a popup linking to an URL"),
-            parameters={'description': _("General description"),
-                        'message': _("String to display."),
-                        'url': _("URL"),
-                        'duration': _("Display duration in ms. Ignored if empty.")},
-            defaults={'description': 'annotation/content/data',
-                      'message': _('string:Display annotation in web browser'),
-                      'url': 'annotation/absolute_url',
-                      'duration': 'annotation/fragment/duration'},
-            predefined={'description': (
-                    ('annotation/content/data', _("The annotation content")),
-                    ),
-                        'message': (
-                    ('string:'+_('See the Advene website'), _('See the Advene website')),
-                    ('string:'+_('See the annotation'), _('See the annotation')),
-                    ),
-                        'url': (
-                    ('string:http://advene.org/', _("The Advene website")),
-                    ('annotation/absolute_url', _("The annotation URL")),
-                        ),
-                        'duration': (
-                    ( 'string:1000', _("1 second") ),
-                    ( 'annotation/fragment/duration',_("The annotation duration") )
-                    )},
-            category='gui',
-            ))
+        name="PopupGoto2",
+        method=ac.generate_action_popup_goton(2),
+        description=_("Display a popup with 2 options"),
+        parameters={'description': _("General description"),
+                    'message1': _("First option description"),
+                    'position1': _("First position"),
+                    'message2': _("Second option description"),
+                    'position2': _("Second position"),
+                    'duration': _("Display duration in ms. Ignored if empty.")
+        },
+        defaults={'description': 'annotation/content/data',
+                  'message1': 'string:' + _('Go to the beginning'),
+                  'position1': 'annotation/fragment/begin',
+                  'message2': 'string:' + _('Go to the end'),
+                  'position2': 'annotation/fragment/end',
+                  'duration': 'annotation/fragment/duration',
+        },
+        predefined=ac.action_popup_goto_predefined,
+        category='popup',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="OpenInterface",
-            method=ac.action_open_interface,
-            description=_("Open an interface view"),
-            parameters={'guiview': _("View name (timeline, tree, transcription, browser, webbrowser, transcribe)"),
-                        'destination': _("Destination: popup, south, east"),
-                        },
-            defaults={'guiview': 'string:timeline',
-                      'destination': 'string:south',
-                      },
-            predefined=ac.action_open_interface_predefined,
-            category='gui',
-            ))
+        name="PopupGoto3",
+        method=ac.generate_action_popup_goton(3),
+        description=_("Display a popup with 3 options"),
+        parameters={'description': _("General description"),
+                    'message1': _("First option description"),
+                    'position1': _("First position"),
+                    'message2': _("Second option description"),
+                    'position2': _("Second position"),
+                    'message3': _("Third option description"),
+                    'position3': _("Third position"),
+                    'duration': _("Display duration in ms. Ignored if empty.")
+        },
+        defaults={'description': 'annotation/content/data',
+                  'message1': 'string:' + _('Go to the beginning'),
+                  'position1': 'annotation/fragment/begin',
+                  'message2': 'string:' + _('Go to the end'),
+                  'position2': 'annotation/fragment/end',
+                  'message3': 'string:' + _('Go to related annotation'),
+                  'position3': 'annotation/related/fragment/begin',
+                  'duration': 'annotation/fragment/duration',
+        },
+        predefined=ac.action_popup_goto_predefined,
+        category='popup',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="OpenView",
-            method=ac.action_open_view,
-            description=_("Open a saved view"),
-            parameters={'id': _("Identifier of the saved view"),
-                        },
-            predefined=ac.action_open_view_predefined,
-            category='gui',
-            ))
+        name="PopupGotoOutgoingRelated",
+        method=ac.action_popup_goto_outgoing_related,
+        description=_("Display a popup to navigate to related annotations"),
+        parameters={'message': _("String to display."), },
+        defaults={'message': 'string:'+_("Choose the related annotation you want to visualise."), },
+        category='popup',
+    ))
 
     controller.register_action(RegisteredAction(
-            name="PopupGoto2",
-            method=ac.generate_action_popup_goton(2),
-            description=_("Display a popup with 2 options"),
-            parameters={'description': _("General description"),
-                        'message1': _("First option description"),
-                        'position1': _("First position"),
-                        'message2': _("Second option description"),
-                        'position2': _("Second position"),
-                        'duration': _("Display duration in ms. Ignored if empty.")
-                        },
-            defaults={'description': 'annotation/content/data',
-                      'message1': 'string:' + _('Go to the beginning'),
-                      'position1': 'annotation/fragment/begin',
-                      'message2': 'string:' + _('Go to the end'),
-                      'position2': 'annotation/fragment/end',
-                      'duration': 'annotation/fragment/duration',
-                      },
-            predefined=ac.action_popup_goto_predefined,
-            category='popup',
-            ))
-
-    controller.register_action(RegisteredAction(
-            name="PopupGoto3",
-            method=ac.generate_action_popup_goton(3),
-            description=_("Display a popup with 3 options"),
-            parameters={'description': _("General description"),
-                        'message1': _("First option description"),
-                        'position1': _("First position"),
-                        'message2': _("Second option description"),
-                        'position2': _("Second position"),
-                        'message3': _("Third option description"),
-                        'position3': _("Third position"),
-                        'duration': _("Display duration in ms. Ignored if empty.")
-                        },
-            defaults={'description': 'annotation/content/data',
-                      'message1': 'string:' + _('Go to the beginning'),
-                      'position1': 'annotation/fragment/begin',
-                      'message2': 'string:' + _('Go to the end'),
-                      'position2': 'annotation/fragment/end',
-                      'message3': 'string:' + _('Go to related annotation'),
-                      'position3': 'annotation/related/fragment/begin',
-                      'duration': 'annotation/fragment/duration',
-                      },
-            predefined=ac.action_popup_goto_predefined,
-            category='popup',
-            ))
-
-    controller.register_action(RegisteredAction(
-            name="PopupGotoOutgoingRelated",
-            method=ac.action_popup_goto_outgoing_related,
-            description=_("Display a popup to navigate to related annotations"),
-            parameters={'message': _("String to display."), },
-            defaults={'message': 'string:'+_("Choose the related annotation you want to visualise."), },
-            category='popup',
-            ))
-
-    controller.register_action(RegisteredAction(
-            name="CreateBookmark",
-            method=ac.action_create_bookmark,
-            description=_("Create a bookmark"),
-            parameters={'position': _("Bookmark position (in ms)"),
-                        'message': _("Bookmark content."), },
-            defaults={'message': 'string:'+_("Bookmark"),
-                      'position': 'options/controller/player/current_position_value'},
-            category='gui',
-            ))
+        name="CreateBookmark",
+        method=ac.action_create_bookmark,
+        description=_("Create a bookmark"),
+        parameters={'position': _("Bookmark position (in ms)"),
+                    'message': _("Bookmark content."), },
+        defaults={'message': 'string:'+_("Bookmark"),
+                  'position': 'options/controller/player/current_position_value'},
+        category='gui',
+    ))
 
 class DefaultGUIActions:
     def __init__(self, controller=None):
         self.controller=controller
         self.gui=self.controller.gui
+
+    def log(self, *p):
+        self.controller.log(*p)
 
     def parse_parameter(self, context, parameters, name, default_value):
         """Helper method used in actions.
@@ -233,10 +236,10 @@ class DefaultGUIActions:
                     rulename=context.evaluateValue('rule')
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
-                self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
-                                                                                                                          'parametername': name})
-                self.controller.log(str(e)[:160])
-                result=default_value
+                    self.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
+                                                                                                                    'parametername': name})
+                    self.log(str(e)[:160])
+                    result=default_value
         else:
             result=default_value
         return result
@@ -259,7 +262,7 @@ class DefaultGUIActions:
         """
         message = self.parse_parameter(context, parameters, 'message', _("No message..."))
         message = unescape_string(message)
-        self.gui.log (message)
+        self.log (message)
         return True
 
     def action_open_interface (self, context, parameters):
@@ -274,7 +277,7 @@ class DefaultGUIActions:
         if self.controller.gui is not None and view in self.controller.gui.registered_adhoc_views:
             self.gui.open_adhoc_view(view, destination=dest)
         else:
-            self.gui.log(_("Error: undefined GUI view %s") % view)
+            self.log(_("Error: undefined GUI view %s") % view)
         return True
 
     def action_open_interface_predefined(self, controller):
@@ -282,15 +285,15 @@ class DefaultGUIActions:
             'guiview': [
                 ( 'string:' + ident, view.view_name)
                 for (ident, view) in controller.gui.registered_adhoc_views.items()
-                ],
+            ],
             'destination': (
                 ('string:popup', _("...in its own window")),
                 ('string:east', _("...embedded east of the video")),
                 ('string:west', _("...embedded west of the video")),
                 ('string:south', _("...embedded south of the video")),
                 ('string:fareast', _("...embedded at the right of the window")),
-                )
-            }
+            )
+        }
         return d
 
     def action_open_view (self, context, parameters):
@@ -330,8 +333,8 @@ class DefaultGUIActions:
             'id': [
                 ( 'string:' + v.id, get_title(v) )
                 for v in controller.package.views
-                ],
-            }
+            ],
+        }
 
     def action_popup (self, context, parameters):
         """Popup action.
@@ -397,13 +400,13 @@ class DefaultGUIActions:
 
     def action_entry_predefined(self, controller):
         d= {'message': [
-                    ( 'annotation/content/data', _("The annotation content") ),
-                    ],
+            ( 'annotation/content/data', _("The annotation content") ),
+        ],
             'destination': self.related_annotation_expressions(controller),
             'duration': (
                 ( 'string:1000', _("1 second") ),
                 ( 'annotation/fragment/duration',_("The annotation duration") )
-                )}
+            )}
         return d
 
     def action_popup_url (self, context, parameters):
@@ -414,7 +417,7 @@ class DefaultGUIActions:
         def handle_response(button, url, widget):
             if url:
                 self.controller.open_url(url)
-            self.gui.popupwidget.undisplay(widget)
+                self.gui.popupwidget.undisplay(widget)
             return True
 
         description=self.parse_parameter(context, parameters, 'description', _("Follow a link"))
@@ -526,7 +529,7 @@ class DefaultGUIActions:
         return {
             'description': (
                 ('annotation/content/data', _("The annotation content")),
-                ),
+            ),
             'message': (),
             'position': p,
             'message1': (),
@@ -538,7 +541,7 @@ class DefaultGUIActions:
             'duration': (
                 ( 'string:1000', _("1 second") ),
                 ( 'annotation/fragment/duration',_("The annotation duration") )
-                )}
+            )}
 
     def action_popup_goto_outgoing_related (self, context, parameters):
         """PopupGotoOutgoingRelated action.
@@ -571,13 +574,13 @@ class DefaultGUIActions:
             t=''
             if r.content.data:
                 t=' (%s)' % r.content.data
-            c=_("Through %(title)s%(relation_content)s:\n%(annotation_content)s") % {
-                'title': self.controller.get_title(r.type),
-                'relation_content': t,
-                'annotation_content': self.controller.get_title(a) }
-            b.add(self.gui.get_illustrated_text(c, a.fragment.begin))
-            vbox.pack_start(b, False, True, 0)
-            b.connect('clicked', handle_response, a.fragment.begin, vbox)
+                c=_("Through %(title)s%(relation_content)s:\n%(annotation_content)s") % {
+                    'title': self.controller.get_title(r.type),
+                    'relation_content': t,
+                    'annotation_content': self.controller.get_title(a) }
+                b.add(self.gui.get_illustrated_text(c, a.fragment.begin))
+                vbox.pack_start(b, False, True, 0)
+                b.connect('clicked', handle_response, a.fragment.begin, vbox)
 
         self.gui.popupwidget.display(widget=vbox, timeout=annotation.fragment.duration, title=_("Relation navigation"))
         return True
@@ -593,4 +596,3 @@ class DefaultGUIActions:
 
         self.controller.gui.create_bookmark(position, comment=message)
         return True
-

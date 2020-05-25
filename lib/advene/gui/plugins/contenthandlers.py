@@ -21,11 +21,12 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-import os
+import io
 from gi.repository import Gdk
 from gi.repository import Gtk
+import os
 import xml.parsers.expat
-import io
+import xml.etree.ElementTree as ET
 
 import advene.core.config as config
 import advene.util.helper as helper
@@ -35,7 +36,6 @@ from advene.gui.util import image_from_position, dialog, decode_drop_parameters,
 
 from advene.gui.edit.rules import EditRuleSet, EditQuery
 from advene.rules.elements import RuleSet, SimpleQuery
-import xml.etree.ElementTree as ET
 
 name="Default content handlers"
 
@@ -46,16 +46,15 @@ def register(controller=None):
 
 class ZoneContentHandler (ContentHandler):
     """Create a zone edit form for the given element."""
+    @staticmethod
     def can_handle(mimetype):
         res=0
         if mimetype == 'application/x-advene-zone':
             res=80
         return res
-    can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, parent=None, **kw):
-        self.element = element
-        self.controller=controller
+        super().__init__(element, controller)
         self.parent=parent
         self.editable = True
         self.fname=None
@@ -138,16 +137,15 @@ class ZoneContentHandler (ContentHandler):
 
 class SVGContentHandler (ContentHandler):
     """Create a SVG edit form for the given element."""
+    @staticmethod
     def can_handle(mimetype):
         res=0
         if mimetype == 'image/svg+xml':
             res=80
         return res
-    can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, parent=None, **kw):
-        self.element = element
-        self.controller=controller
+        super().__init__(element, controller)
         self.parent=parent
         self.editable = True
         # Internal rules defined by the plugin
@@ -375,16 +373,15 @@ class SVGContentHandler (ContentHandler):
 class RuleSetContentHandler (ContentHandler):
     """Create a RuleSet edit form for the given element (a view, presumably).
     """
+    @staticmethod
     def can_handle(mimetype):
         res=0
         if mimetype == 'application/x-advene-ruleset':
             res=80
         return res
-    can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, parent=None, **kw):
-        self.element = element
-        self.controller=controller
+        super().__init__(element, controller)
         self.parent=parent
         self.editable = True
         self.view = None
@@ -434,16 +431,15 @@ class RuleSetContentHandler (ContentHandler):
 class SimpleQueryContentHandler (ContentHandler):
     """Create a SimpleQuery edit form for the given element (a view, presumably).
     """
+    @staticmethod
     def can_handle(mimetype):
         res=0
         if mimetype == 'application/x-advene-simplequery':
             res=80
         return res
-    can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, parent=None, editable=True, **kw):
-        self.element = element
-        self.controller=controller
+        super().__init__(element, controller)
         self.parent=parent
         self.editable = editable
         self.view = None

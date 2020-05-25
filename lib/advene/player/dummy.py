@@ -209,7 +209,7 @@ class Player:
         if position is None:
             position = 0
 
-        if status == "start" or status == "seek" or status == "seek_relative":
+        if status in ("start", "seek", "seek_relative"):
             self.position_update()
             if status == "seek_relative":
                 position = self.current_position() + position
@@ -227,7 +227,7 @@ class Player:
                 self.resume (position)
             elif status == "stop":
                 self.stop (position)
-            elif status == "" or status == None:
+            elif status == "" or status is None:
                 pass
             else:
                 self.log("******* Error : unknown status %s")
@@ -273,4 +273,4 @@ class Player:
         return
 
     def sound_is_muted(self):
-        return (self.mute_volume is not None)
+        return self.mute_volume is not None

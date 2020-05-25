@@ -30,7 +30,7 @@ from advene.gui.widget import TimestampRepresentation
 from advene.gui.util import dialog
 from gettext import gettext as _
 
-class FrameSelector(object):
+class FrameSelector:
     """Frame selector interface.
 
     Given a timestamp, it displays a series of snapshots around

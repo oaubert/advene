@@ -53,7 +53,7 @@ class ViewType:
     def __str__(self):
         return self.title
 
-class CreateElementPopup(object):
+class CreateElementPopup:
     """Popup for creating elements.
 
     If takes as parameter the element type, its parent and the
@@ -81,10 +81,10 @@ class CreateElementPopup(object):
             flags=Gtk.DialogFlags.DESTROY_WITH_PARENT
 
         d=dialog.title_id_dialog(title=_("%s creation")  % element_label[self.type_],
-                                          text=_("To create a new element of type %s,\nyou must give the following information.") % element_label[self.type_],
-                                          element_title=i,
-                                          element_id=i,
-                                          flags=flags)
+                                 text=_("To create a new element of type %s,\nyou must give the following information.") % element_label[self.type_],
+                                 element_title=i,
+                                 element_id=i,
+                                 flags=flags)
         d.type_combo=None
 
         # Choose a type if possible
@@ -392,4 +392,3 @@ if __name__ == "__main__":
 
     window.show_all()
     Gtk.main ()
-

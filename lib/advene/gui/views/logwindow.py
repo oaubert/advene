@@ -24,15 +24,13 @@ in a timestamped clickable list."""
 
 import time
 
-from advene.gui.views import AdhocView
-
-import advene.util.helper as helper
-
 from gettext import gettext as _
 
 from gi.repository import Gtk
 
+from advene.gui.views import AdhocView
 import advene.rules.elements
+import advene.util.helper as helper
 
 name="Link view plugin"
 
@@ -160,12 +158,12 @@ class LogWindow(AdhocView):
             defaults={'message': "string:"+_("See the Advene website"),
                       'url': 'string:http://www.advene.org/'},
             predefined={'message': (
-                        ('string:'+_('See the Advene website'), _('See the Advene website')),
-                        ('string:'+_('See the annotation'), _('See the annotation')),
-                        ),
+                ('string:'+_('See the Advene website'), _('See the Advene website')),
+                ('string:'+_('See the annotation'), _('See the annotation')),
+            ),
                         'url': (
-                        ('string:http://www.advene.org/', _("The Advene website")),
-                        ('annotation/absolute_url', _("The annotation URL")),
+                            ('string:http://www.advene.org/', _("The Advene website")),
+                            ('annotation/absolute_url', _("The annotation URL")),
                         )},
             category='gui',
             ))
@@ -174,4 +172,3 @@ class LogWindow(AdhocView):
 
     def unregister_callback (self, controller=None):
         controller.event_handler.remove_rule(self.callback, type_="internal")
-

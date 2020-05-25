@@ -35,6 +35,9 @@ class CaptionView(AdhocView):
         self.close_on_package_load = False
         self.contextual_actions = ()
 
+        self.begin = None
+        self.end = None
+
         self.controller=controller
         self.widget=self.build_widget()
 
