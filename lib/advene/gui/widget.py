@@ -423,7 +423,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             # The annotation contains a list of space-separated values
             # that should be treated as percentage (between 0.0 and
             # 100.0) of the height (FIXME: define a scale somewhere)
-            l=[ (1 - v / 100.0) for v in self.annotation.content.parsed() ]
+            l=[ v / 100.0 for v in self.annotation.content.parsed() ]
             s=len(l)
             if not s:
                 # Nothing to draw
@@ -443,17 +443,22 @@ class AnnotationWidget(GenericColorButtonWidget):
                 context.set_line_width(w + 1)
                 c = w / 2
                 for v in l:
-                    context.move_to(int(c), int(height * (0.5 - v / 2)))
-                    context.line_to(int(c), int(height * (0.5 + v / 2)))
+                    if v == 0:
+                        context.move_to(int(c), int(height * 0.5))
+                        context.line_to(int(c), int(height * 0.5 + 1))
+                    else:
+                        context.move_to(int(c), int(height * (0.5 - v / 2)))
+                        context.line_to(int(c), int(height * (0.5 + v / 2)))
                     c += w
                 context.stroke()
+                return
             else:
                 # bar normally
                 context.move_to(0, height)
                 for v in l:
-                    context.line_to(int(c), int(height * v))
+                    context.line_to(int(c), int(height * (1 - v)))
                     c += w
-                    context.line_to(int(c), int(height * v))
+                    context.line_to(int(c), int(height * (1 - v)))
                 context.line_to(int(c), height)
 
             context.fill()
