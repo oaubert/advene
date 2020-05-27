@@ -81,9 +81,13 @@ class GstImporter(GenericImporter):
         # stop pipeline, convert last buffered elements...
         GObject.idle_add(lambda: self.pipeline.set_state(Gst.State.NULL) and False)
         logger.warning("finalize")
-        if hasattr(self, 'do_finalize'):
-            self.do_finalize()
-        self.end_callback()
+        def wrapper():
+            if hasattr(self, 'do_finalize'):
+                self.do_finalize()
+            self.end_callback()
+            return False
+        # Make sure finalize is called in the context of the main thread
+        GObject.idle_add(wrapper)
 
     def on_bus_message_error(self, bus, message):
         s = message.get_structure()
