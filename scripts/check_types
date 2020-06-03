@@ -1,0 +1,72 @@
+#! /usr/bin/env python3
+
+#
+# Advene: Annotate Digital Videos, Exchange on the NEt
+# Copyright (C) 2020 Olivier Aubert <contact@olivieraubert.net>
+#
+# This file is part of Advene.
+#
+# Advene is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# Advene is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+import logging
+logger = logging.getLogger(__name__)
+
+import os
+import sys
+
+try:
+    import advene.core.config as config
+except ImportError:
+    # Try to set path
+    (maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
+    if subdir == 'scripts':
+        # Chances are that we were in a development tree...
+        libpath = os.path.join(maindir, "lib")
+        sys.path.insert(0, libpath)
+        import advene.core.config as config
+        config.data.fix_paths(maindir)
+
+from advene.model.package import Package
+import advene.util.helper as helper
+
+def check_package(uri):
+    logger.info('Parsing %s', uri)
+    try:
+        p = Package(uri)
+        for at in p.annotationTypes:
+            mt = at.mimetype
+            for a in at.annotations:
+                if a.content.mimetype != mt:
+                    logger.info('Type mismatch %s: %s vs. %s', a.id, a.content.mimetype, mt)
+    except:
+        logger.error("Cannot parse %s", uri, exc_info=True)
+        return {}
+
+def process_files_or_directories(l, outfile=None):
+    data = []
+    for d in l:
+        if os.path.isdir(d):
+            for root, dirs, files in os.walk(d):
+                for name in files:
+                    if not (name.endswith('.azp') or name.endswith('.xml')):
+                        continue
+                    uri = os.path.join(root, name)
+                    check_package(uri)
+        else:
+            check_package(d)
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    process_files_or_directories(sys.argv[1:])    
