@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-25 17:17+0200\n"
-"PO-Revision-Date: 2020-05-25 17:18+0200\n"
+"POT-Creation-Date: 2020-06-09 10:22+0200\n"
+"PO-Revision-Date: 2020-06-09 10:23+0200\n"
 "Last-Translator: Olivier Aubert <contact@olivieraubert.net>\n"
 "Language-Team: contact@advene.org\n"
 "Language: fr\n"
@@ -43,24 +43,25 @@ msgstr "Le répertoire %s n'est pas un recueil Advene décompressé."
 msgid "Set of %s annotations"
 msgstr "Ensemble de %s annotations"
 
-#: ../lib/advene/gui/widget.py:997 ../lib/advene/gui/views/transcription.py:460
+#: ../lib/advene/gui/widget.py:1035
+#: ../lib/advene/gui/views/transcription.py:460
 #: ../lib/advene/gui/edit/montage.py:60
 msgid "Play"
 msgstr "Lecture"
 
-#: ../lib/advene/gui/widget.py:1001 ../lib/advene/gui/edit/timeadjustment.py:78
+#: ../lib/advene/gui/widget.py:1039 ../lib/advene/gui/edit/timeadjustment.py:78
 msgid "Refresh snapshot"
 msgstr "Rafraîchir la capture d'écran"
 
-#: ../lib/advene/gui/widget.py:1005
+#: ../lib/advene/gui/widget.py:1043
 msgid "Save as..."
 msgstr "Sauvegarder sous..."
 
-#: ../lib/advene/gui/widget.py:1010
+#: ../lib/advene/gui/widget.py:1048
 msgid "Use current player position"
 msgstr "Utiliser la position courante du lecteur"
 
-#: ../lib/advene/gui/widget.py:1016
+#: ../lib/advene/gui/widget.py:1054
 msgid "Adjust timestamp"
 msgstr "Ajuster le timecode"
 
@@ -8243,7 +8244,7 @@ msgid "Volume threshold (in dB, can be negative) before trigger."
 msgstr "Seuil de détection de silence (en dB, peut être négatif)"
 
 #: ../lib/advene/plugins/cutter.py:56
-#: ../lib/advene/plugins/soundenveloppe.py:62
+#: ../lib/advene/plugins/soundenveloppe.py:63
 msgid "Channel selection."
 msgstr "Choix du canal"
 
@@ -8347,7 +8348,7 @@ msgid "Language model (.DMP file)"
 msgstr "Modèle de langage (fichier .dmp)"
 
 #: ../lib/advene/plugins/pocketsphinx.py:122
-#: ../lib/advene/plugins/soundenveloppe.py:80
+#: ../lib/advene/plugins/soundenveloppe.py:88
 msgid "Generating annotations"
 msgstr "Création des annotations"
 
@@ -8431,7 +8432,11 @@ msgid ""
 "For every annotation type that has predefined keywords, this table displays "
 "the annotations that contain unspecified keywords or invalid syntax. Update "
 "is not real-time, you need to manually update the view with the button below."
-msgstr "Pour chaque type d'annotation ayant des mots-clés prédéfinis, ce tableau affiche les annotations contenant des mots-clés non spécifiés ou une syntaxe invalide. La mise à jour n'est pas en temps-réel, vous devez la relancer avec le bouton ci-dessous."
+msgstr ""
+"Pour chaque type d'annotation ayant des mots-clés prédéfinis, ce tableau "
+"affiche les annotations contenant des mots-clés non spécifiés ou une syntaxe "
+"invalide. La mise à jour n'est pas en temps-réel, vous devez la relancer "
+"avec le bouton ci-dessous."
 
 #: ../lib/advene/plugins/aeidon_import.py:50
 msgid "Aeidon (subtitles) importer"
@@ -8649,18 +8654,26 @@ msgstr ""
 "Synthèse vocale désactivée. Impossible de trouver l'application 'aplay'"
 
 #: ../lib/advene/plugins/soundenveloppe.py:38
-#: ../lib/advene/plugins/soundenveloppe.py:125
-#: ../lib/advene/plugins/soundenveloppe.py:127
+#: ../lib/advene/plugins/soundenveloppe.py:136
+#: ../lib/advene/plugins/soundenveloppe.py:138
 msgid "Sound enveloppe"
 msgstr "Enveloppe sonore"
 
-#: ../lib/advene/plugins/soundenveloppe.py:56
+#: ../lib/advene/plugins/soundenveloppe.py:57
 msgid "Interval (in ms) at which to take samples."
 msgstr "Intervalle d'échantillonage (en ms)"
 
-#: ../lib/advene/plugins/soundenveloppe.py:59
+#: ../lib/advene/plugins/soundenveloppe.py:60
 msgid "Maximum number of samples per annotation."
 msgstr "Nombre maximum d'échantillons par annotation"
+
+#: ../lib/advene/plugins/soundenveloppe.py:66
+msgid "Value to consider (peak or RMS)."
+msgstr "Valeur à utiliser (peak ou RMS)"
+
+#: ../lib/advene/plugins/soundenveloppe.py:69
+msgid "Lower dB limit"
+msgstr "Limite inférieure en dB"
 
 #: ../lib/advene/plugins/keywords.py:46
 msgid "Keyword extraction"
@@ -9517,11 +9530,11 @@ msgstr "Expert"
 msgid "GStreamer generic importer"
 msgstr "Importateur GStreamer générique"
 
-#: ../lib/advene/util/gstimporter.py:128
+#: ../lib/advene/util/gstimporter.py:132
 msgid "Imported data"
 msgstr "Données importées"
 
-#: ../lib/advene/util/gstimporter.py:179
+#: ../lib/advene/util/gstimporter.py:183
 msgid "Starting processing"
 msgstr "Début du traitement"
 

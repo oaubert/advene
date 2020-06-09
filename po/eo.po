@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-25 17:17+0200\n"
+"POT-Creation-Date: 2020-06-09 10:22+0200\n"
 "PO-Revision-Date: 2006-04-07 11:42+0200\n"
 "Last-Translator: Olivier Aubert <olivier.aubert@liris.cnrs.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
@@ -44,27 +44,28 @@ msgstr ""
 msgid "Set of %s annotations"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/widget.py:997 ../lib/advene/gui/views/transcription.py:460
+#: ../lib/advene/gui/widget.py:1035
+#: ../lib/advene/gui/views/transcription.py:460
 #: ../lib/advene/gui/edit/montage.py:60
 msgid "Play"
 msgstr ""
 
-#: ../lib/advene/gui/widget.py:1001 ../lib/advene/gui/edit/timeadjustment.py:78
+#: ../lib/advene/gui/widget.py:1039 ../lib/advene/gui/edit/timeadjustment.py:78
 #, fuzzy
 msgid "Refresh snapshot"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/widget.py:1005
+#: ../lib/advene/gui/widget.py:1043
 #, fuzzy
 msgid "Save as..."
 msgstr "Komentaraj attributoj"
 
-#: ../lib/advene/gui/widget.py:1010
+#: ../lib/advene/gui/widget.py:1048
 #, fuzzy
 msgid "Use current player position"
 msgstr "Defauxlta regularo"
 
-#: ../lib/advene/gui/widget.py:1016
+#: ../lib/advene/gui/widget.py:1054
 #, fuzzy
 msgid "Adjust timestamp"
 msgstr "Arbvido"
@@ -8188,7 +8189,7 @@ msgid "Volume threshold (in dB, can be negative) before trigger."
 msgstr ""
 
 #: ../lib/advene/plugins/cutter.py:56
-#: ../lib/advene/plugins/soundenveloppe.py:62
+#: ../lib/advene/plugins/soundenveloppe.py:63
 #, fuzzy
 msgid "Channel selection."
 msgstr "Vido"
@@ -8289,7 +8290,7 @@ msgid "Language model (.DMP file)"
 msgstr ""
 
 #: ../lib/advene/plugins/pocketsphinx.py:122
-#: ../lib/advene/plugins/soundenveloppe.py:80
+#: ../lib/advene/plugins/soundenveloppe.py:88
 #, fuzzy
 msgid "Generating annotations"
 msgstr "Krei komentajxojn de DVD cxapitroj"
@@ -8600,18 +8601,26 @@ msgid "TTS disabled. Cannot find the application 'aplay' in PATH"
 msgstr ""
 
 #: ../lib/advene/plugins/soundenveloppe.py:38
-#: ../lib/advene/plugins/soundenveloppe.py:125
-#: ../lib/advene/plugins/soundenveloppe.py:127
+#: ../lib/advene/plugins/soundenveloppe.py:136
+#: ../lib/advene/plugins/soundenveloppe.py:138
 #, fuzzy
 msgid "Sound enveloppe"
 msgstr "Dosiero"
 
-#: ../lib/advene/plugins/soundenveloppe.py:56
+#: ../lib/advene/plugins/soundenveloppe.py:57
 msgid "Interval (in ms) at which to take samples."
 msgstr ""
 
-#: ../lib/advene/plugins/soundenveloppe.py:59
+#: ../lib/advene/plugins/soundenveloppe.py:60
 msgid "Maximum number of samples per annotation."
+msgstr ""
+
+#: ../lib/advene/plugins/soundenveloppe.py:66
+msgid "Value to consider (peak or RMS)."
+msgstr ""
+
+#: ../lib/advene/plugins/soundenveloppe.py:69
+msgid "Lower dB limit"
 msgstr ""
 
 #: ../lib/advene/plugins/keywords.py:46
@@ -9495,12 +9504,12 @@ msgstr "Defauxlta regularo"
 msgid "GStreamer generic importer"
 msgstr "Importi dosieron"
 
-#: ../lib/advene/util/gstimporter.py:128
+#: ../lib/advene/util/gstimporter.py:132
 #, fuzzy
 msgid "Imported data"
 msgstr "Importi dosieron"
 
-#: ../lib/advene/util/gstimporter.py:179
+#: ../lib/advene/util/gstimporter.py:183
 msgid "Starting processing"
 msgstr ""
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.32\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-25 17:17+0200\n"
+"POT-Creation-Date: 2020-06-09 10:22+0200\n"
 "PO-Revision-Date: 2014-04-18 21:12-0700\n"
 "Last-Translator: Emmanuel Ayala Mexicano <emmanuelayalamexicano@gmail.com>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
@@ -46,24 +46,25 @@ msgstr "El directorio %s no es una extracción de un paquete zip de Advene."
 msgid "Set of %s annotations"
 msgstr "Conjunto de %s anotaciones"
 
-#: ../lib/advene/gui/widget.py:997 ../lib/advene/gui/views/transcription.py:460
+#: ../lib/advene/gui/widget.py:1035
+#: ../lib/advene/gui/views/transcription.py:460
 #: ../lib/advene/gui/edit/montage.py:60
 msgid "Play"
 msgstr "Reproducir"
 
-#: ../lib/advene/gui/widget.py:1001 ../lib/advene/gui/edit/timeadjustment.py:78
+#: ../lib/advene/gui/widget.py:1039 ../lib/advene/gui/edit/timeadjustment.py:78
 msgid "Refresh snapshot"
 msgstr "Refrescar captura"
 
-#: ../lib/advene/gui/widget.py:1005
+#: ../lib/advene/gui/widget.py:1043
 msgid "Save as..."
 msgstr "Guardar como..."
 
-#: ../lib/advene/gui/widget.py:1010
+#: ../lib/advene/gui/widget.py:1048
 msgid "Use current player position"
 msgstr "Utiliza la posición actual del reproductor"
 
-#: ../lib/advene/gui/widget.py:1016
+#: ../lib/advene/gui/widget.py:1054
 msgid "Adjust timestamp"
 msgstr "Ajustar la marca de tiempo"
 
@@ -8279,7 +8280,7 @@ msgid "Volume threshold (in dB, can be negative) before trigger."
 msgstr "Umbral de volumen (en dB, puede ser negativa) antes de disparar."
 
 #: ../lib/advene/plugins/cutter.py:56
-#: ../lib/advene/plugins/soundenveloppe.py:62
+#: ../lib/advene/plugins/soundenveloppe.py:63
 msgid "Channel selection."
 msgstr "Selección de canal"
 
@@ -8384,7 +8385,7 @@ msgid "Language model (.DMP file)"
 msgstr "Modelo de lenguaje (archivo .DMP)"
 
 #: ../lib/advene/plugins/pocketsphinx.py:122
-#: ../lib/advene/plugins/soundenveloppe.py:80
+#: ../lib/advene/plugins/soundenveloppe.py:88
 msgid "Generating annotations"
 msgstr "Generando anotaciones"
 
@@ -8690,18 +8691,26 @@ msgstr ""
 "TTS deshabilitado. No se puede encontrar la aplicación 'aplay' en el PATH"
 
 #: ../lib/advene/plugins/soundenveloppe.py:38
-#: ../lib/advene/plugins/soundenveloppe.py:125
-#: ../lib/advene/plugins/soundenveloppe.py:127
+#: ../lib/advene/plugins/soundenveloppe.py:136
+#: ../lib/advene/plugins/soundenveloppe.py:138
 msgid "Sound enveloppe"
 msgstr "Envolvente de sonido"
 
-#: ../lib/advene/plugins/soundenveloppe.py:56
+#: ../lib/advene/plugins/soundenveloppe.py:57
 msgid "Interval (in ms) at which to take samples."
 msgstr "Intervalo (en ms) de cuando tomar muestras."
 
-#: ../lib/advene/plugins/soundenveloppe.py:59
+#: ../lib/advene/plugins/soundenveloppe.py:60
 msgid "Maximum number of samples per annotation."
 msgstr "Número máximo de muestras por anotación"
+
+#: ../lib/advene/plugins/soundenveloppe.py:66
+msgid "Value to consider (peak or RMS)."
+msgstr ""
+
+#: ../lib/advene/plugins/soundenveloppe.py:69
+msgid "Lower dB limit"
+msgstr ""
 
 #: ../lib/advene/plugins/keywords.py:46
 #, fuzzy
@@ -9563,12 +9572,12 @@ msgstr "Acciones genéricas"
 msgid "GStreamer generic importer"
 msgstr "Importador generico"
 
-#: ../lib/advene/util/gstimporter.py:128
+#: ../lib/advene/util/gstimporter.py:132
 #, fuzzy
 msgid "Imported data"
 msgstr "Importado?"
 
-#: ../lib/advene/util/gstimporter.py:179
+#: ../lib/advene/util/gstimporter.py:183
 #, fuzzy
 msgid "Starting processing"
 msgstr "Inicializando exportación"
