@@ -1,5 +1,7 @@
 advene (3.8) unstable; urgency=medium
 
+  * Update the HTML component to WebKit2 to be compatible with Ubuntu20
+
   * Settings directory is now called "Advene3" on Windows and MacOSX, to
     avoid confusion with previous versions of Advene. It was already
     different on Linux. Your preferences will be reset.
@@ -19,9 +21,7 @@ advene (3.8) unstable; urgency=medium
     called "Scene change detection". The ShotDetect based algorithm is
     still available.
 
-  * Update the HTML component to WebKit2 to be compatible with Ubuntu20
-
- --
+ -- Olivier Aubert <contact@olivieraubert.net>  Tue, 09 Jun 2020 11:34:37 +0200
 
 advene (3.7) unstable; urgency=medium
 
