@@ -207,7 +207,7 @@ class AdARDFExporter(WebAnnotationExporter):
 
             # Attach comment to the last body
             if keywords.get_comment() and bodies:
-                bodies[-1]['rdf:comment'] = keywords.get_comment()
+                bodies[-1]['rdfs:comment'] = keywords.get_comment()
 
             # Add textual body
             body = new_body(btype="oa:TextualBody")
