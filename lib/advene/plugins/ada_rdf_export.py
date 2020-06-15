@@ -218,7 +218,12 @@ class AdARDFExporter(WebAnnotationExporter):
 
         else:
             body = new_body(btype="oa:TextualBody")
-            body['value'] = a.content.data
+            # If a representation is specified, then use it.
+            rep = a.type.getMetaData(config.data.namespace, "representation")
+            if rep:
+                body['value'] = self.controller.get_title(a)
+            else:
+                body['value'] = a.content.data
             bodies = [ body ]
 
         if len(bodies) == 1:
