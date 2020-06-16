@@ -224,12 +224,19 @@ class AdARDFExporter(WebAnnotationExporter):
 
         else:
             body = new_body(btype="oa:TextualBody")
-            # If a representation is specified, then use it.
-            rep = a.type.getMetaData(config.data.namespace, "representation")
-            if rep:
-                body['value'] = self.controller.get_title(a)
+            # Default: use raw content data
+            body['value'] = a.content.data
+
+            # Special cases
+            if a.type.id == 'ShotDuration':
+                # Hardcoded case: duration in ms
+                body['value'] = a.fragment.duration
             else:
-                body['value'] = a.content.data
+                # If a representation is specified, then use it.
+                rep = a.type.getMetaData(config.data.namespace, "representation")
+                if rep:
+                    body['value'] = self.controller.get_title(a)
+
             bodies = [ body ]
 
         if len(bodies) == 1:
