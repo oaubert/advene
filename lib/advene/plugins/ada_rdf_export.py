@@ -195,7 +195,13 @@ class AdARDFExporter(WebAnnotationExporter):
                             body['ao:annotationValue'] = [ get_keyword_uri(kw) for kw in typedvalues.values ]
                     else:
                         # Generate a sequence for contrasting/evolving values.
-                        body['ao:annotationValueSequence'] = { "@list": [ get_keyword_uri(kw) for kw in typedvalues.values ] }
+                        body['ao:annotationValueSequence'] = { "@list": [
+                            get_keyword_uri(kw) for kw in typedvalues.values
+                        ] }
+                        body['ao:annotationNumericValueSequence'] = { "@list": [
+                            keywords.get(kw, 'numeric_value', -1) for kw in typedvalues.values
+                        ] }
+
                     bodies.append(body)
 
             error = None
