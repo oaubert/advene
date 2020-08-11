@@ -219,13 +219,21 @@ Aborting.""", config.data.path[d])
             c.on_exit()
             sys.exit(1)
         l = l[0]
+        if not config.data.args:
+            logging.error("Syntax: advene -f filter_name [-o output=foo.ext] input.azp")
+            c.on_exit()
+            sys.exit(1)
         ext = l.extension
+
         for f in config.data.args:
-            # A filename was provided. Strip the extension.
-            output = ".".join((os.path.splitext(f)[0], ext))
-            if os.path.exists(output):
-                logging.error("Output file %s already exists. Remove it before proceeding.", output)
-                continue
+            output = config.data.options.options.get('output')
+            if output is None:
+                # Use the input filename, replacing its extension.
+                output = ".".join((os.path.splitext(f)[0], ext))
+                # In this case, we do not want to overwrite existing files
+                if os.path.exists(output):
+                    logging.error("Output file %s already exists. Remove it before proceeding.", output)
+                    continue
             logging.warning("Converting %s into %s", f, output)
             c.load_package(f)
             # FIXME: could trigger events?

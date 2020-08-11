@@ -533,6 +533,10 @@ class Config:
 
         parser.add_argument("-n", "--dry-run", dest="dry_run", action="store_true")
 
+        parser.add_argument("-o", "--option", dest="options", action="append",
+                            default=None, metavar="OPTION-STRING",
+                            help="Filter specific options, as a key=value item.")
+
         parser.add_argument("--no-embedded",
                             dest="embedded", action="store_false", default=True,
                             help="Do not embed the video player.")
@@ -565,6 +569,8 @@ class Config:
                             nargs="*")
         self.options = parser.parse_args()
         self.args = self.options.positional_args
+        # Convert the options array into a dict
+        self.options.options = dict(i.split('=', 1) for i in (self.options.options or []))
         if self.options.version:
             logger.warning(self.get_version_string())
             sys.exit(0)
