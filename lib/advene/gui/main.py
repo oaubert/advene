@@ -1714,7 +1714,7 @@ class AdveneGUI:
         # Make sure that we use a fixed-size font, so that the
         # time_label width is constant and does not constantly modify
         # the slider available width.
-        self.time_label.modify_font(Pango.FontDescription("courier 10"))
+        self.time_label.modify_font(Pango.FontDescription("monospace 10"))
         self.time_label.set_time(None)
         eb.add(self.time_label)
 
