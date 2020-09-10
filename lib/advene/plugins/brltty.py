@@ -65,7 +65,7 @@ def register(controller=None):
     method=controller.message_log
 
     if brlapi is None:
-        controller.log(_("BrlTTY not installed. There will be no braille support."))
+        logger.warning(_("BrlTTY not installed. There will be no braille support."))
     else:
         engine=BrlEngine(controller)
         try:
@@ -77,7 +77,7 @@ def register(controller=None):
                 method=engine.action_brldisplay
                 engine.brldisplay("Advene connected")
         except:
-            controller.log(_("Could not initialize BrlTTY. No braille support."))
+            logger.warning(_("Could not initialize BrlTTY. No braille support."))
 
     # Register the Braille action even if the API is not available.
     controller.register_action(RegisteredAction(
@@ -249,13 +249,13 @@ class BrlEngine:
         return result
 
     def init_brlapi(self):
-        self.controller.log("Connecting brltty...")
+        logger.debug("Connecting brltty...")
         try:
             b = brlapi.Connection()
             b.enterTtyMode()
             self.brlconnection=b
         except (brlapi.ConnectionError, TypeError) as e:
-            self.controller.log(_("BrlTTY connection error: %s") % str(e))
+            logger.warning(_("BrlTTY connection error: %s") % str(e))
             self.brlconnection=None
 
     def disconnect_brlapi(self):

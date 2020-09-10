@@ -37,7 +37,7 @@ def register(controller=None):
         and Gst.ElementFactory.find('pocketsphinx')):
         controller.register_importer(PocketSphinxImporter)
     else:
-        controller.log(_("Cannot register speech recognition: Pocketsphinx plugins not found. See http://cmusphinx.sourceforge.net/wiki/gstreamer for details."))
+        logger.warning(_("Cannot register speech recognition: Pocketsphinx plugins not found. See http://cmusphinx.sourceforge.net/wiki/gstreamer for details."))
     return True
 
 class PocketSphinxImporter(GenericImporter):

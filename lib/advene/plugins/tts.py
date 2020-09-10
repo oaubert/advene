@@ -56,19 +56,19 @@ def register(controller=None):
         for name in ('customarg', 'custom', 'espeak', 'macosx', 'festival', 'sapi', 'generic'):
             c = ENGINES[name]
             if c.can_run():
-                controller.log("TTS: Automatically using " + c.__doc__.splitlines()[0])
+                logger.info("TTS: Automatically using " + c.__doc__.splitlines()[0])
                 selected = c
                 break
     else:
         c = ENGINES.get(engine_name)
         if c is None:
-            controller.log("TTS: %s was specified but it does not exist. Using generic fallback. Please check your configuration." % c.__doc__.splitlines()[0])
+            logger.warning("TTS: %s was specified but it does not exist. Using generic fallback. Please check your configuration." % c.__doc__.splitlines()[0])
             selected = ENGINES['generic']
         elif c.can_run():
-            controller.log("TTS: Using %s as specified." % c.__doc__.splitlines()[0])
+            logger.warning("TTS: Using %s as specified." % c.__doc__.splitlines()[0])
             selected = c
         else:
-            controller.log("TTS: Using %s as specified, but it apparently cannot run. Please check your configuration."  % c.__doc__.splitlines()[0])
+            logger.warning("TTS: Using %s as specified, but it apparently cannot run. Please check your configuration."  % c.__doc__.splitlines()[0])
             selected = c
 
     engine = selected(controller)
@@ -110,9 +110,9 @@ class TTSEngine:
                     rulename=context.evaluateValue('rule')
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
-                self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
-                                                                                                                           'parametername': name})
-                self.controller.log(str(e.message)[:160])
+                logger.error(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
+                                                                                                                      'parametername': name})
+                logger.error(str(e.message)[:160])
                 result=default_value
         else:
             result=default_value
@@ -124,7 +124,7 @@ class TTSEngine:
     def pronounce(self, sentence):
         """Engine-specific method.
         """
-        self.controller.log("TTS: pronounce " + sentence)
+        logger.debug("TTS: pronounce " + sentence)
         return True
 
     def action_pronounce (self, context, parameters):
@@ -155,9 +155,9 @@ class FestivalTTSEngine(TTSEngine):
         self.festival_path=helper.find_in_path('festival')
         self.aplay_path=helper.find_in_path('aplay')
         if self.festival_path is None:
-            self.controller.log(_("TTS disabled. Cannot find the application 'festival' in PATH"))
+            logger.warning(_("TTS disabled. Cannot find the application 'festival' in PATH"))
         if self.aplay_path is None:
-            self.controller.log(_("TTS disabled. Cannot find the application 'aplay' in PATH"))
+            logger.warning(_("TTS disabled. Cannot find the application 'aplay' in PATH"))
         self.festival_process=None
 
     def init(self):
@@ -185,7 +185,7 @@ class FestivalTTSEngine(TTSEngine):
             if self.festival_process is not None:
                 self.festival_process.stdin.write('(SayText "%s")\n' % helper.unaccent(sentence))
         except OSError as e:
-            self.controller.log("TTS Error: " + str(e.message))
+            logger.error("TTS Error: " + str(e.message))
         return True
 ENGINES['festival'] = FestivalTTSEngine
 
@@ -273,7 +273,7 @@ class EspeakTTSEngine(TTSEngine):
                 self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, **kw)
             self.espeak_process.stdin.write((sentence + "\n").encode(config.data.preferences['tts-encoding'], 'ignore'))
         except OSError as e:
-            self.controller.log("TTS Error: ", str(e.message).encode('utf8'))
+            logger.error("TTS Error: %s", str(e.message))
         return True
 ENGINES['espeak'] = EspeakTTSEngine
 
@@ -357,7 +357,7 @@ class CustomTTSEngine(TTSEngine):
                 self.prg_process = subprocess.Popen([ self.prg_path, '-v', self.language ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, **kw)
             self.prg_process.stdin.write((sentence + "\n").encode(config.data.preferences['tts-encoding'], 'ignore'))
         except OSError as e:
-            self.controller.log("TTS Error: ", str(e.message).encode('utf8'))
+            logger.error("TTS Error: %s", str(e.message))
         return True
 ENGINES['custom'] = CustomTTSEngine
 
