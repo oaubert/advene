@@ -62,7 +62,7 @@ class SoundEnveloppeImporter(GstImporter):
                                      action="store", type="choice", dest="channel", choices=("both", "left", "right"), default=self.channel,
                                      help=_("Channel selection."))
         self.optionparser.add_option("-v", "--value",
-                                     action="store", type="choice", dest="value", choices=("rms", "peak"), default=self.channel,
+                                     action="store", type="choice", dest="value", choices=("rms", "peak"), default=self.value,
                                      help=_("Value to consider (peak or RMS)."))
         self.optionparser.add_option("-l", "--lower-db-limit",
                                      action="store", type="int", dest="lower_db_limit", default=self.lower_db_limit,
