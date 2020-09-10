@@ -822,12 +822,9 @@ class AdveneController:
             self._soundplayer=SoundPlayer()
         return self._soundplayer
 
-    def init(self, args=None):
-        """Initialize the controller.
+    def init_plugins(self):
+        """Plugin initialization
         """
-        if args is None:
-            args=[]
-
         try:
             self.player_plugins=self.load_plugins(os.path.join(os.path.dirname(advene.__file__), 'player'),
                                                   prefix="advene_player_plugins")
@@ -845,6 +842,14 @@ class AdveneController:
                                                 prefix="advene_user_plugins")
         except OSError:
             logger.error("Error while loading user plugins", exc_info=True)
+
+    def init(self, args=None):
+        """Initialize the controller.
+        """
+        if args is None:
+            args=[]
+
+        self.init_plugins()
 
         # Read the default rules
         self.event_handler.read_ruleset_from_file(config.data.advenefile('default_rules.xml'),
