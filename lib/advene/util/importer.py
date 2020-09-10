@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 #
 # Advene: Annotate Digital Videos, Exchange on the NEt
 # Copyright (C) 2008-2017 Olivier Aubert <contact@olivieraubert.net>
@@ -78,15 +79,14 @@ from gettext import gettext as _
 
 from gi.repository import GObject
 
-if __name__ != '__main__':
-    import advene.core.config as config
+import advene.core.config as config
 
-    from advene.model.package import Package
-    from advene.model.annotation import Annotation
-    from advene.model.schema import AnnotationType, Schema
-    from advene.model.fragment import MillisecondFragment
+from advene.model.package import Package
+from advene.model.annotation import Annotation
+from advene.model.schema import AnnotationType, Schema
+from advene.model.fragment import MillisecondFragment
 
-    import advene.util.helper as helper
+import advene.util.helper as helper
 
 IMPORTERS=[]
 
@@ -112,7 +112,10 @@ def get_valid_importers(fname):
     valid=[]
     invalid=[]
     n=fname.lower()
-    for i in IMPORTERS:
+    # Use fully qualified name here, so that we access the appropriate
+    # instance of IMPORTERS (the latted will fail if we call this
+    # module as a script)
+    for i in controller.advene.util.importer.IMPORTERS:
         v=i.can_handle(n)
         if v:
             valid.append( (i, v) )
@@ -125,7 +128,7 @@ def get_valid_importers(fname):
 def get_importer(fname, **kw):
     """Return the first/best valid importer.
     """
-    valid, invalid=get_valid_importers(fname)
+    valid, invalid = get_valid_importers(fname)
     i=None
     if len(valid) == 0:
         logger.warning("No valid importer")
@@ -653,61 +656,51 @@ class ExternalAppImporter(GenericImporter):
         yield {}
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    USAGE = "%prog filter_name input_file [options] output_file"
-    if sys.argv[1:]:
-        filtername = sys.argv[1]
-    else:
-        filtername = None
-    params = sys.argv[2:]
-    sys.argv[2:] = []
+    logging.basicConfig(level=logging.INFO)
+    USAGE = f"{sys.argv[0]} [-o filter_options] filter_name input_file [output_file]"
 
-    import advene.core.config as config
     import advene.core.controller as controller
-    import advene
 
-    from advene.model.package import Package
-    from advene.model.annotation import Annotation
-    from advene.model.schema import AnnotationType, Schema
-    from advene.model.fragment import MillisecondFragment
-
-    import advene.util.helper as helper
-
-    import io
-
-    log = io.StringIO()
-    saved, sys.stdout = sys.stdout, log
-    # Load plugins
+    # Basic controller initialization - load plugins
     c = controller.AdveneController()
     c.load_package()
-    try:
-        app_plugins = c.load_plugins(os.path.join(os.path.dirname(advene.__file__), 'plugins'),
-                                     prefix="advene_app_plugins")
-    except OSError:
-        pass
+    c.init_plugins()
 
-    try:
-        user_plugins = c.load_plugins(config.data.advenefile('plugins', 'settings'),
-                                      prefix="advene_user_plugins")
-    except OSError:
-        pass
-    sys.stdout = saved
+    if len(config.data.args) < 2:
+        logger.info("""\n\nSyntax: %s
 
-    if filtername is None or len(params) == 0:
-        logger.error("""Syntax: %s
-filter_name can be "auto" for autodetection.
+filter_name can be "auto" for autodetection (first valid importer),
+"list" for a list of valid importers for the file
+
+Use "-o help" as filter option for getting parameter help
+
+If no output file is specified, then data will be dumped to stdout in a JSON format.
+
 Available filters:
   * %s
-        """ % (USAGE.replace('%prog', sys.argv[0]),
+        """ % (USAGE,
                "\n  * ".join(sorted(i.name for i in controller.advene.util.importer.IMPORTERS))))
         sys.exit(0)
 
-    def progress(value, label):
-        print('\rProgress %02d%% - %s' % (int(100 * value), label), end='', flush=True)
+    filtername = config.data.args[0]
+    inputfile = config.data.args[1]
+    if config.data.args[2:]:
+        outputfile = config.data.args[2]
+    else:
+        outputfile = ''
+
+    def progress(value, label=""):
+        sys.stderr.write('\rProgress %02d%% - %s' % (int(100 * value), label))
         return True
 
     if filtername == 'auto':
-        i = get_importer(params[0], package=c.package, controller=c, callback=progress)
+        i = get_importer(inputfile, package=c.package, controller=c, callback=progress)
+    elif filtername == 'list':
+        # List valid importer names for the given file
+        valid, invalid = get_valid_importers(inputfile)
+        validlist = '\n  * '.join(sorted(i.name for i in valid))
+        logger.info(f"Valid importers for {inputfile}:\n  * {validlist}")
+        sys.exit(1)
     else:
         i = None
         cl = [ f for f in controller.advene.util.importer.IMPORTERS if f.name.startswith(filtername) ]
@@ -718,27 +711,26 @@ Available filters:
             sys.exit(1)
 
     if i is None:
-        logger.error("No matching importer for %s", filtername)
+        logger.error("No matching importer starting with %s", filtername)
         sys.exit(1)
 
     i.optionparser.set_usage(USAGE)
-    args = i.process_options(params)
-    if not args:
-        i.optionparser.print_help()
-        sys.exit(0)
-    inputfile = args[0]
-    try:
-        outputfile = args[1]
-    except IndexError:
-        outputfile = ''
+    # Rebuild filter option string from config.data.options.options dict
+    option_list = [ (f"--{k}={v}" if v else f"--{k}")
+                    for (k, v) in config.data.options.options.items() ]
+    if option_list:
+        args = i.process_options(option_list)
+
     # (for .sub conversion for instance, --fps, --offset)
     logger.info("Converting %s to %s using %s", inputfile, outputfile, i.name)
 
+    # Serialize data as JSON to stdout
     def json_serialize(p):
         from advene.util.exporter import FlatJsonExporter
         e = FlatJsonExporter(controller=c)
         e.set_source(p)
         e.export('-')
+
     if hasattr(i, 'async_process_file'):
         # async mode
 
