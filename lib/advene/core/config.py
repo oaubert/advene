@@ -570,7 +570,8 @@ class Config:
         self.options = parser.parse_args()
         self.args = self.options.positional_args
         # Convert the options array into a dict
-        self.options.options = dict(i.split('=', 1) for i in (self.options.options or []))
+        self.options.options = dict((i.split('=', 1) if '=' in i else (i, ""))
+                                    for i in (self.options.options or []))
         if self.options.version:
             logger.warning(self.get_version_string())
             sys.exit(0)
