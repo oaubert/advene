@@ -725,11 +725,11 @@ Available filters:
     logger.info("Converting %s to %s using %s", inputfile, outputfile, i.name)
 
     # Serialize data as JSON to stdout
-    def json_serialize(p):
+    def json_serialize(p, filename="-"):
         from advene.util.exporter import FlatJsonExporter
         e = FlatJsonExporter(controller=c)
         e.set_source(p)
-        e.export('-')
+        e.export(filename)
 
     if hasattr(i, 'async_process_file'):
         # async mode
@@ -737,20 +737,20 @@ Available filters:
         from gi.repository import GLib
         mainloop = GLib.MainLoop()
         def end_callback():
-            if outputfile:
-                logger.info("Saving package to %s", outputfile)
-                i.package.save(outputfile)
+            if not outputfile or outputfile.endswith('.json'):
+                json_serialize(i.package, outputfile)
             else:
-                json_serialize(i.package)
+                i.package.save(outputfile)
             mainloop.quit()
             return True
         i.async_process_file(inputfile, end_callback)
         mainloop.run()
     else:
         p = i.process_file(inputfile)
-        if outputfile:
-            p.save(outputfile)
+        if not outputfile or outputfile.endswith('.json'):
+            json_serialize(p, outputfile)
         else:
-            json_serialize(p)
+            p.save(outputfile)
+
         logger.info(i.statistics_formatted())
     sys.exit(0)
