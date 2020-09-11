@@ -88,7 +88,7 @@ from advene.model.fragment import MillisecondFragment
 
 import advene.util.helper as helper
 
-IMPORTERS=[]
+IMPORTERS = []
 
 def subprocess_setup():
     # Python installs a SIGPIPE handler by default. This is usually not what
@@ -112,10 +112,7 @@ def get_valid_importers(fname):
     valid=[]
     invalid=[]
     n=fname.lower()
-    # Use fully qualified name here, so that we access the appropriate
-    # instance of IMPORTERS (the latted will fail if we call this
-    # module as a script)
-    for i in controller.advene.util.importer.IMPORTERS:
+    for i in IMPORTERS:
         v=i.can_handle(n)
         if v:
             valid.append( (i, v) )
@@ -660,6 +657,11 @@ if __name__ == "__main__":
     USAGE = f"{sys.argv[0]} [-o filter_options] filter_name input_file [output_file]"
 
     import advene.core.controller as controller
+    # The controller will import (as a module) advene.util.importer,
+    # which will be different from __main__. So local IMPORTERS
+    # variable will be different from advene.util.importer.IMPORTERS
+    # Fix this situation by restoring appropriate IMPORTERS reference:
+    IMPORTERS = controller.advene.util.importer.IMPORTERS
 
     # Basic controller initialization - load plugins
     c = controller.AdveneController()
@@ -729,7 +731,7 @@ Available filters:
         from advene.util.exporter import FlatJsonExporter
         e = FlatJsonExporter(controller=c)
         e.set_source(p)
-        e.export(filename)
+        e.export(filename or '-')
 
     if hasattr(i, 'async_process_file'):
         # async mode
@@ -737,7 +739,7 @@ Available filters:
         from gi.repository import GLib
         mainloop = GLib.MainLoop()
         def end_callback():
-            if not outputfile or outputfile.endswith('.json'):
+            if outputfile == '' or outputfile.endswith('.json'):
                 json_serialize(i.package, outputfile)
             else:
                 i.package.save(outputfile)
@@ -747,7 +749,7 @@ Available filters:
         mainloop.run()
     else:
         p = i.process_file(inputfile)
-        if not outputfile or outputfile.endswith('.json'):
+        if outputfile == '' or outputfile.endswith('.json'):
             json_serialize(p, outputfile)
         else:
             p.save(outputfile)
