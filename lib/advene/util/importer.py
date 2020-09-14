@@ -85,7 +85,7 @@ except ModuleNotFoundError:
     # Try to find if we are in a development tree.
     maindir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     if os.path.exists(os.path.join(maindir, "setup.py")):
-        # Chances are that we were in a development tree...
+        # Chances are that we are in a development tree...
         libpath = os.path.join(maindir, "lib")
         logger.warning("You seem to have a development tree at:\n%s." % libpath)
         sys.path.insert(0, libpath)
@@ -692,10 +692,11 @@ If no output file is specified, then data will be dumped to stdout in a JSON for
 Available filters:
   * %s
         """ % (USAGE,
-               "\n  * ".join(sorted(i.name for i in controller.advene.util.importer.IMPORTERS))))
+               "\n  * ".join(sorted(i.name.replace(' ', '_')
+                                    for i in controller.advene.util.importer.IMPORTERS))))
         sys.exit(0)
 
-    filtername = config.data.args[0]
+    filtername = config.data.args[0].replace('_', ' ')
     inputfile = config.data.args[1]
     if config.data.args[2:]:
         outputfile = config.data.args[2]
