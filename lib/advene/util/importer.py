@@ -79,7 +79,21 @@ from gettext import gettext as _
 
 from gi.repository import GObject
 
-import advene.core.config as config
+try:
+    import advene.core.config as config
+except ModuleNotFoundError:
+    # Try to find if we are in a development tree.
+    (maindir, subdir) = os.path.split(
+        os.path.dirname(
+            os.path.abspath(
+                os.path.join(os.path.pardir, os.path.pardir, __file__))))
+    if os.path.exists(os.path.join(maindir, "setup.py")):
+        # Chances are that we were in a development tree...
+        libpath = os.path.join(maindir, "lib")
+        logger.warning("You seem to have a development tree at:\n%s." % libpath)
+        sys.path.insert(0, libpath)
+    import advene.core.config as config
+    config.data.fix_paths(maindir)
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation
