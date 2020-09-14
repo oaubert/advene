@@ -83,10 +83,7 @@ try:
     import advene.core.config as config
 except ModuleNotFoundError:
     # Try to find if we are in a development tree.
-    (maindir, subdir) = os.path.split(
-        os.path.dirname(
-            os.path.abspath(
-                os.path.join(os.path.pardir, os.path.pardir, __file__))))
+    maindir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     if os.path.exists(os.path.join(maindir, "setup.py")):
         # Chances are that we were in a development tree...
         libpath = os.path.join(maindir, "lib")
