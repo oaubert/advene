@@ -51,6 +51,7 @@ class WebAnnotationExporter(FlatJsonExporter):
             "@type": "Annotation",
             "advene:type": a.type.id,
             "advene:type_title": self.controller.get_title(a.type),
+            "advene:type_color": self.controller.get_element_color(a.type),
             "advene:color": self.controller.get_element_color(a),
             "created": a.date,
             "creator": {

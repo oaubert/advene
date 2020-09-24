@@ -347,6 +347,7 @@ class FlatJsonExporter(GenericExporter):
                 "creator": a.author,
                 "type": a.type.id,
                 "type_title": self.controller.get_title(a.type),
+                "type_color": self.controller.get_element_color(a.type),
                 "media": media_uri,
                 "begin": a.fragment.begin,
                 "end": a.fragment.end,
@@ -393,22 +394,8 @@ if __name__ == "__main__":
     from advene.model.package import Package
 
     init_templateexporters()
-    log = io.StringIO()
-    saved, sys.stdout = sys.stdout, log
-    # Load plugins
     c = controller.AdveneController()
-    try:
-        app_plugins = c.load_plugins(os.path.join(os.path.dirname(advene.__file__), 'plugins'),
-                                     prefix="advene_app_plugins")
-    except OSError:
-        pass
-
-    try:
-        user_plugins = c.load_plugins(config.data.advenefile('plugins', 'settings'),
-                                      prefix="advene_user_plugins")
-    except OSError:
-        pass
-    sys.stdout = saved
+    c.init_plugins()
 
     if filtername is None or len(params) == 0:
         logger.error("""Syntax: %s
