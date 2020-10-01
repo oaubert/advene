@@ -434,14 +434,14 @@ Available filters:
         e.optionparser.print_help()
         sys.exit(0)
     inputfile = args[0]
-    try:
-        outputfile = args[1]
-    except IndexError:
-        outputfile = ""
 
     c.load_package(inputfile)
     e.set_source(c.package)
 
-    logger.info("Converting %s to %s using %s", inputfile, outputfile, e.name)
-    p = e.export(e.get_filename(outputfile))
+    try:
+        outputfile = e.get_filename(args[1])
+        logger.info("Converting %s to %s using %s", inputfile, outputfile, e.name)
+        p = e.export(outputfile)
+    except IndexError:
+        p = e.export(sys.stdout)
     sys.exit(0)
