@@ -676,7 +676,6 @@ if __name__ == "__main__":
 
     # Basic controller initialization - load plugins
     c = controller.AdveneController()
-    c.load_package()
     c.init_plugins()
 
     if len(config.data.args) < 2:
@@ -685,7 +684,14 @@ if __name__ == "__main__":
 filter_name can be "auto" for autodetection (first valid importer),
 "list" for a list of valid importers for the file
 
-Use "-o help" as filter option for getting parameter help
+Use "-o help" as filter option for getting parameter help. Filter
+parameters displayed as --long-option-name in the help message should
+be entered as "-o long-option-name=value" (strip leading -- from
+option and use one "-o" option per parameter).
+
+A base template package can be specified using the "-o
+template_package=path.azp" option. The given package will be loaded
+before the import takes place.
 
 If no output file is specified, then data will be dumped to stdout in a JSON format.
 
@@ -696,12 +702,26 @@ Available filters:
                                     for i in controller.advene.util.importer.IMPORTERS))))
         sys.exit(0)
 
+    # Handle input parameters/options
     filtername = config.data.args[0].replace('_', ' ')
     inputfile = config.data.args[1]
     if config.data.args[2:]:
         outputfile = config.data.args[2]
     else:
         outputfile = ''
+
+    # Filter options are passed using the -o option, but there is a
+    # specific template_package option to specify initial template
+    # packages
+    template_package = config.data.options.options.get('template_package')
+    # Rebuild filter option string from config.data.options.options dict
+    option_list = [ (f"--{k}={v}" if v else f"--{k}")
+                    for (k, v) in config.data.options.options.items()
+                    if k != 'template_package' ]
+
+    # If template_package is None, then the controller will use the
+    # standard template package
+    c.load_package(template_package)
 
     def progress(value, label=""):
         sys.stderr.write('\rProgress %02d%% - %s' % (int(100 * value), label))
@@ -729,9 +749,6 @@ Available filters:
         sys.exit(1)
 
     i.optionparser.set_usage(USAGE)
-    # Rebuild filter option string from config.data.options.options dict
-    option_list = [ (f"--{k}={v}" if v else f"--{k}")
-                    for (k, v) in config.data.options.options.items() ]
     if option_list:
         args = i.process_options(option_list)
 
