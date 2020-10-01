@@ -388,8 +388,18 @@ if __name__ == "__main__":
     params = sys.argv[2:]
     sys.argv[2:] = []
 
-    import advene
-    import advene.core.config as config
+    try:
+        import advene.core.config as config
+    except ImportError:
+        # Fix paths if necessary
+        maindir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        if os.path.exists(os.path.join(maindir, "setup.py")):
+            # Chances are that we are in a development tree...
+            libpath = os.path.join(maindir, "lib")
+            logger.warning("You seem to have a development tree at:\n%s." % libpath)
+            sys.path.insert(0, libpath)
+        import advene.core.config as config
+        config.data.fix_paths(maindir)
     import advene.core.controller as controller
     from advene.model.package import Package
 
