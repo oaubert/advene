@@ -36,6 +36,18 @@ if __name__ == '__main__':
     saved_args = sys.argv[1:]
     sys.argv = [ sys.argv[0] ]
 
+try:
+    import advene.core.config as config
+except ModuleNotFoundError:
+    # Try to find if we are in a development tree.
+    maindir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    if os.path.exists(os.path.join(maindir, "setup.py")):
+        # Chances are that we are in a development tree...
+        libpath = os.path.join(maindir, "lib")
+        logger.warning("You seem to have a development tree at:\n%s." % libpath)
+        sys.path.insert(0, libpath)
+    import advene.core.config as config
+    config.data.fix_paths(maindir)
 from advene.core.idgenerator import Generator
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
