@@ -42,6 +42,13 @@ class WebAnnotationExporter(FlatJsonExporter):
     extension = 'jsonld'
     mimetype = "application/json"
 
+    def __init__(self, controller=None, source=None):
+        super().__init__(controller, source)
+        self.split = False
+        self.optionparser.add_option("-s", "--split",
+                                     action="store_true", dest="split", default=self.split,
+                                     help=_("Split types in different AnnotationCollections"))
+
     def annotation_uri(self, a, media_uri):
         return a.uri
 
@@ -77,11 +84,7 @@ class WebAnnotationExporter(FlatJsonExporter):
             }
         }
 
-    def export(self, filename=None):
-        # Works if source is a package or a type
-        package = self.source.ownerPackage
-        media_uri = package.getMetaData(config.data.namespace, "media_uri") or self.controller.get_default_media()
-
+    def single_data(self, media_uri):
         data = {
             "@context": [ "http://www.w3.org/ns/anno.jsonld",
                           "http://www.w3.org/ns/ldp.jsonld",
@@ -107,5 +110,62 @@ class WebAnnotationExporter(FlatJsonExporter):
                            if json is not None ]}
         }
         data["totalItems"] = len(data['first']['items'])
+        return data
+
+    def split_data(self, media_uri):
+        def get_collection(at):
+            col = {
+                "id": at.uri,
+                "type": "AnnotationCollection",
+                "label": self.controller.get_title(at),
+                "advene:type": at.id,
+                "advene:type_color": self.controller.get_element_color(at),
+                "created": at.date,
+                "creator": {
+                    "@id": "local:user/%s" % at.author,
+                    "@type": "Person",
+                    "nick": at.author
+                },
+                "first": {
+                    "id": "/".join((at.uri, "page1")),
+                    "type": "AnnotationPage",
+                    "startIndex": 0,
+                    "items": [ json
+                               for json in ( self.annotation_jsonld(a, media_uri) for a in at.annotations )
+                               if json is not None ]
+                },
+            }
+            col["totalItems"] = len(col['first']['items'])
+            return col
+
+        data = {
+            "@context": [ "http://www.w3.org/ns/anno.jsonld",
+                          "http://www.w3.org/ns/ldp.jsonld",
+                          {
+                              "advene": "http://www.advene.org/ns/webannotation/",
+                              # Ideally, we should use a random URI
+                              # here (because without more
+                              # information, we cannot know the actual
+                              # URI of this local symbol) but it would
+                              # render the export unstable.
+                              "local": "http://www.advene.org/ns/_local/"
+                          }
+            ],
+            "id": self.source.uri,
+            "type": "ldp:Container",
+            "label": self.controller.get_title(self.source),
+            "ldp:contains": [ get_collection(at) for at in self.source.annotationTypes ],
+            }
+        return data
+
+    def export(self, filename=None):
+        # Works if source is a package or a type
+        package = self.source.ownerPackage
+        media_uri = package.getMetaData(config.data.namespace, "media_uri") or self.controller.get_default_media()
+
+        if self.split:
+            data = self.split_data(media_uri)
+        else:
+            data = self.single_data(media_uri)
 
         return self.output(data, filename)
