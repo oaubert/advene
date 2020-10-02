@@ -1,5 +1,4 @@
 #! /bin/bash
 
 PACKAGEDIR=$(dirname "$0")/../lib
-export PYTHONPATH=${PACKAGEDIR}
 exec python3 "${PACKAGEDIR}/advene/util/merger.py" "$@"

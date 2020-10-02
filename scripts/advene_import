@@ -1,0 +1,4 @@
+#! /bin/bash
+
+PACKAGEDIR=$(dirname "$0")/../lib
+exec python3 "${PACKAGEDIR}/advene/util/importer.py" "$@"
