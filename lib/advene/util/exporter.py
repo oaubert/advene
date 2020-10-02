@@ -35,10 +35,21 @@ import os
 from simpletal import simpleTAL, simpleTALES
 import sys
 
-if __name__ != '__main__':
+try:
     import advene.core.config as config
-    from advene.model.package import Package
-    from advene.model.content import KeywordList
+except ModuleNotFoundError:
+    # Try to find if we are in a development tree.
+    maindir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    if os.path.exists(os.path.join(maindir, "setup.py")):
+        # Chances are that we are in a development tree...
+        libpath = os.path.join(maindir, "lib")
+        logger.warning("You seem to have a development tree at:\n%s." % libpath)
+        sys.path.insert(0, libpath)
+    import advene.core.config as config
+    config.data.fix_paths(maindir)
+
+from advene.model.package import Package
+from advene.model.content import KeywordList
 
 EXPORTERS = {}
 
@@ -380,41 +391,35 @@ if __name__ != "__main__":
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    USAGE = "%prog filter_name input_file [options] output_file"
-    if sys.argv[1:]:
-        filtername = sys.argv[1]
-    else:
-        filtername = None
-    params = sys.argv[2:]
-    sys.argv[2:] = []
+    USAGE = f"{sys.argv[0]} [-o filter_options] filter_name input_file [output_file]"
 
-    try:
-        import advene.core.config as config
-    except ImportError:
-        # Fix paths if necessary
-        maindir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        if os.path.exists(os.path.join(maindir, "setup.py")):
-            # Chances are that we are in a development tree...
-            libpath = os.path.join(maindir, "lib")
-            logger.warning("You seem to have a development tree at:\n%s." % libpath)
-            sys.path.insert(0, libpath)
-        import advene.core.config as config
-        config.data.fix_paths(maindir)
     import advene.core.controller as controller
-    from advene.model.package import Package
-
     init_templateexporters()
     c = controller.AdveneController()
     c.init_plugins()
 
-    if filtername is None or len(params) == 0:
+    if (len(config.data.args) < 2
+        or config.data.args[0] == 'list'):
         logger.error("""Syntax: %s
 
 Available filters:
   * %s
-        """ % (USAGE.replace('%prog', sys.argv[0]),
+        """ % (USAGE,
                "\n  * ".join(i.get_id() for i in c.get_export_filters())))
         sys.exit(0)
+
+    # Handle input parameters/options
+    filtername = config.data.args[0]
+    inputfile = config.data.args[1]
+    if config.data.args[2:]:
+        outputfile = config.data.args[2]
+    else:
+        outputfile = ''
+
+    # Filter options are passed using the -o option
+    # Rebuild filter option string from config.data.options.options dict
+    option_list = [ (f"--{k}={v}" if v else f"--{k}")
+                    for (k, v) in config.data.options.options.items() ]
 
     e = None
     cl = [ f for f in c.get_export_filters() if f.get_id().startswith(filtername) ]
@@ -429,19 +434,15 @@ Available filters:
         sys.exit(1)
 
     e.optionparser.set_usage(USAGE)
-    args = e.process_options(params)
-    if not args:
-        e.optionparser.print_help()
-        sys.exit(0)
-    inputfile = args[0]
+    e.process_options(option_list)
 
     c.load_package(inputfile)
     e.set_source(c.package)
 
-    try:
-        outputfile = e.get_filename(args[1])
+    if outputfile:
+        outputfile = e.get_filename(outputfile)
         logger.info("Converting %s to %s using %s", inputfile, outputfile, e.name)
         p = e.export(outputfile)
-    except IndexError:
+    else:
         p = e.export(sys.stdout)
     sys.exit(0)
