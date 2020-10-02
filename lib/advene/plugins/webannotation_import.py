@@ -25,6 +25,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
+import itertools
 import json
 import os
 
@@ -49,6 +50,37 @@ class WebAnnotationImporter(GenericImporter):
             return 90
         return 0
 
+    def fix_item(self, i, collection=None):
+        """Enrich item content with structure-specific information.
+        """
+        if collection is not None and i.get('advene:type') is None:
+            i['advene:type'] = (collection.get('@id')
+                                or collection.get('id')
+                                or collection.get('@label')
+                                or collection.get('label')
+                                or str(collection))
+        return i
+
+    def get_items(self, data):
+        if (data.get('type') or data.get('@type')) == 'AnnotationCollection':
+            # Top-level AnnotationCollection. Consider only the first page.
+            return [ self.fix_item(i, data)
+                     for i in data.get('first', {}).get('items', []) ]
+            #label = data.get('label', 'No label')
+        elif (data.get('type') or data.get('@type')) == 'ldp:Container':
+            # ldp:Container, for holding multiple AnnotationCollections
+            # It should have a property ldp:contains with a list of AnnotationCollection
+            # FIXME: it AnnotationCollection is used to convey type
+            # information, how do we carry this information in
+            # individual items?
+            return list(itertools.chain(self.get_items(col) for col in data.get('ldp:contains')))
+        elif data.get('items'):
+            # Direct item list
+            return [ self.fix_item(i, 'imported')
+                     for i in data.get('items') ]
+        else:
+            return []
+
     def process_file(self, filename, dest=None):
         try:
             with open(filename, 'r') as f:
@@ -61,13 +93,7 @@ class WebAnnotationImporter(GenericImporter):
                       'description',
                       _("Converted from %s") % filename)
 
-        if data.get('type') == 'AnnotationCollection':
-            items = data.get('first', {}).get('items', [])
-            #label = data.get('label', 'No label')
-        elif data.get('items'):
-            items = data.get('items')
-        else:
-            items = []
+        items = [ i for items in self.get_items(data) for i in items ]
 
         self.convert(self.iterator(items))
         self.progress(1.0)
@@ -106,8 +132,7 @@ class WebAnnotationImporter(GenericImporter):
         step = 1.0 / len(items)
         self.progress(progress, "Starting conversion")
         for i in items:
-            if not (i.get('@type') == 'Annotation'
-                    or i.get('type') == 'Annotation'):
+            if (i.get('type') or i.get('@type')) != 'Annotation':
                 logger.debug("Not an annotation")
                 continue
             # Check that it is a media annotation
