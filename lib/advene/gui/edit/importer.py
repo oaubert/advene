@@ -140,6 +140,10 @@ class AnnotationImporter(AdhocView):
             self.do_gui_operation(self.processing_ended, msg=msg)
             return True
         self.progress_callback(1.0)
+        if self.controller.cached_duration == 0:
+            # Importing into an videoless package. Use the maximum timestamp as duration.
+            self.controller.cached_duration = max(a.fragment.end for a in self.controller.package.annotations)
+            self.controller.notify('DurationUpdate', duration=self.controller.cached_duration)
         self.controller.notify("PackageActivate", package=self.controller.package)
         self.close()
         if msg is None:
