@@ -309,6 +309,8 @@ class GenericImporter:
     def ensure_new_type(self, prefix="at_converted", title="Converted data", schemaid=None, mimetype=None, description=None):
         """Create a new type.
         """
+        if prefix == "":
+            prefix = "at_converted"
         l=[ at.id for at in self.package.annotationTypes ]
         if prefix in l:
             i = 1
@@ -495,25 +497,20 @@ class GenericImporter:
             title = d.get('title', content[:20])
             timestamp = d.get('timestamp', self.timestamp)
 
-            try:
-                type_=d['type']
-                if isinstance(type_, str):
-                    # A type id was specified. Dereference it, and
-                    # create it if necessary.
-                    type_id = type_
-                    type_ = self.package.get_element_by_id(type_id)
-                    if type_ is None:
-                        # Not existing, create it.
-                        type_ = self.ensure_new_type(type_id, title=type_id, mimetype=d.get('mimetype', None))
-                    elif not isinstance(type_, AnnotationType):
-                        raise Exception("Error during import: the specified type id %s is not an annotation type" % type_id)
-            except KeyError:
-                type_=self.defaulttype
+            type_ = d.get('type')
+            if not type:
+                # Either None or an empty string. Set to defaulttype anyway.
+                type_ = self.defaulttype
+            elif isinstance(type_, str):
+                # A type id was specified. Dereference it, and
+                # create it if necessary.
+                type_id = type_
+                type_ = self.package.get_element_by_id(type_id)
                 if type_ is None:
-                    if len(self.package.annotationTypes) > 0:
-                        type_ = self.package.annotationTypes[0]
-                    else:
-                        raise Exception("No type")
+                    # Not existing, create it.
+                    type_ = self.ensure_new_type(prefix=type_id, title=type_id, mimetype=d.get('mimetype', None))
+            if not isinstance(type_, AnnotationType):
+                raise Exception("Error during import: the specified type id %s is not an annotation type" % type_)
 
             a = self.create_annotation(type_=type_,
                                        begin=begin,
