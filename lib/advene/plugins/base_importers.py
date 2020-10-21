@@ -67,6 +67,10 @@ class TextImporter(GenericImporter):
     appropriate format but can be mislead if annotation data looks
     like a timestamp. In doubt, specify your format.
 
+    If the first_word_is_type option is checked, then the first word
+    of annotation_data is used as a type identifier (which allows to
+    import multiple types easily).
+
     begin_time and end_time can be formatted in various ways.
 
     This function tries to handle multiple formats:
@@ -93,6 +97,7 @@ class TextImporter(GenericImporter):
       s: seconds
       ms: milliseconds
       NN: frame number
+
     """
     name=_("Text importer")
 
@@ -105,6 +110,7 @@ class TextImporter(GenericImporter):
         self.first_timestamp = None
         self.unit = "ms"
         self.timestampmode = "auto"
+        self.first_word_is_type = False
         self.optionparser.add_option("-e", "--encoding",
                                      action="store", type="string", dest="encoding", default=self.encoding,
                                      help=_("Specify the encoding of the input file (latin1, utf8...)"))
@@ -117,6 +123,9 @@ class TextImporter(GenericImporter):
         self.optionparser.add_option("-t", "--timestampmode",
                                      action="store", type="choice", dest="timestamp", choices=("begin", "both", "auto"), default=self.timestampmode,
                                      help=_("What timestamps are present in a line (only begin, both begin and end, or automatic recognition)"))
+        self.optionparser.add_option("-f", "--first_word_is_type",
+                                     action="store_true", dest="first_word_is_type", default=self.first_word_is_type,
+                                     help=_("Consider the first data word as a type id"))
 
 
     @staticmethod
@@ -207,10 +216,18 @@ class TextImporter(GenericImporter):
                         stored_data = data[1]
                         stored_begin = begin
                     else:
+                        if self.first_word_is_type:
+                            if ' ' in stored_data:
+                                type_, content = stored_data.split(" ", 1)
+                            else:
+                                type_, content = stored_data, ""
+                        else:
+                            type_, content = "text_import", stored_data
                         yield {
                             'begin': stored_begin,
                             'end': max(begin - 1, 0),
-                            'content': stored_data,
+                            'content': content,
+                            'type': type_.strip(),
                         }
                         stored_begin = begin
                         stored_data = data[1]
@@ -229,11 +246,19 @@ class TextImporter(GenericImporter):
                         content = data[2]
                     else:
                         content = ""
+                    if self.first_word_is_type:
+                        if ' ' in content:
+                            type_, content = content.split(" ", 1)
+                        else:
+                            type_, content = content, ""
+                    else:
+                        type_ = "text_import"
                     yield {
                         'begin': begin,
                         'end': end,
                         'content': content,
-                        }
+                        'type': type_.strip(),
+                    }
                     stored_begin = begin
                     index += 1
 
