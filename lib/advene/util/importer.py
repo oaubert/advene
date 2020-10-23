@@ -463,8 +463,8 @@ class GenericImporter:
           - complete: boolean. Used to mark the completeness of the annotation.
           - send: yield should return the created annotation
         """
-        if self.package is None:
-            self.package, self.defaulttype=self.init_package(annotationtypeid='imported', schemaid='imported-schema')
+        if self.defaulttype is None:
+            self.package, self.defaulttype = self.init_package(annotationtypeid='imported', schemaid='imported-schema')
         if not hasattr(source, '__next__'):
             # It is not an iterator, so it may be another iterable
             # (most probably a list). Replace it by an iterator to
@@ -498,7 +498,7 @@ class GenericImporter:
             timestamp = d.get('timestamp', self.timestamp)
 
             type_ = d.get('type')
-            if not type:
+            if not type_:
                 # Either None or an empty string. Set to defaulttype anyway.
                 type_ = self.defaulttype
             elif isinstance(type_, str):
