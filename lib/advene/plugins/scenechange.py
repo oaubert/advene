@@ -41,6 +41,8 @@ class SceneChangeImporter(GstImporter):
 
         ## Internal data structures
         self.buffer = [ 0 ]
+        self.duration = None
+        self.is_finalized = False
 
     def do_finalize(self):
         self.convert({ 'begin': int(begin / Gst.MSECOND),
@@ -52,8 +54,18 @@ class SceneChangeImporter(GstImporter):
     def pipeline_postprocess(self, pipeline):
         def event_handler(pad, event):
             if event is not None:
-                logger.debug("****** Event %s", event.get_structure().to_string())
-                if event.type == Gst.EventType.STREAM_GROUP_DONE:
+                logger.debug("****** Event %s %s", event.type, event.get_structure().to_string())
+                if event.type == Gst.EventType.SEGMENT:
+                    s = event.get_structure()
+                    self.duration = s.get_value('segment').duration
+                elif event.type == Gst.EventType.STREAM_GROUP_DONE:
+                    # Guard against multiple calls
+                    if self.is_finalized:
+                        return None
+                    self.is_finalized = True
+                    # Push last timecode
+                    if self.duration is not None:
+                        self.buffer.append(self.duration)
                     # End of stream.
                     self.finalize()
                     return None
@@ -61,14 +73,14 @@ class SceneChangeImporter(GstImporter):
                     s = event.get_structure()
                     if s.get_name() == 'GstForceKeyUnit':
                         # Get stream time
-                        self.buffer.append(s.get_uint64('timestamp').value)
+                        self.buffer.append(s.get_value('timestamp'))
             return event
         pad = self.sink.get_static_pad('sink')
         pad.set_event_function(event_handler)
 
     def setup_importer(self, filename):
-        at = self.ensure_new_type('scenechange',
-                                  title=_("Scene change"),
-                                  description = _("Scene change"))
+        self.ensure_new_type('scenechange',
+                             title=_("Scene change"),
+                             description = _("Scene change"))
 
         return "videoconvert ! videoscale ! scenechange"
