@@ -116,7 +116,7 @@ class WebAnnotationImporter(GenericImporter):
             except KeyError:
                 logger.debug("Invalid target")
                 return None
-            if selector.get('@type') != "FragmentSelector":
+            if selector.get('@type', selector.get('type')) != "FragmentSelector":
                 logger.debug("No mediafragment selector")
                 return None
             # If there are advene:begin/advene:end properties, use
@@ -159,7 +159,7 @@ class WebAnnotationImporter(GenericImporter):
             # body can be either an object or a list of objects
             if body is not None:
                 if isinstance(body, list):
-                    textbody = [ b for b in body if b.get('@type') in ('Text', 'TextualBody', 'oa:TextualBody') ]
+                    textbody = [ b for b in body if b.get('@type', b.get('type')) in ('Text', 'TextualBody', 'oa:TextualBody') ]
                     if len(textbody) == 1:
                         # Found 1 Text body. Use it.
                         el['content'] = textbody[0].get('value', '')
@@ -169,13 +169,15 @@ class WebAnnotationImporter(GenericImporter):
                         el['content'] = json.dumps(body)
                         yield el
                 else:
-                    if body.get('@type') in ('Text', 'TextualBody', 'oa:TextualBody'):
+                    if body.get('@type', body.get('type')) in ('Text', 'TextualBody', 'oa:TextualBody'):
                         el['content'] = body.get('value')
                         yield el
                     else:
                         # Fallback for other body types
                         el['content'] = json.dumps(body)
                         yield el
+            else:
+                logger.info("body is None")
             yield el
             progress += step
             self.progress(progress)
