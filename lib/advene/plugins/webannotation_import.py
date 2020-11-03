@@ -111,8 +111,9 @@ class WebAnnotationImporter(GenericImporter):
                 # List of multiple targets. Let's consider only the first one for now.
                 target = target[0]
             try:
-                media = target['source']
                 selector = target['selector']
+                # First try source, then id, then fail.
+                media = target.get('source', target['id'])
             except KeyError:
                 logger.debug("Invalid target")
                 return None
@@ -145,6 +146,7 @@ class WebAnnotationImporter(GenericImporter):
             # Check that it is a media annotation
             fragment = parse_mediafragment(i.get('target'))
             if fragment is None:
+                logger.debug('Empty target. Ignoring annotation')
                 continue
             el = { 'media': fragment[0],
                    'begin': fragment[1],
