@@ -62,7 +62,11 @@ class WebAnnotationImporter(GenericImporter):
         return i
 
     def get_items(self, data):
-        if (data.get('type') or data.get('@type')) == 'AnnotationCollection':
+        if isinstance(data, list):
+            # List of something (collection hopefully).  Let's flatten
+            # the generated lists
+            return [ self.get_items(d) for d in data ]
+        elif (data.get('type') or data.get('@type')) == 'AnnotationCollection':
             # Top-level AnnotationCollection. Consider only the first page.
             return [ self.fix_item(i, data)
                      for i in data.get('first', {}).get('items', []) ]
