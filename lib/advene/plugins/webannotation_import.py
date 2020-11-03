@@ -107,6 +107,9 @@ class WebAnnotationImporter(GenericImporter):
         """Iterate through the loaded jsonld items
         """
         def parse_mediafragment(target):
+            if isinstance(target, list):
+                # List of multiple targets. Let's consider only the first one for now.
+                target = target[0]
             try:
                 media = target['source']
                 selector = target['selector']
