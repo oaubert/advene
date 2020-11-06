@@ -113,7 +113,7 @@ class WebAnnotationImporter(GenericImporter):
             try:
                 selector = target['selector']
                 # First try source, then id, then fail.
-                media = target.get('source', target['id'])
+                media = target.get('source', target.get('id', ''))
             except KeyError:
                 logger.debug("Invalid target")
                 return None
