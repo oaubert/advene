@@ -1379,7 +1379,7 @@ class AdveneController:
         except ZeroDivisionError:
             framerate = 0
         if framerate == 0:
-            framerate = 1 / config.data.prefix['default-fps']
+            framerate = 1 / config.data.preferences['default-fps']
             logger.warning("Cannot determine video FPS. Using default value %.02f", framerate)
         # Reset the imagecache
         if uri not in self.imagecache:
