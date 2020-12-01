@@ -135,7 +135,7 @@ class TextImporter(GenericImporter):
             return 100
         elif ext == '.gz':
             return 50
-        elif ext in config.data.video_extensions:
+        elif helper.is_video_file(fname):
             return 0
         else:
             # It may handle any type of file ?

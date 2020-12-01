@@ -584,6 +584,5 @@ def get_view_type(v):
         return 'static'
 
 def is_video_file(uri):
-    ext = os.path.splitext(uri)[1]
+    ext = os.path.splitext(uri)[1].lower()
     return (ext in config.data.video_extensions)
-

@@ -885,7 +885,7 @@ class AdveneController:
                             'uri': uri,
                             'error': str(e)}, exc_info=True)
                 elif ('dvd' in name
-                      or ext.lower() in config.data.video_extensions):
+                      or helper.is_video_file(uri)):
                     # Try to load the file as a video file
                     media = uri
                 else:

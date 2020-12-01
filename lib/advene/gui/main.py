@@ -3832,7 +3832,7 @@ class AdveneGUI:
         if filename:
             name, ext = os.path.splitext(filename.lower())
             filename = helper.path2uri(filename)
-            if ext in config.data.video_extensions:
+            if helper.is_video_file(filename):
                 self.log(_("A video file was selected. Pretend that the user selected 'Select a video file'..."))
                 self.controller.set_default_media(filename)
                 return True

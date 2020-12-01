@@ -34,6 +34,7 @@ except ImportError:
     numpy = cv = hg = None
 
 import advene.core.config as config
+import advene.util.helper as helper
 from advene.util.importer import GenericImporter
 
 def register(controller=None):
@@ -68,8 +69,7 @@ class DelakisShotDetectImporter(GenericImporter):
 
         100 is for the best match (specific extension), 0 is for no match at all.
         """
-        ext = os.path.splitext(fname)[1]
-        if ext in config.data.video_extensions:
+        if helper.is_video_file(fname):
             return 80
         return 0
 
