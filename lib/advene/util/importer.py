@@ -720,6 +720,11 @@ Available filters:
     # standard template package
     c.load_package(template_package)
 
+    # If we are importing a video file, then set it as default media
+    # for the package. This will also initialize the imagecache.
+    if helper.is_video_file(inputfile):
+        c.set_default_media(inputfile)
+
     def progress(value, label=""):
         sys.stderr.write('\rProgress %02d%% - %s' % (int(100 * value), label))
         return True
