@@ -759,6 +759,12 @@ Available filters:
         e.set_source(p)
         e.export(filename or '-')
 
+    reqs = i.check_requirements()
+    if reqs:
+        # Not all requirements are met. Display some information.
+        logger.error("The filter is not ready.\n%s" % "\n".join(reqs))
+        sys.exit(1)
+
     if hasattr(i, 'async_process_file'):
         # async mode
 
