@@ -774,11 +774,11 @@ Available filters:
         i.async_process_file(inputfile, end_callback)
         mainloop.run()
     else:
-        p = i.process_file(inputfile)
+        i.process_file(inputfile)
         if outputfile == '' or outputfile.endswith('.json'):
-            json_serialize(p, outputfile)
+            json_serialize(i.package, outputfile)
         else:
-            p.save(outputfile)
+            i.package.save(outputfile)
 
         logger.info(i.statistics_formatted())
     sys.exit(0)
