@@ -26,6 +26,7 @@ import time
 import io
 import inspect
 import json
+import os
 import re
 import zipfile
 
@@ -581,3 +582,8 @@ def get_view_type(v):
         return 'adhoc'
     else:
         return 'static'
+
+def is_video_file(uri):
+    ext = os.path.splitext(uri)[1]
+    return (ext in config.data.video_extensions)
+
