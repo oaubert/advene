@@ -54,7 +54,7 @@ class SceneChangeImporter(GstImporter):
     def pipeline_postprocess(self, pipeline):
         def event_handler(pad, event):
             if event is not None:
-                logger.debug("****** Event %s %s", event.type, event.get_structure().to_string())
+                # logger.debug("****** Event %s %s", event.type, event.get_structure() and event.get_structure().to_string())
                 if event.type == Gst.EventType.SEGMENT:
                     s = event.get_structure()
                     self.duration = s.get_value('segment').duration
