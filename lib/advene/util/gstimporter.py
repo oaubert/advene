@@ -23,12 +23,9 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-import os
-
 from gi.repository import GObject
 from gi.repository import Gst
 
-import advene.core.config as config
 import advene.util.helper as helper
 from advene.util.importer import GenericImporter
 from advene.util.tools import path2uri
@@ -89,6 +86,22 @@ class GstImporter(GenericImporter):
         # Make sure finalize is called in the context of the main thread
         GObject.idle_add(wrapper)
 
+    def get_current_position(self):
+        """Return the current pipeline position in ms
+
+        This should not be relied upon in import plugins, since all
+        information is asynchronous. But sometimes the element's
+        messages do not carry time informatin.
+        """
+        try:
+            pos = self.pipeline.query_position(Gst.Format.TIME)[1]
+        except Exception:
+            logger.error("Current position exception", exc_info=True)
+            position = 0
+        else:
+            position = pos / Gst.MSECOND
+        return position
+
     def on_bus_message_error(self, bus, message):
         s = message.get_structure()
         if s is None:
@@ -105,7 +118,7 @@ class GstImporter(GenericImporter):
         logger.warning("%s: %s", title, message)
         return True
 
-    def do_process_message(self, message):
+    def do_process_message(self, message, bus=None):
         """Custom message handling.
         """
         return True
@@ -121,7 +134,7 @@ class GstImporter(GenericImporter):
                 if not self.progress(progress, self.progress_message(progress, message)):
                     self.finalize()
             else:
-                self.do_process_message(s)
+                self.do_process_message(s, bus)
         return True
 
     def setup_importer(self, filename):
