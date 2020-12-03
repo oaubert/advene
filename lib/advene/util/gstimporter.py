@@ -29,6 +29,7 @@ from gi.repository import GObject
 from gi.repository import Gst
 
 import advene.core.config as config
+import advene.util.helper as helper
 from advene.util.importer import GenericImporter
 from advene.util.tools import path2uri
 
