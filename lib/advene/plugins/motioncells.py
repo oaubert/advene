@@ -25,10 +25,15 @@ from gettext import gettext as _
 
 from math import isinf, isnan
 
+from gi.repository import Gst
+
 from advene.util.gstimporter import GstImporter
 
 def register(controller=None):
-    controller.register_importer(MotionCellImporter)
+    if Gst.ElementFactory.find('motioncells'):
+        controller.register_importer(MotionCellImporter)
+    else:
+        logger.warning(_("Cannot register motion detection: opencv plugins not found. Install the gstreamer1.0-opencv package."))
     return True
 
 class MotionCellImporter(GstImporter):
