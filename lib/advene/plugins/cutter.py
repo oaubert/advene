@@ -68,7 +68,7 @@ class CutterImporter(GstImporter):
                         'content': 'sound' }
                       for begin, end in self.buffer )
 
-    def do_process_message(self, message):
+    def do_process_message(self, message, bus=None):
         if message.get_name() == 'cutter':
             t = message['timestamp'] / Gst.MSECOND
             if message['above']:

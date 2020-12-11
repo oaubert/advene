@@ -160,7 +160,7 @@ class GenericImporter:
         Note: some importers can use an existing annotation type as
         source element (for processing annotations, e.g. concept
         extraction). In this case, the annotation_filter attribute
-        must be set to True, and an additional annotation_type
+        must be set to True, and an additional source_type
         parameter is provided to __init__.
 
         @param author: author for imported/created elements

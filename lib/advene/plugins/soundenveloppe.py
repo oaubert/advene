@@ -104,7 +104,7 @@ class SoundEnveloppeImporter(GstImporter):
         self.generate_normalized_annotations()
         return True
 
-    def do_process_message(self, message):
+    def do_process_message(self, message, bus=None):
         if message.get_name() == 'level':
             if not self.buffer:
                 self.first_item_time = message['stream-time'] / Gst.MSECOND
