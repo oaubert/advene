@@ -214,7 +214,7 @@ class ECAEngine:
                 self.scheduler.enterabs(time.time()+delay, 0, action.execute, (context,))
             else:
                 self.scheduler.enter(delay, 0, action.execute, (context,))
-            if not self.schedulerthread.isAlive():
+            if not self.schedulerthread.is_alive():
                 try:
                     self.schedulerthread.run()
                 except Exception:
