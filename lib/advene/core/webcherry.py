@@ -50,7 +50,7 @@ from gettext import gettext as _
 import cherrypy
 
 if int(cherrypy.__version__.split('.')[0]) < 3:
-    raise _("The webserver requires version 3.0 of CherryPy at least.")
+    raise Exception("The webserver requires version 3.0 of CherryPy at least.")
 
 from advene.model.fragment import MillisecondFragment
 from advene.model.annotation import Annotation, Relation
