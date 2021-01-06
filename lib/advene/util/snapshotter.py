@@ -34,7 +34,6 @@ import gi
 gi.require_version('Gst', '1.0')
 gi.require_version('GstBase', '1.0')
 from gi.repository import GObject, GLib, GstBase, Gst
-GObject.threads_init()
 Gst.init(None)
 
 import heapq
