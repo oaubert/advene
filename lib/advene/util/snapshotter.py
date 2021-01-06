@@ -383,7 +383,7 @@ if __name__ == '__main__':
         # Timestamps have been specified. Non-interactive version.
         s.enqueue( *(int(t) for t in sys.argv[2:]) )
 
-        loop=GObject.MainLoop()
+        loop=GLib.MainLoop()
         def wait_for_completion():
             if s.timestamp_queue.empty():
                 # Quit application
