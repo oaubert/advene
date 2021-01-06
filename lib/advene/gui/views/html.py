@@ -35,6 +35,8 @@ try:
     engine='webkit'
 except ImportError:
     pass
+except ValueError:
+    pass
 
 from gettext import gettext as _
 from advene.gui.views import AdhocView
