@@ -368,8 +368,9 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     try:
         uri=sys.argv[1]
-        if uri.startswith('/'):
-            uri='file://'+uri
+        if not Gst.uri_is_valid(uri):
+            # Try to convert local filename to URI
+            uri = Gst.filename_to_uri(uri)
     except IndexError:
         uri='file:///data/video/Bataille.avi'
 
