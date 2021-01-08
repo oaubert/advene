@@ -32,8 +32,7 @@ This will capture snapshots for the given timestamps (in ms) and save them into 
 
 import gi
 gi.require_version('Gst', '1.0')
-gi.require_version('GstBase', '1.0')
-from gi.repository import GObject, GLib, GstBase, Gst
+from gi.repository import GLib, Gst
 Gst.init(None)
 
 import heapq
@@ -55,81 +54,6 @@ def debug(f):
         logger.warning("%s %s", f.__name__, args)
         return f(*args)
     return wrap
-
-class NotifySink(GstBase.BaseSink):
-
-    __gstmetadata__ = ("Notify sink", "Sink", "Notifying sink",
-                       "Olivier Aubert <contact@olivieraubert.net>")
-
-    __gsttemplates__ = (
-        Gst.PadTemplate.new("sink",
-                            Gst.PadDirection.SINK,
-                            Gst.PadPresence.ALWAYS,
-                            Gst.Caps.new_any()),
-        )
-
-    __gproperties__ = {
-        'notify': ( GObject.TYPE_PYOBJECT, 'notify', 'The notify method called upon render', GObject.ParamFlags.READWRITE ),
-        'preroll': ( GObject.TYPE_PYOBJECT, 'preroll', 'The notify method called upon preroll', GObject.ParamFlags.READWRITE ),
-        }
-
-    def __init__(self):
-        GstBase.BaseSink.__init__(self)
-        self.set_sync(False)
-        self._notify = None
-        self._preroll = None
-
-    def do_render(self, buffer):
-        if self._notify is not None:
-            self._notify(self.buffer_as_struct(buffer))
-        return Gst.FlowReturn.OK
-
-    def do_preroll(self, buffer):
-        if self._preroll is not None:
-            self._preroll(self.buffer_as_struct(buffer))
-        return Gst.FlowReturn.OK
-
-    def do_set_property(self, key, value):
-        if key.name == 'notify':
-            self._notify=value
-        elif key.name == 'preroll':
-            self._preroll=value
-        else:
-            logger.info("No property %s", key.name)
-
-    def do_get_property(self, key):
-        if key.name == 'notify':
-            return self._notify
-        elif key.name == 'preroll':
-            return self._preroll
-        else:
-            logger.info("No property %s", key.name)
-
-    def buffer_as_struct(self, buffer):
-        (res, mapinfo) = buffer.map(Gst.MapFlags.READ)
-        if not res:
-            logger.warning("Error in converting buffer")
-            res = None
-        else:
-            pos = self.query_position(Gst.Format.TIME)[1]
-            res = {
-                'data': bytes(mapinfo.data),
-                'date': pos / Gst.MSECOND,
-                'pts': buffer.pts / Gst.MSECOND,
-            }
-        buffer.unmap(mapinfo)
-        return res
-
-__gstelementfactory__ = ("notifysink", Gst.Rank.NONE, NotifySink)
-def plugin_init(plugin, userarg):
-    NotifySinkType = GObject.type_register(NotifySink)
-    Gst.Element.register(plugin, 'notifysink', 0, NotifySinkType)
-    return True
-
-version = Gst.version()
-reg = Gst.Plugin.register_static_full(version[0], version[1],
-                                      'notify_plugin', 'Notify plugin',
-                                      plugin_init, '1.0', 'Proprietary', 'abc', 'def', 'ghi', None)
 
 class UniquePriorityQueue(queue.PriorityQueue):
     """PriorityQueue with unique elements.
@@ -163,10 +87,8 @@ class Snapshotter:
     called with the result.
 
     Setup note: the Snapshotter class runs a daemon thread
-    continuously waiting for timestamps to process. Thus you should:
-    * call GObject.threads_init() at the beginning of you application
-    * invoke the "start" method to start the thread.
-
+    continuously waiting for timestamps to process. Thus you should
+    invoke the "start" method to start the thread.
     """
     def __init__(self, notify=None, width=None):
         self.active = False
@@ -187,7 +109,8 @@ class Snapshotter:
         csp = Gst.ElementFactory.make('videoconvert')
         pngenc = Gst.ElementFactory.make('pngenc')
         queue_ = Gst.ElementFactory.make('queue')
-        sink = NotifySink()
+        sink = Gst.ElementFactory.make('fakesink', 'videosink')
+        sink.set_property('signal-handoffs', True)
 
         fakesink = Gst.ElementFactory.make('fakesink', 'audiosink')
         self.player.set_property('audio-sink', fakesink)
@@ -221,7 +144,7 @@ class Snapshotter:
         bus.connect('message::error', self.on_bus_message_error)
         bus.connect('message::warning', self.on_bus_message_warning)
 
-        sink.props.preroll = self.queue_notify
+        sink.connect("preroll-handoff", self.queue_notify)
 
     def get_uri(self):
         return self.player.get_property('current-uri')
@@ -290,8 +213,6 @@ class Snapshotter:
         res = self.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE, p)
         if not res:
             logger.debug("Snapshotter error when sending event for %d %s. ", t, res)
-            # Enqueue again
-            self.enqueue(t)
         return True
 
     def enqueue(self, *l):
@@ -335,7 +256,7 @@ class Snapshotter:
             self.should_clear = True
         return True
 
-    def queue_notify(self, frame):
+    def queue_notify(self, element, buf, pad):
         """Notification method.
 
         It processes the captured buffer and unlocks the
@@ -343,16 +264,26 @@ class Snapshotter:
         """
         if self.notify is not None:
             # Add media info to the structure
-            data = frame['data']
-            if data[:8] == b'\x89PNG\r\n\x1a\n'and data[12:16] == b'IHDR':
-                w, h = struct.unpack('>LL', data[16:24])
-                frame['media'] = self.get_uri()
-                frame['type'] = 'PNG'
-                frame['width'] = int(w)
-                frame['height'] = int(h)
-                self.notify(frame)
+            (res, mapinfo) = buf.map(Gst.MapFlags.READ)
+            if not res:
+                logger.warning("Error in converting buffer")
+                res = None
             else:
-                logger.error("Invalid PNG data in snapshot output %s", data)
+                pos = element.query_position(Gst.Format.TIME)[1]
+                data = bytes(mapinfo.data)
+                if data[:8] == b'\x89PNG\r\n\x1a\n'and data[12:16] == b'IHDR':
+                    w, h = struct.unpack('>LL', data[16:24])
+                    self.notify({
+                        "data": data,
+                        'date': pos / Gst.MSECOND,
+                        "pts": buf.pts / Gst.MSECOND,
+                        'media': self.get_uri(),
+                        'type': 'PNG',
+                        'width': int(w),
+                        'height': int(h)
+                    })
+                else:
+                    logger.error("Invalid PNG data in snapshot output %s", data)
         # We are ready to process the next snapshot
         self.snapshot_ready.set()
         return True
@@ -380,6 +311,8 @@ if __name__ == '__main__':
     s.start()
 
     if sys.argv[2:]:
+        # For initialization
+        s.enqueue(0,);
         # Timestamps have been specified. Non-interactive version.
         s.enqueue( *(int(t) for t in sys.argv[2:]) )
 
@@ -396,12 +329,6 @@ if __name__ == '__main__':
         if Evaluator is None:
             logger.warning("Missing evaluator module.\nFetch it from the repository")
             sys.exit(0)
-
-        # Adding the following lines breaks the code, with a warning:
-        #    sys:1: Warning: cannot register existing type `GstSelectorPad'
-        #    sys:1: Warning: g_object_new: assertion `G_TYPE_IS_OBJECT (object_type)' failed
-        #pipe=Gst.parse_launch('playbin uri=file:///media/video/Bataille.avi')
-        #pipe.set_state(Gst.State.PLAYING)
 
         ev=Evaluator(globals_=globals(), locals_=locals())
         ev.set_expression('s.enqueue(12000, 24000, 36000)')
