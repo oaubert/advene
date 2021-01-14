@@ -48,7 +48,7 @@ class SceneChangeImporter(GstImporter):
         self.convert({ 'begin': int(begin / Gst.MSECOND),
                        'end': int(end / Gst.MSECOND),
                        'content': i + 1 }
-                     for i, (begin, end) in enumerate(zip(self.buffer, self.buffer[1:])))
+                     for i, (begin, end) in enumerate(zip(self.buffer[:-1], self.buffer[1:])))
         self.buffer = []
 
     def pipeline_postprocess(self, pipeline):
