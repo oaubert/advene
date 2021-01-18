@@ -347,9 +347,6 @@ class TimeLine(AdhocView):
         self.relations_to_draw = []
         self.bookmarks_to_draw = []
 
-        # Current position in units
-        self.current_position = self.minimum
-
         # Holds the ref. to a newly created annotation, so that its
         # widget gets focus when it is created (cf  update_annotation)
         self.transmuted_annotation = None
@@ -832,12 +829,14 @@ class TimeLine(AdhocView):
         """Scroll the view to put the annotation in the middle.
         """
         self.center_on_position(annotation.fragment.begin)
-        self.update_position (None)
+        self.update_position(None)
         return True
 
-    def center_on_position(self, position):
+    def center_on_position(self, position=None):
         """Scroll the view to center on the given position.
         """
+        if position is None:
+            position = self.controller.player.current_position_value
         alloc = self.layout.get_allocation()
         pos = self.unit2pixel(position, absolute=True) - int(alloc.width / 2)
         a = self.adjustment
@@ -2038,8 +2037,8 @@ class TimeLine(AdhocView):
                             self.relations_to_draw.append( (button, b, r) )
                 self.update_relation_lines()
 
-            if (self.options['autoscroll'] and
-                self.controller.player.status != self.controller.player.PlayingStatus):
+            if (self.options['autoscroll'] == AUTOSCROLL_ANNOTATION
+                and self.controller.player.status != self.controller.player.PlayingStatus):
                 # Check if the annotation is not already visible
                 a = self.adjustment
                 start=a.get_value()
@@ -2197,7 +2196,7 @@ class TimeLine(AdhocView):
 
     def update_position (self, pos):
         if pos is None:
-            pos = self.current_position
+            pos = self.controller.player.current_position_value
         p = self.controller.player
         if (self.options['autoscroll'] == AUTOSCROLL_CONTINUOUS
             and p.is_playing()):
@@ -2207,7 +2206,8 @@ class TimeLine(AdhocView):
             p=self.unit2pixel(pos, absolute=True)
             begin=self.adjustment.get_value()
             end=begin + self.adjustment.get_page_size()
-            if p > end or p < begin:
+            if p < begin or p > end:
+                # Cursor is out of the visible page portion
                 self.center_on_position(pos)
         self.layout.queue_draw()
         self.scale_layout.queue_draw()
@@ -2363,7 +2363,7 @@ class TimeLine(AdhocView):
                 self.controller.gui.edit_element(self.quickview.annotation)
                 return True
         elif event.keyval == Gdk.KEY_c:
-            self.center_on_position(self.current_position)
+            self.center_on_position()
             return True
         elif event.keyval == Gdk.KEY_p:
             # Play at the current position
@@ -3645,7 +3645,7 @@ class TimeLine(AdhocView):
 
         def center_on_current_position(*p):
             if self.controller.player.is_playing():
-                self.center_on_position(self.current_position)
+                self.center_on_position()
             return True
 
         for tooltip, icon, callback in (
