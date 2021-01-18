@@ -60,6 +60,11 @@ def register(controller):
 # the annotation types to actually display.
 ANNOTATION_COUNT_LIMIT = 2000
 
+AUTOSCROLL_NONE = 0
+AUTOSCROLL_CONTINUOUS = 1
+AUTOSCROLL_DISCRETE = 2
+AUTOSCROLL_ANNOTATION = 3
+
 class QuickviewBar(Gtk.HBox):
     def __init__(self, controller=None):
         super().__init__()
@@ -153,8 +158,7 @@ class TimeLine(AdhocView):
             )
         self.options = {
             'highlight': False,
-            # Autoscroll: 0: None, 1: continuous, 2: discrete, 3: annotation
-            'autoscroll': 2,
+            'autoscroll': AUTOSCROLL_DISCRETE,
             'display-relations': True,
             'display-all-relations': False,
             'display-relation-type': True,
@@ -253,10 +257,10 @@ class TimeLine(AdhocView):
 
         # Scroll the window to display the activated annotations
         self.autoscroll_choice = dialog.list_selector_widget(
-            members= ( ( 0, _("No scrolling") ),
-                       ( 1, _("Continuous scrolling")),
-                       ( 2, _("Discrete scrolling")),
-                       ( 3, _("Annotation scrolling")) ),
+            members= ( ( AUTOSCROLL_NONE, _("No scrolling") ),
+                       ( AUTOSCROLL_CONTINUOUS, _("Continuous scrolling")),
+                       ( AUTOSCROLL_DISCRETE, _("Discrete scrolling")),
+                       ( AUTOSCROLL_ANNOTATION, _("Annotation scrolling")) ),
             preselect= self.options['autoscroll'],
             callback=handle_autoscroll_combo)
 
@@ -764,7 +768,10 @@ class TimeLine(AdhocView):
     def set_autoscroll_mode(self, v):
         """Set the autoscroll value.
         """
-        if v not in (0, 1, 2, 3):
+        if v not in (AUTOSCROLL_NONE,
+                     AUTOSCROLL_CONTINUOUS,
+                     AUTOSCROLL_DISCRETE,
+                     AUTOSCROLL_ANNOTATION):
             return False
         # Update self.autoscroll_choice
         self.autoscroll_choice.set_active(v)
@@ -844,7 +851,7 @@ class TimeLine(AdhocView):
     def activate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
         if annotation is not None:
-            if self.options['autoscroll'] == 3:
+            if self.options['autoscroll'] == AUTOSCROLL_ANNOTATION:
                 self.scroll_to_annotation(annotation)
             if self.options['highlight']:
                 self.activate_annotation (annotation)
@@ -1051,7 +1058,7 @@ class TimeLine(AdhocView):
         l = self.get_annotations()
         if event == 'AnnotationActivate' and annotation in l:
             self.activate_annotation(annotation)
-            if self.options['autoscroll'] == 3:
+            if self.options['autoscroll'] == AUTOSCROLL_ANNOTATION:
                 self.scroll_to_annotation(annotation)
             return True
         elif event == 'AnnotationDeactivate' and annotation in l:
@@ -1119,7 +1126,7 @@ class TimeLine(AdhocView):
 
         def center_and_zoom(menu, widget, ann):
             # Deactivate autoscroll...
-            self.set_autoscroll_mode(0)
+            self.set_autoscroll_mode(AUTOSCROLL_NONE)
 
             # Set the zoom
             z=1.0 * ann.fragment.duration / (self.maximum - self.minimum)
@@ -2192,10 +2199,10 @@ class TimeLine(AdhocView):
         if pos is None:
             pos = self.current_position
         p = self.controller.player
-        if (self.options['autoscroll'] == 1
+        if (self.options['autoscroll'] == AUTOSCROLL_CONTINUOUS
             and p.is_playing()):
             self.center_on_position(pos)
-        elif (self.options['autoscroll'] == 2
+        elif (self.options['autoscroll'] == AUTOSCROLL_DISCRETE
               and p.is_playing()):
             p=self.unit2pixel(pos, absolute=True)
             begin=self.adjustment.get_value()
@@ -2782,7 +2789,7 @@ class TimeLine(AdhocView):
 
     def zoom_on_region(self, begin, end):
         # Deactivate autoscroll...
-        self.set_autoscroll_mode(0)
+        self.set_autoscroll_mode(AUTOSCROLL_NONE)
 
         new_scale = 1.3 * (end - begin) / self.layout.get_clip().width or 100
         logger.debug("zoom on region %d %d: %f -> %f", begin, end, self.scale.get_value(), new_scale)
