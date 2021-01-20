@@ -159,14 +159,29 @@ class GstImporter(GenericImporter):
     #    """
     #    return True
 
+    def frame_handler(self, element):
+        """Convert frame before passing it to self.process_frame as a dict
+        """
+        sample = element.emit("pull-sample")
+        buf = sample.get_buffer()
+        (res, mapinfo) = buf.map(Gst.MapFlags.READ)
+        if not res:
+            logger.warning("Error in converting buffer")
+        else:
+            pos = element.query_position(Gst.Format.TIME)[1]
+            data = bytes(mapinfo.data)
+            self.process_frame({
+                "data": data,
+                "date": pos / Gst.MSECOND,
+                "pts": buf.pts / Gst.MSECOND,
+                "media": self.uri
+            })
+        return Gst.FlowReturn.OK
+
     def async_process_file(self, filename, end_callback):
         self.end_callback = end_callback
 
-        sink = 'fakesink name=sink'
-        if hasattr(self, 'process_frame'):
-            # Note: we know that at this point in time the notifysink
-            # has been defined, since it is used by the snapshotter.
-            sink = 'notifysink name=sink'
+        sink = 'appsink name=sink emit-signals=true sync=false'
 
         pipeline_elements = self.setup_importer(filename)
 
@@ -181,9 +196,11 @@ class GstImporter(GenericImporter):
         self.decoder = self.pipeline.get_by_name('decoder')
         self.report = self.pipeline.get_by_name('report')
         self.sink = self.pipeline.get_by_name('sink')
-        bus = self.pipeline.get_bus()
         if hasattr(self, 'process_frame'):
-            self.sink.props.notify = self.process_frame
+            print("Connecting signal handler")
+            self.sink.connect("new-sample", self.frame_handler)
+
+        bus = self.pipeline.get_bus()
 
         # Enabling sync_message_emission will in fact force the
         # self.progress call from a thread other than the main thread,
@@ -194,7 +211,8 @@ class GstImporter(GenericImporter):
         bus.connect('message::error', self.on_bus_message_error)
         bus.connect('message::warning', self.on_bus_message_warning)
 
-        self.decoder.props.uri = path2uri(filename)
+        self.uri = path2uri(filename)
+        self.decoder.props.uri = self.uri
         self.progress(.1, _("Starting processing"))
 
         if hasattr(self, 'pipeline_postprocess'):
