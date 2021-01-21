@@ -209,14 +209,14 @@ class AnnotationImporter(AdhocView):
             try:
                 i.async_process_file(fname, self.processing_ended)
             except Exception as e:
-                dialog.message_dialog(str(e.args), modal=False)
+                dialog.message_dialog("\n".join(str(a) for a in e.args), modal=False)
                 self.close()
         else:
             # Standard, synchronous version
             try:
                 i.process_file(fname)
             except Exception as e:
-                dialog.message_dialog(str(e.args), modal=False)
+                dialog.message_dialog("\n".join(str(a) for a in e.args), modal=False)
                 logger.exception("Error in processing import data")
             finally:
                 self.processing_ended()
