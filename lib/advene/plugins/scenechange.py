@@ -52,7 +52,7 @@ class SceneChangeImporter(GstImporter):
         self.buffer = []
 
     def pipeline_postprocess(self, pipeline):
-        def event_handler(pad, event):
+        def event_handler(pad, parent, event):
             if event is not None:
                 logger.debug("****** Event %s %s", event.type, event.get_structure() and event.get_structure().to_string())
                 if event.type == Gst.EventType.SEGMENT:
@@ -76,7 +76,7 @@ class SceneChangeImporter(GstImporter):
                         self.buffer.append(s.get_value('timestamp'))
             return event
         pad = self.sink.get_static_pad('sink')
-        pad.set_event_function(event_handler)
+        pad.set_event_function_full(event_handler)
 
     def setup_importer(self, filename):
         self.ensure_new_type('scenechange',
