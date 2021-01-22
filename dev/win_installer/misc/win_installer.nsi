@@ -7,38 +7,35 @@
 
 Unicode true
 
-!define QL_NAME "Quod Libet"
-!define QL_ID "quodlibet"
-!define QL_DESC "Music Library / Editor / Player"
+!define ADVENE_NAME "Advene"
+!define ADVENE_ID "advene"
+!define ADVENE_DESC "Video Annotation / Player"
 
-!define EF_NAME "Ex Falso"
-!define EF_ID "exfalso"
+!define ADVENE_WEBSITE "https://www.advene.org"
 
-!define QL_WEBSITE "https://quodlibet.readthedocs.io"
-
-!define QL_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${QL_NAME}"
-!define QL_INSTDIR_KEY "Software\${QL_NAME}"
-!define QL_INSTDIR_VALUENAME "InstDir"
+!define ADVENE_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${ADVENE_NAME}"
+!define ADVENE_INSTDIR_KEY "Software\${ADVENE_NAME}"
+!define ADVENE_INSTDIR_VALUENAME "InstDir"
 
 !define MUI_CUSTOMFUNCTION_GUIINIT custom_gui_init
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
 
-Name "${QL_NAME} (${VERSION})"
-OutFile "quodlibet-LATEST.exe"
+Name "${ADVENE_NAME} (${VERSION})"
+OutFile "advene-LATEST.exe"
 SetCompressor /SOLID /FINAL lzma
 SetCompressorDictSize 32
-InstallDir "$PROGRAMFILES\${QL_NAME}"
+InstallDir "$PROGRAMFILES\${ADVENE_NAME}"
 RequestExecutionLevel admin
 
 Var EF_INST_BIN
-Var QL_INST_BIN
+Var ADVENE_INST_BIN
 Var UNINST_BIN
 
 !define MUI_ABORTWARNING
-!define MUI_ICON "..\quodlibet.ico"
+!define MUI_ICON "..\advene.ico"
 
-!insertmacro MUI_PAGE_LICENSE "..\quodlibet\COPYING"
+!insertmacro MUI_PAGE_LICENSE "..\COPYING"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 
@@ -46,64 +43,8 @@ Var UNINST_BIN
 !insertmacro MUI_UNPAGE_INSTFILES
 
 !insertmacro MUI_LANGUAGE "English"
-!insertmacro MUI_LANGUAGE "Afrikaans"
-!insertmacro MUI_LANGUAGE "Albanian"
-!insertmacro MUI_LANGUAGE "Arabic"
-!insertmacro MUI_LANGUAGE "Basque"
-!insertmacro MUI_LANGUAGE "Belarusian"
-!insertmacro MUI_LANGUAGE "Bosnian"
-!insertmacro MUI_LANGUAGE "Breton"
-!insertmacro MUI_LANGUAGE "Bulgarian"
-!insertmacro MUI_LANGUAGE "Catalan"
-!insertmacro MUI_LANGUAGE "Croatian"
-!insertmacro MUI_LANGUAGE "Czech"
-!insertmacro MUI_LANGUAGE "Danish"
-!insertmacro MUI_LANGUAGE "Dutch"
 !insertmacro MUI_LANGUAGE "Esperanto"
-!insertmacro MUI_LANGUAGE "Estonian"
-!insertmacro MUI_LANGUAGE "Farsi"
-!insertmacro MUI_LANGUAGE "Finnish"
 !insertmacro MUI_LANGUAGE "French"
-!insertmacro MUI_LANGUAGE "Galician"
-!insertmacro MUI_LANGUAGE "German"
-!insertmacro MUI_LANGUAGE "Greek"
-!insertmacro MUI_LANGUAGE "Hebrew"
-!insertmacro MUI_LANGUAGE "Hungarian"
-!insertmacro MUI_LANGUAGE "Icelandic"
-!insertmacro MUI_LANGUAGE "Indonesian"
-!insertmacro MUI_LANGUAGE "Irish"
-!insertmacro MUI_LANGUAGE "Italian"
-!insertmacro MUI_LANGUAGE "Japanese"
-!insertmacro MUI_LANGUAGE "Korean"
-!insertmacro MUI_LANGUAGE "Kurdish"
-!insertmacro MUI_LANGUAGE "Latvian"
-!insertmacro MUI_LANGUAGE "Lithuanian"
-!insertmacro MUI_LANGUAGE "Luxembourgish"
-!insertmacro MUI_LANGUAGE "Macedonian"
-!insertmacro MUI_LANGUAGE "Malay"
-!insertmacro MUI_LANGUAGE "Mongolian"
-!insertmacro MUI_LANGUAGE "Norwegian"
-!insertmacro MUI_LANGUAGE "NorwegianNynorsk"
-!insertmacro MUI_LANGUAGE "Polish"
-!insertmacro MUI_LANGUAGE "PortugueseBR"
-!insertmacro MUI_LANGUAGE "Portuguese"
-!insertmacro MUI_LANGUAGE "Romanian"
-!insertmacro MUI_LANGUAGE "Russian"
-!insertmacro MUI_LANGUAGE "SerbianLatin"
-!insertmacro MUI_LANGUAGE "Serbian"
-!insertmacro MUI_LANGUAGE "SimpChinese"
-!insertmacro MUI_LANGUAGE "Slovak"
-!insertmacro MUI_LANGUAGE "Slovenian"
-!insertmacro MUI_LANGUAGE "SpanishInternational"
-!insertmacro MUI_LANGUAGE "Spanish"
-!insertmacro MUI_LANGUAGE "Swedish"
-!insertmacro MUI_LANGUAGE "Thai"
-!insertmacro MUI_LANGUAGE "TradChinese"
-!insertmacro MUI_LANGUAGE "Turkish"
-!insertmacro MUI_LANGUAGE "Ukrainian"
-!insertmacro MUI_LANGUAGE "Uzbek"
-!insertmacro MUI_LANGUAGE "Welsh"
-
 
 Section "Install"
     SetShellVarContext all
@@ -115,31 +56,30 @@ Section "Install"
     SetOutPath "$INSTDIR"
     File /r "*.*"
 
-    StrCpy $EF_INST_BIN "$INSTDIR\bin\exfalso.exe"
-    StrCpy $QL_INST_BIN "$INSTDIR\bin\quodlibet.exe"
+    StrCpy $ADVENE_INST_BIN "$INSTDIR\bin\advene.exe"
     StrCpy $UNINST_BIN "$INSTDIR\uninstall.exe"
 
     ; Store installation folder
-    WriteRegStr HKLM "${QL_INSTDIR_KEY}" "${QL_INSTDIR_VALUENAME}" $INSTDIR
+    WriteRegStr HKLM "${ADVENE_INSTDIR_KEY}" "${ADVENE_INSTDIR_VALUENAME}" $INSTDIR
 
     ; Set up an entry for the uninstaller
-    WriteRegStr HKLM "${QL_UNINST_KEY}" \
-        "DisplayName" "${QL_NAME} - ${QL_DESC}"
-    WriteRegStr HKLM "${QL_UNINST_KEY}" "DisplayIcon" "$\"$QL_INST_BIN$\""
-    WriteRegStr HKLM "${QL_UNINST_KEY}" "UninstallString" \
+    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" \
+        "DisplayName" "${ADVENE_NAME} - ${ADVENE_DESC}"
+    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "DisplayIcon" "$\"$ADVENE_INST_BIN$\""
+    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "UninstallString" \
         "$\"$UNINST_BIN$\""
-    WriteRegStr HKLM "${QL_UNINST_KEY}" "QuietUninstallString" \
+    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "QuietUninstallString" \
     "$\"$UNINST_BIN$\" /S"
-    WriteRegStr HKLM "${QL_UNINST_KEY}" "InstallLocation" "$INSTDIR"
-    WriteRegStr HKLM "${QL_UNINST_KEY}" "HelpLink" "${QL_WEBSITE}"
-    WriteRegStr HKLM "${QL_UNINST_KEY}" "Publisher" "The ${QL_NAME} Development Community"
-    WriteRegStr HKLM "${QL_UNINST_KEY}" "DisplayVersion" "${VERSION}"
-    WriteRegDWORD HKLM "${QL_UNINST_KEY}" "NoModify" 0x1
-    WriteRegDWORD HKLM "${QL_UNINST_KEY}" "NoRepair" 0x1
+    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "InstallLocation" "$INSTDIR"
+    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "HelpLink" "${ADVENE_WEBSITE}"
+    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "Publisher" "The ${ADVENE_NAME} Development Community"
+    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "DisplayVersion" "${VERSION}"
+    WriteRegDWORD HKLM "${ADVENE_UNINST_KEY}" "NoModify" 0x1
+    WriteRegDWORD HKLM "${ADVENE_UNINST_KEY}" "NoRepair" 0x1
     ; Installation size
     ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
     IntFmt $0 "0x%08X" $0
-    WriteRegDWORD HKLM "${QL_UNINST_KEY}" "EstimatedSize" "$0"
+    WriteRegDWORD HKLM "${ADVENE_UNINST_KEY}" "EstimatedSize" "$0"
 
     ; Folder association for Ex Falso
     ; Context menu for folders
@@ -156,85 +96,71 @@ Section "Install"
     WriteRegStr HKLM  "Software\Classes\Directory\Background\shell\${EF_ID}\command" "" "$\"$EF_INST_BIN$\" $\"%V$\""
 
     ; Register a default entry for file extensions
-    WriteRegStr HKLM "Software\Classes\${QL_ID}.assoc.ANY\shell\play\command" "" "$\"$QL_INST_BIN$\" --run --play-file $\"%1$\""
-    WriteRegStr HKLM "Software\Classes\${QL_ID}.assoc.ANY\DefaultIcon" "" "$\"$QL_INST_BIN$\""
-    WriteRegStr HKLM "Software\Classes\${QL_ID}.assoc.ANY\shell\play" "FriendlyAppName" "${QL_NAME}"
+    WriteRegStr HKLM "Software\Classes\${ADVENE_ID}.assoc.ANY\shell\play\command" "" "$\"$ADVENE_INST_BIN$\" --run --play-file $\"%1$\""
+    WriteRegStr HKLM "Software\Classes\${ADVENE_ID}.assoc.ANY\DefaultIcon" "" "$\"$ADVENE_INST_BIN$\""
+    WriteRegStr HKLM "Software\Classes\${ADVENE_ID}.assoc.ANY\shell\play" "FriendlyAppName" "${ADVENE_NAME}"
 
     ; Add application entry
-    WriteRegStr HKLM "Software\${QL_NAME}\${QL_ID}\Capabilities" "ApplicationDescription" "${QL_DESC}"
-    WriteRegStr HKLM "Software\${QL_NAME}\${QL_ID}\Capabilities" "ApplicationName" "${QL_NAME}"
+    WriteRegStr HKLM "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities" "ApplicationDescription" "${ADVENE_DESC}"
+    WriteRegStr HKLM "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities" "ApplicationName" "${ADVENE_NAME}"
 
     ; Register supported file extensions
     ; (generated using gen_supported_types.py)
-    !define QL_ASSOC_KEY "Software\${QL_NAME}\${QL_ID}\Capabilities\FileAssociations"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".3g2" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".3gp" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".3gp2" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".669" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".aac" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".adif" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".adts" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".aif" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".aifc" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".aiff" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".amf" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".ams" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".ape" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".asf" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".dsf" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".dsm" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".far" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".flac" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".gdm" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".it" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".m4a" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".m4v" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".med" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mid" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mod" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mp+" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mp1" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mp2" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mp3" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mp4" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mpc" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mpeg" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mpg" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mt2" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".mtm" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".oga" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".ogg" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".oggflac" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".ogv" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".okt" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".opus" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".s3m" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".spc" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".spx" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".stm" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".tta" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".ult" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".vgm" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".wav" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".wma" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".wmv" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".wv" "${QL_ID}.assoc.ANY"
-    WriteRegStr HKLM "${QL_ASSOC_KEY}" ".xm" "${QL_ID}.assoc.ANY"
+    !define ADVENE_ASSOC_KEY "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities\FileAssociations"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".264" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".3gp" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".apl" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".asf" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".avi" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".azp" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".dv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".flv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".m4v" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mjpg" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mjpg" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mkv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mov" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mp3" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mp4" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mp4v" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mpeg" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mpg" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mts" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ogg" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ogm" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ogv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ogx" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ps" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".qt" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".qtm" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".rm" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".rmd" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".rmvb" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".rv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ts" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".vfw" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".vob" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".vp6" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".vp7" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".vp8" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".wav" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".webm" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".wmv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".xml" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".xvid" "${ADVENE_ID}.assoc.ANY"
 
     ; Register application entry
-    WriteRegStr HKLM "Software\RegisteredApplications" "${QL_NAME}" "Software\${QL_NAME}\${QL_ID}\Capabilities"
+    WriteRegStr HKLM "Software\RegisteredApplications" "${ADVENE_NAME}" "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities"
 
     ; Register app paths
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\quodlibet.exe" "" "$QL_INST_BIN"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\exfalso.exe" "" "$EF_INST_BIN"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\advene.exe" "" "$ADVENE_INST_BIN"
 
     ; Create uninstaller
     WriteUninstaller "$UNINST_BIN"
 
     ; Create start menu shortcuts
-    CreateDirectory "$SMPROGRAMS\${QL_NAME}"
-    CreateShortCut "$SMPROGRAMS\${QL_NAME}\${QL_NAME}.lnk" "$QL_INST_BIN"
-    CreateShortCut "$SMPROGRAMS\${QL_NAME}\${EF_NAME}.lnk" "$EF_INST_BIN"
+    CreateDirectory "$SMPROGRAMS\${ADVENE_NAME}"
+;     CreateShortCut "$SMPROGRAMS\${ADVENE_NAME}\${ADVENE_NAME}.lnk" "$ADVENE_INST_BIN"
 SectionEnd
 
 Function custom_gui_init
@@ -245,14 +171,14 @@ Function custom_gui_init
     Var /GLOBAL uninst_bin_temp
 
     SetRegView 32
-    ReadRegStr $instdir_temp HKLM "${QL_INSTDIR_KEY}" "${QL_INSTDIR_VALUENAME}"
+    ReadRegStr $instdir_temp HKLM "${ADVENE_INSTDIR_KEY}" "${ADVENE_INSTDIR_VALUENAME}"
     SetRegView lastused
     StrCmp $instdir_temp "" skip 0
         StrCpy $INSTDIR $instdir_temp
     skip:
 
     SetRegView 64
-    ReadRegStr $instdir_temp HKLM "${QL_INSTDIR_KEY}" "${QL_INSTDIR_VALUENAME}"
+    ReadRegStr $instdir_temp HKLM "${ADVENE_INSTDIR_KEY}" "${ADVENE_INSTDIR_VALUENAME}"
     SetRegView lastused
     StrCmp $instdir_temp "" skip2 0
         StrCpy $INSTDIR $instdir_temp
@@ -290,26 +216,20 @@ Section "Uninstall"
     SetAutoClose true
 
     ; Remove start menu entries
-    Delete "$SMPROGRAMS\${QL_NAME}\${QL_NAME}.lnk"
-    Delete "$SMPROGRAMS\${QL_NAME}\${EF_NAME}.lnk"
-    RMDir "$SMPROGRAMS\${QL_NAME}"
-
-    ; Remove exfalso folder association
-    DeleteRegKey HKLM "Software\Classes\Directory\shell\${EF_ID}"
-    DeleteRegKey HKLM "Software\Classes\Directory\Background\shell\${EF_ID}"
+;    Delete "$SMPROGRAMS\${ADVENE_NAME}\${ADVENE_NAME}.lnk"
+    RMDir "$SMPROGRAMS\${ADVENE_NAME}"
 
     ; Remove application registration and file assocs
-    DeleteRegKey HKLM "Software\Classes\${QL_ID}.assoc.ANY"
-    DeleteRegKey HKLM "Software\${QL_NAME}"
-    DeleteRegValue HKLM "Software\RegisteredApplications" "${QL_NAME}"
+    DeleteRegKey HKLM "Software\Classes\${ADVENE_ID}.assoc.ANY"
+    DeleteRegKey HKLM "Software\${ADVENE_NAME}"
+    DeleteRegValue HKLM "Software\RegisteredApplications" "${ADVENE_NAME}"
 
     ; Remove app paths
-    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\quodlibet.exe"
-    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\exfalso.exe"
+    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\advene.exe"
 
     ; Delete installation related keys
-    DeleteRegKey HKLM "${QL_UNINST_KEY}"
-    DeleteRegKey HKLM "${QL_INSTDIR_KEY}"
+    DeleteRegKey HKLM "${ADVENE_UNINST_KEY}"
+    DeleteRegKey HKLM "${ADVENE_INSTDIR_KEY}"
 
     ; Delete files
     RMDir /r "$INSTDIR"

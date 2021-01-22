@@ -26,7 +26,7 @@ function main {
     create_root
     install_deps
     cleanup_before
-    install_quodlibet "$GIT_TAG"
+    install_advene "$GIT_TAG"
     cleanup_after
     build_installer
     build_portable_installer

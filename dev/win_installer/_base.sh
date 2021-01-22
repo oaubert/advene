@@ -18,18 +18,14 @@ BUILD_VERSION="0"
 # CONFIG END
 
 MISC="${DIR}"/misc
-if [ "${ARCH}" = "x86_64" ]; then
-    MINGW="mingw64"
-else
-    MINGW="mingw32"
-fi
+MINGW="mingw64"
 
 QL_VERSION="0.0.0"
 QL_VERSION_DESC="UNKNOWN"
 
 function set_build_root {
     BUILD_ROOT="$1"
-    REPO_CLONE="${BUILD_ROOT}"/quodlibet
+    REPO_CLONE="${BUILD_ROOT}"/advene
     MINGW_ROOT="${BUILD_ROOT}/${MINGW}"
     export PATH="${MINGW_ROOT}/bin:${PATH}"
 }
@@ -97,18 +93,14 @@ function install_deps {
         mingw-w64-"${ARCH}"-gst-plugins-bad \
         mingw-w64-"${ARCH}"-gst-plugins-ugly \
         mingw-w64-"${ARCH}"-gst-libav \
-        mingw-w64-"${ARCH}"-python3-pytest \
-        mingw-w64-"${ARCH}"-python3-certifi \
-        mingw-w64-"${ARCH}"-python3-coverage \
-        mingw-w64-"${ARCH}"-python3-toml
+        mingw-w64-"${ARCH}"-libsrtp \
+        mingw-w64-"${ARCH}"-gtksourceview3  \
+        mingw-w64-"${ARCH}"-goocanvas \
+        mingw-w64-"${ARCH}"-libsrtp \
+        mingw-w64-"${ARCH}"-python3-pillow \
+        intltool
 
     PIP_REQUIREMENTS="\
-feedparser==5.2.1
-musicbrainzngs==0.6
-mutagen==1.44.0
-flake8==3.7.9
-entrypoints==0.3
-pycodestyle==2.5.0
 pyflakes==2.1.1
 "
 
@@ -135,7 +127,7 @@ pyflakes==2.1.1
     build_pacman -S --noconfirm mingw-w64-"${ARCH}"-python3-setuptools
 }
 
-function install_quodlibet {
+function install_advene {
     [ -z "$1" ] && (echo "Missing arg"; exit 1)
 
     rm -Rf "${REPO_CLONE}"
@@ -145,18 +137,18 @@ function install_quodlibet {
 
     build_python "${REPO_CLONE}"/setup.py install
 
-    # Create launchers
-    python3 "${MISC}"/create-launcher.py \
-        "${QL_VERSION}" "${MINGW_ROOT}"/bin
+    # Create launchers FIXME
+    #python3 "${MISC}"/create-launcher.py \
+    #    "${QL_VERSION}" "${MINGW_ROOT}"/bin
 
-    QL_VERSION=$(MSYSTEM= build_python -c \
-        "import quodlibet.const; import sys; sys.stdout.write(quodlibet.const.VERSION)")
-    QL_VERSION_DESC="$QL_VERSION"
+    ADVENE_VERSION=$(MSYSTEM= build_python -c \
+        "import advene.core.version; import sys; sys.stdout.write(advene.core.version)")
+    ADVENE_VERSION_DESC="$ADVENE_VERSION"
     if [ "$1" = "master" ]
     then
         local GIT_REV=$(git rev-list --count HEAD)
         local GIT_HASH=$(git rev-parse --short HEAD)
-        QL_VERSION_DESC="$QL_VERSION-rev$GIT_REV-$GIT_HASH"
+        ADVENE_VERSION_DESC="$ADVENE_VERSION-rev$GIT_REV-$GIT_HASH"
     fi
 
     build_compileall -d "" -f -q "$(cygpath -w "${MINGW_ROOT}")"
@@ -194,13 +186,13 @@ function cleanup_before {
 function cleanup_after {
     # delete translations we don't support
     for d in "${MINGW_ROOT}"/share/locale/*/LC_MESSAGES; do
-        if [ ! -f "${d}"/quodlibet.mo ]; then
+        if [ ! -f "${d}"/advene.mo ]; then
             rm -Rf "${d}"
         fi
     done
 
     find "${MINGW_ROOT}" -regextype "posix-extended" -name "*.exe" -a ! \
-        -iregex ".*/(quodlibet|exfalso|operon|python|gspawn-)[^/]*\\.exe" \
+        -iregex ".*/(advene||python|)[^/]*\\.exe" \
         -exec rm -f {} \;
 
     rm -Rf "${MINGW_ROOT}"/libexec
@@ -329,8 +321,8 @@ function cleanup_after {
 }
 
 function build_installer {
-    BUILDPY=$(echo "${MINGW_ROOT}"/lib/python3.*/site-packages/quodlibet)/build.py
-    cp "${REPO_CLONE}"/quodlibet/build.py "$BUILDPY"
+    BUILDPY=$(echo "${MINGW_ROOT}"/lib/python3.*/site-packages/advene)/build.py
+    cp "${REPO_CLONE}"/dev/win_installer/build.py "$BUILDPY"
     echo 'BUILD_TYPE = u"windows"' >> "$BUILDPY"
     echo "BUILD_VERSION = $BUILD_VERSION" >> "$BUILDPY"
     (cd "$REPO_CLONE" && echo "BUILD_INFO = u\"$(git rev-parse --short HEAD)\"" >> "$BUILDPY")
@@ -339,23 +331,22 @@ function build_installer {
     cp misc/quodlibet.ico "${BUILD_ROOT}"
     (cd "${MINGW_ROOT}" && makensis -NOCD -DVERSION="$QL_VERSION_DESC" "${MISC}"/win_installer.nsi)
 
-    mv "${MINGW_ROOT}/quodlibet-LATEST.exe" "$DIR/quodlibet-$QL_VERSION_DESC-installer.exe"
+    mv "${MINGW_ROOT}/advene-LATEST.exe" "$DIR/advene-$QL_VERSION_DESC-installer.exe"
 }
 
 function build_portable_installer {
-    BUILDPY=$(echo "${MINGW_ROOT}"/lib/python3.*/site-packages/quodlibet)/build.py
-    cp "${REPO_CLONE}"/quodlibet/build.py "$BUILDPY"
+    BUILDPY=$(echo "${MINGW_ROOT}"/lib/python3.*/site-packages/advene)/build.py
+    cp "${REPO_CLONE}"/dev/win_installer/build.py "$BUILDPY"
     echo 'BUILD_TYPE = u"windows-portable"' >> "$BUILDPY"
     echo "BUILD_VERSION = $BUILD_VERSION" >> "$BUILDPY"
     (cd "$REPO_CLONE" && echo "BUILD_INFO = u\"$(git rev-parse --short HEAD)\"" >> "$BUILDPY")
     build_compileall -d "" -q -f "$BUILDPY"
 
-    local PORTABLE="$DIR/quodlibet-$QL_VERSION_DESC-portable"
+    local PORTABLE="$DIR/advene-$QL_VERSION_DESC-portable"
 
     rm -rf "$PORTABLE"
     mkdir "$PORTABLE"
-    cp "$MISC"/quodlibet.lnk "$PORTABLE"
-    cp "$MISC"/exfalso.lnk "$PORTABLE"
+    # cp "$MISC"/advene.lnk "$PORTABLE"
     cp "$MISC"/README-PORTABLE.txt "$PORTABLE"/README.txt
     unix2dos "$PORTABLE"/README.txt
     mkdir "$PORTABLE"/config

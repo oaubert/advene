@@ -10,11 +10,7 @@ set -e
 
 function main {
 
-    if [[ "$MSYSTEM" == "MINGW32" ]]; then
-        local MSYS2_ARCH="i686"
-    else
-        local MSYS2_ARCH="x86_64"
-    fi
+    local MSYS2_ARCH="x86_64"
 
     pacman --noconfirm -Suy
 
@@ -40,12 +36,12 @@ function main {
         mingw-w64-$MSYS2_ARCH-python3-gobject \
         mingw-w64-$MSYS2_ARCH-python3-cairo \
         mingw-w64-$MSYS2_ARCH-python3-pip \
-        mingw-w64-$MSYS2_ARCH-python3-pytest \
-        mingw-w64-$MSYS2_ARCH-python3-certifi \
-        mingw-w64-$MSYS2_ARCH-python3-coverage \
-        mingw-w64-$MSYS2_ARCH-python3-flake8
+        mingw-w64-$MSYS2_ARCH-gtksourceview3  \
+        mingw-w64-$MSYS2_ARCH-goocanvas \
+        mingw-w64-$MSYS2_ARCH-libsrtp \
+        mingw-w64-$MSYS2_ARCH-python3-pillow
 
-    pip3 install --user -U feedparser musicbrainzngs mutagen
+    #pip3 install --user -U feedparser musicbrainzngs mutagen
 }
 
 main;

@@ -2,5 +2,4 @@
 
 set -e
 
-convert ../../../quodlibet/images/hicolor/*/apps/io.github.quodlibet.QuodLibet.png quodlibet.ico
-convert ../../../quodlibet/images/hicolor/*/apps/io.github.quodlibet.ExFalso.png exfalso.ico
+convert ../../../share/pixmaps/icon_advene128.png advene.ico

@@ -173,44 +173,29 @@ def main():
     version = argv[1]
     target = argv[2]
 
-    company_name = "The Quod Libet Development Community"
+    company_name = "Advene Community"
     misc = os.path.dirname(os.path.realpath(__file__))
 
     build_launcher(
-        os.path.join(target, "quodlibet.exe"),
-        os.path.join(misc, "quodlibet.ico"),
+        os.path.join(target, "advene.exe"),
+        os.path.join(misc, "advene.ico"),
         os.path.join(misc, "launcher.manifest"),
-        "Quod Libet", "Quod Libet",
-        version, company_name, "quodlibet.main:main", True)
+        "Advene", "Advene",
+        version, company_name, "advene.main:main", True)
 
     build_launcher(
-        os.path.join(target, "quodlibet-cmd.exe"),
-        os.path.join(misc, "quodlibet.ico"),
+        os.path.join(target, "advene_import.exe"),
+        os.path.join(misc, "advene.ico"),
         os.path.join(misc, "launcher.manifest"),
-        "Quod Libet", "Quod Libet",
-        version, company_name, "quodlibet.main:main", False)
+        "Advene", "Advene",
+        version, company_name, "advene.main:main", False)
 
     build_launcher(
-        os.path.join(target, "exfalso.exe"),
-        os.path.join(misc, "exfalso.ico"),
+        os.path.join(target, "advene_export.exe"),
+        os.path.join(misc, "advene.ico"),
         os.path.join(misc, "launcher.manifest"),
-        "Ex Falso", "Quod Libet",
-        version, company_name, "quodlibet.exfalso:main", True)
-
-    build_launcher(
-        os.path.join(target, "exfalso-cmd.exe"),
-        os.path.join(misc, "exfalso.ico"),
-        os.path.join(misc, "launcher.manifest"),
-        "Ex Falso", "Quod Libet",
-        version, company_name, "quodlibet.exfalso:main", False)
-
-    build_launcher(
-        os.path.join(target, "operon.exe"),
-        os.path.join(misc, "exfalso.ico"),
-        os.path.join(misc, "launcher.manifest"),
-        "Operon", "Quod Libet",
-        version, company_name, "quodlibet.operon:main", False)
-
+        "Advene", "Advene",
+        version, company_name, "advene.main:main", False)
 
 if __name__ == "__main__":
     main()

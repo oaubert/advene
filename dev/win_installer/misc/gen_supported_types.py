@@ -7,12 +7,13 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
-from quodlibet.formats import init, loaders
+import advene.core.config as config
 
 if __name__ == "__main__":
-    init()
 
+    exts = list(config.data.video_extensions)
+    exts.extend([ '.azp', '.xml', '.apl' ])
     # these are for showing up in the openwith dialog
-    for ext in sorted(loaders.keys()):
+    for ext in sorted(exts):
         print('WriteRegStr HKLM "${QL_ASSOC_KEY}" '
-              '"%s" "${QL_ID}.assoc.ANY"' % ext)
+              '"%s" "${ADVENE_ID}.assoc.ANY"' % ext)

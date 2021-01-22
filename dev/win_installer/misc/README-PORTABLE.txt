@@ -1,13 +1,13 @@
-==============================
-Quod Libet / Ex Falso Portable
-==============================
+===============
+Advene Portable
+===============
 
 Content
 -------
 
 * 'config' contains all user configuration and the song database
 * 'data' contains the program
-* The links, quodlibet and exfalso, point to data/bin/<name>.exe
+* advene points to data/bin/advene.exe
 
 
 How to update to a newer version?
