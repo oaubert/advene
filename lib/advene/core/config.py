@@ -634,9 +634,7 @@ class Config:
         """
         if self.os != 'darwin':
             return
-        # This one should go away sometime. But for the moment, the only way
-        # to embed vlc is to use the X11 video output
-        self.player['vout'] = 'x11'
+        self.player['vout'] = 'gtk'
 
     def get_registry_value (self, subkey, name):
         """(win32) get a value from the registry.
