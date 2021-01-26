@@ -69,6 +69,7 @@ logger = logging.getLogger(__name__)
 import json
 import os
 import optparse
+from pathlib import Path
 import shutil
 import signal
 import subprocess
@@ -81,16 +82,16 @@ from gi.repository import GObject
 
 try:
     import advene.core.config as config
-except ModuleNotFoundError:
+except (ModuleNotFoundError,  ImportError):
     # Try to find if we are in a development tree.
-    maindir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    if os.path.exists(os.path.join(maindir, "setup.py")):
-        # Chances are that we are in a development tree...
-        libpath = os.path.join(maindir, "lib")
-        logger.warning("You seem to have a development tree at:\n%s." % libpath)
-        sys.path.insert(0, libpath)
+    app_dir = Path(__file__).resolve().parent.parent.parent.parent
+    if (app_dir / "setup.py").exists():
+        # Chances are that we are using a development tree
+        sys.path.insert(0, str(app_dir / "lib"))
+        logger.warning("You seem to use a development tree at:\n%s." % app_dir)
+    # Try to import again. It will fail if we could not fix paths.
     import advene.core.config as config
-    config.data.fix_paths(maindir)
+    config.data.fix_paths(app_dir)
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation
@@ -660,7 +661,7 @@ class ExternalAppImporter(GenericImporter):
         """
         yield {}
 
-if __name__ == "__main__":
+def main():
     logging.basicConfig(level=logging.INFO)
     USAGE = f"{sys.argv[0]} [-o filter_options] filter_name input_file [output_file]"
 
@@ -793,3 +794,6 @@ Available filters:
 
         logger.info(i.statistics_formatted())
     sys.exit(0)
+
+if __name__ == "__main__":
+    main()

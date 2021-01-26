@@ -28,25 +28,26 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
-import optparse
 import io
 import json
+from pathlib import Path
+import optparse
 import os
 from simpletal import simpleTAL, simpleTALES
 import sys
 
 try:
     import advene.core.config as config
-except ModuleNotFoundError:
+except (ModuleNotFoundError,  ImportError):
     # Try to find if we are in a development tree.
-    maindir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    if os.path.exists(os.path.join(maindir, "setup.py")):
-        # Chances are that we are in a development tree...
-        libpath = os.path.join(maindir, "lib")
-        logger.warning("You seem to have a development tree at:\n%s." % libpath)
-        sys.path.insert(0, libpath)
+    app_dir = Path(__file__).resolve().parent.parent.parent.parent
+    if (app_dir / "setup.py").exists():
+        # Chances are that we are using a development tree
+        sys.path.insert(0, str(app_dir / "lib"))
+        logger.warning("You seem to use a development tree at:\n%s." % app_dir)
+    # Try to import again. It will fail if we could not fix paths.
     import advene.core.config as config
-    config.data.fix_paths(maindir)
+    config.data.fix_paths(app_dir)
 
 from advene.model.package import Package
 from advene.model.content import KeywordList
@@ -386,10 +387,7 @@ def init_templateexporters():
         })
         register_exporter(klass)
 
-if __name__ != "__main__":
-    init_templateexporters()
-
-if __name__ == "__main__":
+def main():
     logging.basicConfig(level=logging.DEBUG)
     USAGE = f"{sys.argv[0]} [-o filter_options] filter_name input_file [output_file]"
 
@@ -442,7 +440,11 @@ Available filters:
     if outputfile:
         outputfile = e.get_filename(outputfile)
         logger.info("Converting %s to %s using %s", inputfile, outputfile, e.name)
-        p = e.export(outputfile)
+        e.export(outputfile)
     else:
-        p = e.export(sys.stdout)
+        e.export(sys.stdout)
     sys.exit(0)
+
+if __name__ == "__main__":
+    init_templateexporters()
+    main()
