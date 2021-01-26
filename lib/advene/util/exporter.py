@@ -388,6 +388,7 @@ def init_templateexporters():
         register_exporter(klass)
 
 def main():
+    init_templateexporters()
     logging.basicConfig(level=logging.DEBUG)
     USAGE = f"{sys.argv[0]} [-o filter_options] filter_name input_file [output_file]"
 
@@ -446,5 +447,4 @@ Available filters:
     sys.exit(0)
 
 if __name__ == "__main__":
-    init_templateexporters()
     main()
