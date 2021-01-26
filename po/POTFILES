@@ -81,6 +81,7 @@
 ../lib/advene/plugins/tts.py
 ../lib/advene/plugins/soundenveloppe.py
 ../lib/advene/plugins/keywords.py
+../lib/advene/plugins/motioncells.py
 ../lib/advene/plugins/scenechange.py
 ../lib/advene/plugins/base_importers.py
 ../lib/advene/plugins/dcp.py
