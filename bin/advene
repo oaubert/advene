@@ -2,7 +2,7 @@
 #
 #
 # Advene: Annotate Digital Videos, Exchange on the NEt
-# Copyright (C) 2008-2017 Olivier Aubert <contact@olivieraubert.net>
+# Copyright (C) 2021 Olivier Aubert <contact@olivieraubert.net>
 #
 # This file is part of Advene.
 #
@@ -20,261 +20,28 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-
-# Let's start by configuring logging
-import logging
-import logging.config
-import logging.handlers
-logger = logging.getLogger(__name__)
+#!/usr/bin/env python3
+# Copyright 2016 Christoph Reiter
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 
 from pathlib import Path
-import os
 import sys
-import time
 
-# Try to find if we are in a development tree.
-(maindir, subdir) = os.path.split(
-    os.path.dirname(os.path.abspath(sys.argv[0])))
-if subdir == 'bin' and os.path.exists(os.path.join(maindir, "setup.py")):
-    # Chances are that we were in a development tree...
-    libpath = os.path.join(maindir, "lib")
-    logging.warning("You seem to have a development tree at:\n%s." % libpath)
-    sys.path.insert(0, libpath)
+try:
+    from advene.main import main
+    app_dir = None
+except ImportError:
+    # Try to find if we are in a development tree.
+    app_dir = Path(sys.argv[0]).absolute().parent.parent
 
-    import advene.core.config as config
-    config.data.fix_paths(maindir)
-else:
-    try:
-        import advene.core.config as config
-    except ImportError:
-        logging.error("""Cannot guess a valid directory.
-        Please check your installation or set the PYTHONPATH environment variable.""", exc_info=True)
-        sys.exit(1)
+    if (app_dir / "setup.py").exists():
+        # Chances are that we are using a development tree
+        sys.path.insert(0, str(app_dir / "lib"))
+        from advene.main import main
 
-logfile = config.data.advenefile('advene.log', 'settings')
-# We have the logfile name. Let's configure RotatingFileHandler logging handler
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(name)s %(message)s'
-        },
-        'simple': {
-            'format': '%(name)s %(levelname)s %(message)s'
-        },
-    },
-    'handlers': {
-        'console': {
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
-            'formatter': 'simple'
-        },
-        'logfile': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': logfile,
-            'formatter': 'verbose',
-            'backupCount': 7,
-        },
-    },
-    'root': {
-        'handlers':['console', 'logfile'],
-        'level': 'INFO',
-    },
-    'loggers': {
-        'cherrypy.error': {
-            'handlers': [ 'logfile' ],
-            'propagate': False,
-            'level': 'INFO',
-        },
-    }
-}
-for m in os.environ.get('ADVENE_DEBUG', '').split(':'):
-    LOGGING['loggers'][m] = { 'level': 'DEBUG' }
-    LOGGING['loggers'][m.replace('.', '_')] = { 'level': 'DEBUG' }
-
-logging.config.dictConfig(LOGGING)
-# Do a forced rollover for the RotatingFileHandler
-for h in logging.root.handlers:
-    if hasattr(h, 'doRollover'):
-        h.doRollover()
-
-# Locale selection
-if config.data.preferences['language']:
-    # A non-empty value overrides the system default
-    os.environ['LANG'] = config.data.preferences['language']
-
-logging.warning("%s run at %s on %s", config.data.version_string, time.strftime("%d/%m/%y %H:%M:%S %Z"), sys.platform)
-
-# Maybe we are running from a pyinstaller version
-if not config.data.path['resources'].exists():
-    maindir = Path(sys.executable).absolute().parent
-    if (maindir / 'share' / 'web').exists():
-        # There is a 'share/web' directory at the same level as the executable
-        # This can mean that we are in a pyinstaller version
-        logging.warning("Seemingly running from a pyinstaller version in\n%s", maindir)
-        config.data.fix_paths(maindir)
-    else:
-        # We can possibly be in a MacOSX .app bundle
-        d = Path(sys.argv[0]).absolute().parent
-        if d.name == 'Resources':
-            logging.warning("Seemingly running from a .app bundle")
-
-            # We will put pangorc, Pango.modules and gdk-pixbuf.loaders files in a directory of the user preferences.
-            userconf = config.data.advenefile('_config', 'settings')
-            if not userconf.is_dir():
-                userconf.mkdir(parents=True)
-
-            config.data.fix_paths(d)
-            executable_path_dot_dot = d.parent
-            os.environ['GTK_EXE_PREFIX'] = d
-            os.environ['GTK_PATH'] = d
-            os.environ['GDK_PIXBUF_MODULE_FILE'] = userconf / 'gdk-pixbuf.loaders'
-            os.environ['PANGO_RC_FILE'] = userconf / 'pangorc'
-            os.environ['FONTCONFIG_FILE'] = d / 'fonts.conf'
-            # Pango hack
-            os.environ['PANGO_SYSCONF_DIR'] = d
-            os.environ['PANGO_LIB_DIR'] = d
-            os.environ['XDG_DATA_DIRS'] = d
-            os.environ['GST_PLUGIN_PATH'] = d / 'gst-plugins'
-
-            # Let us fix the Pango.modules and pixbuf.loaders files if necessary
-            for n in ('pangorc', 'Pango.modules', 'gdk-pixbuf.loaders'):
-                sname = d / (n + '.in')
-                dname = userconf / n
-                data = open(sname, 'r').readlines()
-                # Rewrite only if necessary
-                if [l for l in data if '@executable_path' in l or '@userconf' in l]:
-                    relocated = [l.replace('@executable_path/..', executable_path_dot_dot).replace('@userconf', userconf) for l in data]
-                    f = open(dname, 'w', encoding='utf-8')
-                    f.writelines(relocated)
-                    f.close()
-
-if config.data.os == 'win32':
-    # win32 platform, add the "lib" folder to the system path
-    os.environ['PATH'] += os.path.pathsep + "lib"
-    # add pixbufloader dir in environment
-    if 'GDK_PIXBUF_MODULE_FILE' in os.environ and os.path.exists(os.environ['GDK_PIXBUF_MODULE_FILE']):
-        d = Path(sys.executable).absolute().parent
-        os.environ['GDK_PIXBUF_MODULE_FILE'] = d + Path('lib',
-                                                        'gdk-pixbuf-2.0',
-                                                        '2.10.0',
-                                                        'loaders',
-                                                        'loaders.cache')
-    try:
-        import gi
-        gi.require_version('Gtk', '3.0')
-        from gi.repository import Gtk
-    except ImportError:
-        # Gtk DLLs are not in the PATH. Try to get their directory
-        # from the registry
-        path = config.data.get_registry_value('Software\\GTK\\2.0', 'Path')
-        if path is None:
-            raise ImportError("Couldn't find GTK DLLs.")
-        os.environ['PATH'] += os.path.pathsep + path.encode('utf8')
-        os.environ['PATH'] += os.path.pathsep + os.path.join(path, 'bin').encode('utf8')
-        logging.warning("Using GTK DLLs at %s", path)
-        try:
-            import gi
-            from gi.repository import Gtk
-        except ImportError:
-            logging.error("Cannot import GTK, try installing visual studio 2008 redist.")
-else:
-    import gi
-    gi.require_version('Gtk', '3.0')
-    from gi.repository import Gtk
-
-if __name__ == '__main__':
-
-    # Check for directories
-    for d in ('resources', 'web'):
-        if not config.data.path[d].exists():
-            logging.error("""Error: the %s directory does not exist.
-Advene seems to be either badly installed or badly configured (maybe both).
-Aborting.""", config.data.path[d])
-            sys.exit(1)
-
-    filter = config.data.options.filter
-    if filter == 'help':
-        # List available filters.
-        import advene.core.controller
-        c = advene.core.controller.AdveneController()
-        c.init()
-        logging.warning("Available export filters:\n%s",
-                     "\n".join("%s\t: %s (.%s extension)" % (v.get_id(),
-                                                             v.name,
-                                                             v.extension)
-                               for v in c.get_export_filters()))
-        c.on_exit()
-        sys.exit(0)
-    elif filter is not None:
-        # A filter has been specified.
-        import advene.core.controller
-        c = advene.core.controller.AdveneController()
-        c.init()
-        l = [ v for v in c.get_export_filters() if v.get_id() == filter ]
-        if not l:
-            logging.error("Export filter %s is not defined", filter)
-            c.on_exit()
-            sys.exit(1)
-        l = l[0]
-        if not config.data.args:
-            logging.error("Syntax: advene -f filter_name [-o output=foo.ext] input.azp")
-            c.on_exit()
-            sys.exit(1)
-        ext = l.extension
-
-        for f in config.data.args:
-            output = config.data.options.options.get('output')
-            if output is None:
-                # Use the input filename, replacing its extension.
-                output = ".".join((os.path.splitext(f)[0], ext))
-                # In this case, we do not want to overwrite existing files
-                if os.path.exists(output):
-                    logging.error("Output file %s already exists. Remove it before proceeding.", output)
-                    continue
-            logging.warning("Converting %s into %s", f, output)
-            c.load_package(f)
-            # FIXME: could trigger events?
-            c.apply_export_filter(c.package, l, output)
-        c.on_exit()
-        sys.exit(0)
-
-    # First time configuration
-    if config.data.first_run:
-        import advene.gui.util.initialconfig
-        c = advene.gui.util.initialconfig.Config()
-        c.main()
-
-    if config.data.os in ('linux', ) and 'DISPLAY' not in os.environ:
-        logging.error("The DISPLAY environment variable is not set. Cannot continue.")
-        sys.exit(1)
-
-    import advene.gui.main
-    gui = advene.gui.main.AdveneGUI()
-    try:
-        # import hotshot
-        # filename = "/tmp/pythongrind.prof"
-        # prof = hotshot.Profile(filename, lineevents=1)
-        # prof.runcall(gui.main, config.data.args)
-        # prof.close()
-        gui.main(config.data.args)
-    except Exception:
-        logging.warning("Got exception. Stopping services...", exc_info=True)
-
-        if logfile is not None:
-            d = Gtk.MessageDialog(None,
-                                  Gtk.DialogFlags.MODAL,
-                                  Gtk.MessageType.ERROR,
-                                  Gtk.ButtonsType.OK,
-                                  "An error occurred.")
-            d.format_secondary_text("You can inform the Advene developers by sending the file\n %s\n to support@advene.org, along with a description of how the bug occurred." % logfile)
-
-            def q(*p):
-                Gtk.main_quit()
-                return True
-
-            d.connect('response', q)
-            d.show()
-            Gtk.main()
+if __name__ == "__main__":
+    sys.exit(main(app_dir))
