@@ -59,51 +59,6 @@ _version=get_version()
 
 platform_options={}
 
-if sys.platform == 'win32':
-    # WARNING: this code has not been updated for Advene 3 (python3,
-    # gstreamer1.0). Do not expect it to work. It is preserved here as
-    # a starting point when someone has some time to work on it.
-    import py2exe
-
-    platform_options['windows'] = [ "bin/advene" ]
-    platform_options['options'] = {
-	"py2exe": {
-	    "includes": "email.header,pango,pangocairo,cairo,atk,gtk,gio,pygst,gst,gtk.keysyms,gobject,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
-	    "excludes": [ "Tkconstants","Tkinter","tcl" ],
-	    # "dll_excludes": ["libgstvideo-0.10.dll","libgstpbutils-0.10.dll","libgstinterfaces-0.10.dll","libgstdataprotocol-0.10.dll","libgstbase-0.10.dll","libgstnet-0.10.dll","libgstcontroller-0.10.dll","libgstaudio-0.10.dll","libgsttag-0.10.dll","libgstreamer-0.10.dll","libvlc.dll","libvlc-control.dll", "libglade-2.0-0.dll"],
-	    #         		 ["iconv.dll","intl.dll","libatk-1.0-0.dll",
-	    #                          "libgdk_pixbuf-2.0-0.dll","libgdk-win32-2.0-0.dll",
-	    #                          "libglib-2.0-0.dll","libgmodule-2.0-0.dll",
-	    #                          "libgobject-2.0-0.dll","libgthread-2.0-0.dll",
-	    #                          "libgtk-win32-2.0-0.dll","libpango-1.0-0.dll",
-	    #                          "libpangowin32-1.0-0.dll"],
-
-         }
-	}
-elif sys.platform == 'darwin':
-    # WARNING: this code has not been updated for Advene 3 (python3,
-    # gstreamer1.0). Do not expect it to work. It is preserved here as
-    # a starting point when someone has some time to work on it.
-    import py2app
-    SCRIPTNAME='advene_gui.py'
-    platform_options['app'] = [ 'bin/%s' % SCRIPTNAME ]
-    platform_options['options'] = dict(py2app=dict(
-                    iconfile='mac/Advene.icns',
-                    #includes=",".join( [ l.strip() for l in open('mac_includes.txt') ]),
-                    includes="AppKit,_hashlib,hashlib,email.header,pango,cairo,ctypes,gtk,gtk.keysyms,atk,gobject,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be,cPickle,optparse,sets,pprint,cgi,webbrowser,sgmllib,zipfile,shutil,sched,imghdr,BaseHTTPServer,Cookie,ConfigParser,xmlrpclib,Queue,csv,filecmp," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
-                    argv_emulation=True,
-                    site_packages=True,
-                    #frameworks='Cairo.framework,Glib.framework,Gtk.framework',
-                    plist=dict(
-                       CFBundleName               = "Advene",
-                       CFBundleShortVersionString = _version,     # must be in X.X.X format
-                       CFBundleGetInfoString      = "Advene " + _version,
-                       CFBundleExecutable         = "Advene",
-                       CFBundleIdentifier         = "com.oaubert.advene",
-                   ),
-                 )
-               )
-
 def get_packages_list():
     """Recursively find packages in lib.
 
