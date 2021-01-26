@@ -36,7 +36,7 @@ try:
     app_dir = None
 except ImportError:
     # Try to find if we are in a development tree.
-    app_dir = Path(sys.argv[0]).absolute().parent.parent
+    app_dir = Path(sys.argv[0]).resolve().parent.parent
 
     if (app_dir / "setup.py").exists():
         # Chances are that we are using a development tree
