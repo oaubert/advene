@@ -34,7 +34,7 @@ import sys
 try:
     from advene.main import main
     app_dir = None
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     # Try to find if we are in a development tree.
     app_dir = Path(sys.argv[0]).resolve().parent.parent
 
