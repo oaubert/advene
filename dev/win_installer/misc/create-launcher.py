@@ -188,14 +188,14 @@ def main():
         os.path.join(misc, "advene.ico"),
         os.path.join(misc, "launcher.manifest"),
         "Advene", "Advene",
-        version, company_name, "advene.main:main", False)
+        version, company_name, "advene.util.importer:main", False)
 
     build_launcher(
         os.path.join(target, "advene_export.exe"),
         os.path.join(misc, "advene.ico"),
         os.path.join(misc, "launcher.manifest"),
         "Advene", "Advene",
-        version, company_name, "advene.main:main", False)
+        version, company_name, "advene.util.exporter:main", False)
 
 if __name__ == "__main__":
     main()

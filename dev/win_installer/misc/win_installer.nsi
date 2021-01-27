@@ -28,14 +28,13 @@ SetCompressorDictSize 32
 InstallDir "$PROGRAMFILES\${ADVENE_NAME}"
 RequestExecutionLevel admin
 
-Var EF_INST_BIN
 Var ADVENE_INST_BIN
 Var UNINST_BIN
 
 !define MUI_ABORTWARNING
 !define MUI_ICON "..\advene.ico"
 
-!insertmacro MUI_PAGE_LICENSE "..\COPYING"
+!insertmacro MUI_PAGE_LICENSE "..\advene\COPYING"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 
@@ -80,20 +79,6 @@ Section "Install"
     ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
     IntFmt $0 "0x%08X" $0
     WriteRegDWORD HKLM "${ADVENE_UNINST_KEY}" "EstimatedSize" "$0"
-
-    ; Folder association for Ex Falso
-    ; Context menu for folders
-    WriteRegStr HKLM  "Software\Classes\Directory\shell\${EF_ID}" "Icon" "$EF_INST_BIN"
-    WriteRegStr HKLM  "Software\Classes\Directory\shell\${EF_ID}" "MUIVerb" "${EF_NAME}"
-    WriteRegStr HKLM  "Software\Classes\Directory\shell\${EF_ID}\command" "" "$\"$EF_INST_BIN$\" $\"%1$\""
-
-    ; Context menu by shift+right clicking on explorer background
-    WriteRegStr HKLM  "Software\Classes\Directory\Background\shell\${EF_ID}" "Icon" "$EF_INST_BIN"
-    WriteRegStr HKLM  "Software\Classes\Directory\Background\shell\${EF_ID}" "MUIVerb" "${EF_NAME}"
-
-    ; Extended hides it if shift isn't pressed, like the cmd entry
-    WriteRegStr HKLM  "Software\Classes\Directory\Background\shell\${EF_ID}" "Extended" ""
-    WriteRegStr HKLM  "Software\Classes\Directory\Background\shell\${EF_ID}\command" "" "$\"$EF_INST_BIN$\" $\"%V$\""
 
     ; Register a default entry for file extensions
     WriteRegStr HKLM "Software\Classes\${ADVENE_ID}.assoc.ANY\shell\play\command" "" "$\"$ADVENE_INST_BIN$\" --run --play-file $\"%1$\""

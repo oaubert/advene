@@ -20,8 +20,8 @@ BUILD_VERSION="0"
 MISC="${DIR}"/misc
 MINGW="mingw64"
 
-QL_VERSION="0.0.0"
-QL_VERSION_DESC="UNKNOWN"
+ADVENE_VERSION="0.0.0"
+ADVENE_VERSION_DESC="UNKNOWN"
 
 function set_build_root {
     BUILD_ROOT="$1"
@@ -133,16 +133,16 @@ function install_advene {
     rm -Rf "${REPO_CLONE}"
     git clone "${DIR}"/../.. "${REPO_CLONE}"
 
-    (cd "${REPO_CLONE}" && git checkout "$1") || exit 1
+    cd "${REPO_CLONE}" && git checkout "$1" || exit 1
 
-    build_python "${REPO_CLONE}"/setup.py install
+    build_python setup.py install
 
-    # Create launchers FIXME
-    #python3 "${MISC}"/create-launcher.py \
-    #    "${QL_VERSION}" "${MINGW_ROOT}"/bin
+    # Create launchers
+    python3 "${MISC}"/create-launcher.py \
+        "${ADVENE_VERSION}" "${MINGW_ROOT}"/bin
 
     ADVENE_VERSION=$(MSYSTEM= build_python -c \
-        "import advene.core.version; import sys; sys.stdout.write(advene.core.version)")
+	    "import sys; sys.path.insert(0, 'lib'); import advene.core.version; sys.stdout.write(advene.core.version.version)")
     ADVENE_VERSION_DESC="$ADVENE_VERSION"
     if [ "$1" = "master" ]
     then
@@ -151,6 +151,7 @@ function install_advene {
         ADVENE_VERSION_DESC="$ADVENE_VERSION-rev$GIT_REV-$GIT_HASH"
     fi
 
+    cd ..
     build_compileall -d "" -f -q "$(cygpath -w "${MINGW_ROOT}")"
 }
 
@@ -167,7 +168,7 @@ function cleanup_before {
     "${MINGW_ROOT}"/bin/gtk-update-icon-cache-3.0.exe \
         "${MINGW_ROOT}"/share/icons/hicolor
 
-    # python related, before installing quodlibet
+    # python related, before installing advene
     rm -Rf "${MINGW_ROOT}"/lib/python3.*/test
     rm -f "${MINGW_ROOT}"/lib/python3.*/lib-dynload/_tkinter*
     find "${MINGW_ROOT}"/lib/python3.* -type d -name "test*" \
@@ -259,29 +260,29 @@ function cleanup_after {
     rm -Rf "${MINGW_ROOT}"/lib/ruby
     rm -Rf "${MINGW_ROOT}"/lib/engines
 
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstvpx.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstdaala.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstdvdread.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopenal.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopenexr.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopenh264.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstresindvd.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstassrender.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstx265.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstwebp.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopengl.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstmxf.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstfaac.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstschro.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstrtmp.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstzbar.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstfdkaac.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstaom.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstvpx.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstdaala.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstdvdread.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopenal.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopenexr.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopenh264.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstresindvd.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstassrender.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstx265.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstwebp.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopengl.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstmxf.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstfaac.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstschro.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstrtmp.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstzbar.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstfdkaac.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstaom.dll
 
     rm -f "${MINGW_ROOT}"/bin/libharfbuzz-icu-0.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstcacasink.dll
-    rm -f "${MINGW_ROOT}"/bin/libgstopencv-1.0-0.dll
-    rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopencv.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstcacasink.dll
+    #rm -f "${MINGW_ROOT}"/bin/libgstopencv-1.0-0.dll
+    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopencv.dll
     rm -Rf "${MINGW_ROOT}"/lib/python2.*
 
     find "${MINGW_ROOT}" -name "*.a" -exec rm -f {} \;
@@ -321,28 +322,28 @@ function cleanup_after {
 }
 
 function build_installer {
-    BUILDPY=$(echo "${MINGW_ROOT}"/lib/python3.*/site-packages/advene)/build.py
-    cp "${REPO_CLONE}"/dev/win_installer/build.py "$BUILDPY"
-    echo 'BUILD_TYPE = u"windows"' >> "$BUILDPY"
-    echo "BUILD_VERSION = $BUILD_VERSION" >> "$BUILDPY"
-    (cd "$REPO_CLONE" && echo "BUILD_INFO = u\"$(git rev-parse --short HEAD)\"" >> "$BUILDPY")
-    build_compileall -d "" -q -f "$BUILDPY"
+    #BUILDPY=$(echo "${MINGW_ROOT}"/lib/python3.*/site-packages/advene)/build.py
+    #cp "${REPO_CLONE}"/dev/win_installer/build.py "$BUILDPY"
+    #echo 'BUILD_TYPE = u"windows"' >> "$BUILDPY"
+    #echo "BUILD_VERSION = $BUILD_VERSION" >> "$BUILDPY"
+    #(cd "$REPO_CLONE" && echo "BUILD_INFO = u\"$(git rev-parse --short HEAD)\"" >> "$BUILDPY")
+    #build_compileall -d "" -q -f "$BUILDPY"
 
-    cp misc/quodlibet.ico "${BUILD_ROOT}"
-    (cd "${MINGW_ROOT}" && makensis -NOCD -DVERSION="$QL_VERSION_DESC" "${MISC}"/win_installer.nsi)
+    cp ${REPO_CLONE}/dev/win_installer/misc/advene.ico "${BUILD_ROOT}"
+    (cd "${MINGW_ROOT}" && makensis -NOCD -DVERSION="$ADVENE_VERSION_DESC" "${MISC}"/win_installer.nsi)
 
-    mv "${MINGW_ROOT}/advene-LATEST.exe" "$DIR/advene-$QL_VERSION_DESC-installer.exe"
+    mv "${MINGW_ROOT}/advene-LATEST.exe" "$DIR/advene-$ADVENE_VERSION_DESC-installer.exe"
 }
 
 function build_portable_installer {
-    BUILDPY=$(echo "${MINGW_ROOT}"/lib/python3.*/site-packages/advene)/build.py
-    cp "${REPO_CLONE}"/dev/win_installer/build.py "$BUILDPY"
-    echo 'BUILD_TYPE = u"windows-portable"' >> "$BUILDPY"
-    echo "BUILD_VERSION = $BUILD_VERSION" >> "$BUILDPY"
-    (cd "$REPO_CLONE" && echo "BUILD_INFO = u\"$(git rev-parse --short HEAD)\"" >> "$BUILDPY")
-    build_compileall -d "" -q -f "$BUILDPY"
+    #BUILDPY=$(echo "${MINGW_ROOT}"/lib/python3.*/site-packages/advene)/build.py
+    #cp "${REPO_CLONE}"/dev/win_installer/build.py "$BUILDPY"
+    #echo 'BUILD_TYPE = u"windows-portable"' >> "$BUILDPY"
+    #echo "BUILD_VERSION = $BUILD_VERSION" >> "$BUILDPY"
+    #(cd "$REPO_CLONE" && echo "BUILD_INFO = u\"$(git rev-parse --short HEAD)\"" >> "$BUILDPY")
+    #build_compileall -d "" -q -f "$BUILDPY"
 
-    local PORTABLE="$DIR/advene-$QL_VERSION_DESC-portable"
+    local PORTABLE="$DIR/advene-$ADVENE_VERSION_DESC-portable"
 
     rm -rf "$PORTABLE"
     mkdir "$PORTABLE"
