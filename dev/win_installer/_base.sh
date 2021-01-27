@@ -193,7 +193,7 @@ function cleanup_after {
     done
 
     find "${MINGW_ROOT}" -regextype "posix-extended" -name "*.exe" -a ! \
-        -iregex ".*/(advene||python|)[^/]*\\.exe" \
+        -iregex ".*/(advene|python|bzip2|curl|fc|ff|gst|xz)[^/]*\\.exe" \
         -exec rm -f {} \;
 
     rm -Rf "${MINGW_ROOT}"/libexec
@@ -235,6 +235,7 @@ function cleanup_after {
     rm -Rf "${MINGW_ROOT}"/share/pki
     rm -Rf "${MINGW_ROOT}"/share/thumbnailers
     rm -Rf "${MINGW_ROOT}"/share/gtk-3.0
+    rm -Rf "${MINGW_ROOT}"/share/gtksourceview-3.0
     rm -Rf "${MINGW_ROOT}"/share/nghttp2
     rm -Rf "${MINGW_ROOT}"/share/themes
     rm -Rf "${MINGW_ROOT}"/share/fontconfig
@@ -260,29 +261,7 @@ function cleanup_after {
     rm -Rf "${MINGW_ROOT}"/lib/ruby
     rm -Rf "${MINGW_ROOT}"/lib/engines
 
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstvpx.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstdaala.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstdvdread.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopenal.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopenexr.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopenh264.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstresindvd.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstassrender.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstx265.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstwebp.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopengl.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstmxf.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstfaac.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstschro.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstrtmp.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstzbar.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstfdkaac.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstaom.dll
-
     rm -f "${MINGW_ROOT}"/bin/libharfbuzz-icu-0.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstcacasink.dll
-    #rm -f "${MINGW_ROOT}"/bin/libgstopencv-1.0-0.dll
-    #rm -f "${MINGW_ROOT}"/lib/gstreamer-1.0/libgstopencv.dll
     rm -Rf "${MINGW_ROOT}"/lib/python2.*
 
     find "${MINGW_ROOT}" -name "*.a" -exec rm -f {} \;
@@ -299,7 +278,7 @@ function cleanup_after {
     find "${MINGW_ROOT}" -name "*.manifest" -exec rm -f {} \;
     find "${MINGW_ROOT}" -name "*.pyo" -exec rm -f {} \;
 
-    find "${MINGW_ROOT}"/bin -name "*-config" -exec rm -f {} \;
+    find "${MINGW_ROOT}"/bin -name "*-config" -a ! -iregex ".*python.*" -exec rm -f {} \;
     find "${MINGW_ROOT}"/bin -name "easy_install*" -exec rm -f {} \;
     find "${MINGW_ROOT}" -regex ".*/bin/[^.]+" -exec rm -f {} \;
     find "${MINGW_ROOT}" -regex ".*/bin/[^.]+\\.[0-9]+" -exec rm -f {} \;
