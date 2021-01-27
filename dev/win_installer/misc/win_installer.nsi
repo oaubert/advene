@@ -17,6 +17,7 @@ Unicode true
 !define ADVENE_INSTDIR_KEY "Software\${ADVENE_NAME}"
 !define ADVENE_INSTDIR_VALUENAME "InstDir"
 
+
 !define MUI_CUSTOMFUNCTION_GUIINIT custom_gui_init
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
@@ -25,8 +26,36 @@ Name "${ADVENE_NAME} (${VERSION})"
 OutFile "advene-LATEST.exe"
 SetCompressor /SOLID /FINAL lzma
 SetCompressorDictSize 32
-InstallDir "$PROGRAMFILES\${ADVENE_NAME}"
-RequestExecutionLevel admin
+RequestExecutionLevel highest
+
+Var IsAdminMode
+  !macro SetAdminMode
+  StrCpy $IsAdminMode 1
+  SetShellVarContext All
+  ${IfThen} $InstDir == "" ${|} StrCpy $InstDir "$Programfiles\${ADVENE_NAME}" ${|}
+  !macroend
+  !macro SetUserMode
+  StrCpy $IsAdminMode 0
+  SetShellVarContext Current
+  ${IfThen} $InstDir == "" ${|} StrCpy $InstDir "$LocalAppData\Programs\${ADVENE_NAME}" ${|}
+  !macroend
+
+Function .onInit
+UserInfo::GetAccountType
+Pop $0
+${IfThen} $0 != "Admin" ${|} Goto setmode_currentuser ${|}
+
+!insertmacro SetAdminMode
+Goto finalize_mode
+
+setmode_currentuser:
+!insertmacro SetUserMode
+
+finalize_mode:
+FunctionEnd
+
+
+InstallDir "$InstDir"
 
 Var ADVENE_INST_BIN
 Var UNINST_BIN
@@ -44,6 +73,7 @@ Var UNINST_BIN
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "Esperanto"
 !insertmacro MUI_LANGUAGE "French"
+!insertmacro MUI_LANGUAGE "Spanish"
 
 Section "Install"
     SetShellVarContext all
@@ -59,86 +89,86 @@ Section "Install"
     StrCpy $UNINST_BIN "$INSTDIR\uninstall.exe"
 
     ; Store installation folder
-    WriteRegStr HKLM "${ADVENE_INSTDIR_KEY}" "${ADVENE_INSTDIR_VALUENAME}" $INSTDIR
+    WriteRegStr ShCtx "${ADVENE_INSTDIR_KEY}" "${ADVENE_INSTDIR_VALUENAME}" $INSTDIR
 
     ; Set up an entry for the uninstaller
-    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" \
+    WriteRegStr ShCtx "${ADVENE_UNINST_KEY}" \
         "DisplayName" "${ADVENE_NAME} - ${ADVENE_DESC}"
-    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "DisplayIcon" "$\"$ADVENE_INST_BIN$\""
-    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "UninstallString" \
+    WriteRegStr ShCtx "${ADVENE_UNINST_KEY}" "DisplayIcon" "$\"$ADVENE_INST_BIN$\""
+    WriteRegStr ShCtx "${ADVENE_UNINST_KEY}" "UninstallString" \
         "$\"$UNINST_BIN$\""
-    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "QuietUninstallString" \
+    WriteRegStr ShCtx "${ADVENE_UNINST_KEY}" "QuietUninstallString" \
     "$\"$UNINST_BIN$\" /S"
-    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "InstallLocation" "$INSTDIR"
-    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "HelpLink" "${ADVENE_WEBSITE}"
-    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "Publisher" "The ${ADVENE_NAME} Development Community"
-    WriteRegStr HKLM "${ADVENE_UNINST_KEY}" "DisplayVersion" "${VERSION}"
-    WriteRegDWORD HKLM "${ADVENE_UNINST_KEY}" "NoModify" 0x1
-    WriteRegDWORD HKLM "${ADVENE_UNINST_KEY}" "NoRepair" 0x1
+    WriteRegStr ShCtx "${ADVENE_UNINST_KEY}" "InstallLocation" "$INSTDIR"
+    WriteRegStr ShCtx "${ADVENE_UNINST_KEY}" "HelpLink" "${ADVENE_WEBSITE}"
+    WriteRegStr ShCtx "${ADVENE_UNINST_KEY}" "Publisher" "The ${ADVENE_NAME} Development Community"
+    WriteRegStr ShCtx "${ADVENE_UNINST_KEY}" "DisplayVersion" "${VERSION}"
+    WriteRegDWORD ShCtx "${ADVENE_UNINST_KEY}" "NoModify" 0x1
+    WriteRegDWORD ShCtx "${ADVENE_UNINST_KEY}" "NoRepair" 0x1
     ; Installation size
     ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
     IntFmt $0 "0x%08X" $0
-    WriteRegDWORD HKLM "${ADVENE_UNINST_KEY}" "EstimatedSize" "$0"
+    WriteRegDWORD ShCtx "${ADVENE_UNINST_KEY}" "EstimatedSize" "$0"
 
     ; Register a default entry for file extensions
-    WriteRegStr HKLM "Software\Classes\${ADVENE_ID}.assoc.ANY\shell\play\command" "" "$\"$ADVENE_INST_BIN$\" --run --play-file $\"%1$\""
-    WriteRegStr HKLM "Software\Classes\${ADVENE_ID}.assoc.ANY\DefaultIcon" "" "$\"$ADVENE_INST_BIN$\""
-    WriteRegStr HKLM "Software\Classes\${ADVENE_ID}.assoc.ANY\shell\play" "FriendlyAppName" "${ADVENE_NAME}"
+    WriteRegStr ShCtx "Software\Classes\${ADVENE_ID}.assoc.ANY\shell\play\command" "" "$\"$ADVENE_INST_BIN$\" --run --play-file $\"%1$\""
+    WriteRegStr ShCtx "Software\Classes\${ADVENE_ID}.assoc.ANY\DefaultIcon" "" "$\"$ADVENE_INST_BIN$\""
+    WriteRegStr ShCtx "Software\Classes\${ADVENE_ID}.assoc.ANY\shell\play" "FriendlyAppName" "${ADVENE_NAME}"
 
     ; Add application entry
-    WriteRegStr HKLM "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities" "ApplicationDescription" "${ADVENE_DESC}"
-    WriteRegStr HKLM "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities" "ApplicationName" "${ADVENE_NAME}"
+    WriteRegStr ShCtx "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities" "ApplicationDescription" "${ADVENE_DESC}"
+    WriteRegStr ShCtx "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities" "ApplicationName" "${ADVENE_NAME}"
 
     ; Register supported file extensions
     ; (generated using gen_supported_types.py)
     !define ADVENE_ASSOC_KEY "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities\FileAssociations"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".264" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".3gp" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".apl" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".asf" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".avi" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".azp" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".dv" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".flv" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".m4v" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mjpg" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mjpg" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mkv" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mov" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mp3" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mp4" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mp4v" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mpeg" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mpg" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".mts" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ogg" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ogm" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ogv" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ogx" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ps" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".qt" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".qtm" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".rm" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".rmd" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".rmvb" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".rv" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".ts" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".vfw" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".vob" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".vp6" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".vp7" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".vp8" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".wav" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".webm" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".wmv" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".xml" "${ADVENE_ID}.assoc.ANY"
-    WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" ".xvid" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".264" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".3gp" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".apl" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".asf" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".avi" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".azp" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".dv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".flv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".m4v" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".mjpg" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".mjpg" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".mkv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".mov" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".mp3" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".mp4" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".mp4v" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".mpeg" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".mpg" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".mts" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".ogg" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".ogm" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".ogv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".ogx" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".ps" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".qt" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".qtm" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".rm" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".rmd" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".rmvb" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".rv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".ts" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".vfw" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".vob" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".vp6" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".vp7" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".vp8" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".wav" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".webm" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".wmv" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".xml" "${ADVENE_ID}.assoc.ANY"
+    WriteRegStr ShCtx "${ADVENE_ASSOC_KEY}" ".xvid" "${ADVENE_ID}.assoc.ANY"
 
     ; Register application entry
-    WriteRegStr HKLM "Software\RegisteredApplications" "${ADVENE_NAME}" "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities"
+    WriteRegStr ShCtx "Software\RegisteredApplications" "${ADVENE_NAME}" "Software\${ADVENE_NAME}\${ADVENE_ID}\Capabilities"
 
     ; Register app paths
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\advene.exe" "" "$ADVENE_INST_BIN"
+    WriteRegStr ShCtx "Software\Microsoft\Windows\CurrentVersion\App Paths\advene.exe" "" "$ADVENE_INST_BIN"
 
     ; Create uninstaller
     WriteUninstaller "$UNINST_BIN"
@@ -156,14 +186,14 @@ Function custom_gui_init
     Var /GLOBAL uninst_bin_temp
 
     SetRegView 32
-    ReadRegStr $instdir_temp HKLM "${ADVENE_INSTDIR_KEY}" "${ADVENE_INSTDIR_VALUENAME}"
+    ReadRegStr $instdir_temp ShCtx "${ADVENE_INSTDIR_KEY}" "${ADVENE_INSTDIR_VALUENAME}"
     SetRegView lastused
     StrCmp $instdir_temp "" skip 0
         StrCpy $INSTDIR $instdir_temp
     skip:
 
     SetRegView 64
-    ReadRegStr $instdir_temp HKLM "${ADVENE_INSTDIR_KEY}" "${ADVENE_INSTDIR_VALUENAME}"
+    ReadRegStr $instdir_temp ShCtx "${ADVENE_INSTDIR_KEY}" "${ADVENE_INSTDIR_VALUENAME}"
     SetRegView lastused
     StrCmp $instdir_temp "" skip2 0
         StrCpy $INSTDIR $instdir_temp
@@ -205,16 +235,16 @@ Section "Uninstall"
     RMDir "$SMPROGRAMS\${ADVENE_NAME}"
 
     ; Remove application registration and file assocs
-    DeleteRegKey HKLM "Software\Classes\${ADVENE_ID}.assoc.ANY"
-    DeleteRegKey HKLM "Software\${ADVENE_NAME}"
-    DeleteRegValue HKLM "Software\RegisteredApplications" "${ADVENE_NAME}"
+    DeleteRegKey ShCtx "Software\Classes\${ADVENE_ID}.assoc.ANY"
+    DeleteRegKey ShCtx "Software\${ADVENE_NAME}"
+    DeleteRegValue ShCtx "Software\RegisteredApplications" "${ADVENE_NAME}"
 
     ; Remove app paths
-    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\advene.exe"
+    DeleteRegKey ShCtx "Software\Microsoft\Windows\CurrentVersion\App Paths\advene.exe"
 
     ; Delete installation related keys
-    DeleteRegKey HKLM "${ADVENE_UNINST_KEY}"
-    DeleteRegKey HKLM "${ADVENE_INSTDIR_KEY}"
+    DeleteRegKey ShCtx "${ADVENE_UNINST_KEY}"
+    DeleteRegKey ShCtx "${ADVENE_INSTDIR_KEY}"
 
     ; Delete files
     RMDir /r "$INSTDIR"
