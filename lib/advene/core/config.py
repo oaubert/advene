@@ -119,13 +119,14 @@ class Config:
         self.parse_options()
 
         if os.sys.platform in ( 'win32', 'darwin' ):
-            self.os=os.sys.platform
+            self.os = os.sys.platform
         elif 'linux' in os.sys.platform:
-            self.os='linux'
+            self.os = 'linux'
         else:
             logger.warning("Warning: undefined platform: %s", os.sys.platform)
             self.os = os.sys.platform
 
+        # Default values
         if self.os == 'win32':
             prgdir = Path(os.environ.get('PROGRAMFILES', 'c:/Program Files'))
             advenedir = prgdir / 'Advene'
@@ -334,7 +335,7 @@ class Config:
             'plugin': 'gstreamer',
             'bundled': True,
             'embedded': True,
-            'vout': 'default',
+            'vout': 'gtk',
             'svg': True,
             'osdfont': '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
             'verbose': None, # None, 0, 1, 2
@@ -493,10 +494,35 @@ class Config:
         # Global methods (user-defined)
         self.global_methods = {}
 
+        # Try to fix paths when necessary
+        if not self.path['resources'].exists() or not self.path['web'].exists():
+            self.autodetect_paths()
+        # Second check
+        if not self.path['resources'].exists() or not self.path['web'].exists():
+            logger.error("Cannot determine paths.")
+
+        if len(sys.argv) > 1 and sys.argv[1] == '--debug-startup':
+            import pdb; pdb.set_trace()
+
         if self.os == 'win32':
             self.win32_specific_config()
         elif self.os == 'darwin':
             self.darwin_specific_config()
+
+    def autodetect_paths(self):
+        package_dir = Path(__file__).resolve().parent.parent.parent
+        app_dir = package_dir.parent
+        # 1st hypothesis: module is loaded from sources
+        if (app_dir / "setup.py").exists():
+            # Chances are that we are using a development tree
+            logger.warning("You seem to use a development tree at:\n%s." % app_dir)
+            self.fix_paths(app_dir)
+            return
+        # 2nd hypothesis: we are running from an egg dir
+        if (package_dir / "EGG-INFO").exists():
+            # egg-info install. The locale/share/doc files are in the same dir.
+            self.fix_paths(str(package_dir))
+            return
 
     def check_settings_directory(self):
         """Check if the settings directory is present, and create it if necessary.
@@ -615,26 +641,13 @@ class Config:
         """
         if self.os != 'win32':
             return
-
         self.player['dvd-device']='E:'
-        self.player['vout'] = 'gtk'
-        advenehome = self.get_registry_value('software\\advene','path')
-        if advenehome is None:
-            logger.warning("Cannot get the Advene location from registry")
-            return
-        advenehome = Path(advenehome)
-        logger.info("Setting Advene paths from %s", advenehome)
-        self.path['advene'] = advenehome
-        self.path['locale'] = advenehome / 'locale'
-        self.path['resources'] = advenehome / 'share'
-        self.path['web'] = advenehome / 'share' / 'web'
 
     def darwin_specific_config(self):
         """MacOS X specific tweaks.
         """
         if self.os != 'darwin':
             return
-        self.player['vout'] = 'gtk'
 
     def get_registry_value (self, subkey, name):
         """(win32) get a value from the registry.

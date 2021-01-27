@@ -37,7 +37,7 @@ def main(app_dir=None):
 
     if app_dir is not None:
         # Chances are that we are running from a development tree
-        logging.warning("You seem to use a development tree at:\n%s\Setting paths." % str(app_dir))
+        logging.warning("Using specified path %s" % str(app_dir))
         config.data.fix_paths(str(app_dir))
 
     # Check for directories
@@ -196,3 +196,6 @@ Aborting.""", dir_path)
             d.connect('response', q)
             d.show()
             Gtk.main()
+
+if __name__ == "__main__":
+    sys.exit(main())

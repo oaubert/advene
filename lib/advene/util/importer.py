@@ -88,7 +88,6 @@ except (ModuleNotFoundError,  ImportError):
     if (app_dir / "setup.py").exists():
         # Chances are that we are using a development tree
         sys.path.insert(0, str(app_dir / "lib"))
-        logger.warning("You seem to use a development tree at:\n%s." % app_dir)
     # Try to import again. It will fail if we could not fix paths.
     import advene.core.config as config
     config.data.fix_paths(app_dir)
@@ -794,6 +793,12 @@ Available filters:
 
         logger.info(i.statistics_formatted())
     sys.exit(0)
+
+def mingw_main():
+    # mingw-specific main
+    basedir = __file__.split("/mingw64/")[0]
+    config.data.fix_paths(basedir + "advene")
+    main()
 
 if __name__ == "__main__":
     main()
