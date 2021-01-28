@@ -175,7 +175,7 @@ Section "Install"
 
     ; Create start menu shortcuts
     CreateDirectory "$SMPROGRAMS\${ADVENE_NAME}"
-;     CreateShortCut "$SMPROGRAMS\${ADVENE_NAME}\${ADVENE_NAME}.lnk" "$ADVENE_INST_BIN"
+    CreateShortCut "$SMPROGRAMS\${ADVENE_NAME}\${ADVENE_NAME}.lnk" "$ADVENE_INST_BIN"
 SectionEnd
 
 Function custom_gui_init
