@@ -45,11 +45,11 @@ function build_python {
 }
 
 function build_compileall_pyconly {
-    MSYSTEM= build_python -m compileall --invalidation-mode unchecked-hash -b "$@"
+    MSYSTEM="" build_python -m compileall --invalidation-mode unchecked-hash -b "$@"
 }
 
 function build_compileall {
-    MSYSTEM= build_python -m compileall --invalidation-mode unchecked-hash "$@"
+    MSYSTEM="" build_python -m compileall --invalidation-mode unchecked-hash "$@"
 }
 
 function install_pre_deps {
@@ -73,7 +73,7 @@ function extract_installer {
 
     mkdir -p "$BUILD_ROOT"
     7z x -o"$BUILD_ROOT"/"$MINGW" "$1"
-    rm -rf "$MINGW_ROOT"/'$PLUGINSDIR' "$MINGW_ROOT"/*.txt "$MINGW_ROOT"/*.nsi
+    rm -rf "$MINGW_ROOT"/*.txt "$MINGW_ROOT"/*.nsi
 }
 
 function install_deps {
@@ -141,7 +141,7 @@ function install_advene {
     python3 "${MISC}"/create-launcher.py \
         "${ADVENE_VERSION}" "${MINGW_ROOT}"/bin
 
-    ADVENE_VERSION=$(MSYSTEM= build_python -c \
+    ADVENE_VERSION=$(MSYSTEM="" build_python -c \
 	    "import sys; sys.path.insert(0, 'lib'); import advene.core.version; sys.stdout.write(advene.core.version.version)")
     ADVENE_VERSION_DESC="$ADVENE_VERSION"
     if [ "$1" = "master" ]
@@ -308,7 +308,7 @@ function build_installer {
     #(cd "$REPO_CLONE" && echo "BUILD_INFO = u\"$(git rev-parse --short HEAD)\"" >> "$BUILDPY")
     #build_compileall -d "" -q -f "$BUILDPY"
 
-    cp ${REPO_CLONE}/dev/win_installer/misc/advene.ico "${BUILD_ROOT}"
+    cp "${REPO_CLONE}/dev/win_installer/misc/advene.ico" "${BUILD_ROOT}"
     (cd "${MINGW_ROOT}" && makensis -NOCD -DVERSION="$ADVENE_VERSION_DESC" "${MISC}"/win_installer.nsi)
 
     mv "${MINGW_ROOT}/advene-LATEST.exe" "$DIR/advene-$ADVENE_VERSION_DESC-installer.exe"
@@ -323,6 +323,7 @@ function build_portable_installer {
     #build_compileall -d "" -q -f "$BUILDPY"
 
     local PORTABLE="$DIR/advene-$ADVENE_VERSION_DESC-portable"
+    local ZBIN="7z1900.exe"
 
     rm -rf "$PORTABLE"
     mkdir "$PORTABLE"
@@ -334,8 +335,8 @@ function build_portable_installer {
 
     rm -Rf 7zout 7z1604.exe
     7z a payload.7z "$PORTABLE"
-    wget -P "$DIR" -c http://www.7-zip.org/a/7z1604.exe
-    7z x -o7zout 7z1604.exe
+    wget -O "${DIR:?}/${ZBIN}" -c http://www.7-zip.org/a/${ZBIN}
+    7z x -o7zout "${DIR:?}/${ZBIN}"
     cat 7zout/7z.sfx payload.7z > "$PORTABLE".exe
-    rm -Rf 7zout 7z1604.exe payload.7z "$PORTABLE"
+    rm -Rf 7zout "${DIR:?}/${ZBIN}" payload.7z "$PORTABLE"
 }
