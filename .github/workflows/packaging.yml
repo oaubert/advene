@@ -23,6 +23,7 @@ jobs:
         with:
           msystem: MSYS
           update: true
+          install: git
 
       - name: "Build package"
         shell: msys2 {0}
