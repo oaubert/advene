@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          path: advene
+          path: /advene
           fetch-depth: 0
 
       - uses: msys2/setup-msys2@v2
@@ -28,10 +28,10 @@ jobs:
       - name: "Build package"
         shell: msys2 {0}
         run: |
-          cd advene/dev/win_installer
+          cd /advene/dev/win_installer
           ./build.sh
 
       - name: "Upload binaries"
         uses: actions/upload-artifact@v2
         with:
-          path: advene/dev/win_installer/advene-*-installer.exe
+          path: /advene/dev/win_installer/advene-*-installer.exe
