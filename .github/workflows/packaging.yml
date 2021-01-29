@@ -12,12 +12,12 @@ jobs:
   windows:
     runs-on: windows-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
+
     steps:
       - uses: actions/checkout@v2
         with:
-          path: /advene
-          fetch-depth: 0
+          fetch-depth: 1
 
       - uses: msys2/setup-msys2@v2
         with:
@@ -28,11 +28,11 @@ jobs:
       - name: "Build package"
         shell: msys2 {0}
         run: |
-          cd /advene/dev/win_installer
+          cd dev/win_installer
           ./build.sh
-          ls -l /advene/dev/win_installer
+          ls -l dev/win_installer
 
       - name: "Upload binaries"
         uses: actions/upload-artifact@v2
         with:
-          path: /advene/dev/win_installer/advene-*-installer.exe
+          path: dev/win_installer/advene-*-installer.exe
