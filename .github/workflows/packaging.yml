@@ -1,12 +1,9 @@
 name: Packaging workflow
 
-# Manually triggered for now
 on:
-  workflow_dispatch:
-    inputs:
-      tags:
-        description: 'build tags'
-        required: false
+  push:
+    tags:
+    - 'release/*'
 
 jobs:
   windows:
@@ -28,13 +25,36 @@ jobs:
       - name: "Build package"
         shell: msys2 {0}
         run: |
-          echo "Current dir" && pwd && ls -l
-          echo "Dev" && ls -l dev/win_installer
           cd dev/win_installer
           ./build.sh
-          echo "End of build" && ls -l
+          ARTIFACT_PATHNAME=$(ls advene-*-installer.exe | head -n 1)
+          ARTIFACT_NAME=$(basename $ARTIFACT_PATHNAME)
+          echo ::set-env name=ARTIFACT_PATHNAME::${ARTIFACT_PATHNAME}
+          echo ::set-env name=ARTIFACT_NAME::${ARTIFACT_NAME}
 
-      - name: "Upload binaries"
+      - name: "Upload binary as artifact"
         uses: actions/upload-artifact@v2
         with:
           path: dev/win_installer/advene-*-installer.exe
+
+      - name: "Create Release"
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: "Upload Release Asset"
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        asset_path: ${{ env.ARTIFACT_PATHNAME }}
+        asset_name: ${{ env.ARTIFACT_NAME }}
+        asset_content_type: application/octet-stream
