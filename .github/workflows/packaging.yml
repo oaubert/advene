@@ -30,6 +30,7 @@ jobs:
         run: |
           cd /advene/dev/win_installer
           ./build.sh
+          ls -l /advene/dev/win_installer
 
       - name: "Upload binaries"
         uses: actions/upload-artifact@v2
