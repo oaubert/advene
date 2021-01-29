@@ -28,9 +28,11 @@ jobs:
       - name: "Build package"
         shell: msys2 {0}
         run: |
-          cd dev/win_installer
+          echo "Current dir" && pwd && ls -l
+          echo "Dev" && ls -l /dev/win_installer
+          cd $GITHUB_WORKSPACE/dev/win_installer
           ./build.sh
-          ls -l dev/win_installer
+          echo "End of build" && ls -l
 
       - name: "Upload binaries"
         uses: actions/upload-artifact@v2
