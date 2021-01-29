@@ -29,8 +29,8 @@ jobs:
         shell: msys2 {0}
         run: |
           echo "Current dir" && pwd && ls -l
-          echo "Dev" && ls -l /dev/win_installer
-          cd $GITHUB_WORKSPACE/dev/win_installer
+          echo "Dev" && ls -l dev/win_installer
+          cd dev/win_installer
           ./build.sh
           echo "End of build" && ls -l
 
