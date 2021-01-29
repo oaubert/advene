@@ -8,6 +8,7 @@
 
 set -e
 DIR="$( cd "$( dirname "$0" )" && pwd )"
+echo "Using $DIR as base build directory"
 cd "${DIR}"
 
 # CONFIG START
