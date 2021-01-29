@@ -27,7 +27,8 @@ jobs:
         run: |
           cd dev/win_installer
           ./build.sh
-          ARTIFACT_PATHNAME=$(ls advene-*-installer.exe | head -n 1)
+          cd ../..
+          ARTIFACT_PATHNAME=$(ls dev/win_installer/advene-*-installer.exe | head -n 1)
           ARTIFACT_NAME=$(basename $ARTIFACT_PATHNAME)
           echo "ARTIFACT_PATHNAME=${ARTIFACT_PATHNAME}" >> $GITHUB_ENV
           echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
