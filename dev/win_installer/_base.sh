@@ -136,6 +136,9 @@ function install_advene {
 
     cd "${REPO_CLONE}" && git checkout "$1" || exit 1
 
+    # Download/extract the cherrypy lib (missing in mingw64)
+    (cd lib && wget https://advene.org/download/src/cherrypy-8.9.1.tgz && tar xvfz cherrypy-8.9.1.tgz)
+
     build_python setup.py install
 
     # Create launchers
@@ -147,9 +150,8 @@ function install_advene {
     ADVENE_VERSION_DESC="$ADVENE_VERSION"
     if [ "$1" = "master" ]
     then
-        local GIT_REV=$(git rev-list --count HEAD)
-        local GIT_HASH=$(git rev-parse --short HEAD)
-        ADVENE_VERSION_DESC="$ADVENE_VERSION-rev$GIT_REV-$GIT_HASH"
+        local GIT_DESCRIBE=$(git describe | sed -e 's/release\///')
+        ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
     fi
 
     cd ..
