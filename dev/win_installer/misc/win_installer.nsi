@@ -31,12 +31,12 @@ RequestExecutionLevel highest
 Var IsAdminMode
   !macro SetAdminMode
   StrCpy $IsAdminMode 1
-  SetShellVarContext All
+  SetShellVarContext all
   ${IfThen} $InstDir == "" ${|} StrCpy $InstDir "$Programfiles\${ADVENE_NAME}" ${|}
   !macroend
   !macro SetUserMode
   StrCpy $IsAdminMode 0
-  SetShellVarContext Current
+  SetShellVarContext current
   ${IfThen} $InstDir == "" ${|} StrCpy $InstDir "$LocalAppData\Programs\${ADVENE_NAME}" ${|}
   !macroend
 
@@ -76,8 +76,6 @@ Var UNINST_BIN
 !insertmacro MUI_LANGUAGE "Spanish"
 
 Section "Install"
-    SetShellVarContext all
-
     ; Use this to make things faster for testing installer changes
     ;~ SetOutPath "$INSTDIR\bin"
     ;~ File /r "mingw32\bin\*.exe"
@@ -176,6 +174,9 @@ Section "Install"
     ; Create start menu shortcuts
     CreateDirectory "$SMPROGRAMS\${ADVENE_NAME}"
     CreateShortCut "$SMPROGRAMS\${ADVENE_NAME}\${ADVENE_NAME}.lnk" "$ADVENE_INST_BIN"
+
+    ; Create desktop link
+    CreateShortCut "$DESKTOP\${ADVENE_NAME}.lnk" "$ADVENE_INST_BIN"
 SectionEnd
 
 Function custom_gui_init
@@ -227,7 +228,6 @@ Function custom_gui_init
 FunctionEnd
 
 Section "Uninstall"
-    SetShellVarContext all
     SetAutoClose true
 
     ; Remove start menu entries
