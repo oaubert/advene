@@ -2706,14 +2706,11 @@ class TimeLine(AdhocView):
             self.controller.create_annotation(position, at)
             return True
 
-        item = Gtk.MenuItem(_("Position %s") % helper.format_time(position))
+        item = Gtk.MenuItem(_("Go to %s") % helper.format_time(position))
+        item.connect('activate', popup_goto, position)
         menu.append(item)
 
         item = Gtk.SeparatorMenuItem()
-        menu.append(item)
-
-        item = Gtk.MenuItem(_("Go to..."))
-        item.connect('activate', popup_goto, position)
         menu.append(item)
 
         item = Gtk.MenuItem(_("New annotation at player time"))
