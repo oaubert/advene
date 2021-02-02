@@ -148,12 +148,8 @@ function install_advene {
     ADVENE_VERSION=$(MSYSTEM="" build_python -c \
 	    "import sys; sys.path.insert(0, 'lib'); import advene.core.version; sys.stdout.write(advene.core.version.version)")
     ADVENE_VERSION_DESC="$ADVENE_VERSION"
-    if [ "$1" = "master" ]
-    then
-        local GIT_DESCRIBE=$(git describe | sed -e 's/release\///')
-        ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
-    fi
-
+    local GIT_DESCRIBE=$(git describe | sed -e 's/release\///')
+    ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
     cd ..
     build_compileall -d "" -f -q "$(cygpath -w "${MINGW_ROOT}")"
 }
