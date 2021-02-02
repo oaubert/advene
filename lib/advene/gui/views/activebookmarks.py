@@ -580,7 +580,7 @@ class ActiveBookmarks(AdhocView):
             if actions in (Gdk.DragAction.MOVE, Gdk.DragAction.LINK):
                 # Only 1 possible action. Use it.
                 Gdk.drag_status(drag_context, actions, timestamp)
-            elif actions == Gdk.DragAction.COPY and is_in_view and config.data.drag_type['annotation'][0][0] in drag_context.list_targets():
+            elif actions & Gdk.DragAction.COPY and is_in_view and config.data.drag_type['annotation'][0][0] in drag_context.list_targets():
                 # We cannot just copy an annotation from our own view,
                 # it just can be moved
                 Gdk.drag_status(drag_context, Gdk.DragAction.MOVE, timestamp)

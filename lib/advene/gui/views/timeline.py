@@ -1390,7 +1390,7 @@ class TimeLine(AdhocView):
                                                     source.type,
                                                     dest)
 
-        if action == Gdk.DragAction.COPY:
+        if action & Gdk.DragAction.COPY:
             # Direct copy
             if len(sources) > 1:
                 if source.type == dest:
@@ -1401,7 +1401,7 @@ class TimeLine(AdhocView):
                     position=None
                 copy_annotation(None, source, dest, position=position)
             return True
-        elif action == Gdk.DragAction.MOVE:
+        elif action & Gdk.DragAction.MOVE:
             if len(sources) > 1:
                 if source.type == dest:
                     return True
@@ -1411,7 +1411,7 @@ class TimeLine(AdhocView):
                     position=None
                 move_annotation(None, source, dest, position=position)
             return True
-        elif action == Gdk.DragAction.LINK:
+        elif action & Gdk.DragAction.LINK:
             # Copy and create a relation. Ignore the selection (?)
             if len(relationtypes) == 1:
                 copy_annotation(None, source, dest, relationtype=relationtypes[0])
@@ -2390,11 +2390,7 @@ class TimeLine(AdhocView):
             sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
             if drop_types:
                 # Copy/Move to a[0]
-                if config.data.os == 'win32':
-                    # Control/Shift mods for DND is broken on win32. Force ACTION_ASK.
-                    ac=Gdk.DragAction.ASK
-                else:
-                    ac=context.get_actions()
+                ac=context.get_actions()
                 self.move_or_copy_annotations(sources, drop_types[0], position=self.pixel2unit(self.adjustment.get_value() + x, absolute=True), action=ac)
             else:
                 # Maybe we should propose to create a new annotation-type ?
