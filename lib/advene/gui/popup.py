@@ -527,7 +527,7 @@ class Menu:
             self.controller.gui.save_snapshot_as(ann.fragment.begin)
             return True
 
-        add_item(_("Go to..."), self.goto_annotation, element)
+        add_item(_("Go to %s") % helper.format_time(element.fragment.begin), self.goto_annotation, element)
         add_item(_("Loop"), loop_on_annotation, element)
         add_item(_("Duplicate"), self.duplicate_annotation, element)
         item = Gtk.MenuItem(_("Highlight"), use_underline=False)
