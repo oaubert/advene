@@ -26,7 +26,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cd dev/win_installer
-          ./build.sh master
+          ./build.sh
           cd ../..
           ARTIFACT_PATHNAME=$(ls dev/win_installer/advene-*-installer.exe | head -n 1)
           ARTIFACT_NAME=$(basename $ARTIFACT_PATHNAME)
