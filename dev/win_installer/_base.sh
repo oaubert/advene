@@ -137,7 +137,7 @@ function install_advene {
     cd "${REPO_CLONE}" && git checkout "$1" || exit 1
 
     # Download/extract the cherrypy lib (missing in mingw64)
-    (cd lib && wget https://advene.org/download/src/cherrypy-8.9.1.tgz && tar xvfz cherrypy-8.9.1.tgz)
+    (cd lib && wget http://advene.org/download/src/cherrypy-8.9.1.tgz && tar xvfz cherrypy-8.9.1.tgz)
 
     build_python setup.py install
 
