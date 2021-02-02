@@ -40,6 +40,7 @@ if config.data.os == 'win32':
 import io
 import urllib.request, urllib.parse, urllib.error
 
+from advene.gui.util.dialog import center_on_mouse
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
@@ -63,10 +64,54 @@ predefined_content_mimetypes=[
     ('image/svg+xml', _("SVG graphics content")),
     ]
 
-if not hasattr(Gtk.Menu, 'popup_at_pointer'):
-    # Monkey patch Gtk.Menu (popup_at_pointer is available only in Gtk >= 3.22)
-    def popup_at_pointer(widget, event):
-        widget.popup(None, None, None, None, 0, Gtk.get_current_event_time())
+if config.data.os == 'win32':
+    # Monkey patch Gtk.Menu to workaround a bug in popup_at_pointer when event is DROP_START
+    def popup_at_pointer(menu, event):
+        if event is None:
+            event = Gtk.get_current_event()
+        if event is None or event.type != Gdk.EventType.DROP_START:
+            # We should be able to use the real popup_at_pointer (button press...)
+            menu._real_popup_at_pointer(event)
+            return
+
+        # else:
+        # Problematic case on win32. Workaround by using a modal.
+        popup = Gtk.Window(Gtk.WindowType.POPUP)
+        # For some reason, enter_notify is triggered upon creation
+        # (even if the pointer is not in it). So guard using multiple
+        # enter events before enabling deletion.
+        popup.can_delete = -2
+        def enable_deletion(w, e=None):
+            popup.can_delete += 1
+        def conditional_deletion(w, e=None):
+            if popup.can_delete > 0:
+                popup.destroy()
+                return False
+        def forced_deletion(w, e=None):
+            popup.destroy()
+            return False
+        newmenu = Gtk.MenuBar()
+        newmenu.set_pack_direction(Gtk.PackDirection.TTB)
+        popup.add(newmenu)
+        # Set our popup as modal wrt. normal menu toplevel
+        p = menu.get_parent()
+        if p is not None:
+            popup.set_transient_for(p.get_toplevel())
+            popup.set_modal(True)
+        # Take menuitems from menu and reattach them to our new menu
+        for menuitem in menu.get_children():
+            menu.remove(menuitem)
+            newmenu.append(menuitem)
+        popup.connect("enter-notify-event", enable_deletion)
+        popup.connect("leave-notify-event", conditional_deletion)
+        popup.connect("button-press-event", enable_deletion)
+        popup.connect("button-release-event", conditional_deletion)
+        newmenu.connect("selection-done", forced_deletion)
+        newmenu.connect("cancel", forced_deletion)
+        center_on_mouse(popup)
+        popup.show_all()
+        newmenu.set_take_focus(True)
+    Gtk.Menu._real_popup_at_pointer = Gtk.Menu.popup_at_pointer
     Gtk.Menu.popup_at_pointer = popup_at_pointer
 
 def image_new_from_pixbuf(pb, width=None):
