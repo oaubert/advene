@@ -160,6 +160,9 @@ class Player:
             sink='d3dvideosink'
         elif config.data.player['vout'] == 'gl':
             sink='glimagesinkelement'
+        elif config.data.player['vout'].startswith('raw:'):
+            # "Raw" element definition - will be passed to Gst.parse_launch
+            sink = config.data.player['vout'][4:]
 
         self.player = Gst.ElementFactory.make("playbin", "player")
 
