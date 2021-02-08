@@ -155,7 +155,7 @@ class Player:
         elif config.data.player['vout'] == 'xvideo':
             sink='xvimagesink'
         elif config.data.player['vout'] == 'gtk':
-            sink='gtksink'
+            sink='gtksink sync=false'
         elif config.data.player['vout'] == 'd3d':
             sink='d3dvideosink'
         elif config.data.player['vout'] == 'gl':
@@ -181,7 +181,7 @@ class Player:
             except:
                 logger.error("Gstreamer SVG overlay element is not available", exc_info=True)
 
-        self.imagesink = Gst.ElementFactory.make(sink, 'sink')
+        self.imagesink = Gst.parse_launch(f"{sink} name=sink")
         try:
             self.imagesink.set_property('force-aspect-ratio', True)
         except TypeError:
