@@ -103,6 +103,7 @@ function install_deps {
 
     PIP_REQUIREMENTS="\
 pyflakes==2.1.1
+requests
 "
 
     build_pip install --no-deps --no-binary ":all:" --upgrade \
