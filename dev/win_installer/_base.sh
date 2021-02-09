@@ -151,6 +151,9 @@ function install_advene {
     ADVENE_VERSION_DESC="$ADVENE_VERSION"
     local GIT_DESCRIBE=$(git describe | sed -e 's/release\///')
     ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
+
+    echo "\nbuild='${ADVENE_VERSION_DESC}'" >> lib/advene/core/version.py
+    echo "build_date='$(date -Is)'">> lib/advene/core/version.py
     cd ..
     build_compileall -d "" -f -q "$(cygpath -w "${MINGW_ROOT}")"
 }
