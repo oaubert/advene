@@ -155,7 +155,7 @@ class Player:
         elif config.data.player['vout'] == 'xvideo':
             sink='xvimagesink'
         elif config.data.player['vout'] == 'gtk':
-            sink='gtksink sync=false'
+            sink='gtksink'
         elif config.data.player['vout'] == 'd3d':
             sink='d3dvideosink'
         elif config.data.player['vout'] == 'gl':
