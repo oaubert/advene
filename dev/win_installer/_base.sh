@@ -102,7 +102,7 @@ function install_deps {
         intltool
 
     PIP_REQUIREMENTS="\
-requests
+requests==2.25.1
 "
 
     build_pip install --no-deps --no-binary ":all:" --upgrade \
