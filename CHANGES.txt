@@ -1,4 +1,4 @@
-advene (3.10) unstable; urgency=medium
+advene (3.11) unstable; urgency=medium
 
   * New scripts advene_import / advene_export to facilitate test and
     automation of import/export tasks.
@@ -10,7 +10,7 @@ advene (3.10) unstable; urgency=medium
   * The Window installer has been rewritten and automated - Windows
     releases will now be up-to-date.
 
- -- Olivier Aubert <contact@olivieraubert.net>  Tue, 09 Feb 2021 19:05:55 +0100
+ -- Olivier Aubert <contact@olivieraubert.net>  Tue, 16 Feb 2021 19:18:31 +0100
 
 advene (3.9) unstable; urgency=medium
 
