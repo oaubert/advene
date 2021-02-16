@@ -203,6 +203,9 @@ class Player:
         if self.captioner is not None:
             elements.append(self.captioner)
 
+        # Add a queue before display
+        elements.append(Gst.ElementFactory.make('queue', None))
+
         if sink == 'glimagesinkelement':
             upload = Gst.ElementFactory.make('glupload', None)
             csp=Gst.ElementFactory.make('glcolorconvert', None)
