@@ -102,7 +102,6 @@ function install_deps {
         intltool
 
     PIP_REQUIREMENTS="\
-pyflakes==2.1.1
 requests
 "
 
