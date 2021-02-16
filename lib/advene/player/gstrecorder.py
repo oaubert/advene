@@ -47,7 +47,7 @@ try:
     from gi.repository import Gst
     from gi.repository import GstPbutils
     Gst.init(None)
-except ImportError:
+except (ImportError, ValueError):
     Gst=None
 
 import os

@@ -43,7 +43,7 @@ from gi.repository import Pango
 try:
     gi.require_version('Rsvg', '2.0')
     from gi.repository import Rsvg
-except ImportError:
+except (ImportError, ValueError):
     import advene.util.ctypesrsvg as Rsvg
 
 # Advene part

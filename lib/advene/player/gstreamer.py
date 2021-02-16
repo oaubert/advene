@@ -55,7 +55,7 @@ try:
     if True or not hasattr(Gst.Structure, '__getitem__'):
         # Monkey patch __getitem__
         Gst.Structure.__getitem__ = Gst.Structure.get_value
-except ImportError:
+except (ImportError, ValueError):
     Gst=None
 
 name="GStreamer video player"
