@@ -102,6 +102,7 @@ function install_deps {
         intltool
 
     PIP_REQUIREMENTS="\
+setuptools
 requests
 "
 
