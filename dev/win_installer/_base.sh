@@ -98,35 +98,30 @@ function install_deps {
         mingw-w64-"${ARCH}"-gtksourceview3  \
         mingw-w64-"${ARCH}"-goocanvas \
         mingw-w64-"${ARCH}"-libsrtp \
+        mingw-w64-"${ARCH}"-python3-setuptools \
         mingw-w64-"${ARCH}"-python3-pillow \
+        mingw-w64-"${ARCH}"-python3-requests \
         intltool
 
-    PIP_REQUIREMENTS="\
-setuptools
-requests
-"
-
-    build_pip install --no-deps --no-binary ":all:" --upgrade \
-        --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr ["\\n"] [" "])
-
+    # Packages to remove
     build_pacman --noconfirm -Rdds \
         mingw-w64-"${ARCH}"-shared-mime-info \
         mingw-w64-"${ARCH}"-python-pip \
         mingw-w64-"${ARCH}"-ncurses \
         mingw-w64-"${ARCH}"-tk \
         mingw-w64-"${ARCH}"-tcl \
-        mingw-w64-"${ARCH}"-opencv \
-        mingw-w64-"${ARCH}"-libdvdcss \
-        mingw-w64-"${ARCH}"-libdvdnav \
-        mingw-w64-"${ARCH}"-libdvdread \
         mingw-w64-"${ARCH}"-openexr \
-        mingw-w64-"${ARCH}"-openh264 \
         mingw-w64-"${ARCH}"-zbar \
         mingw-w64-"${ARCH}"-gsl
 
     build_pacman --noconfirm -Rdds mingw-w64-"${ARCH}"-python2 || true
 
-    build_pacman -S --noconfirm mingw-w64-"${ARCH}"-python3-setuptools
+#    PIP_REQUIREMENTS="\
+#"
+#
+#    build_pip install --no-deps --no-binary ":all:" --upgrade \
+#        --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr ["\\n"] [" "])
+
 }
 
 function install_advene {
