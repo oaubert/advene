@@ -93,10 +93,10 @@ function install_deps {
         mingw-w64-"${ARCH}"-gst-plugins-good \
         mingw-w64-"${ARCH}"-gst-plugins-bad \
         mingw-w64-"${ARCH}"-gst-plugins-ugly \
+        mingw-w64-"${ARCH}"-gst-editing-services \
         mingw-w64-"${ARCH}"-gst-libav \
         mingw-w64-"${ARCH}"-libsrtp \
         mingw-w64-"${ARCH}"-gtksourceview3  \
-        mingw-w64-"${ARCH}"-goocanvas \
         mingw-w64-"${ARCH}"-libsrtp \
         mingw-w64-"${ARCH}"-python3-setuptools \
         mingw-w64-"${ARCH}"-python3-pillow \
