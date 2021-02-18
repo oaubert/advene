@@ -16,6 +16,9 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Get all git tags
+        run: git fetch --prune --unshallow --tags
+
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
