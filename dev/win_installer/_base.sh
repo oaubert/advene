@@ -147,7 +147,7 @@ function install_advene {
     local GIT_DESCRIBE=$(git describe | sed -e 's/release\///')
     ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
 
-    echo "\nbuild='${ADVENE_VERSION_DESC}'" >> lib/advene/core/version.py
+    echo "build='${ADVENE_VERSION_DESC}'" >> lib/advene/core/version.py
     echo "build_date='$(date -Is)'">> lib/advene/core/version.py
     cd ..
     build_compileall -d "" -f -q "$(cygpath -w "${MINGW_ROOT}")"
@@ -305,6 +305,14 @@ function build_installer {
     #echo "BUILD_VERSION = $BUILD_VERSION" >> "$BUILDPY"
     #(cd "$REPO_CLONE" && echo "BUILD_INFO = u\"$(git rev-parse --short HEAD)\"" >> "$BUILDPY")
     #build_compileall -d "" -q -f "$BUILDPY"
+
+    # Variable should have been initialized in install_advene but it
+    # is not correctly set here, for some rease. Fetch the info again from git-describe.
+    (
+        cd "${REPO_CLONE}"
+        GIT_DESCRIBE=$(git describe | sed -e 's/release\///')
+        ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
+    )
 
     cp "${REPO_CLONE}/dev/win_installer/misc/advene.ico" "${BUILD_ROOT}"
     (cd "${MINGW_ROOT}" && makensis -NOCD -DVERSION="$ADVENE_VERSION_DESC" "${MISC}"/win_installer.nsi)
