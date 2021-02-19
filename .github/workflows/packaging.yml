@@ -1,4 +1,4 @@
-name: Packaging workflow
+name: Advene packaging workflow
 
 on:
   push:
@@ -14,6 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          # Note: we are using fetch-depth: 0 here to fetch the whole
+          # history and especially tags, since we use git describe
+          # afterwards to generate the installer filename.
           fetch-depth: 0
 
       - uses: msys2/setup-msys2@v2
