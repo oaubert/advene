@@ -456,7 +456,7 @@ class AdveneGUI:
         # Resize the main window
         window=self.gui.win
         window.connect('key-press-event', self.on_win_key_press_event)
-        window.connect('destroy', self.on_exit)
+        window.connect('delete-event', self.on_exit)
         self.init_window_size(window, 'main')
         window.set_icon_list(self.get_icon_list())
 
