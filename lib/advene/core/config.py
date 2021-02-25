@@ -309,7 +309,7 @@ class Config:
             'text-abbreviations': '',
             # Automatically start the player when loading a media file
             # (either directly or through a package)
-            'player-autostart': True,
+            'player-autostart': False,
             'prefer-wysiwyg': True,
             'player-shortcuts-in-edit-windows': True,
             # See Gtk.accelerator_parse for possible values
