@@ -2261,24 +2261,24 @@ class AdveneGUI:
         return False
 
     def overlay(self, png_data, svg_data, other_thread=False):
-        if other_thread and config.data.os == 'win32':
-            # If executed in a thread other than the one that was
-            # initialized, pixbuf loader (do not know if it is
-            # specific to svg though) crashes in the write method on
-            # win32.  So we have to make sure the method is executed
-            # in the main thread context.
-            q=queue.Queue(1)
-            def process_overlay(queue=None):
-                queue.put(overlay_svg_as_png(png_data, svg_data))
-                return False
-            GObject.timeout_add(0, process_overlay, q)
-            try:
-                data=q.get(True, 2)
-            except queue.Empty:
-                data=None
-            return data
-        else:
-            return overlay_svg_as_png(png_data, svg_data)
+        # if other_thread and config.data.os == 'win32':
+        #     # If executed in a thread other than the one that was
+        #     # initialized, pixbuf loader (do not know if it is
+        #     # specific to svg though) crashes in the write method on
+        #     # win32.  So we have to make sure the method is executed
+        #     # in the main thread context.
+        #     q=queue.Queue(1)
+        #     def process_overlay(queue=None):
+        #         queue.put(overlay_svg_as_png(png_data, svg_data))
+        #         return False
+        #     GObject.timeout_add(0, process_overlay, q)
+        #     try:
+        #         data=q.get(True, 2)
+        #     except queue.Empty:
+        #         data=None
+        #     return data
+        # else:
+        return overlay_svg_as_png(png_data, svg_data)
 
     def edit_element(self, element, destination='default'):
         """Edit the element.
