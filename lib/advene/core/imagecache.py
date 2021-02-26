@@ -186,6 +186,8 @@ class ImageCache:
         @return: an image
         @rtype: PNG data
         """
+        if isinstance(key, str):
+            key = int(key)
         if key is None or key < 0:
             return self.not_yet_available_image
         return self._dict.get(self.round_timestamp(key), self.not_yet_available_image)
