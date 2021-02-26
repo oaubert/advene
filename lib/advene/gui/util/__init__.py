@@ -29,15 +29,15 @@ import cairo
 import gi
 gi.require_version('Gdk', '3.0')
 gi.require_version('Gtk', '3.0')
+from gi.repository import GObject
+from gi.repository import Gio
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
-from gi.repository import GObject
 if config.data.os == 'win32':
     gi.require_version('GdkWin32', '3.0')
     from gi.repository import GdkWin32
 
-import io
 import urllib.request, urllib.parse, urllib.error
 
 from advene.gui.util.dialog import center_on_mouse
@@ -200,13 +200,11 @@ def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
     return pixbuf
 
 def overlay_svg_as_png(png_data, svg_data):
-    pixbuf=overlay_svg_as_pixbuf(png_data, svg_data)
-    s=io.StringIO()
-    def pixbuf_save_func(buf):
-        s.write(buf)
-        return True
-    pixbuf.save_to_callback(pixbuf_save_func, "png", {"tEXt::key":"Overlayed SVG"})
-    return s.getvalue()
+    pixbuf = overlay_svg_as_pixbuf(png_data, svg_data)
+    stream = Gio.MemoryOutputStream.new_resizable()
+    pixbuf.save_to_streamv(stream, "png", [ "tEXt::key" ], [ "Overlayed SVG" ], None)
+    stream.close()
+    return stream.steal_as_bytes().get_data()
 
 def get_small_stock_button(sid, callback=None, *p):
     b=Gtk.Button()
