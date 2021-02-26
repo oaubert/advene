@@ -35,10 +35,9 @@ fragment_re=re.compile('(.*)#(.+)')
 package_expression_re=re.compile(r'packages/(\w+)/(.*)')
 href_re=re.compile(r'''(xlink:href|href|src|about|resource)=['"](.+?)['"> ]''')
 snapshot_re=re.compile(r'/packages/[^/]+/imagecache/(\d+)')
-overlay_re=re.compile(r'/media/overlay/[^/]+/([\w\d]+)(/.+)?')
 tales_re=re.compile(r'(\w+)/(.+)')
 player_re=re.compile(r'/media/play(/|\?position=)(\d+)(/(\d+))?')
-overlay_replace_re=re.compile(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?')
+overlay_re=re.compile(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?')
 
 class WebsiteExporter:
     """Export a set of static views to a directory.
@@ -197,8 +196,8 @@ class WebsiteExporter:
 
             m=overlay_re.search(url)
             if m:
-                ident=m.group(1)
-                tales=m.group(2) or ''
+                ident=m.group(2)
+                tales=m.group(3) or ''
                 # FIXME: not robust wrt. multiple packages/videos
                 a=self.controller.package.get_element_by_id(ident)
                 if not a:
@@ -319,18 +318,6 @@ class WebsiteExporter:
     def fix_links(self, content):
         """Transform contents in order to fix links.
         """
-        # Handle overlays
-        def overlay_replacement(m):
-            package_id=m.group(1)
-            ident=m.group(2)
-            tales=m.group(3)
-            if tales:
-                name=ident+tales.replace('/', '_')
-            else:
-                name=ident
-            return 'imagecache/overlay_%s.png' % name
-        content=overlay_replace_re.sub(overlay_replacement, content)
-
         # Convert all links
         for (attname, link) in href_re.findall(content):
             if link.startswith('imagecache/'):
@@ -404,7 +391,10 @@ class WebsiteExporter:
                     data=ctx.evaluateValue('here' + tales)
                 else:
                     data=a.content.data
-                f.write(self.controller.gui.overlay(self.controller.package.imagecache[a.fragment.begin], data))
+                try:
+                    f.write(self.controller.gui.overlay(self.controller.package.imagecache[a.fragment.begin], data))
+                except TypeError:
+                    logger.exception("Error when trying to export overlayed thumbnail")
 
         # Copy resources
         for path in used_resources:
@@ -537,7 +527,6 @@ class WebsiteExporter:
                            'data': "\n".join( '<li><a href="%s">%s</a>' % (self.url_translation[view_url[v]],
                                                                            v.title)
                                               for v in self.views ) })
-        f.close()
 
         frame="frame.html"
         if frame in list(self.url_translation.values()):
