@@ -27,6 +27,8 @@ If called on an invalid target, the method should return None.
 import logging
 logger = logging.getLogger(__name__)
 
+from json import dumps
+
 def absolute_url(target, context):
     """Return the absolute URL of the element.
     """
@@ -622,12 +624,23 @@ def urlquote(target, context):
 def json(target, context):
     """JSON-encode the parameter.
     """
+    def default_repr(o):
+        if callable(o):
+            return o()
+        if hasattr(o, '__iter__'):
+            return list(o)
+        return str(o)
+
     try:
-        from json import dumps
-    except ImportError:
-        # json is standard in 2.6. For python <= 2.5, hope that simplejson is installed.
-        from simplejson import dumps
-    return dumps(target, skipkeys=True, ensure_ascii=False, sort_keys=True, indent=4)
+        ret = dumps(target,
+                    default=default_repr,
+                    skipkeys=True,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    indent=4)
+    except:
+        import pdb; pdb.set_trace()
+    return ret
 
 def export(target, context):
     """Apply an export filter to the target.
