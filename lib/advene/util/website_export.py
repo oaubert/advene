@@ -72,10 +72,17 @@ class WebsiteExporter:
         if views is None:
             views=[ v
                     for v in self.controller.package.views
-                    if (not v.id.startswith('_')
+                    if (not v.id.startswith('_') # Do not include admin views
                         and v.matchFilter['class'] == 'package'
                         and helper.get_view_type(v) == 'static')
                     ]
+        defaultview = self.controller.package.getMetaData(config.data.namespace, 'default_utbv')
+        v = self.controller.package.views.get_by_id(defaultview)
+        if v is not None and v not in views:
+            # The specified default view is not present in views
+            # (probably because it starts with _). Add it.
+            views.append(v)
+
         self.views=views
         self.max_depth=max_depth
         if progress_callback is not None:
@@ -504,17 +511,22 @@ class WebsiteExporter:
         name="index.html"
         if name in list(self.url_translation.values()):
             name="_index.html"
-        f=open(os.path.join(self.destination, name), 'w', encoding='utf-8')
+
+        default_href=''
+        default=''
         defaultview=self.controller.package.getMetaData(config.data.namespace, 'default_utbv')
         v=self.controller.package.views.get_by_id(defaultview)
         if defaultview and v:
-            default_href=self.url_translation[view_url[v]]
-            default=_("""<p><strong>You should probably begin at <a href="%(href)s">%(title)s</a>.</strong></p>""") % { 'href': default_href, 'title': self.controller.get_title(v) }
-        else:
-            default_href=''
-            default=''
+            url = view_url.get(v)
+            if url is not None:
+                default_href=self.url_translation[url]
+                default=_("""<p><strong>You should probably begin at <a href="%(href)s">%(title)s</a>.</strong></p>""") % { 'href': default_href, 'title': self.controller.get_title(v) }
+            else:
+                # No view url defined for v???
+                logger.error("No view url for default view")
 
-        f.write("""<html><head>%(title)s</head>
+        with open(os.path.join(self.destination, name), 'w', encoding='utf-8') as f:
+            f.write("""<html><head>%(title)s</head>
 <body>
 <h1>%(title)s views</h1>
 %(default)s
