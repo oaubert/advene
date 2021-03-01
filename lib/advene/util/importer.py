@@ -64,6 +64,7 @@ im.statistics hold a dictionary containing the creation statistics.
 """
 
 import logging
+import logging.config
 logger = logging.getLogger(__name__)
 
 import json
@@ -662,6 +663,19 @@ class ExternalAppImporter(GenericImporter):
 
 def main():
     logging.basicConfig(level=logging.INFO)
+    if os.environ.get('ADVENE_DEBUG'):
+        LOGGING = { 'version': 1,
+                    'disable_existing_loggers': False,
+                    'loggers': { } }
+        # Handle ADVENE_DEBUG variable.
+        for m in os.environ.get('ADVENE_DEBUG', '').split(':'):
+            LOGGING['loggers'][m] = { 'level': 'DEBUG' }
+            LOGGING['loggers'][m.replace('.', '_')] = { 'level': 'DEBUG' }
+            # Plugin package name can be mangled
+            if '.plugins' in m:
+                LOGGING['loggers'][m.replace('.', '_').replace('_plugins_', '_app_plugins_')] = { 'level': 'DEBUG' }
+        logging.config.dictConfig(LOGGING)
+
     USAGE = f"{sys.argv[0]} [-o filter_options] filter_name input_file [output_file]"
 
     import advene.core.controller as controller
