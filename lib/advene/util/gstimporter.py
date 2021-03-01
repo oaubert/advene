@@ -62,6 +62,7 @@ class GstImporter(GenericImporter):
 
     def __init__(self, *p, **kw):
         super(GstImporter, self).__init__(*p, **kw)
+        self.is_finalized = False
 
     @staticmethod
     def can_handle(fname):
@@ -76,8 +77,11 @@ class GstImporter(GenericImporter):
     def finalize(self):
         # Data finalization (EOS or user break):
         # stop pipeline, convert last buffered elements...
+        if self.is_finalized:
+            return
+        self.is_finalized = True
         GObject.idle_add(lambda: self.pipeline.set_state(Gst.State.NULL) and False)
-        logger.warning("finalize")
+        logger.debug("Doing finalize")
         def wrapper():
             if hasattr(self, 'do_finalize'):
                 self.do_finalize()
@@ -126,12 +130,16 @@ class GstImporter(GenericImporter):
     def on_bus_message(self, bus, message):
         s = message.get_structure()
         if message.type == Gst.MessageType.EOS:
+            logger.debug("MSG EOS - finalize")
             self.finalize()
         elif s:
             logger.debug("MSG %s: %s", bus.get_name(), s.to_string())
             if s.get_name() == 'progress' and self.progress is not None:
                 progress = s['percent-double'] / 100
                 if not self.progress(progress, self.progress_message(progress, message)):
+                    self.finalize()
+                if s['current'] == s['total']:
+                    # End of file. Use this information instead of the EOS signal, which is not always sent.
                     self.finalize()
             else:
                 self.do_process_message(s, bus)
