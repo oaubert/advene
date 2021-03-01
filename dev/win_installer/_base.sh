@@ -161,6 +161,11 @@ function cleanup_before {
     "${MINGW_ROOT}"/bin/gtk-update-icon-cache-3.0.exe \
         "${MINGW_ROOT}"/share/icons/Adwaita
 
+    # OpenCV depends on a lot of things, that we do not use
+    # and some of them are quite heavy
+    rm -Rf "${MINGW_ROOT}/share/OGRE/"
+    rm -Rf "${MINGW_ROOT}/bin/libopenblas.dll"
+
     # remove some gtk demo icons
     find "${MINGW_ROOT}"/share/icons/hicolor -name "gtk3-*" -exec rm -f {} \;
     "${MINGW_ROOT}"/bin/gtk-update-icon-cache-3.0.exe \
