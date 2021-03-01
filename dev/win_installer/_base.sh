@@ -163,8 +163,14 @@ function cleanup_before {
 
     # OpenCV depends on a lot of things, that we do not use
     # and some of them are quite heavy
-    rm -Rf "${MINGW_ROOT}/share/OGRE/"
+    rm -Rf "${MINGW_ROOT}/share/OGRE"
+    rm -Rf "${MINGW_ROOT}/lib/OGRE"
     rm -Rf "${MINGW_ROOT}/bin/libopenblas.dll"
+    rm -Rf "${MINGW_ROOT}/bin/OgreMain.dll"
+    rm -Rf "${MINGW_ROOT}/bin/OgreOverlay.dll"
+    rm -Rf "${MINGW_ROOT}/bin/OgreRTShaderSystem.dll"
+    rm -Rf "${MINGW_ROOT}/bin/OgreBites.dll"
+    rm -rf "${MINGW_ROOT}/x86_64-w64-mingw32"
 
     # remove some gtk demo icons
     find "${MINGW_ROOT}"/share/icons/hicolor -name "gtk3-*" -exec rm -f {} \;
