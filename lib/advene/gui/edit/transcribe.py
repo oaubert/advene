@@ -1153,7 +1153,7 @@ class TranscriptionEdit(AdhocView):
             i.connect('activate', set_scale, size)
             m.append(i)
         m.show_all()
-        m.popup(None, None, None, 0, Gtk.get_current_event_time())
+        m.popup_at_pointer(None)
         return True
 
     def get_toolbar(self):
