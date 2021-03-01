@@ -79,6 +79,7 @@ function extract_installer {
 
 function install_deps {
     build_pacman --noconfirm -S \
+        mingw-w64-"${ARCH}"-busybox \
         mingw-w64-"${ARCH}"-gettext \
         mingw-w64-"${ARCH}"-gdk-pixbuf2 \
         mingw-w64-"${ARCH}"-librsvg \
@@ -149,8 +150,8 @@ function install_advene {
 
     echo "build='${ADVENE_VERSION_DESC}'" >> lib/advene/core/version.py
     echo "build_date='$(date -Is)'">> lib/advene/core/version.py
-    git describe > share/buildinfo.log
-    git status --long --verbose >> share/buildinfo.log
+    git describe > "${MINGW_ROOT}/share/buildinfo.log"
+    git status --long --verbose >> "${MINGW_ROOT}/share/buildinfo.log"
     cd ..
     build_compileall -d "" -f -q "$(cygpath -w "${MINGW_ROOT}")"
 }
