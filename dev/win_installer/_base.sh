@@ -149,6 +149,8 @@ function install_advene {
 
     echo "build='${ADVENE_VERSION_DESC}'" >> lib/advene/core/version.py
     echo "build_date='$(date -Is)'">> lib/advene/core/version.py
+    git describe > share/buildinfo.log
+    git status --long --verbose >> share/buildinfo.log
     cd ..
     build_compileall -d "" -f -q "$(cygpath -w "${MINGW_ROOT}")"
 }
