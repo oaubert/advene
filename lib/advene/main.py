@@ -105,7 +105,7 @@ Aborting.""", dir_path)
     # Locale selection
     if config.data.preferences['language']:
         # A non-empty value overrides the system default
-        os.environ['LANG'] = config.data.preferences['language']
+        os.environ['LANGUAGE'] = config.data.preferences['language']
 
     logging.warning("%s run at %s on %s", config.data.version_string, time.strftime("%d/%m/%y %H:%M:%S %Z"), sys.platform)
 
