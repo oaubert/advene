@@ -145,20 +145,13 @@ class VideoPlayer(AdhocView):
         self.label.set_text(os.path.basename(self.uri))
 
     def reparent_prepare(self):
-        if config.data.os != 'win32':
-            # On X11, the socket id changes. Since we destroy the
-            # origin socket before having realized the destination
-            # one, we cannot maintain a valid xid for the
-            # application. Create a temporary window for this.
-            self.temp_window = self._popup()
         return True
 
     def reparent_done(self):
-        if config.data.os != 'win32':
-            self.drawable.connect_after('realize', self.register_drawable)
-            if hasattr(self, 'temp_window') and self.temp_window is not None:
-                self.temp_window.destroy()
-                self.temp_window = None
+        self.drawable.connect_after('realize', self.register_drawable)
+        if hasattr(self, 'temp_window') and self.temp_window is not None:
+            self.temp_window.destroy()
+            self.temp_window = None
         return True
 
     def close(self, *p):
@@ -217,6 +210,8 @@ class VideoPlayer(AdhocView):
         self.player.sound_mute()
 
         self.drawable = get_drawable()
+        self.video_container = Gtk.VBox()
+        self.video_container.add(self.drawable)
 
         black = Gdk.Color(0, 0, 0)
         for state in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
@@ -288,11 +283,11 @@ class VideoPlayer(AdhocView):
             eb.modify_bg(state, black)
             self.label.modify_fg(state, white)
 
-        vbox.add(self.drawable)
+        vbox.add(self.video_container)
         vbox.pack_start(eb, False, True, 0)
         vbox.pack_start(self.toolbar, False, True, 0)
 
-        self.drawable.connect_after('realize', self.register_drawable)
+        self.drawable.connect_after('realize', self.register_drawable, self.video_container)
 
         # Accept annotation/timestamp drop, to adjust time offset
         vbox.connect('drag-data-received', self.drag_received_cb)
