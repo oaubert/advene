@@ -81,7 +81,7 @@ import advene.model.tal.context
 import advene.util.helper as helper
 from advene.util.tools import unescape_string
 import advene.util.importer
-from advene.util.exporter import get_exporter, register_exporter
+from advene.util.exporter import get_exporter, register_exporter, init_templateexporters
 import xml.etree.ElementTree as ET
 from advene.util.audio import SoundPlayer
 
@@ -850,6 +850,9 @@ class AdveneController:
             args=[]
 
         self.init_plugins()
+
+        # Initialize exporters defined in exporters.xml
+        init_templateexporters()
 
         # Read the default rules
         self.event_handler.read_ruleset_from_file(config.data.advenefile('default_rules.xml'),

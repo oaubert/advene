@@ -388,14 +388,13 @@ def init_templateexporters():
         register_exporter(klass)
 
 def main():
-    init_templateexporters()
     logging.basicConfig(level=logging.DEBUG)
     USAGE = f"{sys.argv[0]} [-o filter_options] filter_name input_file [output_file]"
 
     import advene.core.controller as controller
-    init_templateexporters()
     c = controller.AdveneController()
     c.init_plugins()
+    controller.init_templateexporters()
 
     if (len(config.data.args) < 2
         or config.data.args[0] == 'list'):
