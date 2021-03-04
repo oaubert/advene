@@ -33,7 +33,6 @@ import json
 from pathlib import Path
 import optparse
 import os
-from simpletal import simpleTAL, simpleTALES
 import sys
 
 try:
@@ -50,6 +49,8 @@ except (ModuleNotFoundError,  ImportError):
 
 from advene.model.package import Package
 from advene.model.content import KeywordList
+
+from simpletal import simpleTAL, simpleTALES
 
 EXPORTERS = {}
 
