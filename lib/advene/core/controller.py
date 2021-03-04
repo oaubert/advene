@@ -32,6 +32,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from gi.repository import GObject
+import html
 import itertools
 import json
 import operator
@@ -2685,17 +2686,23 @@ class AdveneController:
                 v.title=_("Comment on set of %d annotations") % len(elements)
             else:
                 v.title=_("Comment on %s") % self.get_title(elements[0])
-            data=[]
+            data=[ """<div class="comment">""" ]
             for element in elements:
                 ctx=self.build_context(element)
-                data.append(_("""<h1>Comment on %(title)s</h1>
-<span class="advene:annotation" advene:annotation="%(id)s" advene:presentation="link:snapshot"><a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href="%(href)s"><img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img></a></span>""") % {
-    'title': self.get_title(element),
+
+                data.append(_("""<div class="comment_item"><strong>Annotation %(title)s (%(timecode)s)</strong>
+<span class="advene:annotation" advene:annotation="%(id)s" advene:presentation="link:snapshot"><a title="Click to play the movie in Advene" tal:attributes="href package/annotations/%(id)s/player_url" href="%(href)s"><img title="Click here to play" width="160" height="100" tal:attributes="src package/annotations/%(id)s/snapshot_url" src="%(imgurl)s" ></img></a></span>
+<span class="comment_content">%(content)s</span>
+</div>""") % {
+    'title': html.escape(self.get_title(element, max_size=20)),
+    'content': html.escape(self.get_title(element)),
     'id': element.id,
+    'timecode': helper.format_time(element.fragment.begin),
     'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
     'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
 })
-                v.content.data="\n".join(data)
+            data.append("</div>")
+            v.content.data="\n".join(data)
         elif isinstance(elements[0], AnnotationType):
             at_title=self.get_title(elements[0])
             v.title=_("List of %s annotations") % at_title
@@ -2714,7 +2721,7 @@ class AdveneController:
 </a><br />
 <span>(<span tal:content="a/fragment/formatted/begin">Debut</span> - <span tal:content="a/fragment/formatted/end">Fin</span>)</span>
 <br />
-</div></span>""" % { 'id': elements[0].id,
+</div></span></div>""" % { 'id': elements[0].id,
                      'title': at_title,
                      }
         self.notify('ViewCreate', view=v, immediate=True)
