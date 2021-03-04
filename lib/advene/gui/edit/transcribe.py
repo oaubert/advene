@@ -46,7 +46,7 @@ from advene.model.schema import AnnotationType
 import advene.util.importer
 
 import advene.util.helper as helper
-from advene.util.tools import unescape_string
+from advene.util.tools import unescape_string, is_uri
 
 from gettext import gettext as _
 
@@ -889,13 +889,10 @@ class TranscriptionEdit(AdhocView):
     def load_transcription(self, filename=None, buffer=None):
         if buffer is None:
             try:
-                if re.match('[a-zA-Z]:', filename):
-                    # Windows drive: notation. Convert it to
-                    # a more URI-compatible syntax
-                    fname=urllib.request.pathname2url(filename)
+                if is_uri(filename):
+                    f = urllib.request.urlopen(filename)
                 else:
-                    fname=filename
-                f=urllib.request.urlopen(fname)
+                    f = open(filename)
             except IOError as e:
                 self.message(_("Cannot open %(filename)s: %(error)s") % {'filename': filename,
                                                                          'error': str(e) })
